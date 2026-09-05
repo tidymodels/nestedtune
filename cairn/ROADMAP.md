@@ -1,15 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-05 (M65 done via PR #75, merged on green at f91d1ab after two ceiling stops, the held tracking line carried to the archive; validate green; ROADMAP and LESSONS under budget; the M41 lesson extended with the internal-name shadowing case; M60's row pruned to keep five terminal rows; the `procedure` accessor candidate row already present from the plan; no known issue, nothing graduated.)_
+_Last hygiene check: 2026-09-05 (M66 done via PR #76, merged on green at 75ad92f after one ceiling stop, the held resume and re-approval lines carried to the archive; validate green; ROADMAP and LESSONS under budget; one lesson added on vignette timing under load, the M17 line trimmed to pay for it; M61's row pruned to keep five terminal rows; the em-dash and `procedure` accessor candidate rows already present; no known issue, nothing graduated.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M65 | Three readers stack a per-fold list column with the fold labels beside it: `collect_notes()`, `collect_selections()` and `collect_inner_metrics()` | done | — | normal | milestones/archive/M65-collect-readers.md |
-| M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | review | M65 | normal | milestones/M66-vignette-sweep.md |
-| M61 | A vignette runs the four alternative inner tuners on one design and shows what each records | done | M60 | normal | milestones/archive/M61-tuner-vignette.md |
+| M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | done | M65 | normal | milestones/archive/M66-vignette-sweep.md |
 | M62 | A vignette reads the results object: summary, agreement, both plots, a failed fold, dplyr and the survival arguments | done | M60 | normal | milestones/archive/M62-results-vignette.md |
 | M63 | A site-only article runs the outer loop on mirai daemons and shows the result identical to the serial run | done | M60 | normal | milestones/archive/M63-parallel-article.md |
 | M64 | A site-only article repeats a null-data simulation showing tuned-CV optimism and the nested estimate removing it | done | M60 | normal | milestones/archive/M64-why-nest-article.md |
