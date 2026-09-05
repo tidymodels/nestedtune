@@ -89,10 +89,8 @@ do while developing the package, and how a run stops.</p>
 <p><code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> carries the reference version of each
 of those under its parallel section. This page shows them running.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org" class="external-link">rsample</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/workflows" class="external-link">workflows</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-design-and-the-workflow">The design and the workflow<a class="anchor" aria-label="anchor" href="#the-design-and-the-workflow"></a>
 </h2>
@@ -184,7 +182,7 @@ parallelism across folds would oversubscribe the cores.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
 <p>The result carries no mark of how it was computed. That is
-deliberate, and the serial run below is why.</p>
+deliberate, and the serial run below shows what it buys.</p>
 </div>
 <div class="section level2">
 <h2 id="stopping-the-pool">Stopping the pool<a class="anchor" aria-label="anchor" href="#stopping-the-pool"></a>
@@ -221,9 +219,9 @@ whichever process runs it.</p>
 <span><span class="co">#&gt;     metrics    selected tuning_seed </span></span>
 <span><span class="co">#&gt;        TRUE        TRUE        TRUE</span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code> on the outer scores, the selections and the
-tuning seeds returns TRUE for each. The two results are identical, and
-which one was computed on daemons is not recoverable from either. That
-is what lets a pool be a matter of the session rather than of the
+tuning seeds returns TRUE for each: the scores, the selections and the
+seeds match, and which run used daemons is not recoverable from either.
+That is what lets a pool be a matter of the session rather than of the
 analysis: a script gives the same answer on a laptop with no daemons and
 on a workstation with many.</p>
 </div>
@@ -241,8 +239,9 @@ data per fold. Two things this does not reach, both of them objects you
 supply rather than anything the package builds. A recipe keeps a copy of
 the data it was created with, and a formula carries the environment it
 was written in, so a workflow built inside a function that holds a large
-object sends that object with every fold. Building the workflow at the
-top level avoids the second.</p>
+object sends that object with every fold. The recipe’s copy is the
+recipe’s own record and travels with every fold; building the workflow
+at the top level avoids the second.</p>
 </div>
 <div class="section level2">
 <h2 id="developing-against-daemons">Developing against daemons<a class="anchor" aria-label="anchor" href="#developing-against-daemons"></a>
@@ -280,29 +279,30 @@ folds run to completion. The results of such a pool are correct, and it
 is not refused. What it lacks is the ability to stop, and the call says
 so at dispatch with a warning of class
 <code>nestedtune_pool_not_cancellable</code>, once per run.</p>
-<p>Here is that pool, with the warning caught by a handler and its class
-printed. The results it returns are the same as before.</p>
+<p>Here is that pool. The first chunk runs the loop on it with the
+warning muted and checks the result against the serial run. The second
+repeats the call and catches the warning with
+<code><a href="https://rlang.r-lib.org/reference/catch_cnd.html" class="external-link">rlang::catch_cnd()</a></code> to show its class.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">2</span>, dispatcher <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">caught</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">nd_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers</a></span><span class="op">(</span></span>
+<span><span class="va">nd_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">nd_res</span><span class="op">$</span><span class="va">.metrics</span>, <span class="va">ser_res</span><span class="op">$</span><span class="va">.metrics</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">caught</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/catch_cnd.html" class="external-link">catch_cnd</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>,</span>
-<span>  nestedtune_pool_not_cancellable <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">caught</span> <span class="op">&lt;&lt;-</span> <span class="va">w</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">invokeRestart</a></span><span class="op">(</span><span class="st">"muffleWarning"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
+<span>  classes <span class="op">=</span> <span class="st">"nestedtune_pool_not_cancellable"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">caught</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "nestedtune_pool_not_cancellable" "rlang_warning"                  </span></span>
 <span><span class="co">#&gt; [3] "warning"                         "condition"</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">nd_res</span><span class="op">$</span><span class="va">.metrics</span>, <span class="va">ser_res</span><span class="op">$</span><span class="va">.metrics</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
 <span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>The message itself names the remedy: restart the pool with

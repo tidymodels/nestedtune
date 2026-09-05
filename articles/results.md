@@ -3,19 +3,17 @@
 Every driver in this package returns the same kind of object, a
 `nested_results`, and the getting-started guide,
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md),
-reads three things off it: the print, the summary and the estimate. This
-page reads the whole object. It walks the columns one at a time, runs
-each of the readers on one result, shows what a run looks like when one
-outer fold fails, says which dplyr verbs keep the class and which shed
-it, and ends with the two arguments the runs above do not use,
-`event_level` and `eval_time`.
+reads the print, the summary, the estimate, the selections and both
+plots off it. This page reads the whole object. It walks the columns one
+at a time, runs each of the readers on one result, shows what a run
+looks like when one outer fold fails, says which dplyr verbs keep the
+class and which shed it, and ends with the two arguments the runs above
+do not use, `event_level` and `eval_time`.
 
 ``` r
 
+library(tidymodels)
 library(nestedtune)
-library(parsnip)
-library(rsample)
-library(workflows)
 ```
 
 ## The run
@@ -70,7 +68,8 @@ res
 ## What the columns hold
 
 The object is a tibble with one row per outer fold, and the print above
-shows its columns. Each holds one piece of what that fold did.
+shows the columns that fit, its footer naming the rest. Each holds one
+piece of what that fold did.
 
 ``` r
 
@@ -120,6 +119,7 @@ res$.metrics[[1]]
 
 `.selected` is the candidate the fold’s inner tuning chose, a one-row
 tibble of the tuned parameters. It is what
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`summary()`](https://rdrr.io/r/base/summary.html),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 and the default
@@ -137,7 +137,9 @@ res$.selected[[1]]
 
 `.inner_metrics` is the whole table the inner search scored, every
 candidate on every inner resample, averaged. It is what the fold’s
-selection was made from, and
+selection was made from;
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+stacks it across folds, and
 [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
 shows how its shape differs by search.
 
@@ -191,7 +193,7 @@ give the recipe for replaying one fold by hand.
 
 ``` r
 
-res[, c(".tuning_seed", ".outer_fit_seed")]
+select(res, .tuning_seed, .outer_fit_seed)
 #> # A tibble: 5 × 2
 #>   .tuning_seed .outer_fit_seed
 #>          <int>           <int>
@@ -268,6 +270,44 @@ collect_metrics(res, summarize = FALSE)
 #> 10 Fold5 rsq     standard       0.911
 ```
 
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+and
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+stack `.selected` and `.inner_metrics` over the folds that completed,
+with the fold label beside each row, so what every fold chose and
+everything every fold scored are read as one table each.
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+further down, does the same for `.notes` over every fold.
+
+``` r
+
+collect_selections(res)
+#> # A tibble: 5 × 4
+#>   id     mtry min_n .config        
+#>   <chr> <int> <int> <chr>          
+#> 1 Fold1     8     2 pre0_mod5_post0
+#> 2 Fold2     8     2 pre0_mod5_post0
+#> 3 Fold3     5     2 pre0_mod3_post0
+#> 4 Fold4     8     2 pre0_mod5_post0
+#> 5 Fold5     5     2 pre0_mod3_post0
+
+collect_inner_metrics(res)
+#> # A tibble: 60 × 9
+#>    id     mtry min_n .metric .estimator  mean     n std_err .config    
+#>    <chr> <int> <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>      
+#>  1 Fold1     2     2 rmse    standard   2.87      5  0.435  pre0_mod1_…
+#>  2 Fold1     2     2 rsq     standard   0.814     5  0.0935 pre0_mod1_…
+#>  3 Fold1     2    10 rmse    standard   3.09      5  0.548  pre0_mod2_…
+#>  4 Fold1     2    10 rsq     standard   0.776     5  0.115  pre0_mod2_…
+#>  5 Fold1     5     2 rmse    standard   2.88      5  0.446  pre0_mod3_…
+#>  6 Fold1     5     2 rsq     standard   0.834     5  0.0900 pre0_mod3_…
+#>  7 Fold1     5    10 rmse    standard   2.88      5  0.510  pre0_mod4_…
+#>  8 Fold1     5    10 rsq     standard   0.803     5  0.115  pre0_mod4_…
+#>  9 Fold1     8     2 rmse    standard   2.85      5  0.419  pre0_mod5_…
+#> 10 Fold1     8     2 rsq     standard   0.834     5  0.0942 pre0_mod5_…
+#> # ℹ 50 more rows
+```
+
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 counts the selections: one row per distinct combination the folds chose,
 with how many completed folds chose it, `n`, and that count as a share
@@ -328,8 +368,6 @@ and that fold fails.
 
 ``` r
 
-library(recipes)
-
 rec <- recipe(mpg ~ ., data = mtcars) |>
   check_range(hp)
 
@@ -376,12 +414,24 @@ fit that produced nothing, then this package’s, naming the fold. The
 chunk mutes tune’s progress messages and keeps its warnings. The print
 counts the failure, `.completed` is `FALSE` for the fold that failed,
 and its `.notes` say where.
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+stacks every fold’s `.notes` into one table with the fold label beside
+them, so the failed fold’s notes are the rows carrying its label.
 
 ``` r
 
-which_failed <- which(!failed$.completed)
+failed_id <- failed |>
+  filter(!.completed) |>
+  pull(id)
 
-failed$.notes[[which_failed]][, c("location", "type", "note")]
+failed_id
+#> [1] "Fold1"
+
+notes <- collect_notes(failed)
+
+failed_notes <- filter(notes, id == failed_id)
+
+select(failed_notes, location, type, note)
 #> # A tibble: 2 × 3
 #>   location                                      type  note             
 #>   <chr>                                         <chr> <chr>            
@@ -403,19 +453,33 @@ every candidate. Some folds carry a second note of the same kind from
 the low end of the range, an inner resample that held out a car with
 less horsepower than any it trained on. Tuning still returned a
 candidate, from the inner resamples that ran, and the fold finished. Its
-notes say so.
+notes say so. Counting the stacked notes by fold shows how many each
+carries (a fold with none would be absent from the count), and the first
+fold in the table other than the failed one reads like this:
 
 ``` r
 
-vapply(failed$.notes, nrow, integer(1))
-#> [1] 2 2 1 1 1
+count(notes, id)
+#> # A tibble: 5 × 2
+#>   id        n
+#>   <chr> <int>
+#> 1 Fold1     2
+#> 2 Fold2     2
+#> 3 Fold3     1
+#> 4 Fold4     1
+#> 5 Fold5     1
 
-noted <- which(failed$.completed & vapply(failed$.notes, nrow, integer(1)) > 0)
+noted_id <- notes |>
+  filter(id != failed_id) |>
+  slice(1) |>
+  pull(id)
 
-failed$id[noted[1]]
+noted_id
 #> [1] "Fold2"
 
-failed$.notes[[noted[1]]][, c("location", "type", "note")]
+notes |>
+  filter(id == noted_id) |>
+  select(location, type, note)
 #> # A tibble: 2 × 3
 #>   location                                                 type  note  
 #>   <chr>                                                    <chr> <chr> 
@@ -429,26 +493,32 @@ fold’s own inner design, not another outer fold. So `.completed` being
 on less than the whole inner design it was given.
 
 [`summary()`](https://rdrr.io/r/base/summary.html) on a run with a
-failed fold still answers, and warns first. The chunk below catches the
-warning to show its class and its message, then prints the summary it
-returned.
+failed fold still answers, and warns first. The first chunk below
+catches the warning with
+[`rlang::catch_cnd()`](https://rlang.r-lib.org/reference/catch_cnd.html)
+to show its class and its message. The second prints the summary, with
+the warning muted.
 
 ``` r
 
-partial <- withCallingHandlers(
+partial_warning <- rlang::catch_cnd(
   summary(failed),
-  warning = function(w) {
-    cat("class:", class(w)[1], "\n")
-    cat(conditionMessage(w), "\n")
-    invokeRestart("muffleWarning")
-  }
+  classes = "nestedtune_partial_summary"
 )
-#> class: nestedtune_partial_summary 
+
+class(partial_warning)
+#> [1] "nestedtune_partial_summary" "rlang_warning"             
+#> [3] "warning"                    "condition"
+
+cat(conditionMessage(partial_warning))
 #> ! This summary covers 4 of 5 outer folds.
 #> ✖ Failed: "Fold1".
 #> ℹ It describes the folds that ran, not the design that was requested.
+```
 
-partial
+``` r
+
+summary(failed)
 #> 
 #> ── Nested cross-validation results ────────────────────────────────────
 #> Outer resamples: 5-fold cross-validation
@@ -477,9 +547,11 @@ many the design asked for, and the summary itself describes the folds
 that ran: the selections are those 4 folds’ selections, and the estimate
 is the mean over their 4 scores, with the failed fold absent rather than
 filled in.
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 and
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 warn the same way, and
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 leaves the failed fold’s place on its axis empty. A run in which no fold
@@ -488,6 +560,8 @@ completed is different:
 but
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
@@ -505,12 +579,9 @@ produced cannot answer for the run. Adding a column keeps the class.
 
 ``` r
 
-with_rmse <- dplyr::mutate(
-  res,
-  rmse = vapply(.metrics, function(m) m$.estimate[m$.metric == "rmse"], 1)
-)
+with_position <- mutate(res, position = row_number())
 
-class(with_rmse)
+class(with_position)
 #> [1] "nested_results" "tbl_df"         "tbl"            "data.frame"
 ```
 
@@ -519,7 +590,7 @@ that completed on the run above, which removes one row.
 
 ``` r
 
-completed_only <- dplyr::filter(failed, .completed)
+completed_only <- filter(failed, .completed)
 
 class(completed_only)
 #> [1] "tbl_df"     "tbl"        "data.frame"
@@ -537,23 +608,24 @@ class(res[, "id"])
 Both of those hand back the data and nothing more: a plain tibble print,
 no summary of the run, no
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html).
-That is the point. A four-row table cannot describe itself as a
-five-fold design, so it stops describing itself. To read a partial run,
-read the run: `collect_metrics(failed)` already averages the folds that
-completed, and warns that it did.
+That is the point. A table that has lost a fold, or lost the columns the
+run wrote, cannot describe itself as a five-fold design, so it stops
+describing itself. To read a partial run, read the run:
+`collect_metrics(failed)` already averages the folds that completed, and
+warns that it did.
 
 ## Two more arguments: `event_level` and `eval_time`
 
 Every tuning driver takes two more arguments than the runs above used,
 and both reach tune untouched;
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-reads them back from the results object instead. `event_level` is for
-classification: it names which level of the outcome factor counts as the
-event, `"first"` unless you say otherwise, and it sets the same slot on
-the inner tuning and on the outer scoring fit at once. A regression or
-censored-regression run ignores it, as tune does. `eval_time` is for
-censored regression, and it changes the shape of the result, so the rest
-of this section runs one.
+takes neither, and reads both back from the results object.
+`event_level` is for classification: it names which level of the outcome
+factor counts as the event, `"first"` unless you say otherwise, and it
+sets the same slot on the inner tuning and on the outer scoring fit at
+once. A regression or censored-regression run ignores it, as tune does.
+`eval_time` is for censored regression, and it changes the shape of the
+result, so the rest of this section runs one.
 
 ``` r
 
@@ -571,7 +643,7 @@ event_time <- ifelse(
 )
 censor_time <- runif(n, 3, 60)
 
-surv_df <- data.frame(
+surv_df <- tibble(
   time = pmin(event_time, censor_time),
   event = as.numeric(event_time <= censor_time),
   x1 = x1,
@@ -594,7 +666,7 @@ surv_spec <- survival_reg(dist = tune()) |>
 
 surv_wf <- workflow(survival::Surv(time, event) ~ x1 + x2, surv_spec)
 
-surv_grid <- data.frame(dist = c("weibull", "lognormal", "exponential"))
+surv_grid <- tibble(dist = c("weibull", "lognormal", "exponential"))
 ```
 
 A dynamic survival metric is evaluated at a time: the Brier score at one
@@ -620,7 +692,7 @@ surv_res <- nested_tune_grid(
   surv_wf,
   surv_folds,
   grid = surv_grid,
-  metrics = yardstick::metric_set(yardstick::brier_survival),
+  metrics = metric_set(brier_survival),
   eval_time = c(0.5, 10)
 )
 

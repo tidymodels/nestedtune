@@ -2,6 +2,26 @@
 
 ## nestedtune 0.0.0.9000
 
+- The three code vignettes and the two site articles attach
+  `tidymodels`, new in Suggests, before `nestedtune`, behind a guard
+  that ends the page with one notice naming whichever of it and the
+  page’s other optional packages is absent, and read the results object
+  through the package’s readers and dplyr:
+  [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+  for the guide’s fold-by-selection table,
+  [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  for a failed fold’s and a completed fold’s notes on the results page,
+  [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+  for the fits each racing fold spent on the tuners page,
+  [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+  with `show_best()` for the selection-time score, and
+  [`rlang::catch_cnd()`](https://rlang.r-lib.org/reference/catch_cnd.html)
+  where a page shows a warning’s class. No shown chunk on those pages
+  calls the apply family,
+  [`do.call()`](https://rdrr.io/r/base/do.call.html),
+  [`withCallingHandlers()`](https://rdrr.io/r/base/conditions.html) or
+  [`data.frame()`](https://rdrr.io/r/base/data.frame.html) any more.
+
 - Three new readers stack a per-fold list column of a `nested_results`
   into one table with the design’s fold labels beside it, read from the
   object’s record so a repeated design gives `id` and `id2`.
@@ -513,30 +533,21 @@
 
 - Breaking: an operation that changes which outer folds a
   `nested_results` holds now returns a plain tibble instead of a
-  `nested_results`.
-  [`slice()`](https://dplyr.tidyverse.org/reference/slice.html),
+  `nested_results`. `slice()`,
   [`head()`](https://rdrr.io/r/utils/head.html), `x[1, ]`, `x[-1, ]`, a
-  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) that
-  drops a failed fold and
-  [`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
-  all take this branch, and so does dropping any of the columns the run
-  is recorded in. Previously `dplyr::slice(x, 1)` returned a one-row
-  object still headed `Outer resamples: 3-fold cross-validation` and
-  still reporting three outer folds attempted, and `x[1, ]` returned a
-  one-row object that went on claiming to be a results object.
+  [`filter()`](https://rdrr.io/r/stats/filter.html) that drops a failed
+  fold and `bind_rows()` all take this branch, and so does dropping any
+  of the columns the run is recorded in. Previously `dplyr::slice(x, 1)`
+  returned a one-row object still headed
+  `Outer resamples: 3-fold cross-validation` and still reporting three
+  outer folds attempted, and `x[1, ]` returned a one-row object that
+  went on claiming to be a results object.
 
   Operations that leave the set of folds alone keep the class and the
-  run’s record: reordering rows with
-  [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html),
-  adding a column with
-  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) or
-  [`bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html),
-  reordering columns with
-  [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html),
-  and a
-  [`left_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html)
-  that matches one row apiece. These are the invariants `tune` declares
-  on its own results objects.
+  run’s record: reordering rows with `arrange()`, adding a column with
+  `mutate()` or `bind_cols()`, reordering columns with `relocate()`, and
+  a `left_join()` that matches one row apiece. These are the invariants
+  `tune` declares on its own results objects.
 
 - Breaking: the same rule now covers the vctrs verbs and base
   [`rbind()`](https://rdrr.io/r/base/cbind.html).
@@ -563,10 +574,8 @@
   [`dplyr::rename()`](https://dplyr.tidyverse.org/reference/rename.html)
   moving one of the columns the run is recorded in now returns a plain
   tibble. Previously it returned a `nested_results` that no longer had
-  that column:
-  [`rename()`](https://dplyr.tidyverse.org/reference/rename.html)
-  renames through `names<-`, which reaches neither dplyr’s
-  reconstruction nor vctrs’.
+  that column: `rename()` renames through `names<-`, which reaches
+  neither dplyr’s reconstruction nor vctrs’.
 
 - `vctrs` is now a hard dependency. It was already installed alongside
   nestedtune, since `dplyr` requires it.
@@ -598,12 +607,12 @@
 
 - Fixed a failure where every outer fold errored under parallel
   processing if the workflow’s recipe used unqualified selectors such as
-  [`all_numeric_predictors()`](https://recipes.tidymodels.org/reference/has_role.html).
-  The packages a workflow declares are now attached inside each `mirai`
-  daemon before any fold is dispatched, so a selector that resolves from
-  your own attached packages resolves on a worker too. The same call ran
-  without error when no daemons were running, which is what made the
-  failure look like a parallel-only quirk.
+  `all_numeric_predictors()`. The packages a workflow declares are now
+  attached inside each `mirai` daemon before any fold is dispatched, so
+  a selector that resolves from your own attached packages resolves on a
+  worker too. The same call ran without error when no daemons were
+  running, which is what made the failure look like a parallel-only
+  quirk.
 
 - Breaking:
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),

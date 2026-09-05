@@ -36,8 +36,9 @@ Two quantities it is not, both easy to mistake it for.
   a reader has in mind, and it is much harder to get. Luo and
   Barber (2026) prove that any assumption-free test of it needs a
   dataset many times larger than the training size being evaluated. A
-  v-fold outer loop supplies a ratio of v to v - 1, which is not that.
-  So this package reports the estimate and offers no test of it.
+  v-fold outer loop scores each training set of v - 1 folds on one
+  held-out fold, a fraction of the training size rather than a multiple
+  of it. So this package reports the estimate and offers no test of it.
 
 Two more things the estimate does not say, both easy to over-read.
 
@@ -73,12 +74,12 @@ data points rather than a trend. They differ in data, metric and
 baseline, and the same study reports a cell where the nested estimate
 came out optimistic instead.
 
-Two cautions on reading that. The gap is a property of the estimator,
-not a prediction about any one run. At a small sample size it is small
-next to fold-to-fold noise, so one run’s numbers can land either way,
-and no single run demonstrates it. And “pessimistic” is a claim about
-the procedure’s error, never a licence to adjust the reported figure
-upward. There is no correction here to apply.
+Two cautions on reading those measurements. The gap is a property of the
+estimator, not a prediction about any one run. At a small sample size it
+is small next to fold-to-fold noise, so one run’s numbers can land
+either way, and no single run demonstrates it. And “pessimistic” is a
+claim about the procedure’s error, never a licence to adjust the
+reported figure upward. There is no correction here to apply.
 
 ## The standard error
 
@@ -116,7 +117,7 @@ of a set scored on the very resamples that chose it. It therefore
 carries an optimistic component of unknown size, and nothing in the
 output says how large.
 
-What it is not is reliably worse-looking. At a small sample size the
+What it is not is reliably better-looking. At a small sample size the
 bias is small next to resampling noise, so a single comparison can land
 either way. The structural argument is the reason to distrust the
 number, not its sign. That is why the results object and the final fit
@@ -157,13 +158,14 @@ cross-validation score across two regimes and found it material only
 when the features vastly outnumber the observations. Their phrase is p ≫
 n, not merely p \> n. With 400 observations and 100 features, the worst
 optimism they saw on pure noise was under 3 points. At 40 observations
-and 1000 features a shrunken-centroid classifier’s own score read 0.384
-where the truth was 0.5. Even there it depends on the learner: in that
-same cell an SVM read 0.475 and a tree 0.498, both within 3 points of
-the truth. Wide data, a big grid, and a preprocessing step that the loop
-has to redo are where the money is. That paper’s own conclusion is not
-to nest but to correct the flat score cheaply instead. It is cited here
-for where the bias lives, not for its remedy.
+and 1000 features a shrunken-centroid classifier’s own minimum error
+rate read 0.384 where the true error was 0.5. Even there it depends on
+the learner: in that same cell an SVM read 0.475 and a tree 0.498, both
+within 3 points of the truth. Wide data, a big grid, and a preprocessing
+step that the loop has to redo are where the bias is largest. That
+paper’s own conclusion is not to nest but to correct the flat score
+cheaply instead. It is cited here for where the bias lives, not for its
+remedy.
 
 **It removes little when the data is tall and the search is small.**
 Wilimitis and Walsh (2023) ran exactly that case, 41,121 hospital visits

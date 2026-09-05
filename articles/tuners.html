@@ -87,10 +87,8 @@ all four on the guide’s example, shows what each fold records about its
 search, shows how a tune control object reaches the inner call, and says
 what differs from calling tune or finetune directly.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org" class="external-link">rsample</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/workflows" class="external-link">workflows</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-design-and-the-workflow">The design and the workflow<a class="anchor" aria-label="anchor" href="#the-design-and-the-workflow"></a>
 </h2>
@@ -124,9 +122,9 @@ parameter set below fixes that range by hand, and bounds
 past the size of an inner analysis set here.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
-<span>  <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_parameter_set_dials</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fu">dials</span><span class="fu">::</span><span class="fu"><a href="https://dials.tidymodels.org/reference/mtry.html" class="external-link">mtry</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">8L</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fu">dials</span><span class="fu">::</span><span class="fu"><a href="https://dials.tidymodels.org/reference/trees.html" class="external-link">min_n</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">10L</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_parameter_set_dials</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span>,</span>
+<span>  mtry <span class="op">=</span> <span class="fu">mtry</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">8L</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu">min_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">10L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">params</span></span>
@@ -176,11 +174,12 @@ those two stages, kept small here so the page builds quickly.</p>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
 <p>Each fold scored 7 candidates on 5 inner resamples, which is 35 fits
 per outer fold for tuning, against the 30 the guide’s grid costs. The
-print above notes that the folds did not search the same grid. That is
-the nature of the search rather than a fault: each fold proposes
-candidates from its own scores, so no two folds need score the same set,
-and the note is there so that a reader of the summary does not mistake
-the selections for a vote over shared candidates.</p>
+print above notes that the folds did not search the same grid: the same
+number of candidates each, but not the same ones. That is the nature of
+the search rather than a fault: each fold proposes candidates from its
+own scores, so no two folds need score the same set, and the note is
+there so that a reader of the summary does not mistake the selections
+for a vote over shared candidates.</p>
 <p><code>.inner_metrics</code> holds what the search inside one fold
 saw. Here is the first fold’s:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -242,63 +241,68 @@ pairwise wins fitted by <code>BradleyTerry2</code>.</p>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
 <p>A fold’s <code>.inner_metrics</code> from a race is the whole grid,
 and the <code>n</code> column says how many inner resamples each
-candidate was scored on before it was dropped or the race ended. The
-fold that spent the fewest fits is the one where elimination did the
-most work:</p>
+candidate was scored on before it was dropped or the race ended.
+<code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> stacks those tables with the fold
+label beside them, so summing <code>n</code> over one metric’s rows
+counts the fits each fold spent on tuning. The fold that spent the
+fewest is the one where elimination did the most work:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span></span>
-<span>  <span class="va">race</span><span class="op">$</span><span class="va">.inner_metrics</span>,</span>
-<span>  <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">n</span><span class="op">[</span><span class="va">m</span><span class="op">$</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">race</span><span class="op">$</span><span class="va">id</span></span>
-<span><span class="va">fits</span></span>
-<span><span class="co">#&gt; Fold1 Fold2 Fold3 Fold4 Fold5 </span></span>
-<span><span class="co">#&gt;    30    30    23    29    30</span></span>
+<code class="sourceCode R"><span><span class="va">fits_per_fold</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collect_selections.html">collect_inner_metrics</a></span><span class="op">(</span><span class="va">race</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>fits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cheapest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span>
+<span><span class="va">fits_per_fold</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;   id     fits</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Fold1    30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Fold2    30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Fold3    23</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Fold4    29</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Fold5    30</span></span>
 <span></span>
-<span><span class="va">race</span><span class="op">$</span><span class="va">.inner_metrics</span><span class="op">[[</span><span class="va">cheapest</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 8</span></span></span>
-<span><span class="co">#&gt;     mtry min_n .metric .estimator  mean     n std_err .config        </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     2     2 rmse    standard   2.37      4  0.393  pre0_mod1_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2     2 rsq     standard   0.918     4  0.027<span style="text-decoration: underline;">0</span> pre0_mod1_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     2    10 rmse    standard   3.48      3  0.660  pre0_mod2_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     2    10 rsq     standard   0.887     3  0.065<span style="text-decoration: underline;">7</span> pre0_mod2_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5     2 rmse    standard   2.23      5  0.327  pre0_mod3_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     5     2 rsq     standard   0.911     5  0.021<span style="text-decoration: underline;">8</span> pre0_mod3_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     5    10 rmse    standard   3.12      3  0.764  pre0_mod4_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     5    10 rsq     standard   0.896     3  0.051<span style="text-decoration: underline;">5</span> pre0_mod4_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     8     2 rmse    standard   2.27      5  0.313  pre0_mod5_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     8     2 rsq     standard   0.903     5  0.025<span style="text-decoration: underline;">3</span> pre0_mod5_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     8    10 rmse    standard   3.08      3  0.791  pre0_mod6_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     8    10 rsq     standard   0.893     3  0.046<span style="text-decoration: underline;">8</span> pre0_mod6_post0</span></span></code></pre></div>
+<span><span class="va">cheapest</span> <span class="op">&lt;-</span> <span class="fu">slice_min</span><span class="op">(</span><span class="va">fits_per_fold</span>, <span class="va">fits</span>, n <span class="op">=</span> <span class="fl">1</span>, with_ties <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/collect_selections.html">collect_inner_metrics</a></span><span class="op">(</span><span class="va">race</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">==</span> <span class="va">cheapest</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 9</span></span></span>
+<span><span class="co">#&gt;    id     mtry min_n .metric .estimator  mean     n std_err .config    </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Fold3     2     2 rmse    standard   2.37      4  0.393  pre0_mod1_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Fold3     2     2 rsq     standard   0.918     4  0.027<span style="text-decoration: underline;">0</span> pre0_mod1_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Fold3     2    10 rmse    standard   3.48      3  0.660  pre0_mod2_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Fold3     2    10 rsq     standard   0.887     3  0.065<span style="text-decoration: underline;">7</span> pre0_mod2_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Fold3     5     2 rmse    standard   2.23      5  0.327  pre0_mod3_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Fold3     5     2 rsq     standard   0.911     5  0.021<span style="text-decoration: underline;">8</span> pre0_mod3_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Fold3     5    10 rmse    standard   3.12      3  0.764  pre0_mod4_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Fold3     5    10 rsq     standard   0.896     3  0.051<span style="text-decoration: underline;">5</span> pre0_mod4_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Fold3     8     2 rmse    standard   2.27      5  0.313  pre0_mod5_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold3     8     2 rsq     standard   0.903     5  0.025<span style="text-decoration: underline;">3</span> pre0_mod5_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Fold3     8    10 rmse    standard   3.08      3  0.791  pre0_mod6_…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Fold3     8    10 rsq     standard   0.893     3  0.046<span style="text-decoration: underline;">8</span> pre0_mod6_…</span></span></code></pre></div>
 <p>In <code>Fold3</code>, 4 of the 6 candidates show <code>n</code>
 below the 5 inner resamples, so they were dropped before the race ended,
 and the fold spent 23 fits on tuning where the full grid costs 30.</p>
-<p>The win/loss race records the same table, and reads the same way:</p>
+<p>The win/loss race records the same table, and reads the same way. Its
+fits per fold:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">win_loss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_tune_race.html">nested_tune_race_win_loss</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">win_loss</span><span class="op">$</span><span class="va">.inner_metrics</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 8</span></span></span>
-<span><span class="co">#&gt;     mtry min_n .metric .estimator  mean     n std_err .config        </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     2     2 rmse    standard   2.92      5  0.415  pre0_mod1_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2     2 rsq     standard   0.806     5  0.094<span style="text-decoration: underline;">0</span> pre0_mod1_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     2    10 rmse    standard   3.15      5  0.559  pre0_mod2_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     2    10 rsq     standard   0.757     5  0.123  pre0_mod2_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5     2 rmse    standard   2.84      5  0.453  pre0_mod3_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     5     2 rsq     standard   0.831     5  0.090<span style="text-decoration: underline;">7</span> pre0_mod3_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     5    10 rmse    standard   2.88      5  0.507  pre0_mod4_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     5    10 rsq     standard   0.800     5  0.113  pre0_mod4_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     8     2 rmse    standard   2.78      5  0.448  pre0_mod5_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     8     2 rsq     standard   0.836     5  0.094<span style="text-decoration: underline;">2</span> pre0_mod5_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     8    10 rmse    standard   2.86      5  0.493  pre0_mod6_post0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     8    10 rsq     standard   0.804     5  0.113  pre0_mod6_post0</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/collect_selections.html">collect_inner_metrics</a></span><span class="op">(</span><span class="va">win_loss</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>fits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;   id     fits</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Fold1    30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Fold2    30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Fold3    30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Fold4    28</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Fold5    30</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="simulated-annealing">Simulated annealing<a class="anchor" aria-label="anchor" href="#simulated-annealing"></a>
@@ -348,7 +352,7 @@ same as the guide’s grid.</p>
 </h2>
 <p>None of the four drivers on this page has a <code>control</code>
 argument of its own. A control object of the matching kind,
-<code><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">tune::control_bayes()</a></code> for the Bayesian driver,
+<code>control_bayes()</code> for the Bayesian driver,
 <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code> and
 <code><a href="https://finetune.tidymodels.org/reference/control_sim_anneal.html" class="external-link">finetune::control_sim_anneal()</a></code> for the others, is passed as
 <code>control</code> through <code>...</code>, and reaches the inner
@@ -364,7 +368,7 @@ no improvement.</p>
 <span>  param_info <span class="op">=</span> <span class="va">params</span>,</span>
 <span>  initial <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  iter <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  control <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">control_bayes</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, no_improve <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span>  control <span class="op">=</span> <span class="fu">control_bayes</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, no_improve <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No improvement for 3 iterations; returning current results.</span></span>
 <span></span>
@@ -443,12 +447,11 @@ it back on the control at the point the inner call is made.</p>
 </h2>
 <p>Every statistical step is tune’s or finetune’s, and the driver adds
 the loop around it. The differences a caller meets are these.</p>
-<p>A control reaches the inner call through <code>...</code>, as above,
-with <code>allow_par</code> forced off, <code>event_level</code> taken
-from the argument and the Bayesian <code>seed</code> supplied by the
-fold. Everything else on the control passes through as given, including
-the slots that stop a search early, which is why one fold’s
-<code>.inner_metrics</code> can be shorter than another’s.</p>
+<p>A control reaches the inner call through <code>...</code>, as above.
+Apart from the three slots the previous section names, everything on it
+passes through as given, including the slots that stop a search early,
+which is why one fold’s <code>.inner_metrics</code> can be shorter than
+another’s.</p>
 <p>The search’s own settings are arguments here rather than control
 slots. <code>iter</code>, <code>initial</code> and
 <code>objective</code> on the Bayesian driver, <code>iter</code> and

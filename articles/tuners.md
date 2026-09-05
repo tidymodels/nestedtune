@@ -14,10 +14,8 @@ what differs from calling tune or finetune directly.
 
 ``` r
 
+library(tidymodels)
 library(nestedtune)
-library(parsnip)
-library(rsample)
-library(workflows)
 ```
 
 ## The design and the workflow
@@ -57,9 +55,9 @@ default runs past the size of an inner analysis set here.
 ``` r
 
 params <- update(
-  tune::extract_parameter_set_dials(wf),
-  mtry = dials::mtry(c(2L, 8L)),
-  min_n = dials::min_n(c(2L, 10L))
+  extract_parameter_set_dials(wf),
+  mtry = mtry(c(2L, 8L)),
+  min_n = min_n(c(2L, 10L))
 )
 
 params
@@ -115,11 +113,12 @@ bayes
 
 Each fold scored 7 candidates on 5 inner resamples, which is 35 fits per
 outer fold for tuning, against the 30 the guide’s grid costs. The print
-above notes that the folds did not search the same grid. That is the
-nature of the search rather than a fault: each fold proposes candidates
-from its own scores, so no two folds need score the same set, and the
-note is there so that a reader of the summary does not mistake the
-selections for a vote over shared candidates.
+above notes that the folds did not search the same grid: the same number
+of candidates each, but not the same ones. That is the nature of the
+search rather than a fault: each fold proposes candidates from its own
+scores, so no two folds need score the same set, and the note is there
+so that a reader of the summary does not mistake the selections for a
+vote over shared candidates.
 
 `.inner_metrics` holds what the search inside one fold saw. Here is the
 first fold’s:
@@ -189,46 +188,56 @@ race
 
 A fold’s `.inner_metrics` from a race is the whole grid, and the `n`
 column says how many inner resamples each candidate was scored on before
-it was dropped or the race ended. The fold that spent the fewest fits is
-the one where elimination did the most work:
+it was dropped or the race ended.
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+stacks those tables with the fold label beside them, so summing `n` over
+one metric’s rows counts the fits each fold spent on tuning. The fold
+that spent the fewest is the one where elimination did the most work:
 
 ``` r
 
-fits <- vapply(
-  race$.inner_metrics,
-  function(m) sum(m$n[m$.metric == "rmse"]),
-  numeric(1)
-)
-names(fits) <- race$id
-fits
-#> Fold1 Fold2 Fold3 Fold4 Fold5 
-#>    30    30    23    29    30
+fits_per_fold <- collect_inner_metrics(race) |>
+  filter(.metric == "rmse") |>
+  group_by(id) |>
+  summarise(fits = sum(n))
 
-cheapest <- which.min(fits)
+fits_per_fold
+#> # A tibble: 5 × 2
+#>   id     fits
+#>   <chr> <int>
+#> 1 Fold1    30
+#> 2 Fold2    30
+#> 3 Fold3    23
+#> 4 Fold4    29
+#> 5 Fold5    30
 
-race$.inner_metrics[[cheapest]]
-#> # A tibble: 12 × 8
-#>     mtry min_n .metric .estimator  mean     n std_err .config        
-#>    <int> <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>          
-#>  1     2     2 rmse    standard   2.37      4  0.393  pre0_mod1_post0
-#>  2     2     2 rsq     standard   0.918     4  0.0270 pre0_mod1_post0
-#>  3     2    10 rmse    standard   3.48      3  0.660  pre0_mod2_post0
-#>  4     2    10 rsq     standard   0.887     3  0.0657 pre0_mod2_post0
-#>  5     5     2 rmse    standard   2.23      5  0.327  pre0_mod3_post0
-#>  6     5     2 rsq     standard   0.911     5  0.0218 pre0_mod3_post0
-#>  7     5    10 rmse    standard   3.12      3  0.764  pre0_mod4_post0
-#>  8     5    10 rsq     standard   0.896     3  0.0515 pre0_mod4_post0
-#>  9     8     2 rmse    standard   2.27      5  0.313  pre0_mod5_post0
-#> 10     8     2 rsq     standard   0.903     5  0.0253 pre0_mod5_post0
-#> 11     8    10 rmse    standard   3.08      3  0.791  pre0_mod6_post0
-#> 12     8    10 rsq     standard   0.893     3  0.0468 pre0_mod6_post0
+cheapest <- slice_min(fits_per_fold, fits, n = 1, with_ties = FALSE)
+
+collect_inner_metrics(race) |>
+  filter(id == cheapest$id)
+#> # A tibble: 12 × 9
+#>    id     mtry min_n .metric .estimator  mean     n std_err .config    
+#>    <chr> <int> <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>      
+#>  1 Fold3     2     2 rmse    standard   2.37      4  0.393  pre0_mod1_…
+#>  2 Fold3     2     2 rsq     standard   0.918     4  0.0270 pre0_mod1_…
+#>  3 Fold3     2    10 rmse    standard   3.48      3  0.660  pre0_mod2_…
+#>  4 Fold3     2    10 rsq     standard   0.887     3  0.0657 pre0_mod2_…
+#>  5 Fold3     5     2 rmse    standard   2.23      5  0.327  pre0_mod3_…
+#>  6 Fold3     5     2 rsq     standard   0.911     5  0.0218 pre0_mod3_…
+#>  7 Fold3     5    10 rmse    standard   3.12      3  0.764  pre0_mod4_…
+#>  8 Fold3     5    10 rsq     standard   0.896     3  0.0515 pre0_mod4_…
+#>  9 Fold3     8     2 rmse    standard   2.27      5  0.313  pre0_mod5_…
+#> 10 Fold3     8     2 rsq     standard   0.903     5  0.0253 pre0_mod5_…
+#> 11 Fold3     8    10 rmse    standard   3.08      3  0.791  pre0_mod6_…
+#> 12 Fold3     8    10 rsq     standard   0.893     3  0.0468 pre0_mod6_…
 ```
 
 In `Fold3`, 4 of the 6 candidates show `n` below the 5 inner resamples,
 so they were dropped before the race ended, and the fold spent 23 fits
 on tuning where the full grid costs 30.
 
-The win/loss race records the same table, and reads the same way:
+The win/loss race records the same table, and reads the same way. Its
+fits per fold:
 
 ``` r
 
@@ -236,22 +245,18 @@ set.seed(4)
 
 win_loss <- nested_tune_race_win_loss(wf, folds, grid = grid)
 
-win_loss$.inner_metrics[[1]]
-#> # A tibble: 12 × 8
-#>     mtry min_n .metric .estimator  mean     n std_err .config        
-#>    <int> <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>          
-#>  1     2     2 rmse    standard   2.92      5  0.415  pre0_mod1_post0
-#>  2     2     2 rsq     standard   0.806     5  0.0940 pre0_mod1_post0
-#>  3     2    10 rmse    standard   3.15      5  0.559  pre0_mod2_post0
-#>  4     2    10 rsq     standard   0.757     5  0.123  pre0_mod2_post0
-#>  5     5     2 rmse    standard   2.84      5  0.453  pre0_mod3_post0
-#>  6     5     2 rsq     standard   0.831     5  0.0907 pre0_mod3_post0
-#>  7     5    10 rmse    standard   2.88      5  0.507  pre0_mod4_post0
-#>  8     5    10 rsq     standard   0.800     5  0.113  pre0_mod4_post0
-#>  9     8     2 rmse    standard   2.78      5  0.448  pre0_mod5_post0
-#> 10     8     2 rsq     standard   0.836     5  0.0942 pre0_mod5_post0
-#> 11     8    10 rmse    standard   2.86      5  0.493  pre0_mod6_post0
-#> 12     8    10 rsq     standard   0.804     5  0.113  pre0_mod6_post0
+collect_inner_metrics(win_loss) |>
+  filter(.metric == "rmse") |>
+  group_by(id) |>
+  summarise(fits = sum(n))
+#> # A tibble: 5 × 2
+#>   id     fits
+#>   <chr> <int>
+#> 1 Fold1    30
+#> 2 Fold2    30
+#> 3 Fold3    30
+#> 4 Fold4    28
+#> 5 Fold5    30
 ```
 
 ## Simulated annealing
@@ -304,9 +309,8 @@ guide’s grid.
 ## Passing a control through `...`
 
 None of the four drivers on this page has a `control` argument of its
-own. A control object of the matching kind,
-[`tune::control_bayes()`](https://tune.tidymodels.org/reference/control_bayes.html)
-for the Bayesian driver,
+own. A control object of the matching kind, `control_bayes()` for the
+Bayesian driver,
 [`finetune::control_race()`](https://finetune.tidymodels.org/reference/control_race.html)
 and
 [`finetune::control_sim_anneal()`](https://finetune.tidymodels.org/reference/control_sim_anneal.html)
@@ -325,7 +329,7 @@ stopped <- nested_tune_bayes(
   param_info = params,
   initial = 4,
   iter = 3,
-  control = tune::control_bayes(verbose = FALSE, no_improve = 3)
+  control = control_bayes(verbose = FALSE, no_improve = 3)
 )
 #> ! No improvement for 3 iterations; returning current results.
 
@@ -405,11 +409,10 @@ the control at the point the inner call is made.
 Every statistical step is tune’s or finetune’s, and the driver adds the
 loop around it. The differences a caller meets are these.
 
-A control reaches the inner call through `...`, as above, with
-`allow_par` forced off, `event_level` taken from the argument and the
-Bayesian `seed` supplied by the fold. Everything else on the control
-passes through as given, including the slots that stop a search early,
-which is why one fold’s `.inner_metrics` can be shorter than another’s.
+A control reaches the inner call through `...`, as above. Apart from the
+three slots the previous section names, everything on it passes through
+as given, including the slots that stop a search early, which is why one
+fold’s `.inner_metrics` can be shorter than another’s.
 
 The search’s own settings are arguments here rather than control slots.
 `iter`, `initial` and `objective` on the Bayesian driver, `iter` and

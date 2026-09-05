@@ -18,14 +18,16 @@ model. The model you eventually deploy is a separate object, produced
 further down this page, and it has no honest performance number of its
 own. This page walks the path from a design to a write-up. What the
 estimate means, and what it does not, is the subject of
-[`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md).
+[`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md);
+[`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
+reads the whole results object, and
+[`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
+swaps in the other inner searches.
 
 ``` r
 
+library(tidymodels)
 library(nestedtune)
-library(parsnip)
-library(rsample)
-library(workflows)
 ```
 
 ## The design
@@ -78,8 +80,8 @@ folds$inner_resamples[[1]]
 
 `mtcars` has 32 rows, which keeps this page fast to build. With that
 little data the tuning step is unstable, and the fold-to-fold selections
-further down show it directly. It is not the case where nesting removes
-the most. That is wide data searched hard, and
+further down show it directly. This example is not where nesting removes
+the most bias; that is wide data searched hard, and
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
 says why.
 
@@ -186,7 +188,7 @@ est
 #> 1 rmse    standard   2.49      5  0.447 
 #> 2 rsq     standard   0.842     5  0.0293
 
-rmse_row <- est[est$.metric == "rmse", ]
+rmse_row <- filter(est, .metric == "rmse")
 ```
 
 Report that. The RMSE of 2.49 is the mean of 5 scores, each measured on
@@ -202,28 +204,31 @@ compare workflows.
 
 ## What each fold chose
 
-The summary above reported this, and `.selected` holds it exactly: a
-list column of one-row tibbles, one per outer fold, each holding the
-parameters that fold’s inner tuning chose. Stacked up, with the fold
-each came from:
+The summary above listed what each fold selected, and `.selected` is
+where those choices live: a list column of one-row tibbles, one per
+outer fold, each holding the parameters that fold’s inner tuning chose.
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+stacks them, with the fold each came from beside it:
 
 ``` r
 
-selected <- do.call(rbind, res$.selected)
+selected <- collect_selections(res)
 
-data.frame(fold = res$id, mtry = selected$mtry, min_n = selected$min_n)
-#>    fold mtry min_n
-#> 1 Fold1    8     2
-#> 2 Fold2    8     2
-#> 3 Fold3    5     2
-#> 4 Fold4    8     2
-#> 5 Fold5    5     2
+selected
+#> # A tibble: 5 × 4
+#>   id     mtry min_n .config        
+#>   <chr> <int> <int> <chr>          
+#> 1 Fold1     8     2 pre0_mod5_post0
+#> 2 Fold2     8     2 pre0_mod5_post0
+#> 3 Fold3     5     2 pre0_mod3_post0
+#> 4 Fold4     8     2 pre0_mod5_post0
+#> 5 Fold5     5     2 pre0_mod3_post0
 ```
 
 ``` r
 
-n_mtry <- length(unique(selected$mtry))
-n_min_n <- length(unique(selected$min_n))
+n_mtry <- n_distinct(selected$mtry)
+n_min_n <- n_distinct(selected$min_n)
 ```
 
 Across 5 outer folds, `mtry` took 2 distinct selected values and `min_n`
@@ -231,9 +236,9 @@ took 1. Most tools throw this away. nestedtune keeps it, because it is
 information about the procedure rather than noise in it.
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-draws the same thing, one panel per tuned parameter and one point per
-outer fold. A flat row means the folds agreed. Scatter means they did
-not.
+draws those same selections, one panel per tuned parameter and one point
+per outer fold. A flat row means the folds agreed. Scatter means they
+did not.
 
 ``` r
 
@@ -273,7 +278,10 @@ per_fold
 #>  9 Fold5 rmse    standard       3.69 
 #> 10 Fold5 rsq     standard       0.911
 
-fold_rmse <- per_fold$.estimate[per_fold$.metric == "rmse"]
+fold_rmse <- per_fold |>
+  filter(.metric == "rmse") |>
+  pull(.estimate)
+
 c(sd = sd(fold_rmse), std_err = sd(fold_rmse) / sqrt(length(fold_rmse)))
 #>        sd   std_err 
 #> 1.0002719 0.4473352
@@ -291,7 +299,7 @@ The other view of
 shows that spread, with the dashed line at the nested estimate. It is
 the same number
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reports, so the figure and the summary cannot drift apart.
+reports, so the figure and the reported estimate cannot drift apart.
 
 ``` r
 
@@ -308,8 +316,9 @@ Nothing above produced a model you can predict with, and that is
 deliberate. The estimate describes the procedure. The model is a
 separate object, built by running that same procedure once more with the
 whole dataset in hand. The procedure is read from `res` (the design’s
-inner resampling specification, the grid, the metrics), so it cannot be
-restated: the model and the estimate come from one search.
+inner resampling specification, the grid, the metrics), so you cannot
+accidentally specify it differently: the model and the estimate come
+from one search.
 
 ``` r
 
@@ -357,22 +366,31 @@ predict(final, new_data = mtcars[1:3, ])
 #> 3  24.0
 ```
 
-`final$tuning` is the tuning run this model’s parameters were selected
-from, and its best score is the number a user is most tempted to report:
+[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+returns the tuning run this model’s parameters were selected from, an
+ordinary tune result, and `show_best()` on it gives the number a user is
+most tempted to report:
 
 ``` r
 
-selection_scores <- collect_metrics(final$tuning)
-selection_rmse <- selection_scores[selection_scores$.metric == "rmse", ]
-best_selection_rmse <- min(selection_rmse$mean)
+best_selection <- extract_tune_results(final) |>
+  show_best(metric = "rmse", n = 1)
 
-data.frame(
+best_selection
+#> # A tibble: 1 × 8
+#>    mtry min_n .metric .estimator  mean     n std_err .config        
+#>   <int> <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>          
+#> 1     2     2 rmse    standard    2.58     5   0.346 pre0_mod1_post0
+
+tibble(
   quantity = c("nested estimate (report this)", "best selection-time score"),
-  rmse = c(rmse_row$mean, best_selection_rmse)
+  rmse = c(rmse_row$mean, best_selection$mean)
 )
-#>                        quantity     rmse
-#> 1 nested estimate (report this) 2.490053
-#> 2     best selection-time score 2.583402
+#> # A tibble: 2 × 2
+#>   quantity                       rmse
+#>   <chr>                         <dbl>
+#> 1 nested estimate (report this)  2.49
+#> 2 best selection-time score      2.58
 ```
 
 The selection-time score is higher than the nested estimate here, 2.58
@@ -381,9 +399,8 @@ difference this size is well inside what resampling noise produces, and
 the point stands whichever way it falls: the selection-time number was
 computed on the very resamples that chose the winner, so it is not an
 estimate of performance on anything. It is kept on the object because it
-is the record of what selection saw, and
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-will hand it over without warning you.
+is the record of what selection saw, and tune’s readers will hand it
+over without warning you.
 
 The model in hand has no honest number of its own. Everything computable
 from its training data was consumed by selecting it or by fitting it.
@@ -395,15 +412,15 @@ selection-time score dressed as a performance number.
 
 ``` r
 
-tune::show_best(res, metric = "rmse")
-#> Error in `tune::show_best()`:
+show_best(res, metric = "rmse")
+#> Error in `show_best()`:
 #> ! No `show_best()` exists for this type of object.
 ```
 
 ``` r
 
-tune::select_best(final, metric = "rmse")
-#> Error in `tune::select_best()`:
+select_best(final, metric = "rmse")
+#> Error in `select_best()`:
 #> ! No `select_best()` exists for this type of object.
 ```
 
@@ -426,7 +443,8 @@ nesting pays best.
 Seed the session before the call, as elsewhere in tidymodels. Neither
 function takes a seed of its own. Each draws and pins its own per-step
 seeds from the session state instead, and stores them, so any single
-piece is reproducible by hand:
+piece is reproducible by hand. The final fit carries the two seeds too,
+as `tuning_seed` and `fit_seed`:
 
 ``` r
 

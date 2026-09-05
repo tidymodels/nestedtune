@@ -15,6 +15,12 @@ learner on it and compare what the tuning run’s best score says against
 what the nested estimate says. Repeat over fresh draws, and read the two
 distributions.
 
+``` r
+
+library(tidymodels)
+library(nestedtune)
+```
+
 ## What this page reads
 
 Every replicate fits hundreds of small neural networks, so the page does
@@ -136,19 +142,17 @@ store carries.
 
 ``` r
 
-library(ggplot2)
-
-long <- rbind(
-  data.frame(
+long <- bind_rows(
+  tibble(
     quantity = "Flat run: best candidate's CV accuracy",
     accuracy = sim$results$flat_best
   ),
-  data.frame(
+  tibble(
     quantity = "Nested estimate",
     accuracy = sim$results$nested_estimate
   )
-)
-long$quantity <- factor(long$quantity, levels = unique(long$quantity))
+) |>
+  mutate(quantity = factor(quantity, levels = unique(quantity)))
 
 ggplot(long, aes(x = quantity, y = accuracy)) +
   geom_hline(yintercept = sim$null_accuracy, linetype = "dashed") +
@@ -185,14 +189,15 @@ with a standard deviation of 0.066 for the flat run’s best score and
 score is above the truth on 25, at it on 3 and below it on 2; the nested
 estimate is above the truth on 11, at it on 1 and below it on 18.
 
-The nested median sits a little below the truth rather than on it. The
-design gives no reason to expect that: every label is an independent
-coin toss, so whatever a fold’s network predicts, the rows it is scored
-on agree with it half the time in expectation, and the nested estimate’s
-expectation is the null accuracy. The mean nested estimate over the
-replicates is 0.485, 0.015 below the truth against a standard error of
-0.016. The median is the summary the page holds to its tolerance, and on
-this many replicates it lands where the draws put it.
+The nested median sits a little below the truth rather than on it, and
+the distance is inside the draw-to-draw noise: the mean nested estimate
+over the replicates is 0.485, 0.015 below the truth against a standard
+error of 0.016. The design gives no reason to expect a shortfall: every
+label is an independent coin toss, so whatever a fold’s network
+predicts, the rows it is scored on agree with it half the time in
+expectation, and the nested estimate’s expectation is the null accuracy.
+The median is the summary the page holds to its tolerance, and on this
+many replicates it lands where the draws put it.
 
 ## Why the flat number is high
 
@@ -202,14 +207,13 @@ scores is an unbiased estimate of an accuracy that, on this data, is the
 same for every candidate. The maximum of a set of noisy estimates of one
 value is not an unbiased estimate of that value; it is biased upward,
 and more so the larger the set. For candidates whose estimates are
-independent, their expression for the probability that the minimum error
-over the grid falls below the truth is one minus one half to the power
-of the grid size, so the chance that it does not is one half to that
-power, for this page’s 20 candidates one in 1,048,576. Here the
-candidates are scored on the same folds, so their estimates are not
-independent and that figure overstates the case, but the direction is
-the same. The best candidate’s score describes how lucky the search was,
-not how good the winner is.
+independent, their expression gives the chance that no candidate’s score
+beats the truth as one half to the power of the grid size: for this
+page’s 20 candidates, one in 1,048,576. Here the candidates are scored
+on the same folds, so their estimates are not independent and that
+figure overstates the case, but the direction is the same. The best
+candidate’s score describes how lucky the search was, not how good the
+winner is.
 
 The nested run’s outer folds are not part of that search. Each fold’s
 winner is chosen on the inner folds and then scored once on rows the
@@ -248,14 +252,13 @@ points pessimistic on it.
 
 The stored result was produced by `vignettes/articles/why-nest-sim.R` at
 commit 686e14687935eea8bfb304686c8c9258f47ffb18 on 2026-09-05, from seed
-20260905 under the Mersenne-Twister generator. The commit is one on the
-branch that added this page, reachable through that pull request’s
-history. On one machine and one set of package versions, the script
-writes the same object from the same seed apart from those two
-provenance fields; other versions of R or of the fitting packages may
-not reproduce the fits. The tolerance the store carries, 0.05, is the
-distance from the null accuracy inside which the nested median is held
-when the result is regenerated.
+20260905 under the Mersenne-Twister generator, and the commit is in the
+package repository’s history. On one machine and one set of package
+versions, the script writes the same object from the same seed apart
+from those two provenance fields; other versions of R or of the fitting
+packages may not reproduce the fits. The tolerance the store carries,
+0.05, is the distance from the null accuracy inside which the nested
+median is held when the result is regenerated.
 
 ## References
 
