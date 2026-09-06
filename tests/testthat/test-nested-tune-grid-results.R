@@ -539,3 +539,62 @@ test_that("a failed fold's .extracts element is NULL, with no extract note (AC2)
     expect_identical(res$.extracts[[i]], coef_extract(ref$.workflow[[1L]]))
   }
 })
+
+
+# ---- the two columns are record columns (M68, AC5) ---------------------------
+#
+# The five doors D-031 and D-032 fixed, on an object carrying both columns:
+# a replaced or dropped record column sheds the class, a move keeps it. And
+# one control, a run carrying neither column, which keeps its class through
+# the same verbs -- so what sheds is the record, not the verb.
+
+expect_bare <- function(out) {
+  expect_false(inherits(out, "nested_results"))
+  expect_s3_class(out, "tbl_df")
+  invisible(out)
+}
+
+test_that(".predictions and .extracts are record columns through the five doors (AC5)", {
+  skip_if_no_engines()
+  skip_if_not_installed("tibble")
+
+  d <- make_reg_data()
+  res <- extracted_results(d)
+  expect_true(all(c(".extracts", ".predictions") %in% names(res)))
+
+  for (col in c(".predictions", ".extracts")) {
+    # mutate() replacing the column.
+    expect_bare(dplyr::mutate(res, !!col := lapply(.completed, function(x) NULL)))
+    # select() dropping it.
+    expect_bare(dplyr::select(res, -dplyr::all_of(col)))
+    # `[` dropping it.
+    expect_bare(res[setdiff(names(res), col)])
+    # vec_restore() on a frame with the column altered.
+    altered <- tibble::as_tibble(res)
+    altered[[col]][2L] <- list(NULL)
+    expect_bare(vctrs::vec_restore(altered, res))
+    # relocate() moving it keeps the class.
+    expect_s3_class(dplyr::relocate(res, dplyr::all_of(col)), "nested_results")
+  }
+  expect_s3_class(dplyr::relocate(res, .predictions, .extracts), "nested_results")
+})
+
+test_that("a run carrying neither column keeps its class through the same verbs (AC5)", {
+  skip_if_no_engines()
+  skip_if_not_installed("tibble")
+
+  res <- example_results()
+  expect_false(any(c(".predictions", ".extracts") %in% names(res)))
+
+  expect_s3_class(
+    dplyr::mutate(res, .predictions = lapply(.completed, function(x) NULL)),
+    "nested_results"
+  )
+  expect_s3_class(dplyr::select(res, dplyr::everything()), "nested_results")
+  expect_s3_class(res[names(res)], "nested_results")
+  expect_s3_class(
+    vctrs::vec_restore(tibble::as_tibble(res), res),
+    "nested_results"
+  )
+  expect_s3_class(dplyr::relocate(res, .notes), "nested_results")
+})

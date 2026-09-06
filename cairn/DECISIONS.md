@@ -1607,6 +1607,44 @@ not admit for stacking. Falsified by the attach cost pushing a page past its
 build cap or the guard failing on a CRAN flavor, at which point the pages
 attach tune, dplyr and ggplot2 individually and the entry leaves Suggests.
 
+### D-054 (2026-09-06): `save_pred` and `extract` govern the outer fit as well as the inner run, and `.predictions` and `.extracts` join the record when present — supersedes the "Not returned" clause of D-042's help classification, and annotates D-043's column set and D-030's falsifier
+
+**Context:** Every orchestrator ran `tune::last_fit()` on the outer split and
+kept its metrics alone, so `save_pred` and `extract` landed on the inner
+`tune_results` a fold discards and were classified "Not returned" (D-042,
+M48). D-043 recorded that the two slots still had nothing to act on, and the
+G6 candidate row names per-observation losses as a blocker the discarded
+predictions leave standing. The 2026-09-06 feature survey put the gap first
+of four.
+
+**Decision:** `nested_fold_fit()` keeps the `.predictions` element
+`last_fit()` returns when the effective control carries `save_pred = TRUE`,
+and applies the control's `extract` function to the fitted `.workflow`
+after the fit, keeping the value; the constructor writes `.extracts` and
+`.predictions` after `.notes` only when the slot asked, and
+`record_columns()` names both, so a present column is part of the record
+the dplyr and vctrs invariants read (D-031, D-032) and an absent one is
+nothing to vouch for. A failed fold holds `NULL` in each. An `extract` that
+errors leaves the fold completed with a `NULL` element and one note at
+location `"outer extract"` (IP4: a reporting failure discards no estimate).
+`collect_predictions()` and `collect_extracts()`, tune's generics
+re-exported, get a `nested_results` method each on D-052's stacker, one row
+per completed fold with an `.extracts` list column for the second, refusing
+an object without the column as `nestedtune_column_not_saved` naming the
+slot. Considered and rejected: always keeping predictions (a caller who did
+not ask pays the wire and the object, GP4); routing `extract` through
+`control_last_fit()` (tune moves its identity extract into `.workflow`
+there, and a caller's function would replace the workflow); failing the
+fold on an extract error (a valid estimate discarded for a report).
+
+**Consequences:** the help pages classify the two slots under a seventh
+heading, "Kept from the outer fit"; `save_workflow` and `save_history` stay
+"Not returned", `extract = function(x) x` keeping a fitted workflow. The
+inner run's predictions and extracts are still discarded, so D-043's
+falsifier stands as written. `summarize = TRUE` on the predictions is a
+candidate row. Falsified by a user needing the inner run's predictions, or
+by a per-fold extract whose size makes the parallel return dominate a run.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
