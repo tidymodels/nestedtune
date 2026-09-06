@@ -407,3 +407,62 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
     expect_no_error(calls[[method]](), message = method)
   }
 })
+
+# The selection rule on the Bayesian path (M69, AC1): the reference loop's
+# selection is tune's selector called by name on the hand run
+# (reference_select(), helper-orchestration.R), so O1 pins the rule as it
+# pins the default. Measured 2026-09-06 on bayes_results()'s fixture under
+# seed 20: best picks (5,1), (5,1), (1,5); one_std_err by df1 (5,1), (5,1),
+# (1,10); pct_loss by df1 at limit 5 (1,5), (5,1), (1,10).
+
+test_that("AC1: each selection rule picks what tune's selector picks on the fold's Bayesian run (M69)", {
+  skip_if_no_bayes_fixture()
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+
+  rules <- list(
+    best = selection_rule("best"),
+    one_std_err = selection_rule("one_std_err", df1),
+    pct_loss = selection_rule("pct_loss", df1, limit = 5)
+  )
+  picked <- list()
+  for (nm in names(rules)) {
+    set.seed(20)
+    res <- nested_tune_bayes(
+      wf,
+      folds,
+      iter = 2,
+      initial = 3,
+      param_info = p,
+      metrics = ms,
+      select = rules[[nm]]
+    )
+    expect_true(all(res$.completed), info = nm)
+    ref <- reference_nested_bayes_loop(
+      wf,
+      folds,
+      iter = 2,
+      initial = 3,
+      objective = tune::exp_improve(),
+      param_info = p,
+      metrics = ms,
+      seed = 20,
+      metric_name = "rmse",
+      select = rules[[nm]]
+    )
+    for (i in seq_len(nrow(res))) {
+      expect_identical(res$.selected[[i]], ref[[i]]$selected, info = nm)
+      expect_identical(res$.metrics[[i]], ref[[i]]$metrics, info = nm)
+    }
+    expect_identical(extract_procedure(res)$select, rules[[nm]])
+    picked[[nm]] <- res$.selected
+  }
+
+  # The rule reached the selection (see the note above).
+  expect_false(identical(picked$one_std_err, picked$best))
+  expect_false(identical(picked$pct_loss, picked$best))
+})

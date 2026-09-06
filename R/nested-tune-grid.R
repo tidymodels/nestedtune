@@ -2,8 +2,9 @@
 #'
 #' `nested_tune_grid()` drives the outer loop of nested cross-validation. For
 #' each outer fold it tunes on that fold's inner resamples with
-#' [tune::tune_grid()], selects the best candidate, finalizes the workflow, and
-#' fits and scores it on the outer split with [tune::last_fit()]. Every step is
+#' [tune::tune_grid()], selects a candidate by the rule `select` names,
+#' finalizes the workflow, and fits and scores it on the outer split with
+#' [tune::last_fit()]. Every step is
 #' delegated to tune; what this function contributes is the loop, the
 #' reproducibility contract, and a results object that keeps each fold's chosen
 #' parameters rather than discarding them.
@@ -75,8 +76,8 @@
 #'   anything is fitted: every column must name a parameter marked with
 #'   [tune::tune()], and every such parameter must have a column.
 #' @param metrics A [yardstick::metric_set()], or `NULL` to use tune's defaults
-#'   for the model's mode. The first metric in the set selects the best inner
-#'   candidate.
+#'   for the model's mode. The first metric in the set is the one `select`
+#'   selects the inner candidate on.
 #' @param event_level `"first"` (the default) or `"second"`, naming which level
 #'   of a two-class outcome factor is the event. It reaches both loops: the
 #'   inner tuning run, where it decides which candidate is selected, and the
@@ -108,6 +109,16 @@
 #'   times and times out of order are accepted and passed on untouched, since
 #'   tune normalizes those itself; a repeated time draws tune's warning that 0
 #'   inappropriate evaluation time points were removed, once per tune call.
+#' @param select A [selection_rule()]: which of tune's three selectors each
+#'   outer fold picks its candidate with, on that fold's inner tuning run and
+#'   the first metric. The default, `selection_rule("best")`, is
+#'   [tune::select_best()]; `selection_rule("one_std_err", ...)` and
+#'   `selection_rule("pct_loss", ..., limit = )` are
+#'   [tune::select_by_one_std_err()] and [tune::select_by_pct_loss()] with
+#'   the parameter orderings in `...`. Every name an ordering uses must be a
+#'   parameter `object` tunes; anything but a `selection_rule()` is refused
+#'   at entry. The rule is recorded, so [nested_final_fit()] applies the same
+#'   one.
 #'
 #' @return An object of class `nested_results`: one row per outer fold, with the
 #'   fold's split and id, the metrics scored on its assessment set
@@ -127,9 +138,11 @@
 #'   `std_err` and `.config` columns, with `.eval_time` beside them when a
 #'   dynamic survival metric was scored. The candidates a fold searched are the
 #'   table's distinct parameter rows. Ranking those rows on one metric by
-#'   `mean` reproduces the fold's `.selected` except where candidates tie,
-#'   which [tune::select_best()] resolved on the inner run in its own order;
-#'   `.selected` records the candidate the fold's outer fit used.
+#'   `mean` reproduces the fold's `.selected` under the default rule except
+#'   where candidates tie, which [tune::select_best()] resolved on the inner
+#'   run in its own order; under another `select` it is that selector's
+#'   answer on the same table, and `.selected` records the candidate the
+#'   fold's outer fit used either way.
 #'
 #'   The two diverge routinely, in both directions. A size is expanded by tune
 #'   and may reach fewer candidates than were asked for (a request for 20 on a
@@ -243,6 +256,8 @@
 #'                    metrics = metrics, eval_time = eval_time,
 #'                    control = extract_procedure(res)$control)
 #' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+#'   # under the default select; select_by_one_std_err() or
+#'   # select_by_pct_loss() with the rule's orderings and limit otherwise
 #' set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -497,10 +512,19 @@
 #' **Inert: `backend_options`.** Options for a parallel backend, with no
 #' backend to reach at `allow_par = FALSE`.
 #'
-#' Not passed on: `select_best()` is called without `eval_time`. Left unset it
-#' selects at the first of the evaluation times the tuning run was built with,
-#' which are the ones named here, so naming them twice would change no choice
-#' and would repeat tune's message about which time it took.
+#' Not passed on: the selector `select` names is called without `eval_time`.
+#' Left unset it selects at the first of the evaluation times the tuning run
+#' was built with, which are the ones named here, so naming them twice would
+#' change no choice and would repeat tune's message about which time it took.
+#'
+#' Selected by `select`: tune leaves the choice of candidate to a call the
+#' user makes on the tuning result; here it is made inside every fold, so the
+#' rule is an argument. `select` takes what [selection_rule()] returns:
+#' [tune::select_best()] by default, or [tune::select_by_one_std_err()] or
+#' [tune::select_by_pct_loss()] with the orderings and limit the rule
+#' carries, each on the fold's own inner run with `metric` the first metric.
+#' The result records the rule as `extract_procedure(res)$select`, and
+#' [nested_final_fit()] selects by it too.
 #'
 #' @examples
 #' \donttest{
@@ -542,7 +566,8 @@ nested_tune_grid <- function(
   grid = 10,
   metrics = NULL,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 ) {
   control <- check_dots_control(capture_dots(...))
   check_workflow(object)
@@ -553,6 +578,7 @@ nested_tune_grid <- function(
   check_param_info(param_info)
   check_event_level(event_level)
   check_eval_time(eval_time)
+  check_selection_rule(select, object)
   control <- check_control(control, "tune_grid", event_level)
 
   nested_loop(
@@ -563,6 +589,7 @@ nested_tune_grid <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control,
     grid = grid,
     call = rlang::current_env()
@@ -592,6 +619,7 @@ nested_loop <- function(
   param_info,
   event_level,
   eval_time,
+  select,
   control,
   grid,
   call
@@ -627,6 +655,7 @@ nested_loop <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control,
     call = call
   )
@@ -636,6 +665,7 @@ nested_loop <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control
   )
   out <- new_nested_results(resamples, folds, seeds, grid, metrics, procedure)
@@ -661,6 +691,7 @@ nested_fold_fit <- function(
   param_info = NULL,
   event_level = "first",
   eval_time = NULL,
+  select = selection_rule(),
   control = NULL
 ) {
   # The zero-row inner table a fold that scores nothing records (M49). Built
@@ -700,14 +731,16 @@ nested_fold_fit <- function(
       # Resolved from the tuned object rather than from `metrics`, so the same
       # code answers whether the caller supplied a metric set or let tune pick.
       metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
-      # `eval_time` is deliberately not passed on (D-038). Left NULL,
+      # The recorded rule (M69), one of tune's three selectors behind
+      # `apply_selection_rule()` (R/selection-rule.R). `eval_time` is
+      # deliberately not passed on (D-038). Left NULL,
       # `tune:::choose_eval_time()` reads the evaluation times off `tuned` --
       # which are the ones this run was tuned at, because the argument reached
       # `tune_grid()` above -- and `tune:::first_eval_time()` takes element one
       # of them, the same element passing the argument would name. Selection is
       # therefore identical either way, and passing it would repeat tune's
       # "First evaluation time" message once per fold.
-      tune::select_best(tuned, metric = metric_name)
+      apply_selection_rule(tuned, select, metric_name)
     },
     error = function(cnd) cnd
   )

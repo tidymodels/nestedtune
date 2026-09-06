@@ -359,6 +359,7 @@ test_that("BC3: a daemon killed mid-run yields a recorded failure, not an abort"
       param_info,
       event_level,
       eval_time,
+      select,
       control
     ) {
       seed <- payload$seeds[[1L]]
@@ -380,6 +381,7 @@ test_that("BC3: a daemon killed mid-run yields a recorded failure, not an abort"
         param_info = param_info,
         event_level = event_level,
         eval_time = eval_time,
+        select = select,
         control = control
       )
     }
@@ -845,5 +847,57 @@ test_that("BC14: the outer fit's predictions and extracts match serially and on 
   expect_true(all(parallel$.completed))
   expect_identical(parallel$.predictions, serial$.predictions)
   expect_identical(parallel$.extracts, serial$.extracts)
+  expect_identical(parallel, serial)
+})
+
+
+# BC15 (M69, AC5): the selection rule reaches every fold on the parallel path
+# as on the serial one. The percent-loss rule with a non-default limit and a
+# two-term ordering with desc(), on the two-parameter fixture, so the rule has
+# something to order and the wire carries orderings and a limit rather than
+# the default object; on this fixture the rule picks a candidate the default
+# does not in a fold (test-nested-tune-grid-oracles.R, O5), so a daemon that
+# fell back to the default rule would differ.
+
+test_that("BC15: the selection rule reaches the folds on two daemons as serially (M69, AC5)", {
+  skip_if_no_daemons()
+  skip_if_not_installed("dials")
+
+  data <- make_reg_data()
+  nested <- det_nested(data)
+  wf <- bayes_workflow(data)
+  p <- bayes_param_info(wf)
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  rule <- selection_rule("pct_loss", desc(df1), df2, limit = 5)
+  on.exit(mirai::daemons(0), add = TRUE)
+
+  mirai::daemons(0)
+  set.seed(2026L)
+  serial <- nested_tune_grid(
+    wf,
+    nested,
+    grid = g,
+    metrics = reg_metrics(),
+    param_info = p,
+    select = rule
+  )
+  expect_identical(last_dispatch(), "serial")
+  expect_true(all(serial$.completed))
+  expect_identical(extract_procedure(serial)$select, rule)
+
+  start_daemons(2)
+  set.seed(2026L)
+  parallel <- without_pkgload_warning(nested_tune_grid(
+    wf,
+    nested,
+    grid = g,
+    metrics = reg_metrics(),
+    param_info = p,
+    select = rule
+  ))
+
+  expect_identical(last_dispatch(), "parallel")
+  expect_true(all(parallel$.completed))
+  expect_identical(parallel$.selected, serial$.selected)
   expect_identical(parallel, serial)
 })

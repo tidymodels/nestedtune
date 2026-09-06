@@ -720,9 +720,12 @@ check_grid_params <- function(
 # nested_results", never as a classed object missing its record. A classed
 # object with no `inside` has two indistinguishable origins, because an
 # attribute cannot hold NULL: a result built before the specification was
-# recorded, and one built from a design that carried none. And a classed
-# object with the record and no rows is a prototype: it describes a run and
-# holds no data to re-run it on.
+# recorded, and one built from a design that carried none. A record whose
+# procedure holds no selection rule was built before the rule was recorded
+# (M69), and is refused the same way rather than fitted under a rule the
+# folds may not have used (D-041 declined migration). And a classed object
+# with the record and no rows is a prototype: it describes a run and holds
+# no data to re-run it on.
 check_results_record <- function(results, call = rlang::caller_env()) {
   if (!inherits(results, "nested_results")) {
     cli::cli_abort(
@@ -740,18 +743,31 @@ check_results_record <- function(results, call = rlang::caller_env()) {
   }
   inside <- attr(results, "inside")
   procedure <- attr(results, "procedure")
-  if (!rlang::is_call(inside) || !is.list(procedure)) {
+  # The selection rule is an entry of the procedure (M69), so it is asked
+  # for only where there is a procedure to hold it: a record with none has
+  # one absence to report, not two.
+  has_select <- is.list(procedure) && is_selection_rule(procedure$select)
+  if (!rlang::is_call(inside) || !is.list(procedure) || !has_select) {
     absent <- c(
       if (!rlang::is_call(inside)) "inner resampling specification",
-      if (!is.list(procedure)) "tuning procedure"
+      if (!is.list(procedure)) {
+        "tuning procedure"
+      } else if (!has_select) {
+        "selection rule"
+      }
     )
+    origin <- if (identical(absent, "selection rule")) {
+      "It was built by an earlier version of nestedtune, before the rule \\
+       was recorded."
+    } else {
+      "It was built by an earlier version of nestedtune, or from a design \\
+       assembled by hand rather than by {.fn nested_resamples} or \\
+       {.fn rsample::nested_cv}, which store the specification as a call."
+    }
     cli::cli_abort(
       c(
         "{.arg results} carries no {absent} to re-run.",
-        x = "It was built by an earlier version of nestedtune, or from a \\
-             design assembled by hand rather than by {.fn nested_resamples} \\
-             or {.fn rsample::nested_cv}, which store the specification as \\
-             a call.",
+        x = origin,
         i = "Re-run {.fn nested_tune_grid} or the sibling that built it on \\
              this version, on a design from one of those constructors; a \\
              results object is not migrated."
@@ -1158,6 +1174,52 @@ check_dots_control <- function(dots, call = rlang::caller_env()) {
     )
   }
   dots[["control"]]
+}
+
+# The selection rule (M69): what `selection_rule()` returns and nothing
+# else, so a string or NULL is refused at entry rather than inside every fold,
+# and every symbol its orderings name is a parameter the workflow tunes, read
+# off the workflow as `check_grid_params()` reads it. `all.vars()` rather than
+# `all.names()`, so `desc(df1)` contributes `df1` and not the function it is
+# wrapped in. As there, an extraction that fails skips the check rather than
+# turning into a false refusal.
+check_selection_rule <- function(select, object, call = rlang::caller_env()) {
+  if (!is_selection_rule(select)) {
+    cli::cli_abort(
+      c(
+        "{.arg select} must be what {.fn selection_rule} returns.",
+        x = "Got {.obj_type_friendly {select}}.",
+        i = "The default, {.code selection_rule(\"best\")}, takes the \\
+             candidate with the best mean on the first metric."
+      ),
+      class = "nestedtune_bad_selection_rule",
+      call = call
+    )
+  }
+  if (length(select$order) == 0L) {
+    return(invisible(select))
+  }
+  ids <- tryCatch(
+    tune::extract_parameter_set_dials(object)$id,
+    error = function(cnd) NULL
+  )
+  if (is.null(ids)) {
+    return(invisible(select))
+  }
+  symbols <- unique(unlist(lapply(select$order, all.vars)))
+  unknown <- setdiff(symbols, ids)
+  if (length(unknown) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg select} orders the candidates by {length(unknown)} name{?s} \\
+         {.arg object} does not tune: {.val {unknown}}.",
+        i = "{.arg object} tunes {.val {ids}}."
+      ),
+      class = "nestedtune_selection_rule_unknown_param",
+      call = call
+    )
+  }
+  invisible(select)
 }
 
 # The control, held to the tuner and to the `event_level` argument, and

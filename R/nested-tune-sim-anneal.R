@@ -103,6 +103,8 @@
 #'                          param_info = param_info, metrics = metrics,
 #'                          eval_time = eval_time, control = control)
 #' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+#'   # under the default select; select_by_one_std_err() or
+#'   # select_by_pct_loss() with the rule's orderings and limit otherwise
 #' set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -111,7 +113,7 @@
 #' ```
 #'
 #' and `res$.inner_metrics[[i]]` is `collect_metrics(tuned)`,
-#' `res$.selected[[i]]` the `select_best()` above.
+#' `res$.selected[[i]]` the selection above, under the rule `select` names.
 #'
 #' The caller's RNG state and generator kind are restored on exit, including
 #' when the call errors. The same seed gives the same result serially and in
@@ -187,6 +189,12 @@
 #' **Inert: `backend_options`.** Options for a parallel backend, with no
 #' backend to reach at `allow_par = FALSE`.
 #'
+#' Selected by `select`, as on [nested_tune_grid()]: each fold picks its
+#' candidate with the selector the [selection_rule()] in `select` names, on
+#' its own inner run and the first metric, [tune::select_best()] by default;
+#' the rule is recorded as `extract_procedure(res)$select` and the final fit
+#' selects by it too.
+#'
 #' @examples
 #' \donttest{
 #' if (rlang::is_installed(c("finetune", "recipes", "yardstick"))) {
@@ -234,7 +242,8 @@ nested_tune_sim_anneal <- function(
   metrics = NULL,
   initial = 1,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 ) {
   # finetune first, before anything is judged that could not run anyway
   # (D-044, GP3) -- ahead of the dots, so a `control = finetune::...()` in
@@ -252,6 +261,7 @@ nested_tune_sim_anneal <- function(
   check_param_info(param_info)
   check_event_level(event_level)
   check_eval_time(eval_time)
+  check_selection_rule(select, object)
   control <- check_control(control, "tune_sim_anneal", event_level)
 
   nested_loop(
@@ -262,6 +272,7 @@ nested_tune_sim_anneal <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control,
     grid = NULL,
     call = rlang::current_env()

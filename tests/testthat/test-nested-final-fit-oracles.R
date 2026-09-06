@@ -350,8 +350,8 @@ test_that("the procedure records the effective control on both tuners (M48, AC4)
   expect_identical(recorded$uncertain, 2)
   expect_false("seed" %in% names(recorded))
 
-  # The record's shared slots, and the tuner rebuilt from it: `control` is
-  # shared, so the final fit passes exactly one to the inner call.
+  # The record's shared slots, and the tuner rebuilt from it: `control` and
+  # `select` are shared, so the final fit passes exactly one of each.
   expect_identical(
     names(attr(res, "procedure")),
     c(
@@ -362,6 +362,7 @@ test_that("the procedure records the effective control on both tuners (M48, AC4)
       "param_info",
       "event_level",
       "eval_time",
+      "select",
       "control"
     )
   )

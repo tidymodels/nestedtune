@@ -268,7 +268,8 @@ test_that("the key separates every formal argument of both orchestrators", {
         grid = det_grid(),
         metrics = reg_metrics(),
         event_level = "first",
-        eval_time = NULL
+        eval_time = NULL,
+        select = selection_rule()
       )
     }
   }
@@ -296,7 +297,8 @@ test_that("the key separates every formal argument of both orchestrators", {
         grid = function() data.frame(num_comp = 1:2),
         metrics = function() NULL,
         event_level = function() "second",
-        eval_time = function() 1
+        eval_time = function() 1,
+        select = function() selection_rule("one_std_err", num_comp)
       )
     }
   }

@@ -14,7 +14,7 @@ test_that("AC1: the four entry points carry `...` after their required arguments
   # Written out rather than derived, so a signature that drifts has to be
   # re-agreed here. For nested_tune_grid(), `param_info`, `grid`, `metrics` and
   # `event_level` all sit behind the barrier and therefore match by name only,
-  # as does `eval_time` (M41).
+  # as do `eval_time` (M41) and `select` (M69).
   expect_identical(
     names(formals(nested_tune_grid)),
     c(
@@ -25,7 +25,8 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       "grid",
       "metrics",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )
   )
   # Its sibling (M45) puts its own three arguments behind the same barrier.
@@ -41,7 +42,8 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       "initial",
       "objective",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )
   )
   # nested_final_fit() takes only `object` and `results` now (M46): the

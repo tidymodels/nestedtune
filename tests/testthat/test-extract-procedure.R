@@ -69,3 +69,30 @@ test_that("AC2: the no-method refusal wins over a dots complaint", {
   expect_s3_class(cnd, "nestedtune_no_extract_method")
   expect_false(inherits(cnd, "rlib_error_dots_nonempty"))
 })
+
+test_that("the record's `select` is the selection_rule() the call was given, on both objects (M69, AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  rule <- selection_rule("one_std_err", num_comp)
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    final_nested(d),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    select = rule
+  ))
+  expect_identical(extract_procedure(res)$select, rule)
+
+  set.seed(31)
+  final <- memoised(nested_final_fit(wf, res))
+  expect_identical(extract_procedure(final)$select, rule)
+
+  # The default is recorded too, as the constructor's default object.
+  expect_identical(
+    extract_procedure(final_results(d))$select,
+    selection_rule("best")
+  )
+})

@@ -296,3 +296,65 @@ test_that("a grid size larger than the reachable candidates records what ran", {
     expect_identical(nrow(g), 4L)
   }
 })
+
+# O5 -- type "live" (reference implementation), for the selection rule (M69,
+#   AC1). Source: tune's own selectors, called by name on the fold's hand-run
+#   tuning result inside reference_nested_loop() (reference_select() in
+#   helper-orchestration.R), with the orderings the test built spliced in.
+#   Pinned by the test below. The two-parameter fixture is bayes_workflow()
+#   (df1, df2), on a 3-by-3 grid, so a two-term ordering with desc() has
+#   something to order; the default rule is O1's existing test, unchanged.
+#   Measured 2026-09-06 on this fixture under seed 20: best picks (2,2),
+#   (2,2), (2,5); one_std_err (2,2), (8,2), (2,5); pct_loss at limit 5
+#   (2,2), (5,2), (2,5). The two non-default rules each differ from best in
+#   a fold, which is what lets the test tell a driver that applied the rule
+#   from one that ignored it.
+
+test_that("AC1: each selection rule picks what tune's selector picks on the fold's inner run (M69)", {
+  skip_if_no_bayes_fixture()
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+
+  rules <- list(
+    best = selection_rule("best"),
+    one_std_err = selection_rule("one_std_err", desc(df1), df2),
+    pct_loss = selection_rule("pct_loss", desc(df1), df2, limit = 5)
+  )
+  picked <- list()
+  for (nm in names(rules)) {
+    set.seed(20)
+    res <- nested_tune_grid(
+      wf,
+      folds,
+      grid = g,
+      metrics = ms,
+      param_info = p,
+      select = rules[[nm]]
+    )
+    expect_true(all(res$.completed), info = nm)
+    ref <- reference_nested_loop(
+      wf,
+      folds,
+      g,
+      ms,
+      seed = 20,
+      metric_name = "rmse",
+      select = rules[[nm]]
+    )
+    for (i in seq_len(nrow(res))) {
+      expect_identical(res$.selected[[i]], ref[[i]]$selected, info = nm)
+      expect_identical(res$.metrics[[i]], ref[[i]]$metrics, info = nm)
+    }
+    expect_identical(extract_procedure(res)$select, rules[[nm]])
+    picked[[nm]] <- res$.selected
+  }
+
+  # The rule reached the selection (see O5 above).
+  expect_false(identical(picked$one_std_err, picked$best))
+  expect_false(identical(picked$pct_loss, picked$best))
+})

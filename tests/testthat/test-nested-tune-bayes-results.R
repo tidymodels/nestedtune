@@ -181,7 +181,15 @@ test_that("a grid run records its procedure, and its grid and metrics as before"
   expect_type(procedure, "list")
   expect_identical(
     names(procedure),
-    c("tuner", "grid", "param_info", "event_level", "eval_time", "control")
+    c(
+      "tuner",
+      "grid",
+      "param_info",
+      "event_level",
+      "eval_time",
+      "select",
+      "control"
+    )
   )
   expect_identical(procedure$tuner, "tune_grid")
   expect_identical(procedure$grid, grid)
@@ -211,6 +219,7 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
       "param_info",
       "event_level",
       "eval_time",
+      "select",
       "control"
     )
   )

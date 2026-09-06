@@ -51,6 +51,7 @@ reference:
   - autoplot.nested_results
   - agreement
   - extract_procedure
+  - selection_rule
 
 - title: The final model
   desc: >

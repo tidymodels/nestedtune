@@ -68,15 +68,18 @@ naming convention.
   loop, told which inner tuner to
   call by an internal *tuner description* — the tune or finetune function's
   name and its static arguments (`R/tuner.R`, D-040), resolved against the
-  tuner registry there (M50) — plus the `collect_metrics()` method on the
-  `nested_results` object both return, `agreement()`, the package-owned
-  generic tabulating how often each selected parameter combination was chosen
-  across the outer folds (D-039), and the three readers that stack a per-fold
-  list column with the recorded fold labels beside it: `collect_notes()`, a
-  method on tune's generic, and the package-owned `collect_selections()` and
-  `collect_inner_metrics()` (D-052), joined by `collect_predictions()` and
-  `collect_extracts()`, methods on tune's generics over the two columns the
-  outer fit keeps under `save_pred` and `extract` (D-054).
+  tuner registry there (M50), and which of tune's three selectors each fold
+  picks by, a `select` argument taking `selection_rule()`, recorded in the
+  procedure so the final fit applies it (M69, D-056) — plus the `collect_metrics()`
+  method on the `nested_results` object both return, `agreement()`, the
+  package-owned generic tabulating how often each selected parameter
+  combination was chosen across the outer folds (D-039), and the three readers
+  that stack a per-fold list column with the recorded fold labels beside it:
+  `collect_notes()`, a method on tune's generic, and the package-owned
+  `collect_selections()` and `collect_inner_metrics()` (D-052), joined by
+  `collect_predictions()` and `collect_extracts()`, methods on tune's generics
+  over the two columns the outer fit keeps under `save_pred` and `extract`
+  (D-054).
   `extract_procedure()`, a package-owned generic on the `extract_` shape
   (D-023), returns the `procedure` record from
   a `nested_results` (its attribute) and from a `nested_final_fit` (its slot)

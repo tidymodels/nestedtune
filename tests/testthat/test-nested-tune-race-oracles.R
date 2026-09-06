@@ -60,7 +60,8 @@ test_that("the racing exports carry nested_tune_grid()'s formals, defaults and o
       "grid",
       "metrics",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )
   )
 })
@@ -326,5 +327,58 @@ test_that("a racing run keeps the outer fit's predictions and extracts when the 
     # neither column.
     plain <- race_results(fn)
     expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
+  }
+})
+
+# The selection rule on the racing path (M69, AC1), for both racers: the
+# reference loop's selection is tune's selector called by name on the hand
+# race (reference_select(), helper-orchestration.R). Measured 2026-09-06 on
+# race_results()'s fixture under seed 20, either racer: best picks 3, 3, 3;
+# one_std_err by num_comp 2, 3, 2; pct_loss by num_comp at limit 5 2, 3, 2.
+
+test_that("AC1: each selection rule picks what tune's selector picks on the fold's race, for both racers (M69)", {
+  skip_if_no_race_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- det_nested(d)
+  ms <- reg_metrics()
+  ctrl <- race_control()
+
+  rules <- list(
+    best = selection_rule("best"),
+    one_std_err = selection_rule("one_std_err", num_comp),
+    pct_loss = selection_rule("pct_loss", num_comp, limit = 5)
+  )
+  for (fn in RACERS) {
+    picked <- list()
+    for (nm in names(rules)) {
+      set.seed(20)
+      res <- race_fn(fn)(
+        wf,
+        folds,
+        grid = det_grid(),
+        metrics = ms,
+        control = ctrl,
+        select = rules[[nm]]
+      )
+      ref <- reference_nested_race_loop(
+        fn,
+        wf,
+        folds,
+        grid = det_grid(),
+        metrics = ms,
+        seed = 20,
+        metric_name = "rmse",
+        control = ctrl,
+        select = rules[[nm]]
+      )
+      expect_matches_reference(res, ref, "rmse")
+      expect_identical(extract_procedure(res)$select, rules[[nm]])
+      picked[[nm]] <- res$.selected
+    }
+    # The rule reached the selection (see the note above).
+    expect_false(identical(picked$one_std_err, picked$best), info = fn)
+    expect_false(identical(picked$pct_loss, picked$best), info = fn)
   }
 })

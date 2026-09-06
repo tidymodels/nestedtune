@@ -171,7 +171,10 @@ test_that("each shared check fires through nested_tune_bayes()", {
     check_event_level = function() {
       nested_tune_bayes(wf, folds, event_level = "third")
     },
-    check_eval_time = function() nested_tune_bayes(wf, folds, eval_time = -1)
+    check_eval_time = function() nested_tune_bayes(wf, folds, eval_time = -1),
+    check_selection_rule = function() {
+      nested_tune_bayes(wf, folds, select = "best")
+    }
   )
   patterns <- c(
     check_dots_control = "accepts `control`",
@@ -181,7 +184,8 @@ test_that("each shared check fires through nested_tune_bayes()", {
     check_metrics = "metric_set",
     check_param_info = "parameters",
     check_event_level = "event_level",
-    check_eval_time = "eval_time"
+    check_eval_time = "eval_time",
+    check_selection_rule = "selection_rule"
   )
 
   shared <- setdiff(
@@ -300,4 +304,34 @@ test_that("a refusal leaves the RNG where it found it", {
   expect_error(nested_tune_bayes(wf, folds, initial = 1))
   expect_error(nested_tune_bayes(wf, folds, objective = NULL))
   expect_identical(.Random.seed, before)
+})
+
+test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
+  skip_if_no_bayes_fixture()
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- bayes_folds(d)
+
+  for (bad in list("best", NULL)) {
+    cnd <- refusal(nested_tune_bayes(wf, folds, select = bad))
+    expect_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
+  }
+  cnd <- refusal(nested_tune_bayes(
+    wf,
+    folds,
+    select = selection_rule("pct_loss", df1, nonesuch)
+  ))
+  expect_refused(cnd, "nestedtune_selection_rule_unknown_param", "nonesuch")
+  expect_match(cli::ansi_strip(conditionMessage(cnd)), "df1", fixed = TRUE)
+  expect_match(cli::ansi_strip(conditionMessage(cnd)), "df2", fixed = TRUE)
+
+  expect_s3_class(
+    refusal(nested_tune_bayes(
+      wf,
+      folds,
+      select = selection_rule("one_std_err", desc(df1), df2)
+    )),
+    "nestedtune_sentinel"
+  )
 })

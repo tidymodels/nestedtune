@@ -349,6 +349,9 @@ test_that("each shared check fires through both racing exports", {
       },
       check_eval_time = function() {
         race_call(fn, wf, folds, eval_time = -1, control = ctrl)
+      },
+      check_selection_rule = function() {
+        race_call(fn, wf, folds, select = "best", control = ctrl)
       }
     )
     patterns <- c(
@@ -361,7 +364,8 @@ test_that("each shared check fires through both racing exports", {
       check_metrics = "metric_set",
       check_param_info = "parameters",
       check_event_level = "event_level",
-      check_eval_time = "eval_time"
+      check_eval_time = "eval_time",
+      check_selection_rule = "selection_rule"
     )
 
     expect_identical(
@@ -452,4 +456,54 @@ test_that("a refusal leaves the RNG where it found it", {
     expect_error(race_call(fn, wf, folds, grid = 0, control = race_control()))
   }
   expect_identical(.Random.seed, before)
+})
+
+test_that("`select` is held at entry by both racers, before any fold runs (M69, AC4)", {
+  skip_if_no_race_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- race_folds(d)
+  ctrl <- race_control()
+
+  for (fn in RACERS) {
+    for (bad in list("best", NULL)) {
+      cnd <- refusal(race_call(fn, wf, folds, select = bad, control = ctrl))
+      expect_refused(
+        cnd,
+        "nestedtune_bad_selection_rule",
+        "selection_rule",
+        export_name(fn)
+      )
+    }
+    cnd <- refusal(race_call(
+      fn,
+      wf,
+      folds,
+      select = selection_rule("one_std_err", nonesuch),
+      control = ctrl
+    ))
+    expect_refused(
+      cnd,
+      "nestedtune_selection_rule_unknown_param",
+      "nonesuch",
+      export_name(fn)
+    )
+    expect_match(
+      cli::ansi_strip(conditionMessage(cnd)),
+      "num_comp",
+      fixed = TRUE
+    )
+
+    expect_s3_class(
+      refusal(race_call(
+        fn,
+        wf,
+        folds,
+        select = selection_rule("one_std_err", num_comp),
+        control = ctrl
+      )),
+      "nestedtune_sentinel"
+    )
+  }
 })

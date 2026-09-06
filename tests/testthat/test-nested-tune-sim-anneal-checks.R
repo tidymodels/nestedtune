@@ -307,6 +307,9 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     },
     check_eval_time = function() {
       nested_tune_sim_anneal(wf, folds, eval_time = -1, control = ctrl)
+    },
+    check_selection_rule = function() {
+      nested_tune_sim_anneal(wf, folds, select = "best", control = ctrl)
     }
   )
   patterns <- c(
@@ -319,7 +322,8 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     check_metrics = "metric_set",
     check_param_info = "parameters",
     check_event_level = "event_level",
-    check_eval_time = "eval_time"
+    check_eval_time = "eval_time",
+    check_selection_rule = "selection_rule"
   )
 
   shared <- setdiff(check_calls(nested_tune_bayes), "check_objective")
@@ -424,4 +428,45 @@ test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests
   m <- tune::collect_metrics(fit)
   iterated <- !startsWith(m$.config, "initial_")
   expect_gt(sum(iterated), 0L)
+})
+
+test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
+  skip_if_no_anneal_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- anneal_folds(d)
+  ctrl <- anneal_control()
+
+  for (bad in list("best", NULL)) {
+    cnd <- refusal(nested_tune_sim_anneal(
+      wf,
+      folds,
+      select = bad,
+      control = ctrl
+    ))
+    expect_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
+  }
+  cnd <- refusal(nested_tune_sim_anneal(
+    wf,
+    folds,
+    select = selection_rule("one_std_err", nonesuch),
+    control = ctrl
+  ))
+  expect_refused(cnd, "nestedtune_selection_rule_unknown_param", "nonesuch")
+  expect_match(
+    cli::ansi_strip(conditionMessage(cnd)),
+    "num_comp",
+    fixed = TRUE
+  )
+
+  expect_s3_class(
+    refusal(nested_tune_sim_anneal(
+      wf,
+      folds,
+      select = selection_rule("one_std_err", num_comp),
+      control = ctrl
+    )),
+    "nestedtune_sentinel"
+  )
 })

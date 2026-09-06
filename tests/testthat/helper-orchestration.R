@@ -76,7 +76,8 @@ reference_nested_loop <- function(
   metrics,
   seed,
   metric_name,
-  control = NULL
+  control = NULL,
+  select = NULL
 ) {
   set.seed(seed)
   n <- nrow(nested)
@@ -99,7 +100,7 @@ reference_nested_loop <- function(
       metrics = metrics,
       control = forced_grid_control(control)
     )
-    best <- tune::select_best(tuned, metric = metric_name)
+    best <- reference_select(tuned, select, metric_name)
     final_wf <- tune::finalize_workflow(wf, best)
 
     set.seed(
@@ -121,6 +122,34 @@ reference_nested_loop <- function(
       outer_fit_seed = outer_seed
     )
   })
+}
+
+# The selection each reference loop makes (M69, AC1): tune's own selector
+# called by name, the orderings spliced from the rule the test built, so the
+# loop is written from the documented contract of `selection_rule()` and never
+# from the package's `apply_selection_rule()`. `NULL` is the loop as it stood
+# before M69, `tune::select_best()` on the first metric, which is also what
+# the default rule promises.
+reference_select <- function(tuned, select, metric_name) {
+  if (is.null(select) || identical(select$rule, "best")) {
+    return(tune::select_best(tuned, metric = metric_name))
+  }
+  if (identical(select$rule, "one_std_err")) {
+    return(rlang::inject(tune::select_by_one_std_err(
+      tuned,
+      !!!select$order,
+      metric = metric_name
+    )))
+  }
+  if (identical(select$rule, "pct_loss")) {
+    return(rlang::inject(tune::select_by_pct_loss(
+      tuned,
+      !!!select$order,
+      metric = metric_name,
+      limit = select$limit
+    )))
+  }
+  rlang::abort(sprintf("reference_select() knows no rule %s", select$rule))
 }
 
 # The control a fold's `tune_grid()` runs under, written from the documented
@@ -152,7 +181,8 @@ reference_nested_bayes_loop <- function(
   metrics,
   seed,
   metric_name,
-  control = NULL
+  control = NULL,
+  select = NULL
 ) {
   set.seed(seed)
   n <- nrow(nested)
@@ -178,7 +208,7 @@ reference_nested_bayes_loop <- function(
       metrics = metrics,
       control = forced_bayes_control(control, tuning_seed)
     )
-    best <- tune::select_best(tuned, metric = metric_name)
+    best <- reference_select(tuned, select, metric_name)
     final_wf <- tune::finalize_workflow(wf, best)
 
     set.seed(
@@ -634,6 +664,7 @@ results_from <- function(design) {
       param_info = NULL,
       event_level = "first",
       eval_time = NULL,
+      select = selection_rule(),
       control = effective_control("tune_grid", NULL, "first")
     )
   )
@@ -1662,7 +1693,8 @@ reference_nested_race_loop <- function(
   seed,
   metric_name,
   control = NULL,
-  param_info = NULL
+  param_info = NULL,
+  select = NULL
 ) {
   racer <- getExportedValue("finetune", fn)
   set.seed(seed)
@@ -1687,7 +1719,7 @@ reference_nested_race_loop <- function(
       metrics = metrics,
       control = forced_race_control(control)
     )
-    best <- tune::select_best(raced, metric = metric_name)
+    best <- reference_select(raced, select, metric_name)
     final_wf <- tune::finalize_workflow(wf, best)
 
     set.seed(
@@ -1893,7 +1925,8 @@ reference_nested_anneal_loop <- function(
   seed,
   metric_name,
   control = NULL,
-  param_info = NULL
+  param_info = NULL,
+  select = NULL
 ) {
   set.seed(seed)
   n <- nrow(nested)
@@ -1918,7 +1951,7 @@ reference_nested_anneal_loop <- function(
       metrics = metrics,
       control = forced_anneal_control(control)
     )
-    best <- tune::select_best(tuned, metric = metric_name)
+    best <- reference_select(tuned, select, metric_name)
     final_wf <- tune::finalize_workflow(wf, best)
 
     set.seed(
