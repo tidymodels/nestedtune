@@ -45,6 +45,7 @@ Suggests:
     tibble,
     tidymodels,
     vdiffr,
+    workflowsets,
     yardstick
 VignetteBuilder: knitr
 Config/Needs/website: tidymodels, tidyverse/tidytemplate, pkgdown

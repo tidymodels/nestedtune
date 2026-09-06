@@ -12,29 +12,6 @@
 # the check consults. The method is registered on the generic's own namespace,
 # where S3 dispatch from `recipes:::required_pkgs.recipe()` finds it.
 
-ABSENT_PKG <- "nestedtune.no.such.package"
-
-absent_step_workflow <- function(data) {
-  registerS3method(
-    "required_pkgs",
-    "step_nestedtune_absent",
-    function(x, ...) ABSENT_PKG,
-    envir = asNamespace("generics")
-  )
-  step <- recipes::step(
-    subclass = "nestedtune_absent",
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = "absent"
-  )
-  rec <- recipes::add_step(
-    recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
-    step
-  )
-  workflows::workflow(rec, parsnip::linear_reg())
-}
-
 test_that("the fixture's package reaches the workflow's list and is not installed", {
   # The precondition, asserted: the step's method is what puts the name on
   # the list, and nothing on this machine answers to it.

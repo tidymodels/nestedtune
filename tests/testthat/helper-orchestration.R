@@ -2389,3 +2389,150 @@ expect_outer_columns_kept <- function(res) {
   }
   invisible(res)
 }
+
+# The workflow sets `nested_workflow_map()` runs (M71, D-058), built with
+# `workflowsets::as_workflow_set()` over the fixtures above, so each id is
+# the name given here and each element is the fixture workflow itself.
+# `wset_two()` holds one tuned workflow and one fixed, the mixed set the
+# routing rule exists for. `wset_fixed()` holds two fixed workflows, the only
+# set the plain resampling orchestrator accepts (it refuses a marked one at
+# entry, D-057). `wset_three()` adds a second tuned workflow whose parameter
+# `det_grid()` does not name, carrying its own `grid` as a per-workflow
+# option -- the override AC1's third oracle reads, and one the map must
+# honour or the element fails at `check_grid_params()`.
+wset_two <- function(data) {
+  workflowsets::as_workflow_set(
+    tuned = det_workflow(data),
+    fixed = fixed_workflow(data)
+  )
+}
+
+# The second fixed workflow: the formula preprocessor and lm, nothing to
+# tune and no recipe step id drawn from the stream.
+plain_workflow <- function(data) {
+  workflows::workflow(y ~ x1 + x2 + x3 + x4, parsnip::linear_reg())
+}
+
+wset_fixed <- function(data) {
+  workflowsets::as_workflow_set(
+    fixed = fixed_workflow(data),
+    plain = plain_workflow(data)
+  )
+}
+
+cont_grid <- function() data.frame(threshold = c(0.5, 0.9))
+
+wset_three <- function(data) {
+  workflowsets::option_add(
+    workflowsets::as_workflow_set(
+      tuned = det_workflow(data),
+      fixed = fixed_workflow(data),
+      threshold = cont_workflow(data)
+    ),
+    id = "threshold",
+    grid = cont_grid()
+  )
+}
+
+# The six orchestrator names `fn` accepts, in the registry's order.
+MAP_FNS <- c(
+  "nested_tune_grid",
+  "nested_tune_bayes",
+  "nested_tune_race_anova",
+  "nested_tune_race_win_loss",
+  "nested_tune_sim_anneal",
+  "nested_fit_resamples"
+)
+
+# The arguments each orchestrator's map run takes beyond the design and the
+# metrics: the same counts and controls the single-workflow fixtures above
+# use, so a hand call under the same seed reproduces the element.
+wset_map_args <- function(fn) {
+  switch(
+    fn,
+    nested_tune_grid = list(grid = det_grid()),
+    nested_tune_bayes = list(iter = 1, initial = 2),
+    nested_tune_race_anova = ,
+    nested_tune_race_win_loss = list(
+      grid = det_grid(),
+      control = race_control()
+    ),
+    nested_tune_sim_anneal = list(
+      iter = 2,
+      initial = 3,
+      control = anneal_control()
+    ),
+    nested_fit_resamples = list()
+  )
+}
+
+# The suite's map run per orchestrator, served from the cache: `wset_two()`
+# (or `wset_fixed()` for the plain resampling orchestrator) on
+# `final_nested()`, whose inner specification is literal and so survives the
+# final fit's re-run, under entry seed 31. Seeded before the set is built as
+# well as before the run, for the reason `race_final_results()` gives: the
+# recipe step ids are drawn from the stream. The call is spliced into
+# `memoised()` with the arguments named, so the cache key reads them as the
+# orchestrator would match them.
+wset_results <- function(fn, data = make_reg_data(), seed = 31) {
+  set.seed(seed)
+  wset <- if (fn == "nested_fit_resamples") wset_fixed(data) else wset_two(data)
+  folds <- final_nested(data)
+  ms <- reg_metrics()
+  args <- wset_map_args(fn)
+  set.seed(seed)
+  rlang::inject(memoised(nested_workflow_map(
+    object = wset,
+    fn = fn,
+    resamples = folds,
+    metrics = ms,
+    !!!args
+  )))
+}
+
+# What a map run needs beyond the engines: workflowsets for the set, dials
+# for the Bayesian tuner, and the routed tuner's own packages read off the
+# registry, keyed by the orchestrator's name less its prefix.
+skip_if_no_wset_fixture <- function(
+  fn = "nested_tune_grid",
+  stochastic = FALSE
+) {
+  testthat::skip_if_not_installed("workflowsets")
+  skip_if_no_engines(stochastic = stochastic)
+  if (identical(fn, "nested_tune_bayes")) {
+    testthat::skip_if_not_installed("dials")
+  }
+  for (pkg in tuner_registry[[sub("^nested_", "", fn)]]$requires) {
+    testthat::skip_if_not_installed(pkg)
+  }
+}
+
+# The absent-package fixture (M58), shared since M71 by test-workflow-pkgs.R
+# and test-nested-workflow-map-checks.R: a step with no prep or bake of its
+# own whose `required_pkgs()` names a package this library lacks, so the
+# entry check refuses before anything fits. The method is registered on the
+# generic's own namespace, where S3 dispatch from
+# `recipes:::required_pkgs.recipe()` finds it.
+ABSENT_PKG <- "nestedtune.no.such.package"
+
+absent_step_workflow <- function(data) {
+  registerS3method(
+    "required_pkgs",
+    "step_nestedtune_absent",
+    function(x, ...) ABSENT_PKG,
+    envir = asNamespace("generics")
+  )
+  step <- recipes::step(
+    subclass = "nestedtune_absent",
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = "absent"
+  )
+  rec <- recipes::add_step(
+    recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
+    step
+  )
+  workflows::workflow(rec, parsnip::linear_reg())
+}
+
