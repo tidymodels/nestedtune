@@ -11,12 +11,15 @@ nested_final_fit(object, results, ...)
 for tuning with \code{\link[tune:tune]{tune::tune()}}: the workflow the nested run was built
 around. For a grid or a racing procedure it is checked against the
 recorded grid the way \code{\link[=nested_tune_grid]{nested_tune_grid()}} checked it, so a different
-workflow is refused here rather than by tune one tuning run later.}
+workflow is refused here rather than by tune one tuning run later. For a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result the workflow has no marker, and one
+carrying a marker is refused here with class \code{nestedtune_tuned_workflow},
+as that orchestrator refused it.}
 
 \item{results}{The \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}},
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} or \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} whose
-estimate you will report for this model.
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} or
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} whose estimate you will report for this model.
 Everything the re-run needs is read from it: the design's inner
 resampling specification, recorded on the result as the design stored it;
 the data, which every split references; and the procedure -- the tuner
@@ -55,7 +58,11 @@ and \code{augment()} directly, and \code{\link[=extract_workflow]{extract_workfl
 itself), \code{selected}
 (the parameters chosen), \code{tuning} (the tuning run they were chosen from),
 \code{tuning_seed} and \code{fit_seed} (the two seeds that reproduce it), and
-\code{procedure} (the record re-run, as \code{results} carried it).
+\code{procedure} (the record re-run, as \code{results} carried it). From a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result, \code{selected} is an empty table, \code{tuning}
+is \code{NULL}, and \code{\link[=extract_tune_results]{extract_tune_results()}} and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}}
+refuse the object with class \code{nestedtune_no_tuning_run}; its print says
+no tuning ran.
 }
 \description{
 \code{nested_final_fit()} runs the tuning procedure a nested run recorded once
@@ -66,7 +73,9 @@ resampling specification against every row, tunes with \code{\link[tune:tune_gri
 carries,
 selects a candidate by the \code{\link[=selection_rule]{selection_rule()}} it recorded, finalizes the
 workflow, and fits it on all the data. The result is the model to deploy,
-built by the same search the estimate you report describes.
+built by the same search the estimate you report describes. On a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result there is no search to re-run: the workflow
+is fitted as given on all the data.
 }
 \details{
 The procedure a nested estimate describes is "resample this dataset by the
@@ -164,6 +173,11 @@ set.seed(fit$fit_seed, kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 fit(final, data)
 }\if{html}{\out{</div>}}
+
+A result from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} re-runs no tuning call. Both seeds
+are still drawn, so the object's seed layout is the one above; the first
+is consumed by nothing, the inner specification is not re-evaluated, and
+the whole recipe is \code{fit(object, data)} under the second seed.
 
 Building the resamples sits \emph{inside} the first seed's scope, not before it:
 constructing an \code{rset} draws from the generator, so a version that built them

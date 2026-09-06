@@ -22,7 +22,7 @@ rather than silently ignored.}
 \code{summary()} returns an object of class \code{summary.nested_final_fit}: a list
 holding the full-data tuning run's resampling label (\code{tuning_label}), the
 tuner that ran (\code{tuner}: \code{"tune_grid"}, \code{"tune_bayes"}, \code{"tune_race_anova"},
-\code{"tune_race_win_loss"} or \code{"tune_sim_anneal"}), the number of
+\code{"tune_race_win_loss"}, \code{"tune_sim_anneal"} or \code{"fit_resamples"}), the number of
 candidates that run scored (\code{candidates}), the iterating tuners' counts
 (\code{initial} and \code{initial_requested}, \code{iterations_completed} and
 \code{iterations_requested}, each \code{NULL} on a grid or a racing fit; the scored figures are
@@ -30,7 +30,9 @@ read from the candidate record, the requested ones from the procedure, and
 a run whose candidate record cannot be derived reports its scored figures
 as zero rather than failing to print), the
 parameter values selection chose (\code{selection}), and an \code{estimate}
-component that is always \code{NULL}. Printing it is what most callers want;
+component that is always \code{NULL}. A fit built from a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no tuning: its \code{tuning_label} is
+\code{NULL}, \code{candidates} is \code{0} and \code{selection} is empty. Printing it is what most callers want;
 the components are there for a caller that needs a value rather than a
 line of text.
 

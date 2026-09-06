@@ -39,6 +39,14 @@ tuner_anneal <- function(iter, initial) {
   new_tuner("tune_sim_anneal", list(iter = iter, initial = initial))
 }
 
+# tune's plain resampling fit (M70, D-057): no inner stage, no static
+# arguments. The fold skips the tuner call and the selection, and runs
+# `last_fit()` on the outer split alone; the description exists so the loop,
+# the record and the daemon pre-flight read one shape whichever path ran.
+tuner_fit_resamples <- function() {
+  new_tuner("fit_resamples", list())
+}
+
 new_tuner <- function(tuner, args) {
   list(tuner = tuner, args = args)
 }
@@ -63,7 +71,10 @@ new_tuner <- function(tuner, args) {
 # grid-column checks and the zero-row prototype's typing key on; `iterates`
 # says its metrics tables carry `.iter`, and that its final fit's print
 # reports initial candidates and iterations, scored beside requested
-# (`procedure_counts()`). `label` is the search's name in that print.
+# (`procedure_counts()`). `selects` says the tuner picks a candidate from an
+# inner run, so its orchestrator takes a `select` rule, its record carries
+# one, and its final fit re-runs a search; the plain resampling fit is the
+# one tuner that does not (M70). `label` is the search's name in that print.
 tuner_registry <- list(
   tune_grid = list(
     package = "tune",
@@ -72,6 +83,7 @@ tuner_registry <- list(
     control_class = "control_grid",
     takes_grid = TRUE,
     iterates = FALSE,
+    selects = TRUE,
     label = "grid search"
   ),
   tune_bayes = list(
@@ -86,6 +98,7 @@ tuner_registry <- list(
     control_class = "control_bayes",
     takes_grid = FALSE,
     iterates = TRUE,
+    selects = TRUE,
     label = "Bayesian optimization"
   ),
   tune_race_anova = list(
@@ -95,6 +108,7 @@ tuner_registry <- list(
     control_class = "control_race",
     takes_grid = TRUE,
     iterates = FALSE,
+    selects = TRUE,
     label = "ANOVA racing"
   ),
   tune_race_win_loss = list(
@@ -104,6 +118,7 @@ tuner_registry <- list(
     control_class = "control_race",
     takes_grid = TRUE,
     iterates = FALSE,
+    selects = TRUE,
     label = "win/loss racing"
   ),
   # `control_sim_anneal()` has no seed slot: the perturbations draw from the
@@ -115,7 +130,24 @@ tuner_registry <- list(
     control_class = "control_sim_anneal",
     takes_grid = FALSE,
     iterates = TRUE,
+    selects = TRUE,
     label = "simulated annealing"
+  ),
+  # tune's plain resampling fit (M70): no inner run and nothing selected. Its
+  # control is `control_resamples()`, whose class tune shares with
+  # `control_grid()` (both `c("control_grid", "control_resamples")`, tune
+  # 2.1.0, read 2026-09-06), so a `control_grid()` is accepted here as the
+  # same object. The outer fit's own `control_last_fit()` carries that class
+  # too; the recorded control reaches it through `save_pred` and `extract`.
+  fit_resamples = list(
+    package = "tune",
+    requires = "tune",
+    control = function() tune::control_resamples(),
+    control_class = "control_resamples",
+    takes_grid = FALSE,
+    iterates = FALSE,
+    selects = FALSE,
+    label = "no tuning"
   )
 )
 
@@ -145,6 +177,17 @@ tuner_iterates <- function(tuner) {
   rlang::is_string(tuner) &&
     tuner %in% names(tuner_registry) &&
     isTRUE(tuner_registry[[tuner]]$iterates)
+}
+
+# Whether the tuner selects a candidate from an inner run (M70). Total the
+# other way round from `tuner_iterates()`: a tuner the registry does not
+# know, or no name at all, is read as one that selects, so a hand-built or
+# older record is still held to the selection rule M69 requires
+# (`check_results_record()`), and only the registry's own word waives it.
+tuner_selects <- function(tuner) {
+  !(rlang::is_string(tuner) &&
+    tuner %in% names(tuner_registry) &&
+    isFALSE(tuner_registry[[tuner]]$selects))
 }
 
 # The inner tuning call, assembled and evaluated.
@@ -252,7 +295,10 @@ control_class <- function(tuner) {
 # walking a nested description, and so the record reads the same whichever
 # tuner ran. `control` is the effective control (D-042), so a later final fit
 # re-runs under exactly what ran, and `select` the selection rule (M69), so it
-# selects by the rule the folds selected by.
+# selects by the rule the folds selected by. A tuner that selects nothing
+# (M70) records neither `select` nor `param_info`: no rule was applied and no
+# parameter set was read, and a record naming them would claim otherwise
+# (IP4).
 new_procedure <- function(
   tuner,
   param_info,
@@ -261,9 +307,7 @@ new_procedure <- function(
   select,
   control
 ) {
-  c(
-    list(tuner = tuner$tuner),
-    tuner$args,
+  shared <- if (tuner_selects(tuner$tuner)) {
     list(
       param_info = param_info,
       event_level = event_level,
@@ -271,7 +315,14 @@ new_procedure <- function(
       select = select,
       control = control
     )
-  )
+  } else {
+    list(
+      event_level = event_level,
+      eval_time = eval_time,
+      control = control
+    )
+  }
+  c(list(tuner = tuner$tuner), tuner$args, shared)
 }
 
 # The tuner description rebuilt from a results object's record, for the final

@@ -994,3 +994,20 @@ test_that("an ordering naming a parameter the workflow does not tune is refused,
   # `desc` is the wrapper, never reported as an unknown parameter.
   expect_no_match(msg, "\"desc\"")
 })
+
+test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  wf <- fixed_workflow(d)
+  folds <- det_nested(d)
+
+  set.seed(1)
+  before <- .Random.seed
+  cnd <- rlang::catch_cnd(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_untuned_workflow")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+  expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
+  # The seeds are drawn only once every check has passed, so an untouched
+  # stream is the evidence that no fold ran.
+  expect_identical(.Random.seed, before)
+})

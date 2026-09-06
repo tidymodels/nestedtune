@@ -52,7 +52,8 @@ included -- a failed fold's notes are the reason to ask, and a completed
 fold's can carry an error note too, from an \code{extract} that failed on it
 (see \code{\link[=collect_predictions.nested_results]{collect_extracts()}}).
 \item \code{collect_selections()} stacks \code{.selected} over the folds that completed:
-one row per completed fold.
+one row per completed fold. A \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives zero
+rows, since no fold selected anything.
 \item \code{collect_inner_metrics()} stacks \code{.inner_metrics} over the folds that
 completed: one row per candidate (and per metric, and per iteration
 where the tuner iterates) that each fold's inner tuning scored.

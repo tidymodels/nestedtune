@@ -7,8 +7,8 @@
 \method{autoplot}{nested_results}(object, type = c("parameters", "performance"), ...)
 }
 \arguments{
-\item{object}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}.}
+\item{object}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one
+of its siblings, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} included.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}.}
@@ -39,7 +39,11 @@ as does a fold that completed without recording a value for a parameter.
 Neither is imputed and neither is dropped from the axis, so the shortfall is
 visible in the figure itself. A run in which no fold completed is refused
 with condition class \code{nestedtune_no_completed_folds}, as
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}} and \code{\link[=nested_final_fit]{nested_final_fit()}} refuse it.
+\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}} and \code{\link[=nested_final_fit]{nested_final_fit()}} refuse it. A
+run in which no completed fold recorded a selected parameter -- a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result -- is refused under \code{type = "parameters"}
+with condition class \code{nestedtune_no_tuned_parameters}, and
+\code{type = "performance"} draws it.
 
 The subtitle states how much of the requested design ran. Contribution is
 counted per panel instead, because it differs between them: a panel says so

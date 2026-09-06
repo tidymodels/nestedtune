@@ -23,7 +23,9 @@ tune wrote per metric is dropped: \code{.metric}, \code{.estimator}, \code{mean}
 \code{std_err}, and on a fit that scored a dynamic survival metric the
 \code{.eval_time} column, so a candidate has one row here however many
 evaluation times it was scored at. The times and the scores are in
-\code{collect_metrics(extract_tune_results(x))}.
+\code{collect_metrics(extract_tune_results(x))}. A fit built from a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result scored no candidate and is refused with
+condition class \code{nestedtune_no_tuning_run}.
 
 This is what was \strong{scored}, not what was \strong{asked for}. A \code{grid} given as
 a size is expanded by tune and may reach fewer candidates than the number

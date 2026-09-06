@@ -22,17 +22,22 @@
 #' carries,
 #' selects a candidate by the [selection_rule()] it recorded, finalizes the
 #' workflow, and fits it on all the data. The result is the model to deploy,
-#' built by the same search the estimate you report describes.
+#' built by the same search the estimate you report describes. On a
+#' [nested_fit_resamples()] result there is no search to re-run: the workflow
+#' is fitted as given on all the data.
 #'
 #' @param object A [workflows::workflow()] with at least one parameter marked
 #'   for tuning with [tune::tune()]: the workflow the nested run was built
 #'   around. For a grid or a racing procedure it is checked against the
 #'   recorded grid the way [nested_tune_grid()] checked it, so a different
-#'   workflow is refused here rather than by tune one tuning run later.
+#'   workflow is refused here rather than by tune one tuning run later. For a
+#'   [nested_fit_resamples()] result the workflow has no marker, and one
+#'   carrying a marker is refused here with class `nestedtune_tuned_workflow`,
+#'   as that orchestrator refused it.
 #' @param results The `nested_results` object from [nested_tune_grid()],
 #'   [nested_tune_bayes()], [nested_tune_race_anova()],
-#'   [nested_tune_race_win_loss()] or [nested_tune_sim_anneal()] whose
-#'   estimate you will report for this model.
+#'   [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] or
+#'   [nested_fit_resamples()] whose estimate you will report for this model.
 #'   Everything the re-run needs is read from it: the design's inner
 #'   resampling specification, recorded on the result as the design stored it;
 #'   the data, which every split references; and the procedure -- the tuner
@@ -69,7 +74,11 @@
 #'   itself), `selected`
 #'   (the parameters chosen), `tuning` (the tuning run they were chosen from),
 #'   `tuning_seed` and `fit_seed` (the two seeds that reproduce it), and
-#'   `procedure` (the record re-run, as `results` carried it).
+#'   `procedure` (the record re-run, as `results` carried it). From a
+#'   [nested_fit_resamples()] result, `selected` is an empty table, `tuning`
+#'   is `NULL`, and [extract_tune_results()] and [extract_scored_candidates()]
+#'   refuse the object with class `nestedtune_no_tuning_run`; its print says
+#'   no tuning ran.
 #'
 #' @details
 #' The procedure a nested estimate describes is "resample this dataset by the
@@ -166,6 +175,11 @@
 #' fit(final, data)
 #' ```
 #'
+#' A result from [nested_fit_resamples()] re-runs no tuning call. Both seeds
+#' are still drawn, so the object's seed layout is the one above; the first
+#' is consumed by nothing, the inner specification is not re-evaluated, and
+#' the whole recipe is `fit(object, data)` under the second seed.
+#'
 #' Building the resamples sits *inside* the first seed's scope, not before it:
 #' constructing an `rset` draws from the generator, so a version that built them
 #' earlier would still be reproducible from the session seed but no longer from
@@ -254,6 +268,12 @@ nested_final_fit <- function(object, results, ...) {
   if (tuner_takes_grid(procedure$tuner)) {
     check_grid_params(object, procedure$grid, recorded = TRUE)
   }
+  # A record that selected nothing (M70) takes a workflow with nothing to
+  # tune, as `nested_fit_resamples()` took it: a marked parameter would reach
+  # `fit()` unfinalized, and the refusal names the five that tune.
+  if (!tuner_selects(procedure$tuner)) {
+    check_tuned_workflow(object)
+  }
   inside <- attr(results, "inside")
   # Absent rather than NULL when the run was given none; either way tune picks.
   metrics <- attr(results, "metrics")
@@ -319,6 +339,31 @@ final_fit_worker <- function(
   # `run_tuner()` makes are one object (D-042); a worker driven without one
   # runs and records tune's default, as the orchestrator would have.
   control <- effective_control(tuner$tuner, control, event_level)
+  # A tuner that selects nothing (M70): no inner rset, no run, no rule. The
+  # workflow is fitted as given on every row under the second seed; the
+  # first is drawn with it so the object's seed layout matches a tuned fit's,
+  # and is consumed by nothing. The design's inner specification is not
+  # evaluated, since nothing on this path reads it (a milestone-local
+  # decision, M70). `tuning` is NULL, and the two accessors say so.
+  if (!tuner_selects(tuner$tuner)) {
+    set_fold_seed(seeds[[2L]])
+    fitted <- parsnip::fit(object, data = data)
+    procedure <- new_procedure(
+      tuner,
+      param_info = NULL,
+      event_level = event_level,
+      eval_time = eval_time,
+      select = NULL,
+      control = control
+    )
+    return(new_nested_final_fit(
+      fitted,
+      empty_candidates(),
+      NULL,
+      seeds,
+      procedure
+    ))
+  }
   # D-016: the tuning seed's scope is "construct the resamples and tune", so
   # the specification is evaluated *after* the seed is set. Building an rset
   # draws from the RNG, and a draw made outside this scope would leave the run

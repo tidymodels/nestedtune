@@ -16,17 +16,20 @@ rather than silently ignored.}
 \value{
 The stored record, unchanged: a flat named list with \code{tuner}, the
 name of the tune or finetune function that ran (\code{"tune_grid"},
-\code{"tune_bayes"}, \code{"tune_race_anova"}, \code{"tune_race_win_loss"} or
-\code{"tune_sim_anneal"}); that tuner's own arguments (\code{grid} for the grid and
+\code{"tune_bayes"}, \code{"tune_race_anova"}, \code{"tune_race_win_loss"},
+\code{"tune_sim_anneal"}, or \code{"fit_resamples"} from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}});
+that tuner's own arguments (\code{grid} for the grid and
 racing tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian tuner;
-\code{iter} and \code{initial} for simulated annealing); the arguments every
-orchestrator shares, \code{param_info}, \code{event_level}, \code{eval_time} and
-\code{select}, the \code{\link[=selection_rule]{selection_rule()}} each fold selected by, as they were
-given; and \code{control}, the control object the run was given, or
-tune's default when none was, with the slots this package forces already
-applied, and on a Bayesian result with \code{seed} left out. See "Differences
-from calling tune directly" on each orchestrator's help page for what
-those slots are.
+\code{iter} and \code{initial} for simulated annealing; none for the plain fit);
+the arguments every orchestrator shares, \code{param_info}, \code{event_level},
+\code{eval_time} and \code{select}, the \code{\link[=selection_rule]{selection_rule()}} each fold selected by,
+as they were given; and \code{control}, the control object the run was given,
+or tune's default when none was, with the slots this package forces
+already applied, and on a Bayesian result with \code{seed} left out. A
+\code{"fit_resamples"} record carries no \code{param_info} and no \code{select}: no
+parameter set was read and no rule applied. See "Differences from
+calling tune directly" on each orchestrator's help page for what those
+slots are.
 
 On a \code{nested_results} the record travels as an attribute of the object;
 on a \code{nested_final_fit} it is the record the fit re-ran, which is the

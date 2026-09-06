@@ -228,6 +228,65 @@ figure and the reported estimate cannot drift apart.
 autoplot(res, type = "performance")
 ```
 
+## A baseline on the same folds
+
+A tuned procedure is usually compared against something simpler: the same
+model with its parameters fixed. `nested_fit_resamples()` scores such a
+workflow on the same nested design. It runs the same outer loop with the
+inner stage removed, so each fold fits the workflow as given on its analysis
+rows and scores it once on its assessment rows, and the record says no tuning
+ran. A plain `rset` of the outer folds would serve a baseline on its own. What
+the nested design buys is that the two runs score on identical folds.
+
+```{r baseline}
+fixed_rf <- rand_forest(mtry = 2L, min_n = 10L, trees = 500) |>
+  set_engine("ranger") |>
+  set_mode("regression")
+
+set.seed(2)
+baseline <- nested_fit_resamples(workflow(mpg ~ ., fixed_rf), folds)
+
+extract_procedure(baseline)$tuner
+collect_metrics(baseline)
+```
+
+Under the same seed the two runs share each fold's outer-fit seed, and every
+reader answers on the baseline. Its `.selected` column holds an empty table on
+every fold, since nothing was chosen, and `collect_selections()` and
+`agreement()` return zero rows:
+
+```{r baseline-empty}
+collect_selections(baseline)
+agreement(baseline)
+```
+
+The per-fold metrics join by fold label:
+
+```{r baseline-join}
+per_fold |>
+  filter(.metric == "rmse") |>
+  select(id, tuned = .estimate) |>
+  left_join(
+    collect_metrics(baseline, summarize = FALSE) |>
+      filter(.metric == "rmse") |>
+      select(id, fixed = .estimate),
+    by = "id"
+  )
+```
+
+Read the table fold by fold rather than as one difference. Two nested
+estimates cannot be subtracted to compare procedures, for the reasons
+`vignette("estimate")` gives, and a fold where the two disagree is what the
+shared design is built to show.
+
+The two doors are exclusive. A workflow carrying a `tune()` marker is refused
+by `nested_fit_resamples()`, and a workflow with none is refused by
+`nested_tune_grid()` and its siblings, each naming the other:
+
+```{r baseline-refusal, error = TRUE}
+nested_fit_resamples(wf, folds)
+```
+
 ## The model you deploy
 
 Nothing above produced a model you can predict with, and that is deliberate.

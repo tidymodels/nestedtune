@@ -64,13 +64,18 @@ naming convention.
   classes, so it is a drop-in for `rsample::nested_cv()`'s output (D-008).
 - **Orchestration — `nested_tune_*`** — `nested_tune_grid()`,
   `nested_tune_bayes()`, `nested_tune_race_anova()`,
-  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`: one outer
+  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`, and
+  `nested_fit_resamples()` for a workflow with nothing to tune (M70, D-057):
+  one outer
   loop, told which inner tuner to
   call by an internal *tuner description* — the tune or finetune function's
   name and its static arguments (`R/tuner.R`, D-040), resolved against the
   tuner registry there (M50), and which of tune's three selectors each fold
   picks by, a `select` argument taking `selection_rule()`, recorded in the
-  procedure so the final fit applies it (M69, D-056) — plus the `collect_metrics()`
+  procedure so the final fit applies it (M69, D-056); the plain fit's
+  description says the tuner selects nothing, so its fold skips the inner
+  stage and its record carries no rule, and each door refuses the other's
+  workflow at entry — plus the `collect_metrics()`
   method on the `nested_results` object both return, `agreement()`, the
   package-owned generic tabulating how often each selected parameter
   combination was chosen across the outer folds (D-039), and the three readers
@@ -256,16 +261,21 @@ splits reference the one copy the caller already holds.
 
 `nested_tune_grid()` (`R/nested-tune-grid.R`), `nested_tune_bayes()`
 (`R/nested-tune-bayes.R`), `nested_tune_sim_anneal()`
-(`R/nested-tune-sim-anneal.R`) and the two racing exports over one
-`nested_tune_race()` (`R/nested-tune-race.R`) each validate their arguments
+(`R/nested-tune-sim-anneal.R`), the two racing exports over one
+`nested_tune_race()` (`R/nested-tune-race.R`) and `nested_fit_resamples()`
+(`R/nested-fit-resamples.R`, M70) each validate their arguments
 (`R/checks.R`), build a tuner description — `tuner_grid(grid)`,
-`tuner_bayes(iter, initial, objective)`, `tuner_anneal(iter, initial)` or
-`tuner_race(fn, grid)` (`R/tuner.R`) — and hand it to `nested_loop()`, the
+`tuner_bayes(iter, initial, objective)`, `tuner_anneal(iter, initial)`,
+`tuner_race(fn, grid)` or `tuner_fit_resamples()` (`R/tuner.R`) — and hand
+it to `nested_loop()`, the
 one outer loop. The
 description names the tuner; `tuner_registry` (`R/tuner.R`, M50) holds what
 the package knows about each name — its package, the packages it requires,
 its default control and control class, whether it takes a grid, whether its
-tables carry `.iter`, its print label — and the sites that once switched on
+tables carry `.iter`, whether it selects a candidate at all (`selects`, M70:
+`nested_fold_fit()` skips the inner stage, `new_procedure()` omits `select`
+and `param_info`, and `check_results_record()` asks for no rule where it is
+`FALSE`), its print label — and the sites that once switched on
 the name for a package, control, grid, iteration counts or label read the
 registry (`procedure_counts()` and `procedure_label()` since M51); the
 Bayesian tuner's seed injection alone still keys on its name

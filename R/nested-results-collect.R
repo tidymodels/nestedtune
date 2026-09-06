@@ -26,7 +26,8 @@
 #'   fold's can carry an error note too, from an `extract` that failed on it
 #'   (see [`collect_extracts()`][collect_predictions.nested_results]).
 #' * `collect_selections()` stacks `.selected` over the folds that completed:
-#'   one row per completed fold.
+#'   one row per completed fold. A [nested_fit_resamples()] result gives zero
+#'   rows, since no fold selected anything.
 #' * `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
 #'   completed: one row per candidate (and per metric, and per iteration
 #'   where the tuner iterates) that each fold's inner tuning scored.

@@ -1,5 +1,29 @@
 # nestedtune 0.0.0.9000
 
+* `nested_fit_resamples()` scores a workflow with nothing to tune on the
+  outer folds of a nested design: the same outer loop as `nested_tune_grid()`
+  with the inner stage removed, so a fixed workflow and a tuned one run on
+  identical outer folds and their per-fold metrics join by fold label. It is
+  shaped like `tune::fit_resamples()` (`metrics`, `event_level`, `eval_time`,
+  and a `tune::control_resamples()` through `...`), and returns a
+  `nested_results` whose record says no tuning ran: `.selected` is an empty
+  table on every completed fold, `.inner_metrics` a zero-row table, and
+  `extract_procedure(res)` names the tuner `"fit_resamples"` with no `grid`,
+  `param_info` or `select`. Every reader answers on it; `agreement()`,
+  `collect_selections()` and `collect_inner_metrics()` return zero rows, and
+  `autoplot(type = "parameters")` refuses with class
+  `nestedtune_no_tuned_parameters`. `nested_final_fit()` accepts the result
+  and fits the workflow as given on every row; `extract_tune_results()` and
+  `extract_scored_candidates()` refuse that fit with class
+  `nestedtune_no_tuning_run`.
+
+* The five tuning orchestrators refuse a workflow with no `tune()` marker at
+  entry, with class `nestedtune_untuned_workflow`, naming
+  `nested_fit_resamples()`; before, such a workflow ran through
+  `nested_tune_grid()` with tune's warning on every fold and failed every
+  fold on the iterating tuners. `nested_fit_resamples()` refuses a workflow
+  carrying a marker with class `nestedtune_tuned_workflow`, naming the five.
+
 * A `select` argument on `nested_tune_grid()`, `nested_tune_bayes()`,
   `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and
   `nested_tune_sim_anneal()` names the rule each outer fold selects its

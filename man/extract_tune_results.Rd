@@ -14,7 +14,9 @@ rather than silently ignored.}
 }
 \value{
 The stored \code{tune_results} object, unchanged. It is tune's own object,
-so tune's generics apply to it directly.
+so tune's generics apply to it directly. A fit built from a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no tuning and is refused with
+condition class \code{nestedtune_no_tuning_run}.
 }
 \description{
 Returns the \code{\link[tune:tune_grid]{tune::tune_grid()}} or \code{\link[tune:tune_bayes]{tune::tune_bayes()}} result that

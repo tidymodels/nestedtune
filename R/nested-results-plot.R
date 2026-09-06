@@ -27,8 +27,8 @@
 #' assessment set, with a rule at the nested estimate: the same value
 #' [collect_metrics()] reports.
 #'
-#' @param object A `nested_results` object from [nested_tune_grid()] or
-#'   [nested_tune_bayes()].
+#' @param object A `nested_results` object from [nested_tune_grid()] or one
+#'   of its siblings, [nested_fit_resamples()] included.
 #' @param type Which view to draw: `"parameters"` (the default) or
 #'   `"performance"`.
 #' @param ... Not used; must be empty. An argument passed here is an error
@@ -42,7 +42,11 @@
 #' Neither is imputed and neither is dropped from the axis, so the shortfall is
 #' visible in the figure itself. A run in which no fold completed is refused
 #' with condition class `nestedtune_no_completed_folds`, as
-#' [collect_metrics()], [agreement()] and [nested_final_fit()] refuse it.
+#' [collect_metrics()], [agreement()] and [nested_final_fit()] refuse it. A
+#' run in which no completed fold recorded a selected parameter -- a
+#' [nested_fit_resamples()] result -- is refused under `type = "parameters"`
+#' with condition class `nestedtune_no_tuned_parameters`, and
+#' `type = "performance"` draws it.
 #'
 #' The subtitle states how much of the requested design ran. Contribution is
 #' counted per panel instead, because it differs between them: a panel says so
@@ -101,6 +105,8 @@ autoplot.nested_results <- function(
 plot_selection <- function(x, call = rlang::caller_env()) {
   frame <- selection_frame(x)
   if (is.null(frame)) {
+    # Classed since M70: a `nested_fit_resamples()` result reaches this on
+    # every call, so a caller can catch it as the refusal it is.
     cli::cli_abort(
       c(
         "There are no tuned parameters to plot.",
@@ -108,6 +114,7 @@ plot_selection <- function(x, call = rlang::caller_env()) {
         i = "{.code autoplot(x, type = \"performance\")} draws the outer-fold \\
              scores instead."
       ),
+      class = "nestedtune_no_tuned_parameters",
       call = call
     )
   }
