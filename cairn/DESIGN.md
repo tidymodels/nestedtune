@@ -74,8 +74,10 @@ naming convention.
   across the outer folds (D-039), and the three readers that stack a per-fold
   list column with the recorded fold labels beside it: `collect_notes()`, a
   method on tune's generic, and the package-owned `collect_selections()` and
-  `collect_inner_metrics()` (D-052). The suffix names the inner tuning method
-  (D-010).
+  `collect_inner_metrics()` (D-052). `extract_procedure()`, a package-owned
+  generic on the `extract_` shape (D-023), returns the `procedure` record from
+  a `nested_results` (its attribute) and from a `nested_final_fit` (its slot)
+  (M67). The suffix names the inner tuning method (D-010).
 - **Final fit** — `nested_final_fit(object, results)`, returning a
   `nested_final_fit` object that answers `predict()` and `augment()` with the
   trained workflow's own results (M47) and hands the workflow itself over with

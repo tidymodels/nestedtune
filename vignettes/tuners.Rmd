@@ -321,11 +321,11 @@ stopped <- nested_tune_bayes(
   control = control_bayes(verbose = FALSE, no_improve = 3)
 )
 
-procedure <- attr(stopped, "procedure")
+procedure <- extract_procedure(stopped)
 procedure
 ```
 
-The `procedure` attribute is the record of what ran, and a final fit built
+This record says what ran, and a final fit built
 from this result re-runs exactly that. Its `control` element is the control
 as it took effect, not as it was passed. Two of its slots are this package's
 to set. `allow_par` is `r procedure$control$allow_par` whatever the control

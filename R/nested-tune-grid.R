@@ -151,7 +151,8 @@
 #'   than `NULL` when none was supplied. `.inner_metrics` is a column, so it
 #'   travels with the fold it describes.
 #'
-#'   `attr(x, "procedure")` records what ran, on the result of every
+#'   The `procedure` record, which [extract_procedure()] returns, records what
+#'   ran, on the result of every
 #'   orchestrator: a named list giving the tuner (`"tune_grid"` here,
 #'   `"tune_bayes"` from [nested_tune_bayes()], `"tune_race_anova"` or
 #'   `"tune_race_win_loss"` from [nested_tune_race_anova()] and its sibling,
@@ -160,7 +161,7 @@
 #'   `initial` and `objective` for the Bayesian tuner, `iter` and `initial`
 #'   for annealing), and `param_info`,
 #'   `event_level` and `eval_time` on all. A Bayesian result carries the
-#'   `procedure` attribute and no `grid` attribute, and its `.inner_metrics`
+#'   `procedure` record and no `grid` attribute, and its `.inner_metrics`
 #'   tables carry an `.iter` column; [nested_tune_bayes()] documents both.
 #'
 #'   **What an operation on the object may and may not do.** The result carries
@@ -240,7 +241,7 @@
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' tuned <- tune_grid(object, resamples$inner_resamples[[i]], grid = grid,
 #'                    metrics = metrics, eval_time = eval_time,
-#'                    control = attr(res, "procedure")$control)
+#'                    control = extract_procedure(res)$control)
 #' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
 #' set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
@@ -433,7 +434,7 @@
 #' the final fit that re-runs the result. What runs is the control passed, or
 #' tune's default when none is, with the slots this package forces
 #' overwritten; the result records that effective control as
-#' `attr(res, "procedure")$control`, which is what the recipe above passes.
+#' `extract_procedure(res)$control`, which is what the recipe above passes.
 #' Every slot of `control_grid()` falls under one of six headings.
 #'
 #' **Forced: `allow_par`.** Both tune calls a fold makes -- the inner tuning

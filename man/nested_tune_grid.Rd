@@ -151,7 +151,8 @@ fold's columns, never \code{NULL}.
 than \code{NULL} when none was supplied. \code{.inner_metrics} is a column, so it
 travels with the fold it describes.
 
-\code{attr(x, "procedure")} records what ran, on the result of every
+The \code{procedure} record, which \code{\link[=extract_procedure]{extract_procedure()}} returns, records what
+ran, on the result of every
 orchestrator: a named list giving the tuner (\code{"tune_grid"} here,
 \code{"tune_bayes"} from \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{"tune_race_anova"} or
 \code{"tune_race_win_loss"} from \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}} and its sibling,
@@ -160,7 +161,7 @@ that tuner's own arguments (\code{grid} here and for the racers; \code{iter},
 \code{initial} and \code{objective} for the Bayesian tuner, \code{iter} and \code{initial}
 for annealing), and \code{param_info},
 \code{event_level} and \code{eval_time} on all. A Bayesian result carries the
-\code{procedure} attribute and no \code{grid} attribute, and its \code{.inner_metrics}
+\code{procedure} record and no \code{grid} attribute, and its \code{.inner_metrics}
 tables carry an \code{.iter} column; \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} documents both.
 
 \strong{What an operation on the object may and may not do.} The result carries
@@ -266,7 +267,7 @@ an unknown range, finalized on those rows as \code{param_info} describes):
          normal.kind = "Inversion", sample.kind = "Rejection")
 tuned <- tune_grid(object, resamples$inner_resamples[[i]], grid = grid,
                    metrics = metrics, eval_time = eval_time,
-                   control = attr(res, "procedure")$control)
+                   control = extract_procedure(res)$control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
 set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
@@ -465,7 +466,7 @@ There is no \code{control} formal, but a \code{\link[tune:control_grid]{tune::co
 the final fit that re-runs the result. What runs is the control passed, or
 tune's default when none is, with the slots this package forces
 overwritten; the result records that effective control as
-\code{attr(res, "procedure")$control}, which is what the recipe above passes.
+\code{extract_procedure(res)$control}, which is what the recipe above passes.
 Every slot of \code{control_grid()} falls under one of six headings.
 
 \strong{Forced: \code{allow_par}.} Both tune calls a fold makes -- the inner tuning

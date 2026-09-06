@@ -49,6 +49,7 @@ reference:
   - summary.nested_results
   - autoplot.nested_results
   - agreement
+  - extract_procedure
 
 - title: The final model
   desc: >

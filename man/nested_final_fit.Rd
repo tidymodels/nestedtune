@@ -120,8 +120,9 @@ Seed the session before the call, as elsewhere in tidymodels; there is no
 inner resamples \emph{and} tuning; the second covers the final fit. Both are
 applied with the generator kind pinned, and both are returned on the object.
 
-The run is reproducible by hand from those two seeds and the record on
-\code{fit$procedure}, every value below being one that record holds (or, for
+The run is reproducible by hand from those two seeds and the record
+\code{extract_procedure(fit)} returns, every value below being one that record
+holds (or, for
 \code{metrics}, \code{attr(results, "metrics")}); the tuning call is the one the
 record names, and \code{control} is the record's own -- the control the run
 was given, or tune's default, with the slots the orchestrator forces
@@ -130,7 +131,7 @@ already applied:
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 inner <- <the design's `inside` specification>(data)
-control <- fit$procedure$control
+control <- extract_procedure(fit)$control
 # a grid procedure: the recorded control, untouched
 tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
   metrics = metrics, eval_time = eval_time, control = control)

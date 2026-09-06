@@ -1,5 +1,16 @@
 # nestedtune 0.0.0.9000
 
+* A new accessor, `extract_procedure()`, returns the record of what ran, the
+  tuner, its arguments and the control as it took effect, from a results
+  object and from a final fit alike. The help pages and the tuners vignette
+  reach the record through it rather than by the attribute or list slot that
+  holds it. Its default method refuses any other object with class
+  `nestedtune_no_extract_method`, naming both classes that answer.
+
+* The em dash is gone from the text the package publishes: the results
+  print's line on folds that searched different grids, the help pages, the
+  reference index, this file and the README.
+
 * The three code vignettes and the two site articles attach `tidymodels`, new in
   Suggests, before `nestedtune`, behind a guard that ends the page with one
   notice naming whichever of it and the page's other optional packages is

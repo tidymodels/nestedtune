@@ -137,7 +137,8 @@ DOTS_EXEMPT_METHODS <- c(
 # Default methods that refuse the object ahead of the dots (M56).
 NO_METHOD_DEFAULTS <- c(
   "extract_tune_results.default",
-  "extract_scored_candidates.default"
+  "extract_scored_candidates.default",
+  "extract_procedure.default"
 )
 
 # The registry the package's own NAMESPACE writes, read back from the loaded
@@ -160,7 +161,9 @@ DOTS_PROBED_METHODS <- c(
   "summary.nested_results",
   "print.nested_final_fit",
   "extract_tune_results.nested_final_fit",
-  "extract_scored_candidates.nested_final_fit"
+  "extract_scored_candidates.nested_final_fit",
+  "extract_procedure.nested_results",
+  "extract_procedure.nested_final_fit"
 )
 
 test_that("AC5: every registered method whose `...` is unused fences it", {

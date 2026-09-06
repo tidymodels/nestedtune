@@ -92,7 +92,7 @@
 #' ```
 #' set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
-#' control <- attr(res, "procedure")$control
+#' control <- extract_procedure(res)$control
 #' control$seed <- res$.tuning_seed[[i]]
 #' tuned <- tune_bayes(object, resamples$inner_resamples[[i]],
 #'                     iter = iter, initial = initial, objective = objective,
@@ -118,7 +118,7 @@
 #' = 5, uncertain = 3)`, say, to stop a fold's search sooner. What runs is the
 #' control passed, or tune's default when none is, with the slots this package
 #' forces overwritten; the result records that effective control, `seed` left
-#' out, as `attr(res, "procedure")$control`, which is what the recipe above
+#' out, as `extract_procedure(res)$control`, which is what the recipe above
 #' passes. Every slot of `control_bayes()` falls under one of six headings.
 #'
 #' **Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls a

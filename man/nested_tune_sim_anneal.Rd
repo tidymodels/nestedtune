@@ -182,7 +182,7 @@ into the control; the fold's tuning seed alone governs the search. Fold
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
-control <- attr(res, "procedure")$control
+control <- extract_procedure(res)$control
 tuned <- tune_sim_anneal(object, resamples$inner_resamples[[i]],
                          iter = iter, initial = initial,
                          param_info = param_info, metrics = metrics,
@@ -213,7 +213,7 @@ through \code{...} as \code{control} reaches the inner search in every fold, and
 the final fit that re-runs the result -- \code{control = control_sim_anneal( no_improve = 5, verbose_iter = FALSE)}, say, to stop a fold's search sooner
 and keep the console quiet. What runs is the control passed, or finetune's
 default when none is, with the slots this package forces overwritten; the
-result records that effective control as \code{attr(res, "procedure")$control},
+result records that effective control as \code{extract_procedure(res)$control},
 which is what the recipe above passes. Every slot of \code{control_sim_anneal()}
 falls under one of six headings.
 
