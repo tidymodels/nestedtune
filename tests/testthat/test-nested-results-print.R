@@ -756,7 +756,7 @@ test_that("folds that searched different candidate sets are said to have", {
   expect_no_warning(print_text(differing))
 
   txt <- print_text(differing)
-  expect_match(txt, "Candidates searched: 5, 5, 5")
+  expect_match(txt, "Candidates searched: 5, 5, 5\\. The folds")
   expect_match(txt, "did not search the\\s+same grid")
 
   # A data-frame grid is handed to every fold unchanged, so there is nothing to

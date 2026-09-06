@@ -25,7 +25,7 @@
 #'
 #' Printing also says when the folds were not choosing from the same menu. A
 #' grid given as a size is expanded per fold, under that fold's own seed, so a
-#' continuous parameter leaves every fold with its own candidates — which
+#' continuous parameter leaves every fold with its own candidates, which
 #' changes how the selections [summary.nested_results()] reports should be
 #' read. The line
 #' reports each fold's candidate count and appears only when the sets actually
@@ -144,11 +144,11 @@ print_failure_count <- function(x) {
 #'
 #' The selection lines are the part nothing else in the ecosystem shows. When
 #' outer folds choose different parameters, the tuning procedure is unstable on
-#' this data — averaging the metrics hides that, so the summary marks it.
+#' this data: averaging the metrics hides that, so the summary marks it.
 #'
 #' Summarizing a run that only partly completed warns, and still returns the
 #' summary: the folds that ran are described, and the warning says the design
-#' asked for more. A run where every fold failed is the same case — it warns
+#' asked for more. A run where every fold failed is the same case: it warns
 #' and still returns, describing a failed run rather than refusing to answer.
 #' That is where this differs from [collect_metrics()], which aborts when no
 #' outer fold completed.
@@ -361,7 +361,7 @@ print_candidate_sets <- function(grids) {
     list("vec-sep" = ", ", "vec-last" = ", ", "vec-trunc" = 12)
   )
   cli::cli_bullets(c(
-    "!" = "Candidates searched: {shown} \u2014 the folds did not search the \\
+    "!" = "Candidates searched: {shown}. The folds did not search the \\
            same grid"
   ))
   invisible(NULL)

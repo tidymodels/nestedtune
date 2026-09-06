@@ -49,7 +49,7 @@
       Outer resamples: 3-fold cross-validation
       # A tibble: 3 x 9
       <tibble body: column types, rows and the more-variables footer>
-      ! Candidates searched: 5, 5, 5 — the folds did not search the same grid
+      ! Candidates searched: 5, 5, 5. The folds did not search the same grid
       i Use `summary()` for what the run means: which folds failed, what each one
         selected, and the estimate across them.
 

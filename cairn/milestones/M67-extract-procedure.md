@@ -60,6 +60,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: T3 done: the twelve roxygen sites and the two `tuners.Rmd` sites rewritten onto `extract_procedure()`; AC3's grep finds no roxygen or vignette hit.
 - 2026-09-05: checkpoint with the full `devtools::test()` run still in progress and the [S] prose sweep mid-flight; T1 to T3 are ticked on their file-level checks and the next commit records the suite result.
 - 2026-09-05: full `devtools::test()` on the checkpoint: one failure, the Bayesian oracles' method-coverage table lacking a call for `extract_procedure.nested_results`; the call added, the file re-run clean, the rest of the suite green. T1 to T3 stand verified.
+- 2026-09-05: T4 part: the print's candidates line reads `Candidates searched: 5, 5, 5. The folds did not search the same grid`; the regex at `test-nested-results-print.R:759` follows it and the snapshot line is re-recorded, the print file passing; the prose sweep still with the subagent.
 
 ## Decisions
 
