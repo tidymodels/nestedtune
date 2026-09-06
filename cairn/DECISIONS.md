@@ -1663,6 +1663,38 @@ argument shape stands.
 **Consequences:** D-054's order clause is superseded here; the rest of D-054
 stands. Falsified by tune reordering the two columns on a `tune_results`.
 
+### D-056 (2026-09-06): the selection rule is a `selection_rule()` object on a `select` argument, recorded in the procedure and checked against the tuned parameters at entry
+
+**Context:** The orchestrators selected each fold's candidate with
+`tune::select_best()` on the first metric, with no way to ask for tune's
+one-standard-error or percent-loss rule; the final fit had to apply the same
+rule the folds did (IP3 pairs the estimate with the model it describes).
+
+**Decision:** A `select` argument on the five orchestrators takes what the
+exported `selection_rule(rule, ..., limit)` returns: the rule name, the
+parameter orderings captured as bare expressions, and the percent-loss
+limit. The rule joins the `procedure` record as a shared entry the tuner
+never receives, and `nested_final_fit()` applies the recorded rule; a record
+without one is refused as an object built before the rule was recorded, not
+migrated (D-041). The orderings may name only parameters the workflow tunes,
+checked at entry; tune's selectors would also order by any column of the
+metrics summary, and that wider contract is deliberately not offered, since
+an ordering by a summary column is a selection tune's own documentation does
+not describe and the entry check cannot validate. Considered and rejected: a
+function-valued `select` (a closure carries its frame to every daemon and
+defeats the fixture cache); a string plus ordering and limit formals (three
+formals on five signatures); `eval_time` on the selector (D-038's reasoning
+stands); naming the rule in `summary()` and the final fit's print (a
+candidate row).
+
+**Consequences:** the constructor refuses a rule outside tune's three, an
+ordering with `"best"` or none with the other two, an ordering that is a
+literal, a named argument in the dots, and a malformed or misplaced `limit`;
+the orchestrators refuse anything but a `selection_rule()` and an unknown
+ordering name at entry. Falsified by a caller needing a selector outside
+tune's three, or by an ordering by a summary column that a user can state a
+selection for.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

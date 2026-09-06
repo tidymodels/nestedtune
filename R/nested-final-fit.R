@@ -37,8 +37,9 @@
 #'   resampling specification, recorded on the result as the design stored it;
 #'   the data, which every split references; and the procedure -- the tuner
 #'   and its own arguments (`grid`; `iter`, `initial` and `objective`; or
-#'   `iter` and `initial`) with
-#'   `param_info`, `event_level` and `eval_time`, and the metric set. A
+#'   `iter` and `initial`) with `param_info`, `event_level`, `eval_time`
+#'   and `select`, the [selection_rule()] the folds selected by, and the
+#'   metric set. A
 #'   `param_info` parameter whose range is unknown until the data is seen is
 #'   finalized here on the full data -- every row is this model's training
 #'   data -- where each outer fold of the nested run finalized it on that

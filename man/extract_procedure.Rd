@@ -20,8 +20,9 @@ name of the tune or finetune function that ran (\code{"tune_grid"},
 \code{"tune_sim_anneal"}); that tuner's own arguments (\code{grid} for the grid and
 racing tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian tuner;
 \code{iter} and \code{initial} for simulated annealing); the arguments every
-orchestrator shares, \code{param_info}, \code{event_level} and \code{eval_time}, as they
-were given; and \code{control}, the control object the run was given, or
+orchestrator shares, \code{param_info}, \code{event_level}, \code{eval_time} and
+\code{select}, the \code{\link[=selection_rule]{selection_rule()}} each fold selected by, as they were
+given; and \code{control}, the control object the run was given, or
 tune's default when none was, with the slots this package forces already
 applied, and on a Bayesian result with \code{seed} left out. See "Differences
 from calling tune directly" on each orchestrator's help page for what

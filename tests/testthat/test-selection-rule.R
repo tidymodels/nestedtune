@@ -54,6 +54,35 @@ test_that("AC3: one_std_err and pct_loss need at least one ordering", {
   )
 })
 
+test_that("an ordering that is a string or a number is refused: it would order nothing", {
+  cnd <- expect_error(
+    selection_rule("one_std_err", "num_comp"),
+    class = "nestedtune_selection_rule_order"
+  )
+  expect_match(conditionMessage(cnd), "a string", fixed = TRUE)
+  expect_error(
+    selection_rule("pct_loss", 1),
+    class = "nestedtune_selection_rule_order"
+  )
+  expect_error(
+    selection_rule("pct_loss", num_comp, "penalty"),
+    class = "nestedtune_selection_rule_order"
+  )
+  # The accepting shapes: a name and a call.
+  expect_length(selection_rule("pct_loss", desc(num_comp), penalty)$order, 2L)
+})
+
+test_that("a named argument in the dots is refused, so a misspelled limit is not an ordering", {
+  expect_error(
+    selection_rule("pct_loss", num_comp, limt = 5),
+    class = "rlib_error_dots_named"
+  )
+  expect_error(
+    selection_rule("one_std_err", by = num_comp),
+    class = "rlib_error_dots_named"
+  )
+})
+
 test_that("an ordering given with best is refused, as tune::select_best() refuses one", {
   cnd <- rlang::catch_cnd(selection_rule("best", df1))
   expect_s3_class(cnd, "nestedtune_selection_rule_order")
@@ -98,6 +127,38 @@ test_that("the object prints on one line naming the rule, orderings and limit", 
     selection_rule("one_std_err", desc(df1), df2)
     selection_rule("pct_loss", df1, limit = 5)
   })
+})
+
+test_that("a rule that selects no candidate fails the fold with a note naming the rule", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  set.seed(1)
+  # One inner resample leaves `std_err` NA, and tune's one-standard-error
+  # selector then returns no row.
+  folds <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 2),
+    inside = rsample::mc_cv(times = 1)
+  )
+  expect_warning(
+    res <- nested_tune_grid(
+      wf,
+      folds,
+      grid = det_grid(),
+      select = selection_rule("one_std_err", num_comp)
+    ),
+    "2 of 2 outer folds failed"
+  )
+  expect_true(all(vapply(res$.selected, is.null, logical(1))))
+  notes <- collect_notes(res)
+  expect_true(all(grepl("chose no candidate", notes$note, fixed = TRUE)))
+  expect_true(all(grepl("one_std_err", notes$note, fixed = TRUE)))
+  # The same design completes under the default rule.
+  set.seed(1)
+  ok <- suppressMessages(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_false(any(vapply(ok$.selected, is.null, logical(1))))
 })
 
 test_that("is_selection_rule() answers for the class alone", {

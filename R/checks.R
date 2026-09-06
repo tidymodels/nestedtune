@@ -756,13 +756,18 @@ check_results_record <- function(results, call = rlang::caller_env()) {
         "selection rule"
       }
     )
+    origin <- if (identical(absent, "selection rule")) {
+      "It was built by an earlier version of nestedtune, before the rule \\
+       was recorded."
+    } else {
+      "It was built by an earlier version of nestedtune, or from a design \\
+       assembled by hand rather than by {.fn nested_resamples} or \\
+       {.fn rsample::nested_cv}, which store the specification as a call."
+    }
     cli::cli_abort(
       c(
         "{.arg results} carries no {absent} to re-run.",
-        x = "It was built by an earlier version of nestedtune, or from a \\
-             design assembled by hand rather than by {.fn nested_resamples} \\
-             or {.fn rsample::nested_cv}, which store the specification as \\
-             a call.",
+        x = origin,
         i = "Re-run {.fn nested_tune_grid} or the sibling that built it on \\
              this version, on a design from one of those constructors; a \\
              results object is not migrated."

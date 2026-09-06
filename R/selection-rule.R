@@ -33,8 +33,11 @@
 #'   tune's selectors take them: parameter names, wrapped in [dplyr::desc()]
 #'   where a larger value is simpler. At least one is required for those two
 #'   rules, and none is accepted for `"best"`, which [tune::select_best()]
-#'   refuses. Each name must be a parameter the workflow tunes; the
-#'   orchestrators check that at entry.
+#'   refuses. Each must be a bare name or a call, never a string or a
+#'   number, which would order nothing; and none may be named, so a
+#'   misspelled `limit` is refused rather than taken as an ordering. Each
+#'   name must be a parameter the workflow tunes; the orchestrators check
+#'   that at entry.
 #' @param limit For `"pct_loss"` only, the acceptable loss of performance
 #'   against the best candidate, in percent, a single non-negative number;
 #'   left `NULL` it takes tune's default of 2. Refused with the other two
@@ -66,7 +69,26 @@ selection_rule <- function(
   limit = NULL
 ) {
   rule <- rlang::arg_match(rule)
+  rlang::check_dots_unnamed()
   order <- unname(rlang::enexprs(...))
+  literal <- !vapply(
+    order,
+    function(x) rlang::is_symbol(x) || rlang::is_call(x),
+    logical(1L)
+  )
+  if (any(literal)) {
+    cli::cli_abort(
+      c(
+        "Each ordering in {.arg ...} must be a bare parameter name, or one \
+         wrapped in {.fn desc}, as {.fn tune::select_by_one_std_err} and \
+         {.fn tune::select_by_pct_loss} take them.",
+        x = "Got {.obj_type_friendly {order[[which(literal)[1L]]]}}, which \
+             names no parameter and would order nothing.",
+        i = "Write {.code num_comp}, not {.code \"num_comp\"}."
+      ),
+      class = "nestedtune_selection_rule_order"
+    )
+  }
   if (rule == "best" && length(order) > 0L) {
     cli::cli_abort(
       c(
@@ -174,7 +196,7 @@ print.selection_rule <- function(x, ...) {
 # tryCatch and in the final fit's worker, so both apply the one rule the
 # record names.
 apply_selection_rule <- function(tuned, select, metric_name) {
-  switch(
+  selected <- switch(
     select$rule,
     best = tune::select_best(tuned, metric = metric_name),
     one_std_err = tune::select_by_one_std_err(
@@ -189,4 +211,21 @@ apply_selection_rule <- function(tuned, select, metric_name) {
       limit = select$limit
     )
   )
+  # tune's one-standard-error rule filters on `std_err`, which a single inner
+  # resample leaves NA, so the selector returns no row; left alone, the empty
+  # selection fails the outer fit one step later with a note about the
+  # preprocessor. Name the failure where it happens, so the fold's note does.
+  if (nrow(selected) == 0L) {
+    cli::cli_abort(
+      c(
+        "The {.val {select$rule}} selection rule chose no candidate on this \
+         fold's inner run.",
+        i = "{.fn tune::select_by_one_std_err} needs a standard error, \
+             which one inner resample cannot give; use more inner resamples \
+             or another rule."
+      ),
+      class = "nestedtune_selection_rule_empty"
+    )
+  }
+  selected
 }

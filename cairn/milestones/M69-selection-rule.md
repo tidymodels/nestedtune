@@ -68,8 +68,11 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - 2026-09-06: T6 done: `devtools::check()` 0 errors, 0 warnings, 1 NOTE (`Rplots.pdf` at top level, the gitignored plot-device file a suite run wrote at 10:28 before the check bundled the directory; deleted); status review.
 - 2026-09-06: review checkpoint: PR #79 open as draft; AC3, AC4, AC6 evidenced and ticked; the suite and two reviewers running, `devtools::check()` and AC1, AC2, AC5, AC7 follow.
 - 2026-09-06: review, fix-now from the blame-history lens ahead of the gate: the overlong roxygen line in `R/nested-final-fit.R` re-flowed, DESIGN's orchestration sentence re-worded, `test-fixture-cache.R`'s base request pins `select = selection_rule()` as it pins `eval_time`; `document()` and that test file re-run once the full suite finishes.
+- 2026-09-06: review, findings triage ahead of the gate: 12 diff-bug, 3 blame-history, 0 prior-review findings; fix-now landed for the two constructor holes (literal orderings, named dots), the empty-selection fold note, the record enumerations on two help pages, the missing-rule bullet, the intro vignette sentence, the fixture-cache base pin, three wraps; D-056 written; the rest rejected with reasons in the Review section.
 
 ## Decisions
+
+- 2026-09-06: review gate: the milestone's cross-cutting choices (constructor object, the `select` name, the entry check narrowing tune's ordering contract to tuned parameters, the refused pre-rule record) are recorded as D-056; a selector returning no row fails the fold with a note naming the rule (`nestedtune_selection_rule_empty`) rather than an entry-time refusal, since the inner resample count is the design's and the fold report is where the failure shows (IP4).
 
 ## Review
 
@@ -80,3 +83,24 @@ Reviewed 2026-09-06 on `m069-selection-rule` at PR #79; `main` had not moved sin
 - AC6: by command. `grep -n "select_best\|best candidate"` over the four orchestrator files restricted to `#'` lines returns 11 hits, each either inside the `@param select` text, a "Selected by `select`" paragraph, the `.selected` sentence (which says "under the default rule"), or a by-hand recipe `select_best()` line whose next two lines annotate "under the default select; select_by_one_std_err() or select_by_pct_loss() ... otherwise"; the one remaining hit (`R/nested-tune-sim-anneal.R:160`, "restarts from its best candidate") describes annealing restarts, not selection. The sweep over `vignettes/tuners.Rmd` returns no hit; its lines 360 to 364 name `selection_rule("best")` and tune's other two selectors. All four `man/nested_tune_*.Rd` pages carry `\item{select}` and a "Selected by" paragraph; `man/selection_rule.Rd` has an `\examples` block (`selection_rule()`, `selection_rule("one_std_err", num_comp)`); `_pkgdown.yml:54` lists `selection_rule`.
 - AC3: by command on `devtools::load_all()`: `selection_rule("median")` raises `rlang_error`; `"one_std_err"` and `"pct_loss"` with no ordering raise `nestedtune_selection_rule_no_order`; `limit = 2` with `"best"` and with `"one_std_err"`, and each of `-1`, `NA_real_`, `c(1, 2)`, `"2"` with `"pct_loss"`, raise `nestedtune_selection_rule_limit`; the captured orderings are a call and a symbol, no quosure; `limit` defaults to 2 for `"pct_loss"` and `NULL` for `"best"`. `test-selection-rule.R` (10 blocks) asserts the same by class in the suite run recorded under AC7.
 - AC4: by command on `devtools::load_all()` over `det_workflow()` and a 2×3 `nested_resamples()`: each of the five orchestrators given `select = "best"` raises `nestedtune_bad_selection_rule`, and given `selection_rule("one_std_err", desc(nonesuch))` raises `nestedtune_selection_rule_unknown_param` with a message naming `nonesuch` and the tuned id `num_comp`; the error's call is the caller's expression. The five `*-checks.R` AC4 blocks (`test-nested-tune-grid-checks.R:937,975`, `-bayes-checks.R:309`, `-race-checks.R:461` for both racers, `-sim-anneal-checks.R:433`) assert the class, the orchestrator name in the call, `select = NULL`, and, through the sentinel fixture, that no fold ran; they pass in the suite run recorded under AC7.
+
+### Independent review findings and triage
+
+Three fresh-context lenses on `git diff main..HEAD`: [O] diff-bug (12 findings), [S] blame-history (3), [S] prior-review record (0; PR-comment probe found one human comment repo-wide, on a workflow file this diff never touches, so no thread walk).
+
+- O1 (fix now): a literal ordering, `selection_rule("one_std_err", "num_comp")` or `selection_rule("pct_loss", 1)`, passed the constructor and the entry check (`all.vars()` of a literal is empty) and tune's `arrange()` then ordered nothing. `selection_rule()` now refuses an ordering that is neither a symbol nor a call as `nestedtune_selection_rule_order`; test in `test-selection-rule.R`.
+- O2 (fix now): a named argument in the dots, `selection_rule("pct_loss", num_comp, limt = 5)`, became an ordering and the run used tune's default limit. `rlang::check_dots_unnamed()` now refuses it (`rlib_error_dots_named`); test in `test-selection-rule.R`.
+- O3 (fix now): the record enumerations on the `extract_procedure()` and `nested_final_fit()` help pages did not name `select`; both now do.
+- O4 (fix now): no D-entry for a user-facing argument and an exported constructor; D-056 written.
+- O5 (fix now, same as H3): `test-fixture-cache.R`'s base request pins `select = selection_rule()` so the axis differs by value, not presence.
+- O6 (fix now): the missing-rule refusal's `x` bullet spoke of hand-assembled designs; when the only absence is the rule it now says the object predates the rule.
+- O7 (fix now): `vignettes/nested-cv.Rmd:126` said "selects the best candidate"; it now names the `select` rule.
+- O8 (reject): `select = selection_rule()` defaults on the internal workers mirror the `eval_time = NULL` defaults beside them, and BC15 plus the five entry checks cover the threading; making internal formals required is a convention change for another milestone.
+- O9 (reject, recorded): the entry check admits only tuned parameter ids where tune's selectors order by any summary column; the plan's AC4 named that narrowing and D-056 records the reason.
+- O10 (fix now): confirmed by command: one inner resample leaves `std_err` NA, `select_by_one_std_err()` returns zero rows, and the fold failed one step later with a preprocessor note while the default rule completed. `apply_selection_rule()` now fails the fold with a note naming the rule and the cause (`nestedtune_selection_rule_empty`); test in `test-selection-rule.R`.
+- O11 (reject): `format()`/`print()` refusing a stray dot is the package's dots barrier, fenced by `test-dots-barrier.R`.
+- O12 (fix now): DESIGN's orchestration paragraph re-wrapped.
+- H1 (fix now): the overlong roxygen line in `R/nested-final-fit.R` re-flowed.
+- H2 (fix now): DESIGN's "picks by through" re-worded.
+- H3: see O5.
+- The blame-history lens's remark that no D-041 text records a declined migration is refuted against the record: D-041 lists "migrating pre-M46 objects (pre-1.0)" under considered and rejected.

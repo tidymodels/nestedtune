@@ -28,8 +28,9 @@
 #'   `"tune_sim_anneal"`); that tuner's own arguments (`grid` for the grid and
 #'   racing tuners; `iter`, `initial` and `objective` for the Bayesian tuner;
 #'   `iter` and `initial` for simulated annealing); the arguments every
-#'   orchestrator shares, `param_info`, `event_level` and `eval_time`, as they
-#'   were given; and `control`, the control object the run was given, or
+#'   orchestrator shares, `param_info`, `event_level`, `eval_time` and
+#'   `select`, the [selection_rule()] each fold selected by, as they were
+#'   given; and `control`, the control object the run was given, or
 #'   tune's default when none was, with the slots this package forces already
 #'   applied, and on a Bayesian result with `seed` left out. See "Differences
 #'   from calling tune directly" on each orchestrator's help page for what

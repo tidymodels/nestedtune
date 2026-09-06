@@ -19,8 +19,11 @@ expressions ordering the candidates from simplest to most complex, as
 tune's selectors take them: parameter names, wrapped in \code{\link[dplyr:desc]{dplyr::desc()}}
 where a larger value is simpler. At least one is required for those two
 rules, and none is accepted for \code{"best"}, which \code{\link[tune:select_best]{tune::select_best()}}
-refuses. Each name must be a parameter the workflow tunes; the
-orchestrators check that at entry.}
+refuses. Each must be a bare name or a call, never a string or a
+number, which would order nothing; and none may be named, so a
+misspelled \code{limit} is refused rather than taken as an ordering. Each
+name must be a parameter the workflow tunes; the orchestrators check
+that at entry.}
 
 \item{limit}{For \code{"pct_loss"} only, the acceptable loss of performance
 against the best candidate, in percent, a single non-negative number;
