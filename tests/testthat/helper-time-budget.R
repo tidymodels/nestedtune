@@ -785,6 +785,14 @@ time_budget_ledger <- function() {
       times = 2L,
       note = "inside for (n in c(2L, 3L)) (M51)"
     ),
+    tb_row(
+      "test-parallel-identity.R",
+      834L,
+      "start_daemons",
+      START_DAEMONS_BOUND_S(),
+      "the outer fit's predictions and extracts match serially and on two daemons",
+      note = "one pool of 2 (M68)"
+    ),
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two
