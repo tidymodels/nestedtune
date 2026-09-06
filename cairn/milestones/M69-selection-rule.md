@@ -64,6 +64,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - 2026-09-06: T2 to T5 were verified by one `devtools::test()` run over the combined tree rather than one per task: `new_procedure()`'s new formal reached the final fit at T2, and the doc parser shaped T5, so the tree was not green between them.
 - 2026-09-06: checkpoint with T1 to T5 ticked while the combined-tree `devtools::test()` run was still in progress; its result and T6 follow in the next commit.
 - 2026-09-06: the combined-tree suite returned 8 failures in three files, all the new formal's: `test-dots-barrier.R`'s two formals lists and its method fence (`format()`/`print()` on `selection_rule` now refuse a stray dot), `test-fixture-cache.R`'s variant registry (a `select` axis value), `test-nested-tune-grid-leakage.R`'s `nested_fold_fit()` stub signature; fixed, the three files green, the full suite re-running for T6.
+- 2026-09-06: T6 in progress: `devtools::document()` no diff, `air format --check` clean, `pkgdown::check_pkgdown()` clean, `devtools::test()` 7816 passed, 0 failed, 0 warnings, 0 skipped; `devtools::check()` running.
 
 ## Decisions
 
