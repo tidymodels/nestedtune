@@ -1,18 +1,17 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (status audit after the same-day triage pass: nothing in flight, validate green, inboxes empty, no outside merges, no RB open; ROADMAP 51 lines / 22,458 bytes, LESSONS 19,909 of 20,000 bytes; no row touched.)_
+_Last hygiene check: 2026-09-06 (M69 done and archived after PR #79; M63's row pruned to keep five terminal rows; validate green; no RB open; LESSONS unchanged at 19,909 of 20,000 bytes.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | review | — | normal | milestones/M69-selection-rule.md |
+| M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
 | M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
 | M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | done | — | normal | milestones/archive/M67-extract-procedure.md |
 | M65 | Three readers stack a per-fold list column with the fold labels beside it: `collect_notes()`, `collect_selections()` and `collect_inner_metrics()` | done | — | normal | milestones/archive/M65-collect-readers.md |
 | M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | done | M65 | normal | milestones/archive/M66-vignette-sweep.md |
-| M63 | A site-only article runs the outer loop on mirai daemons and shows the result identical to the serial run | done | M60 | normal | milestones/archive/M63-parallel-article.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
