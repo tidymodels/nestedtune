@@ -454,10 +454,10 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
     )
     expect_identical(names(res$.extracts[[i]])[[1L]], "(Intercept)")
   }
-  # Both slots on one control: the run carries both columns, `.extracts`
-  # before `.predictions` as tune orders them.
+  # Both slots on one control: the run carries both columns, `.predictions`
+  # before `.extracts` as tune orders them on a `tune_results`.
   expect_true(".predictions" %in% names(res))
-  expect_lt(match(".extracts", names(res)), match(".predictions", names(res)))
+  expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
 })
 
 test_that("an extract that errors leaves the fold completed, its element NULL, and one note (AC2)", {

@@ -480,7 +480,8 @@
 #' value on each completed fold's fitted workflow, applied after the fit. A
 #' failed fold holds `NULL` in each, and a fold whose extract errored stays
 #' completed with `NULL` there and a note at location `"outer extract"`.
-#' [collect_predictions()] and [collect_extracts()] stack the two columns
+#' [`collect_predictions()`][collect_predictions.nested_results] and
+#' [`collect_extracts()`][collect_predictions.nested_results] stack the two columns
 #' with the fold labels. What is kept is the outer fit's; the inner run's
 #' predictions and extracts, which the same slots save inside tune, are
 #' still discarded with that run, and neither column exists on a run that
@@ -781,9 +782,12 @@ nested_fold_fit <- function(
   # whether the fold record carries them home: on a daemon the table travels
   # back with the fold, and a caller who did not ask pays neither the wire
   # nor the object for it (GP4). The inner run's predictions, which the same
-  # slot saves on `tuned`, are discarded with that run as before.
+  # slot saves on `tuned`, are discarded with that run as before. Read
+  # through `[[` on the column so a result lacking it gives NULL rather than
+  # an error: `control_last_fit()` forces `save_pred`, so the column is
+  # there today, and this fold's estimate does not depend on it staying so.
   predictions <- if (isTRUE(control$save_pred)) {
-    fitted$.predictions[[1L]]
+    fitted[[".predictions"]][[1L]]
   }
 
   # The control's `extract`, applied to the outer fit's workflow after the

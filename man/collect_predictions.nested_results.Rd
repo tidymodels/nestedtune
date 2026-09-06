@@ -49,15 +49,17 @@ Both read the folds that completed, the rule \code{\link[=collect_selections]{co
 \code{\link[=collect_metrics]{collect_metrics()}} follow: a partial run is stacked over the completed
 folds with one warning of class \code{nestedtune_partial_summary}, and a run in
 which no fold completed is an error of class
-\code{nestedtune_no_completed_folds}. An object that carries no \code{.predictions}
-or \code{.extracts} column, because its run's control did not ask for it, is
-refused with condition class \code{nestedtune_column_not_saved}, the message
-naming the slot to set.
+\code{nestedtune_no_completed_folds}. An object whose run's control did not ask
+for \code{.predictions} or \code{.extracts}, read from the recorded procedure, or
+that no longer carries the column, is refused with condition class
+\code{nestedtune_column_not_saved}, the message naming the slot to set.
 
-The predictions are the outer fit's, one held-out row each, so every row
-of the data appears once per repeat of the design in
-\code{collect_predictions()}'s table. The inner tuning run's predictions and
-extracts, which the same two slots also save inside tune, are not kept.
+The predictions are the outer fit's on each fold's assessment rows, so on
+a v-fold outer design every row of the data appears once per repeat in
+\code{collect_predictions()}'s table; on a bootstrap or Monte Carlo outer
+design a row appears as often as it was held out. The inner tuning run's
+predictions and extracts, which the same two slots also save inside tune,
+are not kept.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

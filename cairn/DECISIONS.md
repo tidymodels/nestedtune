@@ -1645,6 +1645,24 @@ falsifier stands as written. `summarize = TRUE` on the predictions is a
 candidate row. Falsified by a user needing the inner run's predictions, or
 by a per-fold extract whose size makes the parallel return dominate a run.
 
+### D-055 (2026-09-06): tune orders `.predictions` before `.extracts`, and the annotation of D-030's falsifier that D-054's heading promised — supersedes D-054's column-order clause
+
+**Context:** D-054 wrote the two outer-fit columns as `.extracts` then
+`.predictions` and said tune orders them so; tune's `fit_resamples()` places
+`.predictions` first (M68 review finding O1). D-054's heading promised an
+annotation of D-030's falsifier that its body never made (finding O6).
+
+**Decision:** The constructor writes `.predictions` then `.extracts` after
+`.notes`, tune's order, and `record_columns()` names them in that order.
+D-030's falsifier named the inner tuning run being retained on
+`nested_results` as what would give `save_pred` and `extract` something to
+act on; M68 gives the two slots the outer fit to act on without retaining the
+inner run, so that falsifier has not fired and D-030's `event_level`-only
+argument shape stands.
+
+**Consequences:** D-054's order clause is superseded here; the rest of D-054
+stands. Falsified by tune reordering the two columns on a `tune_results`.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

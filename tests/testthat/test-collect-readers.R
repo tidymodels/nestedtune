@@ -614,6 +614,33 @@ test_that("an object lacking the column is refused by name, the message naming t
   expect_no_error(suppressWarnings(collect_predictions(half)))
 })
 
+test_that("a column added by hand to a run that never saved one is refused, the recorded control deciding", {
+  skip_if_not_installed("tibble")
+  design <- repeated_design()
+  folds <- lapply(seq_len(nrow(design)), function(i) stub_fold())
+  # The default control asked for neither column; a caller then adds both.
+  res <- stub_results(design, folds)
+  res$.predictions <- lapply(seq_len(nrow(res)), function(i) {
+    stub_predictions(seq(i, i + 2L))
+  })
+  res$.extracts <- as.list(seq_len(nrow(res)))
+  expect_s3_class(res, "nested_results")
+  expect_true(all(c(".predictions", ".extracts") %in% names(res)))
+
+  cnd <- rlang::catch_cnd(collect_predictions(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "save_pred", fixed = TRUE)
+  cnd <- rlang::catch_cnd(collect_extracts(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "extract", fixed = TRUE)
+
+  # Without a recorded procedure (an object built before it was recorded),
+  # the column's presence is all there is to read, and it is read.
+  attr(res, "procedure") <- NULL
+  expect_no_error(collect_predictions(res))
+  expect_no_error(collect_extracts(res))
+})
+
 test_that("both readers refuse a non-empty `...`", {
   skip_if_not_installed("tibble")
   res <- kept_results()

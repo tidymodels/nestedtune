@@ -37,15 +37,15 @@ new_nested_results <- function(
   # so a column's presence says what ran (IP4), and an object built under the
   # default control looks as it did before. A failed fold's element is NULL,
   # and so is a completed fold's extract when the function errored on it (its
-  # notes say so). tune places `.extracts` then `.predictions` after `.notes`
+  # notes say so). tune places `.predictions` then `.extracts` after `.notes`
   # on a `tune_results`, and so does this. `[[` rather than `$`: a fold
   # record from a worker running older code lacks the element, and `$` would
   # partially match.
-  if (is.function(procedure$control$extract)) {
-    cols[[".extracts"]] <- lapply(folds, function(x) x[["extracts"]])
-  }
   if (isTRUE(procedure$control$save_pred)) {
     cols[[".predictions"]] <- lapply(folds, function(x) x[["predictions"]])
+  }
+  if (is.function(procedure$control$extract)) {
+    cols[[".extracts"]] <- lapply(folds, function(x) x[["extracts"]])
   }
   cols[[".completed"]] <- completed
   cols[[".tuning_seed"]] <- seeds[seq(1L, by = 2L, length.out = n)]
@@ -152,8 +152,8 @@ record_columns <- function(x) {
     ".notes",
     # Present only on a run whose control asked for them (M68); a present
     # column is part of the record, an absent one is nothing to vouch for.
-    ".extracts",
     ".predictions",
+    ".extracts",
     ".completed",
     ".tuning_seed",
     ".outer_fit_seed"
@@ -987,7 +987,10 @@ per_fold_metrics <- function(x) {
 # `completed_only` is the readers' rule about failed folds: the selections
 # and inner tables are read over the completed folds, the way
 # collect_metrics() and agreement() read, while the notes are read over every
-# fold, a failed fold's notes being the point of asking.
+# fold, a failed fold's notes being the point of asking. `tables` is the list
+# of per-fold tables to stack, one per row of `x`; it defaults to the column
+# itself, and collect_extracts() passes each fold's value wrapped as a one-row
+# table.
 stack_fold_column <- function(
   x,
   column,

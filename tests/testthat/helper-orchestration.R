@@ -2286,7 +2286,7 @@ coef_extract <- rlang::new_function(
 )
 
 # What a run whose control asked for both outer-fit columns carries (M68):
-# `.extracts` then `.predictions`, every fold completed, each prediction table
+# `.predictions` then `.extracts`, every fold completed, each prediction table
 # one row per assessment row of its split with tune's columns, and each
 # extract `coef_extract()`'s named vector with the intercept first. Every
 # orchestrator runs the same fold fit, so this is the presence check the four
@@ -2294,8 +2294,8 @@ coef_extract <- rlang::new_function(
 expect_outer_columns_kept <- function(res) {
   testthat::expect_true(all(c(".extracts", ".predictions") %in% names(res)))
   testthat::expect_lt(
-    match(".extracts", names(res)),
-    match(".predictions", names(res))
+    match(".predictions", names(res)),
+    match(".extracts", names(res))
   )
   testthat::expect_true(all(res$.completed))
   for (i in seq_len(nrow(res))) {
