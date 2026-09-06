@@ -1,6 +1,6 @@
 # M68: `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -75,6 +75,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: T8 done: `devtools::check()` 0 errors, 0 warnings, 0 notes (6m 10s); `air format --check` clean over the touched files after one reformat of `test-nested-tune-grid-results.R`; `devtools::document()` no diff; `devtools::test()` clean on the final tree. Status set to review.
 - 2026-09-06: review checkpoint: default branch unmoved since the cut; branch pushed, draft PR #78 open; cairn_validate, document() no-diff, pkgdown check and air clean; full suite, check() and the three review lenses pending.
 - 2026-09-06: review checkpoint: AC1-AC5 verified; three lenses reported (findings O1-O11, S1 recorded in Review with dispositions); O4 fails AC3 as written, so a defect return follows once `devtools::check()`, still running, lands its AC7 line.
+- 2026-09-06: defect return (1 of the thrash count): AC3 fails as written, finding O4 — `check_dots_empty()` runs ahead of `check_any_completed()` in both new readers, so a non-empty `...` on an all-failed run refuses as `rlib_error_dots_nonempty` where the criterion says `nestedtune_no_completed_folds` wins; resolve by reordering the two checks (siblings included or not) or by the step-6 amendment narrowing the clause, the user's call. Fix O1, O2, O3, O6, O7, O8, O9 and O11 in the same stint per the Review dispositions; AC1-AC5 verified, check() 0/0/0. Status in-progress; PR #78 stays a draft.
 
 ## Decisions
 
@@ -88,7 +89,7 @@ Evidence gathered 2026-09-06 on branch head 800f58f (PR #78), the default branch
 - AC4: same suite run with `NOT_CRAN=true`, 0 skips, so BC14 in `test-parallel-identity.R` ran: the ranger workflow with `save_pred = TRUE` and the out-of-bag-error extract, serial against two mirai daemons with `last_dispatch()` `"parallel"`, `.predictions` and `.extracts` identical, every fold completed, every extract a number and every prediction table a data frame. Verified.
 - AC5: same suite run. The grid file's five-door test on an object carrying both columns: `mutate()` replacing, `select()` dropping, `[` dropping and `vec_restore()` on an altered frame each return a bare tibble, `relocate()` keeps the class; the control on a run without the columns keeps its class through the same verbs. Verified.
 - AC6: by grep on the rendered Rd: the four orchestrator pages carry the heading "Kept from the outer fit: `save_pred`, `extract`" and leave `save_workflow` alone under "Not returned" (the annealing page `save_workflow`, `save_history`); the grid page says what is kept is the outer fit's and the inner run's is discarded; `man/collect_predictions.nested_results.Rd` carries both aliases; `_pkgdown.yml` lists `collect_predictions.nested_results` after `collect_selections`; NEWS carries the entry; DESIGN's Function Families paragraph names both readers; `results.Rmd` runs `control_grid(save_pred = TRUE)` and calls `collect_predictions(res)` under "The readers". The fresh render was not run: the review returned before it (finding O4 below). Not ticked.
-- AC7: `NOT_CRAN=true devtools::test()` 7446 pass, 0 fail; `air format --check` over the branch's R files reports nothing; `devtools::check()`: CHECK_RESULT. Not ticked, the check result recorded for the re-review.
+- AC7: `NOT_CRAN=true devtools::test()` 7446 pass, 0 fail; `air format --check` over the branch's R files reports nothing; `devtools::check()`: 0 errors, 0 warnings, 0 notes (6m 33s). Not ticked, the check result recorded for the re-review.
 
 Consistency gate: `cairn_validate.py` exit 0 (18 references-staleness advisories, pre-existing); `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; README.Rmd untouched by the branch; NEWS entry present; no new top-level file. No DESIGN principle changed, `cairn_impact.py` skipped.
 
