@@ -282,7 +282,10 @@ test_that("the key separates every formal argument of both orchestrators", {
     if (identical(fn_name, "nested_final_fit")) {
       list(
         object = function() stoch_workflow(d),
-        results = function() final_fit_results(det_nested(d, v = 4))
+        results = function() final_fit_results(det_nested(d, v = 4)),
+        # `id` (M71) names a workflow of a `nested_results_set`; the base
+        # request leaves it at its `NULL` default, and any string differs.
+        id = function() "tuned"
       )
     } else {
       list(
