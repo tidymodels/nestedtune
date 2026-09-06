@@ -1,17 +1,16 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (M70 done and archived after PR #80; M65's row pruned to keep five terminal rows; validate green; no RB open; LESSONS unchanged at 19,909 of 20,000 bytes, no lesson added.)_
+_Last hygiene check: 2026-09-06 (M71 planned; its lineage candidate row absorbed and two rows added at its plan gate; M67 and M66 rows pruned since the validator now retains 3 terminal rows; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | planned | — | normal | milestones/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
 | M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
-| M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | done | — | normal | milestones/archive/M67-extract-procedure.md |
-| M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | done | M65 | normal | milestones/archive/M66-vignette-sweep.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -45,7 +44,8 @@ _Last hygiene check: 2026-09-06 (M70 done and archived after PR #80; M65's row p
 - What `...` still does not carry after M48: the Gaussian-process fitter's options (`corr`, `nug_thres`, `maxit`, `optim_start`, which `tune_bayes()` forwards from its own `...`) and the outer-loop `control` topepo reserved the name for in [#33](https://github.com/tidymodels/nestedtune/issues/33) — added 2026-09-02 — M48 Out, D-042. Promote on a user needing a GP option, or on a first outer-loop setting that is not its own argument
 - An `autoplot()` view of each fold's inner search trajectory over `.inner_metrics` — the best-so-far by `.iter` for a Bayesian run, which is what [#57](https://github.com/tidymodels/nestedtune/issues/57) wanted the column for — added 2026-09-02 — M49 Out (done 2026-09-02), D-019. Extended 2026-09-02 at M50/M51's plan gate: a racing view (the per-resample elimination order `finetune::plot_race()` draws is not kept by the fold record, M50 Out) and an annealing trajectory (M51 Out) join it; and a view over the out-of-fold predictions M68 keeps (M68 Out, 2026-09-06). Promote on a user asking for a plot rather than the table
 - Name the selection rule in `summary()` and the final fit's print when it is not the default best-by-metric rule — added 2026-09-06 — M69 Out; `extract_procedure(res)$select` reaches it. Promote on a user misreading `.selected` for lack of the rule on the printed surface
-- A `workflow_set` through one nested design, the results stacked with the workflow id beside the fold labels — added 2026-09-06 at M68's plan gate. Today one workflow per call and `rbind.nested_results()` by hand. Depends on M70. Promote on a user comparing model families under one design
+- `summary()`, `autoplot()` and `agreement()` on a `nested_results_set`, each element's view keyed by `wflow_id` — added 2026-09-06 at M71's plan gate — M71 Out. Promote on a user asking for the per-workflow view rather than `collect_metrics()` on the set
+- Dispatch a `nested_workflow_map()` run as workflow-by-fold units in one parallel round instead of one round per workflow — added 2026-09-06 at M71's plan gate — M71 Out; needs the payload to carry the workflow (`R/parallel.R`, `fold_task()`). Promote on evidence that the per-workflow rounds leave daemons idle on a user's run
 - `nested_final_fit()` ties a fixed workflow to a `fit_resamples` record — added 2026-09-06 at M70's review gate (finding O1). Today the final fit on a no-tuning record checks only that the workflow carries no `tune()` marker, so any fixed workflow is accepted and paired with the record's estimate, where the tuned paths tie the workflow to the record through the recorded grid. Promote on a user pairing the wrong workflow with a baseline record, or on a recorded workflow identity being wanted by another reader
 - `summarize = TRUE` on `collect_predictions()` for a `nested_results`, averaging each row's predictions across the repeats of a repeated design as tune's method does — added 2026-09-06 — M68 Out. Needs an oracle against tune's own averaging for class probabilities and votes. Promote on a user asking for it on a repeated design
 <!-- drift-check: lean_bundle_bytes=941.7 kB; mori_bundle_bytes=103.1 kB; ratio_lean_over_mori=9.13; gap_bytes=838.6 kB; worker_closure_bytes=524 B@2 -->

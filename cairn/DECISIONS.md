@@ -1703,6 +1703,14 @@ selection for.
 
 **Consequences:** D-056's clause refusing a record without a rule narrows to tuners that select; `agreement()` on the new result is D-039's zero rows. Falsified by a user needing tune's warn-and-run path through a nested design, or the inner-loop estimate of a fixed workflow.
 
+### D-058 (2026-09-06): `nested_workflow_map()` runs a `workflow_set` through one nested design and returns a standalone `nested_results_set`, and `workflowsets` joins Suggests — extends the orchestrator family D-010 named and its standalone-class rule, and narrows D-057's refusal for sets
+
+**Context:** One workflow per call and `rbind.nested_results()` by hand was the only way to score model families on the same outer folds, and the results class, its `procedure` record and every pooled reader assume one workflow. `workflowsets::workflow_map()` is the idiom a tidymodels user reaches for.
+
+**Decision:** A new export shaped like `workflow_map()` takes a `workflow_set` and the name of one of the six orchestrators, runs each workflow in order with the call's arguments merged with the set's per-workflow `option` entry, routes a workflow with no `tune()` marker to `nested_fit_resamples()` with the arguments narrowed to its formals, keeps the generator state between workflows so every workflow runs under the same per-fold seeds, and returns a `nested_results_set`: a package-owned tibble of `wflow_id`, `workflow` and `result`, one `nested_results` per row, not carrying the `workflow_set` class. The six `collect_*` readers stack the per-element tables under `wflow_id`; `extract_workflow(x, id)` and `nested_final_fit(x, id = )` read one element. `workflowsets` joins Suggests for the tests and the vignette, and no package code calls it. Considered and rejected: one `nested_results` carrying a `wflow_id` column (rewrites the class, the record and every pooled reader); refusing a mixed set (a baseline beside tuned models is what the set is for); distinct seeds per workflow (loses the paired comparison and the hand-call identity oracle); inheriting the `workflow_set` class (`rank_results()` and `fit_best()` would answer over nested estimates, the reading IP3 forbids, where D-010 chose erroring); `workflowsets` in Imports (nothing is called at run time).
+
+**Consequences:** D-057's refusal of an unmarked workflow on the five stands for a bare workflow and is answered by routing inside a set; `summary()`, `autoplot()` and `agreement()` on the set, and a workflow-by-fold parallel round, are candidate rows; no ranking or best-workflow method is registered on the set, and `estimate.Rmd` says why. Falsified by a reader a user needs that per-element stacking cannot express, or by a run-time need for a workflowsets validator.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
