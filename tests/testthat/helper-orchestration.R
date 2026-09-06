@@ -2271,3 +2271,45 @@ malformed_designs <- function(data) {
     inner_rules
   )
 }
+
+# The extract the outer-fit criteria name (M68): the engine fit's coefficient
+# vector. Built over the base environment rather than this file's: a fixture
+# key hashes a function with its enclosing environment, and this file's
+# environment holds the fixture cache, so a closure over it would key
+# differently on every request as the cache filled (measured 2026-09-06: two
+# builds of one run). Over `baseenv()` the function hashes by its body, and
+# travels to a daemon by its body alone.
+coef_extract <- rlang::new_function(
+  rlang::pairlist2(x = ),
+  quote(stats::coef(workflows::extract_fit_engine(x))),
+  env = baseenv()
+)
+
+# What a run whose control asked for both outer-fit columns carries (M68):
+# `.extracts` then `.predictions`, every fold completed, each prediction table
+# one row per assessment row of its split with tune's columns, and each
+# extract `coef_extract()`'s named vector with the intercept first. Every
+# orchestrator runs the same fold fit, so this is the presence check the four
+# siblings make against the grid path's oracle.
+expect_outer_columns_kept <- function(res) {
+  testthat::expect_true(all(c(".extracts", ".predictions") %in% names(res)))
+  testthat::expect_lt(
+    match(".extracts", names(res)),
+    match(".predictions", names(res))
+  )
+  testthat::expect_true(all(res$.completed))
+  for (i in seq_len(nrow(res))) {
+    preds <- res$.predictions[[i]]
+    testthat::expect_s3_class(preds, "tbl_df")
+    testthat::expect_identical(
+      nrow(preds),
+      nrow(rsample::assessment(res$splits[[i]]))
+    )
+    testthat::expect_true(all(c(".pred", ".row", ".config") %in% names(preds)))
+    coefs <- res$.extracts[[i]]
+    testthat::expect_type(coefs, "double")
+    testthat::expect_identical(names(coefs)[[1L]], "(Intercept)")
+    testthat::expect_false("outer extract" %in% res$.notes[[i]]$location)
+  }
+  invisible(res)
+}

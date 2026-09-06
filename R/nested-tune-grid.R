@@ -773,6 +773,25 @@ nested_fold_fit <- function(
     fitted$.predictions[[1L]]
   }
 
+  # The control's `extract`, applied to the outer fit's workflow after the
+  # fit rather than passed to `control_last_fit()`: tune moves its own
+  # identity extract into `.workflow` there, and a caller's function in that
+  # slot would replace the workflow (M68). An extract that errors is a
+  # reporting failure and not a fold failure (IP4): the fold keeps its
+  # metrics, its element is NULL, and the error is a note under its own
+  # stage, so a NULL is never read as a value without the notes saying why.
+  extracts <- NULL
+  extract_notes <- empty_notes()
+  if (is.function(control$extract)) {
+    extracts <- tryCatch(
+      control$extract(fitted$.workflow[[1L]]),
+      error = function(cnd) {
+        extract_notes <<- own_note("outer extract", conditionMessage(cnd))
+        NULL
+      }
+    )
+  }
+
   # A fold can complete and still have had trouble: tune_grid() returns a usable
   # result when only some inner splits fail, and select_best() then chooses from
   # the survivors. Discarding those notes would report a selection made on a
@@ -783,10 +802,14 @@ nested_fold_fit <- function(
     metrics = fold_metrics,
     selected = selected,
     inner_metrics = inner_metrics(tuned, prototype),
+    extracts = extracts,
     predictions = predictions,
     notes = bind_notes(
-      tune_notes(tuned, "inner tuning"),
-      tune_notes(fitted, "outer fit")
+      bind_notes(
+        tune_notes(tuned, "inner tuning"),
+        tune_notes(fitted, "outer fit")
+      ),
+      extract_notes
     )
   )
 }
@@ -1056,13 +1079,15 @@ failed_fold <- function(
       conditionMessage(cnd)
     }
   }
-  # A fold that did not finish has no outer fit to have kept predictions from;
-  # its element is NULL whether or not the control asked for them (M68).
+  # A fold that did not finish has no outer fit to have kept predictions or
+  # an extract from; each element is NULL whether or not the control asked
+  # (M68).
   list(
     completed = FALSE,
     metrics = empty_metrics(),
     selected = NULL,
     inner_metrics = inner_metrics(tuned, prototype),
+    extracts = NULL,
     predictions = NULL,
     notes = bind_notes(own_note(stage, message), tune_notes(result, stage))
   )

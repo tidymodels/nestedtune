@@ -32,14 +32,20 @@ new_nested_results <- function(
   # same principle forbids.
   cols[[".inner_metrics"]] <- lapply(folds, function(x) x$inner_metrics)
   cols[[".notes"]] <- lapply(folds, function(x) x$notes)
-  # The outer fit's predictions, a column only when the control asked for
-  # them (M68): the slot is read off the recorded procedure, so the column's
-  # presence says what ran (IP4), and an object built under the default
-  # control looks as it did before. A failed fold's element is NULL. tune
-  # places `.predictions` after `.notes` on a `tune_results`, and so does
-  # this.
+  # The outer fit's extract and predictions, each a column only when the
+  # control asked for it (M68): the slot is read off the recorded procedure,
+  # so a column's presence says what ran (IP4), and an object built under the
+  # default control looks as it did before. A failed fold's element is NULL,
+  # and so is a completed fold's extract when the function errored on it (its
+  # notes say so). tune places `.extracts` then `.predictions` after `.notes`
+  # on a `tune_results`, and so does this. `[[` rather than `$`: a fold
+  # record from a worker running older code lacks the element, and `$` would
+  # partially match.
+  if (is.function(procedure$control$extract)) {
+    cols[[".extracts"]] <- lapply(folds, function(x) x[["extracts"]])
+  }
   if (isTRUE(procedure$control$save_pred)) {
-    cols[[".predictions"]] <- lapply(folds, function(x) x$predictions)
+    cols[[".predictions"]] <- lapply(folds, function(x) x[["predictions"]])
   }
   cols[[".completed"]] <- completed
   cols[[".tuning_seed"]] <- seeds[seq(1L, by = 2L, length.out = n)]
@@ -146,6 +152,7 @@ record_columns <- function(x) {
     ".notes",
     # Present only on a run whose control asked for them (M68); a present
     # column is part of the record, an absent one is nothing to vouch for.
+    ".extracts",
     ".predictions",
     ".completed",
     ".tuning_seed",
