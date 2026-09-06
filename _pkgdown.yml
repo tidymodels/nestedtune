@@ -37,7 +37,7 @@ reference:
 - title: Running the loop
   desc: >
     Tune on each outer fold's inner resamples, select, then fit and score on
-    the outer split — and keep what each fold chose.
+    the outer split, and keep what each fold chose.
   contents:
   - nested_tune_grid
   - nested_tune_bayes
@@ -49,11 +49,12 @@ reference:
   - summary.nested_results
   - autoplot.nested_results
   - agreement
+  - extract_procedure
 
 - title: The final model
   desc: >
     Run the same tuning procedure once more with the whole dataset in hand,
-    and get back the model to deploy — as its own object, never a field on
+    and get back the model to deploy, as its own object, never a field on
     the results.
   contents:
   - nested_final_fit

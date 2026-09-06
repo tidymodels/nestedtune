@@ -40,9 +40,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 \code{nestedtune_bad_design} and every offending row, column, inner split or
 index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned — a specification that
+design whatever its \code{inside} argument returned (a specification that
 produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction — and because a
+where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.}
 
 \item{...}{A control object as \code{control} -- what \code{\link[tune:control_grid]{tune::control_grid()}}
@@ -187,7 +187,7 @@ carries no \code{seed} for that reason. Fold \code{i} is exactly:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
-control <- attr(res, "procedure")$control
+control <- extract_procedure(res)$control
 control$seed <- res$.tuning_seed[[i]]
 tuned <- tune_bayes(object, resamples$inner_resamples[[i]],
                     iter = iter, initial = initial, objective = objective,
@@ -214,7 +214,7 @@ There is no \code{control} formal, but a \code{\link[tune:control_bayes]{tune::c
 the final fit that re-runs the result -- \code{control = control_bayes(no_improve = 5, uncertain = 3)}, say, to stop a fold's search sooner. What runs is the
 control passed, or tune's default when none is, with the slots this package
 forces overwritten; the result records that effective control, \code{seed} left
-out, as \code{attr(res, "procedure")$control}, which is what the recipe above
+out, as \code{extract_procedure(res)$control}, which is what the recipe above
 passes. Every slot of \code{control_bayes()} falls under one of six headings.
 
 \strong{Forced: \code{allow_par}, \code{seed}.} \code{allow_par = FALSE} on both tune calls a

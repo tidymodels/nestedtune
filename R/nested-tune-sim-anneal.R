@@ -97,7 +97,7 @@
 #' ```
 #' set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
-#' control <- attr(res, "procedure")$control
+#' control <- extract_procedure(res)$control
 #' tuned <- tune_sim_anneal(object, resamples$inner_resamples[[i]],
 #'                          iter = iter, initial = initial,
 #'                          param_info = param_info, metrics = metrics,
@@ -127,7 +127,7 @@
 #' no_improve = 5, verbose_iter = FALSE)`, say, to stop a fold's search sooner
 #' and keep the console quiet. What runs is the control passed, or finetune's
 #' default when none is, with the slots this package forces overwritten; the
-#' result records that effective control as `attr(res, "procedure")$control`,
+#' result records that effective control as `extract_procedure(res)$control`,
 #' which is what the recipe above passes. Every slot of `control_sim_anneal()`
 #' falls under one of six headings.
 #'

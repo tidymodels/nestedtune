@@ -38,9 +38,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 \code{nestedtune_bad_design} and every offending row, column, inner split or
 index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned — a specification that
+design whatever its \code{inside} argument returned (a specification that
 produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction — and because a
+where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.}
 
 \item{...}{A control object as \code{control} -- what \code{\link[tune:control_grid]{tune::control_grid()}}
@@ -118,7 +118,7 @@ seeds that reproduce it (\code{.tuning_seed}, \code{.outer_fit_seed}). Use
 \code{\link[=collect_metrics]{collect_metrics()}} to summarize.
 
 \strong{Two records describe the grid, and they answer different questions.}
-\code{attr(x, "grid")} holds the \code{grid} argument \strong{as it was given} — a
+\code{attr(x, "grid")} holds the \code{grid} argument \strong{as it was given}: a
 positive whole number, not a table of candidates, whenever a size was
 passed. The \code{.inner_metrics} column holds what each outer fold's inner
 tuning actually scored: \code{\link[tune:collect_metrics]{tune::collect_metrics()}} of that fold's tuning
@@ -132,16 +132,16 @@ which \code{\link[tune:select_best]{tune::select_best()}} resolved on the inner 
 \code{.selected} records the candidate the fold's outer fit used.
 
 The two diverge routinely, in both directions. A size is expanded by tune
-and may reach fewer candidates than were asked for — a request for 20 on a
-parameter with four reachable values evaluates four — and a candidate that
-fails scores nothing. Folds can also differ from \emph{each other}: expanding a
-size draws from the generator, and each fold tunes under its own seed, so
-a continuous parameter gives every fold its own candidates. Printing says
-so when it happens.
+and may reach fewer candidates than were asked for (a request for 20 on a
+parameter with four reachable values evaluates four), and a candidate
+that fails scores nothing. Folds can also differ from \emph{each other}:
+expanding a size draws from the generator, and each fold tunes under its
+own seed, so a continuous parameter gives every fold its own candidates.
+Printing says so when it happens.
 
 One limit is worth stating plainly. \code{.inner_metrics} is tune's summary of
 the tuning run, and a candidate that failed on \strong{every} inner resample
-scored nothing: it has no row there — \code{.notes} is where its failure is
+scored nothing: it has no row there. \code{.notes} is where its failure is
 recorded. A candidate that failed on some inner resamples and scored on
 others has its rows, with \code{n} below the inner resample count. A fold that
 scored no candidate at all carries a zero-row table with a completed
@@ -151,7 +151,8 @@ fold's columns, never \code{NULL}.
 than \code{NULL} when none was supplied. \code{.inner_metrics} is a column, so it
 travels with the fold it describes.
 
-\code{attr(x, "procedure")} records what ran, on the result of every
+The \code{procedure} record, which \code{\link[=extract_procedure]{extract_procedure()}} returns, records what
+ran, on the result of every
 orchestrator: a named list giving the tuner (\code{"tune_grid"} here,
 \code{"tune_bayes"} from \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{"tune_race_anova"} or
 \code{"tune_race_win_loss"} from \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}} and its sibling,
@@ -160,7 +161,7 @@ that tuner's own arguments (\code{grid} here and for the racers; \code{iter},
 \code{initial} and \code{objective} for the Bayesian tuner, \code{iter} and \code{initial}
 for annealing), and \code{param_info},
 \code{event_level} and \code{eval_time} on all. A Bayesian result carries the
-\code{procedure} attribute and no \code{grid} attribute, and its \code{.inner_metrics}
+\code{procedure} record and no \code{grid} attribute, and its \code{.inner_metrics}
 tables carry an \code{.iter} column; \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} documents both.
 
 \strong{What an operation on the object may and may not do.} The result carries
@@ -175,24 +176,24 @@ held.
 The columns the run is recorded in are the ones the resampling design
 named, and \code{nested_tune_grid()} records them when it builds the result. So
 a column you add afterwards is read as a fold label only when the design
-itself carries a column of that name — \code{id}, and \code{id2} for a repeated
+itself carries a column of that name: \code{id}, and \code{id2} for a repeated
 design. The name you pick decides nothing on its own: adding \code{id2} to a
 result from a plain v-fold design leaves the class, the record and the
 fold labels alone, exactly as adding \code{extra} does.
 
-An operation that stays inside those rules — \code{arrange()}, \code{mutate()}
-adding a column, a join that matches one row apiece — returns a
-\code{nested_results} with the call's record intact. Anything else — \code{slice()},
+An operation that stays inside those rules (\code{arrange()}, \code{mutate()}
+adding a column, a join that matches one row apiece) returns a
+\code{nested_results} with the call's record intact. Anything else (\code{slice()},
 a \code{filter()} that drops a fold, \code{bind_rows()}, \code{x[1, ]}, dropping one of
-the columns above — returns a bare tibble, with the record removed along
+the columns above) returns a bare tibble, with the record removed along
 with the class. A three-row object cannot honestly describe itself as the
 ten-fold design it was cut from, so it stops describing itself at all and
 hands back the data.
 
 It is one rule, reached through four doors. dplyr's verbs and \code{[} reach it
-through a \code{dplyr_reconstruct()} method; \strong{vctrs}' own verbs —
-\code{vec_slice()}, \code{vec_rbind()}, \code{vec_c()}, \code{vec_cbind()}, \code{vec_ptype()} and
-\code{vec_cast()} — reach it through \code{vec_restore()}; and \code{rbind()} and
+through a \code{dplyr_reconstruct()} method; \strong{vctrs}' own verbs
+(\code{vec_slice()}, \code{vec_rbind()}, \code{vec_c()}, \code{vec_cbind()}, \code{vec_ptype()} and
+\code{vec_cast()}) reach it through \code{vec_restore()}; and \code{rbind()} and
 \code{rename()}, which reach neither generic, have methods of their own. So
 \code{rbind(x, x)} and a \code{rename()} that moves one of the columns above hand
 back a bare tibble, the same answer \code{slice()} gives, rather than an object
@@ -214,7 +215,7 @@ position.
 
 Three verbs sit outside all of it. \code{group_by()}, \code{rowwise()} and
 \code{tibble::as_tibble()} return a grouped, a rowwise and a plain tibble
-respectively — none of them a \code{nested_results} — and each carries the
+respectively (none of them a \code{nested_results}), and each carries the
 attributes across, so \code{attr(dplyr::group_by(x, id), "outer_label")} still
 answers with the run's scheme. Nothing they hand back claims to be a
 results object; the record is along for the ride.
@@ -266,7 +267,7 @@ an unknown range, finalized on those rows as \code{param_info} describes):
          normal.kind = "Inversion", sample.kind = "Rejection")
 tuned <- tune_grid(object, resamples$inner_resamples[[i]], grid = grid,
                    metrics = metrics, eval_time = eval_time,
-                   control = attr(res, "procedure")$control)
+                   control = extract_procedure(res)$control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
 set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
@@ -276,13 +277,13 @@ last_fit(final, resamples$splits[[i]], metrics = metrics,
 }\if{html}{\out{</div>}}
 
 The caller's RNG state and generator kind are restored on exit, including
-when the call errors, so a seeded script that draws afterwards is unaffected
-— the same contract \code{\link[tune:tune_grid]{tune::tune_grid()}} gives. One consequence worth knowing:
-two consecutive calls with no \code{set.seed()} between them return identical
-results, exactly as repeated \code{tune_grid()} calls do.
+when the call errors, so a seeded script that draws afterwards is
+unaffected: the same contract \code{\link[tune:tune_grid]{tune::tune_grid()}} gives. One consequence
+worth knowing: two consecutive calls with no \code{set.seed()} between them
+return identical results, exactly as repeated \code{tune_grid()} calls do.
 
 This binds randomness that flows through R's generator. Engines that
-randomize outside it — kernlab's SVMs, the deep-learning engines — cannot be
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 pinned by any R-side scheme, here or in tune.
 }
 
@@ -292,13 +293,13 @@ pinned by any R-side scheme, here or in tune.
 A fold that fails does not end the run. The remaining folds still run, and
 the fold that failed is recorded rather than discarded: \code{.completed} is
 \code{FALSE} for it and \code{.notes} holds what went wrong, in the same shape tune
-uses — one row naming the stage that failed (\code{"inner tuning"} or
+uses: one row naming the stage that failed (\code{"inner tuning"} or
 \code{"outer fit"}), followed by tune's own notes about the underlying cause.
 The number of folds attempted and the number completed are stored on the
 object as the \code{folds_attempted} and \code{folds_completed} attributes.
 
 Both stages can fail quietly. Inner tuning raises only once every candidate
-has failed, and the outer fit does not raise at all — it hands back a result
+has failed, and the outer fit does not raise at all: it hands back a result
 with no metrics. Both are recorded as failures here.
 
 A fold can also complete \emph{and} carry notes. When only some of a fold's inner
@@ -309,11 +310,11 @@ means exactly that: it worked, on less than the whole design.
 
 A failed fold still records the candidates it got as far as scoring, whatever
 stage it failed at. A fold that died at the outer fit had already tuned, so
-its \code{.inner_metrics} holds the full table — and so does one that tuned
+its \code{.inner_metrics} holds the full table, and so does one that tuned
 successfully and then failed while selecting from the results. Only a fold
-that never reached a scored candidate at all — tuning itself raised, or every
-candidate failed — holds a zero-row table. No fold is reported as having
-searched a grid it did not.
+that never reached a scored candidate at all (tuning itself raised, or
+every candidate failed) holds a zero-row table. No fold is reported as
+having searched a grid it did not.
 
 Any operation outside the invariants stated under \strong{Value} above returns a
 bare tibble, and both counts go with the class rather than being recomputed
@@ -330,7 +331,7 @@ an estimate is never reported for a design that did not execute.
 
 
 The outer folds run in parallel when you have started mirai daemons, and
-serially otherwise. There is no argument for this — start daemons before the
+serially otherwise. There is no argument for this: start daemons before the
 call and the loop uses them:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{mirai::daemons(4)
@@ -343,7 +344,7 @@ stays serial, the same threshold \code{tune} applies. Inner tuning always runs
 serially whatever you set, because nested parallelism oversubscribes cores.
 
 \strong{Results do not depend on how the loop ran.} The same seed gives the same
-result serially and in parallel, at any number of daemons — each fold's seeds
+result serially and in parallel, at any number of daemons: each fold's seeds
 are drawn up front and assigned by position, so a fold's outcome depends on
 where it sits in the design and never on which worker took it or in what
 order. One exception, and it carries no numbers: the backtraces stored in
@@ -354,7 +355,7 @@ message lines to its own console width rather than your terminal's.
 
 \strong{Each fold is sent one copy of the data, not one per inner split.} A
 resampling split carries the whole frame it indexes, and sending a fold to a
-daemon means serializing it — which does not preserve the single shared copy
+daemon means serializing it, which does not preserve the single shared copy
 the design holds in memory. Each fold's splits are therefore emptied before
 dispatch and refilled on the worker, so what crosses is the fold's row
 indices plus one copy of the data rather than one copy per split. On a design
@@ -364,7 +365,7 @@ fold also carries its own, still once rather than once per inner split.
 
 Two things this does not reach, both of them objects you supply rather than
 anything the package builds. A recipe keeps a copy of the data it was created
-with, and a formula carries the environment it was written in — so a workflow
+with, and a formula carries the environment it was written in, so a workflow
 built inside a function that holds a large object sends that object with
 every fold. Building the workflow at the top level avoids the second.
 
@@ -374,13 +375,13 @@ Daemons are \strong{separate R processes}, which has consequences worth knowing:
 environment variables you set after launching them. Set what a fold needs
 with \code{\link[mirai:everywhere]{mirai::everywhere()}}, or start the daemons after setting it.
 \item They load nestedtune from an installed library. Running under
-\code{devtools::load_all()} is not enough — the daemons cannot see it, and the
+\code{devtools::load_all()} is not enough: the daemons cannot see it, and the
 call stops rather than failing every fold with the same opaque note. During
 development, prime them with
 \code{mirai::everywhere(pkgload::load_all("<path>"))}.
 \item Before dispatching, the call asks \strong{every} connected daemon whether it can
 load the package, and stops if any of them cannot. A pool whose daemons
-differ — one respawned, or started against a different library — therefore
+differ (one respawned, or started against a different library) therefore
 fails here, naming how many are affected, rather than as a run in which
 some folds come back as opaque worker failures.
 \item The same round trip asks each daemon which of this session's internal
@@ -388,12 +389,12 @@ functions its own copy of the package defines, and stops if any are
 missing. A daemon holding an \emph{older install} loads the package perfectly
 well and then fails every fold, because the worker resolves what it needs
 by name inside that daemon's copy. The error names the missing functions
-and asks you to reinstall and then restart the pool — a running daemon
+and asks you to reinstall and then restart the pool: a running daemon
 keeps the namespace it has already loaded, so reinstalling underneath one
 changes nothing until it is replaced.
 \item The same round trip also asks every daemon for each package the workflow
-and the tuner need — the engine's, a recipe step's, and for a race the
-package its model is fitted with — and stops when one daemon cannot load
+and the tuner need (the engine's, a recipe step's, and for a race the
+package its model is fitted with), and stops when one daemon cannot load
 one of them, naming how many daemons are affected and which packages.
 Install them into the daemons' library and restart the pool.
 \item A daemon that does not answer at all is reported as a non-response, not as
@@ -406,13 +407,13 @@ it.
 is what makes every daemon load the package, and the whole tidymodels
 stack is not cheap to load. Because the check now waits for \emph{all} of them
 rather than whichever answers first, a cold pool on a loaded machine can
-need more than the default 30 seconds — raise the option if you see a
+need more than the default 30 seconds; raise the option if you see a
 non-response you do not believe. Later calls in the same session reuse
 what the daemons already loaded.
 \item That check is bounded; the folds themselves are not. If every daemon dies
 \emph{after} folds are dispatched, the call blocks waiting for results that will
 never arrive, and you interrupt it. No per-fold timeout is imposed, because
-no time limit is defensible for an arbitrary model fit — a slow fold and a
+no time limit is defensible for an arbitrary model fit: a slow fold and a
 dead one would be indistinguishable.
 }
 
@@ -431,11 +432,11 @@ on the way out.
 
 Interrupting the call at your own console is not one of these. It unwinds the
 blocking wait before any worker's return value is classified, so an ordinary
-interrupt propagates and no nestedtune condition class is attached — the RNG
+interrupt propagates and no nestedtune condition class is attached: the RNG
 state is still restored, but do not write a handler expecting one.
 
 An interrupt also asks the folds it leaves behind to stop. However the call
-is left once its folds are dispatched — an interrupt, or an error — the
+is left once its folds are dispatched (an interrupt, or an error), the
 outstanding ones are cancelled on the way out, so the pool goes idle shortly
 after rather than computing folds whose results nobody will read. Two limits
 are worth knowing. Cancelling needs mirai's dispatcher, which
@@ -444,14 +445,14 @@ are worth knowing. Cancelling needs mirai's dispatcher, which
 folds run to completion. You are told so at dispatch rather than left to
 discover it: such a pool raises a warning of class
 \code{nestedtune_pool_not_cancellable}, once per call, naming the remedy. The pool
-is not refused, because its results are correct — what it lacks is the
+is not refused, because its results are correct: what it lacks is the
 ability to stop. And stopping is a request rather than a guarantee:
 a fold already inside a compiled fitting routine may not be interruptible,
 and one that has nearly finished may simply finish.
 
 One case cannot be told apart, and is documented rather than guessed at:
 calling \code{mirai::daemons(0)} while folds are outstanding produces exactly the
-value a daemon dying mid-fold produces — same code, same classes, nothing to
+value a daemon dying mid-fold produces: same code, same classes, nothing to
 separate them. Tearing the pool down that way is therefore recorded as fold
 failures rather than treated as a cancellation, because the alternative would
 discard every completed fold whenever a single worker died.
@@ -465,7 +466,7 @@ There is no \code{control} formal, but a \code{\link[tune:control_grid]{tune::co
 the final fit that re-runs the result. What runs is the control passed, or
 tune's default when none is, with the slots this package forces
 overwritten; the result records that effective control as
-\code{attr(res, "procedure")$control}, which is what the recipe above passes.
+\code{extract_procedure(res)$control}, which is what the recipe above passes.
 Every slot of \code{control_grid()} falls under one of six headings.
 
 \strong{Forced: \code{allow_par}.} Both tune calls a fold makes -- the inner tuning

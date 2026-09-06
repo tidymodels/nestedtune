@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-05 (M66 done via PR #76, merged on green at 75ad92f
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | planned | — | normal | milestones/M67-extract-procedure.md |
+| M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | review | — | normal | milestones/M67-extract-procedure.md |
 | M65 | Three readers stack a per-fold list column with the fold labels beside it: `collect_notes()`, `collect_selections()` and `collect_inner_metrics()` | done | — | normal | milestones/archive/M65-collect-readers.md |
 | M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | done | M65 | normal | milestones/archive/M66-vignette-sweep.md |
 | M62 | A vignette reads the results object: summary, agreement, both plots, a failed fold, dplyr and the survival arguments | done | M60 | normal | milestones/archive/M62-results-vignette.md |

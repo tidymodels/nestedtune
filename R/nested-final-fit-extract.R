@@ -24,7 +24,7 @@
 #' Extract the tuning run a final fit was selected from
 #'
 #' Returns the [tune::tune_grid()] or [tune::tune_bayes()] result that
-#' [nested_final_fit()] chose its parameters from — the record of what
+#' [nested_final_fit()] chose its parameters from: the record of what
 #' selection saw when the procedure was re-run on the complete dataset.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
@@ -42,7 +42,7 @@
 #' describes, which makes it optimistically biased as a claim about the model
 #' this final fit produced. Nothing in that object is this model's performance.
 #'
-#' Report the nested estimate instead — `collect_metrics()` on the results
+#' Report the nested estimate instead: `collect_metrics()` on the results
 #' object the fit was built from, the [nested_tune_grid()] or
 #' [nested_tune_bayes()] result. That number is measured on data no part of the
 #' tune-and-fit procedure ever saw, which is what makes it an honest description
@@ -98,6 +98,7 @@ extract_tune_results.default <- function(x, ...) {
   abort_no_extract_method(
     "extract_tune_results",
     x,
+    classes = "nested_final_fit",
     call = rlang::current_env()
   )
 }
@@ -111,7 +112,7 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #' Extract the candidates a final fit actually scored
 #'
 #' Returns the candidate parameter settings that [nested_final_fit()]'s tuning
-#' run actually evaluated — the full-data counterpart of the candidate set each
+#' run actually evaluated: the full-data counterpart of the candidate set each
 #' outer fold's `.inner_metrics` table describes on a [nested_tune_grid()] or
 #' [nested_tune_bayes()] result, derived the same way from the run's
 #' [tune::collect_metrics()] table, so a Bayesian final fit's table carries the
@@ -124,9 +125,9 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #' @return A tibble with one row per candidate scored, carrying one column per
 #'   tuned parameter plus tune's `.config` label for the candidate, and `.iter`
 #'   on a Bayesian fit. It is the distinct parameter rows of the run's
-#'   [tune::collect_metrics()] table with those labels — the same shape one
+#'   [tune::collect_metrics()] table with those labels: the same shape one
 #'   element of a result's `.inner_metrics` column reduces to when its metric
-#'   columns are dropped — so the two can be compared directly. Everything
+#'   columns are dropped, so the two can be compared directly. Everything
 #'   tune wrote per metric is dropped: `.metric`, `.estimator`, `mean`, `n`,
 #'   `std_err`, and on a fit that scored a dynamic survival metric the
 #'   `.eval_time` column, so a candidate has one row here however many
@@ -137,14 +138,14 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'   a size is expanded by tune and may reach fewer candidates than the number
 #'   requested; a candidate that failed everywhere scored nothing. See the
 #'   `.inner_metrics` discussion in [nested_tune_grid()] for the full account
-#'   of how the two records diverge, which holds here too — this record is
+#'   of how the two records diverge, which holds here too: this record is
 #'   derived the same way.
 #'
 #'   One pointer there does **not** carry over. A candidate that failed on every
 #'   inner resample is missing from this table, and on a `nested_tune_grid()`
 #'   result its failure is recorded in that object's `.notes` column. A
 #'   `nested_final_fit` has no such column. Look instead inside the tuning run
-#'   itself — `tune::collect_notes(extract_tune_results(x))`.
+#'   itself: `tune::collect_notes(extract_tune_results(x))`.
 #'
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
 #' data(mtcars)
@@ -179,10 +180,11 @@ extract_scored_candidates <- function(x, ...) {
 
 #' @export
 extract_scored_candidates.default <- function(x, ...) {
-  # No dots check before the refusal, for the reason the other default gives.
+  # No dots check before the refusal, for the reason the other defaults give.
   abort_no_extract_method(
     "extract_scored_candidates",
     x,
+    classes = "nested_final_fit",
     call = rlang::current_env()
   )
 }
@@ -202,12 +204,26 @@ extract_scored_candidates.nested_final_fit <- function(x, ...) {
 # Classed, so a caller can catch it as this package's own rather than by
 # matching the message -- the convention M18 established for the argument
 # checks.
-abort_no_extract_method <- function(fn, x, call = rlang::caller_env()) {
+abort_no_extract_method <- function(
+  fn,
+  x,
+  classes,
+  call = rlang::caller_env()
+) {
+  # `classes` names the classes the generic answers for, each paired with
+  # where such an object comes from (M67 added `nested_results`). The
+  # `nested_results` phrase is abort_no_agreement_method()'s, so the two
+  # families say the same thing about the same object.
+  origins <- c(
+    nested_results = "{.fn nested_tune_grid} or one of its siblings",
+    nested_final_fit = "{.fn nested_final_fit}"
+  )
+  stopifnot(all(classes %in% names(origins)))
+  answers <- sprintf("a {.cls %s} object, from %s", classes, origins[classes])
   cli::cli_abort(
     c(
       "{.fn {fn}} has no method for {.obj_type_friendly {x}}.",
-      i = "It answers for a {.cls nested_final_fit} object, from \\
-           {.fn nested_final_fit}."
+      i = paste0("It answers for ", paste(answers, collapse = ", or "), ".")
     ),
     class = "nestedtune_no_extract_method",
     call = call

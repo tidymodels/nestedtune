@@ -51,9 +51,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 \code{nestedtune_bad_design} and every offending row, column, inner split or
 index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned — a specification that
+design whatever its \code{inside} argument returned (a specification that
 produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction — and because a
+where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.}
 
 \item{...}{A control object as \code{control} -- what \code{\link[finetune:control_race]{finetune::control_race()}}
@@ -129,12 +129,13 @@ eliminated candidates included -- \verb{tune::collect_metrics(<the race>, all_co
 alone -- and \code{n} is the number of inner resamples each candidate was
 scored on: the full inner resample count for a candidate that survived to
 the end, and fewer for one eliminated along the way. The recorded \code{grid},
-on the \code{procedure} attribute and as \code{attr(x, "grid")}, is the design the
+in the \code{procedure} record and as \code{attr(x, "grid")}, is the design the
 race was \emph{offered}, exactly as given; what each candidate \emph{ran} is \code{n}.
 A candidate that failed on every inner resample is absent, and its
 failure is in \code{.notes}, as on the grid path.
 
-\code{attr(x, "procedure")} names the tuner (\code{"tune_race_anova"} or
+The \code{procedure} record, which \code{\link[=extract_procedure]{extract_procedure()}} returns, names the
+tuner (\code{"tune_race_anova"} or
 \code{"tune_race_win_loss"}) and holds the \code{grid}, \code{param_info},
 \code{event_level}, \code{eval_time} and the effective control, as
 \code{\link[=nested_tune_grid]{nested_tune_grid()}} describes.
@@ -186,7 +187,7 @@ is exactly (with \code{resamples$inner_resamples[[i]]} read as
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
-control <- attr(res, "procedure")$control
+control <- extract_procedure(res)$control
 raced <- tune_race_anova(object, resamples$inner_resamples[[i]],
                          grid = grid, param_info = param_info,
                          metrics = metrics, eval_time = eval_time,
@@ -217,7 +218,7 @@ final fit that re-runs the result -- \code{control = control_race(burn_in = 2)},
 say, on a design with three inner resamples. What runs is the control
 passed, or finetune's default when none is, with the slots this package
 forces overwritten; the result records that effective control as
-\code{attr(res, "procedure")$control}, which is what the recipe above passes.
+\code{extract_procedure(res)$control}, which is what the recipe above passes.
 Every slot of \code{control_race()} falls under one of six headings.
 
 \strong{Forced: \code{allow_par}.} Both tune calls a fold makes -- the inner race and
