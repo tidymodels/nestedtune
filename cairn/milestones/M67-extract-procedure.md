@@ -7,7 +7,7 @@
 - **Principles touched:** IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — an exported generic, a print method's text and the published help, changelog and README pages
-- **Branch/PR:** m067-extract-procedure
+- **Branch/PR:** m067-extract-procedure · https://github.com/tidymodels/nestedtune/pull/77
 
 ## Goal
 
@@ -21,13 +21,13 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 
 ## Acceptance criteria
 
-- [ ] AC1: `extract_procedure()` is an exported S3 generic with a `nested_results` method returning `attr(x, "procedure")` unchanged and a `nested_final_fit` method returning `x$procedure` unchanged; a test asserts `identical()` for a grid result and for the final fit built from it.
-- [ ] AC2: The default method aborts with class `nestedtune_no_extract_method`, its message naming the generic, the object's type and both classes that answer; both methods refuse a non-empty `...` with class `rlib_error_dots_nonempty`; a test plants each of the three and a fourth, `extract_procedure(1, foo = 1)`, refused as `nestedtune_no_extract_method` rather than for its dots.
-- [ ] AC3: A case-insensitive grep of the pattern `attr\([A-Za-z_.]+, *"procedure"\)|\$procedure|`procedure` attribute|procedure slot` over `R/*.R` and `vignettes/**/*.Rmd` finds no hit on a roxygen line (a line beginning with `#'`) and no hit under `vignettes/`; the hits it leaves are in package code, tests aside.
-- [ ] AC4: A grep for the byte sequence U+2014 and for the escape `\u2014` (any case, with or without braces, with optional leading zeros) over `R/*.R`, `_pkgdown.yml`, `NEWS.md`, `README.Rmd`, `README.md` and `man/*.Rd` finds no hit on a roxygen line, in a string literal, or in any of the five non-`R/` targets; the hits it leaves in `R/*.R` are code-comment lines. `README.md` is re-knit from `README.Rmd` with `devtools::build_readme()`. The `print_candidate_sets()` bullet in `R/nested-results-print.R` is among the sites changed, and its snapshot in `tests/testthat/_snaps/nested-results-print.md` is re-recorded.
+- [x] AC1: `extract_procedure()` is an exported S3 generic with a `nested_results` method returning `attr(x, "procedure")` unchanged and a `nested_final_fit` method returning `x$procedure` unchanged; a test asserts `identical()` for a grid result and for the final fit built from it.
+- [x] AC2: The default method aborts with class `nestedtune_no_extract_method`, its message naming the generic, the object's type and both classes that answer; both methods refuse a non-empty `...` with class `rlib_error_dots_nonempty`; a test plants each of the three and a fourth, `extract_procedure(1, foo = 1)`, refused as `nestedtune_no_extract_method` rather than for its dots.
+- [x] AC3: A case-insensitive grep of the pattern `attr\([A-Za-z_.]+, *"procedure"\)|\$procedure|`procedure` attribute|procedure slot` over `R/*.R` and `vignettes/**/*.Rmd` finds no hit on a roxygen line (a line beginning with `#'`) and no hit under `vignettes/`; the hits it leaves are in package code, tests aside.
+- [x] AC4: A grep for the byte sequence U+2014 and for the escape `\u2014` (any case, with or without braces, with optional leading zeros) over `R/*.R`, `_pkgdown.yml`, `NEWS.md`, `README.Rmd`, `README.md` and `man/*.Rd` finds no hit on a roxygen line, in a string literal, or in any of the five non-`R/` targets; the hits it leaves in `R/*.R` are code-comment lines. `README.md` is re-knit from `README.Rmd` with `devtools::build_readme()`. The `print_candidate_sets()` bullet in `R/nested-results-print.R` is among the sites changed, and its snapshot in `tests/testthat/_snaps/nested-results-print.md` is re-recorded.
 - [ ] AC5: Each of the six `.Rmd` pages under `vignettes/` (recursive) rendered with `rmarkdown::render()` produces HTML in which a grep for U+2014, `&mdash;`, `&#8212;` and `&#x2014;` finds nothing.
 - [ ] AC6: `devtools::document()` leaves no diff; `pkgdown::check_pkgdown()` passes; `devtools::test()` is clean; `devtools::check()` reports 0 errors and 0 warnings.
-- [ ] AC7: A help page `man/extract_procedure.Rd` with an executed example, a `_pkgdown.yml` reference row, a NEWS entry with no milestone number, and a `cairn/DESIGN.md` Function Families line naming the generic exist.
+- [x] AC7: A help page `man/extract_procedure.Rd` with an executed example, a `_pkgdown.yml` reference row, a NEWS entry with no milestone number, and a `cairn/DESIGN.md` Function Families line naming the generic exist.
 
 ## Coverage
 
@@ -63,7 +63,17 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: T4 part: the print's candidates line reads `Candidates searched: 5, 5, 5. The folds did not search the same grid`; the regex at `test-nested-results-print.R:759` follows it and the snapshot line is re-recorded, the print file passing; the prose sweep still with the subagent.
 - 2026-09-05: T4 done: the [S] sweep reworded 59 roxygen lines (the plan's count of 31 was low), 39 NEWS sites, 4 in README.Rmd and 2 in `_pkgdown.yml`, its diff read here in full with no meaning change found; `document()` and `build_readme()` re-run; AC4's grep finds no hit in any target, and no comment line in `R/` carries one either.
 - 2026-09-05: T5 done: the branch package installed (the tuners page attaches the installed nestedtune, and the first render found no `extract_procedure()` there), the six pages rendered and their HTML free of U+2014 and the three entities (AC5); `devtools::test()` 0 failures, `devtools::check()` 0 errors, 0 warnings, 0 notes, `document()` leaving no diff, `check_pkgdown()` clean (AC6). Status to review.
+- 2026-09-05: review checkpoint: PR #77 opened as draft; AC1, AC2, AC3, AC4 and AC7 verified with evidence recorded; AC5 and AC6 runs and the three reviewers still in flight.
 
 ## Decisions
 
 ## Review
+
+### Acceptance evidence (2026-09-05, branch head fb5fc01 on PR #77)
+
+- AC1: `NAMESPACE` exports `extract_procedure` with S3 methods for `default`, `nested_final_fit` and `nested_results`; the `nested_results` method returns `attr(x, "procedure")` and the `nested_final_fit` method `x$procedure` (`R/extract-procedure.R`); `test-extract-procedure.R` asserts `expect_identical()` against the raw read on a grid result and on the final fit built from it. Fresh run of `test-extract-procedure.R` and `test-dots-barrier.R`: 62 passed, 0 failed, 0 skipped. PASS.
+- AC2: the default routes through `abort_no_extract_method()` with class `nestedtune_no_extract_method`; the test asserts the message names `extract_procedure()`, the friendly type (`an integer vector`), `nested_results` and `nested_final_fit`, with a snapshot; both methods call `rlang::check_dots_empty()` and the test asserts `rlib_error_dots_nonempty` on each; `extract_procedure(1, foo = 1)` is asserted `nestedtune_no_extract_method` and not `rlib_error_dots_nonempty`. Same fresh run, green. PASS.
+- AC3: the case-insensitive grep over `R/*.R` and `vignettes/**/*.Rmd` finds 9 hits, none on a `#'` line and none under `vignettes/`: the two method bodies, `checks.R`, `nested-final-fit.R`, `nested-final-fit-print.R` (2), `nested-results.R` (2) and one code comment in `tuner.R`. PASS.
+- AC7: `man/extract_procedure.Rd` exists with an `\examples` block under `@examplesIf` (executed by `check()`, AC6); `_pkgdown.yml:52` carries the row; `NEWS.md:3` carries the entry and a grep for `M67`/`M067` over NEWS, README, `man/` and `_pkgdown.yml` finds nothing; `cairn/DESIGN.md:77` names the generic in Function Families. PASS.
+- AC4: the byte grep for U+2014 and the escape grep (`\\u\{?0*2014\}?`, case-insensitive) over `R/*.R`, `_pkgdown.yml`, `NEWS.md`, `README.Rmd`, `README.md` and `man/*.Rd` each find zero hits, so no roxygen line, string literal or comment carries one. `devtools::build_readme()` re-run at review leaves `README.md` unchanged. `print_candidate_sets()` (`R/nested-results-print.R:364`) reads `Candidates searched: {shown}. The folds did not search the same grid`, the regex at `test-nested-results-print.R:759` follows it, and `_snaps/nested-results-print.md:52` holds the re-recorded line. PASS.
+
