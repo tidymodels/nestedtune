@@ -296,7 +296,8 @@ test_that("the key separates every formal argument of both orchestrators", {
         grid = function() data.frame(num_comp = 1:2),
         metrics = function() NULL,
         event_level = function() "second",
-        eval_time = function() 1
+        eval_time = function() 1,
+        select = function() selection_rule("one_std_err", num_comp)
       )
     }
   }

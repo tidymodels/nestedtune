@@ -144,6 +144,7 @@ is_selection_rule <- function(x) {
 
 #' @export
 format.selection_rule <- function(x, ...) {
+  rlang::check_dots_empty()
   out <- paste0("<selection_rule> ", x$rule)
   if (length(x$order) > 0L) {
     out <- paste0(
@@ -160,7 +161,8 @@ format.selection_rule <- function(x, ...) {
 
 #' @export
 print.selection_rule <- function(x, ...) {
-  cat(format(x, ...), "\n", sep = "")
+  rlang::check_dots_empty()
+  cat(format(x), "\n", sep = "")
   invisible(x)
 }
 
