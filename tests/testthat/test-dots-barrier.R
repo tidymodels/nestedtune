@@ -49,9 +49,11 @@ test_that("AC1: the four entry points carry `...` after their required arguments
   # nested_final_fit() takes only `object` and `results` now (M46): the
   # procedure that once sat behind its barrier -- `param_info`, `grid`,
   # `metrics`, `event_level`, `eval_time` -- is read off `results` instead.
+  # `id` (M71) names a workflow of a `nested_results_set` and sits behind
+  # the barrier too.
   expect_identical(
     names(formals(nested_final_fit)),
-    c("object", "results", "...")
+    c("object", "results", "...", "id")
   )
   # All three of `nested_resamples()`'s arguments are required, so its barrier
   # is last rather than mid-signature.
@@ -167,7 +169,16 @@ DOTS_PROBED_METHODS <- c(
   "extract_procedure.nested_results",
   "extract_procedure.nested_final_fit",
   "collect_predictions.nested_results",
-  "collect_extracts.nested_results"
+  "collect_extracts.nested_results",
+  # The workflow-set surface (M71): the readers, the print and the
+  # extractor, whose `id` sits ahead of its dots and is never reached by
+  # the probe.
+  "collect_metrics.nested_results_set",
+  "collect_notes.nested_results_set",
+  "collect_predictions.nested_results_set",
+  "collect_extracts.nested_results_set",
+  "print.nested_results_set",
+  "extract_workflow.nested_results_set"
 )
 
 test_that("AC5: every registered method whose `...` is unused fences it", {

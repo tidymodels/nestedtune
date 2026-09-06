@@ -1,0 +1,314 @@
+# The `nested_results_set` surface (M71, D-058): one `nested_results` per
+# workflow, and readers that stack each element's table under its id. The
+# class adds no statistics of its own -- every number comes from an
+# element's own reader -- and it registers none of the ranking or
+# best-workflow methods the `workflow_set` class would bring: a choice among
+# the set's workflows by their nested estimates is a selection the outer loop
+# did not nest (IP3; `vignette("estimate")`).
+
+#' Stack each workflow's table of a workflow-set run under its id
+#'
+#' @description
+#' The six readers of a `nested_results` answer on a `nested_results_set`,
+#' what [nested_workflow_map()] returns: each calls its single-workflow
+#' method on every element and binds the tables in the set's order, with a
+#' `wflow_id` column first. `collect_metrics()` gives one row per workflow
+#' and metric summarized, or per workflow, outer fold and metric with
+#' `summarize = FALSE`, where `wflow_id` stands ahead of the fold label
+#' columns; `collect_selections()`, `collect_inner_metrics()`,
+#' `collect_notes()`, `collect_predictions()` and `collect_extracts()` stack
+#' their per-fold tables the same way.
+#'
+#' @param x A `nested_results_set` from [nested_workflow_map()].
+#' @param ... Not used; must be empty. An argument passed here is an error
+#'   rather than silently ignored.
+#' @param summarize Whether to average each workflow's per-fold metrics
+#'   (`TRUE`, the default) or return them one row per outer fold (`FALSE`),
+#'   as on [collect_metrics.nested_results()].
+#'
+#' @return A tibble: `wflow_id` first, then the columns the single-workflow
+#'   reader returns for each element, bound in the set's order over the
+#'   union of the elements' columns, `NA` where an element lacks one. An
+#'   element whose table has no rows contributes none.
+#'
+#' @details
+#' Five of the readers read the folds that completed, as they do on one
+#' workflow. A workflow in which no outer fold completed is left out of
+#' their tables while another workflow completed one, with one warning of
+#' class `nestedtune_partial_summary` naming it; a workflow in which some
+#' folds failed contributes the folds that ran, with that reader's own
+#' partial-run warning raised once for it, the workflow's id at the front of
+#' the message; and a set in which no workflow completed a fold is refused
+#' with class `nestedtune_no_completed_folds`. `collect_predictions()` and
+#' `collect_extracts()` then refuse a set in which a workflow that would
+#' contribute rows did not keep the column, with class
+#' `nestedtune_column_not_saved` naming it: on a set a control reaches each
+#' workflow through the call's `...` or its own `option` entry, so one
+#' workflow can have kept what another did not. `collect_notes()` reads
+#' every workflow, those in which no fold completed included, and refuses
+#' nothing: a failed workflow's notes are the reason to ask.
+#'
+#' An element's table already carrying a `wflow_id` column -- a parameter
+#' given that id -- is refused with class
+#' `nestedtune_collect_name_collision`.
+#'
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick", "workflowsets"))
+#' data(mtcars)
+#'
+#' rec <- recipes::recipe(mpg ~ ., data = mtcars)
+#' tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
+#' wset <- workflowsets::workflow_set(
+#'   preproc = list(pca = tuned, none = rec),
+#'   models = list(lm = parsnip::linear_reg())
+#' )
+#'
+#' set.seed(1)
+#' folds <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 3),
+#'   inside = rsample::vfold_cv(v = 3)
+#' )
+#'
+#' set.seed(2)
+#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+#'
+#' collect_metrics(res)
+#' collect_metrics(res, summarize = FALSE)
+#' collect_selections(res)
+#' collect_notes(res)
+#'
+#' @seealso [nested_workflow_map()], [collect_metrics.nested_results()],
+#'   [collect_selections()], [collect_predictions.nested_results()]
+#' @name collect_metrics.nested_results_set
+NULL
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_metrics.nested_results_set <- function(x, ..., summarize = TRUE) {
+  rlang::check_dots_empty()
+  stack_set(
+    x,
+    function(r) collect_metrics(r, summarize = summarize),
+    call = rlang::current_env()
+  )
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_selections.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, collect_selections, call = rlang::current_env())
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_inner_metrics.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, collect_inner_metrics, call = rlang::current_env())
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_notes.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(
+    x,
+    collect_notes,
+    call = rlang::current_env(),
+    completed_only = FALSE
+  )
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_predictions.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, collect_predictions, call = rlang::current_env())
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+collect_extracts.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, collect_extracts, call = rlang::current_env())
+}
+
+# One reader mapped over the elements and bound under `wflow_id`.
+#
+# The element rule is the single-workflow rule applied per element: a
+# reader that reads completed folds is given the elements with one, a
+# workflow with none is left out with a warning naming it, and a set with
+# none is refused under the class every summary door refuses with
+# (`check_any_completed()`). Everything the element's reader raises --
+# its partial-run warning, its refusal of a column the run did not keep --
+# is re-signalled naming the workflow (`resignal_for_workflow()`,
+# R/nested-workflow-map.R), so the set's conditions say which workflow they
+# are about. The bind is vctrs', as `stack_fold_column()` binds folds.
+stack_set <- function(x, reader, call, completed_only = TRUE) {
+  ids <- x$wflow_id
+  results <- x$result
+  which <- seq_along(ids)
+  if (completed_only) {
+    completed <- vapply(results, function(r) any(r$.completed), logical(1))
+    if (!any(completed)) {
+      n <- length(ids)
+      cli::cli_abort(
+        c(
+          "No outer fold of any workflow completed, so there is nothing \\
+           to collect.",
+          x = "All {n} workflow{?s} failed on every outer fold.",
+          i = "Call {.fn collect_notes} on the set, or {.fn summary} on \\
+               each {.code x$result[[i]]}, for the stage each fold failed at."
+        ),
+        class = "nestedtune_no_completed_folds",
+        call = call
+      )
+    }
+    for (i in which(!completed)) {
+      cli::cli_warn(
+        c(
+          "!" = "Workflow {.val {ids[[i]]}}: no outer fold completed, so \\
+                 this table leaves it out.",
+          i = "Its {.code .notes} say what went wrong."
+        ),
+        class = "nestedtune_partial_summary",
+        call = call
+      )
+    }
+    which <- which(completed)
+  }
+  tables <- lapply(which, function(i) {
+    tbl <- for_workflow(ids[[i]], call, reader(results[[i]]))
+    if ("wflow_id" %in% names(tbl)) {
+      cli::cli_abort(
+        c(
+          "Cannot stack workflow {.val {ids[[i]]}}: its table carries a \\
+           column named {.val wflow_id}, the column the set names each \\
+           workflow by.",
+          i = "Give the parameter another id in {.fn tune::tune}."
+        ),
+        class = "nestedtune_collect_name_collision",
+        call = call
+      )
+    }
+    vctrs::new_data_frame(c(
+      list(wflow_id = rep(ids[[i]], nrow(tbl))),
+      as.list(tbl)
+    ))
+  })
+  new_tbl(as.list(vctrs::vec_rbind(!!!tables)))
+}
+
+#' Print a workflow-set run
+#'
+#' Shows the orchestrator the set ran through, how many workflows it holds,
+#' and for each workflow its id with how many of its outer folds completed
+#' and the procedure that ran for it.
+#'
+#' @param x A `nested_results_set` from [nested_workflow_map()].
+#' @param ... Not used; must be empty.
+#'
+#' @return `x`, invisibly.
+#' @seealso [nested_workflow_map()], [collect_metrics.nested_results_set()]
+#' @export
+print.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  cli::cli_h1("Nested cross-validation results for a workflow set")
+  fn <- attr(x, "fn")
+  if (rlang::is_string(fn)) {
+    cli::cli_text("Orchestrator: {.fn {fn}} ({orchestrator_label(fn)})")
+  }
+  n <- nrow(x)
+  cli::cli_text("Workflows: {n}")
+  bullets <- vapply(
+    seq_len(n),
+    function(i) {
+      r <- x$result[[i]]
+      completed <- sum(r$.completed)
+      total <- nrow(r)
+      label <- orchestrator_label(attr(r, "procedure")$tuner)
+      cli::format_inline(
+        "{.val {x$wflow_id[[i]]}}: {completed} of {total} outer \\
+         fold{?s} completed ({label})"
+      )
+    },
+    character(1)
+  )
+  status <- vapply(
+    x$result,
+    function(r) if (all(r$.completed)) "v" else "x",
+    character(1)
+  )
+  cli::cli_bullets(stats::setNames(bullets, status))
+  cli::cli_bullets(c(
+    i = "Use {.fn collect_metrics} for every workflow's estimate under its \\
+         id, and {.code x$result[[i]]} for one workflow's run."
+  ))
+  invisible(x)
+}
+
+# The registry's label for an orchestrator or a tuner name: the map records
+# the orchestrator's name (`fn`), each element's procedure the tuner's.
+orchestrator_label <- function(name) {
+  key <- sub("^nested_", "", name)
+  if (rlang::is_string(key) && key %in% names(tuner_registry)) {
+    tuner_registry[[key]]$label
+  } else {
+    "unknown"
+  }
+}
+
+#' Extract one workflow of a workflow-set run
+#'
+#' @param x A `nested_results_set` from [nested_workflow_map()].
+#' @param id The `wflow_id` of the workflow to return, one of `x$wflow_id`.
+#' @param ... Not used; must be empty.
+#'
+#' @return The workflow, untrained, as the set held it. An `id` naming no
+#'   row of the set is refused with class `nestedtune_unknown_id`.
+#'
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick", "workflowsets"))
+#' data(mtcars)
+#' rec <- recipes::recipe(mpg ~ ., data = mtcars)
+#' wset <- workflowsets::workflow_set(
+#'   preproc = list(none = rec),
+#'   models = list(lm = parsnip::linear_reg())
+#' )
+#' set.seed(1)
+#' folds <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 3),
+#'   inside = rsample::vfold_cv(v = 3)
+#' )
+#' set.seed(2)
+#' res <- nested_workflow_map(wset, resamples = folds)
+#' extract_workflow(res, "none_lm")
+#'
+#' @seealso [nested_workflow_map()], [nested_final_fit()]
+#' @export
+extract_workflow.nested_results_set <- function(x, id, ...) {
+  rlang::check_dots_empty()
+  x$workflow[[match_set_id(x, id)]]
+}
+
+# The row `id` names, or a refusal naming the ids the set holds.
+match_set_id <- function(x, id, call = rlang::caller_env()) {
+  ids <- x$wflow_id
+  if (missing(id) || !rlang::is_string(id) || !id %in% ids) {
+    cli::cli_abort(
+      c(
+        "{.arg id} must name one workflow of the set: {.val {ids}}.",
+        x = if (missing(id)) {
+          "No {.arg id} was given."
+        } else if (rlang::is_string(id)) {
+          "Got {.val {id}}."
+        } else {
+          "Got {.obj_type_friendly {id}}."
+        }
+      ),
+      class = "nestedtune_unknown_id",
+      call = call
+    )
+  }
+  match(id, ids)
+}
