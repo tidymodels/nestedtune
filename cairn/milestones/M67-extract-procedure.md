@@ -1,6 +1,6 @@
 # M67: `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - [x] T2: Roxygen page with `@examplesIf` on the D-023 pages' pattern; `_pkgdown.yml` row under "Running the loop" after `agreement`; NEWS entry; DESIGN.md Function Families line beside the D-052 readers. `devtools::document()`.
 - [x] T3: Rewrite the roxygen sites (`R/nested-tune-grid.R:154,243,436`, `R/nested-tune-bayes.R:95,121`, `R/nested-tune-race.R:58,81,111`, `R/nested-tune-sim-anneal.R:100,130`, `R/nested-final-fit.R:124,134`) and `vignettes/tuners.Rmd:324-328` onto `extract_procedure()`, then run AC3's grep until it is clean of roxygen and vignette hits.
 - [x] T4: Replace the `\u2014` in `print_candidate_sets()` with a colon or full stop, update the regex at `tests/testthat/test-nested-results-print.R:760`, re-record the snapshot; then sweep the roxygen lines (31 today), `_pkgdown.yml` (2), `NEWS.md` (41) and `README.Rmd` (4), re-knit `README.md`, `devtools::document()`, and run AC4's grep until clean.
-- [ ] T5: Render the six pages on a quiet machine and grep the HTML (AC5); `air format --check` on the touched files; `devtools::document()` no-diff, `pkgdown::check_pkgdown()`, `devtools::test()`, `devtools::check()` (AC6).
+- [x] T5: Render the six pages on a quiet machine and grep the HTML (AC5); `air format --check` on the touched files; `devtools::document()` no-diff, `pkgdown::check_pkgdown()`, `devtools::test()`, `devtools::check()` (AC6).
 
 ## Work log
 
@@ -62,6 +62,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: full `devtools::test()` on the checkpoint: one failure, the Bayesian oracles' method-coverage table lacking a call for `extract_procedure.nested_results`; the call added, the file re-run clean, the rest of the suite green. T1 to T3 stand verified.
 - 2026-09-05: T4 part: the print's candidates line reads `Candidates searched: 5, 5, 5. The folds did not search the same grid`; the regex at `test-nested-results-print.R:759` follows it and the snapshot line is re-recorded, the print file passing; the prose sweep still with the subagent.
 - 2026-09-05: T4 done: the [S] sweep reworded 59 roxygen lines (the plan's count of 31 was low), 39 NEWS sites, 4 in README.Rmd and 2 in `_pkgdown.yml`, its diff read here in full with no meaning change found; `document()` and `build_readme()` re-run; AC4's grep finds no hit in any target, and no comment line in `R/` carries one either.
+- 2026-09-05: T5 done: the branch package installed (the tuners page attaches the installed nestedtune, and the first render found no `extract_procedure()` there), the six pages rendered and their HTML free of U+2014 and the three entities (AC5); `devtools::test()` 0 failures, `devtools::check()` 0 errors, 0 warnings, 0 notes, `document()` leaving no diff, `check_pkgdown()` clean (AC6). Status to review.
 
 ## Decisions
 
