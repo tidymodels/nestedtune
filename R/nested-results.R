@@ -992,12 +992,13 @@ stack_fold_column <- function(
   x,
   column,
   completed_only,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  tables = x[[column]]
 ) {
   id_cols <- id_columns(x)
   which <- if (completed_only) which(x$.completed) else seq_len(nrow(x))
   rows <- lapply(which, function(i) {
-    tbl <- x[[column]][[i]]
+    tbl <- tables[[i]]
     if (is.null(tbl)) {
       return(NULL)
     }

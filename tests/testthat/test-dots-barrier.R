@@ -163,7 +163,9 @@ DOTS_PROBED_METHODS <- c(
   "extract_tune_results.nested_final_fit",
   "extract_scored_candidates.nested_final_fit",
   "extract_procedure.nested_results",
-  "extract_procedure.nested_final_fit"
+  "extract_procedure.nested_final_fit",
+  "collect_predictions.nested_results",
+  "collect_extracts.nested_results"
 )
 
 test_that("AC5: every registered method whose `...` is unused fences it", {
