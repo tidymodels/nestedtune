@@ -154,6 +154,28 @@ test_that("every control_bayes() slot sits under one heading on nested_tune_baye
   expect_identical(buckets[["Not returned"]], "save_workflow")
 })
 
+test_that("every control_resamples() slot sits under one heading on nested_fit_resamples()'s page (M70, AC7)", {
+  buckets <- expect_classified("nested_fit_resamples", tune::control_resamples)
+  expect_identical(buckets[["Forced"]], "allow_par")
+  expect_identical(buckets[["Settable as its own argument"]], "event_level")
+  expect_kept_from_outer_fit("nested_fit_resamples", buckets)
+  # No inner call exists for a slot to pass through to or be withheld from:
+  # the rest are inert on this page, and the headings say so.
+  expect_length(buckets[["Passed through"]], 0L)
+  expect_length(buckets[["Not returned"]], 0L)
+  expect_setequal(
+    buckets[["Inert"]],
+    c(
+      "verbose",
+      "pkgs",
+      "save_workflow",
+      "parallel_over",
+      "backend_options",
+      "workflow_size"
+    )
+  )
+})
+
 test_that("every control_race() slot sits under one heading on the racing page (M50, AC7)", {
   skip_if_not_installed("finetune")
   buckets <- expect_classified("nested_tune_race", finetune::control_race)

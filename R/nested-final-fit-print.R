@@ -45,10 +45,26 @@ print.nested_final_fit <- function(x, ...) {
   cli::cli_text("Procedure: {procedure_label(new_summary_nested_final_fit(x))}")
   cli::cli_text("Selected: {selected_label(x$selected)}")
   cli::cli_text("")
-  cli::cli_bullets(c(
+  estimate <- c(
     i = "This model has no performance estimate of its own. Report the nested \\
          estimate from {.code collect_metrics()} on the results object this \\
-         fit was built from, which describes the procedure that produced it.",
+         fit was built from, which describes the procedure that produced it."
+  )
+  # A fit that ran no tuning (M70) has no selection to compare and no run
+  # to reach: the two accessors refuse it, and the print says so rather
+  # than pointing at them.
+  if (!tuner_selects(x$procedure$tuner)) {
+    cli::cli_bullets(c(
+      estimate,
+      i = "No tuning ran: the workflow was fitted as given on every row. \\
+           {.fn extract_workflow} returns the fitted workflow; \\
+           {.fn extract_tune_results} and {.fn extract_scored_candidates} \\
+           have nothing to return and refuse."
+    ))
+    return(invisible(x))
+  }
+  cli::cli_bullets(c(
+    estimate,
     i = "Compare the parameters above with {.code .selected} from that run. \\
          Outer folds choosing differently is selection instability, and it is \\
          information about the procedure rather than noise.",
@@ -218,6 +234,11 @@ procedure_label <- function(s) {
   label <- if (is.character(s$tuner) && s$tuner %in% names(tuner_registry)) {
     tuner_registry[[s$tuner]]$label
   }
+  # A tuner that selects nothing (M70) is named by its label alone: a count
+  # of zero candidates would read as a search that found nothing.
+  if (!tuner_selects(s$tuner)) {
+    return(label)
+  }
   if (tuner_iterates(s$tuner)) {
     return(sprintf(
       "%s, %d initial candidate%s (%d requested), %d iteration%s completed (%d requested)",
@@ -317,7 +338,11 @@ print_final_design <- function(s) {
     cli::cli_text("Full-data tuning: {s$tuning_label}")
   }
   cli::cli_text("Procedure: {procedure_label(s)}")
-  cli::cli_text("Candidates scored: {s$candidates}")
+  # No count line where no search ran (M70), for the reason
+  # `procedure_label()` gives; the component still records zero.
+  if (tuner_selects(s$tuner)) {
+    cli::cli_text("Candidates scored: {s$candidates}")
+  }
   invisible(NULL)
 }
 

@@ -800,6 +800,14 @@ time_budget_ledger <- function() {
       START_DAEMONS_BOUND_S(),
       "BC15: the selection rule reaches the folds on two daemons as serially"
     ),
+    tb_row(
+      "test-parallel-identity.R",
+      928L,
+      "start_daemons",
+      START_DAEMONS_BOUND_S(),
+      "BC16: the plain resampling path matches serial on two daemons",
+      note = "one pool of 2 (M70)"
+    ),
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two

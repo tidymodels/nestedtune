@@ -901,3 +901,39 @@ test_that("BC15: the selection rule reaches the folds on two daemons as serially
   expect_identical(parallel$.selected, serial$.selected)
   expect_identical(parallel, serial)
 })
+
+# BC16 (M70, AC6): the plain resampling path matches serial on two daemons.
+# ranger with every parameter fixed, so the outer fit draws from the stream
+# and a daemon that ran the fold under another seed, or ran an inner stage
+# at all, would differ; the tuner needs no package beyond tune, which every
+# daemon already holds through the namespace load.
+
+test_that("BC16: the plain resampling path matches serial on two daemons (M70, AC6)", {
+  skip_if_no_daemons()
+  skip_if_not_installed("ranger")
+
+  data <- make_reg_data()
+  nested <- det_nested(data)
+  wf <- fixed_stoch_workflow(data)
+  ms <- reg_metrics()
+  on.exit(mirai::daemons(0), add = TRUE)
+
+  mirai::daemons(0)
+  set.seed(2026L)
+  serial <- nested_fit_resamples(wf, nested, metrics = ms)
+  expect_identical(last_dispatch(), "serial")
+  expect_true(all(serial$.completed))
+  expect_identical(extract_procedure(serial)$tuner, "fit_resamples")
+
+  start_daemons(2)
+  set.seed(2026L)
+  parallel <- without_pkgload_warning(
+    nested_fit_resamples(wf, nested, metrics = ms)
+  )
+
+  expect_identical(last_dispatch(), "parallel")
+  expect_true(all(parallel$.completed))
+  expect_identical(parallel$.metrics, serial$.metrics)
+  expect_identical(parallel$.selected, serial$.selected)
+  expect_identical(parallel, serial)
+})

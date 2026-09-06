@@ -22,10 +22,17 @@
 #' [nested_tune_race_anova()] and [nested_tune_race_win_loss()]; and for
 #' simulated annealing -- finetune perturbing the current candidate one
 #' iteration at a time -- see [nested_tune_sim_anneal()]. Each runs this same
-#' outer loop with the inner tuner swapped.
+#' outer loop with the inner tuner swapped. For a workflow with nothing to
+#' tune -- the baseline a tuned procedure is compared against -- see
+#' [nested_fit_resamples()], which runs the same outer loop with the inner
+#' stage removed and refuses a workflow carrying a marker.
 #'
 #' @param object A [workflows::workflow()] with at least one parameter marked
-#'   for tuning with [tune::tune()].
+#'   for tuning with [tune::tune()]. A workflow with no marker is refused at
+#'   entry, before any fold runs, with condition class
+#'   `nestedtune_untuned_workflow`: there is nothing for the inner loop to
+#'   search, and [nested_fit_resamples()] scores a fixed workflow on the same
+#'   nested design instead.
 #' @param ... A control object as `control` -- what [tune::control_grid()]
 #'   returns for `nested_tune_grid()`, what [tune::control_bayes()] returns for
 #'   `nested_tune_bayes()` -- and nothing else. It reaches the inner tuning
@@ -571,6 +578,7 @@ nested_tune_grid <- function(
 ) {
   control <- check_dots_control(capture_dots(...))
   check_workflow(object)
+  check_untuned_workflow(object)
   check_nested(resamples)
   check_grid(grid)
   check_grid_params(object, grid)
@@ -699,51 +707,62 @@ nested_fold_fit <- function(
   # a fold whose tuning raised has no run to read columns off, and one whose
   # every candidate failed has a run `collect_metrics()` raises on (M03).
   prototype <- empty_inner_metrics(object, tuner, metrics, param_info)
-  set_fold_seed(seeds[[1L]])
 
   # `tuned` is assigned inside the tryCatch expression, which evaluates in this
   # frame -- so when select_best() is what errors, tune's own notes explaining
   # why every model failed are still in hand to record.
   tuned <- NULL
-  selected <- tryCatch(
-    {
-      # The inner rset tune reads is framed on this fold's analysis rows
-      # (M54): tune finalizes an unknown parameter range on the frame the
-      # first inner split carries, and a `nested_resamples()` design's
-      # splits carry the whole data. Inside the seed's scope so the fold
-      # stays reproducible from its seeds alone; it draws nothing.
-      framed <- analysis_framed_inner(inner, split)
-      # The tuner's own call -- `tune_grid()` or `tune_bayes()` -- assembled
-      # from the description the orchestrator built (R/tuner.R). The fold's
-      # tuning seed goes in with it, because `control_bayes()` is seeded from
-      # it and has to be built inside this seed's scope.
-      tuned <- run_tuner(
-        tuner,
-        object = object,
-        resamples = framed,
-        param_info = param_info,
-        metrics = metrics,
-        eval_time = eval_time,
-        event_level = event_level,
-        control = control,
-        seed = seeds[[1L]]
-      )
-      # Resolved from the tuned object rather than from `metrics`, so the same
-      # code answers whether the caller supplied a metric set or let tune pick.
-      metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
-      # The recorded rule (M69), one of tune's three selectors behind
-      # `apply_selection_rule()` (R/selection-rule.R). `eval_time` is
-      # deliberately not passed on (D-038). Left NULL,
-      # `tune:::choose_eval_time()` reads the evaluation times off `tuned` --
-      # which are the ones this run was tuned at, because the argument reached
-      # `tune_grid()` above -- and `tune:::first_eval_time()` takes element one
-      # of them, the same element passing the argument would name. Selection is
-      # therefore identical either way, and passing it would repeat tune's
-      # "First evaluation time" message once per fold.
-      apply_selection_rule(tuned, select, metric_name)
-    },
-    error = function(cnd) cnd
-  )
+  # A tuner that selects nothing (M70, `tuner_selects()`) skips the inner
+  # stage whole: no framed inner rset, no tuner call, no rule. The fold's
+  # tuning seed was drawn with the others so the record keeps one layout, and
+  # is consumed by nothing here; the outer fit below runs under the second
+  # seed as on every other path. `selected` is the zero-row, zero-column
+  # table `empty_candidates()` builds, so `.selected` holds a table on every
+  # completed fold and NULL on a failed one, as it does for the five.
+  selected <- if (!tuner_selects(tuner$tuner)) {
+    empty_candidates()
+  } else {
+    set_fold_seed(seeds[[1L]])
+    tryCatch(
+      {
+        # The inner rset tune reads is framed on this fold's analysis rows
+        # (M54): tune finalizes an unknown parameter range on the frame the
+        # first inner split carries, and a `nested_resamples()` design's
+        # splits carry the whole data. Inside the seed's scope so the fold
+        # stays reproducible from its seeds alone; it draws nothing.
+        framed <- analysis_framed_inner(inner, split)
+        # The tuner's own call -- `tune_grid()` or `tune_bayes()` -- assembled
+        # from the description the orchestrator built (R/tuner.R). The fold's
+        # tuning seed goes in with it, because `control_bayes()` is seeded from
+        # it and has to be built inside this seed's scope.
+        tuned <- run_tuner(
+          tuner,
+          object = object,
+          resamples = framed,
+          param_info = param_info,
+          metrics = metrics,
+          eval_time = eval_time,
+          event_level = event_level,
+          control = control,
+          seed = seeds[[1L]]
+        )
+        # Resolved from the tuned object rather than from `metrics`, so the same
+        # code answers whether the caller supplied a metric set or let tune pick.
+        metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
+        # The recorded rule (M69), one of tune's three selectors behind
+        # `apply_selection_rule()` (R/selection-rule.R). `eval_time` is
+        # deliberately not passed on (D-038). Left NULL,
+        # `tune:::choose_eval_time()` reads the evaluation times off `tuned` --
+        # which are the ones this run was tuned at, because the argument reached
+        # `tune_grid()` above -- and `tune:::first_eval_time()` takes element one
+        # of them, the same element passing the argument would name. Selection is
+        # therefore identical either way, and passing it would repeat tune's
+        # "First evaluation time" message once per fold.
+        apply_selection_rule(tuned, select, metric_name)
+      },
+      error = function(cnd) cnd
+    )
+  }
   if (inherits(selected, "condition")) {
     return(failed_fold(
       "inner tuning",
@@ -760,7 +779,13 @@ nested_fold_fit <- function(
   # the whole run -- the one outcome this function exists to prevent.
   fitted <- tryCatch(
     {
-      final_wf <- tune::finalize_workflow(object, selected)
+      # Nothing to finalize where nothing was selected: the workflow runs as
+      # given, its parameters already fixed (M70).
+      final_wf <- if (tuner_selects(tuner$tuner)) {
+        tune::finalize_workflow(object, selected)
+      } else {
+        object
+      }
       set_fold_seed(seeds[[2L]])
       # The outer fit had no control object at all until M35, so its metrics
       # were computed at tune's default event level whatever the inner run had

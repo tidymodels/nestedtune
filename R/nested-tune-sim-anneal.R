@@ -254,6 +254,7 @@ nested_tune_sim_anneal <- function(
   check_tuner_installed("tune_sim_anneal")
   control <- check_dots_control(capture_dots(...))
   check_workflow(object)
+  check_untuned_workflow(object)
   check_nested(resamples)
   check_iter(iter, floor = 1)
   check_initial(initial, floor = 1)

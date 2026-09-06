@@ -13,12 +13,17 @@ test_that("every registry entry names a function in its package and a control of
       "tune_bayes",
       "tune_race_anova",
       "tune_race_win_loss",
-      "tune_sim_anneal"
+      "tune_sim_anneal",
+      "fit_resamples"
     )
   )
   for (nm in names(tuner_registry)) {
     entry <- tuner_registry[[nm]]
     expect_true(entry$package %in% entry$requires, info = nm)
+    expect_true(
+      is.logical(entry$selects) && length(entry$selects) == 1L,
+      info = nm
+    )
     if (!rlang::is_installed(entry$package)) {
       next
     }
@@ -57,6 +62,22 @@ test_that("the racers take a grid and do not iterate; the Bayesian and annealing
   expect_false(tuner_iterates("tune_grid"))
   expect_false(tuner_iterates("tune_nonesuch"))
   expect_false(tuner_iterates(NULL))
+
+  # `tuner_selects()` is total the other way round (M70): only the
+  # registry's own word waives the selection rule, so an unknown name or
+  # none at all still selects, and a hand-built record is held to M69's rule.
+  expect_false(tuner_selects("fit_resamples"))
+  expect_false(tuner_registry$fit_resamples$takes_grid)
+  expect_false(tuner_registry$fit_resamples$iterates)
+  for (nm in setdiff(names(tuner_registry), "fit_resamples")) {
+    expect_true(tuner_selects(nm), info = nm)
+  }
+  expect_true(tuner_selects("tune_nonesuch"))
+  expect_true(tuner_selects(NULL))
+  expect_identical(
+    tuner_fit_resamples(),
+    list(tuner = "fit_resamples", args = list())
+  )
 
   anneal <- tuner_anneal(iter = 2, initial = 3)
   expect_identical(anneal$tuner, "tune_sim_anneal")
@@ -109,7 +130,9 @@ test_that("the final-fit reproducibility recipe calls every registry tuner", {
   recipe <- rd_text(blocks[[1L]])
   expect_true(grepl("set.seed(", recipe, fixed = TRUE))
 
-  for (nm in names(tuner_registry)) {
+  # Every tuner that selects: the plain resampling fit (M70) re-runs no
+  # tuning call, and the recipe says so in prose beside the block.
+  for (nm in Filter(tuner_selects, names(tuner_registry))) {
     expect_true(
       grepl(paste0("\\b", nm, "\\("), recipe),
       label = paste0("recipe calls ", nm, "(")

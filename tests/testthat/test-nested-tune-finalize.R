@@ -172,7 +172,9 @@ test_that("AC1: every tuner finalizes on the outer fold's analysis rows", {
   nested <- finalize_nested(d)
   wf <- stoch_workflow(d)
 
-  tuners <- setdiff(names(tuner_registry), "tune_bayes")
+  # The tuners that read a parameter set: the plain resampling fit (M70)
+  # takes none and finalizes nothing.
+  tuners <- Filter(tuner_selects, setdiff(names(tuner_registry), "tune_bayes"))
   expect_length(tuners, 4L)
   ran <- character()
   for (fn in tuners) {

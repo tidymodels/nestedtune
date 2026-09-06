@@ -101,6 +101,8 @@ autoplot.nested_results <- function(
 plot_selection <- function(x, call = rlang::caller_env()) {
   frame <- selection_frame(x)
   if (is.null(frame)) {
+    # Classed since M70: a `nested_fit_resamples()` result reaches this on
+    # every call, so a caller can catch it as the refusal it is.
     cli::cli_abort(
       c(
         "There are no tuned parameters to plot.",
@@ -108,6 +110,7 @@ plot_selection <- function(x, call = rlang::caller_env()) {
         i = "{.code autoplot(x, type = \"performance\")} draws the outer-fold \\
              scores instead."
       ),
+      class = "nestedtune_no_tuned_parameters",
       call = call
     )
   }

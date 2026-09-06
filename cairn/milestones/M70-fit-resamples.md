@@ -62,6 +62,7 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 - 2026-09-06: plan chose recording the drawn tuning seed over `NA` because the seed layout then matches a tuned run's and the reproduction recipes stay one shape; falsified by a reader misreading the seed as consumed.
 - 2026-09-06: /milestone-implement started; branch `m070-fit-resamples` cut from the pushed default branch at `9601cc5`.
 - 2026-09-06: T1 done: `fixed_workflow()` and `fixed_stoch_workflow()` added to `helper-orchestration.R`; grep over `R/`, `tests/`, `vignettes/`, `man/` found no holder of either name or of the M70 export and check names.
+- 2026-09-06: checkpoint, half-done: T2 to T9 code, tests and docs written (registry entry, fold path, export and checks, oracle/readers/checks/final-fit/rng test files, BC16, help pages, pkgdown, NEWS, DESIGN); the targeted test files pass; the full-suite verify for T2 to T8 is running and the boxes are ticked on its green, T10 (vignette) not started.
 
 ## Decisions
 

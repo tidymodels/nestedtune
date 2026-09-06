@@ -110,6 +110,69 @@ check_workflow_pkgs <- function(object, call = rlang::caller_env()) {
   invisible(needed)
 }
 
+# The workflow's tuned parameter ids, or NULL where they cannot be read: a
+# check that cannot be made is skipped, never turned into a false refusal, as
+# `check_grid_params()` reads the same set.
+tuned_parameter_ids <- function(object) {
+  tryCatch(
+    tune::extract_parameter_set_dials(object)$id,
+    error = function(cnd) NULL
+  )
+}
+
+# The two doors a workflow takes (M70, D-057), decided by whether anything in
+# it is marked with `tune()`. The five tuning orchestrators refuse a workflow
+# with nothing to tune: an inner loop over one candidate runs for nothing,
+# tune warns once per fold, and the record would call it a search. Before
+# this, an unmarked workflow ran through `nested_tune_grid()` with that
+# warning on every fold and failed every fold on the iterating tuners (probed
+# 2026-09-06). Refused at entry, before any fold runs (GP3), naming the export
+# that scores a fixed workflow; the class is the check's own so a caller can
+# catch the refusal as this one.
+check_untuned_workflow <- function(object, call = rlang::caller_env()) {
+  ids <- tuned_parameter_ids(object)
+  if (is.null(ids) || length(ids) > 0L) {
+    return(invisible(object))
+  }
+  cli::cli_abort(
+    c(
+      "{.arg object} has no parameter marked for tuning.",
+      x = "Nothing in it is marked with {.fn tune::tune}, so there is \\
+           nothing for the inner loop to search.",
+      i = "Score a fixed workflow on the outer folds with \\
+           {.fn nested_fit_resamples}, or mark a parameter with \\
+           {.fn tune::tune} to tune it here."
+    ),
+    class = "nestedtune_untuned_workflow",
+    call = call
+  )
+}
+
+# The other door. `nested_fit_resamples()` runs no inner stage, so a marked
+# parameter would reach the outer fit unfinalized and every fold would fail
+# alike, one outer loop later; refused at entry instead, naming the five that
+# tune. `nested_final_fit()` on a record that selected nothing asks the same
+# of the workflow it is handed.
+check_tuned_workflow <- function(object, call = rlang::caller_env()) {
+  ids <- tuned_parameter_ids(object)
+  if (is.null(ids) || length(ids) == 0L) {
+    return(invisible(object))
+  }
+  cli::cli_abort(
+    c(
+      "{.arg object} has {length(ids)} parameter{?s} marked for tuning: \\
+       {.val {ids}}.",
+      x = "{.fn nested_fit_resamples} runs no inner tuning, so a marked \\
+           parameter would never be finalized.",
+      i = "Tune it with {.fn nested_tune_grid}, {.fn nested_tune_bayes}, \\
+           {.fn nested_tune_race_anova}, {.fn nested_tune_race_win_loss} or \\
+           {.fn nested_tune_sim_anneal}, or fix its value in the workflow."
+    ),
+    class = "nestedtune_tuned_workflow",
+    call = call
+  )
+}
+
 check_nested <- function(resamples, call = rlang::caller_env()) {
   # Every refusal here carries one class, so a caller can catch a malformed
   # design at any of the five drivers alike (M55); each names every offending
@@ -745,8 +808,10 @@ check_results_record <- function(results, call = rlang::caller_env()) {
   procedure <- attr(results, "procedure")
   # The selection rule is an entry of the procedure (M69), so it is asked
   # for only where there is a procedure to hold it: a record with none has
-  # one absence to report, not two.
-  has_select <- is.list(procedure) && is_selection_rule(procedure$select)
+  # one absence to report, not two. A tuner the registry says selects
+  # nothing (M70, D-057) records no rule, and is not asked for one.
+  has_select <- is.list(procedure) &&
+    (!tuner_selects(procedure$tuner) || is_selection_rule(procedure$select))
   if (!rlang::is_call(inside) || !is.list(procedure) || !has_select) {
     absent <- c(
       if (!rlang::is_call(inside)) "inner resampling specification",

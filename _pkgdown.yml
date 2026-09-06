@@ -43,6 +43,7 @@ reference:
   - nested_tune_bayes
   - nested_tune_race
   - nested_tune_sim_anneal
+  - nested_fit_resamples
   - collect_metrics.nested_results
   - collect_selections
   - collect_predictions.nested_results

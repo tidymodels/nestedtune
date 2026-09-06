@@ -282,6 +282,9 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     check_workflow = function() {
       nested_tune_sim_anneal(parsnip::linear_reg(), folds, control = ctrl)
     },
+    check_untuned_workflow = function() {
+      nested_tune_sim_anneal(fixed_workflow(d), folds, control = ctrl)
+    },
     check_nested = function() {
       nested_tune_sim_anneal(wf, rsample::vfold_cv(d, v = 2), control = ctrl)
     },
@@ -316,6 +319,7 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     check_dots_control = "accepts `control`",
     check_control = "control_sim_anneal",
     check_workflow = "must be a",
+    check_untuned_workflow = "no parameter marked for tuning",
     check_nested = "nested resampling design",
     check_iter = "at least 1",
     check_initial = "at least 1",
@@ -469,4 +473,25 @@ test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
     )),
     "nestedtune_sentinel"
   )
+})
+
+test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+  skip_if_no_engines()
+  skip_if_not_installed("finetune")
+  d <- make_reg_data()
+  wf <- fixed_workflow(d)
+  folds <- det_nested(d)
+
+  set.seed(1)
+  before <- .Random.seed
+  cnd <- rlang::catch_cnd(nested_tune_sim_anneal(wf, folds, iter = 1))
+  expect_s3_class(cnd, "nestedtune_untuned_workflow")
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_tune_sim_anneal"
+  )
+  expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
+  # The seeds are drawn only once every check has passed, so an untouched
+  # stream is the evidence that no fold ran.
+  expect_identical(.Random.seed, before)
 })

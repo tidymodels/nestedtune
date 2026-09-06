@@ -106,6 +106,7 @@ extract_tune_results.default <- function(x, ...) {
 #' @export
 extract_tune_results.nested_final_fit <- function(x, ...) {
   rlang::check_dots_empty()
+  check_tuning_run(x, "extract_tune_results", call = rlang::current_env())
   x$tuning
 }
 
@@ -192,11 +193,35 @@ extract_scored_candidates.default <- function(x, ...) {
 #' @export
 extract_scored_candidates.nested_final_fit <- function(x, ...) {
   rlang::check_dots_empty()
+  check_tuning_run(x, "extract_scored_candidates", call = rlang::current_env())
   # The same derivation the fold readers apply to `.inner_metrics`,
   # deliberately: two functions deriving one thing is two chances to describe
   # it differently, and the `@return` above promises a reader they can compare
   # this against a fold's candidate set directly (D-043).
   scored_candidates(x$tuning)
+}
+
+# A fit that ran no tuning has no run and no candidates to hand over (M70):
+# the record names a tuner that selects nothing, and both accessors refuse
+# rather than returning NULL or an empty table a caller might read as a run
+# that scored nothing. Read off the procedure, not off `tuning` being NULL,
+# so a hand-built object with no procedure is answered as before.
+check_tuning_run <- function(x, fn, call = rlang::caller_env()) {
+  if (tuner_selects(x$procedure$tuner)) {
+    return(invisible(x))
+  }
+  cli::cli_abort(
+    c(
+      "{.fn {fn}} has no tuning run to reach: this fit ran none.",
+      x = "It was built from a {.fn nested_fit_resamples} result, which \\
+           fits the workflow as given; there is no run and no scored \\
+           candidate set.",
+      i = "{.fn extract_workflow} returns the fitted workflow, and \\
+           {.fn extract_procedure} the record."
+    ),
+    class = "nestedtune_no_tuning_run",
+    call = call
+  )
 }
 
 # One refusal serving every accessor here, so their wording cannot drift apart.

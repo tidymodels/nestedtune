@@ -24,17 +24,20 @@
 #'
 #' @return The stored record, unchanged: a flat named list with `tuner`, the
 #'   name of the tune or finetune function that ran (`"tune_grid"`,
-#'   `"tune_bayes"`, `"tune_race_anova"`, `"tune_race_win_loss"` or
-#'   `"tune_sim_anneal"`); that tuner's own arguments (`grid` for the grid and
+#'   `"tune_bayes"`, `"tune_race_anova"`, `"tune_race_win_loss"`,
+#'   `"tune_sim_anneal"`, or `"fit_resamples"` from [nested_fit_resamples()]);
+#'   that tuner's own arguments (`grid` for the grid and
 #'   racing tuners; `iter`, `initial` and `objective` for the Bayesian tuner;
-#'   `iter` and `initial` for simulated annealing); the arguments every
-#'   orchestrator shares, `param_info`, `event_level`, `eval_time` and
-#'   `select`, the [selection_rule()] each fold selected by, as they were
-#'   given; and `control`, the control object the run was given, or
-#'   tune's default when none was, with the slots this package forces already
-#'   applied, and on a Bayesian result with `seed` left out. See "Differences
-#'   from calling tune directly" on each orchestrator's help page for what
-#'   those slots are.
+#'   `iter` and `initial` for simulated annealing; none for the plain fit);
+#'   the arguments every orchestrator shares, `param_info`, `event_level`,
+#'   `eval_time` and `select`, the [selection_rule()] each fold selected by,
+#'   as they were given; and `control`, the control object the run was given,
+#'   or tune's default when none was, with the slots this package forces
+#'   already applied, and on a Bayesian result with `seed` left out. A
+#'   `"fit_resamples"` record carries no `param_info` and no `select`: no
+#'   parameter set was read and no rule applied. See "Differences from
+#'   calling tune directly" on each orchestrator's help page for what those
+#'   slots are.
 #'
 #'   On a `nested_results` the record travels as an attribute of the object;
 #'   on a `nested_final_fit` it is the record the fit re-ran, which is the

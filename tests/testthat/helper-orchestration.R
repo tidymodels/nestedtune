@@ -87,6 +87,22 @@ fixed_stoch_workflow <- function(data) {
   workflows::workflow(y ~ x1 + x2 + x3 + x4, spec)
 }
 
+# The suite's `nested_fit_resamples()` run (M70), served from the cache: the
+# fixed deterministic workflow on `det_nested()`, under entry seed 30, the
+# seed the value oracles in test-nested-fit-resamples-oracles.R use directly.
+# Seeded before the workflow is built as well as before the run, as
+# `bayes_control_final_results()` is: the recipe step id is drawn from the
+# stream, and a workflow built under whatever state the requesting test left
+# would key a fresh build on every request.
+fit_resamples_results <- function(data, seed = 30) {
+  set.seed(seed)
+  wf <- fixed_workflow(data)
+  folds <- det_nested(data)
+  ms <- reg_metrics()
+  set.seed(seed)
+  memoised(nested_fit_resamples(wf, folds, metrics = ms))
+}
+
 reg_metrics <- function() {
   yardstick::metric_set(yardstick::rmse, yardstick::rsq)
 }

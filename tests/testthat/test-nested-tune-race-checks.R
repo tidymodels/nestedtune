@@ -317,6 +317,9 @@ test_that("each shared check fires through both racing exports", {
       check_workflow = function() {
         race_call(fn, parsnip::linear_reg(), folds, control = ctrl)
       },
+      check_untuned_workflow = function() {
+        race_call(fn, fixed_workflow(d), folds, control = ctrl)
+      },
       check_nested = function() {
         race_call(fn, wf, rsample::vfold_cv(d, v = 2), control = ctrl)
       },
@@ -358,6 +361,7 @@ test_that("each shared check fires through both racing exports", {
       check_dots_control = "accepts `control`",
       check_control = "control_race",
       check_workflow = "must be a",
+      check_untuned_workflow = "no parameter marked for tuning",
       check_nested = "nested resampling design",
       check_grid = "grid",
       check_grid_params = "not marked for tuning",
@@ -505,5 +509,27 @@ test_that("`select` is held at entry by both racers, before any fold runs (M69, 
       )),
       "nestedtune_sentinel"
     )
+  }
+})
+
+test_that("AC5: a workflow with no tune() marker is refused by both racers, naming nested_fit_resamples(), before any fold runs (M70)", {
+  skip_if_no_race_fixture()
+  d <- make_reg_data()
+  wf <- fixed_workflow(d)
+  folds <- race_folds(d)
+
+  for (fn in RACERS) {
+    set.seed(1)
+    before <- .Random.seed
+    cnd <- rlang::catch_cnd(race_call_by_name(
+      fn,
+      wf,
+      folds,
+      grid = det_grid()
+    ))
+    expect_s3_class(cnd, "nestedtune_untuned_workflow")
+    expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
+    expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
+    expect_identical(.Random.seed, before)
   }
 })
