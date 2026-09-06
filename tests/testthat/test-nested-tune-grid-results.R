@@ -308,3 +308,301 @@ test_that("a run given no metric set carries no metrics attribute", {
   expect_false("metrics" %in% names(attributes(res)))
   expect_null(attr(res, "metrics"))
 })
+
+# ---- .predictions and .extracts (M68) ----------------------------------------
+#
+# Oracle provenance. A fold's `.predictions` element is compared against the
+# `.predictions[[1]]` of `tune::last_fit()` called by hand on that fold's
+# outer split, with the workflow finalized on the fold's `.selected` row, the
+# run's metrics, `eval_time` and `event_level`, under
+# `control_last_fit(event_level, allow_par = FALSE)`, the fold's recorded
+# `.outer_fit_seed` set (Mersenne-Twister, Inversion, Rejection) after
+# finalizing and before the call -- the documented seed contract, never the
+# driver's own fit. A fold's `.extracts` element is compared against the
+# caller's function applied to that same call's `.workflow[[1]]`. Neither
+# figure is the package's own.
+
+saved_control <- function() tune::control_grid(save_pred = TRUE)
+
+saved_results <- function(d = make_reg_data(), nested = det_nested(d)) {
+  set.seed(2)
+  memoised(nested_tune_grid(
+    det_workflow(d),
+    nested,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = saved_control()
+  ))
+}
+
+# The reference last_fit() for fold `i` of a grid run on the deterministic
+# workflow, written from the documented contract.
+reference_last_fit <- function(res, i, d, event_level = "first") {
+  final_wf <- tune::finalize_workflow(det_workflow(d), res$.selected[[i]])
+  set.seed(
+    res$.outer_fit_seed[[i]],
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  tune::last_fit(
+    final_wf,
+    split = res$splits[[i]],
+    metrics = reg_metrics(),
+    eval_time = NULL,
+    control = tune::control_last_fit(
+      event_level = event_level,
+      allow_par = FALSE
+    )
+  )
+}
+
+test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  res <- saved_results(d)
+
+  expect_true(".predictions" %in% names(res))
+  expect_type(res$.predictions, "list")
+  expect_true(all(res$.completed))
+  for (i in seq_len(nrow(res))) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.predictions[[i]], ref$.predictions[[1L]])
+    # One fact held independently of the derivation: the table is the fold's
+    # assessment rows, one prediction each.
+    expect_identical(
+      nrow(res$.predictions[[i]]),
+      nrow(rsample::assessment(res$splits[[i]]))
+    )
+    expect_true(all(
+      c(".pred", ".row", "y", ".config") %in%
+        names(res$.predictions[[i]])
+    ))
+  }
+})
+
+test_that("the default control and save_pred = FALSE leave no .predictions column (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  by_default <- example_results()
+  expect_false(".predictions" %in% names(by_default))
+
+  # Not memoised: the run equals the default one in value, and the fixture
+  # cache would report it as the same fit paid for twice.
+  set.seed(2)
+  off <- nested_tune_grid(
+    det_workflow(d),
+    det_nested(d),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(save_pred = FALSE)
+  )
+  expect_false(".predictions" %in% names(off))
+  # The passing control: the same run with the slot on carries the column.
+  expect_true(".predictions" %in% names(saved_results(d)))
+})
+
+test_that("a failed fold's .predictions element is NULL (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  nested <- break_fold(det_nested(d), 2, "outer fit")
+  res <- suppressWarnings(saved_results(d, nested))
+
+  expect_identical(res$.completed, c(TRUE, FALSE, TRUE))
+  expect_null(res$.predictions[[2L]])
+  for (i in c(1L, 3L)) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.predictions[[i]], ref$.predictions[[1L]])
+  }
+})
+
+extracted_results <- function(
+  d = make_reg_data(),
+  nested = det_nested(d),
+  extract = coef_extract
+) {
+  set.seed(2)
+  memoised(nested_tune_grid(
+    det_workflow(d),
+    nested,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(save_pred = TRUE, extract = extract)
+  ))
+}
+
+test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s (AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  res <- extracted_results(d)
+
+  expect_true(".extracts" %in% names(res))
+  expect_type(res$.extracts, "list")
+  expect_true(all(res$.completed))
+  for (i in seq_len(nrow(res))) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.extracts[[i]], coef_extract(ref$.workflow[[1L]]))
+    # One fact held independently of the derivation: a linear model on
+    # `num_comp` components has that many slopes and an intercept.
+    expect_identical(
+      length(res$.extracts[[i]]),
+      res$.selected[[i]]$num_comp + 1L
+    )
+    expect_identical(names(res$.extracts[[i]])[[1L]], "(Intercept)")
+  }
+  # Both slots on one control: the run carries both columns, `.predictions`
+  # before `.extracts` as tune orders them on a `tune_results`.
+  expect_true(".predictions" %in% names(res))
+  expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
+})
+
+test_that("an extract that errors leaves the fold completed, its element NULL, and one note (AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  set.seed(2)
+  # No warning: the fold completed, and a reporting failure is not a fold
+  # failure (IP4).
+  expect_no_warning(
+    res <- memoised(nested_tune_grid(
+      det_workflow(d),
+      det_nested(d),
+      grid = det_grid(),
+      metrics = reg_metrics(),
+      control = tune::control_grid(
+        save_pred = TRUE,
+        extract = function(x) stop("no extract for this fold")
+      )
+    ))
+  )
+
+  expect_true(all(res$.completed))
+  expect_true(".extracts" %in% names(res))
+  for (i in seq_len(nrow(res))) {
+    expect_null(res$.extracts[[i]])
+    # tune applies the same function inside the inner run and files each of
+    # those errors as a note of its own, which the fold keeps (GP1); this
+    # package's row is the one at its own stage.
+    notes <- res$.notes[[i]]
+    ours <- notes[notes$location == "outer extract", ]
+    expect_identical(nrow(ours), 1L)
+    expect_identical(ours$type, "error")
+    expect_identical(ours$note, "no extract for this fold")
+    expect_true(all(grepl("^inner tuning", notes$location[-nrow(notes)])))
+    # The rest of the record is untouched: the predictions the same control
+    # asked for are kept, and the metrics are the reference's.
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.predictions[[i]], ref$.predictions[[1L]])
+    expect_identical(
+      res$.metrics[[i]]$.estimate,
+      tune::collect_metrics(ref)$.estimate
+    )
+  }
+})
+
+test_that("extract = NULL leaves no .extracts column (AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  # The default control carries `extract = NULL`.
+  expect_null(tune::control_grid()$extract)
+  expect_false(".extracts" %in% names(example_results()))
+
+  # Not memoised, for the reason the `save_pred = FALSE` run gives.
+  set.seed(2)
+  off <- nested_tune_grid(
+    det_workflow(d),
+    det_nested(d),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(extract = NULL)
+  )
+  expect_false(".extracts" %in% names(off))
+  # The passing control: the same run with a function carries the column.
+  expect_true(".extracts" %in% names(extracted_results(d)))
+})
+
+test_that("a failed fold's .extracts element is NULL, with no extract note (AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  nested <- break_fold(det_nested(d), 2, "outer fit")
+  res <- suppressWarnings(extracted_results(d, nested))
+
+  expect_identical(res$.completed, c(TRUE, FALSE, TRUE))
+  expect_null(res$.extracts[[2L]])
+  expect_false("outer extract" %in% res$.notes[[2L]]$location)
+  for (i in c(1L, 3L)) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.extracts[[i]], coef_extract(ref$.workflow[[1L]]))
+  }
+})
+
+
+# ---- the two columns are record columns (M68, AC5) ---------------------------
+#
+# The five doors D-031 and D-032 fixed, on an object carrying both columns:
+# a replaced or dropped record column sheds the class, a move keeps it. And
+# one control, a run carrying neither column, which keeps its class through
+# the same verbs -- so what sheds is the record, not the verb.
+
+expect_bare <- function(out) {
+  expect_false(inherits(out, "nested_results"))
+  expect_s3_class(out, "tbl_df")
+  invisible(out)
+}
+
+test_that(".predictions and .extracts are record columns through the five doors (AC5)", {
+  skip_if_no_engines()
+  skip_if_not_installed("tibble")
+
+  d <- make_reg_data()
+  res <- extracted_results(d)
+  expect_true(all(c(".extracts", ".predictions") %in% names(res)))
+
+  for (col in c(".predictions", ".extracts")) {
+    # mutate() replacing the column.
+    expect_bare(dplyr::mutate(
+      res,
+      !!col := lapply(.completed, function(x) NULL)
+    ))
+    # select() dropping it.
+    expect_bare(dplyr::select(res, -dplyr::all_of(col)))
+    # `[` dropping it.
+    expect_bare(res[setdiff(names(res), col)])
+    # vec_restore() on a frame with the column altered.
+    altered <- tibble::as_tibble(res)
+    altered[[col]][2L] <- list(NULL)
+    expect_bare(vctrs::vec_restore(altered, res))
+    # relocate() moving it keeps the class.
+    expect_s3_class(dplyr::relocate(res, dplyr::all_of(col)), "nested_results")
+  }
+  expect_s3_class(
+    dplyr::relocate(res, .predictions, .extracts),
+    "nested_results"
+  )
+})
+
+test_that("a run carrying neither column keeps its class through the same verbs (AC5)", {
+  skip_if_no_engines()
+  skip_if_not_installed("tibble")
+
+  res <- example_results()
+  expect_false(any(c(".predictions", ".extracts") %in% names(res)))
+
+  expect_s3_class(
+    dplyr::mutate(res, .predictions = lapply(.completed, function(x) NULL)),
+    "nested_results"
+  )
+  expect_s3_class(dplyr::select(res, dplyr::everything()), "nested_results")
+  expect_s3_class(res[names(res)], "nested_results")
+  expect_s3_class(
+    vctrs::vec_restore(tibble::as_tibble(res), res),
+    "nested_results"
+  )
+  expect_s3_class(dplyr::relocate(res, .notes), "nested_results")
+})

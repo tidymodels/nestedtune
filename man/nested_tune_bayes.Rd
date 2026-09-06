@@ -215,7 +215,7 @@ the final fit that re-runs the result -- \code{control = control_bayes(no_improv
 control passed, or tune's default when none is, with the slots this package
 forces overwritten; the result records that effective control, \code{seed} left
 out, as \code{extract_procedure(res)$control}, which is what the recipe above
-passes. Every slot of \code{control_bayes()} falls under one of six headings.
+passes. Every slot of \code{control_bayes()} falls under one of seven headings.
 
 \strong{Forced: \code{allow_par}, \code{seed}.} \code{allow_par = FALSE} on both tune calls a
 fold makes, because parallelism belongs over the outer folds; and \code{seed},
@@ -252,11 +252,15 @@ parallel path. \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{parallel_over} included: it changes the numbers a
 stochastic engine produces even at \code{allow_par = FALSE}.
 
-\strong{Not returned: \code{extract}, \code{save_pred}, \code{save_workflow}.} As on
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}: each lands on the inner \code{tune_results} a fold record
-discards, so on a nested run setting them costs the work and returns
-nothing; the final fit keeps its tuning run as \verb{$tuning}, where what they
-saved is reachable.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}: the outer fit's predictions and extracts are kept
+as \code{.predictions} and \code{.extracts}, and the inner run's are still
+discarded.
+
+\strong{Not returned: \code{save_workflow}.} As on \code{\link[=nested_tune_grid]{nested_tune_grid()}}: it lands on
+the inner \code{tune_results} a fold record discards, so on a nested run
+setting it costs the work and returns nothing; the final fit keeps its
+tuning run as \verb{$tuning}, where what it saved is reachable.
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.

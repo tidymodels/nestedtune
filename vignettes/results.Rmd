@@ -60,7 +60,9 @@ library(nestedtune)
 
 The design, the workflow and the grid are the guide's, unchanged: five outer
 folds of `mtcars`, five inner folds under each, and a random forest with two
-parameters marked for tuning.
+parameters marked for tuning. One thing is added: a control passed through
+`...` asks each fold's outer fit to keep its predictions, so this page can
+show that column and the reader that stacks it.
 
 ```{r design}
 set.seed(1)
@@ -83,7 +85,12 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 ```{r run}
 set.seed(2)
 
-res <- nested_tune_grid(wf, folds, grid = grid)
+res <- nested_tune_grid(
+  wf,
+  folds,
+  grid = grid,
+  control = control_grid(save_pred = TRUE)
+)
 
 res
 ```
@@ -161,6 +168,18 @@ one fold by hand.
 select(res, .tuning_seed, .outer_fit_seed)
 ```
 
+`.predictions` is there because the control asked for it: each completed
+fold's predictions on its assessment rows, as `tune::last_fit()` returns
+them, with `.row` naming the row of the data. A run under the default
+control has no such column, and a run whose control sets `extract` to a
+function has an `.extracts` column beside it, holding what that function
+returned for each fold's fitted workflow. A fold that failed holds `NULL`
+in either.
+
+```{r predictions}
+res$.predictions[[1]]
+```
+
 The description of the run itself rides on the object as attributes rather
 than columns; `extract_procedure()` returns the one that records what ran,
 and `vignette("tuners")` reads it.
@@ -195,6 +214,16 @@ as one table each. `collect_notes()`, further down, does the same for
 collect_selections(res)
 
 collect_inner_metrics(res)
+```
+
+`collect_predictions()` stacks `.predictions` the same way, one row per
+held-out row of every completed fold with the fold label beside it, which is
+where a plot of predicted against observed, or a per-observation loss, would
+start. It refuses a run that did not save them, naming the slot to set;
+`collect_extracts()` does the same for `.extracts`, one row per fold.
+
+```{r collect-predictions}
+collect_predictions(res)
 ```
 
 `agreement()` counts the selections: one row per distinct combination the

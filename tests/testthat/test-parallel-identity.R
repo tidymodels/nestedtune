@@ -789,3 +789,61 @@ test_that("BC13: the annealing path matches serial at two above-threshold daemon
     expect_identical(parallel, serial)
   }
 })
+
+
+# BC14 (M68, AC4): the two columns the outer fit keeps under `save_pred` and
+# `extract` are identical between a serial run and a parallel one. The
+# extract reads ranger's out-of-bag prediction error, a number the fold's
+# seed decides, so the `.extracts` identity has a value to fail on. AC2's
+# coefficient extract is not usable here: `coef()` of a ranger fit is NULL,
+# and tune's inner run errors on a NULL extract ("attempt to set an attribute
+# on NULL", tune 2.1.0, measured 2026-09-06), so every fold would fail before
+# the outer fit.
+
+test_that("BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)", {
+  skip_if_no_daemons()
+  skip_if_not_installed("ranger")
+
+  data <- make_reg_data()
+  nested <- det_nested(data)
+  wf <- stoch_workflow(data)
+  on.exit(mirai::daemons(0), add = TRUE)
+
+  # Over `baseenv()`, for coef_extract()'s reason.
+  oob_extract <- rlang::new_function(
+    rlang::pairlist2(x = ),
+    quote(workflows::extract_fit_engine(x)$prediction.error),
+    env = baseenv()
+  )
+  ctrl <- tune::control_grid(save_pred = TRUE, extract = oob_extract)
+
+  mirai::daemons(0)
+  set.seed(2026L)
+  serial <- nested_tune_grid(
+    wf,
+    nested,
+    grid = stoch_grid(),
+    metrics = reg_metrics(),
+    control = ctrl
+  )
+  expect_identical(last_dispatch(), "serial")
+  expect_true(all(serial$.completed))
+  expect_true(all(vapply(serial$.extracts, is.numeric, logical(1))))
+  expect_true(all(vapply(serial$.predictions, is.data.frame, logical(1))))
+
+  start_daemons(2)
+  set.seed(2026L)
+  parallel <- without_pkgload_warning(nested_tune_grid(
+    wf,
+    nested,
+    grid = stoch_grid(),
+    metrics = reg_metrics(),
+    control = ctrl
+  ))
+
+  expect_identical(last_dispatch(), "parallel")
+  expect_true(all(parallel$.completed))
+  expect_identical(parallel$.predictions, serial$.predictions)
+  expect_identical(parallel$.extracts, serial$.extracts)
+  expect_identical(parallel, serial)
+})

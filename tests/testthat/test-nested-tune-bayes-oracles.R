@@ -311,6 +311,18 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
     "S3method(collect_metrics,nested_results)" = function() {
       collect_metrics(res)
     },
+    # The two readers over what the outer fit keeps refuse this run by
+    # contract (its control asked for neither column), so running them is
+    # running their refusal, as the casts into the class below.
+    "S3method(collect_extracts,nested_results)" = function() {
+      expect_error(collect_extracts(res), class = "nestedtune_column_not_saved")
+    },
+    "S3method(collect_predictions,nested_results)" = function() {
+      expect_error(
+        collect_predictions(res),
+        class = "nestedtune_column_not_saved"
+      )
+    },
     "S3method(collect_inner_metrics,nested_results)" = function() {
       collect_inner_metrics(res)
     },

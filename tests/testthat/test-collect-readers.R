@@ -12,7 +12,11 @@
 # fixture reaches: folds whose selections or inner tables carry different
 # columns, and a repeated design's two label columns. Built through the
 # constructor, so the record is the code's and not the fixture's (M38).
-stub_results <- function(design, folds) {
+stub_results <- function(
+  design,
+  folds,
+  control = effective_control("tune_grid", NULL, "first")
+) {
   n <- nrow(design)
   stopifnot(length(folds) == n)
   new_nested_results(
@@ -26,7 +30,7 @@ stub_results <- function(design, folds) {
       param_info = NULL,
       event_level = "first",
       eval_time = NULL,
-      control = effective_control("tune_grid", NULL, "first")
+      control = control
     )
   )
 }
@@ -435,4 +439,240 @@ test_that("a stacked column named like a fold label is refused, not renamed", {
 
 test_that("collect_notes() is tune's generic, re-exported", {
   expect_identical(collect_notes, tune::collect_notes)
+})
+
+# ---- collect_predictions() and collect_extracts() (M68, AC3) ------------------
+#
+# Oracle provenance, as above: the stacked predictions are compared against
+# hand_stacked() over `.predictions`, and the extracts table against a table
+# built by hand from the object's columns, never against the reader.
+
+# A control that asked for both columns, so the constructor writes them.
+kept_control <- function() {
+  effective_control(
+    "tune_grid",
+    tune::control_grid(save_pred = TRUE, extract = coef_extract),
+    "first"
+  )
+}
+
+# A fold's stand-in prediction table: `rows` assessment rows in tune's shape.
+stub_predictions <- function(rows, config = "Preprocessor1_Model1") {
+  new_tbl(list(
+    y = as.numeric(rows),
+    .pred = as.numeric(rows) / 2,
+    .row = as.integer(rows),
+    .config = rep(config, length(rows))
+  ))
+}
+
+# A results object on the repeated design whose folds carry both columns,
+# fold 3 of 6 failed and fold 5 completed with an extract that errored.
+kept_results <- function() {
+  design <- repeated_design()
+  folds <- lapply(seq_len(nrow(design)), function(i) {
+    if (i == 3L) {
+      return(c(
+        stub_fold(completed = FALSE, selected = NULL),
+        list(predictions = NULL, extracts = NULL)
+      ))
+    }
+    c(
+      stub_fold(),
+      list(
+        predictions = stub_predictions(seq(i, i + 2L)),
+        extracts = if (i == 5L) NULL else c("(Intercept)" = i, x = -i)
+      )
+    )
+  })
+  stub_results(design, folds, control = kept_control())
+}
+
+# The extracts table by hand: one row per completed fold with the labels.
+hand_extracts <- function(x, rows = which(x$.completed)) {
+  id_cols <- attr(x, "id_columns")
+  rows <- lapply(rows, function(i) {
+    tbl <- tibble::tibble(.extracts = list(x$.extracts[[i]]))
+    for (nm in rev(id_cols)) {
+      tbl <- dplyr::mutate(tbl, !!nm := x[[nm]][[i]], .before = 1L)
+    }
+    tbl
+  })
+  dplyr::bind_rows(!!!rows)
+}
+
+test_that("collect_predictions() stacks each completed fold's predictions under id and id2", {
+  skip_if_not_installed("tibble")
+  res <- kept_results()
+
+  expect_warning(
+    preds <- collect_predictions(res),
+    class = "nestedtune_partial_summary"
+  )
+  expect_identical(names(preds)[1:2], c("id", "id2"))
+  expect_identical(
+    names(preds),
+    c("id", "id2", "y", ".pred", ".row", ".config")
+  )
+  expect_identical(nrow(preds), 15L)
+  expect_equal(
+    preds,
+    suppressWarnings(hand_stacked(res, ".predictions", which(res$.completed)))
+  )
+  # The failed fold contributes no row.
+  expect_false(any(preds$id == res$id[[3L]] & preds$id2 == res$id2[[3L]]))
+})
+
+test_that("collect_extracts() is one row per completed fold, the value in a list column, NULL kept", {
+  skip_if_not_installed("tibble")
+  res <- kept_results()
+
+  expect_warning(
+    ext <- collect_extracts(res),
+    class = "nestedtune_partial_summary"
+  )
+  expect_identical(names(ext), c("id", "id2", ".extracts"))
+  expect_identical(nrow(ext), 5L)
+  expect_type(ext$.extracts, "list")
+  expect_equal(ext, hand_extracts(res))
+  # The fold whose extract errored is a row holding NULL, not a missing row.
+  expect_null(ext$.extracts[[4L]])
+  expect_identical(ext$.extracts[[1L]], c("(Intercept)" = 1L, x = -1L))
+})
+
+test_that("both readers warn once on a partial run and read the completed folds only", {
+  skip_if_not_installed("tibble")
+  res <- kept_results()
+
+  for (reader in list(collect_predictions, collect_extracts)) {
+    expect_identical(
+      times_warned(reader(res), "nestedtune_partial_summary"),
+      1L
+    )
+    cnd <- rlang::catch_cnd(reader(res), "nestedtune_partial_summary")
+    expect_match(conditionMessage(cnd), fold_ids(res)[[3L]], fixed = TRUE)
+  }
+})
+
+test_that("a run in which no fold completed is refused ahead of the column refusals", {
+  skip_if_not_installed("tibble")
+  design <- repeated_design()
+  folds <- lapply(seq_len(nrow(design)), function(i) {
+    stub_fold(completed = FALSE, selected = NULL)
+  })
+  # Under the default control, so neither column exists either: the
+  # no-completed-fold refusal has to win over the column refusal.
+  none <- stub_results(design, folds)
+  expect_false(any(c(".predictions", ".extracts") %in% names(none)))
+
+  for (reader in list(collect_predictions, collect_extracts)) {
+    ours <- rlang::catch_cnd(reader(none), "error")
+    expect_s3_class(ours, "nestedtune_no_completed_folds")
+    theirs <- rlang::catch_cnd(collect_metrics(none), "error")
+    expect_identical(class(ours), class(theirs))
+  }
+})
+
+test_that("a prediction table carrying a fold label column is refused, not renamed", {
+  skip_if_not_installed("tibble")
+  res <- kept_results()
+  res$.predictions[[1L]]$id <- "stray"
+
+  cnd <- rlang::catch_cnd(
+    suppressWarnings(collect_predictions(res)),
+    "nestedtune_collect_name_collision"
+  )
+  expect_s3_class(cnd, "nestedtune_collect_name_collision")
+  expect_match(conditionMessage(cnd), ".predictions", fixed = TRUE)
+})
+
+test_that("an object lacking the column is refused by name, the message naming the slot to set", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- clean_run(d)
+  expect_false(any(c(".predictions", ".extracts") %in% names(res)))
+
+  cnd <- rlang::catch_cnd(collect_predictions(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "save_pred", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "control_grid", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1L]], as.name("collect_predictions"))
+
+  cnd <- rlang::catch_cnd(collect_extracts(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "extract", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1L]], as.name("collect_extracts"))
+
+  # One column and not the other is refused for the one that is absent.
+  skip_if_not_installed("tibble")
+  half <- kept_results()
+  half$.extracts <- NULL
+  expect_s3_class(
+    rlang::catch_cnd(suppressWarnings(collect_extracts(half)), "error"),
+    "nestedtune_column_not_saved"
+  )
+  expect_no_error(suppressWarnings(collect_predictions(half)))
+})
+
+test_that("a column added by hand to a run that never saved one is refused, the recorded control deciding", {
+  skip_if_not_installed("tibble")
+  design <- repeated_design()
+  folds <- lapply(seq_len(nrow(design)), function(i) stub_fold())
+  # The default control asked for neither column; a caller then adds both.
+  res <- stub_results(design, folds)
+  res$.predictions <- lapply(seq_len(nrow(res)), function(i) {
+    stub_predictions(seq(i, i + 2L))
+  })
+  res$.extracts <- as.list(seq_len(nrow(res)))
+  expect_s3_class(res, "nested_results")
+  expect_true(all(c(".predictions", ".extracts") %in% names(res)))
+
+  cnd <- rlang::catch_cnd(collect_predictions(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "save_pred", fixed = TRUE)
+  cnd <- rlang::catch_cnd(collect_extracts(res), "error")
+  expect_s3_class(cnd, "nestedtune_column_not_saved")
+  expect_match(conditionMessage(cnd), "extract", fixed = TRUE)
+
+  # Without a recorded procedure (an object built before it was recorded),
+  # the column's presence is all there is to read, and it is read.
+  attr(res, "procedure") <- NULL
+  expect_no_error(collect_predictions(res))
+  expect_no_error(collect_extracts(res))
+})
+
+test_that("both readers refuse a non-empty `...`", {
+  skip_if_not_installed("tibble")
+  res <- kept_results()
+  expect_error(
+    collect_predictions(res, foo = 1),
+    class = "rlib_error_dots_nonempty"
+  )
+  expect_error(
+    collect_extracts(res, summarize = TRUE),
+    class = "rlib_error_dots_nonempty"
+  )
+})
+
+test_that("on a fitted run, collect_predictions() is the hand stack of what the folds kept", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  set.seed(2)
+  res <- memoised(nested_tune_grid(
+    det_workflow(d),
+    det_nested(d),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(save_pred = TRUE, extract = coef_extract)
+  ))
+
+  preds <- collect_predictions(res)
+  expect_equal(preds, hand_stacked(res, ".predictions"))
+  # Every row of the data is held out exactly once on a plain v-fold design.
+  expect_identical(sort(preds$.row), seq_len(nrow(d)))
+
+  ext <- collect_extracts(res)
+  expect_identical(nrow(ext), 3L)
+  expect_identical(ext$.extracts, res$.extracts)
+  expect_identical(ext$id, res$id)
 })

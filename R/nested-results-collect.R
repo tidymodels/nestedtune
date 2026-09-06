@@ -22,7 +22,9 @@
 #' came from.
 #'
 #' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
-#'   included -- a failed fold's notes are the reason to ask.
+#'   included -- a failed fold's notes are the reason to ask, and a completed
+#'   fold's can carry an error note too, from an `extract` that failed on it
+#'   (see [`collect_extracts()`][collect_predictions.nested_results]).
 #' * `collect_selections()` stacks `.selected` over the folds that completed:
 #'   one row per completed fold.
 #' * `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
@@ -174,6 +176,200 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
            {.fn nested_tune_grid} or one of its siblings."
     ),
     class = "nestedtune_no_collect_method",
+    call = call
+  )
+}
+
+# The two readers over what the outer fit kept (M68). Both are methods on
+# tune's generics, re-exported beside collect_notes(): the names exist and
+# their shapes are the shapes wanted. A run that did not ask for a column is
+# refused by name, so a caller learns which control slot to set rather than
+# reading an absent column as an empty one.
+
+#' Stack the outer fit's predictions or extracts across the outer folds
+#'
+#' @description
+#' A run whose control asked for them keeps, per outer fold, the predictions
+#' its finalized model made on the fold's assessment rows (`.predictions`,
+#' under `save_pred = TRUE`) and the value the control's `extract` function
+#' returned for the fold's fitted workflow (`.extracts`). These two readers,
+#' methods on tune's generics, stack one such column into a single table with
+#' the columns the design labelled its folds with placed first.
+#'
+#' * `collect_predictions()` stacks `.predictions` over the folds that
+#'   completed: one row per assessment row of every completed fold, the
+#'   columns as `tune::last_fit()` produced them (the outcome, `.pred` or the
+#'   class columns, `.row` and `.config`).
+#' * `collect_extracts()` gives one row per completed fold, the fold's value
+#'   in an `.extracts` list column. A completed fold whose extract function
+#'   errored holds `NULL` there, and its `.notes` say why.
+#'
+#' @param x A `nested_results` object from [nested_tune_grid()] or one of its
+#'   siblings, run with a control that asked for the column.
+#' @param ... Not used; must be empty. An argument passed here is an error
+#'   rather than silently ignored. tune's `summarize` and `parameters`
+#'   arguments are not offered.
+#'
+#' @return A tibble. The first columns are the design's fold labels, read from
+#'   the object's record: `id` on a plain v-fold design, `id` and `id2` on a
+#'   repeated one. Then, for `collect_predictions()`, the columns of the
+#'   stacked prediction tables over the union of the columns any fold
+#'   carries, `NA` where a fold lacks one; for `collect_extracts()`, the
+#'   `.extracts` list column. A prediction table carrying a column named like
+#'   a fold label column is refused with condition class
+#'   `nestedtune_collect_name_collision`.
+#'
+#' @details
+#' Both read the folds that completed, the rule [collect_selections()] and
+#' [collect_metrics()] follow: a partial run is stacked over the completed
+#' folds with one warning of class `nestedtune_partial_summary`, and a run in
+#' which no fold completed is an error of class
+#' `nestedtune_no_completed_folds`. An object whose run's control did not ask
+#' for `.predictions` or `.extracts`, read from the recorded procedure, or
+#' that no longer carries the column, is refused with condition class
+#' `nestedtune_column_not_saved`, the message naming the slot to set.
+#'
+#' The predictions are the outer fit's on each fold's assessment rows, so on
+#' a v-fold outer design every row of the data appears once per repeat in
+#' `collect_predictions()`'s table; on a bootstrap or Monte Carlo outer
+#' design a row appears as often as it was held out. The inner tuning run's
+#' predictions and extracts, which the same two slots also save inside tune,
+#' are not kept.
+#'
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' data(mtcars)
+#'
+#' rec <- recipes::step_pca(
+#'   recipes::recipe(mpg ~ ., data = mtcars),
+#'   recipes::all_predictors(),
+#'   num_comp = tune::tune()
+#' )
+#' wf <- workflows::workflow(rec, parsnip::linear_reg())
+#'
+#' set.seed(1)
+#' folds <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 3),
+#'   inside = rsample::vfold_cv(v = 3)
+#' )
+#'
+#' set.seed(2)
+#' res <- nested_tune_grid(
+#'   wf,
+#'   folds,
+#'   grid = data.frame(num_comp = 1:3),
+#'   control = tune::control_grid(
+#'     save_pred = TRUE,
+#'     extract = function(x) coef(workflows::extract_fit_engine(x))
+#'   )
+#' )
+#'
+#' collect_predictions(res)
+#' collect_extracts(res)
+#'
+#' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()]
+#' @name collect_predictions.nested_results
+NULL
+
+#' @rdname collect_predictions.nested_results
+#' @export
+collect_predictions.nested_results <- function(x, ...) {
+  rlang::check_dots_empty()
+  check_any_completed(x, action = "collect")
+  check_column_saved(x, ".predictions", call = rlang::current_env())
+  warn_partial_summary(x, noun = "table")
+  stack_fold_column(
+    x,
+    ".predictions",
+    completed_only = TRUE,
+    call = rlang::current_env()
+  )
+}
+
+#' @rdname collect_predictions.nested_results
+#' @export
+collect_extracts.nested_results <- function(x, ...) {
+  rlang::check_dots_empty()
+  check_any_completed(x, action = "collect")
+  check_column_saved(x, ".extracts", call = rlang::current_env())
+  warn_partial_summary(x, noun = "table")
+  # A fold's extract is one value of whatever kind the function returned,
+  # so each becomes a one-row table holding it in a list column, tune's own
+  # shape; a NULL (the function errored on that fold) is a row too, so the
+  # table has one row per completed fold and a missing value is seen rather
+  # than dropped (IP4).
+  tables <- lapply(x$.extracts, function(v) new_tbl(list(.extracts = list(v))))
+  stack_fold_column(
+    x,
+    ".extracts",
+    completed_only = TRUE,
+    call = rlang::current_env(),
+    tables = tables
+  )
+}
+
+# The refusal for an object whose run did not keep the column asked for. The
+# record the readers trust is the recorded procedure's control: it says
+# whether the run asked, so a column a caller added by hand to a run that
+# never saved one is not read back as the outer fit's, even though
+# `record_columns()` admits it to the class invariant, which vouches for a
+# column's consistency across verbs and not for where it came from. The
+# object's names say whether the column is still there. Either failing
+# refuses, the first naming the control slot and the control function the
+# recorded procedure says the run took. A results object carries no `procedure` only
+# if it was built before M46, and then the column's presence is all there is
+# to read and the slot alone is named.
+check_column_saved <- function(x, column, call = rlang::caller_env()) {
+  control <- attr(x, "procedure")$control
+  present <- column %in% names(x)
+  asked <- if (is.null(control)) {
+    present
+  } else {
+    switch(
+      column,
+      .predictions = isTRUE(control$save_pred),
+      .extracts = is.function(control$extract)
+    )
+  }
+  if (asked && present) {
+    return(invisible(x))
+  }
+  slot <- switch(column, .predictions = "save_pred", .extracts = "extract")
+  if (asked) {
+    cli::cli_abort(
+      c(
+        "This object no longer carries {.code {column}}, though its run's \\
+         control set {.arg {slot}}.",
+        i = "Read the column from the object the run returned."
+      ),
+      class = "nestedtune_column_not_saved",
+      call = call
+    )
+  }
+  setting <- switch(
+    column,
+    .predictions = "save_pred = TRUE",
+    .extracts = "extract = <a function>"
+  )
+  tuner <- attr(x, "procedure")$tuner
+  control_fn <- if (is.null(tuner)) {
+    "the control passed through {.arg ...}"
+  } else {
+    paste0(
+      "{.fn ",
+      tuner_entry(tuner)$package,
+      "::",
+      control_class(tuner),
+      "} passed through {.arg ...}"
+    )
+  }
+  cli::cli_abort(
+    c(
+      "This run did not keep {.code {column}}: its control did not set \\
+       {.arg {slot}}.",
+      i = paste0("Run it again with {.code ", setting, "} in ", control_fn, ".")
+    ),
+    class = "nestedtune_column_not_saved",
     call = call
   )
 }

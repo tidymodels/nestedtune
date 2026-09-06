@@ -435,7 +435,7 @@
 #' tune's default when none is, with the slots this package forces
 #' overwritten; the result records that effective control as
 #' `extract_procedure(res)$control`, which is what the recipe above passes.
-#' Every slot of `control_grid()` falls under one of six headings.
+#' Every slot of `control_grid()` falls under one of seven headings.
 #'
 #' **Forced: `allow_par`.** Both tune calls a fold makes -- the inner tuning
 #' run and the outer scoring fit -- run at `allow_par = FALSE`, whatever the
@@ -472,13 +472,27 @@
 #' remarks on a workflow `save_workflow` keeps, so it speaks only beside that
 #' slot, and only where the run it lands on is kept.
 #'
-#' **Not returned: `extract`, `save_pred`, `save_workflow`.** Each lands on
-#' the inner `tune_results`. A fold record discards that run once the fold
-#' succeeds -- the fold keeps its metrics, its selection and the candidates it
-#' scored -- so on a nested run setting them costs the work and returns
-#' nothing. The final fit is the exception: [nested_final_fit()] re-runs the
-#' recorded control and keeps its tuning run as `$tuning`, where
-#' [extract_tune_results()] reaches what these saved.
+#' **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
+#' outer scoring fit as well as the inner run. With `save_pred = TRUE` the
+#' result carries a `.predictions` list column, each completed fold's
+#' predictions on its assessment rows as [tune::last_fit()] returns them;
+#' with `extract` a function, an `.extracts` list column, the function's
+#' value on each completed fold's fitted workflow, applied after the fit. A
+#' failed fold holds `NULL` in each, and a fold whose extract errored stays
+#' completed with `NULL` there and a note at location `"outer extract"`.
+#' [`collect_predictions()`][collect_predictions.nested_results] and
+#' [`collect_extracts()`][collect_predictions.nested_results] stack the two
+#' columns with the fold labels. What is kept is the outer fit's; the inner run's
+#' predictions and extracts, which the same slots save inside tune, are
+#' still discarded with that run, and neither column exists on a run that
+#' did not ask.
+#'
+#' **Not returned: `save_workflow`.** It lands on the inner `tune_results`,
+#' which a fold record discards once the fold succeeds, so on a nested run
+#' setting it costs the work and returns nothing; `extract = function(x) x`
+#' keeps a fold's fitted workflow instead. The final fit is the exception:
+#' [nested_final_fit()] re-runs the recorded control and keeps its tuning
+#' run as `$tuning`, where [extract_tune_results()] reaches what it saved.
 #'
 #' **Inert: `backend_options`.** Options for a parallel backend, with no
 #' backend to reach at `allow_par = FALSE`.
@@ -763,6 +777,38 @@ nested_fold_fit <- function(
     ))
   }
 
+  # The outer fit's assessment-set predictions, kept when the control asks
+  # (M68). `last_fit()` always computes them, so `save_pred` decides only
+  # whether the fold record carries them home: on a daemon the table travels
+  # back with the fold, and a caller who did not ask pays neither the wire
+  # nor the object for it (GP4). The inner run's predictions, which the same
+  # slot saves on `tuned`, are discarded with that run as before. Read
+  # through `[[` on the column so a result lacking it gives NULL rather than
+  # an error: `control_last_fit()` forces `save_pred`, so the column is
+  # there today, and this fold's estimate does not depend on it staying so.
+  predictions <- if (isTRUE(control$save_pred)) {
+    fitted[[".predictions"]][[1L]]
+  }
+
+  # The control's `extract`, applied to the outer fit's workflow after the
+  # fit rather than passed to `control_last_fit()`: tune moves its own
+  # identity extract into `.workflow` there, and a caller's function in that
+  # slot would replace the workflow (M68). An extract that errors is a
+  # reporting failure and not a fold failure (IP4): the fold keeps its
+  # metrics, its element is NULL, and the error is a note under its own
+  # stage, so a NULL is never read as a value without the notes saying why.
+  extracts <- NULL
+  extract_notes <- empty_notes()
+  if (is.function(control$extract)) {
+    extracts <- tryCatch(
+      control$extract(fitted[[".workflow"]][[1L]]),
+      error = function(cnd) {
+        extract_notes <<- own_note("outer extract", conditionMessage(cnd))
+        NULL
+      }
+    )
+  }
+
   # A fold can complete and still have had trouble: tune_grid() returns a usable
   # result when only some inner splits fail, and select_best() then chooses from
   # the survivors. Discarding those notes would report a selection made on a
@@ -773,9 +819,14 @@ nested_fold_fit <- function(
     metrics = fold_metrics,
     selected = selected,
     inner_metrics = inner_metrics(tuned, prototype),
+    predictions = predictions,
+    extracts = extracts,
     notes = bind_notes(
-      tune_notes(tuned, "inner tuning"),
-      tune_notes(fitted, "outer fit")
+      bind_notes(
+        tune_notes(tuned, "inner tuning"),
+        tune_notes(fitted, "outer fit")
+      ),
+      extract_notes
     )
   )
 }
@@ -1045,11 +1096,16 @@ failed_fold <- function(
       conditionMessage(cnd)
     }
   }
+  # A fold that did not finish has no outer fit to have kept predictions or
+  # an extract from; each element is NULL whether or not the control asked
+  # (M68).
   list(
     completed = FALSE,
     metrics = empty_metrics(),
     selected = NULL,
     inner_metrics = inner_metrics(tuned, prototype),
+    predictions = NULL,
+    extracts = NULL,
     notes = bind_notes(own_note(stage, message), tune_notes(result, stage))
   )
 }

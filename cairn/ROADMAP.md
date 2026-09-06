@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-06 (M67 done via PR #77, merged on green at 20392e5
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | planned | — | normal | milestones/M68-outer-predictions.md |
+| M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | review | — | normal | milestones/M68-outer-predictions.md |
 | M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | done | — | normal | milestones/archive/M67-extract-procedure.md |
 | M65 | Three readers stack a per-fold list column with the fold labels beside it: `collect_notes()`, `collect_selections()` and `collect_inner_metrics()` | done | — | normal | milestones/archive/M65-collect-readers.md |
 | M66 | The six vignette pages read the results through the package's readers under `library(tidymodels)`, and take a prose pass | done | M65 | normal | milestones/archive/M66-vignette-sweep.md |

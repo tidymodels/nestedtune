@@ -286,3 +286,45 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
     )
   }
 })
+
+# ---- the outer fit's predictions and extracts (M68) --------------------------
+
+test_that("a racing run keeps the outer fit's predictions and extracts when the control asks (AC1, AC2)", {
+  skip_if_no_race_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- det_nested(d)
+  g <- det_grid()
+  ms <- reg_metrics()
+  ctrl <- finetune::control_race(
+    burn_in = 2,
+    save_pred = TRUE,
+    extract = coef_extract
+  )
+  for (fn in RACERS) {
+    set.seed(20)
+    res <- switch(
+      fn,
+      tune_race_anova = memoised(nested_tune_race_anova(
+        wf,
+        folds,
+        grid = g,
+        metrics = ms,
+        control = ctrl
+      )),
+      tune_race_win_loss = memoised(nested_tune_race_win_loss(
+        wf,
+        folds,
+        grid = g,
+        metrics = ms,
+        control = ctrl
+      ))
+    )
+    expect_outer_columns_kept(res)
+    # The passing control: the suite's run under `race_control()` carries
+    # neither column.
+    plain <- race_results(fn)
+    expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
+  }
+})

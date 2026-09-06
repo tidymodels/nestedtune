@@ -17,3 +17,11 @@ tune::augment
 #' @importFrom tune collect_notes
 #' @export
 tune::collect_notes
+
+#' @importFrom tune collect_predictions
+#' @export
+tune::collect_predictions
+
+#' @importFrom tune collect_extracts
+#' @export
+tune::collect_extracts

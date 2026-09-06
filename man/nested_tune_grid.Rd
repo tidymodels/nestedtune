@@ -467,7 +467,7 @@ the final fit that re-runs the result. What runs is the control passed, or
 tune's default when none is, with the slots this package forces
 overwritten; the result records that effective control as
 \code{extract_procedure(res)$control}, which is what the recipe above passes.
-Every slot of \code{control_grid()} falls under one of six headings.
+Every slot of \code{control_grid()} falls under one of seven headings.
 
 \strong{Forced: \code{allow_par}.} Both tune calls a fold makes -- the inner tuning
 run and the outer scoring fit -- run at \code{allow_par = FALSE}, whatever the
@@ -504,13 +504,27 @@ than one inner resample. \code{workflow_size} is the size past which tune
 remarks on a workflow \code{save_workflow} keeps, so it speaks only beside that
 slot, and only where the run it lands on is kept.
 
-\strong{Not returned: \code{extract}, \code{save_pred}, \code{save_workflow}.} Each lands on
-the inner \code{tune_results}. A fold record discards that run once the fold
-succeeds -- the fold keeps its metrics, its selection and the candidates it
-scored -- so on a nested run setting them costs the work and returns
-nothing. The final fit is the exception: \code{\link[=nested_final_fit]{nested_final_fit()}} re-runs the
-recorded control and keeps its tuning run as \verb{$tuning}, where
-\code{\link[=extract_tune_results]{extract_tune_results()}} reaches what these saved.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
+outer scoring fit as well as the inner run. With \code{save_pred = TRUE} the
+result carries a \code{.predictions} list column, each completed fold's
+predictions on its assessment rows as \code{\link[tune:last_fit]{tune::last_fit()}} returns them;
+with \code{extract} a function, an \code{.extracts} list column, the function's
+value on each completed fold's fitted workflow, applied after the fit. A
+failed fold holds \code{NULL} in each, and a fold whose extract errored stays
+completed with \code{NULL} there and a note at location \code{"outer extract"}.
+\code{\link[=collect_predictions.nested_results]{collect_predictions()}} and
+\code{\link[=collect_predictions.nested_results]{collect_extracts()}} stack the two
+columns with the fold labels. What is kept is the outer fit's; the inner run's
+predictions and extracts, which the same slots save inside tune, are
+still discarded with that run, and neither column exists on a run that
+did not ask.
+
+\strong{Not returned: \code{save_workflow}.} It lands on the inner \code{tune_results},
+which a fold record discards once the fold succeeds, so on a nested run
+setting it costs the work and returns nothing; \code{extract = function(x) x}
+keeps a fold's fitted workflow instead. The final fit is the exception:
+\code{\link[=nested_final_fit]{nested_final_fit()}} re-runs the recorded control and keeps its tuning
+run as \verb{$tuning}, where \code{\link[=extract_tune_results]{extract_tune_results()}} reaches what it saved.
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.
