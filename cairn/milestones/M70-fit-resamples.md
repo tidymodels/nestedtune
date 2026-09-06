@@ -1,13 +1,13 @@
 # M70: `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2, IP4, GP1, GP2, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — a new exported orchestrator and a new entry refusal on the five existing ones
-- **Branch/PR:** —
+- **Branch/PR:** `m070-fit-resamples`
 
 ## Goal
 
@@ -60,6 +60,7 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 - 2026-09-06: plan gate chose the final fit accepting a baseline result over refusing it because one story (run, then final fit) holds for every result; falsified by a reader mistaking the plain fit for a tuned one.
 - 2026-09-06: plan chose a zero-row, zero-column `.selected` over a one-row empty tuple because D-039 rejected the empty-tuple row for claiming a candidate where none was chosen; falsified by a reader needing one row per completed fold from `collect_selections()`.
 - 2026-09-06: plan chose recording the drawn tuning seed over `NA` because the seed layout then matches a tuned run's and the reproduction recipes stay one shape; falsified by a reader misreading the seed as consumed.
+- 2026-09-06: /milestone-implement started; branch `m070-fit-resamples` cut from the pushed default branch at `9601cc5`.
 
 ## Decisions
 

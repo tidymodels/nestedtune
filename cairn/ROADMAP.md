@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-06 (M69 done and archived after PR #79; M63's row p
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | planned | — | normal | milestones/M70-fit-resamples.md |
+| M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | in-progress | — | normal | milestones/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
 | M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
 | M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | done | — | normal | milestones/archive/M67-extract-procedure.md |
