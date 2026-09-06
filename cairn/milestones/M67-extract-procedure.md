@@ -26,7 +26,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - [x] AC3: A case-insensitive grep of the pattern `attr\([A-Za-z_.]+, *"procedure"\)|\$procedure|`procedure` attribute|procedure slot` over `R/*.R` and `vignettes/**/*.Rmd` finds no hit on a roxygen line (a line beginning with `#'`) and no hit under `vignettes/`; the hits it leaves are in package code, tests aside.
 - [x] AC4: A grep for the byte sequence U+2014 and for the escape `\u2014` (any case, with or without braces, with optional leading zeros) over `R/*.R`, `_pkgdown.yml`, `NEWS.md`, `README.Rmd`, `README.md` and `man/*.Rd` finds no hit on a roxygen line, in a string literal, or in any of the five non-`R/` targets; the hits it leaves in `R/*.R` are code-comment lines. `README.md` is re-knit from `README.Rmd` with `devtools::build_readme()`. The `print_candidate_sets()` bullet in `R/nested-results-print.R` is among the sites changed, and its snapshot in `tests/testthat/_snaps/nested-results-print.md` is re-recorded.
 - [ ] AC5: Each of the six `.Rmd` pages under `vignettes/` (recursive) rendered with `rmarkdown::render()` produces HTML in which a grep for U+2014, `&mdash;`, `&#8212;` and `&#x2014;` finds nothing.
-- [ ] AC6: `devtools::document()` leaves no diff; `pkgdown::check_pkgdown()` passes; `devtools::test()` is clean; `devtools::check()` reports 0 errors and 0 warnings.
+- [x] AC6: `devtools::document()` leaves no diff; `pkgdown::check_pkgdown()` passes; `devtools::test()` is clean; `devtools::check()` reports 0 errors and 0 warnings.
 - [x] AC7: A help page `man/extract_procedure.Rd` with an executed example, a `_pkgdown.yml` reference row, a NEWS entry with no milestone number, and a `cairn/DESIGN.md` Function Families line naming the generic exist.
 
 ## Coverage
@@ -65,6 +65,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: T5 done: the branch package installed (the tuners page attaches the installed nestedtune, and the first render found no `extract_procedure()` there), the six pages rendered and their HTML free of U+2014 and the three entities (AC5); `devtools::test()` 0 failures, `devtools::check()` 0 errors, 0 warnings, 0 notes, `document()` leaving no diff, `check_pkgdown()` clean (AC6). Status to review.
 - 2026-09-05: review checkpoint: PR #77 opened as draft; AC1, AC2, AC3, AC4 and AC7 verified with evidence recorded; AC5 and AC6 runs and the three reviewers still in flight.
 - 2026-09-05: review fix-now, from the [O] lens: the extract family's `nested_results` origin phrase aligned with `agreement()`'s (`nested_tune_grid()` or one of its siblings) and the snapshot re-recorded; `abort_no_extract_method()` refuses an unknown class instead of printing NA; the `@return` names the Bayesian record's dropped `seed`; the NEWS fragment at the malformed-design entry repunctuated; `results.Rmd` and the DESIGN final-fit line name the accessor; a comment's plurality fixed. Full chain re-run on this tree for AC5 and AC6.
+- 2026-09-05: review checkpoint: AC6 verified on 31f751d, gate and the three lenses recorded, six fix-now findings landed; AC5's render run in flight.
 
 ## Decisions
 
@@ -77,4 +78,28 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - AC3: the case-insensitive grep over `R/*.R` and `vignettes/**/*.Rmd` finds 9 hits, none on a `#'` line and none under `vignettes/`: the two method bodies, `checks.R`, `nested-final-fit.R`, `nested-final-fit-print.R` (2), `nested-results.R` (2) and one code comment in `tuner.R`. PASS.
 - AC7: `man/extract_procedure.Rd` exists with an `\examples` block under `@examplesIf` (executed by `check()`, AC6); `_pkgdown.yml:52` carries the row; `NEWS.md:3` carries the entry and a grep for `M67`/`M067` over NEWS, README, `man/` and `_pkgdown.yml` finds nothing; `cairn/DESIGN.md:77` names the generic in Function Families. PASS.
 - AC4: the byte grep for U+2014 and the escape grep (`\\u\{?0*2014\}?`, case-insensitive) over `R/*.R`, `_pkgdown.yml`, `NEWS.md`, `README.Rmd`, `README.md` and `man/*.Rd` each find zero hits, so no roxygen line, string literal or comment carries one. `devtools::build_readme()` re-run at review leaves `README.md` unchanged. `print_candidate_sets()` (`R/nested-results-print.R:364`) reads `Candidates searched: {shown}. The folds did not search the same grid`, the regex at `test-nested-results-print.R:759` follows it, and `_snaps/nested-results-print.md:52` holds the re-recorded line. PASS.
+- AC6: on the fix-now tree (31f751d), `devtools::document()` left `git status` empty; `pkgdown::check_pkgdown()` reported no problems; `devtools::test()` 7192 passed, 0 failed, 0 warnings, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes (6m 54s). PASS.
+
+### Consistency gate (2026-09-05, 31f751d)
+
+- `cairn_validate.py`: all checks passed, exit 0; the 18 `references staleness` lines are the standing advisory, not gate failures.
+- `cairn_impact.py`: skipped, no IP/GP principle changed.
+- r-package slot: `document()` no diff; `NAMESPACE` and `man/` regenerated, not hand-edited; `build_readme()` leaves `README.md` unchanged; `check_pkgdown()` passes; `NEWS.md` carries the `extract_procedure()` entry with no milestone number; no new top-level file; `check()` 0/0/0 (AC6).
+
+### Independent review (three lenses, fresh context, 2026-09-05)
+
+- [S] blame-history: no findings; every reworded site checked against the milestone that wrote it, the two pre-existing `abort_no_extract_method()` callers' snapshot unchanged.
+- [S] prior-review record: no prior-review evidence of regression; the GitHub probe found two real inline comments, both on workflow files this diff does not touch.
+- [O] diff-bug, ranked, with disposition:
+  - F1 `abort_no_agreement_method()` promises to say what `abort_no_extract_method()` says, and the extract family's `nested_results` origin phrase had drifted from it. Fix now: the extract helper takes agreement's phrase; snapshot re-recorded.
+  - F2 `origins[classes]` on an unknown class would print `from NA`. Fix now: `stopifnot(all(classes %in% names(origins)))`.
+  - F3 `vignettes/results.Rmd:164` pointed at the `procedure` attribute without naming the accessor. Fix now: the sentence names `extract_procedure()`.
+  - F4 `NEWS.md:594` left a subject-less fragment after the em dash became a semicolon. Fix now: a comma.
+  - F5 the `@return` did not say a Bayesian record's `control` drops `seed`. Fix now: one clause added; `man/` regenerated.
+  - F6 DESIGN's Final-fit bullet named `extract_workflow()` as its only accessor. Fix now: names `extract_procedure()` too.
+  - F7 ragged roxygen rewraps and one 140-char generated Rd line. Rejected: cosmetic, renders identically.
+  - F8 a comment's "the other default gives" under-counted. Fix now, plural.
+  - F9 an 81-character comment line. Rejected: `air` passes, precedent exists.
+  - F10 AC1's identity pinned for the grid tuner only. Rejected: AC1 as written names a grid result; the Bayesian shape is exercised by the oracles' coverage table.
+  - F11 AC5/AC6 unticked while the work log said green. Resolved by this review's own evidence lines.
 
