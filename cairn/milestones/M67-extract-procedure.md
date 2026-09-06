@@ -68,6 +68,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: review checkpoint: AC6 verified on 31f751d, gate and the three lenses recorded, six fix-now findings landed; AC5's render run in flight.
 - 2026-09-05: review pre-gate checkpoint: all seven criteria verified with evidence; PR #77 conversation empty; approval chip posed.
 - 2026-09-05: step-7 approval: PR #77 approved for merge.
+- 2026-09-05: CI wait hit the harness ceiling at step 8 with the six R CMD check legs and test-coverage pending on aa85d66 (format-suggest and pkgdown green); watcher stopped, marker written, session stops here; resume re-derives the check state.
 
 ## Decisions
 
