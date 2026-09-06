@@ -1,6 +1,6 @@
 # M69: A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - [x] T3: `nested_final_fit()` reads `procedure$select` (`R/nested-final-fit.R:279`) and `apply_selection_rule()` replaces the call at `R/nested-final-fit.R:342`; a record without `select` is refused where `check_results_record()` refuses a missing record. Tests for AC2 in `test-nested-final-fit-results.R`, the `extract_procedure()` identity in `test-extract-procedure.R`.
 - [x] T4: BC15 in `test-parallel-identity.R` after BC14 (`:803`), on the same two-daemon shape, with the percent-loss rule and `limit = 5`; the `helper-time-budget.R` ledger row if the block is budgeted.
 - [x] T5: The five help pages: `@param select`, a "Selected by" paragraph under "Differences from calling tune directly" (`R/nested-tune-grid.R:430`), the `.selected` sentence at `R/nested-tune-grid.R:131` and the `select_best()` sentence at `:500`, and the sibling pages' `res$.selected[[i]]` sentences (`R/nested-tune-race.R:96`, `R/nested-tune-sim-anneal.R:114`); `vignettes/tuners.Rmd:360`; NEWS entry; DESIGN Function Families orchestration line names the argument and constructor. Run AC6's sweep and fix what it finds.
-- [ ] T6: `devtools::document()`, `devtools::test()`, `devtools::check()`; `air format --check` on the touched files.
+- [x] T6: `devtools::document()`, `devtools::test()`, `devtools::check()`; `air format --check` on the touched files.
 
 ## Work log
 
@@ -65,6 +65,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - 2026-09-06: checkpoint with T1 to T5 ticked while the combined-tree `devtools::test()` run was still in progress; its result and T6 follow in the next commit.
 - 2026-09-06: the combined-tree suite returned 8 failures in three files, all the new formal's: `test-dots-barrier.R`'s two formals lists and its method fence (`format()`/`print()` on `selection_rule` now refuse a stray dot), `test-fixture-cache.R`'s variant registry (a `select` axis value), `test-nested-tune-grid-leakage.R`'s `nested_fold_fit()` stub signature; fixed, the three files green, the full suite re-running for T6.
 - 2026-09-06: T6 in progress: `devtools::document()` no diff, `air format --check` clean, `pkgdown::check_pkgdown()` clean, `devtools::test()` 7816 passed, 0 failed, 0 warnings, 0 skipped; `devtools::check()` running.
+- 2026-09-06: T6 done: `devtools::check()` 0 errors, 0 warnings, 1 NOTE (`Rplots.pdf` at top level, the gitignored plot-device file a suite run wrote at 10:28 before the check bundled the directory; deleted); status review.
 
 ## Decisions
 
