@@ -70,6 +70,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - 2026-09-06: review, fix-now from the blame-history lens ahead of the gate: the overlong roxygen line in `R/nested-final-fit.R` re-flowed, DESIGN's orchestration sentence re-worded, `test-fixture-cache.R`'s base request pins `select = selection_rule()` as it pins `eval_time`; `document()` and that test file re-run once the full suite finishes.
 - 2026-09-06: review, findings triage ahead of the gate: 12 diff-bug, 3 blame-history, 0 prior-review findings; fix-now landed for the two constructor holes (literal orderings, named dots), the empty-selection fold note, the record enumerations on two help pages, the missing-rule bullet, the intro vignette sentence, the fixture-cache base pin, three wraps; D-056 written; the rest rejected with reasons in the Review section.
 - 2026-09-06: step-7 approval: PR #79 approved for merge at the gate, all seven criteria evidenced, 11 findings fixed on the branch, 3 rejected, 1 refuted; no issue writes (Resolves: —).
+- 2026-09-06: CI wait hit the session ceiling after approval: 7 check and coverage legs pending on the approval push, pkgdown and format-suggest passed; watcher stopped, no merge; resume at `/milestone-review M69`, which re-derives the state. This line is committed locally and not pushed, so the pull-request run on the approval commit is not restarted.
 
 ## Decisions
 
