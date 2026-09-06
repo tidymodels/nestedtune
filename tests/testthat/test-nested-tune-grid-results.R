@@ -375,8 +375,10 @@ test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical t
       nrow(res$.predictions[[i]]),
       nrow(rsample::assessment(res$splits[[i]]))
     )
-    expect_true(all(c(".pred", ".row", "y", ".config") %in%
-      names(res$.predictions[[i]])))
+    expect_true(all(
+      c(".pred", ".row", "y", ".config") %in%
+        names(res$.predictions[[i]])
+    ))
   }
 })
 
@@ -564,7 +566,10 @@ test_that(".predictions and .extracts are record columns through the five doors 
 
   for (col in c(".predictions", ".extracts")) {
     # mutate() replacing the column.
-    expect_bare(dplyr::mutate(res, !!col := lapply(.completed, function(x) NULL)))
+    expect_bare(dplyr::mutate(
+      res,
+      !!col := lapply(.completed, function(x) NULL)
+    ))
     # select() dropping it.
     expect_bare(dplyr::select(res, -dplyr::all_of(col)))
     # `[` dropping it.
@@ -576,7 +581,10 @@ test_that(".predictions and .extracts are record columns through the five doors 
     # relocate() moving it keeps the class.
     expect_s3_class(dplyr::relocate(res, dplyr::all_of(col)), "nested_results")
   }
-  expect_s3_class(dplyr::relocate(res, .predictions, .extracts), "nested_results")
+  expect_s3_class(
+    dplyr::relocate(res, .predictions, .extracts),
+    "nested_results"
+  )
 })
 
 test_that("a run carrying neither column keeps its class through the same verbs (AC5)", {

@@ -1,6 +1,6 @@
 # M68: `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - [x] T5: The identity case in `test-parallel-identity.R` (two daemons, `expect_identical(last_dispatch(), "parallel")`), on the file's ranger workflow, with its bounded wait in `helper-time-budget.R`'s ledger.
 - [x] T6: Tests first in `test-nested-tune-grid-results.R` for the five invariant doors of AC5 on an object carrying both columns, and one control where a run without them keeps its class through the same verbs. Then the D-entry: `save_pred` and `extract` govern the outer fit as well as the inner run, the two columns join the record when present, superseding the "Not returned" clause D-042's help classification carries and annotating D-043's column set and D-030's falsifier.
 - [x] T7: Roxygen on the four orchestrator pages (`R/nested-tune-grid.R:475`, `R/nested-tune-bayes.R:159`, `R/nested-tune-race.R:154`, `R/nested-tune-sim-anneal.R:173`); the `collect_predictions` topic with an executed example; `_pkgdown.yml` row after `collect_selections`; NEWS entry; DESIGN Function Families line and the collect readers' comment at `R/nested-results-collect.R:26` (a completed fold can now carry an error note); `results.Rmd` paragraph, rendered after `devtools::install()` of the branch (M06 lesson) on a quiet machine (M66 lesson).
-- [ ] T8: `devtools::check()`, `devtools::test()`, `air format --check` on the touched files (M56 lesson); hold docs-only commits local while CI runs (M50 lesson).
+- [x] T8: `devtools::check()`, `devtools::test()`, `air format --check` on the touched files (M56 lesson); hold docs-only commits local while CI runs (M50 lesson).
 
 ## Work log
 
@@ -72,6 +72,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: T6 done: the five doors on an object carrying both columns and the no-column control; with the two names removed from `record_columns()` the file fails 8 ways; D-054 appended; suite clean.
 - 2026-09-06: T7 checkpoint: the four pages' seventh heading "Kept from the outer fit" and their "Not returned" narrowed, the readers' topic as `collect_predictions.nested_results` (the bare alias belongs to the re-export block, and a second owner drew a roxygen warning), pkgdown row, NEWS, DESIGN, the collect readers' comment and the `results.Rmd` paragraphs land; heading test, hygiene and `pkgdown::check_pkgdown()` green; the page render after `devtools::install()` is running and T7 is ticked once it renders.
 - 2026-09-06: T7 done: `results.Rmd` rendered after `devtools::install()` of the branch (`upgrade = FALSE`; `"never"` is not a value the argument takes), the page showing `.predictions` among the columns, the first fold's table and `collect_predictions(res)` over 32 rows.
+- 2026-09-06: T8 done: `devtools::check()` 0 errors, 0 warnings, 0 notes (6m 10s); `air format --check` clean over the touched files after one reformat of `test-nested-tune-grid-results.R`; `devtools::document()` no diff; `devtools::test()` clean on the final tree. Status set to review.
 
 ## Decisions
 
