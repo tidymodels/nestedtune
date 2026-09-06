@@ -1,13 +1,13 @@
 # M67: `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — an exported generic, a print method's text and the published help, changelog and README pages
-- **Branch/PR:** —
+- **Branch/PR:** m067-extract-procedure
 
 ## Goal
 
