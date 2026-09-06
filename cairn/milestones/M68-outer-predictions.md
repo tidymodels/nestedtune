@@ -1,6 +1,6 @@
 # M68: `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -80,6 +80,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: re-audit: AC3 (full) — one finding: "(`id` and `id2` on a repeated design)" said to over-generalize to bootstrap and Monte Carlo designs; not taken, since only `vfold_cv()` takes `repeats` and a repeated design does carry `id2` (checked against rsample), so the wording stands as amended.
 - 2026-09-06: review-return fixes: O1 the constructor and `record_columns()` write `.predictions` then `.extracts`, tune's order, with the comment, the grid test's and the presence helper's order assertions and DESIGN's column sentence flipped, and D-055 superseding D-054's order clause; O2 the outer fit's `.predictions` read through `[[` so an absent column gives NULL; O3 `check_column_saved()` reads the recorded control's slot as well as the column's presence, a hand-added column on a run that never saved one refused (new test, failing against the presence-only check), and an object without a recorded procedure read by presence; O6 D-055 states the D-030 annotation; O7 the readers' help ties once-per-repeat to a v-fold outer design; O8 the two `[collect_predictions()]` links point at the readers' topic; O9 `stack_fold_column()`'s `tables` argument documented; O11 DESIGN line rewrapped. O5 rejected as tune's own serial-versus-daemon warning asymmetry, the objects identical. O10 rejected per the Review disposition. Touched test files clean, `air format --check` clean, `document()` rerun.
 - 2026-09-06: return-fix checkpoint: the fixes above committed with the touched test files clean; the full suite is running and status moves to review once it is clean.
+- 2026-09-06: return stint done: `NOT_CRAN=true devtools::test()` 7454 pass, 0 fail, 0 skip on the final tree; `document()` no diff; `air format --check` clean. Status set to review for the re-review; `devtools::check()` and the `results.Rmd` render left to it.
 
 ## Decisions
 
