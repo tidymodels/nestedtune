@@ -556,7 +556,7 @@ every fold, and in the final fit that re-runs the result. What runs is
 the control passed, or tune's default when none is, with the slots this
 package forces overwritten; the result records that effective control as
 `extract_procedure(res)$control`, which is what the recipe above passes.
-Every slot of `control_grid()` falls under one of six headings.
+Every slot of `control_grid()` falls under one of seven headings.
 
 **Forced: `allow_par`.** Both tune calls a fold makes – the inner tuning
 run and the outer scoring fit – run at `allow_par = FALSE`, whatever the
@@ -596,16 +596,33 @@ than one inner resample. `workflow_size` is the size past which tune
 remarks on a workflow `save_workflow` keeps, so it speaks only beside
 that slot, and only where the run it lands on is kept.
 
-**Not returned: `extract`, `save_pred`, `save_workflow`.** Each lands on
-the inner `tune_results`. A fold record discards that run once the fold
-succeeds – the fold keeps its metrics, its selection and the candidates
-it scored – so on a nested run setting them costs the work and returns
-nothing. The final fit is the exception:
+**Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
+outer scoring fit as well as the inner run. With `save_pred = TRUE` the
+result carries a `.predictions` list column, each completed fold's
+predictions on its assessment rows as
+[`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
+returns them; with `extract` a function, an `.extracts` list column, the
+function's value on each completed fold's fitted workflow, applied after
+the fit. A failed fold holds `NULL` in each, and a fold whose extract
+errored stays completed with `NULL` there and a note at location
+`"outer extract"`.
+[`collect_predictions()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+and
+[`collect_extracts()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+stack the two columns with the fold labels. What is kept is the outer
+fit's; the inner run's predictions and extracts, which the same slots
+save inside tune, are still discarded with that run, and neither column
+exists on a run that did not ask.
+
+**Not returned: `save_workflow`.** It lands on the inner `tune_results`,
+which a fold record discards once the fold succeeds, so on a nested run
+setting it costs the work and returns nothing; `extract = function(x) x`
+keeps a fold's fitted workflow instead. The final fit is the exception:
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 re-runs the recorded control and keeps its tuning run as `$tuning`,
 where
 [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
-reaches what these saved.
+reaches what it saved.
 
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.

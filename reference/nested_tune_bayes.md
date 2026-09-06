@@ -285,7 +285,7 @@ fold's search sooner. What runs is the control passed, or tune's default
 when none is, with the slots this package forces overwritten; the result
 records that effective control, `seed` left out, as
 `extract_procedure(res)$control`, which is what the recipe above passes.
-Every slot of `control_bayes()` falls under one of six headings.
+Every slot of `control_bayes()` falls under one of seven headings.
 
 **Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls
 a fold makes, because parallelism belongs over the outer folds; and
@@ -325,12 +325,16 @@ process that tuned, a daemon's own on the parallel path. `pkgs`,
 `parallel_over` included: it changes the numbers a stochastic engine
 produces even at `allow_par = FALSE`.
 
-**Not returned: `extract`, `save_pred`, `save_workflow`.** As on
+**Kept from the outer fit: `save_pred`, `extract`.** As on
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md):
-each lands on the inner `tune_results` a fold record discards, so on a
-nested run setting them costs the work and returns nothing; the final
-fit keeps its tuning run as `$tuning`, where what they saved is
-reachable.
+the outer fit's predictions and extracts are kept as `.predictions` and
+`.extracts`, and the inner run's are still discarded.
+
+**Not returned: `save_workflow`.** As on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md):
+it lands on the inner `tune_results` a fold record discards, so on a
+nested run setting it costs the work and returns nothing; the final fit
+keeps its tuning run as `$tuning`, where what it saved is reachable.
 
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.

@@ -94,7 +94,10 @@ with the two arguments the runs above do not use,
 </h2>
 <p>The design, the workflow and the grid are the guide’s, unchanged:
 five outer folds of <code>mtcars</code>, five inner folds under each,
-and a random forest with two parameters marked for tuning.</p>
+and a random forest with two parameters marked for tuning. One thing is
+added: a control passed through <code>...</code> asks each fold’s outer
+fit to keep its predictions, so this page can show that column and the
+reader that stacks it.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -114,13 +117,18 @@ and a random forest with two parameters marked for tuning.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span></span>
+<span>  <span class="va">wf</span>,</span>
+<span>  <span class="va">folds</span>,</span>
+<span>  grid <span class="op">=</span> <span class="va">grid</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results</span> <span style="color: #00BBBB;">────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Outer resamples: 5-fold cross-validation</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 10</span></span></span>
 <span><span class="co">#&gt;   splits         id    .metrics .selected .inner_metrics    .notes  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="color: #949494;">&lt;split [25/7]&gt;</span> Fold1 <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span>  <span style="color: #949494;">&lt;tibble [12 × 8]&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
@@ -128,8 +136,8 @@ and a random forest with two parameters marked for tuning.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold3 <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span>  <span style="color: #949494;">&lt;tibble [12 × 8]&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold4 <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span>  <span style="color: #949494;">&lt;tibble [12 × 8]&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold5 <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span>  <span style="color: #949494;">&lt;tibble [12 × 8]&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .completed &lt;lgl&gt;, .tuning_seed &lt;int&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .outer_fit_seed &lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .predictions &lt;list&gt;, .completed &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .tuning_seed &lt;int&gt;, .outer_fit_seed &lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
 </div>
@@ -141,9 +149,10 @@ above shows the columns that fit, its footer naming the rest. Each holds
 one piece of what that fold did.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "splits"          "id"              ".metrics"       </span></span>
-<span><span class="co">#&gt; [4] ".selected"       ".inner_metrics"  ".notes"         </span></span>
-<span><span class="co">#&gt; [7] ".completed"      ".tuning_seed"    ".outer_fit_seed"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "splits"          "id"              ".metrics"       </span></span>
+<span><span class="co">#&gt;  [4] ".selected"       ".inner_metrics"  ".notes"         </span></span>
+<span><span class="co">#&gt;  [7] ".predictions"    ".completed"      ".tuning_seed"   </span></span>
+<span><span class="co">#&gt; [10] ".outer_fit_seed"</span></span></code></pre></div>
 <p><code>splits</code> is the fold’s outer split, an ordinary rsample
 split whose analysis rows the tuning saw and whose assessment rows
 scored the fold’s model.</p>
@@ -229,6 +238,26 @@ by hand.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>   <span style="text-decoration: underline;">2</span>010<span style="text-decoration: underline;">156</span>236       226<span style="text-decoration: underline;">245</span>929</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>   <span style="text-decoration: underline;">1</span>118<span style="text-decoration: underline;">907</span>979      <span style="text-decoration: underline;">1</span>740<span style="text-decoration: underline;">692</span>099</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>   <span style="text-decoration: underline;">2</span>046<span style="text-decoration: underline;">114</span>256      <span style="text-decoration: underline;">1</span>910<span style="text-decoration: underline;">444</span>850</span></span></code></pre></div>
+<p><code>.predictions</code> is there because the control asked for it:
+each completed fold’s predictions on its assessment rows, as
+<code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code> returns them, with <code>.row</code>
+naming the row of the data. A run under the default control has no such
+column, and a run whose control sets <code>extract</code> to a function
+has an <code>.extracts</code> column beside it, holding what that
+function returned for each fold’s fitted workflow. A fold that failed
+holds <code>NULL</code> in either.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">.predictions</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 4</span></span></span>
+<span><span class="co">#&gt;     mpg .pred  .row .config        </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  21.4  18.7     4 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  14.3  14.7     7 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  16.4  16.1    12 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  21.5  22.9    21 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  26    25.2    27 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  15.8  16.1    29 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>  15    15.0    31 pre0_mod0_post0</span></span></code></pre></div>
 <p>The description of the run itself rides on the object as attributes
 rather than columns; <code><a href="../reference/extract_procedure.html">extract_procedure()</a></code> returns the one
 that records what ran, and <code><a href="../articles/tuners.html">vignette("tuners")</a></code> reads it.</p>
@@ -239,7 +268,7 @@ that records what ran, and <code><a href="../articles/tuners.html">vignette("tun
 <p>Printing describes the object in hand. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> says
 what the run means: how much of the design ran, what each fold chose,
 and the estimate.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results</span> <span style="color: #00BBBB;">────────────────────────────────────</span></span></span>
@@ -264,7 +293,7 @@ and standard error of the outer scores. With
 <code>summarize = FALSE</code> it is the outer scores themselves, one
 row per fold and metric, which is each fold’s <code>.metrics</code>
 rows, less <code>.config</code>, with the fold label beside them.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
 <span><span class="co">#&gt;   .metric .estimator  mean     n std_err</span></span>
@@ -292,7 +321,7 @@ rows, less <code>.config</code>, with the fold label beside them.</p>
 label beside each row, so what every fold chose and everything every
 fold scored are read as one table each. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>,
 further down, does the same for <code>.notes</code> over every fold.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   id     mtry min_n .config        </span></span>
@@ -318,6 +347,29 @@ further down, does the same for <code>.notes</code> over every fold.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Fold1     8     2 rmse    standard   2.85      5  0.419  pre0_mod5_…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold1     8     2 rsq     standard   0.834     5  0.094<span style="text-decoration: underline;">2</span> pre0_mod5_…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
+<p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> stacks <code>.predictions</code>
+the same way, one row per held-out row of every completed fold with the
+fold label beside it, which is where a plot of predicted against
+observed, or a per-observation loss, would start. It refuses a run that
+did not save them, naming the slot to set;
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> does the same for
+<code>.extracts</code>, one row per fold.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 32 × 5</span></span></span>
+<span><span class="co">#&gt;    id      mpg .pred  .row .config        </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Fold1  21.4  18.7     4 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Fold1  14.3  14.7     7 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Fold1  16.4  16.1    12 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Fold1  21.5  22.9    21 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Fold1  26    25.2    27 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Fold1  15.8  16.1    29 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Fold1  15    15.0    31 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Fold2  22.8  25.2     3 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Fold2  18.7  17.0     5 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold2  15.2  16.6    14 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 22 more rows</span></span></span></code></pre></div>
 <p><code><a href="../reference/agreement.html">agreement()</a></code> counts the selections: one row per distinct
 combination the folds chose, with how many completed folds chose it,
 <code>n</code>, and that count as a share of the completed folds,
@@ -325,7 +377,7 @@ combination the folds chose, with how many completed folds chose it,
 procedure’s choice was on this data. It is not the final model’s
 parameters, which come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> running the
 procedure once more on the whole dataset.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;    mtry min_n     n  prop</span></span>
@@ -335,13 +387,13 @@ procedure once more on the whole dataset.</p>
 <p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> draws the same two facts. The default view is
 the selections, one panel per tuned parameter and one point per outer
 fold.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
 <p><img src="results_files/figure-html/autoplot-parameters-1.png" class="r-plt" alt="One panel per tuned parameter, mtry and min_n, with one point per outer fold at the value that fold's inner tuning selected." width="672"></p>
 <p>The other view is the outer scores, one panel per metric and one
 point per fold, with a dashed line at the mean that
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"performance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="results_files/figure-html/autoplot-performance-1.png" class="r-plt" alt="One panel per metric, rmse and rsq, with one point per outer fold's score on its assessment rows and a dashed line at the mean across folds." width="672"></p>
 </div>
@@ -357,12 +409,12 @@ range the model was trained on, beyond a small slack. One car, the
 Maserati Bora, has far more horsepower than any other in
 <code>mtcars</code>, 335 against 264 for the next. The fold that holds
 it out cannot score it, and that fold fails.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">check_range</span><span class="op">(</span><span class="va">hp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">wf_checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">rf</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">failed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf_checked</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span></span>
@@ -373,7 +425,7 @@ it out cannot score it, and that fold fails.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> See `x$.notes` for what went wrong.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">!</span><span class="va">failed</span><span class="op">$</span><span class="va">.completed</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1L</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results</span> <span style="color: #00BBBB;">────────────────────────────────────</span></span></span>
@@ -399,7 +451,7 @@ the fold that failed, and its <code>.notes</code> say where.
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code> stacks every fold’s <code>.notes</code>
 into one table with the fold label beside them, so the failed fold’s
 notes are the rows carrying its label.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed_id</span> <span class="op">&lt;-</span> <span class="va">failed</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">.completed</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
@@ -433,7 +485,7 @@ candidate, from the inner resamples that ran, and the fold finished. Its
 notes say so. Counting the stacked notes by fold shows how many each
 carries (a fold with none would be absent from the count), and the first
 fold in the table other than the failed one reads like this:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">count</span><span class="op">(</span><span class="va">notes</span>, <span class="va">id</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
 <span><span class="co">#&gt;   id        n</span></span>
@@ -469,7 +521,7 @@ the whole inner design it was given.</p>
 warns first. The first chunk below catches the warning with
 <code><a href="https://rlang.r-lib.org/reference/catch_cnd.html" class="external-link">rlang::catch_cnd()</a></code> to show its class and its message. The
 second prints the summary, with the warning muted.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">partial_warning</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/catch_cnd.html" class="external-link">catch_cnd</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">failed</span><span class="op">)</span>,</span>
 <span>  classes <span class="op">=</span> <span class="st">"nestedtune_partial_summary"</span></span>
@@ -483,7 +535,7 @@ second prints the summary, with the warning muted.</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> This summary covers 4 of 5 outer folds.</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Failed: <span style="color: #0000BB;">"Fold1"</span>.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> It describes the folds that ran, not the design that was requested.</span></span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">failed</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results</span> <span style="color: #00BBBB;">────────────────────────────────────</span></span></span>
@@ -532,14 +584,14 @@ that adds or removes a row, or drops or overwrites one of the columns
 above, returns a bare tibble, because an object that no longer holds
 what the run produced cannot answer for the run. Adding a column keeps
 the class.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">with_position</span> <span class="op">&lt;-</span> <span class="fu">mutate</span><span class="op">(</span><span class="va">res</span>, position <span class="op">=</span> <span class="fu">row_number</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">with_position</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "nested_results" "tbl_df"         "tbl"            "data.frame"</span></span></code></pre></div>
 <p>Dropping a fold sheds it. The natural case is keeping only the folds
 that completed on the run above, which removes one row.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">completed_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">failed</span>, <span class="va">.completed</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">completed_only</span><span class="op">)</span></span>
@@ -547,7 +599,7 @@ that completed on the run above, which removes one row.</p>
 <p>So does a column subset that leaves the run’s record behind, through
 base <code>[</code> rather than a dplyr verb, since the same rule
 governs it.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
 <p>Both of those hand back the data and nothing more: a plain tibble
@@ -572,7 +624,7 @@ outer scoring fit at once. A regression or censored-regression run
 ignores it, as tune does. <code>eval_time</code> is for censored
 regression, and it changes the shape of the result, so the rest of this
 section runs one.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">51</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">180</span></span>
@@ -597,7 +649,7 @@ section runs one.</p>
 that is zero where the observation was censored before its event. The
 model is a parametric survival regression whose one tunable is the
 distribution of the event times, and the grid names three.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/censored" class="external-link">censored</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">surv_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/survival_reg.html" class="external-link">survival_reg</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -613,7 +665,7 @@ point. So the metric has one value per time, and <code>eval_time</code>
 is where the times are given. They reach the inner tuning, which selects
 on the first of them and warns once per fold to say so (the chunk mutes
 those warnings), and the outer scoring fit, which scores at each.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">61</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">surv_folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span>
@@ -643,7 +695,7 @@ row per metric and time: the Brier score at 0.5 and at 10, each the mean
 over the outer folds of that fold’s score at that time. The per-fold
 table carries the same column, and so does each fold’s
 <code>.metrics</code>.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">surv_res</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">#&gt;   id    .metric        .estimator .eval_time .estimate</span></span>
@@ -662,7 +714,7 @@ table carries the same column, and so does each fold’s
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> lognormal pre0_mod2_post0</span></span></code></pre></div>
 <p>Everything else reads as before. <code><a href="../reference/agreement.html">agreement()</a></code> counts the
 selected distributions the way it counted <code>mtry</code> above:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">surv_res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
 <span><span class="co">#&gt;   dist          n  prop</span></span>

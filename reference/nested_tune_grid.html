@@ -509,7 +509,7 @@ the final fit that re-runs the result. What runs is the control passed, or
 tune's default when none is, with the slots this package forces
 overwritten; the result records that effective control as
 <code>extract_procedure(res)$control</code>, which is what the recipe above passes.
-Every slot of <code>control_grid()</code> falls under one of six headings.</p>
+Every slot of <code>control_grid()</code> falls under one of seven headings.</p>
 <p><strong>Forced: <code>allow_par</code>.</strong> Both tune calls a fold makes – the inner tuning
 run and the outer scoring fit – run at <code>allow_par = FALSE</code>, whatever the
 control carries. Parallelism belongs over the outer folds, as above, and
@@ -541,13 +541,26 @@ stochastic engine's numbers differ between <code>"resamples"</code> and
 than one inner resample. <code>workflow_size</code> is the size past which tune
 remarks on a workflow <code>save_workflow</code> keeps, so it speaks only beside that
 slot, and only where the run it lands on is kept.</p>
-<p><strong>Not returned: <code>extract</code>, <code>save_pred</code>, <code>save_workflow</code>.</strong> Each lands on
-the inner <code>tune_results</code>. A fold record discards that run once the fold
-succeeds – the fold keeps its metrics, its selection and the candidates it
-scored – so on a nested run setting them costs the work and returns
-nothing. The final fit is the exception: <code><a href="nested_final_fit.html">nested_final_fit()</a></code> re-runs the
-recorded control and keeps its tuning run as <code>$tuning</code>, where
-<code><a href="extract_tune_results.html">extract_tune_results()</a></code> reaches what these saved.</p>
+<p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
+outer scoring fit as well as the inner run. With <code>save_pred = TRUE</code> the
+result carries a <code>.predictions</code> list column, each completed fold's
+predictions on its assessment rows as <code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code> returns them;
+with <code>extract</code> a function, an <code>.extracts</code> list column, the function's
+value on each completed fold's fitted workflow, applied after the fit. A
+failed fold holds <code>NULL</code> in each, and a fold whose extract errored stays
+completed with <code>NULL</code> there and a note at location <code>"outer extract"</code>.
+<code><a href="collect_predictions.nested_results.html">collect_predictions()</a></code> and
+<code><a href="collect_predictions.nested_results.html">collect_extracts()</a></code> stack the two
+columns with the fold labels. What is kept is the outer fit's; the inner run's
+predictions and extracts, which the same slots save inside tune, are
+still discarded with that run, and neither column exists on a run that
+did not ask.</p>
+<p><strong>Not returned: <code>save_workflow</code>.</strong> It lands on the inner <code>tune_results</code>,
+which a fold record discards once the fold succeeds, so on a nested run
+setting it costs the work and returns nothing; <code>extract = function(x) x</code>
+keeps a fold's fitted workflow instead. The final fit is the exception:
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> re-runs the recorded control and keeps its tuning
+run as <code>$tuning</code>, where <code><a href="extract_tune_results.html">extract_tune_results()</a></code> reaches what it saved.</p>
 <p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
 backend to reach at <code>allow_par = FALSE</code>.</p>
 <p>Not passed on: <code>select_best()</code> is called without <code>eval_time</code>. Left unset it

@@ -10,6 +10,8 @@ to see their documentation.
 - tune:
 
   [`augment`](https://generics.r-lib.org/reference/augment.html),
+  [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html),
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
   [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html),
   [`extract_workflow`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)

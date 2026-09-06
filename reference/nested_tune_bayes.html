@@ -300,7 +300,7 @@ the final fit that re-runs the result – <code>control = control_bayes(no_impro
 control passed, or tune's default when none is, with the slots this package
 forces overwritten; the result records that effective control, <code>seed</code> left
 out, as <code>extract_procedure(res)$control</code>, which is what the recipe above
-passes. Every slot of <code>control_bayes()</code> falls under one of six headings.</p>
+passes. Every slot of <code>control_bayes()</code> falls under one of seven headings.</p>
 <p><strong>Forced: <code>allow_par</code>, <code>seed</code>.</strong> <code>allow_par = FALSE</code> on both tune calls a
 fold makes, because parallelism belongs over the outer folds; and <code>seed</code>,
 set to the fold's tuning seed inside that seed's scope, as the section
@@ -332,11 +332,14 @@ the temporary directory of the process that tuned, a daemon's own on the
 parallel path. <code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as on
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code>parallel_over</code> included: it changes the numbers a
 stochastic engine produces even at <code>allow_par = FALSE</code>.</p>
-<p><strong>Not returned: <code>extract</code>, <code>save_pred</code>, <code>save_workflow</code>.</strong> As on
-<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>: each lands on the inner <code>tune_results</code> a fold record
-discards, so on a nested run setting them costs the work and returns
-nothing; the final fit keeps its tuning run as <code>$tuning</code>, where what they
-saved is reachable.</p>
+<p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> As on
+<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>: the outer fit's predictions and extracts are kept
+as <code>.predictions</code> and <code>.extracts</code>, and the inner run's are still
+discarded.</p>
+<p><strong>Not returned: <code>save_workflow</code>.</strong> As on <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>: it lands on
+the inner <code>tune_results</code> a fold record discards, so on a nested run
+setting it costs the work and returns nothing; the final fit keeps its
+tuning run as <code>$tuning</code>, where what it saved is reachable.</p>
 <p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
 backend to reach at <code>allow_par = FALSE</code>.</p>
     </div>

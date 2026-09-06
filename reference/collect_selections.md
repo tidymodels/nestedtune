@@ -10,7 +10,9 @@ which fold it came from.
 
 - [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   stacks `.notes` over every outer fold, failed folds included – a
-  failed fold's notes are the reason to ask.
+  failed fold's notes are the reason to ask, and a completed fold's can
+  carry an error note too, from an `extract` that failed on it (see
+  [`collect_extracts()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)).
 
 - `collect_selections()` stacks `.selected` over the folds that
   completed: one row per completed fold.

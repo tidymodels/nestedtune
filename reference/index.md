@@ -31,6 +31,9 @@ the outer split, and keep what each fold chose.
   [`collect_notes(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
   : Stack a per-fold column of a nested resampling run across the outer
   folds
+- [`collect_predictions(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+  [`collect_extracts(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+  : Stack the outer fit's predictions or extracts across the outer folds
 - [`print(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/print.nested_results.md)
   : Print a nested cross-validation result
 - [`summary(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
@@ -73,4 +76,6 @@ the results.
   [`autoplot`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`augment`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`collect_notes`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`collect_predictions`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`collect_extracts`](https://nestedtune.tidymodels.org/reference/reexports.md)
   : Objects exported from other packages

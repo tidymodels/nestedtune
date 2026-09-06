@@ -275,7 +275,7 @@ resamples. What runs is the control passed, or finetune's default when
 none is, with the slots this package forces overwritten; the result
 records that effective control as `extract_procedure(res)$control`,
 which is what the recipe above passes. Every slot of `control_race()`
-falls under one of six headings.
+falls under one of seven headings.
 
 **Forced: `allow_par`.** Both tune calls a fold makes – the inner race
 and the outer scoring fit – run at `allow_par = FALSE`, whatever the
@@ -319,11 +319,16 @@ finetune 1.3.0; the version that added `workflow_size` to
 `control_race()` is not named in finetune's NEWS, and the `>= 1.0.1`
 floor this package declares does not require it.
 
-**Not returned: `extract`, `save_pred`, `save_workflow`.** As on
+**Kept from the outer fit: `save_pred`, `extract`.** As on
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md):
-each lands on the inner race result a fold record discards, so on a
-nested run setting them costs the work and returns nothing; the final
-fit keeps its race as `$tuning`, where what they saved is reachable.
+the outer fit's predictions and extracts are kept as `.predictions` and
+`.extracts`, and the inner race's are still discarded.
+
+**Not returned: `save_workflow`.** As on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md):
+it lands on the inner race result a fold record discards, so on a nested
+run setting it costs the work and returns nothing; the final fit keeps
+its race as `$tuning`, where what it saved is reachable.
 
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.

@@ -20,7 +20,10 @@ library(nestedtune)
 
 The design, the workflow and the grid are the guide’s, unchanged: five
 outer folds of `mtcars`, five inner folds under each, and a random
-forest with two parameters marked for tuning.
+forest with two parameters marked for tuning. One thing is added: a
+control passed through `...` asks each fold’s outer fit to keep its
+predictions, so this page can show that column and the reader that
+stacks it.
 
 ``` r
 
@@ -45,13 +48,18 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 
 set.seed(2)
 
-res <- nested_tune_grid(wf, folds, grid = grid)
+res <- nested_tune_grid(
+  wf,
+  folds,
+  grid = grid,
+  control = control_grid(save_pred = TRUE)
+)
 
 res
 #> 
 #> ── Nested cross-validation results ────────────────────────────────────
 #> Outer resamples: 5-fold cross-validation
-#> # A tibble: 5 × 9
+#> # A tibble: 5 × 10
 #>   splits         id    .metrics .selected .inner_metrics    .notes  
 #>   <list>         <chr> <list>   <list>    <list>            <list>  
 #> 1 <split [25/7]> Fold1 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
@@ -59,8 +67,8 @@ res
 #> 3 <split [26/6]> Fold3 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
 #> 4 <split [26/6]> Fold4 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
 #> 5 <split [26/6]> Fold5 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
-#> # ℹ 3 more variables: .completed <lgl>, .tuning_seed <int>,
-#> #   .outer_fit_seed <int>
+#> # ℹ 4 more variables: .predictions <list>, .completed <lgl>,
+#> #   .tuning_seed <int>, .outer_fit_seed <int>
 #> ℹ Use `summary()` for what the run means: which folds failed, what
 #>   each one selected, and the estimate across them.
 ```
@@ -74,9 +82,10 @@ piece of what that fold did.
 ``` r
 
 names(res)
-#> [1] "splits"          "id"              ".metrics"       
-#> [4] ".selected"       ".inner_metrics"  ".notes"         
-#> [7] ".completed"      ".tuning_seed"    ".outer_fit_seed"
+#>  [1] "splits"          "id"              ".metrics"       
+#>  [4] ".selected"       ".inner_metrics"  ".notes"         
+#>  [7] ".predictions"    ".completed"      ".tuning_seed"   
+#> [10] ".outer_fit_seed"
 ```
 
 `splits` is the fold’s outer split, an ordinary rsample split whose
@@ -204,6 +213,30 @@ select(res, .tuning_seed, .outer_fit_seed)
 #> 5   2046114256      1910444850
 ```
 
+`.predictions` is there because the control asked for it: each completed
+fold’s predictions on its assessment rows, as
+[`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
+returns them, with `.row` naming the row of the data. A run under the
+default control has no such column, and a run whose control sets
+`extract` to a function has an `.extracts` column beside it, holding
+what that function returned for each fold’s fitted workflow. A fold that
+failed holds `NULL` in either.
+
+``` r
+
+res$.predictions[[1]]
+#> # A tibble: 7 × 4
+#>     mpg .pred  .row .config        
+#>   <dbl> <dbl> <int> <chr>          
+#> 1  21.4  18.7     4 pre0_mod0_post0
+#> 2  14.3  14.7     7 pre0_mod0_post0
+#> 3  16.4  16.1    12 pre0_mod0_post0
+#> 4  21.5  22.9    21 pre0_mod0_post0
+#> 5  26    25.2    27 pre0_mod0_post0
+#> 6  15.8  16.1    29 pre0_mod0_post0
+#> 7  15    15.0    31 pre0_mod0_post0
+```
+
 The description of the run itself rides on the object as attributes
 rather than columns;
 [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
@@ -308,6 +341,33 @@ collect_inner_metrics(res)
 #>  9 Fold1     8     2 rmse    standard   2.85      5  0.419  pre0_mod5_…
 #> 10 Fold1     8     2 rsq     standard   0.834     5  0.0942 pre0_mod5_…
 #> # ℹ 50 more rows
+```
+
+[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+stacks `.predictions` the same way, one row per held-out row of every
+completed fold with the fold label beside it, which is where a plot of
+predicted against observed, or a per-observation loss, would start. It
+refuses a run that did not save them, naming the slot to set;
+[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+does the same for `.extracts`, one row per fold.
+
+``` r
+
+collect_predictions(res)
+#> # A tibble: 32 × 5
+#>    id      mpg .pred  .row .config        
+#>    <chr> <dbl> <dbl> <int> <chr>          
+#>  1 Fold1  21.4  18.7     4 pre0_mod0_post0
+#>  2 Fold1  14.3  14.7     7 pre0_mod0_post0
+#>  3 Fold1  16.4  16.1    12 pre0_mod0_post0
+#>  4 Fold1  21.5  22.9    21 pre0_mod0_post0
+#>  5 Fold1  26    25.2    27 pre0_mod0_post0
+#>  6 Fold1  15.8  16.1    29 pre0_mod0_post0
+#>  7 Fold1  15    15.0    31 pre0_mod0_post0
+#>  8 Fold2  22.8  25.2     3 pre0_mod0_post0
+#>  9 Fold2  18.7  17.0     5 pre0_mod0_post0
+#> 10 Fold2  15.2  16.6    14 pre0_mod0_post0
+#> # ℹ 22 more rows
 ```
 
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
