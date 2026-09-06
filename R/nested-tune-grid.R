@@ -52,9 +52,9 @@
 #'   refused at the call, before anything is fitted, with condition class
 #'   `nestedtune_bad_design` and every offending row, column, inner split or
 #'   index named. The checks exist because [rsample::nested_cv()] builds a
-#'   design whatever its `inside` argument returned — a specification that
+#'   design whatever its `inside` argument returned (a specification that
 #'   produces no `rset`, or an empty one, gives a design that cannot be run,
-#'   where [nested_resamples()] refuses one at construction — and because a
+#'   where [nested_resamples()] refuses one at construction), and because a
 #'   design assembled by hand can index rows its outer fold never sees.
 #' @param param_info A [dials::parameters()] object, or `NULL` to let tune
 #'   derive one from the workflow. Passed unchanged to [tune::tune_grid()] on
@@ -118,7 +118,7 @@
 #'   [collect_metrics()] to summarize.
 #'
 #'   **Two records describe the grid, and they answer different questions.**
-#'   `attr(x, "grid")` holds the `grid` argument **as it was given** — a
+#'   `attr(x, "grid")` holds the `grid` argument **as it was given**: a
 #'   positive whole number, not a table of candidates, whenever a size was
 #'   passed. The `.inner_metrics` column holds what each outer fold's inner
 #'   tuning actually scored: [tune::collect_metrics()] of that fold's tuning
@@ -132,16 +132,16 @@
 #'   `.selected` records the candidate the fold's outer fit used.
 #'
 #'   The two diverge routinely, in both directions. A size is expanded by tune
-#'   and may reach fewer candidates than were asked for — a request for 20 on a
-#'   parameter with four reachable values evaluates four — and a candidate that
-#'   fails scores nothing. Folds can also differ from *each other*: expanding a
-#'   size draws from the generator, and each fold tunes under its own seed, so
-#'   a continuous parameter gives every fold its own candidates. Printing says
-#'   so when it happens.
+#'   and may reach fewer candidates than were asked for (a request for 20 on a
+#'   parameter with four reachable values evaluates four), and a candidate
+#'   that fails scores nothing. Folds can also differ from *each other*:
+#'   expanding a size draws from the generator, and each fold tunes under its
+#'   own seed, so a continuous parameter gives every fold its own candidates.
+#'   Printing says so when it happens.
 #'
 #'   One limit is worth stating plainly. `.inner_metrics` is tune's summary of
 #'   the tuning run, and a candidate that failed on **every** inner resample
-#'   scored nothing: it has no row there — `.notes` is where its failure is
+#'   scored nothing: it has no row there. `.notes` is where its failure is
 #'   recorded. A candidate that failed on some inner resamples and scored on
 #'   others has its rows, with `n` below the inner resample count. A fold that
 #'   scored no candidate at all carries a zero-row table with a completed
@@ -175,24 +175,24 @@
 #'   The columns the run is recorded in are the ones the resampling design
 #'   named, and `nested_tune_grid()` records them when it builds the result. So
 #'   a column you add afterwards is read as a fold label only when the design
-#'   itself carries a column of that name — `id`, and `id2` for a repeated
+#'   itself carries a column of that name: `id`, and `id2` for a repeated
 #'   design. The name you pick decides nothing on its own: adding `id2` to a
 #'   result from a plain v-fold design leaves the class, the record and the
 #'   fold labels alone, exactly as adding `extra` does.
 #'
-#'   An operation that stays inside those rules — `arrange()`, `mutate()`
-#'   adding a column, a join that matches one row apiece — returns a
-#'   `nested_results` with the call's record intact. Anything else — `slice()`,
+#'   An operation that stays inside those rules (`arrange()`, `mutate()`
+#'   adding a column, a join that matches one row apiece) returns a
+#'   `nested_results` with the call's record intact. Anything else (`slice()`,
 #'   a `filter()` that drops a fold, `bind_rows()`, `x[1, ]`, dropping one of
-#'   the columns above — returns a bare tibble, with the record removed along
+#'   the columns above) returns a bare tibble, with the record removed along
 #'   with the class. A three-row object cannot honestly describe itself as the
 #'   ten-fold design it was cut from, so it stops describing itself at all and
 #'   hands back the data.
 #'
 #'   It is one rule, reached through four doors. dplyr's verbs and `[` reach it
-#'   through a `dplyr_reconstruct()` method; **vctrs**' own verbs —
-#'   `vec_slice()`, `vec_rbind()`, `vec_c()`, `vec_cbind()`, `vec_ptype()` and
-#'   `vec_cast()` — reach it through `vec_restore()`; and `rbind()` and
+#'   through a `dplyr_reconstruct()` method; **vctrs**' own verbs
+#'   (`vec_slice()`, `vec_rbind()`, `vec_c()`, `vec_cbind()`, `vec_ptype()` and
+#'   `vec_cast()`) reach it through `vec_restore()`; and `rbind()` and
 #'   `rename()`, which reach neither generic, have methods of their own. So
 #'   `rbind(x, x)` and a `rename()` that moves one of the columns above hand
 #'   back a bare tibble, the same answer `slice()` gives, rather than an object
@@ -214,7 +214,7 @@
 #'
 #'   Three verbs sit outside all of it. `group_by()`, `rowwise()` and
 #'   `tibble::as_tibble()` return a grouped, a rowwise and a plain tibble
-#'   respectively — none of them a `nested_results` — and each carries the
+#'   respectively (none of them a `nested_results`), and each carries the
 #'   attributes across, so `attr(dplyr::group_by(x, id), "outer_label")` still
 #'   answers with the run's scheme. Nothing they hand back claims to be a
 #'   results object; the record is along for the ride.
@@ -251,13 +251,13 @@
 #' ```
 #'
 #' The caller's RNG state and generator kind are restored on exit, including
-#' when the call errors, so a seeded script that draws afterwards is unaffected
-#' — the same contract [tune::tune_grid()] gives. One consequence worth knowing:
-#' two consecutive calls with no `set.seed()` between them return identical
-#' results, exactly as repeated `tune_grid()` calls do.
+#' when the call errors, so a seeded script that draws afterwards is
+#' unaffected: the same contract [tune::tune_grid()] gives. One consequence
+#' worth knowing: two consecutive calls with no `set.seed()` between them
+#' return identical results, exactly as repeated `tune_grid()` calls do.
 #'
 #' This binds randomness that flows through R's generator. Engines that
-#' randomize outside it — kernlab's SVMs, the deep-learning engines — cannot be
+#' randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 #' pinned by any R-side scheme, here or in tune.
 #'
 #' @section When a fold fails:
@@ -265,13 +265,13 @@
 #' A fold that fails does not end the run. The remaining folds still run, and
 #' the fold that failed is recorded rather than discarded: `.completed` is
 #' `FALSE` for it and `.notes` holds what went wrong, in the same shape tune
-#' uses — one row naming the stage that failed (`"inner tuning"` or
+#' uses: one row naming the stage that failed (`"inner tuning"` or
 #' `"outer fit"`), followed by tune's own notes about the underlying cause.
 #' The number of folds attempted and the number completed are stored on the
 #' object as the `folds_attempted` and `folds_completed` attributes.
 #'
 #' Both stages can fail quietly. Inner tuning raises only once every candidate
-#' has failed, and the outer fit does not raise at all — it hands back a result
+#' has failed, and the outer fit does not raise at all: it hands back a result
 #' with no metrics. Both are recorded as failures here.
 #'
 #' A fold can also complete *and* carry notes. When only some of a fold's inner
@@ -282,11 +282,11 @@
 #'
 #' A failed fold still records the candidates it got as far as scoring, whatever
 #' stage it failed at. A fold that died at the outer fit had already tuned, so
-#' its `.inner_metrics` holds the full table — and so does one that tuned
+#' its `.inner_metrics` holds the full table, and so does one that tuned
 #' successfully and then failed while selecting from the results. Only a fold
-#' that never reached a scored candidate at all — tuning itself raised, or every
-#' candidate failed — holds a zero-row table. No fold is reported as having
-#' searched a grid it did not.
+#' that never reached a scored candidate at all (tuning itself raised, or
+#' every candidate failed) holds a zero-row table. No fold is reported as
+#' having searched a grid it did not.
 #'
 #' Any operation outside the invariants stated under **Value** above returns a
 #' bare tibble, and both counts go with the class rather than being recomputed
@@ -301,7 +301,7 @@
 #' @section Parallel execution:
 #'
 #' The outer folds run in parallel when you have started mirai daemons, and
-#' serially otherwise. There is no argument for this — start daemons before the
+#' serially otherwise. There is no argument for this: start daemons before the
 #' call and the loop uses them:
 #'
 #' ```
@@ -315,7 +315,7 @@
 #' serially whatever you set, because nested parallelism oversubscribes cores.
 #'
 #' **Results do not depend on how the loop ran.** The same seed gives the same
-#' result serially and in parallel, at any number of daemons — each fold's seeds
+#' result serially and in parallel, at any number of daemons: each fold's seeds
 #' are drawn up front and assigned by position, so a fold's outcome depends on
 #' where it sits in the design and never on which worker took it or in what
 #' order. One exception, and it carries no numbers: the backtraces stored in
@@ -326,7 +326,7 @@
 #'
 #' **Each fold is sent one copy of the data, not one per inner split.** A
 #' resampling split carries the whole frame it indexes, and sending a fold to a
-#' daemon means serializing it — which does not preserve the single shared copy
+#' daemon means serializing it, which does not preserve the single shared copy
 #' the design holds in memory. Each fold's splits are therefore emptied before
 #' dispatch and refilled on the worker, so what crosses is the fold's row
 #' indices plus one copy of the data rather than one copy per split. On a design
@@ -336,7 +336,7 @@
 #'
 #' Two things this does not reach, both of them objects you supply rather than
 #' anything the package builds. A recipe keeps a copy of the data it was created
-#' with, and a formula carries the environment it was written in — so a workflow
+#' with, and a formula carries the environment it was written in, so a workflow
 #' built inside a function that holds a large object sends that object with
 #' every fold. Building the workflow at the top level avoids the second.
 #'
@@ -346,13 +346,13 @@
 #'   environment variables you set after launching them. Set what a fold needs
 #'   with [mirai::everywhere()], or start the daemons after setting it.
 #' - They load nestedtune from an installed library. Running under
-#'   `devtools::load_all()` is not enough — the daemons cannot see it, and the
+#'   `devtools::load_all()` is not enough: the daemons cannot see it, and the
 #'   call stops rather than failing every fold with the same opaque note. During
 #'   development, prime them with
 #'   `mirai::everywhere(pkgload::load_all("<path>"))`.
 #' - Before dispatching, the call asks **every** connected daemon whether it can
 #'   load the package, and stops if any of them cannot. A pool whose daemons
-#'   differ — one respawned, or started against a different library — therefore
+#'   differ (one respawned, or started against a different library) therefore
 #'   fails here, naming how many are affected, rather than as a run in which
 #'   some folds come back as opaque worker failures.
 #' - The same round trip asks each daemon which of this session's internal
@@ -360,12 +360,12 @@
 #'   missing. A daemon holding an *older install* loads the package perfectly
 #'   well and then fails every fold, because the worker resolves what it needs
 #'   by name inside that daemon's copy. The error names the missing functions
-#'   and asks you to reinstall and then restart the pool — a running daemon
+#'   and asks you to reinstall and then restart the pool: a running daemon
 #'   keeps the namespace it has already loaded, so reinstalling underneath one
 #'   changes nothing until it is replaced.
 #' - The same round trip also asks every daemon for each package the workflow
-#'   and the tuner need — the engine's, a recipe step's, and for a race the
-#'   package its model is fitted with — and stops when one daemon cannot load
+#'   and the tuner need (the engine's, a recipe step's, and for a race the
+#'   package its model is fitted with), and stops when one daemon cannot load
 #'   one of them, naming how many daemons are affected and which packages.
 #'   Install them into the daemons' library and restart the pool.
 #' - A daemon that does not answer at all is reported as a non-response, not as
@@ -378,13 +378,13 @@
 #'   is what makes every daemon load the package, and the whole tidymodels
 #'   stack is not cheap to load. Because the check now waits for *all* of them
 #'   rather than whichever answers first, a cold pool on a loaded machine can
-#'   need more than the default 30 seconds — raise the option if you see a
+#'   need more than the default 30 seconds; raise the option if you see a
 #'   non-response you do not believe. Later calls in the same session reuse
 #'   what the daemons already loaded.
 #' - That check is bounded; the folds themselves are not. If every daemon dies
 #'   *after* folds are dispatched, the call blocks waiting for results that will
 #'   never arrive, and you interrupt it. No per-fold timeout is imposed, because
-#'   no time limit is defensible for an arbitrary model fit — a slow fold and a
+#'   no time limit is defensible for an arbitrary model fit: a slow fold and a
 #'   dead one would be indistinguishable.
 #'
 #' A fold whose worker dies is recorded as a failed fold, exactly like any other
@@ -402,11 +402,11 @@
 #'
 #' Interrupting the call at your own console is not one of these. It unwinds the
 #' blocking wait before any worker's return value is classified, so an ordinary
-#' interrupt propagates and no nestedtune condition class is attached — the RNG
+#' interrupt propagates and no nestedtune condition class is attached: the RNG
 #' state is still restored, but do not write a handler expecting one.
 #'
 #' An interrupt also asks the folds it leaves behind to stop. However the call
-#' is left once its folds are dispatched — an interrupt, or an error — the
+#' is left once its folds are dispatched (an interrupt, or an error), the
 #' outstanding ones are cancelled on the way out, so the pool goes idle shortly
 #' after rather than computing folds whose results nobody will read. Two limits
 #' are worth knowing. Cancelling needs mirai's dispatcher, which
@@ -415,14 +415,14 @@
 #' folds run to completion. You are told so at dispatch rather than left to
 #' discover it: such a pool raises a warning of class
 #' `nestedtune_pool_not_cancellable`, once per call, naming the remedy. The pool
-#' is not refused, because its results are correct — what it lacks is the
+#' is not refused, because its results are correct: what it lacks is the
 #' ability to stop. And stopping is a request rather than a guarantee:
 #' a fold already inside a compiled fitting routine may not be interruptible,
 #' and one that has nearly finished may simply finish.
 #'
 #' One case cannot be told apart, and is documented rather than guessed at:
 #' calling `mirai::daemons(0)` while folds are outstanding produces exactly the
-#' value a daemon dying mid-fold produces — same code, same classes, nothing to
+#' value a daemon dying mid-fold produces: same code, same classes, nothing to
 #' separate them. Tearing the pool down that way is therefore recorded as fold
 #' failures rather than treated as a cancellation, because the alternative would
 #' discard every completed fold whenever a single worker died.

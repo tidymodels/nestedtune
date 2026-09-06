@@ -39,9 +39,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 \code{nestedtune_bad_design} and every offending row, column, inner split or
 index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned — a specification that
+design whatever its \code{inside} argument returned (a specification that
 produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction — and because a
+where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.}
 
 \item{...}{A control object as \code{control} -- what

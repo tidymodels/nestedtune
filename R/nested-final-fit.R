@@ -74,7 +74,7 @@
 #' The procedure a nested estimate describes is "resample this dataset by the
 #' inner specification, tune, select, fit", and the dataset that procedure is
 #' meant to be applied to is all of yours. So the final model comes from running
-#' it again with nothing held out — the same convention as cross-validating a
+#' it again with nothing held out: the same convention as cross-validating a
 #' model and then refitting on everything, one level up.
 #'
 #' The outer folds play no part. Their selections are not pooled or voted on:
@@ -107,7 +107,7 @@
 #' Two things the nested estimate does not say. It is marginal over selection,
 #' not conditional on the parameters this model happens to carry, so it is not a
 #' claim about this configuration specifically. And it describes new data drawn
-#' like your training data — not a different population, and not a model
+#' like your training data, not a different population, and not a model
 #' retrained at a different size.
 #'
 #' If the outer folds disagreed about the best parameters, report that too.
@@ -174,14 +174,14 @@
 #' repeated [tune::tune_grid()] calls do.
 #'
 #' This binds randomness that flows through R's generator. Engines that
-#' randomize outside it — kernlab's SVMs, the deep-learning engines — cannot be
+#' randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 #' pinned by any R-side scheme, here or in tune.
 #'
 #' @section The inner specification is re-evaluated:
 #'
 #' A nested design stores its `inside` argument as an unevaluated call, the
-#' nested run records it on its result, and this function evaluates it again
-#' — against the whole dataset, in the environment you call from, not the one
+#' nested run records it on its result, and this function evaluates it again,
+#' against the whole dataset, in the environment you call from, not the one
 #' the design was built in.
 #'
 #' Write it with literal arguments. `inside = vfold_cv(v = 5)` is re-evaluated

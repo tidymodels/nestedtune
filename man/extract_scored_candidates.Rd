@@ -16,9 +16,9 @@ rather than silently ignored.}
 A tibble with one row per candidate scored, carrying one column per
 tuned parameter plus tune's \code{.config} label for the candidate, and \code{.iter}
 on a Bayesian fit. It is the distinct parameter rows of the run's
-\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table with those labels — the same shape one
+\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table with those labels: the same shape one
 element of a result's \code{.inner_metrics} column reduces to when its metric
-columns are dropped — so the two can be compared directly. Everything
+columns are dropped, so the two can be compared directly. Everything
 tune wrote per metric is dropped: \code{.metric}, \code{.estimator}, \code{mean}, \code{n},
 \code{std_err}, and on a fit that scored a dynamic survival metric the
 \code{.eval_time} column, so a candidate has one row here however many
@@ -29,18 +29,18 @@ This is what was \strong{scored}, not what was \strong{asked for}. A \code{grid}
 a size is expanded by tune and may reach fewer candidates than the number
 requested; a candidate that failed everywhere scored nothing. See the
 \code{.inner_metrics} discussion in \code{\link[=nested_tune_grid]{nested_tune_grid()}} for the full account
-of how the two records diverge, which holds here too — this record is
+of how the two records diverge, which holds here too: this record is
 derived the same way.
 
 One pointer there does \strong{not} carry over. A candidate that failed on every
 inner resample is missing from this table, and on a \code{nested_tune_grid()}
 result its failure is recorded in that object's \code{.notes} column. A
 \code{nested_final_fit} has no such column. Look instead inside the tuning run
-itself — \code{tune::collect_notes(extract_tune_results(x))}.
+itself: \code{tune::collect_notes(extract_tune_results(x))}.
 }
 \description{
 Returns the candidate parameter settings that \code{\link[=nested_final_fit]{nested_final_fit()}}'s tuning
-run actually evaluated — the full-data counterpart of the candidate set each
+run actually evaluated: the full-data counterpart of the candidate set each
 outer fold's \code{.inner_metrics} table describes on a \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} result, derived the same way from the run's
 \code{\link[tune:collect_metrics]{tune::collect_metrics()}} table, so a Bayesian final fit's table carries the

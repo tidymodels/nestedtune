@@ -29,9 +29,10 @@ pak::pak("tidymodels/nestedtune")
 
 ## Building a nested resampling design
 
-`nested_resamples()` builds the same structure as `rsample::nested_cv()`
-— an outer resampling with an inner resampling attached to each outer
-fold — without keeping a copy of the data for every outer fold.
+`nested_resamples()` builds the same structure as
+`rsample::nested_cv()`: an outer resampling with an inner resampling
+attached to each outer fold, without keeping a copy of the data for
+every outer fold.
 
 ``` r
 library(nestedtune)
@@ -50,7 +51,7 @@ For the same seed and the same specifications the splits select the same
 rows as rsample’s: `analysis()` and `assessment()` return identical
 frames, and each inner split carries the same class and resample id, so
 anything dispatching on those keeps working. What differs is what the
-splits point at — the original data rather than a materialized copy per
+splits point at: the original data rather than a materialized copy per
 outer fold.
 
 ## Why
@@ -80,10 +81,9 @@ of the data are gone.
 
 `nested_tune_grid()` tunes on each outer fold’s inner resamples,
 selects, fits on the outer analysis set, and scores on the outer
-assessment set — keeping what each fold chose. `nested_final_fit()`
-takes that result and runs the procedure it recorded once more with the
-whole dataset in hand, and gives back the model to deploy as its own
-object.
+assessment set, keeping what each fold chose. `nested_final_fit()` takes
+that result and runs the procedure it recorded once more with the whole
+dataset in hand, and gives back the model to deploy as its own object.
 
 ``` r
 library(nestedtune)

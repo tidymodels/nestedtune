@@ -34,7 +34,7 @@ pointer to \code{\link[=summary.nested_results]{summary.nested_results()}} for w
 
 Printing also says when the folds were not choosing from the same menu. A
 grid given as a size is expanded per fold, under that fold's own seed, so a
-continuous parameter leaves every fold with its own candidates — which
+continuous parameter leaves every fold with its own candidates, which
 changes how the selections \code{\link[=summary.nested_results]{summary.nested_results()}} reports should be
 read. The line
 reports each fold's candidate count and appears only when the sets actually
