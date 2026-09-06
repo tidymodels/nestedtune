@@ -1399,3 +1399,239 @@ check_race_burn_in <- function(resamples, control, call = rlang::caller_env()) {
   }
   invisible(counts)
 }
+
+# The entry checks `nested_workflow_map()` runs over a workflow set (M71,
+# D-058), each before the first workflow runs (GP3). The set is read by its
+# columns and never through a workflowsets function, which is what keeps
+# that package in Suggests.
+
+check_workflow_set <- function(object, call = rlang::caller_env()) {
+  needed <- c("wflow_id", "info", "option", "result")
+  if (!inherits(object, "workflow_set") || !is.data.frame(object)) {
+    cli::cli_abort(
+      c(
+        "{.arg object} must be a {.cls workflow_set}.",
+        x = "Got {.obj_type_friendly {object}}.",
+        i = "Build one with {.fn workflowsets::workflow_set} or \\
+             {.fn workflowsets::as_workflow_set}; a single workflow runs \\
+             through {.fn nested_tune_grid} or one of its siblings."
+      ),
+      class = "nestedtune_bad_workflow_set",
+      call = call
+    )
+  }
+  missing <- setdiff(needed, names(object))
+  if (length(missing) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg object} must be a {.cls workflow_set} carrying the \\
+         {.field {needed}} columns.",
+        x = "It lacks {.field {missing}}.",
+        i = "Build one with {.fn workflowsets::workflow_set} or \\
+             {.fn workflowsets::as_workflow_set}."
+      ),
+      class = "nestedtune_bad_workflow_set",
+      call = call
+    )
+  }
+  if (nrow(object) == 0L) {
+    cli::cli_abort(
+      "{.arg object} holds no workflows.",
+      class = "nestedtune_bad_workflow_set",
+      call = call
+    )
+  }
+  invisible(object)
+}
+
+# The six orchestrator names `fn` accepts: this package's exports, never
+# tune's own names for the functions they wrap, so `"tune_grid"` is refused
+# naming the six rather than silently read as the grid orchestrator.
+MAP_ORCHESTRATORS <- c(
+  "nested_tune_grid",
+  "nested_tune_bayes",
+  "nested_tune_race_anova",
+  "nested_tune_race_win_loss",
+  "nested_tune_sim_anneal",
+  "nested_fit_resamples"
+)
+
+check_map_fn <- function(fn, call = rlang::caller_env()) {
+  if (rlang::is_string(fn) && fn %in% MAP_ORCHESTRATORS) {
+    return(invisible(fn))
+  }
+  cli::cli_abort(
+    c(
+      "{.arg fn} must name one of the six orchestrators: \\
+       {.fn {MAP_ORCHESTRATORS}}.",
+      x = if (rlang::is_string(fn)) {
+        "Got {.val {fn}}."
+      } else {
+        "Got {.obj_type_friendly {fn}}."
+      }
+    ),
+    class = "nestedtune_bad_fn",
+    call = call
+  )
+}
+
+# What an orchestrator accepts beyond the workflow: its formals other than
+# `object` (so `resamples` and everything behind the dots), and the `control`
+# every one of the six takes through `...` (D-042). Read off the function
+# itself, so a formal added to an orchestrator is accepted here the day it
+# lands.
+orchestrator_args <- function(fn) {
+  formals <- names(formals(get(fn, envir = asNamespace("nestedtune"))))
+  c(setdiff(formals, c("object", "...")), "control")
+}
+
+# The map's `...` (M71): every name must be one the orchestrator `fn` names
+# accepts, so a typo is refused rather than narrowed away for every
+# workflow; `object` is the set's to bind, never the caller's; everything
+# after `fn` is matched by name; and the design is the one argument every
+# route needs, so its absence is refused here rather than as a missing
+# argument two frames down. `dots` is the list `capture_dots()` returns.
+check_map_dots <- function(dots, fn, call = rlang::caller_env()) {
+  nms <- rlang::names2(dots)
+  n_unnamed <- sum(!nzchar(nms))
+  if (n_unnamed > 0L) {
+    cli::cli_abort(
+      c(
+        "Every argument in {.arg ...} must be named.",
+        x = "Got {n_unnamed} unnamed argument{?s}; everything after \\
+             {.arg fn} is matched by name."
+      ),
+      class = "nestedtune_bad_dots",
+      call = call
+    )
+  }
+  accepted <- orchestrator_args(fn)
+  unknown <- unique(nms[!nms %in% accepted])
+  if (length(unknown) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg ...} carries {length(unknown)} argument{?s} {.fn {fn}} does \\
+         not take: {.arg {unknown}}.",
+        i = if ("object" %in% unknown) {
+          "The workflow is the set's own; {.arg object} is the set."
+        },
+        i = "{.fn {fn}} takes {.arg {setdiff(accepted, 'object')}}; an \\
+             argument for one workflow alone goes in the set's \\
+             {.field option} column ({.fn workflowsets::option_add})."
+      ),
+      class = "nestedtune_bad_dots",
+      call = call
+    )
+  }
+  repeated <- unique(nms[duplicated(nms)])
+  if (length(repeated) > 0L) {
+    cli::cli_abort(
+      "{.arg ...} carries {.arg {repeated}} more than once.",
+      class = "nestedtune_bad_dots",
+      call = call
+    )
+  }
+  if (!"resamples" %in% nms) {
+    cli::cli_abort(
+      c(
+        "{.arg ...} must carry the nested design as {.arg resamples}.",
+        i = "Every workflow of the set runs on the same design; build one \\
+             with {.fn nested_resamples}."
+      ),
+      class = "nestedtune_bad_dots",
+      call = call
+    )
+  }
+  invisible(dots)
+}
+
+# Which orchestrator a workflow of the set takes (D-057, D-058): the plain
+# resampling one when nothing in it is marked with `tune()`, whatever `fn`
+# names, and `fn` otherwise. A workflow whose parameters cannot be read
+# keeps `fn`, as `check_untuned_workflow()` lets it pass: a check that
+# cannot be made is never turned into a route.
+route_workflow <- function(workflow, fn) {
+  ids <- tuned_parameter_ids(workflow)
+  if (!is.null(ids) && length(ids) == 0L) {
+    return("nested_fit_resamples")
+  }
+  fn
+}
+
+# Each workflow's `option` entry, held to the orchestrator that workflow
+# routes to (M71): a name that orchestrator does not take is refused naming
+# the workflow, and `object` and `resamples` are refused whatever the route,
+# since the workflow and the design come from the set and the call. Checked
+# over the whole set before the first workflow runs, so a bad entry on the
+# last workflow does not cost the runs before it.
+check_map_options <- function(object, routes, call = rlang::caller_env()) {
+  for (i in seq_len(nrow(object))) {
+    option <- object$option[[i]]
+    nms <- rlang::names2(option)
+    if (length(nms) == 0L) {
+      next
+    }
+    id <- object$wflow_id[[i]]
+    route <- routes[[i]]
+    accepted <- setdiff(orchestrator_args(route), c("object", "resamples"))
+    reserved <- intersect(nms, c("object", "resamples"))
+    if (length(reserved) > 0L) {
+      cli::cli_abort(
+        c(
+          "Workflow {.val {id}} carries {.arg {reserved}} as an option.",
+          x = "The workflow and the design are the set's and the call's; \\
+               neither can be replaced per workflow."
+        ),
+        class = "nestedtune_bad_option",
+        call = call
+      )
+    }
+    unknown <- unique(nms[!nms %in% accepted])
+    if (length(unknown) > 0L) {
+      cli::cli_abort(
+        c(
+          "Workflow {.val {id}} carries {length(unknown)} option{?s} \\
+           {.fn {route}} does not take: {.arg {unknown}}.",
+          i = "It runs through {.fn {route}}, which takes {.arg {accepted}}."
+        ),
+        class = "nestedtune_bad_option",
+        call = call
+      )
+    }
+  }
+  invisible(object)
+}
+
+# The final fit's two shapes (M71): a workflow with its results, or a
+# workflow-set run with an `id`. Anything between the two -- a set with
+# `results` supplied, a set with no `id`, a workflow with an `id` -- is a
+# call that meant one shape and wrote the other, refused naming both.
+check_final_fit_set_args <- function(
+  object,
+  has_results,
+  id,
+  call = rlang::caller_env()
+) {
+  is_set <- inherits(object, "nested_results_set")
+  problem <- if (is_set && has_results) {
+    "A {.cls nested_results_set} holds each workflow's results beside it, \\
+     so {.arg results} is not given with one."
+  } else if (is_set && is.null(id)) {
+    "A {.cls nested_results_set} needs {.arg id} to name the workflow to fit."
+  } else if (!is_set && !is.null(id)) {
+    "{.arg id} names a workflow of a {.cls nested_results_set}; with a \\
+     workflow as {.arg object}, hand its results over as {.arg results}."
+  }
+  if (is.null(problem)) {
+    return(invisible(object))
+  }
+  cli::cli_abort(
+    c(
+      "{.fn nested_final_fit} takes a workflow with its {.arg results}, or a \\
+       {.cls nested_results_set} with an {.arg id}.",
+      x = problem
+    ),
+    class = "nestedtune_bad_final_fit_args",
+    call = call
+  )
+}

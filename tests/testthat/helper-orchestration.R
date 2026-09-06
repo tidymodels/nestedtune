@@ -2394,7 +2394,8 @@ expect_outer_columns_kept <- function(res) {
 # `workflowsets::as_workflow_set()` over the fixtures above, so each id is
 # the name given here and each element is the fixture workflow itself.
 # `wset_two()` holds one tuned workflow and one fixed, the mixed set the
-# routing rule exists for. `wset_fixed()` holds two fixed workflows, the only
+# routing rule exists for. No set's order is its `wflow_id` sort order, so
+# a map that sorted its rows would fail the order assertion (AC3). `wset_fixed()` holds two fixed workflows, the only
 # set the plain resampling orchestrator accepts (it refuses a marked one at
 # entry, D-057). `wset_three()` adds a second tuned workflow whose parameter
 # `det_grid()` does not name, carrying its own `grid` as a per-workflow
@@ -2416,7 +2417,7 @@ plain_workflow <- function(data) {
 wset_fixed <- function(data) {
   workflowsets::as_workflow_set(
     fixed = fixed_workflow(data),
-    plain = plain_workflow(data)
+    baseline = plain_workflow(data)
   )
 }
 
@@ -2475,6 +2476,10 @@ wset_map_args <- function(fn) {
 # `memoised()` with the arguments named, so the cache key reads them as the
 # orchestrator would match them.
 wset_results <- function(fn, data = make_reg_data(), seed = 31) {
+  # Forced before the seed: `make_reg_data()` seeds the generator itself,
+  # and a promise forced after `set.seed()` would build the set's recipe
+  # step ids under that seed rather than this one.
+  force(data)
   set.seed(seed)
   wset <- if (fn == "nested_fit_resamples") wset_fixed(data) else wset_two(data)
   folds <- final_nested(data)
@@ -2535,4 +2540,3 @@ absent_step_workflow <- function(data) {
   )
   workflows::workflow(rec, parsnip::linear_reg())
 }
-
