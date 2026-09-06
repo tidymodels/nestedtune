@@ -74,7 +74,9 @@ naming convention.
   across the outer folds (D-039), and the three readers that stack a per-fold
   list column with the recorded fold labels beside it: `collect_notes()`, a
   method on tune's generic, and the package-owned `collect_selections()` and
-  `collect_inner_metrics()` (D-052). `extract_procedure()`, a package-owned
+  `collect_inner_metrics()` (D-052), joined by `collect_predictions()` and
+  `collect_extracts()`, methods on tune's generics over the two columns the
+  outer fit keeps under `save_pred` and `extract` (D-054). `extract_procedure()`, a package-owned
   generic on the `extract_` shape (D-023), returns the `procedure` record from
   a `nested_results` (its attribute) and from a `nested_final_fit` (its slot)
   (M67). The suffix names the inner tuning method (D-010).
@@ -315,7 +317,9 @@ kind pin is what makes a fresh worker agree with a serial run.
 `collect_metrics()` table as `.inner_metrics` (M49, D-043; the candidate set a
 reader needs is its distinct parameter rows; on a race, `all_configs = TRUE`
 through `inner_metrics_table()`, so eliminated candidates are in it with
-their `n`, M50), notes, and the fold's two seeds —
+their `n`, M50), notes, the fold's two seeds, and, only when the control
+asked, the outer fit's extract and predictions as `.extracts` and
+`.predictions` (M68, D-054) —
 as a plain tibble carrying class `nested_results`. It deliberately does **not**
 inherit `tune_results`: that would bring `show_best()` and `select_best()`
 along, and both would rank outer folds, which is the reading IP3 forbids

@@ -1,7 +1,7 @@
 # Every slot of tune's two control objects is classified on the help page of
-# the orchestrator it reaches (M48, AC6): under exactly one of six headings --
-# forced, settable as its own argument, refused, passed through, not returned,
-# inert.
+# the orchestrator it reaches (M48, AC6): under exactly one of seven headings --
+# forced, settable as its own argument, refused, passed through, kept from the
+# outer fit (M68), not returned, inert.
 #
 # The classification is read off the rendered help rather than off a list kept
 # here, and the slot names come from `formals()` of tune's own functions, so a
@@ -18,9 +18,22 @@ CONTROL_HEADINGS <- c(
   "Settable as its own argument",
   "Refused",
   "Passed through",
+  "Kept from the outer fit",
   "Not returned",
   "Inert"
 )
+
+# What the outer fit keeps (M68, AC6): the two slots under their heading on
+# every page, with the sentence saying the inner run's are still discarded.
+KEPT_SLOTS <- c("save_pred", "extract")
+
+expect_kept_from_outer_fit <- function(topic, buckets) {
+  expect_setequal(buckets[["Kept from the outer fit"]], KEPT_SLOTS)
+  expect_false(any(KEPT_SLOTS %in% buckets[["Not returned"]]))
+  txt <- gsub("\\s+", " ", rd_text(help_rd(topic)))
+  expect_match(txt, "still discarded", fixed = TRUE)
+  expect_match(txt, "outer fit", fixed = TRUE)
+}
 
 # The topic's Rd, from the source tree where there is one and from the
 # installed help database under `R CMD check`, where `man/` is not on disk.
@@ -105,7 +118,7 @@ expect_classified <- function(topic, control_fn) {
 
   buckets <- heading_slots(differences_section(help_rd(topic)))
 
-  # The six headings, each exactly once, and nothing else in bold.
+  # The seven headings, each exactly once, and nothing else in bold.
   expect_identical(sort(names(buckets)), sort(CONTROL_HEADINGS))
 
   # Every slot under exactly one heading, and nothing under a heading that is
@@ -125,6 +138,8 @@ test_that("every control_grid() slot sits under one heading on nested_tune_grid(
   # The forced slot is the one the package overwrites on both tuners.
   expect_identical(buckets[["Forced"]], "allow_par")
   expect_identical(buckets[["Settable as its own argument"]], "event_level")
+  expect_kept_from_outer_fit("nested_tune_grid", buckets)
+  expect_identical(buckets[["Not returned"]], "save_workflow")
 })
 
 test_that("every control_bayes() slot sits under one heading on nested_tune_bayes()'s page", {
@@ -135,6 +150,8 @@ test_that("every control_bayes() slot sits under one heading on nested_tune_baye
   expect_true(all(
     c("no_improve", "uncertain", "time_limit") %in% buckets[["Passed through"]]
   ))
+  expect_kept_from_outer_fit("nested_tune_bayes", buckets)
+  expect_identical(buckets[["Not returned"]], "save_workflow")
 })
 
 test_that("every control_race() slot sits under one heading on the racing page (M50, AC7)", {
@@ -148,10 +165,8 @@ test_that("every control_race() slot sits under one heading on the racing page (
     c("burn_in", "alpha", "num_ties", "randomize", "verbose_elim") %in%
       buckets[["Passed through"]]
   ))
-  expect_setequal(
-    buckets[["Not returned"]],
-    c("extract", "save_pred", "save_workflow")
-  )
+  expect_kept_from_outer_fit("nested_tune_race", buckets)
+  expect_identical(buckets[["Not returned"]], "save_workflow")
   expect_identical(buckets[["Inert"]], "backend_options")
 })
 
@@ -178,9 +193,10 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
     ) %in%
       buckets[["Passed through"]]
   ))
+  expect_kept_from_outer_fit("nested_tune_sim_anneal", buckets)
   expect_setequal(
     buckets[["Not returned"]],
-    c("extract", "save_pred", "save_workflow", "save_history")
+    c("save_workflow", "save_history")
   )
   expect_identical(buckets[["Inert"]], "backend_options")
 

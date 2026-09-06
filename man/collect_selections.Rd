@@ -48,7 +48,9 @@ the rows of every fold are read at once and each row says which fold it
 came from.
 \itemize{
 \item \code{collect_notes()} stacks \code{.notes} over every outer fold, failed folds
-included -- a failed fold's notes are the reason to ask.
+included -- a failed fold's notes are the reason to ask, and a completed
+fold's can carry an error note too, from an \code{extract} that failed on it
+(see \code{\link[=collect_extracts]{collect_extracts()}}).
 \item \code{collect_selections()} stacks \code{.selected} over the folds that completed:
 one row per completed fold.
 \item \code{collect_inner_metrics()} stacks \code{.inner_metrics} over the folds that

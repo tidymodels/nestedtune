@@ -219,7 +219,7 @@ say, on a design with three inner resamples. What runs is the control
 passed, or finetune's default when none is, with the slots this package
 forces overwritten; the result records that effective control as
 \code{extract_procedure(res)$control}, which is what the recipe above passes.
-Every slot of \code{control_race()} falls under one of six headings.
+Every slot of \code{control_race()} falls under one of seven headings.
 
 \strong{Forced: \code{allow_par}.} Both tune calls a fold makes -- the inner race and
 the outer scoring fit -- run at \code{allow_par = FALSE}, whatever the control
@@ -259,11 +259,15 @@ finetune 1.3.0; the version that added \code{workflow_size} to
 \code{control_race()} is not named in finetune's NEWS, and the \verb{>= 1.0.1}
 floor this package declares does not require it.
 
-\strong{Not returned: \code{extract}, \code{save_pred}, \code{save_workflow}.} As on
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}: each lands on the inner race result a fold record
-discards, so on a nested run setting them costs the work and returns
-nothing; the final fit keeps its race as \verb{$tuning}, where what they saved
-is reachable.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}: the outer fit's predictions and extracts are kept
+as \code{.predictions} and \code{.extracts}, and the inner race's are still
+discarded.
+
+\strong{Not returned: \code{save_workflow}.} As on \code{\link[=nested_tune_grid]{nested_tune_grid()}}: it lands on
+the inner race result a fold record discards, so on a nested run setting
+it costs the work and returns nothing; the final fit keeps its race as
+\verb{$tuning}, where what it saved is reachable.
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.

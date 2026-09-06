@@ -70,6 +70,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: re-audit: AC4 (full) — an all-NULL `.extracts` column from an extract erroring on every fold would satisfy the identity, and "two or more daemons" quantifies over a count nothing enumerates; both fixes taken at the gate (the value clauses and "two mirai daemons"). Second line: the stop for this criterion.
 - 2026-09-06: T5 done: BC14 in `test-parallel-identity.R` on one pool of two daemons, its ledger row in `helper-time-budget.R`; the test skips outside `NOT_CRAN`, so it was run with that set (9 expectations) and the hygiene file's ledger cross-check passes.
 - 2026-09-06: T6 done: the five doors on an object carrying both columns and the no-column control; with the two names removed from `record_columns()` the file fails 8 ways; D-054 appended; suite clean.
+- 2026-09-06: T7 checkpoint: the four pages' seventh heading "Kept from the outer fit" and their "Not returned" narrowed, the readers' topic as `collect_predictions.nested_results` (the bare alias belongs to the re-export block, and a second owner drew a roxygen warning), pkgdown row, NEWS, DESIGN, the collect readers' comment and the `results.Rmd` paragraphs land; heading test, hygiene and `pkgdown::check_pkgdown()` green; the page render after `devtools::install()` is running and T7 is ticked once it renders.
 
 ## Decisions
 

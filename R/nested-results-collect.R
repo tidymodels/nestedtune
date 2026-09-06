@@ -22,7 +22,9 @@
 #' came from.
 #'
 #' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
-#'   included -- a failed fold's notes are the reason to ask.
+#'   included -- a failed fold's notes are the reason to ask, and a completed
+#'   fold's can carry an error note too, from an `extract` that failed on it
+#'   (see [collect_extracts()]).
 #' * `collect_selections()` stacks `.selected` over the folds that completed:
 #'   one row per completed fold.
 #' * `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
@@ -264,10 +266,10 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' collect_extracts(res)
 #'
 #' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()]
-#' @name collect_predictions
+#' @name collect_predictions.nested_results
 NULL
 
-#' @rdname collect_predictions
+#' @rdname collect_predictions.nested_results
 #' @export
 collect_predictions.nested_results <- function(x, ...) {
   rlang::check_dots_empty()
@@ -282,7 +284,7 @@ collect_predictions.nested_results <- function(x, ...) {
   )
 }
 
-#' @rdname collect_predictions
+#' @rdname collect_predictions.nested_results
 #' @export
 collect_extracts.nested_results <- function(x, ...) {
   rlang::check_dots_empty()

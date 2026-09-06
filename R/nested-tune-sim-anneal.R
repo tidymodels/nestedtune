@@ -129,7 +129,7 @@
 #' default when none is, with the slots this package forces overwritten; the
 #' result records that effective control as `extract_procedure(res)$control`,
 #' which is what the recipe above passes. Every slot of `control_sim_anneal()`
-#' falls under one of six headings.
+#' falls under one of seven headings.
 #'
 #' **Forced: `allow_par`.** Both tune calls a fold makes -- the inner search
 #' and the outer scoring fit -- run at `allow_par = FALSE`, whatever the
@@ -170,11 +170,16 @@
 #' `workflow_size` to `control_sim_anneal()` is not named in finetune's
 #' NEWS, and the `>= 1.0.1` floor this package declares does not require it.
 #'
-#' **Not returned: `extract`, `save_pred`, `save_workflow`, `save_history`.**
-#' The first three as on [nested_tune_grid()]: each lands on the inner
-#' `tune_results` a fold record discards, so on a nested run setting them
-#' costs the work and returns nothing; the final fit keeps its tuning run as
-#' `$tuning`, where what they saved is reachable. `save_history` writes
+#' **Kept from the outer fit: `save_pred`, `extract`.** As on
+#' [nested_tune_grid()]: the outer fit's predictions and extracts are kept
+#' as `.predictions` and `.extracts`, and the inner run's are still
+#' discarded.
+#'
+#' **Not returned: `save_workflow`, `save_history`.** `save_workflow` as on
+#' [nested_tune_grid()]: it lands on the inner `tune_results` a fold record
+#' discards, so on a nested run setting it costs the work and returns
+#' nothing; the final fit keeps its tuning run as `$tuning`, where what it
+#' saved is reachable. `save_history` writes
 #' finetune's search history to `sa_history.RData` in the temporary directory
 #' of the process that tuned -- a daemon's own on the parallel path -- and
 #' every fold overwrites the last one's; nothing of it reaches the result.

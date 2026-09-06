@@ -1,5 +1,22 @@
 # nestedtune 0.0.0.9000
 
+* `save_pred` and `extract` on a control passed through `...` now reach the
+  outer fit. With `save_pred = TRUE` the results object carries a
+  `.predictions` list column, each completed fold's predictions on its
+  assessment rows as `tune::last_fit()` returns them; with `extract` a
+  function, an `.extracts` list column holding the function's value on each
+  completed fold's fitted workflow. A failed fold holds `NULL` in each, and a
+  fold whose extract errored stays completed with `NULL` there and a note at
+  location `"outer extract"`. Both columns are part of the record the dplyr
+  and vctrs invariants read, and neither exists on a run that did not ask.
+  `collect_predictions()` and `collect_extracts()`, tune's generics
+  re-exported with a method here, stack them with the design's fold labels
+  over the folds that completed, the second as one row per fold with an
+  `.extracts` list column; an object lacking the column is refused with class
+  `nestedtune_column_not_saved`, naming the slot to set. The help pages
+  classify the two slots under "Kept from the outer fit"; `save_workflow` and
+  `save_history` stay "Not returned".
+
 * A new accessor, `extract_procedure()`, returns the record of what ran, the
   tuner, its arguments and the control as it took effect, from a results
   object and from a final fit alike. The help pages and the tuners vignette
