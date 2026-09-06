@@ -4,12 +4,13 @@
 \alias{nested_final_fit}
 \title{Fit the final model after nested cross-validation}
 \usage{
-nested_final_fit(object, results, ...)
+nested_final_fit(object, results, ..., id = NULL)
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
 for tuning with \code{\link[tune:tune]{tune::tune()}}: the workflow the nested run was built
-around. For a grid or a racing procedure it is checked against the
+around; or a \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}, with
+\code{id} naming the workflow to fit (see \code{id}). For a grid or a racing procedure it is checked against the
 recorded grid the way \code{\link[=nested_tune_grid]{nested_tune_grid()}} checked it, so a different
 workflow is refused here rather than by tune one tuning run later. For a
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result the workflow has no marker, and one
@@ -50,6 +51,16 @@ object with. A run in which some folds failed is fitted; its estimate is
 rather than silently ignored -- in particular the former \code{grid},
 \code{param_info}, \code{metrics}, \code{event_level} and \code{eval_time} arguments, which
 now come from \code{results}.}
+
+\item{id}{For a \code{nested_results_set} as \code{object} (what
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} returns), the \code{wflow_id} of the workflow to
+fit; \code{results} is then left missing, since the set holds each
+workflow's record beside it, and the fit is
+\code{nested_final_fit(extract_workflow(object, id), object$result[[i]])}.
+An \code{id} naming no row is refused with class \code{nestedtune_unknown_id};
+a set given with \code{results} supplied, a set given with no \code{id}, or an
+\code{id} given with a workflow as \code{object}, with class
+\code{nestedtune_bad_final_fit_args}. \code{NULL}, the default, for a workflow.}
 }
 \value{
 An object of class \code{nested_final_fit} with elements \code{workflow} (the
