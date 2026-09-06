@@ -91,7 +91,11 @@ parameters rather than discarding them.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with at least one parameter marked
-for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>.</p></dd>
+for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>. A workflow with no marker is refused at
+entry, before any fold runs, with condition class
+<code>nestedtune_untuned_workflow</code>: there is nothing for the inner loop to
+search, and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores a fixed workflow on the same
+nested design instead.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>
@@ -323,7 +327,10 @@ eliminating candidates as the inner resamples come in – see
 <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code> and <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>; and for
 simulated annealing – finetune perturbing the current candidate one
 iteration at a time – see <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code>. Each runs this same
-outer loop with the inner tuner swapped.</p>
+outer loop with the inner tuner swapped. For a workflow with nothing to
+tune – the baseline a tuned procedure is compared against – see
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>, which runs the same outer loop with the inner
+stage removed and refuses a workflow carrying a marker.</p>
     </div>
     <div class="section level2">
     <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>

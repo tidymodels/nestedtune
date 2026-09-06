@@ -12,7 +12,10 @@ the
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
 it recorded, finalizes the workflow, and fits it on all the data. The
 result is the model to deploy, built by the same search the estimate you
-report describes.
+report describes. On a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+result there is no search to re-run: the workflow is fitted as given on
+all the data.
 
 ## Usage
 
@@ -32,7 +35,11 @@ nested_final_fit(object, results, ...)
   procedure it is checked against the recorded grid the way
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   checked it, so a different workflow is refused here rather than by
-  tune one tuning run later.
+  tune one tuning run later. For a
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  result the workflow has no marker, and one carrying a marker is
+  refused here with class `nestedtune_tuned_workflow`, as that
+  orchestrator refused it.
 
 - results:
 
@@ -40,9 +47,10 @@ nested_final_fit(object, results, ...)
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
   [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-  or
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
   [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  or
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   whose estimate you will report for this model. Everything the re-run
   needs is read from it: the design's inner resampling specification,
   recorded on the result as the design stored it; the data, which every
@@ -96,7 +104,14 @@ directly, and
 returns the workflow itself), `selected` (the parameters chosen),
 `tuning` (the tuning run they were chosen from), `tuning_seed` and
 `fit_seed` (the two seeds that reproduce it), and `procedure` (the
-record re-run, as `results` carried it).
+record re-run, as `results` carried it). From a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+result, `selected` is an empty table, `tuning` is `NULL`, and
+[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+and
+[`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
+refuse the object with class `nestedtune_no_tuning_run`; its print says
+no tuning ran.
 
 ## Details
 
@@ -197,6 +212,13 @@ orchestrator forces already applied:
     set.seed(fit$fit_seed, kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     fit(final, data)
+
+A result from
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+re-runs no tuning call. Both seeds are still drawn, so the object's seed
+layout is the one above; the first is consumed by nothing, the inner
+specification is not re-evaluated, and the whole recipe is
+`fit(object, data)` under the second seed.
 
 Building the resamples sits *inside* the first seed's scope, not before
 it: constructing an `rset` draws from the generator, so a version that

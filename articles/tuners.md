@@ -10,7 +10,13 @@ simulated annealing, and each has a driver here that takes the same
 design and workflow and returns the same kind of object. This page runs
 all four on the guide’s example, shows what each fold records about its
 search, shows how a tune control object reaches the inner call, and says
-what differs from calling tune or finetune directly.
+what differs from calling tune or finetune directly. A workflow with
+nothing to tune takes none of the five: each refuses it at entry and
+names
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
+which
+[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
+shows scoring a fixed workflow on the same design.
 
 ``` r
 
@@ -429,14 +435,16 @@ table, the whole grid for a race, and `.selected` is the candidate the
 `select` rule picked on it by the first metric: `selection_rule("best")`
 by default, or tune’s one-standard-error or percent-loss rule with the
 parameter orderings the rule names. The rule is recorded with the
-procedure, and the final fit selects by it. So a control’s `extract`,
-`save_pred` and `save_workflow` slots cost their work inside every fold
-and return nothing on a nested run. The final fit keeps its tuning run
-whole, and that is where those slots’ results are reachable. The
-annealing control’s `save_history` slot writes finetune’s search history
-to a file in the temporary directory of the process that tuned, each
-fold overwriting the last, and nothing of it reaches the result or the
-final fit.
+procedure, and the final fit selects by it. So a control’s
+`save_workflow` slot costs its work inside every fold and returns
+nothing on a nested run, and `extract` and `save_pred` reach the result
+through the outer fit alone: a fold’s `.predictions` and `.extracts` are
+what its outer fit produced, never the inner run’s. The final fit keeps
+its tuning run whole, and that is where the inner run’s results are
+reachable. The annealing control’s `save_history` slot writes finetune’s
+search history to a file in the temporary directory of the process that
+tuned, each fold overwriting the last, and nothing of it reaches the
+result or the final fit.
 
 The racing and annealing drivers refuse at entry when a package their
 search needs is not installed, rather than one outer loop’s worth of

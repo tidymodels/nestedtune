@@ -87,17 +87,20 @@ rather than silently ignored.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The stored record, unchanged: a flat named list with <code>tuner</code>, the
 name of the tune or finetune function that ran (<code>"tune_grid"</code>,
-<code>"tune_bayes"</code>, <code>"tune_race_anova"</code>, <code>"tune_race_win_loss"</code> or
-<code>"tune_sim_anneal"</code>); that tuner's own arguments (<code>grid</code> for the grid and
+<code>"tune_bayes"</code>, <code>"tune_race_anova"</code>, <code>"tune_race_win_loss"</code>,
+<code>"tune_sim_anneal"</code>, or <code>"fit_resamples"</code> from <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>);
+that tuner's own arguments (<code>grid</code> for the grid and
 racing tuners; <code>iter</code>, <code>initial</code> and <code>objective</code> for the Bayesian tuner;
-<code>iter</code> and <code>initial</code> for simulated annealing); the arguments every
-orchestrator shares, <code>param_info</code>, <code>event_level</code>, <code>eval_time</code> and
-<code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> each fold selected by, as they were
-given; and <code>control</code>, the control object the run was given, or
-tune's default when none was, with the slots this package forces already
-applied, and on a Bayesian result with <code>seed</code> left out. See "Differences
-from calling tune directly" on each orchestrator's help page for what
-those slots are.</p>
+<code>iter</code> and <code>initial</code> for simulated annealing; none for the plain fit);
+the arguments every orchestrator shares, <code>param_info</code>, <code>event_level</code>,
+<code>eval_time</code> and <code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> each fold selected by,
+as they were given; and <code>control</code>, the control object the run was given,
+or tune's default when none was, with the slots this package forces
+already applied, and on a Bayesian result with <code>seed</code> left out. A
+<code>"fit_resamples"</code> record carries no <code>param_info</code> and no <code>select</code>: no
+parameter set was read and no rule applied. See "Differences from
+calling tune directly" on each orchestrator's help page for what those
+slots are.</p>
 <p>On a <code>nested_results</code> the record travels as an attribute of the object;
 on a <code>nested_final_fit</code> it is the record the fit re-ran, which is the
 record of the results object it was built from.</p>

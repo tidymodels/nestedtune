@@ -99,7 +99,11 @@ operation on the result may do.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with at least one parameter marked
-for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>.</p></dd>
+for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>. A workflow with no marker is refused at
+entry, before any fold runs, with condition class
+<code>nestedtune_untuned_workflow</code>: there is nothing for the inner loop to
+search, and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores a fixed workflow on the same
+nested design instead.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>

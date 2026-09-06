@@ -62,7 +62,7 @@
       </dl></div><div class="section level2">
       <h2 id="running-the-loop">Running the loop<a class="anchor" aria-label="anchor" href="#running-the-loop"></a></h2>
 
-      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose.</p></div>
+      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose; or score a workflow with nothing to tune on the same outer splits.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -96,6 +96,13 @@
 
         </dt>
         <dd>Run the nested cross-validation loop with simulated annealing inside</dd>
+
+        <dt>
+
+          <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
+
+        </dt>
+        <dd>Score a workflow with nothing to tune on the outer folds of a nested design</dd>
 
         <dt>
 

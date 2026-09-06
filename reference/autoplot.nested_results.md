@@ -27,8 +27,9 @@ autoplot(object, type = c("parameters", "performance"), ...)
 
   A `nested_results` object from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or
-  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md).
+  or one of its siblings,
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  included.
 
 - type:
 
@@ -55,7 +56,11 @@ completed is refused with condition class
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-refuse it.
+refuse it. A run in which no completed fold recorded a selected
+parameter – a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+result – is refused under `type = "parameters"` with condition class
+`nestedtune_no_tuned_parameters`, and `type = "performance"` draws it.
 
 The subtitle states how much of the requested design ran. Contribution
 is counted per panel instead, because it differs between them: a panel

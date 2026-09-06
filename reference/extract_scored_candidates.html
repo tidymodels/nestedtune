@@ -94,7 +94,9 @@ tune wrote per metric is dropped: <code>.metric</code>, <code>.estimator</code>,
 <code>std_err</code>, and on a fit that scored a dynamic survival metric the
 <code>.eval_time</code> column, so a candidate has one row here however many
 evaluation times it was scored at. The times and the scores are in
-<code>collect_metrics(extract_tune_results(x))</code>.</p>
+<code>collect_metrics(extract_tune_results(x))</code>. A fit built from a
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> result scored no candidate and is refused with
+condition class <code>nestedtune_no_tuning_run</code>.</p>
 <p>This is what was <strong>scored</strong>, not what was <strong>asked for</strong>. A <code>grid</code> given as
 a size is expanded by tune and may reach fewer candidates than the number
 requested; a candidate that failed everywhere scored nothing. See the

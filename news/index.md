@@ -2,6 +2,46 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  scores a workflow with nothing to tune on the outer folds of a nested
+  design: the same outer loop as
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  with the inner stage removed, so a fixed workflow and a tuned one run
+  on identical outer folds and their per-fold metrics join by fold
+  label. It is shaped like
+  [`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
+  (`metrics`, `event_level`, `eval_time`, and a
+  [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html)
+  through `...`), and returns a `nested_results` whose record says no
+  tuning ran: `.selected` is an empty table on every completed fold,
+  `.inner_metrics` a zero-row table, and `extract_procedure(res)` names
+  the tuner `"fit_resamples"` with no `grid`, `param_info` or `select`.
+  Every reader answers on it;
+  [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
+  [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+  and
+  [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+  return zero rows, and `autoplot(type = "parameters")` refuses with
+  class `nestedtune_no_tuned_parameters`.
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  accepts the result and fits the workflow as given on every row;
+  [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+  and
+  [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
+  refuse that fit with class `nestedtune_no_tuning_run`.
+
+- The five tuning orchestrators refuse a workflow with no
+  [`tune()`](https://hardhat.tidymodels.org/reference/tune.html) marker
+  at entry, with class `nestedtune_untuned_workflow`, naming
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md);
+  before, such a workflow ran through
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  with tune’s warning on every fold and failed every fold on the
+  iterating tuners.
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  refuses a workflow carrying a marker with class
+  `nestedtune_tuned_workflow`, naming the five.
+
 - A `select` argument on
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),

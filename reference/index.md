@@ -12,7 +12,8 @@ the data for every outer fold.
 ## Running the loop
 
 Tune on each outer fold’s inner resamples, select, then fit and score on
-the outer split, and keep what each fold chose.
+the outer split, and keep what each fold chose; or score a workflow with
+nothing to tune on the same outer splits.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   : Run the nested cross-validation loop
@@ -24,6 +25,9 @@ the outer split, and keep what each fold chose.
   : Run the nested cross-validation loop with racing inside
 - [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
   : Run the nested cross-validation loop with simulated annealing inside
+- [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  : Score a workflow with nothing to tune on the outer folds of a nested
+  design
 - [`collect_metrics(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
   : Collect the metrics from a nested resampling run
 - [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)

@@ -30,7 +30,10 @@ extract_tune_results(x, ...)
 ## Value
 
 The stored `tune_results` object, unchanged. It is tune's own object, so
-tune's generics apply to it directly.
+tune's generics apply to it directly. A fit built from a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+result ran no tuning and is refused with condition class
+`nestedtune_no_tuning_run`.
 
 ## What its numbers are, and are not
 

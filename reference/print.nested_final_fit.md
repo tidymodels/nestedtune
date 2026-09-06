@@ -18,7 +18,14 @@ candidates scored and requested, and the iterations completed and
 requested, since
 [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
 may score fewer initial candidates than `initial` names and stop short
-of `iter`.
+of `iter`. A fit built from a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+result ran no search: its procedure line reads "no tuning", its
+selection line "nothing to select", and the note says that
+[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+and
+[`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
+refuse it.
 
 ## Usage
 

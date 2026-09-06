@@ -34,6 +34,11 @@ nested_tune_grid(
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html).
+  A workflow with no marker is refused at entry, before any fold runs,
+  with condition class `nestedtune_untuned_workflow`: there is nothing
+  for the inner loop to search, and
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  scores a fixed workflow on the same nested design instead.
 
 - resamples:
 
@@ -335,7 +340,12 @@ and
 and for simulated annealing – finetune perturbing the current candidate
 one iteration at a time – see
 [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md).
-Each runs this same outer loop with the inner tuner swapped.
+Each runs this same outer loop with the inner tuner swapped. For a
+workflow with nothing to tune – the baseline a tuned procedure is
+compared against – see
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
+which runs the same outer loop with the inner stage removed and refuses
+a workflow carrying a marker.
 
 ## Reproducibility
 

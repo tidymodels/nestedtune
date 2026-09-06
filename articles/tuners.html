@@ -89,7 +89,11 @@ simulated annealing, and each has a driver here that takes the same
 design and workflow and returns the same kind of object. This page runs
 all four on the guide’s example, shows what each fold records about its
 search, shows how a tune control object reaches the inner call, and says
-what differs from calling tune or finetune directly.</p>
+what differs from calling tune or finetune directly. A workflow with
+nothing to tune takes none of the five: each refuses it at entry and
+names <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code>, which
+<code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> shows scoring a fixed workflow on the
+same design.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
@@ -473,14 +477,17 @@ the candidate the <code>select</code> rule picked on it by the first
 metric: <code>selection_rule("best")</code> by default, or tune’s
 one-standard-error or percent-loss rule with the parameter orderings the
 rule names. The rule is recorded with the procedure, and the final fit
-selects by it. So a control’s <code>extract</code>,
-<code>save_pred</code> and <code>save_workflow</code> slots cost their
-work inside every fold and return nothing on a nested run. The final fit
-keeps its tuning run whole, and that is where those slots’ results are
-reachable. The annealing control’s <code>save_history</code> slot writes
-finetune’s search history to a file in the temporary directory of the
-process that tuned, each fold overwriting the last, and nothing of it
-reaches the result or the final fit.</p>
+selects by it. So a control’s <code>save_workflow</code> slot costs its
+work inside every fold and returns nothing on a nested run, and
+<code>extract</code> and <code>save_pred</code> reach the result through
+the outer fit alone: a fold’s <code>.predictions</code> and
+<code>.extracts</code> are what its outer fit produced, never the inner
+run’s. The final fit keeps its tuning run whole, and that is where the
+inner run’s results are reachable. The annealing control’s
+<code>save_history</code> slot writes finetune’s search history to a
+file in the temporary directory of the process that tuned, each fold
+overwriting the last, and nothing of it reaches the result or the final
+fit.</p>
 <p>The racing and annealing drivers refuse at entry when a package their
 search needs is not installed, rather than one outer loop’s worth of
 work later when finetune would ask for it, and the racers refuse a

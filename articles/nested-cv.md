@@ -312,6 +312,105 @@ autoplot(res, type = "performance")
 dashed line at the mean across
 folds.](nested-cv_files/figure-html/autoplot-performance-1.png)
 
+## A baseline on the same folds
+
+A tuned procedure is usually compared against something simpler: the
+same model with its parameters fixed.
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+scores such a workflow on the same nested design. It runs the same outer
+loop with the inner stage removed, so each fold fits the workflow as
+given on its analysis rows and scores it once on its assessment rows,
+and the record says no tuning ran. A plain `rset` of the outer folds
+would serve a baseline on its own. What the nested design buys is that
+the two runs score on identical folds.
+
+``` r
+
+fixed_rf <- rand_forest(mtry = 2L, min_n = 10L, trees = 500) |>
+  set_engine("ranger") |>
+  set_mode("regression")
+
+set.seed(2)
+baseline <- nested_fit_resamples(workflow(mpg ~ ., fixed_rf), folds)
+
+extract_procedure(baseline)$tuner
+#> [1] "fit_resamples"
+collect_metrics(baseline)
+#> # A tibble: 2 × 5
+#>   .metric .estimator  mean     n std_err
+#>   <chr>   <chr>      <dbl> <int>   <dbl>
+#> 1 rmse    standard   2.75      5  0.576 
+#> 2 rsq     standard   0.827     5  0.0274
+```
+
+Under the same seed the two runs share each fold’s outer-fit seed, and
+every reader answers on the baseline. Its `.selected` column holds an
+empty table on every fold, since nothing was chosen, and
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+and
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+return zero rows:
+
+``` r
+
+collect_selections(baseline)
+#> # A tibble: 0 × 1
+#> # ℹ 1 variable: id <chr>
+agreement(baseline)
+#> # A tibble: 0 × 2
+#> # ℹ 2 variables: n <int>, prop <dbl>
+```
+
+The per-fold metrics join by fold label:
+
+``` r
+
+per_fold |>
+  filter(.metric == "rmse") |>
+  select(id, tuned = .estimate) |>
+  left_join(
+    collect_metrics(baseline, summarize = FALSE) |>
+      filter(.metric == "rmse") |>
+      select(id, fixed = .estimate),
+    by = "id"
+  )
+#> # A tibble: 5 × 3
+#>   id    tuned fixed
+#>   <chr> <dbl> <dbl>
+#> 1 Fold1  1.23  1.83
+#> 2 Fold2  3.22  3.85
+#> 3 Fold3  2.48  1.81
+#> 4 Fold4  1.83  1.82
+#> 5 Fold5  3.69  4.43
+```
+
+Read the table fold by fold rather than as one difference. Two nested
+estimates cannot be subtracted to compare procedures, for the reasons
+[`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
+gives, and a fold where the two disagree is what the shared design is
+built to show.
+
+The two doors are exclusive. A workflow carrying a
+[`tune()`](https://hardhat.tidymodels.org/reference/tune.html) marker is
+refused by
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
+and a workflow with none is refused by
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and its siblings, each naming the other:
+
+``` r
+
+nested_fit_resamples(wf, folds)
+#> Error in `nested_fit_resamples()`:
+#> ! `object` has 2 parameters marked for tuning: "mtry" and
+#>   "min_n".
+#> ✖ `nested_fit_resamples()` runs no inner tuning, so a marked parameter
+#>   would never be finalized.
+#> ℹ Tune it with `nested_tune_grid()`, `nested_tune_bayes()`,
+#>   `nested_tune_race_anova()`, `nested_tune_race_win_loss()` or
+#>   `nested_tune_sim_anneal()`, or fix its value in the workflow.
+```
+
 ## The model you deploy
 
 Nothing above produced a model you can predict with, and that is

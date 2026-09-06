@@ -337,6 +337,85 @@ estimate cannot drift apart.</p>
 <p><img src="nested-cv_files/figure-html/autoplot-performance-1.png" class="r-plt" alt="One panel per metric, with one point per outer fold's score and a dashed line at the mean across folds." width="672"></p>
 </div>
 <div class="section level2">
+<h2 id="a-baseline-on-the-same-folds">A baseline on the same folds<a class="anchor" aria-label="anchor" href="#a-baseline-on-the-same-folds"></a>
+</h2>
+<p>A tuned procedure is usually compared against something simpler: the
+same model with its parameters fixed.
+<code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> scores such a workflow on the same
+nested design. It runs the same outer loop with the inner stage removed,
+so each fold fits the workflow as given on its analysis rows and scores
+it once on its assessment rows, and the record says no tuning ran. A
+plain <code>rset</code> of the outer folds would serve a baseline on its
+own. What the nested design buys is that the two runs score on identical
+folds.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fixed_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mtry <span class="op">=</span> <span class="fl">2L</span>, min_n <span class="op">=</span> <span class="fl">10L</span>, trees <span class="op">=</span> <span class="fl">500</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">baseline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_fit_resamples.html">nested_fit_resamples</a></span><span class="op">(</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">fixed_rf</span><span class="op">)</span>, <span class="va">folds</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/extract_procedure.html">extract_procedure</a></span><span class="op">(</span><span class="va">baseline</span><span class="op">)</span><span class="op">$</span><span class="va">tuner</span></span>
+<span><span class="co">#&gt; [1] "fit_resamples"</span></span>
+<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">baseline</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
+<span><span class="co">#&gt;   .metric .estimator  mean     n std_err</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rmse    standard   2.75      5  0.576 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> rsq     standard   0.827     5  0.027<span style="text-decoration: underline;">4</span></span></span></code></pre></div>
+<p>Under the same seed the two runs share each fold’s outer-fit seed,
+and every reader answers on the baseline. Its <code>.selected</code>
+column holds an empty table on every fold, since nothing was chosen, and
+<code><a href="../reference/collect_selections.html">collect_selections()</a></code> and <code><a href="../reference/agreement.html">agreement()</a></code> return
+zero rows:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">baseline</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 variable: id &lt;chr&gt;</span></span></span>
+<span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">baseline</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 variables: n &lt;int&gt;, prop &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The per-fold metrics join by fold label:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">per_fold</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">id</span>, tuned <span class="op">=</span> <span class="va">.estimate</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">baseline</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu">select</span><span class="op">(</span><span class="va">id</span>, fixed <span class="op">=</span> <span class="va">.estimate</span><span class="op">)</span>,</span>
+<span>    by <span class="op">=</span> <span class="st">"id"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
+<span><span class="co">#&gt;   id    tuned fixed</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Fold1  1.23  1.83</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Fold2  3.22  3.85</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Fold3  2.48  1.81</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Fold4  1.83  1.82</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Fold5  3.69  4.43</span></span></code></pre></div>
+<p>Read the table fold by fold rather than as one difference. Two nested
+estimates cannot be subtracted to compare procedures, for the reasons
+<code><a href="../articles/estimate.html">vignette("estimate")</a></code> gives, and a fold where the two
+disagree is what the shared design is built to show.</p>
+<p>The two doors are exclusive. A workflow carrying a
+<code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune()</a></code> marker is refused by
+<code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code>, and a workflow with none is refused
+by <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> and its siblings, each naming the
+other:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/nested_fit_resamples.html">nested_fit_resamples</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `nested_fit_resamples()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `object` has 2 parameters marked for tuning: <span style="color: #0000BB;">"mtry"</span> and</span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">"min_n"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> `nested_fit_resamples()` runs no inner tuning, so a marked parameter</span></span>
+<span><span class="co">#&gt;   would never be finalized.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Tune it with `nested_tune_grid()`, `nested_tune_bayes()`,</span></span>
+<span><span class="co">#&gt;   `nested_tune_race_anova()`, `nested_tune_race_win_loss()` or</span></span>
+<span><span class="co">#&gt;   `nested_tune_sim_anneal()`, or fix its value in the workflow.</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="the-model-you-deploy">The model you deploy<a class="anchor" aria-label="anchor" href="#the-model-you-deploy"></a>
 </h2>
 <p>Nothing above produced a model you can predict with, and that is
@@ -346,7 +425,7 @@ whole dataset in hand. The procedure is read from <code>res</code> (the
 design’s inner resampling specification, the grid, the metrics), so you
 cannot accidentally specify it differently: the model and the estimate
 come from one search.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nested_final_fit.html">nested_final_fit</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">res</span><span class="op">)</span></span>
@@ -373,7 +452,7 @@ across the instability they reveal.</p>
 <p>The object predicts directly. <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and
 <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> on it are the trained workflow’s own methods, and
 <code><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow()</a></code> returns the workflow itself:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final</span>, new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
 <span><span class="co">#&gt;   .pred</span></span>
@@ -385,7 +464,7 @@ across the instability they reveal.</p>
 model’s parameters were selected from, an ordinary tune result, and
 <code>show_best()</code> on it gives the number a user is most tempted
 to report:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_selection</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_tune_results.html">extract_tune_results</a></span><span class="op">(</span><span class="va">final</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">show_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span>, n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -419,11 +498,11 @@ rather than answering them. On the loop’s results they would rank outer
 folds, which is not a ranking of anything a user wants. On the final fit
 there is only one model and nothing to rank, and what they would surface
 is the selection-time score dressed as a performance number.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `show_best()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No `show_best()` exists for this type of object.</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">select_best</span><span class="op">(</span><span class="va">final</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `select_best()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No `select_best()` exists for this type of object.</span></span></code></pre></div>
@@ -450,7 +529,7 @@ function takes a seed of its own. Each draws and pins its own per-step
 seeds from the session state instead, and stores them, so any single
 piece is reproducible by hand. The final fit carries the two seeds too,
 as <code>tuning_seed</code> and <code>fit_seed</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">.tuning_seed</span></span>
 <span><span class="co">#&gt; [1]  794080207 1906307464 2010156236 1118907979 2046114256</span></span>
 <span><span class="va">final</span><span class="op">$</span><span class="va">tuning_seed</span></span>
@@ -459,7 +538,7 @@ as <code>tuning_seed</code> and <code>fit_seed</code>:</p>
 rather than by the order the folds happen to run in, the result does not
 depend on how the loop is scheduled. And the caller’s own random state
 is put back as it was found:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">before</span> <span class="op">&lt;-</span> <span class="va">.Random.seed</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/nested_final_fit.html">nested_final_fit</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">res</span><span class="op">)</span><span class="op">)</span></span>

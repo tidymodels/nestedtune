@@ -15,7 +15,9 @@ which fold it came from.
   [`collect_extracts()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)).
 
 - `collect_selections()` stacks `.selected` over the folds that
-  completed: one row per completed fold.
+  completed: one row per completed fold. A
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  result gives zero rows, since no fold selected anything.
 
 - `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
   completed: one row per candidate (and per metric, and per iteration
