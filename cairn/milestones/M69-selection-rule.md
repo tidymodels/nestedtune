@@ -67,6 +67,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - 2026-09-06: T6 in progress: `devtools::document()` no diff, `air format --check` clean, `pkgdown::check_pkgdown()` clean, `devtools::test()` 7816 passed, 0 failed, 0 warnings, 0 skipped; `devtools::check()` running.
 - 2026-09-06: T6 done: `devtools::check()` 0 errors, 0 warnings, 1 NOTE (`Rplots.pdf` at top level, the gitignored plot-device file a suite run wrote at 10:28 before the check bundled the directory; deleted); status review.
 - 2026-09-06: review checkpoint: PR #79 open as draft; AC3, AC4, AC6 evidenced and ticked; the suite and two reviewers running, `devtools::check()` and AC1, AC2, AC5, AC7 follow.
+- 2026-09-06: review, fix-now from the blame-history lens ahead of the gate: the overlong roxygen line in `R/nested-final-fit.R` re-flowed, DESIGN's orchestration sentence re-worded, `test-fixture-cache.R`'s base request pins `select = selection_rule()` as it pins `eval_time`; `document()` and that test file re-run once the full suite finishes.
 
 ## Decisions
 

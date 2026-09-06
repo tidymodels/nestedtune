@@ -21,8 +21,8 @@
 #' [finetune::tune_sim_anneal()] under the arguments the results object
 #' carries,
 #' selects a candidate by the [selection_rule()] it recorded, finalizes the
-#' workflow, and fits it on all the data. The result is the model to deploy, built by the same search the
-#' estimate you report describes.
+#' workflow, and fits it on all the data. The result is the model to deploy,
+#' built by the same search the estimate you report describes.
 #'
 #' @param object A [workflows::workflow()] with at least one parameter marked
 #'   for tuning with [tune::tune()]: the workflow the nested run was built

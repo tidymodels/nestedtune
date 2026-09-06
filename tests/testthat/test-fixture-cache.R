@@ -268,7 +268,8 @@ test_that("the key separates every formal argument of both orchestrators", {
         grid = det_grid(),
         metrics = reg_metrics(),
         event_level = "first",
-        eval_time = NULL
+        eval_time = NULL,
+        select = selection_rule()
       )
     }
   }

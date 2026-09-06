@@ -69,7 +69,7 @@ naming convention.
   call by an internal *tuner description* — the tune or finetune function's
   name and its static arguments (`R/tuner.R`, D-040), resolved against the
   tuner registry there (M50), and which of tune's three selectors each fold
-  picks by through a `select` argument taking `selection_rule()`, recorded
+  picks by, a `select` argument taking `selection_rule()`, recorded
   in the procedure so the final fit applies it (M69) — plus the `collect_metrics()` method on the
   `nested_results` object both return, `agreement()`, the package-owned
   generic tabulating how often each selected parameter combination was chosen
