@@ -195,7 +195,10 @@ both. \code{eval_time} is offered the same way.
 
 \strong{Refused: none.} No slot is refused on its own. What is refused at entry
 is a control of another class -- a \code{control_bayes()} -- and the
-\code{event_level} conflict above.
+\code{event_level} conflict above. The class is the contract: tune gives
+\code{control_resamples()}, \code{\link[tune:control_grid]{tune::control_grid()}} and \code{\link[tune:control_last_fit]{tune::control_last_fit()}}
+one class, so any of the three is accepted as what \code{control_resamples()}
+returns, its slots read under these headings.
 
 \strong{Passed through: none.} There is no inner tuning call for a slot to be
 passed through to.

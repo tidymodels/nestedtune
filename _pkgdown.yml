@@ -37,7 +37,8 @@ reference:
 - title: Running the loop
   desc: >
     Tune on each outer fold's inner resamples, select, then fit and score on
-    the outer split, and keep what each fold chose.
+    the outer split, and keep what each fold chose; or score a workflow with
+    nothing to tune on the same outer splits.
   contents:
   - nested_tune_grid
   - nested_tune_bayes

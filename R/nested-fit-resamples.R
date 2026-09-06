@@ -126,7 +126,10 @@
 #'
 #' **Refused: none.** No slot is refused on its own. What is refused at entry
 #' is a control of another class -- a `control_bayes()` -- and the
-#' `event_level` conflict above.
+#' `event_level` conflict above. The class is the contract: tune gives
+#' `control_resamples()`, [tune::control_grid()] and [tune::control_last_fit()]
+#' one class, so any of the three is accepted as what `control_resamples()`
+#' returns, its slots read under these headings.
 #'
 #' **Passed through: none.** There is no inner tuning call for a slot to be
 #' passed through to.

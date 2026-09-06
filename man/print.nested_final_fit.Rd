@@ -32,6 +32,10 @@ scored, the search named; for a
 Bayesian one the initial candidates scored and requested, and the
 iterations completed and requested, since \code{\link[tune:tune_bayes]{tune::tune_bayes()}} may score
 fewer initial candidates than \code{initial} names and stop short of \code{iter}.
+A fit built from a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no search: its
+procedure line reads "no tuning", its selection line "nothing to select",
+and the note says that \code{\link[=extract_tune_results]{extract_tune_results()}} and
+\code{\link[=extract_scored_candidates]{extract_scored_candidates()}} refuse it.
 }
 \seealso{
 \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},

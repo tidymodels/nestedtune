@@ -32,7 +32,9 @@
 #'   rather than silently ignored.
 #'
 #' @return The stored `tune_results` object, unchanged. It is tune's own object,
-#'   so tune's generics apply to it directly.
+#'   so tune's generics apply to it directly. A fit built from a
+#'   [nested_fit_resamples()] result ran no tuning and is refused with
+#'   condition class `nestedtune_no_tuning_run`.
 #'
 #' @section What its numbers are, and are not:
 #'
@@ -133,7 +135,9 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'   `std_err`, and on a fit that scored a dynamic survival metric the
 #'   `.eval_time` column, so a candidate has one row here however many
 #'   evaluation times it was scored at. The times and the scores are in
-#'   `collect_metrics(extract_tune_results(x))`.
+#'   `collect_metrics(extract_tune_results(x))`. A fit built from a
+#'   [nested_fit_resamples()] result scored no candidate and is refused with
+#'   condition class `nestedtune_no_tuning_run`.
 #'
 #'   This is what was **scored**, not what was **asked for**. A `grid` given as
 #'   a size is expanded by tune and may reach fewer candidates than the number

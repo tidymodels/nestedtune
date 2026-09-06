@@ -253,7 +253,14 @@ collect_metrics(baseline)
 Under the same seed the two runs share each fold's outer-fit seed, and every
 reader answers on the baseline. Its `.selected` column holds an empty table on
 every fold, since nothing was chosen, and `collect_selections()` and
-`agreement()` return zero rows. The per-fold metrics join by fold label:
+`agreement()` return zero rows:
+
+```{r baseline-empty}
+collect_selections(baseline)
+agreement(baseline)
+```
+
+The per-fold metrics join by fold label:
 
 ```{r baseline-join}
 per_fold |>

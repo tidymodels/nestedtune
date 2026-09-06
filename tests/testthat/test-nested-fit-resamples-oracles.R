@@ -63,6 +63,8 @@ test_that("AC1: every fold's metrics are identical to fit_resamples() on the sam
   expect_true(all(res$.completed))
   for (i in seq_len(nrow(res))) {
     fold_ref <- plain_metrics[plain_metrics$id == outer$id[[i]], ]
+    # The reference must hold both rows, or the loop below asserts nothing.
+    expect_identical(nrow(fold_ref), 2L)
     fold_res <- res$.metrics[[i]]
     # Both metrics, by name, so a fold that scored one and not the other
     # cannot pass on the one it scored.

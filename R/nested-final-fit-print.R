@@ -26,6 +26,10 @@
 #' Bayesian one the initial candidates scored and requested, and the
 #' iterations completed and requested, since [tune::tune_bayes()] may score
 #' fewer initial candidates than `initial` names and stop short of `iter`.
+#' A fit built from a [nested_fit_resamples()] result ran no search: its
+#' procedure line reads "no tuning", its selection line "nothing to select",
+#' and the note says that [extract_tune_results()] and
+#' [extract_scored_candidates()] refuse it.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
 #' @param ... Not used; must be empty. An argument passed here is an error
@@ -104,7 +108,7 @@ print.nested_final_fit <- function(x, ...) {
 #' `summary()` returns an object of class `summary.nested_final_fit`: a list
 #' holding the full-data tuning run's resampling label (`tuning_label`), the
 #' tuner that ran (`tuner`: `"tune_grid"`, `"tune_bayes"`, `"tune_race_anova"`,
-#' `"tune_race_win_loss"` or `"tune_sim_anneal"`), the number of
+#' `"tune_race_win_loss"`, `"tune_sim_anneal"` or `"fit_resamples"`), the number of
 #' candidates that run scored (`candidates`), the iterating tuners' counts
 #' (`initial` and `initial_requested`, `iterations_completed` and
 #' `iterations_requested`, each `NULL` on a grid or a racing fit; the scored figures are
@@ -112,7 +116,9 @@ print.nested_final_fit <- function(x, ...) {
 #' a run whose candidate record cannot be derived reports its scored figures
 #' as zero rather than failing to print), the
 #' parameter values selection chose (`selection`), and an `estimate`
-#' component that is always `NULL`. Printing it is what most callers want;
+#' component that is always `NULL`. A fit built from a
+#' [nested_fit_resamples()] result ran no tuning: its `tuning_label` is
+#' `NULL`, `candidates` is `0` and `selection` is empty. Printing it is what most callers want;
 #' the components are there for a caller that needs a value rather than a
 #' line of text.
 #'
