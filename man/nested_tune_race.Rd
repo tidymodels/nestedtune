@@ -32,7 +32,11 @@ nested_tune_race_win_loss(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused at
+entry, before any fold runs, with condition class
+\code{nestedtune_untuned_workflow}: there is nothing for the inner loop to
+search, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a fixed workflow on the same
+nested design instead.}
 
 \item{resamples}{A nested resampling design, from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}: a data frame whose \code{splits} column holds one

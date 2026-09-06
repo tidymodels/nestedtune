@@ -18,7 +18,11 @@ nested_tune_grid(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused at
+entry, before any fold runs, with condition class
+\code{nestedtune_untuned_workflow}: there is nothing for the inner loop to
+search, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a fixed workflow on the same
+nested design instead.}
 
 \item{resamples}{A nested resampling design, from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}: a data frame whose \code{splits} column holds one
@@ -258,7 +262,10 @@ eliminating candidates as the inner resamples come in -- see
 \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}} and \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}; and for
 simulated annealing -- finetune perturbing the current candidate one
 iteration at a time -- see \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each runs this same
-outer loop with the inner tuner swapped.
+outer loop with the inner tuner swapped. For a workflow with nothing to
+tune -- the baseline a tuned procedure is compared against -- see
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, which runs the same outer loop with the inner
+stage removed and refuses a workflow carrying a marker.
 }
 \section{Reproducibility}{
 
