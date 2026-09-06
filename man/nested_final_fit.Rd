@@ -63,8 +63,8 @@ resampling specification against every row, tunes with \code{\link[tune:tune_gri
 \code{\link[tune:tune_bayes]{tune::tune_bayes()}}, one of finetune's racers or
 \code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}} under the arguments the results object
 carries,
-selects the best candidate, finalizes the workflow, and fits it on all the
-data. The result is the model to deploy, built by the same search the
+selects a candidate by the \code{\link[=selection_rule]{selection_rule()}} it recorded, finalizes the
+workflow, and fits it on all the data. The result is the model to deploy, built by the same search the
 estimate you report describes.
 }
 \details{
@@ -157,6 +157,8 @@ tuned <- tune_bayes(object, inner, iter = iter, initial = initial,
   objective = objective, param_info = param_info, metrics = metrics,
   eval_time = eval_time, control = control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+  # under the recorded default select; select_by_one_std_err() or
+  # select_by_pct_loss() with the recorded orderings and limit otherwise
 set.seed(fit$fit_seed, kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 fit(final, data)

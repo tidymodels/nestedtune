@@ -316,6 +316,7 @@ test_that("a daemon receives the payload the serial branch would have passed", {
       param_info,
       event_level,
       eval_time,
+      select,
       control
     ) {
       list(

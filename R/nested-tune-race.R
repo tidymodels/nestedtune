@@ -85,6 +85,8 @@
 #'                          metrics = metrics, eval_time = eval_time,
 #'                          control = control)   # or tune_race_win_loss()
 #' final <- finalize_workflow(object, select_best(raced, metric = <first metric>))
+#'   # under the default select; select_by_one_std_err() or
+#'   # select_by_pct_loss() with the rule's orderings and limit otherwise
 #' set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -93,7 +95,8 @@
 #' ```
 #'
 #' and `res$.inner_metrics[[i]]` is `collect_metrics(raced, all_configs =
-#' TRUE)`, `res$.selected[[i]]` the `select_best()` above.
+#' TRUE)`, `res$.selected[[i]]` the selection above, under the rule `select`
+#' names.
 #'
 #' The caller's RNG state and generator kind are restored on exit, including
 #' when the call errors. The same seed gives the same result serially and in
@@ -164,6 +167,12 @@
 #' **Inert: `backend_options`.** Options for a parallel backend, with no
 #' backend to reach at `allow_par = FALSE`.
 #'
+#' Selected by `select`, as on [nested_tune_grid()]: each fold picks its
+#' candidate with the selector the [selection_rule()] in `select` names, on
+#' its own inner run and the first metric, [tune::select_best()] by default;
+#' the rule is recorded as `extract_procedure(res)$select` and the final fit
+#' selects by it too.
+#'
 #' @examples
 #' \donttest{
 #' if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) {
@@ -214,7 +223,8 @@ nested_tune_race_anova <- function(
   grid = 10,
   metrics = NULL,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 ) {
   nested_tune_race(
     "tune_race_anova",
@@ -226,6 +236,7 @@ nested_tune_race_anova <- function(
     metrics = metrics,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     call = rlang::current_env()
   )
 }
@@ -240,7 +251,8 @@ nested_tune_race_win_loss <- function(
   grid = 10,
   metrics = NULL,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 ) {
   nested_tune_race(
     "tune_race_win_loss",
@@ -252,6 +264,7 @@ nested_tune_race_win_loss <- function(
     metrics = metrics,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     call = rlang::current_env()
   )
 }
@@ -275,6 +288,7 @@ nested_tune_race <- function(
   metrics,
   event_level,
   eval_time,
+  select,
   call
 ) {
   check_tuner_installed(fn, call = call)
@@ -287,6 +301,7 @@ nested_tune_race <- function(
   check_param_info(param_info, call = call)
   check_event_level(event_level, call = call)
   check_eval_time(eval_time, call = call)
+  check_selection_rule(select, object, call = call)
   control <- check_control(control, fn, event_level, call = call)
   check_race_burn_in(resamples, control, call = call)
 
@@ -298,6 +313,7 @@ nested_tune_race <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control,
     grid = grid,
     call = call

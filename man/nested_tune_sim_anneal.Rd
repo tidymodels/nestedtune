@@ -13,7 +13,8 @@ nested_tune_sim_anneal(
   metrics = NULL,
   initial = 1,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 )
 }
 \arguments{
@@ -73,8 +74,8 @@ holds out, as \code{\link[=nested_tune_grid]{nested_tune_grid()}} describes; \co
 finalizes on the full data.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to use tune's defaults
-for the model's mode. The first metric in the set selects the best inner
-candidate.}
+for the model's mode. The first metric in the set is the one \code{select}
+selects the inner candidate on.}
 
 \item{initial}{The number of candidates to score before the first
 iteration: a single whole number of at least 1, finetune's default. Each
@@ -116,6 +117,17 @@ refuses them all at entry, before a whole run is paid for. Zero, repeated
 times and times out of order are accepted and passed on untouched, since
 tune normalizes those itself; a repeated time draws tune's warning that 0
 inappropriate evaluation time points were removed, once per tune call.}
+
+\item{select}{A \code{\link[=selection_rule]{selection_rule()}}: which of tune's three selectors each
+outer fold picks its candidate with, on that fold's inner tuning run and
+the first metric. The default, \code{selection_rule("best")}, is
+\code{\link[tune:select_best]{tune::select_best()}}; \code{selection_rule("one_std_err", ...)} and
+\code{selection_rule("pct_loss", ..., limit = )} are
+\code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}} and \code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} with
+the parameter orderings in \code{...}. Every name an ordering uses must be a
+parameter \code{object} tunes; anything but a \code{selection_rule()} is refused
+at entry. The rule is recorded, so \code{\link[=nested_final_fit]{nested_final_fit()}} applies the same
+one.}
 }
 \value{
 An object of class \code{nested_results}, one row per outer fold, with
@@ -188,6 +200,8 @@ tuned <- tune_sim_anneal(object, resamples$inner_resamples[[i]],
                          param_info = param_info, metrics = metrics,
                          eval_time = eval_time, control = control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+  # under the default select; select_by_one_std_err() or
+  # select_by_pct_loss() with the rule's orderings and limit otherwise
 set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -196,7 +210,7 @@ last_fit(final, resamples$splits[[i]], metrics = metrics,
 }\if{html}{\out{</div>}}
 
 and \code{res$.inner_metrics[[i]]} is \code{collect_metrics(tuned)},
-\code{res$.selected[[i]]} the \code{select_best()} above.
+\code{res$.selected[[i]]} the selection above, under the rule \code{select} names.
 
 The caller's RNG state and generator kind are restored on exit, including
 when the call errors. The same seed gives the same result serially and in
@@ -272,6 +286,12 @@ every fold overwrites the last one's; nothing of it reaches the result.
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.
+
+Selected by \code{select}, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}: each fold picks its
+candidate with the selector the \code{\link[=selection_rule]{selection_rule()}} in \code{select} names, on
+its own inner run and the first metric, \code{\link[tune:select_best]{tune::select_best()}} by default;
+the rule is recorded as \code{extract_procedure(res)$select} and the final fit
+selects by it too.
 }
 
 \examples{

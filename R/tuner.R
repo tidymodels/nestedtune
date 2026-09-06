@@ -251,8 +251,16 @@ control_class <- function(tuner) {
 # flat named list, so a reader asks `attr(x, "procedure")$iter` rather than
 # walking a nested description, and so the record reads the same whichever
 # tuner ran. `control` is the effective control (D-042), so a later final fit
-# re-runs under exactly what ran.
-new_procedure <- function(tuner, param_info, event_level, eval_time, control) {
+# re-runs under exactly what ran, and `select` the selection rule (M69), so it
+# selects by the rule the folds selected by.
+new_procedure <- function(
+  tuner,
+  param_info,
+  event_level,
+  eval_time,
+  select,
+  control
+) {
   c(
     list(tuner = tuner$tuner),
     tuner$args,
@@ -260,19 +268,27 @@ new_procedure <- function(tuner, param_info, event_level, eval_time, control) {
       param_info = param_info,
       event_level = event_level,
       eval_time = eval_time,
+      select = select,
       control = control
     )
   )
 }
 
 # The tuner description rebuilt from a results object's record, for the final
-# fit (D-041): the record is the description plus the four shared arguments,
+# fit (D-041): the record is the description plus the five shared arguments,
 # so everything that is neither the tuner's name nor one of those is the
 # tuner's own argument. Read by name rather than by position so a record
 # whose shared arguments were reordered still rebuilds the same description.
-# `control` is shared, so the final fit passes it once, as its own argument,
-# and never a second time inside the description.
+# `control` and `select` are shared, so the final fit passes each once, as
+# its own argument, and never a second time inside the description.
 procedure_tuner <- function(procedure) {
-  shared <- c("tuner", "param_info", "event_level", "eval_time", "control")
+  shared <- c(
+    "tuner",
+    "param_info",
+    "event_level",
+    "eval_time",
+    "select",
+    "control"
+  )
   new_tuner(procedure$tuner, procedure[setdiff(names(procedure), shared)])
 }

@@ -12,7 +12,8 @@ nested_tune_grid(
   grid = 10,
   metrics = NULL,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 )
 }
 \arguments{
@@ -73,8 +74,8 @@ anything is fitted: every column must name a parameter marked with
 \code{\link[tune:tune]{tune::tune()}}, and every such parameter must have a column.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to use tune's defaults
-for the model's mode. The first metric in the set selects the best inner
-candidate.}
+for the model's mode. The first metric in the set is the one \code{select}
+selects the inner candidate on.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which level
 of a two-class outcome factor is the event. It reaches both loops: the
@@ -107,6 +108,17 @@ refuses them all at entry, before a whole run is paid for. Zero, repeated
 times and times out of order are accepted and passed on untouched, since
 tune normalizes those itself; a repeated time draws tune's warning that 0
 inappropriate evaluation time points were removed, once per tune call.}
+
+\item{select}{A \code{\link[=selection_rule]{selection_rule()}}: which of tune's three selectors each
+outer fold picks its candidate with, on that fold's inner tuning run and
+the first metric. The default, \code{selection_rule("best")}, is
+\code{\link[tune:select_best]{tune::select_best()}}; \code{selection_rule("one_std_err", ...)} and
+\code{selection_rule("pct_loss", ..., limit = )} are
+\code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}} and \code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} with
+the parameter orderings in \code{...}. Every name an ordering uses must be a
+parameter \code{object} tunes; anything but a \code{selection_rule()} is refused
+at entry. The rule is recorded, so \code{\link[=nested_final_fit]{nested_final_fit()}} applies the same
+one.}
 }
 \value{
 An object of class \code{nested_results}: one row per outer fold, with the
@@ -127,9 +139,11 @@ candidate and metric, and tune's \code{.metric}, \code{.estimator}, \code{mean},
 \code{std_err} and \code{.config} columns, with \code{.eval_time} beside them when a
 dynamic survival metric was scored. The candidates a fold searched are the
 table's distinct parameter rows. Ranking those rows on one metric by
-\code{mean} reproduces the fold's \code{.selected} except where candidates tie,
-which \code{\link[tune:select_best]{tune::select_best()}} resolved on the inner run in its own order;
-\code{.selected} records the candidate the fold's outer fit used.
+\code{mean} reproduces the fold's \code{.selected} under the default rule except
+where candidates tie, which \code{\link[tune:select_best]{tune::select_best()}} resolved on the inner
+run in its own order; under another \code{select} it is that selector's
+answer on the same table, and \code{.selected} records the candidate the
+fold's outer fit used either way.
 
 The two diverge routinely, in both directions. A size is expanded by tune
 and may reach fewer candidates than were asked for (a request for 20 on a
@@ -223,8 +237,9 @@ results object; the record is along for the ride.
 \description{
 \code{nested_tune_grid()} drives the outer loop of nested cross-validation. For
 each outer fold it tunes on that fold's inner resamples with
-\code{\link[tune:tune_grid]{tune::tune_grid()}}, selects the best candidate, finalizes the workflow, and
-fits and scores it on the outer split with \code{\link[tune:last_fit]{tune::last_fit()}}. Every step is
+\code{\link[tune:tune_grid]{tune::tune_grid()}}, selects a candidate by the rule \code{select} names,
+finalizes the workflow, and fits and scores it on the outer split with
+\code{\link[tune:last_fit]{tune::last_fit()}}. Every step is
 delegated to tune; what this function contributes is the loop, the
 reproducibility contract, and a results object that keeps each fold's chosen
 parameters rather than discarding them.
@@ -269,6 +284,8 @@ tuned <- tune_grid(object, resamples$inner_resamples[[i]], grid = grid,
                    metrics = metrics, eval_time = eval_time,
                    control = extract_procedure(res)$control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+  # under the default select; select_by_one_std_err() or
+  # select_by_pct_loss() with the rule's orderings and limit otherwise
 set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -529,10 +546,19 @@ run as \verb{$tuning}, where \code{\link[=extract_tune_results]{extract_tune_res
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.
 
-Not passed on: \code{select_best()} is called without \code{eval_time}. Left unset it
-selects at the first of the evaluation times the tuning run was built with,
-which are the ones named here, so naming them twice would change no choice
-and would repeat tune's message about which time it took.
+Not passed on: the selector \code{select} names is called without \code{eval_time}.
+Left unset it selects at the first of the evaluation times the tuning run
+was built with, which are the ones named here, so naming them twice would
+change no choice and would repeat tune's message about which time it took.
+
+Selected by \code{select}: tune leaves the choice of candidate to a call the
+user makes on the tuning result; here it is made inside every fold, so the
+rule is an argument. \code{select} takes what \code{\link[=selection_rule]{selection_rule()}} returns:
+\code{\link[tune:select_best]{tune::select_best()}} by default, or \code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}} or
+\code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} with the orderings and limit the rule
+carries, each on the fold's own inner run with \code{metric} the first metric.
+The result records the rule as \code{extract_procedure(res)$select}, and
+\code{\link[=nested_final_fit]{nested_final_fit()}} selects by it too.
 }
 
 \examples{

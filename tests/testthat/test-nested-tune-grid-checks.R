@@ -930,3 +930,67 @@ test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() de
     expect_identical(res$.completed, c(TRUE, TRUE), info = nm)
   }
 })
+
+# M69: what `select` accepts, refused at entry with the sentinel in place so
+# the refusal is shown to fire before any fold runs.
+
+test_that("`select` must be a selection_rule(), refused before any fold runs (M69, AC4)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- valid_folds(d)
+
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    select = "best"
+  ))
+  expect_grid_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
+  expect_match(conditionMessage(cnd), "a string", fixed = TRUE)
+
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    select = NULL
+  ))
+  expect_grid_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
+
+  # The accepting side reaches the sentinel: the refusal is the check's, not
+  # a fold's.
+  expect_s3_class(
+    grid_refusal(nested_tune_grid(
+      wf,
+      folds,
+      grid = det_grid(),
+      select = selection_rule("one_std_err", num_comp)
+    )),
+    "nestedtune_sentinel"
+  )
+})
+
+test_that("an ordering naming a parameter the workflow does not tune is refused, naming both (M69, AC4)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- valid_folds(d)
+
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    select = selection_rule("one_std_err", desc(nonesuch), num_comp)
+  ))
+  expect_grid_refused(
+    cnd,
+    "nestedtune_selection_rule_unknown_param",
+    "nonesuch"
+  )
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "num_comp", fixed = TRUE)
+  # `desc` is the wrapper, never reported as an unknown parameter.
+  expect_no_match(msg, "\"desc\"")
+})

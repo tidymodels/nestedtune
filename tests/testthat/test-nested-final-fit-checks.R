@@ -167,6 +167,36 @@ test_that("a results object carrying no procedure is refused", {
   )
 })
 
+test_that("a results object whose record holds no selection rule is refused (M69, AC2)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+
+  # Only an object saved before the rule was recorded looks like this; it is
+  # reached here by dropping the entry, which no verb does.
+  res <- final_results(d)
+  procedure <- attr(res, "procedure")
+  procedure$select <- NULL
+  attr(res, "procedure") <- procedure
+  expect_s3_class(res, "nested_results")
+
+  cnd <- expect_bad_results(nested_final_fit(wf, res), "no selection rule")
+  expect_match(conditionMessage(cnd), "earlier version")
+
+  # A rule that is not one -- the entry present but not the constructor's
+  # object -- is the same absence.
+  procedure$select <- "best"
+  attr(res, "procedure") <- procedure
+  expect_bad_results(nested_final_fit(wf, res), "no selection rule")
+
+  # With no procedure at all there is nothing to hold a rule, so the record
+  # reports the procedure and not the rule.
+  attr(res, "procedure") <- NULL
+  cnd <- expect_bad_results(nested_final_fit(wf, res), "no tuning procedure")
+  expect_no_match(conditionMessage(cnd), "selection rule")
+})
+
 test_that("a results object with the record and no rows is refused", {
   skip_if_no_engines()
 

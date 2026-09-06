@@ -45,7 +45,8 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "metrics",
       "initial",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )
   )
   expect_identical(formals(nested_tune_sim_anneal)$iter, 10)
@@ -58,7 +59,8 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "param_info",
       "metrics",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )],
     formals(nested_tune_bayes)[c(
       "object",
@@ -67,7 +69,8 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "param_info",
       "metrics",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )]
   )
 })
@@ -319,4 +322,63 @@ test_that("an annealing run keeps the outer fit's predictions and extracts when 
   # neither column.
   plain <- anneal_results()
   expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
+})
+
+# The selection rule on the annealing path (M69, AC1): the reference loop's
+# selection is tune's selector called by name on the hand run
+# (reference_select(), helper-orchestration.R). On the metric-separating
+# fixture rather than the deterministic one: measured 2026-09-06 under seed
+# 27, best picks 1, 2, 2 there, and one_std_err by num_comp and pct_loss by
+# num_comp at limit 5 both pick 1, 1, 2, where anneal_results()'s fixture
+# picks 4 in every fold under every rule and so could not tell a driver that
+# applied the rule from one that ignored it. Seed 27 rather than the file's
+# 23: under 23 an annealing fold revisits a candidate, two scored rows tie at
+# the best, and tune::select_by_pct_loss() warns ("numerical expression has
+# 2 elements") on the driver and the reference alike (tune 2.1.0).
+
+test_that("AC1: each selection rule picks what tune's selector picks on the fold's annealing run (M69)", {
+  skip_if_no_anneal_fixture()
+
+  d <- sep_data()
+  wf <- sep_workflow(d)
+  folds <- sep_nested(d)
+  ms <- sep_metrics()
+  ctrl <- anneal_control()
+
+  rules <- list(
+    best = selection_rule("best"),
+    one_std_err = selection_rule("one_std_err", num_comp),
+    pct_loss = selection_rule("pct_loss", num_comp, limit = 5)
+  )
+  picked <- list()
+  for (nm in names(rules)) {
+    set.seed(27)
+    res <- nested_tune_sim_anneal(
+      wf,
+      folds,
+      iter = 2,
+      initial = 2,
+      metrics = ms,
+      control = ctrl,
+      select = rules[[nm]]
+    )
+    ref <- reference_nested_anneal_loop(
+      wf,
+      folds,
+      iter = 2,
+      initial = 2,
+      metrics = ms,
+      seed = 27,
+      metric_name = "mae",
+      control = ctrl,
+      select = rules[[nm]]
+    )
+    expect_matches_reference(res, ref)
+    expect_identical(extract_procedure(res)$select, rules[[nm]])
+    picked[[nm]] <- res$.selected
+  }
+
+  # The rule reached the selection (see the note above).
+  expect_false(identical(picked$one_std_err, picked$best))
+  expect_false(identical(picked$pct_loss, picked$best))
 })

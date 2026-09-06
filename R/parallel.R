@@ -200,6 +200,7 @@ dispatch_folds <- function(
   param_info = NULL,
   event_level = "first",
   eval_time = NULL,
+  select = selection_rule(),
   control = NULL,
   call = rlang::caller_env()
 ) {
@@ -214,6 +215,7 @@ dispatch_folds <- function(
       param_info = param_info,
       event_level = event_level,
       eval_time = eval_time,
+      select = select,
       control = control
     ))
   }
@@ -288,6 +290,7 @@ dispatch_folds <- function(
       param_info,
       event_level,
       eval_time,
+      select,
       control,
       shared,
       worker
@@ -301,6 +304,7 @@ dispatch_folds <- function(
         param_info,
         event_level,
         eval_time,
+        select,
         control
       )
     }
@@ -311,6 +315,7 @@ dispatch_folds <- function(
       param_info = param_info,
       event_level = event_level,
       eval_time = eval_time,
+      select = select,
       control = control,
       shared = shared,
       worker = worker
@@ -324,6 +329,7 @@ dispatch_folds <- function(
       param_info = param_info,
       event_level = event_level,
       eval_time = eval_time,
+      select = select,
       control = control
     )
   }
@@ -1216,6 +1222,7 @@ fold_task <- function(
   param_info = NULL,
   event_level = "first",
   eval_time = NULL,
+  select = selection_rule(),
   control = NULL
 ) {
   ns <- asNamespace("nestedtune")
@@ -1229,6 +1236,7 @@ fold_task <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control
   )
 }

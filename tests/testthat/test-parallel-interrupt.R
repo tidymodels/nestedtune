@@ -25,6 +25,7 @@ completed_fold_task <- function(
   param_info,
   event_level,
   eval_time,
+  select,
   control
 ) {
   list(
@@ -64,6 +65,7 @@ test_that("an interrupted run leaves no fold executing", {
       param_info,
       event_level,
       eval_time,
+      select,
       control
     ) {
       file.create(payload$marker)

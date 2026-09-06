@@ -30,6 +30,7 @@ stub_results <- function(
       param_info = NULL,
       event_level = "first",
       eval_time = NULL,
+      select = selection_rule(),
       control = control
     )
   )

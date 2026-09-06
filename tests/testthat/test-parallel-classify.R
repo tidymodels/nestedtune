@@ -814,7 +814,7 @@ test_that("the option, not an argument, is what carries the bound", {
   # signature knobs specifically, which is why the timeout became an option.
   # Recorded literally so growing the signature fails here rather than in
   # review. M34 added the `...` barrier and `param_info`, M35 `event_level` and
-  # M41 `eval_time`, none of which carries a bound: the literal moves when the signature does,
+  # M41 `eval_time` and M69 `select`, none of which carries a bound: the literal moves when the signature does,
   # and the assertion this test exists to make is that nothing here names a
   # daemon count or a timeout.
   expect_identical(
@@ -827,7 +827,8 @@ test_that("the option, not an argument, is what carries the bound", {
       "grid",
       "metrics",
       "event_level",
-      "eval_time"
+      "eval_time",
+      "select"
     )
   )
 })

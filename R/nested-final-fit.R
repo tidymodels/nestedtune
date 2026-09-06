@@ -20,8 +20,8 @@
 #' [tune::tune_bayes()], one of finetune's racers or
 #' [finetune::tune_sim_anneal()] under the arguments the results object
 #' carries,
-#' selects the best candidate, finalizes the workflow, and fits it on all the
-#' data. The result is the model to deploy, built by the same search the
+#' selects a candidate by the [selection_rule()] it recorded, finalizes the
+#' workflow, and fits it on all the data. The result is the model to deploy, built by the same search the
 #' estimate you report describes.
 #'
 #' @param object A [workflows::workflow()] with at least one parameter marked
@@ -158,6 +158,8 @@
 #'   objective = objective, param_info = param_info, metrics = metrics,
 #'   eval_time = eval_time, control = control)
 #' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+#'   # under the recorded default select; select_by_one_std_err() or
+#'   # select_by_pct_loss() with the recorded orderings and limit otherwise
 #' set.seed(fit$fit_seed, kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' fit(final, data)
@@ -279,6 +281,7 @@ nested_final_fit <- function(object, results, ...) {
     param_info = procedure$param_info,
     event_level = procedure$event_level,
     eval_time = procedure$eval_time,
+    select = procedure$select,
     control = procedure$control,
     call = rlang::current_env()
   )
@@ -307,6 +310,7 @@ final_fit_worker <- function(
   param_info = NULL,
   event_level = "first",
   eval_time = NULL,
+  select = selection_rule(),
   control = NULL,
   call = rlang::caller_env()
 ) {
@@ -336,10 +340,11 @@ final_fit_worker <- function(
   # Resolved from the tuned object rather than from `metrics`, so the same code
   # answers whether the caller supplied a metric set or let tune pick.
   metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
-  # Not passed on, for the reason `nested_fold_fit()` gives at the same call
+  # The recorded rule (M69), applied as every fold applied it. `eval_time` is
+  # not passed on, for the reason `nested_fold_fit()` gives at the same call
   # (D-038): left NULL, tune reads the evaluation times off `tuned` -- the ones
   # this run was tuned at -- and selects at the first of them either way.
-  selected <- tune::select_best(tuned, metric = metric_name)
+  selected <- apply_selection_rule(tuned, select, metric_name)
   final_wf <- tune::finalize_workflow(object, selected)
 
   set_fold_seed(seeds[[2L]])
@@ -353,6 +358,7 @@ final_fit_worker <- function(
     param_info = param_info,
     event_level = event_level,
     eval_time = eval_time,
+    select = select,
     control = control
   )
   new_nested_final_fit(fitted, selected, tuned, seeds, procedure)

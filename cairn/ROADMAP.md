@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-06 (status audit after the same-day triage pass: no
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | planned | — | normal | milestones/M69-selection-rule.md |
+| M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | in-progress | — | normal | milestones/M69-selection-rule.md |
 | M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
 | M67 | `extract_procedure()` reaches the `procedure` record on both objects, and the em dashes leave the package's user-facing text | done | — | normal | milestones/archive/M67-extract-procedure.md |
 | M65 | Three readers stack a per-fold list column with the fold labels beside it: `collect_notes()`, `collect_selections()` and `collect_inner_metrics()` | done | — | normal | milestones/archive/M65-collect-readers.md |

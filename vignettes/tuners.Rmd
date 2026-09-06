@@ -357,7 +357,11 @@ result, which tune and finetune both accept there, is refused.
 
 What comes back from the inner call is its metrics table and its selection,
 never the tuning object itself. `.inner_metrics` is that table, the whole
-grid for a race, and `.selected` is the best candidate by the first metric.
+grid for a race, and `.selected` is the candidate the `select` rule picked
+on it by the first metric: `selection_rule("best")` by default, or tune's
+one-standard-error or percent-loss rule with the parameter orderings the
+rule names. The rule is recorded with the procedure, and the final fit
+selects by it.
 So a control's `extract`, `save_pred` and `save_workflow` slots cost their
 work inside every fold and return nothing on a nested run. The final fit
 keeps its tuning run whole, and that is where those slots' results are
