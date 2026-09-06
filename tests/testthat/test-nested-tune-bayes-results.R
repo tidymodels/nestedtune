@@ -363,3 +363,34 @@ test_that("a Bayesian fold that scored nothing carries a zero-row table with .it
     vapply(done, function(col) class(col)[[1L]], character(1))
   )
 })
+
+# ---- the outer fit's predictions and extracts (M68) --------------------------
+
+test_that("a Bayesian run keeps the outer fit's predictions and extracts when the control asks (AC1, AC2)", {
+  skip_if_no_bayes_fixture()
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  # Built under a fixed seed, for ac1_control()'s reason.
+  set.seed(1)
+  ctrl <- tune::control_bayes(save_pred = TRUE, extract = coef_extract)
+  set.seed(20)
+  res <- memoised(nested_tune_bayes(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    param_info = p,
+    metrics = ms,
+    control = ctrl
+  ))
+
+  expect_outer_columns_kept(res)
+  # The passing control: the suite's run under the default control carries
+  # neither column.
+  plain <- bayes_results()
+  expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
+})

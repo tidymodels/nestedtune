@@ -289,3 +289,34 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
     tune::select_best(tuned, metric = "rmse")
   )
 })
+
+# ---- the outer fit's predictions and extracts (M68) --------------------------
+
+test_that("an annealing run keeps the outer fit's predictions and extracts when the control asks (AC1, AC2)", {
+  skip_if_no_anneal_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- det_nested(d)
+  ms <- reg_metrics()
+  ctrl <- finetune::control_sim_anneal(
+    verbose_iter = FALSE,
+    save_pred = TRUE,
+    extract = coef_extract
+  )
+  set.seed(20)
+  res <- memoised(nested_tune_sim_anneal(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    metrics = ms,
+    control = ctrl
+  ))
+
+  expect_outer_columns_kept(res)
+  # The passing control: the suite's run under `anneal_control()` carries
+  # neither column.
+  plain <- anneal_results()
+  expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
+})
