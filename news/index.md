@@ -2,6 +2,38 @@
 
 ## nestedtune 0.0.0.9000
 
+- A `select` argument on
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+  and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  names the rule each outer fold selects its candidate by. It takes the
+  new
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md):
+  `"best"` (the default,
+  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html)),
+  or `"one_std_err"` and `"pct_loss"`
+  ([`tune::select_by_one_std_err()`](https://tune.tidymodels.org/reference/show_best.html)
+  and
+  [`tune::select_by_pct_loss()`](https://tune.tidymodels.org/reference/show_best.html))
+  with the parameter orderings as bare expressions and, for the
+  percent-loss rule, a `limit`. Each fold applies the rule to its own
+  inner run on the first metric; the rule is recorded as
+  `extract_procedure(res)$select`, and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  selects by the recorded rule. The constructor refuses a rule outside
+  the three, an ordering with `"best"` or none with the other two, and a
+  `limit` outside the percent-loss rule or that is not a single
+  non-negative number; the orchestrators refuse anything but a
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  and an ordering naming a parameter the workflow does not tune, at
+  entry. A results object saved before the rule was recorded is refused
+  by
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  with class `nestedtune_bad_results`.
+
 - `save_pred` and `extract` on a control passed through `...` now reach
   the outer fit. With `save_pred = TRUE` the results object carries a
   `.predictions` list column, each completed fold’s predictions on its

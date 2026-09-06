@@ -102,7 +102,8 @@ operation on the result may do.</p>
 <span>  grid <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  event_level <span class="op">=</span> <span class="st">"first"</span>,</span>
-<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  select <span class="op">=</span> <span class="fu"><a href="selection_rule.html">selection_rule</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nested_tune_race_win_loss</span><span class="op">(</span></span>
@@ -113,7 +114,8 @@ operation on the result may do.</p>
 <span>  grid <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  event_level <span class="op">=</span> <span class="st">"first"</span>,</span>
-<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  select <span class="op">=</span> <span class="fu"><a href="selection_rule.html">selection_rule</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -187,8 +189,8 @@ checked against the workflow before anything is fitted, as on
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
 <dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> to use tune's defaults
-for the model's mode. The first metric in the set selects the best inner
-candidate.</p></dd>
+for the model's mode. The first metric in the set is the one <code>select</code>
+selects the inner candidate on.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
@@ -224,6 +226,19 @@ refuses them all at entry, before a whole run is paid for. Zero, repeated
 times and times out of order are accepted and passed on untouched, since
 tune normalizes those itself; a repeated time draws tune's warning that 0
 inappropriate evaluation time points were removed, once per tune call.</p></dd>
+
+
+<dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
+<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code>: which of tune's three selectors each
+outer fold picks its candidate with, on that fold's inner tuning run and
+the first metric. The default, <code>selection_rule("best")</code>, is
+<code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code>; <code>selection_rule("one_std_err", ...)</code> and
+<code>selection_rule("pct_loss", ..., limit = )</code> are
+<code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_by_one_std_err()</a></code> and <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_by_pct_loss()</a></code> with
+the parameter orderings in <code>...</code>. Every name an ordering uses must be a
+parameter <code>object</code> tunes; anything but a <code><a href="selection_rule.html">selection_rule()</a></code> is refused
+at entry. The rule is recorded, so <code><a href="nested_final_fit.html">nested_final_fit()</a></code> applies the same
+one.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -282,12 +297,15 @@ is exactly (with <code>resamples$inner_resamples[[i]]</code> read as
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                         <span class="at">metrics =</span> metrics, <span class="at">eval_time =</span> eval_time,</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>                         <span class="at">control =</span> control)   <span class="co"># or tune_race_win_loss()</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">finalize_workflow</span>(object, <span class="fu">select_best</span>(raced, <span class="at">metric =</span> <span class="sc">&lt;</span>first metric<span class="sc">&gt;</span>))</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">set.seed</span>(res<span class="sc">$</span>.outer_fit_seed[[i]], <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">last_fit</span>(final, resamples<span class="sc">$</span>splits[[i]], <span class="at">metrics =</span> metrics,</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>         <span class="at">eval_time =</span> eval_time,</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>         <span class="at">control =</span> <span class="fu">control_last_fit</span>(<span class="at">event_level =</span> event_level))</span></code></pre><p></p></div>
-<p>and <code>res$.inner_metrics[[i]]</code> is <code>collect_metrics(raced, all_configs = TRUE)</code>, <code>res$.selected[[i]]</code> the <code>select_best()</code> above.</p>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="co"># under the default select; select_by_one_std_err() or</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="co"># select_by_pct_loss() with the rule's orderings and limit otherwise</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">set.seed</span>(res<span class="sc">$</span>.outer_fit_seed[[i]], <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">last_fit</span>(final, resamples<span class="sc">$</span>splits[[i]], <span class="at">metrics =</span> metrics,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>         <span class="at">eval_time =</span> eval_time,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>         <span class="at">control =</span> <span class="fu">control_last_fit</span>(<span class="at">event_level =</span> event_level))</span></code></pre><p></p></div>
+<p>and <code>res$.inner_metrics[[i]]</code> is <code>collect_metrics(raced, all_configs = TRUE)</code>, <code>res$.selected[[i]]</code> the selection above, under the rule <code>select</code>
+names.</p>
 <p>The caller's RNG state and generator kind are restored on exit, including
 when the call errors. The same seed gives the same result serially and in
 parallel, at any number of daemons – provided every daemon's library holds
@@ -351,6 +369,11 @@ it costs the work and returns nothing; the final fit keeps its race as
 <code>$tuning</code>, where what it saved is reachable.</p>
 <p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
 backend to reach at <code>allow_par = FALSE</code>.</p>
+<p>Selected by <code>select</code>, as on <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>: each fold picks its
+candidate with the selector the <code><a href="selection_rule.html">selection_rule()</a></code> in <code>select</code> names, on
+its own inner run and the first metric, <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> by default;
+the rule is recorded as <code>extract_procedure(res)$select</code> and the final fit
+selects by it too.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

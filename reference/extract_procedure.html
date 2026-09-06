@@ -92,8 +92,9 @@ name of the tune or finetune function that ran (<code>"tune_grid"</code>,
 <code>"tune_sim_anneal"</code>); that tuner's own arguments (<code>grid</code> for the grid and
 racing tuners; <code>iter</code>, <code>initial</code> and <code>objective</code> for the Bayesian tuner;
 <code>iter</code> and <code>initial</code> for simulated annealing); the arguments every
-orchestrator shares, <code>param_info</code>, <code>event_level</code> and <code>eval_time</code>, as they
-were given; and <code>control</code>, the control object the run was given, or
+orchestrator shares, <code>param_info</code>, <code>event_level</code>, <code>eval_time</code> and
+<code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> each fold selected by, as they were
+given; and <code>control</code>, the control object the run was given, or
 tune's default when none was, with the slots this package forces already
 applied, and on a Bayesian result with <code>seed</code> left out. See "Differences
 from calling tune directly" on each orchestrator's help page for what

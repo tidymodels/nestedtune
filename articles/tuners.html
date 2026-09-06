@@ -410,6 +410,9 @@ no improvement.</p>
 <span><span class="co">#&gt; $eval_time</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $select</span></span>
+<span><span class="co">#&gt; &lt;selection_rule&gt; best</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $control</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Bayes control object</span></span></span>
 <span><span class="co">#&gt;   `verbose`: <span style="color: #0000BB;">FALSE</span></span></span>
@@ -462,15 +465,18 @@ accept there, is refused.</p>
 <p>What comes back from the inner call is its metrics table and its
 selection, never the tuning object itself. <code>.inner_metrics</code>
 is that table, the whole grid for a race, and <code>.selected</code> is
-the best candidate by the first metric. So a control’s
-<code>extract</code>, <code>save_pred</code> and
-<code>save_workflow</code> slots cost their work inside every fold and
-return nothing on a nested run. The final fit keeps its tuning run
-whole, and that is where those slots’ results are reachable. The
-annealing control’s <code>save_history</code> slot writes finetune’s
-search history to a file in the temporary directory of the process that
-tuned, each fold overwriting the last, and nothing of it reaches the
-result or the final fit.</p>
+the candidate the <code>select</code> rule picked on it by the first
+metric: <code>selection_rule("best")</code> by default, or tune’s
+one-standard-error or percent-loss rule with the parameter orderings the
+rule names. The rule is recorded with the procedure, and the final fit
+selects by it. So a control’s <code>extract</code>,
+<code>save_pred</code> and <code>save_workflow</code> slots cost their
+work inside every fold and return nothing on a nested run. The final fit
+keeps its tuning run whole, and that is where those slots’ results are
+reachable. The annealing control’s <code>save_history</code> slot writes
+finetune’s search history to a file in the temporary directory of the
+process that tuned, each fold overwriting the last, and nothing of it
+reaches the result or the final fit.</p>
 <p>The racing and annealing drivers refuse at entry when a package their
 search needs is not installed, rather than one outer loop’s worth of
 work later when finetune would ask for it, and the racers refuse a

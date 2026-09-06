@@ -5,17 +5,17 @@ resampling specification against every row, tunes with tune::tune_grid(),
 tune::tune_bayes(), one of finetune's racers or
 finetune::tune_sim_anneal() under the arguments the results object
 carries,
-selects the best candidate, finalizes the workflow, and fits it on all the
-data. The result is the model to deploy, built by the same search the
-estimate you report describes."><meta property="og:description" content="nested_final_fit() runs the tuning procedure a nested run recorded once
+selects a candidate by the selection_rule() it recorded, finalizes the
+workflow, and fits it on all the data. The result is the model to deploy,
+built by the same search the estimate you report describes."><meta property="og:description" content="nested_final_fit() runs the tuning procedure a nested run recorded once
 more, with the whole dataset in hand: it re-evaluates the design's inner
 resampling specification against every row, tunes with tune::tune_grid(),
 tune::tune_bayes(), one of finetune's racers or
 finetune::tune_sim_anneal() under the arguments the results object
 carries,
-selects the best candidate, finalizes the workflow, and fits it on all the
-data. The result is the model to deploy, built by the same search the
-estimate you report describes."><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
+selects a candidate by the selection_rule() it recorded, finalizes the
+workflow, and fits it on all the data. The result is the model to deploy,
+built by the same search the estimate you report describes."><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
     <a href="#container" class="visually-hidden-focusable">Skip to content</a>
 
 
@@ -69,9 +69,9 @@ resampling specification against every row, tunes with <code><a href="https://tu
 <code><a href="https://tune.tidymodels.org/reference/tune_bayes.html" class="external-link">tune::tune_bayes()</a></code>, one of finetune's racers or
 <code><a href="https://finetune.tidymodels.org/reference/tune_sim_anneal.html" class="external-link">finetune::tune_sim_anneal()</a></code> under the arguments the results object
 carries,
-selects the best candidate, finalizes the workflow, and fits it on all the
-data. The result is the model to deploy, built by the same search the
-estimate you report describes.</p>
+selects a candidate by the <code><a href="selection_rule.html">selection_rule()</a></code> it recorded, finalizes the
+workflow, and fits it on all the data. The result is the model to deploy,
+built by the same search the estimate you report describes.</p>
     </div>
 
     <div class="section level2">
@@ -100,8 +100,9 @@ Everything the re-run needs is read from it: the design's inner
 resampling specification, recorded on the result as the design stored it;
 the data, which every split references; and the procedure – the tuner
 and its own arguments (<code>grid</code>; <code>iter</code>, <code>initial</code> and <code>objective</code>; or
-<code>iter</code> and <code>initial</code>) with
-<code>param_info</code>, <code>event_level</code> and <code>eval_time</code>, and the metric set. A
+<code>iter</code> and <code>initial</code>) with <code>param_info</code>, <code>event_level</code>, <code>eval_time</code>
+and <code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> the folds selected by, and the
+metric set. A
 <code>param_info</code> parameter whose range is unknown until the data is seen is
 finalized here on the full data – every row is this model's training
 data – where each outer fold of the nested run finalized it on that
@@ -227,9 +228,11 @@ already applied:</p>
 <span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>  <span class="at">objective =</span> objective, <span class="at">param_info =</span> param_info, <span class="at">metrics =</span> metrics,</span>
 <span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>  <span class="at">eval_time =</span> eval_time, <span class="at">control =</span> control)</span>
 <span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">finalize_workflow</span>(object, <span class="fu">select_best</span>(tuned, <span class="at">metric =</span> <span class="sc">&lt;</span>first metric<span class="sc">&gt;</span>))</span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="fu">set.seed</span>(fit<span class="sc">$</span>fit_seed, <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
-<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="fu">fit</span>(final, data)</span></code></pre><p></p></div>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  <span class="co"># under the recorded default select; select_by_one_std_err() or</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  <span class="co"># select_by_pct_loss() with the recorded orderings and limit otherwise</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="fu">set.seed</span>(fit<span class="sc">$</span>fit_seed, <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a><span class="fu">fit</span>(final, data)</span></code></pre><p></p></div>
 <p>Building the resamples sits <em>inside</em> the first seed's scope, not before it:
 constructing an <code>rset</code> draws from the generator, so a version that built them
 earlier would still be reproducible from the session seed but no longer from

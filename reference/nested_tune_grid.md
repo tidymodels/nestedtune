@@ -3,8 +3,8 @@
 `nested_tune_grid()` drives the outer loop of nested cross-validation.
 For each outer fold it tunes on that fold's inner resamples with
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html),
-selects the best candidate, finalizes the workflow, and fits and scores
-it on the outer split with
+selects a candidate by the rule `select` names, finalizes the workflow,
+and fits and scores it on the outer split with
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html).
 Every step is delegated to tune; what this function contributes is the
 loop, the reproducibility contract, and a results object that keeps each
@@ -21,7 +21,8 @@ nested_tune_grid(
   grid = 10,
   metrics = NULL,
   event_level = "first",
-  eval_time = NULL
+  eval_time = NULL,
+  select = selection_rule()
 )
 ```
 
@@ -123,7 +124,7 @@ nested_tune_grid(
   A
   [`yardstick::metric_set()`](https://yardstick.tidymodels.org/reference/metric_set.html),
   or `NULL` to use tune's defaults for the model's mode. The first
-  metric in the set selects the best inner candidate.
+  metric in the set is the one `select` selects the inner candidate on.
 
 - event_level:
 
@@ -164,6 +165,26 @@ nested_tune_grid(
   normalizes those itself; a repeated time draws tune's warning that 0
   inappropriate evaluation time points were removed, once per tune call.
 
+- select:
+
+  A
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md):
+  which of tune's three selectors each outer fold picks its candidate
+  with, on that fold's inner tuning run and the first metric. The
+  default, `selection_rule("best")`, is
+  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html);
+  `selection_rule("one_std_err", ...)` and
+  `selection_rule("pct_loss", ..., limit = )` are
+  [`tune::select_by_one_std_err()`](https://tune.tidymodels.org/reference/show_best.html)
+  and
+  [`tune::select_by_pct_loss()`](https://tune.tidymodels.org/reference/show_best.html)
+  with the parameter orderings in `...`. Every name an ordering uses
+  must be a parameter `object` tunes; anything but a
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  is refused at entry. The rule is recorded, so
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  applies the same one.
+
 ## Value
 
 An object of class `nested_results`: one row per outer fold, with the
@@ -188,10 +209,11 @@ parameter, one row per candidate and metric, and tune's `.metric`,
 `.eval_time` beside them when a dynamic survival metric was scored. The
 candidates a fold searched are the table's distinct parameter rows.
 Ranking those rows on one metric by `mean` reproduces the fold's
-`.selected` except where candidates tie, which
+`.selected` under the default rule except where candidates tie, which
 [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html)
-resolved on the inner run in its own order; `.selected` records the
-candidate the fold's outer fit used.
+resolved on the inner run in its own order; under another `select` it is
+that selector's answer on the same table, and `.selected` records the
+candidate the fold's outer fit used either way.
 
 The two diverge routinely, in both directions. A size is expanded by
 tune and may reach fewer candidates than were asked for (a request for
@@ -341,6 +363,8 @@ finalized on those rows as `param_info` describes):
                        metrics = metrics, eval_time = eval_time,
                        control = extract_procedure(res)$control)
     final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+      # under the default select; select_by_one_std_err() or
+      # select_by_pct_loss() with the rule's orderings and limit otherwise
     set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     last_fit(final, resamples$splits[[i]], metrics = metrics,
@@ -627,10 +651,27 @@ reaches what it saved.
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.
 
-Not passed on: `select_best()` is called without `eval_time`. Left unset
-it selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here, so naming them twice would change
-no choice and would repeat tune's message about which time it took.
+Not passed on: the selector `select` names is called without
+`eval_time`. Left unset it selects at the first of the evaluation times
+the tuning run was built with, which are the ones named here, so naming
+them twice would change no choice and would repeat tune's message about
+which time it took.
+
+Selected by `select`: tune leaves the choice of candidate to a call the
+user makes on the tuning result; here it is made inside every fold, so
+the rule is an argument. `select` takes what
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+returns:
+[`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html)
+by default, or
+[`tune::select_by_one_std_err()`](https://tune.tidymodels.org/reference/show_best.html)
+or
+[`tune::select_by_pct_loss()`](https://tune.tidymodels.org/reference/show_best.html)
+with the orderings and limit the rule carries, each on the fold's own
+inner run with `metric` the first metric. The result records the rule as
+`extract_procedure(res)$select`, and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+selects by it too.
 
 ## See also
 

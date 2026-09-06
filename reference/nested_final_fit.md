@@ -7,8 +7,10 @@ inner resampling specification against every row, tunes with
 [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html),
 one of finetune's racers or
 [`finetune::tune_sim_anneal()`](https://finetune.tidymodels.org/reference/tune_sim_anneal.html)
-under the arguments the results object carries, selects the best
-candidate, finalizes the workflow, and fits it on all the data. The
+under the arguments the results object carries, selects a candidate by
+the
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+it recorded, finalizes the workflow, and fits it on all the data. The
 result is the model to deploy, built by the same search the estimate you
 report describes.
 
@@ -46,14 +48,16 @@ nested_final_fit(object, results, ...)
   recorded on the result as the design stored it; the data, which every
   split references; and the procedure – the tuner and its own arguments
   (`grid`; `iter`, `initial` and `objective`; or `iter` and `initial`)
-  with `param_info`, `event_level` and `eval_time`, and the metric set.
-  A `param_info` parameter whose range is unknown until the data is seen
-  is finalized here on the full data – every row is this model's
-  training data – where each outer fold of the nested run finalized it
-  on that fold's analysis rows alone, so the final model's candidate
-  range can exceed any fold's. A results object that carries no such
-  record (one built by an earlier version of nestedtune, or from a
-  design assembled by hand rather than by
+  with `param_info`, `event_level`, `eval_time` and `select`, the
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  the folds selected by, and the metric set. A `param_info` parameter
+  whose range is unknown until the data is seen is finalized here on the
+  full data – every row is this model's training data – where each outer
+  fold of the nested run finalized it on that fold's analysis rows
+  alone, so the final model's candidate range can exceed any fold's. A
+  results object that carries no such record (one built by an earlier
+  version of nestedtune, or from a design assembled by hand rather than
+  by
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   or
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)),
@@ -188,6 +192,8 @@ orchestrator forces already applied:
       objective = objective, param_info = param_info, metrics = metrics,
       eval_time = eval_time, control = control)
     final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+      # under the recorded default select; select_by_one_std_err() or
+      # select_by_pct_loss() with the recorded orderings and limit otherwise
     set.seed(fit$fit_seed, kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     fit(final, data)

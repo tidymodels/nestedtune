@@ -179,11 +179,12 @@ arithmetic is where the cost lives.</p>
 </h2>
 <p><code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> drives the outer loop. For each outer
 fold it calls <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> on that fold’s inner
-resamples, selects the best candidate, finalizes the workflow, and fits
-and scores it on the outer split. Every statistical step is
-<code>tune</code>’s. What this package contributes is the loop, a
-reproducibility contract, and a result that keeps what each fold
-chose.</p>
+resamples, selects a candidate by the <code>select</code> rule (the best
+by the first metric unless <code><a href="../reference/selection_rule.html">selection_rule()</a></code> says
+otherwise), finalizes the workflow, and fits and scores it on the outer
+split. Every statistical step is <code>tune</code>’s. What this package
+contributes is the loop, a reproducibility contract, and a result that
+keeps what each fold chose.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>

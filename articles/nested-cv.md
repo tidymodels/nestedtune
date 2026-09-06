@@ -119,11 +119,13 @@ is where the cost lives.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 drives the outer loop. For each outer fold it calls
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-on that fold’s inner resamples, selects the best candidate, finalizes
-the workflow, and fits and scores it on the outer split. Every
-statistical step is `tune`’s. What this package contributes is the loop,
-a reproducibility contract, and a result that keeps what each fold
-chose.
+on that fold’s inner resamples, selects a candidate by the `select` rule
+(the best by the first metric unless
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+says otherwise), finalizes the workflow, and fits and scores it on the
+outer split. Every statistical step is `tune`’s. What this package
+contributes is the loop, a reproducibility contract, and a result that
+keeps what each fold chose.
 
 ``` r
 

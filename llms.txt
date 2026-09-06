@@ -186,6 +186,8 @@ the outer split, and keep what each fold chose.
   folds
 - [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
   : Extract the record of the procedure that ran
+- [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  : Choose the rule each fold selects its candidate by
 
 ## The final model
 
