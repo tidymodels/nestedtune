@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (triage pass over 33 candidate rows and 7 known issues: the p > n vignette re-cut row dropped as already shipped by M64's why-nest article; four rows compressed to correct stale facts — the tidymodels conventions row (site analytics shipped in `72c3be2`), the published-site row (deploy action at v4.9.0), the remote daemon pools row (M58 done) and the autoplot trajectory row (M49 done); nothing merged, split, routed, re-rated or promoted; no decision entry; validate green; ROADMAP 51 lines / 22,629 bytes.)_
+_Last hygiene check: 2026-09-06 (triage pass over 33 candidate rows and 7 known issues: the p > n vignette re-cut row dropped as already shipped by M64's why-nest article; four rows compressed to correct stale facts — the tidymodels conventions row (site analytics shipped in `72c3be2`), the published-site row (deploy action at v4.9.0), the remote daemon pools row (M58 done) and the autoplot trajectory row (M49 done); nothing merged, split, routed, re-rated or promoted; no decision entry; validate green; ROADMAP 51 lines / 22,762 bytes.)_
 
 ## Milestones
 
