@@ -1,6 +1,6 @@
 # M70: `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -50,7 +50,7 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 - [x] T7: AC5's refusal tests in `test-nested-fit-resamples-checks.R` and the five `*-checks.R` files, asserting the class and that no fold ran.
 - [x] T8: AC6's reproducibility test (two direct calls, never through `memoised()`, the M42 lesson) and BC16 in `test-parallel-identity.R` with its comment block, a `helper-time-budget.R` ledger row for any bounded wait; a third RNG kind where a pin is asserted (the M07 lesson).
 - [x] T9: Roxygen for the new page (headings as the grid page, every `control_resamples()` slot classified, the reproduction recipe, executed example), the refusal paragraph on the five pages, `_pkgdown.yml`, `NEWS.md`, `cairn/DESIGN.md` Function Families and the orchestration line.
-- [ ] T10: The `nested-cv.Rmd` section; `devtools::install()` the branch before rendering (the M06 lesson) and measure the render on a quiet machine (the M66 lesson); `air format --check` on touched files before the review push (the M56 lesson).
+- [x] T10: The `nested-cv.Rmd` section; `devtools::install()` the branch before rendering (the M06 lesson) and measure the render on a quiet machine (the M66 lesson); `air format --check` on touched files before the review push (the M56 lesson).
 
 ## Work log
 
@@ -72,6 +72,8 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 - 2026-09-06: T8 done: `test-nested-fit-resamples-rng.R` (two direct calls, Wichmann-Hill pin on the fold, state restored) and BC16 in `test-parallel-identity.R` with its ledger row at line 928.
 - 2026-09-06: verify for T2 to T8 ran once over the finished state (full `devtools::test()` green, 0 failures) rather than per task; the intermediate task states were checked by their own test files only.
 - 2026-09-06: T9 done: the refusal on the five pages through the grid page's inherited `object` parameter, the final-fit page (object, results, return, recipe prose), `extract_procedure()`'s return, a pkgdown row, the NEWS entry, DESIGN's Function Families and Architecture lines, and a control-slot classification test for the new page; `air format --check` clean.
+- 2026-09-06: T10 done: "A baseline on the same folds" section in `vignettes/nested-cv.Rmd` before "The model you deploy": a fixed ranger workflow through `nested_fit_resamples()` on the same design, the two runs' per-fold rmse joined by `id`, and the refusal shown; rendered from the installed branch in 9.1 s elapsed at load average 4.2 to 3.9; `pkgdown::check_pkgdown()` and `cairn_validate` clean.
+- 2026-09-06: all tasks checked; `devtools::test()` green over the finished code, `document()` no diff, `air format --check` clean; status set to review.
 
 ## Decisions
 
