@@ -1695,6 +1695,14 @@ ordering name at entry. Falsified by a caller needing a selector outside
 tune's three, or by an ordering by a summary column that a user can state a
 selection for.
 
+### D-057 (2026-09-06): a workflow with nothing to tune runs through `nested_fit_resamples()`, and the five tuning orchestrators refuse it at entry — extends the orchestrator family D-010 named, and is the first tuner whose record carries no selection rule, narrowing D-056's refusal clause
+
+**Context:** An unmarked workflow ran through `nested_tune_grid()` with tune's warning on every fold and an inner loop scoring one candidate, and failed every fold on the Bayesian and annealing orchestrators; the record called the first a grid search. A fixed model scored on the same outer folds as a tuned one is what a comparison needs.
+
+**Decision:** A sixth orchestrator, `nested_fit_resamples()`, shaped like `tune::fit_resamples()`, takes the nested design and skips the inner stage; its record names the tuner `fit_resamples` and holds no grid, parameter set or selection rule, and `nested_final_fit()` fits the workflow on every row from it. The five tuning orchestrators refuse a workflow with no `tune()` marker at entry, naming the new export, without a deprecation cycle (D-003). Considered and rejected: accepting an unmarked workflow on the five (the inner loop runs for nothing and the record misnames the procedure); refusing only where the tuner cannot run (two paths for one model); a plain `rset` as the design (`tune::fit_resamples()` serves it).
+
+**Consequences:** D-056's clause refusing a record without a rule narrows to tuners that select; `agreement()` on the new result is D-039's zero rows. Falsified by a user needing tune's warn-and-run path through a nested design, or the inner-loop estimate of a fixed workflow.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
