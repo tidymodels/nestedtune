@@ -41,7 +41,7 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 
 ## Tasks
 
-- [ ] T1: Fixtures in `tests/testthat/helper-orchestration.R`: `fixed_workflow(data)` (the deterministic workflow finalized at `num_comp = 2L`) and `fixed_stoch_workflow(data)` (ranger, `min_n` and `trees` fixed, `num.threads = 1`); grep every holder of each new name first (the M41 lesson).
+- [x] T1: Fixtures in `tests/testthat/helper-orchestration.R`: `fixed_workflow(data)` (the deterministic workflow finalized at `num_comp = 2L`) and `fixed_stoch_workflow(data)` (ranger, `min_n` and `trees` fixed, `num.threads = 1`); grep every holder of each new name first (the M41 lesson).
 - [ ] T2: The `fit_resamples` registry entry in `R/tuner.R` (`package`/`requires` tune, `control = tune::control_resamples()`, `control_class = "control_resamples"`, `takes_grid = FALSE`, `iterates = FALSE`, a new `selects = FALSE` flag, `label = "no tuning"`), `tuner_fit_resamples()`, and the fold path in `nested_fold_fit()` (`R/nested-tune-grid.R`) that skips `analysis_framed_inner()`, `run_tuner()` and `apply_selection_rule()` for it, records the AC2 shapes, and runs `last_fit()` under the outer-fit seed; `new_procedure()` omits `select` and `param_info` for it and `check_results_record()` (`R/checks.R`) requires the rule only where the registry says the tuner selects.
 - [ ] T3: `nested_fit_resamples()` in `R/nested-fit-resamples.R` with its entry checks (`check_workflow()`, `check_nested()`, `check_metrics()`, `check_event_level()`, `check_eval_time()`, `check_control()` against `control_resamples`) and `check_tuned_workflow()`; `check_untuned_workflow()` reading `tune::extract_parameter_set_dials(object)$id` on the five orchestrators' entry (skipped, never a false refusal, when extraction fails); NAMESPACE.
 - [ ] T4: `test-nested-fit-resamples-oracles.R`: AC1's two oracles (the `fit_resamples()` reference in the shape of `test-nested-tune-grid-oracles.R`'s single-candidate test, and the by-hand fit) and AC2's record shapes, including a failing fold and the `save_pred`/`extract` columns.
@@ -61,7 +61,12 @@ Give a fixed workflow one obvious path through the same nested design a tuned on
 - 2026-09-06: plan chose a zero-row, zero-column `.selected` over a one-row empty tuple because D-039 rejected the empty-tuple row for claiming a candidate where none was chosen; falsified by a reader needing one row per completed fold from `collect_selections()`.
 - 2026-09-06: plan chose recording the drawn tuning seed over `NA` because the seed layout then matches a tuned run's and the reproduction recipes stay one shape; falsified by a reader misreading the seed as consumed.
 - 2026-09-06: /milestone-implement started; branch `m070-fit-resamples` cut from the pushed default branch at `9601cc5`.
+- 2026-09-06: T1 done: `fixed_workflow()` and `fixed_stoch_workflow()` added to `helper-orchestration.R`; grep over `R/`, `tests/`, `vignettes/`, `man/` found no holder of either name or of the M70 export and check names.
 
 ## Decisions
+
+- 2026-09-06: `nested_final_fit()` on a `fit_resamples` record refuses a workflow carrying a `tune()` marker at entry with class `nestedtune_tuned_workflow`, as a grid record refuses a workflow that does not match its recorded grid; letting it reach `fit()` would fail there with tune's message. Falsified by a user needing the final fit to finalize a marked workflow from a record that selected nothing.
+- 2026-09-06: the final fit's print names a `fit_resamples` procedure by the registry label alone ("Procedure: no tuning"), with no candidate count, because a count of zero reads as a search that found nothing; the selection line reads "nothing to select". Falsified by a reader needing the count line on every final fit.
+- 2026-09-06: `nested_final_fit()` on a `fit_resamples` record draws both seeds, the tuning seed consumed by nothing (the fold's shape), and does not evaluate the design's inner specification, which nothing on this path reads; `check_results_record()` still requires the specification as the mark of an orchestrator-built object. Falsified by a reader of the final fit's seeds needing the inner resamples rebuilt.
 
 ## Review
