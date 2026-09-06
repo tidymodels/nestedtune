@@ -12,7 +12,8 @@
   `collect_predictions()` and `collect_extracts()`, tune's generics
   re-exported with a method here, stack them with the design's fold labels
   over the folds that completed, the second as one row per fold with an
-  `.extracts` list column; an object lacking the column is refused with class
+  `.extracts` list column; an object whose run did not ask for the column,
+  or that no longer carries it, is refused with class
   `nestedtune_column_not_saved`, naming the slot to set. The help pages
   classify the two slots under "Kept from the outer fit"; `save_workflow` and
   `save_history` stay "Not returned".

@@ -84,6 +84,8 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 
 - 2026-09-06: re-review: route (d) on PR #78 (open draft, AC6-AC7 unticked); default branch unmoved, head baf1313 already pushed and its CI green; suite, check(), render and three fresh lenses run against it; evidence and the second lens round's findings P1-P11 recorded in Review with proposed dispositions for the gate.
 
+- 2026-09-06: step-7 approval: PR #78 approved for merge, with the six fix-now items (P2, P4, P5, P6, P7, P11) landed on the branch first: the `check_column_saved()` comment names the recorded control as the record the readers trust and says the class invariant vouches for consistency, not provenance; NEWS's refusal clause widened to a run that did not ask; the AC3 test title renamed to the column refusals; both readers added to the final-fit refusal test; the fold record and `failed_fold()` list `predictions` before `extracts`; the extract reads `.workflow` through `[[`; the roxygen line rewrapped. P1, P3, P8, P9, P10 rejected per the Review dispositions. Touched test files clean (171, 164, 174 expectations), `document()` rerun, `air format --check` clean. PR conversation empty.
+
 ## Decisions
 
 ## Review
@@ -143,3 +145,5 @@ Independent review, second round, three fresh-context lenses on the branch diff.
 - P9 (O5 restated): an extract that warns is neither noted nor caught. Proposed: reject, per O5's disposition.
 - P10 (vacuous clause): the collision refusal cannot fire in `collect_extracts()`, whose one stacked column is `.extracts`. Proposed: reject; the clause holds trivially and no test claims otherwise.
 - P11 (nit): `R/nested-tune-grid.R:481` runs to 87 characters. Proposed: fix now (rewrap).
+
+Gate, 2026-09-06: the user chose fixing the six items before the merge over merging as-is. Landed: P2, P4, P5, P6, P7, P11 as the work log states. Rejected with the reasons above: P1, P3, P8, P9, P10. PR-conversation read: no reviews, no comments, no unresolved threads. Approval recorded; the fixes push once and the merge waits on green CI.

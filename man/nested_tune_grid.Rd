@@ -513,8 +513,8 @@ value on each completed fold's fitted workflow, applied after the fit. A
 failed fold holds \code{NULL} in each, and a fold whose extract errored stays
 completed with \code{NULL} there and a note at location \code{"outer extract"}.
 \code{\link[=collect_predictions.nested_results]{collect_predictions()}} and
-\code{\link[=collect_predictions.nested_results]{collect_extracts()}} stack the two columns
-with the fold labels. What is kept is the outer fit's; the inner run's
+\code{\link[=collect_predictions.nested_results]{collect_extracts()}} stack the two
+columns with the fold labels. What is kept is the outer fit's; the inner run's
 predictions and extracts, which the same slots save inside tune, are
 still discarded with that run, and neither column exists on a run that
 did not ask.

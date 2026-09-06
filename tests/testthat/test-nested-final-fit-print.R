@@ -61,6 +61,8 @@ test_that("tune's ranking generics have no method for a final fit", {
   expect_error(collect_metrics(final), refusal)
   expect_error(tune::show_best(final), refusal)
   expect_error(tune::select_best(final), refusal)
+  expect_error(collect_predictions(final), refusal)
+  expect_error(collect_extracts(final), refusal)
 })
 
 test_that("the printed report is stable", {

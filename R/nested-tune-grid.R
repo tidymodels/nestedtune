@@ -481,8 +481,8 @@
 #' failed fold holds `NULL` in each, and a fold whose extract errored stays
 #' completed with `NULL` there and a note at location `"outer extract"`.
 #' [`collect_predictions()`][collect_predictions.nested_results] and
-#' [`collect_extracts()`][collect_predictions.nested_results] stack the two columns
-#' with the fold labels. What is kept is the outer fit's; the inner run's
+#' [`collect_extracts()`][collect_predictions.nested_results] stack the two
+#' columns with the fold labels. What is kept is the outer fit's; the inner run's
 #' predictions and extracts, which the same slots save inside tune, are
 #' still discarded with that run, and neither column exists on a run that
 #' did not ask.
@@ -801,7 +801,7 @@ nested_fold_fit <- function(
   extract_notes <- empty_notes()
   if (is.function(control$extract)) {
     extracts <- tryCatch(
-      control$extract(fitted$.workflow[[1L]]),
+      control$extract(fitted[[".workflow"]][[1L]]),
       error = function(cnd) {
         extract_notes <<- own_note("outer extract", conditionMessage(cnd))
         NULL
@@ -819,8 +819,8 @@ nested_fold_fit <- function(
     metrics = fold_metrics,
     selected = selected,
     inner_metrics = inner_metrics(tuned, prototype),
-    extracts = extracts,
     predictions = predictions,
+    extracts = extracts,
     notes = bind_notes(
       bind_notes(
         tune_notes(tuned, "inner tuning"),
@@ -1104,8 +1104,8 @@ failed_fold <- function(
     metrics = empty_metrics(),
     selected = NULL,
     inner_metrics = inner_metrics(tuned, prototype),
-    extracts = NULL,
     predictions = NULL,
+    extracts = NULL,
     notes = bind_notes(own_note(stage, message), tune_notes(result, stage))
   )
 }

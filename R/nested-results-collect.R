@@ -309,12 +309,14 @@ collect_extracts.nested_results <- function(x, ...) {
 }
 
 # The refusal for an object whose run did not keep the column asked for. The
-# recorded procedure's control says whether the run asked (D-054: a column's
-# presence says what ran, so a column a caller added by hand to a run that
-# never saved one is not read back as the outer fit's), and the object's
-# names say whether the column is still there. Either failing refuses, the
-# first naming the control slot and the control function the recorded
-# procedure says the run took. A results object carries no `procedure` only
+# record the readers trust is the recorded procedure's control: it says
+# whether the run asked, so a column a caller added by hand to a run that
+# never saved one is not read back as the outer fit's, even though
+# `record_columns()` admits it to the class invariant, which vouches for a
+# column's consistency across verbs and not for where it came from. The
+# object's names say whether the column is still there. Either failing
+# refuses, the first naming the control slot and the control function the
+# recorded procedure says the run took. A results object carries no `procedure` only
 # if it was built before M46, and then the column's presence is all there is
 # to read and the slot alone is named.
 check_column_saved <- function(x, column, call = rlang::caller_env()) {

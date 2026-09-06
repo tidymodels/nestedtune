@@ -554,7 +554,7 @@ test_that("both readers warn once on a partial run and read the completed folds 
   }
 })
 
-test_that("a run in which no fold completed is refused ahead of every other refusal", {
+test_that("a run in which no fold completed is refused ahead of the column refusals", {
   skip_if_not_installed("tibble")
   design <- repeated_design()
   folds <- lapply(seq_len(nrow(design)), function(i) {
