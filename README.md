@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# nestedtune
+# nestedtune <a href="https://nestedtune.tidymodels.org"><img src="man/figures/logo.png" align="right" height="138" alt="nestedtune website" /></a>
 
 <!-- badges: start -->
 
