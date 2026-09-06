@@ -27,7 +27,7 @@ Let the caller choose the rule each outer fold selects its candidate by, from tu
 - [x] AC4: Each of the five orchestrators refuses at entry, with the error's call naming the orchestrator and no fold run, `select = "best"` and `select = NULL` (`nestedtune_bad_selection_rule`) and an ordering whose symbols include a name that is not one of `object`'s tuned parameter ids (`nestedtune_selection_rule_unknown_param`, naming the symbol and the ids).
 - [x] AC5: Under `selection_rule("pct_loss", <ordering>, limit = 5)`, the grid orchestrator's run on two mirai daemons is identical to its serial run, as `test_that()` block BC15 in `tests/testthat/test-parallel-identity.R`.
 - [x] AC6: The five orchestrator help pages document `select` in their arguments and under "Differences from calling tune directly", and no roxygen line of `R/nested-tune-grid.R`, `R/nested-tune-bayes.R`, `R/nested-tune-race.R`, `R/nested-tune-sim-anneal.R` or prose line of `vignettes/tuners.Rmd` states that selection is by `select_best()` or "the best candidate" without naming the rule, the sweep being `grep -n "select_best\|best candidate"` over those files restricted to `#'` lines and vignette prose; `selection_rule()` has its own help page with an executed example and a `_pkgdown.yml` row.
-- [ ] AC7: `devtools::document()` produces no diff, `devtools::test()` passes, and `devtools::check()` reports 0 errors and 0 warnings, any NOTE justified in the review evidence.
+- [x] AC7: `devtools::document()` produces no diff, `devtools::test()` passes, and `devtools::check()` reports 0 errors and 0 warnings, any NOTE justified in the review evidence.
 
 ## Coverage
 
@@ -86,6 +86,17 @@ Reviewed 2026-09-06 on `m069-selection-rule` at PR #79; `main` had not moved sin
 - AC5: the same run passed `test-parallel-identity.R:862`, BC15, `pct_loss` with `desc(df1), df2` and `limit = 5` on two mirai daemons identical to serial; `SKIP 0`, so it ran.
 - AC3: by command on `devtools::load_all()`: `selection_rule("median")` raises `rlang_error`; `"one_std_err"` and `"pct_loss"` with no ordering raise `nestedtune_selection_rule_no_order`; `limit = 2` with `"best"` and with `"one_std_err"`, and each of `-1`, `NA_real_`, `c(1, 2)`, `"2"` with `"pct_loss"`, raise `nestedtune_selection_rule_limit`; the captured orderings are a call and a symbol, no quosure; `limit` defaults to 2 for `"pct_loss"` and `NULL` for `"best"`. `test-selection-rule.R` (10 blocks) asserts the same by class in the suite run recorded under AC7.
 - AC4: by command on `devtools::load_all()` over `det_workflow()` and a 2×3 `nested_resamples()`: each of the five orchestrators given `select = "best"` raises `nestedtune_bad_selection_rule`, and given `selection_rule("one_std_err", desc(nonesuch))` raises `nestedtune_selection_rule_unknown_param` with a message naming `nonesuch` and the tuned id `num_comp`; the error's call is the caller's expression. The five `*-checks.R` AC4 blocks (`test-nested-tune-grid-checks.R:937,975`, `-bayes-checks.R:309`, `-race-checks.R:461` for both racers, `-sim-anneal-checks.R:433`) assert the class, the orchestrator name in the call, `select = NULL`, and, through the sentinel fixture, that no fold ran; they pass in the suite run recorded under AC7.
+
+- AC7: on the final tree (commit a6fde40 and the fix-now commits before it): `devtools::document()` produces no diff (`git status` clean after the run); `devtools::check()` 10m 4.6s, 0 errors, 0 warnings, 0 notes, its test step over the full suite with the new `test-selection-rule.R` blocks; `devtools::test()` on the pre-fix tree recorded under AC1, and the three files the fix-now edits touched (`selection-rule`, `fixture-cache`, `extract-procedure`) re-run green on the final tree before the `check()`.
+
+### Consistency gate
+
+- `cairn_validate.py`: all checks passed; the 18 `references staleness` advisories are the standing ones, not gate failures. No IP/GP principle changed on the branch, so `cairn_impact.py` was not run.
+- Toolchain (`r-package` profile): `document()` no diff; `NAMESPACE` and `man/` regenerated, never hand-edited; `README.Rmd` untouched on the branch, so `README.md` needs no re-knit; `pkgdown::check_pkgdown()` no problems; `NEWS.md` carries the entry for `select` and `selection_rule()`, no milestone number; no new top-level file, and `check()` reports 0 notes; `air format --check R tests/testthat/*.R` clean (the one `air` hit is the gitignored `tests/testthat/_problems/` debris from a Sep 5 run, outside the diff).
+
+### PR conversation (read 2026-09-06, before the gate)
+
+- conversation: PR #79 — no reviews, no comments, no review threads; nothing to triage.
 
 ### Independent review findings and triage
 
