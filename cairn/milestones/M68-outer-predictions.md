@@ -1,13 +1,13 @@
 # M68: `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2, IP4, GP1, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — two exported reader methods and two columns on the results object
-- **Branch/PR:** —
+- **Branch/PR:** `m068-outer-predictions`
 
 ## Goal
 
@@ -59,6 +59,8 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: plan gate chose leaving `save_workflow` not returned over a `.workflow` column because `extract = function(x) x` already keeps the fitted workflow and a per-fold ensemble copy is a size risk (GP4); falsified by a user needing the fitted workflows without knowing the extract idiom.
 - 2026-09-06: plan gate chose a candidate row for `summarize = TRUE` over implementing it because averaging class probabilities needs its own oracle; falsified by a user on a repeated design asking for it.
 - 2026-09-06: plan chose applying `extract` to the returned `.workflow` after the fit over routing it through `control_last_fit()` because tune's `last_fit()` moves its own identity extract into `.workflow` and a caller's function there would replace the workflow (audit finding); falsified by an extract whose value depends on running inside tune's fit loop.
+- 2026-09-06: implement gate chose one row per completed fold with an `.extracts` list column for `collect_extracts()`, tune's own shape, over stacking a data-frame return or adding `.config`; and the help-page heading "Kept from the outer fit" over "Reaches the outer fit" and "Returned". Branch `m068-outer-predictions` cut from the pushed default branch.
+- 2026-09-06: T1 checkpoint: the `.predictions` oracle tests, absence tests and failed-fold test land with the fold-fit, failed-fold, constructor and `record_columns()` plumbing; the file's tests pass and fail without the code change; the full suite is running and T1 is ticked once it is clean.
 
 ## Decisions
 

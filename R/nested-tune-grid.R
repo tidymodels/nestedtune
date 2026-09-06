@@ -763,6 +763,16 @@ nested_fold_fit <- function(
     ))
   }
 
+  # The outer fit's assessment-set predictions, kept when the control asks
+  # (M68). `last_fit()` always computes them, so `save_pred` decides only
+  # whether the fold record carries them home: on a daemon the table travels
+  # back with the fold, and a caller who did not ask pays neither the wire
+  # nor the object for it (GP4). The inner run's predictions, which the same
+  # slot saves on `tuned`, are discarded with that run as before.
+  predictions <- if (isTRUE(control$save_pred)) {
+    fitted$.predictions[[1L]]
+  }
+
   # A fold can complete and still have had trouble: tune_grid() returns a usable
   # result when only some inner splits fail, and select_best() then chooses from
   # the survivors. Discarding those notes would report a selection made on a
@@ -773,6 +783,7 @@ nested_fold_fit <- function(
     metrics = fold_metrics,
     selected = selected,
     inner_metrics = inner_metrics(tuned, prototype),
+    predictions = predictions,
     notes = bind_notes(
       tune_notes(tuned, "inner tuning"),
       tune_notes(fitted, "outer fit")
@@ -1045,11 +1056,14 @@ failed_fold <- function(
       conditionMessage(cnd)
     }
   }
+  # A fold that did not finish has no outer fit to have kept predictions from;
+  # its element is NULL whether or not the control asked for them (M68).
   list(
     completed = FALSE,
     metrics = empty_metrics(),
     selected = NULL,
     inner_metrics = inner_metrics(tuned, prototype),
+    predictions = NULL,
     notes = bind_notes(own_note(stage, message), tune_notes(result, stage))
   )
 }

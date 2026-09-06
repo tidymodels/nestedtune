@@ -308,3 +308,109 @@ test_that("a run given no metric set carries no metrics attribute", {
   expect_false("metrics" %in% names(attributes(res)))
   expect_null(attr(res, "metrics"))
 })
+
+# ---- .predictions and .extracts (M68) ----------------------------------------
+#
+# Oracle provenance. A fold's `.predictions` element is compared against the
+# `.predictions[[1]]` of `tune::last_fit()` called by hand on that fold's
+# outer split, with the workflow finalized on the fold's `.selected` row, the
+# run's metrics, `eval_time` and `event_level`, under
+# `control_last_fit(event_level, allow_par = FALSE)`, the fold's recorded
+# `.outer_fit_seed` set (Mersenne-Twister, Inversion, Rejection) after
+# finalizing and before the call -- the documented seed contract, never the
+# driver's own fit. A fold's `.extracts` element is compared against the
+# caller's function applied to that same call's `.workflow[[1]]`. Neither
+# figure is the package's own.
+
+saved_control <- function() tune::control_grid(save_pred = TRUE)
+
+saved_results <- function(d = make_reg_data(), nested = det_nested(d)) {
+  set.seed(2)
+  memoised(nested_tune_grid(
+    det_workflow(d),
+    nested,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = saved_control()
+  ))
+}
+
+# The reference last_fit() for fold `i` of a grid run on the deterministic
+# workflow, written from the documented contract.
+reference_last_fit <- function(res, i, d, event_level = "first") {
+  final_wf <- tune::finalize_workflow(det_workflow(d), res$.selected[[i]])
+  set.seed(
+    res$.outer_fit_seed[[i]],
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  tune::last_fit(
+    final_wf,
+    split = res$splits[[i]],
+    metrics = reg_metrics(),
+    eval_time = NULL,
+    control = tune::control_last_fit(
+      event_level = event_level,
+      allow_par = FALSE
+    )
+  )
+}
+
+test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  res <- saved_results(d)
+
+  expect_true(".predictions" %in% names(res))
+  expect_type(res$.predictions, "list")
+  expect_true(all(res$.completed))
+  for (i in seq_len(nrow(res))) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.predictions[[i]], ref$.predictions[[1L]])
+    # One fact held independently of the derivation: the table is the fold's
+    # assessment rows, one prediction each.
+    expect_identical(
+      nrow(res$.predictions[[i]]),
+      nrow(rsample::assessment(res$splits[[i]]))
+    )
+    expect_true(all(c(".pred", ".row", "y", ".config") %in%
+      names(res$.predictions[[i]])))
+  }
+})
+
+test_that("the default control and save_pred = FALSE leave no .predictions column (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  by_default <- example_results()
+  expect_false(".predictions" %in% names(by_default))
+
+  set.seed(2)
+  off <- memoised(nested_tune_grid(
+    det_workflow(d),
+    det_nested(d),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(save_pred = FALSE)
+  ))
+  expect_false(".predictions" %in% names(off))
+  # The passing control: the same run with the slot on carries the column.
+  expect_true(".predictions" %in% names(saved_results(d)))
+})
+
+test_that("a failed fold's .predictions element is NULL (AC1)", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  nested <- break_fold(det_nested(d), 2, "outer fit")
+  res <- suppressWarnings(saved_results(d, nested))
+
+  expect_identical(res$.completed, c(TRUE, FALSE, TRUE))
+  expect_null(res$.predictions[[2L]])
+  for (i in c(1L, 3L)) {
+    ref <- reference_last_fit(res, i, d)
+    expect_identical(res$.predictions[[i]], ref$.predictions[[1L]])
+  }
+})
