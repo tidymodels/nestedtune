@@ -73,21 +73,21 @@ is **not** a confidence interval for the estimate, and one should not be
 built from it.
 
 That is a limit of the statistics rather than of this implementation.
-Outer fold scores are not independent — any two folds share most of
-their training rows — so a standard error computed as though they were
-can misstate the uncertainty, typically downward. Bengio and Grandvalet
+Outer fold scores are not independent (any two folds share most of their
+training rows), so a standard error computed as though they were can
+misstate the uncertainty, typically downward. Bengio and Grandvalet
 (2004) proved there is no universally unbiased estimator of a k-fold
 cross-validation estimate's variance to put in its place. Gauran, Ombao
 and Yu (2025) measured what that costs inside a nested design: several
 of their test statistics built on a variance-based denominator rejected
-a true null far more often than the nominal 5% they were run at — 36%
-and 40% in the worst cells they report — and they recommend against such
+a true null far more often than the nominal 5% they were run at (36% and
+40% in the worst cells they report), and they recommend against such
 denominators outright.
 
 Both results are about closely related quantities rather than this
 column exactly: Bengio and Grandvalet study the variance of a k-fold
 estimate built from per-observation losses, and Gauran and colleagues
-work inside ridge and LASSO designs. Neither gap rescues the column — no
+work inside ridge and LASSO designs. Neither gap rescues the column: no
 interval here is oracle-backed, which is the practical point.
 
 The column is reported because `tune` reports it and users expect the

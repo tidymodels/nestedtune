@@ -6,7 +6,7 @@ or
 [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
 result that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-chose its parameters from — the record of what selection saw when the
+chose its parameters from: the record of what selection saw when the
 procedure was re-run on the complete dataset.
 
 ## Usage
@@ -42,7 +42,7 @@ that chose the candidate it describes, which makes it optimistically
 biased as a claim about the model this final fit produced. Nothing in
 that object is this model's performance.
 
-Report the nested estimate instead —
+Report the nested estimate instead:
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 on the results object the fit was built from, the
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)

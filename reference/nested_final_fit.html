@@ -144,7 +144,7 @@ itself), <code>selected</code>
     <p>The procedure a nested estimate describes is "resample this dataset by the
 inner specification, tune, select, fit", and the dataset that procedure is
 meant to be applied to is all of yours. So the final model comes from running
-it again with nothing held out — the same convention as cross-validating a
+it again with nothing held out: the same convention as cross-validating a
 model and then refitting on everything, one level up.</p>
 <p>The outer folds play no part. Their selections are not pooled or voted on:
 they belong to the estimate, which describes the procedure across the
@@ -177,7 +177,7 @@ describe this model.</p>
 <p>Two things the nested estimate does not say. It is marginal over selection,
 not conditional on the parameters this model happens to carry, so it is not a
 claim about this configuration specifically. And it describes new data drawn
-like your training data — not a different population, and not a model
+like your training data, not a different population, and not a model
 retrained at a different size.</p>
 <p>If the outer folds disagreed about the best parameters, report that too.</p>
     </div>
@@ -191,8 +191,9 @@ retrained at a different size.</p>
 <code>sample.int(.Machine$integer.max, 2)</code> call. The first covers building the
 inner resamples <em>and</em> tuning; the second covers the final fit. Both are
 applied with the generator kind pinned, and both are returned on the object.</p>
-<p>The run is reproducible by hand from those two seeds and the record on
-<code>fit$procedure</code>, every value below being one that record holds (or, for
+<p>The run is reproducible by hand from those two seeds and the record
+<code>extract_procedure(fit)</code> returns, every value below being one that record
+holds (or, for
 <code>metrics</code>, <code>attr(results, "metrics")</code>); the tuning call is the one the
 record names, and <code>control</code> is the record's own – the control the run
 was given, or tune's default, with the slots the orchestrator forces
@@ -200,7 +201,7 @@ already applied:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(fit<span class="sc">$</span>tuning_seed, <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>inner <span class="ot">&lt;-</span> <span class="er">&lt;</span>the design<span class="st">'s `inside` specification&gt;(data)</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="st">control &lt;- fit$procedure$control</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="st">control &lt;- extract_procedure(fit)$control</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="st"># a grid procedure: the recorded control, untouched</span></span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="st">tuned &lt;- tune_grid(object, inner, grid = grid, param_info = param_info,</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="st">  metrics = metrics, eval_time = eval_time, control = control)</span></span>
@@ -238,7 +239,7 @@ when the call errors. One consequence worth knowing: two consecutive calls
 with no <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> between them return identical results, exactly as
 repeated <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> calls do.</p>
 <p>This binds randomness that flows through R's generator. Engines that
-randomize outside it — kernlab's SVMs, the deep-learning engines — cannot be
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 pinned by any R-side scheme, here or in tune.</p>
     </div>
     <div class="section level2">
@@ -247,8 +248,8 @@ pinned by any R-side scheme, here or in tune.</p>
 
 
 <p>A nested design stores its <code>inside</code> argument as an unevaluated call, the
-nested run records it on its result, and this function evaluates it again
-— against the whole dataset, in the environment you call from, not the one
+nested run records it on its result, and this function evaluates it again,
+against the whole dataset, in the environment you call from, not the one
 the design was built in.</p>
 <p>Write it with literal arguments. <code>inside = vfold_cv(v = 5)</code> is re-evaluated
 identically anywhere. <code>inside = vfold_cv(v = k)</code> is not: if <code>k</code> is gone by

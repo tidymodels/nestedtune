@@ -168,7 +168,7 @@ those two stages, kept small here so the page builds quickly.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold5 <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span>  <span style="color: #949494;">&lt;tibble [14 × 9]&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .completed &lt;lgl&gt;, .tuning_seed &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .outer_fit_seed &lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Candidates searched: 7, 7, 7, 7, 7 — the folds did not search the</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Candidates searched: 7, 7, 7, 7, 7. The folds did not search the</span></span>
 <span><span class="co">#&gt;   same grid</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
@@ -372,7 +372,7 @@ no improvement.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No improvement for 3 iterations; returning current results.</span></span>
 <span></span>
-<span><span class="va">procedure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">stopped</span>, <span class="st">"procedure"</span><span class="op">)</span></span>
+<span><span class="va">procedure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_procedure.html">extract_procedure</a></span><span class="op">(</span><span class="va">stopped</span><span class="op">)</span></span>
 <span><span class="va">procedure</span></span>
 <span><span class="co">#&gt; $tuner</span></span>
 <span><span class="co">#&gt; [1] "tune_bayes"</span></span>
@@ -427,20 +427,20 @@ no improvement.</p>
 <span><span class="co">#&gt;   `parallel_over`: NULL</span></span>
 <span><span class="co">#&gt;   `backend_options`: NULL</span></span>
 <span><span class="co">#&gt;   `workflow_size`: <span style="color: #0000BB;">100</span></span></span></code></pre></div>
-<p>The <code>procedure</code> attribute is the record of what ran, and a
-final fit built from this result re-runs exactly that. Its
-<code>control</code> element is the control as it took effect, not as it
-was passed. Two of its slots are this package’s to set.
-<code>allow_par</code> is FALSE whatever the control said, because
-parallelism belongs over the outer folds, and a second pool inside each
-fold would contend with the first. <code>event_level</code> is set once,
-by the driver’s own argument: a control left at tune’s default takes
-that argument’s level, and a control naming a level that is neither
-tune’s default nor the argument’s is refused at entry, naming both. One
-slot is missing from the record. <code>seed</code> is dropped, because
-the Bayesian search’s seed is the fold’s tuning seed, which the fold’s
-own <code>.tuning_seed</code> column already holds, and the driver puts
-it back on the control at the point the inner call is made.</p>
+<p>This record says what ran, and a final fit built from this result
+re-runs exactly that. Its <code>control</code> element is the control as
+it took effect, not as it was passed. Two of its slots are this
+package’s to set. <code>allow_par</code> is FALSE whatever the control
+said, because parallelism belongs over the outer folds, and a second
+pool inside each fold would contend with the first.
+<code>event_level</code> is set once, by the driver’s own argument: a
+control left at tune’s default takes that argument’s level, and a
+control naming a level that is neither tune’s default nor the argument’s
+is refused at entry, naming both. One slot is missing from the record.
+<code>seed</code> is dropped, because the Bayesian search’s seed is the
+fold’s tuning seed, which the fold’s own <code>.tuning_seed</code>
+column already holds, and the driver puts it back on the control at the
+point the inner call is made.</p>
 </div>
 <div class="section level2">
 <h2 id="what-differs-from-calling-tune-or-finetune-directly">What differs from calling tune or finetune directly<a class="anchor" aria-label="anchor" href="#what-differs-from-calling-tune-or-finetune-directly"></a>

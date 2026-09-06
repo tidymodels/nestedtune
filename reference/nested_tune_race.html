@@ -146,9 +146,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 <code>nestedtune_bad_design</code> and every offending row, column, inner split or
 index named. The checks exist because <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a
-design whatever its <code>inside</code> argument returned — a specification that
+design whatever its <code>inside</code> argument returned (a specification that
 produces no <code>rset</code>, or an empty one, gives a design that cannot be run,
-where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction — and because a
+where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.</p></dd>
 
 
@@ -236,11 +236,12 @@ eliminated candidates included – <code>tune::collect_metrics(&lt;the race&gt;,
 alone – and <code>n</code> is the number of inner resamples each candidate was
 scored on: the full inner resample count for a candidate that survived to
 the end, and fewer for one eliminated along the way. The recorded <code>grid</code>,
-on the <code>procedure</code> attribute and as <code>attr(x, "grid")</code>, is the design the
+in the <code>procedure</code> record and as <code>attr(x, "grid")</code>, is the design the
 race was <em>offered</em>, exactly as given; what each candidate <em>ran</em> is <code>n</code>.
 A candidate that failed on every inner resample is absent, and its
 failure is in <code>.notes</code>, as on the grid path.</p>
-<p><code>attr(x, "procedure")</code> names the tuner (<code>"tune_race_anova"</code> or
+<p>The <code>procedure</code> record, which <code><a href="extract_procedure.html">extract_procedure()</a></code> returns, names the
+tuner (<code>"tune_race_anova"</code> or
 <code>"tune_race_win_loss"</code>) and holds the <code>grid</code>, <code>param_info</code>,
 <code>event_level</code>, <code>eval_time</code> and the effective control, as
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> describes.</p>
@@ -275,7 +276,7 @@ is exactly (with <code>resamples$inner_resamples[[i]]</code> read as
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>'s reproducibility section reads it):</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(res<span class="sc">$</span>.tuning_seed[[i]], <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">attr</span>(res, <span class="st">"procedure"</span>)<span class="sc">$</span>control</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">extract_procedure</span>(res)<span class="sc">$</span>control</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>raced <span class="ot">&lt;-</span> <span class="fu">tune_race_anova</span>(object, resamples<span class="sc">$</span>inner_resamples[[i]],</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                         <span class="at">grid =</span> grid, <span class="at">param_info =</span> param_info,</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                         <span class="at">metrics =</span> metrics, <span class="at">eval_time =</span> eval_time,</span>
@@ -304,7 +305,7 @@ final fit that re-runs the result – <code>control = control_race(burn_in = 2)<
 say, on a design with three inner resamples. What runs is the control
 passed, or finetune's default when none is, with the slots this package
 forces overwritten; the result records that effective control as
-<code>attr(res, "procedure")$control</code>, which is what the recipe above passes.
+<code>extract_procedure(res)$control</code>, which is what the recipe above passes.
 Every slot of <code>control_race()</code> falls under one of six headings.</p>
 <p><strong>Forced: <code>allow_par</code>.</strong> Both tune calls a fold makes – the inner race and
 the outer scoring fit – run at <code>allow_par = FALSE</code>, whatever the control

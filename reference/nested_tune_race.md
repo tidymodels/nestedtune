@@ -84,11 +84,11 @@ nested_tune_race_win_loss(
   every offending row, column, inner split or index named. The checks
   exist because
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-  builds a design whatever its `inside` argument returned — a
+  builds a design whatever its `inside` argument returned (a
   specification that produces no `rset`, or an empty one, gives a design
   that cannot be run, where
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  refuses one at construction — and because a design assembled by hand
+  refuses one at construction), and because a design assembled by hand
   can index rows its outer fold never sees.
 
 - ...:
@@ -193,15 +193,17 @@ eliminated candidates included –
 finetune's own default keeps the survivors alone – and `n` is the number
 of inner resamples each candidate was scored on: the full inner resample
 count for a candidate that survived to the end, and fewer for one
-eliminated along the way. The recorded `grid`, on the `procedure`
-attribute and as `attr(x, "grid")`, is the design the race was
-*offered*, exactly as given; what each candidate *ran* is `n`. A
-candidate that failed on every inner resample is absent, and its failure
-is in `.notes`, as on the grid path.
+eliminated along the way. The recorded `grid`, in the `procedure` record
+and as `attr(x, "grid")`, is the design the race was *offered*, exactly
+as given; what each candidate *ran* is `n`. A candidate that failed on
+every inner resample is absent, and its failure is in `.notes`, as on
+the grid path.
 
-`attr(x, "procedure")` names the tuner (`"tune_race_anova"` or
-`"tune_race_win_loss"`) and holds the `grid`, `param_info`,
-`event_level`, `eval_time` and the effective control, as
+The `procedure` record, which
+[`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+returns, names the tuner (`"tune_race_anova"` or `"tune_race_win_loss"`)
+and holds the `grid`, `param_info`, `event_level`, `eval_time` and the
+effective control, as
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 describes.
 
@@ -240,7 +242,7 @@ reproducibility section reads it):
 
     set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
-    control <- attr(res, "procedure")$control
+    control <- extract_procedure(res)$control
     raced <- tune_race_anova(object, resamples$inner_resamples[[i]],
                              grid = grid, param_info = param_info,
                              metrics = metrics, eval_time = eval_time,
@@ -271,7 +273,7 @@ and in the final fit that re-runs the result –
 `control = control_race(burn_in = 2)`, say, on a design with three inner
 resamples. What runs is the control passed, or finetune's default when
 none is, with the slots this package forces overwritten; the result
-records that effective control as `attr(res, "procedure")$control`,
+records that effective control as `extract_procedure(res)$control`,
 which is what the recipe above passes. Every slot of `control_race()`
 falls under one of six headings.
 

@@ -111,9 +111,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 <code>nestedtune_bad_design</code> and every offending row, column, inner split or
 index named. The checks exist because <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a
-design whatever its <code>inside</code> argument returned — a specification that
+design whatever its <code>inside</code> argument returned (a specification that
 produces no <code>rset</code>, or an empty one, gives a design that cannot be run,
-where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction — and because a
+where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.</p></dd>
 
 
@@ -203,7 +203,7 @@ finished (<code>.completed</code>), anything that went wrong (<code>.notes</code
 seeds that reproduce it (<code>.tuning_seed</code>, <code>.outer_fit_seed</code>). Use
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> to summarize.</p>
 <p><strong>Two records describe the grid, and they answer different questions.</strong>
-<code>attr(x, "grid")</code> holds the <code>grid</code> argument <strong>as it was given</strong> — a
+<code>attr(x, "grid")</code> holds the <code>grid</code> argument <strong>as it was given</strong>: a
 positive whole number, not a table of candidates, whenever a size was
 passed. The <code>.inner_metrics</code> column holds what each outer fold's inner
 tuning actually scored: <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">tune::collect_metrics()</a></code> of that fold's tuning
@@ -216,15 +216,15 @@ table's distinct parameter rows. Ranking those rows on one metric by
 which <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> resolved on the inner run in its own order;
 <code>.selected</code> records the candidate the fold's outer fit used.</p>
 <p>The two diverge routinely, in both directions. A size is expanded by tune
-and may reach fewer candidates than were asked for — a request for 20 on a
-parameter with four reachable values evaluates four — and a candidate that
-fails scores nothing. Folds can also differ from <em>each other</em>: expanding a
-size draws from the generator, and each fold tunes under its own seed, so
-a continuous parameter gives every fold its own candidates. Printing says
-so when it happens.</p>
+and may reach fewer candidates than were asked for (a request for 20 on a
+parameter with four reachable values evaluates four), and a candidate
+that fails scores nothing. Folds can also differ from <em>each other</em>:
+expanding a size draws from the generator, and each fold tunes under its
+own seed, so a continuous parameter gives every fold its own candidates.
+Printing says so when it happens.</p>
 <p>One limit is worth stating plainly. <code>.inner_metrics</code> is tune's summary of
 the tuning run, and a candidate that failed on <strong>every</strong> inner resample
-scored nothing: it has no row there — <code>.notes</code> is where its failure is
+scored nothing: it has no row there. <code>.notes</code> is where its failure is
 recorded. A candidate that failed on some inner resamples and scored on
 others has its rows, with <code>n</code> below the inner resample count. A fold that
 scored no candidate at all carries a zero-row table with a completed
@@ -232,7 +232,8 @@ fold's columns, never <code>NULL</code>.</p>
 <p><code>attr(x, "metrics")</code> holds the <code>metrics</code> argument, and is absent rather
 than <code>NULL</code> when none was supplied. <code>.inner_metrics</code> is a column, so it
 travels with the fold it describes.</p>
-<p><code>attr(x, "procedure")</code> records what ran, on the result of every
+<p>The <code>procedure</code> record, which <code><a href="extract_procedure.html">extract_procedure()</a></code> returns, records what
+ran, on the result of every
 orchestrator: a named list giving the tuner (<code>"tune_grid"</code> here,
 <code>"tune_bayes"</code> from <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code>"tune_race_anova"</code> or
 <code>"tune_race_win_loss"</code> from <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code> and its sibling,
@@ -241,7 +242,7 @@ that tuner's own arguments (<code>grid</code> here and for the racers; <code>ite
 <code>initial</code> and <code>objective</code> for the Bayesian tuner, <code>iter</code> and <code>initial</code>
 for annealing), and <code>param_info</code>,
 <code>event_level</code> and <code>eval_time</code> on all. A Bayesian result carries the
-<code>procedure</code> attribute and no <code>grid</code> attribute, and its <code>.inner_metrics</code>
+<code>procedure</code> record and no <code>grid</code> attribute, and its <code>.inner_metrics</code>
 tables carry an <code>.iter</code> column; <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> documents both.</p>
 <p><strong>What an operation on the object may and may not do.</strong> The result carries
 the invariants <code>tune</code> declares on its own results objects:</p><ul><li><p>rows may be reordered, but never added or removed;</p></li>
@@ -251,22 +252,22 @@ held.</p></li>
 </ul><p>The columns the run is recorded in are the ones the resampling design
 named, and <code>nested_tune_grid()</code> records them when it builds the result. So
 a column you add afterwards is read as a fold label only when the design
-itself carries a column of that name — <code>id</code>, and <code>id2</code> for a repeated
+itself carries a column of that name: <code>id</code>, and <code>id2</code> for a repeated
 design. The name you pick decides nothing on its own: adding <code>id2</code> to a
 result from a plain v-fold design leaves the class, the record and the
 fold labels alone, exactly as adding <code>extra</code> does.</p>
-<p>An operation that stays inside those rules — <code>arrange()</code>, <code>mutate()</code>
-adding a column, a join that matches one row apiece — returns a
-<code>nested_results</code> with the call's record intact. Anything else — <code>slice()</code>,
+<p>An operation that stays inside those rules (<code>arrange()</code>, <code>mutate()</code>
+adding a column, a join that matches one row apiece) returns a
+<code>nested_results</code> with the call's record intact. Anything else (<code>slice()</code>,
 a <code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code> that drops a fold, <code>bind_rows()</code>, <code>x[1, ]</code>, dropping one of
-the columns above — returns a bare tibble, with the record removed along
+the columns above) returns a bare tibble, with the record removed along
 with the class. A three-row object cannot honestly describe itself as the
 ten-fold design it was cut from, so it stops describing itself at all and
 hands back the data.</p>
 <p>It is one rule, reached through four doors. dplyr's verbs and <code>[</code> reach it
-through a <code>dplyr_reconstruct()</code> method; <strong>vctrs</strong>' own verbs —
-<code>vec_slice()</code>, <code>vec_rbind()</code>, <code>vec_c()</code>, <code>vec_cbind()</code>, <code>vec_ptype()</code> and
-<code>vec_cast()</code> — reach it through <code>vec_restore()</code>; and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> and
+through a <code>dplyr_reconstruct()</code> method; <strong>vctrs</strong>' own verbs
+(<code>vec_slice()</code>, <code>vec_rbind()</code>, <code>vec_c()</code>, <code>vec_cbind()</code>, <code>vec_ptype()</code> and
+<code>vec_cast()</code>) reach it through <code>vec_restore()</code>; and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> and
 <code>rename()</code>, which reach neither generic, have methods of their own. So
 <code>rbind(x, x)</code> and a <code>rename()</code> that moves one of the columns above hand
 back a bare tibble, the same answer <code>slice()</code> gives, rather than an object
@@ -285,7 +286,7 @@ holding the same ten columns. Either verb answers the same way in either
 position.</p>
 <p>Three verbs sit outside all of it. <code>group_by()</code>, <code>rowwise()</code> and
 <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> return a grouped, a rowwise and a plain tibble
-respectively — none of them a <code>nested_results</code> — and each carries the
+respectively (none of them a <code>nested_results</code>), and each carries the
 attributes across, so <code>attr(dplyr::group_by(x, id), "outer_label")</code> still
 answers with the run's scheme. Nothing they hand back claims to be a
 results object; the record is along for the ride.</p>
@@ -328,7 +329,7 @@ an unknown range, finalized on those rows as <code>param_info</code> describes):
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>tuned <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(object, resamples<span class="sc">$</span>inner_resamples[[i]], <span class="at">grid =</span> grid,</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>                   <span class="at">metrics =</span> metrics, <span class="at">eval_time =</span> eval_time,</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">attr</span>(res, <span class="st">"procedure"</span>)<span class="sc">$</span>control)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">extract_procedure</span>(res)<span class="sc">$</span>control)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">finalize_workflow</span>(object, <span class="fu">select_best</span>(tuned, <span class="at">metric =</span> <span class="sc">&lt;</span>first metric<span class="sc">&gt;</span>))</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">set.seed</span>(res<span class="sc">$</span>.outer_fit_seed[[i]], <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
@@ -336,12 +337,12 @@ an unknown range, finalized on those rows as <code>param_info</code> describes):
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>         <span class="at">eval_time =</span> eval_time,</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>         <span class="at">control =</span> <span class="fu">control_last_fit</span>(<span class="at">event_level =</span> event_level))</span></code></pre><p></p></div>
 <p>The caller's RNG state and generator kind are restored on exit, including
-when the call errors, so a seeded script that draws afterwards is unaffected
-— the same contract <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> gives. One consequence worth knowing:
-two consecutive calls with no <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> between them return identical
-results, exactly as repeated <code>tune_grid()</code> calls do.</p>
+when the call errors, so a seeded script that draws afterwards is
+unaffected: the same contract <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> gives. One consequence
+worth knowing: two consecutive calls with no <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> between them
+return identical results, exactly as repeated <code>tune_grid()</code> calls do.</p>
 <p>This binds randomness that flows through R's generator. Engines that
-randomize outside it — kernlab's SVMs, the deep-learning engines — cannot be
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 pinned by any R-side scheme, here or in tune.</p>
     </div>
     <div class="section level2">
@@ -352,12 +353,12 @@ pinned by any R-side scheme, here or in tune.</p>
 <p>A fold that fails does not end the run. The remaining folds still run, and
 the fold that failed is recorded rather than discarded: <code>.completed</code> is
 <code>FALSE</code> for it and <code>.notes</code> holds what went wrong, in the same shape tune
-uses — one row naming the stage that failed (<code>"inner tuning"</code> or
+uses: one row naming the stage that failed (<code>"inner tuning"</code> or
 <code>"outer fit"</code>), followed by tune's own notes about the underlying cause.
 The number of folds attempted and the number completed are stored on the
 object as the <code>folds_attempted</code> and <code>folds_completed</code> attributes.</p>
 <p>Both stages can fail quietly. Inner tuning raises only once every candidate
-has failed, and the outer fit does not raise at all — it hands back a result
+has failed, and the outer fit does not raise at all: it hands back a result
 with no metrics. Both are recorded as failures here.</p>
 <p>A fold can also complete <em>and</em> carry notes. When only some of a fold's inner
 resamples fail, tuning still returns a candidate and the fold finishes, but
@@ -366,11 +367,11 @@ Those notes are kept, so <code>.completed</code> being <code>TRUE</code> with a 
 means exactly that: it worked, on less than the whole design.</p>
 <p>A failed fold still records the candidates it got as far as scoring, whatever
 stage it failed at. A fold that died at the outer fit had already tuned, so
-its <code>.inner_metrics</code> holds the full table — and so does one that tuned
+its <code>.inner_metrics</code> holds the full table, and so does one that tuned
 successfully and then failed while selecting from the results. Only a fold
-that never reached a scored candidate at all — tuning itself raised, or every
-candidate failed — holds a zero-row table. No fold is reported as having
-searched a grid it did not.</p>
+that never reached a scored candidate at all (tuning itself raised, or
+every candidate failed) holds a zero-row table. No fold is reported as
+having searched a grid it did not.</p>
 <p>Any operation outside the invariants stated under <strong>Value</strong> above returns a
 bare tibble, and both counts go with the class rather than being recomputed
 for whatever rows are left. Dropping the <code>.completed</code> column is one such
@@ -386,7 +387,7 @@ an estimate is never reported for a design that did not execute.</p>
 
 
 <p>The outer folds run in parallel when you have started mirai daemons, and
-serially otherwise. There is no argument for this — start daemons before the
+serially otherwise. There is no argument for this: start daemons before the
 call and the loop uses them:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>mirai<span class="sc">::</span><span class="fu">daemons</span>(<span class="dv">4</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">nested_tune_grid</span>(wf, folds, <span class="at">grid =</span> grid)</span>
@@ -395,7 +396,7 @@ call and the loop uses them:</p>
 stays serial, the same threshold <code>tune</code> applies. Inner tuning always runs
 serially whatever you set, because nested parallelism oversubscribes cores.</p>
 <p><strong>Results do not depend on how the loop ran.</strong> The same seed gives the same
-result serially and in parallel, at any number of daemons — each fold's seeds
+result serially and in parallel, at any number of daemons: each fold's seeds
 are drawn up front and assigned by position, so a fold's outcome depends on
 where it sits in the design and never on which worker took it or in what
 order. One exception, and it carries no numbers: the backtraces stored in
@@ -405,7 +406,7 @@ location, and its type are the same either way, though a daemon wraps long
 message lines to its own console width rather than your terminal's.</p>
 <p><strong>Each fold is sent one copy of the data, not one per inner split.</strong> A
 resampling split carries the whole frame it indexes, and sending a fold to a
-daemon means serializing it — which does not preserve the single shared copy
+daemon means serializing it, which does not preserve the single shared copy
 the design holds in memory. Each fold's splits are therefore emptied before
 dispatch and refilled on the worker, so what crosses is the fold's row
 indices plus one copy of the data rather than one copy per split. On a design
@@ -414,20 +415,20 @@ built by <code><a href="nested_resamples.html">nested_resamples()</a></code> tha
 fold also carries its own, still once rather than once per inner split.</p>
 <p>Two things this does not reach, both of them objects you supply rather than
 anything the package builds. A recipe keeps a copy of the data it was created
-with, and a formula carries the environment it was written in — so a workflow
+with, and a formula carries the environment it was written in, so a workflow
 built inside a function that holds a large object sends that object with
 every fold. Building the workflow at the top level avoids the second.</p>
 <p>Daemons are <strong>separate R processes</strong>, which has consequences worth knowing:</p><ul><li><p>They do not inherit your session's options, your <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code> changes, or
 environment variables you set after launching them. Set what a fold needs
 with <code><a href="https://mirai.r-lib.org/reference/everywhere.html" class="external-link">mirai::everywhere()</a></code>, or start the daemons after setting it.</p></li>
 <li><p>They load nestedtune from an installed library. Running under
-<code>devtools::load_all()</code> is not enough — the daemons cannot see it, and the
+<code>devtools::load_all()</code> is not enough: the daemons cannot see it, and the
 call stops rather than failing every fold with the same opaque note. During
 development, prime them with
 <code>mirai::everywhere(pkgload::load_all("&lt;path&gt;"))</code>.</p></li>
 <li><p>Before dispatching, the call asks <strong>every</strong> connected daemon whether it can
 load the package, and stops if any of them cannot. A pool whose daemons
-differ — one respawned, or started against a different library — therefore
+differ (one respawned, or started against a different library) therefore
 fails here, naming how many are affected, rather than as a run in which
 some folds come back as opaque worker failures.</p></li>
 <li><p>The same round trip asks each daemon which of this session's internal
@@ -435,12 +436,12 @@ functions its own copy of the package defines, and stops if any are
 missing. A daemon holding an <em>older install</em> loads the package perfectly
 well and then fails every fold, because the worker resolves what it needs
 by name inside that daemon's copy. The error names the missing functions
-and asks you to reinstall and then restart the pool — a running daemon
+and asks you to reinstall and then restart the pool: a running daemon
 keeps the namespace it has already loaded, so reinstalling underneath one
 changes nothing until it is replaced.</p></li>
 <li><p>The same round trip also asks every daemon for each package the workflow
-and the tuner need — the engine's, a recipe step's, and for a race the
-package its model is fitted with — and stops when one daemon cannot load
+and the tuner need (the engine's, a recipe step's, and for a race the
+package its model is fitted with), and stops when one daemon cannot load
 one of them, naming how many daemons are affected and which packages.
 Install them into the daemons' library and restart the pool.</p></li>
 <li><p>A daemon that does not answer at all is reported as a non-response, not as
@@ -453,13 +454,13 @@ it.</p></li>
 is what makes every daemon load the package, and the whole tidymodels
 stack is not cheap to load. Because the check now waits for <em>all</em> of them
 rather than whichever answers first, a cold pool on a loaded machine can
-need more than the default 30 seconds — raise the option if you see a
+need more than the default 30 seconds; raise the option if you see a
 non-response you do not believe. Later calls in the same session reuse
 what the daemons already loaded.</p></li>
 <li><p>That check is bounded; the folds themselves are not. If every daemon dies
 <em>after</em> folds are dispatched, the call blocks waiting for results that will
 never arrive, and you interrupt it. No per-fold timeout is imposed, because
-no time limit is defensible for an arbitrary model fit — a slow fold and a
+no time limit is defensible for an arbitrary model fit: a slow fold and a
 dead one would be indistinguishable.</p></li>
 </ul><p>A fold whose worker dies is recorded as a failed fold, exactly like any other
 failure: the run finishes, the other folds keep their results, and <code>.notes</code>
@@ -474,10 +475,10 @@ that cares can tell them apart. Either way the caller's RNG state is restored
 on the way out.</p>
 <p>Interrupting the call at your own console is not one of these. It unwinds the
 blocking wait before any worker's return value is classified, so an ordinary
-interrupt propagates and no nestedtune condition class is attached — the RNG
+interrupt propagates and no nestedtune condition class is attached: the RNG
 state is still restored, but do not write a handler expecting one.</p>
 <p>An interrupt also asks the folds it leaves behind to stop. However the call
-is left once its folds are dispatched — an interrupt, or an error — the
+is left once its folds are dispatched (an interrupt, or an error), the
 outstanding ones are cancelled on the way out, so the pool goes idle shortly
 after rather than computing folds whose results nobody will read. Two limits
 are worth knowing. Cancelling needs mirai's dispatcher, which
@@ -486,13 +487,13 @@ are worth knowing. Cancelling needs mirai's dispatcher, which
 folds run to completion. You are told so at dispatch rather than left to
 discover it: such a pool raises a warning of class
 <code>nestedtune_pool_not_cancellable</code>, once per call, naming the remedy. The pool
-is not refused, because its results are correct — what it lacks is the
+is not refused, because its results are correct: what it lacks is the
 ability to stop. And stopping is a request rather than a guarantee:
 a fold already inside a compiled fitting routine may not be interruptible,
 and one that has nearly finished may simply finish.</p>
 <p>One case cannot be told apart, and is documented rather than guessed at:
 calling <code>mirai::daemons(0)</code> while folds are outstanding produces exactly the
-value a daemon dying mid-fold produces — same code, same classes, nothing to
+value a daemon dying mid-fold produces: same code, same classes, nothing to
 separate them. Tearing the pool down that way is therefore recorded as fold
 failures rather than treated as a cancellation, because the alternative would
 discard every completed fold whenever a single worker died.</p>
@@ -507,7 +508,7 @@ discard every completed fold whenever a single worker died.</p>
 the final fit that re-runs the result. What runs is the control passed, or
 tune's default when none is, with the slots this package forces
 overwritten; the result records that effective control as
-<code>attr(res, "procedure")$control</code>, which is what the recipe above passes.
+<code>extract_procedure(res)$control</code>, which is what the recipe above passes.
 Every slot of <code>control_grid()</code> falls under one of six headings.</p>
 <p><strong>Forced: <code>allow_par</code>.</strong> Both tune calls a fold makes – the inner tuning
 run and the outer scoring fit – run at <code>allow_par = FALSE</code>, whatever the

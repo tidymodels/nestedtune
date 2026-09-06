@@ -2,7 +2,7 @@
 
 Returns the candidate parameter settings that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)'s
-tuning run actually evaluated — the full-data counterpart of the
+tuning run actually evaluated: the full-data counterpart of the
 candidate set each outer fold's `.inner_metrics` table describes on a
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 or
@@ -37,8 +37,8 @@ tuned parameter plus tune's `.config` label for the candidate, and
 `.iter` on a Bayesian fit. It is the distinct parameter rows of the
 run's
 [`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-table with those labels — the same shape one element of a result's
-`.inner_metrics` column reduces to when its metric columns are dropped —
+table with those labels: the same shape one element of a result's
+`.inner_metrics` column reduces to when its metric columns are dropped,
 so the two can be compared directly. Everything tune wrote per metric is
 dropped: `.metric`, `.estimator`, `mean`, `n`, `std_err`, and on a fit
 that scored a dynamic survival metric the `.eval_time` column, so a
@@ -52,14 +52,14 @@ number requested; a candidate that failed everywhere scored nothing. See
 the `.inner_metrics` discussion in
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 for the full account of how the two records diverge, which holds here
-too — this record is derived the same way.
+too: this record is derived the same way.
 
 One pointer there does **not** carry over. A candidate that failed on
 every inner resample is missing from this table, and on a
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 result its failure is recorded in that object's `.notes` column. A
 `nested_final_fit` has no such column. Look instead inside the tuning
-run itself — `tune::collect_notes(extract_tune_results(x))`.
+run itself: `tune::collect_notes(extract_tune_results(x))`.
 
 ## See also
 

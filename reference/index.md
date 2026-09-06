@@ -12,7 +12,7 @@ the data for every outer fold.
 ## Running the loop
 
 Tune on each outer fold’s inner resamples, select, then fit and score on
-the outer split — and keep what each fold chose.
+the outer split, and keep what each fold chose.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   : Run the nested cross-validation loop
@@ -41,11 +41,13 @@ the outer split — and keep what each fold chose.
 - [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
   : Tabulate how often each candidate was selected across the outer
   folds
+- [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  : Extract the record of the procedure that ran
 
 ## The final model
 
 Run the same tuning procedure once more with the whole dataset in hand,
-and get back the model to deploy — as its own object, never a field on
+and get back the model to deploy, as its own object, never a field on
 the results.
 
 - [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)

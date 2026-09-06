@@ -99,7 +99,7 @@ record re-run, as `results` carried it).
 The procedure a nested estimate describes is "resample this dataset by
 the inner specification, tune, select, fit", and the dataset that
 procedure is meant to be applied to is all of yours. So the final model
-comes from running it again with nothing held out — the same convention
+comes from running it again with nothing held out: the same convention
 as cross-validating a model and then refitting on everything, one level
 up.
 
@@ -138,7 +138,7 @@ describe this model.
 Two things the nested estimate does not say. It is marginal over
 selection, not conditional on the parameters this model happens to
 carry, so it is not a claim about this configuration specifically. And
-it describes new data drawn like your training data — not a different
+it describes new data drawn like your training data, not a different
 population, and not a model retrained at a different size.
 
 If the outer folds disagreed about the best parameters, report that too.
@@ -152,17 +152,17 @@ the inner resamples *and* tuning; the second covers the final fit. Both
 are applied with the generator kind pinned, and both are returned on the
 object.
 
-The run is reproducible by hand from those two seeds and the record on
-`fit$procedure`, every value below being one that record holds (or, for
-`metrics`, `attr(results, "metrics")`); the tuning call is the one the
-record names, and `control` is the record's own – the control the run
-was given, or tune's default, with the slots the orchestrator forces
-already applied:
+The run is reproducible by hand from those two seeds and the record
+`extract_procedure(fit)` returns, every value below being one that
+record holds (or, for `metrics`, `attr(results, "metrics")`); the tuning
+call is the one the record names, and `control` is the record's own –
+the control the run was given, or tune's default, with the slots the
+orchestrator forces already applied:
 
     set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     inner <- <the design's `inside` specification>(data)
-    control <- fit$procedure$control
+    control <- extract_procedure(fit)$control
     # a grid procedure: the recorded control, untouched
     tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
       metrics = metrics, eval_time = eval_time, control = control)
@@ -206,14 +206,14 @@ identical results, exactly as repeated
 calls do.
 
 This binds randomness that flows through R's generator. Engines that
-randomize outside it — kernlab's SVMs, the deep-learning engines —
-cannot be pinned by any R-side scheme, here or in tune.
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot
+be pinned by any R-side scheme, here or in tune.
 
 ## The inner specification is re-evaluated
 
 A nested design stores its `inside` argument as an unevaluated call, the
 nested run records it on its result, and this function evaluates it
-again — against the whole dataset, in the environment you call from, not
+again, against the whole dataset, in the environment you call from, not
 the one the design was built in.
 
 Write it with literal arguments. `inside = vfold_cv(v = 5)` is

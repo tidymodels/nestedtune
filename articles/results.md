@@ -205,9 +205,11 @@ select(res, .tuning_seed, .outer_fit_seed)
 ```
 
 The description of the run itself rides on the object as attributes
-rather than columns, and
+rather than columns;
+[`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+returns the one that records what ran, and
 [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
-reads one of them, `procedure`.
+reads it.
 
 ## The readers
 

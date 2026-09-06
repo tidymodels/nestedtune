@@ -81,7 +81,7 @@
 <div class="section level2">
 <h2 id="building-a-nested-resampling-design">Building a nested resampling design<a class="anchor" aria-label="anchor" href="#building-a-nested-resampling-design"></a>
 </h2>
-<p><code><a href="reference/nested_resamples.html">nested_resamples()</a></code> builds the same structure as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> — an outer resampling with an inner resampling attached to each outer fold — without keeping a copy of the data for every outer fold.</p>
+<p><code><a href="reference/nested_resamples.html">nested_resamples()</a></code> builds the same structure as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>: an outer resampling with an inner resampling attached to each outer fold, without keeping a copy of the data for every outer fold.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
 <span></span>
@@ -93,7 +93,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">folds</span><span class="op">$</span><span class="va">inner_resamples</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p>For the same seed and the same specifications the splits select the same rows as rsample’s: <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">analysis()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">assessment()</a></code> return identical frames, and each inner split carries the same class and resample id, so anything dispatching on those keeps working. What differs is what the splits point at — the original data rather than a materialized copy per outer fold.</p>
+<p>For the same seed and the same specifications the splits select the same rows as rsample’s: <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">analysis()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">assessment()</a></code> return identical frames, and each inner split carries the same class and resample id, so anything dispatching on those keeps working. What differs is what the splits point at: the original data rather than a materialized copy per outer fold.</p>
 </div>
 <div class="section level2">
 <h2 id="why">Why<a class="anchor" aria-label="anchor" href="#why"></a>
@@ -134,7 +134,7 @@
 <div class="section level2">
 <h2 id="running-the-nested-loop">Running the nested loop<a class="anchor" aria-label="anchor" href="#running-the-nested-loop"></a>
 </h2>
-<p><code><a href="reference/nested_tune_grid.html">nested_tune_grid()</a></code> tunes on each outer fold’s inner resamples, selects, fits on the outer analysis set, and scores on the outer assessment set — keeping what each fold chose. <code><a href="reference/nested_final_fit.html">nested_final_fit()</a></code> takes that result and runs the procedure it recorded once more with the whole dataset in hand, and gives back the model to deploy as its own object.</p>
+<p><code><a href="reference/nested_tune_grid.html">nested_tune_grid()</a></code> tunes on each outer fold’s inner resamples, selects, fits on the outer analysis set, and scores on the outer assessment set, keeping what each fold chose. <code><a href="reference/nested_final_fit.html">nested_final_fit()</a></code> takes that result and runs the procedure it recorded once more with the whole dataset in hand, and gives back the model to deploy as its own object.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>

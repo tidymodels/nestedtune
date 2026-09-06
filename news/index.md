@@ -2,6 +2,19 @@
 
 ## nestedtune 0.0.0.9000
 
+- A new accessor,
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md),
+  returns the record of what ran, the tuner, its arguments and the
+  control as it took effect, from a results object and from a final fit
+  alike. The help pages and the tuners vignette reach the record through
+  it rather than by the attribute or list slot that holds it. Its
+  default method refuses any other object with class
+  `nestedtune_no_extract_method`, naming both classes that answer.
+
+- The em dash is gone from the text the package publishes: the results
+  print’s line on folds that searched different grids, the help pages,
+  the reference index, this file and the README.
+
 - The three code vignettes and the two site articles attach
   `tidymodels`, new in Suggests, before `nestedtune`, behind a guard
   that ends the page with one notice naming whichever of it and the
@@ -490,7 +503,7 @@
   `nested_final_fit` returns a `summary.nested_final_fit` object holding
   the full-data tuning run’s resampling scheme, the number of candidates
   that run scored, the parameter values selection chose, and an
-  `estimate` component that is always `NULL` — so a caller can reach a
+  `estimate` component that is always `NULL`, so a caller can reach a
   value without re-deriving it from the fit. Printing it reports those
   under headings and says, where the number would be, that this model
   has no performance estimate of its own and that the nested estimate is
@@ -500,7 +513,7 @@
   internal components. [`print()`](https://rdrr.io/r/base/print.html) on
   a final fit is unchanged.
 
-- Breaking: printing a `nested_results` now shows the object — its outer
+- Breaking: printing a `nested_results` now shows the object: its outer
   folds as the tibble rows they are, the resampling scheme it came from,
   a count of the folds that did not complete, and a note when the folds
   did not all search the same grid. Everything else printing used to
@@ -516,7 +529,7 @@
   `nested_results` returns a `summary.nested_results` object holding the
   requested and completed fold counts, the failed folds with the stage
   each failed at, the values the completed folds selected for each tuned
-  parameter, and the metric estimates averaged across them — so a caller
+  parameter, and the metric estimates averaged across them, so a caller
   can reach a number without re-deriving it from the columns.
   Summarizing a run that only partly completed warns and still returns
   the summary; summarizing one where every fold failed does the same,
@@ -525,11 +538,11 @@
   refuses outright.
 
 - A `nested_results` whose record of its fold-label columns cannot label
-  its rows — because the record is empty, or names a column the object
-  no longer carries — now names each fold by its row position.
-  Previously the first two cases made printing raise, and a record
-  naming several columns of which some were absent produced a truncated
-  label such as `Fold1,`.
+  its rows (because the record is empty, or names a column the object no
+  longer carries) now names each fold by its row position. Previously
+  the first two cases made printing raise, and a record naming several
+  columns of which some were absent produced a truncated label such as
+  `Fold1,`.
 
 - Breaking: an operation that changes which outer folds a
   `nested_results` holds now returns a plain tibble instead of a
@@ -554,7 +567,7 @@
   `vctrs::vec_slice(x, 1)`, `vctrs::vec_rbind(x, x)`,
   `vctrs::vec_c(x, x)` and `rbind(x, x)` each return a plain tibble.
   Previously all four handed back an object still carrying the class and
-  still reporting the fold counts of the object it was built from —
+  still reporting the fold counts of the object it was built from:
   `rbind(x, x)` gave six rows still headed as a 3-fold run. Reordering
   rows with `vctrs::vec_slice(x, c(2, 1, 3))` keeps the class, and so
   does adding a column with
@@ -637,8 +650,8 @@
   and
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   gain `param_info`, passed unchanged to
-  [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-  — on every outer fold and on the parallel path as well as the serial
+  [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html),
+  on every outer fold and on the parallel path as well as the serial
   one. Restricting a parameter’s range restricts the grid every fold
   searches. A `param_info` that is not a
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
@@ -652,7 +665,7 @@
   functions, and on
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   the outer scoring fit as well, which the package sent no settings to
-  before — so a reported `sens` or `spec` was computed against the first
+  before, so a reported `sens` or `spec` was computed against the first
   level whatever the inner run had been told. Metrics that do not
   distinguish the two levels, such as `roc_auc` and `accuracy`, are
   unaffected. A value that is not `"first"` or `"second"` is refused
@@ -675,7 +688,7 @@
   instead of describing it.
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   estimates the k-fold test error of the whole tune-and-fit procedure on
-  the analysis sets the outer folds drew — which is neither the risk of
+  the analysis sets the outer folds drew, which is neither the risk of
   the model you deploy nor the same quantity averaged over datasets, and
   the help page and the guide both say so.
 
@@ -696,12 +709,12 @@
 - A parallel run now refuses to start when a worker is holding an older
   install of nestedtune, instead of failing every fold with an opaque
   error. Workers are separate R processes, and the outer loop reaches
-  into each one’s own copy of the package by name — so a worker whose
+  into each one’s own copy of the package by name, so a worker whose
   copy predates a function the loop needs loads the package quite
   happily and then dies on every fold. The startup check now asks each
   worker which of this session’s internal functions its copy is missing,
   and the error names them, along with the fix: reinstall, then restart
-  the pool. The restart matters — a running worker keeps the version it
+  the pool. The restart matters: a running worker keeps the version it
   has already loaded, so reinstalling underneath one changes nothing.
 
 - A parallel run started on a worker pool that cannot be cancelled now
@@ -711,15 +724,15 @@
   and the two are indistinguishable from the outside. On the second
   kind, interrupting a run hands you back your prompt while the outer
   folds carry on computing results nobody will read. Previously only the
-  documentation mentioned this. The pool is not refused — its results
-  are correct, and only the ability to stop it is missing — so this is a
+  documentation mentioned this. The pool is not refused (its results are
+  correct, and only the ability to stop it is missing), so this is a
   warning, of class `nestedtune_pool_not_cancellable`.
 
 - Running the outer folds in parallel now sends each fold one copy of
   your data instead of one copy per inner resample. A split carries the
   whole frame it indexes, and sending a fold to a worker serializes it,
   which does not preserve the single shared copy the design holds in
-  memory — so a design with five inner resamples was putting six copies
+  memory, so a design with five inner resamples was putting six copies
   of the data on the wire for every outer fold. The splits are now
   emptied before dispatch and refilled on the worker. On a five-fold
   design over a 5,000-row frame this took a run from 25.7 MB to 4.7 MB.
@@ -730,8 +743,8 @@
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   returns now has two named accessors for the tuning run behind it.
   [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
-  returns that run — the record of what parameter selection actually saw
-  when the procedure was re-run on your whole dataset — and
+  returns that run (the record of what parameter selection actually saw
+  when the procedure was re-run on your whole dataset), and
   [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
   returns the candidate settings it scored, in the same shape as the
   per-fold `.grid` tables on a
@@ -746,18 +759,18 @@
   on the
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   result remains the number to report. Handing either accessor an object
-  it cannot answer for — a
+  it cannot answer for (a
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  result, say — now produces an error saying so, rather than R’s bare
-  “no applicable method”.
+  result, say) now produces an error saying so, rather than R’s bare “no
+  applicable method”.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   results now record which parameter candidates each outer fold actually
   searched, in a new `.grid` column holding one table per fold. Until
   now the object recorded only the grid you *asked* for, and the two are
   routinely different: a grid size is expanded by tune and can reach
-  fewer candidates than you requested — asking for 20 on a parameter
-  with four reachable values searches four — and a candidate that fails
+  fewer candidates than you requested (asking for 20 on a parameter with
+  four reachable values searches four), and a candidate that fails
   scores nothing. Folds can also differ from each other, because
   expanding a size draws from the random number generator and each fold
   is seeded separately, so tuning a continuous parameter with
@@ -768,7 +781,7 @@
   fold that failed keeps whatever it managed to score, and one that
   scored nothing carries an empty table. A candidate that failed on
   every inner resample is absent from `.grid` and recorded in `.notes`
-  instead — tune keeps no other record of it.
+  instead; tune keeps no other record of it.
 
 - The object
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
@@ -787,7 +800,7 @@
   column and the position of the first offending element. A design whose
   `splits` or `inner_resamples` column held something other than a split
   or a resampling object used to cost a full run and come back reporting
-  that every outer fold had failed — or, on
+  that every outer fold had failed, or, on
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
   fail with a message from base R that named nothing you wrote.
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
@@ -824,7 +837,7 @@
   the message. Both `outside` and `inside` had the data frame written
   into the call being evaluated, so a failure on a small 30×2 frame
   already produced around 1,200 characters that were mostly your own
-  numbers, growing from there — long enough to bury the actual problem.
+  numbers, growing from there: long enough to bury the actual problem.
   Such a failure is now also wrapped in a nestedtune error carrying the
   original as its cause, so code matching on the underlying package’s
   condition class or on the whole message string sees a different
@@ -836,11 +849,11 @@
   now say for themselves that a workflow has no model in it, and point
   at
   [`workflows::add_model()`](https://workflows.tidymodels.org/reference/add_model.html).
-  A workflow carrying only a preprocessor — the easiest one to build by
-  accident — used to fail with an error raised inside `workflows`,
-  naming a call you never wrote, while every other bad `object` named
-  yours. An entirely empty workflow is refused the same way and says
-  which of the two it is.
+  A workflow carrying only a preprocessor (the easiest one to build by
+  accident) used to fail with an error raised inside `workflows`, naming
+  a call you never wrote, while every other bad `object` named yours. An
+  entirely empty workflow is refused the same way and says which of the
+  two it is.
 
 - The documentation website now actually publishes. The job that pushes
   the built site had no copy of the repository to work in, so the first
@@ -857,7 +870,7 @@
 
 - Interrupting a parallel run now asks the folds it had already sent to
   the workers to stop. Before, the interrupt gave you your prompt back
-  but left those folds computing — work whose results nobody would ever
+  but left those folds computing: work whose results nobody would ever
   read, on the very pool you were about to reuse, until it finished on
   its own. However the call is left once its folds are dispatched, the
   outstanding ones are now cancelled on the way out and the pool goes
@@ -869,8 +882,8 @@
 
 - The check that runs before parallel dispatch now asks every connected
   daemon whether it can load the package, instead of asking one and
-  believing it for all of them. In a pool whose daemons differ — one
-  respawned, or started against a different library — a single loadable
+  believing it for all of them. In a pool whose daemons differ (one
+  respawned, or started against a different library), a single loadable
   daemon used to pass the check for the whole pool, and every fold that
   ran elsewhere came back as an opaque worker failure. The check now
   names how many daemons are affected and stops.
@@ -888,12 +901,12 @@
   settable with
   `options(nestedtune.preflight_timeout = <milliseconds>)`. The default
   is unchanged, and no statistical result depends on it. It must be a
-  single positive, finite number — an unbounded wait would restore the
+  single positive, finite number: an unbounded wait would restore the
   hang the bound exists to turn into an error.
 
 - One consequence worth knowing: because the check now waits for every
   daemon rather than whichever answers first, the first parallel call
-  after starting a cold pool is the slow one — it is what makes each
+  after starting a cold pool is the slow one: it is what makes each
   daemon load the package, and on a loaded machine that can exceed the
   default 30 seconds. Raise the option if you meet a non-response you do
   not believe. Later calls in the same session reuse what the daemons
@@ -938,7 +951,7 @@
   drawn at an invented value.
 
 - The subtitle says how much of the requested design ran, and each panel
-  says when fewer folds contributed to it than completed —
+  says when fewer folds contributed to it than completed:
   `mtry (2 of 3 chose)`, `rmse (from 2 folds)`. Counting per panel
   rather than per figure is what keeps the claim true: a parameter only
   some folds chose a value for would otherwise read as unanimity, and a
@@ -959,10 +972,10 @@
 
 - Parallel results are identical to serial ones. The same seed gives the
   same answer at any number of workers, because each fold’s seeds are
-  drawn before the loop starts and assigned by position — a fold’s
-  result depends on where it sits in the design, never on which worker
-  ran it. A fold whose worker dies is recorded as a failed fold like any
-  other, and the run finishes.
+  drawn before the loop starts and assigned by position: a fold’s result
+  depends on where it sits in the design, never on which worker ran it.
+  A fold whose worker dies is recorded as a failed fold like any other,
+  and the run finishes.
 
 - [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   gains a “Parallel execution” section covering what workers do and do
@@ -971,8 +984,8 @@
 
 - A new guide,
   [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md),
-  runs the whole path — build a nested design, run the loop, read what
-  each fold selected, fit the model to deploy — as code you can run, and
+  runs the whole path (build a nested design, run the loop, read what
+  each fold selected, fit the model to deploy) as code you can run, and
   says plainly what to report for that model and why. It puts the nested
   estimate next to the selection-time score users are most tempted to
   report, and closes with a worked write-up. Every number in its prose
@@ -994,14 +1007,14 @@
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   on the
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  result for it — the documentation says why, and what that number does
+  result for it: the documentation says why, and what that number does
   and does not claim.
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
   `show_best()`, and `select_best()` deliberately refuse a final fit
   rather than returning something that reads as its score.
 
 - Because the inner resampling specification is stored unevaluated and
-  re-evaluated at final-fit time, write it with literal arguments —
+  re-evaluated at final-fit time, write it with literal arguments:
   `inside = vfold_cv(v = 5)`, not `inside = vfold_cv(v = k)`. A
   specification whose variables have gone out of scope now fails with a
   message naming it.
@@ -1019,7 +1032,7 @@
   metrics would hide.
 
 - Printing also states plainly that the estimate describes the
-  tune-and-fit procedure rather than a model you can deploy — the caveat
+  tune-and-fit procedure rather than a model you can deploy: the caveat
   now travels with the number instead of living only in the
   documentation.
 
@@ -1033,7 +1046,7 @@
   still run, and the failed one is recorded rather than thrown away:
   `.completed` marks it, and `.notes` says which stage failed and why,
   carrying tune’s own notes about the underlying cause. This matters
-  because both stages can fail quietly — inner tuning only raises once
+  because both stages can fail quietly: inner tuning only raises once
   every candidate has failed, and the outer fit does not raise at all.
 
 - A fold that completes on only part of its inner design now keeps the
@@ -1046,7 +1059,7 @@
   anything: a column that is not marked for tuning, or a tuned parameter
   with no column, is refused immediately and by name. Either mistake is
   wrong for every fold rather than for one, so it is reported as what it
-  is — an error in the call — instead of as an entire design failing.
+  is (an error in the call) instead of as an entire design failing.
 
 - [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   now summarizes only the outer folds that completed, warns naming the
@@ -1061,8 +1074,8 @@
   [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html),
   selects the best candidate, finalizes the workflow, and fits and
   scores it on the outer split. The result keeps each fold’s chosen
-  parameters alongside its metrics, so disagreement between folds —
-  selection instability — is visible rather than averaged away.
+  parameters alongside its metrics, so disagreement between folds
+  (selection instability) is visible rather than averaged away.
 
 - Added a
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)

@@ -6,7 +6,7 @@ fold with the folds in design order.
 `type = "parameters"`, the default, shows what each outer fold's inner
 tuning selected. A flat row of points means the folds agreed; points at
 different heights mean they disagreed, and the tuning procedure is
-unstable on this data — which averaging the metrics hides. This is the
+unstable on this data, which averaging the metrics hides. This is the
 view nothing else in the ecosystem offers.
 
 `type = "performance"` shows each outer fold's score on its held-out
@@ -59,14 +59,14 @@ refuse it.
 
 The subtitle states how much of the requested design ran. Contribution
 is counted per panel instead, because it differs between them: a panel
-says so when fewer folds contributed to it than completed —
-`mtry (2 of 3 chose)`, `rmse (from 2 folds)` — and an unqualified panel
+says so when fewer folds contributed to it than completed, as in
+`mtry (2 of 3 chose)` or `rmse (from 2 folds)`; an unqualified panel
 means every completed fold contributed. A requested metric that no
 completed fold could score keeps an empty panel rather than
 disappearing.
 
 The selected-value axis is numeric when every value drawn is a number,
-and discrete otherwise — a single axis cannot be both, and
+and discrete otherwise: a single axis cannot be both, and
 character-valued tuning parameters are ordinary. A fold that selected
 `NA` is a value on that discrete axis rather than an absent point.
 

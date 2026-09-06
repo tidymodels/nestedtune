@@ -52,9 +52,9 @@ each outer fold's inner resamples reference their own copy of that
 fold's analysis set. Object size therefore grows by roughly one copy of
 the data for every outer fold. `nested_resamples()` evaluates the inner
 specification the same way, against the same transient frame, but keeps
-only the row indices it produces and remaps them onto the original data
-— so the inner splits reference the single shared copy the caller
-already has.
+only the row indices it produces and remaps them onto the original data,
+so the inner splits reference the single shared copy the caller already
+has.
 
 ## Differences from rsample
 

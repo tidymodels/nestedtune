@@ -6,12 +6,12 @@ tuning selected, and the estimate across the folds that completed.
 
 The selection lines are the part nothing else in the ecosystem shows.
 When outer folds choose different parameters, the tuning procedure is
-unstable on this data — averaging the metrics hides that, so the summary
+unstable on this data: averaging the metrics hides that, so the summary
 marks it.
 
 Summarizing a run that only partly completed warns, and still returns
 the summary: the folds that ran are described, and the warning says the
-design asked for more. A run where every fold failed is the same case —
+design asked for more. A run where every fold failed is the same case:
 it warns and still returns, describing a failed run rather than refusing
 to answer. That is where this differs from
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),

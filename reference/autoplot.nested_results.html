@@ -4,7 +4,7 @@ fold with the folds in design order.
 type = &quot;parameters&quot;, the default, shows what each outer fold's inner
 tuning selected. A flat row of points means the folds agreed; points at
 different heights mean they disagreed, and the tuning procedure is unstable
-on this data — which averaging the metrics hides. This is the view nothing
+on this data, which averaging the metrics hides. This is the view nothing
 else in the ecosystem offers.
 type = &quot;performance&quot; shows each outer fold's score on its held-out
 assessment set, with a rule at the nested estimate: the same value
@@ -13,7 +13,7 @@ fold with the folds in design order.
 type = &quot;parameters&quot;, the default, shows what each outer fold's inner
 tuning selected. A flat row of points means the folds agreed; points at
 different heights mean they disagreed, and the tuning procedure is unstable
-on this data — which averaging the metrics hides. This is the view nothing
+on this data, which averaging the metrics hides. This is the view nothing
 else in the ecosystem offers.
 type = &quot;performance&quot; shows each outer fold's score on its held-out
 assessment set, with a rule at the nested estimate: the same value
@@ -70,7 +70,7 @@ fold with the folds in design order.</p>
 <p><code>type = "parameters"</code>, the default, shows what each outer fold's inner
 tuning selected. A flat row of points means the folds agreed; points at
 different heights mean they disagreed, and the tuning procedure is unstable
-on this data — which averaging the metrics hides. This is the view nothing
+on this data, which averaging the metrics hides. This is the view nothing
 else in the ecosystem offers.</p>
 <p><code>type = "performance"</code> shows each outer fold's score on its held-out
 assessment set, with a rule at the nested estimate: the same value
@@ -116,12 +116,11 @@ with condition class <code>nestedtune_no_completed_folds</code>, as
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>, <code><a href="agreement.html">agreement()</a></code> and <code><a href="nested_final_fit.html">nested_final_fit()</a></code> refuse it.</p>
 <p>The subtitle states how much of the requested design ran. Contribution is
 counted per panel instead, because it differs between them: a panel says so
-when fewer folds contributed to it than completed — <code>mtry (2 of 3 chose)</code>,
-<code>rmse (from 2 folds)</code> — and an unqualified panel means every completed fold
-contributed. A requested metric that no completed fold could score keeps an
-empty panel rather than disappearing.</p>
+when fewer folds contributed to it than completed, as in <code>mtry (2 of 3 chose)</code> or <code>rmse (from 2 folds)</code>; an unqualified panel means every
+completed fold contributed. A requested metric that no completed fold
+could score keeps an empty panel rather than disappearing.</p>
 <p>The selected-value axis is numeric when every value drawn is a number, and
-discrete otherwise — a single axis cannot be both, and character-valued
+discrete otherwise: a single axis cannot be both, and character-valued
 tuning parameters are ordinary. A fold that selected <code>NA</code> is a value on that
 discrete axis rather than an absent point.</p>
     </div>

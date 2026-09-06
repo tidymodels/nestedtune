@@ -71,11 +71,11 @@ nested_tune_sim_anneal(
   every offending row, column, inner split or index named. The checks
   exist because
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-  builds a design whatever its `inside` argument returned — a
+  builds a design whatever its `inside` argument returned (a
   specification that produces no `rset`, or an empty one, gives a design
   that cannot be run, where
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  refuses one at construction — and because a design assembled by hand
+  refuses one at construction), and because a design assembled by hand
   can index rows its outer fold never sees.
 
 - ...:
@@ -243,7 +243,7 @@ reproducibility section reads it):
 
     set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
-    control <- attr(res, "procedure")$control
+    control <- extract_procedure(res)$control
     tuned <- tune_sim_anneal(object, resamples$inner_resamples[[i]],
                              iter = iter, initial = initial,
                              param_info = param_info, metrics = metrics,
@@ -274,7 +274,7 @@ fold, and in the final fit that re-runs the result –
 say, to stop a fold's search sooner and keep the console quiet. What
 runs is the control passed, or finetune's default when none is, with the
 slots this package forces overwritten; the result records that effective
-control as `attr(res, "procedure")$control`, which is what the recipe
+control as `extract_procedure(res)$control`, which is what the recipe
 above passes. Every slot of `control_sim_anneal()` falls under one of
 six headings.
 

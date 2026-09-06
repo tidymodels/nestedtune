@@ -8,7 +8,7 @@ for what the run means.
 
 Printing also says when the folds were not choosing from the same menu.
 A grid given as a size is expanded per fold, under that fold's own seed,
-so a continuous parameter leaves every fold with its own candidates —
+so a continuous parameter leaves every fold with its own candidates,
 which changes how the selections
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
 reports should be read. The line reports each fold's candidate count and

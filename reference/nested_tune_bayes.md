@@ -69,11 +69,11 @@ nested_tune_bayes(
   every offending row, column, inner split or index named. The checks
   exist because
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-  builds a design whatever its `inside` argument returned — a
+  builds a design whatever its `inside` argument returned (a
   specification that produces no `rset`, or an empty one, gives a design
   that cannot be run, where
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  refuses one at construction — and because a design assembled by hand
+  refuses one at construction), and because a design assembled by hand
   can index rows its outer fold never sees.
 
 - ...:
@@ -257,7 +257,7 @@ reason. Fold `i` is exactly:
 
     set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
-    control <- attr(res, "procedure")$control
+    control <- extract_procedure(res)$control
     control$seed <- res$.tuning_seed[[i]]
     tuned <- tune_bayes(object, resamples$inner_resamples[[i]],
                         iter = iter, initial = initial, objective = objective,
@@ -284,7 +284,7 @@ every fold, and in the final fit that re-runs the result –
 fold's search sooner. What runs is the control passed, or tune's default
 when none is, with the slots this package forces overwritten; the result
 records that effective control, `seed` left out, as
-`attr(res, "procedure")$control`, which is what the recipe above passes.
+`extract_procedure(res)$control`, which is what the recipe above passes.
 Every slot of `control_bayes()` falls under one of six headings.
 
 **Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls

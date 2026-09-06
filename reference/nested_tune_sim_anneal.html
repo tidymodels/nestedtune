@@ -127,9 +127,9 @@ design breaking any of this, or using a bootstrap for the outer loop, is
 refused at the call, before anything is fitted, with condition class
 <code>nestedtune_bad_design</code> and every offending row, column, inner split or
 index named. The checks exist because <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a
-design whatever its <code>inside</code> argument returned — a specification that
+design whatever its <code>inside</code> argument returned (a specification that
 produces no <code>rset</code>, or an empty one, gives a design that cannot be run,
-where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction — and because a
+where <code><a href="nested_resamples.html">nested_resamples()</a></code> refuses one at construction), and because a
 design assembled by hand can index rows its outer fold never sees.</p></dd>
 
 
@@ -269,7 +269,7 @@ into the control; the fold's tuning seed alone governs the search. Fold
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>'s reproducibility section reads it):</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(res<span class="sc">$</span>.tuning_seed[[i]], <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>,</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>         <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>, <span class="at">sample.kind =</span> <span class="st">"Rejection"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">attr</span>(res, <span class="st">"procedure"</span>)<span class="sc">$</span>control</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">extract_procedure</span>(res)<span class="sc">$</span>control</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>tuned <span class="ot">&lt;-</span> <span class="fu">tune_sim_anneal</span>(object, resamples<span class="sc">$</span>inner_resamples[[i]],</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                         <span class="at">iter =</span> iter, <span class="at">initial =</span> initial,</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                         <span class="at">param_info =</span> param_info, <span class="at">metrics =</span> metrics,</span>
@@ -298,7 +298,7 @@ through <code>...</code> as <code>control</code> reaches the inner search in eve
 the final fit that re-runs the result – <code>control = control_sim_anneal( no_improve = 5, verbose_iter = FALSE)</code>, say, to stop a fold's search sooner
 and keep the console quiet. What runs is the control passed, or finetune's
 default when none is, with the slots this package forces overwritten; the
-result records that effective control as <code>attr(res, "procedure")$control</code>,
+result records that effective control as <code>extract_procedure(res)$control</code>,
 which is what the recipe above passes. Every slot of <code>control_sim_anneal()</code>
 falls under one of six headings.</p>
 <p><strong>Forced: <code>allow_par</code>.</strong> Both tune calls a fold makes – the inner search

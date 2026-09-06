@@ -105,7 +105,7 @@ bayes
 #> 5 <split [26/6]> Fold5 <tibble> <tibble>  <tibble [14 × 9]> <tibble>
 #> # ℹ 3 more variables: .completed <lgl>, .tuning_seed <int>,
 #> #   .outer_fit_seed <int>
-#> ! Candidates searched: 7, 7, 7, 7, 7 — the folds did not search the
+#> ! Candidates searched: 7, 7, 7, 7, 7. The folds did not search the
 #>   same grid
 #> ℹ Use `summary()` for what the run means: which folds failed, what
 #>   each one selected, and the estimate across them.
@@ -333,7 +333,7 @@ stopped <- nested_tune_bayes(
 )
 #> ! No improvement for 3 iterations; returning current results.
 
-procedure <- attr(stopped, "procedure")
+procedure <- extract_procedure(stopped)
 procedure
 #> $tuner
 #> [1] "tune_bayes"
@@ -390,19 +390,19 @@ procedure
 #>   `workflow_size`: 100
 ```
 
-The `procedure` attribute is the record of what ran, and a final fit
-built from this result re-runs exactly that. Its `control` element is
-the control as it took effect, not as it was passed. Two of its slots
-are this package’s to set. `allow_par` is FALSE whatever the control
-said, because parallelism belongs over the outer folds, and a second
-pool inside each fold would contend with the first. `event_level` is set
-once, by the driver’s own argument: a control left at tune’s default
-takes that argument’s level, and a control naming a level that is
-neither tune’s default nor the argument’s is refused at entry, naming
-both. One slot is missing from the record. `seed` is dropped, because
-the Bayesian search’s seed is the fold’s tuning seed, which the fold’s
-own `.tuning_seed` column already holds, and the driver puts it back on
-the control at the point the inner call is made.
+This record says what ran, and a final fit built from this result
+re-runs exactly that. Its `control` element is the control as it took
+effect, not as it was passed. Two of its slots are this package’s to
+set. `allow_par` is FALSE whatever the control said, because parallelism
+belongs over the outer folds, and a second pool inside each fold would
+contend with the first. `event_level` is set once, by the driver’s own
+argument: a control left at tune’s default takes that argument’s level,
+and a control naming a level that is neither tune’s default nor the
+argument’s is refused at entry, naming both. One slot is missing from
+the record. `seed` is dropped, because the Bayesian search’s seed is the
+fold’s tuning seed, which the fold’s own `.tuning_seed` column already
+holds, and the driver puts it back on the control at the point the inner
+call is made.
 
 ## What differs from calling tune or finetune directly
 

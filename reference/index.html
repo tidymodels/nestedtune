@@ -63,7 +63,7 @@
       </dl></div><div class="section level2">
       <h2 id="running-the-loop">Running the loop<a class="anchor" aria-label="anchor" href="#running-the-loop"></a></h2>
 
-      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split — and keep what each fold chose.</p></div>
+      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -139,10 +139,17 @@
 
         </dt>
         <dd>Tabulate how often each candidate was selected across the outer folds</dd>
+
+        <dt>
+
+          <code><a href="extract_procedure.html">extract_procedure()</a></code>
+
+        </dt>
+        <dd>Extract the record of the procedure that ran</dd>
       </dl></div><div class="section level2">
       <h2 id="the-final-model">The final model<a class="anchor" aria-label="anchor" href="#the-final-model"></a></h2>
 
-      <div class="section-desc"><p>Run the same tuning procedure once more with the whole dataset in hand, and get back the model to deploy — as its own object, never a field on the results.</p></div>
+      <div class="section-desc"><p>Run the same tuning procedure once more with the whole dataset in hand, and get back the model to deploy, as its own object, never a field on the results.</p></div>
 
       <dl></dl></div><div class="section level2">
 

@@ -22,9 +22,9 @@ pak::pak("tidymodels/nestedtune")
 
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
 builds the same structure as
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-— an outer resampling with an inner resampling attached to each outer
-fold — without keeping a copy of the data for every outer fold.
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html):
+an outer resampling with an inner resampling attached to each outer
+fold, without keeping a copy of the data for every outer fold.
 
 ``` r
 
@@ -47,7 +47,7 @@ and
 [`assessment()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
 return identical frames, and each inner split carries the same class and
 resample id, so anything dispatching on those keeps working. What
-differs is what the splits point at — the original data rather than a
+differs is what the splits point at: the original data rather than a
 materialized copy per outer fold.
 
 ## Why
@@ -81,7 +81,7 @@ of the data are gone.
 
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 tunes on each outer fold’s inner resamples, selects, fits on the outer
-analysis set, and scores on the outer assessment set — keeping what each
+analysis set, and scores on the outer assessment set, keeping what each
 fold chose.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 takes that result and runs the procedure it recorded once more with the
