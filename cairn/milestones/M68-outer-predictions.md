@@ -7,7 +7,7 @@
 - **Principles touched:** IP2, IP4, GP1, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — two exported reader methods and two columns on the results object
-- **Branch/PR:** `m068-outer-predictions`
+- **Branch/PR:** `m068-outer-predictions` · https://github.com/tidymodels/nestedtune/pull/78
 
 ## Goal
 
@@ -73,6 +73,7 @@ Keep what each outer fold's scoring fit already produces, the assessment-set pre
 - 2026-09-06: T7 checkpoint: the four pages' seventh heading "Kept from the outer fit" and their "Not returned" narrowed, the readers' topic as `collect_predictions.nested_results` (the bare alias belongs to the re-export block, and a second owner drew a roxygen warning), pkgdown row, NEWS, DESIGN, the collect readers' comment and the `results.Rmd` paragraphs land; heading test, hygiene and `pkgdown::check_pkgdown()` green; the page render after `devtools::install()` is running and T7 is ticked once it renders.
 - 2026-09-06: T7 done: `results.Rmd` rendered after `devtools::install()` of the branch (`upgrade = FALSE`; `"never"` is not a value the argument takes), the page showing `.predictions` among the columns, the first fold's table and `collect_predictions(res)` over 32 rows.
 - 2026-09-06: T8 done: `devtools::check()` 0 errors, 0 warnings, 0 notes (6m 10s); `air format --check` clean over the touched files after one reformat of `test-nested-tune-grid-results.R`; `devtools::document()` no diff; `devtools::test()` clean on the final tree. Status set to review.
+- 2026-09-06: review checkpoint: default branch unmoved since the cut; branch pushed, draft PR #78 open; cairn_validate, document() no-diff, pkgdown check and air clean; full suite, check() and the three review lenses pending.
 
 ## Decisions
 
