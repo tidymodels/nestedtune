@@ -31,8 +31,9 @@
 #'   orchestrator shares, `param_info`, `event_level` and `eval_time`, as they
 #'   were given; and `control`, the control object the run was given, or
 #'   tune's default when none was, with the slots this package forces already
-#'   applied. See "Differences from calling tune directly" on each orchestrator's
-#'   help page for what those slots are.
+#'   applied, and on a Bayesian result with `seed` left out. See "Differences
+#'   from calling tune directly" on each orchestrator's help page for what
+#'   those slots are.
 #'
 #'   On a `nested_results` the record travels as an attribute of the object;
 #'   on a `nested_final_fit` it is the record the fit re-ran, which is the

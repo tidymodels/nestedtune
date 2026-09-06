@@ -180,7 +180,7 @@ extract_scored_candidates <- function(x, ...) {
 
 #' @export
 extract_scored_candidates.default <- function(x, ...) {
-  # No dots check before the refusal, for the reason the other default gives.
+  # No dots check before the refusal, for the reason the other defaults give.
   abort_no_extract_method(
     "extract_scored_candidates",
     x,
@@ -211,11 +211,14 @@ abort_no_extract_method <- function(
   call = rlang::caller_env()
 ) {
   # `classes` names the classes the generic answers for, each paired with
-  # where such an object comes from (M67 added `nested_results`).
+  # where such an object comes from (M67 added `nested_results`). The
+  # `nested_results` phrase is abort_no_agreement_method()'s, so the two
+  # families say the same thing about the same object.
   origins <- c(
-    nested_results = "a {.fn nested_tune_*} orchestrator",
+    nested_results = "{.fn nested_tune_grid} or one of its siblings",
     nested_final_fit = "{.fn nested_final_fit}"
   )
+  stopifnot(all(classes %in% names(origins)))
   answers <- sprintf("a {.cls %s} object, from %s", classes, origins[classes])
   cli::cli_abort(
     c(

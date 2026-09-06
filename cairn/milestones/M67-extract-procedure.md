@@ -64,6 +64,7 @@ Give the `procedure` record an accessor on the two objects that hold it, so no p
 - 2026-09-05: T4 done: the [S] sweep reworded 59 roxygen lines (the plan's count of 31 was low), 39 NEWS sites, 4 in README.Rmd and 2 in `_pkgdown.yml`, its diff read here in full with no meaning change found; `document()` and `build_readme()` re-run; AC4's grep finds no hit in any target, and no comment line in `R/` carries one either.
 - 2026-09-05: T5 done: the branch package installed (the tuners page attaches the installed nestedtune, and the first render found no `extract_procedure()` there), the six pages rendered and their HTML free of U+2014 and the three entities (AC5); `devtools::test()` 0 failures, `devtools::check()` 0 errors, 0 warnings, 0 notes, `document()` leaving no diff, `check_pkgdown()` clean (AC6). Status to review.
 - 2026-09-05: review checkpoint: PR #77 opened as draft; AC1, AC2, AC3, AC4 and AC7 verified with evidence recorded; AC5 and AC6 runs and the three reviewers still in flight.
+- 2026-09-05: review fix-now, from the [O] lens: the extract family's `nested_results` origin phrase aligned with `agreement()`'s (`nested_tune_grid()` or one of its siblings) and the snapshot re-recorded; `abort_no_extract_method()` refuses an unknown class instead of printing NA; the `@return` names the Bayesian record's dropped `seed`; the NEWS fragment at the malformed-design entry repunctuated; `results.Rmd` and the DESIGN final-fit line name the accessor; a comment's plurality fixed. Full chain re-run on this tree for AC5 and AC6.
 
 ## Decisions
 

@@ -592,7 +592,7 @@
   before fitting anything, naming the column and the position of the first
   offending element. A design whose `splits` or `inner_resamples` column held
   something other than a split or a resampling object used to cost a full run
-  and come back reporting that every outer fold had failed; or, on
+  and come back reporting that every outer fold had failed, or, on
   `nested_final_fit()`, fail with a message from base R that named nothing you
   wrote. `rsample::nested_cv()` builds such a design without complaint when its
   `inside` argument produces no `rset`, which is the usual way to arrive at one.

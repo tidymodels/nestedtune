@@ -23,8 +23,9 @@ racing tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian
 orchestrator shares, \code{param_info}, \code{event_level} and \code{eval_time}, as they
 were given; and \code{control}, the control object the run was given, or
 tune's default when none was, with the slots this package forces already
-applied. See "Differences from calling tune directly" on each orchestrator's
-help page for what those slots are.
+applied, and on a Bayesian result with \code{seed} left out. See "Differences
+from calling tune directly" on each orchestrator's help page for what
+those slots are.
 
 On a \code{nested_results} the record travels as an attribute of the object;
 on a \code{nested_final_fit} it is the record the fit re-ran, which is the

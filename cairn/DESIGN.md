@@ -80,8 +80,9 @@ naming convention.
   (M67). The suffix names the inner tuning method (D-010).
 - **Final fit** — `nested_final_fit(object, results)`, returning a
   `nested_final_fit` object that answers `predict()` and `augment()` with the
-  trained workflow's own results (M47) and hands the workflow itself over with
-  `extract_workflow()`. It re-runs the
+  trained workflow's own results (M47), hands the workflow itself over with
+  `extract_workflow()` and its `procedure` slot with `extract_procedure()`
+  (M67). It re-runs the
   procedure the results object recorded — the design's `inside` call, the
   tuner and its arguments — over the whole dataset, so the model and the
   estimate come from one search by construction (D-041), and answers none of
