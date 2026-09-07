@@ -1,6 +1,6 @@
 # M71: `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -44,7 +44,7 @@ Score every workflow of a `workflow_set` on the same outer folds of one nested d
 - [x] T3: `R/nested-workflow-map.R`: the loop routing each workflow by `tuned_parameter_ids()` (empty → `nested_fit_resamples`), merging `option` over `...`, narrowing to the routed orchestrator's formals, calling it with `rlang::call2()` in the package namespace, and `new_nested_results_set()` with the `fn` attribute; the RNG envelope leaving the caller's state untouched (`snapshot_rng()` / `restore_rng()` as `nested_loop()` uses them). Oracle tests in `test-nested-workflow-map-oracles.R` (AC1, six `fn` values on `wset_two()`, the grid option on `wset_three()`), the net-zero and never-drew tests in `test-nested-workflow-map-rng.R`, and BC17 with its ledger row (AC2).
 - [x] T4: `R/nested-results-set.R`: a `stack_set()` helper mapping a reader over the elements with a completed fold and binding under `wflow_id`; the six `collect_*` methods over it, each fencing `...` first; the all-failed refusal; `print.nested_results_set()` with its snapshot; `extract_workflow.nested_results_set(x, id, ...)`; the signature pin in `test-dots-barrier.R`; `test-nested-workflow-map-readers.R` (AC3, the print and extract halves of AC4).
 - [x] T5: `nested_final_fit(object, results, ..., id = NULL)`: the set branch reading `workflow[[i]]` and `result[[i]]` by `id`, `nestedtune_unknown_id`, `nestedtune_bad_final_fit_args`, the `rank_results()` / `fit_best()` error probe; `test-nested-final-fit-set.R` (the rest of AC4).
-- [ ] T6: Roxygen for the export, the class, the reader pages, `extract_workflow` and `nested_final_fit`; `_pkgdown.yml` row under "Running the loop"; NEWS; DESIGN Function Families and Architecture; the `tuners.Rmd` section and the `estimate.Rmd` paragraph; `devtools::install()` then render both pages; `air format --check` on the touched files (the M56 lesson); `devtools::check()` (AC6).
+- [x] T6: Roxygen for the export, the class, the reader pages, `extract_workflow` and `nested_final_fit`; `_pkgdown.yml` row under "Running the loop"; NEWS; DESIGN Function Families and Architecture; the `tuners.Rmd` section and the `estimate.Rmd` paragraph; `devtools::install()` then render both pages; `air format --check` on the touched files (the M56 lesson); `devtools::check()` (AC6).
 
 ## Work log
 
@@ -75,6 +75,7 @@ Score every workflow of a `workflow_set` on the same outer folds of one nested d
 - 2026-09-06: T5 done. `nested_final_fit(object, results, ..., id = NULL)`: the set branch reads the row's workflow and record, `check_final_fit_set_args()` refuses the three mixed shapes (`nestedtune_bad_final_fit_args`); `test-nested-final-fit-set.R` asserts `$selected`, the two seeds and `predict()` identical to the hand pairing on both rows, and the refusals.
 - 2026-09-06: T6 in progress. Help pages, `_pkgdown.yml` rows (`pkgdown::check_pkgdown()` clean), NEWS, DESIGN Function Families and Architecture, the `tuners.Rmd` section and the `estimate.Rmd` paragraph written; branch installed and both pages rendered (`tuners.Rmd` in 118 s), the rendered set section read back against its prose; `devtools::check()` running at this checkpoint, its result and the T6 tick to follow.
 - 2026-09-06: first `devtools::check()` on the branch: 0 warnings, 0 notes, one test failure, `test-fixture-cache.R`'s formal-axis registry naming `nested_final_fit()`'s new `id` formal with no variant; an `id = "tuned"` variant registered against the `NULL` default (keys only, nothing runs); check re-running.
+- 2026-09-06: T6 done; second `devtools::check()`: 0 errors, 0 warnings, 0 notes, the suite inside it clean. Status set to review; all tasks checked.
 
 ## Decisions
 

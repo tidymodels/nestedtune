@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-06 (M71 planned; its lineage candidate row absorbed
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | in-progress | — | normal | milestones/M71-workflow-map.md |
+| M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | review | — | normal | milestones/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
 | M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
