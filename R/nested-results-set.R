@@ -144,7 +144,19 @@ collect_extracts.nested_results_set <- function(x, ...) {
 # is re-signalled naming the workflow (`resignal_for_workflow()`,
 # R/nested-workflow-map.R), so the set's conditions say which workflow they
 # are about. The bind is vctrs', as `stack_fold_column()` binds folds.
-stack_set <- function(x, reader, call, completed_only = TRUE) {
+#
+# `action` and `noun` are the words the two refusals say -- "collect" and
+# "table" for the readers, "plot" and "figure" for the set's `autoplot()`
+# views, which stack their per-workflow frames through here (M72) so the
+# fold-state rules are one code path.
+stack_set <- function(
+  x,
+  reader,
+  call,
+  completed_only = TRUE,
+  action = "collect",
+  noun = "table"
+) {
   ids <- x$wflow_id
   results <- x$result
   which <- seq_along(ids)
@@ -155,7 +167,7 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
       cli::cli_abort(
         c(
           "No outer fold of any workflow completed, so there is nothing \\
-           to collect.",
+           to {action}.",
           x = "All {n} workflow{?s} failed on every outer fold.",
           i = "Call {.fn collect_notes} on the set, or {.fn summary} on \\
                each {.code x$result[[i]]}, for the stage each fold failed at."
@@ -168,7 +180,7 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
       cli::cli_warn(
         c(
           "!" = "Workflow {.val {ids[[i]]}}: no outer fold completed, so \\
-                 this table leaves it out.",
+                 this {noun} leaves it out.",
           i = "Its {.code .notes} say what went wrong."
         ),
         class = "nestedtune_partial_summary",

@@ -497,3 +497,172 @@ selection_axis <- function(values) {
     levels = unique_labels[order(as_number, unique_labels, na.last = TRUE)]
   )
 }
+
+#' @rdname summary.nested_results_set
+#' @export
+autoplot.nested_results_set <- function(
+  object,
+  type = c("parameters", "performance"),
+  ...
+) {
+  rlang::check_dots_empty()
+  type <- check_plot_type(type)
+  call <- rlang::current_env()
+  switch(
+    type,
+    parameters = plot_set_selection(object, call = call),
+    performance = plot_set_performance(object, call = call)
+  )
+}
+
+# The set's performance view: the workflows on the x axis inside one panel
+# per metric, so the estimates are read across one axis, each marked by a
+# rule at that workflow's nested estimate -- the same `summarize_folds()`
+# `collect_metrics()` reads, never recomputed. Every workflow keeps its slot
+# on the axis, an all-failed one included (IP4, as a failed fold keeps its
+# slot in the single view), and a fold that scored nothing draws no point.
+plot_set_performance <- function(x, call) {
+  ids <- x$wflow_id
+  # The per-fold rows, stacked under the readers' fold-state rules: a
+  # workflow with a failed fold warns naming it, an all-failed one
+  # contributes no row, a set with no completed fold is refused.
+  per_fold <- stack_set(
+    x,
+    function(r) {
+      warn_partial_summary(r, noun = "figure")
+      per_fold_metrics(r)
+    },
+    call = call,
+    action = "plot",
+    noun = "figure"
+  )
+
+  # The panel names, decided over the distinct (metric, estimator, time)
+  # keys of the whole set rather than per workflow, so a metric two
+  # estimators scored gets a panel each and one every workflow scored
+  # once gets one panel, not one per workflow.
+  keys <- distinct_metric_keys(per_fold)
+  timed_keys <- timed_metric(keys)
+  ambiguous <- ambiguous_metrics(timed_keys)
+  panels <- metric_panel(timed_keys, keys$.estimator, ambiguous)
+
+  scored <- !is.na(per_fold$.estimate)
+  points <- new_tbl(list(
+    wflow_id = factor(per_fold$wflow_id[scored], levels = ids),
+    score = per_fold$.estimate[scored],
+    metric = factor(
+      metric_panel(
+        timed_metric(per_fold)[scored],
+        per_fold$.estimator[scored],
+        ambiguous
+      ),
+      levels = panels
+    )
+  ))
+
+  # One rule per workflow and panel, each workflow's rows summarized on
+  # their own through the function the readers share.
+  rules <- lapply(unique(per_fold$wflow_id), function(id) {
+    own <- summarize_folds(take_rows(per_fold, per_fold$wflow_id == id))
+    estimated <- !is.na(own$mean)
+    new_tbl(list(
+      wflow_id = rep(id, sum(estimated)),
+      metric = metric_panel(
+        timed_metric(own)[estimated],
+        own$.estimator[estimated],
+        ambiguous
+      ),
+      mean = own$mean[estimated]
+    ))
+  })
+  rules <- new_tbl(as.list(vctrs::vec_rbind(!!!rules)))
+  rules$wflow_id <- factor(rules$wflow_id, levels = ids)
+  rules$metric <- factor(rules$metric, levels = panels)
+
+  ggplot2::ggplot(points, ggplot2::aes(x = .data$wflow_id, y = .data$score)) +
+    # A rule with no height, under the points as the single view's line is.
+    ggplot2::geom_errorbar(
+      data = rules,
+      mapping = ggplot2::aes(
+        x = .data$wflow_id,
+        ymin = .data$mean,
+        ymax = .data$mean
+      ),
+      inherit.aes = FALSE,
+      width = 0.6,
+      linetype = "dashed"
+    ) +
+    ggplot2::geom_point(size = 2.5) +
+    ggplot2::scale_x_discrete(drop = FALSE) +
+    ggplot2::facet_wrap(
+      ggplot2::vars(.data$metric),
+      scales = "free_y",
+      drop = FALSE
+    ) +
+    ggplot2::labs(
+      title = "Nested cross-validation estimates across workflows",
+      subtitle = paste0(
+        set_design_line(x),
+        " Each line marks a workflow's nested estimate.\nIt describes the ",
+        "tune-and-fit procedure, not a model you can deploy."
+      ),
+      x = "Workflow",
+      y = "Score on the held-out outer fold"
+    )
+}
+
+# How much of the set ran, for the subtitle: the workflow and fold counts,
+# and when any workflow has a failed fold, how many do and where to read
+# which. The per-panel qualifier of the single view is not repeated here --
+# "completed" is per workflow in a set, and `summary()` names each
+# workflow's failed folds.
+set_design_line <- function(x) {
+  k <- nrow(x)
+  n <- nrow(x$result[[1L]])
+  short <- sum(vapply(x$result, function(r) !all(r$.completed), logical(1)))
+  line <- paste0(
+    k,
+    " workflow",
+    if (k == 1L) "" else "s",
+    ", ",
+    n,
+    " outer fold",
+    if (n == 1L) "" else "s",
+    " each."
+  )
+  if (short > 0L) {
+    line <- paste0(
+      line,
+      "\n",
+      short,
+      " of ",
+      k,
+      " workflow",
+      if (k == 1L) "" else "s",
+      " ha",
+      if (short == 1L) "s" else "ve",
+      " a failed fold; see summary()."
+    )
+  }
+  line
+}
+
+# The distinct (metric, estimator, time) keys of a stacked per-fold table,
+# in first-appearance order, keyed as `summarize_folds()` keys them.
+distinct_metric_keys <- function(per_fold) {
+  cols <- intersect(c(".metric", ".estimator", ".eval_time"), names(per_fold))
+  rendered <- lapply(cols, function(nm) {
+    if (nm == ".eval_time") {
+      sprintf("%.17g", per_fold[[nm]])
+    } else {
+      per_fold[[nm]]
+    }
+  })
+  first <- !duplicated(do.call(paste, c(rendered, sep = "\r")))
+  take_rows(per_fold[cols], first)
+}
+
+# The rows of a plain-column table, as a tibble.
+take_rows <- function(tbl, rows) {
+  new_tbl(lapply(as.list(tbl), function(col) col[rows]))
+}

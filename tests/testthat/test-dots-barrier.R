@@ -184,7 +184,8 @@ DOTS_PROBED_METHODS <- c(
   # The set readers (M72).
   "agreement.nested_results_set",
   "summary.nested_results_set",
-  "print.summary.nested_results_set"
+  "print.summary.nested_results_set",
+  "autoplot.nested_results_set"
 )
 
 test_that("AC5: every registered method whose `...` is unused fences it", {

@@ -2574,6 +2574,20 @@ broken_set_results <- function(
   )))
 }
 
+# The partial-run warnings a call raises, muffled, in order: what a set
+# reader says about each workflow with a failed fold (M72).
+partial_warnings <- function(expr) {
+  warnings <- list()
+  withCallingHandlers(
+    expr,
+    nestedtune_partial_summary = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  warnings
+}
+
 # What a map run needs beyond the engines: workflowsets for the set, dials
 # for the Bayesian tuner, and the routed tuner's own packages read off the
 # registry, keyed by the orchestrator's name less its prefix.

@@ -673,3 +673,87 @@ test_that("a non-numeric selection is drawn on a discrete axis", {
   expect_identical(plot_points(p)$fold, c("Fold1", "Fold2", "Fold3"))
   expect_identical(axis_labels(p, "y"), "c3")
 })
+
+# ---- the set views (M72) ------------------------------------------------------
+#
+# Asserted on the built plot as above, against the set readers: the points
+# are `collect_metrics(x, summarize = FALSE)`'s scored rows and the rules
+# are `collect_metrics(x)`'s means, so the figure and the tables cannot
+# disagree about a number.
+
+test_that("AC2: the set's performance view puts the workflows on x inside one panel per metric", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_s3_class(p, "ggplot")
+
+  # The panel names are the single view's, the x axis the ids in set order.
+  expect_identical(strip_labels(p), c("rmse", "rsq"))
+  expect_identical(axis_labels(p, "x"), res$wflow_id)
+  expect_false(identical(res$wflow_id, sort(res$wflow_id)))
+
+  # One point per scored fold, at the unsummarized reader's value.
+  folds_tbl <- as.data.frame(collect_metrics(res, summarize = FALSE))
+  scored <- folds_tbl[!is.na(folds_tbl$.estimate), ]
+  pts <- plot_points(p)
+  expect_identical(nrow(pts), nrow(scored))
+  for (m in c("rmse", "rsq")) {
+    rows <- scored$.metric == m
+    expect_identical(pts$fold[pts$panel == m], scored$wflow_id[rows])
+    expect_identical(pts$y[pts$panel == m], scored$.estimate[rows])
+  }
+
+  # One rule per workflow and panel, both ends at the summarized mean.
+  seg <- plot_segments(p)
+  means <- as.data.frame(collect_metrics(res))
+  expect_identical(nrow(seg), nrow(means))
+  for (i in seq_len(nrow(means))) {
+    hit <- seg$x == means$wflow_id[[i]] & seg$panel == means$.metric[[i]]
+    expect_identical(sum(hit), 1L)
+    expect_identical(seg$ymin[hit], means$mean[[i]])
+    expect_identical(seg$ymax[hit], means$mean[[i]])
+  }
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "3 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_no_match(subtitle, "summary()", fixed = TRUE)
+  expect_match(
+    subtitle,
+    "It describes the tune-and-fit procedure, not a model you can deploy.",
+    fixed = TRUE
+  )
+  expect_identical(plot_label(p, "x"), "Workflow")
+})
+
+test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
+  skip_if_no_wset_fixture()
+  beside <- broken_set_results()
+  warnings <- partial_warnings(p <- autoplot(beside, type = "performance"))
+  expect_length(warnings, 1L)
+  expect_match(
+    conditionMessage(warnings[[1L]]),
+    'Workflow "broken": no outer fold completed',
+    fixed = TRUE
+  )
+
+  # On the axis, in set order, with nothing drawn at it.
+  expect_identical(axis_labels(p, "x"), c("tuned", "broken"))
+  pts <- plot_points(p)
+  expect_identical(unique(pts$fold), "tuned")
+  expect_identical(nrow(pts), 4L)
+  seg <- plot_segments(p)
+  expect_identical(unique(seg$x), "tuned")
+  expect_identical(nrow(seg), 2L)
+  expect_identical(
+    seg$ymin[seg$panel == "rmse"],
+    suppressWarnings(collect_metrics(beside))$mean[[1L]]
+  )
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "2 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_match(
+    subtitle,
+    "1 of 2 workflows has a failed fold; see summary().",
+    fixed = TRUE
+  )
+})

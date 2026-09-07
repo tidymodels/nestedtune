@@ -967,19 +967,6 @@ test_that("printed output holds its shape", {
 
 # ---- summary() on a set (M72, AC1) -------------------------------------------
 
-# The partial-run warnings a call raises, muffled, in order.
-partial_warnings <- function(expr) {
-  warnings <- list()
-  withCallingHandlers(
-    expr,
-    nestedtune_partial_summary = function(w) {
-      warnings[[length(warnings) + 1L]] <<- w
-      invokeRestart("muffleWarning")
-    }
-  )
-  warnings
-}
-
 test_that("AC1: summary() on a set is one element summary per workflow, named and in set order", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
