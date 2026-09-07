@@ -65,10 +65,19 @@ jobs:
     # its tests took 14 minutes on the default branch and 18 then 19 on the
     # M72 branch, the step passing once with 30 seconds to spare and then
     # timing out inside the same vignette rebuild (job 101627605935 of run
-    # 34085134425). Those two legs now get 40, chosen at M72's review gate
-    # over trimming the suite; the three fast legs keep 30, so a hang still
-    # surfaces in 30 there, and the suite still owes the speed-up (ROADMAP
-    # candidate).
+    # 34085134425). Those two legs got 40 at M72's review gate, over trimming
+    # the suite, and the suite was made faster next: M74 (2026-09-07) served
+    # every hand-rolled reference loop from the fixture cache, merged the
+    # test blocks that reran one orchestrator call, shared one daemon pool
+    # across the parallel-identity blocks instead of restarting it 26 times,
+    # and cut the help-page examples to two-by-two folds. Measured serially
+    # on the maintainer's machine by benchmarks/profile-tests.R, the suite
+    # went from 732 s to 631 s, and the examples (benchmarks/time-examples.R,
+    # with \donttest) from 28 s to 16 s; the last two default-branch runs
+    # before it (34129642542, 34077230243) had check steps of 18 to 28
+    # minutes, tests 11 to 18 of them. Every leg is back on 30, so a hang
+    # surfaces in 30 everywhere; the per-leg step times of the M74 head are
+    # in its milestone file.
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
