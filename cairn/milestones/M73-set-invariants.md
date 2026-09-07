@@ -71,6 +71,7 @@ Make a subset of a workflow-set result answer only for the workflows it holds, s
 - 2026-09-07: T6 — `devtools::test()` under `TESTTHAT_PARALLEL=FALSE`: 0 failures, 0 warnings, 0 skips; fixture-cache report 149 signatures, 149 builds, 485 requests, and the branch adds no `memoised()` call site (`git diff main -- tests`); `devtools::check()` 0 errors, 0 warnings, 0 notes in 11m27s, against the 0/0/0 M72's review recorded for the default branch; `air format --check` clean on every touched R file. Status → review.
 - 2026-09-07: step-7 approval: PR #83 approved for merge, with findings O1–O5 fixed now and O6, O7 rejected.
 - 2026-09-07: CI wait on PR #83 hit the 590s foreground ceiling with checks still running; watcher stopped, session stopped at step 8 for a stateless resume (marker written, PR marked ready).
+- 2026-09-07: step-7 approval: PR #83 approved for merge (re-posed on resume, CI green on 11 checks).
 
 ## Decisions
 
