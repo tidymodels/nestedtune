@@ -260,3 +260,30 @@ test_that("AC1: a bare result sheds the record with the class", {
   expect_identical(nrow(out), 4L)
   expect_null(attr(out, "fn"))
 })
+
+test_that("group_by(), rowwise() and as_tibble() return a non-set that still carries fn", {
+  skip_if_no_wset_fixture()
+  src <- compat_set()
+  forms <- list(
+    group_by = dplyr::group_by(src, wflow_id),
+    rowwise = dplyr::rowwise(src),
+    as_tibble = tibble::as_tibble(src)
+  )
+  for (nm in names(forms)) {
+    out <- forms[[nm]]
+    expect_false(inherits(out, "nested_results_set"), label = nm)
+    expect_identical(attr(out, "fn"), attr(src, "fn"), label = paste(nm, "fn"))
+  }
+  expect_s3_class(forms$group_by, "grouped_df")
+  expect_s3_class(forms$rowwise, "rowwise_df")
+  expect_identical(class(forms$as_tibble), c("tbl_df", "tbl", "data.frame"))
+})
+
+test_that("the rule refuses a template that is not a set", {
+  skip_if_no_wset_fixture()
+  src <- compat_set()
+  bare <- bare_set(src)
+  expect_false(can_reconstruct_set(bare, bare))
+  expect_bare_set(reconstruct_set(bare, bare), name = "a bare template")
+  expect_true(can_reconstruct_set(bare, src))
+})

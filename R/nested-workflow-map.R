@@ -93,7 +93,10 @@
 #' `dplyr::bind_cols()` with a table first, and a direct
 #' `vctrs::vec_cbind()`, which finalizes to a tibble before the rule is
 #' asked. Replacing a value under the class with `$<-` or `[[<-` is not
-#' checked, as it is not on a `nested_results`.
+#' checked, as it is not on a `nested_results`. `dplyr::group_by()`,
+#' `dplyr::rowwise()` and `tibble::as_tibble()` return a grouped, a rowwise
+#' and a plain tibble that is not a set and still carries the `fn`
+#' attribute, as they do on a `nested_results`.
 #'
 #' @param object A [workflowsets::workflow_set()]: one workflow per row,
 #'   untrained, with `wflow_id`, `info`, `option` and `result` columns as
@@ -290,10 +293,18 @@ for_workflow <- function(id, call, expr) {
 # `warning()`, an error through rlang's own signaller, which adds a trace
 # to one that has none.
 resignal_for_workflow <- function(cnd, id, call) {
-  cnd$message[[1L]] <- paste0(
+  # A condition built with no message text -- `character(0)`, or no
+  # `message` element at all -- gets the prefix as its whole first line;
+  # sub-assigning into it would index past the end or make a list.
+  message <- cnd$message
+  if (length(message) == 0L) {
+    message <- ""
+  }
+  message[[1L]] <- paste0(
     cli::format_inline("Workflow {.val {id}}: "),
-    cnd$message[[1L]]
+    message[[1L]]
   )
+  cnd$message <- message
   # The callers hand their frame as `call`, which `rlang::abort()` would
   # resolve to the frame's call; assigned directly it needs the same step.
   cnd$call <- rlang::error_call(call)

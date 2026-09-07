@@ -468,7 +468,10 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   this rather than intercepting three further entry points to strip attributes
   off objects that have already stopped answering for the run. The **Value**
   section of `?nested_tune_grid` states it, and `test-vctrs-compat.R` asserts
-  it.
+  it. The same three on a `nested_results_set` keep its `fn` attribute on an
+  object that is no longer a set (measured 2026-09-07, M73 review); the
+  Subsetting section of `?nested_workflow_map` states it, and
+  `test-nested-results-set-compat.R` asserts it.
 
 - `time_limit` on a `control_bayes()` or a `control_sim_anneal()` passed
   through `...` reaches `tune_bayes()` or `tune_sim_anneal()` as given, and a

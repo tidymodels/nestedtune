@@ -140,7 +140,10 @@ row left, a \code{wflow_id} repeated (\code{x[c(1, 1), ]}, \code{rbind(x, x)},
 \code{dplyr::bind_cols()} with a table first, and a direct
 \code{vctrs::vec_cbind()}, which finalizes to a tibble before the rule is
 asked. Replacing a value under the class with \verb{$<-} or \verb{[[<-} is not
-checked, as it is not on a \code{nested_results}.
+checked, as it is not on a \code{nested_results}. \code{dplyr::group_by()},
+\code{dplyr::rowwise()} and \code{tibble::as_tibble()} return a grouped, a rowwise
+and a plain tibble that is not a set and still carries the \code{fn}
+attribute, as they do on a \code{nested_results}.
 }
 
 \examples{

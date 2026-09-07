@@ -463,12 +463,12 @@ set_record_columns <- function() {
 # repeated, and every row's three values identical to the template's row of
 # that id. The template is the first data-frame argument of the operation,
 # so a combination of two subsets, or of two map runs, is not a set
-# (D-059).
+# (D-059). A template that is not itself a set vouches for nothing.
 can_reconstruct_set <- function(data, template) {
   cols <- set_record_columns()
   if (
     !is.data.frame(data) ||
-      !is.data.frame(template) ||
+      !inherits(template, "nested_results_set") ||
       !all(cols %in% names(template)) ||
       !all(cols %in% names(data)) ||
       duplicated_record_names(names(data), cols) ||

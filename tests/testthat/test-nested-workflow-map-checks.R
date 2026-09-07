@@ -361,6 +361,49 @@ test_that("AC4: a re-signalled condition keeps the original's class, parent, bod
       info = form$name
     )
   }
+
+  # The package's callers hand their own frame, which `rlang::error_call()`
+  # resolves to that frame's call.
+  a_reader <- function(x) {
+    for_workflow(
+      "tuned",
+      environment(),
+      rlang::abort("planted", class = "nestedtune_planted")
+    )
+  }
+  cnd <- rlang::catch_cnd(a_reader(1))
+  expect_s3_class(cnd, "nestedtune_planted")
+  expect_identical(cnd$call, quote(a_reader(1)))
+  expect_identical(conditionMessage(cnd), 'Workflow "tuned": planted')
+})
+
+test_that("a re-signalled condition with no message text gets the prefix as its message", {
+  call <- quote(the_reader(x))
+  empty <- rlang::catch_cnd(
+    for_workflow(
+      "tuned",
+      call,
+      rlang::cnd_signal(rlang::error_cnd(
+        "nestedtune_planted",
+        message = character(0)
+      ))
+    )
+  )
+  expect_s3_class(empty, "nestedtune_planted")
+  expect_identical(empty$message, 'Workflow "tuned": ')
+  absent <- rlang::catch_cnd(
+    for_workflow(
+      "tuned",
+      call,
+      stop(structure(
+        class = c("nestedtune_planted", "error", "condition"),
+        list(message = NULL, call = NULL)
+      ))
+    )
+  )
+  expect_s3_class(absent, "nestedtune_planted")
+  expect_identical(absent$message, 'Workflow "tuned": ')
+  expect_identical(conditionMessage(absent), 'Workflow "tuned": ')
 })
 
 test_that("AC4: a re-signalled warning is muffled at the source and a warning of another class passes untouched", {
