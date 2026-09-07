@@ -1,0 +1,64 @@
+# M72: `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id`
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** IP3, IP4
+- **Resolves:** —
+- **Surface tier:** user-facing — three exported S3 methods and a print method on `nested_results_set`
+- **Branch/PR:** —
+
+## Goal
+
+Give the three single-workflow readers a set method, so a user comparing workflows on one design reads each workflow's selections, fold spread and agreement table under its id without indexing `x$result`.
+
+## Scope
+
+**In:** `summary.nested_results_set()` returning a list of the element summaries with a print of one h1 and one h2 per workflow; `autoplot.nested_results_set()` with the two `type` values (D-019), the performance view putting workflows on the x axis inside metric panels and the parameters view one panel per (workflow, tuned parameter); `agreement.nested_results_set()` stacking each element's table under `wflow_id`; the fold-state rules of `stack_set()` on the two views; a memoised `wset_three()` results fixture; help page, pkgdown row, NEWS bullet, `tuners.Rmd` set section.
+
+**Out:** `[`, `dplyr_reconstruct()`, `names<-`, `vec_restore()` on the set and `resignal_for_workflow()` keeping the parent chain → ROADMAP candidate (M71 review O2/O3/O5). A set fixture with survival metrics or a character-valued parameter → not built; AC2 and AC3 are bounded to `wset_three()`. A per-workflow "(from k folds)" qualifier on the performance panels → the subtitle sentence carries the shortfall. A set section in `results.Rmd` → `tuners.Rmd` already holds `mapped`.
+
+## Acceptance criteria
+
+- [ ] AC1: `summary()` on a `nested_results_set` returns a `summary.nested_results_set` object: a list of one `summary.nested_results` per workflow, named by `wflow_id` in set order, each `identical()` to `summary()` of that element called alone (warnings suppressed on both sides), an all-failed workflow included, with the orchestrator name as an attribute of the list and never of an element; it warns `nestedtune_partial_summary` once per workflow with a failed fold, all-failed included, with the id in front, and never aborts. Its print shows one h1 with the orchestrator and workflow count, then one h2 per `wflow_id` in set order holding that element's design line, failures, selection and estimate, and the IP3 note once at the end. Tested on `wset_three()`'s results, on those results over a design with one fold broken by `break_fold()`, and on a `broken_workflow()` beside a completing one; the print pinned by `expect_snapshot()` on the first two.
+- [ ] AC2: `autoplot(x, type = "performance")` on a set draws one panel per metric, panel names computed by the single view's `timed_metric()` and `metric_panel()`, `wflow_id` on the x axis in set order with levels taken from `x$wflow_id` and `drop = FALSE` so an all-failed workflow keeps an empty slot, one point per completed non-NA fold score whose y values equal the non-NA rows of `collect_metrics(x, summarize = FALSE)`, and one horizontal segment per workflow per panel read from a layer whose `ymin` and `ymax` both equal `collect_metrics(x)`'s mean; the subtitle names the workflow count and, when any workflow has a failed fold, how many do and points at `summary()`, then the single view's IP3 sentence. `ggplot_build()` assertions on `wset_three()`'s results and on a set holding an all-failed workflow, and a `vdiffr` doppelganger of the first.
+- [ ] AC3: `autoplot(x, type = "parameters")` on a set draws one panel per (workflow, tuned parameter) pair, in set order, labelled `"<id>: "` followed by the single view's qualified label for that element, the fold labels on the x axis with `drop = FALSE` so a failed fold keeps its slot; on `wset_three()`'s results, where every selected value is numeric, each panel's points equal the single view's points for that element, and the axis type is decided over the set's pooled values by `selection_axis()` as the single view decides over its parameters; a workflow with nothing to tune contributes no panel; a set in which no workflow has a tuned parameter refuses with `nestedtune_no_tuned_parameters`. `ggplot_build()` assertions on `wset_three()`'s results (the fixed workflow contributes no panel) and on `wset_fixed()`'s under `nested_fit_resamples` (refusal), and a `vdiffr` doppelganger of the first.
+- [ ] AC4: Both set views refuse a set with no completed fold with `nestedtune_no_completed_folds`, and warn once per workflow with a failed fold with `nestedtune_partial_summary` naming it, an all-failed one contributing no point; tested on a set built from `broken_workflow()` beside a completing one (all-failed, and no-completed when alone) and on `wset_three()`'s results over a `break_fold()` design (partial). `type` outside the two values refuses through `check_plot_type()`. The four registered methods (`summary`, `print` on the summary object, `autoplot`, `agreement`) fence `...` first and pass the dots probe.
+- [ ] AC5: `agreement()` on a set returns a tibble reordered after stacking to `wflow_id` first, then the union of the elements' parameter columns, then `n` and `prop`, rows in set order; on `wset_three()`'s results, whose parameter ids are disjoint, each workflow's block less `wflow_id` and the columns that element lacks is `identical()` to `agreement()` of that element alone (warnings suppressed); a workflow with nothing to tune contributes zero rows; a tuned parameter with id `wflow_id` refuses with `nestedtune_collect_name_collision`, and one with id `n` or `prop` refuses with `nestedtune_agreement_name_collision` naming the workflow in front. Tested on `wset_three()`'s results and on planted sets for each of the three ids.
+- [ ] AC6: One help page `summary.nested_results_set` documents the four methods, linked from the set readers page and from each single-view page; a row in `_pkgdown.yml`'s "Running the loop" section; a NEWS bullet; the `tuners.Rmd` set section shows `summary()`, `agreement()` and both `autoplot()` views on `mapped`; `pkgdown::check_pkgdown()` passes, `devtools::document()` produces no diff, and `devtools::check()` reports 0 errors and 0 warnings.
+
+## Coverage
+
+- AC1 → T1, T3
+- AC2 → T1, T4, T6
+- AC3 → T1, T5, T6
+- AC4 → T2, T6
+- AC5 → T1, T2
+- AC6 → T7
+
+## Tasks
+
+- [ ] T1: Fixtures in `tests/testthat/helper-orchestration.R`: extend `wset_results()` (line ~2478) or add `wset_three_results()` memoising `nested_workflow_map()` over `wset_three()` for grid, every default forced before the seed (M71 lesson); move `broken_workflow()` (`test-nested-workflow-map-readers.R:27`) into the helper with a builder for a broken-beside-completing set; `skip_if_no_wset_fixture()` covers the new entry.
+- [ ] T2: `agreement.nested_results_set()` in `R/nested-results-agreement.R` over `stack_set()` (`R/nested-results-set.R:147`) with the column reorder; tests in `test-nested-results-agreement.R` for AC5's identity, zero-row, three planted collisions; entry in `DOTS_PROBED_METHODS` (`test-dots-barrier.R:176`).
+- [ ] T3: Factor `print.summary.nested_results()`'s body (`R/nested-results-print.R:208`) into a helper taking a heading level; `summary.nested_results_set()` looping `for_workflow()` over the elements (not `stack_set()`, which drops an all-failed element) and `print.summary.nested_results_set()`; tests and snapshots in `test-nested-results-print.R`; dots-probe entries for both.
+- [ ] T4: Performance view in `R/nested-results-plot.R`: `autoplot.nested_results_set()` dispatching on `check_plot_type()` and `check_any_completed()`'s set counterpart; a per-workflow frame over `per_fold_metrics()` with x levels from `x$wflow_id`, panel names through `timed_metric()`/`metric_panel()`, a segment layer at the mean, the subtitle sentence; a segment reader beside `plot_rules()` in `helper-plot.R`; `ggplot_build()` tests.
+- [ ] T5: Parameters view: per-element `selection_frame()` with `"<id>: "` prefixed to the qualified label, panels in set order, pooled `selection_axis()`, `drop = FALSE`, the `nestedtune_no_tuned_parameters` refusal when no element yields a frame; `ggplot_build()` tests on `wset_three()` and `wset_fixed()` results.
+- [ ] T6: Fold-state tests for both views (AC4) in `test-nested-results-plot.R`; `vdiffr` doppelgangers for both set views, each rendered and looked at before its snapshot is approved (LESSONS 2026-07-26 plots); `air format --check` on touched files.
+- [ ] T7: Roxygen page `summary.nested_results_set` with `@seealso` from `collect_metrics.nested_results_set`, `summary.nested_results`, `autoplot.nested_results`, `agreement`; `_pkgdown.yml` row after line 61; NEWS bullet; `vignettes/tuners.Rmd` set section (lines 346–395) gains the three readers on `mapped`; `devtools::document()`, `pkgdown::check_pkgdown()`, `devtools::check()`.
+
+## Work log
+
+- 2026-09-06: created by /milestone-plan, promoting the ROADMAP candidate row added at M71's plan gate (M71 Out, D-058 consequences).
+- 2026-09-06: criteria audit ran in full mode ([O] fresh-context reader) over the six drafted criteria: five FIX applied (AC5 column order and identity clause, AC4 partial-run fixture, AC1 warning clause, AC4 method count, AC2 NA rows and segment layer), five DECIDE items posed or settled at the gate; a second full-mode pass over the gate-changed AC1–AC3 and the reworded AC4–AC5 returned four FIX applied (AC1 all-failed probe, AC2 x levels from `wflow_id`, AC3 `wset_fixed()` orchestrator, AC5 reorder and disjoint scope, plus the `wset_three()` fixture task) and three DECIDE settled autonomously (factoring clause moved to T3, subtitle count defined, axis clause kept numeric).
+- 2026-09-06: plan gate chose one h1 with per-workflow h2 sections and one IP3 note over reusing `print.summary.nested_results()` whole per element because the repeated h1 and note add nothing; falsified by a reader needing an element's print byte-identical to the standalone one.
+- 2026-09-06: plan gate chose shipping the parameters view with `"<id>: "` plus the single view's qualified label over flat labels (drops the false-agreement guard M08 review F2 added) and over a performance-only set method (leaves the candidate row half done); falsified by a set whose qualified strips overflow the panel width on a real workflow count.
+- 2026-09-06: plan gate chose workflows on the x axis inside metric panels over `facet_grid(metric ~ wflow_id)` keeping fold labels on x because the set exists to compare workflows and means are read across one axis; falsified by a user needing per-fold identity across workflows on the plot.
+- 2026-09-06: plan gate chose keeping an all-failed workflow's empty x slot over dropping it, mirroring the failed-fold slot (IP4 visible shortfall); falsified by evidence the empty slot is misread as a zero.
+- 2026-09-06: plan settled the eval-time clause as "computed by the single view's helpers" over a survival set fixture because none exists and the single view's tests already cover the helpers; falsified by a set method bypassing them.
+- 2026-09-06: plan settled the subtitle sentence over a per-workflow "(from k folds)" panel qualifier because "completed" is per workflow in a set and a qualifier per panel would repeat per metric; falsified by a partial workflow's mean being read as full from an exported figure.
+- 2026-09-06: plan settled `tuners.Rmd` as the vignette home over a new `results.Rmd` section because `mapped` is already built there and a second map render would cost the M66 render budget; falsified by readers of `results.Rmd` missing the set readers.
+
+## Decisions
+
+## Review

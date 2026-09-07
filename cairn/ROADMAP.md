@@ -1,12 +1,13 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (M71 done and archived; M68 row pruned; one candidate row for M71's deferred findings; one LESSONS line; validate green; no RB open.)_
+_Last hygiene check: 2026-09-06 (M72 planned from the M71-Out candidate row, which is promoted; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | planned | — | normal | milestones/M72-set-readers.md |
 | M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
@@ -43,7 +44,6 @@ _Last hygiene check: 2026-09-06 (M71 done and archived; M68 row pruned; one cand
 - What `...` still does not carry after M48: the Gaussian-process fitter's options (`corr`, `nug_thres`, `maxit`, `optim_start`, which `tune_bayes()` forwards from its own `...`) and the outer-loop `control` topepo reserved the name for in [#33](https://github.com/tidymodels/nestedtune/issues/33) — added 2026-09-02 — M48 Out, D-042. Promote on a user needing a GP option, or on a first outer-loop setting that is not its own argument
 - An `autoplot()` view of each fold's inner search trajectory over `.inner_metrics` — the best-so-far by `.iter` for a Bayesian run, which is what [#57](https://github.com/tidymodels/nestedtune/issues/57) wanted the column for — added 2026-09-02 — M49 Out (done 2026-09-02), D-019. Extended 2026-09-02 at M50/M51's plan gate: a racing view (the per-resample elimination order `finetune::plot_race()` draws is not kept by the fold record, M50 Out) and an annealing trajectory (M51 Out) join it; and a view over the out-of-fold predictions M68 keeps (M68 Out, 2026-09-06). Promote on a user asking for a plot rather than the table
 - Name the selection rule in `summary()` and the final fit's print when it is not the default best-by-metric rule — added 2026-09-06 — M69 Out; `extract_procedure(res)$select` reaches it. Promote on a user misreading `.selected` for lack of the rule on the printed surface
-- `summary()`, `autoplot()` and `agreement()` on a `nested_results_set`, each element's view keyed by `wflow_id` — added 2026-09-06 at M71's plan gate — M71 Out. Promote on a user asking for the per-workflow view rather than `collect_metrics()` on the set
 - Dispatch a `nested_workflow_map()` run as workflow-by-fold units in one parallel round instead of one round per workflow — added 2026-09-06 at M71's plan gate — M71 Out; needs the payload to carry the workflow (`R/parallel.R`, `fold_task()`). Promote on evidence that the per-workflow rounds leave daemons idle on a user's run
 - `nested_final_fit()` ties a fixed workflow to a `fit_resamples` record — added 2026-09-06 at M70's review gate (finding O1). Today the final fit on a no-tuning record checks only that the workflow carries no `tune()` marker, so any fixed workflow is accepted and paired with the record's estimate, where the tuned paths tie the workflow to the record through the recorded grid. Promote on a user pairing the wrong workflow with a baseline record, or on a recorded workflow identity being wanted by another reader
 - `summarize = TRUE` on `collect_predictions()` for a `nested_results`, averaging each row's predictions across the repeats of a repeated design as tune's method does — added 2026-09-06 — M68 Out. Needs an oracle against tune's own averaging for class probabilities and votes. Promote on a user asking for it on a repeated design
