@@ -26,3 +26,30 @@
       i Use `collect_metrics()` for every workflow's estimate under its id, and
         `x$result[[i]]` for one workflow's run.
 
+# AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged
+
+    Code
+      print(one)
+    Message
+      
+      -- Nested cross-validation results for a workflow set --------------------------
+      Orchestrator: `nested_tune_grid()` (grid search)
+      Workflows: 1
+      v "fixed": 2 of 2 outer folds completed (no tuning)
+      i Use `collect_metrics()` for every workflow's estimate under its id, and
+        `x$result[[i]]` for one workflow's run.
+
+---
+
+    Code
+      print(two)
+    Message
+      
+      -- Nested cross-validation results for a workflow set --------------------------
+      Orchestrator: `nested_tune_grid()` (grid search)
+      Workflows: 2
+      v "threshold": 2 of 2 outer folds completed (grid search)
+      v "fixed": 2 of 2 outer folds completed (no tuning)
+      i Use `collect_metrics()` for every workflow's estimate under its id, and
+        `x$result[[i]]` for one workflow's run.
+

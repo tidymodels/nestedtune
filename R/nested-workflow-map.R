@@ -65,7 +65,38 @@
 #' workflow lost folds. An error an orchestrator raises for one workflow --
 #' a `grid` that names a parameter that workflow does not tune, a control of
 #' the wrong class -- is raised the same way, when that workflow's turn
-#' comes; the workflows before it have run by then.
+#' comes; the workflows before it have run by then. What is raised is the
+#' original condition object: its class vector, its `parent` and the cause
+#' chain printed under it, its bullets and every field a handler reads come
+#' through unchanged, with `Workflow "<id>": ` written in front of the
+#' first line of its message and this function, or the reader, as its
+#' call.
+#'
+#' @section Subsetting:
+#'
+#' Each row's `nested_results` describes its own run whole, so a subset of
+#' the set that keeps rows of the run answers for the workflows it holds.
+#' An operation keeps the class and the `fn` attribute when its result
+#' holds `wflow_id`, `workflow` and `result` under those names with none
+#' repeated, at least one row, no `wflow_id` repeated, and each row's three
+#' values identical to the row of that id in the operation's first
+#' data-frame argument: rows dropped or reordered and columns added keep
+#' the class, so `dplyr::filter()`, `dplyr::arrange()`, `dplyr::mutate()`,
+#' `dplyr::bind_cols()` with the set first, `x[i, ]` and
+#' `vctrs::vec_slice()` on a kept subset hand back a set whose readers,
+#' `summary()`, `print()`, `extract_workflow()` and [nested_final_fit()]
+#' answer for the rows in hand alone. Anything else comes back a plain
+#' tibble without the attribute: a record column dropped or renamed, no
+#' row left, a `wflow_id` repeated (`x[c(1, 1), ]`, `rbind(x, x)`,
+#' `dplyr::bind_rows(x, x)`), a row that is not the run's own (a
+#' `result` replaced, a row bound in from another set or a bare table),
+#' `dplyr::bind_cols()` with a table first, and a direct
+#' `vctrs::vec_cbind()`, which finalizes to a tibble before the rule is
+#' asked. Replacing a value under the class with `$<-` or `[[<-` is not
+#' checked, as it is not on a `nested_results`. `dplyr::group_by()`,
+#' `dplyr::rowwise()` and `tibble::as_tibble()` return a grouped, a rowwise
+#' and a plain tibble that is not a set and still carries the `fn`
+#' attribute, as they do on a `nested_results`.
 #'
 #' @param object A [workflowsets::workflow_set()]: one workflow per row,
 #'   untrained, with `wflow_id`, `info`, `option` and `result` columns as
@@ -252,22 +283,32 @@ for_workflow <- function(id, call, expr) {
 }
 
 # The re-signal itself, shared with the set's readers (R/nested-results-set.R).
-# The whole formatted message travels, with cli's leading bullet glyph on
-# the first line dropped so the id reads as the head of the sentence; the
-# package's own classes travel, rlang's and base R's are re-added by the
-# signaller.
+# The original condition object travels whole (M73): its class vector, its
+# `parent` and the cause chain that prints under it, its bullets, its
+# format flag and every data field a handler reads, with the workflow's id
+# written in front of the first line of its header and the caller's call
+# in place of the element's. A rebuilt condition -- `rlang::abort()` on the
+# formatted text, what M71 did -- kept the class and the text and lost the
+# rest. `cnd_signal()` raises the object as it is: a warning is raised with
+# `warning()`, an error through rlang's own signaller, which adds a trace
+# to one that has none.
 resignal_for_workflow <- function(cnd, id, call) {
-  own <- setdiff(
-    class(cnd),
-    c("rlang_error", "rlang_warning", "error", "warning", "condition")
-  )
-  message <- sub("^[!] ", "", conditionMessage(cnd))
-  message <- paste0(cli::format_inline("Workflow {.val {id}}: "), message)
-  if (inherits(cnd, "warning")) {
-    rlang::warn(message, class = own, call = call)
-  } else {
-    rlang::abort(message, class = own, call = call)
+  # A condition built with no message text -- `character(0)`, or no
+  # `message` element at all -- gets the prefix as its whole first line;
+  # sub-assigning into it would index past the end or make a list.
+  message <- cnd$message
+  if (length(message) == 0L) {
+    message <- ""
   }
+  message[[1L]] <- paste0(
+    cli::format_inline("Workflow {.val {id}}: "),
+    message[[1L]]
+  )
+  cnd$message <- message
+  # The callers hand their frame as `call`, which `rlang::abort()` would
+  # resolve to the frame's call; assigned directly it needs the same step.
+  cnd$call <- rlang::error_call(call)
+  rlang::cnd_signal(cnd)
 }
 
 # The map's counterpart of `restore_rng()`: the caller's state goes back

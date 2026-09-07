@@ -236,3 +236,206 @@ test_that("AC5: every workflow's packages are checked at entry", {
   expect_match(conditionMessage(cnd), ABSENT_PKG, fixed = TRUE)
   expect_match(conditionMessage(cnd), "absent", fixed = TRUE)
 })
+
+# AC4 (M73): a condition `for_workflow()` re-signals is the original
+# object, its first message line prefixed with the workflow's id and its
+# call the map's or the reader's. Every planted form is compared field by
+# field with the same condition caught outside `for_workflow()`, so a
+# re-signal that rebuilt the condition from its message -- what M71 did,
+# dropping `parent` and every data field -- fails here on each form.
+
+# The condition `expr` raises, caught outside any re-signal.
+planted_cnd <- function(expr) {
+  rlang::catch_cnd(expr)
+}
+
+# The forms: cli-built with bullets, a parent and a data field; rlang
+# plain; base. Each is a function so the same expression can be raised
+# twice, once caught bare and once through `for_workflow()`.
+RESIGNAL_FORMS <- list(
+  list(
+    name = "cli_abort with bullets, parent and data",
+    kind = "error",
+    f = function() {
+      cli::cli_abort(
+        c("Planted {.val header}", i = "a bullet", x = "another"),
+        class = "nestedtune_planted",
+        parent = simpleError("the root cause"),
+        planted_field = 1:2
+      )
+    }
+  ),
+  list(
+    name = "rlang::abort plain",
+    kind = "error",
+    f = function() {
+      rlang::abort("plain header\nsecond line", class = "nestedtune_planted")
+    }
+  ),
+  list(
+    name = "base stop",
+    kind = "error",
+    f = function() stop("a base message")
+  ),
+  list(
+    name = "cli_warn partial_summary with bullets, parent and data",
+    kind = "warning",
+    f = function() {
+      cli::cli_warn(
+        c("Planted {.val header}", i = "a bullet"),
+        class = "nestedtune_partial_summary",
+        parent = simpleWarning("the root cause"),
+        planted_field = "a"
+      )
+    }
+  ),
+  list(
+    name = "cli_warn failed_folds with bullets, parent and data",
+    kind = "warning",
+    f = function() {
+      cli::cli_warn(
+        c("Planted {.val header}", i = "a bullet"),
+        class = "nestedtune_failed_folds",
+        parent = simpleWarning("the root cause"),
+        planted_field = list(1)
+      )
+    }
+  ),
+  list(
+    name = "rlang::warn partial_summary plain",
+    kind = "warning",
+    f = function() {
+      rlang::warn("plain warning", class = "nestedtune_partial_summary")
+    }
+  ),
+  list(
+    name = "rlang::warn failed_folds plain",
+    kind = "warning",
+    f = function() {
+      rlang::warn("plain warning", class = "nestedtune_failed_folds")
+    }
+  )
+)
+
+# The fields a re-signal may set: the call, and the trace rlang adds to
+# an error it signals. Everything else must come through unchanged.
+RESIGNAL_OWN_FIELDS <- c("message", "call", "trace")
+
+test_that("AC4: a re-signalled condition keeps the original's class, parent, body, footer, format flag and data fields", {
+  call <- quote(the_reader(x))
+  for (form in RESIGNAL_FORMS) {
+    original <- planted_cnd(form$f())
+    got <- rlang::catch_cnd(
+      for_workflow("tuned", call, form$f()),
+      classes = form$kind
+    )
+    expect_identical(class(got), class(original), info = form$name)
+    for (field in c("parent", "body", "footer", "use_cli_format")) {
+      expect_identical(
+        got[[field]],
+        original[[field]],
+        info = paste(form$name, field)
+      )
+    }
+    kept <- setdiff(names(original), RESIGNAL_OWN_FIELDS)
+    expect_identical(got[kept], original[kept], info = form$name)
+    expect_identical(got$call, call, info = form$name)
+
+    # The message: the original's, the id in front of its first line.
+    expected <- conditionMessage(original)
+    prefix <- 'Workflow "tuned": '
+    expect_identical(
+      conditionMessage(got),
+      paste0(prefix, expected),
+      info = form$name
+    )
+    lines <- strsplit(conditionMessage(got), "\n", fixed = TRUE)[[1L]]
+    expect_identical(
+      sum(grepl(prefix, lines, fixed = TRUE)),
+      1L,
+      info = form$name
+    )
+    expect_match(
+      lines[[1L]],
+      paste0("^", gsub("([\"()])", "\\\\\\1", prefix)),
+      info = form$name
+    )
+  }
+
+  # The package's callers hand their own frame, which `rlang::error_call()`
+  # resolves to that frame's call.
+  a_reader <- function(x) {
+    for_workflow(
+      "tuned",
+      environment(),
+      rlang::abort("planted", class = "nestedtune_planted")
+    )
+  }
+  cnd <- rlang::catch_cnd(a_reader(1))
+  expect_s3_class(cnd, "nestedtune_planted")
+  expect_identical(cnd$call, quote(a_reader(1)))
+  expect_identical(conditionMessage(cnd), 'Workflow "tuned": planted')
+})
+
+test_that("a re-signalled condition with no message text gets the prefix as its message", {
+  call <- quote(the_reader(x))
+  empty <- rlang::catch_cnd(
+    for_workflow(
+      "tuned",
+      call,
+      rlang::cnd_signal(rlang::error_cnd(
+        "nestedtune_planted",
+        message = character(0)
+      ))
+    )
+  )
+  expect_s3_class(empty, "nestedtune_planted")
+  expect_identical(empty$message, 'Workflow "tuned": ')
+  absent <- rlang::catch_cnd(
+    for_workflow(
+      "tuned",
+      call,
+      stop(structure(
+        class = c("nestedtune_planted", "error", "condition"),
+        list(message = NULL, call = NULL)
+      ))
+    )
+  )
+  expect_s3_class(absent, "nestedtune_planted")
+  expect_identical(absent$message, 'Workflow "tuned": ')
+  expect_identical(conditionMessage(absent), 'Workflow "tuned": ')
+})
+
+test_that("AC4: a re-signalled warning is muffled at the source and a warning of another class passes untouched", {
+  call <- quote(the_reader(x))
+  # One warning reaches the caller, the prefixed one; the original does not
+  # reach it a second time.
+  seen <- list()
+  withCallingHandlers(
+    for_workflow(
+      "tuned",
+      call,
+      rlang::warn("plain warning", class = "nestedtune_failed_folds")
+    ),
+    warning = function(w) {
+      seen[[length(seen) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(seen, 1L)
+  expect_match(
+    conditionMessage(seen[[1L]]),
+    '^Workflow "tuned": plain warning$'
+  )
+
+  other <- rlang::catch_cnd(
+    for_workflow(
+      "tuned",
+      call,
+      rlang::warn("not ours", class = "some_other_warning")
+    ),
+    classes = "warning"
+  )
+  expect_identical(conditionMessage(other), "not ours")
+  expect_null(other$call)
+})

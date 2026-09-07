@@ -388,3 +388,270 @@ test_that("AC4: rank_results() and fit_best() raise on the set rather than answe
   expect_error(workflowsets::rank_results(res), "must be a workflow set")
   expect_error(tune::fit_best(res), "No `fit_best\\(\\)` exists")
 })
+
+# A row subset of the set (M73, AC2 and AC3). A subset that keeps the class
+# answers for the workflows it holds, so every reader on it gives what the
+# whole set's reader gives for those workflows, in the subset's order; the
+# print reports the rows in hand alone.
+
+# The whole set's rows for `ids`, in that order.
+rows_for <- function(tbl, ids) {
+  vctrs::vec_slice(
+    tbl,
+    unlist(lapply(ids, function(id) which(tbl$wflow_id == id)))
+  )
+}
+
+# The subset's table against the whole set's rows for its workflows. A
+# reader whose table carries each workflow's own parameter columns binds
+# over the union of the workflows in hand, so its subset table holds the
+# columns the kept workflows contribute, in the bind's order: those are
+# compared, and a whole-set column the subset lacks must be one no kept row
+# holds a value in.
+expect_subset_reads <- function(sub, whole, reader, name, own_columns = FALSE) {
+  got <- expect_no_warning(reader(sub))
+  exp <- rows_for(reader(whole), sub$wflow_id)
+  if (own_columns) {
+    expect_true(all(names(got) %in% names(exp)), info = name)
+    for (nm in setdiff(names(exp), names(got))) {
+      expect_true(all(is.na(exp[[nm]])), info = paste(name, nm))
+    }
+    exp <- exp[names(got)]
+  }
+  expect_identical(got, exp, info = name)
+  invisible(got)
+}
+
+# The readers by name, with whether their table carries per-workflow
+# parameter columns.
+SUBSET_READERS <- list(
+  list(name = "collect_metrics", f = collect_metrics, own = FALSE),
+  list(
+    name = "collect_metrics (folds)",
+    f = function(x) collect_metrics(x, summarize = FALSE),
+    own = FALSE
+  ),
+  list(name = "collect_selections", f = collect_selections, own = TRUE),
+  list(name = "collect_inner_metrics", f = collect_inner_metrics, own = TRUE),
+  list(name = "collect_notes", f = collect_notes, own = FALSE),
+  list(name = "agreement", f = agreement, own = TRUE)
+)
+
+test_that("AC2: every reader on a row subset gives the whole set's rows for the workflows kept, in the subset's order", {
+  skip_if_no_wset_fixture()
+  whole <- wset_three_results()
+  expect_identical(whole$wflow_id, c("tuned", "fixed", "threshold"))
+  # Rows 3 and 1 hold the two workflows that each contribute a parameter
+  # column, in the reverse of the set's order, so the union bind has two
+  # contributors to order.
+  subsets <- list(
+    whole[1, ],
+    whole[2, ],
+    whole[3, ],
+    whole[3:2, ],
+    whole[c(3L, 1L), ]
+  )
+  for (sub in subsets) {
+    expect_s3_class(sub, "nested_results_set")
+    for (entry in SUBSET_READERS) {
+      expect_subset_reads(
+        sub,
+        whole,
+        entry$f,
+        paste(entry$name, deparse(sub$wflow_id)),
+        own_columns = entry$own
+      )
+    }
+  }
+  # The reversed subset really is reversed in every table with rows.
+  rev <- whole[3:2, ]
+  expect_identical(
+    unique(collect_metrics(rev)$wflow_id),
+    c("threshold", "fixed")
+  )
+  expect_identical(unique(collect_selections(rev)$wflow_id), "threshold")
+  both <- whole[c(3L, 1L), ]
+  expect_identical(
+    unique(collect_selections(both)$wflow_id),
+    c("threshold", "tuned")
+  )
+  expect_identical(
+    names(collect_selections(both)),
+    c("wflow_id", "id", "threshold", ".config", "num_comp")
+  )
+  # A subset holding a workflow with nothing to tune alone answers the
+  # selection readers with no rows.
+  expect_identical(nrow(collect_selections(whole[2, ])), 0L)
+  expect_identical(nrow(agreement(whole[2, ])), 0L)
+})
+
+test_that("AC2: the two column readers answer on a subset of the set that kept their columns", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  whole <- kept_set_results(d)
+  readers <- c(
+    SUBSET_READERS,
+    list(
+      list(name = "collect_predictions", f = collect_predictions, own = FALSE),
+      list(name = "collect_extracts", f = collect_extracts, own = FALSE)
+    )
+  )
+  for (sub in list(whole[1, ], whole[2, ], whole[2:1, ])) {
+    for (entry in readers) {
+      expect_subset_reads(
+        sub,
+        whole,
+        entry$f,
+        paste(entry$name, deparse(sub$wflow_id)),
+        own_columns = entry$own
+      )
+    }
+  }
+  expect_identical(
+    unique(collect_predictions(whole[2:1, ])$wflow_id),
+    c("fixed", "tuned")
+  )
+})
+
+test_that("AC2: summary() of a row subset is the whole set's summary restricted to its ids, fn kept", {
+  skip_if_no_wset_fixture()
+  whole <- wset_three_results()
+  all <- summary(whole)
+  for (sub in list(whole[1, ], whole[2, ], whole[3, ], whole[3:2, ])) {
+    got <- expect_no_warning(summary(sub))
+    ids <- sub$wflow_id
+    expect_identical(names(got), ids)
+    expect_identical(
+      got,
+      structure(
+        unclass(all)[ids],
+        fn = attr(all, "fn"),
+        class = "summary.nested_results_set"
+      )
+    )
+    expect_identical(attr(got, "fn"), "nested_tune_grid")
+  }
+})
+
+test_that("AC2: extract_workflow() and nested_final_fit() answer for a kept id and refuse a dropped one", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  whole <- wset_three_results()
+  sub <- whole[2, ]
+  expect_identical(sub$wflow_id, "fixed")
+
+  expect_identical(
+    extract_workflow(sub, "fixed"),
+    extract_workflow(whole, "fixed")
+  )
+  cnd <- rlang::catch_cnd(extract_workflow(sub, "tuned"))
+  expect_s3_class(cnd, "nestedtune_unknown_id")
+  # The refusal names the ids in hand, not the whole set's.
+  expect_match(
+    conditionMessage(cnd),
+    'one workflow of the set: "fixed".',
+    fixed = TRUE
+  )
+
+  set.seed(41)
+  by_subset <- nested_final_fit(sub, id = "fixed")
+  set.seed(41)
+  by_whole <- nested_final_fit(whole, id = "fixed")
+  expect_s3_class(by_subset, "nested_final_fit")
+  expect_identical(by_subset$selected, by_whole$selected)
+  expect_identical(by_subset$fit_seed, by_whole$fit_seed)
+  expect_identical(
+    predict(by_subset, new_data = d[1:5, ]),
+    predict(by_whole, new_data = d[1:5, ])
+  )
+  cnd <- rlang::catch_cnd(nested_final_fit(sub, id = "tuned"))
+  expect_s3_class(cnd, "nestedtune_unknown_id")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
+})
+
+test_that("AC2: a subset dropping the failed workflow reads the completed one as the whole set does, warning of nothing", {
+  skip_if_no_wset_fixture()
+  whole <- broken_set_results()
+  expect_identical(whole$wflow_id, c("tuned", "broken"))
+  sub <- whole[1, ]
+  expect_s3_class(sub, "nested_results_set")
+  # The whole set warns of the workflow it leaves out; the subset has
+  # nothing to leave out.
+  expect_warning(collect_metrics(whole), class = "nestedtune_partial_summary")
+  for (entry in SUBSET_READERS) {
+    got <- expect_no_warning(entry$f(sub))
+    exp <- rows_for(suppressWarnings(entry$f(whole)), "tuned")
+    if (entry$own) {
+      expect_true(all(names(got) %in% names(exp)), info = entry$name)
+      for (nm in setdiff(names(exp), names(got))) {
+        expect_true(all(is.na(exp[[nm]])), info = paste(entry$name, nm))
+      }
+      exp <- exp[names(got)]
+    }
+    expect_identical(got, exp, info = entry$name)
+  }
+  expect_identical(
+    expect_no_warning(summary(sub)),
+    structure(
+      unclass(suppressWarnings(summary(whole)))["tuned"],
+      fn = attr(whole, "fn"),
+      class = "summary.nested_results_set"
+    )
+  )
+})
+
+test_that("AC2: a subset holding only workflows in which no fold completed is refused as the whole set is", {
+  skip_if_no_wset_fixture()
+  whole <- broken_set_results()
+  sub <- whole[2, ]
+  expect_identical(sub$wflow_id, "broken")
+  expect_s3_class(sub, "nested_results_set")
+  expect_false(any(sub$result[[1L]]$.completed))
+
+  readers <- c(names(COMPLETED_READERS), "agreement")
+  for (name in readers) {
+    cnd <- rlang::catch_cnd(do.call(name, list(sub)))
+    expect_s3_class(cnd, "nestedtune_no_completed_folds")
+    expect_identical(rlang::call_name(conditionCall(cnd)), name, info = name)
+    expect_match(conditionMessage(cnd), "1 workflow ", fixed = TRUE)
+  }
+  # The whole set of the same shape refuses under the same class.
+  alone <- broken_set_results(alone = TRUE)
+  expect_s3_class(
+    rlang::catch_cnd(collect_metrics(alone)),
+    "nestedtune_no_completed_folds"
+  )
+  # The notes still answer for the failed workflow.
+  notes <- expect_no_warning(collect_notes(sub))
+  expect_identical(notes, rows_for(collect_notes(whole), "broken"))
+})
+
+test_that("AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged", {
+  skip_if_no_wset_fixture()
+  whole <- wset_three_results()
+  one <- whole[2, ]
+  two <- whole[3:2, ]
+  expect_snapshot(print(one))
+  expect_snapshot(print(two))
+
+  txt <- print_text(one)
+  expect_match(
+    txt,
+    "Orchestrator: `nested_tune_grid()` (grid search)",
+    fixed = TRUE
+  )
+  expect_match(txt, "Workflows: 1", fixed = TRUE)
+  expect_match(txt, '"fixed": 2 of 2 outer folds completed', fixed = TRUE)
+  expect_no_match(txt, '"tuned"', fixed = TRUE)
+  expect_no_match(txt, '"threshold"', fixed = TRUE)
+
+  txt <- print_text(two)
+  expect_match(txt, "Workflows: 2", fixed = TRUE)
+  expect_no_match(txt, '"tuned"', fixed = TRUE)
+  lines <- strsplit(txt, "\n", fixed = TRUE)[[1L]]
+  named <- grep('^[vx] "', lines)
+  expect_length(named, 2L)
+  expect_match(lines[[named[[1L]]]], '"threshold"', fixed = TRUE)
+  expect_match(lines[[named[[2L]]]], '"fixed"', fixed = TRUE)
+  expect_invisible(print(two))
+})

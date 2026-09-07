@@ -354,7 +354,15 @@ the elements with a completed fold, warns for one without, refuses a set
 with none under `nestedtune_no_completed_folds`, re-signals each element's
 partial-run warning and column-not-saved refusal with its id, and binds
 under `wflow_id` with `vctrs::vec_rbind()`; `collect_notes()` reads every
-element.
+element. The set keeps its class through the same five doors as the single
+class — `dplyr_reconstruct()`, `[`, `vec_restore()`, base `rbind()` and
+`names<-` — each routed to one rule, `reconstruct_set()` beside
+`reconstruct_results()`: the set's keeps the class while every row is one
+of the first argument's own under its `wflow_id`, rows dropped or reordered
+included (D-059), where the single class's sheds on any row change
+(D-031); neither registers a `vec_ptype2()`/`vec_cast()` lattice for the
+set. The re-signal raises the element's own condition object, its first
+message line prefixed and its call replaced (`resignal_for_workflow()`, M73).
 
 `new_nested_results()` (`R/nested-results.R`) assembles one row per outer fold
 — split, id, metrics, selected parameters, the inner tuning run's
@@ -460,7 +468,10 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   this rather than intercepting three further entry points to strip attributes
   off objects that have already stopped answering for the run. The **Value**
   section of `?nested_tune_grid` states it, and `test-vctrs-compat.R` asserts
-  it.
+  it. The same three on a `nested_results_set` keep its `fn` attribute on an
+  object that is no longer a set (measured 2026-09-07, M73 review); the
+  Subsetting section of `?nested_workflow_map` states it, and
+  `test-nested-results-set-compat.R` asserts it.
 
 - `time_limit` on a `control_bayes()` or a `control_sim_anneal()` passed
   through `...` reaches `tune_bayes()` or `tune_sim_anneal()` as given, and a

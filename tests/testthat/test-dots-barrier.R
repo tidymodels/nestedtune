@@ -135,7 +135,14 @@ DOTS_EXEMPT_METHODS <- c(
   "vec_cast.nested_results.data.frame",
   "vec_cbind_frame_ptype.nested_results",
   "rbind.nested_results",
-  "names<-.nested_results"
+  "names<-.nested_results",
+  # The set's four doors of the same kinds (M73), exempt for the same
+  # reasons: `vec_restore()` and `rbind()` take the generic's own `...`,
+  # `[` forwards its dots to tibble's method, and `names<-` has none.
+  "[.nested_results_set",
+  "vec_restore.nested_results_set",
+  "rbind.nested_results_set",
+  "names<-.nested_results_set"
 )
 
 # Default methods that refuse the object ahead of the dots (M56).
