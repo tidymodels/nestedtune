@@ -48,7 +48,7 @@ Cut the time the check suite and the help-page examples take, so every CI leg's 
 - [x] T5: One example helper shape across the 16 pages that build a tuning run: `mtcars`, 2 outer × 2 inner folds, `num_comp = 1:2`, the rest of each example unchanged; `\donttest` untouched; `benchmarks/time-examples.R` committed with a header stating its method; `devtools::document()`; NEWS bullet.
 - [ ] T6: `Rscript benchmarks/profile-tests.R 3` on the branch point and then on the head, back to back; record both totals and the head's per-file table in the work log; if the head's total is above 88% of the branch point's, name the file and return to T2–T4.
 - [ ] T7: Revert the 40s in `R-CMD-check.yaml:141` to a flat 30, rewrite the cap comment's M72 paragraph to state the measurement, update `cairn/PROFILE.md` lines 47–49; push the measured head and read three attempts' step times.
-- [ ] T8: `devtools::check()` and `air format --check` on the touched files.
+- [x] T8: `devtools::check()` and `air format --check` on the touched files.
 
 ## Work log
 
@@ -74,6 +74,7 @@ Cut the time the check suite and the help-page examples take, so every CI leg's 
 - 2026-09-07: re-audit: AC1 (full) — two findings: the recorded pair (732.1 / 631.3 s) was not measured back to back under one load, so it did not instantiate the procedure and its 1.8-point margin sits inside the documented variance; the parenthetical measurement inside the criterion bound a recording property (moved to the work log).
 - 2026-09-07: re-audit: AC1 (full) — two findings on the reader's replacement text: "under the same machine load" is a condition no instrument records (dropped); T6's task text still named 480 s (re-worded). The user accepted the final wording at a second mini gate; no further reader.
 - 2026-09-07: T7 (measurement part) — the check workflows run on `pull_request` events only, so the push of `294ca2b` started nothing; draft PR #84 (https://github.com/tidymodels/nestedtune/pull/84) opened at the user's choice, its first attempt on `294ca2b` (run 34161078202, coverage run 34161078201); tracking-only commits after it are held local until the merge (M50 lesson), so the merge-time head differs from `294ca2b` only under `cairn/`.
+- 2026-09-07: T8 — `devtools::check()` at `294ca2b`: 0 errors, 0 warnings, 0 notes (a first run reported one NOTE for a stray `Rplots.pdf` the example runs had left in the working tree, gitignored and deleted); `air format --check` clean on the 35 R files `git diff --name-only 2f6c0e6` lists.
 
 ## Decisions
 
