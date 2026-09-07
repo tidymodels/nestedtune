@@ -20,7 +20,7 @@ all the data.
 ## Usage
 
 ``` r
-nested_final_fit(object, results, ...)
+nested_final_fit(object, results, ..., id = NULL)
 ```
 
 ## Arguments
@@ -31,8 +31,11 @@ nested_final_fit(object, results, ...)
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html):
-  the workflow the nested run was built around. For a grid or a racing
-  procedure it is checked against the recorded grid the way
+  the workflow the nested run was built around; or a
+  `nested_results_set` from
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md),
+  with `id` naming the workflow to fit (see `id`). For a grid or a
+  racing procedure it is checked against the recorded grid the way
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   checked it, so a different workflow is refused here rather than by
   tune one tuning run later. For a
@@ -92,6 +95,19 @@ nested_final_fit(object, results, ...)
   than silently ignored – in particular the former `grid`, `param_info`,
   `metrics`, `event_level` and `eval_time` arguments, which now come
   from `results`.
+
+- id:
+
+  For a `nested_results_set` as `object` (what
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  returns), the `wflow_id` of the workflow to fit; `results` is then
+  left missing, since the set holds each workflow's record beside it,
+  and the fit is
+  `nested_final_fit(extract_workflow(object, id), object$result[[i]])`.
+  An `id` naming no row is refused with class `nestedtune_unknown_id`; a
+  set given with `results` supplied, a set given with no `id`, or an
+  `id` given with a workflow as `object`, with class
+  `nestedtune_bad_final_fit_args`. `NULL`, the default, for a workflow.
 
 ## Value
 

@@ -62,7 +62,7 @@
       </dl></div><div class="section level2">
       <h2 id="running-the-loop">Running the loop<a class="anchor" aria-label="anchor" href="#running-the-loop"></a></h2>
 
-      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose; or score a workflow with nothing to tune on the same outer splits.</p></div>
+      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose; score a workflow with nothing to tune on the same outer splits; or run every workflow of a workflow set through one design and read the results under each id.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -103,6 +103,13 @@
 
         </dt>
         <dd>Score a workflow with nothing to tune on the outer folds of a nested design</dd>
+
+        <dt>
+
+          <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>
+
+        </dt>
+        <dd>Run every workflow of a workflow set through one nested design</dd>
 
         <dt>
 
@@ -166,6 +173,27 @@
 
         </dt>
         <dd>Choose the rule each fold selects its candidate by</dd>
+
+        <dt>
+
+          <code><a href="collect_metrics.nested_results_set.html">collect_metrics(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_selections(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_inner_metrics(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_notes(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_predictions(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_extracts(<i>&lt;nested_results_set&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Stack each workflow's table of a workflow-set run under its id</dd>
+
+        <dt>
+
+          <code><a href="print.nested_results_set.html">print(<i>&lt;nested_results_set&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a workflow-set run</dd>
+
+        <dt>
+
+          <code><a href="extract_workflow.nested_results_set.html">extract_workflow(<i>&lt;nested_results_set&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract one workflow of a workflow-set run</dd>
       </dl></div><div class="section level2">
       <h2 id="the-final-model">The final model<a class="anchor" aria-label="anchor" href="#the-final-model"></a></h2>
 

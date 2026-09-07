@@ -206,6 +206,16 @@ both refuse tune’s ranking generics such as <code>show_best()</code>: on
 the results they would rank outer folds, which is not a ranking of
 anything a user wants, and on the final fit they would surface the
 selection-time scores dressed as a performance number.</p>
+<p>The same reasoning covers a set of workflows run through one design
+with <code><a href="../reference/nested_workflow_map.html">nested_workflow_map()</a></code>. Each workflow’s nested estimate
+describes its own tune-and-fit procedure, and picking the workflow with
+the best of those estimates is a selection step the outer loop did not
+nest: the chosen workflow’s estimate is then the best of several numbers
+scored on the same outer folds, not an estimate of the procedure that
+chose it. That is why the package registers no ranking or best-workflow
+method for the set. Compare the estimates as a reason to look closer,
+and report the chosen workflow’s estimate as what a comparison read,
+never as what choosing it achieves.</p>
 </div>
 <div class="section level2">
 <h2 id="why-the-folds-disagree">Why the folds disagree<a class="anchor" aria-label="anchor" href="#why-the-folds-disagree"></a>

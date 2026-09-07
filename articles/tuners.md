@@ -16,7 +16,9 @@ names
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
 which
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-shows scoring a fixed workflow on the same design.
+shows scoring a fixed workflow on the same design. The last section runs
+a baseline and two tuned workflows through one design in one call, with
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md).
 
 ``` r
 
@@ -412,6 +414,82 @@ the record. `seed` is dropped, because the Bayesian search’s seed is the
 fold’s tuning seed, which the fold’s own `.tuning_seed` column already
 holds, and the driver puts it back on the control at the point the inner
 call is made.
+
+## A set of workflows on one design
+
+A comparison across model families needs every family scored on the same
+outer folds.
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+takes a `workflow_set()` and the name of one driver, and runs each
+workflow of the set through it on one design, so the results come back
+side by side. Here the set holds the random forest above, a linear model
+on the same predictors with nothing to tune, and a linear model on
+principal components whose count is tuned. The forest’s grid goes in the
+call; the components workflow cannot use it, so its own grid goes in the
+set’s `option` column with `option_add()`.
+
+``` r
+
+pca <- recipe(mpg ~ ., data = mtcars) |>
+  step_pca(all_predictors(), num_comp = tune())
+
+wset <- as_workflow_set(
+  forest = wf,
+  baseline = workflow(mpg ~ ., linear_reg()),
+  components = workflow(pca, linear_reg())
+) |>
+  option_add(grid = tibble(num_comp = 1:4), id = "components")
+
+set.seed(7)
+mapped <- nested_workflow_map(
+  wset,
+  fn = "nested_tune_grid",
+  resamples = folds,
+  grid = grid
+)
+
+mapped
+#> 
+#> ── Nested cross-validation results for a workflow set ─────────────────
+#> Orchestrator: `nested_tune_grid()` (grid search)
+#> Workflows: 3
+#> ✔ "forest": 5 of 5 outer folds completed (grid search)
+#> ✔ "baseline": 5 of 5 outer folds completed (no tuning)
+#> ✔ "components": 5 of 5 outer folds completed (grid search)
+#> ℹ Use `collect_metrics()` for every workflow's estimate under its id,
+#>   and `x$result[[i]]` for one workflow's run.
+```
+
+The baseline has nothing to tune, so it ran through
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+whatever `fn` named, and the print says so beside its id. Each row’s
+`result` is the object the named driver returns for that workflow,
+called by hand with the same arguments under the same seed, so
+everything the earlier sections read off one result reads off a row
+here.
+
+``` r
+
+collect_metrics(mapped)
+#> # A tibble: 6 × 6
+#>   wflow_id   .metric .estimator  mean     n std_err
+#>   <chr>      <chr>   <chr>      <dbl> <int>   <dbl>
+#> 1 forest     rmse    standard   2.43      5  0.455 
+#> 2 forest     rsq     standard   0.847     5  0.0265
+#> 3 baseline   rmse    standard   4.42      5  0.571 
+#> 4 baseline   rsq     standard   0.639     5  0.0859
+#> 5 components rmse    standard   3.15      5  0.385 
+#> 6 components rsq     standard   0.757     5  0.0666
+```
+
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+stacks each workflow’s estimate under its id, and the other readers
+stack their tables the same way. What the set does not offer is a
+ranking of its workflows or a fit of the best one: choosing among them
+by these estimates would be a selection the outer loop did not nest, and
+[`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
+says why. The final fit for one workflow of the set is
+`nested_final_fit(mapped, id = "forest")`.
 
 ## What differs from calling tune or finetune directly
 

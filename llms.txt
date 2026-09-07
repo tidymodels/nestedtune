@@ -152,8 +152,9 @@ the data for every outer fold.
 ## Running the loop
 
 Tune on each outer fold’s inner resamples, select, then fit and score on
-the outer split, and keep what each fold chose; or score a workflow with
-nothing to tune on the same outer splits.
+the outer split, and keep what each fold chose; score a workflow with
+nothing to tune on the same outer splits; or run every workflow of a
+workflow set through one design and read the results under each id.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   : Run the nested cross-validation loop
@@ -168,6 +169,8 @@ nothing to tune on the same outer splits.
 - [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   : Score a workflow with nothing to tune on the outer folds of a nested
   design
+- [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  : Run every workflow of a workflow set through one nested design
 - [`collect_metrics(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
   : Collect the metrics from a nested resampling run
 - [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
@@ -192,6 +195,17 @@ nothing to tune on the same outer splits.
   : Extract the record of the procedure that ran
 - [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
   : Choose the rule each fold selects its candidate by
+- [`collect_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`collect_selections(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`collect_inner_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`collect_notes(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`collect_predictions(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`collect_extracts(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  : Stack each workflow's table of a workflow-set run under its id
+- [`print(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/print.nested_results_set.md)
+  : Print a workflow-set run
+- [`extract_workflow(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/extract_workflow.nested_results_set.md)
+  : Extract one workflow of a workflow-set run
 
 ## The final model
 

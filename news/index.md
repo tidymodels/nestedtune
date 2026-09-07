@@ -2,6 +2,48 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  runs every workflow of a
+  [`workflowsets::workflow_set()`](https://workflowsets.tidymodels.org/reference/workflow_set.html)
+  through one nested design in one call, shaped like
+  [`workflowsets::workflow_map()`](https://workflowsets.tidymodels.org/reference/workflow_map.html):
+  `fn` names one of the six orchestrators, the orchestrator’s arguments
+  come through `...` with the design as `resamples`, and an entry of the
+  set’s `option` column overrides the same-named argument for its
+  workflow alone. A workflow with no
+  [`tune()`](https://hardhat.tidymodels.org/reference/tune.html) marker
+  runs through
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  whatever `fn` names, with the arguments narrowed to what that
+  orchestrator takes; a `control` in `...` reaches only the workflows
+  that run through `fn`. The generator state at entry is reinstated
+  before each workflow, so every workflow’s fold `i` runs under the same
+  two seeds and each element is identical to the orchestrator called by
+  hand on that workflow; the caller’s state is put back on exit. It
+  returns a `nested_results_set`, a tibble of `wflow_id`, `workflow` and
+  `result` with one `nested_results` per row, which does not carry the
+  `workflow_set` class, so
+  [`workflowsets::rank_results()`](https://workflowsets.tidymodels.org/reference/rank_results.html)
+  and
+  [`tune::fit_best()`](https://tune.tidymodels.org/reference/fit_best.html)
+  refuse it. The six `collect_*()` readers stack each workflow’s table
+  under a `wflow_id` column in the set’s order; a workflow in which no
+  fold completed is left out with a `nestedtune_partial_summary` warning
+  naming it, a workflow’s own partial-run warning and failed-fold
+  warning are raised with its id at the front, and
+  [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  reads every workflow. [`print()`](https://rdrr.io/r/base/print.html)
+  shows the orchestrator and each workflow’s completed fold count;
+  `extract_workflow(x, id)` returns one workflow; and
+  `nested_final_fit(x, id = )` fits one workflow by its own record.
+  Entry refusals name their class: `nestedtune_bad_workflow_set`,
+  `nestedtune_bad_fn`, `nestedtune_bad_dots` (a name the orchestrator
+  does not take, an unnamed argument, or no `resamples`),
+  `nestedtune_bad_option` (naming the workflow),
+  `nestedtune_tuned_workflow` under `fn = "nested_fit_resamples"`, and
+  `nestedtune_unknown_id` on the extractor and the final fit.
+  `workflowsets` joins Suggests; no package code calls it.
+
 - [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   scores a workflow with nothing to tune on the outer folds of a nested
   design: the same outer loop as

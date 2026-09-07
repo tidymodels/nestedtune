@@ -83,7 +83,9 @@ which the same two slots also save inside tune, are not kept.
 
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+[`collect_metrics.nested_results_set()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+for the same readers on a workflow-set run
 
 ## Examples
 

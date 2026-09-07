@@ -101,7 +101,9 @@ way tune's answers for a `tune_results`.
 
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
-[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
+[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md),
+[`collect_metrics.nested_results_set()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+for the same readers on a workflow-set run
 
 ## Examples
 
