@@ -31,7 +31,10 @@ expect_kept_set <- function(out, src, name = NULL) {
     label = paste0(what, "'s fn attribute")
   )
   rows <- match(out$wflow_id, src$wflow_id)
-  testthat::expect_false(anyNA(rows), label = paste0(what, " holds a foreign id"))
+  testthat::expect_false(
+    anyNA(rows),
+    label = paste0(what, " holds a foreign id")
+  )
   testthat::expect_identical(out$workflow, src$workflow[rows])
   testthat::expect_identical(out$result, src$result[rows])
   invisible(out)
@@ -63,15 +66,27 @@ set_compat_table <- function() {
       x[c(FALSE, TRUE), ]
     }),
     list(name = "[ (negative index)", branch = "kept", f = function(x) x[-1, ]),
-    list(name = "[ (column index, reordered)", branch = "kept", f = function(x) {
-      x[, 3:1]
+    list(
+      name = "[ (column index, reordered)",
+      branch = "kept",
+      f = function(x) {
+        x[, 3:1]
+      }
+    ),
+    list(
+      name = "[ (column index, record column dropped)",
+      branch = "bare",
+      f = function(x) {
+        x[, c("wflow_id", "result")]
+      }
+    ),
+    list(name = "[ (single column)", branch = "bare", f = function(x) {
+      x["wflow_id"]
     }),
-    list(name = "[ (column index, record column dropped)", branch = "bare", f = function(x) {
-      x[, c("wflow_id", "result")]
-    }),
-    list(name = "[ (single column)", branch = "bare", f = function(x) x["wflow_id"]),
     list(name = "[ (zero rows)", branch = "bare", f = function(x) x[0, ]),
-    list(name = "[ (repeated index)", branch = "bare", f = function(x) x[c(1, 1), ]),
+    list(name = "[ (repeated index)", branch = "bare", f = function(x) {
+      x[c(1, 1), ]
+    }),
     # dplyr verbs ---------------------------------------------------------
     list(name = "filter (one row kept)", branch = "kept", f = function(x) {
       dplyr::filter(x, wflow_id == "fixed")
@@ -104,9 +119,13 @@ set_compat_table <- function() {
     list(name = "select (reordered)", branch = "kept", f = function(x) {
       dplyr::select(x, result, wflow_id, workflow)
     }),
-    list(name = "select (record column dropped)", branch = "bare", f = function(x) {
-      dplyr::select(x, -workflow)
-    }),
+    list(
+      name = "select (record column dropped)",
+      branch = "bare",
+      f = function(x) {
+        dplyr::select(x, -workflow)
+      }
+    ),
     list(name = "relocate", branch = "kept", f = function(x) {
       dplyr::relocate(x, result)
     }),
@@ -133,13 +152,17 @@ set_compat_table <- function() {
     list(name = "bind_cols (tibble first)", branch = "bare", f = function(x) {
       dplyr::bind_cols(tibble::tibble(extra = 1:2), x)
     }),
-    list(name = "bind_cols (second wflow_id, minimal repair)", branch = "bare", f = function(x) {
-      dplyr::bind_cols(
-        x,
-        tibble::tibble(wflow_id = 1:2),
-        .name_repair = "minimal"
-      )
-    }),
+    list(
+      name = "bind_cols (second wflow_id, minimal repair)",
+      branch = "bare",
+      f = function(x) {
+        dplyr::bind_cols(
+          x,
+          tibble::tibble(wflow_id = 1:2),
+          .name_repair = "minimal"
+        )
+      }
+    ),
     # base `rbind()` -----------------------------------------------------
     list(name = "rbind (row-doubling)", branch = "bare", f = function(x) {
       rbind(x, x)

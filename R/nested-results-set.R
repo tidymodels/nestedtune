@@ -426,3 +426,142 @@ match_set_id <- function(x, id, call = rlang::caller_env()) {
   }
   match(id, ids)
 }
+
+# What an operation may and may not do to a `nested_results_set` (M73,
+# D-059).
+#
+# The set's record is per row. Each row's `nested_results` describes its own
+# run whole, so a row dropped or reordered leaves every row in hand still
+# true of itself, and the class stays on -- where the single class sheds it
+# (D-031), because a fold table's record describes one design and fewer
+# rows than the design's cannot answer for it. What the set cannot vouch
+# for is a row that is not one of the run's own: repeated, added from
+# elsewhere, or with its `result` swapped for another row's. Those, a
+# record column gone or renamed, a name duplicated over a record column,
+# and a set with no row left come back a bare tibble, the orchestrator
+# attribute gone with the class (IP4).
+#
+# Five doors route to the one rule, as the single class's do
+# (R/nested-results.R): `dplyr_reconstruct()` for the verbs, `[`,
+# `vec_restore()` for `vec_slice()` and the combinations, base `rbind()`,
+# and `names<-` for `dplyr::rename()`. No `vec_ptype2()`/`vec_cast()`
+# lattice is registered: vctrs' same-class fallback carries the class into
+# `vec_restore()` for a combination of two sets, where the rule sheds it, a
+# set combined with a bare table finalizes to a bare tibble before the rule
+# is asked, and so does a direct `vctrs::vec_cbind()` (measured 2026-09-07;
+# a candidate ROADMAP row). `$<-` and `[[<-` on a record column keep the
+# class without consulting the rule, the blind spot `R/nested-results.R`
+# records for the single class.
+
+# The template's record: the three columns the constructor writes.
+set_record_columns <- function() {
+  c("wflow_id", "workflow", "result")
+}
+
+# Whether `data` may wear `template`'s class: the three record columns
+# present under their names with none repeated, at least one row, no id
+# repeated, and every row's three values identical to the template's row of
+# that id. The template is the first data-frame argument of the operation,
+# so a combination of two subsets, or of two map runs, is not a set
+# (D-059).
+can_reconstruct_set <- function(data, template) {
+  cols <- set_record_columns()
+  if (
+    !is.data.frame(data) ||
+      !is.data.frame(template) ||
+      !all(cols %in% names(template)) ||
+      !all(cols %in% names(data)) ||
+      duplicated_record_names(names(data), cols) ||
+      nrow(data) == 0L
+  ) {
+    return(FALSE)
+  }
+  ids <- data[["wflow_id"]]
+  if (!is.character(ids) || anyDuplicated(ids) > 0L) {
+    return(FALSE)
+  }
+  rows <- match(ids, template[["wflow_id"]])
+  if (anyNA(rows)) {
+    return(FALSE)
+  }
+  for (nm in cols) {
+    if (!identical(data[[nm]], template[[nm]][rows])) {
+      return(FALSE)
+    }
+  }
+  TRUE
+}
+
+# The rule. The orchestrator name comes from the template; the rows in hand
+# describe themselves.
+reconstruct_set <- function(data, template) {
+  if (!can_reconstruct_set(data, template)) {
+    return(bare_set(data))
+  }
+  out <- as_results_tbl(data)
+  if (!inherits(out, "nested_results_set")) {
+    class(out) <- c("nested_results_set", class(out))
+  }
+  attr(out, "fn") <- attr(template, "fn")
+  out
+}
+
+# Shedding the class sheds the orchestrator attribute with it: a bare tibble
+# still naming the orchestrator would leave the stale claim readable.
+bare_set <- function(data) {
+  attr(data, "fn") <- NULL
+  class(data) <- setdiff(class(data), "nested_results_set")
+  as_results_tbl(data)
+}
+
+#' @export
+dplyr_reconstruct.nested_results_set <- function(data, template) {
+  reconstruct_set(data, template)
+}
+
+#' @export
+`[.nested_results_set` <- function(x, i, j, ...) {
+  out <- NextMethod()
+  if (!is.data.frame(out)) {
+    return(out)
+  }
+  reconstruct_set(out, x)
+}
+
+# `vec_slice()` hands the original as `to`; a combination hands a zero-row
+# prototype, whose rows match none of the rows in hand, and `vec_cbind()`
+# one with no columns, which the rule refuses for lacking the record.
+#' @export
+vec_restore.nested_results_set <- function(x, to, ...) {
+  reconstruct_set(x, to)
+}
+
+# Base `rbind()` reaches no generic either package dispatches on. The
+# arguments go in stripped so the `rbind()` inside is base R's data-frame
+# method, and the result is put through the rule against the first
+# argument.
+#' @export
+rbind.nested_results_set <- function(..., deparse.level = 1) {
+  args <- list(...)
+  parts <- lapply(args, function(a) {
+    if (is.data.frame(a)) bare_set(a) else a
+  })
+  out <- do.call(base::rbind, c(parts, list(deparse.level = deparse.level)))
+  if (!is.data.frame(out)) {
+    return(out)
+  }
+  reconstruct_set(out, args[[1L]])
+}
+
+# `dplyr::rename()` is `set_names()`, reaching the class through `names<-`
+# alone. Renaming moves no value, so the rule's comparison passes exactly
+# when each record column still answers to its name and no other column has
+# taken one.
+#' @export
+`names<-.nested_results_set` <- function(x, value) {
+  out <- NextMethod()
+  if (!is.data.frame(out)) {
+    return(out)
+  }
+  reconstruct_set(out, x)
+}
