@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-07 (M73 planned, absorbing the set subsetting row; 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | planned | — | normal | milestones/M73-set-invariants.md |
+| M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | in-progress | — | normal | milestones/M73-set-invariants.md |
 | M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | done | — | normal | milestones/archive/M72-set-readers.md |
 | M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
