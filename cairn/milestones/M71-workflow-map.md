@@ -77,6 +77,8 @@ Score every workflow of a `workflow_set` on the same outer folds of one nested d
 - 2026-09-06: first `devtools::check()` on the branch: 0 warnings, 0 notes, one test failure, `test-fixture-cache.R`'s formal-axis registry naming `nested_final_fit()`'s new `id` formal with no variant; an `id = "tuned"` variant registered against the `NULL` default (keys only, nothing runs); check re-running.
 - 2026-09-06: T6 done; second `devtools::check()`: 0 errors, 0 warnings, 0 notes, the suite inside it clean. Status set to review; all tasks checked.
 - 2026-09-06: /milestone-review started; PR #81 opened as draft; AC1–AC5 evidenced and ticked (checkpoint: `devtools::check()`, the vignette renders and the three reviewers pending).
+- 2026-09-06: review gate: fix-now O4, O9, O10, F1 committed on the branch; `test-dots-barrier.R` and `air format --check` clean after them.
+- 2026-09-06: step-7 approval: PR #81 approved for merge.
 
 ## Decisions
 
@@ -113,3 +115,5 @@ Independent review (three fresh-context reviewers on `git diff main..HEAD`), fin
 - S2: the `id = function() "tuned"` fixture-key variant in `test-fixture-cache.R` pairs a workflow object with an `id`, a shape the final fit refuses, but `fixture_key()` only hashes and never calls.
 - F1 (orchestrator, at AC6): the three existing reader pages (`collect_metrics.nested_results`, `collect_predictions.nested_results`, `collect_selections`) carry no `@seealso` to the set page.
 - Refuted by the diff-bug reviewer with evidence: `which` shadowing in `stack_set()` (R resolves the function), `capture_dots()` leaving `.Random.seed` (it snapshots and restores), `check_workflow_pkgs()` unimplemented (called inside `check_workflow()`), `extract_workflow(x, id, ...)` tripping the S3 consistency check (upstream has the same shape; check 0 notes), subsetting losing the `fn` attribute (row subsets keep it). The history lens found no undone intent and no contradicted decision; the prior-review lens found no regressed lesson and no real GitHub review threads to walk.
+- Dispositions at the gate (2026-09-06, user accepted the recommended triage): O4/P1 fix now (the two names added to `DOTS_PROBED_METHODS`); O9 fix now (`@return` names `NULL` for a list column); O10 fix now (DESIGN carries the `...` barrier); F1 fix now (`@seealso` to the set page on the three reader pages); O2, O3 and O5 follow-up, one candidate row at post-merge hygiene; O6 rejected (every affected argument defaults to `NULL`, so removal and override coincide); O7 rejected (only R's legacy `"Rounding"` sampler in a never-drew session); O8 rejected (no upstream condition class exists; the probe is the best available); O11 rejected (the same dots-first shape as every orchestrator); S1 rejected (a deliberate, commented variant with a different contract); S2 rejected (`fixture_key()` hashes and never calls).
+- conversation: PR #81 — empty read (no reviews, no comments, no review threads).

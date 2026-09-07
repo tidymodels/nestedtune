@@ -174,6 +174,8 @@ DOTS_PROBED_METHODS <- c(
   # extractor, whose `id` sits ahead of its dots and is never reached by
   # the probe.
   "collect_metrics.nested_results_set",
+  "collect_selections.nested_results_set",
+  "collect_inner_metrics.nested_results_set",
   "collect_notes.nested_results_set",
   "collect_predictions.nested_results_set",
   "collect_extracts.nested_results_set",

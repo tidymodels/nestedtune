@@ -34,8 +34,8 @@ as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_result
 \value{
 A tibble: \code{wflow_id} first, then the columns the single-workflow
 reader returns for each element, bound in the set's order over the
-union of the elements' columns, \code{NA} where an element lacks one. An
-element whose table has no rows contributes none.
+union of the elements' columns, \code{NA} where an element lacks one (\code{NULL}
+in a list column). An element whose table has no rows contributes none.
 }
 \description{
 The six readers of a \code{nested_results} answer on a \code{nested_results_set},

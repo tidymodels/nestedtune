@@ -792,6 +792,8 @@ new_tbl <- function(cols) {
 #' on the exhaustive nested cross-validation for high-dimensional data.
 #' *arXiv:2408.03138*.
 #'
+#' @seealso [collect_metrics.nested_results_set()] for the same reader on a
+#'   workflow-set run
 #' @export
 collect_metrics.nested_results <- function(x, ..., summarize = TRUE) {
   rlang::check_dots_empty()

@@ -96,7 +96,7 @@ naming convention.
   `workflow_set` class so no ranking or best-workflow method answers on it —
   with the six `collect_*` readers, `print()` and `extract_workflow(x, id)`
   registered on it (`R/nested-results-set.R`).
-- **Final fit** — `nested_final_fit(object, results, id = NULL)`, a
+- **Final fit** — `nested_final_fit(object, results, ..., id = NULL)`, a
   `nested_results_set` with an `id` in place of the pair (M71), returning a
   `nested_final_fit` object that answers `predict()` and `augment()` with the
   trained workflow's own results (M47), hands the workflow itself over with

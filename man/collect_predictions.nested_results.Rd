@@ -95,5 +95,7 @@ collect_extracts(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}}
+\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same readers on a
+workflow-set run
 }

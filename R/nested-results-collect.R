@@ -94,7 +94,9 @@
 #' collect_inner_metrics(res)
 #' collect_notes(res)
 #'
-#' @seealso [collect_metrics()], [agreement()], [summary.nested_results()]
+#' @seealso [collect_metrics()], [agreement()], [summary.nested_results()],
+#'   [collect_metrics.nested_results_set()] for the same readers on a
+#'   workflow-set run
 #' @name collect_selections
 #' @export
 collect_selections <- function(x, ...) {
@@ -268,7 +270,9 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' collect_predictions(res)
 #' collect_extracts(res)
 #'
-#' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()]
+#' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()],
+#'   [collect_metrics.nested_results_set()] for the same readers on a
+#'   workflow-set run
 #' @name collect_predictions.nested_results
 NULL
 

@@ -28,8 +28,8 @@
 #'
 #' @return A tibble: `wflow_id` first, then the columns the single-workflow
 #'   reader returns for each element, bound in the set's order over the
-#'   union of the elements' columns, `NA` where an element lacks one. An
-#'   element whose table has no rows contributes none.
+#'   union of the elements' columns, `NA` where an element lacks one (`NULL`
+#'   in a list column). An element whose table has no rows contributes none.
 #'
 #' @details
 #' Five of the readers read the folds that completed, as they do on one
