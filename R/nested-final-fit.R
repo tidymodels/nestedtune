@@ -28,7 +28,8 @@
 #'
 #' @param object A [workflows::workflow()] with at least one parameter marked
 #'   for tuning with [tune::tune()]: the workflow the nested run was built
-#'   around. For a grid or a racing procedure it is checked against the
+#'   around; or a `nested_results_set` from [nested_workflow_map()], with
+#'   `id` naming the workflow to fit (see `id`). For a grid or a racing procedure it is checked against the
 #'   recorded grid the way [nested_tune_grid()] checked it, so a different
 #'   workflow is refused here rather than by tune one tuning run later. For a
 #'   [nested_fit_resamples()] result the workflow has no marker, and one
@@ -67,6 +68,15 @@
 #'   rather than silently ignored -- in particular the former `grid`,
 #'   `param_info`, `metrics`, `event_level` and `eval_time` arguments, which
 #'   now come from `results`.
+#' @param id For a `nested_results_set` as `object` (what
+#'   [nested_workflow_map()] returns), the `wflow_id` of the workflow to
+#'   fit; `results` is then left missing, since the set holds each
+#'   workflow's record beside it, and the fit is
+#'   `nested_final_fit(extract_workflow(object, id), object$result[[i]])`.
+#'   An `id` naming no row is refused with class `nestedtune_unknown_id`;
+#'   a set given with `results` supplied, a set given with no `id`, or an
+#'   `id` given with a workflow as `object`, with class
+#'   `nestedtune_bad_final_fit_args`. `NULL`, the default, for a workflow.
 #'
 #' @return An object of class `nested_final_fit` with elements `workflow` (the
 #'   trained workflow; the object answers [predict()][predict.nested_final_fit]
@@ -248,8 +258,20 @@
 #' @seealso [nested_tune_grid()], [nested_tune_bayes()],
 #'   [predict.nested_final_fit()], [extract_workflow()]
 #' @export
-nested_final_fit <- function(object, results, ...) {
+nested_final_fit <- function(object, results, ..., id = NULL) {
   rlang::check_dots_empty()
+  # A workflow-set run (M71): `object` is the set, `id` names the row, and
+  # the workflow and its record are read together off that row, so the
+  # wrong pairing cannot happen. The rest of the path is the single
+  # workflow's, on what the row holds.
+  if (inherits(object, "nested_results_set")) {
+    check_final_fit_set_args(object, !missing(results), id)
+    i <- match_set_id(object, id)
+    results <- object$result[[i]]
+    object <- object$workflow[[i]]
+  } else if (!is.null(id)) {
+    check_final_fit_set_args(object, !missing(results), id)
+  }
   check_workflow(object)
   check_results_record(results)
   check_completed_folds(results)

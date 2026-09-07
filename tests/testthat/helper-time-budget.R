@@ -808,6 +808,14 @@ time_budget_ledger <- function() {
       "BC16: the plain resampling path matches serial on two daemons",
       note = "one pool of 2 (M70)"
     ),
+    tb_row(
+      "test-parallel-identity.R",
+      973L,
+      "start_daemons",
+      START_DAEMONS_BOUND_S(),
+      "BC17: the workflow-set map matches serial on two daemons",
+      note = "one pool of 2 (M71)"
+    ),
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two

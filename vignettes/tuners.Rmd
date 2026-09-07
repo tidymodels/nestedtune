@@ -25,6 +25,8 @@ the inner call, and says what differs from calling tune or finetune
 directly. A workflow with nothing to tune takes none of the five: each
 refuses it at entry and names `nested_fit_resamples()`, which
 `vignette("nested-cv")` shows scoring a fixed workflow on the same design.
+The last section runs a baseline and two tuned workflows through one design
+in one call, with `nested_workflow_map()`.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "ranger")
@@ -340,6 +342,56 @@ missing from the record. `seed` is dropped, because the Bayesian search's
 seed is the fold's tuning seed, which the fold's own `.tuning_seed` column
 already holds, and the driver puts it back on the control at the point the
 inner call is made.
+
+## A set of workflows on one design
+
+A comparison across model families needs every family scored on the same
+outer folds. `nested_workflow_map()` takes a `workflow_set()` and the name
+of one driver, and runs each workflow of the set through it on one design,
+so the results come back side by side. Here the set holds the random
+forest above, a linear model on the same predictors with nothing to tune,
+and a linear model on principal components whose count is tuned. The
+forest's grid goes in the call; the components workflow cannot use it, so
+its own grid goes in the set's `option` column with `option_add()`.
+
+```{r wset}
+pca <- recipe(mpg ~ ., data = mtcars) |>
+  step_pca(all_predictors(), num_comp = tune())
+
+wset <- as_workflow_set(
+  forest = wf,
+  baseline = workflow(mpg ~ ., linear_reg()),
+  components = workflow(pca, linear_reg())
+) |>
+  option_add(grid = tibble(num_comp = 1:4), id = "components")
+
+set.seed(7)
+mapped <- nested_workflow_map(
+  wset,
+  fn = "nested_tune_grid",
+  resamples = folds,
+  grid = grid
+)
+
+mapped
+```
+
+The baseline has nothing to tune, so it ran through `nested_fit_resamples()`
+whatever `fn` named, and the print says so beside its id. Each row's
+`result` is the object the named driver returns for that workflow, called by
+hand with the same arguments under the same seed, so everything the earlier
+sections read off one result reads off a row here.
+
+```{r wset-metrics}
+collect_metrics(mapped)
+```
+
+`collect_metrics()` stacks each workflow's estimate under its id, and the
+other readers stack their tables the same way. What the set does not offer
+is a ranking of its workflows or a fit of the best one: choosing among them
+by these estimates would be a selection the outer loop did not nest, and
+`vignette("estimate")` says why. The final fit for one workflow of the set
+is `nested_final_fit(mapped, id = "forest")`.
 
 ## What differs from calling tune or finetune directly
 

@@ -110,3 +110,7 @@ Gauran, I. I., Ombao, H., & Yu, Z. (2025). Predictive performance test based
 on the exhaustive nested cross-validation for high-dimensional data.
 \emph{arXiv:2408.03138}.
 }
+\seealso{
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same reader on a
+workflow-set run
+}

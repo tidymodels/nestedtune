@@ -937,3 +937,54 @@ test_that("BC16: the plain resampling path matches serial on two daemons (M70, A
   expect_identical(parallel$.selected, serial$.selected)
   expect_identical(parallel, serial)
 })
+
+# BC17 (M71, AC2): the workflow-set map matches serial on two daemons. The
+# grid orchestrator on the mixed two-workflow fixture, every fold completing,
+# so each element's folds ran one parallel round per workflow under the
+# entry state the map reinstated; a daemon that ran a workflow's fold under
+# another seed, or the map handing the second workflow a state the first
+# had advanced, would differ.
+
+test_that("BC17: the workflow-set map matches serial on two daemons (M71, AC2)", {
+  skip_if_no_daemons()
+  skip_if_not_installed("workflowsets")
+  skip_if_no_engines()
+
+  data <- make_reg_data()
+  set.seed(31)
+  wset <- wset_two(data)
+  nested <- det_nested(data)
+  ms <- reg_metrics()
+  on.exit(mirai::daemons(0), add = TRUE)
+
+  mirai::daemons(0)
+  set.seed(2026L)
+  serial <- nested_workflow_map(
+    wset,
+    resamples = nested,
+    grid = det_grid(),
+    metrics = ms
+  )
+  expect_identical(last_dispatch(), "serial")
+  for (r in serial$result) {
+    expect_true(all(r$.completed))
+  }
+
+  start_daemons(2)
+  set.seed(2026L)
+  parallel <- without_pkgload_warning(
+    nested_workflow_map(
+      wset,
+      resamples = nested,
+      grid = det_grid(),
+      metrics = ms
+    )
+  )
+
+  expect_identical(last_dispatch(), "parallel")
+  for (i in seq_along(parallel$result)) {
+    expect_true(all(parallel$result[[i]]$.completed))
+    expect_identical(parallel$result[[i]]$.metrics, serial$result[[i]]$.metrics)
+  }
+  expect_identical(parallel, serial)
+})

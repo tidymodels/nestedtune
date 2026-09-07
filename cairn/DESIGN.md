@@ -89,7 +89,15 @@ naming convention.
   (D-023), returns the `procedure` record from
   a `nested_results` (its attribute) and from a `nested_final_fit` (its slot)
   (M67). The suffix names the inner tuning method (D-010).
-- **Final fit** — `nested_final_fit(object, results)`, returning a
+  `nested_workflow_map()` (M71, D-058) runs every workflow of a
+  `workflowsets::workflow_set()` through one of the six on one design and
+  returns a `nested_results_set` — a standalone tibble of `wflow_id`,
+  `workflow` and `result`, one `nested_results` per row, not carrying the
+  `workflow_set` class so no ranking or best-workflow method answers on it —
+  with the six `collect_*` readers, `print()` and `extract_workflow(x, id)`
+  registered on it (`R/nested-results-set.R`).
+- **Final fit** — `nested_final_fit(object, results, ..., id = NULL)`, a
+  `nested_results_set` with an `id` in place of the pair (M71), returning a
   `nested_final_fit` object that answers `predict()` and `augment()` with the
   trained workflow's own results (M47), hands the workflow itself over with
   `extract_workflow()` and its `procedure` slot with `extract_procedure()`
@@ -326,6 +334,28 @@ call at entry, assigned by fold position, applied with the generator kind
 pinned, and the caller's RNG state restored on exit including on error. The
 kind pin is what makes a fresh worker agree with a serial run.
 
+`nested_workflow_map()` (`R/nested-workflow-map.R`, M71, D-058) sits above
+the six: it checks the set, `fn`, the `...` names against the named
+orchestrator's formals plus `control`, and each `option` entry against the
+orchestrator its workflow routes to (`R/checks.R`: `check_workflow_set()`,
+`check_map_fn()`, `check_map_dots()`, `check_map_options()`), routes each
+workflow by `tuned_parameter_ids()` (none → `nested_fit_resamples()`,
+D-057), then for each workflow reinstates the entry state (initialized when
+the session had none, and removed again on exit), merges the option over
+`...`, narrows to the route's arguments — dropping a `...` `control` on a
+rerouted workflow, since its class is `fn`'s — and evaluates a
+`rlang::call2()` in an environment binding the workflow and every argument
+to a name (the M05 lesson), re-signalling the orchestrator's failed-fold
+warning and any error with the `wflow_id` at the front
+(`for_workflow()`, `resignal_for_workflow()`). Each element is therefore the
+hand call's result, `identical()`. `new_nested_results_set()` keeps `fn` as
+an attribute; `stack_set()` (`R/nested-results-set.R`) maps a reader over
+the elements with a completed fold, warns for one without, refuses a set
+with none under `nestedtune_no_completed_folds`, re-signals each element's
+partial-run warning and column-not-saved refusal with its id, and binds
+under `wflow_id` with `vctrs::vec_rbind()`; `collect_notes()` reads every
+element.
+
 `new_nested_results()` (`R/nested-results.R`) assembles one row per outer fold
 — split, id, metrics, selected parameters, the inner tuning run's
 `collect_metrics()` table as `.inner_metrics` (M49, D-043; the candidate set a
@@ -373,6 +403,8 @@ parsnip, and ggplot2 _(ggplot2 added 2026-07-26 at M08, D-019: the first Import
 that is not needed to compute a result — it carries `autoplot()`)_. finetune, with lme4
 and BradleyTerry2, sits in Suggests for the racing exports alone (D-044): a
 missing package is refused at those exports' entry and nothing else reaches
+it. workflowsets sits in Suggests for the tests and a vignette alone
+(D-058): `nested_workflow_map()` reads a set's columns and calls nothing of
 it. The tune
 floor is load-bearing rather than defensive: every
 reproducibility guarantee above rests on tune >= 2.0.0 deriving its own

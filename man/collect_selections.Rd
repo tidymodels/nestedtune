@@ -107,5 +107,7 @@ collect_notes(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}}
+\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same readers on a
+workflow-set run
 }
