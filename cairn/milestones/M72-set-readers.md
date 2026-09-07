@@ -1,13 +1,13 @@
 # M72: `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id`
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — three exported S3 methods and a print method on `nested_results_set`
-- **Branch/PR:** —
+- **Branch/PR:** `m072-set-readers`
 
 ## Goal
 

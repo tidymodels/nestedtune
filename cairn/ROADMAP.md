@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-06 (M72 planned from the M71-Out candidate row, whi
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | planned | — | normal | milestones/M72-set-readers.md |
+| M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | in-progress | — | normal | milestones/M72-set-readers.md |
 | M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
