@@ -99,3 +99,4 @@ Independent review (step 5, three lenses, fresh context). [S] blame-history: no 
 - O12 (`broken_workflow(data)` ignores `data`) — rejected: moved verbatim from M71, not introduced here.
 Fix-now edits re-verified: the four touched test files 0 failures under `NOT_CRAN=true`, `document()` no diff, `check_pkgdown()` clean, `air format` clean.
 - 2026-09-06: step-7 approval: PR #82 approved for merge.
+- 2026-09-06: CI wait on PR #82 hit the harness ceiling with the seven check legs still pending (format-suggest and pkgdown green); watcher stopped, not merged; resume with /milestone-review M72 (route c).
