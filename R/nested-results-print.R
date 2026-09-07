@@ -208,10 +208,65 @@ summary.nested_results <- function(object, ...) {
 print.summary.nested_results <- function(x, ...) {
   rlang::check_dots_empty()
   cli::cli_h1("Nested cross-validation results")
-  print_design(x)
-  print_failures(x)
-  print_selection(x)
-  print_estimate(x)
+  print_summary_sections(x, level = 2L)
+  print_procedure_note()
+  invisible(x)
+}
+
+# The body of one summary's print: the design line, the failures, the
+# selections and the estimate, the last two under headings one level below
+# the heading the summary sits under -- h2 under the single summary's h1,
+# h3 under a workflow's h2 in a set's print (M72). The IP3 note is the
+# caller's, printed once per print rather than once per summary.
+print_summary_sections <- function(s, level) {
+  print_design(s)
+  print_failures(s)
+  print_selection(s, heading = section_heading(level))
+  print_estimate(s, heading = section_heading(level))
+  invisible(NULL)
+}
+
+section_heading <- function(level) {
+  switch(as.character(level), "2" = cli::cli_h2, "3" = cli::cli_h3)
+}
+
+#' @rdname summary.nested_results_set
+#' @export
+summary.nested_results_set <- function(object, ...) {
+  rlang::check_dots_empty()
+  # Every element summarized, an all-failed one included: `summary()`
+  # describes a failed run rather than refusing, so the set's summary
+  # holds one entry per workflow where the stacking readers leave such a
+  # workflow out. Each element's partial-run warning is re-signalled naming
+  # the workflow, as the readers re-signal (R/nested-results-set.R).
+  ids <- object$wflow_id
+  call <- rlang::current_env()
+  out <- lapply(seq_along(ids), function(i) {
+    for_workflow(ids[[i]], call, summary(object$result[[i]]))
+  })
+  names(out) <- ids
+  structure(
+    out,
+    fn = attr(object, "fn"),
+    class = "summary.nested_results_set"
+  )
+}
+
+#' @rdname summary.nested_results_set
+#' @export
+print.summary.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  cli::cli_h1("Nested cross-validation results for a workflow set")
+  fn <- attr(x, "fn")
+  if (rlang::is_string(fn)) {
+    cli::cli_text("Orchestrator: {.fn {fn}} ({orchestrator_label(fn)})")
+  }
+  n <- length(x)
+  cli::cli_text("Workflows: {n}")
+  for (id in names(x)) {
+    cli::cli_h2("Workflow {.val {id}}")
+    print_summary_sections(x[[id]], level = 3L)
+  }
   print_procedure_note()
   invisible(x)
 }
@@ -309,8 +364,8 @@ fold_failure_stage <- function(notes) {
   notes$location[[1L]]
 }
 
-print_selection <- function(s) {
-  cli::cli_h2("Selected parameters")
+print_selection <- function(s, heading = cli::cli_h2) {
+  heading("Selected parameters")
 
   if (s$completed == 0L) {
     cli::cli_bullets(c(i = "No outer fold completed, so nothing was selected."))
@@ -510,19 +565,19 @@ print_one_parameter <- function(param, values, n) {
   invisible(NULL)
 }
 
-print_estimate <- function(s) {
+print_estimate <- function(s, heading = cli::cli_h2) {
   requested <- s$requested
   completed <- s$completed
 
   if (completed == 0L) {
-    cli::cli_h2("Estimate")
+    heading("Estimate")
     cli::cli_bullets(c(i = "No outer fold completed, so there is no estimate."))
     return(invisible(NULL))
   }
 
   # The fold count sits in the heading rather than beside each number, so a
   # partial run cannot be read as a whole one however far down the reader gets.
-  cli::cli_h2("Estimate ({completed} of {requested} outer fold{?s})")
+  heading("Estimate ({completed} of {requested} outer fold{?s})")
   summarized <- s$estimate
   timed <- ".eval_time" %in% names(summarized)
   for (i in seq_len(nrow(summarized))) {

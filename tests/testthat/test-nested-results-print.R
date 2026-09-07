@@ -964,3 +964,156 @@ test_that("printed output holds its shape", {
   expect_snapshot(print(suppressWarnings(summary(partial))))
   expect_snapshot(print(suppressWarnings(summary(nothing))))
 })
+
+# ---- summary() on a set (M72, AC1) -------------------------------------------
+
+# The partial-run warnings a call raises, muffled, in order.
+partial_warnings <- function(expr) {
+  warnings <- list()
+  withCallingHandlers(
+    expr,
+    nestedtune_partial_summary = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  warnings
+}
+
+test_that("AC1: summary() on a set is one element summary per workflow, named and in set order", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+
+  s <- expect_no_warning(summary(res))
+  expect_s3_class(s, "summary.nested_results_set")
+  expect_type(s, "list")
+  expect_named(s, res$wflow_id)
+  expect_identical(attr(s, "fn"), "nested_tune_grid")
+  for (i in seq_along(res$wflow_id)) {
+    element <- s[[i]]
+    expect_s3_class(element, "summary.nested_results")
+    expect_null(attr(element, "fn"))
+    expect_identical(element, summary(res$result[[i]]))
+  }
+  # The fixed workflow's selection is empty; the tuned ones' are not.
+  expect_length(s$fixed$selection, 0L)
+  expect_named(s$tuned$selection, "num_comp")
+  expect_named(s$threshold$selection, "threshold")
+})
+
+test_that("AC1: summary() on a set warns once per workflow with a failed fold, the id in front, and never aborts", {
+  skip_if_no_wset_fixture()
+  partial <- wset_three_results(broken = 1L)
+  warnings <- partial_warnings(s <- summary(partial))
+  expect_length(warnings, 3L)
+  for (i in 1:3) {
+    msg <- conditionMessage(warnings[[i]])
+    expect_match(msg, paste0('^Workflow "', partial$wflow_id[[i]], '"'))
+    expect_match(msg, "This summary covers 1 of 2 outer folds", fixed = TRUE)
+    expect_match(msg, "Fold1", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(warnings[[i]])), "summary")
+  }
+  for (i in 1:3) {
+    expect_identical(s[[i]], suppressWarnings(summary(partial$result[[i]])))
+    expect_identical(s[[i]]$failures$id, "Fold1")
+  }
+
+  # An all-failed workflow beside a completing one is summarized too, where
+  # the stacking readers leave it out: one warning, naming it.
+  beside <- broken_set_results()
+  warnings <- partial_warnings(s <- summary(beside))
+  expect_length(warnings, 1L)
+  expect_match(conditionMessage(warnings[[1L]]), '^Workflow "broken"')
+  expect_match(
+    conditionMessage(warnings[[1L]]),
+    "covers 0 of 2 outer folds",
+    fixed = TRUE
+  )
+  expect_named(s, c("tuned", "broken"))
+  expect_identical(s$broken, suppressWarnings(summary(beside$result[[2L]])))
+  expect_identical(s$broken$completed, 0L)
+  expect_identical(s$tuned, summary(beside$result[[1L]]))
+
+  # A set in which no workflow completed is still summarized, one warning
+  # per workflow.
+  alone <- broken_set_results(alone = TRUE)
+  warnings <- partial_warnings(s <- summary(alone))
+  expect_length(warnings, 2L)
+  expect_named(s, c("broken", "also_broken"))
+})
+
+test_that("AC1: the set's print is one h1, one h2 per workflow in set order, and the note once", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  s <- summary(res)
+  txt <- print_text(s)
+  lines <- strsplit(txt, "\n")[[1L]]
+
+  count <- function(pattern) sum(grepl(pattern, lines, fixed = TRUE))
+  expect_identical(
+    count("Nested cross-validation results for a workflow set"),
+    1L
+  )
+  expect_identical(count("Nested cross-validation results"), 1L)
+  expect_match(txt, "nested_tune_grid()", fixed = TRUE)
+  expect_match(txt, "grid search", fixed = TRUE)
+  expect_match(txt, "Workflows: 3", fixed = TRUE)
+  # One section per workflow, in set order, each holding its design line,
+  # its selection and its estimate.
+  heads <- grep("Workflow \"", lines)
+  expect_length(heads, 3L)
+  expect_identical(
+    sub('^.*Workflow "([^"]+)".*$', "\\1", lines[heads]),
+    res$wflow_id
+  )
+  expect_identical(count("Outer folds: 2 requested, 2 completed"), 3L)
+  expect_identical(count("Selected parameters"), 3L)
+  expect_identical(count("Estimate (2 of 2 outer folds)"), 3L)
+  expect_identical(count("No tuned parameters."), 1L)
+  expect_identical(count("num_comp:"), 1L)
+  expect_identical(count("threshold:"), 1L)
+  # The note once, at the end.
+  expect_identical(count("tune-and-fit procedure"), 1L)
+  expect_gt(grep("tune-and-fit procedure", lines), max(heads))
+  expect_invisible(print(s))
+
+  # A failed fold is named under its workflow's section, and an all-failed
+  # workflow's section says it has nothing to report.
+  beside <- broken_set_results()
+  txt <- print_text(suppressWarnings(summary(beside)))
+  expect_match(txt, "Fold1 failed during outer fit", fixed = TRUE)
+  expect_match(txt, "Fold2 failed during outer fit", fixed = TRUE)
+  expect_match(
+    txt,
+    "No outer fold completed, so nothing was selected",
+    fixed = TRUE
+  )
+  expect_match(
+    txt,
+    "No outer fold completed, so there is no estimate",
+    fixed = TRUE
+  )
+})
+
+test_that("AC1: the set's summary and its print fence their dots", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  expect_s3_class(
+    rlang::catch_cnd(summary(res, nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+  expect_s3_class(
+    rlang::catch_cnd(print(summary(res), nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+})
+
+test_that("AC1: the set's printed summary holds its shape", {
+  skip_if_no_wset_fixture()
+  # A single summary's print is unchanged by the factoring (the snapshots
+  # above hold it); these pin the set's, complete and with one fold broken.
+  expect_snapshot(print(summary(wset_three_results())))
+  expect_snapshot(print(suppressWarnings(summary(wset_three_results(
+    broken = 1L
+  )))))
+})
