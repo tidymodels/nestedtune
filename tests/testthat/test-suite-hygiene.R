@@ -65,7 +65,10 @@ BUDGETED_WAIT_CALLS <- c(
   "check_daemons_can_load",
   "start_daemons",
   "start_mixed_daemons",
-  "start_daemons_undispatched"
+  "start_daemons_undispatched",
+  "share_daemons",
+  "shared_daemons",
+  "daemon_rng_kinds"
 )
 
 BUDGETED_FILES <- c(

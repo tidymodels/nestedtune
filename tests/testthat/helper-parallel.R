@@ -18,6 +18,7 @@ PRIME_DAEMONS_BOUND_S <- 60
 WARM_DAEMONS_BOUND_S <- 60
 PREFLIGHT_TEST_TIMEOUT_MS <- 120000L
 MIXED_DAEMONS_BOUND_S <- 60
+DAEMON_SNAPSHOT_BOUND_S <- 30
 
 # Collect a mirai, or a whole mirai_map, with a deadline -- never open-endedly.
 #
@@ -158,6 +159,151 @@ start_daemons_undispatched <- function(n) {
   prime_daemons()
   warm_daemons()
   invisible(n)
+}
+
+# A pool shared across the blocks of one file (M74).
+#
+# test-parallel-identity.R once restarted its pool in every block -- 26 starts,
+# each priming and warming every daemon -- where all but two blocks need only
+# a primed pool of a given size. A pool is now started once per section by a
+# visible `start_daemons(n)` call (so the time-budget ledger counts the start
+# where it happens) and registered here with `share_daemons(n)`, which takes
+# the snapshot below; every block that reuses it opens with
+# `shared_daemons(n)`, which asks the pool for the same snapshot and compares
+# it with the one taken at the start (see `shared_daemons()` for which
+# fields are compared exactly and which as supersets). What a fold could
+# observe of a daemon's state and the package reads -- the loaded namespaces,
+# the one option the package consults, `search()`, the library variables and
+# `.libPaths()` -- has therefore not moved between blocks except by the
+# package's own attach step, which is the evidence M12 asked for before
+# sharing a pool. What the snapshot does not
+# hold is deliberate: a daemon's RNG kind changes on its first fold, since the
+# pin sets Mersenne-Twister there and the worker does not restore it, so it
+# cannot be an equality field; `daemon_rng_kinds()` reads it for the one
+# block that needs it (BC2, the M07 lesson).
+#
+# A private pool -- BC3, which kills a daemon -- is started with
+# `start_daemons()` as before, and replaces the shared pool: mirai holds one
+# pool at a time, so the file orders its blocks by pool and the last shared
+# block of a section is the one that may leave its daemons dirty (BC9).
+shared_pool <- new.env(parent = emptyenv())
+
+# What each daemon is asked for. Built from text, for the reason
+# `daemon_probe_expr()` in R/parallel.R gives: `everywhere()` serializes the
+# host's copy of a live expression, and under covr that copy carries
+# `covr:::count()` calls the daemons cannot evaluate (the M10 lesson).
+daemon_snapshot_expr <- function() {
+  str2lang(paste0(
+    "list(",
+    "pid = Sys.getpid(), ",
+    "namespaces = sort(loadedNamespaces()), ",
+    "options = options('nestedtune.preflight_timeout'), ",
+    "search = search(), ",
+    "env = as.list(Sys.getenv(c('R_LIBS', 'R_LIBS_USER', 'R_LIBS_SITE'), ",
+    "names = TRUE)), ",
+    "libpaths = .libPaths()",
+    ")"
+  ))
+}
+
+# One record per daemon, named by the daemon's pid and sorted by it, so that
+# a reuse compares each daemon with ITSELF at the start: the order daemons
+# answer in is fixed by nothing between two round trips, and a daemon that
+# died and was replaced answers under a pid the start never saw.
+daemon_state_snapshot <- function() {
+  snapshot_expr <- daemon_snapshot_expr()
+  answers <- collect_bounded(
+    mirai::everywhere(snapshot_expr),
+    seconds = DAEMON_SNAPSHOT_BOUND_S
+  )
+  pids <- vapply(
+    answers,
+    function(x) if (is.list(x) && is.integer(x$pid)) x$pid else NA_integer_,
+    integer(1)
+  )
+  answers <- answers[order(pids)]
+  names(answers) <- as.character(sort(pids))
+  answers
+}
+
+# The kind each daemon's generator is on, by daemon.
+daemon_rng_kinds <- function() {
+  kind_expr <- str2lang("RNGkind()[[1L]]")
+  answers <- collect_bounded(
+    mirai::everywhere(kind_expr),
+    seconds = DAEMON_SNAPSHOT_BOUND_S
+  )
+  vapply(answers, function(x) if (is.character(x)) x else NA_character_, "")
+}
+
+# Register the pool `start_daemons(n)` just started as the file's shared pool
+# of size `n`, and take the snapshot every reuse is compared against.
+share_daemons <- function(n) {
+  snapshot <- daemon_state_snapshot()
+  testthat::expect_length(snapshot, n)
+  for (record in snapshot) {
+    testthat::expect_named(
+      record,
+      c("pid", "namespaces", "options", "search", "env", "libpaths")
+    )
+  }
+  shared_pool$n <- as.integer(n)
+  shared_pool$snapshot <- snapshot
+  invisible(n)
+}
+
+# Reuse the shared pool of size `n`: it is up, and its daemons' state reads as
+# it did when the pool started -- the option, the library variables and
+# `.libPaths()` exactly, the loaded namespaces and `search()` as supersets.
+# The last two grow on a daemon's first fold and keep growing through a
+# section, by the package's own attach step (`attach_daemon_pkgs()`, which
+# attaches the workflow's and the tuner's packages in every daemon) and by
+# what those packages load lazily: measured 2026-09-07 on a 2-daemon pool,
+# one grid run on the ranger fixture attached workflows, ranger and parsnip
+# and loaded tailor, sparsevctrs and eleven more, and a race added lme4,
+# Matrix, finetune and tune to the search path. That is the package doing on
+# a shared pool what it does on a fresh one, so the probe asks that nothing
+# the pool started with has been unloaded or detached, and that nothing else
+# about the daemons has moved.
+shared_daemons <- function(n) {
+  testthat::expect_identical(shared_pool$n, as.integer(n))
+  testthat::expect_identical(mirai::status()$connections, as.integer(n))
+  now <- daemon_state_snapshot()
+  was <- shared_pool$snapshot
+  # The same daemons, by pid: a replaced daemon is a difference, not a
+  # record that happens to sort into the same slot.
+  testthat::expect_identical(names(now), names(was))
+  for (i in seq_along(was)) {
+    for (field in c("options", "env", "libpaths")) {
+      testthat::expect_identical(now[[i]][[field]], was[[i]][[field]])
+    }
+    for (field in c("namespaces", "search")) {
+      testthat::expect_identical(
+        setdiff(was[[i]][[field]], now[[i]][[field]]),
+        character(0)
+      )
+    }
+  }
+  invisible(n)
+}
+
+# The shared pool is gone; nothing registered here describes a pool any more.
+unshare_daemons <- function() {
+  mirai::daemons(0)
+  shared_pool$n <- NULL
+  shared_pool$snapshot <- NULL
+  invisible(NULL)
+}
+
+# A serial run while a pool is up (M74). The orchestrator takes the serial
+# branch when it counts fewer than two connected daemons (`use_parallel()`,
+# D-018); with a shared pool live for the whole section, a block builds its
+# serial reference by having that count read zero, exactly as
+# test-parallel-classify.R fabricates a pool by having it read two. Nothing on
+# the serial path consults the pool, so the branch runs as it would with no
+# daemons at all; callers still assert `last_dispatch()` is "serial".
+serial_run <- function(expr) {
+  testthat::with_mocked_bindings(expr, mirai_workers = function() 0L)
 }
 
 skip_if_no_daemons <- function() {
