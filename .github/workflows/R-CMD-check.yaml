@@ -61,10 +61,14 @@ jobs:
     # vignette rebuild in 3 on the default branch, finishing about 90 seconds
     # under 30, and the M72 branch's two added minutes of tests pushed it over
     # (job 101620541844 of run 34082554608, killed inside the vignette
-    # rebuild after the tests had passed). That leg alone now gets 40, chosen
-    # at M72's review gate over trimming the suite; the four binary legs keep
-    # 30, so a hang still surfaces in 30 everywhere but devel, and the suite
-    # still owes the speed-up (ROADMAP candidate).
+    # rebuild after the tests had passed). Windows followed on the next run:
+    # its tests took 14 minutes on the default branch and 18 then 19 on the
+    # M72 branch, the step passing once with 30 seconds to spare and then
+    # timing out inside the same vignette rebuild (job 101627605935 of run
+    # 34085134425). Those two legs now get 40, chosen at M72's review gate
+    # over trimming the suite; the three fast legs keep 30, so a hang still
+    # surfaces in 30 there, and the suite still owes the speed-up (ROADMAP
+    # candidate).
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
@@ -134,7 +138,7 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: ${{ matrix.config.r == 'devel' && 40 || 30 }}
+        timeout-minutes: ${{ (matrix.config.r == 'devel' || matrix.config.os == 'windows-latest') && 40 || 30 }}
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
