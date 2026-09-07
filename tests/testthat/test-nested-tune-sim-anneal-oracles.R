@@ -119,7 +119,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled ann
   ms <- reg_metrics()
 
   res <- anneal_results()
-  ref <- reference_nested_anneal_loop(
+  ref <- memoised(reference_nested_anneal_loop(
     wf,
     folds,
     iter = 2,
@@ -128,7 +128,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled ann
     seed = 20,
     metric_name = "rmse",
     control = anneal_control()
-  )
+  ))
   expect_matches_reference(res, ref)
   expect_identical(attr(res, "procedure")$tuner, "tune_sim_anneal")
   expect_identical(attr(res, "procedure")$iter, 2)
@@ -165,7 +165,7 @@ test_that("the annealing reference loop also matches on the metric-separating fi
     metrics = ms,
     control = ctrl
   )
-  ref <- reference_nested_anneal_loop(
+  ref <- memoised(reference_nested_anneal_loop(
     wf,
     folds,
     iter = 2,
@@ -174,7 +174,7 @@ test_that("the annealing reference loop also matches on the metric-separating fi
     seed = 23,
     metric_name = "mae",
     control = ctrl
-  )
+  ))
   expect_matches_reference(res, ref)
   # The metric set reached the search: the outer metrics are the set's, and
   # selection was under its first metric.
@@ -350,6 +350,19 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     one_std_err = selection_rule("one_std_err", num_comp),
     pct_loss = selection_rule("pct_loss", num_comp, limit = 5)
   )
+  # One reference search for the configuration, served from the cache; each
+  # rule is applied to it through reference_with_rule() (M74).
+  set.seed(27)
+  ref_best <- memoised(reference_nested_anneal_loop(
+    wf,
+    folds,
+    iter = 2,
+    initial = 2,
+    metrics = ms,
+    seed = 27,
+    metric_name = "mae",
+    control = ctrl
+  ))
   picked <- list()
   for (nm in names(rules)) {
     set.seed(27)
@@ -362,17 +375,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
       control = ctrl,
       select = rules[[nm]]
     )
-    ref <- reference_nested_anneal_loop(
-      wf,
-      folds,
-      iter = 2,
-      initial = 2,
-      metrics = ms,
-      seed = 27,
-      metric_name = "mae",
-      control = ctrl,
-      select = rules[[nm]]
-    )
+    ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "mae")
     expect_matches_reference(res, ref)
     expect_identical(extract_procedure(res)$select, rules[[nm]])
     picked[[nm]] <- res$.selected

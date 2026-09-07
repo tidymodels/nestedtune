@@ -246,7 +246,7 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
   )
 })
 
-test_that("forced slots win: a control setting them yields the default run (M48, AC3)", {
+test_that("forced slots win, and a control built inline draws nothing the caller can see (M48, AC3)", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -258,38 +258,12 @@ test_that("forced slots win: a control setting them yields the default run (M48,
   # The default run, served from the cache under entry seed 20.
   plain <- bayes_results()
 
-  # `allow_par` and `seed` are the two slots the package overwrites; a control
-  # setting both draws nothing when built, so the entry state is the same.
-  set.seed(20)
-  forced <- nested_tune_bayes(
-    wf,
-    folds,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms,
-    control = tune::control_bayes(allow_par = TRUE, seed = 999L)
-  )
-
-  # The whole object, the `procedure` attribute included: the record holds the
-  # effective control, so what was overwritten leaves no trace.
-  expect_identical(forced, plain)
-})
-
-test_that("a control built inline draws nothing the caller can see (M48)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- det_nested(d)
-  p <- bayes_param_info(wf)
-  ms <- reg_metrics()
-
-  plain <- bayes_results()
-
-  # `tune::control_bayes()` draws its `seed` slot when it is built, and an
-  # inline control is built when `...` is forced, inside the call. The draw
-  # is discarded, so the stream must be put back: the run equals the
+  # One run carries both claims (M74). `allow_par` and `seed` are the two
+  # slots the package overwrites: the control below sets `allow_par` and
+  # leaves `seed` to `tune::control_bayes()`'s default, which draws it from
+  # the stream when the control is built -- and an inline control is built
+  # when `...` is forced, inside the call. The draw is discarded and the
+  # slot overwritten, so the stream must be put back: the run equals the
   # no-control run, and the caller's state after the call is the state on
   # entry (M48 review round 1, finding 2).
   set.seed(20)
@@ -301,9 +275,11 @@ test_that("a control built inline draws nothing the caller can see (M48)", {
     initial = 3,
     param_info = p,
     metrics = ms,
-    control = tune::control_bayes()
+    control = tune::control_bayes(allow_par = TRUE)
   )
   expect_identical(.Random.seed, before)
+  # The whole object, the `procedure` attribute included: the record holds the
+  # effective control, so what was overwritten leaves no trace.
   expect_identical(inline, plain)
 
   # The discrimination: building that control at the top level does move the

@@ -1,13 +1,13 @@
 # M74: The check suite runs faster without dropping an assertion, and every CI leg's step cap returns to 30 minutes
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — the test suite and CI caps are internal, but the help-page examples the milestone lightens are documentation every user reads
-- **Branch/PR:** —
+- **Branch/PR:** `m074-suite-speed`
 
 ## Goal
 
@@ -42,8 +42,8 @@ Cut the time the check suite and the help-page examples take, so every CI leg's 
 ## Tasks
 
 - [ ] T1: Record the branch point: `Rscript benchmarks/profile-tests.R 3` output, and the last two default-branch runs' per-leg `check-r-package`, test, example and vignette times (2026-09-07 runs 34129642542 and 34077230243) in the work log.
-- [ ] T2: Wrap every `reference_*` call in `memoised()` (the seed-scoped call the reference takes must be inside the memoised expression so the key sees it); in the four selection-rule blocks build one reference per configuration and apply the three rules through `reference_select()`; check the serial cache report for one `reference_*` signature per configuration.
-- [ ] T3: Merge the rerun pairs: bayes-rng `:12`/`:52`, race-rng `:21`/`:49`, anneal-rng `:23`/`:50` (one seed-77 run per tuner, the different-seed run beside it); bayes-results `:249`/`:279` into one run under an inline control; finalize AC2 (`:220`) reads AC1's recorded run; final-fit-oracles `:65`/`:128` share one memoised fit-and-reference pair as `bayes_final_and_reference()` does.
+- [x] T2: Wrap every `reference_*` call in `memoised()` (the seed-scoped call the reference takes must be inside the memoised expression so the key sees it); in the four selection-rule blocks build one reference per configuration and apply the three rules through `reference_select()`; check the serial cache report for one `reference_*` signature per configuration.
+- [x] T3: Merge the rerun pairs: bayes-rng `:12`/`:52`, race-rng `:21`/`:49`, anneal-rng `:23`/`:50` (one seed-77 run per tuner, the different-seed run beside it); bayes-results `:249`/`:279` into one run under an inline control; finalize AC2 (`:220`) reads AC1's recorded run; final-fit-oracles `:65`/`:128` share one memoised fit-and-reference pair as `bayes_final_and_reference()` does.
 - [ ] T4: In `helper-parallel.R` add `shared_daemons(n)` (start once per file, `daemon_state_snapshot()` at start, `expect_identical()` against it before each reuse) and `daemon_state_snapshot()`; convert the 19 blocks that only need a primed 2-daemon pool and the n=3 arms of BC1, BC10, BC12, BC13; BC9 and BC3 keep private pools; re-key the `helper-time-budget.R` ledger to the new `file:line` sites and re-sum per file against the CI caps (M16 lesson). Add a Wichmann-Hill kind check to the probe so a missing pin still fails (M07 lesson).
 - [ ] T5: One example helper shape across the 16 pages that build a tuning run: `mtcars`, 2 outer × 2 inner folds, `num_comp = 1:2`, the rest of each example unchanged; `\donttest` untouched; `benchmarks/time-examples.R` committed with a header stating its method; `devtools::document()`; NEWS bullet.
 - [ ] T6: `Rscript benchmarks/profile-tests.R 3` on the head; record the per-file table in the work log; if the total is above 480 s, name the file and return to T2–T4.
@@ -58,6 +58,10 @@ Cut the time the check suite and the help-page examples take, so every CI leg's 
 - 2026-09-07: plan gate chose a 24-minute bar with every cap back to 30 over keeping M72's 40s, because the yaml's own stance is that a leg nearing its cap is a suite to make faster; falsified by three attempts of the measured head with a leg above 24 on runners that were not slower than the branch point's.
 - 2026-09-07: plan gate chose including the example pages over a candidate row, at the user's choice; falsified by a page whose lighter design changes what its printed output demonstrates.
 - 2026-09-07: plan step 2 chose cheaper reference and rerun paths over a shared disk cache (M57's decline stands on today's 873-versus-690 CPU-second measurement) and over smaller fixture data (M18's searched-property fixtures); falsified by a per-worker report showing rebuilds above a quarter of the CPU, or by an oracle fixture whose property survives a smaller size.
+- 2026-09-07: question gate — the race help page keeps inner v = 5 (the burn-in check refuses a race with no more inner resamples than its `burn_in` of 2) and goes to 2 outer folds; BC9 pollutes the shared 2-daemon pool in place as the last 2-daemon block instead of restarting; the n=3 arms of BC1, BC10, BC12 and BC13 become their own blocks on a shared 3-daemon pool, each rebuilding its serial reference, since mirai holds one pool at a time.
+- 2026-09-07: T1 (CI part) — default-branch runs 34129642542 / 34077230243 `check-r-package` minutes: ubuntu release 26.9 / 26.3, devel 20.9 / 28.2, oldrel 20.5 / 25.2, macOS 22.9 / 22.0, windows 18.0 / 23.3; tests 17 / 17, 13 / 18, 13 / 16, 14 / 14, 11 / 14 min; examples 70 / 63, 59 / 76, 53 / 62, 62 / 43, 45 / 58 s; vignettes 165 / 161, 154 / 184, 143 / 164, 122 / 126, 125 / 157 s.
+- 2026-09-07: T2 — every `reference_*` site goes through `memoised()` (18 sites); `reference_nested_loop()` keeps its `tuned` result and `reference_with_rule()` applies a rule to a cached reference, so the four selection-rule blocks build one reference per configuration; serial run of the 11 touched files: 57 signatures, 57 builds, 89 requests, one `reference_*` signature per configuration; 1110 pass, 0 fail, 0 skip.
+- 2026-09-07: T3 — the seed-77 run is memoised in the bayes, race and anneal rng pairs (`first` the build, `second` direct); bayes-results' two control blocks are one run under `control_bayes(allow_par = TRUE)`; finalize AC2 reads AC1's memoised grid run; `grid_final_and_reference()` serves final-fit-oracles' two strands.
 
 ## Decisions
 

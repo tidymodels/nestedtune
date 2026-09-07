@@ -96,14 +96,14 @@ test_that("nested_tune_grid() selects under the metrics it was given", {
   # The reference resolves the first metric of the caller's set, exactly as the
   # driver does off its own tuned object -- so this fails if the inner
   # tune_grid() ever stops receiving `metrics` and falls back to `rmse`.
-  ref <- reference_nested_loop(
+  ref <- memoised(reference_nested_loop(
     wf,
     nested,
     sep_grid(),
     sep_metrics(),
     seed = 20,
     metric_name = "mae"
-  )
+  ))
   expect_equal(nrow(res), 3L)
   for (i in seq_len(nrow(res))) {
     expect_identical(res$.selected[[i]], ref[[i]]$selected)
