@@ -753,7 +753,7 @@ test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and th
   expect_match(subtitle, "2 workflows, 2 outer folds each.", fixed = TRUE)
   expect_match(
     subtitle,
-    "\n1 of 2 workflows has a failed fold; see summary().\n",
+    "\n1 of 2 workflows did not complete every fold; see summary().\n",
     fixed = TRUE
   )
 })
@@ -840,7 +840,7 @@ test_that("AC4: both set views warn once per workflow with a failed fold, naming
     }
     expect_match(
       plot_label(p, "subtitle"),
-      "3 of 3 workflows have a failed fold; see summary().",
+      "3 of 3 workflows did not complete every fold; see summary().",
       fixed = TRUE
     )
   }

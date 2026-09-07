@@ -8,7 +8,7 @@
   heading for the set and one section per workflow, the note on what a
   nested estimate describes once at the end. `autoplot(type =
   "performance")` puts the workflows along the x axis inside one panel per
-  metric, one point per completed outer fold and a dashed rule at each
+  metric, one point per completed outer fold's score and a dashed rule at each
   workflow's `collect_metrics()` mean, an all-failed workflow keeping an
   empty slot; `autoplot(type = "parameters")` draws one panel per workflow
   and tuned parameter, labelled `"<id>: <parameter>"`, over one axis

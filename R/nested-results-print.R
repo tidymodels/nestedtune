@@ -265,9 +265,10 @@ print.summary.nested_results_set <- function(x, ...) {
   }
   n <- length(x)
   cli::cli_text("Workflows: {n}")
-  for (id in names(x)) {
+  for (i in seq_along(x)) {
+    id <- names(x)[[i]]
     cli::cli_h2("Workflow {.val {id}}")
-    print_summary_sections(x[[id]], level = 3L)
+    print_summary_sections(x[[i]], level = 3L)
   }
   print_procedure_note()
   invisible(x)

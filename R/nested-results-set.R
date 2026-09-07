@@ -257,7 +257,9 @@ stack_set <- function(
 #' parameter any workflow's completed fold selected, then `n` and `prop`,
 #' with each workflow's rows as [agreement()] on that run alone gives them,
 #' in the set's order, `NA` in a column that workflow's run does not
-#' tune. A workflow with nothing to tune contributes no row.
+#' tune; inside a workflow's own rows `NA` keeps the meaning [agreement()]
+#' gives it there, a fold that recorded no value for the parameter. A
+#' workflow with nothing to tune contributes no row.
 #'
 #' @details
 #' The three readers follow the fold-state rules of the set's
@@ -265,9 +267,10 @@ stack_set <- function(
 #' which some outer folds failed is read over the folds that ran, with one
 #' warning of class `nestedtune_partial_summary` naming it. A workflow in
 #' which no fold completed is still summarized by `summary()`, which
-#' describes a failed run rather than refusing; the two plots keep its
-#' slot on the x axis of the performance view and draw nothing for it, and
-#' `agreement()` leaves it out, each warning once naming it. A set in which
+#' describes a failed run rather than refusing; the performance view keeps
+#' its slot on the x axis and draws nothing for it, the parameters view
+#' draws no panel for it, and `agreement()` leaves it out, each warning
+#' once naming it. A set in which
 #' no workflow completed a fold is refused by the plots and by
 #' `agreement()` with class `nestedtune_no_completed_folds`. A set in which
 #' no workflow's completed fold recorded a selected parameter is refused

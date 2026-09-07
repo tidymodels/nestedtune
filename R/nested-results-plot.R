@@ -653,7 +653,8 @@ set_design_line <- function(x) {
   )
 }
 
-# A line of its own when any workflow has a failed fold: how many do, and
+# A line of its own when any workflow has a failed fold, an all-failed one
+# included: how many did not complete every fold, and
 # where to read which. The per-panel qualifier of the single view is not
 # repeated here -- "completed" is per workflow in a set, and `summary()`
 # names each workflow's failed folds. Empty on a set that ran whole.
@@ -670,9 +671,7 @@ set_shortfall_line <- function(x) {
     k,
     " workflow",
     if (k == 1L) "" else "s",
-    " ha",
-    if (short == 1L) "s" else "ve",
-    " a failed fold; see summary()."
+    " did not complete every fold; see summary()."
   )
 }
 

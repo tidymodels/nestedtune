@@ -140,6 +140,7 @@ agreement.nested_results <- function(x, ...) {
   new_tbl(out)
 }
 
+#' @name summary.nested_results_set
 #' @rdname summary.nested_results_set
 #' @export
 agreement.nested_results_set <- function(x, ...) {
