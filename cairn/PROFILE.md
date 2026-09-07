@@ -4,7 +4,6 @@
      doctrine is universal, not a slot (skills/shared/validation-doctrine.md); all seven slots must be non-empty — cairn_validate FAILs on a missing or empty slot. -->
 
 The R-package toolchain: devtools/roxygen/testthat/pkgdown, CRAN release.
-Selected by `cairn-init` when a `DESCRIPTION` file is present.
 
 ## verify
 Run by `/milestone-implement` (per task) and `/hotfix` (gate-lite):
@@ -46,8 +45,9 @@ rules in tracking-rules:
   `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD check` sees — that is the test a fourth path must
   meet; it bites on `push` only, GitHub evaluating it on a `pull_request` against the whole PR diff. **Hang
   caps at two scopes** turn a hang into a failed job with a timestamp: `R-CMD-check` bounds its job at 60
-  minutes and its `check-r-package` step at 30, `test-coverage` its job at 20, `R-CMD-check-hard` its job at
-  30 (M57; its yaml says why one scope); re-read them with `grep -n timeout-minutes .github/workflows/*.yaml`.
+  minutes and its `check-r-package` step at 30 (40 on the devel leg since M72, whose tests pushed a step already
+  at 28.5 minutes past 30), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57; its yaml says
+  why one scope); re-read them with `grep -n timeout-minutes .github/workflows/*.yaml`.
   The step bound is the guarantee, on the code both hangs were in (`test_check("nestedtune")`, 52 min under `R
   CMD check` and 40 under `covr`, hence the two scopes). It was 20 until M48 (2026-09-02) saw the windows step
   killed at 20 three runs in a row; 30 is not free headroom, and a leg nearing it is a suite to make faster

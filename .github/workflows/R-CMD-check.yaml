@@ -56,7 +56,15 @@ jobs:
     # under the 52-minute hang it was cut against while leaving the slowest
     # leg roughly 10 minutes of headroom; it is still not free headroom, and a
     # leg that approaches it again is the suite asking to be made faster
-    # rather than the cap asking to be raised.
+    # rather than the cap asking to be raised. The devel leg approached it
+    # first: on 2026-09-06 its step ran the tests in 18 minutes and the
+    # vignette rebuild in 3 on the default branch, finishing about 90 seconds
+    # under 30, and the M72 branch's two added minutes of tests pushed it over
+    # (job 101620541844 of run 34082554608, killed inside the vignette
+    # rebuild after the tests had passed). That leg alone now gets 40, chosen
+    # at M72's review gate over trimming the suite; the four binary legs keep
+    # 30, so a hang still surfaces in 30 everywhere but devel, and the suite
+    # still owes the speed-up (ROADMAP candidate).
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
@@ -126,7 +134,7 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: 30
+        timeout-minutes: ${{ matrix.config.r == 'devel' && 40 || 30 }}
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'

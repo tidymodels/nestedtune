@@ -21,13 +21,6 @@ bind_by_id <- function(x, reader) {
   dplyr::bind_rows(tables, .id = "wflow_id")
 }
 
-# A fixed workflow that fails on every outer fold: the formula names a
-# column the data does not hold, so `last_fit()` refuses each split and the
-# fold is recorded as failed at the outer fit.
-broken_workflow <- function(data) {
-  workflows::workflow(y ~ nonesuch, parsnip::linear_reg())
-}
-
 # The set whose every workflow kept the two outer-fit columns: the tuned one
 # through the call's control, the fixed one through its own option, since
 # the call's control is the grid orchestrator's and does not reach it.

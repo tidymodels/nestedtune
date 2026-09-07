@@ -173,3 +173,109 @@
         deploy. Build that with `nested_final_fit()`, and report this estimate as
         what its procedure achieves.
 
+# AC1: the set's printed summary holds its shape
+
+    Code
+      print(summary(wset_three_results()))
+    Message
+      
+      -- Nested cross-validation results for a workflow set --------------------------
+      Orchestrator: `nested_tune_grid()` (grid search)
+      Workflows: 3
+      
+      -- Workflow "tuned" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 2 completed
+      
+      -- Selected parameters 
+      ! num_comp: 3 2 (folds disagree)
+      
+      -- Estimate (2 of 2 outer folds) 
+      rmse (standard): 1.49
+      rsq (standard): 0.687
+      
+      -- Workflow "fixed" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 2 completed
+      
+      -- Selected parameters 
+      i No tuned parameters.
+      
+      -- Estimate (2 of 2 outer folds) 
+      rmse (standard): 1.51
+      rsq (standard): 0.678
+      
+      -- Workflow "threshold" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 2 completed
+      
+      -- Selected parameters 
+      v threshold: 0.9 (all 2 completed folds agree)
+      
+      -- Estimate (2 of 2 outer folds) 
+      rmse (standard): 1.13
+      rsq (standard): 0.814
+      
+      i A nested estimate describes the tune-and-fit procedure, not a model you can
+        deploy. Build that with `nested_final_fit()`, and report this estimate as
+        what its procedure achieves.
+
+---
+
+    Code
+      print(suppressWarnings(summary(wset_three_results(broken = 1L))))
+    Message
+      
+      -- Nested cross-validation results for a workflow set --------------------------
+      Orchestrator: `nested_tune_grid()` (grid search)
+      Workflows: 3
+      
+      -- Workflow "tuned" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 1 completed
+      x Fold1 failed during outer fit.
+      i See the `.notes` column of the results object for what went wrong.
+      
+      -- Selected parameters 
+      v num_comp: 2 (the only completed fold)
+      
+      -- Estimate (1 of 2 outer folds) 
+      rmse (standard): 1.81
+      rsq (standard): 0.601
+      
+      -- Workflow "fixed" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 1 completed
+      x Fold1 failed during outer fit.
+      i See the `.notes` column of the results object for what went wrong.
+      
+      -- Selected parameters 
+      i No tuned parameters.
+      
+      -- Estimate (1 of 2 outer folds) 
+      rmse (standard): 1.81
+      rsq (standard): 0.601
+      
+      -- Workflow "threshold" --
+      
+      Outer resamples: 2-fold cross-validation
+      Outer folds: 2 requested, 1 completed
+      x Fold1 failed during outer fit.
+      i See the `.notes` column of the results object for what went wrong.
+      
+      -- Selected parameters 
+      v threshold: 0.9 (the only completed fold)
+      
+      -- Estimate (1 of 2 outer folds) 
+      rmse (standard): 1.07
+      rsq (standard): 0.866
+      
+      i A nested estimate describes the tune-and-fit procedure, not a model you can
+        deploy. Build that with `nested_final_fit()`, and report this estimate as
+        what its procedure achieves.
+

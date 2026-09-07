@@ -673,3 +673,267 @@ test_that("a non-numeric selection is drawn on a discrete axis", {
   expect_identical(plot_points(p)$fold, c("Fold1", "Fold2", "Fold3"))
   expect_identical(axis_labels(p, "y"), "c3")
 })
+
+# ---- the set views (M72) ------------------------------------------------------
+#
+# Asserted on the built plot as above, against the set readers: the points
+# are `collect_metrics(x, summarize = FALSE)`'s scored rows and the rules
+# are `collect_metrics(x)`'s means, so the figure and the tables cannot
+# disagree about a number.
+
+test_that("AC2: the set's performance view puts the workflows on x inside one panel per metric", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_s3_class(p, "ggplot")
+
+  # The panel names are the single view's, the x axis the ids in set order.
+  expect_identical(strip_labels(p), c("rmse", "rsq"))
+  expect_identical(axis_labels(p, "x"), res$wflow_id)
+  expect_false(identical(res$wflow_id, sort(res$wflow_id)))
+
+  # One point per scored fold, at the unsummarized reader's value.
+  folds_tbl <- as.data.frame(collect_metrics(res, summarize = FALSE))
+  scored <- folds_tbl[!is.na(folds_tbl$.estimate), ]
+  pts <- plot_points(p)
+  expect_identical(nrow(pts), nrow(scored))
+  for (m in c("rmse", "rsq")) {
+    rows <- scored$.metric == m
+    expect_identical(pts$fold[pts$panel == m], scored$wflow_id[rows])
+    expect_identical(pts$y[pts$panel == m], scored$.estimate[rows])
+  }
+
+  # One rule per workflow and panel, both ends at the summarized mean.
+  seg <- plot_segments(p)
+  means <- as.data.frame(collect_metrics(res))
+  expect_identical(nrow(seg), nrow(means))
+  for (i in seq_len(nrow(means))) {
+    hit <- seg$x == means$wflow_id[[i]] & seg$panel == means$.metric[[i]]
+    expect_identical(sum(hit), 1L)
+    expect_identical(seg$ymin[hit], means$mean[[i]])
+    expect_identical(seg$ymax[hit], means$mean[[i]])
+  }
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "3 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_no_match(subtitle, "summary()", fixed = TRUE)
+  expect_match(
+    subtitle,
+    "It describes the tune-and-fit procedure, not a model you can deploy.",
+    fixed = TRUE
+  )
+  expect_identical(plot_label(p, "x"), "Workflow")
+})
+
+test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
+  skip_if_no_wset_fixture()
+  beside <- broken_set_results()
+  warnings <- partial_warnings(p <- autoplot(beside, type = "performance"))
+  expect_length(warnings, 1L)
+  expect_match(
+    conditionMessage(warnings[[1L]]),
+    'Workflow "broken": no outer fold completed',
+    fixed = TRUE
+  )
+
+  # On the axis, in set order, with nothing drawn at it.
+  expect_identical(axis_labels(p, "x"), c("tuned", "broken"))
+  pts <- plot_points(p)
+  expect_identical(unique(pts$fold), "tuned")
+  expect_identical(nrow(pts), 4L)
+  seg <- plot_segments(p)
+  expect_identical(unique(seg$x), "tuned")
+  expect_identical(nrow(seg), 2L)
+  expect_identical(
+    seg$ymin[seg$panel == "rmse"],
+    suppressWarnings(collect_metrics(beside))$mean[[1L]]
+  )
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "2 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_match(
+    subtitle,
+    "\n1 of 2 workflows did not complete every fold; see summary().\n",
+    fixed = TRUE
+  )
+})
+
+test_that("AC3: the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  p <- expect_no_warning(autoplot(res))
+  expect_s3_class(p, "ggplot")
+
+  # Set order, the id ahead of the single view's label; the fixed workflow
+  # tuned nothing and has no panel.
+  expect_identical(
+    strip_labels(p),
+    c("tuned: num_comp", "threshold: threshold")
+  )
+  expect_identical(axis_labels(p, "x"), c("Fold1", "Fold2"))
+  pts <- plot_points(p)
+  for (i in c(1L, 3L)) {
+    own <- plot_points(autoplot(res$result[[i]]))
+    panel <- paste0(res$wflow_id[[i]], ": ", unique(own$panel))
+    expect_identical(pts$fold[pts$panel == panel], own$fold)
+    expect_identical(pts$y[pts$panel == panel], own$y)
+  }
+  expect_identical(nrow(pts), 4L)
+  # Every value drawn is a number, so the axis is numeric, and the
+  # whole-number panel keeps whole-number breaks beside the continuous one.
+  b <- ggplot2::ggplot_build(p)
+  expect_false(b$layout$panel_scales_y[[1L]]$is_discrete())
+  expect_identical(axis_labels(b, "y", panel = 1L), c("2", "3"))
+  expect_true(any(grepl(".", axis_labels(b, "y", panel = 2L), fixed = TRUE)))
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "3 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_match(subtitle, "folds disagreed", fixed = TRUE)
+  expect_identical(plot_label(p, "x"), "Outer fold")
+
+  # The axis is decided over the pooled values: one workflow's character
+  # selection puts every panel on a discrete axis, as one parameter's does
+  # in the single view.
+  mixed <- res
+  mixed$result[[3L]]$.selected <- lapply(
+    mixed$result[[3L]]$.selected,
+    function(s) {
+      s$threshold <- paste0("t", s$threshold)
+      s
+    }
+  )
+  b <- ggplot2::ggplot_build(autoplot(mixed))
+  expect_true(b$layout$panel_scales_y[[1L]]$is_discrete())
+  expect_true(b$layout$panel_scales_y[[2L]]$is_discrete())
+  expect_identical(plot_points(autoplot(mixed))$fold, pts$fold)
+})
+
+test_that("AC3: a set in which no workflow tuned a parameter is refused, pointing at the other view", {
+  skip_if_no_wset_fixture("nested_fit_resamples")
+  res <- wset_results("nested_fit_resamples")
+  cnd <- rlang::catch_cnd(autoplot(res), "error")
+  expect_s3_class(cnd, "nestedtune_no_tuned_parameters")
+  expect_match(conditionMessage(cnd), "no tuned parameters", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "type = \"performance\"", fixed = TRUE)
+  expect_identical(rlang::call_name(conditionCall(cnd)), "autoplot")
+  # The view it points at draws the set.
+  p <- autoplot(res, type = "performance")
+  expect_s3_class(p, "ggplot")
+  expect_identical(axis_labels(p, "x"), res$wflow_id)
+})
+
+test_that("AC4: both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
+  skip_if_no_wset_fixture()
+  partial <- wset_three_results(broken = 1L)
+  for (type in c("parameters", "performance")) {
+    warnings <- partial_warnings(p <- autoplot(partial, type = type))
+    expect_length(warnings, 3L)
+    for (i in 1:3) {
+      msg <- conditionMessage(warnings[[i]])
+      expect_match(msg, paste0('^Workflow "', partial$wflow_id[[i]], '"'))
+      expect_match(msg, "This figure covers 1 of 2 outer folds", fixed = TRUE)
+      expect_match(msg, "Fold1", fixed = TRUE)
+      expect_identical(
+        rlang::call_name(conditionCall(warnings[[i]])),
+        "autoplot"
+      )
+    }
+    expect_match(
+      plot_label(p, "subtitle"),
+      "3 of 3 workflows did not complete every fold; see summary().",
+      fixed = TRUE
+    )
+  }
+  # The parameters view keeps the failed fold on the axis and draws no
+  # point at it; the performance view draws one point per workflow, metric
+  # and completed fold.
+  p <- suppressWarnings(autoplot(partial))
+  pts <- plot_points(p)
+  expect_identical(axis_labels(p, "x"), c("Fold1", "Fold2"))
+  expect_identical(unique(pts$fold), "Fold2")
+  expect_identical(nrow(pts), 2L)
+  pts <- plot_points(suppressWarnings(autoplot(partial, type = "performance")))
+  expect_identical(nrow(pts), 6L)
+  expect_identical(
+    sort(pts$y),
+    sort(
+      suppressWarnings(collect_metrics(partial, summarize = FALSE))$.estimate
+    )
+  )
+})
+
+test_that("AC4: an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
+  skip_if_no_wset_fixture()
+  beside <- broken_set_results()
+  for (type in c("parameters", "performance")) {
+    warnings <- partial_warnings(p <- autoplot(beside, type = type))
+    expect_length(warnings, 1L)
+    expect_match(
+      conditionMessage(warnings[[1L]]),
+      'Workflow "broken": no outer fold completed',
+      fixed = TRUE
+    )
+    expect_identical(
+      rlang::call_name(conditionCall(warnings[[1L]])),
+      "autoplot"
+    )
+  }
+  # The completing workflow's panel alone, and its points alone.
+  expect_identical(
+    strip_labels(suppressWarnings(autoplot(beside))),
+    "tuned: num_comp"
+  )
+  expect_identical(
+    unique(plot_points(suppressWarnings(autoplot(beside)))$fold),
+    c("Fold1", "Fold2")
+  )
+  expect_identical(
+    unique(
+      plot_points(
+        suppressWarnings(autoplot(beside, type = "performance"))
+      )$fold
+    ),
+    "tuned"
+  )
+
+  alone <- broken_set_results(alone = TRUE)
+  for (type in c("parameters", "performance")) {
+    cnd <- rlang::catch_cnd(autoplot(alone, type = type), "error")
+    expect_s3_class(cnd, "nestedtune_no_completed_folds")
+    expect_match(conditionMessage(cnd), "nothing to plot", fixed = TRUE)
+    expect_match(conditionMessage(cnd), "2 workflows", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "autoplot")
+  }
+})
+
+test_that("AC4: the set's autoplot() refuses a type outside the two, and fences its dots first", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  expect_error(autoplot(res, type = "parameter"), "must be one of")
+  expect_error(autoplot(res, type = "parameter"), "performance")
+  expect_error(autoplot(res, type = 1), "must be one of")
+  expect_error(autoplot(res, type = NA_character_), "must be one of")
+  expect_s3_class(
+    rlang::catch_cnd(autoplot(res, nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+  # The fence before the type check.
+  expect_s3_class(
+    rlang::catch_cnd(autoplot(res, type = "parameter", nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+})
+
+# The pictures of the set views, on the three-workflow fixture: what a reader
+# meets -- the id-prefixed strips, the workflows along one axis under each
+# metric, the rules -- pinned after being rendered and read (M72).
+test_that("both set views look the way they read", {
+  skip_if_not_installed("vdiffr")
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  vdiffr::expect_doppelganger("set parameters, three workflows", autoplot(res))
+  vdiffr::expect_doppelganger(
+    "set performance, three workflows",
+    autoplot(res, type = "performance")
+  )
+})
