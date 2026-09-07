@@ -80,6 +80,7 @@ Score every workflow of a `workflow_set` on the same outer folds of one nested d
 - 2026-09-06: review gate: fix-now O4, O9, O10, F1 committed on the branch; `test-dots-barrier.R` and `air format --check` clean after them.
 - 2026-09-06: step-7 approval: PR #81 approved for merge.
 - 2026-09-06: CI wait on PR #81 hit the harness ceiling with pkgdown and format-suggest green and seven checks pending; watcher stopped, session stopped at step 8 before the merge (marker written); resume via /milestone-review M71.
+- 2026-09-06: resume: PR #81 open, main unmoved, CI green on 11 checks, conversation re-read empty; step-7 chip re-posed and approved (step-7 approval: PR #81 approved for merge); re-entering at step 8.
 
 ## Decisions
 
