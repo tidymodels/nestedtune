@@ -1,16 +1,15 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (M72 planned from the M71-Out candidate row, which is promoted; validate green; no RB open.)_
+_Last hygiene check: 2026-09-07 (M72 done and archived; M69 row pruned; two candidate rows added at M72's gate; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | review | — | normal | milestones/M72-set-readers.md |
+| M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | done | — | normal | milestones/archive/M72-set-readers.md |
 | M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
-| M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
