@@ -313,8 +313,8 @@ if (rlang::is_installed(c("finetune", "recipes", "yardstick"))) {
   set.seed(1)
   folds <- nested_resamples(
     mtcars,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 3)
+    outside = rsample::vfold_cv(v = 2),
+    inside = rsample::vfold_cv(v = 2)
   )
 
   set.seed(2)

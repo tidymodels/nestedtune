@@ -75,15 +75,15 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
 res <- nested_tune_grid(
   wf,
   folds,
-  grid = data.frame(num_comp = 1:3),
+  grid = data.frame(num_comp = 1:2),
   control = tune::control_grid(
     save_pred = TRUE,
     extract = function(x) coef(workflows::extract_fit_engine(x))
