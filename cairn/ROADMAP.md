@@ -1,16 +1,15 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-06 (M71 planned; its lineage candidate row absorbed and two rows added at its plan gate; M67 and M66 rows pruned since the validator now retains 3 terminal rows; validate green; no RB open.)_
+_Last hygiene check: 2026-09-06 (M71 done and archived; M68 row pruned; one candidate row for M71's deferred findings; one LESSONS line; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | review | — | normal | milestones/M71-workflow-map.md |
+| M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
 | M69 | A `select` argument on the five orchestrators takes a `selection_rule()`, and the final fit applies the recorded rule | done | — | normal | milestones/archive/M69-selection-rule.md |
-| M68 | `save_pred` and `extract` reach the outer fit, and `collect_predictions()` and `collect_extracts()` stack what each fold kept | done | — | normal | milestones/archive/M68-outer-predictions.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -48,4 +47,5 @@ _Last hygiene check: 2026-09-06 (M71 planned; its lineage candidate row absorbed
 - Dispatch a `nested_workflow_map()` run as workflow-by-fold units in one parallel round instead of one round per workflow — added 2026-09-06 at M71's plan gate — M71 Out; needs the payload to carry the workflow (`R/parallel.R`, `fold_task()`). Promote on evidence that the per-workflow rounds leave daemons idle on a user's run
 - `nested_final_fit()` ties a fixed workflow to a `fit_resamples` record — added 2026-09-06 at M70's review gate (finding O1). Today the final fit on a no-tuning record checks only that the workflow carries no `tune()` marker, so any fixed workflow is accepted and paired with the record's estimate, where the tuned paths tie the workflow to the record through the recorded grid. Promote on a user pairing the wrong workflow with a baseline record, or on a recorded workflow identity being wanted by another reader
 - `summarize = TRUE` on `collect_predictions()` for a `nested_results`, averaging each row's predictions across the repeats of a repeated design as tune's method does — added 2026-09-06 — M68 Out. Needs an oracle against tune's own averaging for class probabilities and votes. Promote on a user asking for it on a repeated design
+- `nested_results_set` subsetting and re-signalling — added 2026-09-06 at M71's review gate (findings O2, O3, O5). The set registers no `[`, `dplyr_reconstruct()`, `names<-` or `vec_restore()` method, so a column subset keeps the class and `print(res[, 1])` warns per row instead of refusing, a zero-row subset reaches the readers' `nestedtune_no_completed_folds` refusal; and `resignal_for_workflow()` rebuilds a condition from its message and classes, dropping the parent chain and data fields. Promote on a user subsetting a set before reading it, or a handler needing the original condition's fields
 <!-- drift-check: lean_bundle_bytes=941.7 kB; mori_bundle_bytes=103.1 kB; ratio_lean_over_mori=9.13; gap_bytes=838.6 kB; worker_closure_bytes=524 B@2 -->
