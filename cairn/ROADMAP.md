@@ -1,12 +1,13 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-07 (M72 done and archived; M69 row pruned; two candidate rows added at M72's gate; validate green; no RB open.)_
+_Last hygiene check: 2026-09-07 (M73 planned, absorbing the set subsetting row; one candidate row added at its gate; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | planned | — | normal | milestones/M73-set-invariants.md |
 | M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | done | — | normal | milestones/archive/M72-set-readers.md |
 | M71 | `nested_workflow_map()` runs a `workflow_set` through one nested design, and the readers stack each workflow's results under its id | done | — | normal | milestones/archive/M71-workflow-map.md |
 | M70 | `nested_fit_resamples()` scores a workflow with nothing to tune on the outer folds of a nested design, and the five tuning orchestrators refuse one | done | — | normal | milestones/archive/M70-fit-resamples.md |
@@ -48,5 +49,5 @@ _Last hygiene check: 2026-09-07 (M72 done and archived; M69 row pruned; two cand
 - `summarize = TRUE` on `collect_predictions()` for a `nested_results`, averaging each row's predictions across the repeats of a repeated design as tune's method does — added 2026-09-06 — M68 Out. Needs an oracle against tune's own averaging for class probabilities and votes. Promote on a user asking for it on a repeated design
 - The check suite runs 19–20 minutes elapsed on the devel leg and 18–19 on windows under `R CMD check` (14 on windows before M72) — added 2026-09-06 at M72's review gate, where those two legs' 30-minute step cap was raised to 40 instead of trimming the suite. The yaml's own stance is that a leg nearing the cap is a suite to make faster; the per-file figures from `benchmarks/profile-tests.R` say where the time goes. Promotion condition: a third leg nearing 30, or devel or windows nearing 40.
 - Set-view coverage past `wset_three()` — added 2026-09-06 at M72's review gate (findings O1, O2, O3, O7, O11). The set performance view repeats no per-panel qualifier, so a completed fold scoring `NA` on one metric leaves a two-fold mean reading as full (the single view's M08 F1 case); `distinct_metric_keys()` has no test on a duplicated name, an ambiguous estimator or a timed key, and a mixed survival set gives the plot's mean an `.eval_time` column the element's `collect_metrics()` lacks; the discrete pooled-axis test checks fold labels, not values; `panel_owner()`'s same-range tie is likelier when two workflows tune one parameter. Promotion condition: a set fixture with survival metrics or a character-valued parameter, which M72 put out of scope.
-- `nested_results_set` subsetting and re-signalling — added 2026-09-06 at M71's review gate (findings O2, O3, O5). The set registers no `[`, `dplyr_reconstruct()`, `names<-` or `vec_restore()` method, so a column subset keeps the class and `print(res[, 1])` warns per row instead of refusing, a zero-row subset reaches the readers' `nestedtune_no_completed_folds` refusal; and `resignal_for_workflow()` rebuilds a condition from its message and classes, dropping the parent chain and data fields. Promote on a user subsetting a set before reading it, or a handler needing the original condition's fields
+- A `vec_ptype2`/`vec_cast` lattice on `nested_results_set` — added 2026-09-07 at M73's plan gate — M73 Out. Under M73's rule a set combined with a bare table sheds the class through both doors and a direct `vctrs::vec_cbind()` gives a plain tibble. Promote on a user needing a set-with-table combination or `vec_cbind()` to keep the class
 <!-- drift-check: lean_bundle_bytes=941.7 kB; mori_bundle_bytes=103.1 kB; ratio_lean_over_mori=9.13; gap_bytes=838.6 kB; worker_closure_bytes=524 B@2 -->

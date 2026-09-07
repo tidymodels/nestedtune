@@ -1,0 +1,61 @@
+# M73: A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** IP4
+- **Resolves:** —
+- **Surface tier:** user-facing — exported S3 methods on the class `nested_workflow_map()` returns
+- **Branch/PR:** —
+
+## Goal
+
+Make a subset of a workflow-set result answer only for the workflows it holds, so an operation that leaves rows that are not the run's own returns a plain tibble instead of an object still claiming the run, and make a condition re-signalled with a workflow's id keep the original's cause chain and fields.
+
+## Scope
+
+**In:** one reconstruction rule for `nested_results_set` (`R/nested-results-set.R`), routed to from five doors — `dplyr_reconstruct()`, `[`, `vec_restore()`, base `rbind()` and `names<-` — as `R/nested-results.R` routes the single class's; the readers, `summary()`, `print()`, `extract_workflow()` and `nested_final_fit()` on a kept subset; `resignal_for_workflow()` (`R/nested-workflow-map.R`) re-raising the original condition object with its first message line prefixed; a help-page section, a NEWS bullet, a DESIGN sentence; D-059 records the rule.
+
+**Out:** a `vec_ptype2`/`vec_cast` lattice on the set → candidate row (a set combined with a bare table sheds the class through both doors under the rule, and a direct `vctrs::vec_cbind()` gives a plain tibble, documented); `$<-`/`[[<-` replacing a `result` under the class → the same blind spot the single class documents at `R/nested-results.R:112-119`, unchanged; a double prefix from two nested `for_workflow()` calls → no package path nests them; set-view coverage past `wset_three()` and the set's other candidate rows → unchanged in the ROADMAP.
+
+## Acceptance criteria
+
+- [ ] AC1: Over these operations, each through the door named — `[` with a row index, a logical mask, a negative index, a column index, zero rows and a repeated index; `filter()`, `slice()`, `head()`, `arrange()`, `mutate()`, `select()`, `relocate()`, `rename()`, `bind_rows()`; `bind_cols()` in each argument position and once with `.name_repair = "minimal"` adding a second `wflow_id`; base `rbind()`; `names<-`; `vctrs::vec_slice()` and `vctrs::vec_rbind()` — a `nested_results_set` comes back wearing its class and `fn` attribute when the result holds `wflow_id`, `workflow` and `result` under those names with none repeated, at least one row, no repeated `wflow_id`, and each row's three values `identical()` to the row of the same `wflow_id` in the first data-frame argument; otherwise it comes back a `tbl_df` without the class or the attribute. So a row reorder, a caller-added column, a row subset keeping at least one row, and `bind_cols()` with the set first keep the class; a column drop, a record-column rename, a zero-row subset, a repeated row, a row-doubling bind, a bind with a bare tibble, a `mutate()` replacing `result`, `bind_cols()` with a tibble first, and a second `wflow_id` under minimal repair give a tibble.
+- [ ] AC2: Over these row subsets of the cached set fixtures — each single-row subset and the two-row subset in reversed order, each holding a workflow with a completed fold, the two column readers on the fixture that kept their columns — `collect_metrics()` under both `summarize` values, `collect_selections()`, `collect_inner_metrics()`, `collect_notes()`, `collect_predictions()`, `collect_extracts()` and `agreement()` return `identical()` the rows of the same reader on the whole set whose `wflow_id` the subset keeps, in the subset's order; `summary()` returns `identical()` the whole set's summary restricted to those ids, `fn` attribute kept; `extract_workflow()` and `nested_final_fit(x, id = )` answer for a kept id and refuse a dropped one with `nestedtune_unknown_id`; a subset holding only workflows in which no fold completed is refused by the readers with `nestedtune_no_completed_folds`, as the whole set is.
+- [ ] AC3: `print()` of a row subset that keeps the class reports the workflow count and the per-workflow lines of the rows in hand alone, the orchestrator line unchanged: `print(x[2, ])` names one workflow and `print(x[3:2, ])` names two in that order.
+- [ ] AC4: A condition `for_workflow()` re-signals keeps the original's class vector, `parent`, `body`, `footer`, `use_cli_format` and every data field `identical()`; its `conditionMessage()` is the original's with `Workflow "<id>": ` prefixed to the first line; its `call` is the map's or the reader's. Holds over these planted forms: errors built by `cli::cli_abort()` with bullets, a `parent` and a data field, by `rlang::abort()` plain, and by base `stop()`; warnings of class `nestedtune_partial_summary` and `nestedtune_failed_folds` built by `cli::cli_warn()` with bullets, a `parent` and a data field, and by `rlang::warn()` plain.
+- [ ] AC5: The `nested_workflow_map()` help page states which operations keep the class (rows dropped or reordered, columns added) and which give a tibble (a record column dropped or renamed, no row left, a repeated `wflow_id`, a row not the run's own, a direct `vec_cbind()`), and that a re-signalled condition keeps its original's fields; `NEWS.md` carries a bullet saying the same; `cairn/DESIGN.md`'s Architecture names the set's five doors beside the single class's.
+- [ ] AC6: `devtools::document()` produces no diff; `devtools::test()` is clean; `devtools::check()` reports 0 errors, 0 warnings and no NOTE the default branch's last check did not report.
+
+## Coverage
+
+- AC1 → T1, T2
+- AC2 → T3
+- AC3 → T3
+- AC4 → T4
+- AC5 → T5
+- AC6 → T6
+
+## Tasks
+
+- [ ] T1: Tests first: `tests/testthat/test-nested-results-set-compat.R`, one expected branch per AC1 operation on `wset_results("nested_tune_grid")` (served from the fixture cache; no new fit, the M72 cap lesson), with `expect_kept_set()`/`expect_bare_set()` helpers on the pattern of `test-dplyr-compat.R:48-80`; red before T2.
+- [ ] T2: The rule in `R/nested-results-set.R` — `can_reconstruct_set(data, template)`, `reconstruct_set()`, `bare_set()` — and the five doors `dplyr_reconstruct.nested_results_set()`, `` `[.nested_results_set` ``, `vec_restore.nested_results_set()`, `rbind.nested_results_set()`, `` `names<-.nested_results_set` ``, each routed as `R/nested-results.R:332-373` and `:629-668` route the single class's; grep every holder of each name first (M41 lesson); add `[` and `names<-` to the exemption lists at `test-dots-barrier.R:110,138`; measure `vctrs::vec_cbind()` and `bind_cols()` in each position on the set and record the result in the work log.
+- [ ] T3: AC2 and AC3 tests in `test-nested-workflow-map-readers.R`: the readers, `agreement()`, `summary()`, `extract_workflow()` and `nested_final_fit()` on the named subsets of `wset_three_results()` and `kept_set_results()`; the all-failed subset through `broken_set_results()`; snapshots of `print(x[2, ])` and `print(x[3:2, ])`.
+- [ ] T4: Re-signal: tests planting AC4's forms through `for_workflow()` (in `test-nested-workflow-map-checks.R`), then rewrite `resignal_for_workflow()` (`R/nested-workflow-map.R:259-271`) to prefix the condition's first message line, set `call`, and re-raise the same object with `rlang::cnd_signal()`, keeping `for_workflow()`'s muffle; the M71 partial-warning and failed-fold tests stay as they are.
+- [ ] T5: Docs: a `@section Subsetting:` on `nested_workflow_map()`'s page (`R/nested-workflow-map.R`) with AC5's content, the NEWS bullet, the DESIGN Architecture sentence; `devtools::document()`; `pkgdown::check_pkgdown()`.
+- [ ] T6: `devtools::test()` and `devtools::check()`; `air format --check` on the touched files; the fixture-cache report under `TESTTHAT_PARALLEL=FALSE` showing no fixture the cache did not already hold; NOTEs compared to the default branch's last check.
+
+## Work log
+
+- 2026-09-07: created by /milestone-plan from the ROADMAP candidate row "`nested_results_set` subsetting and re-signalling" (M71 review O2, O3, O5); measured on main at 83362cd: every door keeps the class on any subset, `bind_rows(set, tibble)` keeps it with an `NA` id row, `x[c(1,1), ]` stacks one workflow's metrics twice, `vec_rbind(tibble, set)` is already a bare tibble, and the re-signal drops `parent` and data fields.
+- 2026-09-07: criteria audit ran in full mode ([O] fresh reader, user-facing tier): 16 findings; ten fixed in the wording before the gate (first argument as template, verbs named literally, instrument clauses moved to tasks, AC2 scoped to completed subsets over named subsets, bare-print criterion replaced by the kept subset's print, AC4's fields named positively with a probe matrix over form, docs criterion names content, NOTE bound added); the row rule, the doors breadth and the D-entry went to the gate; the nested double-prefix probe declined as unreachable in package code.
+- 2026-09-07: plan gate chose the template rule (rows identical to the first argument's row of the same id) over a structural check because the structural check passes a row whose `result` was swapped for another run's; falsified by a user needing to bind two map runs into one set.
+- 2026-09-07: plan gate chose keeping the class on a row drop over mirroring D-031's row clause because each row's `nested_results` describes its own run whole and a `filter()` before reading is the use the candidate row named; falsified by a set reader that needs the original row count.
+- 2026-09-07: plan gate chose editing and re-raising the original condition over chaining it as a `parent` because the chain prints the original message twice under a "Caused by" block; falsified by a handler that needs the map's own condition distinct from the workflow's.
+- 2026-09-07: plan gate chose the wider doors table (`bind_cols()` both positions, a minimal-repair second `wflow_id`) over the four named doors because the single class's defects were found at the column-add door across three review rounds (D-035, D-048); falsified by nothing short of a door the table omits shedding wrongly.
+- 2026-09-07: plan gate chose one milestone over splitting the re-signal into M74 because the re-signal is one function and one test file against a second CI matrix; falsified by the PR's review returning on the re-signal alone.
+
+## Decisions
+
+## Review
