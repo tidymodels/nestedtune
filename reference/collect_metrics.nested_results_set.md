@@ -94,7 +94,12 @@ given that id – is refused with class
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md),
 [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md),
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
-[`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+[`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md),
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+for the set's [`summary()`](https://rdrr.io/r/base/summary.html),
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+and
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 
 ## Examples
 

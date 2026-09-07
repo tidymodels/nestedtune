@@ -66,6 +66,11 @@ workflow set through one design and read the results under each id.
   : Print a workflow-set run
 - [`extract_workflow(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/extract_workflow.nested_results_set.md)
   : Extract one workflow of a workflow-set run
+- [`agreement(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+  [`autoplot(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+  [`summary(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+  [`print(`*`<summary.nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+  : Summarize, plot and tabulate a workflow-set run
 
 ## The final model
 

@@ -514,11 +514,86 @@ sections read off one result reads off a row here.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> components rmse    standard   3.15      5  0.385 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> components rsq     standard   0.757     5  0.066<span style="text-decoration: underline;">6</span></span></span></code></pre></div>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> stacks each workflow’s estimate under
-its id, and the other readers stack their tables the same way. What the
-set does not offer is a ranking of its workflows or a fit of the best
-one: choosing among them by these estimates would be a selection the
-outer loop did not nest, and <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says why.
-The final fit for one workflow of the set is
+its id, and the other readers stack their tables the same way. The three
+readers of one result answer on the set too. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>
+summarizes every workflow, one section per id under one heading for the
+set.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results for a workflow set</span> <span style="color: #00BBBB;">─────────────────</span></span></span>
+<span><span class="co">#&gt; Orchestrator: `nested_tune_grid()` (grid search)</span></span>
+<span><span class="co">#&gt; Workflows: 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Workflow </span><span style="color: #0000BB; font-weight: bold;">"forest"</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Outer resamples: 5-fold cross-validation</span></span>
+<span><span class="co">#&gt; Outer folds: 5 requested, 5 completed</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Selected parameters</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> mtry: 8, 5, 8, 5, 5 (folds disagree)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> min_n: 2 (all 5 completed folds agree)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Estimate (5 of 5 outer folds)</span></span>
+<span><span class="co">#&gt; rmse (standard): 2.43</span></span>
+<span><span class="co">#&gt; rsq (standard): 0.847</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Workflow </span><span style="color: #0000BB; font-weight: bold;">"baseline"</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Outer resamples: 5-fold cross-validation</span></span>
+<span><span class="co">#&gt; Outer folds: 5 requested, 5 completed</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Selected parameters</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> No tuned parameters.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Estimate (5 of 5 outer folds)</span></span>
+<span><span class="co">#&gt; rmse (standard): 4.42</span></span>
+<span><span class="co">#&gt; rsq (standard): 0.639</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Workflow </span><span style="color: #0000BB; font-weight: bold;">"components"</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Outer resamples: 5-fold cross-validation</span></span>
+<span><span class="co">#&gt; Outer folds: 5 requested, 5 completed</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Selected parameters</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> num_comp: 1 (all 5 completed folds agree)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Estimate (5 of 5 outer folds)</span></span>
+<span><span class="co">#&gt; rmse (standard): 3.15</span></span>
+<span><span class="co">#&gt; rsq (standard): 0.757</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> A nested estimate describes the tune-and-fit procedure, not a model</span></span>
+<span><span class="co">#&gt;   you can deploy. Build that with `nested_final_fit()`, and report</span></span>
+<span><span class="co">#&gt;   this estimate as what its procedure achieves.</span></span></code></pre></div>
+<p><code><a href="../reference/agreement.html">agreement()</a></code> stacks each workflow’s selection table under
+its id, with the parameter columns ahead of the counts; the baseline
+tuned nothing and has no row.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
+<span><span class="co">#&gt;   wflow_id    mtry min_n num_comp     n  prop</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> forest         5     2       <span style="color: #BB0000;">NA</span>     3   0.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> forest         8     2       <span style="color: #BB0000;">NA</span>     2   0.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> components    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        1     5   1</span></span></code></pre></div>
+<p>The performance view puts the workflows along one axis inside a panel
+per metric, so the estimates are read across it, each marked by a dashed
+rule at that workflow’s <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> mean.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span>, type <span class="op">=</span> <span class="st">"performance"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="tuners_files/figure-html/wset-performance-1.png" class="r-plt" alt="Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate." width="672"></p>
+<p>The parameters view keeps the outer folds on the x axis and gives
+each workflow’s tuned parameter its own panel, labelled by the id, so
+the question of one result, whether the folds agreed, is asked once per
+workflow; the baseline has no panel.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span></code></pre></div>
+<p><img src="tuners_files/figure-html/wset-parameters-1.png" class="r-plt" alt="One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected." width="672"></p>
+<p>What the set does not offer is a ranking of its workflows or a fit of
+the best one: choosing among them by these estimates would be a
+selection the outer loop did not nest, and
+<code><a href="../articles/estimate.html">vignette("estimate")</a></code> says why. The final fit for one
+workflow of the set is
 <code>nested_final_fit(mapped, id = "forest")</code>.</p>
 </div>
 <div class="section level2">

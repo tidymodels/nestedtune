@@ -484,9 +484,108 @@ collect_metrics(mapped)
 
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks each workflow’s estimate under its id, and the other readers
-stack their tables the same way. What the set does not offer is a
-ranking of its workflows or a fit of the best one: choosing among them
-by these estimates would be a selection the outer loop did not nest, and
+stack their tables the same way. The three readers of one result answer
+on the set too. [`summary()`](https://rdrr.io/r/base/summary.html)
+summarizes every workflow, one section per id under one heading for the
+set.
+
+``` r
+
+summary(mapped)
+#> 
+#> ── Nested cross-validation results for a workflow set ─────────────────
+#> Orchestrator: `nested_tune_grid()` (grid search)
+#> Workflows: 3
+#> 
+#> ── Workflow "forest" ──
+#> 
+#> Outer resamples: 5-fold cross-validation
+#> Outer folds: 5 requested, 5 completed
+#> 
+#> ── Selected parameters
+#> ! mtry: 8, 5, 8, 5, 5 (folds disagree)
+#> ✔ min_n: 2 (all 5 completed folds agree)
+#> 
+#> ── Estimate (5 of 5 outer folds)
+#> rmse (standard): 2.43
+#> rsq (standard): 0.847
+#> 
+#> ── Workflow "baseline" ──
+#> 
+#> Outer resamples: 5-fold cross-validation
+#> Outer folds: 5 requested, 5 completed
+#> 
+#> ── Selected parameters
+#> ℹ No tuned parameters.
+#> 
+#> ── Estimate (5 of 5 outer folds)
+#> rmse (standard): 4.42
+#> rsq (standard): 0.639
+#> 
+#> ── Workflow "components" ──
+#> 
+#> Outer resamples: 5-fold cross-validation
+#> Outer folds: 5 requested, 5 completed
+#> 
+#> ── Selected parameters
+#> ✔ num_comp: 1 (all 5 completed folds agree)
+#> 
+#> ── Estimate (5 of 5 outer folds)
+#> rmse (standard): 3.15
+#> rsq (standard): 0.757
+#> 
+#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
+#>   you can deploy. Build that with `nested_final_fit()`, and report
+#>   this estimate as what its procedure achieves.
+```
+
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+stacks each workflow’s selection table under its id, with the parameter
+columns ahead of the counts; the baseline tuned nothing and has no row.
+
+``` r
+
+agreement(mapped)
+#> # A tibble: 3 × 6
+#>   wflow_id    mtry min_n num_comp     n  prop
+#>   <chr>      <int> <int>    <int> <int> <dbl>
+#> 1 forest         5     2       NA     3   0.6
+#> 2 forest         8     2       NA     2   0.4
+#> 3 components    NA    NA        1     5   1
+```
+
+The performance view puts the workflows along one axis inside a panel
+per metric, so the estimates are read across it, each marked by a dashed
+rule at that workflow’s
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+mean.
+
+``` r
+
+autoplot(mapped, type = "performance")
+```
+
+![Two panels, one per metric, with the three workflows along the x axis,
+one point per outer fold and a dashed rule at each workflow's nested
+estimate.](tuners_files/figure-html/wset-performance-1.png)
+
+The parameters view keeps the outer folds on the x axis and gives each
+workflow’s tuned parameter its own panel, labelled by the id, so the
+question of one result, whether the folds agreed, is asked once per
+workflow; the baseline has no panel.
+
+``` r
+
+autoplot(mapped)
+```
+
+![One panel per tuned parameter and workflow, labelled by the workflow
+id, with the outer folds along the x axis and one point per fold at the
+value it selected.](tuners_files/figure-html/wset-parameters-1.png)
+
+What the set does not offer is a ranking of its workflows or a fit of
+the best one: choosing among them by these estimates would be a
+selection the outer loop did not nest, and
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
 says why. The final fit for one workflow of the set is
 `nested_final_fit(mapped, id = "forest")`.

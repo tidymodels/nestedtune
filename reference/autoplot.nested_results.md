@@ -79,7 +79,9 @@ character-valued tuning parameters are ordinary. A fold that selected
 
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
 [`print.nested_results()`](https://nestedtune.tidymodels.org/reference/print.nested_results.md),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+for the same two views of a workflow-set run
 
 ## Examples
 

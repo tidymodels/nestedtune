@@ -67,7 +67,9 @@ and
 
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md),
 [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md),
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+for a workflow-set run
 
 ## Examples
 

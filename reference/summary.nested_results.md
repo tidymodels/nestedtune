@@ -62,7 +62,9 @@ a number rather than a line of text.
 
 [`print.nested_results()`](https://nestedtune.tidymodels.org/reference/print.nested_results.md),
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+for a workflow-set run
 
 ## Examples
 
