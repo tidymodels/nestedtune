@@ -189,7 +189,9 @@ print_failure_count <- function(x) {
 #'
 #' summary(res)
 #'
-#' @seealso [print.nested_results()], [nested_tune_grid()], [collect_metrics()]
+#' @seealso [print.nested_results()], [nested_tune_grid()],
+#'   [collect_metrics()], [summary.nested_results_set()] for a workflow-set
+#'   run
 #' @export
 summary.nested_results <- function(object, ...) {
   rlang::check_dots_empty()

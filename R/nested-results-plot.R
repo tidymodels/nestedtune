@@ -83,7 +83,9 @@
 #' autoplot(res)
 #' autoplot(res, type = "performance")
 #'
-#' @seealso [nested_tune_grid()], [print.nested_results()], [collect_metrics()]
+#' @seealso [nested_tune_grid()], [print.nested_results()],
+#'   [collect_metrics()], [summary.nested_results_set()] for the same two
+#'   views of a workflow-set run
 #' @importFrom rlang .data
 #' @export
 autoplot.nested_results <- function(

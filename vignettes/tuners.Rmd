@@ -387,7 +387,40 @@ collect_metrics(mapped)
 ```
 
 `collect_metrics()` stacks each workflow's estimate under its id, and the
-other readers stack their tables the same way. What the set does not offer
+other readers stack their tables the same way. The three readers of one
+result answer on the set too. `summary()` summarizes every workflow, one
+section per id under one heading for the set.
+
+```{r wset-summary}
+summary(mapped)
+```
+
+`agreement()` stacks each workflow's selection table under its id, with
+the parameter columns ahead of the counts; the baseline tuned nothing and
+has no row.
+
+```{r wset-agreement}
+agreement(mapped)
+```
+
+The performance view puts the workflows along one axis inside a panel per
+metric, so the estimates are read across it, each marked by a dashed rule
+at that workflow's `collect_metrics()` mean.
+
+```{r wset-performance, fig.width = 7, fig.height = 3.6, fig.alt = "Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate."}
+autoplot(mapped, type = "performance")
+```
+
+The parameters view keeps the outer folds on the x axis and gives each
+workflow's tuned parameter its own panel, labelled by the id, so the
+question of one result, whether the folds agreed, is asked once per
+workflow; the baseline has no panel.
+
+```{r wset-parameters, fig.width = 7, fig.height = 3.6, fig.alt = "One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected."}
+autoplot(mapped)
+```
+
+What the set does not offer
 is a ranking of its workflows or a fit of the best one: choosing among them
 by these estimates would be a selection the outer loop did not nest, and
 `vignette("estimate")` says why. The final fit for one workflow of the set

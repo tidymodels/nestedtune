@@ -76,5 +76,6 @@ agreement(res)
 }
 \seealso{
 \code{\link[=summary.nested_results]{summary.nested_results()}}, \code{\link[=autoplot.nested_results]{autoplot.nested_results()}},
-\code{\link[=nested_final_fit]{nested_final_fit()}}
+\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for a workflow-set
+run
 }

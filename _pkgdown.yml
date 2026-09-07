@@ -59,6 +59,7 @@ reference:
   - collect_metrics.nested_results_set
   - print.nested_results_set
   - extract_workflow.nested_results_set
+  - summary.nested_results_set
 
 - title: The final model
   desc: >

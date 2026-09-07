@@ -73,7 +73,8 @@
 #' agreement(res)
 #'
 #' @seealso [summary.nested_results()], [autoplot.nested_results()],
-#'   [nested_final_fit()]
+#'   [nested_final_fit()], [summary.nested_results_set()] for a workflow-set
+#'   run
 #' @export
 agreement <- function(x, ...) {
   UseMethod("agreement")

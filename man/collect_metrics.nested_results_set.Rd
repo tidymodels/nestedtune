@@ -98,5 +98,7 @@ collect_notes(res)
 }
 \seealso{
 \code{\link[=nested_workflow_map]{nested_workflow_map()}}, \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}},
-\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}
+\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}},
+\code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for the set's \code{summary()}, \code{autoplot()}
+and \code{agreement()}
 }

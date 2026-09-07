@@ -1,5 +1,25 @@
 # nestedtune 0.0.0.9000
 
+* `summary()`, `autoplot()` and `agreement()` answer on a
+  `nested_results_set`, each workflow's view keyed by its `wflow_id`.
+  `summary()` returns a list of one `summary.nested_results` per workflow,
+  named by id in the set's order, each identical to the workflow's own
+  summary, with the orchestrator as an attribute; its print shows one
+  heading for the set and one section per workflow, the note on what a
+  nested estimate describes once at the end. `autoplot(type =
+  "performance")` puts the workflows along the x axis inside one panel per
+  metric, one point per completed outer fold and a dashed rule at each
+  workflow's `collect_metrics()` mean, an all-failed workflow keeping an
+  empty slot; `autoplot(type = "parameters")` draws one panel per workflow
+  and tuned parameter, labelled `"<id>: <parameter>"`, over one axis
+  decided across every workflow's values. `agreement()` stacks each
+  workflow's table under `wflow_id` with the parameter columns ahead of `n`
+  and `prop`. A workflow with a failed fold warns once with
+  `nestedtune_partial_summary` naming it; a set with no completed fold is
+  refused by the plots and the table with `nestedtune_no_completed_folds`;
+  a parameter whose id is `wflow_id` is refused with
+  `nestedtune_collect_name_collision`.
+
 * `nested_workflow_map()` runs every workflow of a
   `workflowsets::workflow_set()` through one nested design in one call,
   shaped like `workflowsets::workflow_map()`: `fn` names one of the six

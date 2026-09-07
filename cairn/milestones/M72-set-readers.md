@@ -1,6 +1,6 @@
 # M72: `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Give the three single-workflow readers a set method, so a user comparing workflo
 - [x] T4: Performance view in `R/nested-results-plot.R`: `autoplot.nested_results_set()` dispatching on `check_plot_type()` and `check_any_completed()`'s set counterpart; a per-workflow frame over `per_fold_metrics()` with x levels from `x$wflow_id`, panel names through `timed_metric()`/`metric_panel()`, a segment layer at the mean, the subtitle sentence; a segment reader beside `plot_rules()` in `helper-plot.R`; `ggplot_build()` tests.
 - [x] T5: Parameters view: per-element `selection_frame()` with `"<id>: "` prefixed to the qualified label, panels in set order, pooled `selection_axis()`, `drop = FALSE`, the `nestedtune_no_tuned_parameters` refusal when no element yields a frame; `ggplot_build()` tests on `wset_three()` and `wset_fixed()` results.
 - [x] T6: Fold-state tests for both views (AC4) in `test-nested-results-plot.R`; `vdiffr` doppelgangers for both set views, each rendered and looked at before its snapshot is approved (LESSONS 2026-07-26 plots); `air format --check` on touched files.
-- [ ] T7: Roxygen page `summary.nested_results_set` with `@seealso` from `collect_metrics.nested_results_set`, `summary.nested_results`, `autoplot.nested_results`, `agreement`; `_pkgdown.yml` row after line 61; NEWS bullet; `vignettes/tuners.Rmd` set section (lines 346–395) gains the three readers on `mapped`; `devtools::document()`, `pkgdown::check_pkgdown()`, `devtools::check()`.
+- [x] T7: Roxygen page `summary.nested_results_set` with `@seealso` from `collect_metrics.nested_results_set`, `summary.nested_results`, `autoplot.nested_results`, `agreement`; `_pkgdown.yml` row after line 61; NEWS bullet; `vignettes/tuners.Rmd` set section (lines 346–395) gains the three readers on `mapped`; `devtools::document()`, `pkgdown::check_pkgdown()`, `devtools::check()`.
 
 ## Work log
 
@@ -65,6 +65,8 @@ Give the three single-workflow readers a set method, so a user comparing workflo
 - 2026-09-06: T4 done: `autoplot.nested_results_set()` dispatches on `check_plot_type()`; `plot_set_performance()` stacks each workflow's `per_fold_metrics()` through `stack_set()`, which gained `action`/`noun` words ("plot"/"figure") so both refusals and the all-failed warning are one code path; the rule per workflow is a zero-height `geom_errorbar` under the points (its built `ymin`/`ymax` are what AC2 reads); panels decided over the set's distinct metric keys; `plot_segments()` and a `without` filter on `layer_with()` in `helper-plot.R`; `partial_warnings()` moved to the shared helper; two AC2 tests.
 - 2026-09-06: T5 done: `selection_frame()` split into `selection_rows()` (fold, qualified label, raw values) and the axis step, so `plot_set_selection()` pools every workflow's values before `selection_axis()`; panels `"<id>: <label>"` in stacking order; the no-tuned refusal keeps the single view's class and pointer; the performance subtitle's shortfall sentence moved to its own line after the 7-inch render clipped it; two AC3 tests; all four views rendered to PNG and read.
 - 2026-09-06: T6 done: three AC4 tests over the partial, broken-beside and broken-alone sets for both views (warnings, empty slots, refusal class and call, type check, dots fence) and two `vdiffr` doppelgangers of the three-workflow views, approved after the PNG renders of T4/T5 were read; `air format --check` clean on every touched file.
+- 2026-09-06: T7 done: the `summary.nested_results_set` page written in full, `@seealso` links from the set readers page and the three single-view pages, the `_pkgdown.yml` row after `extract_workflow.nested_results_set`, the NEWS bullet, and the `tuners.Rmd` set section with the four readers on `mapped` (chunks sized 7 by 3.6 as the other vignettes size theirs, after the unsized render came out narrow); the page rendered against the installed branch and its prose read against the output; `pkgdown::check_pkgdown()` clean, `devtools::document()` no diff, `devtools::test()` no failures, `devtools::check()` 0 errors, 0 warnings, 0 notes (9m 38s), `cairn_validate` all checks passed.
+- 2026-09-06: all tasks done; status set to review.
 
 ## Decisions
 
