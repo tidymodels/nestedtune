@@ -821,3 +821,119 @@ test_that("AC3: a set in which no workflow tuned a parameter is refused, pointin
   expect_s3_class(p, "ggplot")
   expect_identical(axis_labels(p, "x"), res$wflow_id)
 })
+
+test_that("AC4: both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
+  skip_if_no_wset_fixture()
+  partial <- wset_three_results(broken = 1L)
+  for (type in c("parameters", "performance")) {
+    warnings <- partial_warnings(p <- autoplot(partial, type = type))
+    expect_length(warnings, 3L)
+    for (i in 1:3) {
+      msg <- conditionMessage(warnings[[i]])
+      expect_match(msg, paste0('^Workflow "', partial$wflow_id[[i]], '"'))
+      expect_match(msg, "This figure covers 1 of 2 outer folds", fixed = TRUE)
+      expect_match(msg, "Fold1", fixed = TRUE)
+      expect_identical(
+        rlang::call_name(conditionCall(warnings[[i]])),
+        "autoplot"
+      )
+    }
+    expect_match(
+      plot_label(p, "subtitle"),
+      "3 of 3 workflows have a failed fold; see summary().",
+      fixed = TRUE
+    )
+  }
+  # The parameters view keeps the failed fold on the axis and draws no
+  # point at it; the performance view draws one point per workflow, metric
+  # and completed fold.
+  p <- suppressWarnings(autoplot(partial))
+  pts <- plot_points(p)
+  expect_identical(axis_labels(p, "x"), c("Fold1", "Fold2"))
+  expect_identical(unique(pts$fold), "Fold2")
+  expect_identical(nrow(pts), 2L)
+  pts <- plot_points(suppressWarnings(autoplot(partial, type = "performance")))
+  expect_identical(nrow(pts), 6L)
+  expect_identical(
+    sort(pts$y),
+    sort(
+      suppressWarnings(collect_metrics(partial, summarize = FALSE))$.estimate
+    )
+  )
+})
+
+test_that("AC4: an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
+  skip_if_no_wset_fixture()
+  beside <- broken_set_results()
+  for (type in c("parameters", "performance")) {
+    warnings <- partial_warnings(p <- autoplot(beside, type = type))
+    expect_length(warnings, 1L)
+    expect_match(
+      conditionMessage(warnings[[1L]]),
+      'Workflow "broken": no outer fold completed',
+      fixed = TRUE
+    )
+    expect_identical(
+      rlang::call_name(conditionCall(warnings[[1L]])),
+      "autoplot"
+    )
+  }
+  # The completing workflow's panel alone, and its points alone.
+  expect_identical(
+    strip_labels(suppressWarnings(autoplot(beside))),
+    "tuned: num_comp"
+  )
+  expect_identical(
+    unique(plot_points(suppressWarnings(autoplot(beside)))$fold),
+    c("Fold1", "Fold2")
+  )
+  expect_identical(
+    unique(
+      plot_points(
+        suppressWarnings(autoplot(beside, type = "performance"))
+      )$fold
+    ),
+    "tuned"
+  )
+
+  alone <- broken_set_results(alone = TRUE)
+  for (type in c("parameters", "performance")) {
+    cnd <- rlang::catch_cnd(autoplot(alone, type = type), "error")
+    expect_s3_class(cnd, "nestedtune_no_completed_folds")
+    expect_match(conditionMessage(cnd), "nothing to plot", fixed = TRUE)
+    expect_match(conditionMessage(cnd), "2 workflows", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "autoplot")
+  }
+})
+
+test_that("AC4: the set's autoplot() refuses a type outside the two, and fences its dots first", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  expect_error(autoplot(res, type = "parameter"), "must be one of")
+  expect_error(autoplot(res, type = "parameter"), "performance")
+  expect_error(autoplot(res, type = 1), "must be one of")
+  expect_error(autoplot(res, type = NA_character_), "must be one of")
+  expect_s3_class(
+    rlang::catch_cnd(autoplot(res, nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+  # The fence before the type check.
+  expect_s3_class(
+    rlang::catch_cnd(autoplot(res, type = "parameter", nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+})
+
+# The pictures of the set views, on the three-workflow fixture: what a reader
+# meets -- the id-prefixed strips, the workflows along one axis under each
+# metric, the rules -- pinned after being rendered and read (M72).
+test_that("both set views look the way they read", {
+  skip_if_not_installed("vdiffr")
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  vdiffr::expect_doppelganger("set parameters, three workflows", autoplot(res))
+  vdiffr::expect_doppelganger(
+    "set performance, three workflows",
+    autoplot(res, type = "performance")
+  )
+})
