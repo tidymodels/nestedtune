@@ -409,6 +409,24 @@ ambiguous_metrics <- function(metric) {
 # across completed folds, as printing takes them, so a parameter only some folds
 # carry is still shown.
 selection_frame <- function(x) {
+  rows <- selection_rows(x)
+  if (is.null(rows)) {
+    return(NULL)
+  }
+  new_tbl(list(
+    fold = factor(rows$fold, levels = rows$fold_levels),
+    parameter = factor(rows$parameter, levels = rows$panels),
+    value = selection_axis(rows$values)
+  ))
+}
+
+# The frame's rows before the axis is decided: the fold and qualified panel
+# label per drawn value, the values themselves as a list, and the levels of
+# each. Split from `selection_frame()` so the set's view (M72) can pool
+# every workflow's values before `selection_axis()` decides one axis for
+# every panel, where a decision per workflow could put a numeric panel
+# beside a discrete one.
+selection_rows <- function(x) {
   ids <- fold_ids(x)
   params <- selection_params(x$.selected[x$.completed])
   if (length(params) == 0L) {
@@ -438,11 +456,13 @@ selection_frame <- function(x) {
   # (M08 review F2).
   panels <- qualify_panels(params, chose, sum(x$.completed), chose_value)
 
-  new_tbl(list(
-    fold = factor(fold, levels = ids),
-    parameter = factor(panels[match(parameter, params)], levels = panels),
-    value = selection_axis(values)
-  ))
+  list(
+    fold = fold,
+    fold_levels = ids,
+    parameter = panels[match(parameter, params)],
+    panels = panels,
+    values = values
+  )
 }
 
 # One fold's value for a parameter, or NULL where it has none.
@@ -601,26 +621,25 @@ plot_set_performance <- function(x, call) {
     ) +
     ggplot2::labs(
       title = "Nested cross-validation estimates across workflows",
+      # Two or three lines, each short enough for a 7-inch device: the
+      # shortfall sentence, when there is one, takes a line of its own.
       subtitle = paste0(
         set_design_line(x),
-        " Each line marks a workflow's nested estimate.\nIt describes the ",
-        "tune-and-fit procedure, not a model you can deploy."
+        " Each line marks a workflow's nested estimate.",
+        set_shortfall_line(x),
+        "\nIt describes the tune-and-fit procedure, not a model you can deploy."
       ),
       x = "Workflow",
       y = "Score on the held-out outer fold"
     )
 }
 
-# How much of the set ran, for the subtitle: the workflow and fold counts,
-# and when any workflow has a failed fold, how many do and where to read
-# which. The per-panel qualifier of the single view is not repeated here --
-# "completed" is per workflow in a set, and `summary()` names each
-# workflow's failed folds.
+# The set's design, for the subtitle: the workflow and fold counts. Every
+# workflow ran the one design, so the fold count is any element's.
 set_design_line <- function(x) {
   k <- nrow(x)
   n <- nrow(x$result[[1L]])
-  short <- sum(vapply(x$result, function(r) !all(r$.completed), logical(1)))
-  line <- paste0(
+  paste0(
     k,
     " workflow",
     if (k == 1L) "" else "s",
@@ -630,21 +649,29 @@ set_design_line <- function(x) {
     if (n == 1L) "" else "s",
     " each."
   )
-  if (short > 0L) {
-    line <- paste0(
-      line,
-      "\n",
-      short,
-      " of ",
-      k,
-      " workflow",
-      if (k == 1L) "" else "s",
-      " ha",
-      if (short == 1L) "s" else "ve",
-      " a failed fold; see summary()."
-    )
+}
+
+# A line of its own when any workflow has a failed fold: how many do, and
+# where to read which. The per-panel qualifier of the single view is not
+# repeated here -- "completed" is per workflow in a set, and `summary()`
+# names each workflow's failed folds. Empty on a set that ran whole.
+set_shortfall_line <- function(x) {
+  k <- nrow(x)
+  short <- sum(vapply(x$result, function(r) !all(r$.completed), logical(1)))
+  if (short == 0L) {
+    return("")
   }
-  line
+  paste0(
+    "\n",
+    short,
+    " of ",
+    k,
+    " workflow",
+    if (k == 1L) "" else "s",
+    " ha",
+    if (short == 1L) "s" else "ve",
+    " a failed fold; see summary()."
+  )
 }
 
 # The distinct (metric, estimator, time) keys of a stacked per-fold table,
@@ -665,4 +692,81 @@ distinct_metric_keys <- function(per_fold) {
 # The rows of a plain-column table, as a tibble.
 take_rows <- function(tbl, rows) {
   new_tbl(lapply(as.list(tbl), function(col) col[rows]))
+}
+
+# The set's parameters view: one panel per workflow and tuned parameter,
+# in set order, labelled by the workflow's id and then the single view's
+# qualified label for that parameter, so a parameter two workflows tune
+# is two panels and a panel some folds did not choose says so as it does
+# for one workflow. The fold labels stay on the x axis: within a workflow
+# the question is the single view's -- did the folds agree? -- asked once
+# per workflow.
+plot_set_selection <- function(x, call) {
+  ids <- x$wflow_id
+  rows <- stack_set(
+    x,
+    function(r) {
+      warn_partial_summary(r, noun = "figure")
+      own <- selection_rows(r)
+      if (is.null(own)) {
+        # A workflow with nothing to tune, or whose completed folds recorded
+        # no selection, contributes no panel.
+        return(new_tbl(list(
+          fold = character(),
+          parameter = character(),
+          value = list()
+        )))
+      }
+      new_tbl(list(
+        fold = own$fold,
+        parameter = own$parameter,
+        value = own$values
+      ))
+    },
+    call = call,
+    action = "plot",
+    noun = "figure"
+  )
+  if (nrow(rows) == 0L) {
+    cli::cli_abort(
+      c(
+        "There are no tuned parameters to plot.",
+        x = "No completed outer fold of any workflow recorded a selected \\
+             parameter.",
+        i = "{.code autoplot(x, type = \"performance\")} draws the outer-fold \\
+             scores instead."
+      ),
+      class = "nestedtune_no_tuned_parameters",
+      call = call
+    )
+  }
+
+  # Panels in set order, then the workflow's parameter order, which is the
+  # order the rows were stacked in; the fold levels are the design's, the
+  # same for every workflow.
+  panels <- unique(paste0(rows$wflow_id, ": ", rows$parameter))
+  frame <- new_tbl(list(
+    fold = factor(rows$fold, levels = fold_ids(x$result[[1L]])),
+    parameter = factor(
+      paste0(rows$wflow_id, ": ", rows$parameter),
+      levels = panels
+    ),
+    value = selection_axis(rows$value)
+  ))
+
+  ggplot2::ggplot(frame, ggplot2::aes(x = .data$fold, y = .data$value)) +
+    ggplot2::geom_point(size = 2.5) +
+    ggplot2::scale_x_discrete(drop = FALSE) +
+    value_scale(frame$value, frame$parameter) +
+    ggplot2::facet_wrap(ggplot2::vars(.data$parameter), scales = "free_y") +
+    ggplot2::labs(
+      title = "Inner-loop selections across outer folds, by workflow",
+      subtitle = paste0(
+        set_design_line(x),
+        set_shortfall_line(x),
+        "\nPoints at different heights in a panel mean the folds disagreed."
+      ),
+      x = "Outer fold",
+      y = "Selected value"
+    )
 }

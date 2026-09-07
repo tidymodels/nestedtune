@@ -753,7 +753,71 @@ test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and th
   expect_match(subtitle, "2 workflows, 2 outer folds each.", fixed = TRUE)
   expect_match(
     subtitle,
-    "1 of 2 workflows has a failed fold; see summary().",
+    "\n1 of 2 workflows has a failed fold; see summary().\n",
     fixed = TRUE
   )
+})
+
+test_that("AC3: the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  p <- expect_no_warning(autoplot(res))
+  expect_s3_class(p, "ggplot")
+
+  # Set order, the id ahead of the single view's label; the fixed workflow
+  # tuned nothing and has no panel.
+  expect_identical(
+    strip_labels(p),
+    c("tuned: num_comp", "threshold: threshold")
+  )
+  expect_identical(axis_labels(p, "x"), c("Fold1", "Fold2"))
+  pts <- plot_points(p)
+  for (i in c(1L, 3L)) {
+    own <- plot_points(autoplot(res$result[[i]]))
+    panel <- paste0(res$wflow_id[[i]], ": ", unique(own$panel))
+    expect_identical(pts$fold[pts$panel == panel], own$fold)
+    expect_identical(pts$y[pts$panel == panel], own$y)
+  }
+  expect_identical(nrow(pts), 4L)
+  # Every value drawn is a number, so the axis is numeric, and the
+  # whole-number panel keeps whole-number breaks beside the continuous one.
+  b <- ggplot2::ggplot_build(p)
+  expect_false(b$layout$panel_scales_y[[1L]]$is_discrete())
+  expect_identical(axis_labels(b, "y", panel = 1L), c("2", "3"))
+  expect_true(any(grepl(".", axis_labels(b, "y", panel = 2L), fixed = TRUE)))
+
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, "3 workflows, 2 outer folds each.", fixed = TRUE)
+  expect_match(subtitle, "folds disagreed", fixed = TRUE)
+  expect_identical(plot_label(p, "x"), "Outer fold")
+
+  # The axis is decided over the pooled values: one workflow's character
+  # selection puts every panel on a discrete axis, as one parameter's does
+  # in the single view.
+  mixed <- res
+  mixed$result[[3L]]$.selected <- lapply(
+    mixed$result[[3L]]$.selected,
+    function(s) {
+      s$threshold <- paste0("t", s$threshold)
+      s
+    }
+  )
+  b <- ggplot2::ggplot_build(autoplot(mixed))
+  expect_true(b$layout$panel_scales_y[[1L]]$is_discrete())
+  expect_true(b$layout$panel_scales_y[[2L]]$is_discrete())
+  expect_identical(plot_points(autoplot(mixed))$fold, pts$fold)
+})
+
+test_that("AC3: a set in which no workflow tuned a parameter is refused, pointing at the other view", {
+  skip_if_no_wset_fixture("nested_fit_resamples")
+  res <- wset_results("nested_fit_resamples")
+  cnd <- rlang::catch_cnd(autoplot(res), "error")
+  expect_s3_class(cnd, "nestedtune_no_tuned_parameters")
+  expect_match(conditionMessage(cnd), "no tuned parameters", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "type = \"performance\"", fixed = TRUE)
+  expect_identical(rlang::call_name(conditionCall(cnd)), "autoplot")
+  # The view it points at draws the set.
+  p <- autoplot(res, type = "performance")
+  expect_s3_class(p, "ggplot")
+  expect_identical(axis_labels(p, "x"), res$wflow_id)
 })
