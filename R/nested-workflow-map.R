@@ -252,22 +252,24 @@ for_workflow <- function(id, call, expr) {
 }
 
 # The re-signal itself, shared with the set's readers (R/nested-results-set.R).
-# The whole formatted message travels, with cli's leading bullet glyph on
-# the first line dropped so the id reads as the head of the sentence; the
-# package's own classes travel, rlang's and base R's are re-added by the
-# signaller.
+# The original condition object travels whole (M73): its class vector, its
+# `parent` and the cause chain that prints under it, its bullets, its
+# format flag and every data field a handler reads, with the workflow's id
+# written in front of the first line of its header and the caller's call
+# in place of the element's. A rebuilt condition -- `rlang::abort()` on the
+# formatted text, what M71 did -- kept the class and the text and lost the
+# rest. `cnd_signal()` raises the object as it is: a warning is raised with
+# `warning()`, an error through rlang's own signaller, which adds a trace
+# to one that has none.
 resignal_for_workflow <- function(cnd, id, call) {
-  own <- setdiff(
-    class(cnd),
-    c("rlang_error", "rlang_warning", "error", "warning", "condition")
+  cnd$message[[1L]] <- paste0(
+    cli::format_inline("Workflow {.val {id}}: "),
+    cnd$message[[1L]]
   )
-  message <- sub("^[!] ", "", conditionMessage(cnd))
-  message <- paste0(cli::format_inline("Workflow {.val {id}}: "), message)
-  if (inherits(cnd, "warning")) {
-    rlang::warn(message, class = own, call = call)
-  } else {
-    rlang::abort(message, class = own, call = call)
-  }
+  # The callers hand their frame as `call`, which `rlang::abort()` would
+  # resolve to the frame's call; assigned directly it needs the same step.
+  cnd$call <- rlang::error_call(call)
+  rlang::cnd_signal(cnd)
 }
 
 # The map's counterpart of `restore_rng()`: the caller's state goes back
