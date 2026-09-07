@@ -100,3 +100,4 @@ Independent review (step 5, three lenses, fresh context). [S] blame-history: no 
 Fix-now edits re-verified: the four touched test files 0 failures under `NOT_CRAN=true`, `document()` no diff, `check_pkgdown()` clean, `air format` clean.
 - 2026-09-06: step-7 approval: PR #82 approved for merge.
 - 2026-09-06: CI wait on PR #82 hit the harness ceiling with the seven check legs still pending (format-suggest and pkgdown green); watcher stopped, not merged; resume with /milestone-review M72 (route c).
+- 2026-09-06: resume (route c): PR #82 open, CI red on the ubuntu devel leg alone — its check step hit the 30-minute cap inside the vignette rebuild after the tests passed in 20 minutes (18 on `main`, which finished about 90 seconds under the cap); the user chose raising that leg's step cap to 40 over trimming the suite or re-running; yaml comment and PROFILE updated, candidate row added for the suite speed-up; re-approval to follow on green CI.
