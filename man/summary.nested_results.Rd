@@ -70,5 +70,7 @@ summary(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=print.nested_results]{print.nested_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=collect_metrics]{collect_metrics()}}
+\code{\link[=print.nested_results]{print.nested_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
+\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for a workflow-set
+run
 }

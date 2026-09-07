@@ -10,7 +10,7 @@
 # labels, so the lookup is what turns a position back into a fold.
 plot_points <- function(p) {
   b <- ggplot2::ggplot_build(p)
-  d <- layer_with(b, "x")
+  d <- layer_with(b, "x", without = "ymin")
   data.frame(
     fold = axis_labels(b, "x")[as.integer(d$x)],
     y = d$y,
@@ -30,11 +30,32 @@ plot_rules <- function(p) {
   )
 }
 
-# The first built layer carrying a given column. Named by what it carries rather
-# than by position, so adding a layer beneath the points does not silently move
-# every assertion onto the wrong one.
-layer_with <- function(b, column) {
-  hit <- vapply(b$data, function(d) column %in% names(d), logical(1))
+# The horizontal rules of the set's performance view (M72): one zero-height
+# errorbar per workflow and panel, keyed by the workflow label its x position
+# stands for.
+plot_segments <- function(p) {
+  b <- ggplot2::ggplot_build(p)
+  d <- layer_with(b, "ymin")
+  data.frame(
+    x = axis_labels(b, "x")[as.integer(d$x)],
+    ymin = d$ymin,
+    ymax = d$ymax,
+    panel = panel_labels(b)[as.integer(d$PANEL)],
+    stringsAsFactors = FALSE
+  )
+}
+
+# The first built layer carrying a given column, and not carrying `without`.
+# Named by what it carries rather than by position, so adding a layer beneath
+# the points does not silently move every assertion onto the wrong one; the
+# set's rules carry an `x` beside the points' and are told apart by their
+# `ymin`.
+layer_with <- function(b, column, without = NULL) {
+  hit <- vapply(
+    b$data,
+    function(d) column %in% names(d) && !any(without %in% names(d)),
+    logical(1)
+  )
   if (!any(hit)) {
     testthat::fail(paste0("no built layer carries a `", column, "` column"))
   }

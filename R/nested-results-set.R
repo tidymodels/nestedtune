@@ -78,7 +78,9 @@
 #' collect_notes(res)
 #'
 #' @seealso [nested_workflow_map()], [collect_metrics.nested_results()],
-#'   [collect_selections()], [collect_predictions.nested_results()]
+#'   [collect_selections()], [collect_predictions.nested_results()],
+#'   [summary.nested_results_set()] for the set's `summary()`, `autoplot()`
+#'   and `agreement()`
 #' @name collect_metrics.nested_results_set
 NULL
 
@@ -144,7 +146,19 @@ collect_extracts.nested_results_set <- function(x, ...) {
 # is re-signalled naming the workflow (`resignal_for_workflow()`,
 # R/nested-workflow-map.R), so the set's conditions say which workflow they
 # are about. The bind is vctrs', as `stack_fold_column()` binds folds.
-stack_set <- function(x, reader, call, completed_only = TRUE) {
+#
+# `action` and `noun` are the words the two refusals say -- "collect" and
+# "table" for the readers, "plot" and "figure" for the set's `autoplot()`
+# views, which stack their per-workflow frames through here (M72) so the
+# fold-state rules are one code path.
+stack_set <- function(
+  x,
+  reader,
+  call,
+  completed_only = TRUE,
+  action = "collect",
+  noun = "table"
+) {
   ids <- x$wflow_id
   results <- x$result
   which <- seq_along(ids)
@@ -155,7 +169,7 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
       cli::cli_abort(
         c(
           "No outer fold of any workflow completed, so there is nothing \\
-           to collect.",
+           to {action}.",
           x = "All {n} workflow{?s} failed on every outer fold.",
           i = "Call {.fn collect_notes} on the set, or {.fn summary} on \\
                each {.code x$result[[i]]}, for the stage each fold failed at."
@@ -168,7 +182,7 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
       cli::cli_warn(
         c(
           "!" = "Workflow {.val {ids[[i]]}}: no outer fold completed, so \\
-                 this table leaves it out.",
+                 this {noun} leaves it out.",
           i = "Its {.code .notes} say what went wrong."
         ),
         class = "nestedtune_partial_summary",
@@ -198,6 +212,106 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
   })
   new_tbl(as.list(vctrs::vec_rbind(!!!tables)))
 }
+
+#' Summarize, plot and tabulate a workflow-set run
+#'
+#' @description
+#' The three readers of one workflow's run answer on a `nested_results_set`,
+#' what [nested_workflow_map()] returns, each workflow's view keyed by its
+#' `wflow_id`. `summary()` summarizes every workflow; `autoplot()` draws
+#' the two views of [autoplot.nested_results()] across the workflows; and
+#' [agreement()] stacks each workflow's selection table under its id.
+#'
+#' @param x,object A `nested_results_set` from [nested_workflow_map()]; for
+#'   the print method, the `summary.nested_results_set` that `summary()`
+#'   returns.
+#' @param type Which view to draw: `"parameters"` (the default) or
+#'   `"performance"`, as on [autoplot.nested_results()].
+#' @param ... Not used; must be empty. An argument passed here is an error
+#'   rather than silently ignored.
+#'
+#' @return
+#' `summary()` returns a `summary.nested_results_set`: a list of one
+#' [summary.nested_results()] object per workflow, named by `wflow_id` in
+#' the set's order, each the summary of that workflow's run called alone,
+#' with the orchestrator's name as the list's `fn` attribute. Its print
+#' shows the orchestrator and the workflow count, then one section per
+#' workflow holding that run's design, failed folds, selected parameters
+#' and estimate, and the note on what a nested estimate describes once at
+#' the end.
+#'
+#' `autoplot()` returns a `ggplot` object. Under `type = "performance"`
+#' the workflows stand along the x axis inside one panel per metric, one
+#' point per completed outer fold's score and a dashed rule at each
+#' workflow's nested estimate, the value [collect_metrics()] reports for it
+#' on the set; the panels are named as the single view names them. Under
+#' `type = "parameters"` there is one panel per workflow and tuned
+#' parameter, in the set's order, labelled by the id and then the single
+#' view's label for that parameter, with the outer folds along the x axis,
+#' so each panel asks the single view's question of one workflow. The
+#' selected-value axis is decided over every workflow's values at once:
+#' numeric when all are numbers, discrete otherwise. A workflow with
+#' nothing to tune contributes no panel.
+#'
+#' `agreement()` returns a tibble: `wflow_id`, then one column per
+#' parameter any workflow's completed fold selected, then `n` and `prop`,
+#' with each workflow's rows as [agreement()] on that run alone gives them,
+#' in the set's order, `NA` in a column that workflow's run does not
+#' tune; inside a workflow's own rows `NA` keeps the meaning [agreement()]
+#' gives it there, a fold that recorded no value for the parameter. A
+#' workflow with nothing to tune contributes no row.
+#'
+#' @details
+#' The three readers follow the fold-state rules of the set's
+#' [collect_metrics()][collect_metrics.nested_results_set]. A workflow in
+#' which some outer folds failed is read over the folds that ran, with one
+#' warning of class `nestedtune_partial_summary` naming it. A workflow in
+#' which no fold completed is still summarized by `summary()`, which
+#' describes a failed run rather than refusing; the performance view keeps
+#' its slot on the x axis and draws nothing for it, the parameters view
+#' draws no panel for it, and `agreement()` leaves it out, each warning
+#' once naming it. A set in which
+#' no workflow completed a fold is refused by the plots and by
+#' `agreement()` with class `nestedtune_no_completed_folds`. A set in which
+#' no workflow's completed fold recorded a selected parameter is refused
+#' under `type = "parameters"` with class `nestedtune_no_tuned_parameters`.
+#'
+#' The performance view's subtitle names the workflow and fold counts and,
+#' when any workflow has a failed fold, how many do; `summary()` names the
+#' folds. A tuned parameter whose id is `wflow_id` cannot be tabulated
+#' beside the set's own column and is refused with class
+#' `nestedtune_collect_name_collision`; one whose id is `n` or `prop` is
+#' refused as [agreement()] refuses it, the workflow named in front.
+#'
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick", "workflowsets"))
+#' data(mtcars)
+#'
+#' rec <- recipes::recipe(mpg ~ ., data = mtcars)
+#' tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
+#' wset <- workflowsets::workflow_set(
+#'   preproc = list(pca = tuned, none = rec),
+#'   models = list(lm = parsnip::linear_reg())
+#' )
+#'
+#' set.seed(1)
+#' folds <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 3),
+#'   inside = rsample::vfold_cv(v = 3)
+#' )
+#'
+#' set.seed(2)
+#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+#'
+#' summary(res)
+#' agreement(res)
+#' autoplot(res)
+#' autoplot(res, type = "performance")
+#'
+#' @seealso [collect_metrics.nested_results_set()], [summary.nested_results()],
+#'   [autoplot.nested_results()], [agreement()], [nested_workflow_map()]
+#' @name summary.nested_results_set
+NULL
 
 #' Print a workflow-set run
 #'

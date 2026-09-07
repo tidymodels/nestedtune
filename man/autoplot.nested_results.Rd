@@ -82,5 +82,7 @@ autoplot(res, type = "performance")
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=print.nested_results]{print.nested_results()}}, \code{\link[=collect_metrics]{collect_metrics()}}
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=print.nested_results]{print.nested_results()}},
+\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for the same two
+views of a workflow-set run
 }

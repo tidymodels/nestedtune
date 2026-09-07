@@ -355,3 +355,123 @@ test_that("a partial run with nothing tuned still warns, then gives no rows", {
   expect_named(tab, c("n", "prop"))
   expect_identical(nrow(tab), 0L)
 })
+
+# ---- the set method (M72, AC5) -----------------------------------------------
+
+# One element's block of the stacked table: its rows, less `wflow_id` and
+# the columns the element's own table lacks, in the element's column order.
+set_block <- function(stacked, id, element_tbl) {
+  rows <- stacked$wflow_id == id
+  cols <- lapply(names(element_tbl), function(nm) stacked[[nm]][rows])
+  names(cols) <- names(element_tbl)
+  nestedtune:::new_tbl(cols)
+}
+
+test_that("AC5: agreement() on a set stacks each element's table under wflow_id, parameters before the counts", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  tab <- agreement(res)
+
+  expect_s3_class(tab, "tbl_df")
+  # `wflow_id`, the union of the elements' parameters in set order, then the
+  # counts: the bind alone would put `threshold` after `prop`.
+  expect_named(tab, c("wflow_id", "num_comp", "threshold", "n", "prop"))
+  # Rows in set order over the workflows with a row; the fixed workflow
+  # tuned nothing and contributes none.
+  expect_identical(unique(tab$wflow_id), c("tuned", "threshold"))
+  expect_false("fixed" %in% tab$wflow_id)
+  expect_identical(nrow(agreement(res$result[[2L]])), 0L)
+
+  # Each block is the element's own table: the parameter ids are disjoint,
+  # so the columns an element lacks are the other element's, NA throughout.
+  for (i in c(1L, 3L)) {
+    id <- res$wflow_id[[i]]
+    own <- agreement(res$result[[i]])
+    expect_identical(set_block(tab, id, own), own, info = id)
+  }
+  expect_true(all(is.na(tab$threshold[tab$wflow_id == "tuned"])))
+  expect_true(all(is.na(tab$num_comp[tab$wflow_id == "threshold"])))
+  # The fixture discriminates: the first workflow's folds disagreed.
+  expect_gt(nrow(tab[tab$wflow_id == "tuned", ]), 1L)
+})
+
+test_that("AC5: a set's partial and all-failed workflows are warned and refused as the readers warn and refuse", {
+  skip_if_no_wset_fixture()
+  partial <- wset_three_results(broken = 1L)
+  warnings <- list()
+  tab <- withCallingHandlers(
+    agreement(partial),
+    nestedtune_partial_summary = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  # Once per workflow, the id in front, the table's own words after, under
+  # the generic as the call.
+  expect_length(warnings, 3L)
+  for (i in 1:3) {
+    msg <- conditionMessage(warnings[[i]])
+    expect_match(msg, paste0('^Workflow "', partial$wflow_id[[i]], '"'))
+    expect_match(msg, "This table covers 1 of 2 outer folds", fixed = TRUE)
+    expect_identical(
+      rlang::call_name(conditionCall(warnings[[i]])),
+      "agreement"
+    )
+  }
+  expect_identical(sum(tab$n[tab$wflow_id == "tuned"]), 1L)
+
+  # An all-failed workflow beside a completing one is left out with the
+  # warning naming it; a set with no completed fold is refused.
+  beside <- broken_set_results()
+  cnd <- rlang::catch_cnd(agreement(beside), "nestedtune_partial_summary")
+  expect_match(conditionMessage(cnd), 'Workflow "broken"', fixed = TRUE)
+  expect_match(conditionMessage(cnd), "no outer fold completed", fixed = TRUE)
+  tab <- suppressWarnings(agreement(beside))
+  expect_identical(unique(tab$wflow_id), "tuned")
+
+  alone <- broken_set_results(alone = TRUE)
+  cnd <- rlang::catch_cnd(agreement(alone), "error")
+  expect_s3_class(cnd, "nestedtune_no_completed_folds")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "agreement")
+})
+
+test_that("AC5: a parameter whose id is wflow_id, n or prop is refused naming the workflow", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+
+  # Planted on the first element's selections: the element's own method
+  # refuses `n` and `prop`, the stacking refuses `wflow_id`.
+  plant <- function(id) {
+    planted <- res
+    planted$result[[1L]]$.selected <- lapply(
+      planted$result[[1L]]$.selected,
+      function(s) {
+        names(s)[names(s) == "num_comp"] <- id
+        s
+      }
+    )
+    planted
+  }
+  for (id in c("n", "prop")) {
+    cnd <- rlang::catch_cnd(agreement(plant(id)), "error")
+    expect_s3_class(cnd, "nestedtune_agreement_name_collision")
+    expect_match(conditionMessage(cnd), '^Workflow "tuned"', info = id)
+    expect_match(conditionMessage(cnd), paste0('"', id, '"'), info = id)
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "agreement",
+      info = id
+    )
+  }
+  cnd <- rlang::catch_cnd(agreement(plant("wflow_id")), "error")
+  expect_s3_class(cnd, "nestedtune_collect_name_collision")
+  expect_match(conditionMessage(cnd), 'workflow "tuned"', fixed = TRUE)
+  # The control: the unplanted set tabulates.
+  expect_no_error(agreement(res))
+
+  # The fence comes first.
+  expect_s3_class(
+    rlang::catch_cnd(agreement(res, nonesuch = 1)),
+    "rlib_error_dots_nonempty"
+  )
+})
