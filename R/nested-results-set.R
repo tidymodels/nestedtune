@@ -199,6 +199,19 @@ stack_set <- function(x, reader, call, completed_only = TRUE) {
   new_tbl(as.list(vctrs::vec_rbind(!!!tables)))
 }
 
+#' Summarize, plot and tabulate a workflow-set run
+#'
+#' @description
+#' The three single-workflow readers answer on a `nested_results_set`,
+#' each workflow's view keyed by its `wflow_id`.
+#'
+#' @param x,object A `nested_results_set` from [nested_workflow_map()].
+#' @param ... Not used; must be empty. An argument passed here is an error
+#'   rather than silently ignored.
+#'
+#' @name summary.nested_results_set
+NULL
+
 #' Print a workflow-set run
 #'
 #' Shows the orchestrator the set ran through, how many workflows it holds,

@@ -139,6 +139,23 @@ agreement.nested_results <- function(x, ...) {
   new_tbl(out)
 }
 
+#' @rdname summary.nested_results_set
+#' @export
+agreement.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  # Each element's table, the id in front, bound in set order over the
+  # union of the elements' parameter columns; a parameter named `n` or
+  # `prop` is refused by the element's own method, and `wflow_id` by the
+  # stacking, each naming the workflow (R/nested-results-set.R). The bind
+  # puts a later element's parameter after the first element's counts, so
+  # the columns are put back in the single table's order: the parameters,
+  # then the counts.
+  out <- stack_set(x, agreement, call = rlang::current_env())
+  counts <- c("n", "prop")
+  params <- setdiff(names(out), c("wflow_id", counts))
+  new_tbl(as.list(out)[c("wflow_id", params, counts)])
+}
+
 # The refusal for every object this generic has no method for, shaped like
 # abort_no_extract_method() so the two families cannot drift apart in what
 # they say. Classed, so a caller can catch it as this package's own rather than
