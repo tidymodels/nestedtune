@@ -65,7 +65,35 @@
 #' workflow lost folds. An error an orchestrator raises for one workflow --
 #' a `grid` that names a parameter that workflow does not tune, a control of
 #' the wrong class -- is raised the same way, when that workflow's turn
-#' comes; the workflows before it have run by then.
+#' comes; the workflows before it have run by then. What is raised is the
+#' original condition object: its class vector, its `parent` and the cause
+#' chain printed under it, its bullets and every field a handler reads come
+#' through unchanged, with `Workflow "<id>": ` written in front of the
+#' first line of its message and this function, or the reader, as its
+#' call.
+#'
+#' @section Subsetting:
+#'
+#' Each row's `nested_results` describes its own run whole, so a subset of
+#' the set that keeps rows of the run answers for the workflows it holds.
+#' An operation keeps the class and the `fn` attribute when its result
+#' holds `wflow_id`, `workflow` and `result` under those names with none
+#' repeated, at least one row, no `wflow_id` repeated, and each row's three
+#' values identical to the row of that id in the operation's first
+#' data-frame argument: rows dropped or reordered and columns added keep
+#' the class, so `dplyr::filter()`, `dplyr::arrange()`, `dplyr::mutate()`,
+#' `dplyr::bind_cols()` with the set first, `x[i, ]` and
+#' `vctrs::vec_slice()` on a kept subset hand back a set whose readers,
+#' `summary()`, `print()`, `extract_workflow()` and [nested_final_fit()]
+#' answer for the rows in hand alone. Anything else comes back a plain
+#' tibble without the attribute: a record column dropped or renamed, no
+#' row left, a `wflow_id` repeated (`x[c(1, 1), ]`, `rbind(x, x)`,
+#' `dplyr::bind_rows(x, x)`), a row that is not the run's own (a
+#' `result` replaced, a row bound in from another set or a bare table),
+#' `dplyr::bind_cols()` with a table first, and a direct
+#' `vctrs::vec_cbind()`, which finalizes to a tibble before the rule is
+#' asked. Replacing a value under the class with `$<-` or `[[<-` is not
+#' checked, as it is not on a `nested_results`.
 #'
 #' @param object A [workflowsets::workflow_set()]: one workflow per row,
 #'   untrained, with `wflow_id`, `info`, `option` and `result` columns as

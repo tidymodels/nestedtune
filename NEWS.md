@@ -1,5 +1,19 @@
 # nestedtune 0.0.0.9000
 
+* A `nested_results_set` keeps its class only while every row is one of
+  the run's own workflows. Rows dropped or reordered and columns added keep
+  the class, so `dplyr::filter()`, `dplyr::arrange()`, `dplyr::mutate()`,
+  `dplyr::bind_cols()` with the set first, `x[i, ]` and
+  `vctrs::vec_slice()` hand back a set whose readers, `summary()`,
+  `print()`, `extract_workflow()` and `nested_final_fit()` answer for the
+  rows in hand alone; a record column dropped or renamed, no row left, a
+  repeated `wflow_id`, a row not the run's own, `dplyr::bind_cols()` with
+  a table first and a direct `vctrs::vec_cbind()` give a plain tibble
+  without the `fn` attribute. A warning or error raised for one workflow
+  is the original condition object, its class vector, `parent`, bullets
+  and data fields kept, with `Workflow "<id>": ` in front of the first
+  line of its message.
+
 * `summary()`, `autoplot()` and `agreement()` answer on a
   `nested_results_set`, each workflow's view keyed by its `wflow_id`.
   `summary()` returns a list of one `summary.nested_results` per workflow,

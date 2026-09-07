@@ -110,7 +110,37 @@ condition class, so a user who never calls a reader still learns which
 workflow lost folds. An error an orchestrator raises for one workflow --
 a \code{grid} that names a parameter that workflow does not tune, a control of
 the wrong class -- is raised the same way, when that workflow's turn
-comes; the workflows before it have run by then.
+comes; the workflows before it have run by then. What is raised is the
+original condition object: its class vector, its \code{parent} and the cause
+chain printed under it, its bullets and every field a handler reads come
+through unchanged, with \verb{Workflow "<id>": } written in front of the
+first line of its message and this function, or the reader, as its
+call.
+}
+
+\section{Subsetting}{
+
+
+Each row's \code{nested_results} describes its own run whole, so a subset of
+the set that keeps rows of the run answers for the workflows it holds.
+An operation keeps the class and the \code{fn} attribute when its result
+holds \code{wflow_id}, \code{workflow} and \code{result} under those names with none
+repeated, at least one row, no \code{wflow_id} repeated, and each row's three
+values identical to the row of that id in the operation's first
+data-frame argument: rows dropped or reordered and columns added keep
+the class, so \code{dplyr::filter()}, \code{dplyr::arrange()}, \code{dplyr::mutate()},
+\code{dplyr::bind_cols()} with the set first, \code{x[i, ]} and
+\code{vctrs::vec_slice()} on a kept subset hand back a set whose readers,
+\code{summary()}, \code{print()}, \code{extract_workflow()} and \code{\link[=nested_final_fit]{nested_final_fit()}}
+answer for the rows in hand alone. Anything else comes back a plain
+tibble without the attribute: a record column dropped or renamed, no
+row left, a \code{wflow_id} repeated (\code{x[c(1, 1), ]}, \code{rbind(x, x)},
+\code{dplyr::bind_rows(x, x)}), a row that is not the run's own (a
+\code{result} replaced, a row bound in from another set or a bare table),
+\code{dplyr::bind_cols()} with a table first, and a direct
+\code{vctrs::vec_cbind()}, which finalizes to a tibble before the rule is
+asked. Replacing a value under the class with \verb{$<-} or \verb{[[<-} is not
+checked, as it is not on a \code{nested_results}.
 }
 
 \examples{

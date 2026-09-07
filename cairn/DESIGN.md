@@ -354,7 +354,15 @@ the elements with a completed fold, warns for one without, refuses a set
 with none under `nestedtune_no_completed_folds`, re-signals each element's
 partial-run warning and column-not-saved refusal with its id, and binds
 under `wflow_id` with `vctrs::vec_rbind()`; `collect_notes()` reads every
-element.
+element. The set keeps its class through the same five doors as the single
+class — `dplyr_reconstruct()`, `[`, `vec_restore()`, base `rbind()` and
+`names<-` — each routed to one rule, `reconstruct_set()` beside
+`reconstruct_results()`: the set's keeps the class while every row is one
+of the first argument's own under its `wflow_id`, rows dropped or reordered
+included (D-059), where the single class's sheds on any row change
+(D-031); neither registers a `vec_ptype2()`/`vec_cast()` lattice for the
+set. The re-signal raises the element's own condition object, its first
+message line prefixed and its call replaced (`resignal_for_workflow()`, M73).
 
 `new_nested_results()` (`R/nested-results.R`) assembles one row per outer fold
 — split, id, metrics, selected parameters, the inner tuning run's
