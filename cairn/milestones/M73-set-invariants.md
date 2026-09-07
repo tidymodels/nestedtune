@@ -1,6 +1,6 @@
 # M73: A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -44,7 +44,7 @@ Make a subset of a workflow-set result answer only for the workflows it holds, s
 - [x] T3: AC2 and AC3 tests in `test-nested-workflow-map-readers.R`: the readers, `agreement()`, `summary()`, `extract_workflow()` and `nested_final_fit()` on the named subsets of `wset_three_results()` and `kept_set_results()`; the all-failed subset through `broken_set_results()`; snapshots of `print(x[2, ])` and `print(x[3:2, ])`.
 - [x] T4: Re-signal: tests planting AC4's forms through `for_workflow()` (in `test-nested-workflow-map-checks.R`), then rewrite `resignal_for_workflow()` (`R/nested-workflow-map.R:259-271`) to prefix the condition's first message line, set `call`, and re-raise the same object with `rlang::cnd_signal()`, keeping `for_workflow()`'s muffle; the M71 partial-warning and failed-fold tests stay as they are.
 - [x] T5: Docs: a `@section Subsetting:` on `nested_workflow_map()`'s page (`R/nested-workflow-map.R`) with AC5's content, the NEWS bullet, the DESIGN Architecture sentence; `devtools::document()`; `pkgdown::check_pkgdown()`.
-- [ ] T6: `devtools::test()` and `devtools::check()`; `air format --check` on the touched files; the fixture-cache report under `TESTTHAT_PARALLEL=FALSE` showing no fixture the cache did not already hold; NOTEs compared to the default branch's last check.
+- [x] T6: `devtools::test()` and `devtools::check()`; `air format --check` on the touched files; the fixture-cache report under `TESTTHAT_PARALLEL=FALSE` showing no fixture the cache did not already hold; NOTEs compared to the default branch's last check.
 
 ## Work log
 
@@ -67,6 +67,8 @@ Make a subset of a workflow-set result answer only for the workflows it holds, s
 - 2026-09-07: T4 — seven planted forms through `for_workflow()` in `test-nested-workflow-map-checks.R`, red on every form under the M71 re-signal (`parent` and the data field dropped, `rlang_error` added to a base error); `resignal_for_workflow()` now prefixes the header field, sets `call` through `rlang::error_call()` (the callers pass their frame, which a direct assignment left as an environment) and re-raises with `rlang::cnd_signal()`; the M71 partial-warning and failed-fold tests and every snapshot unchanged.
 
 - 2026-09-07: T5 — `@section Subsetting:` on `nested_workflow_map()`'s page and a sentence added to its warnings section, the NEWS bullet, the DESIGN Architecture sentence naming the set's five doors beside the single class's; every operation the page names measured in `test-nested-results-set-compat.R`, and `$<-`/`[[<-` on a record column measured keeping the class (2026-09-07); `devtools::document()` rewrote `nested_workflow_map.Rd` only; `pkgdown::check_pkgdown()` clean.
+
+- 2026-09-07: T6 — `devtools::test()` under `TESTTHAT_PARALLEL=FALSE`: 0 failures, 0 warnings, 0 skips; fixture-cache report 149 signatures, 149 builds, 485 requests, and the branch adds no `memoised()` call site (`git diff main -- tests`); `devtools::check()` 0 errors, 0 warnings, 0 notes in 11m27s, against the 0/0/0 M72's review recorded for the default branch; `air format --check` clean on every touched R file. Status → review.
 
 ## Decisions
 
