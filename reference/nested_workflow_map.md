@@ -137,7 +137,52 @@ same condition class, so a user who never calls a reader still learns
 which workflow lost folds. An error an orchestrator raises for one
 workflow – a `grid` that names a parameter that workflow does not tune,
 a control of the wrong class – is raised the same way, when that
-workflow's turn comes; the workflows before it have run by then.
+workflow's turn comes; the workflows before it have run by then. What is
+raised is the original condition object: its class vector, its `parent`
+and the cause chain printed under it, its bullets and every field a
+handler reads come through unchanged, with `Workflow "<id>": ` written
+in front of the first line of its message and this function, or the
+reader, as its call.
+
+## Subsetting
+
+Each row's `nested_results` describes its own run whole, so a subset of
+the set that keeps rows of the run answers for the workflows it holds.
+An operation keeps the class and the `fn` attribute when its result
+holds `wflow_id`, `workflow` and `result` under those names with none
+repeated, at least one row, no `wflow_id` repeated, and each row's three
+values identical to the row of that id in the operation's first
+data-frame argument: rows dropped or reordered and columns added keep
+the class, so
+[`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+[`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html),
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+[`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+with the set first, `x[i, ]` and
+[`vctrs::vec_slice()`](https://vctrs.r-lib.org/reference/vec_slice.html)
+on a kept subset hand back a set whose readers,
+[`summary()`](https://rdrr.io/r/base/summary.html),
+[`print()`](https://rdrr.io/r/base/print.html),
+[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+answer for the rows in hand alone. Anything else comes back a plain
+tibble without the attribute: a record column dropped or renamed, no row
+left, a `wflow_id` repeated (`x[c(1, 1), ]`, `rbind(x, x)`,
+`dplyr::bind_rows(x, x)`), a row that is not the run's own (a `result`
+replaced, a row bound in from another set or a bare table),
+[`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+with a table first, and a direct
+[`vctrs::vec_cbind()`](https://vctrs.r-lib.org/reference/vec_bind.html),
+which finalizes to a tibble before the rule is asked. Replacing a value
+under the class with `$<-` or `[[<-` is not checked, as it is not on a
+`nested_results`.
+[`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
+[`dplyr::rowwise()`](https://dplyr.tidyverse.org/reference/rowwise.html)
+and
+[`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+return a grouped, a rowwise and a plain tibble that is not a set and
+still carries the `fn` attribute, as they do on a `nested_results`.
 
 ## See also
 

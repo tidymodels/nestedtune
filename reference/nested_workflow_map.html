@@ -187,7 +187,41 @@ condition class, so a user who never calls a reader still learns which
 workflow lost folds. An error an orchestrator raises for one workflow –
 a <code>grid</code> that names a parameter that workflow does not tune, a control of
 the wrong class – is raised the same way, when that workflow's turn
-comes; the workflows before it have run by then.</p>
+comes; the workflows before it have run by then. What is raised is the
+original condition object: its class vector, its <code>parent</code> and the cause
+chain printed under it, its bullets and every field a handler reads come
+through unchanged, with <code>Workflow "&lt;id&gt;": </code> written in front of the
+first line of its message and this function, or the reader, as its
+call.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="subsetting">Subsetting<a class="anchor" aria-label="anchor" href="#subsetting"></a></h2>
+
+
+
+<p>Each row's <code>nested_results</code> describes its own run whole, so a subset of
+the set that keeps rows of the run answers for the workflows it holds.
+An operation keeps the class and the <code>fn</code> attribute when its result
+holds <code>wflow_id</code>, <code>workflow</code> and <code>result</code> under those names with none
+repeated, at least one row, no <code>wflow_id</code> repeated, and each row's three
+values identical to the row of that id in the operation's first
+data-frame argument: rows dropped or reordered and columns added keep
+the class, so <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">dplyr::arrange()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>,
+<code><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">dplyr::bind_cols()</a></code> with the set first, <code>x[i, ]</code> and
+<code><a href="https://vctrs.r-lib.org/reference/vec_slice.html" class="external-link">vctrs::vec_slice()</a></code> on a kept subset hand back a set whose readers,
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow()</a></code> and <code><a href="nested_final_fit.html">nested_final_fit()</a></code>
+answer for the rows in hand alone. Anything else comes back a plain
+tibble without the attribute: a record column dropped or renamed, no
+row left, a <code>wflow_id</code> repeated (<code>x[c(1, 1), ]</code>, <code>rbind(x, x)</code>,
+<code>dplyr::bind_rows(x, x)</code>), a row that is not the run's own (a
+<code>result</code> replaced, a row bound in from another set or a bare table),
+<code><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">dplyr::bind_cols()</a></code> with a table first, and a direct
+<code><a href="https://vctrs.r-lib.org/reference/vec_bind.html" class="external-link">vctrs::vec_cbind()</a></code>, which finalizes to a tibble before the rule is
+asked. Replacing a value under the class with <code>$&lt;-</code> or <code>[[&lt;-</code> is not
+checked, as it is not on a <code>nested_results</code>. <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>,
+<code><a href="https://dplyr.tidyverse.org/reference/rowwise.html" class="external-link">dplyr::rowwise()</a></code> and <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> return a grouped, a rowwise
+and a plain tibble that is not a set and still carries the <code>fn</code>
+attribute, as they do on a <code>nested_results</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

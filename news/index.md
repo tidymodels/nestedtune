@@ -2,6 +2,31 @@
 
 ## nestedtune 0.0.0.9000
 
+- A `nested_results_set` keeps its class only while every row is one of
+  the run’s own workflows. Rows dropped or reordered and columns added
+  keep the class, so
+  [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html),
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+  [`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+  with the set first, `x[i, ]` and
+  [`vctrs::vec_slice()`](https://vctrs.r-lib.org/reference/vec_slice.html)
+  hand back a set whose readers,
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`print()`](https://rdrr.io/r/base/print.html),
+  [`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+  and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  answer for the rows in hand alone; a record column dropped or renamed,
+  no row left, a repeated `wflow_id`, a row not the run’s own,
+  [`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+  with a table first and a direct
+  [`vctrs::vec_cbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
+  give a plain tibble without the `fn` attribute. A warning or error
+  raised for one workflow is the original condition object, its class
+  vector, `parent`, bullets and data fields kept, with
+  `Workflow "<id>":` in front of the first line of its message.
+
 - [`summary()`](https://rdrr.io/r/base/summary.html),
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   and
