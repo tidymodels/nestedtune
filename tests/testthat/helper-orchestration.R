@@ -2495,6 +2495,85 @@ wset_results <- function(fn, data = make_reg_data(), seed = 31) {
   )))
 }
 
+# The three-workflow map run the set readers read (M72): `wset_three()` --
+# a tuned workflow on the call's grid, a fixed one with nothing to tune, and
+# a second tuned one on its own `grid` option -- through the grid
+# orchestrator on `final_nested()` under entry seed 31, the run
+# test-nested-workflow-map-oracles.R reproduces by hand. `broken` names an
+# outer fold whose outer fit is broken with `break_fold()`, so every
+# workflow fails that fold and completes the other. Every default is forced
+# before the seed, for the reason `wset_results()` gives.
+wset_three_results <- function(
+  data = make_reg_data(),
+  broken = NULL,
+  seed = 31
+) {
+  force(data)
+  force(broken)
+  set.seed(seed)
+  wset <- wset_three(data)
+  folds <- final_nested(data)
+  if (!is.null(broken)) {
+    folds <- break_fold(folds, broken, "outer fit")
+  }
+  ms <- reg_metrics()
+  grid <- det_grid()
+  set.seed(seed)
+  suppressWarnings(memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    metrics = ms,
+    grid = grid
+  )))
+}
+
+# A fixed workflow that fails on every outer fold: the formula names a
+# column the data does not hold, so `last_fit()` refuses each split and the
+# fold is recorded as failed at the outer fit. Shared by the M71 reader
+# tests and the M72 set readers.
+broken_workflow <- function(data) {
+  workflows::workflow(y ~ nonesuch, parsnip::linear_reg())
+}
+
+# The all-failed sets, on `final_nested()` under entry seed 32: `broken`
+# beside the tuned workflow, so one workflow completed every fold and the
+# other none; or with `alone = TRUE` two broken workflows and no completed
+# fold anywhere. The control keeps both outer-fit columns on the tuned
+# workflow, so the prediction and extract readers answer on the set.
+broken_set_results <- function(
+  data = make_reg_data(),
+  alone = FALSE,
+  seed = 32
+) {
+  force(data)
+  set.seed(seed)
+  wset <- if (alone) {
+    workflowsets::as_workflow_set(
+      broken = broken_workflow(data),
+      also_broken = broken_workflow(data)
+    )
+  } else {
+    workflowsets::as_workflow_set(
+      tuned = det_workflow(data),
+      broken = broken_workflow(data)
+    )
+  }
+  folds <- final_nested(data)
+  ms <- reg_metrics()
+  grid <- det_grid()
+  ctrl <- tune::control_grid(save_pred = TRUE, extract = coef_extract)
+  set.seed(seed)
+  suppressWarnings(memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    metrics = ms,
+    grid = grid,
+    control = ctrl
+  )))
+}
+
 # What a map run needs beyond the engines: workflowsets for the set, dials
 # for the Bayesian tuner, and the routed tuner's own packages read off the
 # registry, keyed by the orchestrator's name less its prefix.
