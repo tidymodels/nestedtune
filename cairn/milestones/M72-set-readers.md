@@ -98,3 +98,4 @@ Independent review (step 5, three lenses, fresh context). [S] blame-history: no 
 - O11 (`panel_owner()`'s same-range ambiguity likelier when two workflows tune one parameter) — follow-up, same row, low confidence.
 - O12 (`broken_workflow(data)` ignores `data`) — rejected: moved verbatim from M71, not introduced here.
 Fix-now edits re-verified: the four touched test files 0 failures under `NOT_CRAN=true`, `document()` no diff, `check_pkgdown()` clean, `air format` clean.
+- 2026-09-06: step-7 approval: PR #82 approved for merge.
