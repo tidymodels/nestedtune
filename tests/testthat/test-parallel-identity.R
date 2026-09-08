@@ -1,4 +1,5 @@
-# IP2 across workers: the identity that makes parallel dispatch legitimate.
+# IP2 across workers: the identity that makes parallel dispatch legitimate,
+# on the shared 2-daemon pool.
 #
 # Oracle note (DESIGN "Oracle records"): these tests are *mode-independence*
 # assertions, not absolute-correctness ones. A defect present identically in the
@@ -12,23 +13,20 @@
 # vacuously -- RR03 re-confirmed M02's lesson by executing a wrong dispatcher
 # against the PCA/lm workflow and watching it pass.
 #
-# Pools (M74). mirai holds one pool at a time, so the file is ordered by pool:
-# one shared 2-daemon pool serves every block that only needs a primed pool,
-# started once below and probed before each reuse by `shared_daemons(2)`
-# (helper-parallel.R); the blocks that also compare at three daemons follow
-# on one shared 3-daemon pool; BC9, which pollutes its daemons, is the last
-# block on the 2-daemon pool; BC3, which kills a daemon, starts a private
-# pool at the end. A block's serial reference is built while the pool is up
-# through `serial_run()`, which has the orchestrator count zero daemons.
-
-serial_reference <- function(wf, nested, grid, metrics, seed = 2026L) {
-  set.seed(seed)
-  out <- serial_run(
-    nested_tune_grid(wf, nested, grid = grid, metrics = metrics)
-  )
-  testthat::expect_identical(last_dispatch(), "serial")
-  out
-}
+# Pools. mirai holds one pool at a time, so a file holds exactly one (M76).
+# This file holds the shared 2-daemon pool: every block that needs only a
+# primed pool of two, started once below and probed before each reuse by
+# `shared_daemons(2)` (helper-parallel.R). BC9, which pollutes its daemons, is
+# the last block on it. The three-daemon blocks are in
+# test-parallel-identity-three-daemons.R, and BC3, which kills a daemon, in
+# test-parallel-identity-killed-daemon.R. M74 ordered those three as sections
+# of one file; M76 made them files, so the suite can run them on separate
+# workers.
+#
+# A block's serial reference is built while the pool is up through
+# `serial_run()`, which has the orchestrator count zero daemons; the four
+# reference builders are in helper-parallel-identity.R, shared with the
+# three-daemon file.
 
 test_that("the shared 2-daemon pool starts primed (M74)", {
   skip_if_no_daemons()
@@ -429,28 +427,6 @@ test_that("BC8: the identity holds with a censored fixture at a named eval_time 
   }
   expect_identical(parallel, serial)
 })
-
-# BC10's serial reference (M45, AC4): the stochastic fixture, so the
-# Gaussian-process proposals and the ranger fits both draw -- a deterministic
-# engine would leave only tune's own `set.seed(control$seed + i)` calls to
-# differ, and those are the seed rule under test on both sides of the
-# identity. Shared by the two-daemon block here and the three-daemon one
-# below (M74).
-bayes_serial_reference <- function(wf, nested, p) {
-  set.seed(2026L)
-  serial <- serial_run(nested_tune_bayes(
-    wf,
-    nested,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = reg_metrics()
-  ))
-  expect_identical(last_dispatch(), "serial")
-  expect_true(all(serial$.completed))
-  serial
-}
-
 test_that("BC10: the Bayesian path matches serial at two daemons (M45, AC4)", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
@@ -535,27 +511,6 @@ test_that("BC11: the control reaches every fold on the parallel path as on the s
   }
   expect_identical(parallel, serial)
 })
-
-# BC12 (M50, AC4), for both racers: the stochastic fixture, so the race's
-# resample shuffle and the ranger fits both draw; and the daemons' library
-# holds finetune, which the loop attaches in every daemon before the first
-# fold is sent. The serial race is shared by the two-daemon block here and
-# the three-daemon one below (M74).
-race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
-  set.seed(2026L)
-  serial <- serial_run(race_call_by_name(
-    fn,
-    wf,
-    nested,
-    grid = stoch_grid(),
-    metrics = ms,
-    control = ctrl
-  ))
-  expect_identical(last_dispatch(), "serial")
-  expect_true(all(serial$.completed))
-  serial
-}
-
 test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
   skip_if_no_daemons()
   skip_if_no_race_fixture(stochastic = TRUE)
@@ -593,28 +548,6 @@ test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
   }
 })
 
-# BC13 (M51, AC4): the stochastic fixture, so the search's initial design and
-# perturbations and the ranger fits all draw; and the daemons' library holds
-# finetune, which the loop attaches in every daemon before the first fold is
-# sent. `time_limit` is left unset (`NA`), as AC4 requires: a wall-clock stop
-# is the one slot that could make the two sides differ. The serial search is
-# shared by the two-daemon block here and the three-daemon one below (M74).
-anneal_serial_reference <- function(wf, nested, p, ms, ctrl) {
-  expect_true(is.na(ctrl$time_limit))
-  set.seed(2026L)
-  serial <- serial_run(nested_tune_sim_anneal(
-    wf,
-    nested,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms,
-    control = ctrl
-  ))
-  expect_identical(last_dispatch(), "serial")
-  expect_true(all(serial$.completed))
-  serial
-}
 
 test_that("BC13: the annealing path matches serial at two daemons (M51, AC4)", {
   skip_if_no_daemons()
@@ -881,259 +814,13 @@ test_that("BC9: a fold is immune to whatever a daemon ran before it", {
   expect_identical(last_dispatch(), "parallel")
   expect_identical(polluted, fresh)
 })
-
-# The shared 3-daemon pool (M74): the second count BC1, BC10, BC12 and BC13
-# compare at, each block rebuilding its serial reference so that it depends
-# on nothing an earlier block computed.
-
-test_that("the shared 3-daemon pool starts primed (M74)", {
-  skip_if_no_daemons()
-  start_daemons(3)
-  share_daemons(3)
-})
-
-test_that("BC1: parallel matches serial at three daemons", {
-  skip_if_no_daemons()
-  skip_if_not_installed("ranger")
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-
-  serial <- serial_reference(wf, nested, stoch_grid(), reg_metrics())
-
-  shared_daemons(3)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(
-    nested_tune_grid(wf, nested, grid = stoch_grid(), metrics = reg_metrics())
-  )
-
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(parallel, serial)
-})
-
-test_that("BC10: the Bayesian path matches serial at three daemons (M45, AC4)", {
-  skip_if_no_daemons()
-  skip_if_not_installed("ranger")
-  skip_if_not_installed("dials")
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  p <- bayes_stoch_param_info(wf)
-
-  serial <- bayes_serial_reference(wf, nested, p)
-
-  shared_daemons(3)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(
-    nested_tune_bayes(
-      wf,
-      nested,
-      iter = 2,
-      initial = 3,
-      param_info = p,
-      metrics = reg_metrics()
-    )
-  )
-
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(parallel, serial)
-})
-
-test_that("BC12: both racing paths match serial at three daemons (M50, AC4)", {
-  skip_if_no_daemons()
-  skip_if_no_race_fixture(stochastic = TRUE)
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  ms <- reg_metrics()
-  ctrl <- race_control()
-
-  for (fn in RACERS) {
-    serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
-
-    shared_daemons(3)
-    set.seed(2026L)
-    parallel <- without_pkgload_warning(race_call_by_name(
-      fn,
-      wf,
-      nested,
-      grid = stoch_grid(),
-      metrics = ms,
-      control = ctrl
-    ))
-    expect_identical(last_dispatch(), "parallel")
-    for (col in c(
-      ".metrics",
-      ".selected",
-      ".inner_metrics",
-      ".tuning_seed",
-      ".outer_fit_seed"
-    )) {
-      expect_identical(parallel[[col]], serial[[col]], info = paste(fn, col))
-    }
-    expect_identical(parallel, serial)
-  }
-})
-
-test_that("BC13: the annealing path matches serial at three daemons (M51, AC4)", {
-  skip_if_no_daemons()
-  skip_if_no_anneal_fixture(stochastic = TRUE)
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  p <- bayes_stoch_param_info(wf)
-  ms <- reg_metrics()
-  ctrl <- anneal_control()
-
-  serial <- anneal_serial_reference(wf, nested, p, ms, ctrl)
-
-  shared_daemons(3)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(nested_tune_sim_anneal(
-    wf,
-    nested,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms,
-    control = ctrl
-  ))
-  expect_identical(last_dispatch(), "parallel")
-  for (col in c(
-    ".metrics",
-    ".selected",
-    ".inner_metrics",
-    ".tuning_seed",
-    ".outer_fit_seed"
-  )) {
-    expect_identical(parallel[[col]], serial[[col]], info = col)
-  }
-  expect_identical(parallel, serial)
-})
-
-test_that("no shared pool outlives its section (M74)", {
-  skip_if_no_daemons()
+# mirai holds one pool at a time and the worker that ran this file goes on to
+# another one, so the pool does not outlive the file. A bare call rather than
+# a `test_that()` block: testthat evaluates a file's top-level code as it
+# sources it, so this runs after every block above, and the split that made
+# this file (M76) moves no test claim. The one block that asserts the
+# teardown is in test-parallel-identity-three-daemons.R, where it has sat
+# since M74.
+if (requireNamespace("mirai", quietly = TRUE)) {
   unshare_daemons()
-  expect_identical(mirai::status()$connections, 0L)
-})
-
-# BC3 starts its own pool: it kills one of the daemons, so nothing may share
-# them (M74).
-
-test_that("BC3: a daemon killed mid-run yields a recorded failure, not an abort", {
-  skip_if_no_daemons()
-  skip_if_not_installed("ranger")
-
-  # This drives the REAL nested_tune_grid() -> dispatch_folds() path. An earlier
-  # version hand-rolled mirai_map/collect_mirai/classify_fold_result instead, on
-  # the belief that production code had no injection point; review disproved
-  # that by execution. Because dispatch_folds() looks `fold_task` up by name and
-  # serializes it, a mocked binding reaches the daemon, so the kill happens
-  # inside a genuine dispatch. The old shape left AC5 unpinned: switching the
-  # collect to `.stop = TRUE` kept every test green.
-  #
-  # The mock communicates through environment variables, not captured locals:
-  # dispatch strips the task's environment before sending it, and daemons
-  # inherit environment variables set before they start.
-  ledger <- tempfile()
-  dir.create(ledger)
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-
-  # Fold 2's tuning seed, derived the way the documented contract says the
-  # driver derives it, so the mock can recognise that fold wherever it lands.
-  set.seed(2026L)
-  seeds <- sample.int(.Machine$integer.max, 2L * nrow(nested))
-  kill_seed <- seeds[[2L * 2L - 1L]]
-
-  old <- Sys.getenv(
-    c("NESTEDTUNE_LEDGER", "NESTEDTUNE_KILL_SEED"),
-    names = TRUE
-  )
-  Sys.setenv(NESTEDTUNE_LEDGER = ledger, NESTEDTUNE_KILL_SEED = kill_seed)
-  on.exit(do.call(Sys.setenv, as.list(old)), add = TRUE)
-  on.exit(mirai::daemons(0), add = TRUE)
-
-  mirai::daemons(0)
-  set.seed(2026L)
-  serial <- nested_tune_grid(
-    wf,
-    nested,
-    grid = stoch_grid(),
-    metrics = reg_metrics()
-  )
-
-  start_daemons(2)
-  local_mocked_bindings(
-    fold_task = function(
-      payload,
-      object,
-      tuner,
-      metrics,
-      param_info,
-      event_level,
-      eval_time,
-      select,
-      control
-    ) {
-      seed <- payload$seeds[[1L]]
-      file.create(file.path(
-        Sys.getenv("NESTEDTUNE_LEDGER"),
-        paste0(seed, "-", Sys.getpid())
-      ))
-      if (identical(as.character(seed), Sys.getenv("NESTEDTUNE_KILL_SEED"))) {
-        tools::pskill(Sys.getpid())
-        Sys.sleep(30)
-      }
-      asNamespace("nestedtune")$nested_fold_fit(
-        split = payload$split,
-        inner = payload$inner,
-        seeds = payload$seeds,
-        object = object,
-        tuner = tuner,
-        metrics = metrics,
-        param_info = param_info,
-        event_level = event_level,
-        eval_time = eval_time,
-        select = select,
-        control = control
-      )
-    }
-  )
-
-  set.seed(2026L)
-  parallel <- suppressWarnings(
-    without_pkgload_warning(
-      nested_tune_grid(wf, nested, grid = stoch_grid(), metrics = reg_metrics())
-    )
-  )
-
-  # The run returned rather than aborting -- the whole point (M03, IP4).
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(nrow(parallel), nrow(serial))
-
-  expect_false(parallel$.completed[[2L]])
-  expect_identical(parallel$.notes[[2L]]$location, "worker")
-
-  # Every surviving fold matches its serial counterpart exactly.
-  for (i in setdiff(seq_len(nrow(serial)), 2L)) {
-    expect_true(parallel$.completed[[i]])
-    expect_identical(parallel$.metrics[[i]], serial$.metrics[[i]])
-    expect_identical(parallel$.selected[[i]], serial$.selected[[i]])
-  }
-
-  # One file per fold, and exactly one: a retried fold would leave two, since
-  # the replacement daemon has a different pid.
-  ran <- sub("-.*$", "", list.files(ledger))
-  expect_identical(
-    sort(as.numeric(ran)),
-    sort(as.numeric(seeds[c(TRUE, FALSE)]))
-  )
-  expect_identical(anyDuplicated(ran), 0L)
-})
+}

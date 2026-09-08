@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M076: The two slow check legs run their check step under the cap the other three use
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI workflow configuration and test-file organization; no exported behavior, documentation or shipped artifact changes
-- **Branch/PR:** —
+- **Branch/PR:** `m076-ci-leg-speed`
 
 ## Goal
 
@@ -63,7 +63,7 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
       branch point and under each lever separately, into `benchmarks/`, naming
       head, machine, R version and worker count. `benchmarks/profile-tests.R`
       pins itself serial, so this is a second measurement mode, not that script.
-- [ ] T2: Split `test-parallel-identity.R` (1139 lines) at its two pool-section
+- [x] T2: Split `test-parallel-identity.R` (1139 lines) at its two pool-section
       boundaries — the shared 2-daemon section (`:33`–`:887`), the shared
       3-daemon section (`:889`–`:1025`) and BC3's private pool (`:1027`–) —
       so each resulting file starts exactly one pool. Watch for
@@ -72,7 +72,7 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - [ ] T3: Re-order `Config/testthat/start-first` in `DESCRIPTION` by T1's
       medians, adding the files T2 created and dropping any name that no
       longer exists.
-- [ ] T4: Re-key the `helper-time-budget.R` ledger to the moved call sites and
+- [x] T4: Re-key the `helper-time-budget.R` ledger to the moved call sites and
       get `test-suite-hygiene.R` green (the ledger re-reads its sites by
       `file:line`, so T2's split renumbers them).
 - [ ] T5: Push the branch, re-run the check workflow three times on one head,
@@ -92,6 +92,11 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - 2026-09-08: plan gate chose caps-follow-the-measurement over promising the windows median lands under 24, because no measurement yet says the two test levers are worth the three minutes and the alternative fails the milestone for a reason outside it; falsified by T1 pricing the levers well past three minutes, which would make the harder promise safe to make.
 - 2026-09-08: plan gate chose local per-lever pricing plus one CI round over measuring each lever on the runners, because a CI round is five legs times three attempts and both levers are assertion-neutral; falsified by a lever whose local and runner figures disagree in sign, the local core count differing from the runners' four.
 - 2026-09-08: plan gate left the check-time vignette rebuild out over pre-rendering it or moving pages to `articles/`, because both change what ships to users and the second is a documentation decision, not a speed one; falsified by T5 showing the test levers cannot reach 24 without it.
+- 2026-09-08: implement gate chose four test workers for the local pricing (the runners' count, not this machine's eighteen), split-file names saying which pool each holds, and a new sibling benchmark script rather than a mode on `benchmarks/profile-tests.R`, whose header pins itself serial.
+- 2026-09-08: T1 part: `benchmarks/profile-tests-parallel.R` measures suite wall clock with the files parallel, reading per-file wall clock from the hang-trace reporter's stamps because a testthat result's `real` column is 0 for every test under parallel files. Branch point `9b91e18` at 4 workers, 18-core macOS, R 4.6.1, testthat 3.3.2: 198.0 s median over three runs (196.6-199.4); longest single file 81.9 s.
+- 2026-09-08: T1 part: `start-first` reordered by measured time, split not applied, measured 202.8 s median (201.9-205.3) -- slower than the branch point on non-overlapping ranges.
+- 2026-09-08: T2, T4: `test-parallel-identity.R` split at its two pool boundaries into itself (shared 2-daemon pool), `test-parallel-identity-three-daemons.R` and `test-parallel-identity-killed-daemon.R`; the four serial-reference builders moved to `helper-parallel-identity.R`, since a function defined in a test file is visible only there. Pool teardown in the two files without the M74 assertion block is a bare top-level call, so the split moves no test claim. Ledger re-keyed over all 30 identity call sites plus one displaced `test-parallel-metrics.R` row; `test-suite-hygiene.R`'s budgeted-file list extended. `devtools::test()` clean; the 756 `test_that()` descriptions sort identical to the branch point, the comparison proven able to fail by renaming one and watching it diff.
+- 2026-09-08: checkpoint, T1 unfinished: the split's own pricing is mid-run and its first two runs read 220.1 s and 239.4 s against the 198.0 branch point, which is the oversubscription T2 was told to price rather than assume.
 
 ## Decisions
 
