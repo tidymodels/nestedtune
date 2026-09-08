@@ -1,6 +1,6 @@
 # M74: The check suite and the help-page examples run faster without dropping an assertion
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -82,6 +82,7 @@ Cut the time the check suite and the help-page examples take, with every asserti
 - 2026-09-07: re-cut gate chose a candidate row for the 24-minute step and 30-everywhere cap over planning it as M76 after M75, because no lever is measured to reach it (windows 26.6–28.0 minutes on `294ca2b`, its vignette rebuild alone 197–240 s); falsified by M75's measured head or one priced lever (skipping the check-time vignette rebuild, splitting the identity file) bringing the windows step under 24, which promotes the row.
 - 2026-09-07: re-cut gate chose a 90% suite bar over the 88% one, because the head measured 87.7% and 88.5% in single runs with a 1% spread on identical code, so 88% sat on the point estimate; falsified by a back-to-back median-of-three pair above 90%, which returns the branch to T2–T4.
 - 2026-09-07: re-cut gate tightened AC3's pool bound from four to three, the count the head's three start sites give, at the user's choice.
+- 2026-09-07: resumed by /milestone-implement after the re-cut; T7 (edit part, second pass) — the `check-r-package` cap is M72's expression again (40 on devel and windows, 30 elsewhere); the yaml comment's M72 paragraph now ends with M74's cuts, the 294ca2b measurements (suite 704–711 → 623 s, examples 28 → 16 s) and why the two legs keep 40; `cairn/PROFILE.md`'s test-doctrine slot says the same (119 lines); `benchmarks/profile-tests.R` prints `pass | fail | skip` per run (T6's script part). This commit is the measured head; tracking-only commits after it stay local until the merge.
 
 ## Decisions
 

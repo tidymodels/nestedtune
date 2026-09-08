@@ -66,18 +66,22 @@ jobs:
     # M72 branch, the step passing once with 30 seconds to spare and then
     # timing out inside the same vignette rebuild (job 101627605935 of run
     # 34085134425). Those two legs got 40 at M72's review gate, over trimming
-    # the suite, and the suite was made faster next: M74 (2026-09-07) served
-    # every hand-rolled reference loop from the fixture cache, merged the
-    # test blocks that reran one orchestrator call, shared one daemon pool
-    # across the parallel-identity blocks instead of restarting it 26 times,
-    # and cut the help-page examples to two-by-two folds. Measured serially
-    # on the maintainer's machine by benchmarks/profile-tests.R, the suite
-    # went from 732 s to 631 s, and the examples (benchmarks/time-examples.R,
-    # with \donttest) from 28 s to 16 s; the last two default-branch runs
-    # before it (34129642542, 34077230243) had check steps of 18 to 28
-    # minutes, tests 11 to 18 of them. Every leg is back on 30, so a hang
-    # surfaces in 30 everywhere; the per-leg step times of the M74 head are
-    # in its milestone file.
+    # the suite, and keep it after M74 (2026-09-07) made the suite faster:
+    # every hand-rolled reference loop served from the fixture cache, the
+    # test blocks that reran one orchestrator call merged, one daemon pool
+    # shared across the parallel-identity blocks instead of 26 restarts, and
+    # the help-page examples cut to two-by-two folds. Measured serially on
+    # the maintainer's machine at 294ca2b by benchmarks/profile-tests.R, the
+    # suite went from 704-711 s at the branch point to 623 s, and the
+    # examples (benchmarks/time-examples.R, with \donttest) from 28 s to
+    # 16 s. That 12-14% is not enough to bring the two slow legs under 30
+    # with room: three attempts of 294ca2b ran the windows step at 26.6,
+    # 28.0 and 27.2 minutes (its check-time vignette rebuild alone 197-240 s,
+    # against 125-157 s on the two default-branch runs before it) and devel
+    # at 17.8, 23.2 and 26.4, so those two stay at 40 and the other three at
+    # 30; a hang still surfaces in 30 on the fast legs and 40 on the slow
+    # two. Bringing every leg under 24 with the cap back to 30 is a ROADMAP
+    # candidate waiting on a lever that reaches it.
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
@@ -147,7 +151,7 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: 30
+        timeout-minutes: ${{ (matrix.config.r == 'devel' || matrix.config.os == 'windows-latest') && 40 || 30 }}
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'

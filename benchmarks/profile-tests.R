@@ -61,6 +61,18 @@ passes <- vector("list", runs)
 for (i in seq_len(runs)) {
   cat(sprintf("run %d/%d ...\n", i, runs))
   passes[[i]] <- one_run()
+  # Every run reports its own counts: a comparison between two refs reads the
+  # pass floor and the fail/skip zeros off each run, not off the first one.
+  cat(sprintf(
+    "run %d/%d: pass %d | fail %d | skip %d | suite %.1f s | wall %.1f s\n",
+    i,
+    runs,
+    passes[[i]]$counts[["pass"]],
+    passes[[i]]$counts[["fail"]],
+    passes[[i]]$counts[["skip"]],
+    passes[[i]]$total,
+    passes[[i]]$wall
+  ))
 }
 
 files <- sort(unique(unlist(lapply(passes, function(p) names(p$per_file)))))
@@ -113,13 +125,18 @@ for (f in files[ord]) {
 cat(sprintf("%-42s %8.1f\n", "SUITE TOTAL (sum of test times)", total))
 cat(sprintf("%-42s %8.1f\n", "wall clock for the run", wall))
 
-counts <- passes[[1L]]$counts
-cat(sprintf(
-  "\npass %d | fail %d | skip %d\n",
-  counts[["pass"]],
-  counts[["fail"]],
-  counts[["skip"]]
-))
+cat("\n")
+for (i in seq_len(runs)) {
+  counts <- passes[[i]]$counts
+  cat(sprintf(
+    "run %d/%d: pass %d | fail %d | skip %d\n",
+    i,
+    runs,
+    counts[["pass"]],
+    counts[["fail"]],
+    counts[["skip"]]
+  ))
+}
 
 installed <- vapply(
   c("lobstr", "mlbench", "ranger", "vdiffr"),

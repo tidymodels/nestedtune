@@ -45,8 +45,8 @@ rules in tracking-rules:
   `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD check` sees — that is the test a fourth path must
   meet; it bites on `push` only, GitHub evaluating it on a `pull_request` against the whole PR diff. **Hang
   caps at two scopes** turn a hang into a failed job with a timestamp: `R-CMD-check` bounds its job at 60
-  minutes and its `check-r-package` step at 30 on every leg (M72 raised devel and windows to 40 when their steps
-  ran past 30; M74 cut the suite and brought both back), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57;
+  minutes and its `check-r-package` step at 30, 40 on the devel and windows legs (M72, steps past 30; M74's 12–14%
+  suite cut left windows at 26.6–28.0 minutes over three attempts, so both keep 40 — ROADMAP candidate), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57;
   its yaml says why one scope); re-read them with `grep -n timeout-minutes .github/workflows/*.yaml`.
   The step bound is the guarantee, on the code both hangs were in (`test_check("nestedtune")`, 52 min under `R
   CMD check` and 40 under `covr`, hence the two scopes). It was 20 until M48 (2026-09-02) saw the windows step
