@@ -483,63 +483,11 @@ test_that("the same signature keys the same way twice, so it is built once", {
   ))
 })
 
-test_that("the report counts one build per signature and every request", {
-  before <- nrow(fixture_cache_report())
-
-  set.seed(108)
-  quiet(memoised(fake_fit("wf", "reported")))
-  set.seed(108)
-  quiet(memoised(fake_fit("wf", "reported")))
-  set.seed(108)
-  quiet(memoised(fake_fit("wf", "reported")))
-
-  report <- fixture_cache_report()
-  row <- report[grepl("reported", report$signature, fixed = TRUE), ]
-
-  expect_identical(nrow(report) - before, 1L)
-  expect_identical(row$builds, 1L)
-  expect_identical(row$requests, 3L)
-})
-
-test_that("one call written two ways is one fixture, reported as built twice", {
-  # The failure the report exists to name. These two requests key differently,
-  # so both build -- and both build the same thing. Grouping the table by the
-  # call's source text would show two innocent rows; grouping by what was built
-  # shows one fixture paid for twice, which is the fact worth acting on.
-  set.seed(112)
-  quiet(memoised(fake_fit("wf", "same-value", grid = 10)))
-  set.seed(112)
-  quiet(memoised(fake_fit(object = "wf", resamples = "same-value")))
-
-  report <- fixture_cache_report()
-  rows <- report[grepl("same-value", report$signature, fixed = TRUE), ]
-
-  expect_identical(nrow(rows), 1L)
-  expect_identical(rows$builds, 2L)
-  expect_identical(rows$requests, 2L)
-})
-
-test_that("the same call under two seeds is two fixtures, not one rebuilt", {
-  set.seed(109)
-  quiet(memoised(fake_fit("wf", "two-seeds")))
-  set.seed(110)
-  quiet(memoised(fake_fit("wf", "two-seeds")))
-
-  report <- fixture_cache_report()
-  rows <- report[grepl("two-seeds", report$signature, fixed = TRUE), ]
-
-  # Deliberate: the seed is part of what a fixture is, so this is two fixtures
-  # built once each. Reporting it as one signature built twice would make the
-  # `builds` column cry wolf at exactly the tests that check seed sensitivity.
-  expect_identical(nrow(rows), 2L)
-  expect_identical(rows$builds, c(1L, 1L))
-})
-
 test_that("the scaffolding above leaves the shared cache as it found it", {
-  # Everything this file built went into the cache the rest of the suite uses,
-  # including -- deliberately -- one fixture built twice. Left there, the
-  # run-wide report would carry a finding that is really this file's test data.
-  # The assertions above have already read these entries; nothing needs them now.
+  # Everything this file built went into the cache the rest of the suite uses.
+  # Left there, the run-wide report would list this file's test data beside
+  # the real fixtures. The assertions above have already read these entries;
+  # nothing needs them now.
   removed <- fixture_cache_forget(
     "^(fake_fit|caller_probe|g|no_args|signaller)\\("
   )
@@ -550,42 +498,4 @@ test_that("the scaffolding above leaves the shared cache as it found it", {
     "^(fake_fit|caller_probe|g|no_args|signaller)\\(",
     remaining
   )))
-})
-
-test_that("the teardown's report is written to stderr, and nothing to stdout", {
-  # The stream is the point (M57): a worker's report goes nowhere under
-  # parallel files whichever stream it takes, so this is what a serial run
-  # under `R CMD check` puts in testthat.Rout -- unbuffered, beside the hang
-  # trace. A report fabricated by hand, so the test does not depend on what
-  # the rest of this file left in the cache.
-  report <- data.frame(
-    signature = c("fake_fit(\"wf\", \"a\")", "fake_fit(\"wf\", \"b\")"),
-    builds = c(2L, 1L),
-    requests = c(5L, 1L),
-    stringsAsFactors = FALSE
-  )
-
-  out <- character()
-  err <- capture.output(
-    out <- capture.output(print_fixture_cache_report(report), type = "output"),
-    type = "message"
-  )
-
-  expect_identical(out, character())
-  expect_match(err[[2L]], "fixture cache: 2 signatures, 3 builds, 6 requests")
-  expect_match(err, "^ +2 +5 +fake_fit\\(\"wf\", \"a\"\\)$", all = FALSE)
-  expect_match(
-    err,
-    "^WARNING: 1 fixture\\(s\\) built more than once",
-    all = FALSE
-  )
-
-  # An empty cache reports nothing, on either stream.
-  empty <- report[0L, , drop = FALSE]
-  err <- capture.output(
-    out <- capture.output(print_fixture_cache_report(empty), type = "output"),
-    type = "message"
-  )
-  expect_identical(out, character())
-  expect_identical(err, character())
 })

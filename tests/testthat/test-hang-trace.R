@@ -121,16 +121,6 @@ test_that("a file's end forgets its unended blocks as well as its ended ones", {
   expect_identical(own(reporter$seen), character())
 })
 
-test_that("the two-block fixture's directory is gone once its caller returns", {
-  caller <- function() {
-    path <- fixture_two_blocks()
-    expect_true(file.exists(path))
-    dirname(path)
-  }
-  dir <- caller()
-  expect_false(dir.exists(dir))
-})
-
 # --- Parallel test files (M52) ----------------------------------------------
 #
 # With `Config/testthat/parallel: true` the reporter runs in the parent and
@@ -299,26 +289,4 @@ test_that("no two test_that() blocks in one file share a description", {
   )
 
   expect_identical(duplicated_descriptions(dir), character())
-})
-
-test_that("the duplicate-description scan reports a planted duplicate", {
-  dir <- tempfile("hang-trace-duplicates-")
-  dir.create(dir)
-  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
-  writeLines(
-    c(
-      'test_that("twice", { expect_true(TRUE) })',
-      'test_that("once", { expect_true(TRUE) })',
-      'test_that("twice", { expect_true(TRUE) })'
-    ),
-    file.path(dir, "test-planted.R")
-  )
-  writeLines(
-    'test_that("twice", { expect_true(TRUE) })',
-    file.path(dir, "test-clean.R")
-  )
-
-  # Named, not counted: the same description in a different file is a
-  # different key and must not be reported.
-  expect_identical(duplicated_descriptions(dir), "test-planted.R :: twice")
 })

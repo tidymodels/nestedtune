@@ -39,7 +39,7 @@ Delete test blocks whose claim a surviving block already asserts, and thin the n
 
 - [x] T1: Write the removal table from the survey's per-file findings before deleting anything: one row per candidate block with its surviving partner's `file: description`, and drop from the list any block whose partner asserts less than it does.
 - [x] T2: Delete the per-tuner duplicates in the table; where a partner asserts less, extend the partner rather than keep both.
-- [ ] T3: Disposition each of the nine harness-testing files in the classification ledger — a file whose subject is a repo artifact (the yaml, vignette citations, the drift manifest) is deleted unless a block detects a defect that has reached the default branch before, cited by commit; a file testing a harness the surviving tests depend on (the hang trace, the fixture cache, the parallel classifier) is trimmed to the blocks that would fail on a defect in that harness — then apply it, re-key `start-first` and the time-budget ledger.
+- [x] T3: Disposition each of the nine harness-testing files in the classification ledger — a file whose subject is a repo artifact (the yaml, vignette citations, the drift manifest) is deleted unless a block detects a defect that has reached the default branch before, cited by commit; a file testing a harness the surviving tests depend on (the hang trace, the fixture cache, the parallel classifier) is trimmed to the blocks that would fail on a defect in that harness — then apply it, re-key `start-first` and the time-budget ledger.
 - [ ] T4: Run the AC3 enumeration; remove every helper it leaves uncalled.
 - [ ] T5: `devtools::test()`, `devtools::check()`, `air format --check`.
 
@@ -65,6 +65,14 @@ One row per removed `test_that()` description; the survivor is the block on the 
 | `test-parallel-classify.R: dispatch refuses daemons that cannot load the package` | `test-parallel-classify.R: a pool that cannot load AND holds an old build names both fixes` (its plain-pool clause makes the same call and class assertion) | its ledger row (`helper-time-budget.R`, line 209) goes with it |
 | `test-parallel-classify.R: a load failure still outranks an incompatible daemon` | the same both-fixes block (asserts `outcome`, `cannot_load` and `incompatible` on the same pool shape, plus the message) | — |
 | `test-parallel-classify.R: a miraiInterrupt aborts instead of being recorded as a failed fold` | `test-parallel-classify.R: a real interrupt is an interrupt, not a cancellation` (extended to assert the condition is an error of that class) | same fixture |
+| `test-fixture-cache.R: the report counts one build per signature and every request` | — (T3 trim rule: tests the build report, a diagnostic the cache's correctness does not rest on) | — |
+| `test-fixture-cache.R: one call written two ways is one fixture, reported as built twice` | — (T3 trim rule: report grouping) | — |
+| `test-fixture-cache.R: the same call under two seeds is two fixtures, not one rebuilt` | — (T3 trim rule: report grouping; the seed's place in the key is `the key separates the seed, and argument order does not` and `a different seed rebuilds rather than serving the first result`) | — |
+| `test-fixture-cache.R: the teardown's report is written to stderr, and nothing to stdout` | — (T3 trim rule: the report's print format) | — |
+| `test-hang-trace.R: the two-block fixture's directory is gone once its caller returns` | — (T3 trim rule: a self-test of the test fixture's cleanup) | — |
+| `test-hang-trace.R: the duplicate-description scan reports a planted duplicate` | — (T3 trim rule: a planted-defect self-test of the scan; `no two test_that() blocks in one file share a description` is the check the suite depends on) | — |
+
+The 25 descriptions removed with `test-vignette-citations.R` and `test-drift-manifest.R` are in git at the branch point (`accfbe2`) and take AC4's deleted disposition.
 Considered and kept: the `iter = 0` pair (`test-nested-tune-bayes-oracles.R` run identity with `.iter` zeros; `test-nested-final-fit-oracles.R` final-fit identity) — each asserts what the other does not.
 
 ## File ledger (AC4)
@@ -91,6 +99,7 @@ Considered and kept: the `iter = 0` pair (`test-nested-tune-bayes-oracles.R` run
 - 2026-09-08: re-audit: AC1 (reduced) — the repaired wording re-entered with a fresh reader: instrument finding on its second sentence (the table clause binds the recording instrument; T1 already mandates the table); this second line is the stop, so the choice between the two repairs goes to the user.
 - 2026-09-08: AC2 amended to the audited text above. T2: the 15 removal-table blocks deleted; the partners that asserted less extended (`the final fit returns a trained workflow inside its own object` takes the prediction and mould assertions; race-oracles' AC3 block asserts no `.iter` on the race record; `a real interrupt is an interrupt, not a cancellation` asserts the error by class); the 43 remaining `test-parallel-classify.R` ledger rows re-keyed by a line map and the removed block's row dropped. `devtools::test()` with 6 workers: 786 blocks, 0 failures, 0 skips; `air format --check` clean on the touched files.
 - 2026-09-08: AC1 amended to the second reader's wording at the user's choice (the table sentence dropped; the table stays T1's deliverable).
+- 2026-09-08: T3: the ledger applied — `test-vignette-citations.R`, `test-drift-manifest.R` and `helper-drift-manifest.R` deleted; four report blocks cut from `test-fixture-cache.R` and two self-tests from `test-hang-trace.R`; one comment in `test-dplyr-compat.R` that named the deleted file trimmed. Nothing in `start-first` or the time-budget ledger keyed to the moved calls. Head count 749 against 795 (46 fewer). `devtools::test()` with 6 workers: 755 blocks, 0 failures, 0 skips; `air format --check` clean on the trimmed files.
 - 2026-09-07: plan gate chose a separate pruning milestone over folding it into M74 (see M74's work log); no other alternative weighed here.
 
 ## Decisions
