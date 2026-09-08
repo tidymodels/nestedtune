@@ -1,6 +1,6 @@
 # M75: The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M74
 - **Driving RR:** —
@@ -102,6 +102,7 @@ Considered and kept: the `iter = 0` pair (`test-nested-tune-bayes-oracles.R` run
 - 2026-09-08: re-audit: AC2 (reduced) - nothing; the derivation clause read as provenance for the floor, not a second condition. Second line for AC2, so no further reader is spawned for it.
 - 2026-09-08: AC2 amended to the audited text above; the AC3, AC4 and AC5 ticks cleared, their review evidence having been measured on the pre-repair head.
 - 2026-09-08: checkpoint, half-done: the repair edits and the amended records are committed, but the head's `devtools::test()` and `devtools::check()` had not finished when this commit was made; the four affected test files pass on their own (0 failures, 0 skips) and `air format --check` is clean on the touched files. Head count 755 against 795, 40 fewer, meeting the amended floor.
+- 2026-09-08: repair pass verified on the head: `devtools::test()` with 6 workers reports FAIL 0 | WARN 0 | SKIP 0 | PASS 9517; `devtools::check()` 0 errors, 0 warnings, 0 notes (7m 13.6s, Status OK); `air format --check` clean on every R file the branch diff touches. Description diff against `accfbe2`: 795 to 755, 40 fewer, 1 added. Status back to review.
 - 2026-09-07: plan gate chose a separate pruning milestone over folding it into M74 (see M74's work log); no other alternative weighed here.
 
 ## Decisions
