@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-07 (M74 re-cut: its CI-cap half becomes the check-s
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M74 | The check suite and the help-page examples run faster without dropping an assertion | in-progress | — | normal | milestones/M074-suite-speed.md |
+| M74 | The check suite and the help-page examples run faster without dropping an assertion | review | — | normal | milestones/M074-suite-speed.md |
 | M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | planned | M74 | normal | milestones/M075-suite-prune.md |
 | M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | done | — | normal | milestones/archive/M73-set-invariants.md |
 | M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | done | — | normal | milestones/archive/M72-set-readers.md |
