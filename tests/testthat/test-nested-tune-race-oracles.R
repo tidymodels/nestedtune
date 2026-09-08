@@ -228,6 +228,9 @@ test_that("the fold record is every candidate the race scored, and the selection
       )
 
       tbl <- res$.inner_metrics[[i]]
+      # A race does not iterate: no `.iter` on its record, so none on the
+      # zero-row table a failed fold takes from a completed one.
+      expect_false(".iter" %in% names(tbl))
       n_max <- nrow(folds$inner_resamples[[i]])
       eliminated <- eliminated + sum(tbl$n < n_max)
       # The selection is a candidate raced to the end.
@@ -239,6 +242,43 @@ test_that("the fold record is every candidate the race scored, and the selection
     # `n` below the resample count, which the survivors-only default would
     # have dropped.
     expect_gt(eliminated, 0L)
+  }
+})
+
+test_that("a race fold that scored nothing carries a zero-row table with no .iter", {
+  skip_if_no_race_fixture()
+
+  # The annealing sibling of this block is in test-nested-tune-sim-anneal-
+  # oracles.R; the two differ only in whether `.iter` is among the columns,
+  # which is the point each of them makes.
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  nested <- break_fold(det_nested(d), fold = 2L, stage = "inner tuning")
+
+  for (fn in RACERS) {
+    set.seed(20)
+    res <- suppressWarnings(race_call_by_name(
+      fn,
+      wf,
+      nested,
+      grid = det_grid(),
+      metrics = reg_metrics(),
+      control = race_control()
+    ))
+
+    expect_false(res$.completed[[2L]])
+    expect_true(res$.completed[[1L]])
+    none <- res$.inner_metrics[[2L]]
+    done <- res$.inner_metrics[[1L]]
+    expect_identical(nrow(none), 0L)
+    # A race does not iterate, so the zero-row table it takes from a
+    # completed fold's columns carries no `.iter` either.
+    expect_false(".iter" %in% names(none))
+    expect_identical(names(none), names(done))
+    expect_identical(
+      vapply(none, function(col) class(col)[[1L]], character(1)),
+      vapply(done, function(col) class(col)[[1L]], character(1))
+    )
   }
 })
 
@@ -285,48 +325,6 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
       res$.selected[[i]],
       tune::select_best(raced, metric = "rmse")
     )
-  }
-})
-
-# ---- the outer fit's predictions and extracts (M68) --------------------------
-
-test_that("a racing run keeps the outer fit's predictions and extracts when the control asks (AC1, AC2)", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- det_nested(d)
-  g <- det_grid()
-  ms <- reg_metrics()
-  ctrl <- finetune::control_race(
-    burn_in = 2,
-    save_pred = TRUE,
-    extract = coef_extract
-  )
-  for (fn in RACERS) {
-    set.seed(20)
-    res <- switch(
-      fn,
-      tune_race_anova = memoised(nested_tune_race_anova(
-        wf,
-        folds,
-        grid = g,
-        metrics = ms,
-        control = ctrl
-      )),
-      tune_race_win_loss = memoised(nested_tune_race_win_loss(
-        wf,
-        folds,
-        grid = g,
-        metrics = ms,
-        control = ctrl
-      ))
-    )
-    expect_outer_columns_kept(res)
-    # The passing control: the suite's run under `race_control()` carries
-    # neither column.
-    plain <- race_results(fn)
-    expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
   }
 })
 

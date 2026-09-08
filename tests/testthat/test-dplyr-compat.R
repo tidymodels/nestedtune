@@ -336,7 +336,7 @@ test_that("no row-changing result prints the outer resampling scheme", {
 #
 # `test_path("..", "..", ...)` resolves outside the source tree under
 # `R CMD check`, so this skips there and fires where the documentation is
-# actually edited -- the same layout note test-vignette-citations.R records.
+# actually edited.
 # Each file is asserted non-empty and shown to still carry the sentence that
 # replaced the claim, so a mistyped path or an empty read cannot pass the
 # negatives for the wrong reason.

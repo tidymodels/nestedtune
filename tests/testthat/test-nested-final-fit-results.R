@@ -1,4 +1,5 @@
-# What the final fit hands back (AC1).
+# What the final fit hands back (AC1): its object, the workflow's predictions,
+# and the rows it was trained on, all read off one cached fit.
 
 test_that("the final fit returns a trained workflow inside its own object", {
   skip_if_no_engines()
@@ -33,37 +34,16 @@ test_that("the final fit returns a trained workflow inside its own object", {
   expect_type(final$tuning_seed, "integer")
   expect_type(final$fit_seed, "integer")
   expect_false(identical(final$tuning_seed, final$fit_seed))
-})
 
-test_that("the fitted workflow predicts on new data", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  res <- final_results(d)
-
-  set.seed(3)
-  final <- memoised(nested_final_fit(wf, res))
-
-  preds <- predict(extract_workflow(final), new_data = d[1:5, ])
+  # The fitted workflow predicts on new data.
+  preds <- predict(extracted, new_data = d[1:5, ])
   expect_identical(nrow(preds), 5L)
   expect_true(all(is.finite(preds$.pred)))
-})
 
-test_that("the final fit trains on every row, not on an outer analysis set", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  res <- final_results(d)
-
-  set.seed(3)
-  final <- memoised(nested_final_fit(wf, res))
-
-  # The mould records how many rows the workflow was fitted on. Any outer
-  # analysis set would be smaller, so this is what separates a final fit from
-  # one more fold.
-  mould <- workflows::extract_mold(extract_workflow(final))
+  # And it was trained on every row, not on an outer analysis set: the mould
+  # records how many rows the workflow was fitted on, and any outer analysis
+  # set would be smaller.
+  mould <- workflows::extract_mold(extracted)
   expect_identical(nrow(mould$predictors), nrow(d))
 })
 
