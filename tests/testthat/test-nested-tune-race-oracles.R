@@ -282,7 +282,6 @@ test_that("a race fold that scored nothing carries a zero-row table with no .ite
   }
 })
 
-
 test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
   skip_if_no_race_fixture()
 

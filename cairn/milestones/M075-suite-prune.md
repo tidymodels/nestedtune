@@ -21,11 +21,11 @@ Delete test blocks whose claim a surviving block already asserts, and thin the n
 
 ## Acceptance criteria
 
-- [ ] AC1: Every `test_that()` block removed between the branch point and the head — enumerated by diffing `test_that_descriptions()` over `tests/testthat/test-*.R` at the two refs — has its claim asserted by a block that survives on the head, except a block removed from a harness-testing file under T3's trim rule (whose claim is about the harness, not the package) and a block removed with its whole file under AC4's deleted disposition; a block added on the head may be the survivor for the blocks it replaces.
-- [ ] AC2: The head has at least 40 fewer `test_that()` blocks than the branch point, counted by `test_that_descriptions()` over `tests/testthat/test-*.R` (795 at the branch point `accfbe2`; the floor is the 16 blocks the removal table names plus the 25 the two deleted files take, less the one block added on the head to carry a claim a removal left uncovered).
-- [ ] AC3: Every function defined in `tests/testthat/helper-*.R` (enumerated by `grep -n -E '^[A-Za-z_.]+ <- function' tests/testthat/helper-*.R`) is named outside a comment or string in another top-level expression of some file under `tests/testthat/`, its own included, found by `grep -n -F` on the name; a function that is not is removed.
-- [ ] AC4: Each of the nine harness-testing files named in Scope carries one of three dispositions — deleted, kept whole, or trimmed — in a classification ledger in the milestone file, one row per file naming the disposition and its reason; a trimmed file's removed blocks appear in AC1's table.
-- [ ] AC5: `Rscript -e 'devtools::test()'` on the head reports 0 failures and 0 skips, and the active profile's verify slot is clean — `devtools::check()` 0 errors, 0 warnings, 0 unjustified notes — with `air format --check` clean on every file the branch touches (`git diff --name-only <branch point>`).
+- [x] AC1: Every `test_that()` block removed between the branch point and the head — enumerated by diffing `test_that_descriptions()` over `tests/testthat/test-*.R` at the two refs — has its claim asserted by a block that survives on the head, except a block removed from a harness-testing file under T3's trim rule (whose claim is about the harness, not the package) and a block removed with its whole file under AC4's deleted disposition; a block added on the head may be the survivor for the blocks it replaces.
+- [x] AC2: The head has at least 40 fewer `test_that()` blocks than the branch point, counted by `test_that_descriptions()` over `tests/testthat/test-*.R` (795 at the branch point `accfbe2`; the floor is the 16 blocks the removal table names plus the 25 the two deleted files take, less the one block added on the head to carry a claim a removal left uncovered).
+- [x] AC3: Every function defined in `tests/testthat/helper-*.R` (enumerated by `grep -n -E '^[A-Za-z_.]+ <- function' tests/testthat/helper-*.R`) is named outside a comment or string in another top-level expression of some file under `tests/testthat/`, its own included, found by `grep -n -F` on the name; a function that is not is removed.
+- [x] AC4: Each of the nine harness-testing files named in Scope carries one of three dispositions — deleted, kept whole, or trimmed — in a classification ledger in the milestone file, one row per file naming the disposition and its reason; a trimmed file's removed blocks appear in AC1's table.
+- [x] AC5: `Rscript -e 'devtools::test()'` on the head reports 0 failures and 0 skips, and the active profile's verify slot is clean — `devtools::check()` 0 errors, 0 warnings, 0 unjustified notes — with `air format --check` clean on every file the branch touches (`git diff --name-only <branch point>`).
 
 ## Coverage
 
@@ -103,52 +103,114 @@ Considered and kept: the `iter = 0` pair (`test-nested-tune-bayes-oracles.R` run
 - 2026-09-08: AC2 amended to the audited text above; the AC3, AC4 and AC5 ticks cleared, their review evidence having been measured on the pre-repair head.
 - 2026-09-08: checkpoint, half-done: the repair edits and the amended records are committed, but the head's `devtools::test()` and `devtools::check()` had not finished when this commit was made; the four affected test files pass on their own (0 failures, 0 skips) and `air format --check` is clean on the touched files. Head count 755 against 795, 40 fewer, meeting the amended floor.
 - 2026-09-08: repair pass verified on the head: `devtools::test()` with 6 workers reports FAIL 0 | WARN 0 | SKIP 0 | PASS 9517; `devtools::check()` 0 errors, 0 warnings, 0 notes (7m 13.6s, Status OK); `air format --check` clean on every R file the branch diff touches. Description diff against `accfbe2`: 795 to 755, 40 fewer, 1 added. Status back to review.
+- 2026-09-08: re-review on the repaired head: AC1-AC5 all met with fresh evidence (795 to 755 blocks, 41 removed and 1 added, each of the 11 deduplication removals read against its survivor; 156 helpers all called; nine ledger rows matching disk; `devtools::test()` 0/0/0 with 9517 passes, `devtools::check()` 0/0/0 Status OK, `air format --check` clean). Consistency gate green (`cairn_validate` exit 0; `document()` no diff; `check_pkgdown()` clean). Three-lens fan-out: ten findings, two fixed on the branch (the stale Review section, a double blank line in race-oracles), five follow-ups, two rejected, one noted; no finding meets the return floor.
 - 2026-09-07: plan gate chose a separate pruning milestone over folding it into M74 (see M74's work log); no other alternative weighed here.
 
 ## Decisions
 
 ## Review
 
-Evidence gathered 2026-09-08 on `m075-suite-prune` head against branch point `accfbe2`, PR #85.
+Evidence gathered 2026-09-08 on the `m075-suite-prune` head against branch point
+`accfbe2`, PR #85. This replaces the first round's evidence, which was measured
+on the pre-repair head.
 
 ### Acceptance criteria
 
-- **AC1 — FAILED.** The description diff ran as the criterion names it: `test_that_descriptions()` over `tests/testthat/test-*.R` at both refs gives 795 at `accfbe2`, 749 on the head, 46 removed and 0 added. Of the 46, 25 leave with the two files under AC4's deleted disposition and 6 under T3's trim rule (`test-fixture-cache.R` 4, `test-hang-trace.R` 2), leaving 15 that must have a survivor. Every survivor description the table names was confirmed present on the head, and the three `test-parallel-classify.R` merges and the `test-nested-final-fit-results.R` three-into-one merge were read on both sides and are supersets. But four of the 15 do not meet the criterion:
-  - `test-nested-tune-bayes-oracles.R: every nested_results method in NAMESPACE runs on a Bayesian result` also read the installed `NAMESPACE`, selected every `nested_results` line, and asserted `setdiff(registered, names(calls)) == character(0)` and `setdiff(names(calls), namespace) == character(0)` — a completeness tripwire that fails when a method is registered, renamed or dropped without a matching call. No block on the head enumerates `NAMESPACE` for this class; the named per-method survivors each test one method by name. The removal table's note ("the block asserted only that each method runs") does not describe the removed block.
-  - `test-nested-tune-race-oracles.R: the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)` and its annealing twin re-ran a fold from the **recorded** `attr(res, "procedure")$control / $grid / $param_info / $eval_time` and `res$.tuning_seed[[i]]`, following `?nested_tune_race`'s Reproducibility section line for line. The named reference-loop survivors build every input in the test body (`det_grid()`, `race_control()`); nothing on the head re-runs a fold from the recorded procedure attributes.
-  - `test-nested-tune-race-rng.R: the RNG state is restored when folds fail but the run completes` also asserted `nrow(res$.inner_metrics[[1L]]) == 0L` on a **failed** race fold. The named survivor `test-nested-tune-grid-rng.R: the RNG state is restored when folds fail but the run completes` asserts only `folds_completed == 0L`, and the clause moved to race-oracles asserts `.iter` absence on a **completed** record.
-  - Record defect on a fourth row: the survivor named for `test-nested-tune-sim-anneal-oracles.R: a fold that scored nothing carries .iter on its zero-row table (AC1)` is annotated "(asserts `.iter` on the completed annealing record)", but `nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1 (AC1)` is a pure `formals()` comparison. The `.iter` assertion lives in `expect_iter_column()`, called from the two reference-loop blocks.
-- [x] **AC2 — met.** `test_that_descriptions()` over `tests/testthat/test-*.R`: 795 at `accfbe2`, 749 on the head, 46 fewer against a floor of 45.
-- [x] **AC3 — met.** `grep -n -E '^[A-Za-z_.]+ <- function' tests/testthat/helper-*.R` enumerates 156 functions. For each, `grep -n -F` over every `tests/testthat/*.R` finds at least one occurrence that is neither its own defining line nor a comment line. `fixture_cache_reset()` and `expect_outer_columns_kept()` are gone from the tree entirely.
-- [x] **AC4 — met.** The File ledger carries one row per file for all nine, each naming one of the three dispositions and a reason, and each disposition matches disk: `test-vignette-citations.R`, `test-drift-manifest.R` and `helper-drift-manifest.R` absent; `test-fixture-cache.R`, `test-hang-trace.R` and `test-parallel-classify.R` modified; the other four unmodified. Every block removed from the three trimmed files appears in the AC1 table. (The reason recorded for `test-vignette-citations.R` is inaccurate — see finding P3 — but the criterion asks for a disposition and a reason, and the row carries both.)
-- [x] **AC5 — met.** `devtools::test()` at `TESTTHAT_CPUS=6`: `FAIL 0 | WARN 0 | SKIP 0 | PASS 9456`. `devtools::check()`: 0 errors, 0 warnings, 0 notes, 7m 27.4s, `Status: OK`. `air format --check` exit 0 over the 14 R files the branch diff touches that still exist.
+- **AC1 — met.** The description diff ran as the criterion names it:
+  `test_that_descriptions()` over `tests/testthat/test-*.R` gives 795 at
+  `accfbe2` and 755 on the head, keyed per file so that three identically worded
+  rng descriptions are told apart — 41 blocks removed, 1 added. 25 leave with
+  `test-vignette-citations.R` (22) and `test-drift-manifest.R` (3) under AC4's
+  deleted disposition; 5 go under T3's trim rule, all with harness claims (four
+  `test-fixture-cache.R` blocks about the build report, one `test-hang-trace.R`
+  self-test of its own fixture's cleanup). The remaining 11 each have a
+  survivor, read on both sides: the three-into-one merge in
+  `test-nested-final-fit-results.R` and the three merges in
+  `test-parallel-classify.R` are supersets (the surviving both-fixes block makes
+  the plain-pool `check_daemons_can_load()` call and the ladder's `outcome` /
+  `cannot_load` / `incompatible` assertions alike); the three rng removals are
+  carried by `test-nested-tune-grid-rng.R`'s block plus, for the failed-fold
+  zero-row clause, the new race-oracles block and the restored anneal-oracles
+  block, both of which assert on a broken fold; the outer-columns trio is
+  carried by the two grid-results blocks. The mechanism notes were checked
+  against `R/`: every orchestrator calls `nested_loop()`
+  (`R/nested-tune-grid.R:592`, `R/nested-tune-race.R:309`,
+  `R/nested-tune-sim-anneal.R:268`, `R/nested-tune-bayes.R:244`,
+  `R/nested-fit-resamples.R:209`), and `control$save_pred` and `control$extract`
+  are read at one site inside `nested_fold_fit()` (`R/nested-tune-grid.R:847`
+  and `:860`). The four blocks the first round returned on are present on the
+  head.
+- **AC2 — met.** The same enumeration gives 795 at `accfbe2` and 755 on the
+  head: 40 fewer, against the amended floor of 40 (16 removal-table rows plus
+  the 25 the two deleted files take, less the one block added on the head).
+- **AC3 — met.** `grep -n -E '^[A-Za-z_.]+ <- function' tests/testthat/helper-*.R`
+  enumerates 156 functions. For each, `grep -n -F` over `tests/testthat/*.R`
+  finds at least one occurrence that is neither its own defining line nor a
+  comment line; none is uncalled. `fixture_cache_reset()` and
+  `expect_outer_columns_kept()` are absent from the tree.
+- **AC4 — met.** The File ledger carries one row for each of the nine files,
+  each naming one of the three dispositions and a reason, and each disposition
+  matches disk: `test-vignette-citations.R`, `test-drift-manifest.R` and
+  `helper-drift-manifest.R` absent; `test-fixture-cache.R`, `test-hang-trace.R`
+  and `test-parallel-classify.R` modified; `test-suite-hygiene.R`,
+  `test-ci-workflows.R`, `test-dots-barrier.R` and `test-control-slots.R`
+  unmodified against `accfbe2`. All eight blocks removed from the three trimmed
+  files appear in the AC1 table. The `test-vignette-citations.R` reason was
+  checked against the deleted file: `shelf_dir()` resolved to
+  `../../cairn/references`, so rule 6's real-tree half skipped out of the source
+  tree like the rest.
+- **AC5 — met.** `devtools::test()` at `TESTTHAT_CPUS=6`:
+  `FAIL 0 | WARN 0 | SKIP 0 | PASS 9517`. `devtools::check()`: 0 errors,
+  0 warnings, 0 notes, 7m 10.6s, `Status: OK`. `air format --check` exit 0 over
+  the 13 R files the branch diff touches that still exist (16 touched, 3
+  deleted), re-run after the one fix-now whitespace edit below.
 
 ### Consistency gate
 
-`cairn_validate.py` exit 0, all 16 PASS checks green including `coverage complete` and `binding criteria`; 18 advisory `references staleness` warnings, `release window` OK. `cairn_impact.py` skipped — the branch touches no `DESIGN.md` principle. Profile (`r-package`) toolchain half: `devtools::document()` leaves no diff in `man/`, `NAMESPACE` or `R/`; `pkgdown::check_pkgdown()` "No problems found"; `README.Rmd` untouched so `README.md` is in sync; no new top-level files; `NEWS.md` needs no entry (test-only, no user-visible change); `devtools::check()` clean as recorded under AC5.
+`cairn_validate.py` exit 0: all 16 checks PASS, `coverage complete` and
+`binding criteria` among them; five advisories OK; `references staleness` WARNs
+on 18 pages, unrelated to this branch; `release window` OK. `cairn_impact.py`
+skipped — the branch touches no `DESIGN.md` principle. The `r-package` profile's
+toolchain half: `devtools::document()` leaves no diff in `man/`, `NAMESPACE`,
+`R/` or `DESCRIPTION`; `pkgdown::check_pkgdown()` "No problems found";
+`README.Rmd` untouched, so `README.md` is in sync; no new top-level files;
+`NEWS.md` needs no entry (test-only, no user-visible change); `devtools::check()`
+clean as recorded under AC5.
 
 ### Independent review (three-lens fan-out)
 
-Executable surface touched, so the full fan-out ran: [O] diff-bug, [S] blame-history, [S] prior-PR-comments, none having seen the implementation.
+Executable surface touched (13 `.R` files), so the full fan-out ran: [O]
+diff-bug, [S] blame-history, [S] prior-review, none having seen the
+implementation. The [O] lens re-derived the description diff independently and
+reached the same 795 → 755, 41 removed, 1 added, and read both sides of all 16
+non-file-deletion removals. The [S] blame lens found no new history regression.
+The [S] prior-review lens ran its existence probe
+(`gh api repos/tidymodels/nestedtune/pulls/comments?per_page=1`): one real human
+thread exists, on `.github/workflows/pkgdown.yaml`, which this diff does not
+touch, so no per-PR walk was warranted; its evidence came from the archived
+`## Review` sections.
 
 | # | Lens | Finding | Disposition |
 |---|---|---|---|
-| O1 | O, S-blame(1) | The deleted bayes-oracles block carried a `NAMESPACE` completeness tripwire that no survivor replicates; a newly registered `nested_results` method would be exercised by nothing and nothing would say so. | **Return** — AC1 failure. |
-| O2 | O | Both by-hand-recipe blocks are gone and nothing on the head re-runs a fold from the recorded `procedure` attributes or follows the documented Reproducibility recipe; a wrongly recorded attribute or a drifted help page now passes green. | **Return** — AC1 failure. |
-| O3 | O | The race path's failed-fold zero-row table is no longer asserted; the moved clause covers a completed record only. | **Return** — AC1 failure. |
-| O4 | O | The Removals table names a survivor (`... formals less objective, with initial at 1`) that does not assert what the row annotates; the real survivor is `expect_iter_column()`. Separately, no block asserts that a failed **annealing** fold carries a zero-row table with `.iter` and matching column classes. | **Return** — AC1 record defect plus a second uncovered claim. |
-| O5 | O, S-prior(2) | `test-hang-trace.R`'s planted-duplicate block was the only positive test of `duplicated_descriptions()`; the surviving guard asserts `expect_identical(duplicated_descriptions(dir), character())` and would pass if the scan regressed to returning `character(0)` unconditionally. T3's own trim rule keeps "the blocks that would fail on a defect in that harness", and the survivor would not. M75's whole accounting rests on descriptions being unique keys. | **Fix now** at the return — restore the planted-duplicate block. |
-| P3 | O(6), S-blame(3) | The AC4 ledger reason for `test-vignette-citations.R` is inaccurate on both clauses: rule 6 checked author-year citations in **`R/` roxygen** and rules 1–5/7 checked shipped `vignettes/*.Rmd`, so it is not only a repo-artifact test; and only the real-tree halves skip in a built package — each rule's planted-fixture half built its own temp tree and ran under `R CMD check`. The deletion itself was chosen at the 2026-09-08 question gate; the recorded reason is what is wrong. | **Fix now** at the return — correct the ledger reason, and re-put the deletion to the user with the corrected facts. |
-| P4 | S-blame(2), S-prior(1) | `test-drift-manifest.R` locked the wire figures in `cairn/references/mori-backend-assessment.md` and in `cairn/ROADMAP.md`'s live mori candidate row to `benchmarks/mori-wire-manifest.json`; both documents are current, so those figures can now drift silently. LESSONS records that of the repo's figure citations only the `helper-time-budget.R` ledger and this were test-enforced. Authorized at the question gate. | **Follow-up** — candidate row, at the re-review's hygiene pass. |
-| P5 | S-blame(4), S-prior(3), O(8) | `test-fixture-cache.R`'s "the teardown's report is written to stderr, and nothing to stdout" was the only assertion of M57's measured stream split, and `print_fixture_cache_report()` still runs for real in `teardown-fixture-cache.R`. | **Follow-up** — candidate row. |
-| P6 | O(9) | The outer-columns trio's survivors are strictly stronger, but only on the grid orchestrator; nothing now asserts that the bayes, race and anneal entry points honour `save_pred`/`extract`, and each passes a control of a different class. | **Follow-up** — candidate row. |
-| P7 | S-prior(4), O(11) | `helper-time-budget.R:44`'s comment was de-keyed rather than re-keyed — `classify:760 ... :766` became prose where the correct new keys are 726 and 729 — in the file M16's review made carry exact `file:line`. The line also grew to 114 characters. | **Fix now** at the return. |
-| P8 | S-blame(5) | `test-fixture-cache.R`'s "one call written two ways is one fixture, reported as built twice" tested the report's grouping by canonical signature rather than by caller source text; the named key survivors test the cache key, not the report. Disclosed in the ledger as diagnostic-only. | **Reject** — inside the intentional T3 trim, and the ledger states the trade-off. |
-| P9 | O(10) | The deleted rng blocks asserted `expect_false(any(res$.completed))`; the grid survivor asserts only `folds_completed == 0L`. | **Reject** — implied by the surviving assertion on the same record. |
-| P10 | S-blame(6) | The historical 39-minute-hang coverage for `check_daemons_can_load()` is carried by a block that did not exist at `accfbe2`; not something this branch touched. | **Reject** — pre-existing, not introduced by the diff. |
+| F1 | O(1), S-prior | Deleting `test-vignette-citations.R` removes the only guard on author-year citations in `R/` roxygen and in the shipped vignettes: a citation with no shelf page, an emptied `## References` section, or an uncited numeral now passes green. Not a harness test, and the largest capability the branch removes. | **Follow-up** — candidate row. The deletion itself was chosen by the user at the 2026-09-08 question gate and kept at the amendment gate on the corrected ledger facts; what is filed is the coverage gap. |
+| F2 | O(4), S-blame, S-prior | Deleting `test-drift-manifest.R` leaves the wire figures cited in `cairn/references/mori-backend-assessment.md` and in the ROADMAP's live mori candidate row unenforced against `benchmarks/mori-wire-manifest.json`. `LESSONS.md` records that of the repo's figure citations only that and the `helper-time-budget.R` ledger were test-enforced. | **Follow-up** — same candidate row. |
+| F3 | O(2), S-blame, S-prior | With `expect_outer_columns_kept()` and its three callers gone, every `.predictions` / `.extracts` assertion in the suite passes a `tune::control_grid()`; nothing asserts that the Bayesian, racing and annealing entry points honour `save_pred` and `extract`. The single-site argument was verified (`nested_loop()` → `nested_fold_fit()`, `R/nested-tune-grid.R:847` and `:860`, with `effective_control()` preserving both slots), and `test-control-slots.R` still asserts both slots are documented as kept on each of the five pages, so the residual is drift in an upstream control's slots. | **Follow-up** — same candidate row. |
+| F4 | O(3), S-blame, S-prior | `print_fixture_cache_report()` now has no assertions while still running for real in `teardown-fixture-cache.R`; the stream split M57 measured, the built-more-than-once warning line and the empty-report silent case are untested. | **Follow-up** — same candidate row. |
+| F5 | O(9) | `DESCRIPTION`'s `Config/testthat/start-first` was not re-ordered, though three rng files listed there lost their most expensive block. No deleted file is named in the list, so nothing is broken; it is a scheduling question. | **Follow-up** — absorbed into the existing ROADMAP candidate on CI leg times, which already names M75's deletions as an unpriced lever. |
+| F6 | O(6) | The `## Review` section as committed was the previous round's, with figures (749 / 46 / 0 added) the head no longer matches. | **Fix now** — this rewrite. |
+| F7 | O(8) | Double blank line before the by-hand-recipe block in `test-nested-tune-race-oracles.R`, the only such gap in the file; `air format --check` does not collapse it. | **Fix now** — collapsed; `air format --check` re-run clean on the file. |
+| F8 | O(5) | Scope → In still lists four removal families the repair pass restored and the branch does not perform (both by-hand-recipe blocks, bayes-oracles' NAMESPACE block, the zero-row `.iter` pair, the `iter = 0` identity). | **Reject** — Scope is the plan's record of what was proposed, not of what happened; the Removals table and the work log carry the outcome, and the archive summary will. Amending a plan-owned section at review would take the gated amendment protocol for no gain. |
+| F9 | O(7) | Merging three `test-nested-final-fit-results.R` blocks into one costs failure granularity: an error in the shared prologue now takes all three claims down as one reported failure. | **Reject** — inherent to the merge the milestone planned, and the [O] lens confirmed the merged block is a true superset of the claims. |
+| F10 | S-blame(4) | `fixture_cache_reset()` was already uncalled before this branch and `expect_outer_columns_kept()` only by the blocks T2 removed, so T4's removals lose no coverage. | **Noted** — no defect. |
 
-The [S] prior-PR-comments lens ran its existence probe (`gh api repos/tidymodels/nestedtune/pulls/comments?per_page=1`): one real human thread exists, on `.github/workflows/pkgdown.yaml`, which this diff does not touch, so no per-PR walk was warranted. Its substantive evidence came from the archived `## Review` sections, as the recipe directs.
+Return floor: no actioned finding demonstrates an acceptance criterion failing,
+and none is a load-bearing defect in what the package does for its users. F1–F4
+are reductions in test coverage that follow from the deletions the milestone was
+planned and gated to make; they are filed rather than fixed.
 
 ### Outcome
 
-AC1 fails. Four of the fifteen deduplication rows remove a claim no surviving block asserts (O1–O4), so the milestone returns to `in-progress` for a repair pass over those rows plus the fix-now findings O5, P3 and P7. This is the first defect return on M75; the three amendment returns already in the work log run on their own track.
+Every acceptance criterion is met on fresh evidence and the consistency gate is
+green. Ten findings were reported across the three lenses: two fixed on the
+branch, five filed as follow-ups, two rejected with reason, one noted. The
+milestone goes to the merge-approval gate.
