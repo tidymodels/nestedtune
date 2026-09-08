@@ -1,6 +1,6 @@
 # M75: The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M74
 - **Driving RR:** —
@@ -41,7 +41,7 @@ Delete test blocks whose claim a surviving block already asserts, and thin the n
 - [x] T2: Delete the per-tuner duplicates in the table; where a partner asserts less, extend the partner rather than keep both.
 - [x] T3: Disposition each of the nine harness-testing files in the classification ledger — a file whose subject is a repo artifact (the yaml, vignette citations, the drift manifest) is deleted unless a block detects a defect that has reached the default branch before, cited by commit; a file testing a harness the surviving tests depend on (the hang trace, the fixture cache, the parallel classifier) is trimmed to the blocks that would fail on a defect in that harness — then apply it, re-key `start-first` and the time-budget ledger.
 - [x] T4: Run the AC3 enumeration; remove every helper it leaves uncalled.
-- [ ] T5: `devtools::test()`, `devtools::check()`, `air format --check`.
+- [x] T5: `devtools::test()`, `devtools::check()`, `air format --check`.
 
 ## Removals (AC1)
 
@@ -101,6 +101,7 @@ Considered and kept: the `iter = 0` pair (`test-nested-tune-bayes-oracles.R` run
 - 2026-09-08: AC1 amended to the second reader's wording at the user's choice (the table sentence dropped; the table stays T1's deliverable).
 - 2026-09-08: T3: the ledger applied — `test-vignette-citations.R`, `test-drift-manifest.R` and `helper-drift-manifest.R` deleted; four report blocks cut from `test-fixture-cache.R` and two self-tests from `test-hang-trace.R`; one comment in `test-dplyr-compat.R` that named the deleted file trimmed. Nothing in `start-first` or the time-budget ledger keyed to the moved calls. Head count 749 against 795 (46 fewer). `devtools::test()` with 6 workers: 755 blocks, 0 failures, 0 skips; `air format --check` clean on the trimmed files.
 - 2026-09-08: T4: the AC3 enumeration (parse tokens over every file under `tests/testthat/`, the defining expression excluded) left two helpers uncalled — `fixture_cache_reset()`, uncalled before this branch, and `expect_outer_columns_kept()`, left by T2 — both removed from `helper-orchestration.R`; 156 helpers remain, none uncalled. `devtools::test()` with 6 workers: 755 blocks, 0 failures, 0 skips.
+- 2026-09-08: T5: `devtools::check()` on the head — 0 errors, 0 warnings, 0 notes (7m 16s); `air format --check` clean on every R file the branch diff touches; the description diff against `accfbe2` is 46 removed and none added, matching the removal table's 21 rows plus the 25 descriptions of the two deleted files. Status to review.
 - 2026-09-07: plan gate chose a separate pruning milestone over folding it into M74 (see M74's work log); no other alternative weighed here.
 
 ## Decisions

@@ -8,7 +8,7 @@ _Last hygiene check: 2026-09-07 (M74 done and archived; M71 row pruned; check-st
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M74 | The check suite and the help-page examples run faster without dropping an assertion | done | — | normal | milestones/archive/M74-suite-speed.md |
-| M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | in-progress | M74 | normal | milestones/M075-suite-prune.md |
+| M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | review | M74 | normal | milestones/M075-suite-prune.md |
 | M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | done | — | normal | milestones/archive/M73-set-invariants.md |
 | M72 | `summary()`, `autoplot()` and `agreement()` answer on a `nested_results_set`, each workflow's view keyed by its `wflow_id` | done | — | normal | milestones/archive/M72-set-readers.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
