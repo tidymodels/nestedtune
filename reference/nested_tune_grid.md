@@ -707,12 +707,12 @@ if (rlang::is_installed(c("recipes", "yardstick"))) {
   set.seed(1)
   folds <- nested_resamples(
     mtcars,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 3)
+    outside = rsample::vfold_cv(v = 2),
+    inside = rsample::vfold_cv(v = 2)
   )
 
   set.seed(2)
-  res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+  res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
   collect_metrics(res)
 
   # What each fold chose -- disagreement here is selection instability, and
@@ -723,15 +723,9 @@ if (rlang::is_installed(c("recipes", "yardstick"))) {
 #> # A tibble: 1 × 2
 #>   num_comp .config        
 #>      <int> <chr>          
-#> 1        2 pre2_mod0_post0
-#> 
-#> [[2]]
-#> # A tibble: 1 × 2
-#>   num_comp .config        
-#>      <int> <chr>          
 #> 1        1 pre1_mod0_post0
 #> 
-#> [[3]]
+#> [[2]]
 #> # A tibble: 1 × 2
 #>   num_comp .config        
 #>      <int> <chr>          

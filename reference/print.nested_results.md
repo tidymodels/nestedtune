@@ -74,23 +74,22 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 
 res
 #> 
 #> ── Nested cross-validation results ────────────────────────────────────
-#> Outer resamples: 3-fold cross-validation
-#> # A tibble: 3 × 9
+#> Outer resamples: 2-fold cross-validation
+#> # A tibble: 2 × 9
 #>   splits          id    .metrics .selected .inner_metrics   .notes  
 #>   <list>          <chr> <list>   <list>    <list>           <list>  
-#> 1 <split [21/11]> Fold1 <tibble> <tibble>  <tibble [6 × 7]> <tibble>
-#> 2 <split [21/11]> Fold2 <tibble> <tibble>  <tibble [6 × 7]> <tibble>
-#> 3 <split [22/10]> Fold3 <tibble> <tibble>  <tibble [6 × 7]> <tibble>
+#> 1 <split [16/16]> Fold1 <tibble> <tibble>  <tibble [4 × 7]> <tibble>
+#> 2 <split [16/16]> Fold2 <tibble> <tibble>  <tibble [4 × 7]> <tibble>
 #> # ℹ 3 more variables: .completed <lgl>, .tuning_seed <int>,
 #> #   .outer_fit_seed <int>
 #> ℹ Use `summary()` for what the run means: which folds failed, what

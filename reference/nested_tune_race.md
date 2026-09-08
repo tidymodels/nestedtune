@@ -397,7 +397,7 @@ if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) {
   set.seed(1)
   folds <- nested_resamples(
     mtcars,
-    outside = rsample::vfold_cv(v = 3),
+    outside = rsample::vfold_cv(v = 2),
     inside = rsample::vfold_cv(v = 5)
   )
 
@@ -417,13 +417,13 @@ if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) {
 #> # A tibble: 8 × 7
 #>   num_comp .metric .estimator  mean     n std_err .config        
 #>      <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>          
-#> 1        1 rmse    standard   3.12      5  0.328  pre1_mod0_post0
-#> 2        1 rsq     standard   0.792     5  0.0585 pre1_mod0_post0
-#> 3        2 rmse    standard   3.37      5  0.403  pre2_mod0_post0
-#> 4        2 rsq     standard   0.783     5  0.0575 pre2_mod0_post0
-#> 5        3 rmse    standard   3.21      3  0.662  pre3_mod0_post0
-#> 6        3 rsq     standard   0.707     3  0.0649 pre3_mod0_post0
-#> 7        4 rmse    standard   3.22      3  0.663  pre4_mod0_post0
-#> 8        4 rsq     standard   0.713     3  0.0628 pre4_mod0_post0
+#> 1        1 rmse    standard   2.42      5  0.576  pre1_mod0_post0
+#> 2        1 rsq     standard   0.861     5  0.0627 pre1_mod0_post0
+#> 3        2 rmse    standard   2.81      5  0.414  pre2_mod0_post0
+#> 4        2 rsq     standard   0.847     5  0.0630 pre2_mod0_post0
+#> 5        3 rmse    standard   2.86      5  0.365  pre3_mod0_post0
+#> 6        3 rsq     standard   0.828     5  0.0482 pre3_mod0_post0
+#> 7        4 rmse    standard   3.26      2  0.693  pre4_mod0_post0
+#> 8        4 rsq     standard   0.693     2  0.0868 pre4_mod0_post0
 # }
 ```

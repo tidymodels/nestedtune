@@ -123,27 +123,25 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 
 collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err
 #>   <chr>   <chr>      <dbl> <int>   <dbl>
-#> 1 rmse    standard   3.23      3   0.316
-#> 2 rsq     standard   0.722     3   0.112
+#> 1 rmse    standard   2.98      2  0.459 
+#> 2 rsq     standard   0.747     2  0.0691
 collect_metrics(res, summarize = FALSE)
-#> # A tibble: 6 × 4
+#> # A tibble: 4 × 4
 #>   id    .metric .estimator .estimate
 #>   <chr> <chr>   <chr>          <dbl>
-#> 1 Fold1 rmse    standard       3.25 
-#> 2 Fold1 rsq     standard       0.499
-#> 3 Fold2 rmse    standard       2.67 
-#> 4 Fold2 rsq     standard       0.806
-#> 5 Fold3 rmse    standard       3.77 
-#> 6 Fold3 rsq     standard       0.859
+#> 1 Fold1 rmse    standard       3.44 
+#> 2 Fold1 rsq     standard       0.678
+#> 3 Fold2 rmse    standard       2.52 
+#> 4 Fold2 rsq     standard       0.816
 ```

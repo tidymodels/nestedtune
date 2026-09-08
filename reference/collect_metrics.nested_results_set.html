@@ -163,44 +163,39 @@ and <code><a href="agreement.html">agreement()</a></code></p></div>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">mtcars</span>,</span></span>
-<span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_workflow_map.html">nested_workflow_map</a></span><span class="op">(</span><span class="va">wset</span>, resamples <span class="op">=</span> <span class="va">folds</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_workflow_map.html">nested_workflow_map</a></span><span class="op">(</span><span class="va">wset</span>, resamples <span class="op">=</span> <span class="va">folds</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   wflow_id .metric .estimator  mean     n std_err</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   rmse    standard   3.23      3   0.316</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   rsq     standard   0.722     3   0.112</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> none_lm  rmse    standard   3.31      3   0.565</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> none_lm  rsq     standard   0.703     3   0.113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   rmse    standard   2.98      2  0.459 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   rsq     standard   0.747     2  0.069<span style="text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> none_lm  rmse    standard   5.93      2  2.06  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> none_lm  rsq     standard   0.495     2  0.119 </span>
 <span class="r-in"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    wflow_id id    .metric .estimator .estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> pca_lm   Fold1 rmse    standard       3.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> pca_lm   Fold1 rsq     standard       0.499</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> pca_lm   Fold2 rmse    standard       2.67 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> pca_lm   Fold2 rsq     standard       0.806</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> pca_lm   Fold3 rmse    standard       3.77 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> pca_lm   Fold3 rsq     standard       0.859</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> none_lm  Fold1 rmse    standard       3.04 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> none_lm  Fold1 rsq     standard       0.481</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> none_lm  Fold2 rmse    standard       2.49 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> none_lm  Fold2 rsq     standard       0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> none_lm  Fold3 rmse    standard       4.39 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> none_lm  Fold3 rsq     standard       0.777</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   wflow_id id    .metric .estimator .estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   Fold1 rmse    standard       3.44 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   Fold1 rsq     standard       0.678</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> pca_lm   Fold2 rmse    standard       2.52 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> pca_lm   Fold2 rsq     standard       0.816</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> none_lm  Fold1 rmse    standard       3.87 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> none_lm  Fold1 rsq     standard       0.614</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> none_lm  Fold2 rmse    standard       7.98 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> none_lm  Fold2 rsq     standard       0.375</span>
 <span class="r-in"><span><span class="fu"><a href="collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   wflow_id id    num_comp .config        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   Fold1        2 pre2_mod0_post0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   Fold1        1 pre1_mod0_post0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   Fold2        1 pre1_mod0_post0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> pca_lm   Fold3        1 pre1_mod0_post0</span>
 <span class="r-in"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 0 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 variables: wflow_id &lt;chr&gt;, id &lt;chr&gt;, location &lt;chr&gt;, type &lt;chr&gt;,</span></span>

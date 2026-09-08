@@ -625,12 +625,12 @@ The result records the rule as <code>extract_procedure(res)$select</code>, and
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">mtcars</span>,</span></span>
-<span class="r-in"><span>    outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">nested_tune_grid</span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">nested_tune_grid</span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># What each fold chose -- disagreement here is selection instability, and</span></span></span>
@@ -641,15 +641,9 @@ The result records the rule as <code>extract_procedure(res)$select</code>, and
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   num_comp .config        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>        2 pre2_mod0_post0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   num_comp .config        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>        1 pre1_mod0_post0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   num_comp .config        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span>

@@ -88,21 +88,21 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
 
 summary(final)
 #> 
 #> ── Nested cross-validation final fit ──────────────────────────────────
-#> Full-data tuning: 3-fold cross-validation
-#> Procedure: grid search, 3 candidates scored
-#> Candidates scored: 3
+#> Full-data tuning: 2-fold cross-validation
+#> Procedure: grid search, 2 candidates scored
+#> Candidates scored: 2
 #> 
 #> ── Selected parameters ──
 #> 

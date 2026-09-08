@@ -303,8 +303,8 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
@@ -313,8 +313,8 @@ collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err
 #>   <chr>   <chr>      <dbl> <int>   <dbl>
-#> 1 rmse    standard   3.29      3   0.268
-#> 2 rsq     standard   0.718     3   0.111
+#> 1 rmse    standard   3.02      2  0.419 
+#> 2 rsq     standard   0.740     2  0.0616
 
 # The record says no tuning ran.
 extract_procedure(res)$tuner

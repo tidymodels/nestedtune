@@ -208,33 +208,33 @@ wset <- workflowsets::workflow_set(
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
 res <- nested_workflow_map(
   wset,
   resamples = folds,
-  grid = data.frame(num_comp = 1:3)
+  grid = data.frame(num_comp = 1:2)
 )
 res
 #> 
 #> ── Nested cross-validation results for a workflow set ─────────────────
 #> Orchestrator: `nested_tune_grid()` (grid search)
 #> Workflows: 2
-#> ✔ "pca_lm": 3 of 3 outer folds completed (grid search)
-#> ✔ "none_lm": 3 of 3 outer folds completed (no tuning)
+#> ✔ "pca_lm": 2 of 2 outer folds completed (grid search)
+#> ✔ "none_lm": 2 of 2 outer folds completed (no tuning)
 #> ℹ Use `collect_metrics()` for every workflow's estimate under its id,
 #>   and `x$result[[i]]` for one workflow's run.
 collect_metrics(res)
 #> # A tibble: 4 × 6
 #>   wflow_id .metric .estimator  mean     n std_err
 #>   <chr>    <chr>   <chr>      <dbl> <int>   <dbl>
-#> 1 pca_lm   rmse    standard   3.23      3   0.316
-#> 2 pca_lm   rsq     standard   0.722     3   0.112
-#> 3 none_lm  rmse    standard   3.31      3   0.565
-#> 4 none_lm  rsq     standard   0.703     3   0.113
+#> 1 pca_lm   rmse    standard   2.98      2  0.459 
+#> 2 pca_lm   rsq     standard   0.747     2  0.0691
+#> 3 none_lm  rmse    standard   5.93      2  2.06  
+#> 4 none_lm  rsq     standard   0.495     2  0.119 
 
 # The baseline ran through nested_fit_resamples(), whatever fn named.
 extract_procedure(res$result[[2]])$tuner

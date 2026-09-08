@@ -140,12 +140,12 @@ wset <- workflowsets::workflow_set(
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
 
 summary(res)
 #> 
@@ -155,37 +155,36 @@ summary(res)
 #> 
 #> ── Workflow "pca_lm" ──
 #> 
-#> Outer resamples: 3-fold cross-validation
-#> Outer folds: 3 requested, 3 completed
+#> Outer resamples: 2-fold cross-validation
+#> Outer folds: 2 requested, 2 completed
 #> 
 #> ── Selected parameters 
-#> ! num_comp: 2, 1, 1 (folds disagree)
+#> ✔ num_comp: 1 (all 2 completed folds agree)
 #> 
-#> ── Estimate (3 of 3 outer folds) 
-#> rmse (standard): 3.23
-#> rsq (standard): 0.722
+#> ── Estimate (2 of 2 outer folds) 
+#> rmse (standard): 2.98
+#> rsq (standard): 0.747
 #> 
 #> ── Workflow "none_lm" ──
 #> 
-#> Outer resamples: 3-fold cross-validation
-#> Outer folds: 3 requested, 3 completed
+#> Outer resamples: 2-fold cross-validation
+#> Outer folds: 2 requested, 2 completed
 #> 
 #> ── Selected parameters 
 #> ℹ No tuned parameters.
 #> 
-#> ── Estimate (3 of 3 outer folds) 
-#> rmse (standard): 3.31
-#> rsq (standard): 0.703
+#> ── Estimate (2 of 2 outer folds) 
+#> rmse (standard): 5.93
+#> rsq (standard): 0.495
 #> 
 #> ℹ A nested estimate describes the tune-and-fit procedure, not a model
 #>   you can deploy. Build that with `nested_final_fit()`, and report
 #>   this estimate as what its procedure achieves.
 agreement(res)
-#> # A tibble: 2 × 4
+#> # A tibble: 1 × 4
 #>   wflow_id num_comp     n  prop
 #>   <chr>       <int> <int> <dbl>
-#> 1 pca_lm          1     2 0.667
-#> 2 pca_lm          2     1 0.333
+#> 1 pca_lm          1     2     1
 autoplot(res)
 
 autoplot(res, type = "performance")

@@ -245,33 +245,33 @@ attribute, as they do on a <code>nested_results</code>.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">mtcars</span>,</span></span>
-<span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">nested_workflow_map</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">wset</span>,</span></span>
 <span class="r-in"><span>  resamples <span class="op">=</span> <span class="va">folds</span>,</span></span>
-<span class="r-in"><span>  grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation results for a workflow set</span> <span style="color: #00BBBB;">─────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Orchestrator: `nested_tune_grid()` (grid search)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Workflows: 2</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">"pca_lm"</span>: 3 of 3 outer folds completed (grid search)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">"none_lm"</span>: 3 of 3 outer folds completed (no tuning)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">"pca_lm"</span>: 2 of 2 outer folds completed (grid search)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">"none_lm"</span>: 2 of 2 outer folds completed (no tuning)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `collect_metrics()` for every workflow's estimate under its id,</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   and `x$result[[i]]` for one workflow's run.</span>
 <span class="r-in"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   wflow_id .metric .estimator  mean     n std_err</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   rmse    standard   3.23      3   0.316</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   rsq     standard   0.722     3   0.112</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> none_lm  rmse    standard   3.31      3   0.565</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> none_lm  rsq     standard   0.703     3   0.113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> pca_lm   rmse    standard   2.98      2  0.459 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> pca_lm   rsq     standard   0.747     2  0.069<span style="text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> none_lm  rmse    standard   5.93      2  2.06  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> none_lm  rsq     standard   0.495     2  0.119 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The baseline ran through nested_fit_resamples(), whatever fn named.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="extract_procedure.html">extract_procedure</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">result</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">tuner</span></span></span>

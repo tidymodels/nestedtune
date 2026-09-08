@@ -81,27 +81,27 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 
 summary(res)
 #> 
 #> ── Nested cross-validation results ────────────────────────────────────
-#> Outer resamples: 3-fold cross-validation
-#> Outer folds: 3 requested, 3 completed
+#> Outer resamples: 2-fold cross-validation
+#> Outer folds: 2 requested, 2 completed
 #> 
 #> ── Selected parameters ──
 #> 
-#> ! num_comp: 2, 1, 1 (folds disagree)
+#> ✔ num_comp: 1 (all 2 completed folds agree)
 #> 
-#> ── Estimate (3 of 3 outer folds) ──
+#> ── Estimate (2 of 2 outer folds) ──
 #> 
-#> rmse (standard): 3.23
-#> rsq (standard): 0.722
+#> rmse (standard): 2.98
+#> rsq (standard): 0.747
 #> 
 #> ℹ A nested estimate describes the tune-and-fit procedure, not a model
 #>   you can deploy. Build that with `nested_final_fit()`, and report

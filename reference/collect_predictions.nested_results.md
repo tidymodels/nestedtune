@@ -102,15 +102,15 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
 res <- nested_tune_grid(
   wf,
   folds,
-  grid = data.frame(num_comp = 1:3),
+  grid = data.frame(num_comp = 1:2),
   control = tune::control_grid(
     save_pred = TRUE,
     extract = function(x) coef(workflows::extract_fit_engine(x))
@@ -121,22 +121,21 @@ collect_predictions(res)
 #> # A tibble: 32 × 5
 #>    id      mpg .pred  .row .config        
 #>    <chr> <dbl> <dbl> <int> <chr>          
-#>  1 Fold1  21    23.6     1 pre0_mod0_post0
-#>  2 Fold1  21    23.6     2 pre0_mod0_post0
-#>  3 Fold1  22.8  25.8     3 pre0_mod0_post0
-#>  4 Fold1  21.4  20.3     4 pre0_mod0_post0
-#>  5 Fold1  19.2  23.0    10 pre0_mod0_post0
-#>  6 Fold1  17.3  17.9    13 pre0_mod0_post0
-#>  7 Fold1  21.5  25.2    21 pre0_mod0_post0
-#>  8 Fold1  15.2  17.7    23 pre0_mod0_post0
-#>  9 Fold1  19.2  13.8    25 pre0_mod0_post0
-#> 10 Fold1  30.4  25.7    28 pre0_mod0_post0
+#>  1 Fold1  21    23.2     1 pre0_mod0_post0
+#>  2 Fold1  22.8  25.2     3 pre0_mod0_post0
+#>  3 Fold1  21.4  20.0     4 pre0_mod0_post0
+#>  4 Fold1  18.1  21.2     6 pre0_mod0_post0
+#>  5 Fold1  14.3  14.2     7 pre0_mod0_post0
+#>  6 Fold1  19.2  22.7    10 pre0_mod0_post0
+#>  7 Fold1  17.8  22.7    11 pre0_mod0_post0
+#>  8 Fold1  16.4  18.1    12 pre0_mod0_post0
+#>  9 Fold1  14.7  11.9    17 pre0_mod0_post0
+#> 10 Fold1  32.4  26.6    18 pre0_mod0_post0
 #> # ℹ 22 more rows
 collect_extracts(res)
-#> # A tibble: 3 × 2
+#> # A tibble: 2 × 2
 #>   id    .extracts
 #>   <chr> <list>   
-#> 1 Fold1 <dbl [3]>
+#> 1 Fold1 <dbl [2]>
 #> 2 Fold2 <dbl [2]>
-#> 3 Fold3 <dbl [2]>
 ```

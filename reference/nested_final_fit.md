@@ -298,19 +298,19 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 # The estimate: what the procedure achieves.
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err
 #>   <chr>   <chr>      <dbl> <int>   <dbl>
-#> 1 rmse    standard   3.23      3   0.316
-#> 2 rsq     standard   0.722     3   0.112
+#> 1 rmse    standard   2.98      2  0.459 
+#> 2 rsq     standard   0.747     2  0.0691
 
 # The model: what you deploy. Report the estimate above for it.
 set.seed(3)
@@ -318,7 +318,7 @@ final <- nested_final_fit(wf, res)
 final
 #> 
 #> ── Nested cross-validation final fit ──────────────────────────────────
-#> Procedure: grid search, 3 candidates scored
+#> Procedure: grid search, 2 candidates scored
 #> Selected: num_comp = 1
 #> 
 #> ℹ This model has no performance estimate of its own. Report the nested

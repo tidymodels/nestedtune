@@ -116,44 +116,39 @@ wset <- workflowsets::workflow_set(
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
 
 collect_metrics(res)
 #> # A tibble: 4 × 6
 #>   wflow_id .metric .estimator  mean     n std_err
 #>   <chr>    <chr>   <chr>      <dbl> <int>   <dbl>
-#> 1 pca_lm   rmse    standard   3.23      3   0.316
-#> 2 pca_lm   rsq     standard   0.722     3   0.112
-#> 3 none_lm  rmse    standard   3.31      3   0.565
-#> 4 none_lm  rsq     standard   0.703     3   0.113
+#> 1 pca_lm   rmse    standard   2.98      2  0.459 
+#> 2 pca_lm   rsq     standard   0.747     2  0.0691
+#> 3 none_lm  rmse    standard   5.93      2  2.06  
+#> 4 none_lm  rsq     standard   0.495     2  0.119 
 collect_metrics(res, summarize = FALSE)
-#> # A tibble: 12 × 5
-#>    wflow_id id    .metric .estimator .estimate
-#>    <chr>    <chr> <chr>   <chr>          <dbl>
-#>  1 pca_lm   Fold1 rmse    standard       3.25 
-#>  2 pca_lm   Fold1 rsq     standard       0.499
-#>  3 pca_lm   Fold2 rmse    standard       2.67 
-#>  4 pca_lm   Fold2 rsq     standard       0.806
-#>  5 pca_lm   Fold3 rmse    standard       3.77 
-#>  6 pca_lm   Fold3 rsq     standard       0.859
-#>  7 none_lm  Fold1 rmse    standard       3.04 
-#>  8 none_lm  Fold1 rsq     standard       0.481
-#>  9 none_lm  Fold2 rmse    standard       2.49 
-#> 10 none_lm  Fold2 rsq     standard       0.852
-#> 11 none_lm  Fold3 rmse    standard       4.39 
-#> 12 none_lm  Fold3 rsq     standard       0.777
+#> # A tibble: 8 × 5
+#>   wflow_id id    .metric .estimator .estimate
+#>   <chr>    <chr> <chr>   <chr>          <dbl>
+#> 1 pca_lm   Fold1 rmse    standard       3.44 
+#> 2 pca_lm   Fold1 rsq     standard       0.678
+#> 3 pca_lm   Fold2 rmse    standard       2.52 
+#> 4 pca_lm   Fold2 rsq     standard       0.816
+#> 5 none_lm  Fold1 rmse    standard       3.87 
+#> 6 none_lm  Fold1 rsq     standard       0.614
+#> 7 none_lm  Fold2 rmse    standard       7.98 
+#> 8 none_lm  Fold2 rsq     standard       0.375
 collect_selections(res)
-#> # A tibble: 3 × 4
+#> # A tibble: 2 × 4
 #>   wflow_id id    num_comp .config        
 #>   <chr>    <chr>    <int> <chr>          
-#> 1 pca_lm   Fold1        2 pre2_mod0_post0
+#> 1 pca_lm   Fold1        1 pre1_mod0_post0
 #> 2 pca_lm   Fold2        1 pre1_mod0_post0
-#> 3 pca_lm   Fold3        1 pre1_mod0_post0
 collect_notes(res)
 #> # A tibble: 0 × 6
 #> # ℹ 6 variables: wflow_id <chr>, id <chr>, location <chr>, type <chr>,

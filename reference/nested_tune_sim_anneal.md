@@ -402,8 +402,8 @@ if (rlang::is_installed(c("finetune", "recipes", "yardstick"))) {
   set.seed(1)
   folds <- nested_resamples(
     mtcars,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 3)
+    outside = rsample::vfold_cv(v = 2),
+    inside = rsample::vfold_cv(v = 2)
   )
 
   set.seed(2)
@@ -423,15 +423,15 @@ if (rlang::is_installed(c("finetune", "recipes", "yardstick"))) {
 #> # A tibble: 10 × 8
 #>    num_comp .metric .estimator  mean     n std_err .config        .iter
 #>       <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>          <int>
-#>  1        2 rmse    standard   3.39      6  0.316  initial_pre1_…     0
-#>  2        2 rsq     standard   0.815     6  0.0532 initial_pre1_…     0
-#>  3        4 rmse    standard   3.52      3  0.536  initial_pre2_…     0
-#>  4        4 rsq     standard   0.806     3  0.0777 initial_pre2_…     0
-#>  5        3 rmse    standard   3.46      3  0.554  Iter1              1
-#>  6        3 rsq     standard   0.807     3  0.0798 Iter1              1
-#>  7        1 rmse    standard   3.39      3  0.468  Iter2              2
-#>  8        1 rsq     standard   0.818     3  0.0853 Iter2              2
-#>  9        2 rmse    standard   3.39      6  0.316  Iter3              3
-#> 10        2 rsq     standard   0.815     6  0.0532 Iter3              3
+#>  1        2 rmse    standard   3.46      4 0.119   initial_pre1_…     0
+#>  2        2 rsq     standard   0.737     4 0.0251  initial_pre1_…     0
+#>  3        4 rmse    standard   3.24      2 0.627   initial_pre2_…     0
+#>  4        4 rsq     standard   0.693     2 0.0113  initial_pre2_…     0
+#>  5        3 rmse    standard   3.37      2 0.292   Iter1              1
+#>  6        3 rsq     standard   0.754     2 0.00240 Iter1              1
+#>  7        2 rmse    standard   3.46      4 0.119   Iter2              2
+#>  8        2 rsq     standard   0.737     4 0.0251  Iter2              2
+#>  9        1 rmse    standard   3.20      2 0.476   Iter3              3
+#> 10        1 rsq     standard   0.772     2 0.00975 Iter3              3
 # }
 ```

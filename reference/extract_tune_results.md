@@ -79,22 +79,21 @@ wf <- workflows::workflow(rec, parsnip::linear_reg())
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
-  outside = rsample::vfold_cv(v = 3),
-  inside = rsample::vfold_cv(v = 3)
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
 )
 
 set.seed(2)
-res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
 
 extract_tune_results(final)
 #> # Tuning results
-#> # 3-fold cross-validation 
-#> # A tibble: 3 × 4
+#> # 2-fold cross-validation 
+#> # A tibble: 2 × 4
 #>   splits          id    .metrics         .notes          
 #>   <list>          <chr> <list>           <list>          
-#> 1 <split [21/11]> Fold1 <tibble [6 × 5]> <tibble [0 × 4]>
-#> 2 <split [21/11]> Fold2 <tibble [6 × 5]> <tibble [0 × 4]>
-#> 3 <split [22/10]> Fold3 <tibble [6 × 5]> <tibble [0 × 4]>
+#> 1 <split [16/16]> Fold1 <tibble [4 × 5]> <tibble [0 × 4]>
+#> 2 <split [16/16]> Fold2 <tibble [4 × 5]> <tibble [0 × 4]>
 ```

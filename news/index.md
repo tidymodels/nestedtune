@@ -2,6 +2,12 @@
 
 ## nestedtune 0.0.0.9000
 
+- The help-page examples that build a tuning run use two outer and two
+  inner folds of `mtcars` and a `num_comp` grid of 1:2 (the racing page
+  keeps five inner folds, since a race needs more inner resamples than
+  its burn-in of 2), so the pages run in about half the time; which
+  functions each example calls is unchanged.
+
 - A `nested_results_set` keeps its class only while every row is one of
   the run’s own workflows. Rows dropped or reordered and columns added
   keep the class, so
