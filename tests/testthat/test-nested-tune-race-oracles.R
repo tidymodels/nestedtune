@@ -245,6 +245,90 @@ test_that("the fold record is every candidate the race scored, and the selection
   }
 })
 
+test_that("a race fold that scored nothing carries a zero-row table with no .iter", {
+  skip_if_no_race_fixture()
+
+  # The annealing sibling of this block is in test-nested-tune-sim-anneal-
+  # oracles.R; the two differ only in whether `.iter` is among the columns,
+  # which is the point each of them makes.
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  nested <- break_fold(det_nested(d), fold = 2L, stage = "inner tuning")
+
+  for (fn in RACERS) {
+    set.seed(20)
+    res <- suppressWarnings(race_call_by_name(
+      fn,
+      wf,
+      nested,
+      grid = det_grid(),
+      metrics = reg_metrics(),
+      control = race_control()
+    ))
+
+    expect_false(res$.completed[[2L]])
+    expect_true(res$.completed[[1L]])
+    none <- res$.inner_metrics[[2L]]
+    done <- res$.inner_metrics[[1L]]
+    expect_identical(nrow(none), 0L)
+    # A race does not iterate, so the zero-row table it takes from a
+    # completed fold's columns carries no `.iter` either.
+    expect_false(".iter" %in% names(none))
+    expect_identical(names(none), names(done))
+    expect_identical(
+      vapply(none, function(col) class(col)[[1L]], character(1)),
+      vapply(done, function(col) class(col)[[1L]], character(1))
+    )
+  }
+})
+
+
+test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
+  skip_if_no_race_fixture()
+
+  # Written from the Reproducibility section of ?nested_tune_race, line for
+  # line: the fold's tuning seed with the kind pinned, the recorded control,
+  # the race on the fold's inner rset, then `select_best()`.
+  d <- make_reg_data()
+  object <- det_workflow(d)
+  resamples <- det_nested(d)
+  metrics <- reg_metrics()
+
+  for (fn in RACERS) {
+    res <- race_results(fn)
+    racer <- getExportedValue("finetune", fn)
+    grid <- attr(res, "procedure")$grid
+    param_info <- attr(res, "procedure")$param_info
+    eval_time <- attr(res, "procedure")$eval_time
+    i <- 2L
+
+    set.seed(
+      res$.tuning_seed[[i]],
+      kind = "Mersenne-Twister",
+      normal.kind = "Inversion",
+      sample.kind = "Rejection"
+    )
+    control <- attr(res, "procedure")$control
+    raced <- racer(
+      object,
+      resamples$inner_resamples[[i]],
+      grid = grid,
+      param_info = param_info,
+      metrics = metrics,
+      eval_time = eval_time,
+      control = control
+    )
+    expect_identical(
+      res$.inner_metrics[[i]],
+      tune::collect_metrics(raced, all_configs = TRUE)
+    )
+    expect_identical(
+      res$.selected[[i]],
+      tune::select_best(raced, metric = "rmse")
+    )
+  }
+})
+
 # The selection rule on the racing path (M69, AC1), for both racers: the
 # reference loop's selection is tune's selector called by name on the hand
 # race (reference_select(), helper-orchestration.R). Measured 2026-09-06 on

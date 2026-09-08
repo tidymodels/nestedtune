@@ -41,8 +41,8 @@
 # because an unstated exemption is how the first version of this comment came to
 # overclaim. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (the classify file sets it on one line and spends it on the next block); and a wait that is
-# no function call at all (the deadline poll in interrupt). None carries an
+# and spent at another (classify:723 sets it, :729 spends it); and a wait that
+# is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
 #

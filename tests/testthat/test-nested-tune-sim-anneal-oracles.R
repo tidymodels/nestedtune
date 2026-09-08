@@ -223,6 +223,76 @@ test_that("the initial candidates are the grid path's under the same seed (AC2)"
     }
   }
 })
+
+test_that("a fold that scored nothing carries .iter on its zero-row table (AC1)", {
+  skip_if_no_anneal_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  nested <- break_fold(det_nested(d), fold = 2L, stage = "inner tuning")
+
+  set.seed(20)
+  res <- suppressWarnings(memoised(nested_tune_sim_anneal(
+    wf,
+    nested,
+    iter = 2,
+    initial = 3,
+    metrics = reg_metrics(),
+    control = anneal_control()
+  )))
+
+  expect_false(res$.completed[[2L]])
+  expect_true(res$.completed[[1L]])
+  none <- res$.inner_metrics[[2L]]
+  done <- res$.inner_metrics[[1L]]
+  expect_identical(nrow(none), 0L)
+  expect_true(".iter" %in% names(none))
+  expect_identical(names(none), names(done))
+  expect_identical(
+    vapply(none, function(col) class(col)[[1L]], character(1)),
+    vapply(done, function(col) class(col)[[1L]], character(1))
+  )
+})
+
+test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
+  skip_if_no_anneal_fixture()
+
+  # Written from the Reproducibility section of ?nested_tune_sim_anneal, line
+  # for line: the fold's tuning seed with the kind pinned, the recorded
+  # control, the search on the fold's inner rset, then `select_best()`.
+  d <- make_reg_data()
+  object <- det_workflow(d)
+  resamples <- det_nested(d)
+  metrics <- reg_metrics()
+
+  res <- anneal_results()
+  procedure <- attr(res, "procedure")
+  i <- 2L
+
+  set.seed(
+    res$.tuning_seed[[i]],
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  control <- procedure$control
+  tuned <- finetune::tune_sim_anneal(
+    object,
+    resamples$inner_resamples[[i]],
+    iter = procedure$iter,
+    initial = procedure$initial,
+    param_info = procedure$param_info,
+    metrics = metrics,
+    eval_time = procedure$eval_time,
+    control = control
+  )
+  expect_identical(res$.inner_metrics[[i]], tune::collect_metrics(tuned))
+  expect_identical(
+    res$.selected[[i]],
+    tune::select_best(tuned, metric = "rmse")
+  )
+})
+
 # The selection rule on the annealing path (M69, AC1): the reference loop's
 # selection is tune's selector called by name on the hand run
 # (reference_select(), helper-orchestration.R). On the metric-separating
