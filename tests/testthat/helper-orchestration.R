@@ -1258,17 +1258,12 @@ canonical_form <- function(x, depth = 0L, seen = list()) {
 
 fixture_cache <- new.env(parent = emptyenv())
 
-fixture_cache_reset <- function() {
-  rm(list = ls(fixture_cache, all.names = TRUE), envir = fixture_cache)
-  invisible(NULL)
-}
-
 # Drop every entry whose call matches `pattern`, returning how many went.
 #
 # The cache outlives the file that filled it, which is the whole point, and it
 # is also why test-fixture-cache.R has to tidy up: its stand-in builders are not
-# fixtures anyone else wants, and one of them is a fixture built twice on
-# purpose. Left in place they would surface in the run-wide report as findings.
+# fixtures anyone else wants, and left in place they would surface in the
+# run-wide report beside the real ones.
 fixture_cache_forget <- function(pattern) {
   keys <- ls(fixture_cache, all.names = TRUE)
   drop <- keys[vapply(
@@ -2392,35 +2387,6 @@ coef_extract <- rlang::new_function(
   quote(stats::coef(workflows::extract_fit_engine(x))),
   env = baseenv()
 )
-
-# What a run whose control asked for both outer-fit columns carries (M68):
-# `.predictions` then `.extracts`, every fold completed, each prediction table
-# one row per assessment row of its split with tune's columns, and each
-# extract `coef_extract()`'s named vector with the intercept first. Every
-# orchestrator runs the same fold fit, so this is the presence check the four
-# siblings make against the grid path's oracle.
-expect_outer_columns_kept <- function(res) {
-  testthat::expect_true(all(c(".extracts", ".predictions") %in% names(res)))
-  testthat::expect_lt(
-    match(".predictions", names(res)),
-    match(".extracts", names(res))
-  )
-  testthat::expect_true(all(res$.completed))
-  for (i in seq_len(nrow(res))) {
-    preds <- res$.predictions[[i]]
-    testthat::expect_s3_class(preds, "tbl_df")
-    testthat::expect_identical(
-      nrow(preds),
-      nrow(rsample::assessment(res$splits[[i]]))
-    )
-    testthat::expect_true(all(c(".pred", ".row", ".config") %in% names(preds)))
-    coefs <- res$.extracts[[i]]
-    testthat::expect_type(coefs, "double")
-    testthat::expect_identical(names(coefs)[[1L]], "(Intercept)")
-    testthat::expect_false("outer extract" %in% res$.notes[[i]]$location)
-  }
-  invisible(res)
-}
 
 # The workflow sets `nested_workflow_map()` runs (M71, D-058), built with
 # `workflowsets::as_workflow_set()` over the fixtures above, so each id is
