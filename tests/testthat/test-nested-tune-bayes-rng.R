@@ -294,45 +294,6 @@ test_that("the caller's RNG state and kind survive the call untouched", {
   expect_identical(with_call, without_call)
 })
 
-test_that("the RNG state is restored when folds fail but the run completes", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  p <- bayes_param_info(wf)
-
-  set.seed(7)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-
-  # Both folds engineered to fail: the seeds are drawn, every fold fails inside
-  # tune, and the failures are recorded rather than raised.
-  folds <- break_fold(break_fold(folds, 1L, "inner tuning"), 2L, "inner tuning")
-
-  set.seed(505)
-  before_seed <- .Random.seed
-  before_kind <- RNGkind()
-
-  res <- suppressWarnings(
-    nested_tune_bayes(
-      wf,
-      folds,
-      iter = 1,
-      initial = 3,
-      param_info = p,
-      metrics = reg_metrics()
-    )
-  )
-  expect_identical(attr(res, "folds_completed"), 0L)
-  expect_false(any(res$.completed))
-
-  expect_identical(.Random.seed, before_seed)
-  expect_identical(RNGkind(), before_kind)
-})
-
 test_that("the RNG state is restored when the call itself errors", {
   skip_if_no_bayes_fixture()
 

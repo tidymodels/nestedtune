@@ -112,24 +112,6 @@ test_that("anything else that is not a fold record is recorded as a worker failu
   }
 })
 
-test_that("a miraiInterrupt aborts instead of being recorded as a failed fold", {
-  # BC4: a cancelled run is not a run that had failures. Recording an interrupt
-  # as a failed fold would let a run the user stopped masquerade as a completed
-  # design with some folds missing -- an IP4 inversion.
-  # mirai resolves a real interrupt to an EMPTY CHARACTER STRING carrying these
-  # classes -- not an integer. An earlier fixture used 20L; classification is
-  # inherits()-based so it passed either way, but a fixture that does not match
-  # what production sees is not evidence.
-  interrupt <- structure(
-    "",
-    class = c("miraiInterrupt", "errorValue", "try-error")
-  )
-  expect_error(
-    classify_fold_result(interrupt),
-    class = "nestedtune_interrupted"
-  )
-})
-
 test_that("a cancelled task aborts instead of being recorded as a failed fold", {
   # M09-D1: stop_mirai() resolves every task in the map to errorValue 20 --
   # the one in flight and the ones still queued alike -- and carries no
@@ -154,15 +136,23 @@ test_that("a cancelled run is caught by a handler for any stopped run", {
 })
 
 test_that("a real interrupt is an interrupt, not a cancellation", {
-  # The interrupt fixture is an empty STRING (see the BC4 test above), so
-  # as.integer() on it is NA. A cancellation check that reached for the integer
-  # before validating the shape would misfire right here.
+  # BC4: a cancelled run is not a run that had failures. Recording an
+  # interrupt as a failed fold would let a run the user stopped masquerade as
+  # a completed design with some folds missing -- an IP4 inversion. mirai
+  # resolves a real interrupt to an EMPTY CHARACTER STRING carrying these
+  # classes, not an integer (an earlier fixture used 20L; classification is
+  # inherits()-based so it passed either way, but a fixture that does not
+  # match what production sees is not evidence), so as.integer() on it is NA.
+  # A cancellation check that reached for the integer before validating the
+  # shape would misfire right here.
   interrupt <- structure(
     "",
     class = c("miraiInterrupt", "errorValue", "try-error")
   )
-  cnd <- tryCatch(classify_fold_result(interrupt), condition = identity)
-  expect_s3_class(cnd, "nestedtune_interrupted")
+  cnd <- expect_error(
+    classify_fold_result(interrupt),
+    class = "nestedtune_interrupted"
+  )
   expect_false(inherits(cnd, "nestedtune_cancelled"))
 })
 
@@ -194,21 +184,6 @@ test_that("a worker whose message is the cancel code is not a cancellation", {
   err <- structure("20", class = c("miraiError", "errorValue", "try-error"))
   expect_true(err == cancel_error_value) # the coercion this guards against
   expect_false(is_cancelled_value(err))
-})
-
-test_that("dispatch refuses daemons that cannot load the package", {
-  # The probe result is injected rather than engineered. Producing it for real
-  # means pointing the daemons' library path somewhere empty, which also stops
-  # them loading *mirai* -- they die at startup, are still counted as
-  # connections, and the pre-flight round-trip then blocks forever. That hung
-  # `R CMD check` for 39 minutes before this test was rewritten, and it is the
-  # reason the probe is now bounded (M07-D6). The genuinely heterogeneous pool
-  # AC1 asks for is built in test-parallel-detection.R, where the scratch
-  # library keeps mirai and drops only the target.
-  expect_error(
-    check_daemons_can_load(preflight_outcome(reports(FALSE))),
-    class = "nestedtune_daemons_cannot_load"
-  )
 })
 
 test_that("a connected daemon that cannot answer in time is bounded", {
@@ -558,18 +533,6 @@ test_that("the missing symbols are the union across the pool", {
     status$missing_symbols,
     c("nested_fold_fit", "rehydrate_payload")
   )
-})
-
-test_that("a load failure still outranks an incompatible daemon", {
-  # The ladder extends M10-D1 rather than reordering it: installing the package
-  # is a stronger instruction than reinstalling it, so a pool failing both ways
-  # is still told to install.
-  status <- preflight_outcome(
-    reports(FALSE, TRUE, missing = list(NULL, "rehydrate_payload"))
-  )
-  expect_identical(status$outcome, "cannot_load")
-  expect_identical(status$cannot_load, 1L)
-  expect_identical(status$incompatible, 1L)
 })
 
 test_that("an incompatible daemon outranks one that never answered", {

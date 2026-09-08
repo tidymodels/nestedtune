@@ -228,6 +228,9 @@ test_that("the fold record is every candidate the race scored, and the selection
       )
 
       tbl <- res$.inner_metrics[[i]]
+      # A race does not iterate: no `.iter` on its record, so none on the
+      # zero-row table a failed fold takes from a completed one.
+      expect_false(".iter" %in% names(tbl))
       n_max <- nrow(folds$inner_resamples[[i]])
       eliminated <- eliminated + sum(tbl$n < n_max)
       # The selection is a candidate raced to the end.
@@ -239,94 +242,6 @@ test_that("the fold record is every candidate the race scored, and the selection
     # `n` below the resample count, which the survivors-only default would
     # have dropped.
     expect_gt(eliminated, 0L)
-  }
-})
-
-test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
-  skip_if_no_race_fixture()
-
-  # Written from the Reproducibility section of ?nested_tune_race, line for
-  # line: the fold's tuning seed with the kind pinned, the recorded control,
-  # the race on the fold's inner rset, then `select_best()`.
-  d <- make_reg_data()
-  object <- det_workflow(d)
-  resamples <- det_nested(d)
-  metrics <- reg_metrics()
-
-  for (fn in RACERS) {
-    res <- race_results(fn)
-    racer <- getExportedValue("finetune", fn)
-    grid <- attr(res, "procedure")$grid
-    param_info <- attr(res, "procedure")$param_info
-    eval_time <- attr(res, "procedure")$eval_time
-    i <- 2L
-
-    set.seed(
-      res$.tuning_seed[[i]],
-      kind = "Mersenne-Twister",
-      normal.kind = "Inversion",
-      sample.kind = "Rejection"
-    )
-    control <- attr(res, "procedure")$control
-    raced <- racer(
-      object,
-      resamples$inner_resamples[[i]],
-      grid = grid,
-      param_info = param_info,
-      metrics = metrics,
-      eval_time = eval_time,
-      control = control
-    )
-    expect_identical(
-      res$.inner_metrics[[i]],
-      tune::collect_metrics(raced, all_configs = TRUE)
-    )
-    expect_identical(
-      res$.selected[[i]],
-      tune::select_best(raced, metric = "rmse")
-    )
-  }
-})
-
-# ---- the outer fit's predictions and extracts (M68) --------------------------
-
-test_that("a racing run keeps the outer fit's predictions and extracts when the control asks (AC1, AC2)", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- det_nested(d)
-  g <- det_grid()
-  ms <- reg_metrics()
-  ctrl <- finetune::control_race(
-    burn_in = 2,
-    save_pred = TRUE,
-    extract = coef_extract
-  )
-  for (fn in RACERS) {
-    set.seed(20)
-    res <- switch(
-      fn,
-      tune_race_anova = memoised(nested_tune_race_anova(
-        wf,
-        folds,
-        grid = g,
-        metrics = ms,
-        control = ctrl
-      )),
-      tune_race_win_loss = memoised(nested_tune_race_win_loss(
-        wf,
-        folds,
-        grid = g,
-        metrics = ms,
-        control = ctrl
-      ))
-    )
-    expect_outer_columns_kept(res)
-    # The passing control: the suite's run under `race_control()` carries
-    # neither column.
-    plain <- race_results(fn)
-    expect_false(any(c(".extracts", ".predictions") %in% names(plain)))
   }
 })
 

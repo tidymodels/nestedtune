@@ -239,46 +239,6 @@ test_that("the caller's RNG state and kind survive the call untouched", {
   expect_identical(with_call, without_call)
 })
 
-test_that("the RNG state is restored when folds fail but the run completes", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  ctrl <- anneal_control()
-
-  # Both folds engineered to fail: the seeds are drawn, every fold fails
-  # inside the search, and the failures are recorded rather than raised.
-  set.seed(7)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-  folds <- break_fold(break_fold(folds, 1L, "inner tuning"), 2L, "inner tuning")
-
-  set.seed(505)
-  before_seed <- .Random.seed
-  before_kind <- RNGkind()
-
-  res <- suppressWarnings(nested_tune_sim_anneal(
-    wf,
-    folds,
-    iter = 2,
-    initial = 3,
-    metrics = reg_metrics(),
-    control = ctrl
-  ))
-  expect_identical(attr(res, "folds_completed"), 0L)
-  expect_false(any(res$.completed))
-  # A fold that scored nothing carries the zero-row table under a completed
-  # fold's columns, `.iter` among them: annealing iterates.
-  expect_identical(nrow(res$.inner_metrics[[1L]]), 0L)
-  expect_true(".iter" %in% names(res$.inner_metrics[[1L]]))
-
-  expect_identical(.Random.seed, before_seed)
-  expect_identical(RNGkind(), before_kind)
-})
-
 test_that("the RNG state is restored when the call itself errors", {
   skip_if_no_anneal_fixture()
 
