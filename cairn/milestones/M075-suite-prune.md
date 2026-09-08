@@ -1,13 +1,13 @@
 # M75: The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M74
 - **Driving RR:** —
 - **Principles touched:** GP4
 - **Resolves:** —
 - **Surface tier:** internal — deletes and trims test files; no external consumer of the package relies on them
-- **Branch/PR:** —
+- **Branch/PR:** m075-suite-prune
 
 ## Goal
 
