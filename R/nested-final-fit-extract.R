@@ -66,12 +66,12 @@
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 #' set.seed(3)
 #' final <- nested_final_fit(wf, res)
 #'
@@ -165,12 +165,12 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 #' set.seed(3)
 #' final <- nested_final_fit(wf, res)
 #'

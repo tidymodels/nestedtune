@@ -60,12 +60,12 @@
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 #'
 #' res
 #'
@@ -180,12 +180,12 @@ print_failure_count <- function(x) {
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 #'
 #' summary(res)
 #'

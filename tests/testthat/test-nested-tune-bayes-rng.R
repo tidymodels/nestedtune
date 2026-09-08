@@ -9,6 +9,10 @@
 
 bayes_tuner <- function() tuner_bayes(2, 3, tune::exp_improve())
 
+# The seed-77 run is built once and read back by the different-seed test
+# below (M74). The identity here is still between two executions: `first`
+# is the build, `second` a direct call, never two reads of one cache entry
+# (the M42 lesson).
 test_that("the same seed produces the same result", {
   skip_if_no_bayes_fixture(stochastic = TRUE)
 
@@ -25,14 +29,14 @@ test_that("the same seed produces the same result", {
   )
 
   set.seed(77)
-  first <- nested_tune_bayes(
+  first <- memoised(nested_tune_bayes(
     wf,
     folds,
     iter = 2,
     initial = 3,
     param_info = p,
     metrics = ms
-  )
+  ))
   set.seed(77)
   second <- nested_tune_bayes(
     wf,
@@ -65,14 +69,14 @@ test_that("a different seed produces different numbers", {
   )
 
   set.seed(77)
-  first <- nested_tune_bayes(
+  first <- memoised(nested_tune_bayes(
     wf,
     folds,
     iter = 2,
     initial = 3,
     param_info = p,
     metrics = ms
-  )
+  ))
   set.seed(78)
   other <- nested_tune_bayes(
     wf,

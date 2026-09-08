@@ -20,6 +20,11 @@ anneal_run <- function(wf, folds, p, ms, ctrl = anneal_control()) {
   )
 }
 
+# The seed-77 run is built once and read back by the different-seed test
+# below (M74): `first` is the build, `second` a direct call, so the identity
+# is between two executions and never two reads of one cache entry (the M42
+# lesson). Spelled out rather than through anneal_run() so the cache keys the
+# package call itself.
 test_that("the same seed produces the same result", {
   skip_if_no_anneal_fixture(stochastic = TRUE)
 
@@ -36,7 +41,15 @@ test_that("the same seed produces the same result", {
   )
 
   set.seed(77)
-  first <- anneal_run(wf, folds, p, ms)
+  first <- memoised(nested_tune_sim_anneal(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    param_info = p,
+    metrics = ms,
+    control = anneal_control()
+  ))
   set.seed(77)
   second <- anneal_run(wf, folds, p, ms)
 
@@ -63,7 +76,15 @@ test_that("a different seed produces different inner tables", {
   )
 
   set.seed(77)
-  first <- anneal_run(wf, folds, p, ms)
+  first <- memoised(nested_tune_sim_anneal(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    param_info = p,
+    metrics = ms,
+    control = anneal_control()
+  ))
   set.seed(78)
   other <- anneal_run(wf, folds, p, ms)
 

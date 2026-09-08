@@ -18,6 +18,32 @@ race_run <- function(fn, wf, folds, ms, ctrl = race_control()) {
   )
 }
 
+# The same run served from the fixture cache, keyed on the package call
+# itself (M74): the seed-77 run is built once by the same-seed test and read
+# back by the different-seed test. `first` in the same-seed test is the
+# build and `second` a direct call, so that identity is between two
+# executions, never two reads of one cache entry (the M42 lesson).
+race_run_cached <- function(fn, wf, folds, ms, ctrl = race_control()) {
+  g <- stoch_grid()
+  switch(
+    fn,
+    tune_race_anova = memoised(nested_tune_race_anova(
+      wf,
+      folds,
+      grid = g,
+      metrics = ms,
+      control = ctrl
+    )),
+    tune_race_win_loss = memoised(nested_tune_race_win_loss(
+      wf,
+      folds,
+      grid = g,
+      metrics = ms,
+      control = ctrl
+    ))
+  )
+}
+
 test_that("the same seed produces the same result", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
@@ -34,7 +60,7 @@ test_that("the same seed produces the same result", {
 
   for (fn in RACERS) {
     set.seed(77)
-    first <- race_run(fn, wf, folds, ms)
+    first <- race_run_cached(fn, wf, folds, ms)
     set.seed(77)
     second <- race_run(fn, wf, folds, ms)
 
@@ -62,7 +88,7 @@ test_that("a different seed produces different inner tables", {
 
   for (fn in RACERS) {
     set.seed(77)
-    first <- race_run(fn, wf, folds, ms)
+    first <- race_run_cached(fn, wf, folds, ms)
     set.seed(78)
     other <- race_run(fn, wf, folds, ms)
 

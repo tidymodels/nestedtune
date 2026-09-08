@@ -95,7 +95,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled rac
 
   for (fn in RACERS) {
     res <- race_results(fn)
-    ref <- reference_nested_race_loop(
+    ref <- memoised(reference_nested_race_loop(
       fn,
       wf,
       folds,
@@ -104,7 +104,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled rac
       seed = 20,
       metric_name = "rmse",
       control = race_control()
-    )
+    ))
     expect_matches_reference(res, ref, "rmse")
     expect_identical(attr(res, "procedure")$tuner, fn)
   }
@@ -129,7 +129,7 @@ test_that("the racing reference loop also matches on the metric-separating fixtu
       metrics = ms,
       control = ctrl
     )
-    ref <- reference_nested_race_loop(
+    ref <- memoised(reference_nested_race_loop(
       fn,
       wf,
       folds,
@@ -138,7 +138,7 @@ test_that("the racing reference loop also matches on the metric-separating fixtu
       seed = 23,
       metric_name = "mae",
       control = ctrl
-    )
+    ))
     expect_matches_reference(res, ref, "mae")
     # The metric set reached the race: the outer metrics are the set's.
     expect_setequal(res$.metrics[[1L]]$.metric, c("mae", "rmse"))
@@ -201,7 +201,7 @@ test_that("the fold record is every candidate the race scored, and the selection
       metrics = ms,
       control = ctrl
     )
-    ref <- reference_nested_race_loop(
+    ref <- memoised(reference_nested_race_loop(
       fn,
       wf,
       folds,
@@ -210,7 +210,7 @@ test_that("the fold record is every candidate the race scored, and the selection
       seed = 24,
       metric_name = "rmse",
       control = ctrl
-    )
+    ))
     expect_matches_reference(res, ref, "rmse")
 
     eliminated <- 0L
@@ -351,6 +351,20 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     pct_loss = selection_rule("pct_loss", num_comp, limit = 5)
   )
   for (fn in RACERS) {
+    # One reference race per racer for the configuration -- the one the
+    # deterministic oracle above built, served from the cache -- and each rule
+    # applied to it through reference_with_rule() (M74).
+    set.seed(20)
+    ref_best <- memoised(reference_nested_race_loop(
+      fn,
+      wf,
+      folds,
+      grid = det_grid(),
+      metrics = ms,
+      seed = 20,
+      metric_name = "rmse",
+      control = ctrl
+    ))
     picked <- list()
     for (nm in names(rules)) {
       set.seed(20)
@@ -362,17 +376,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
         control = ctrl,
         select = rules[[nm]]
       )
-      ref <- reference_nested_race_loop(
-        fn,
-        wf,
-        folds,
-        grid = det_grid(),
-        metrics = ms,
-        seed = 20,
-        metric_name = "rmse",
-        control = ctrl,
-        select = rules[[nm]]
-      )
+      ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
       expect_matches_reference(res, ref, "rmse")
       expect_identical(extract_procedure(res)$select, rules[[nm]])
       picked[[nm]] <- res$.selected

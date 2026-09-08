@@ -96,13 +96,17 @@ run_finalize_tuner <- function(fn, wf, nested, param_info) {
   ms <- reg_metrics()
   switch(
     fn,
-    tune_grid = nested_tune_grid(
+    # Served from the fixture cache, so AC2 reads the run AC1 built rather
+    # than paying for a second one (M74). The key sees the recording
+    # `param_info` with its record still empty, which is how AC2's fresh
+    # record keys to AC1's entry.
+    tune_grid = memoised(nested_tune_grid(
       wf,
       nested,
       param_info = param_info,
       grid = 5,
       metrics = ms
-    ),
+    )),
     tune_race_anova = nested_tune_race_anova(
       wf,
       nested,
@@ -225,13 +229,14 @@ test_that("AC2: every candidate a fold searched lies inside the range its analys
   nested <- finalize_nested(d)
   wf <- stoch_workflow(d)
 
-  set.seed(2)
-  res <- suppressMessages(nested_tune_grid(
+  # AC1's grid run, read back from the cache (M74): the same seed and a
+  # fresh, empty record key to the entry AC1 built.
+  set.seed(1)
+  res <- suppressMessages(run_finalize_tuner(
+    "tune_grid",
     wf,
     nested,
-    param_info = frac_param_info(wf),
-    grid = 5,
-    metrics = reg_metrics()
+    frac_param_info(wf, new_frame_record())
   ))
   expect_true(all(res$.completed))
 

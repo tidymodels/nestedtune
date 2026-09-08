@@ -62,24 +62,35 @@
 #   `.iter`-bearing run picks the row the package picked, and routes the tail
 #   through upstream code. Satisfies AC3's second clause.
 
-test_that("the final fit matches a hand-rolled reference pipeline", {
-  skip_if_no_engines(stochastic = TRUE)
-
+# One final fit and one reference per file rather than per test (M74): both
+# are built once and served from the cache to the two strands below, as
+# bayes_final_and_reference() does for the Bayesian path.
+grid_final_and_reference <- function() {
   d <- make_reg_data()
   wf <- stoch_workflow(d)
   res <- stoch_final_results(d)
 
   set.seed(99)
-  final <- nested_final_fit(wf, res)
+  final <- memoised(nested_final_fit(wf, res))
 
-  ref <- reference_final_fit(
+  ref <- memoised(reference_final_fit(
     wf,
     d,
     attr(res, "procedure")$grid,
     attr(res, "metrics"),
     seed = 99,
     metric_name = "rmse"
-  )
+  ))
+  list(d = d, final = final, ref = ref)
+}
+
+test_that("the final fit matches a hand-rolled reference pipeline", {
+  skip_if_no_engines(stochastic = TRUE)
+
+  g <- grid_final_and_reference()
+  d <- g$d
+  final <- g$final
+  ref <- g$ref
 
   # The seed layout itself, derived independently from the documented contract.
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
@@ -128,21 +139,10 @@ test_that("a single-candidate grid degenerates to a direct fit", {
 test_that("the final fit matches tune::fit_best() on the same tuning run", {
   skip_if_no_engines(stochastic = TRUE)
 
-  d <- make_reg_data()
-  wf <- stoch_workflow(d)
-  res <- stoch_final_results(d)
-
-  set.seed(99)
-  final <- nested_final_fit(wf, res)
-
-  ref <- reference_final_fit(
-    wf,
-    d,
-    attr(res, "procedure")$grid,
-    attr(res, "metrics"),
-    seed = 99,
-    metric_name = "rmse"
-  )
+  g <- grid_final_and_reference()
+  d <- g$d
+  final <- g$final
+  ref <- g$ref
 
   # The tail routed through upstream's own implementation rather than ours:
   # fit_best() selects, finalizes, and fits on the full training set itself.
@@ -383,7 +383,7 @@ test_that("the final fit re-runs under the recorded control (M48, AC4)", {
   set.seed(98)
   final <- memoised(nested_final_fit(wf, res))
 
-  ref <- reference_bayes_final_fit(
+  ref <- memoised(reference_bayes_final_fit(
     wf,
     d,
     iter = proc$iter,
@@ -394,7 +394,7 @@ test_that("the final fit re-runs under the recorded control (M48, AC4)", {
     seed = 98,
     metric_name = "rmse",
     control = proc$control
-  )
+  ))
 
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
   expect_identical(final$selected, ref$selected)

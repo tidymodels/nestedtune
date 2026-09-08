@@ -162,7 +162,8 @@ reference_nested_loop <- function(
       metrics = tune::collect_metrics(fitted),
       selected = best,
       tuning_seed = tuning_seed,
-      outer_fit_seed = outer_seed
+      outer_fit_seed = outer_seed,
+      tuned = tuned
     )
   })
 }
@@ -193,6 +194,37 @@ reference_select <- function(tuned, select, metric_name) {
     )))
   }
   rlang::abort(sprintf("reference_select() knows no rule %s", select$rule))
+}
+
+# A reference loop's answer under another selection rule, from the tuning
+# stage it already ran (M74). Each fold's hand-run tuning result is kept in
+# the loop's `tuned` field, and the rule only changes what is selected from
+# it and the outer fit that follows: the selection is `reference_select()`
+# on that result, the outer fit is `tune::last_fit()` under the fold's
+# `outer_fit_seed` with the kind pinned -- the same two steps the loop takes
+# after its tuning stage, on the same numbers. So the four selection-rule
+# blocks pay for one reference tuning stage per configuration and apply the
+# three rules to it, rather than tuning once per rule.
+reference_with_rule <- function(ref, wf, nested, metrics, select, metric_name) {
+  lapply(seq_along(ref), function(i) {
+    fold <- ref[[i]]
+    best <- reference_select(fold$tuned, select, metric_name)
+    final_wf <- tune::finalize_workflow(wf, best)
+    set.seed(
+      fold$outer_fit_seed,
+      kind = "Mersenne-Twister",
+      normal.kind = "Inversion",
+      sample.kind = "Rejection"
+    )
+    fitted <- tune::last_fit(
+      final_wf,
+      split = nested$splits[[i]],
+      metrics = metrics
+    )
+    fold$selected <- best
+    fold$metrics <- tune::collect_metrics(fitted)
+    fold
+  })
 }
 
 # The control a fold's `tune_grid()` runs under, written from the documented

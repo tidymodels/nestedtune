@@ -23,7 +23,10 @@ hand_call <- function(fn, workflow, folds, ms, seed) {
   tuned <- length(tune::extract_parameter_set_dials(workflow)$id) > 0L
   set.seed(seed)
   if (!tuned) {
-    return(nested_fit_resamples(workflow, folds, metrics = ms))
+    # The fixed workflow's hand call is the same run whichever `fn` the block
+    # is for, so it is served from the fixture cache after the first block
+    # builds it (M74).
+    return(memoised(nested_fit_resamples(workflow, folds, metrics = ms)))
   }
   switch(
     fn,

@@ -65,12 +65,12 @@
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
 #'
 #' collect_metrics(res)
 #' collect_metrics(res, summarize = FALSE)
@@ -296,12 +296,12 @@ stack_set <- function(
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #'
 #' set.seed(2)
-#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:3))
+#' res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
 #'
 #' summary(res)
 #' agreement(res)
@@ -391,8 +391,8 @@ orchestrator_label <- function(name) {
 #' set.seed(1)
 #' folds <- nested_resamples(
 #'   mtcars,
-#'   outside = rsample::vfold_cv(v = 3),
-#'   inside = rsample::vfold_cv(v = 3)
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
 #' )
 #' set.seed(2)
 #' res <- nested_workflow_map(wset, resamples = folds)

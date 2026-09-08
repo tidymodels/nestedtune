@@ -59,7 +59,7 @@ test_that("per-fold metrics and selections match a hand-rolled Bayesian referenc
   res <- bayes_results()
   expect_true(all(res$.completed))
 
-  ref <- reference_nested_bayes_loop(
+  ref <- memoised(reference_nested_bayes_loop(
     wf,
     folds,
     iter = 2,
@@ -69,7 +69,7 @@ test_that("per-fold metrics and selections match a hand-rolled Bayesian referenc
     metrics = ms,
     seed = 20,
     metric_name = "rmse"
-  )
+  ))
 
   # The seeds the driver reports must be the ones the documented contract
   # derives -- checked before the metrics, because a driver that both
@@ -114,7 +114,7 @@ test_that("a control passed through `...` reaches every fold (M48, AC1)", {
   res <- bayes_control_results()
   expect_true(all(res$.completed))
 
-  ref <- reference_nested_bayes_loop(
+  ref <- memoised(reference_nested_bayes_loop(
     wf,
     folds,
     iter = 4,
@@ -125,7 +125,7 @@ test_that("a control passed through `...` reaches every fold (M48, AC1)", {
     seed = 20,
     metric_name = "rmse",
     control = ctrl
-  )
+  ))
 
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
   expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
@@ -198,7 +198,7 @@ test_that("the Bayesian reference loop also matches with a stochastic engine", {
   )
   expect_true(all(res$.completed))
 
-  ref <- reference_nested_bayes_loop(
+  ref <- memoised(reference_nested_bayes_loop(
     wf,
     folds,
     iter = 2,
@@ -208,7 +208,7 @@ test_that("the Bayesian reference loop also matches with a stochastic engine", {
     metrics = ms,
     seed = 21,
     metric_name = "rmse"
-  )
+  ))
 
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
   expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
@@ -429,6 +429,21 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     one_std_err = selection_rule("one_std_err", df1),
     pct_loss = selection_rule("pct_loss", df1, limit = 5)
   )
+  # One reference tuning stage for the configuration -- the one the default
+  # oracle above built, served from the cache -- and each rule applied to it
+  # through reference_with_rule() (M74).
+  set.seed(20)
+  ref_best <- memoised(reference_nested_bayes_loop(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    objective = tune::exp_improve(),
+    param_info = p,
+    metrics = ms,
+    seed = 20,
+    metric_name = "rmse"
+  ))
   picked <- list()
   for (nm in names(rules)) {
     set.seed(20)
@@ -442,18 +457,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
       select = rules[[nm]]
     )
     expect_true(all(res$.completed), info = nm)
-    ref <- reference_nested_bayes_loop(
-      wf,
-      folds,
-      iter = 2,
-      initial = 3,
-      objective = tune::exp_improve(),
-      param_info = p,
-      metrics = ms,
-      seed = 20,
-      metric_name = "rmse",
-      select = rules[[nm]]
-    )
+    ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
     for (i in seq_len(nrow(res))) {
       expect_identical(res$.selected[[i]], ref[[i]]$selected, info = nm)
       expect_identical(res$.metrics[[i]], ref[[i]]$metrics, info = nm)
