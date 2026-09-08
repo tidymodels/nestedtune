@@ -22,9 +22,8 @@
 # WHAT THE SERIAL COMPARISON BELOW IS AND IS NOT. It pins argument plumbing. It
 # is NOT a mode-independence (IP2) assertion, and must not be read as one: the
 # sep_* path is step_pca() + linear_reg(), which draws nothing, and
-# test-parallel-identity.R:12-14 records that identity comparisons on an
-# RNG-free workflow pass vacuously. IP2 is asserted in the three identity
-# files (M76 split them), on ranger.
+# test-parallel-identity.R:11-13 records that identity comparisons on an
+# RNG-free workflow pass vacuously. IP2 is asserted in that file, on ranger.
 #
 # TWO RNG FACTS THAT LOOK LIKE A TRAP AND ARE NOT. mirai starts every daemon on
 # its own L'Ecuyer-CMRG stream (M07), and the sep_* fixture's all-three-folds

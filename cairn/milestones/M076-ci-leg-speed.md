@@ -20,13 +20,13 @@ steps earn the 30-minute cap the other three legs carry.
 
 ## Scope
 
-**In:** the two test-suite levers M74's re-cut left unpriced — splitting
-`test-parallel-identity.R` at its daemon-pool section boundaries so its two
-sections run as separate testthat workers, and re-ordering
-`Config/testthat/start-first` by measured per-file time. Local pricing of each
-lever, one CI round of three attempts on the finished head, each leg's
-`timeout-minutes` set from its measured median, and the yaml cap comment and
-`cairn/PROFILE.md` test-doctrine slot brought to the measured figures.
+**In:** local pricing of the two test-suite levers M74's re-cut left
+unpriced — splitting `test-parallel-identity.R` at its daemon-pool section
+boundaries, and re-ordering `Config/testthat/start-first` by measured
+per-file time — and adopting each only where it pays. One CI round of three
+attempts on the finished head, each leg's `timeout-minutes` set from its
+measured median, and the yaml cap comment and `cairn/PROFILE.md`
+test-doctrine slot brought to the measured figures.
 
 **Out:** the check-time vignette rebuild (197–240 s on windows against
 125–157 s before M74) → the candidate row this milestone leaves, which names
@@ -36,52 +36,39 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 
 ## Acceptance criteria
 
-- [ ] AC1: Every file under `tests/testthat/` holding a `share_daemons(` call
-      starts exactly one daemon pool, over the call sites
-      `grep -rn 'share_daemons(' tests/testthat/` lists.
-- [ ] AC2: The sorted list of `test_that()` descriptions extracted from every
+- [ ] AC1: The sorted list of `test_that()` descriptions extracted from every
       `tests/testthat/test-*.R` file on the merged head is identical to the
       list extracted the same way at the branch point.
-- [ ] AC3: Every leg the workflow's `strategy.matrix.config` lists whose
+- [ ] AC2: Every leg the workflow's `strategy.matrix.config` lists whose
       measured `check-r-package` step median is at or below 24 minutes reads
       `timeout-minutes: 30`.
-- [ ] AC4: `Rscript -e 'devtools::test()'` and `Rscript -e 'devtools::check()'`
+- [ ] AC3: `Rscript -e 'devtools::test()'` and `Rscript -e 'devtools::check()'`
       are clean on the merged head (the profile's verify and consistency-gate
       slots).
 
 ## Coverage
 
 - AC1 → T2
-- AC2 → T2, T3
-- AC3 → T5, T6
-- AC4 → T4, T5
+- AC2 → T3, T4
+- AC3 → T2, T3
 
 ## Tasks
 
-- [ ] T1: Price the two levers locally. Record per-file wall-clock medians of
-      three parallel runs (`TESTTHAT_CPUS` at this machine's core count) at the
-      branch point and under each lever separately, into `benchmarks/`, naming
-      head, machine, R version and worker count. `benchmarks/profile-tests.R`
-      pins itself serial, so this is a second measurement mode, not that script.
-- [x] T2: Split `test-parallel-identity.R` (1139 lines) at its two pool-section
-      boundaries — the shared 2-daemon section (`:33`–`:887`), the shared
-      3-daemon section (`:889`–`:1025`) and BC3's private pool (`:1027`–) —
-      so each resulting file starts exactly one pool. Watch for
-      oversubscription: two files each holding a pool run concurrently on a
-      4-vCPU runner, which T1 must price rather than assume.
-- [ ] T3: Re-order `Config/testthat/start-first` in `DESCRIPTION` by T1's
-      medians, adding the files T2 created and dropping any name that no
-      longer exists.
-- [x] T4: Re-key the `helper-time-budget.R` ledger to the moved call sites and
-      get `test-suite-hygiene.R` green (the ledger re-reads its sites by
-      `file:line`, so T2's split renumbers them).
-- [ ] T5: Push the branch, re-run the check workflow three times on one head,
+- [x] T1: Price the two levers locally. Record per-file wall-clock medians of
+      three parallel runs (`TESTTHAT_CPUS` at the runners' four) at the branch
+      point and under each lever separately, into `benchmarks/`, naming head,
+      machine, R version and worker count. `benchmarks/profile-tests.R` pins
+      itself serial, so this is a second measurement mode, not that script.
+- [x] T2: Revert both levers on the branch, on T1's figures — the split of
+      `test-parallel-identity.R` and the `start-first` re-ordering — leaving
+      `benchmarks/profile-tests-parallel.R` and T1's record in place.
+- [ ] T3: Push the branch, re-run the check workflow three times on one head,
       and record each leg's `check-r-package` step duration and median in this
       file, naming the head and its net diff outside `cairn/`.
-- [ ] T6: Set each leg's `timeout-minutes` from its T5 median, and bring the
+- [ ] T4: Set each leg's `timeout-minutes` from its T3 median, and bring the
       yaml cap comment and `cairn/PROFILE.md`'s test-doctrine slot to those
       figures.
-- [ ] T7: Close the absorbed CI-timing candidate row, or re-cut it to what T5
+- [ ] T5: Close the absorbed CI-timing candidate row, or re-cut it to what T3
       measured and what stays unpriced.
 
 ## Work log
@@ -95,8 +82,11 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - 2026-09-08: implement gate chose four test workers for the local pricing (the runners' count, not this machine's eighteen), split-file names saying which pool each holds, and a new sibling benchmark script rather than a mode on `benchmarks/profile-tests.R`, whose header pins itself serial.
 - 2026-09-08: T1 part: `benchmarks/profile-tests-parallel.R` measures suite wall clock with the files parallel, reading per-file wall clock from the hang-trace reporter's stamps because a testthat result's `real` column is 0 for every test under parallel files. Branch point `9b91e18` at 4 workers, 18-core macOS, R 4.6.1, testthat 3.3.2: 198.0 s median over three runs (196.6-199.4); longest single file 81.9 s.
 - 2026-09-08: T1 part: `start-first` reordered by measured time, split not applied, measured 202.8 s median (201.9-205.3) -- slower than the branch point on non-overlapping ranges.
-- 2026-09-08: T2, T4: `test-parallel-identity.R` split at its two pool boundaries into itself (shared 2-daemon pool), `test-parallel-identity-three-daemons.R` and `test-parallel-identity-killed-daemon.R`; the four serial-reference builders moved to `helper-parallel-identity.R`, since a function defined in a test file is visible only there. Pool teardown in the two files without the M74 assertion block is a bare top-level call, so the split moves no test claim. Ledger re-keyed over all 30 identity call sites plus one displaced `test-parallel-metrics.R` row; `test-suite-hygiene.R`'s budgeted-file list extended. `devtools::test()` clean; the 756 `test_that()` descriptions sort identical to the branch point, the comparison proven able to fail by renaming one and watching it diff.
+- 2026-09-08: the split was implemented and green before it was priced and reverted (commit `c2a5bdd`, then the old T2/T4): three files one pool each, the four serial-reference builders moved to a helper, the time-budget ledger re-keyed over all 30 identity call sites, `devtools::test()` clean and the 756 `test_that()` descriptions sorting identical to the branch point. That is what T1 priced.
 - 2026-09-08: checkpoint, T1 unfinished: the split's own pricing is mid-run and its first two runs read 220.1 s and 239.4 s against the 198.0 branch point, which is the oversubscription T2 was told to price rather than assume.
+- 2026-09-08: T1 done. Four configurations at 4 workers, three runs each (five for the last), all `pass 9517 | fail 0 | skip 0`; `benchmarks/test-timing-parallel.md` owns the table. Branch point 198.0 s median against a 194.4 s perfect-packing floor of its own work, so the queue carries 1.9% slack and no re-ordering can recover more than that; re-ordering alone 202.8 s, the split alone 220.1 s, both 201.1 s. The split adds work rather than repacking it -- 862.1 s of file wall against 777.6 -- being three daemon-pool starts and three worker package-loads where there was one, and a 4-vCPU runner pays that more than this 18-core machine does.
+- 2026-09-08: amendment, on T1: both levers reverted and the criteria set narrowed. Dropped the one-pool-per-file criterion, which described only the world where the split landed; the other three keep their wording unchanged, renumbered AC1-AC3, and Coverage with them. Scope now promises pricing both levers and adopting each only where it pays. Tasks re-cut to five: T1 pricing (done), T2 the revert, T3 the CI round, T4 the caps, T5 the candidate row. No re-audit reader was spawned: no criterion's wording changed, one was dropped and three renumbered.
+- 2026-09-08: T2 done. `DESCRIPTION`, `test-parallel-identity.R`, `helper-time-budget.R`, `test-suite-hygiene.R` and `test-parallel-metrics.R` restored to `9b91e18`; the two split files and `helper-parallel-identity.R` deleted. Net diff outside `cairn/` is now `benchmarks/profile-tests-parallel.R` and `benchmarks/test-timing-parallel.md`. `devtools::test()` clean at 9517 passing, the branch-point count.
 
 ## Decisions
 
