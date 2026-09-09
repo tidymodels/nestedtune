@@ -39,35 +39,29 @@ rules in tracking-rules:
 - CI starts from the usethis pair: `check-standard` runs `R CMD check` across
   platforms (a normal CI check — see the merge clause below), `test-coverage` runs
   `covr` to Codecov, annotating a PR but never gating it; `.github/` is `.Rbuildignore`d.
-- Six divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52). **A `concurrency` block**
-  cancels a superseded run on every ref but the default branch, a distribution channel that keeps a completed
-  check instead. **A `paths-ignore` filter** on both triggers of both gating workflows skips `cairn/**`,
-  `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD check` sees — that is the test a fourth path must
-  meet; it bites on `push` only, GitHub evaluating it on a `pull_request` against the whole PR diff. **Hang
-  caps at two scopes** turn a hang into a failed job with a timestamp: `R-CMD-check` bounds its job at 60
-  minutes and its `check-r-package` step at 30, 40 on the windows leg alone (M72, steps past 30; M76 measured three
-  attempts of one head at windows 25.3, devel 20.8, macOS 19.3, oldrel-1 17.6, ubuntu release 19.0 median minutes, so
-  devel came back to 30 and windows alone keeps 40 — the yaml comment holds every attempt and the spread), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57;
-  its yaml says why one scope); re-read them with `grep -n timeout-minutes .github/workflows/*.yaml`.
-  The step bound is the guarantee, on the code both hangs were in (`test_check("nestedtune")`, 52 min under `R
-  CMD check` and 40 under `covr`, hence the two scopes). It was 20 until M48 (2026-09-02) saw the windows step
-  killed at 20 three runs in a row; 30 is not free headroom, and a leg nearing it is a suite to make faster
-  (M52). 60 is the devel leg's from-source build of 129 dependencies, which a 20-minute job cap killed before
-  cache-save; it leaves every non-check step bounded only by the job.
-  **Parallel test files** (`Config/testthat/parallel: true`, M52): `Config/testthat/start-first` in
-  DESCRIPTION queues the slowest files first, so a long file cannot land last (corrected M76: the run is
-  *not* bounded by the largest file — at four workers it takes 198 s against a longest file of 82 s, being
-  bound by how much work it holds and running within 2% of what a perfect packing could reach, so a
-  re-ordering has almost nothing to recover and splitting a file adds work rather than repacking it;
-  `benchmarks/test-timing-parallel.md`). The worker count is `TESTTHAT_CPUS` (testthat prefers `getOption("Ncpus")` when set; no `.Rprofile` sets it), set in the three check workflows' job `env:` at one
-  per runner core (4 on ubuntu and windows, 3 on macOS) and left at testthat's default of 2 locally;
-  `benchmarks/profile-tests.R` pins itself serial so its per-file figures stay comparable, and
-  `benchmarks/profile-tests-parallel.R` is the parallel counterpart that measures wall clock. **A
-  `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the hang on demand, invisible
-  to `ci-usage.py` for carrying neither trigger. **Three organization workflows** ride unedited at
-  tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33): no
-  `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml`
-  runs `air format .` (see DESIGN).
+- Six divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52). **A `concurrency` block** cancels a
+  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
+  `paths-ignore` filter** on both triggers of both gating workflows skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which
+  cannot change what `R CMD check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub
+  evaluating it on a `pull_request` against the whole PR diff. **Hang caps at two scopes** turn a hang into a failed
+  job with a timestamp: `R-CMD-check` bounds its job at 60 minutes and its `check-r-package` step at 30, 40 on windows
+  alone; `test-coverage` its job at 20; `R-CMD-check-hard` its job at 30 (M57). Each yaml comment holds its own
+  measurements and rationale — M76's three attempts per leg among them — and `grep -n timeout-minutes
+  .github/workflows/*.yaml` re-reads every figure. The step bound is the guarantee, being on the code both hangs were
+  in (`test_check("nestedtune")`, hence the two scopes); the job bound covers the devel leg's from-source build of 129
+  dependencies, which a smaller job cap once killed before cache-save. 30 is not free headroom: a leg nearing it is a
+  suite to make faster (M52). **Parallel test files** (`Config/testthat/parallel: true`, M52):
+  `Config/testthat/start-first` in DESCRIPTION queues the slowest files first, so a long file cannot land last — and
+  that is all it buys (corrected M76: the run is *not* bounded by its largest file, sitting within 2% of its own
+  perfect-packing floor, so re-ordering has nothing to recover and splitting a file adds work;
+  `benchmarks/test-timing-parallel.md`). The worker count is `TESTTHAT_CPUS` (testthat prefers `getOption("Ncpus")`
+  when set; no `.Rprofile` sets it), set in the three check workflows' job `env:` at one per runner core (4 on ubuntu
+  and windows, 3 on macOS) and left at testthat's default of 2 locally; `benchmarks/` holds a serial per-file profiler
+  and a parallel wall-clock one. **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the
+  hang on demand, invisible to `ci-usage.py` for carrying neither trigger. **Three organization workflows** ride
+  unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33): no
+  `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air
+  format .` (see DESIGN).
 - Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`)
   writes a timestamped start/end line per test file and per `test_that()` block to unbuffered `stderr()`, so
   a killed job's last unmatched `start` names the block it died in (M14, per-test M16). Under parallel files

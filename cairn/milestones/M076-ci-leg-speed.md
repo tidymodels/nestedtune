@@ -68,7 +68,7 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - [ ] T4: Set each leg's `timeout-minutes` from its T3 median, and bring the
       yaml cap comment and `cairn/PROFILE.md`'s test-doctrine slot to those
       figures.
-- [ ] T5: Close the absorbed CI-timing candidate row, or re-cut it to what T3
+- [x] T5: Close the absorbed CI-timing candidate row, or re-cut it to what T3
       measured and what stays unpriced.
 
 ## Work log
@@ -92,6 +92,9 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - 2026-09-08: the `test-coverage` leg failed once at `readRDS(f): error reading from connection` inside `covr::merge_coverage` (run 34287906318). Same failure identity on M74's and M75's branches (runs 34172488510, 34238384255, 34240761747), and this branch changes nothing `covr` sees, so it is pre-existing and intermittent, not this milestone's. The profile declares `covr` a diagnostic and the leg non-gating; carried to the review gate rather than fixed here.
 - 2026-09-08: T4 part: `.github/workflows/R-CMD-check.yaml`'s step cap is now `matrix.config.os == 'windows-latest' && 40 || 30`, devel having measured a 20.8-minute median; the yaml comment holds every attempt and the per-leg spread, up to 8.5 minutes across three attempts, which is why a median of three sets the cap. `cairn/PROFILE.md`'s test-doctrine slot brought to the same figures.
 - 2026-09-08: corrected in `cairn/PROFILE.md`, marked in place: the run is not bounded by its largest file. At four workers it takes 198 s against a longest file of 82 s, and sits within 2% of its own perfect-packing floor, so `start-first` buys only that a long file cannot land last.
+- 2026-09-08: T5 done. The candidate row re-cut, both its promotion conditions having fired: the test levers measured short of 24 on windows, and the coverage leg failed at 18m23s against its 20-minute job cap. Its remaining half is the check-time vignette rebuild, no longer waiting on a test-suite lever. `ROADMAP.md` was already 17 bytes over its 24,000 budget before this row; four other rows compressed to 23,937, each cross-referencing a record that owns the detail it lost.
+- 2026-09-08: AC3 evidence: `devtools::test()` 9517 pass / 0 fail / 0 skip, and `devtools::check()` Status OK, 0 errors, 0 warnings, 0 notes.
+- 2026-09-08: `cairn/PROFILE.md` crossed its 120-line cap on M76's edits (124). Compressed in one pass on its heaviest section, the CI-divergences bullet of the test-doctrine slot, 26 lines to 23: what went is narration the cited artifacts already carry — the two hang durations, the M48 cap history, and M76's per-attempt figures, all in the workflow yaml comments or git. File at 118; `cairn_validate` green.
 
 ## Decisions
 
