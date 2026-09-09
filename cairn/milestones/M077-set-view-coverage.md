@@ -1,13 +1,13 @@
 # M077: The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — the figures `autoplot()` draws for a reader
-- **Branch/PR:** —
+- **Branch/PR:** `m077-set-view-coverage`
 
 ## Goal
 
@@ -83,7 +83,7 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 
 ## Tasks
 
-- [ ] T1: Add two censored set fixtures to `tests/testthat/helper-orchestration.R`
+- [x] T1: Add two censored set fixtures to `tests/testthat/helper-orchestration.R`
       beside the existing `srv_*` block (`:861-958`): one `workflow_set` of two
       `survival_reg()` workflows tuning `dist`, run through
       `nested_workflow_map()` at `srv_eval_times()` under
@@ -93,20 +93,22 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
       `skip_if_no_censored()` (`:1151`) and `skip_if_no_wset_fixture()` (`:2592`)
       — the first does not cover `workflowsets`. Carry fixture provenance per the
       profile's test-doctrine.
-- [ ] T2: Widen `set_shortfall_line()` (`R/nested-results-plot.R:661`) to also
-      count a workflow whose completed fold scored `NA`, reading `n` from the
-      per-workflow `summarize_folds()` already computed at `:588` against that
-      workflow's `sum(.completed)`. Keep the failed-fold sentence and its count
-      separate.
-- [ ] T3: Write AC1's six planted sets and their assertions in
+- [x] T2: Add `set_short_average_line()` beside `set_shortfall_line()`
+      (`R/nested-results-plot.R`), counting a workflow whose metric averaged
+      fewer folds than it completed, reading `n` from the per-workflow
+      `summarize_folds()` the rules are drawn from against that workflow's
+      `sum(.completed)`. The failed-fold sentence and its count stay separate,
+      which is why this is a sibling function rather than a widening of that
+      one.
+- [x] T3: Write AC1's six planted sets and their assertions in
       `tests/testthat/test-nested-results-plot.R`. `break_fold()` (`:471`) mutates
       the shared design, so set (d) builds on `wset_three_results(broken = )`;
       an `NA` score is planted on the results object's `.metrics`, which
       `per_fold_metrics()` (`R/nested-results.R:948`) reads through.
-- [ ] T4: Write AC2's and AC3's tests on the censored set fixture, deriving the
+- [x] T4: Write AC2's and AC3's tests on the censored set fixture, deriving the
       expected panels from `collect_metrics()` and the rules from the same
       reader.
-- [ ] T5: Write AC4's test on the mixed-parameter censored set, matching drawn
+- [x] T5: Write AC4's test on the mixed-parameter censored set, matching drawn
       points to `collect_selections(x)`.
 - [ ] T6: `NEWS.md` entry for the subtitle change; update the set `autoplot()`
       help text where it describes the subtitle (`R/nested-results-set.R:246`);
@@ -122,7 +124,13 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 - 2026-09-09: plan gate chose widening the performance view's subtitle sentence over labelling each short average inside its panel, because a set has no per-workflow-and-metric label slot and a figure-level count asserting a per-panel truth is the defect M08 review F1 found, while `summary()` already prints the exact count per workflow and metric; falsified by a reader needing the per-panel number without opening `summary()`.
 - 2026-09-09: plan gate chose a real censored set run over planting the `.eval_time` and character-parameter shapes on a regression fixture, because the promoted row's condition names a real fixture and the single-run `srv_*` parts already exist; falsified by AC5's suite-time bar being missed.
 - 2026-09-09: plan gate chose dropping the shared tick-mark picker's same-interval tie to a candidate row over rebuilding the parameters figure in this milestone, because the audit measured both panels receiving byte-identical limits so no test can close it and the source records the tie as a deliberate known limit (`R/nested-results-plot.R:198`); falsified by a wrong tick mark reaching a user's figure.
+- 2026-09-09: implement gate chose counting a workflow whose metric scored on no completed fold toward the new subtitle count, wording A ("N of K workflows average a metric over fewer folds than they completed; see summary()."), and a spline `deg_free` step as the mixed set's numeric parameter.
 - 2026-09-09: plan gate chose one milestone over splitting the figure change from the coverage tests, because every item rests on the same new censored set fixture; falsified by the branch outgrowing one reviewable PR.
+
+- 2026-09-09: T1 — two censored set fixtures in `helper-orchestration.R`: `srv_set_results()` (two `dist` workflows under `brier_survival` + `concordance_survival` at `srv_eval_times()`, giving three metric-and-time keys) and `srv_mixed_results()` (a `dist` workflow beside a spline `deg_free` one). recipes refuses an inline `Surv()` outcome in a formula, so the recipe workflow reads a frame carrying the `Surv` object as its own column (`srv_recipe_data()`).
+- 2026-09-09: T2 — `set_short_average_line()` added; the set's performance view now keeps its per-workflow `summarize_folds()` so the rules and the subtitle count read one `n`. Implementation gate chose a sibling function over widening `set_shortfall_line()`, the two counts being separate sentences.
+- 2026-09-09: T3 — AC1's six planted sets written. Two planted defects proved them able to fail: a sentence that never fires failed 5 of the 6, and counting metrics rather than workflows failed set (b) alone, which is the case it exists for.
+- 2026-09-09: T4, T5 — AC2, AC3 and AC4's tests written on the two censored fixtures. Three planted defects proved them: a changed time label, rules pooled across workflows, and a parameters panel without the workflow id each failed the test written for it. `devtools::test()` on the file: 40 tests, 0 failed, 0 skipped.
 
 ## Decisions
 
