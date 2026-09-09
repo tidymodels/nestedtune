@@ -106,6 +106,8 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 
 - 2026-09-09: step-7 approval: PR #86 approved for merge, at the fix-then-merge option of the gate chip.
 
+- 2026-09-09: CI wait hit the harness ceiling before the checks finished and the watcher was stopped. Fresh state at that point: `format-suggest` and `pkgdown` pass, the five `R-CMD-check` legs, the second ubuntu release leg and `test-coverage` all pending (runs 34389972299, 34389972332, 34389972348). Merge marker written and not consumed; the session stops here, re-entering at `/milestone-review M076`.
+
 ## Review
 
 ### Acceptance-criteria evidence
