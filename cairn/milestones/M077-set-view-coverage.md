@@ -1,6 +1,6 @@
 # M077: The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -115,7 +115,7 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
       redraw the two set `vdiffr` doppelgangers and read the rendered figures
       before approving them (M08 lesson), adding a third for the four-line
       subtitle no existing snapshot carries.
-- [ ] T7: Measure AC5's A/B suite medians, three runs each side in one sitting;
+- [x] T7: Measure AC5's A/B suite medians, three runs each side in one sitting;
       `devtools::document()`, `devtools::test()`, `devtools::check()`.
 
 ## Work log
@@ -134,6 +134,8 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 - 2026-09-09: T4, T5 — AC2, AC3 and AC4's tests written on the two censored fixtures. Three planted defects proved them: a changed time label, rules pooled across workflows, and a parameters panel without the workflow id each failed the test written for it. `devtools::test()` on the file: 40 tests, 0 failed, 0 skipped.
 
 - 2026-09-09: T6 — `NEWS.md` entry and the set `autoplot()` help paragraph on the subtitle, both derived from a rendered figure's observed text. The two existing set doppelgangers were unchanged, `wset_three_results()` carrying no shortfall, so a third was added for the four-line subtitle (a discovered sub-task, recorded in T6). All three set figures and the two censored ones were rendered at 7-8 inches and read: no clipping, and the parameters view puts `weibull`/`lognormal` and `1`/`2` on discrete axes in their own panels.
+
+- 2026-09-09: T7 — AC5 measured on this machine (Apple M5 Pro, 18 cores, macOS 26.6.2, R 4.6.1, testthat's local default of 2 workers), three pairs run interleaved branch/default in one sitting so a load drift hits both sides: branch 329.0, 315.2, 329.1 s (median 329.0); default branch 311.3, 350.6, 312.8 s (median 312.8); branch median 5.2% above, under the 10% bar. `devtools::document()` no diff; `devtools::test()` 770 tests, 0 failed, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes, 6m51s. `cairn_validate` all checks passed.
 
 ## Decisions
 
