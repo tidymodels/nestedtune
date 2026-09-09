@@ -74,14 +74,34 @@ jobs:
     # the maintainer's machine at 294ca2b by benchmarks/profile-tests.R, the
     # suite went from 704-711 s at the branch point to 623 s, and the
     # examples (benchmarks/time-examples.R, with \donttest) from 28 s to
-    # 16 s. That 12-14% is not enough to bring the two slow legs under 30
-    # with room: three attempts of 294ca2b ran the windows step at 26.6,
-    # 28.0 and 27.2 minutes (its check-time vignette rebuild alone 197-240 s,
-    # against 125-157 s on the two default-branch runs before it) and devel
-    # at 17.8, 23.2 and 26.4, so those two stay at 40 and the other three at
-    # 30; a hang still surfaces in 30 on the fast legs and 40 on the slow
-    # two. Bringing every leg under 24 with the cap back to 30 is a ROADMAP
-    # candidate waiting on a lever that reaches it.
+    # 16 s. Three attempts of 294ca2b ran the windows step at 26.6, 28.0 and
+    # 27.2 minutes (its check-time vignette rebuild alone 197-240 s, against
+    # 125-157 s on the two default-branch runs before it) and devel at 17.8,
+    # 23.2 and 26.4, so both stayed at 40.
+    #
+    # Devel came back to 30 at M76, on three attempts of branch head 3b313dd
+    # (run 34287906467) -- a head whose package content is the default
+    # branch's, benchmarks/ being .Rbuildignore'd. The runs themselves ran on
+    # the pull-request merge ref, whose sha is not stable and is not recorded
+    # here for that reason. Step minutes, per leg, in attempt order, medians in
+    # brackets: windows 19.7, 25.7, 25.3 [25.3]; devel 20.8, 18.8, 23.7
+    # [20.8]; macOS 19.5, 17.4, 19.3 [19.3]; oldrel-1 16.0, 17.6, 24.5
+    # [17.6]; ubuntu release 17.8, 19.0, 22.7 [19.0]. So devel joins the
+    # three legs at 30 and windows alone keeps 40 -- the spread within a leg
+    # is up to 8.5 minutes across three attempts, which is why the cap is set
+    # from a median of three rather than one reading, and why 30 on a
+    # 20.8-minute median is not generous. M76 also priced the two test-suite
+    # levers that were meant to buy the windows leg its 30 -- splitting
+    # test-parallel-identity.R at its pool boundaries, and re-ordering
+    # Config/testthat/start-first -- and reverted both: re-ordering measured
+    # 2.4% slower on non-overlapping ranges, and the split bought nothing while
+    # adding a daemon-pool start per file. The branch point's wall clock sits
+    # 1.9% above the makespan floor its own per-file occupancy implies at four
+    # workers, so there is no idle worker time for a re-ordering to recover
+    # (benchmarks/test-timing-parallel.md, which also states what those figures
+    # do not settle).
+    # Bringing windows under 24 too is a ROADMAP candidate, now waiting on
+    # the check-time vignette rebuild rather than on a test-suite lever.
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
@@ -95,7 +115,8 @@ jobs:
     # What the split gives up: every step that is not the check -- checkout,
     # `setup-r-dependencies`, cache save -- is now bounded only by this
     # 60-minute job cap, on all five legs, where the old single cap ended a
-    # stall anywhere in 20. The step cap still ends a hung test suite in 30.
+    # stall anywhere in 20. The step cap still ends a hung test suite -- in 30
+    # on four legs, 40 on windows.
     timeout-minutes: 60
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -151,7 +172,7 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: ${{ (matrix.config.r == 'devel' || matrix.config.os == 'windows-latest') && 40 || 30 }}
+        timeout-minutes: ${{ matrix.config.os == 'windows-latest' && 40 || 30 }}
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
