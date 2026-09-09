@@ -79,9 +79,11 @@ jobs:
     # 125-157 s on the two default-branch runs before it) and devel at 17.8,
     # 23.2 and 26.4, so both stayed at 40.
     #
-    # Devel came back to 30 at M76, on three attempts of d8b8ef6 -- a head
-    # whose package content is the default branch's, benchmarks/ being
-    # .Rbuildignore'd. Step minutes, per leg, in attempt order, medians in
+    # Devel came back to 30 at M76, on three attempts of branch head 3b313dd
+    # (run 34287906467) -- a head whose package content is the default
+    # branch's, benchmarks/ being .Rbuildignore'd. The runs themselves ran on
+    # the pull-request merge ref, whose sha is not stable and is not recorded
+    # here for that reason. Step minutes, per leg, in attempt order, medians in
     # brackets: windows 19.7, 25.7, 25.3 [25.3]; devel 20.8, 18.8, 23.7
     # [20.8]; macOS 19.5, 17.4, 19.3 [19.3]; oldrel-1 16.0, 17.6, 24.5
     # [17.6]; ubuntu release 17.8, 19.0, 22.7 [19.0]. So devel joins the
@@ -91,9 +93,13 @@ jobs:
     # 20.8-minute median is not generous. M76 also priced the two test-suite
     # levers that were meant to buy the windows leg its 30 -- splitting
     # test-parallel-identity.R at its pool boundaries, and re-ordering
-    # Config/testthat/start-first -- and reverted both: the suite runs within
-    # 2% of what a perfect packing of its own work could reach, so nothing is
-    # left to recover by rearranging it (benchmarks/test-timing-parallel.md).
+    # Config/testthat/start-first -- and reverted both: re-ordering measured
+    # 2.4% slower on non-overlapping ranges, and the split bought nothing while
+    # adding a daemon-pool start per file. The branch point's wall clock sits
+    # 1.9% above the makespan floor its own per-file occupancy implies at four
+    # workers, so there is no idle worker time for a re-ordering to recover
+    # (benchmarks/test-timing-parallel.md, which also states what those figures
+    # do not settle).
     # Bringing windows under 24 too is a ROADMAP candidate, now waiting on
     # the check-time vignette rebuild rather than on a test-suite lever.
     #
@@ -109,7 +115,8 @@ jobs:
     # What the split gives up: every step that is not the check -- checkout,
     # `setup-r-dependencies`, cache save -- is now bounded only by this
     # 60-minute job cap, on all five legs, where the old single cap ended a
-    # stall anywhere in 20. The step cap still ends a hung test suite in 30.
+    # stall anywhere in 20. The step cap still ends a hung test suite -- in 30
+    # on four legs, 40 on windows.
     timeout-minutes: 60
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})

@@ -65,7 +65,7 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - [x] T3: Push the branch, re-run the check workflow three times on one head,
       and record each leg's `check-r-package` step duration and median in this
       file, naming the head and its net diff outside `cairn/`.
-- [ ] T4: Set each leg's `timeout-minutes` from its T3 median, and bring the
+- [x] T4: Set each leg's `timeout-minutes` from its T3 median, and bring the
       yaml cap comment and `cairn/PROFILE.md`'s test-doctrine slot to those
       figures.
 - [x] T5: Close the absorbed CI-timing candidate row, or re-cut it to what T3
@@ -99,7 +99,10 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 
 ## Decisions
 
-- 2026-09-08: review. AC1-AC3 verified with fresh evidence (medians re-derived from the GitHub API, `devtools::test()` 9517/0/0, `devtools::check()` OK/0/0/0); consistency gate green, `cairn_validate` exit 0. Three fresh-context reviewers plus one gate finding: 16 findings, none demonstrating a criterion failing and none in package code, so no return floor fires; triage goes to the gate.
+- 2026-09-08: review. AC1-AC3 verified with fresh evidence (medians re-derived from the GitHub API, `devtools::test()` 9517 pass with no failures or skips, `devtools::check()` OK with no errors, warnings or notes); consistency gate green, `cairn_validate` exit 0. Three fresh-context reviewers plus one gate finding: 16 findings, none demonstrating a criterion failing and none in package code, so no return floor fires; triage goes to the gate.
+
+- 2026-09-09: review, gate triage. The maintainer chose fix-then-merge. Applied on the branch: the yaml comment now names the measured branch head `3b313dd` and run 34287906467 in place of the pull-request merge ref `d8b8ef6`, which no longer resolves (G1), and its stale "ends a hung test suite in 30" line names both caps (O10). `benchmarks/test-timing-parallel.md` drops the wrong worker-package-load claim (O3), records that the re-ordering arm changed the priority set's membership as well as its order (O5), reads the perfect-packing column as the self-bound it is rather than a ranking (O1), states the 72 s between the two split arms as queueing cost rather than work (O2), and adds what the overlapping wall-clock ranges do and do not settle (O4). `benchmarks/profile-tests-parallel.R` clears `getOption("Ncpus")` and asserts testthat's worker count against its own argument (O6), fixes the garbled `med()` comment (O11), and takes `na.rm` on LONGEST SINGLE FILE plus two smaller items (O12). `cairn/PROFILE.md` restores the two hang durations its "two scopes" clause rests on (O8) and replaces the unmeasured `start-first` claim with what M76 measured (O9); the bullet was reflowed to hold the 120-line cap, file at 119. T4's checkbox ticked, its work having landed three work-log lines earlier (O7).
+- 2026-09-09: review, triage dispositions. Rejected: the Coverage AC3 mapping item (O13), `cairn_validate`'s coverage check passing and T2 having required a clean `devtools::test()`; the 5-byte ROADMAP figure in an append-only work-log line (O13); and the devel-headroom observation (O10), a consequence of AC2 as written rather than a defect. Deferred to a candidate row: the duplicate per-run count printing copied from `benchmarks/profile-tests.R` (P1), which sits with M74's own O10.
 
 ## Review
 

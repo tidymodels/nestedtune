@@ -39,6 +39,13 @@ stopifnot(!is.na(runs), runs >= 1L, !is.na(workers), workers >= 1L)
 Sys.setenv(NOT_CRAN = "true")
 Sys.setenv(TESTTHAT_PARALLEL = "TRUE")
 Sys.setenv(TESTTHAT_CPUS = as.character(workers))
+# `testthat:::default_num_cpus()` reads `getOption("Ncpus")` BEFORE
+# `TESTTHAT_CPUS` and returns it when it is set, and `Rscript` sources the
+# user's `~/.Rprofile`, so an `options(Ncpus = ...)` there would silently
+# decide the worker count while this script's header still printed the
+# `workers` argument. Clear it, then assert testthat agrees.
+options(Ncpus = NULL)
+stopifnot(identical(testthat:::default_num_cpus(), workers))
 
 # Where the per-file figures come from. Under parallel files the `real` column
 # of a testthat result is 0 for every test -- verified by running this script
@@ -94,6 +101,8 @@ parse_trace <- function(path) {
 
 # `load_package = "source"` because each parallel worker is its own R process
 # and has to load the package itself; there is no parent load to inherit.
+# In parallel mode this is belt and braces -- `testthat:::queue_setup` rewrites
+# "none" to "source" unconditionally -- but it says which path is taken.
 one_run <- function() {
   trace <- tempfile(fileext = ".log")
   con <- file(trace, open = "wt")
@@ -149,8 +158,8 @@ med <- function(f) {
   stats::median(
     vapply(
       passes,
-      # Single-bracket, deliberately: `[[` on a name `per_file` does not carry
-      # raises "subscript out of bounds" rather than returning NA -- so a run
+      # Single-bracket, deliberately: on a name `per_file` does not carry,
+      # `[[` raises "subscript out of bounds" where `[` returns NA -- so a run
       # whose file set differs from the union above (a file that never
       # finished, a file added between runs) would kill the profiler after it
       # had already paid for every run.
@@ -176,14 +185,20 @@ cat(sprintf(
 ))
 cat(sprintf("NOT_CRAN: %s\n", Sys.getenv("NOT_CRAN")))
 cat(sprintf("workers:  %d (TESTTHAT_CPUS)\n", workers))
-cat(sprintf("loading:  each worker loads the package itself (source)\n"))
+cat("loading:  each worker loads the package itself (source)\n")
 cat(sprintf("runs:     %d (all figures are medians)\n\n", runs))
 
 cat(sprintf("%-46s %8s\n", "file (wall clock in the worker queue)", "seconds"))
 for (f in files[ord]) {
   cat(sprintf("%-46s %8.1f\n", f, elapsed[[f]]))
 }
-cat(sprintf("%-46s %8.1f\n", "LONGEST SINGLE FILE", max(elapsed)))
+# na.rm: a file NA in every run leaves an NA here, which `med()`'s own
+# na.rm cannot reach.
+cat(sprintf(
+  "%-46s %8.1f\n",
+  "LONGEST SINGLE FILE",
+  max(elapsed, na.rm = TRUE)
+))
 cat(sprintf("%-46s %8.1f\n", "WALL CLOCK (the figure that is priced)", wall))
 
 cat("\n")
