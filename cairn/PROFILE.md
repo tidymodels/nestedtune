@@ -45,8 +45,9 @@ rules in tracking-rules:
   `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD check` sees — that is the test a fourth path must
   meet; it bites on `push` only, GitHub evaluating it on a `pull_request` against the whole PR diff. **Hang
   caps at two scopes** turn a hang into a failed job with a timestamp: `R-CMD-check` bounds its job at 60
-  minutes and its `check-r-package` step at 30, 40 on the devel and windows legs (M72, steps past 30; M74's 12–14%
-  suite cut left windows at 26.6–28.0 minutes over three attempts, so both keep 40 — ROADMAP candidate), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57;
+  minutes and its `check-r-package` step at 30, 40 on the windows leg alone (M72, steps past 30; M76 measured three
+  attempts of one head at windows 25.3, devel 20.8, macOS 19.3, oldrel-1 17.6, ubuntu release 19.0 median minutes, so
+  devel came back to 30 and windows alone keeps 40 — the yaml comment holds every attempt and the spread), `test-coverage` its job at 20, `R-CMD-check-hard` its job at 30 (M57;
   its yaml says why one scope); re-read them with `grep -n timeout-minutes .github/workflows/*.yaml`.
   The step bound is the guarantee, on the code both hangs were in (`test_check("nestedtune")`, 52 min under `R
   CMD check` and 40 under `covr`, hence the two scopes). It was 20 until M48 (2026-09-02) saw the windows step
@@ -54,10 +55,14 @@ rules in tracking-rules:
   (M52). 60 is the devel leg's from-source build of 129 dependencies, which a 20-minute job cap killed before
   cache-save; it leaves every non-check step bounded only by the job.
   **Parallel test files** (`Config/testthat/parallel: true`, M52): `Config/testthat/start-first` in
-  DESCRIPTION queues the slowest files first, so the run is bounded by the largest file rather than by
-  whatever lands last; the worker count is `TESTTHAT_CPUS` (testthat prefers `getOption("Ncpus")` when set; no `.Rprofile` sets it), set in the three check workflows' job `env:` at one
+  DESCRIPTION queues the slowest files first, so a long file cannot land last (corrected M76: the run is
+  *not* bounded by the largest file — at four workers it takes 198 s against a longest file of 82 s, being
+  bound by how much work it holds and running within 2% of what a perfect packing could reach, so a
+  re-ordering has almost nothing to recover and splitting a file adds work rather than repacking it;
+  `benchmarks/test-timing-parallel.md`). The worker count is `TESTTHAT_CPUS` (testthat prefers `getOption("Ncpus")` when set; no `.Rprofile` sets it), set in the three check workflows' job `env:` at one
   per runner core (4 on ubuntu and windows, 3 on macOS) and left at testthat's default of 2 locally;
-  `benchmarks/profile-tests.R` pins itself serial so its per-file figures stay comparable. **A
+  `benchmarks/profile-tests.R` pins itself serial so its per-file figures stay comparable, and
+  `benchmarks/profile-tests-parallel.R` is the parallel counterpart that measures wall clock. **A
   `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the hang on demand, invisible
   to `ci-usage.py` for carrying neither trigger. **Three organization workflows** ride unedited at
   tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33): no
