@@ -80,9 +80,14 @@ no workflow completed a fold is refused by the plots and by
 no workflow's completed fold recorded a selected parameter is refused
 under \code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}.
 
-The performance view's subtitle names the workflow and fold counts and,
-when any workflow has a failed fold, how many do; \code{summary()} names the
-folds. A tuned parameter whose id is \code{wflow_id} cannot be tabulated
+The performance view's subtitle names the workflow and fold counts, and
+then, each on a line of its own, how many workflows did not complete
+every fold and how many rest a metric's average on fewer folds than they
+completed; \code{summary()} names the folds and prints each workflow's count
+per metric. The two counts are separate: a workflow that ran whole can
+still be named by the second, since a completed fold can score \code{NA} on
+one metric while scoring the others, and a metric no completed fold
+scored is counted there while drawing no rule. A tuned parameter whose id is \code{wflow_id} cannot be tabulated
 beside the set's own column and is refused with class
 \code{nestedtune_collect_name_collision}; one whose id is \code{n} or \code{prop} is
 refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.

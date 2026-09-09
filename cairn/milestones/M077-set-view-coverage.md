@@ -110,10 +110,11 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
       reader.
 - [x] T5: Write AC4's test on the mixed-parameter censored set, matching drawn
       points to `collect_selections(x)`.
-- [ ] T6: `NEWS.md` entry for the subtitle change; update the set `autoplot()`
+- [x] T6: `NEWS.md` entry for the subtitle change; update the set `autoplot()`
       help text where it describes the subtitle (`R/nested-results-set.R:246`);
       redraw the two set `vdiffr` doppelgangers and read the rendered figures
-      before approving them (M08 lesson).
+      before approving them (M08 lesson), adding a third for the four-line
+      subtitle no existing snapshot carries.
 - [ ] T7: Measure AC5's A/B suite medians, three runs each side in one sitting;
       `devtools::document()`, `devtools::test()`, `devtools::check()`.
 
@@ -131,6 +132,8 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 - 2026-09-09: T2 — `set_short_average_line()` added; the set's performance view now keeps its per-workflow `summarize_folds()` so the rules and the subtitle count read one `n`. Implementation gate chose a sibling function over widening `set_shortfall_line()`, the two counts being separate sentences.
 - 2026-09-09: T3 — AC1's six planted sets written. Two planted defects proved them able to fail: a sentence that never fires failed 5 of the 6, and counting metrics rather than workflows failed set (b) alone, which is the case it exists for.
 - 2026-09-09: T4, T5 — AC2, AC3 and AC4's tests written on the two censored fixtures. Three planted defects proved them: a changed time label, rules pooled across workflows, and a parameters panel without the workflow id each failed the test written for it. `devtools::test()` on the file: 40 tests, 0 failed, 0 skipped.
+
+- 2026-09-09: T6 — `NEWS.md` entry and the set `autoplot()` help paragraph on the subtitle, both derived from a rendered figure's observed text. The two existing set doppelgangers were unchanged, `wset_three_results()` carrying no shortfall, so a third was added for the four-line subtitle (a discovered sub-task, recorded in T6). All three set figures and the two censored ones were rendered at 7-8 inches and read: no clipping, and the parameters view puts `weibull`/`lognormal` and `1`/`2` on discrete axes in their own panels.
 
 ## Decisions
 

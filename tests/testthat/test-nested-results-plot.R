@@ -1217,4 +1217,12 @@ test_that("both set views look the way they read", {
     "set performance, three workflows",
     autoplot(res, type = "performance")
   )
+
+  # The four-line subtitle, which no other snapshot carries: a set holding
+  # both a failed fold and a short average. Rendered and read at 7 inches
+  # before this was approved -- `ggplot_build()` cannot see a clipped
+  # subtitle, and this is the tallest one the view can draw (M08).
+  both <- plant_metric_na(wset_three_results(broken = 1L), 1L, 2L, "rmse")
+  partial_warnings(p <- autoplot(both, type = "performance"))
+  vdiffr::expect_doppelganger("set performance, both shortfall sentences", p)
 })

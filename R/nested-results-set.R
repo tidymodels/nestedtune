@@ -276,9 +276,14 @@ stack_set <- function(
 #' no workflow's completed fold recorded a selected parameter is refused
 #' under `type = "parameters"` with class `nestedtune_no_tuned_parameters`.
 #'
-#' The performance view's subtitle names the workflow and fold counts and,
-#' when any workflow has a failed fold, how many do; `summary()` names the
-#' folds. A tuned parameter whose id is `wflow_id` cannot be tabulated
+#' The performance view's subtitle names the workflow and fold counts, and
+#' then, each on a line of its own, how many workflows did not complete
+#' every fold and how many rest a metric's average on fewer folds than they
+#' completed; `summary()` names the folds and prints each workflow's count
+#' per metric. The two counts are separate: a workflow that ran whole can
+#' still be named by the second, since a completed fold can score `NA` on
+#' one metric while scoring the others, and a metric no completed fold
+#' scored is counted there while drawing no rule. A tuned parameter whose id is `wflow_id` cannot be tabulated
 #' beside the set's own column and is refused with class
 #' `nestedtune_collect_name_collision`; one whose id is `n` or `prop` is
 #' refused as [agreement()] refuses it, the workflow named in front.
