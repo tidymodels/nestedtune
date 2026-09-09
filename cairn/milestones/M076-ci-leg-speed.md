@@ -241,3 +241,8 @@ makespan lower bound for four workers, so "no reordering of the branch point can
 recover more than 1.9%" stands on its own terms. What O1 establishes is that the
 figure cannot discriminate between configurations and should not be read as one
 arm being better packed than another.
+
+### PR conversation
+
+- conversation: PR #86 -- no reviews, no conversation comments, no unresolved
+  review threads. Nothing to triage.
