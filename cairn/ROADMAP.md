@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-08 (M76 planned; the CI-timing row absorbed into it
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M76 | The two slow check legs run their check step under the cap the other three use | in-progress | — | normal | milestones/M076-ci-leg-speed.md |
+| M76 | The two slow check legs run their check step under the cap the other three use | review | — | normal | milestones/M076-ci-leg-speed.md |
 | M74 | The check suite and the help-page examples run faster without dropping an assertion | done | — | normal | milestones/archive/M74-suite-speed.md |
 | M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | done | M74 | normal | milestones/archive/M75-suite-prune.md |
 | M73 | A `nested_results_set` keeps its class only while every row is one of the run's own workflows, and a re-signalled condition keeps its original's fields | done | — | normal | milestones/archive/M73-set-invariants.md |

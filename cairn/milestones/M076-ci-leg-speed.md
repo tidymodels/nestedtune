@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M076: The two slow check legs run their check step under the cap the other three use
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI workflow configuration and test-file organization; no exported behavior, documentation or shipped artifact changes
-- **Branch/PR:** `m076-ci-leg-speed`
+- **Branch/PR:** `m076-ci-leg-speed` / https://github.com/tidymodels/nestedtune/pull/86
 
 ## Goal
 
@@ -95,6 +95,7 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 - 2026-09-08: T5 done. The candidate row re-cut, both its promotion conditions having fired: the test levers measured short of 24 on windows, and the coverage leg failed at 18m23s against its 20-minute job cap. Its remaining half is the check-time vignette rebuild, no longer waiting on a test-suite lever. `ROADMAP.md` was already 17 bytes over its 24,000 budget before this row; four other rows compressed to 23,937, each cross-referencing a record that owns the detail it lost.
 - 2026-09-08: AC3 evidence: `devtools::test()` 9517 pass / 0 fail / 0 skip, and `devtools::check()` Status OK, 0 errors, 0 warnings, 0 notes.
 - 2026-09-08: `cairn/PROFILE.md` crossed its 120-line cap on M76's edits (124). Compressed in one pass on its heaviest section, the CI-divergences bullet of the test-doctrine slot, 26 lines to 23: what went is narration the cited artifacts already carry — the two hang durations, the M48 cap history, and M76's per-attempt figures, all in the workflow yaml comments or git. File at 118; `cairn_validate` green.
+- 2026-09-08: all five tasks done; status to review. Package code, tests and DESCRIPTION are byte-identical to the branch point `9b91e18`; the branch's whole diff outside `cairn/` is the two `benchmarks/` files and the workflow cap edit.
 
 ## Decisions
 
