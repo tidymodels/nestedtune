@@ -957,15 +957,18 @@ srv_risk_profile <- function(data, t) {
 }
 
 # The censored set fixtures (M77). Source: `srv_data()` above, whose seed 51
-# draws the frame; generators: the four builders here, each seeded where the
-# recipe step ids are drawn. `wset_three()` cannot produce either shape these
-# exist for. The first is a metric-and-time shape: a metric set holding one
-# dynamic survival metric evaluated at both `srv_eval_times()` beside a static
-# one that reads no time, so `collect_metrics()` carries three distinct
-# metric-and-time keys and the performance view owes a panel to each. The
-# second is a parameter-type shape: two workflows tuning parameters of
-# different types, so the parameters view puts a character value and a number
-# on one axis.
+# draws the frame; generators: `srv_set_results(seed = 77)` and
+# `srv_mixed_results(seed = 78)` below, each rebuilding its workflow set and
+# its design from that frame under its own seed. The seed is what
+# `srv_spline_workflow()` needs, the recipe step's id being drawn from the RNG
+# stream; nothing else in the block draws. `wset_three()` cannot produce
+# either shape these exist for. The first is a metric-and-time shape: a
+# metric set holding one dynamic survival metric evaluated at both
+# `srv_eval_times()` beside a static one that reads no time, so
+# `collect_metrics()` carries three distinct metric-and-time keys and the
+# performance view owes a panel to each. The second is a parameter-type
+# shape: two workflows tuning parameters of different types, so the
+# parameters view puts a character value and a number on one axis.
 srv_set_metrics <- function() {
   yardstick::metric_set(
     yardstick::brier_survival,

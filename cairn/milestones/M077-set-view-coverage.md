@@ -137,6 +137,8 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 
 - 2026-09-09: T7 — AC5 measured on this machine (Apple M5 Pro, 18 cores, macOS 26.6.2, R 4.6.1, testthat's local default of 2 workers), three pairs run interleaved branch/default in one sitting so a load drift hits both sides: branch 329.0, 315.2, 329.1 s (median 329.0); default branch 311.3, 350.6, 312.8 s (median 312.8); branch median 5.2% above, under the 10% bar. `devtools::document()` no diff; `devtools::test()` 770 tests, 0 failed, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes, 6m51s. `cairn_validate` all checks passed.
 
+- 2026-09-09: review — PR #87 opened as a draft; AC1-AC5 executed with fresh evidence and ticked; `cairn_validate` exit 0 and the r-package consistency gate clean; three fresh-context lenses returned 14 findings (13 [O], 1 [S], 0 [S]), 6 fixed on the branch, 1 dispositioned to a candidate row, 7 rejected with reasons, all logged in the Review section; no return-floor finding.
+
 ## Decisions
 
 ## Review
@@ -218,3 +220,112 @@ Fresh evidence, 2026-09-09, on `m077-set-view-coverage` at `76cc0f1` against
   declared changelog `NEWS.md` carries the entry with no milestone number in
   it; no new top-level file, and `check()` reports 0 notes; full `check()`
   clean.
+
+### Independent review
+
+Three fresh-context lenses, none having seen the implementation, each on its
+own evidence base. The diff touches `R/` and `tests/`, so the full fan-out ran.
+
+- [S] blame-history: no findings. It confirmed the change does not resurrect
+  M08 review F1 (a figure-level count asserting a per-panel truth), that
+  hoisting `summarize_folds()` into a `summaries` list is behaviour-preserving,
+  that an all-failed workflow is still left to `set_shortfall_line()`, and that
+  the single view's subtitle is untouched as the plan's Out scope says.
+- [S] prior-PR-comments: one finding (P1, below). Its GitHub probe found one
+  real human inline thread repo-wide, on `.github/workflows/pkgdown.yaml` in an
+  unrelated PR, so no per-PR walk was warranted; the archived `## Review`
+  sections were the evidence.
+- [O] diff-bug: thirteen findings (O1-O13, below), ranked.
+
+Every reported finding and its disposition:
+
+- O1 (fix now, done). "Tautological assertion in AC1(d)'s test —
+  `tests/testthat/test-nested-results-plot.R:1010`. `expect_false(identical(
+  FAILED_THREE, SHORT_ONE))` compares two file-level string constants to each
+  other; it never touches the figure and cannot fail under any change to the
+  code under test." Replaced by reading both counts back off the rendered
+  subtitle and asserting 3 and 1. Planting `short <- k` in
+  `set_short_average_line()` failed both new assertions (and five other tests),
+  so the replacement discriminates where the original could not.
+- O2 (fix now, done). "AC2's rule/mean correspondence can pass vacuously —
+  `tests/testthat/test-nested-results-plot.R:1105-1117`. If `collect_metrics()`
+  ever returned all-`NA` means (or the errorbar layer vanished so `rules` were
+  empty and `reported` were too), the test passes with zero assertions
+  executed. There is no floor assertion pinning that the domain is non-empty."
+  Added `expect_identical(nrow(reported), 6L)` — two workflows against the
+  fixture's three metric-and-time keys — stated independently of the figure and
+  of the reader, per the check-discrimination rule.
+- O3 (reject). "NEWS/help claim about an absent metric is not fully true, and
+  is untested. If a workflow produces no row for a metric key at all, that key
+  is absent from `summaries[[id]]` and the workflow is not counted — while its
+  rule is missing from a panel the reader can see." Rejected: a
+  `nested_workflow_map()` run takes one `metrics` for the whole set, so every
+  workflow carries every key; the case the text actually claims — a metric no
+  completed fold scored — is AC1(e)'s planted case and is tested. The reviewer
+  marked its own reachability as uncertain.
+- O4 (reject). "AC4's discreteness assertion is entailed by the design and
+  cannot fail on this fixture. `selection_axis()` decides the value axis over
+  every workflow's values at once, so once the set holds the character-valued
+  `dist`, every panel is discrete by construction." Confirmed as described
+  (`R/nested-results-plot.R:428`, `:500`), and rejected: AC4 asks the test to
+  assert the figure draws every panel on a discrete axis, which it does, and a
+  per-panel-falsifiable version would require changing the pooled axis
+  decision the source records as deliberate — out of this milestone's scope.
+  The point-placement half of AC4 is falsifiable and did fail its planted
+  defect at T5.
+- O5 (fix now, done). "Help text lost the conditionality of both sentences —
+  `R/nested-results-set.R:279-283`. The new text has no qualifier, so it
+  describes a four-line subtitle as the norm when the common case is two
+  lines." Restored: "and only when there is one to name".
+- O6 and P1 (fix now, done). The same finding from two lenses. [O]: "Over-long
+  roxygen line breaking the file's wrap — `R/nested-results-set.R:286`. The
+  line is 110 characters; every other prose line in that block wraps near 72."
+  [S] adds that three prior reviews on this repo (M66 O11, M68 O11/P11, M69
+  O12/H1/H2) each recorded an un-rewrapped paragraph after a text edit as a
+  finding worth fixing, so the diff regresses a point review has already
+  taught. The paragraph was rewrapped and `man/` regenerated.
+- O7 (follow-up). "The denominator counts workflows the numerator structurally
+  excludes — `R/nested-results-plot.R:709-716`. In a 3-workflow set where 2 are
+  all-failed and the survivor is short, the reader gets '1 of 3 workflows
+  averages a metric over fewer folds than it completed', implying the other 2
+  averaged over all their folds when they averaged over none." Confirmed as
+  described; the source comment records the exclusion as deliberate and the
+  failed-fold sentence names those workflows on its own line, so the two
+  sentences together do not mislead. Dispositioned as a ROADMAP candidate row
+  rather than fixed here; the row is written at the post-merge hygiene pass,
+  where the terminal-row prune frees the bytes `ROADMAP.md` needs for it
+  (23,935 of 24,000 today).
+- O8 (reject). "Near-tautological negative in AC1(c) —
+  `tests/testthat/test-nested-results-plot.R:996`. `expect_no_match(subtitle,
+  SHORT_ONE)` can only fail if both sentences were emitted." That is the code
+  path it discriminates, and it costs nothing; a style nitpick.
+- O9 (fix now, done). "Fixture provenance header miscounts and
+  over-generalizes — `tests/testthat/helper-orchestration.R:959-968`. 'the four
+  builders here, each seeded where the recipe step ids are drawn' — the block
+  adds nine functions, and only `srv_spline_workflow()` draws recipe step ids
+  from the RNG." Confirmed. The header now names the two seeded generators and
+  says which function the seed is for.
+- O10 (reject). "Unused `data` parameter on the new fixture builders —
+  `tests/testthat/helper-orchestration.R:981`, `:995`." Pre-existing convention
+  the file already follows on `srv_workflow(data)`; out-of-scope taxonomy.
+- O11 (reject). "Test-only helper defined in a test file rather than
+  `helper-*.R` — `tests/testthat/test-nested-results-plot.R:938`."
+  `plant_metric_na()` is used only by this file; a style preference.
+- O12 (fix now, done). "Snapshot test does not pin its warnings —
+  `tests/testthat/test-nested-results-plot.R:1225`. If the partial-run warning
+  stopped firing for two of the three workflows, this test would still pass."
+  Added `expect_length(warnings, 3L)`, as AC1(d) already does.
+- O13 (reject). "Tracking inconsistency — AC5 is still `[ ]` while AC1-AC4 are
+  `[x]`." That is AC fencing: the reviewer read the file after AC1-AC4's
+  evidence had landed and before AC5's. AC5 is ticked above against its own
+  evidence.
+
+Return floor: none of the actioned findings demonstrates an acceptance
+criterion failing, and none is a load-bearing defect in what the package does
+for a user, so the milestone stays in `review`.
+
+After the fix-now work: `air format --check` clean over `R/` and the two edited
+test files, `devtools::document()` no diff beyond the regenerated
+`man/summary.nested_results_set.Rd`, and the plot file re-run at 271 tests,
+0 failed, 0 skipped (up from 268 — the three added assertions), and the full
+`devtools::test()` re-run at FAIL 0, WARN 0, SKIP 0, PASS 9583.

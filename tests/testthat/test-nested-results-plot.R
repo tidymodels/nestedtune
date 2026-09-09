@@ -1003,8 +1003,21 @@ test_that("a set with both a failed fold and a short average carries both senten
   subtitle <- plot_label(p, "subtitle")
   expect_match(subtitle, FAILED_THREE, fixed = TRUE)
   expect_match(subtitle, SHORT_ONE, fixed = TRUE)
-  # Two counts, not one repeated: the sentences answer different questions.
-  expect_false(identical(FAILED_THREE, SHORT_ONE))
+  # Two counts, not one repeated: read the numbers back off the subtitle the
+  # figure carries, so the assertion fails if either sentence were derived
+  # from the other's count rather than computed on its own.
+  counted <- function(pattern) {
+    as.integer(sub(
+      pattern,
+      "\\1",
+      regmatches(
+        subtitle,
+        regexpr(pattern, subtitle)
+      )
+    ))
+  }
+  expect_identical(counted("([0-9]+) of 3 workflows did not complete"), 3L)
+  expect_identical(counted("([0-9]+) of 3 workflows averages"), 1L)
 })
 
 test_that("a metric no completed fold scored is counted, draws no rule, and reports no average", {
@@ -1123,6 +1136,12 @@ test_that("the censored set's panels and rules agree with the single view and wi
   reported <- summarized[!is.na(summarized$mean), ]
   rules <- plot_segments(p)
 
+  # The domain this correspondence runs over, stated independently of the
+  # figure and of `collect_metrics()`: two workflows against the three
+  # metric-and-time keys the fixture's metric set makes, every one of which
+  # scored. Without it an all-`NA` read or a vanished layer would empty both
+  # sides and the loop below would assert nothing.
+  expect_identical(nrow(reported), 6L)
   expect_identical(nrow(rules), nrow(reported))
   for (i in seq_len(nrow(reported))) {
     hit <- rules$x == reported$wflow_id[[i]] &
@@ -1223,6 +1242,7 @@ test_that("both set views look the way they read", {
   # before this was approved -- `ggplot_build()` cannot see a clipped
   # subtitle, and this is the tallest one the view can draw (M08).
   both <- plant_metric_na(wset_three_results(broken = 1L), 1L, 2L, "rmse")
-  partial_warnings(p <- autoplot(both, type = "performance"))
+  warnings <- partial_warnings(p <- autoplot(both, type = "performance"))
+  expect_length(warnings, 3L)
   vdiffr::expect_doppelganger("set performance, both shortfall sentences", p)
 })
