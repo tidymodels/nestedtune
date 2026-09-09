@@ -138,6 +138,7 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 - 2026-09-09: T7 — AC5 measured on this machine (Apple M5 Pro, 18 cores, macOS 26.6.2, R 4.6.1, testthat's local default of 2 workers), three pairs run interleaved branch/default in one sitting so a load drift hits both sides: branch 329.0, 315.2, 329.1 s (median 329.0); default branch 311.3, 350.6, 312.8 s (median 312.8); branch median 5.2% above, under the 10% bar. `devtools::document()` no diff; `devtools::test()` 770 tests, 0 failed, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes, 6m51s. `cairn_validate` all checks passed.
 
 - 2026-09-09: review — PR #87 opened as a draft; AC1-AC5 executed with fresh evidence and ticked; `cairn_validate` exit 0 and the r-package consistency gate clean; three fresh-context lenses returned 14 findings (13 [O], 1 [S], 0 [S]), 6 fixed on the branch, 1 dispositioned to a candidate row, 7 rejected with reasons, all logged in the Review section; no return-floor finding.
+- 2026-09-09: step-7 approval: PR #87 approved for merge.
 
 ## Decisions
 
