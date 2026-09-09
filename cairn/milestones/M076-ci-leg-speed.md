@@ -36,13 +36,13 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 
 ## Acceptance criteria
 
-- [ ] AC1: The sorted list of `test_that()` descriptions extracted from every
+- [x] AC1: The sorted list of `test_that()` descriptions extracted from every
       `tests/testthat/test-*.R` file on the merged head is identical to the
       list extracted the same way at the branch point.
-- [ ] AC2: Every leg the workflow's `strategy.matrix.config` lists whose
+- [x] AC2: Every leg the workflow's `strategy.matrix.config` lists whose
       measured `check-r-package` step median is at or below 24 minutes reads
       `timeout-minutes: 30`.
-- [ ] AC3: `Rscript -e 'devtools::test()'` and `Rscript -e 'devtools::check()'`
+- [x] AC3: `Rscript -e 'devtools::test()'` and `Rscript -e 'devtools::check()'`
       are clean on the merged head (the profile's verify and consistency-gate
       slots).
 
@@ -99,4 +99,145 @@ the same row. Any change to what a test asserts → nothing here moves a claim.
 
 ## Decisions
 
+- 2026-09-08: review. AC1-AC3 verified with fresh evidence (medians re-derived from the GitHub API, `devtools::test()` 9517/0/0, `devtools::check()` OK/0/0/0); consistency gate green, `cairn_validate` exit 0. Three fresh-context reviewers plus one gate finding: 16 findings, none demonstrating a criterion failing and none in package code, so no return floor fires; triage goes to the gate.
+
 ## Review
+
+### Acceptance-criteria evidence
+
+- AC1 verified 2026-09-08. `test_that()` descriptions parsed from every
+  `tests/testthat/test-*.R` with R's own parser (a walk over the parse tree,
+  literal first arguments only), at HEAD `aa3312d` and at the branch point
+  `9b91e18`: 755 descriptions each, sorted lists byte-identical (`diff` empty).
+  `git diff 9b91e18 HEAD -- tests/ R/ DESCRIPTION NAMESPACE man/ vignettes/` is
+  also empty, so the package content the criterion ranges over never moved.
+- AC2 verified 2026-09-08, medians re-derived at review from the GitHub API
+  rather than read back from the record: run 34287906467, three attempts, all
+  five legs green on each. `check-r-package` step minutes, attempt order,
+  median in brackets -- windows 19.67, 25.68, 25.32 [25.32]; devel 20.78,
+  18.82, 23.70 [20.78]; macOS 19.47, 17.43, 19.27 [19.27]; oldrel-1 16.00,
+  17.63, 24.48 [17.63]; ubuntu release 17.77, 18.97, 22.67 [18.97]. Four legs
+  sit at or below 24; the workflow's expression
+  `matrix.config.os == 'windows-latest' && 40 || 30` yields 30 for each of
+  them, and windows at 25.32 is outside the criterion's domain and keeps 40.
+  The current head `aa3312d` ran green under those caps (run 34295176957):
+  devel 24.08 and oldrel-1 24.03 against 30, windows 26.73 against 40.
+- AC3 verified 2026-09-08 on HEAD `aa3312d`. `Rscript -e 'devtools::test()'`:
+  `FAIL 0 | WARN 0 | SKIP 0 | PASS 9517`. `Rscript -e 'devtools::check()'`:
+  `Status: OK`, 0 errors, 0 warnings, 0 notes, duration 7m21.8s.
+
+### Consistency gate
+
+- `cairn_validate.py` exit 0: every check PASS, four advisories OK, one WARN
+  (`references staleness`, 18 pages) that is pre-existing and untouched here.
+- No `DESIGN.md` principle changed (`Principles touched: —`), so `cairn_impact`
+  is skipped.
+- Profile (`r-package`) consistency-gate slot: `devtools::document()` leaves no
+  diff; no generated file hand-edited; `README.Rmd` and `README.md` last moved
+  in the same commit and neither is in this diff; `pkgdown::check_pkgdown()`
+  reports no problems; no `NEWS.md` entry owed, the milestone changing nothing
+  user-visible; the two new files sit under `benchmarks/`, already covered by
+  `.Rbuildignore`'s `^benchmarks$`; `devtools::check()` clean as above.
+- Weight caps by hand: `ROADMAP.md` 23,932 B / 53 lines, `LESSONS.md` 19,902 B
+  / 49 lines, `PROFILE.md` 118 lines. All under budget; `LESSONS.md` is 98 B and
+  one line from its cap.
+
+### Independent review
+
+Three fresh-context reviewers, distinct evidence bases: [O] over the full
+`origin/main...HEAD` diff against the criteria, DESIGN and DECISIONS; [S] over
+`git log`/`blame` on the modified lines and the archive; [S] over the prior
+review record. One gate finding (G1) from the review session's own
+verification. Findings ranked by their reporter, most severe first.
+
+- G1: the yaml comment and the T3 work-log line pin the measurement to head
+  `d8b8ef6`, which is the pull-request merge ref as it stood then and no longer
+  resolves in this repo (`git cat-file -t d8b8ef6` fails; the ref now points at
+  `e173cd9`). The measured branch head was `3b313dd`, run 34287906467, three
+  attempts. A pinned figure in a code-adjacent artifact must name a commit a
+  later reader can resolve.
+- O1: the `÷ 4 workers` column in `benchmarks/test-timing-parallel.md` is
+  `sum of per-file wall / 4`, and the ratio of wall clock to that column is
+  1.019, 1.021, 1.021, 1.018 across the four arms -- so "within 2% of a perfect
+  packing" holds of every configuration by construction, including the two the
+  milestone rejects, and describes worker utilization rather than the amount of
+  work. Propagated into the yaml comment and `PROFILE.md`.
+- O2: "the split adds work" is contradicted by the file's own two split rows --
+  split-only and split+reorder measure identical package content and differ only
+  in queue order, yet their sums are 862.1 s and 789.9 s, so the quantity called
+  "work" moves with ordering and the headline +10.9% is not an added-work figure.
+- O3: "Splitting one file into three turns one daemon-pool start into three and
+  one worker package-load into three" is wrong on the second half.
+  `testthat:::queue_setup` passes the package load as a per-worker `load_hook`
+  to `task_q$new(concurrency = num_workers, ...)`, so package loads equal the
+  worker count whatever the file count.
+- O4: the split conclusions rest on overlapping ranges. Split-only is 220.1
+  (191.6-239.4) against a branch point of 198.0 (196.6-199.4), so one split run
+  beat every branch-point run; split+reorder is 201.1 (185.0-203.2). Only the
+  reorder arm is separated from the baseline. The honest statement is that
+  neither split arm shows a gain, not that splitting adds work. The
+  split+reorder arm also got five runs where the others got three, unexplained.
+- O5: the reorder arm confounds ordering with membership. The file describes it
+  as "the sixteen heaviest files longest-first"; `DESCRIPTION`'s `start-first`
+  carries eleven names, so the arm changed the size of the priority set as well
+  as its order, and 202.8 vs 198.0 cannot be attributed to ordering alone.
+- O6: `benchmarks/profile-tests-parallel.R` sets `TESTTHAT_CPUS` only, but
+  `testthat:::default_num_cpus()` returns `getOption("Ncpus")` first when it is
+  set -- and `Rscript` reads the user's `~/.Rprofile`. The header then prints
+  `workers: 4 (TESTTHAT_CPUS)` regardless, so a maintainer with
+  `options(Ncpus = 18)` gets a comparison that looks valid and is not.
+- O7: `T4` is unticked and its work is described as done in three work-log
+  lines, the last of which reads "all five tasks done". AC1 and AC2 were ticked
+  by the plan/implement path's own convention, so the inconsistency is not a
+  convention.
+- O8: `PROFILE.md`'s compression removed the two hang locations (52 min under
+  `R CMD check`, 40 min under `covr`) that made "hence the two scopes" follow;
+  the surviving sentence names one code site and the clause no longer parses as
+  an argument.
+- O9: `PROFILE.md` keeps "queues the slowest files first, so a long file cannot
+  land last -- and that is all it buys" in a bullet whose point is that the
+  lever was priced, while M76 measured queueing by actual measured time 2.4%
+  slower than the current list on non-overlapping ranges.
+- O10: `.github/workflows/R-CMD-check.yaml`'s job-cap comment still reads "The
+  step cap still ends a hung test suite in 30", false on the windows leg at 40.
+  Pre-existing, but inside the comment M76's scope brought to the measured
+  figures. Separately: devel's 20.8-minute median plus the 8.5-minute
+  within-leg spread the same comment documents reaches 29.3, 42 s under the new
+  cap -- a consequence of AC2 as written, not a coding error.
+- O11: the `med()` comment in `benchmarks/profile-tests-parallel.R` is garbled
+  -- "`[[` on a name `per_file` does not carry raises "subscript out of bounds""
+  -- a clause is missing. The code it describes is correct.
+- O12: smaller script items -- `max(elapsed)` without `na.rm` prints `NA` for
+  LONGEST SINGLE FILE in the case `med()` defends against; the `real`-column
+  claim is "near zero", not zero, and the subprocess's own `proc.time()` rides
+  on each message as `m$time`; one `sprintf()` with a constant and no arguments;
+  three env vars set process-wide with no `withr` restore (consistent with the
+  serial sibling); the `load_package = "source"` rationale is moot because
+  `queue_setup` rewrites `"none"` to `"source"` unconditionally.
+- O13: bookkeeping -- the work log says the compressed `ROADMAP.md` is 23,937 B
+  where `wc -c` reads 23,932; the re-cut candidate row is titled "The windows
+  leg's last three minutes" where the measured gap from 25.3 to AC2's 24 is 1.3;
+  Coverage maps AC3 to T2 and T3, but T3 is the CI round and produces no local
+  check evidence.
+- P1: `benchmarks/profile-tests-parallel.R` copies the two-tier per-run
+  pass/fail/skip printing that M74's review flagged on its sibling
+  `benchmarks/profile-tests.R` (finding O10, "duplicate per-run count
+  printing"), which was deferred rather than fixed and is still present on the
+  default branch. An unresolved lesson carried forward, not a fixed defect
+  undone.
+- [S] blame-history: no history conflicts. The 40-minute devel cap was set on
+  pre-M74 observations and M74 cut the suite without re-measuring; M76 supplies
+  that measurement, so the drop to 30 is a re-measurement rather than a
+  reversion. The `start-first` correction in `PROFILE.md` is marked in place per
+  the repo's convention and no live file still asserts the superseded claim.
+- [S] prior-PR-comments, secondary surface: the existence probe found one real
+  human inline comment in the repo (topepo, PR #30). Walking the PRs that
+  touched these files (#84, #82, #62, #86) found no inline review comments on
+  any of them.
+
+The review session verified O3, O5, O6, O10 and O11 against the implementation
+rather than the reporter's account, and refutes part of O1: `sum / 4` is a valid
+makespan lower bound for four workers, so "no reordering of the branch point can
+recover more than 1.9%" stands on its own terms. What O1 establishes is that the
+figure cannot discriminate between configurations and should not be read as one
+arm being better packed than another.
