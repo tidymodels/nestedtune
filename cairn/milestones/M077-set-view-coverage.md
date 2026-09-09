@@ -329,3 +329,6 @@ test files, `devtools::document()` no diff beyond the regenerated
 `man/summary.nested_results_set.Rd`, and the plot file re-run at 271 tests,
 0 failed, 0 skipped (up from 268 — the three added assertions), and the full
 `devtools::test()` re-run at FAIL 0, WARN 0, SKIP 0, PASS 9583.
+
+PR conversation on #87, read once before the merge gate: no reviews, no
+conversation comments, no unresolved review threads.
