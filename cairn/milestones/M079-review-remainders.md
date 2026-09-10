@@ -54,7 +54,7 @@ records → M080.
       blocks of `tests/testthat/test-nested-workflow-map-oracles.R`.
 - [x] AC4: Each of the five comment sites named in T5 describes the code it
       annotates.
-- [ ] AC5: A two-run invocation of `benchmarks/profile-tests.R` and of
+- [x] AC5: A two-run invocation of `benchmarks/profile-tests.R` and of
       `benchmarks/profile-tests-parallel.R` each emits exactly one `run 1/2:`
       count line.
 - [x] AC6: `Rscript -e 'devtools::test()'` run on the branch head on a
@@ -337,3 +337,9 @@ before evidence was gathered. PR #89 already open; `gh pr create` skipped.
      `tb_row()` signature at `:63` and its passthrough at `:69`), and both are
      BC12's. Accurate as a claim; round 1's finding 3 about the cited grep's
      reach is carried to triage separately.
+- **AC5 — verified.** `Rscript benchmarks/profile-tests.R 2` emits one `run 1/2:`
+  count line — `run 1/2: pass 9587 | fail 4 | skip 0 | suite 622.6 s | wall
+  625.0 s` — and `Rscript benchmarks/profile-tests-parallel.R 2` one — `run 1/2:
+  pass 9587 | fail 4 | skip 0 | WALL 225.0 s`. `grep -c '^run 1/2:'` returns 1
+  on each log. Each script's other `run 1/2` line is the progress line, which
+  carries no colon and no counts, and each run's `run 2/2:` line follows.
