@@ -12,8 +12,9 @@
 # `cairn/**`, `CLAUDE.md` or `.claude/**` changes nothing `R CMD check` sees.
 # It is spelled out under both triggers because GitHub Actions does not resolve
 # YAML anchors in workflow files; `.github/ci-usage.py` reads every copy back
-# separately and refuses to run at all while any push or pull-request trigger
-# in the repository carries no list.
+# separately and refuses to run once ANY trigger declares a list while another
+# carries none. With no list anywhere it falls back to its built-in copy and
+# reports; it is the disagreement it will not measure past.
 on:
   push:
     branches: [main, master]

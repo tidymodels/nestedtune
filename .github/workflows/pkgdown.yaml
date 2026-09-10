@@ -19,9 +19,9 @@
 #
 # The list is spelled out under both triggers because GitHub Actions does not
 # resolve YAML anchors in workflow files; `.github/ci-usage.py` reads every
-# copy back separately -- both triggers here, both in R-CMD-check.yaml, and
-# both in test-coverage.yaml -- and exits non-zero if any two of the six
-# disagree.
+# copy back separately -- both triggers here, and both in each of
+# R-CMD-check.yaml, R-CMD-check-hard.yaml and test-coverage.yaml -- and exits
+# non-zero if any two of the eight disagree.
 on:
   push:
     branches: [main, master]
@@ -80,6 +80,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
+      # Not stock either: `use-public-rspm` takes the builder and its
+      # dependencies as Linux binaries from Posit's public repository instead of
+      # compiling them from source on the runner.
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
@@ -131,9 +134,19 @@ jobs:
       # above deleted from the checkout are still in the domain. A page is
       # allowed only for the five sources pkgdown is meant to publish; every
       # other source must have no page at the site root, no copied markdown, no
-      # `sitemap.xml` entry and no `search.json` entry. The two index matches are
-      # anchored at the site root, so an article or reference topic sharing a
-      # stem with some repo-internal file is not mistaken for a leak.
+      # `sitemap.xml` entry and no `search.json` entry. The two index matches
+      # are anchored at the DOMAIN root -- `https?://[^/]+/<stem>.html` -- so an
+      # article or reference topic sharing a stem with some repo-internal file
+      # is not mistaken for a leak. That is the site root only while
+      # `_pkgdown.yml`'s `url:` has no path segment, as it does not today; give
+      # the site a subpath and those two arms stop matching, leaving the
+      # `docs/` listing arms to carry the check alone.
+      #
+      # `git ls-files` also bounds the domain to TRACKED markdown. An untracked
+      # or ignored root `.md` file present in the workspace would be rendered by
+      # pkgdown and seen by none of the four arms; nothing in this repository
+      # writes one, and the index read is what keeps the two files the step
+      # above deleted inside the domain.
       - name: Check the repo-internal pages are absent
         run: |
           set -u
@@ -210,11 +223,20 @@ jobs:
           exit "$missing"
         shell: bash
 
+      # `include-hidden-files` because `build_site_github_pages()` writes
+      # `docs/.nojekyll`, and upload-artifact excludes dotfiles by default. The
+      # two-job shape is what makes this needed: the single-job template
+      # deployed `docs/` straight from the build and never lost it. `.nojekyll`
+      # first reached `gh-pages` on 2026-08-31, under the collapsed shape, and
+      # is absent from every deploy the earlier two-job shape made -- restoring
+      # that shape without this line would have dropped it again, invisibly,
+      # because `clean: false` leaves the copy already on the branch in place.
       - name: Upload the built site
         uses: actions/upload-artifact@v7
         with:
           name: pkgdown-site
           path: docs
+          include-hidden-files: true
           retention-days: 1
 
   # Runs no code from the ref being built -- it checks the ref out, unpacks an

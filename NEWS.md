@@ -5,9 +5,10 @@
   it does not already own, which had put this repository's agent instructions
   and a CI cost measurement on the site, in its sitemap and in its search
   index. The site build now removes those sources before it runs, and fails
-  if any page but `README.md`, `NEWS.md`, `LICENSE.md`,
-  `.github/CODE_OF_CONDUCT.md` or `.github/CONTRIBUTING.md` reaches the built
-  site. The two pages that were already published have been removed.
+  if any tracked markdown file in the repository other than `README.md`,
+  `NEWS.md`, `LICENSE.md`, `.github/CODE_OF_CONDUCT.md` or
+  `.github/CONTRIBUTING.md` gets a page at the top level of the built site.
+  The two pages that were already published have been removed.
 
 * `autoplot()` on a `nested_results_set` with `type = "performance"` gains
   a subtitle sentence counting the workflows that rest a metric's average
