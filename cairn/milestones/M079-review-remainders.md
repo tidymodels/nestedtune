@@ -1,6 +1,6 @@
 # M079: The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -57,11 +57,9 @@ records → M080.
 - [ ] AC5: A two-run invocation of `benchmarks/profile-tests.R` and of
       `benchmarks/profile-tests-parallel.R` each emits exactly one `run 1/2:`
       count line.
-- [ ] AC6: `Rscript -e 'devtools::test()'` reports no failure and no error
-      other than the four `tests/testthat/test-ci-workflows.R` already
-      reports at the branch point (`b07beb3`) — failures at lines 59, 64 and
-      65 and an error at line 66, all from `job_uses()` finding no job named
-      `pkgdown` in `pkgdown.yaml`, which M78 split into `build` and `deploy`.
+- [ ] AC6: `Rscript -e 'devtools::test()'` run on the branch head on a
+      quiescent machine reports no failure and no error in any file this
+      branch touches (`git diff --name-only b07beb3 HEAD`).
 
 ## Coverage
 
@@ -109,8 +107,10 @@ records → M080.
 - [x] T6: Remove the second, duplicate per-run count print from
       `benchmarks/profile-tests.R:130-140` and from
       `benchmarks/profile-tests-parallel.R:205-216`, keeping the in-loop print.
-- [x] T7: `Rscript -e 'devtools::test()'`, with no failure and no error
-      outside the four `test-ci-workflows.R` carries at the branch point.
+- [x] T7: Run `Rscript -e 'devtools::test()'` on the branch head and on `main`
+      at the branch point (`b07beb3`), each on a quiescent machine; compare the
+      two runs' failure and error items by file, line and message, and record
+      the comparison in the work log.
 
 ## Work log
 
@@ -150,6 +150,10 @@ records → M080.
 - 2026-09-10: review opened; branch pushed and draft PR [#89](https://github.com/tidymodels/nestedtune/pull/89) created. `main` had not moved since the branch point, so no merge was needed.
 - 2026-09-10: amendment return: AC6 — "no failure and no error other than the four `tests/testthat/test-ci-workflows.R` already reports at the branch point (`b07beb3`)". The branch point reports five, not four: `test-parallel-interrupt.R:108` fails there too, identically. Status to `in-progress` for that amendment alone; review stops.
 - 2026-09-10: the fifth item is pre-existing and not M079's. `test-parallel-interrupt.R:108` ("Expected `interrupted` to be TRUE") fails on `b07beb3` and on the branch head, same line and same message, and passes 7/7 when its file is run alone under `NOT_CRAN=true` — a timing interaction inside the parallel suite, not a defect this branch introduced. Worth its own candidate row when the amendment gate sets scope.
+- 2026-09-10: amendment return: AC6 — "`Rscript -e 'devtools::test()'` run on the branch head on a quiescent machine reports no failure and no error in any file this branch touches (`git diff --name-only b07beb3 HEAD`)." The review's return was reclassified under its widening test, so the repair narrows the promise rather than widening the excused list: the branch-point comparison moves into T7, which is amended to run both refs and compare their items by file, line and message.
+- 2026-09-10: re-audit: AC6 (reduced) — returned one instrument-binding finding on the wording fixed at the mini gate, that a branch-head-versus-branch-point comparison promises a relation between two harness reports rather than a property of the deliverable, and turns on whether each run happens to hit `test-parallel-interrupt.R:108`'s timing flake; bounded-promise and proportionality: no finding. This is AC6's second re-audit line, so the disposition went to the user, who took the reader's repair. Neither `test-ci-workflows.R` nor `test-parallel-interrupt.R` is among the ten files `git diff --name-only b07beb3 HEAD` names, so both leave the promise by construction rather than by name.
+- 2026-09-10: T7 under the amended wording — the two quiescent runs and their comparison are the ones `/milestone-review` made on this tree this session and recorded in `## Review`: branch head `FAIL 5 | PASS 9587`, `main` at `b07beb3` `FAIL 5 | PASS 9578`, the same five items (`test-ci-workflows.R:59,:64,:65,:66` and `test-parallel-interrupt.R:108`) byte-identical across the two, so the branch head adds none.
+- 2026-09-10: claim audit: not owed — internal tier.
 
 ## Decisions
 
