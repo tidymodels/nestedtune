@@ -61,7 +61,7 @@ dependency cache → its own row. The review remainders → M079.
       generic, the wording vctrs' own documentation uses to mark that generic
       experimental, and the date vctrs' `sf` method for that generic last
       changed.
-- [ ] AC7: `Rscript -e 'devtools::check()'` clean (0 errors, 0 warnings) and
+- [x] AC7: `Rscript -e 'devtools::check()'` clean (0 errors, 0 warnings) and
       `Rscript -e 'devtools::document()'` produces no diff.
 
 ## Coverage
@@ -186,6 +186,9 @@ Fresh evidence, 2026-09-10, on `43c45ad`:
   `pull_request`; the step "Install vctrs from its development branch" runs
   `pak::pak("r-lib/vctrs@main")`; the step after it runs
   `pkgload::load_all(".")` then `testthat::test_local(stop_on_failure = TRUE)`.
+- AC7: `Rscript -e 'devtools::document()'` exit 0 leaving a clean `git status`;
+  `Rscript -e 'devtools::check()'` exit 0, "Status: OK", 8m35.4s, 0 errors 0
+  warnings 0 notes, tests 679s/377s, vignette rebuild 55s.
 - AC6: the `## Upstream issue draft` fenced block names all three, each
   re-verified this session against its source rather than the draft. Method
   site: `vec_cbind_frame_ptype.nested_results <-` sits at
