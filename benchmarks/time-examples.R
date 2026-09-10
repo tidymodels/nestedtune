@@ -1,4 +1,4 @@
-# Where the help-page examples spend their time, per page (M74, AC7).
+# Where the help-page examples spend their time, per page (M74, AC6).
 #
 # Usage, from the package root:
 #
@@ -24,7 +24,7 @@
 # median over the runs, and the totals are sums of per-page medians. The
 # figures move with the machine and its load, so a comparison is always
 # between two runs of this script under the same conditions -- the way
-# AC7 reads the branch point against the branch head.
+# AC6 reads the branch point against the branch head.
 
 runs <- {
   a <- commandArgs(trailingOnly = TRUE)

@@ -93,19 +93,20 @@ records → M080.
       serial fixture-cache report's `builds` column under
       `TESTTHAT_PARALLEL=FALSE`, never off a source comment, and quote that
       row in the work log.
-- [ ] T5: Read each of these five comment sites against the code under it and
+- [x] T5: Read each of these five comment sites against the code under it and
       correct what has drifted, quoting each reading in the work log:
       `benchmarks/time-examples.R:1,27` ("AC7", renumbered to AC6 at M74's
       re-cut); `test-nested-tune-bayes-oracles.R:431-433` (the block builds
       its own cache entry, so "the one the default oracle above built" is
-      false — the workflow's step id is drawn at a different stream state);
+      false — the workflow's step id is drawn at a different stream state;
+      wrong, see the work log);
       `R-CMD-check.yaml:119-120` (reads "in 30 on four legs, 40 on windows",
       which matches today's caps after M76 — expected to need no edit);
       `benchmarks/profile-tests.R:130-140` with
       `profile-tests-parallel.R:205-216`; and `helper-time-budget.R:57-60`,
       whose `times` comment names BC12's site at `test-parallel-identity.R:572`
       alone where `:957` also carries `times = 2L`.
-- [ ] T6: Remove the second, duplicate per-run count print from
+- [x] T6: Remove the second, duplicate per-run count print from
       `benchmarks/profile-tests.R:130-140` and from
       `benchmarks/profile-tests-parallel.R:205-216`, keeping the in-loop print.
 - [ ] T7: `Rscript -e 'devtools::test()'`, with no failure and no error
@@ -131,6 +132,14 @@ records → M080.
 - 2026-09-10: substantive amendment at a mini gate — Scope In's fixed-workflow entry widened from the hand call at `test-nested-workflow-map-oracles.R:22-29` to the duplicate build behind it and its cause in `helper-orchestration.R:69-76`. The two builds are not two hand calls: `fixed_workflow()`'s `step_pca()` draws its id from the stream, so `wset_two()` (which builds it after `det_workflow()` has drawn) and `wset_fixed()` (which builds it first) carry different workflow objects that produce one value. AC3 unchanged.
 - 2026-09-10: T4 — `step_pca()` in `fixed_workflow()` now carries `id = "pca_fixed"`. Serial fixture-cache report for `test-nested-workflow-map-oracles.R` under `TESTTHAT_PARALLEL=FALSE`, `builds` and `requests` columns for `nested_fit_resamples(workflow, folds, metrics = ms)`: `2` / `6` before, `1` / `6` after; file totals `8 signatures, 9 builds, 13 requests` before and `8 signatures, 8 builds, 13 requests` after, the report's "built more than once" warning line present before and absent after.
 - 2026-09-10: T4 verify — `devtools::test()` 9588 pass, 0 warn, 0 skip, only AC6's four excluded items; no other test moved, so nothing in the suite depended on the drawn id.
+
+- 2026-09-10: T5 site 1 — `benchmarks/time-examples.R:1` read "(M74, AC7)" and `:27` "the way AC7 reads"; M74's file at `accfbe2^` carries AC1-AC6 and its AC6 is the examples criterion, so both now read AC6.
+- 2026-09-10: T5 site 2 — the comment at `test-nested-tune-bayes-oracles.R:431-433` is ACCURATE and stands; T5's parenthesis calling it false is wrong, and so is M74 finding O7 behind it. Both blocks open `d <- make_reg_data(); wf <- bayes_workflow(d)`, and `make_reg_data()` calls `set.seed(4242)`, so the two `step_ns()` ids are drawn at the same stream state whatever ran before (measured: `ns_lfjS1, ns_46opZ` from both openings with 37 `runif()` draws in between). The two calls therefore key one cache entry — `fixture_key()` matched for the pair, and the serial report for the file shows `reference_nested_bayes_loop(... iter = 2 ...)` at `builds 1 / requests 2`, the only two iter = 2 seed = 20 sites being lines 62 and 436. No edit made.
+- 2026-09-10: T5 site 3 — `R-CMD-check.yaml:119-120` reads "in 30 on four legs, 40 on windows"; `grep -n timeout-minutes .github/workflows/*.yaml` gives the step cap at `:176` as `windows-latest && 40 || 30` over a five-leg matrix. Accurate, no edit, as the plan expected.
+- 2026-09-10: T5 site 4 — the drift at `profile-tests.R:130-140` and `profile-tests-parallel.R:205-216` was the duplicate print itself, which carried no comment of its own; T6 removed it.
+- 2026-09-10: T5 site 5 — `helper-time-budget.R:57-60` named one BC12 `shared_daemons()` site as paid twice; both `times = 2L` rows are BC12's, at `test-parallel-identity.R:572` (two daemons, block at `:559`) and `:957` (three daemons, block at `:944`), each inside `for (fn in RACERS)`. The comment now names both and cites the grep that re-reads them.
+- 2026-09-10: T6 — the trailing per-run count loop is gone from both profilers; each script now prints its counts once, from inside the run loop. `run %d/%d` remains at `profile-tests.R:62,67` and `profile-tests-parallel.R:141,146`, the `:62`/`:141` pair being the progress line without a colon.
+- 2026-09-10: T5, T6 verify — `devtools::test()` 9588 pass, 0 warn, 0 skip, only AC6's four excluded items; `air format --check` clean on every `.R` file the branch touches.
 
 ## Decisions
 
