@@ -1,13 +1,13 @@
 # M080: The CI records name the workflows that exist and stop copying their caps, and a leg watches the development vctrs one invariant rests on
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI configuration and repository tracking records, all of them `.Rbuildignore`d or outside the package build.
-- **Branch/PR:** `m080-ci-records-vctrs-watch`
+- **Branch/PR:** `m080-ci-records-vctrs-watch` — draft PR [#90](https://github.com/tidymodels/nestedtune/pull/90), opened at T5 so the new leg could be shown able to fail
 
 ## Goal
 
@@ -116,7 +116,7 @@ dependency cache → its own row. The review remainders → M079.
       `dplyr::bind_cols()` already patches in. Cite `R/nested-results.R:519`,
       vctrs' own experimental/keyword-internal wording, and the 2020-03-27
       date its `sf` method last changed. Post nothing.
-- [ ] T9: `Rscript -e 'devtools::check()'` clean; `devtools::document()` no
+- [x] T9: `Rscript -e 'devtools::check()'` clean; `devtools::document()` no
       diff.
 
 ## Work log
@@ -146,6 +146,10 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: T8 — the upstream issue is drafted into this file's `## Upstream issue draft` section, placed after `## Review` so it stays outside the plan-owned 150-line cap. Its three facts were read this session: the method sits at `R/nested-results.R:519`; `man/vec_cbind_frame_ptype.Rd` in `r-lib/vctrs` carries `\keyword{internal}`, an `[Experimental]` badge and "Expect changes"; and `vec_cbind_frame_ptype.sf()` last changed on 2020-03-27 in `647d8975`, confirmed by scanning all 84 commits to `R/bind.R` for a later patch touching it. `dplyr::bind_cols()` calling `vec_cbind()` then `dplyr_reconstruct(out, first)` was read off the installed function. Nothing was posted.
 
 - 2026-09-10: T5 — the leg reported red on the planted break and green without it, and `main` carries no branch protection and no rulesets, so no required check exists for it to join. Cap re-sized to 90 from the leg's own measured run rather than the release leg's, the green run having taken 35m24s against the 45 first guessed.
+
+- 2026-09-10: T9 — `devtools::document()` produces no diff; `devtools::check()` Status OK, 0 errors, 0 warnings, 0 notes, 10m07s, tests 846s/458s.
+- 2026-09-10: claim audit: not owed — internal tier.
+- 2026-09-10: status set to review; all nine tasks checked, `devtools::test()` and `devtools::check()` clean locally.
 
 ## Decisions
 
