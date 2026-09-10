@@ -11,7 +11,7 @@
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — the deliverable is the published documentation site at `nestedtune.tidymodels.org` and the workflow that writes it
-- **Branch/PR:** `m078-pkgdown-workflow-safety`
+- **Branch/PR:** `m078-pkgdown-workflow-safety` / [#88](https://github.com/tidymodels/nestedtune/pull/88) (draft)
 
 ## Goal
 
