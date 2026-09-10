@@ -226,8 +226,9 @@ daemon_state_snapshot <- function() {
 # an answer carrying no integer `pid` reads as `NA`, which `order()` keeps and
 # `sort()` drops, so the name vector comes back short and `names<-` pads it.
 # Today that padding lands the NA exactly where `order()` put it and the names
-# come out right anyway -- three unrelated defaults cancelling, one of which
-# changing would misname every record after the first no-pid answer (M79).
+# come out right anyway -- three unrelated defaults cancelling. Were
+# `order()`'s `na.last` ever `FALSE`, the same pair would hang the sorted pids
+# on the records one slot along and leave the last record unnamed (M79).
 name_by_pid <- function(answers) {
   pids <- vapply(
     answers,

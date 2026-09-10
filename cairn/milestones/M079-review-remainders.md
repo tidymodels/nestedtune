@@ -141,6 +141,8 @@ records → M080.
 - 2026-09-10: T6 — the trailing per-run count loop is gone from both profilers; each script now prints its counts once, from inside the run loop. `run %d/%d` remains at `profile-tests.R:62,67` and `profile-tests-parallel.R:141,146`, the `:62`/`:141` pair being the progress line without a colon.
 - 2026-09-10: T5, T6 verify — `devtools::test()` 9588 pass, 0 warn, 0 skip, only AC6's four excluded items; `air format --check` clean on every `.R` file the branch touches.
 
+- 2026-09-10: checkpoint — three comment refinements on already-committed work (the `na.last` clause in `name_by_pid()`, a paragraph break above `fixed_workflow()`, the fabricated-fixture rationale in the new test block) and the `daemon_rng_kinds()` ledger pointer moved 246 → 247 as those lines shifted. `air format --check` clean; the suite run that covers them is T7's, the two profiler invocations for AC5 holding the machine meanwhile.
+
 ## Decisions
 
 ## Review

@@ -356,9 +356,11 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
 # M79. The probe in `shared_daemons()` compares `names(now)` against
 # `names(was)` to say "the same daemons, by pid", so a name that belongs to a
 # different record turns a replaced daemon into a silent pass. The naming is
-# exercised here against fabricated answers rather than a live pool: a real
-# pool cannot be made to answer without an integer `pid`, which is the case
-# the two functions the old code used disagreed about.
+# exercised here against fabricated answers rather than a live pool: the case
+# that told the two functions the old code used apart is an answer carrying no
+# integer `pid` -- what the helper's own `NA_integer_` fallback is written for
+# -- and fabricating that is cheaper and surer than breaking a pool into
+# producing one.
 test_that("daemon answers are named by the pid each one holds", {
   answer <- function(pid) list(pid = pid, namespaces = character(0))
 

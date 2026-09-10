@@ -66,6 +66,7 @@ stoch_grid <- function() data.frame(min_n = c(2L, 10L, 25L))
 # `det_workflow()` finalized at `num_comp = 2L`, the deterministic path AC1's
 # value oracles need; `fixed_stoch_workflow()` is `stoch_workflow()` with
 # `min_n` fixed, ranger single-threaded, for the seed identities (AC6).
+
 # The step id is written out rather than drawn (M79). `recipes::step_pca()`
 # draws its id from the stream, so the same call at two stream positions
 # builds two workflows that differ in nothing that reaches a fit -- and

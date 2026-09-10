@@ -979,7 +979,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "helper-parallel.R",
-      246L,
+      247L,
       "collect_bounded",
       0,
       "daemon_rng_kinds()",
