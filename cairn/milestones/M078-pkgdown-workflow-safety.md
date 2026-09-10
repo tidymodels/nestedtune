@@ -162,6 +162,7 @@ row stay where they are.
 - 2026-09-09: review — the new candidate row put `cairn/ROADMAP.md` over its 24,000-byte budget; the widest rows were compressed in this same commit, back to 23,945 bytes over 53 lines.
 - 2026-09-09: review — PR conversation read on [#88](https://github.com/tidymodels/nestedtune/pull/88): no reviews, no conversation comments, no unresolved review threads.
 - 2026-09-09: step-7 approval: PR #88 approved for merge. The user also approved posting the drafted reply to topepo on [#30](https://github.com/tidymodels/nestedtune/pull/30) after the merge.
+- 2026-09-09: review — PR #88 marked ready; the CI watcher reached the harness ceiling and was stopped. Fresh state at that point: `build` and `format-suggest` success, `deploy` skipped, the five R-CMD-check legs and `test-coverage` still in progress, nothing red. No merge attempted and no approval marker written; the recorded step-7 approval stands for the resume.
 
 ## Decisions
 
