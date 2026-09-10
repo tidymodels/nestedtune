@@ -155,6 +155,7 @@ records → M080.
 - 2026-09-10: T7 under the amended wording — the two quiescent runs and their comparison are the ones `/milestone-review` made on this tree this session and recorded in `## Review`: branch head `FAIL 5 | PASS 9587`, `main` at `b07beb3` `FAIL 5 | PASS 9578`, the same five items (`test-ci-workflows.R:59,:64,:65,:66` and `test-parallel-interrupt.R:108`) byte-identical across the two, so the branch head adds none.
 - 2026-09-10: claim audit: not owed — internal tier.
 - 2026-09-10: step-7 approval: PR #89 approved for merge.
+- 2026-09-10: PR #89 marked ready; the CI watch hit the harness ceiling with seven legs still pending, so the watcher was stopped and the approval marker removed rather than left armed. Re-running `/milestone-review M079` re-derives the merge state and waits again.
 
 ## Decisions
 
