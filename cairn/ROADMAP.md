@@ -1,15 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-09 (M78 planned at high priority with D-060; the published-site candidate row re-cut to what M78 leaves — the moving-tag pins, `clean: false`, the `/dev/` site; the PR #30 row promoted whole into it; validate green; no RB open.)_
+_Last hygiene check: 2026-09-10 (M78 done and archived; the M17 pkgdown-leak lesson retired, the guard now failing the build on it; one lesson added on artifact dotfiles; a candidate row added for what that guard cannot see; the widest candidate rows compressed to hold the byte budget; M75's terminal row pruned; validate green; no RB open.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | review | — | high | milestones/M078-pkgdown-workflow-safety.md |
+| M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | done | — | high | milestones/archive/M078-pkgdown-workflow-safety.md |
 | M76 | The two slow check legs run their check step under the cap the other three use | done | — | normal | milestones/archive/M076-ci-leg-speed.md |
-| M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | done | M74 | normal | milestones/archive/M75-suite-prune.md |
 | M77 | The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn | done | — | normal | milestones/archive/M077-set-view-coverage.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
