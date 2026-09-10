@@ -1719,6 +1719,56 @@ selection for.
 
 **Consequences:** D-031's row clause holds for `nested_results` and not for the set; a user drops a workflow before reading. Falsified by a reader of the set that needs the original row count, or by a vctrs door that keeps the class on a combination the rule would shed.
 
+### D-060 (2026-09-09): the job that builds the site never holds a token able to write to this repository, and `.github/workflows/pkgdown.yaml` diverges from the r-lib stock template to keep that so — restores the shape `72c3be2` collapsed, and re-asserts the `extra-packages` line D-022 rejected
+
+**Context:** M17 built `.github/workflows/pkgdown.yaml` as two jobs on a
+stated reason: `pkgdown::build_site_github_pages()` executes the ref's
+vignette and every roxygen `@examples` block, so the job running it must not
+hold a token that can write to this repository; only a `deploy` job that runs
+nothing it checked out took `contents: write`, and only on the default branch.
+Commit `72c3be2` (PR #30, merged 2026-08-31) replaced the file with the r-lib
+stock template: one job, `permissions: contents: write`, running that build
+step, with the publish moved to a step-level `github.event_name !=
+'pull_request'` condition. The same replacement dropped the step that removes
+this repository's internal markdown before the build, and both internal pages
+are now served from the published site, in its sitemap and in its search
+index. `permissions:` is not expression-capable, so one job cannot hold the
+write scope conditionally. The reviewer left the question open on the `on:`
+block — whether any of the replaced file should be kept — and it is
+unanswered. `cairn/milestones/M078-pkgdown-workflow-safety.md` holds the
+observations and the restored file's criteria.
+
+**Decision:** the build job runs at the workflow's `read-all` and hands
+`docs/` on as an artifact; a separate `deploy` job holds `contents: write`,
+guards at job level on `github.ref_name ==
+github.event.repository.default_branch`, and runs only checkout,
+download-artifact and the SHA-pinned deploy action. The repo-internal source
+removal, its guard, the advertised-pages guard, `check_pkgdown()`, the
+`paths-ignore` copies and the `timeout-minutes` come back with it, and
+`extra-packages` returns to `local::.` alone, which is D-022's line — naming
+`any::pkgdown` there installs the builder either way and makes
+`Config/Needs/website` decorative. Every departure from the stock template
+carries a comment naming the property it buys, so a later sync does not undo
+it silently. Considered and rejected at the M078 plan gate: a separate
+`workflow_run`-triggered deploy workflow, which runs the default branch's
+definition and needs its own artifact and ref plumbing for the same property;
+gating one job's `permissions:` by expression, which the key does not support;
+and staying on the stock template and deleting the leaked pages alone, which
+leaves PR-authored code beside a writable token. Also rejected: switching the
+deploy off `clean: false`, which would take down pre-1.0 renamed pages that
+D-003 keeps reachable — the two leaked pages come off `gh-pages` directly
+instead.
+
+**Consequences:** this repository's `pkgdown.yaml` is no longer the shared
+r-lib file, so a future template sync is a merge rather than a copy, and the
+in-file comments are what carries the reason across it. The divergence is
+this repository's alone: D-027 and D-028's convergence stands for the
+community files, the site template and the three vendored organization
+workflows, and the moving-tag pins those workflows carry stay with their
+standing ROADMAP row. Falsified by GitHub making `permissions:` accept an
+expression, or by the organization adopting a build-then-publish split
+upstream, either of which would let the file return to a shared blob.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
