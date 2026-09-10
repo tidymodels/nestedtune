@@ -115,7 +115,7 @@ row stay where they are.
       both triggers, matching the four copies in `R-CMD-check.yaml` and
       `test-coverage.yaml` byte for byte; run `.github/ci-usage.py` and record
       its filter line.
-- [ ] T4: Prove each restored guard able to fail, planting a defect at a
+- [x] T4: Prove each restored guard able to fail, planting a defect at a
       location the guard does not name: a fresh root `notes.md` for the
       internal-pages guard (not `CLAUDE.md`, which the removal step deletes),
       the `docs/index.html` arm for the advertised-pages guard (not the
@@ -147,6 +147,8 @@ row stay where they are.
 - 2026-09-09: T3 (partway) — `paths-ignore` restored on both `pkgdown.yaml` triggers and `extra-packages` back to `local::.`; the six copies across the three workflows compare identical. `.github/ci-usage.py` still exits non-zero: `R-CMD-check-hard.yaml`, added by `72c3be2` alongside the collapse, carries `push` and `pull_request` with no list, and the script refuses whenever any trigger lacks one while others have it. Held at a mini gate on extending Scope to that file.
 - 2026-09-09: amendment (substantive, mini gate, user-selected) — Scope In extended to `.github/workflows/R-CMD-check-hard.yaml`'s two triggers, which gain the same `paths-ignore` list; no acceptance criterion's wording changes.
 - 2026-09-09: T3 — the list now has eight identical copies across the four workflows carrying `push`/`pull_request`, and `.github/ci-usage.py` exits 0 with `Path filter read from R-CMD-check-hard.yaml, R-CMD-check.yaml, pkgdown.yaml, test-coverage.yaml: `cairn/**`, `CLAUDE.md`, `.claude/**``.
+- 2026-09-09: PR [#88](https://github.com/tidymodels/nestedtune/pull/88) opened as a draft, so the pull-request runs the criteria ask for exist while the milestone is implemented. Baseline pkgdown run 34423656683 on `a43007b`: `build` pass in 6m10s, `deploy` skipping.
+- 2026-09-09: T4 — each restored guard planted and seen red on its own pull-request run, then reverted. Run 34424415359: a tracked root `notes.md` the guard does not name, red at `Check the repo-internal pages are absent` on the page, copied-source and sitemap arms. Run 34424840769: `docs/index.html` removed after the build, red at `Check the advertised pages exist` naming that path, the internal-pages guard green on the same run. Run 34425274073: `agreement` dropped from `_pkgdown.yml`, red at `Check pkgdown config` with `In _pkgdown.yml, 1 topic missing from index: "agreement"`. Locally the same three guards were also run against the site as published, red on `CLAUDE.md` and `.github/ci-usage-baseline.md` and green over the same 144 sources once those four files and their index entries were removed.
 
 ## Decisions
 

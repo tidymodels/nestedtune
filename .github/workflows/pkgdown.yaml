@@ -195,6 +195,12 @@ jobs:
           exit "$leaked"
         shell: bash
 
+      # TEMPORARY (M078 T4): plants the defect the advertised-pages guard below
+      # claims to catch -- a build that stops emitting `docs/index.html`.
+      - name: PLANT drop the advertised index page
+        run: rm -f docs/index.html
+        shell: bash
+
       # The two pages `DESCRIPTION` and `README.md` advertise. A pkgdown build
       # that silently stopped emitting either would still deploy a green-looking
       # site whose advertised links 404.
