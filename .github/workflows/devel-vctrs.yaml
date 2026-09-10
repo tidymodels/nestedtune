@@ -48,13 +48,14 @@ jobs:
     runs-on: ubuntu-latest
 
     # One job cap rather than R-CMD-check.yaml's two scopes: this leg runs no
-    # `R CMD check`, so there is no check step to bound separately. Sized from
-    # the ubuntu release leg of R-CMD-check.yaml, whose job measured 23m42s end
-    # to end, 22m30s of it in the check step (run 34522794223, 2026-09-10).
-    # This leg drops that check's build and vignette phases and adds a
-    # from-source build of vctrs, so its own time is a different figure -- the
-    # comment carries the release leg's until this leg has been measured.
-    timeout-minutes: 45
+    # `R CMD check`, so there is no check step to bound separately. The leg's
+    # first green run took 35m24s end to end, 33m19s of it in the suite (run
+    # 34526174374, 2026-09-10) -- longer than the ubuntu release leg's whole
+    # 23m42s job on the same day, the suite paying here for what `R CMD check`
+    # runs under its own harness there. 90 is about 2.5x the measurement, the
+    # ratio R-CMD-check.yaml and R-CMD-check-hard.yaml both use. It is a hang
+    # guard, not headroom: a run approaching it is a suite to make faster.
+    timeout-minutes: 90
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
