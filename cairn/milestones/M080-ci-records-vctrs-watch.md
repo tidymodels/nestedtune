@@ -50,7 +50,7 @@ dependency cache → its own row. The review remainders → M079.
 - [x] AC3: `.github/workflows/test-coverage.yaml`'s comment about
       R-CMD-check's cap states the figure `.github/workflows/R-CMD-check.yaml`
       declares today.
-- [ ] AC4: `.github/ci-usage-baseline.md` is the output of one `python3
+- [x] AC4: `.github/ci-usage-baseline.md` is the output of one `python3
       .github/ci-usage.py` run over a window ending on the branch date.
 - [x] AC5: `.github/workflows/` carries a leg that installs vctrs from
       `r-lib/vctrs@main` and runs the package's test suite, triggered on
@@ -176,6 +176,12 @@ Fresh evidence, 2026-09-10, on `43c45ad`:
   `${{ matrix.config.os == 'windows-latest' && 40 || 30 }}`. The two siblings
   T3 widened to agree: `stress-daemon-tests.yaml:43-44` and
   `pkgdown.yaml:68-70` both now say 30, 40 on windows.
+- AC4: `python3 .github/ci-usage.py` run bare from the repo root on 2026-09-10,
+  exit 0, stdout diffed against the committed `.github/ci-usage-baseline.md` —
+  no difference, the two byte-identical. The window is `BASELINE_SINCE`/
+  `BASELINE_UNTIL` = `[2026-08-11T00:00:00Z, 2026-09-10T00:00:00Z)`, closed and
+  a whole day behind the branch date, which is why a second run over the same
+  window reproduces the first exactly.
 - AC5: `.github/workflows/devel-vctrs.yaml` exists; `on:` carries `push` and
   `pull_request`; the step "Install vctrs from its development branch" runs
   `pak::pak("r-lib/vctrs@main")`; the step after it runs
