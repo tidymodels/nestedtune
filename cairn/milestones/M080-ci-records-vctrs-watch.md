@@ -171,7 +171,7 @@ Fresh evidence, 2026-09-10, on `43c45ad`:
   tree returns `source` = `R-CMD-check-hard.yaml, R-CMD-check.yaml,
   devel-vctrs.yaml, pkgdown.yaml, test-coverage.yaml`. The slot's
   `paths-ignore` sentence names those five and no others.
-- AC3: `.github/workflows/test-coverage.yaml:32-33` reads "at 30 minutes, 40 on
+- AC3: `.github/workflows/test-coverage.yaml:34` reads "at 30 minutes, 40 on
   windows"; `.github/workflows/R-CMD-check.yaml:175` declares
   `${{ matrix.config.os == 'windows-latest' && 40 || 30 }}`. The two siblings
   T3 widened to agree: `stress-daemon-tests.yaml:43-44` and
@@ -197,6 +197,66 @@ Fresh evidence, 2026-09-10, on `43c45ad`:
   "Add `sf` method for `vec_cbind_frame_ptype()`", and the method's body is
   byte-identical between that ref and main today (`data.frame()`, at :195 then
   and :255 now), so the draft's "has not changed since" holds.
+
+### Independent review
+
+Three fresh-context lenses, none having seen the implementation. The
+blame-history lens and the prior-review lens each reported no findings: the
+first traced every deleted figure and enumeration to a surviving copy in the
+workflow that declares it, the second read M076's and M078's archived `## Review`
+sections and found this diff correcting those points rather than regressing
+them (its GitHub probe found three human comments, all on PR #30, none
+contradicted). The diff-bug lens returned twelve, ranked; each is verified
+below against the implementation.
+
+- F1 (confirmed): `devel-vctrs.yaml:10` says the break "surfaces on the day it
+  lands upstream", but the leg triggers only on `push` and `pull_request`, so
+  an upstream rename during a quiet week surfaces at the next push here, not
+  the next day. The comment overstates what the trigger delivers.
+- F2 (confirmed): the profile's worker-count sentence now reads "every workflow
+  that runs the suite", where the pre-diff text read "the three check
+  workflows". `stress-daemon-tests.yaml` runs `testthat::test_dir("tests/testthat",
+  filter = …)` through `benchmarks/stress-daemon-tests.R:107` and sets no
+  `TESTTHAT_CPUS`, so the generalization the diff introduced has a
+  counterexample.
+- F3 (confirmed): `pkgdown.yaml:68-70`, rewritten by T3, now enumerates "20 on
+  test-coverage's job" inside a sentence beginning "Not the gating workflows'
+  measured caps" — on a job whose own cap is also 20, and about a workflow the
+  same profile says "annotat[es] a PR but never gat[es] it".
+- F4 (confirmed as a shared key, consequence bounded): `devel-vctrs.yaml:80`
+  and `stress-daemon-tests.yaml:62` pass byte-identical `extra-packages:
+  any::testthat, any::pkgload` to `setup-r-dependencies@v2`, whose cache is
+  saved post-job — so devel-vctrs can save a library holding unreleased vctrs
+  under a key the stress leg may restore. The stress leg is
+  `workflow_dispatch`-only and diagnostic, so the blast radius is a hang hunt
+  reading the wrong vctrs, not a false green on a gating check.
+- F5 (confirmed): the Goal says "the eight workflows that exist";
+  `.github/workflows/` holds nine once T4's leg lands. The count was true when
+  planned and is falsified by the milestone's own work.
+- F6 (confirmed): AC2 cites `.github/ci-usage.py:195`; `read_paths_ignore()` is
+  at :197, the diff's own comment edit having shifted it. The criterion names
+  the function, so what it tests is unchanged.
+- F7 (confirmed, fixed): the AC3 evidence bullet above cited
+  `test-coverage.yaml:32-33` for text on :34. Corrected in place before the
+  gate.
+- F8 (rejected): AC7's box was unticked when the lens read the file because
+  `devtools::check()` was still running; not a defect.
+- F9 (confirmed): `.github/ci-usage.py:60-61` says the upper bound is "a whole
+  day behind the capture". `BASELINE_UNTIL` is midnight of the capture day, so
+  the stated rule is not the rule the values follow; the invariant actually
+  wanted is that the bound precedes any run still in flight.
+- F10 (confirmed, bounded): `devel-vctrs.yaml` runs unpinned upstream HEAD and
+  carries `GITHUB_PAT` under `permissions: read-all`. The token is read-only,
+  so nothing here can write, but `pkgdown.yaml:56-63` reasons that a job
+  executing ref code should hold no more token than it needs, and this job
+  executes another project's code.
+- F11 (confirmed, by construction): `.github/ci-usage-baseline.md:5` names
+  `devel-vctrs.yaml` among the filter-carrying workflows though the leg existed
+  for none of the measured window. The script reads the workflow list off the
+  directory, which is the behaviour AC4 and T7 relied on.
+- F12 (confirmed, pre-existing): the divergence tag list at `PROFILE.md:42`
+  reads `(M11 ×2, M12 rev. M31, M14, M33, M52, M80)` and omits M78, whose
+  two-job pkgdown split the same sentence now asserts.
 
 Evidence recorded during implementation, for the review phase to read:
 
