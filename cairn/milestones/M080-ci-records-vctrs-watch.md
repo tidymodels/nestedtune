@@ -41,21 +41,21 @@ dependency cache → its own row. The review remainders → M079.
 
 ## Acceptance criteria
 
-- [ ] AC1: `cairn/PROFILE.md`'s test-doctrine slot states no `timeout-minutes`
+- [x] AC1: `cairn/PROFILE.md`'s test-doctrine slot states no `timeout-minutes`
       figure of its own, and every cap it discusses is named by the workflow
       file and the job or step that declares it.
-- [ ] AC2: That slot names as carrying `paths-ignore` exactly the workflows
+- [x] AC2: That slot names as carrying `paths-ignore` exactly the workflows
       `read_paths_ignore()` (`.github/ci-usage.py:195`) reports in its
       `source` field for the current tree.
-- [ ] AC3: `.github/workflows/test-coverage.yaml`'s comment about
+- [x] AC3: `.github/workflows/test-coverage.yaml`'s comment about
       R-CMD-check's cap states the figure `.github/workflows/R-CMD-check.yaml`
       declares today.
 - [ ] AC4: `.github/ci-usage-baseline.md` is the output of one `python3
       .github/ci-usage.py` run over a window ending on the branch date.
-- [ ] AC5: `.github/workflows/` carries a leg that installs vctrs from
+- [x] AC5: `.github/workflows/` carries a leg that installs vctrs from
       `r-lib/vctrs@main` and runs the package's test suite, triggered on
       `push` and `pull_request`.
-- [ ] AC6: `cairn/milestones/M080-ci-records-vctrs-watch.md` carries the
+- [x] AC6: `cairn/milestones/M080-ci-records-vctrs-watch.md` carries the
       upstream issue text in a fenced block whose body names three things: the
       file and line of the package method that depends on the experimental
       generic, the wording vctrs' own documentation uses to mark that generic
@@ -154,6 +154,43 @@ dependency cache → its own row. The review remainders → M079.
 ## Decisions
 
 ## Review
+
+Fresh evidence, 2026-09-10, on `43c45ad`:
+
+- AC1: the `## test-doctrine` slot, read whole, carries no `timeout-minutes`
+  key and one minute figure — "52 minutes under `R CMD check`, 40 under
+  `covr`", the two pre-M14 hang durations, which are observed run times and not
+  caps (T2 keeps them by name). Every cap it discusses is named by file and
+  scope: `R-CMD-check.yaml` job and `check-r-package` step separately;
+  `test-coverage.yaml`, `R-CMD-check-hard.yaml` and `devel-vctrs.yaml` one job
+  each; `pkgdown.yaml`'s `build` and `deploy` apart;
+  `stress-daemon-tests.yaml` a job cap "far above the rest". `grep -rn
+  timeout-minutes .github/workflows/` returns eight declarations across those
+  six files, each of which the slot's enumeration reaches.
+- AC2: `read_paths_ignore()` (`.github/ci-usage.py:195`) called on the current
+  tree returns `source` = `R-CMD-check-hard.yaml, R-CMD-check.yaml,
+  devel-vctrs.yaml, pkgdown.yaml, test-coverage.yaml`. The slot's
+  `paths-ignore` sentence names those five and no others.
+- AC3: `.github/workflows/test-coverage.yaml:32-33` reads "at 30 minutes, 40 on
+  windows"; `.github/workflows/R-CMD-check.yaml:175` declares
+  `${{ matrix.config.os == 'windows-latest' && 40 || 30 }}`. The two siblings
+  T3 widened to agree: `stress-daemon-tests.yaml:43-44` and
+  `pkgdown.yaml:68-70` both now say 30, 40 on windows.
+- AC5: `.github/workflows/devel-vctrs.yaml` exists; `on:` carries `push` and
+  `pull_request`; the step "Install vctrs from its development branch" runs
+  `pak::pak("r-lib/vctrs@main")`; the step after it runs
+  `pkgload::load_all(".")` then `testthat::test_local(stop_on_failure = TRUE)`.
+- AC6: the `## Upstream issue draft` fenced block names all three, each
+  re-verified this session against its source rather than the draft. Method
+  site: `vec_cbind_frame_ptype.nested_results <-` sits at
+  `R/nested-results.R:519`. Experimental wording: `man/vec_cbind_frame_ptype.Rd`
+  on `r-lib/vctrs` main carries `\keyword{internal}` (:21), the
+  `[Experimental]` lifecycle badge (:15) and "Expect changes" (:19); the
+  installed 4.6 vctrs renders the same text. sf method: `gh api
+  repos/r-lib/vctrs/commits/647d8975` dates it 2020-03-27T16:19:09Z, message
+  "Add `sf` method for `vec_cbind_frame_ptype()`", and the method's body is
+  byte-identical between that ref and main today (`data.frame()`, at :195 then
+  and :255 now), so the draft's "has not changed since" holds.
 
 Evidence recorded during implementation, for the review phase to read:
 
