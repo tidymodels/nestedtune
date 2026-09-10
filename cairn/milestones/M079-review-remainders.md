@@ -416,3 +416,38 @@ findings are all present in it.
   15. `helper-parallel.R:227-229`'s "Were `order()`'s `na.last` ever `FALSE`"
       describes an argument as if it were a setting; the mechanism it states is
       correct.
+
+**Triage at the approval gate.** No finding demonstrated an acceptance
+criterion failing, so none met the return floor.
+
+- **Fixed now** (1, 3, 4, 6): the three stale rationales in
+  `helper-orchestration.R` now say what the code does — `fit_resamples_results()`
+  records that its pre-build seed has no draw left to protect and is kept for
+  the shape it shares with its siblings, `wset_results()` splits the rationale
+  between `wset_two()`, which still draws through `det_workflow()`, and
+  `wset_fixed()`, which does not, and `plain_workflow()` contrasts on having no
+  recipe rather than on where an id comes from. `helper-time-budget.R` now cites
+  `grep -n 'times = [0-9]'`, which returns the three rows that set the argument
+  (`:65`, `:769`, `:849`) and does not match its own comment. `air format
+  --check` clean on both files; `devtools::test(filter = "suite-hygiene")`
+  `[ FAIL 0 | PASS 32 ]`.
+- **Fixed now** (12, 7): a ROADMAP candidate row for the
+  `test-parallel-interrupt.R:108` flake, and the hygiene stamp rewritten to stop
+  restating a byte figure that had drifted from the file twice — `wc -c` at each
+  pass is the procedure now. Two wide rows compressed to pay for the additions;
+  `wc -c` 23,946 of 24,000.
+- **Follow-up** (5, 8, 9): one candidate row, "M079's review remainders".
+- **Accepted with the limit recorded** (2): AC6 binds failures in two test files
+  in practice. Put to the user at the gate, AC6 having spent both its amendment
+  rounds; accepted as verified, the suite-wide comparison living in T7, which
+  ran both refs and is what surfaced the interrupt flake.
+- **Rejected** (10): AC3's five-versus-six undercount leaves the promise holding
+  a fortiori, and amending it would convene a gate for a criterion already met.
+  (11): the pinned `2 builds / 6 requests` figures name their producing
+  procedure and file, which is what the derived-figures rule asks. (13):
+  resolved — AC5's evidence is recorded above. (14): cosmetic asymmetry between
+  two benchmark scripts. (15): the phrasing describes an argument as a setting,
+  and the mechanism it states the lens confirmed correct.
+
+**Conversation read.** PR #89 carries no reviews, no conversation comments and
+no unresolved threads.

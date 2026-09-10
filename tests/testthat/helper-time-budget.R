@@ -59,7 +59,9 @@
 # two shared_daemons() calls in test-parallel-identity.R's BC12, one at each
 # daemon count, each sit inside `for (fn in RACERS)` and are therefore paid
 # twice. They are the ledger's only rows carrying a `times` above 1;
-# `grep -n 'times = 2L' tests/testthat/helper-time-budget.R` re-reads which.
+# `grep -n 'times = [0-9]' tests/testthat/helper-time-budget.R` lists every row
+# that sets the argument, `tb_row()`'s own default included, so a row added at
+# any other count shows up there rather than going unread.
 tb_row <- function(file, line, call, seconds, payer, times = 1L, note = "") {
   data.frame(
     file = file,
