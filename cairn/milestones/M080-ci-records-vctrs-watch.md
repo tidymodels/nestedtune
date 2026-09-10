@@ -110,7 +110,7 @@ dependency cache → its own row. The review remainders → M079.
       "Path filter read from" line corrects itself, the script reading the
       workflow list off the directory. Record the command and window in the
       Review section.
-- [ ] T8: Draft the upstream issue for `r-lib/vctrs` into this file: ask that
+- [x] T8: Draft the upstream issue for `r-lib/vctrs` into this file: ask that
       `vec_cbind_frame_ptype()` be stabilized, or that `vec_cbind()` restore
       its output against the first data-frame input's full type as
       `dplyr::bind_cols()` already patches in. Cite `R/nested-results.R:519`,
@@ -143,6 +143,8 @@ dependency cache → its own row. The review remainders → M079.
 
 - 2026-09-10: T7 — `BASELINE_SINCE`/`BASELINE_UNTIL` re-pointed to `[2026-08-11T00:00:00Z, 2026-09-10T00:00:00Z)`, a thirty-day window ending on the branch date and clear of any run still in flight, so the bare `python3 .github/ci-usage.py` AC4 names reproduces the file; its line 5 now reads the five filter-carrying workflows off the directory. Command and window recorded in the Review section.
 
+- 2026-09-10: T8 — the upstream issue is drafted into this file's `## Upstream issue draft` section, placed after `## Review` so it stays outside the plan-owned 150-line cap. Its three facts were read this session: the method sits at `R/nested-results.R:519`; `man/vec_cbind_frame_ptype.Rd` in `r-lib/vctrs` carries `\keyword{internal}`, an `[Experimental]` badge and "Expect changes"; and `vec_cbind_frame_ptype.sf()` last changed on 2020-03-27 in `647d8975`, confirmed by scanning all 84 commits to `R/bind.R` for a later patch touching it. `dplyr::bind_cols()` calling `vec_cbind()` then `dplyr_reconstruct(out, first)` was read off the installed function. Nothing was posted.
+
 ## Decisions
 
 ## Review
@@ -154,3 +156,47 @@ Evidence recorded during implementation, for the review phase to read:
   `BASELINE_SINCE`/`BASELINE_UNTIL` declare; stdout redirected to
   `.github/ci-usage-baseline.md`, exit 0, 2067 completed runs and 3893 jobs in
   window.
+
+## Upstream issue draft
+
+For `r-lib/vctrs`. Not posted from any session — the maintainer posts it.
+
+```
+Title: Stabilize `vec_cbind_frame_ptype()`, or restore `vec_cbind()` output
+against the first data frame's type
+
+`vec_cbind()` builds its output's container by calling `x[0]` through
+`vec_cbind_frame_ptype()`. For a data-frame subclass whose zero-column subset
+is a bare tibble — the rule tibble's `[` follows — the subclass is therefore
+gone before `vec_ptype2()` or `vec_restore()` is ever consulted, so a method on
+`vec_cbind_frame_ptype()` is the only way to carry a class through
+`vec_cbind()`.
+
+nestedtune does exactly that. `vec_cbind_frame_ptype.nested_results()`, at
+`R/nested-results.R:519`, exists solely so that `vctrs::vec_cbind(res, extra)`
+and `dplyr::bind_cols(res, extra)` answer the same way.
+
+The difficulty is that the generic is documented as not for public use.
+`man/vec_cbind_frame_ptype.Rd` carries `\keyword{internal}` alongside an
+`[Experimental]` badge, and its description tells readers to "Expect changes".
+A package that needs `vec_cbind()` to preserve a class has one door and is told
+not to walk through it.
+
+Either of two changes would settle it.
+
+1. Stabilize `vec_cbind_frame_ptype()`: drop `\keyword{internal}` and the
+   "Expect changes" wording, and document it as the extension point it already
+   is in practice. It has been stable in fact for years — the only method vctrs
+   itself ships for it, `vec_cbind_frame_ptype.sf()`, was added on 2020-03-27
+   in `647d8975` ("Add `sf` method for `vec_cbind_frame_ptype()`") and has not
+   changed since.
+
+2. Or have `vec_cbind()` restore its own output against the first data-frame
+   input's full type, which is what `dplyr::bind_cols()` already patches around
+   it — `bind_cols()` calls `vec_cbind()` and then `dplyr_reconstruct(out,
+   first)`. With that in vctrs, `vec_ptype2()` and `vec_restore()` would carry
+   the class the way they do everywhere else, and the frame-prototype generic
+   could stay internal.
+
+Happy to send a PR for whichever direction you prefer.
+```
