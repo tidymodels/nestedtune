@@ -7,10 +7,10 @@
 # did: every pull-request run before it was green because the step's `if:` guard
 # skips deploying off that branch, so it had never once executed.
 #
-# `pkgdown.yaml` now builds and deploys in a single `pkgdown` job, so the
-# checkout the deploy step needs is that job's own first step rather than a
-# second job's. The assertion is the same one either way: a checkout precedes
-# the deploy action in the steps the job runs.
+# `pkgdown.yaml` builds and deploys in two jobs, `build` and `deploy`, so the
+# checkout the deploy step needs is `deploy`'s own first step rather than a step
+# of the job that built the site. The assertion is the same one either way: a
+# checkout precedes the deploy action in the steps the job runs.
 #
 # `.github/` is `.Rbuildignore`d, so this file has nothing to read when the suite
 # runs from a built tarball and skips there. It runs under `devtools::test()` in
@@ -48,14 +48,14 @@ job_uses <- function(path, job) {
   trimws(sub("^\\s*(- )?uses:\\s*", "", hits))
 }
 
-test_that("the pkgdown job checks out before it deploys", {
+test_that("the pkgdown deploy job checks out before it deploys", {
   path <- workflow_path("pkgdown.yaml")
   skip_if_not(
     file.exists(path),
     "workflow sources are not in the built package"
   )
 
-  uses <- job_uses(path, "pkgdown")
+  uses <- job_uses(path, "deploy")
   expect_false(is.null(uses))
 
   checkout <- grep("^actions/checkout", uses)
@@ -66,8 +66,8 @@ test_that("the pkgdown job checks out before it deploys", {
   expect_lt(checkout[[1]], deploy[[1]])
 })
 
-# `pkgdown.yaml` holds one job and it is the file's last, so nothing there can
-# tell a read that stops at the job boundary from one that runs off the end.
+# `deploy` is `pkgdown.yaml`'s last job, so nothing there can tell a read that
+# stops at the job boundary from one that runs off the end.
 # `pr-commands.yaml` still has two jobs in sequence, which is what makes the
 # boundary observable at all -- without it the ordering test above would pass
 # just as well over a reader that swept in a neighbouring job's checkout.

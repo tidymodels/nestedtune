@@ -75,7 +75,7 @@ dependency cache → its own row. The review remainders → M079.
 
 ## Tasks
 
-- [ ] T1: Repair `tests/testthat/test-ci-workflows.R`'s ordering assertion
+- [x] T1: Repair `tests/testthat/test-ci-workflows.R`'s ordering assertion
       against the two-job `pkgdown.yaml` M78 left: the `deploy` job runs its own
       `actions/checkout@v7` (:267) before the deploy action (:278), so the
       assertion reads that job. Rewrite the file-header comment, which still
@@ -126,6 +126,8 @@ dependency cache → its own row. The review remainders → M079.
 
 - 2026-09-10: implement gate amended Scope In to cover `tests/testthat/test-ci-workflows.R`'s ordering assertion, which names a `pkgdown` job M78 replaced, and added it as T1; no acceptance criterion changed wording, the clean `devtools::test()` the verify slot already demands being what proves the repair.
 - 2026-09-10: implement gate reordered the eight planned tasks so the devel-vctrs leg (now T4) lands before the `paths-ignore` sentence (now T6) and the regenerated usage baseline (now T7), both of which read the workflow directory; `Tn:` labels and the Coverage lines renumbered together, task wording otherwise unchanged.
+
+- 2026-09-10: T1 — the pkgdown ordering assertion now reads the `deploy` job, whose own `actions/checkout@v7` precedes the deploy action; the file-header comment and the job-boundary comment corrected to the two-job file. `devtools::test()` 9592 pass, 0 fail.
 
 ## Decisions
 
