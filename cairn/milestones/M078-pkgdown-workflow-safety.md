@@ -49,37 +49,37 @@ row stay where they are.
 
 ## Acceptance criteria
 
-- [ ] AC1: On a pull-request run of `pkgdown.yaml` from this milestone's
+- [x] AC1: On a pull-request run of `pkgdown.yaml` from this milestone's
       branch, the "Set up job" log of the job that runs
       `pkgdown::build_site_github_pages` reports `contents: read`, and no job
       in that run reports any write scope.
-- [ ] AC2: `.github/workflows/pkgdown.yaml` declares exactly two jobs; the job
+- [x] AC2: `.github/workflows/pkgdown.yaml` declares exactly two jobs; the job
       holding `contents: write` lists exactly three steps —
       `actions/checkout`, `actions/download-artifact`, and the SHA-pinned
       `JamesIves/github-pages-deploy-action` — carries its publish condition at
       job level as `github.ref_name == github.event.repository.default_branch`,
       and both jobs carry a `timeout-minutes`. On a `workflow_dispatch` run of
       the branch and on a pull-request run, that job reports as skipped.
-- [ ] AC3: For every path `git ls-files -- '*.md' '.github/*.md'` returns on
+- [x] AC3: For every path `git ls-files -- '*.md' '.github/*.md'` returns on
       the branch, the branch's built site carries a page, a `sitemap.xml`
       entry and a `search.json` entry only where the path is `README.md`,
       `NEWS.md`, `LICENSE.md`, `.github/CODE_OF_CONDUCT.md` or
       `.github/CONTRIBUTING.md` — the check iterating that listing, never a
       hand list. `docs/index.html` and `docs/articles/nested-cv.html` are
       present, and `pkgdown::check_pkgdown()` reports no problems.
-- [ ] AC4: `https://nestedtune.tidymodels.org/CLAUDE.html` and
+- [x] AC4: `https://nestedtune.tidymodels.org/CLAUDE.html` and
       `.../ci-usage-baseline.html` each return HTTP 404 after redirects, and
       the live `sitemap.xml` and `search.json` match neither `CLAUDE` nor
       `ci-usage-baseline` — measured before the merge gate, the pages having
       been removed from `gh-pages` directly.
-- [ ] AC5: The dependency step's `extra-packages` reads `local::.` alone, and
+- [x] AC5: The dependency step's `extra-packages` reads `local::.` alone, and
       the branch's site build is green with `needs: website` resolving the
       builder from `DESCRIPTION`'s `Config/Needs/website`.
-- [ ] AC6: Both `pkgdown.yaml` triggers carry a `paths-ignore` list identical
+- [x] AC6: Both `pkgdown.yaml` triggers carry a `paths-ignore` list identical
       to the four copies in `R-CMD-check.yaml` and `test-coverage.yaml`, and
       `.github/ci-usage.py` exits zero with its filter line naming
       `pkgdown.yaml`.
-- [ ] AC7: `Rscript -e 'devtools::check()'` is clean on the branch (0 errors,
+- [x] AC7: `Rscript -e 'devtools::check()'` is clean on the branch (0 errors,
       0 warnings; NOTEs justified), and `devtools::document()` produces no
       diff.
 
@@ -161,3 +161,74 @@ row stay where they are.
 ## Decisions
 
 ## Review
+
+### Acceptance-criterion evidence
+
+- AC1 — pkgdown run 34426967821 (pull_request, head `76b6ac9`, build success
+  in 5m34s). The `build` job runs `pkgdown::build_site_github_pages`; its
+  `Set up job` `GITHUB_TOKEN Permissions` group lists twenty scopes, every one
+  `read`, `Contents: read` among them. The only `: write` string anywhere in
+  the run's log is `Cache mode: write`, printed after the group's
+  `##[endgroup]` and not a token scope. `deploy` was skipped and printed no
+  permissions group.
+- AC2 — parsing `.github/workflows/pkgdown.yaml` yields exactly two jobs,
+  `build` and `deploy`. `deploy` carries `permissions: {contents: write}`,
+  `if: github.ref_name == github.event.repository.default_branch` at job level,
+  `timeout-minutes: 10`, and exactly three steps: `actions/checkout@v7`,
+  `actions/download-artifact@v7`, and
+  `JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445`
+  (v4.9.0, SHA-pinned). `build` carries `timeout-minutes: 20` and no
+  `permissions` key, so it sits at the workflow's `read-all`. `deploy` reports
+  as skipped on both fresh runs of head `76b6ac9`: pull-request run
+  34426967821 and `workflow_dispatch` run 34427173295 (build success on each).
+- AC3 — same run 34426967821. `Check the repo-internal pages are absent`
+  passed, reporting `checking 145 tracked markdown sources`; the step's domain
+  is `git ls-files -- '*.md' '.github/*.md'`, not a hand list
+  (`.github/workflows/pkgdown.yaml:159`), and the allow-list it exempts is
+  exactly `README.md`, `NEWS.md`, `LICENSE.md`, `.github/CODE_OF_CONDUCT.md`,
+  `.github/CONTRIBUTING.md`. No `::error::` line was emitted anywhere in the
+  run. `Check the advertised pages exist` passed, which is the assertion that
+  `docs/index.html` and `docs/articles/nested-cv.html` are both present.
+  `Check pkgdown config` printed `No problems found.`
+- AC4 — measured 2026-09-09 against the live site.
+  `https://nestedtune.tidymodels.org/CLAUDE.html` and
+  `.../ci-usage-baseline.html` each return 404 after redirects. The live
+  `sitemap.xml` holds 44 `<loc>` entries and `search.json` 269 entries;
+  a case-insensitive grep for `CLAUDE` and for `ci-usage` matches 0 lines in
+  each file. Controls still 200: `/`, `/LICENSE.html`,
+  `/CODE_OF_CONDUCT.html`, `/CONTRIBUTING.html`, `/articles/nested-cv.html`,
+  `/news/index.html`.
+- AC5 — `.github/workflows/pkgdown.yaml:95` reads `extra-packages: local::.`
+  and nothing else; `needs: website` sits beside it. Run 34426967821's
+  `setup-r-dependencies` resolved `tidymodels`, `tidyverse/tidytemplate` and
+  `pkgdown` each with `"type": "Config/Needs/website"`, and the `build` job
+  finished success.
+- AC6 — parsing all four workflows carrying `push`/`pull_request`
+  (`R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `pkgdown.yaml`,
+  `test-coverage.yaml`), every one of the eight `paths-ignore` lists is the
+  identical `['cairn/**', 'CLAUDE.md', '.claude/**']`, so `pkgdown.yaml`'s two
+  copies match the four in `R-CMD-check.yaml` and `test-coverage.yaml`.
+  `python3 .github/ci-usage.py` exits 0, its filter line reading `Path filter
+  read from R-CMD-check-hard.yaml, R-CMD-check.yaml, pkgdown.yaml,
+  test-coverage.yaml: \`cairn/**\`, \`CLAUDE.md\`, \`.claude/**\``.
+- AC7 — `Rscript -e 'devtools::check(error_on = "warning")'` on head `76b6ac9`:
+  `Status: OK`, 0 errors, 0 warnings, 0 notes, 6m50s; the test leg ran
+  `testthat.R` in 564s/308s OK. `Rscript -e 'devtools::document()'` afterwards
+  left the tree clean apart from this milestone file's own review edits.
+
+### Consistency gate
+
+- `cairn_validate.py` exits 0; every check PASS or OK. Its 18 advisory
+  warnings are all `references staleness` on `cairn/references/` pages, none
+  from this milestone.
+- `cairn_impact.py` skipped: the branch's `cairn/DESIGN.md` change is a Known
+  issues edit, not an IP/GP principle change.
+- Profile (`r-package`) consistency-gate slot: `devtools::document()` no diff
+  (above); no generated file hand-edited (the no-diff `document()` covers
+  `NAMESPACE` and `man/`); `README.Rmd`/`README.md` untouched by the branch and
+  in sync; `pkgdown::check_pkgdown()` reports no problems, both locally and in
+  run 34426967821; `NEWS.md` carries an entry for the site no longer serving
+  repository-internal pages, with no milestone number in it; the one new
+  top-level file, `benchmarks/pkgdown-30-reply.md`, sits under the already
+  `.Rbuildignore`d `benchmarks/`, and `check()` reports 0 notes; full
+  `devtools::check()` clean.
