@@ -102,7 +102,7 @@ dependency cache → its own row. The review remainders → M079.
       expectation, record the red run's id in the Review section, revert — and
       confirm it is absent from the default branch's required checks, so a red
       upstream branch cannot block a merge.
-- [ ] T6: Correct the same slot's `paths-ignore` sentence against
+- [x] T6: Correct the same slot's `paths-ignore` sentence against
       `read_paths_ignore()`'s `source` field, which after T4 reports five
       workflows carrying the filter, not "both gating workflows".
 - [ ] T7: Run `python3 .github/ci-usage.py` over a window ending on the branch
@@ -138,6 +138,8 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: T3 — all three comments now state 30 minutes, 40 on windows, the figure `R-CMD-check.yaml:176` declares. `R-CMD-check.yaml:108`'s 20-minute mention is a past cap that killed a build, not a copy of a live one, and stays.
 
 - 2026-09-10: T4 — `.github/workflows/devel-vctrs.yaml` installs vctrs from `r-lib/vctrs@main` after the dependency install, records the version and remote sha it got, and runs `testthat::test_local(stop_on_failure = TRUE)` under `NOT_CRAN` and `TESTTHAT_CPUS: 4`; `push` and `pull_request` carry the same `paths-ignore`, and `read_paths_ignore()` now reports five workflows. Job cap 45, derived in the file from the ubuntu release leg's measured 23m42s (run 34522794223); this leg's own time is measured at T5. Four sibling header comments enumerated the filter-carrying workflows by name and counted the copies, which adding a fifth falsified, so each now points at "every other workflow carrying the filter" instead. The profile's divergence list and `paths-ignore` sentence follow at T6.
+
+- 2026-09-10: T6 — the slot's `paths-ignore` sentence names `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`, `pkgdown.yaml` and `test-coverage.yaml`, the five `read_paths_ignore()` reports; the divergence list gains the devel-vctrs leg and drops its own count, and the worker-count sentence stops naming "the three check workflows", now four. Compressed in the same pass to hold the 120-line cap: the hang-locating bullet, the parallel-files parenthetical and the `benchmarks/` listing, and the slot's remaining bullets rewrapped to the width the rest of it uses. 117 lines.
 
 ## Decisions
 
