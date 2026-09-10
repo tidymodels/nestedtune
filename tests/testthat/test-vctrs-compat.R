@@ -168,7 +168,6 @@ test_that("vec_cbind() and bind_cols() adding a column answer the same way", {
   through_dplyr <- dplyr::bind_cols(res, extra)
 
   expect_record_kept(through_vctrs, res)
-  expect_true(FALSE)  # M080 T5: deliberate break, proving the devel-vctrs leg can go red
   expect_record_kept(through_dplyr, res)
   expect_identical(class(through_vctrs), class(through_dplyr))
   expect_true("extra" %in% names(through_vctrs))

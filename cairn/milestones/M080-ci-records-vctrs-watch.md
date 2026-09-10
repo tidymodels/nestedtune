@@ -98,7 +98,7 @@ dependency cache → its own row. The review remainders → M079.
       the package's test suite, trigger on `push` and `pull_request` with the
       same `paths-ignore` the other four legs carry, and give the job a cap
       sized from the release leg's measured time.
-- [ ] T5: Prove the leg able to fail — point it once at a deliberately broken
+- [x] T5: Prove the leg able to fail — point it once at a deliberately broken
       expectation, record the red run's id in the Review section, revert — and
       confirm it is absent from the default branch's required checks, so a red
       upstream branch cannot block a merge.
@@ -145,12 +145,26 @@ dependency cache → its own row. The review remainders → M079.
 
 - 2026-09-10: T8 — the upstream issue is drafted into this file's `## Upstream issue draft` section, placed after `## Review` so it stays outside the plan-owned 150-line cap. Its three facts were read this session: the method sits at `R/nested-results.R:519`; `man/vec_cbind_frame_ptype.Rd` in `r-lib/vctrs` carries `\keyword{internal}`, an `[Experimental]` badge and "Expect changes"; and `vec_cbind_frame_ptype.sf()` last changed on 2020-03-27 in `647d8975`, confirmed by scanning all 84 commits to `R/bind.R` for a later patch touching it. `dplyr::bind_cols()` calling `vec_cbind()` then `dplyr_reconstruct(out, first)` was read off the installed function. Nothing was posted.
 
+- 2026-09-10: T5 — the leg reported red on the planted break and green without it, and `main` carries no branch protection and no rulesets, so no required check exists for it to join. Cap re-sized to 90 from the leg's own measured run rather than the release leg's, the green run having taken 35m24s against the 45 first guessed.
+
 ## Decisions
 
 ## Review
 
 Evidence recorded during implementation, for the review phase to read:
 
+- T5: the leg's first run, green, was run 34526174374 on `2f85a8e` — job
+  35m24s (20:24:23Z to 20:59:47Z), suite step 33m19s. The planted break
+  (`expect_true(FALSE)` beside the `vec_cbind()` class assertion in
+  `tests/testthat/test-vctrs-compat.R`) produced run 34529742899 on `215bbb4`,
+  conclusion `failure`, whose log names one failure and it is the planted one:
+  `Failure ('test-vctrs-compat.R:171:3'): vec_cbind() and bind_cols() adding a
+  column answer the same way`, at `FAIL 1 | WARN 0 | SKIP 0 | PASS 9592` — the
+  same pass count the green local run reports, so nothing else went red with
+  it. The break is reverted in the commit that ticks this task.
+- T5: `gh api repos/tidymodels/nestedtune/branches/main/protection` returns 404
+  and `.../rulesets` returns `[]`, so the default branch has no required checks
+  at all and this leg is absent from them.
 - T7 (AC4): `python3 .github/ci-usage.py` run bare on 2026-09-10 from the repo
   root, window `[2026-08-11T00:00:00Z, 2026-09-10T00:00:00Z)` as
   `BASELINE_SINCE`/`BASELINE_UNTIL` declare; stdout redirected to
