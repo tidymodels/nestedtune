@@ -1,6 +1,6 @@
 # M079: The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -109,7 +109,7 @@ records → M080.
 - [x] T6: Remove the second, duplicate per-run count print from
       `benchmarks/profile-tests.R:130-140` and from
       `benchmarks/profile-tests-parallel.R:205-216`, keeping the in-loop print.
-- [ ] T7: `Rscript -e 'devtools::test()'`, with no failure and no error
+- [x] T7: `Rscript -e 'devtools::test()'`, with no failure and no error
       outside the four `test-ci-workflows.R` carries at the branch point.
 
 ## Work log
@@ -143,6 +143,26 @@ records → M080.
 
 - 2026-09-10: checkpoint — three comment refinements on already-committed work (the `na.last` clause in `name_by_pid()`, a paragraph break above `fixed_workflow()`, the fabricated-fixture rationale in the new test block) and the `daemon_rng_kinds()` ledger pointer moved 246 → 247 as those lines shifted. `air format --check` clean; the suite run that covers them is T7's, the two profiler invocations for AC5 holding the machine meanwhile.
 
+- 2026-09-10: T7 — `devtools::test()` on the committed tree: `[ FAIL 4 | WARN 0 | SKIP 0 | PASS 9588 ]`, the four being AC6's excluded `test-ci-workflows.R` items at `:59`, `:64`, `:65` and `:66`. Branch point was 9580 pass; the 8 added are T3's new block.
+- 2026-09-10: AC5 evidence — `Rscript benchmarks/profile-tests.R 2` and `Rscript benchmarks/profile-tests-parallel.R 2`, each emitting exactly one `run 1/2:` count line (`run 1/2: pass 9587 | fail 4 | skip 0 | suite 612.0 s | wall 614.8 s` and `run 1/2: pass 9587 | fail 4 | skip 0 | WALL 235.0 s`); the `run 1/2 ...` progress line above each carries no colon and no counts.
+- 2026-09-10: an earlier invocation of the same two scripts reported `fail 6` on its first run against `fail 4` on the other three. Cause was this session editing `helper-parallel.R` and `helper-time-budget.R` while that run was in flight, leaving the ledger's line pointer and the call it addresses briefly out of step — the same two failures planting the pre-change code produced under T3. Re-run on a quiescent tree: all four runs `fail 4`. Not suite intermittency; the lesson is that a source edit during a suite run invalidates that run's record.
+
 ## Decisions
+
+- 2026-09-10: Two of the eight items M74's review left behind are not
+  defects. M74's archive line naming them as follow-ups is superseded here,
+  never edited (IP4). **O4** — `daemon_state_snapshot()` ordering by
+  `order(pids)` and naming by `sort(pids)` — misaligns nothing: `order()`
+  keeps an NA where `sort()` drops it, and `names<-` pads the short vector
+  back into that same slot, so the pre-change helper names every fixture
+  tried correctly and planting it back leaves the new test green. What M079
+  changes is alignment-by-coincidence to alignment-by-construction.
+  **O7** — that `test-nested-tune-bayes-oracles.R:431-433` wrongly calls its
+  reference "the one the default oracle above built, served from the cache" —
+  is itself wrong. Both blocks open `d <- make_reg_data(); wf <-
+  bayes_workflow(d)`, and `make_reg_data()` calls `set.seed(4242)`, so the
+  two `step_ns()` ids are drawn at the same stream state whatever ran
+  before; the calls key one cache entry, which the file's serial report
+  shows as `builds 1 / requests 2`. The comment stands unedited.
 
 ## Review
