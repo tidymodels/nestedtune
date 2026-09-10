@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M078: The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -155,6 +155,8 @@ row stay where they are.
 - 2026-09-09: T6 (partway) — `devtools::document()` produces no diff; `pkgdown::check_pkgdown()` reports no problems locally. `cairn/DESIGN.md`'s vendored-workflows Known-issues entry corrected to state that the shared-blob boundary is those three files alone and that this repository's own `pkgdown.yaml` and `R-CMD-check-hard.yaml` diverge from the r-lib templates deliberately. `NEWS.md` gains an entry for the site no longer carrying repository-internal pages. `devtools::check()` still running.
 - 2026-09-09: live site after the `gh-pages` rebuild at `4eb11ed`: `/CLAUDE.html`, `/ci-usage-baseline.html`, `/CLAUDE.md` and `/ci-usage-baseline.md` each return 404 after redirects; `sitemap.xml` holds 44 urls and `search.json` 269 entries, neither matching `CLAUDE` or `ci-usage`; `/`, `/LICENSE.html`, `/CODE_OF_CONDUCT.html`, `/CONTRIBUTING.html`, `/articles/nested-cv.html` and `/news/index.html` still return 200.
 - 2026-09-09: T6 — `devtools::check(error_on = "warning")` on the branch: Status OK, 0 errors, 0 warnings, 0 notes, 6m57s. `devtools::document()` leaves the tree clean. `pkgdown::check_pkgdown()` reports no problems.
+- 2026-09-09: pkgdown run 34426080106 on the final tree (pull_request): `build` pass in 5m27s, `deploy` skipped; the build job's `GITHUB_TOKEN Permissions` block reports every scope as `read` including `Contents: read`, and neither job in the run reports a `write` scope. Run 34426477681 (workflow_dispatch on the branch): `build` success, `deploy` skipped.
+- 2026-09-09: `cairn_validate` passes, 18 advisory warnings, all `references staleness` and none from this milestone. Plan-owned body 137 lines. Status set to `review`; PR [#88](https://github.com/tidymodels/nestedtune/pull/88) is still a draft and the R-CMD-check matrix and coverage legs were still running at handoff.
 
 ## Decisions
 
