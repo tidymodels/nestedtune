@@ -1,13 +1,13 @@
 # M081: The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the Rd pages, examples and pkgdown reference blurbs ship in the package and on the site
-- **Branch/PR:** —
+- **Branch/PR:** `m081-help-pages-rewrite`
 
 ## Goal
 
