@@ -50,14 +50,14 @@ records → M080.
 - [x] AC2: `daemon_state_snapshot()` names each record by the pid of the
       answer that record holds, including when one answer carries no integer
       `pid`.
-- [ ] AC3: The fixed-workflow hand call is built once across the five `fn`
+- [x] AC3: The fixed-workflow hand call is built once across the five `fn`
       blocks of `tests/testthat/test-nested-workflow-map-oracles.R`.
-- [ ] AC4: Each of the five comment sites named in T5 describes the code it
+- [x] AC4: Each of the five comment sites named in T5 describes the code it
       annotates.
 - [ ] AC5: A two-run invocation of `benchmarks/profile-tests.R` and of
       `benchmarks/profile-tests-parallel.R` each emits exactly one `run 1/2:`
       count line.
-- [ ] AC6: `Rscript -e 'devtools::test()'` run on the branch head on a
+- [x] AC6: `Rscript -e 'devtools::test()'` run on the branch head on a
       quiescent machine reports no failure and no error in any file this
       branch touches (`git diff --name-only b07beb3 HEAD`).
 
@@ -175,6 +175,8 @@ records → M080.
 
 ## Review
 
+### Round 1 — stopped at the AC6 amendment return (2026-09-10)
+
 Phase stopped at an amendment return on AC6 (step 5's amendment-return clause);
 AC3, AC4 and AC5 were not reached. Evidence below is what ran before the stop.
 
@@ -260,3 +262,78 @@ bases. Findings are carried to the re-review's triage gate, untriaged.
   ledger pointer `helper-parallel.R:247`, which is where `daemon_rng_kinds()`'s
   `collect_bounded` now sits, and on `R-CMD-check.yaml:119-120` against the cap
   at `:176`.
+
+### Round 2 — after the AC6 amendment (2026-09-10)
+
+Re-entered at step 1 (PR #89 open, criteria unticked). `origin/main` is still
+`b07beb3`, an ancestor of the branch head, so no merge and no re-run were owed
+before evidence was gathered. PR #89 already open; `gh pr create` skipped.
+
+**Criteria executed.**
+
+- **AC1 — verified.** `Rscript -e 'devtools::test()'` on the branch head
+  (`7ee30e4`, quiescent machine): `[ FAIL 4 | WARN 0 | SKIP 0 | PASS 9588 ]`,
+  no failure in `tests/testthat/test-nested-tune-bayes-results.R`. Read against
+  the source: the block at `:248` binds `plain <- bayes_results()`, whose helper
+  (`helper-orchestration.R:1142`) calls `nested_tune_bayes()` with no `control`
+  argument under `set.seed(20)`; the restored run at `:298-307` repeats those
+  arguments under the same entry seed with
+  `control = tune::control_bayes(allow_par = TRUE, seed = 999L)` and
+  `expect_identical(forced, plain)` at `:308`.
+- **AC2 — verified.** The same run reports no failure in
+  `tests/testthat/test-suite-hygiene.R`. `daemon_state_snapshot()`
+  (`helper-parallel.R:213-220`) returns `name_by_pid(answers)`, which builds one
+  `order(pids)` permutation and names from `pids[ord]`, so a record's name is the
+  pid that record carries. The hygiene block drives it over a shuffled fixture
+  (named `"10" "20" "30"`) and a gapped one carrying a non-list answer and a
+  `NULL` pid (named `"10" "30" NA NA`), and closes with a loop asserting over
+  both fixtures that `names(out)` equals the pid read back off each record.
+- **AC6 — verified.** The same run's four items are all in
+  `tests/testthat/test-ci-workflows.R` — failures at `:59`, `:64`, `:65` and the
+  `:66` `subscriptOutOfBoundsError`. `git diff --name-only b07beb3 HEAD` names
+  ten files (three under `benchmarks/`, two under `cairn/`, and
+  `helper-orchestration.R`, `helper-parallel.R`, `helper-time-budget.R`,
+  `test-nested-tune-bayes-results.R`, `test-suite-hygiene.R` under
+  `tests/testthat/`); `test-ci-workflows.R` is not among them, so no failure and
+  no error falls in a file this branch touches. Round 1's fifth item,
+  `test-parallel-interrupt.R:108`, did not fire in this run — the timing
+  interaction the amendment moved out of the promise.
+- **AC3 — verified.** `TESTTHAT_PARALLEL=FALSE Rscript -e 'devtools::test(filter
+  = "nested-workflow-map-oracles")'` on the branch head: `[ FAIL 0 | WARN 0 |
+  SKIP 0 | PASS 108 ]`, and the serial fixture-cache report reads `8 signatures,
+  8 builds, 13 requests` with no "built more than once" line. The hand call's
+  signature — `nested_fit_resamples(workflow, folds, metrics = ms)`, the
+  `memoised()` call at `test-nested-workflow-map-oracles.R:29` — reports
+  `builds 1 / requests 6`, one request per name in `MAP_FNS`
+  (`helper-orchestration.R:2564-2571`, six). Built once across six `fn` blocks,
+  so once across the five the criterion names.
+- **AC4 — verified**, each of the five sites read against the code under it on
+  the branch head.
+  1. `benchmarks/time-examples.R:1,27` reads "(M74, AC6)" and "the way AC6
+     reads the branch point against the branch head". `git show
+     accfbe2^:cairn/milestones/M074-suite-speed.md` carries AC1-AC6, and its AC6
+     is the examples criterion, which compares the two refs. Accurate.
+  2. `tests/testthat/test-nested-tune-bayes-oracles.R:431-433` calls its
+     reference "the one the default oracle above built, served from the cache".
+     Both blocks open `d <- make_reg_data()`, whose `seed = 4242` default is set
+     inside the helper (`helper-orchestration.R:6-7`), so the two workflows are
+     drawn at the same stream state. The two `iter = 2, seed = 20` sites are
+     `:62` and `:436`, and the serial fixture-cache report for the file (`[ FAIL
+     0 | PASS 134 ]`, `6 signatures, 6 builds, 8 requests`) shows that
+     signature at `builds 1 / requests 2`. Accurate.
+  3. `.github/workflows/R-CMD-check.yaml:119-120` reads "in 30 on four legs, 40
+     on windows"; the step cap at `:176` is `windows-latest && 40 || 30` over a
+     five-leg matrix carrying one `windows-latest`. Accurate.
+  4. `benchmarks/profile-tests.R:130-140` with
+     `profile-tests-parallel.R:205-216`: the drift T5 named was the duplicate
+     per-run print, which carried no comment of its own and which T6 removed.
+     Those lines now hold the optional-packages report and the wall-clock line,
+     with no comment sitting on them, so nothing there states anything about the
+     code.
+  5. `tests/testthat/helper-time-budget.R:57-62` names both BC12
+     `shared_daemons()` sites and claims they are "the ledger's only rows
+     carrying a `times` above 1". `grep -n "times = "` over the file returns
+     `:767` and `:847` as the only rows above the `times = 1L` default (plus the
+     `tb_row()` signature at `:63` and its passthrough at `:69`), and both are
+     BC12's. Accurate as a claim; round 1's finding 3 about the cited grep's
+     reach is carried to triage separately.
