@@ -924,6 +924,306 @@ test_that("AC4: the set's autoplot() refuses a type outside the two, and fences 
   )
 })
 
+# The set's short-average sentence (M77). A workflow can complete every outer
+# fold and still rest a metric's average on fewer of them, because a completed
+# fold can score `NA` on one metric while scoring the others. The single view
+# says so on the panel itself; a set has no per-workflow-and-metric label slot,
+# and one figure-level count asserting a per-panel truth is the defect M08
+# review F1 found, so the set counts workflows in the subtitle and sends the
+# reader to `summary()` for which metric and how many folds.
+#
+# The score is planted where `per_fold_metrics()` reads it, on the results
+# object's `.metrics`, so the fold state is untouched and only the average
+# moves. The counts below are the property under test: the sentence counts
+# WORKFLOWS, so two short metrics in one workflow report what one does, and one
+# short metric in two workflows reports more.
+plant_metric_na <- function(res, wflow, folds, metrics) {
+  for (i in folds) {
+    own <- res$result[[wflow]]$.metrics[[i]]
+    own$.estimate[own$.metric %in% metrics] <- NA_real_
+    res$result[[wflow]]$.metrics[[i]] <- own
+  }
+  res
+}
+
+SHORT_ONE <-
+  "1 of 3 workflows averages a metric over fewer folds than it completed; see summary()."
+SHORT_TWO <-
+  "2 of 3 workflows average a metric over fewer folds than they completed; see summary()."
+FAILED_THREE <- "3 of 3 workflows did not complete every fold; see summary()."
+
+test_that("the set's subtitle counts one workflow whose metric averaged fewer folds than it completed", {
+  skip_if_no_wset_fixture()
+  # (a) One metric short in one workflow.
+  res <- plant_metric_na(wset_three_results(), 1L, 1L, "rmse")
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_match(plot_label(p, "subtitle"), SHORT_ONE, fixed = TRUE)
+
+  # The count is of workflows, and it is the `n` the rule was drawn from: the
+  # planted workflow's rmse average now rests on one of the two folds it
+  # completed, and the fold state did not move.
+  summarized <- as.data.frame(collect_metrics(res))
+  own <- summarized[
+    summarized$wflow_id == res$wflow_id[[1L]] & summarized$.metric == "rmse",
+  ]
+  expect_identical(own$n, 1L)
+  expect_identical(sum(res$result[[1L]]$.completed), 2L)
+})
+
+test_that("two short metrics in one workflow report the count one short metric does", {
+  skip_if_no_wset_fixture()
+  # (b) Two metrics short in the same workflow, against (a)'s one.
+  res <- plant_metric_na(wset_three_results(), 1L, 1L, c("rmse", "rsq"))
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_match(plot_label(p, "subtitle"), SHORT_ONE, fixed = TRUE)
+
+  summarized <- as.data.frame(collect_metrics(res))
+  own <- summarized[summarized$wflow_id == res$wflow_id[[1L]], ]
+  expect_identical(sort(own$n), c(1L, 1L))
+})
+
+test_that("one short metric in two workflows reports a larger count than in one", {
+  skip_if_no_wset_fixture()
+  # (c) The same metric short in two workflows.
+  res <- plant_metric_na(wset_three_results(), 1L, 1L, "rmse")
+  res <- plant_metric_na(res, 2L, 1L, "rmse")
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_match(plot_label(p, "subtitle"), SHORT_TWO, fixed = TRUE)
+  expect_no_match(plot_label(p, "subtitle"), SHORT_ONE, fixed = TRUE)
+})
+
+test_that("a set with both a failed fold and a short average carries both sentences with their own counts", {
+  skip_if_no_wset_fixture()
+  # (d) `break_fold()` mutates the shared design, so every workflow fails
+  # Fold1 and completes Fold2; the metric is then planted on that one
+  # completed fold of one workflow.
+  res <- plant_metric_na(wset_three_results(broken = 1L), 1L, 2L, "rmse")
+  warnings <- partial_warnings(p <- autoplot(res, type = "performance"))
+  expect_length(warnings, 3L)
+  subtitle <- plot_label(p, "subtitle")
+  expect_match(subtitle, FAILED_THREE, fixed = TRUE)
+  expect_match(subtitle, SHORT_ONE, fixed = TRUE)
+  # Two counts, not one repeated: read the numbers back off the subtitle the
+  # figure carries, so the assertion fails if either sentence were derived
+  # from the other's count rather than computed on its own.
+  counted <- function(pattern) {
+    as.integer(sub(
+      pattern,
+      "\\1",
+      regmatches(
+        subtitle,
+        regexpr(pattern, subtitle)
+      )
+    ))
+  }
+  expect_identical(counted("([0-9]+) of 3 workflows did not complete"), 3L)
+  expect_identical(counted("([0-9]+) of 3 workflows averages"), 1L)
+})
+
+test_that("a metric no completed fold scored is counted, draws no rule, and reports no average", {
+  skip_if_no_wset_fixture()
+  # (e) Every completed fold of one workflow scores `NA` on rmse.
+  res <- plant_metric_na(wset_three_results(), 1L, 1:2, "rmse")
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  expect_match(plot_label(p, "subtitle"), SHORT_ONE, fixed = TRUE)
+
+  # No rule for that workflow in that panel -- the other two keep theirs, so
+  # the absence is of this one rule and not of the layer.
+  rules <- plot_segments(p)
+  rmse <- rules[rules$panel == "rmse", ]
+  expect_identical(sort(rmse$x), sort(res$wflow_id[2:3]))
+  expect_true(res$wflow_id[[1L]] %in% rules[rules$panel == "rsq", ]$x)
+
+  # And no average reported for it, over the folds it did complete.
+  summarized <- as.data.frame(collect_metrics(res))
+  own <- summarized[
+    summarized$wflow_id == res$wflow_id[[1L]] & summarized$.metric == "rmse",
+  ]
+  expect_true(is.na(own$mean))
+  expect_identical(own$n, 0L)
+  expect_identical(sum(res$result[[1L]]$.completed), 2L)
+})
+
+test_that("a set every completed fold of which scored carries neither shortfall sentence", {
+  skip_if_no_wset_fixture()
+  # (f) The control: nothing planted, so neither sentence may appear. It is
+  # what makes the five above assertions about the planting rather than about
+  # the sentence being present always.
+  res <- wset_three_results()
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  subtitle <- plot_label(p, "subtitle")
+  expect_no_match(subtitle, "averages a metric over fewer folds", fixed = TRUE)
+  expect_no_match(subtitle, "average a metric over fewer folds", fixed = TRUE)
+  expect_no_match(subtitle, "did not complete every fold", fixed = TRUE)
+  expect_match(
+    subtitle,
+    "Each line marks a workflow's nested estimate.",
+    fixed = TRUE
+  )
+})
+
+# The set views over the shapes the regression fixture cannot make (M77).
+#
+# `wset_three()` runs two metrics, neither of them measured at an evaluation
+# time, and every workflow it holds tunes a number. So two things the set views
+# must handle went undrawn: a metric set mixing a dynamic survival metric --
+# one estimate per evaluation time -- with a static one that reads no time, and
+# a set whose workflows tune parameters of different types. Both run through
+# `nested_workflow_map()` on the censored fixture rather than being planted, so
+# the shapes are the ones a real map run produces.
+
+test_that("the censored set's performance view draws one panel per metric-and-time key", {
+  skip_if_no_censored()
+  skip_if_no_wset_fixture()
+  res <- srv_set_results()
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+
+  # The expected panels are read off the reader, not written down: one per
+  # distinct metric-and-time key, the time joining the name where the row
+  # carries one. `format()` here is base R's, stated independently of the
+  # package's own time rendering.
+  summarized <- as.data.frame(collect_metrics(res))
+  keys <- unique(summarized[, c(".metric", ".eval_time")])
+  expected <- ifelse(
+    is.na(keys$.eval_time),
+    keys$.metric,
+    paste0(
+      keys$.metric,
+      " at time ",
+      vapply(keys$.eval_time, format, character(1))
+    )
+  )
+  expect_identical(sort(strip_labels(p)), sort(unique(expected)))
+
+  # And the shape that makes the claim worth asserting: the dynamic metric
+  # takes a panel per time, the static one a single untimed panel.
+  panels <- strip_labels(p)
+  expect_length(panels, 3L)
+  timed <- grepl(" at time ", panels, fixed = TRUE)
+  expect_identical(sum(timed), 2L)
+  expect_true(all(grepl("^brier_survival at time ", panels[timed])))
+  expect_identical(panels[!timed], "concordance_survival")
+})
+
+test_that("the censored set's panels and rules agree with the single view and with collect_metrics()", {
+  skip_if_no_censored()
+  skip_if_no_wset_fixture()
+  res <- srv_set_results()
+  p <- expect_no_warning(autoplot(res, type = "performance"))
+  panels <- strip_labels(p)
+
+  # (1) The names are the single view's, on the same element. Every fold of
+  # every workflow scored here, so neither view carries a qualifier and the
+  # two label sets must match exactly.
+  for (i in seq_len(nrow(res))) {
+    own <- autoplot(res$result[[i]], type = "performance")
+    expect_identical(sort(strip_labels(own)), sort(panels))
+  }
+
+  # (2) and (3) Every rule is a reported mean, and every reported mean has a
+  # rule: the two directions of one correspondence, keyed on workflow and
+  # panel so a rule under the wrong workflow fails rather than balancing out.
+  summarized <- as.data.frame(collect_metrics(res))
+  summarized$panel <- ifelse(
+    is.na(summarized$.eval_time),
+    summarized$.metric,
+    paste0(
+      summarized$.metric,
+      " at time ",
+      vapply(summarized$.eval_time, format, character(1))
+    )
+  )
+  reported <- summarized[!is.na(summarized$mean), ]
+  rules <- plot_segments(p)
+
+  # The domain this correspondence runs over, stated independently of the
+  # figure and of `collect_metrics()`: two workflows against the three
+  # metric-and-time keys the fixture's metric set makes, every one of which
+  # scored. Without it an all-`NA` read or a vanished layer would empty both
+  # sides and the loop below would assert nothing.
+  expect_identical(nrow(reported), 6L)
+  expect_identical(nrow(rules), nrow(reported))
+  for (i in seq_len(nrow(reported))) {
+    hit <- rules$x == reported$wflow_id[[i]] &
+      rules$panel == reported$panel[[i]]
+    expect_identical(sum(hit), 1L)
+    expect_equal(rules$ymin[hit], reported$mean[[i]])
+    # A zero-height rule: the mark is the mean, not a range around it.
+    expect_equal(rules$ymax[hit], reported$mean[[i]])
+  }
+})
+
+test_that("the mixed censored set draws a character and a numeric parameter on discrete axes", {
+  skip_if_no_censored()
+  skip_if_no_wset_fixture()
+  res <- srv_mixed_results()
+  p <- expect_no_warning(autoplot(res, type = "parameters"))
+  b <- ggplot2::ggplot_build(p)
+
+  # Every panel discrete, asserted on the scale each panel was built with --
+  # `scales = "free_y"` gives one per panel, so a numeric panel beside a
+  # discrete one would show up here rather than being averaged away.
+  discrete <- vapply(
+    b$layout$panel_scales_y,
+    function(s) inherits(s, "ScaleDiscretePosition"),
+    logical(1)
+  )
+  expect_length(discrete, length(strip_labels(p)))
+  expect_true(all(discrete))
+
+  # The reader's rows, one per workflow, fold and parameter that recorded a
+  # value; the panel is the workflow's id and then the parameter's label.
+  selections <- as.data.frame(collect_selections(res))
+  params <- setdiff(names(selections), c("wflow_id", "id", ".config"))
+  expected <- do.call(
+    rbind,
+    lapply(params, function(nm) {
+      keep <- !is.na(selections[[nm]])
+      if (!any(keep)) {
+        return(NULL)
+      }
+      data.frame(
+        panel = paste0(selections$wflow_id[keep], ": ", nm),
+        fold = selections$id[keep],
+        value = vapply(selections[[nm]][keep], format, character(1)),
+        stringsAsFactors = FALSE
+      )
+    })
+  )
+
+  # Each drawn point read back through its own panel's axis labels, which is
+  # what turns a discrete position into the value a reader sees.
+  panels <- strip_labels(p)
+  drawn <- plot_points(p)
+  drawn$value <- vapply(
+    seq_len(nrow(drawn)),
+    function(i) {
+      axis_labels(b, "y", match(drawn$panel[[i]], panels))[
+        as.integer(round(drawn$y[[i]]))
+      ]
+    },
+    character(1)
+  )
+
+  expect_identical(nrow(drawn), nrow(expected))
+  key <- function(d) sort(paste(d$panel, d$fold, d$value, sep = "\r"))
+  expect_identical(key(drawn), key(expected))
+
+  # The two parameter types actually reached the figure: one panel's values
+  # are distribution names, the other's are numbers written as text.
+  expect_setequal(
+    unique(expected$panel),
+    c("dist: dist", "spline: deg_free")
+  )
+  expect_true(all(
+    expected$value[expected$panel == "dist: dist"] %in% srv_grid()$dist
+  ))
+  expect_true(all(
+    expected$value[expected$panel == "spline: deg_free"] %in%
+      format(srv_spline_grid()$deg_free)
+  ))
+})
+
 # The pictures of the set views, on the three-workflow fixture: what a reader
 # meets -- the id-prefixed strips, the workflows along one axis under each
 # metric, the rules -- pinned after being rendered and read (M72).
@@ -936,4 +1236,13 @@ test_that("both set views look the way they read", {
     "set performance, three workflows",
     autoplot(res, type = "performance")
   )
+
+  # The four-line subtitle, which no other snapshot carries: a set holding
+  # both a failed fold and a short average. Rendered and read at 7 inches
+  # before this was approved -- `ggplot_build()` cannot see a clipped
+  # subtitle, and this is the tallest one the view can draw (M08).
+  both <- plant_metric_na(wset_three_results(broken = 1L), 1L, 2L, "rmse")
+  warnings <- partial_warnings(p <- autoplot(both, type = "performance"))
+  expect_length(warnings, 3L)
+  vdiffr::expect_doppelganger("set performance, both shortfall sentences", p)
 })

@@ -956,6 +956,120 @@ srv_risk_profile <- function(data, t) {
   )
 }
 
+# The censored set fixtures (M77). Source: `srv_data()` above, whose seed 51
+# draws the frame; generators: `srv_set_results(seed = 77)` and
+# `srv_mixed_results(seed = 78)` below, each rebuilding its workflow set and
+# its design from that frame under its own seed. The seed is what
+# `srv_spline_workflow()` needs, the recipe step's id being drawn from the RNG
+# stream; nothing else in the block draws. `wset_three()` cannot produce
+# either shape these exist for. The first is a metric-and-time shape: a
+# metric set holding one dynamic survival metric evaluated at both
+# `srv_eval_times()` beside a static one that reads no time, so
+# `collect_metrics()` carries three distinct metric-and-time keys and the
+# performance view owes a panel to each. The second is a parameter-type
+# shape: two workflows tuning parameters of different types, so the
+# parameters view puts a character value and a number on one axis.
+srv_set_metrics <- function() {
+  yardstick::metric_set(
+    yardstick::brier_survival,
+    yardstick::concordance_survival
+  )
+}
+
+# The second `dist` workflow: the same engine and grid on one predictor, so
+# the set holds two rows that tune the same parameter and score differently.
+srv_workflow_x1 <- function(data) {
+  spec <- parsnip::set_mode(
+    parsnip::set_engine(
+      parsnip::survival_reg(dist = tune::tune()),
+      "survival"
+    ),
+    "censored regression"
+  )
+  workflows::workflow(survival::Surv(time, event) ~ x1, spec)
+}
+
+srv_wset <- function(data) {
+  workflowsets::as_workflow_set(
+    both = srv_workflow(data),
+    x1_only = srv_workflow_x1(data)
+  )
+}
+
+# A recipe outcome cannot be an inline `Surv()` call -- recipes refuses an
+# in-line function in the formula and says to use steps -- so the frame the
+# recipe workflow reads carries the `Surv` object as a column of its own. The
+# formula workflows keep reading `time` and `event`, which the extra column
+# leaves untouched.
+srv_recipe_data <- function(data = srv_data()) {
+  data$surv <- survival::Surv(data$time, data$event)
+  data
+}
+
+# The numeric-parameter workflow: a natural-spline expansion of `x1` whose
+# degrees of freedom are tuned over two values. The step's id is drawn from
+# the RNG stream, so every caller builds it inside the seeded region.
+srv_spline_workflow <- function(data) {
+  rec <- recipes::step_ns(
+    recipes::recipe(surv ~ x1 + x2, data = data),
+    x1,
+    deg_free = tune::tune()
+  )
+  spec <- parsnip::set_mode(
+    parsnip::set_engine(parsnip::survival_reg(), "survival"),
+    "censored regression"
+  )
+  workflows::workflow(rec, spec)
+}
+
+srv_spline_grid <- function() data.frame(deg_free = c(1, 2))
+
+# The mixed set: the two workflows tune different parameters, so neither can
+# take the call's grid and each carries its own as a per-workflow option, the
+# way `wset_three()` does.
+srv_mixed_wset <- function(data) {
+  wset <- workflowsets::as_workflow_set(
+    dist = srv_workflow(data),
+    spline = srv_spline_workflow(data)
+  )
+  wset <- workflowsets::option_add(wset, id = "dist", grid = srv_grid())
+  workflowsets::option_add(wset, id = "spline", grid = srv_spline_grid())
+}
+
+# The two map runs the set-view tests read, on `srv_nested()`'s three-by-three
+# design at both evaluation times. Every default is forced before the seed, for
+# the reason `wset_results()` gives (M71).
+srv_set_results <- function(data = srv_data(), seed = 77) {
+  force(data)
+  set.seed(seed)
+  wset <- srv_wset(data)
+  folds <- srv_nested(data)
+  set.seed(seed)
+  suppressWarnings(memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    metrics = srv_set_metrics(),
+    grid = srv_grid(),
+    eval_time = srv_eval_times()
+  )))
+}
+
+srv_mixed_results <- function(data = srv_recipe_data(), seed = 78) {
+  force(data)
+  set.seed(seed)
+  wset <- srv_mixed_wset(data)
+  folds <- srv_nested(data)
+  set.seed(seed)
+  suppressWarnings(memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times()
+  )))
+}
+
 skip_if_no_engines <- function(stochastic = FALSE) {
   testthat::skip_if_not_installed("recipes")
   testthat::skip_if_not_installed("yardstick")

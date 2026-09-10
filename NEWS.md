@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* `autoplot()` on a `nested_results_set` with `type = "performance"` gains
+  a subtitle sentence counting the workflows that rest a metric's average
+  on fewer outer folds than the workflow completed, and sending the reader
+  to `summary()` for which metric and how many folds. A completed fold can
+  score `NA` on one metric while scoring the others, so this is a separate
+  count from the one naming the workflows that did not complete every fold,
+  and a figure can carry both sentences. A metric that no completed fold
+  scored is counted here too: it draws no rule and reports no average.
+
 * The help-page examples that build a tuning run use two outer and two
   inner folds of `mtcars` and a `num_comp` grid of 1:2 (the racing page
   keeps five inner folds, since a race needs more inner resamples than

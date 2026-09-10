@@ -582,10 +582,19 @@ plot_set_performance <- function(x, call) {
     )
   ))
 
-  # One rule per workflow and panel, each workflow's rows summarized on
-  # their own through the function the readers share.
-  rules <- lapply(unique(per_fold$wflow_id), function(id) {
-    own <- summarize_folds(take_rows(per_fold, per_fold$wflow_id == id))
+  # Each workflow's rows summarized on their own through the function the
+  # readers share, kept rather than discarded because the subtitle's
+  # short-average sentence counts the same `n` the rules are drawn from.
+  # An all-failed workflow contributes no rows here and so no summary; it is
+  # named by the other sentence, and averages nothing over anything.
+  summaries <- lapply(unique(per_fold$wflow_id), function(id) {
+    summarize_folds(take_rows(per_fold, per_fold$wflow_id == id))
+  })
+  names(summaries) <- unique(per_fold$wflow_id)
+
+  # One rule per workflow and panel.
+  rules <- lapply(names(summaries), function(id) {
+    own <- summaries[[id]]
     estimated <- !is.na(own$mean)
     new_tbl(list(
       wflow_id = rep(id, sum(estimated)),
@@ -623,12 +632,13 @@ plot_set_performance <- function(x, call) {
     ) +
     ggplot2::labs(
       title = "Nested cross-validation estimates across workflows",
-      # Two or three lines, each short enough for a 7-inch device: the
+      # Two to four lines, each short enough for a 7-inch device: each
       # shortfall sentence, when there is one, takes a line of its own.
       subtitle = paste0(
         set_design_line(x),
         " Each line marks a workflow's nested estimate.",
         set_shortfall_line(x),
+        set_short_average_line(x, summaries),
         "\nIt describes the tune-and-fit procedure, not a model you can deploy."
       ),
       x = "Workflow",
@@ -672,6 +682,43 @@ set_shortfall_line <- function(x) {
     " workflow",
     if (k == 1L) "" else "s",
     " did not complete every fold; see summary()."
+  )
+}
+
+# A line of its own when any workflow rests a panel's rule on fewer outer
+# folds than that workflow completed: how many do, and where to read which
+# metric it was. A fold can complete and still score nothing on one metric,
+# so this is a different count from the one above -- a workflow that ran
+# whole can still be named here -- and a metric no completed fold scored is
+# counted too, its rule being absent rather than short. The set has no
+# per-workflow-and-metric label slot to hang the qualifier on the way the
+# single view hangs it on a panel, and one figure-level count cannot assert
+# a per-panel truth, so the sentence counts workflows and sends the reader
+# to `summary()`, which prints the exact count per workflow and metric.
+# Empty on a set every completed fold of which scored.
+set_short_average_line <- function(x, summaries) {
+  k <- nrow(x)
+  completed <- vapply(x$result, function(r) sum(r$.completed), integer(1))
+  names(completed) <- x$wflow_id
+  short <- sum(vapply(
+    names(summaries),
+    function(id) any(summaries[[id]]$n < completed[[id]]),
+    logical(1)
+  ))
+  if (short == 0L) {
+    return("")
+  }
+  paste0(
+    "\n",
+    short,
+    " of ",
+    k,
+    " workflow",
+    if (k == 1L) "" else "s",
+    if (short == 1L) " averages" else " average",
+    " a metric over fewer folds than ",
+    if (short == 1L) "it" else "they",
+    " completed; see summary()."
   )
 }
 

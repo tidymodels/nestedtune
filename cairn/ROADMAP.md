@@ -10,7 +10,7 @@ _Last hygiene check: 2026-09-09 (M77 planned, consuming the set-view coverage ro
 | M76 | The two slow check legs run their check step under the cap the other three use | done | — | normal | milestones/archive/M076-ci-leg-speed.md |
 | M74 | The check suite and the help-page examples run faster without dropping an assertion | done | — | normal | milestones/archive/M74-suite-speed.md |
 | M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | done | M74 | normal | milestones/archive/M75-suite-prune.md |
-| M77 | The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn | planned | — | normal | milestones/M077-set-view-coverage.md |
+| M77 | The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn | review | — | normal | milestones/M077-set-view-coverage.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
