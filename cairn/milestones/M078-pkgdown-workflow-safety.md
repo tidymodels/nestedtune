@@ -27,7 +27,11 @@ an artifact, and a `deploy` job holding `contents: write` whose steps run
 nothing checked out — with the job-level publish guard, the `timeout-minutes`
 on both jobs, the repo-internal source removal and its guard, the
 advertised-pages and `check_pkgdown()` guards, the `paths-ignore` copies, and
-`extra-packages: local::.` (D-022's line). Each restored departure from the
+`extra-packages: local::.` (D-022's line).
+`.github/workflows/R-CMD-check-hard.yaml` gains the same `paths-ignore` list
+on both of its triggers: `.github/ci-usage.py` refuses to run while any `push`
+or `pull_request` trigger in the repository carries no list, so AC6's
+exit-zero clause is unreachable while that file has none. Each restored departure from the
 r-lib stock template carries a comment saying why, so a later template sync
 does not undo it silently. The two pages already published — `CLAUDE.html`
 and `ci-usage-baseline.html` — come off the `gh-pages` branch with their
@@ -107,7 +111,7 @@ row stay where they are.
       `sitemap.xml` and `search.json`, rather than the two hardcoded paths it
       carried before, so a markdown file added later is covered without an
       edit.
-- [ ] T3: Restore `extra-packages: local::.` and the `paths-ignore` list on
+- [x] T3: Restore `extra-packages: local::.` and the `paths-ignore` list on
       both triggers, matching the four copies in `R-CMD-check.yaml` and
       `test-coverage.yaml` byte for byte; run `.github/ci-usage.py` and record
       its filter line.
@@ -141,6 +145,8 @@ row stay where they are.
 - 2026-09-09: T1 — `.github/workflows/pkgdown.yaml` split back into `build` (workflow `read-all`, uploads `docs/`) and `deploy` (`contents: write`, job-level default-branch guard, three steps), workflow-level `concurrency` restored, `timeout-minutes` 20/10, deploy pinned at the v4.9.0 blob `fa24774`, each departure from the stock template commented.
 - 2026-09-09: T2 — restored the `Drop the repo-internal sources` step, `check_pkgdown()`, the advertised-pages guard and the internal-pages guard, the last rewritten to iterate `git ls-files -- '*.md' '.github/*.md'` (144 sources today) against the site root's file listing, `sitemap.xml` and `search.json`, allowing a page only for the five sources pkgdown is meant to publish. Local runs against the published site as it stands: red naming `CLAUDE.md` and `.github/ci-usage-baseline.md` on all four arms; green over the same 144 sources once the four files and their index entries are removed, with the five allowed pages still present. Root-file matching is done against a listing rather than `[ -f ]`, after a case-insensitive filesystem read `cairn/references/INDEX.md` as `docs/index.html`.
 - 2026-09-09: T3 (partway) — `paths-ignore` restored on both `pkgdown.yaml` triggers and `extra-packages` back to `local::.`; the six copies across the three workflows compare identical. `.github/ci-usage.py` still exits non-zero: `R-CMD-check-hard.yaml`, added by `72c3be2` alongside the collapse, carries `push` and `pull_request` with no list, and the script refuses whenever any trigger lacks one while others have it. Held at a mini gate on extending Scope to that file.
+- 2026-09-09: amendment (substantive, mini gate, user-selected) — Scope In extended to `.github/workflows/R-CMD-check-hard.yaml`'s two triggers, which gain the same `paths-ignore` list; no acceptance criterion's wording changes.
+- 2026-09-09: T3 — the list now has eight identical copies across the four workflows carrying `push`/`pull_request`, and `.github/ci-usage.py` exits 0 with `Path filter read from R-CMD-check-hard.yaml, R-CMD-check.yaml, pkgdown.yaml, test-coverage.yaml: `cairn/**`, `CLAUDE.md`, `.claude/**``.
 
 ## Decisions
 
