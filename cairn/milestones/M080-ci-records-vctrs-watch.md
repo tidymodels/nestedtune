@@ -105,7 +105,7 @@ dependency cache → its own row. The review remainders → M079.
 - [x] T6: Correct the same slot's `paths-ignore` sentence against
       `read_paths_ignore()`'s `source` field, which after T4 reports five
       workflows carrying the filter, not "both gating workflows".
-- [ ] T7: Run `python3 .github/ci-usage.py` over a window ending on the branch
+- [x] T7: Run `python3 .github/ci-usage.py` over a window ending on the branch
       date and commit its output as `.github/ci-usage-baseline.md`. The
       "Path filter read from" line corrects itself, the script reading the
       workflow list off the directory. Record the command and window in the
@@ -141,6 +141,16 @@ dependency cache → its own row. The review remainders → M079.
 
 - 2026-09-10: T6 — the slot's `paths-ignore` sentence names `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`, `pkgdown.yaml` and `test-coverage.yaml`, the five `read_paths_ignore()` reports; the divergence list gains the devel-vctrs leg and drops its own count, and the worker-count sentence stops naming "the three check workflows", now four. Compressed in the same pass to hold the 120-line cap: the hang-locating bullet, the parallel-files parenthetical and the `benchmarks/` listing, and the slot's remaining bullets rewrapped to the width the rest of it uses. 117 lines.
 
+- 2026-09-10: T7 — `BASELINE_SINCE`/`BASELINE_UNTIL` re-pointed to `[2026-08-11T00:00:00Z, 2026-09-10T00:00:00Z)`, a thirty-day window ending on the branch date and clear of any run still in flight, so the bare `python3 .github/ci-usage.py` AC4 names reproduces the file; its line 5 now reads the five filter-carrying workflows off the directory. Command and window recorded in the Review section.
+
 ## Decisions
 
 ## Review
+
+Evidence recorded during implementation, for the review phase to read:
+
+- T7 (AC4): `python3 .github/ci-usage.py` run bare on 2026-09-10 from the repo
+  root, window `[2026-08-11T00:00:00Z, 2026-09-10T00:00:00Z)` as
+  `BASELINE_SINCE`/`BASELINE_UNTIL` declare; stdout redirected to
+  `.github/ci-usage-baseline.md`, exit 0, 2067 completed runs and 3893 jobs in
+  window.
