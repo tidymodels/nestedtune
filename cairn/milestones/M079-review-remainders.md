@@ -7,7 +7,7 @@
 - **Principles touched:** IP2
 - **Resolves:** —
 - **Surface tier:** internal — test files, developer benchmark scripts, and code comments, none of which any consumer of the package reaches.
-- **Branch/PR:** `m079-review-remainders`
+- **Branch/PR:** `m079-review-remainders` / [#89](https://github.com/tidymodels/nestedtune/pull/89)
 
 ## Goal
 
