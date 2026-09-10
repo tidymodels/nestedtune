@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-10 (third pass, at M079's amendment gate: one candi
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M79 | The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on | review | — | normal | milestones/M079-review-remainders.md |
+| M79 | The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on | in-progress | — | normal | milestones/M079-review-remainders.md |
 | M80 | The CI records name the workflows that exist and stop copying their caps, and a leg watches the development vctrs one invariant rests on | planned | — | normal | milestones/M080-ci-records-vctrs-watch.md |
 | M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | done | — | high | milestones/archive/M078-pkgdown-workflow-safety.md |
 | M76 | The two slow check legs run their check step under the cap the other three use | done | — | normal | milestones/archive/M076-ci-leg-speed.md |

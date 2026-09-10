@@ -1,6 +1,6 @@
 # M079: The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -43,11 +43,11 @@ records → M080.
 
 ## Acceptance criteria
 
-- [ ] AC1: `tests/testthat/test-nested-tune-bayes-results.R` runs
+- [x] AC1: `tests/testthat/test-nested-tune-bayes-results.R` runs
       `nested_tune_bayes()` under `tune::control_bayes(allow_par = TRUE, seed
       = 999L)` and asserts that result identical to the same run made under no
       explicit control.
-- [ ] AC2: `daemon_state_snapshot()` names each record by the pid of the
+- [x] AC2: `daemon_state_snapshot()` names each record by the pid of the
       answer that record holds, including when one answer carries no integer
       `pid`.
 - [ ] AC3: The fixed-workflow hand call is built once across the five `fn`
@@ -147,6 +147,10 @@ records → M080.
 - 2026-09-10: AC5 evidence — `Rscript benchmarks/profile-tests.R 2` and `Rscript benchmarks/profile-tests-parallel.R 2`, each emitting exactly one `run 1/2:` count line (`run 1/2: pass 9587 | fail 4 | skip 0 | suite 612.0 s | wall 614.8 s` and `run 1/2: pass 9587 | fail 4 | skip 0 | WALL 235.0 s`); the `run 1/2 ...` progress line above each carries no colon and no counts.
 - 2026-09-10: an earlier invocation of the same two scripts reported `fail 6` on its first run against `fail 4` on the other three. Cause was this session editing `helper-parallel.R` and `helper-time-budget.R` while that run was in flight, leaving the ledger's line pointer and the call it addresses briefly out of step — the same two failures planting the pre-change code produced under T3. Re-run on a quiescent tree: all four runs `fail 4`. Not suite intermittency; the lesson is that a source edit during a suite run invalidates that run's record.
 
+- 2026-09-10: review opened; branch pushed and draft PR [#89](https://github.com/tidymodels/nestedtune/pull/89) created. `main` had not moved since the branch point, so no merge was needed.
+- 2026-09-10: amendment return: AC6 — "no failure and no error other than the four `tests/testthat/test-ci-workflows.R` already reports at the branch point (`b07beb3`)". The branch point reports five, not four: `test-parallel-interrupt.R:108` fails there too, identically. Status to `in-progress` for that amendment alone; review stops.
+- 2026-09-10: the fifth item is pre-existing and not M079's. `test-parallel-interrupt.R:108` ("Expected `interrupted` to be TRUE") fails on `b07beb3` and on the branch head, same line and same message, and passes 7/7 when its file is run alone under `NOT_CRAN=true` — a timing interaction inside the parallel suite, not a defect this branch introduced. Worth its own candidate row when the amendment gate sets scope.
+
 ## Decisions
 
 - 2026-09-10: Two of the eight items M74's review left behind are not
@@ -166,3 +170,89 @@ records → M080.
   shows as `builds 1 / requests 2`. The comment stands unedited.
 
 ## Review
+
+Phase stopped at an amendment return on AC6 (step 5's amendment-return clause);
+AC3, AC4 and AC5 were not reached. Evidence below is what ran before the stop.
+
+**Criteria executed.**
+
+- **AC1 — verified.** `devtools::test()` on the branch head (tree of `838441e`,
+  quiescent machine) reports no failure in
+  `tests/testthat/test-nested-tune-bayes-results.R`. The restored block runs
+  `nested_tune_bayes()` under `tune::control_bayes(allow_par = TRUE, seed =
+  999L)` and asserts `expect_identical(forced, plain)` against the same run made
+  with no `control` argument.
+- **AC2 — verified.** The same run reports no failure in
+  `tests/testthat/test-suite-hygiene.R`, whose new block drives `name_by_pid()`
+  over two fabricated answer sets and asserts each record's name equals the pid
+  read back off that record — including the set carrying a non-list answer and
+  one whose `pid` is `NULL`, which come back named `NA`.
+- **AC3, AC4, AC5 — not reached.** The fixture-cache build count, the five
+  comment-site readings and the two-run profiler invocations were not executed
+  before the return.
+- **AC6 — FAILS as written; returned for amendment.** Three full
+  `devtools::test()` runs this session: branch head under machine contention,
+  `FAIL 5 | PASS 9587`; branch head quiescent, `FAIL 5 | PASS 9587`; **`main` at
+  the branch point `b07beb3`, quiescent, `FAIL 5 | PASS 9578`**. Every run
+  carries the same five items — `test-ci-workflows.R` at `:59`, `:64`, `:65` and
+  the `:66` error, plus `test-parallel-interrupt.R:108`, "Expected `interrupted`
+  to be TRUE", byte-identical across refs. AC6 excludes four by name, so a fifth
+  item present at the branch point falsifies the criterion's own premise rather
+  than the work: its exclusion list was fixed by recall of one earlier run, not
+  by a procedure over the branch point. Run alone under `NOT_CRAN=true` that file
+  passes 7/7, so the fifth item is a timing interaction inside the parallel
+  suite, pre-existing and untouched by this branch.
+
+**Consistency gate.** `cairn_validate.py` exit 0, every check PASS, 18
+`references staleness` advisories and no `release window` advisory. No
+`DESIGN.md` principle changed, so `cairn_impact.py` was skipped. Toolchain
+half (`r-package` profile) was not reached before the return: `document()`,
+`pkgdown::check_pkgdown()` and `devtools::check()` are still owed at re-review.
+`README.Rmd` and `README.md` last changed in the same commit and neither is
+touched by this branch; `NEWS.md` needs no entry, the tier being internal.
+
+**Independent review — three-lens fan-out**, fresh context, distinct evidence
+bases. Findings are carried to the re-review's triage gate, untriaged.
+
+- **[S] blame-history: 0 findings.** Traced the drawn `step_pca()` id to
+  `9aab34d0` (M12) and found no milestone relying on it; found the duplicate
+  per-run print was M74's own flagged defect (O10) rather than a second figure;
+  found the `seed = 999L` assertion was dropped by M74's merge (O2), not by
+  intent.
+- **[S] prior-review regression: 0 findings.** Archived `## Review` sections on
+  the touched files are M74's and M76's; each diff site matches its named
+  finding. Neither rejected-finding file appears in the diff. The GitHub probe
+  returned three real inline comments repo-wide, all on workflow files this
+  branch does not touch, so no thread walk was warranted.
+- **[O] diff-bug: 6 findings**, ranked as the reviewer ranked them.
+  1. `tests/testthat/helper-orchestration.R:106-109` — `fit_resamples_results()`
+     still says "the recipe step id is drawn from the stream", 26 lines after the
+     diff's own new comment says it no longer is; the `set.seed(seed)` at `:111`
+     that the false rationale justifies is now inert. The same drift class AC4
+     exists to remove, introduced by this milestone.
+  2. `tests/testthat/test-nested-tune-bayes-results.R:296-306` — the restored
+     live `nested_tune_bayes()` run is not memoised and pays back suite time M74
+     spent, with no seconds recorded anywhere in this milestone.
+  3. `tests/testthat/helper-time-budget.R:61-62` — "the ledger's only rows
+     carrying a `times` above 1" is a universal claim the cited grep cannot
+     check: `grep 'times = 2L'` matches the literal only, misses a `times = 3L`
+     row, and self-matches the comment line.
+  4. `tests/testthat/helper-orchestration.R:2536-2537` and `:2604-2606` —
+     `plain_workflow()`'s "no recipe step id drawn from the stream" contrast and
+     `wset_results()`'s `force(data)` rationale are now over-general;
+     `wset_fixed()` draws no ids at all, though `wset_two()` still does through
+     `det_workflow()`.
+  5. AC3's "the five `fn` blocks" undercounts: `MAP_FNS` holds six and the hand
+     call is reached from all six. The promise still holds a fortiori.
+  6. `cairn/ROADMAP.md:4` — the hygiene stamp claims 23,460 bytes; `wc -c`
+     reports 23,327.
+
+  Verified independently this session: finding 1's two contradicting comments
+  and the inert seed; finding 3's grep behaviour and the two `times = 2L` rows
+  at `helper-time-budget.R:767` and `:847`, whose pointers to
+  `test-parallel-identity.R:572` and `:957` are both correct and both inside
+  `for (fn in RACERS)`; finding 5's `for (fn in MAP_FNS)` over six names;
+  finding 6's byte count. The reviewer's clean list was spot-checked on the
+  ledger pointer `helper-parallel.R:247`, which is where `daemon_rng_kinds()`'s
+  `collect_bounded` now sits, and on `R-CMD-check.yaml:119-120` against the cap
+  at `:176`.
