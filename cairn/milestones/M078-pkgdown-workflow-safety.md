@@ -157,6 +157,9 @@ row stay where they are.
 - 2026-09-09: T6 — `devtools::check(error_on = "warning")` on the branch: Status OK, 0 errors, 0 warnings, 0 notes, 6m57s. `devtools::document()` leaves the tree clean. `pkgdown::check_pkgdown()` reports no problems.
 - 2026-09-09: pkgdown run 34426080106 on the final tree (pull_request): `build` pass in 5m27s, `deploy` skipped; the build job's `GITHUB_TOKEN Permissions` block reports every scope as `read` including `Contents: read`, and neither job in the run reports a `write` scope. Run 34426477681 (workflow_dispatch on the branch): `build` success, `deploy` skipped.
 - 2026-09-09: `cairn_validate` passes, 18 advisory warnings, all `references staleness` and none from this milestone. Plan-owned body 137 lines. Status set to `review`; PR [#88](https://github.com/tidymodels/nestedtune/pull/88) is still a draft and the R-CMD-check matrix and coverage legs were still running at handoff.
+- 2026-09-09: review — all seven criteria executed with fresh evidence on head `d615311`; consistency gate clean (`cairn_validate` exit 0, `devtools::check()` Status OK, `document()` no diff, `check_pkgdown()` no problems).
+- 2026-09-09: review — three fresh-context lenses; [S] blame-history and [S] prior-review found no defect, [O] diff-bug returned fourteen findings. Six fixed at the gate (led by the artifact hop dropping `docs/.nojekyll`, confirmed against run 34426967821's artifact and `gh-pages` history), three routed to a new candidate row, five rejected with reason. No finding demonstrated an acceptance criterion failing, so the return floor did not fire.
+- 2026-09-09: review — the new candidate row put `cairn/ROADMAP.md` over its 24,000-byte budget; the widest rows were compressed in this same commit, back to 23,945 bytes over 53 lines.
 
 ## Decisions
 
@@ -164,8 +167,9 @@ row stay where they are.
 
 ### Acceptance-criterion evidence
 
-- AC1 — pkgdown run 34426967821 (pull_request, head `76b6ac9`, build success
-  in 5m34s). The `build` job runs `pkgdown::build_site_github_pages`; its
+- AC1 — pkgdown run 34428228701 (pull_request, head `d615311`, build success;
+  re-run after the fix-now batch changed the workflow, superseding the same
+  measurement on 34426967821). The `build` job runs `pkgdown::build_site_github_pages`; its
   `Set up job` `GITHUB_TOKEN Permissions` group lists twenty scopes, every one
   `read`, `Contents: read` among them. The only `: write` string anywhere in
   the run's log is `Cache mode: write`, printed after the group's
@@ -179,9 +183,9 @@ row stay where they are.
   `JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445`
   (v4.9.0, SHA-pinned). `build` carries `timeout-minutes: 20` and no
   `permissions` key, so it sits at the workflow's `read-all`. `deploy` reports
-  as skipped on both fresh runs of head `76b6ac9`: pull-request run
-  34426967821 and `workflow_dispatch` run 34427173295 (build success on each).
-- AC3 — same run 34426967821. `Check the repo-internal pages are absent`
+  as skipped on both fresh runs of head `d615311`: pull-request run
+  34428228701 and `workflow_dispatch` run 34428234800 (build success on each).
+- AC3 — same run 34428228701. `Check the repo-internal pages are absent`
   passed, reporting `checking 145 tracked markdown sources`; the step's domain
   is `git ls-files -- '*.md' '.github/*.md'`, not a hand list
   (`.github/workflows/pkgdown.yaml:159`), and the allow-list it exempts is
@@ -198,8 +202,8 @@ row stay where they are.
   each file. Controls still 200: `/`, `/LICENSE.html`,
   `/CODE_OF_CONDUCT.html`, `/CONTRIBUTING.html`, `/articles/nested-cv.html`,
   `/news/index.html`.
-- AC5 — `.github/workflows/pkgdown.yaml:95` reads `extra-packages: local::.`
-  and nothing else; `needs: website` sits beside it. Run 34426967821's
+- AC5 — `.github/workflows/pkgdown.yaml` reads `extra-packages: local::.`
+  and nothing else; `needs: website` sits beside it. Run 34428228701's
   `setup-r-dependencies` resolved `tidymodels`, `tidyverse/tidytemplate` and
   `pkgdown` each with `"type": "Config/Needs/website"`, and the `build` job
   finished success.
@@ -227,8 +231,83 @@ row stay where they are.
   (above); no generated file hand-edited (the no-diff `document()` covers
   `NAMESPACE` and `man/`); `README.Rmd`/`README.md` untouched by the branch and
   in sync; `pkgdown::check_pkgdown()` reports no problems, both locally and in
-  run 34426967821; `NEWS.md` carries an entry for the site no longer serving
+  run 34428228701; `NEWS.md` carries an entry for the site no longer serving
   repository-internal pages, with no milestone number in it; the one new
   top-level file, `benchmarks/pkgdown-30-reply.md`, sits under the already
   `.Rbuildignore`d `benchmarks/`, and `check()` reports 0 notes; full
   `devtools::check()` clean.
+
+### Independent review
+
+Three fresh-context lenses (user-facing tier, executable surface in the diff).
+[S] blame-history: no findings — the restoration drops no property the
+post-collapse shape added, and contradicts no recorded decision. [S]
+prior-review: no regression against M17's review findings; it surfaced
+topepo's open comment on `.github/workflows/pkgdown.yaml:3` in #30, which T7
+already answers, and one comment on an unmodified line. [O] diff-bug returned
+fourteen ranked findings, triaged below.
+
+Fixed at the gate (committed on the branch as `d615311`, before approval):
+
+- O1 — the artifact handoff silently drops `docs/.nojekyll`.
+  `build_site_github_pages()` writes it, and `actions/upload-artifact` excludes
+  hidden files by default, so the two-job shape publishes a site without it.
+  Confirmed directly: the artifact of run 34426967821 carried `CNAME` but no
+  `.nojekyll`, and `.nojekyll` first reached `gh-pages` on 2026-08-31, under
+  the collapsed single-job shape — no deploy the earlier two-job shape made
+  had it. Masked today only by `clean: false`, which leaves the copy already
+  on the branch in place. Fixed with `include-hidden-files: true` and a
+  comment recording why; run 34428234800's artifact carries `.nojekyll`.
+- O3 — `NEWS.md` and the unposted reply draft both describe the guard as
+  failing "if any page but" the five allowed sources reaches the built site.
+  The guard's domain is tracked markdown matched at the site root; `404.html`,
+  `authors.html`, every article and every reference topic are never
+  candidates. Both narrowed to what the guard checks.
+- O4 — the branch made three comments false by adding a fourth filtered
+  workflow: `pkgdown.yaml`, `R-CMD-check.yaml` and `test-coverage.yaml` each
+  still said six copies across three files. All three corrected to eight
+  across four.
+- O5 — `use-public-rspm: true` was restored bare, against the file's own rule
+  that every departure from the stock template carries a comment naming what
+  it buys. Comment added.
+- O2 and O6 — the guard's two index arms are anchored at the domain root,
+  which equals the site root only while `_pkgdown.yml`'s `url:` has no path
+  segment; and `git ls-files` bounds the domain to tracked markdown, so an
+  untracked root `.md` would be rendered and seen by no arm. Both are real
+  limits the comments claimed away. The comments now state both; widening the
+  coverage is the follow-up row below.
+
+Follow-up (candidate row, added this pass):
+
+- O2, O6, O7 — the internal-pages guard's coverage limits: the two index arms
+  stop matching if the site gains a URL path segment; the domain is the git
+  index rather than the filesystem; and stem-only root matching both
+  false-positives on pkgdown's own generated root pages (a future tracked
+  `authors.md`, `404.md`, `index.md` or `LICENSE-text.md` anywhere in the repo
+  would fail the build permanently) and misses any repo-internal markdown
+  pkgdown places outside the site root.
+
+Rejected, with reason:
+
+- O8 — "the `deploy` job has never actually executed", so a merge would be its
+  first run under a job-level `permissions:` block that replaces the
+  workflow's `read-all`. Refuted against the implementation: `gh-pages` holds
+  deploys from 2026-07-28 to 2026-07-30 made by this same three-step job under
+  the same `contents: write` block and the same `@v7` action pins, before
+  `72c3be2` collapsed it. True only of GitHub's 90-day run retention, which
+  holds no pre-collapse run.
+- O9 — the `R-CMD-check-hard.yaml` comment overstated `ci-usage.py`'s refusal.
+  Confirmed against `read_paths_ignore()`, and fixed in the batch above rather
+  than rejected; listed here only because it was reported separately.
+- O10 — `allowed="$(printf '%s\n' "$allowed" | sed 's/^ *//')"` is a no-op,
+  the block scalar having already dedented the lines. Correct, and harmless;
+  left alone rather than re-open a verified guard script for a cosmetic edit.
+- O11 — `'.github/*.md'` is redundant in the pathspec (145 either way).
+  Correct, but the pathspec appears verbatim in AC3's text, so changing it
+  would edit a criterion at review.
+- O12 — the restored comment dropped D-022's id. Style; the decision is cited
+  in `cairn/DESIGN.md` and D-060.
+- O13 — the advertised-pages guard has no `set -u` and checks presence only.
+  A property of the pre-collapse step restored unchanged, not introduced here.
+- O14 — `cairn/ROADMAP.md`'s hygiene line still reads "M78 planned". Correct;
+  that line is rewritten by this milestone's own post-merge hygiene pass.
