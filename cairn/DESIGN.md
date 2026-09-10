@@ -459,6 +459,16 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   its nightly run depends on the repository's default workflow token being
   writable; that setting could not be read at review. The moving-tag half is
   carried by the standing candidate row that tracks the pkgdown deploy pin.
+  The shared-blob boundary is those three files alone (corrected M78): this
+  repository's own CI workflows are held at no shared blob and diverge from
+  the r-lib stock templates deliberately. `pkgdown.yaml` builds the site in a
+  job at `read-all` and publishes from a second job that runs nothing it
+  checked out, so the job executing the ref's vignettes and `@examples` never
+  holds a token able to write here, and it removes this repository's internal
+  markdown before the build; `R-CMD-check-hard.yaml` carries the
+  `paths-ignore` list its three siblings carry. Each departure carries an
+  in-file comment naming the property it buys, so a later template sync is a
+  merge rather than a copy.
 
 - `dplyr::group_by()`, `dplyr::rowwise()` and `tibble::as_tibble()` leave the
   run's recorded attributes readable on the object they return. None of the
