@@ -1,9 +1,20 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# Builds the pkgdown site `DESCRIPTION` and `README.md` advertise, and
+# publishes it to `gh-pages` from the default branch only.
+#
+# This file is NOT the r-lib stock template, and every departure below carries
+# a comment naming the property it buys, so a later template sync is a merge
+# rather than a copy. The collapse into the stock single-job template is what
+# this shape was restored from.
 on:
   push:
     branches: [main, master]
   pull_request:
+  # A published release builds the site but does not publish it: the `deploy`
+  # job below guards on the ref being the default branch, and a release run's
+  # ref is the tag. The trigger is kept as a build check at the released
+  # version, never as a second publishing path.
   release:
     types: [published]
   workflow_dispatch:
@@ -12,22 +23,43 @@ name: pkgdown.yaml
 
 permissions: read-all
 
+# Same reasoning as the gating workflows: a superseded run answers a question
+# about a commit nobody is waiting on. The default branch is exempt because it
+# is a distribution channel -- and here it is the branch that actually
+# publishes, so a cancelled run there would leave the site half-written.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+
+# Two jobs, deliberately. Building the site EXECUTES code from the ref being
+# built -- the vignettes, every roxygen `@examples` block, and whatever those
+# load out of Suggests -- so the build job must not hold a token that can write
+# to this repository. It runs at the workflow's `read-all` and hands `docs/` on
+# as an artifact; only `deploy`, which runs no repository code at all, takes
+# `contents: write`, and only on the default branch. Collapsing these back into
+# one job would put a writable token in the same process as PR-authored code on
+# every pull request.
 jobs:
-  pkgdown:
+  build:
     runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
-    concurrency:
-      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+
+    # Not the gating workflows' measured 20-minute cap, which is priced against
+    # a hang inside `test_check("nestedtune")`; this job runs no tests and the
+    # vignettes start no daemons. It is here only so a runaway build fails in
+    # minutes instead of burning GitHub's 360-minute default.
+    timeout-minutes: 20
+
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
+
     steps:
       - uses: actions/checkout@v7
 
       - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -38,10 +70,53 @@ jobs:
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
-      - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
+      - name: Upload the built site
+        uses: actions/upload-artifact@v7
+        with:
+          name: pkgdown-site
+          path: docs
+          retention-days: 1
+
+  # Runs no code from the ref being built -- it checks the ref out, unpacks an
+  # artifact and pushes it, and executes nothing it checked out -- which is what
+  # makes `contents: write` safe to hold here and nowhere else in this
+  # repository.
+  #
+  # `github.ref_name` rather than `github.event_name != 'pull_request'`: the
+  # looser form also publishes from a `workflow_dispatch` on a feature branch,
+  # which is exactly the accident this guard exists to refuse. It is on the job
+  # so a pull request never starts the writable job at all.
+  deploy:
+    needs: build
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    steps:
+      # The deploy action's first act is `git config user.name` inside the
+      # workspace, so it needs one to be a git checkout: without this step the
+      # job dies at `fatal: not in a git directory` before it reads the
+      # artifact. Nothing here runs what is checked out -- see the job comment
+      # above -- and the artifact is unpacked into `docs/`, which is gitignored,
+      # so the checkout and the built site never contend for the same paths.
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: pkgdown-site
+          path: docs
+
+      # Pinned by commit SHA, not by tag: tags are mutable, and this is the one
+      # action in the repository that runs with a token able to write to it.
+      # `test-coverage.yaml` pins codecov the same way.
+      - name: Deploy to gh-pages
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
         with:
+          # Publication is additive, so a page renamed away before 1.0 stays
+          # reachable at its old address.
           clean: false
           branch: gh-pages
           folder: docs

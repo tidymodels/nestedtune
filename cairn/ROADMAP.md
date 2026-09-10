@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-09 (M78 planned at high priority with D-060; the pu
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | planned | — | high | milestones/M078-pkgdown-workflow-safety.md |
+| M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | in-progress | — | high | milestones/M078-pkgdown-workflow-safety.md |
 | M76 | The two slow check legs run their check step under the cap the other three use | done | — | normal | milestones/archive/M076-ci-leg-speed.md |
 | M75 | The suite makes each claim once, and the files that test the harness rather than the package are deleted or trimmed | done | M74 | normal | milestones/archive/M75-suite-prune.md |
 | M77 | The set's figures say what their averages rest on, and the shapes past `wset_three()` are drawn | done | — | normal | milestones/archive/M077-set-view-coverage.md |

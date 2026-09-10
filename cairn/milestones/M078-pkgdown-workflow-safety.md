@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M078: The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — the deliverable is the published documentation site at `nestedtune.tidymodels.org` and the workflow that writes it
-- **Branch/PR:** —
+- **Branch/PR:** `m078-pkgdown-workflow-safety`
 
 ## Goal
 
@@ -91,7 +91,7 @@ row stay where they are.
 
 ## Tasks
 
-- [ ] T1: Split `.github/workflows/pkgdown.yaml` back into `build` (workflow
+- [x] T1: Split `.github/workflows/pkgdown.yaml` back into `build` (workflow
       `read-all`, uploads `docs/` as an artifact) and `deploy`
       (`permissions: contents: write`, job-level
       `if: github.ref_name == github.event.repository.default_branch`, steps
@@ -137,6 +137,8 @@ row stay where they are.
 - 2026-09-09: plan gate chose the two-job split over gating `permissions:` by expression on one job because the `permissions:` key is not expression-capable; falsified by GitHub documenting expression support there.
 - 2026-09-09: plan gate chose removing the two pages from `gh-pages` directly over switching the deploy off `clean: false`, because the additive publish is what keeps pre-1.0 renamed pages reachable (D-003); falsified by evidence no renamed page is still served.
 - 2026-09-09: criteria audit ran in full mode ([O], fresh context): nine findings over AC2-AC6, eight fixed at the gate (AC3 unsatisfiable — `package_mds()` on the checkout necessarily returns `CLAUDE.md` and never descends into `cairn/`; AC3 and AC6 bound instrument properties; AC4 was observable only post-merge; AC6 asserted a per-trigger report `ci-usage.py` does not emit), one routed to the gate as the `clean: false` question. AC1 and AC5 clean.
+- 2026-09-09: implement gate chose keeping the `release: published` trigger as a build-only check, since a release run's ref is the tag and the job-level publish guard names the default branch; and chose taking the two leaked pages' markdown sources off `gh-pages` alongside their HTML, which the plan's T5 named only as the two pages.
+- 2026-09-09: T1 — `.github/workflows/pkgdown.yaml` split back into `build` (workflow `read-all`, uploads `docs/`) and `deploy` (`contents: write`, job-level default-branch guard, three steps), workflow-level `concurrency` restored, `timeout-minutes` 20/10, deploy pinned at the v4.9.0 blob `fa24774`, each departure from the stock template commented.
 
 ## Decisions
 
