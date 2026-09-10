@@ -141,10 +141,16 @@ no workflow completed a fold is refused by the plots and by
 <code><a href="agreement.html">agreement()</a></code> with class <code>nestedtune_no_completed_folds</code>. A set in which
 no workflow's completed fold recorded a selected parameter is refused
 under <code>type = "parameters"</code> with class <code>nestedtune_no_tuned_parameters</code>.</p>
-<p>The performance view's subtitle names the workflow and fold counts and,
-when any workflow has a failed fold, how many do; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> names the
-folds. A tuned parameter whose id is <code>wflow_id</code> cannot be tabulated
-beside the set's own column and is refused with class
+<p>The performance view's subtitle names the workflow and fold counts and
+then, each on a line of its own and only when there is one to name, how
+many workflows did not complete every fold and how many rest a metric's
+average on fewer folds than they completed; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> names the folds
+and prints each workflow's count per metric. The two counts are
+separate: a workflow that ran whole can still be named by the second,
+since a completed fold can score <code>NA</code> on one metric while scoring the
+others, and a metric no completed fold scored is counted there while
+drawing no rule. A tuned parameter whose id is <code>wflow_id</code> cannot be
+tabulated beside the set's own column and is refused with class
 <code>nestedtune_collect_name_collision</code>; one whose id is <code>n</code> or <code>prop</code> is
 refused as <code><a href="agreement.html">agreement()</a></code> refuses it, the workflow named in front.</p>
     </div>
