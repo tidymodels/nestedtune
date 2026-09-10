@@ -66,9 +66,120 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      # pkgdown renders every root and `.github/` markdown file it does not
+      # already own -- `pkgdown:::package_mds()` globs them against a hardcoded
+      # exclusion list, with no config knob to add to it -- so `CLAUDE.md` (this
+      # repo's agent instructions) and `.github/ci-usage-baseline.md` (a CI cost
+      # measurement) both become public pages.
+      #
+      # Removing the SOURCES before the build, rather than the built HTML after
+      # it, is what keeps them out of the derived artifacts too:
+      # `pkgdown:::get_site_paths()` globs every `*.html` under `docs/`, and both
+      # `sitemap.xml` and `search.json` are built from it, so a post-build delete
+      # would leave the pages listed in the sitemap and their full text in the
+      # site search index. This touches the runner's checkout only.
+      - name: Drop the repo-internal sources
+        run: rm -f CLAUDE.md .github/ci-usage-baseline.md
+        shell: bash
+
+      # Catches an export or article missing from `_pkgdown.yml` before the
+      # build spends time on a site that is already wrong.
+      - name: Check pkgdown config
+        run: pkgdown::check_pkgdown()
+        shell: Rscript {0}
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+
+      # Guards the removal above: if the `Drop the repo-internal sources` step is
+      # ever weakened, this is what turns the resulting publication into a failed
+      # run instead of a live page.
+      #
+      # It iterates the repository's own markdown listing rather than naming the
+      # two known pages, so a markdown file added anywhere later is covered with
+      # no edit here. `git ls-files` reads the index, so the two files the step
+      # above deleted from the checkout are still in the domain. A page is
+      # allowed only for the five sources pkgdown is meant to publish; every
+      # other source must have no page at the site root, no copied markdown, no
+      # `sitemap.xml` entry and no `search.json` entry. The two index matches are
+      # anchored at the site root, so an article or reference topic sharing a
+      # stem with some repo-internal file is not mistaken for a leak.
+      - name: Check the repo-internal pages are absent
+        run: |
+          set -u
+          allowed='README.md
+          NEWS.md
+          LICENSE.md
+          .github/CODE_OF_CONDUCT.md
+          .github/CONTRIBUTING.md'
+          allowed="$(printf '%s\n' "$allowed" | sed 's/^ *//')"
+
+          for index in docs/sitemap.xml docs/search.json; do
+            if [ ! -s "$index" ]; then
+              echo "::error::$index is missing or empty, so this check cannot read it"
+              exit 1
+            fi
+          done
+
+          # Matched against a listing rather than with `[ -f ]`, so the
+          # comparison stays case-sensitive on a case-insensitive filesystem
+          # too: `cairn/references/INDEX.md` must not read as `docs/index.html`.
+          root_files="$(ls -1 docs)"
+
+          sources="$(git ls-files -- '*.md' '.github/*.md' | sort -u)"
+          if [ -z "$sources" ]; then
+            echo "::error::the markdown listing came back empty, so this check looked at nothing"
+            exit 1
+          fi
+          echo "checking $(printf '%s\n' "$sources" | wc -l) tracked markdown sources"
+
+          leaked=0
+          while IFS= read -r src; do
+            [ -n "$src" ] || continue
+            if printf '%s\n' "$allowed" | grep -qxF "$src"; then
+              continue
+            fi
+            stem="$(basename "$src" .md)"
+            stem_re="$(printf '%s' "$stem" | sed -e 's/[][\.*^$(){}?+|/]/\\&/g')"
+            root_re="<loc>https?://[^/]+/${stem_re}\.html</loc>"
+            search_re="\"https?://[^/]+/${stem_re}\.html\""
+            if printf '%s\n' "$root_files" | grep -qxF "$stem.html"; then
+              echo "::error::$src reached the built site as docs/$stem.html"
+              leaked=1
+            fi
+            if printf '%s\n' "$root_files" | grep -qxF "$stem.md"; then
+              echo "::error::$src was copied into the built site as docs/$stem.md"
+              leaked=1
+            fi
+            if grep -qE "$root_re" docs/sitemap.xml; then
+              echo "::error::$src is listed in docs/sitemap.xml at the site root"
+              leaked=1
+            fi
+            if grep -qE "$search_re" docs/search.json; then
+              echo "::error::$src is indexed in docs/search.json at the site root"
+              leaked=1
+            fi
+          done <<EOF
+          $sources
+          EOF
+          exit "$leaked"
+        shell: bash
+
+      # The two pages `DESCRIPTION` and `README.md` advertise. A pkgdown build
+      # that silently stopped emitting either would still deploy a green-looking
+      # site whose advertised links 404.
+      - name: Check the advertised pages exist
+        run: |
+          missing=0
+          for page in docs/index.html docs/articles/nested-cv.html; do
+            if [ ! -f "$page" ]; then
+              echo "::error::$page is missing from the built site"
+              missing=1
+            fi
+          done
+          exit "$missing"
+        shell: bash
 
       - name: Upload the built site
         uses: actions/upload-artifact@v7

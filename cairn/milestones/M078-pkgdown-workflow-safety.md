@@ -100,7 +100,7 @@ row stay where they are.
       `72c3be2` added. Give both jobs a `timeout-minutes` (20 build, 10
       deploy, the pre-collapse figures). Comment each departure from the stock
       template with the property it buys.
-- [ ] T2: Restore the `Drop the repo-internal sources` step, the
+- [x] T2: Restore the `Drop the repo-internal sources` step, the
       internal-pages guard, the advertised-pages guard and the
       `check_pkgdown()` step. Write the internal-pages guard to iterate
       `git ls-files -- '*.md' '.github/*.md'` against the built `docs/`,
@@ -139,6 +139,7 @@ row stay where they are.
 - 2026-09-09: criteria audit ran in full mode ([O], fresh context): nine findings over AC2-AC6, eight fixed at the gate (AC3 unsatisfiable — `package_mds()` on the checkout necessarily returns `CLAUDE.md` and never descends into `cairn/`; AC3 and AC6 bound instrument properties; AC4 was observable only post-merge; AC6 asserted a per-trigger report `ci-usage.py` does not emit), one routed to the gate as the `clean: false` question. AC1 and AC5 clean.
 - 2026-09-09: implement gate chose keeping the `release: published` trigger as a build-only check, since a release run's ref is the tag and the job-level publish guard names the default branch; and chose taking the two leaked pages' markdown sources off `gh-pages` alongside their HTML, which the plan's T5 named only as the two pages.
 - 2026-09-09: T1 — `.github/workflows/pkgdown.yaml` split back into `build` (workflow `read-all`, uploads `docs/`) and `deploy` (`contents: write`, job-level default-branch guard, three steps), workflow-level `concurrency` restored, `timeout-minutes` 20/10, deploy pinned at the v4.9.0 blob `fa24774`, each departure from the stock template commented.
+- 2026-09-09: T2 — restored the `Drop the repo-internal sources` step, `check_pkgdown()`, the advertised-pages guard and the internal-pages guard, the last rewritten to iterate `git ls-files -- '*.md' '.github/*.md'` (144 sources today) against the site root's file listing, `sitemap.xml` and `search.json`, allowing a page only for the five sources pkgdown is meant to publish. Local runs against the published site as it stands: red naming `CLAUDE.md` and `.github/ci-usage-baseline.md` on all four arms; green over the same 144 sources once the four files and their index entries are removed, with the five allowed pages still present. Root-file matching is done against a listing rather than `[ -f ]`, after a case-insensitive filesystem read `cairn/references/INDEX.md` as `docs/index.html`.
 
 ## Decisions
 
