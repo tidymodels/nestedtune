@@ -122,14 +122,14 @@ row stay where they are.
       article arm), and an export dropped from `_pkgdown.yml` for
       `check_pkgdown()`. Record each red run id in the work log, then revert
       the plants.
-- [ ] T5: Remove `CLAUDE.html`, `ci-usage-baseline.html` and their
+- [x] T5: Remove `CLAUDE.html`, `ci-usage-baseline.html` and their
       `sitemap.xml` and `search.json` entries from the `gh-pages` branch in
       one commit; verify the live 404s and the two index files after GitHub
       Pages rebuilds.
 - [ ] T6: Run the consistency gate (`devtools::check()`, `document()` no-diff,
       `check_pkgdown()`), and update `cairn/DESIGN.md`'s Known issues entry on
       the vendored organization workflows to what survives this milestone.
-- [ ] T7: Draft the reply to topepo's review comment on
+- [x] T7: Draft the reply to topepo's review comment on
       `.github/workflows/pkgdown.yaml:3` in [#30](https://github.com/tidymodels/nestedtune/pull/30)
       — what is being restored and the property each piece buys — and hold it
       for the user's approval at the review gate. Post nothing before that.
@@ -149,6 +149,8 @@ row stay where they are.
 - 2026-09-09: T3 — the list now has eight identical copies across the four workflows carrying `push`/`pull_request`, and `.github/ci-usage.py` exits 0 with `Path filter read from R-CMD-check-hard.yaml, R-CMD-check.yaml, pkgdown.yaml, test-coverage.yaml: `cairn/**`, `CLAUDE.md`, `.claude/**``.
 - 2026-09-09: PR [#88](https://github.com/tidymodels/nestedtune/pull/88) opened as a draft, so the pull-request runs the criteria ask for exist while the milestone is implemented. Baseline pkgdown run 34423656683 on `a43007b`: `build` pass in 6m10s, `deploy` skipping.
 - 2026-09-09: T4 — each restored guard planted and seen red on its own pull-request run, then reverted. Run 34424415359: a tracked root `notes.md` the guard does not name, red at `Check the repo-internal pages are absent` on the page, copied-source and sitemap arms. Run 34424840769: `docs/index.html` removed after the build, red at `Check the advertised pages exist` naming that path, the internal-pages guard green on the same run. Run 34425274073: `agreement` dropped from `_pkgdown.yml`, red at `Check pkgdown config` with `In _pkgdown.yml, 1 topic missing from index: "agreement"`. Locally the same three guards were also run against the site as published, red on `CLAUDE.md` and `.github/ci-usage-baseline.md` and green over the same 144 sources once those four files and their index entries were removed.
+- 2026-09-09: T5 — `gh-pages` commit `1275777` removed `CLAUDE.html`, `ci-usage-baseline.html`, their two markdown sources (a discovered addition to the task, taken at the implement gate) and their `sitemap.xml` and `search.json` entries; sitemap 46 -> 44 urls, search index 273 -> 269 entries. GitHub Pages rebuilt at that commit; all four paths return 404 after redirects, and `/`, `index.html`, `LICENSE.html`, `CODE_OF_CONDUCT.html`, `CONTRIBUTING.html`, `articles/nested-cv.html` and `news/index.html` all still return 200.
+- 2026-09-09: T7 — reply to topepo's comment on `.github/workflows/pkgdown.yaml:3` in [#30](https://github.com/tidymodels/nestedtune/pull/30) drafted, unposted, at `benchmarks/pkgdown-30-reply.md`, following the convention `benchmarks/tune-969-reply.md` set. Nothing posted; it is held for the user's approval at the review gate.
 
 ## Decisions
 
