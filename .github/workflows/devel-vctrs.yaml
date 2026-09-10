@@ -7,7 +7,10 @@
 # `vec_cbind()` on a results object silently stops restoring the class, and
 # nothing in a released-vctrs matrix would notice until the change reached CRAN.
 # This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
-# against it, so the break surfaces on the day it lands upstream.
+# against it, so the break surfaces on the next push or pull request here
+# rather than at the upstream release. It carries no `schedule:`, so a quiet
+# week is a week the break waits; what it buys is that no work lands on this
+# repository without the question having been asked.
 #
 # It is NOT a gating check. It reports on another project's unreleased branch,
 # so a red run here is news rather than a reason this repository's own work
@@ -35,7 +38,14 @@ on:
 
 name: devel-vctrs.yaml
 
-permissions: read-all
+# Narrower than the sibling workflows' `read-all`, because this is the one job
+# that builds and runs another project's unreleased HEAD: checkout needs
+# `contents`, and nothing here reads actions, checks or issues. The
+# `GITHUB_PAT` in the job `env:` below is kept so `pak` makes authenticated
+# reads against GitHub's API rather than hitting the anonymous rate limit; it
+# is the same read-scoped token these permissions bound.
+permissions:
+  contents: read
 
 # See the matching block in R-CMD-check.yaml. Keyed on the workflow as well as
 # the ref, so cancelling a superseded run of this leg never touches a check run.

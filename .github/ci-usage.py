@@ -58,9 +58,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WORKFLOW_DIR = REPO_ROOT / ".github" / "workflows"
 
 # The window the recorded baseline was measured over. The upper bound is a
-# whole day behind the capture, never a moment inside it: an in-flight run
-# contributes its jobs but only part of its minutes, so including one makes the
-# totals irreproducible the moment it finishes. Thirty days is long enough to
+# midnight already past when the baseline is captured, never a moment inside
+# the capture: an in-flight run contributes its jobs but only part of its
+# minutes, so including one makes the totals irreproducible the moment it
+# finishes. Re-pointing these is safe only to a bound no run can still be
+# inside. Thirty days is long enough to
 # hold several milestones' worth of branches and stays inside the 90-day run
 # retention the API offers.
 BASELINE_SINCE = "2026-08-11T00:00:00Z"

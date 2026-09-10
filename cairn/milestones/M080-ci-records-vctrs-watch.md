@@ -150,6 +150,9 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: T9 — `devtools::document()` produces no diff; `devtools::check()` Status OK, 0 errors, 0 warnings, 0 notes, 10m07s, tests 846s/458s.
 - 2026-09-10: claim audit: not owed — internal tier.
 - 2026-09-10: status set to review; all nine tasks checked, `devtools::test()` and `devtools::check()` clean locally.
+- 2026-09-10: review ran all seven criteria against fresh evidence and ticked each as its evidence line landed; the universal gate passed at exit 0 and the r-package consistency-gate slot was clean (`document()` no diff, `pkgdown::check_pkgdown()` no problems, README in sync, no new top-level file, no user-visible change so no NEWS entry).
+- 2026-09-10: three fresh-context lenses ran; blame-history and prior-review returned nothing, the diff-bug lens twelve, of which six were fixed on the branch, one had already been fixed, one goes to a candidate row and four were rejected — all twelve recorded with dispositions in the Review section. None met the return floor.
+- 2026-09-10: step-7 approval: PR #90 approved for merge, the maintainer choosing to take the six comment and permission fixes before the merge rather than defer them.
 
 ## Decisions
 
@@ -260,6 +263,30 @@ below against the implementation.
 - F12 (confirmed, pre-existing): the divergence tag list at `PROFILE.md:42`
   reads `(M11 ×2, M12 rev. M31, M14, M33, M52, M80)` and omits M78, whose
   two-job pkgdown split the same sentence now asserts.
+
+**Triage at the gate.** No finding demonstrated an acceptance criterion
+failing, so none met the return floor. F1, F2, F3, F9, F10 and F12 were fixed
+on the branch before the merge; F7 was fixed when found; F4 goes to a candidate
+row at hygiene, alongside the leg's missing `schedule:`; F5, F6, F8 and F11 were
+rejected. Reasons for the rejections: F5 and F6 are pointers inside plan-owned
+text that were true when written and that neither criterion depends on — AC2
+names `read_paths_ignore()` by name, and the Goal's count is falsified only by
+this milestone's own new leg; F8 read a mid-flight file, `check()` having still
+been running; F11 is the behaviour AC4 and T7 chose, the script reading the
+workflow list off the directory so that line 5 corrects itself.
+
+What the fixes changed, none of it package code: `devel-vctrs.yaml`'s header
+now says the break surfaces on the next push or pull request here and states
+plainly that a quiet week is a week it waits; its `permissions:` narrows from
+`read-all` to `contents: read`, with a comment saying why `GITHUB_PAT` is kept;
+`pkgdown.yaml`'s cap comment no longer calls the coverage leg gating and no
+longer enumerates a cap equal to its own; `ci-usage.py`'s window comment states
+the invariant the values actually follow; `PROFILE.md`'s worker-count sentence
+names the four whole-suite workflows and says the stress workflow sets none;
+and its divergence tag list gains M78. Re-verified after the fixes:
+`read_paths_ignore()` reports the same five workflows (AC2), all nine workflow
+files parse as YAML, `ci-usage.py` parses, `test-ci-workflows.R` is 7 pass 0
+fail, and `PROFILE.md` is 118 lines.
 
 Evidence recorded during implementation, for the review phase to read:
 

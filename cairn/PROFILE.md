@@ -39,7 +39,7 @@ rules in tracking-rules:
 - CI starts from the usethis pair: `check-standard` runs `R CMD check` across platforms (a normal CI check — see the
   merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
   `.Rbuildignore`d.
-- Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M80). **A `concurrency` block** cancels a
+- Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80). **A `concurrency` block** cancels a
   superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
   `paths-ignore` filter** on both triggers of `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
   `pkgdown.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
@@ -56,7 +56,8 @@ rules in tracking-rules:
   (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover;
   `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
   `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
-  every workflow that runs the suite and left at testthat's default of 2 locally. **A `workflow_dispatch`-only stress
+  the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
+  sets none, running one file per process. **A `workflow_dispatch`-only stress
   workflow** (`stress-daemon-tests.yaml`) hunts the hang on demand under a job cap far above the rest, invisible to
   `ci-usage.py` for carrying neither trigger. **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs the suite against
   vctrs from `r-lib/vctrs@main`, watching the experimental `vec_cbind_frame_ptype()` `R/nested-results.R` has a method
