@@ -153,6 +153,7 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: review ran all seven criteria against fresh evidence and ticked each as its evidence line landed; the universal gate passed at exit 0 and the r-package consistency-gate slot was clean (`document()` no diff, `pkgdown::check_pkgdown()` no problems, README in sync, no new top-level file, no user-visible change so no NEWS entry).
 - 2026-09-10: three fresh-context lenses ran; blame-history and prior-review returned nothing, the diff-bug lens twelve, of which six were fixed on the branch, one had already been fixed, one goes to a candidate row and four were rejected — all twelve recorded with dispositions in the Review section. None met the return floor.
 - 2026-09-10: step-7 approval: PR #90 approved for merge, the maintainer choosing to take the six comment and permission fixes before the merge rather than defer them.
+- 2026-09-10: PR #90 marked ready; the CI watch hit the harness ceiling with the checks still pending and was stopped, `build` the only one finished (pass, 6m36s) and `deploy` skipping as its branch guard intends. Nothing merged; re-running /milestone-review M080 re-derives the state and waits again.
 
 ## Decisions
 
