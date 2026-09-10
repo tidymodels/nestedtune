@@ -66,11 +66,23 @@ stoch_grid <- function() data.frame(min_n = c(2L, 10L, 25L))
 # `det_workflow()` finalized at `num_comp = 2L`, the deterministic path AC1's
 # value oracles need; `fixed_stoch_workflow()` is `stoch_workflow()` with
 # `min_n` fixed, ranger single-threaded, for the seed identities (AC6).
+# The step id is written out rather than drawn (M79). `recipes::step_pca()`
+# draws its id from the stream, so the same call at two stream positions
+# builds two workflows that differ in nothing that reaches a fit -- and
+# `fixture_key()` reads the workflow, so the two key two cache entries for one
+# value. Measured on the serial fixture-cache report for
+# test-nested-workflow-map-oracles.R: `nested_fit_resamples(workflow, folds,
+# metrics = ms)` at 2 builds / 6 requests with the id drawn, 1 / 6 with it
+# written out, `wset_two()` and `wset_fixed()` being the two sets that call
+# this and build it at different positions. A written-out id also means the
+# "seeded before the workflow is built" step in `fit_resamples_results()` and
+# `wset_results()` no longer has a draw to protect against.
 fixed_workflow <- function(data) {
   rec <- recipes::step_pca(
     recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
     recipes::all_predictors(),
-    num_comp = 2L
+    num_comp = 2L,
+    id = "pca_fixed"
   )
   workflows::workflow(rec, parsnip::linear_reg())
 }

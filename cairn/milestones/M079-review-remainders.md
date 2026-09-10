@@ -20,8 +20,11 @@ that no longer describe the code under them.
 **In:** the eight sites those two reviews named — the merged control block in
 `tests/testthat/test-nested-tune-bayes-results.R:248-289`;
 `daemon_state_snapshot()` at `tests/testthat/helper-parallel.R:213,224-225`;
-the fixed-workflow hand call at
-`tests/testthat/test-nested-workflow-map-oracles.R:22-29`; and the comment
+the duplicate build behind the fixed-workflow hand call at
+`tests/testthat/test-nested-workflow-map-oracles.R:22-29`, whose cause is the
+random `step_pca()` id `fixed_workflow()` draws
+(`tests/testthat/helper-orchestration.R:69-76`), leaving the two workflow sets
+that call it carrying different objects; and the comment
 sites at `benchmarks/time-examples.R:1,27`,
 `tests/testthat/test-nested-tune-bayes-oracles.R:431-433`,
 `.github/workflows/R-CMD-check.yaml:119-120`,
@@ -85,7 +88,7 @@ records → M080.
       whose answers include one with no integer `pid`; record in the work log
       the aligned names the fixed helper yields, beside what the pre-change
       helper yields on the same fixture.
-- [ ] T4: Cut the second build of the fixed-workflow hand call at
+- [x] T4: Cut the second build of the fixed-workflow hand call at
       `test-nested-workflow-map-oracles.R:22-29`. Read the build count off the
       serial fixture-cache report's `builds` column under
       `TESTTHAT_PARALLEL=FALSE`, never off a source comment, and quote that
@@ -124,6 +127,10 @@ records → M080.
 - 2026-09-10: T3 — the naming moved into `name_by_pid()` (`helper-parallel.R`), which orders and names from one `order(pids)` permutation; `daemon_state_snapshot()` calls it, and the ledger row for `daemon_rng_kinds()`'s `collect_bounded` moved 232 → 246 with it. New block in `test-suite-hygiene.R` over two fabricated answer sets, one carrying a non-list answer and one whose `pid` is `NULL`.
 - 2026-09-10: T3 evidence — fixed helper names the shuffled fixture `"10" "20" "30"` and the gapped fixture `"10" "30" NA NA`, each name the pid its own record carries. Pre-change code (`answers[order(pids)]` + `names<-as.character(sort(pids))`) planted back: naming assertions all PASS, the only two failures being the ledger's line pointers, which moved because that form is a line shorter — so the misalignment M74 predicted does not occur, `order()`'s `na.last = TRUE`, `sort()`'s NA drop and `names<-`'s NA padding cancelling. Defect class the block does catch, planted as `names(answers) <- as.character(pids)` after ordering: 5 failures, first reading `actual: "30" "10" "20" / expected: "10" "20" "30"`.
 - 2026-09-10: T3 verify — `devtools::test()` 9588 pass, 0 warn, 0 skip, and only the four `test-ci-workflows.R` items AC6 excludes.
+
+- 2026-09-10: substantive amendment at a mini gate — Scope In's fixed-workflow entry widened from the hand call at `test-nested-workflow-map-oracles.R:22-29` to the duplicate build behind it and its cause in `helper-orchestration.R:69-76`. The two builds are not two hand calls: `fixed_workflow()`'s `step_pca()` draws its id from the stream, so `wset_two()` (which builds it after `det_workflow()` has drawn) and `wset_fixed()` (which builds it first) carry different workflow objects that produce one value. AC3 unchanged.
+- 2026-09-10: T4 — `step_pca()` in `fixed_workflow()` now carries `id = "pca_fixed"`. Serial fixture-cache report for `test-nested-workflow-map-oracles.R` under `TESTTHAT_PARALLEL=FALSE`, `builds` and `requests` columns for `nested_fit_resamples(workflow, folds, metrics = ms)`: `2` / `6` before, `1` / `6` after; file totals `8 signatures, 9 builds, 13 requests` before and `8 signatures, 8 builds, 13 requests` after, the report's "built more than once" warning line present before and absent after.
+- 2026-09-10: T4 verify — `devtools::test()` 9588 pass, 0 warn, 0 skip, only AC6's four excluded items; no other test moved, so nothing in the suite depended on the drawn id.
 
 ## Decisions
 

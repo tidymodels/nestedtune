@@ -366,11 +366,14 @@ test_that("daemon answers are named by the pid each one holds", {
   shuffled <- list(a = answer(30L), b = answer(10L), c = answer(20L))
   named <- name_by_pid(shuffled)
   expect_identical(names(named), c("10", "20", "30"))
-  expect_identical(vapply(named, function(x) x$pid, integer(1)), c(
-    "10" = 10L,
-    "20" = 20L,
-    "30" = 30L
-  ))
+  expect_identical(
+    vapply(named, function(x) x$pid, integer(1)),
+    c(
+      "10" = 10L,
+      "20" = 20L,
+      "30" = 30L
+    )
+  )
 
   # An answer that is not a list, or whose `pid` is not an integer, holds no
   # pid: it sorts last and its name is missing, not another record's pid.
@@ -393,7 +396,11 @@ test_that("daemon answers are named by the pid each one holds", {
     carried <- vapply(
       out,
       function(x) {
-        if (is.list(x) && is.integer(x$pid)) as.character(x$pid) else NA_character_
+        if (is.list(x) && is.integer(x$pid)) {
+          as.character(x$pid)
+        } else {
+          NA_character_
+        }
       },
       character(1),
       USE.NAMES = FALSE
