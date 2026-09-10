@@ -7,6 +7,8 @@ _Last hygiene check: 2026-09-10 (sixth pass, at M080's merge: M080 archived and 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M81 | The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples | planned | — | high | milestones/M081-help-pages-rewrite.md |
+| M82 | The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone | planned | M81 | high | milestones/M082-guides-readme-rewrite.md |
 | M80 | The CI records name the workflows that exist and stop copying their caps, and a leg watches the development vctrs one invariant rests on | done | — | normal | milestones/archive/M080-ci-records-vctrs-watch.md |
 | M79 | The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on | done | — | normal | milestones/archive/M079-review-remainders.md |
 | M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | done | — | high | milestones/archive/M078-pkgdown-workflow-safety.md |
