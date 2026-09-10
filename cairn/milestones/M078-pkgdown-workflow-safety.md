@@ -163,6 +163,7 @@ row stay where they are.
 - 2026-09-09: review — PR conversation read on [#88](https://github.com/tidymodels/nestedtune/pull/88): no reviews, no conversation comments, no unresolved review threads.
 - 2026-09-09: step-7 approval: PR #88 approved for merge. The user also approved posting the drafted reply to topepo on [#30](https://github.com/tidymodels/nestedtune/pull/30) after the merge.
 - 2026-09-09: review — PR #88 marked ready; the CI watcher reached the harness ceiling and was stopped. Fresh state at that point: `build` and `format-suggest` success, `deploy` skipped, the five R-CMD-check legs and `test-coverage` still in progress, nothing red. No merge attempted and no approval marker written; the recorded step-7 approval stands for the resume.
+- 2026-09-09: review resume — `test-coverage` run 34429660527 failed at `Error in readRDS(f) : error reading from connection` in `merge_coverage.character`, after 15m50s and so under its 20-minute cap; the identity the standing coverage candidate row records as intermittent and pre-existing, and the profile declares the leg non-gating. Re-run of the failed job started. All five R-CMD-check legs, `build` and `format-suggest` are green and `deploy` skipped; the CI watcher reached the harness ceiling again and was stopped with the coverage re-run still in progress. No merge attempted, no approval marker written.
 
 ## Decisions
 
