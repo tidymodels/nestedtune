@@ -24,8 +24,9 @@ three more caps uncopied, and which says "both gating workflows" carry
 `.github/workflows/test-coverage.yaml:33-34`, which credits R-CMD-check's
 check step with a 20-minute cap where `R-CMD-check.yaml:176` declares 30, or
 40 on windows; `.github/ci-usage-baseline.md`, generated 2026-07-27 and naming
-two workflows at its line 5; a new workflow leg against `r-lib/vctrs@main`;
-the drafted upstream issue; and `tests/testthat/test-ci-workflows.R:59-66`,
+two workflows at its line 5, and the same wrong figure in
+`stress-daemon-tests.yaml:43` and `pkgdown.yaml:69`; a new workflow leg against
+`r-lib/vctrs@main`; the drafted upstream issue; and `tests/testthat/test-ci-workflows.R:59-66`,
 whose ordering assertion names a `pkgdown` job M78 replaced with `build` and
 `deploy`, so four items fail under `devtools::test()` in the source tree while
 `R CMD check` skips the block.
@@ -86,11 +87,13 @@ dependency cache → its own row. The review remainders → M079.
       them with grep" sentence dropped as it no longer guards anything. Keep
       the passage's rationale, which the figures were only illustrating.
       Historical hang durations are not caps and stay.
-- [ ] T3: Correct `.github/workflows/test-coverage.yaml:33-34`, which says
+- [x] T3: Correct `.github/workflows/test-coverage.yaml:33-34`, which says
       R-CMD-check "bounds the same risk at 20 minutes ... on its check step"
       where that step declares `${{ ... windows && 40 || 30 }}`
       (`R-CMD-check.yaml:176`). M31's review fixed a sibling of this line in
-      `pkgdown.yaml`; this one survived.
+      `pkgdown.yaml`; this one survived. Two further copies of the same figure
+      — `stress-daemon-tests.yaml:43` and `pkgdown.yaml:69` — are corrected
+      with it.
 - [ ] T4: Add the devel-vctrs leg: install vctrs from `r-lib/vctrs@main`, run
       the package's test suite, trigger on `push` and `pull_request` with the
       same `paths-ignore` the other four legs carry, and give the job a cap
@@ -130,6 +133,9 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: T1 — the pkgdown ordering assertion now reads the `deploy` job, whose own `actions/checkout@v7` precedes the deploy action; the file-header comment and the job-boundary comment corrected to the two-job file. `devtools::test()` 9592 pass, 0 fail.
 
 - 2026-09-10: T2 — the cap passage carries no minute figure of its own, naming each cap by its workflow file and the job or step declaring it, and the grep sentence is gone; the two pre-M14 hang durations stay. Compressed in the same pass so `PROFILE.md` clears its 120-line cap with headroom (119 before, 120 after the first rewrite, 118 now): `stress-daemon-tests.yaml` is named once rather than twice, and the parallel-files figures cross-reference `benchmarks/test-timing-parallel.md`, which owns them.
+
+- 2026-09-10: implement gate widened Scope In and T3 from one stale cap cross-reference to three, the two siblings found while writing T2 crediting R-CMD-check's check step with the same 20 minutes; no criterion changed wording and no task was added.
+- 2026-09-10: T3 — all three comments now state 30 minutes, 40 on windows, the figure `R-CMD-check.yaml:176` declares. `R-CMD-check.yaml:108`'s 20-minute mention is a past cap that killed a build, not a copy of a live one, and stays.
 
 ## Decisions
 

@@ -30,10 +30,11 @@ jobs:
   test-coverage:
     runs-on: ubuntu-latest
     # covr has hung inside test_check() here before, and a hung job is worse
-    # than a failed one. R-CMD-check bounds the same risk at 20 minutes as
-    # well, but on its check step rather than its job: its devel leg needs a
-    # long job cap for a from-source dependency build, and this workflow's
-    # single ubuntu release leg gets binaries and needs no such thing.
+    # than a failed one. R-CMD-check bounds the same risk on its check step
+    # rather than on its job -- at 30 minutes, 40 on windows -- because its
+    # devel leg needs a long job cap for a from-source dependency build, and
+    # this workflow's single ubuntu release leg gets binaries and needs no such
+    # thing.
     timeout-minutes: 20
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
