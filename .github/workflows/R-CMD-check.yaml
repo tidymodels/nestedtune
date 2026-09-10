@@ -8,9 +8,8 @@
 #
 # The list is spelled out under both triggers because GitHub Actions does not
 # resolve YAML anchors in workflow files; `.github/ci-usage.py` reads every
-# copy back separately -- both triggers here, and both in each of
-# test-coverage.yaml, pkgdown.yaml and R-CMD-check-hard.yaml -- and exits
-# non-zero if any two of the eight disagree.
+# copy back separately -- both triggers here and both in every other workflow
+# carrying the filter -- and exits non-zero if any two of them disagree.
 on:
   push:
     branches: [main, master]

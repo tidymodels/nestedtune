@@ -29,61 +29,60 @@ cairn-file checks (`cairn_validate`, coverage completeness, `cairn_impact`):
 R-mechanical test expectations layered on the universal "What gets a test"
 rules in tracking-rules:
 - Tests are written for `testthat` edition 3 (3e).
-- Every exported function: happy path, every `cli_abort()` branch fired, R
-  edge cases — zero rows, `NA`, length-one, factor vs. character, empty strings.
+- Every exported function: happy path, every `cli_abort()` branch fired, R edge cases — zero rows, `NA`, length-one,
+  factor vs. character, empty strings.
 - New user-facing conditions use `cli::cli_abort()` / rlang, not assertthat.
 - Indirect by default: internal helpers (direct tests only for independent logic).
-- Never test print cosmetics beyond meaningful snapshots, trivial pass-throughs,
-  dependency behavior, or plots except `vdiffr` when the plot is the product.
+- Never test print cosmetics beyond meaningful snapshots, trivial pass-throughs, dependency behavior, or plots except
+  `vdiffr` when the plot is the product.
 - `covr` is a diagnostic, never a gate.
-- CI starts from the usethis pair: `check-standard` runs `R CMD check` across
-  platforms (a normal CI check — see the merge clause below), `test-coverage` runs
-  `covr` to Codecov, annotating a PR but never gating it; `.github/` is `.Rbuildignore`d.
-- Six divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52). **A `concurrency` block** cancels a
+- CI starts from the usethis pair: `check-standard` runs `R CMD check` across platforms (a normal CI check — see the
+  merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
+  `.Rbuildignore`d.
+- Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80). **A `concurrency` block** cancels a
   superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
-  `paths-ignore` filter** on both triggers of both gating workflows skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which
-  cannot change what `R CMD check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub
-  evaluating it on a `pull_request` against the whole PR diff. **Hang caps at two scopes** turn a hang into a failed
-  job with a timestamp: `R-CMD-check` bounds its job at 60 minutes and its `check-r-package` step at 30, 40 on windows
-  alone; `test-coverage` its job at 20; `R-CMD-check-hard` its job at 30 (M57). Each yaml comment holds its own
-  measurements and rationale — M76's three attempts per leg among them — and `grep -n timeout-minutes
-  .github/workflows/*.yaml` re-reads every figure. The step bound is the guarantee, both pre-M14 hangs having sat in
-  `test_check("nestedtune")` — 52 minutes under `R CMD check`, 40 under `covr`, which is why each workflow carries its
-  own; the job bound covers the devel leg's from-source build of 129 dependencies, which a smaller job cap once killed
-  before cache-save. 30 is not free headroom: a leg nearing it is a suite to make faster (M52). **Parallel test files**
-  (`Config/testthat/parallel: true`, M52): `Config/testthat/start-first` in DESCRIPTION queues named files first, so a
-  long file cannot land last (corrected M76: the run is *not* bounded by its largest file, and the branch point sits
-  1.9% above the makespan floor its own per-file occupancy implies, so re-ordering has nothing to recover — re-ordering
-  by measured time and lengthening the list measured 2.4% slower, splitting a file bought nothing, and
-  `benchmarks/test-timing-parallel.md` states what those figures do not settle). The worker count is `TESTTHAT_CPUS`
-  (testthat reads `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set in the three check workflows'
-  job `env:` at one per runner core (4 on ubuntu and windows, 3 on macOS) and left at testthat's default of 2 locally; `benchmarks/` holds a serial per-file profiler
-  and a parallel wall-clock one. **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the
-  hang on demand, invisible to `ci-usage.py` for carrying neither trigger. **Three organization workflows** ride
-  unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33): no
-  `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air
-  format .` (see DESIGN).
-- Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`)
-  writes a timestamped start/end line per test file and per `test_that()` block to unbuffered `stderr()`, so
-  a killed job's last unmatched `start` names the block it died in (M14, per-test M16). Under parallel files
-  it runs in the parent in testthat's live-update mode, one pair per file and block (M52).
-- `.github/ci-usage.py` measures the first two over any window in GitHub's
-  90-day retention (baseline: `.github/ci-usage-baseline.md`), counting commits
-  from `git log` and never crediting a cancelled run its whole would-be duration.
-- **The merge clause, for the filters:** cairn never merges red or pending CI. A
-  filtered event produces no run, so its check is absent rather than pending and
-  merging past it is correct; what it forbids is a check that ran and failed, or
-  one still running. Required status checks (none here) would leave a filtered
-  check `Pending` forever.
-- Change governance: the dependency surface is DESCRIPTION Imports/Suggests, and
-  a breaking change warns via `lifecycle::deprecate_warn()` before removal. The
-  gates themselves are universal (tracking-rules "Universal tracking rules").
+  `paths-ignore` filter** on both triggers of `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
+  `pkgdown.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
+  check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
+  `pull_request` against the whole PR diff. **Hang caps** turn a hang into a failed job with a timestamp; every figure
+  stays in the workflow declaring it. `R-CMD-check.yaml` bounds its job and its `check-r-package` step separately, the
+  step higher on windows; `test-coverage.yaml`, `R-CMD-check-hard.yaml` (M57) and `devel-vctrs.yaml` each bound one
+  job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own measurements and rationale.
+  The step bound is the guarantee, both pre-M14 hangs having sat in `test_check("nestedtune")` (52 minutes under `R
+  CMD check`, 40 under `covr`), which is why each workflow carries its own; the job bound covers the devel leg's
+  from-source dependency build, which a smaller one once killed before cache-save. A step bound is not free headroom:
+  a leg nearing its own is a suite to make faster (M52). **Parallel test files** (`Config/testthat/parallel: true`,
+  M52): `Config/testthat/start-first` in DESCRIPTION queues named files first, so a long file cannot land last
+  (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover;
+  `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
+  `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
+  the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
+  sets none, running one file per process. **A `workflow_dispatch`-only stress
+  workflow** (`stress-daemon-tests.yaml`) hunts the hang on demand under a job cap far above the rest, invisible to
+  `ci-usage.py` for carrying neither trigger. **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs the suite against
+  vctrs from `r-lib/vctrs@main`, watching the experimental `vec_cbind_frame_ptype()` `R/nested-results.R` has a method
+  on; non-gating and outside the required checks, so an unreleased upstream branch cannot freeze a merge here. **Three
+  organization workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`,
+  `format-suggest.yaml`, M33): no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them;
+  `format-suggest.yaml` runs `air format .` (see DESIGN).
+- Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`) writes
+  timestamped start/end lines per test file and per `test_that()` block to unbuffered `stderr()`, so a killed job's
+  last unmatched `start` names the block it died in (M14, per-test M16; under parallel files it runs in the parent in
+  testthat's live-update mode, M52).
+- `.github/ci-usage.py` measures the first two over any window in GitHub's 90-day retention (baseline:
+  `.github/ci-usage-baseline.md`), counting commits from `git log` and never crediting a cancelled run its whole
+  would-be duration.
+- **The merge clause, for the filters:** cairn never merges red or pending CI. A filtered event produces no run, so
+  its check is absent rather than pending and merging past it is correct; what it forbids is a check that ran and
+  failed, or one still running. Required status checks (none here) would leave a filtered check `Pending` forever.
+- Change governance: the dependency surface is DESCRIPTION Imports/Suggests, and a breaking change warns via
+  `lifecycle::deprecate_warn()` before removal. The gates themselves are universal (tracking-rules "Universal tracking
+  rules").
 - Every newly exported object gets a `_pkgdown.yml` reference-index row in the same commit.
-- Every committed test fixture carries reproducible provenance: its source, the
-  committed `data-raw/` generator that rebuilds it from scratch, and any seed —
-  the R-mechanical form of the universal Reproducibility hard-stop. That content
-  is required; its shape is the repo's choice (a `provenance` attribute, embedded
-  `.rds`/`.rda` fields, or a header comment naming source + generator + seed).
+- Every committed test fixture carries reproducible provenance: its source, the committed `data-raw/` generator that
+  rebuilds it from scratch, and any seed — the R-mechanical form of the universal Reproducibility hard-stop. That
+  content is required; its shape is the repo's choice (a `provenance` attribute, embedded `.rds`/`.rda` fields, or a
+  header comment naming source + generator + seed).
 
 ## release-walk
 Followed by `/cairn-release` — a CRAN release walk (never self-submits):
