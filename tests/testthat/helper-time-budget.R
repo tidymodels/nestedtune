@@ -56,8 +56,12 @@
 
 # One site's worst case: what it waits for, times the number of times the
 # surrounding code runs it. `times` is 1 unless a loop says otherwise -- the
-# shared_daemons() call in test-parallel-identity.R's BC12 sits inside
-# `for (fn in RACERS)` and is therefore paid twice.
+# two shared_daemons() calls in test-parallel-identity.R's BC12, one at each
+# daemon count, each sit inside `for (fn in RACERS)` and are therefore paid
+# twice. They are the ledger's only rows carrying a `times` above 1;
+# `grep -n 'times = [0-9]' tests/testthat/helper-time-budget.R` lists every row
+# that sets the argument, `tb_row()`'s own default included, so a row added at
+# any other count shows up there rather than going unread.
 tb_row <- function(file, line, call, seconds, payer, times = 1L, note = "") {
   data.frame(
     file = file,
@@ -977,7 +981,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "helper-parallel.R",
-      232L,
+      247L,
       "collect_bounded",
       0,
       "daemon_rng_kinds()",

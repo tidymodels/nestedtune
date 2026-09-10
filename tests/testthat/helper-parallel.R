@@ -216,13 +216,28 @@ daemon_state_snapshot <- function() {
     mirai::everywhere(snapshot_expr),
     seconds = DAEMON_SNAPSHOT_BOUND_S
   )
+  name_by_pid(answers)
+}
+
+# Order a set of daemon answers by pid and name each by the pid IT holds.
+#
+# One permutation does both, so the name on a record cannot be the pid of a
+# different record. `sort(pids)` cannot stand in for `pids[order(pids)]` here:
+# an answer carrying no integer `pid` reads as `NA`, which `order()` keeps and
+# `sort()` drops, so the name vector comes back short and `names<-` pads it.
+# Today that padding lands the NA exactly where `order()` put it and the names
+# come out right anyway -- three unrelated defaults cancelling. Were
+# `order()`'s `na.last` ever `FALSE`, the same pair would hang the sorted pids
+# on the records one slot along and leave the last record unnamed (M79).
+name_by_pid <- function(answers) {
   pids <- vapply(
     answers,
     function(x) if (is.list(x) && is.integer(x$pid)) x$pid else NA_integer_,
     integer(1)
   )
-  answers <- answers[order(pids)]
-  names(answers) <- as.character(sort(pids))
+  ord <- order(pids)
+  answers <- answers[ord]
+  names(answers) <- as.character(pids[ord])
   answers
 }
 

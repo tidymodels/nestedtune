@@ -66,11 +66,24 @@ stoch_grid <- function() data.frame(min_n = c(2L, 10L, 25L))
 # `det_workflow()` finalized at `num_comp = 2L`, the deterministic path AC1's
 # value oracles need; `fixed_stoch_workflow()` is `stoch_workflow()` with
 # `min_n` fixed, ranger single-threaded, for the seed identities (AC6).
+
+# The step id is written out rather than drawn (M79). `recipes::step_pca()`
+# draws its id from the stream, so the same call at two stream positions
+# builds two workflows that differ in nothing that reaches a fit -- and
+# `fixture_key()` reads the workflow, so the two key two cache entries for one
+# value. Measured on the serial fixture-cache report for
+# test-nested-workflow-map-oracles.R: `nested_fit_resamples(workflow, folds,
+# metrics = ms)` at 2 builds / 6 requests with the id drawn, 1 / 6 with it
+# written out, `wset_two()` and `wset_fixed()` being the two sets that call
+# this and build it at different positions. A written-out id also means the
+# "seeded before the workflow is built" step in `fit_resamples_results()` and
+# `wset_results()` no longer has a draw to protect against.
 fixed_workflow <- function(data) {
   rec <- recipes::step_pca(
     recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
     recipes::all_predictors(),
-    num_comp = 2L
+    num_comp = 2L,
+    id = "pca_fixed"
   )
   workflows::workflow(rec, parsnip::linear_reg())
 }
@@ -91,9 +104,11 @@ fixed_stoch_workflow <- function(data) {
 # fixed deterministic workflow on `det_nested()`, under entry seed 30, the
 # seed the value oracles in test-nested-fit-resamples-oracles.R use directly.
 # Seeded before the workflow is built as well as before the run, as
-# `bayes_control_final_results()` is: the recipe step id is drawn from the
-# stream, and a workflow built under whatever state the requesting test left
-# would key a fresh build on every request.
+# `bayes_control_final_results()` is. That second seed is the one doing work
+# here: since M79 wrote `fixed_workflow()`'s step id out, nothing between the
+# two `set.seed()` calls draws -- the id is a literal, `det_nested()` seeds
+# itself, `reg_metrics()` draws nothing -- so the pre-build seed is kept for
+# the shape it shares with the other fixture builders, not for an effect.
 fit_resamples_results <- function(data, seed = 30) {
   set.seed(seed)
   wf <- fixed_workflow(data)
@@ -2520,8 +2535,9 @@ wset_two <- function(data) {
   )
 }
 
-# The second fixed workflow: the formula preprocessor and lm, nothing to
-# tune and no recipe step id drawn from the stream.
+# The second fixed workflow: the formula preprocessor and lm, nothing to tune
+# and no recipe at all. Since M79 wrote `fixed_workflow()`'s id out, having no
+# recipe is what separates the two, not where their ids come from.
 plain_workflow <- function(data) {
   workflows::workflow(y ~ x1 + x2 + x3 + x4, parsnip::linear_reg())
 }
@@ -2583,14 +2599,18 @@ wset_map_args <- function(fn) {
 # (or `wset_fixed()` for the plain resampling orchestrator) on
 # `final_nested()`, whose inner specification is literal and so survives the
 # final fit's re-run, under entry seed 31. Seeded before the set is built as
-# well as before the run, for the reason `race_final_results()` gives: the
-# recipe step ids are drawn from the stream. The call is spliced into
+# well as before the run, for the reason `race_final_results()` gives: a
+# recipe step id is drawn from the stream. That reason reaches `wset_two()`,
+# whose `det_workflow()` still draws; `wset_fixed()`'s two members write their
+# id out or carry no recipe (M79), so for `fn == "nested_fit_resamples"` the
+# pre-build seed has nothing to protect. The call is spliced into
 # `memoised()` with the arguments named, so the cache key reads them as the
 # orchestrator would match them.
 wset_results <- function(fn, data = make_reg_data(), seed = 31) {
   # Forced before the seed: `make_reg_data()` seeds the generator itself,
   # and a promise forced after `set.seed()` would build the set's recipe
-  # step ids under that seed rather than this one.
+  # step ids under that seed rather than this one -- `wset_two()`'s, whose
+  # `det_workflow()` draws the only id either set still leaves to the stream.
   force(data)
   set.seed(seed)
   wset <- if (fn == "nested_fit_resamples") wset_fixed(data) else wset_two(data)

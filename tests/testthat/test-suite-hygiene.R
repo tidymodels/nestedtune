@@ -352,3 +352,61 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
     )
   )
 })
+
+# M79. The probe in `shared_daemons()` compares `names(now)` against
+# `names(was)` to say "the same daemons, by pid", so a name that belongs to a
+# different record turns a replaced daemon into a silent pass. The naming is
+# exercised here against fabricated answers rather than a live pool: the case
+# that told the two functions the old code used apart is an answer carrying no
+# integer `pid` -- what the helper's own `NA_integer_` fallback is written for
+# -- and fabricating that is cheaper and surer than breaking a pool into
+# producing one.
+test_that("daemon answers are named by the pid each one holds", {
+  answer <- function(pid) list(pid = pid, namespaces = character(0))
+
+  # Named in true pid order, whichever order the daemons answered in.
+  shuffled <- list(a = answer(30L), b = answer(10L), c = answer(20L))
+  named <- name_by_pid(shuffled)
+  expect_identical(names(named), c("10", "20", "30"))
+  expect_identical(
+    vapply(named, function(x) x$pid, integer(1)),
+    c(
+      "10" = 10L,
+      "20" = 20L,
+      "30" = 30L
+    )
+  )
+
+  # An answer that is not a list, or whose `pid` is not an integer, holds no
+  # pid: it sorts last and its name is missing, not another record's pid.
+  with_gap <- list(
+    a = answer(30L),
+    b = "the daemon died before it answered",
+    c = answer(10L),
+    d = answer(NULL)
+  )
+  gapped <- name_by_pid(with_gap)
+  expect_identical(names(gapped), c("10", "30", NA, NA))
+  expect_identical(gapped[[1L]]$pid, 10L)
+  expect_identical(gapped[[2L]]$pid, 30L)
+  expect_identical(gapped[[3L]], "the daemon died before it answered")
+
+  # The property in one line, over both fixtures: every record's name is the
+  # pid it carries, read back off the record itself.
+  for (fixture in list(shuffled, with_gap)) {
+    out <- name_by_pid(fixture)
+    carried <- vapply(
+      out,
+      function(x) {
+        if (is.list(x) && is.integer(x$pid)) {
+          as.character(x$pid)
+        } else {
+          NA_character_
+        }
+      },
+      character(1),
+      USE.NAMES = FALSE
+    )
+    expect_identical(names(out), carried)
+  }
+})

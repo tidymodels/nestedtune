@@ -200,17 +200,3 @@ cat(sprintf(
   max(elapsed, na.rm = TRUE)
 ))
 cat(sprintf("%-46s %8.1f\n", "WALL CLOCK (the figure that is priced)", wall))
-
-cat("\n")
-for (i in seq_len(runs)) {
-  counts <- passes[[i]]$counts
-  cat(sprintf(
-    "run %d/%d: pass %d | fail %d | skip %d | wall %.1f s\n",
-    i,
-    runs,
-    counts[["pass"]],
-    counts[["fail"]],
-    counts[["skip"]],
-    passes[[i]]$wall
-  ))
-}

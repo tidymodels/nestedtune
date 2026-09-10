@@ -126,18 +126,6 @@ cat(sprintf("%-42s %8.1f\n", "SUITE TOTAL (sum of test times)", total))
 cat(sprintf("%-42s %8.1f\n", "wall clock for the run", wall))
 
 cat("\n")
-for (i in seq_len(runs)) {
-  counts <- passes[[i]]$counts
-  cat(sprintf(
-    "run %d/%d: pass %d | fail %d | skip %d\n",
-    i,
-    runs,
-    counts[["pass"]],
-    counts[["fail"]],
-    counts[["skip"]]
-  ))
-}
-
 installed <- vapply(
   c("lobstr", "mlbench", "ranger", "vdiffr"),
   function(p) requireNamespace(p, quietly = TRUE),
