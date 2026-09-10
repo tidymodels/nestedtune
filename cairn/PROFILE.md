@@ -43,26 +43,25 @@ rules in tracking-rules:
   superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
   `paths-ignore` filter** on both triggers of both gating workflows skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which
   cannot change what `R CMD check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub
-  evaluating it on a `pull_request` against the whole PR diff. **Hang caps at two scopes** turn a hang into a failed
-  job with a timestamp: `R-CMD-check` bounds its job at 60 minutes and its `check-r-package` step at 30, 40 on windows
-  alone; `test-coverage` its job at 20; `R-CMD-check-hard` its job at 30 (M57). Each yaml comment holds its own
-  measurements and rationale — M76's three attempts per leg among them — and `grep -n timeout-minutes
-  .github/workflows/*.yaml` re-reads every figure. The step bound is the guarantee, both pre-M14 hangs having sat in
-  `test_check("nestedtune")` — 52 minutes under `R CMD check`, 40 under `covr`, which is why each workflow carries its
-  own; the job bound covers the devel leg's from-source build of 129 dependencies, which a smaller job cap once killed
-  before cache-save. 30 is not free headroom: a leg nearing it is a suite to make faster (M52). **Parallel test files**
-  (`Config/testthat/parallel: true`, M52): `Config/testthat/start-first` in DESCRIPTION queues named files first, so a
-  long file cannot land last (corrected M76: the run is *not* bounded by its largest file, and the branch point sits
-  1.9% above the makespan floor its own per-file occupancy implies, so re-ordering has nothing to recover — re-ordering
-  by measured time and lengthening the list measured 2.4% slower, splitting a file bought nothing, and
-  `benchmarks/test-timing-parallel.md` states what those figures do not settle). The worker count is `TESTTHAT_CPUS`
-  (testthat reads `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set in the three check workflows'
-  job `env:` at one per runner core (4 on ubuntu and windows, 3 on macOS) and left at testthat's default of 2 locally; `benchmarks/` holds a serial per-file profiler
-  and a parallel wall-clock one. **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the
-  hang on demand, invisible to `ci-usage.py` for carrying neither trigger. **Three organization workflows** ride
-  unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33): no
-  `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air
-  format .` (see DESIGN).
+  evaluating it on a `pull_request` against the whole PR diff. **Hang caps** turn a hang into a failed job with a
+  timestamp; every figure stays in the workflow declaring it. `R-CMD-check.yaml` bounds its job and its
+  `check-r-package` step separately, the step higher on windows; `test-coverage.yaml` and `R-CMD-check-hard.yaml`
+  (M57) each bound one job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own
+  measurements and rationale, M76's three attempts per leg among them. The step bound is the guarantee, both pre-M14
+  hangs having sat in `test_check("nestedtune")` — 52 minutes under `R CMD check`, 40 under `covr` — so each workflow
+  carries its own; the job bound covers the devel leg's from-source build of 129 dependencies, which a smaller job cap
+  once killed before cache-save. A step bound is not free headroom: a leg nearing its own is a suite to make faster
+  (M52). **Parallel test files** (`Config/testthat/parallel: true`, M52): `Config/testthat/start-first` in DESCRIPTION
+  queues named files first, so a long file cannot land last (corrected M76: the run is *not* bounded by its largest
+  file and re-ordering has nothing to recover — `benchmarks/test-timing-parallel.md` owns the measurements and states
+  what they do not settle). The worker count is `TESTTHAT_CPUS` (testthat reads `getOption("Ncpus")` first when set;
+  no `.Rprofile` here sets it), set in the three check workflows' job `env:` at one per runner core (4 on ubuntu and
+  windows, 3 on macOS) and left at testthat's default of 2 locally; `benchmarks/` holds a serial per-file profiler and
+  a parallel wall-clock one. **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`) hunts the
+  hang on demand under a job cap far above the rest, invisible to `ci-usage.py` for carrying neither trigger. **Three
+  organization workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`,
+  `format-suggest.yaml`, M33): no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them;
+  `format-suggest.yaml` runs `air format .` (see DESIGN).
 - Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`)
   writes a timestamped start/end line per test file and per `test_that()` block to unbuffered `stderr()`, so
   a killed job's last unmatched `start` names the block it died in (M14, per-test M16). Under parallel files

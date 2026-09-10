@@ -80,7 +80,7 @@ dependency cache → its own row. The review remainders → M079.
       `actions/checkout@v7` (:267) before the deploy action (:278), so the
       assertion reads that job. Rewrite the file-header comment, which still
       says the file builds and deploys in a single `pkgdown` job.
-- [ ] T2: Rewrite the cap passage in `cairn/PROFILE.md`'s test-doctrine slot
+- [x] T2: Rewrite the cap passage in `cairn/PROFILE.md`'s test-doctrine slot
       so it carries no minute figure of its own — each cap named by its
       workflow file and the job or step declaring it, the existing "re-read
       them with grep" sentence dropped as it no longer guards anything. Keep
@@ -128,6 +128,8 @@ dependency cache → its own row. The review remainders → M079.
 - 2026-09-10: implement gate reordered the eight planned tasks so the devel-vctrs leg (now T4) lands before the `paths-ignore` sentence (now T6) and the regenerated usage baseline (now T7), both of which read the workflow directory; `Tn:` labels and the Coverage lines renumbered together, task wording otherwise unchanged.
 
 - 2026-09-10: T1 — the pkgdown ordering assertion now reads the `deploy` job, whose own `actions/checkout@v7` precedes the deploy action; the file-header comment and the job-boundary comment corrected to the two-job file. `devtools::test()` 9592 pass, 0 fail.
+
+- 2026-09-10: T2 — the cap passage carries no minute figure of its own, naming each cap by its workflow file and the job or step declaring it, and the grep sentence is gone; the two pre-M14 hang durations stay. Compressed in the same pass so `PROFILE.md` clears its 120-line cap with headroom (119 before, 120 after the first rewrite, 118 now): `stress-daemon-tests.yaml` is named once rather than twice, and the parallel-files figures cross-reference `benchmarks/test-timing-parallel.md`, which owns them.
 
 ## Decisions
 
