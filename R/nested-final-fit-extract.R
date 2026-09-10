@@ -23,58 +23,31 @@
 
 #' Extract the tuning run a final fit was selected from
 #'
-#' Returns the [tune::tune_grid()] or [tune::tune_bayes()] result that
-#' [nested_final_fit()] chose its parameters from: the record of what
-#' selection saw when the procedure was re-run on the complete dataset.
+#' Returns the tuning result that [nested_final_fit()] chose its parameters
+#' from: the record of what selection saw when the procedure was re-run on the
+#' complete dataset.
 #'
-#' @param x A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
+#' @inheritParams print.nested_final_fit
 #'
-#' @return The stored `tune_results` object, unchanged. It is tune's own object,
-#'   so tune's generics apply to it directly. A fit built from a
-#'   [nested_fit_resamples()] result ran no tuning and is refused with
-#'   condition class `nestedtune_no_tuning_run`.
+#' @return The stored `tune_results` object, unchanged. It is tune's own
+#'   object, so tune's generics apply to it directly; a fit that ran no tuning
+#'   is refused with condition class `nestedtune_no_tuning_run`.
 #'
 #' @section What its numbers are, and are not:
 #'
-#' The returned object answers `collect_metrics()`, and will hand its metrics
-#' over without qualifying them. Every one of them is a **selection-time**
-#' quantity: it was computed on the resamples that chose the candidate it
-#' describes, which makes it optimistically biased as a claim about the model
-#' this final fit produced. Nothing in that object is this model's performance.
+#' The returned object answers `collect_metrics()` and hands its metrics over
+#' unqualified. Each of them was computed on the resamples that chose the
+#' candidate it describes, which makes it a selection-time quantity,
+#' optimistically biased as a claim about the model this final fit produced.
 #'
-#' Report the nested estimate instead: `collect_metrics()` on the results
-#' object the fit was built from, the [nested_tune_grid()] or
-#' [nested_tune_bayes()] result. That number is measured on data no part of the
-#' tune-and-fit procedure ever saw, which is what makes it an honest description
-#' of the procedure that produced your model.
+#' The nested estimate is the honest one, and [nested_final_fit()] says why.
+#' This run is kept because it is the record of what selection saw, not
+#' because it describes the model.
 #'
-#' The run is kept because it is the record of what selection saw, not because
-#' it describes the model.
-#'
+#' @template example-setup
+#' @template example-run
+#' @template example-final
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#' set.seed(3)
-#' final <- nested_final_fit(wf, res)
-#'
 #' extract_tune_results(final)
 #'
 #' @seealso [extract_scored_candidates()], [nested_final_fit()],
@@ -114,66 +87,39 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 
 #' Extract the candidates a final fit actually scored
 #'
-#' Returns the candidate parameter settings that [nested_final_fit()]'s tuning
-#' run actually evaluated: the full-data counterpart of the candidate set each
-#' outer fold's `.inner_metrics` table describes on a [nested_tune_grid()] or
-#' [nested_tune_bayes()] result, derived the same way from the run's
-#' [tune::collect_metrics()] table, so a Bayesian final fit's table carries the
-#' `.iter` column that path's tables do.
+#' Returns the candidate parameter settings [nested_final_fit()]'s tuning run
+#' evaluated. It is the full-data counterpart of the candidate set each outer
+#' fold's `.inner_metrics` table describes, derived the same way, so the two
+#' can be compared directly.
 #'
-#' @param x A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
-#'
+#' @inheritParams print.nested_final_fit
 #' @return A tibble with one row per candidate scored, carrying one column per
-#'   tuned parameter plus tune's `.config` label for the candidate, and `.iter`
-#'   on a Bayesian fit. It is the distinct parameter rows of the run's
-#'   [tune::collect_metrics()] table with those labels: the same shape one
-#'   element of a result's `.inner_metrics` column reduces to when its metric
-#'   columns are dropped, so the two can be compared directly. Everything
-#'   tune wrote per metric is dropped: `.metric`, `.estimator`, `mean`, `n`,
-#'   `std_err`, and on a fit that scored a dynamic survival metric the
-#'   `.eval_time` column, so a candidate has one row here however many
-#'   evaluation times it was scored at. The times and the scores are in
-#'   `collect_metrics(extract_tune_results(x))`. A fit built from a
-#'   [nested_fit_resamples()] result scored no candidate and is refused with
-#'   condition class `nestedtune_no_tuning_run`.
+#'   tuned parameter plus tune's `.config` label, and `.iter` where the search
+#'   iterated. It is the distinct parameter rows of the run's
+#'   [tune::collect_metrics()] table: everything tune wrote per metric is
+#'   dropped (`.metric`, `.estimator`, `mean`, `n`, `std_err`, and
+#'   `.eval_time` where a dynamic survival metric was scored), so a candidate
+#'   has one row here however many evaluation times it was scored at. The
+#'   times and the scores are in `collect_metrics(extract_tune_results(x))`. A
+#'   fit that ran no tuning scored no candidate and is refused with condition
+#'   class `nestedtune_no_tuning_run`.
 #'
-#'   This is what was **scored**, not what was **asked for**. A `grid` given as
-#'   a size is expanded by tune and may reach fewer candidates than the number
-#'   requested; a candidate that failed everywhere scored nothing. See the
-#'   `.inner_metrics` discussion in [nested_tune_grid()] for the full account
-#'   of how the two records diverge, which holds here too: this record is
-#'   derived the same way.
+#' @section Scored, not asked for:
 #'
-#'   One pointer there does **not** carry over. A candidate that failed on every
-#'   inner resample is missing from this table, and on a `nested_tune_grid()`
-#'   result its failure is recorded in that object's `.notes` column. A
-#'   `nested_final_fit` has no such column. Look instead inside the tuning run
-#'   itself: `tune::collect_notes(extract_tune_results(x))`.
+#' A `grid` given as a size is expanded by tune and may reach fewer candidates
+#' than the number requested, and a candidate that failed everywhere scored
+#' nothing. [nested_tune_grid()] gives the full account of how the two records
+#' diverge under `.inner_metrics`, and it holds here too.
 #'
+#' One pointer there does not carry over. A candidate that failed on every
+#' inner resample is missing from this table, and a `nested_final_fit` has no
+#' `.notes` column to record it in. Look inside the run itself:
+#' `tune::collect_notes(extract_tune_results(x))`.
+#'
+#' @template example-setup
+#' @template example-run
+#' @template example-final
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#' set.seed(3)
-#' final <- nested_final_fit(wf, res)
-#'
 #' extract_scored_candidates(final)
 #'
 #' @seealso [extract_tune_results()], [nested_final_fit()],

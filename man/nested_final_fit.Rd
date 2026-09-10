@@ -7,127 +7,137 @@
 nested_final_fit(object, results, ..., id = NULL)
 }
 \arguments{
-\item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}: the workflow the nested run was built
-around; or a \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}, with
-\code{id} naming the workflow to fit (see \code{id}). For a grid or a racing procedure it is checked against the
-recorded grid the way \code{\link[=nested_tune_grid]{nested_tune_grid()}} checked it, so a different
-workflow is refused here rather than by tune one tuning run later. For a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result the workflow has no marker, and one
-carrying a marker is refused here with class \code{nestedtune_tuned_workflow},
-as that orchestrator refused it.}
+\item{object}{The \code{\link[workflows:workflow]{workflows::workflow()}} the nested run was built around,
+or a \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}} with \code{id} naming
+the workflow to fit. A workflow is checked against the record before
+anything is fitted.}
 
-\item{results}{The \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} or
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} whose estimate you will report for this model.
-Everything the re-run needs is read from it: the design's inner
-resampling specification, recorded on the result as the design stored it;
-the data, which every split references; and the procedure -- the tuner
-and its own arguments (\code{grid}; \code{iter}, \code{initial} and \code{objective}; or
-\code{iter} and \code{initial}) with \code{param_info}, \code{event_level}, \code{eval_time}
-and \code{select}, the \code{\link[=selection_rule]{selection_rule()}} the folds selected by, and the
-metric set. A
-\code{param_info} parameter whose range is unknown until the data is seen is
-finalized here on the full data -- every row is this model's training
-data -- where each outer fold of the nested run finalized it on that
-fold's analysis rows alone, so the final model's candidate range can
-exceed any fold's. A results
-object that carries no such record (one built by an earlier version of
-nestedtune, or from a design assembled by hand rather than by
-\code{\link[=nested_resamples]{nested_resamples()}} or \code{\link[rsample:nested_cv]{rsample::nested_cv()}}), one that is no longer a
-\code{nested_results} (an operation that added or removed rows returns a plain
-tibble), and one with no rows are each refused before any fitting, with
-condition class \code{nestedtune_bad_results}. A results object in which no
-outer fold completed is refused next, with condition class
-\code{nestedtune_no_completed_folds}: there is no estimate to report a model
-with, and \code{summary()} on the object lists the stage each fold failed at.
-That is the class \code{\link[=collect_metrics]{collect_metrics()}},
-\link[=autoplot.nested_results]{autoplot()} and \code{\link[=agreement]{agreement()}} refuse the same
-object with. A run in which some folds failed is fitted; its estimate is
-\code{\link[=collect_metrics]{collect_metrics()}}'s, with that function's partial-run warning.}
+\item{results}{The \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one
+of its siblings whose estimate you will report for this model. Everything
+the re-run needs is read from it.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored -- in particular the former \code{grid},
-\code{param_info}, \code{metrics}, \code{event_level} and \code{eval_time} arguments, which
-now come from \code{results}.}
+\item{...}{Not used; must be empty. The former \code{grid}, \code{param_info},
+\code{metrics}, \code{event_level} and \code{eval_time} arguments now come from
+\code{results}, so passing one here is an error.}
 
-\item{id}{For a \code{nested_results_set} as \code{object} (what
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} returns), the \code{wflow_id} of the workflow to
-fit; \code{results} is then left missing, since the set holds each
-workflow's record beside it, and the fit is
-\code{nested_final_fit(extract_workflow(object, id), object$result[[i]])}.
-An \code{id} naming no row is refused with class \code{nestedtune_unknown_id};
-a set given with \code{results} supplied, a set given with no \code{id}, or an
-\code{id} given with a workflow as \code{object}, with class
-\code{nestedtune_bad_final_fit_args}. \code{NULL}, the default, for a workflow.}
+\item{id}{For a \code{nested_results_set} as \code{object}, the \code{wflow_id} of the
+workflow to fit; \code{results} is then left missing. \code{NULL}, the default, for
+a plain workflow.}
 }
 \value{
 An object of class \code{nested_final_fit} with elements \code{workflow} (the
 trained workflow; the object answers \link[=predict.nested_final_fit]{predict()}
 and \code{augment()} directly, and \code{\link[=extract_workflow]{extract_workflow()}} returns the workflow
-itself), \code{selected}
-(the parameters chosen), \code{tuning} (the tuning run they were chosen from),
-\code{tuning_seed} and \code{fit_seed} (the two seeds that reproduce it), and
-\code{procedure} (the record re-run, as \code{results} carried it). From a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result, \code{selected} is an empty table, \code{tuning}
-is \code{NULL}, and \code{\link[=extract_tune_results]{extract_tune_results()}} and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}}
+itself), \code{selected} (the parameters chosen), \code{tuning} (the tuning run they
+were chosen from), \code{tuning_seed} and \code{fit_seed} (the two seeds that
+reproduce it), and \code{procedure} (the record re-run, as \code{results} carried
+it). Where nothing was tuned, \code{selected} is an empty table, \code{tuning} is
+\code{NULL}, and \code{\link[=extract_tune_results]{extract_tune_results()}} and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}}
 refuse the object with class \code{nestedtune_no_tuning_run}; its print says
 no tuning ran.
 }
 \description{
-\code{nested_final_fit()} runs the tuning procedure a nested run recorded once
-more, with the whole dataset in hand: it re-evaluates the design's inner
-resampling specification against every row, tunes with \code{\link[tune:tune_grid]{tune::tune_grid()}},
-\code{\link[tune:tune_bayes]{tune::tune_bayes()}}, one of finetune's racers or
-\code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}} under the arguments the results object
-carries,
-selects a candidate by the \code{\link[=selection_rule]{selection_rule()}} it recorded, finalizes the
-workflow, and fits it on all the data. The result is the model to deploy,
-built by the same search the estimate you report describes. On a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result there is no search to re-run: the workflow
-is fitted as given on all the data.
+\code{nested_final_fit()} runs the procedure a nested run recorded once more,
+with the whole dataset in hand. It rebuilds the inner resamples on every
+row, tunes with the recorded tuner, selects by the recorded
+\code{\link[=selection_rule]{selection_rule()}}, finalizes the workflow and fits it on all the data.
+
+What comes back is the model to deploy. It carries no performance number of
+its own: the number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results object
+you passed in, for the reason the section on what to report gives.
 }
 \details{
 The procedure a nested estimate describes is "resample this dataset by the
 inner specification, tune, select, fit", and the dataset that procedure is
-meant to be applied to is all of yours. So the final model comes from running
-it again with nothing held out: the same convention as cross-validating a
-model and then refitting on everything, one level up.
+meant for is all of yours. So the final model comes from running it again
+with nothing held out: the same convention as cross-validating a model and
+then refitting on everything, one level up.
 
-The outer folds play no part. Their selections are not pooled or voted on:
-they belong to the estimate, which describes the procedure across the
-instability those selections reveal, and not to this model.
+The outer folds play no part here. Their selections belong to the estimate,
+which describes the procedure across the instability those selections
+reveal; they are not pooled or voted on to build this model.
 }
+\section{The results object}{
+
+
+\code{results} supplies three things: the inner resampling specification the
+design stored, the data every split references, and the \code{procedure} record.
+The record names the tuner and that tuner's own arguments (\code{grid}; \code{iter},
+\code{initial} and \code{objective}; or \code{iter} and \code{initial}) along with
+\code{param_info}, \code{event_level}, \code{eval_time} and \code{select}, the
+\code{\link[=selection_rule]{selection_rule()}} the folds selected by. The metric set travels beside it,
+as \code{attr(results, "metrics")}. \code{\link[=extract_procedure]{extract_procedure()}} shows you the record.
+
+A \code{param_info} parameter whose range is unknown until the data is seen is
+finalized here on the full data, since every row is this model's training
+data. Each outer fold of the nested run finalized it on that fold's
+analysis rows alone, so this model's candidate range can be wider than any
+fold's.
+
+A run in which some folds failed is still fitted. Its estimate is
+\code{\link[=collect_metrics]{collect_metrics()}}'s, with that function's partial-run warning.
+}
+
+\section{Fitting one workflow of a set}{
+
+
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} returns a \code{nested_results_set} holding each
+workflow beside its own results. Pass the set as \code{object}, name the row
+with \code{id}, and leave \code{results} missing; the fit is then
+\code{nested_final_fit(extract_workflow(object, id), object$result[[i]])}, with
+the workflow and its record read off one row so the two cannot be
+mispaired.
+}
+
+\section{What is refused}{
+
+
+Where the record names a tuner that takes a grid, \code{object} is judged
+against the recorded grid as \code{\link[=nested_tune_grid]{nested_tune_grid()}} judged it, so a workflow
+other than the one the estimate was built around is refused here rather
+than by tune a whole tuning run later. Where nothing was tuned (see
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}), the workflow must carry no \code{\link[tune:tune]{tune::tune()}} marker,
+and one that does is refused with class \code{nestedtune_tuned_workflow}.
+
+A \code{results} object carrying no record (one built by an earlier version of
+nestedtune, or from a design assembled by hand rather than by
+\code{\link[=nested_resamples]{nested_resamples()}} or \code{\link[rsample:nested_cv]{rsample::nested_cv()}}), one that is no longer a
+\code{nested_results} (an operation that added or removed rows returns a plain
+tibble), and one with no rows are each refused before any fitting, with
+condition class \code{nestedtune_bad_results}. One in which no outer fold
+completed is refused next, with class \code{nestedtune_no_completed_folds}:
+there is no estimate to report the model with, and \code{summary()} lists the
+stage each fold failed at. That is the class \code{\link[=collect_metrics]{collect_metrics()}},
+\link[=autoplot.nested_results]{autoplot()} and \code{\link[=agreement]{agreement()}} refuse it with.
+
+An \code{id} naming no row of a set is refused with class
+\code{nestedtune_unknown_id}. A set given with \code{results} supplied, a set given
+with no \code{id}, and an \code{id} given beside a plain workflow are each refused
+with class \code{nestedtune_bad_final_fit_args}.
+}
+
 \section{What to report}{
 
 
-Report the estimate from \code{\link[=collect_metrics]{collect_metrics()}} on the results object you
-handed over -- the result of \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its siblings --
-as this model's performance. The model and the estimate come from one
-search by construction: the procedure is read from that object and cannot
-be restated here. That number estimates the k-fold test
-error of the whole tune-and-fit procedure that produced this model, measured
-on data no part of the procedure ever touched. Expect it to run slightly
-pessimistic: each outer fold trains on its analysis rows alone, so every
-model it scores is built on less data than this one. Varma and Simon (2006)
-measured a 4.2-point overshoot from that effect at n = 40, and Wilimitis and
-Walsh (2023) about 1-2\% of AUROC on 41,121 records. The offset shrinks with
+The estimate \code{\link[=collect_metrics]{collect_metrics()}} returns from the results object you handed
+over describes the whole tune-and-fit procedure that produced this model,
+measured on rows no part of that procedure ever saw, and it is the number
+to report for this model. The model has no performance number of its own,
+the metrics inside the tuning run stored on it included: those were
+computed on the resamples that chose the candidate, which makes them
+selection-time quantities, optimistically biased as a claim about this
+model, and \code{collect_metrics()} on \code{x$tuning} hands them over without saying
+so. Expect the nested estimate to run slightly pessimistic instead, since
+each outer fold trained on its analysis rows alone: Varma and Simon (2006)
+measured a 4.2-point overshoot at n = 40, and Wilimitis and Walsh (2023)
+about 1 to 2 percent of AUROC on 41,121 records. That offset shrinks with
 fold size and is not a correction to apply.
 
-The model in hand has no honest number of its own. Everything computable from
-its training data was consumed by selection or by fitting, \strong{including the
-resampling metrics inside the tuning run stored on this object}: those are
-selection-time quantities, optimistically biased as a performance claim, and
-\code{collect_metrics()} on \code{x$tuning} will hand them over without saying so. They
-are kept because they are the record of what selection saw, not because they
-describe this model.
-
-Two things the nested estimate does not say. It is marginal over selection,
-not conditional on the parameters this model happens to carry, so it is not a
-claim about this configuration specifically. And it describes new data drawn
-like your training data, not a different population, and not a model
-retrained at a different size.
+Two things the estimate does not say. It is marginal over selection rather
+than conditional on the parameters this model happens to carry, so it makes
+no claim about this configuration in particular. And it describes new data
+drawn like your training data, not a different population, and not a model
+retrained at another size.
 
 If the outer folds disagreed about the best parameters, report that too.
 }
@@ -135,74 +145,63 @@ If the outer folds disagreed about the best parameters, report that too.
 \section{Reproducibility}{
 
 
-Seed the session before the call, as elsewhere in tidymodels; there is no
-\code{seed} argument. On entry the function draws two seeds in a single
-\code{sample.int(.Machine$integer.max, 2)} call. The first covers building the
-inner resamples \emph{and} tuning; the second covers the final fit. Both are
-applied with the generator kind pinned, and both are returned on the object.
+Seed the session before the call; there is no \code{seed} argument. Two seeds
+are drawn on entry and applied with the generator kind pinned: the first
+builds the inner resamples and tunes, the second fits. Both are kept on the
+object, and the caller's generator state is put back on the way out, so two
+calls with no \code{set.seed()} between them give the same model, as repeated
+\code{tune::tune_grid()} calls do. \code{?nested_tune_grid} covers the rest,
+including what an R-side seed cannot pin.
 
-The run is reproducible by hand from those two seeds and the record
-\code{extract_procedure(fit)} returns, every value below being one that record
-holds (or, for
-\code{metrics}, \code{attr(results, "metrics")}); the tuning call is the one the
-record names, and \code{control} is the record's own -- the control the run
-was given, or tune's default, with the slots the orchestrator forces
-already applied:
+You can redo the run by hand from those two seeds and the record
+\code{\link[=extract_procedure]{extract_procedure()}} returns. Every value below comes from that record,
+except \code{metrics}, which is \code{attr(results, "metrics")}. Only the tuning line
+changes with the tuner; \code{control} is the record's own, the control the run
+was given or tune's default, with the slots this package forces already
+applied.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 inner <- <the design's `inside` specification>(data)
 control <- extract_procedure(fit)$control
-# a grid procedure: the recorded control, untouched
+# A grid search takes the recorded control untouched. So does a race,
+# ANOVA or win/loss: its own draws, the resample order under `randomize`,
+# come from the stream the tuning seed set.
 tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
   metrics = metrics, eval_time = eval_time, control = control)
-# a racing procedure, ANOVA or win/loss: the race's own draws -- the
-# resample order under `randomize` -- come from the stream the tuning
-# seed set, so the recorded `control_race()` is likewise untouched
 tuned <- tune_race_anova(object, inner, grid = grid, param_info = param_info,
   metrics = metrics, eval_time = eval_time, control = control)
 tuned <- tune_race_win_loss(object, inner, grid = grid, param_info = param_info,
   metrics = metrics, eval_time = eval_time, control = control)
-# an annealing procedure: the perturbations draw from the same stream, and
-# `control_sim_anneal()` has no seed slot, so the recorded control is
-# again untouched
+# Annealing draws its perturbations from that stream too, and
+# `control_sim_anneal()` has no seed slot, so again nothing is set.
 tuned <- tune_sim_anneal(object, inner, iter = iter, initial = initial,
   param_info = param_info, metrics = metrics, eval_time = eval_time,
   control = control)
-# a Bayesian procedure, the one branch that alters the control: the
-# Gaussian process is seeded from the tuning seed, the rule
-# nested_tune_bayes() fixes for every fold, so the recorded control --
-# which carries no seed -- takes it here, and only here
+# Bayesian optimization is the one branch that sets a slot: its Gaussian
+# process takes the tuning seed, the rule every outer fold used, and the
+# recorded control carries no seed of its own.
 control$seed <- fit$tuning_seed
 tuned <- tune_bayes(object, inner, iter = iter, initial = initial,
   objective = objective, param_info = param_info, metrics = metrics,
   eval_time = eval_time, control = control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
-  # under the recorded default select; select_by_one_std_err() or
-  # select_by_pct_loss() with the recorded orderings and limit otherwise
+  # Under the recorded default rule; select_by_one_std_err() or
+  # select_by_pct_loss() with the recorded orderings and limit otherwise.
 set.seed(fit$fit_seed, kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 fit(final, data)
 }\if{html}{\out{</div>}}
 
-A result from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} re-runs no tuning call. Both seeds
-are still drawn, so the object's seed layout is the one above; the first
-is consumed by nothing, the inner specification is not re-evaluated, and
-the whole recipe is \code{fit(object, data)} under the second seed.
+Where nothing was tuned there is no such line to redo. Both seeds are still
+drawn, so the object's seed layout is the one above, but the first is
+consumed by nothing, the inner specification is left unevaluated, and the
+whole recipe is \code{fit(object, data)} under the second seed.
 
-Building the resamples sits \emph{inside} the first seed's scope, not before it:
-constructing an \code{rset} draws from the generator, so a version that built them
-earlier would still be reproducible from the session seed but no longer from
-the two seeds above.
-
-The caller's RNG state and generator kind are restored on exit, including
-when the call errors. One consequence worth knowing: two consecutive calls
-with no \code{set.seed()} between them return identical results, exactly as
-repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
-
-This binds randomness that flows through R's generator. Engines that
-randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
-pinned by any R-side scheme, here or in tune.
+Building the resamples sits inside the first seed's scope rather than
+before it. Constructing an \code{rset} draws from the generator, so a version
+that built them earlier would still be reproducible from the session seed,
+but no longer from the two seeds above.
 }
 
 \section{The inner specification is re-evaluated}{
@@ -210,26 +209,23 @@ pinned by any R-side scheme, here or in tune.
 
 A nested design stores its \code{inside} argument as an unevaluated call, the
 nested run records it on its result, and this function evaluates it again,
-against the whole dataset, in the environment you call from, not the one
-the design was built in.
+against the whole dataset, in the environment you call from rather than the
+one the design was built in.
 
 Write it with literal arguments. \code{inside = vfold_cv(v = 5)} is re-evaluated
 identically anywhere. \code{inside = vfold_cv(v = k)} is not: if \code{k} is gone by
-the time you call this, you get an error naming the specification, and if
-some \emph{other} \code{k} is in scope you silently get a different design. Building a
-design inside a function that parameterizes its resampling is the common way
-to meet this.
+the time you call this you get an error naming the specification, and if
+some other \code{k} is in scope you silently get a different design. Building a
+design inside a function that parameterizes its resampling is the common
+way to meet this.
 }
 
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -238,15 +234,20 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
-# The estimate: what the procedure achieves.
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-collect_metrics(res)
-
-# The model: what you deploy. Report the estimate above for it.
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(3)
 final <- nested_final_fit(wf, res)
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+# The estimate: what the procedure achieves, and the number to report.
+collect_metrics(res)
+
+# The model: what you deploy.
 final
 
 predict(final, new_data = mtcars[1:3, ])
