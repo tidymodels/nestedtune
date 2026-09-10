@@ -156,6 +156,7 @@ records → M080.
 - 2026-09-10: claim audit: not owed — internal tier.
 - 2026-09-10: step-7 approval: PR #89 approved for merge.
 - 2026-09-10: PR #89 marked ready; the CI watch hit the harness ceiling with seven legs still pending, so the watcher was stopped and the approval marker removed rather than left armed. Re-running `/milestone-review M079` re-derives the merge state and waits again.
+- 2026-09-10: step-7 approval: PR #89 approved for merge, re-posed with CI green (all five R-CMD-check legs, test-coverage, build, format-suggest, both codecov checks).
 
 ## Decisions
 
