@@ -126,7 +126,7 @@ row stay where they are.
       `sitemap.xml` and `search.json` entries from the `gh-pages` branch in
       one commit; verify the live 404s and the two index files after GitHub
       Pages rebuilds.
-- [ ] T6: Run the consistency gate (`devtools::check()`, `document()` no-diff,
+- [x] T6: Run the consistency gate (`devtools::check()`, `document()` no-diff,
       `check_pkgdown()`), and update `cairn/DESIGN.md`'s Known issues entry on
       the vendored organization workflows to what survives this milestone.
 - [x] T7: Draft the reply to topepo's review comment on
@@ -154,6 +154,7 @@ row stay where they are.
 - 2026-09-09: T5 correction — the `gh-pages` commit `1275777` staged only the four deletions; the `sitemap.xml` and `search.json` edits were left unstaged and the two files still listed the removed pages. `4eb11ed` lands them: sitemap 46 -> 44 urls, search index 273 -> 269 entries.
 - 2026-09-09: T6 (partway) — `devtools::document()` produces no diff; `pkgdown::check_pkgdown()` reports no problems locally. `cairn/DESIGN.md`'s vendored-workflows Known-issues entry corrected to state that the shared-blob boundary is those three files alone and that this repository's own `pkgdown.yaml` and `R-CMD-check-hard.yaml` diverge from the r-lib templates deliberately. `NEWS.md` gains an entry for the site no longer carrying repository-internal pages. `devtools::check()` still running.
 - 2026-09-09: live site after the `gh-pages` rebuild at `4eb11ed`: `/CLAUDE.html`, `/ci-usage-baseline.html`, `/CLAUDE.md` and `/ci-usage-baseline.md` each return 404 after redirects; `sitemap.xml` holds 44 urls and `search.json` 269 entries, neither matching `CLAUDE` or `ci-usage`; `/`, `/LICENSE.html`, `/CODE_OF_CONDUCT.html`, `/CONTRIBUTING.html`, `/articles/nested-cv.html` and `/news/index.html` still return 200.
+- 2026-09-09: T6 — `devtools::check(error_on = "warning")` on the branch: Status OK, 0 errors, 0 warnings, 0 notes, 6m57s. `devtools::document()` leaves the tree clean. `pkgdown::check_pkgdown()` reports no problems.
 
 ## Decisions
 
