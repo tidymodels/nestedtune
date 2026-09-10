@@ -7,46 +7,53 @@
 selection_rule(rule = c("best", "one_std_err", "pct_loss"), ..., limit = NULL)
 }
 \arguments{
-\item{rule}{The selector, one of \code{"best"} (\code{\link[tune:select_best]{tune::select_best()}}, the
-default: the candidate with the best mean on the first metric),
-\code{"one_std_err"} (\code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}}: the simplest candidate
-within one standard error of the best) or \code{"pct_loss"}
-(\code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}}: the simplest candidate whose loss against
-the best is under \code{limit} percent).}
+\item{rule}{The selector: \code{"best"} (the default), \code{"one_std_err"} or
+\code{"pct_loss"}. The section below says what each one picks.}
 
 \item{...}{For \code{"one_std_err"} and \code{"pct_loss"}, one or more bare
 expressions ordering the candidates from simplest to most complex, as
-tune's selectors take them: parameter names, wrapped in \code{\link[dplyr:desc]{dplyr::desc()}}
-where a larger value is simpler. At least one is required for those two
-rules, and none is accepted for \code{"best"}, which \code{\link[tune:select_best]{tune::select_best()}}
-refuses. Each must be a bare name or a call, never a string or a
-number, which would order nothing; and none may be named, so a
-misspelled \code{limit} is refused rather than taken as an ordering. Each
-name must be a parameter the workflow tunes; the orchestrators check
-that at entry.}
+tune's selectors take them. At least one is required for those rules, and
+\code{"best"} accepts none.}
 
-\item{limit}{For \code{"pct_loss"} only, the acceptable loss of performance
-against the best candidate, in percent, a single non-negative number;
-left \code{NULL} it takes tune's default of 2. Refused with the other two
-rules, which have no limit.}
+\item{limit}{For \code{"pct_loss"} only, the acceptable loss against the best
+candidate, in percent, as a single non-negative number. Left \code{NULL} it
+takes tune's default of 2, and the other rules refuse it.}
 }
 \value{
-A list of class \code{selection_rule} with elements \code{rule}, the name
-given; \code{order}, the expressions in \code{...} as a list, empty for \code{"best"};
-and \code{limit}, the limit for \code{"pct_loss"} and \code{NULL} otherwise. The
-expressions are captured, not evaluated, and carry no environment, so
-the object is the same wherever it is built. Printing shows the three on
-one line.
+A list of class \code{selection_rule} with elements \code{rule}, \code{order} (the
+expressions in \code{...}, empty for \code{"best"}) and \code{limit} (\code{NULL} outside
+\code{"pct_loss"}). Printing shows the three on one line.
 }
 \description{
-Builds the object the \code{select} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} takes. It
-names one of tune's three selectors and carries what that selector needs.
-Every outer fold applies the rule to its own inner tuning run, with
-\code{metric} the first metric of the run, and the results object records the
-rule so \code{\link[=nested_final_fit]{nested_final_fit()}} applies the same one to the full-data run.
+Builds the object the \code{select} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} and its
+siblings takes. It names one of tune's three selectors and carries what that
+selector needs.
+
+Every outer fold applies the rule to its own inner tuning run, on the first
+metric of that run. The result records the rule, so \code{\link[=nested_final_fit]{nested_final_fit()}}
+selects the same way on the full data.
 }
+\section{The three rules}{
+
+
+\code{"best"} takes the candidate with the best mean on the first metric, as
+\code{\link[tune:select_best]{tune::select_best()}} does. \code{"one_std_err"} takes the simplest candidate
+within one standard error of the best, as \code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}}
+does. \code{"pct_loss"} takes the simplest candidate whose loss against the best
+stays under \code{limit} percent, as \code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} does.
+}
+
+\section{Writing an ordering}{
+
+
+An ordering is a parameter name, wrapped in \code{\link[dplyr:desc]{dplyr::desc()}} where a larger
+value is the simpler model. Each must be a bare name or a call, never a
+string or a number, which would order nothing, and none may be named, so a
+misspelled \code{limit} is refused instead of read as an ordering. Every name
+must be a parameter the workflow tunes, which the orchestrators check when
+the run starts.
+}
+
 \examples{
 selection_rule()
 

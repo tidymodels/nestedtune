@@ -23,50 +23,29 @@
 #' resampling scheme it came from, how many folds did not complete, and a
 #' pointer to [summary.nested_results()] for what the run means.
 #'
-#' Printing also says when the folds were not choosing from the same menu. A
-#' grid given as a size is expanded per fold, under that fold's own seed, so a
-#' continuous parameter leaves every fold with its own candidates, which
-#' changes how the selections [summary.nested_results()] reports should be
-#' read. The line
-#' reports each fold's candidate count and appears only when the sets actually
-#' differ.
-#'
-#' @param x A `nested_results` object from [nested_tune_grid()] or
-#'   [nested_tune_bayes()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored, so `n` and `width` must be spelled out in
-#'   full.
-#' @param n Number of rows to show, passed to the tibble printing of the outer
-#'   folds. `NULL`, the default, leaves it to tibble: every row when there are
-#'   fewer than the `print_max` option allows, and otherwise the `print_min`
-#'   option's count with a footer saying how many more there are. `Inf` shows
-#'   every fold.
-#' @param width Width of text output to generate for the rows, passed to the
-#'   tibble printing. `NULL`, the default, uses the `width` option. Columns that
-#'   do not fit are listed in the footer under their names.
+#' @inheritParams collect_metrics.nested_results
+#' @param ... Not used; must be empty, so `n` and `width` must be given by
+#'   name in full.
+#' @param n Number of fold rows to show, passed to tibble's printing. `NULL`,
+#'   the default, leaves the choice to tibble and its `print_max` and
+#'   `print_min` options; `Inf` shows every fold.
+#' @param width Width of the printed rows, passed to tibble's printing.
+#'   `NULL`, the default, uses the `width` option, and columns that do not fit
+#'   are named in the footer.
 #'
 #' @return `x`, invisibly.
 #'
+#' @section When the folds searched different candidates:
+#'
+#' A grid given as a size is expanded once per fold, under that fold's own
+#' seed, so a continuous parameter leaves every fold with candidates of its
+#' own. Printing then adds a line giving each fold's candidate count, and only
+#' then. It matters for reading the selections: folds that disagreed were not
+#' choosing from the same menu.
+#'
+#' @template example-setup
+#' @template example-run
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#'
 #' res
 #'
 #' @seealso [summary.nested_results()], [nested_tune_grid()],
@@ -142,51 +121,32 @@ print_failure_count <- function(x) {
 #' which outer folds failed and at which stage, what each fold's inner tuning
 #' selected, and the estimate across the folds that completed.
 #'
-#' The selection lines are the part nothing else in the ecosystem shows. When
-#' outer folds choose different parameters, the tuning procedure is unstable on
-#' this data: averaging the metrics hides that, so the summary marks it.
+#' The selection lines are the part nothing else in the ecosystem shows. Outer
+#' folds that chose different parameters mean the tuning procedure is unstable
+#' on this data, which averaging the metrics hides, so the summary marks it.
 #'
-#' Summarizing a run that only partly completed warns, and still returns the
-#' summary: the folds that ran are described, and the warning says the design
-#' asked for more. A run where every fold failed is the same case: it warns
-#' and still returns, describing a failed run rather than refusing to answer.
-#' That is where this differs from [collect_metrics()], which aborts when no
-#' outer fold completed.
-#'
-#' @param object A `nested_results` object from [nested_tune_grid()] or
-#'   [nested_tune_bayes()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
-#'
+#' @param object A `nested_results` from [nested_tune_grid()] or one of its
+#'   siblings.
+#' @inheritParams collect_metrics.nested_results
 #' @return
 #' `summary()` returns an object of class `summary.nested_results`: a list
-#' holding the outer resampling scheme's label, the outer design's requested
-#' and completed fold counts, the failed folds with the stage each failed at,
-#' the parameter values the completed folds selected, the candidate grid each
-#' completed fold searched, and the metric estimates averaged across them.
-#' Printing it is what most callers want; the components are there for a
-#' caller that needs a number rather than a line of text.
+#' holding the outer resampling scheme's label, the requested and completed
+#' fold counts, the failed folds with the stage each failed at, what the
+#' completed folds selected, the candidates each searched, and the metric
+#' estimates averaged over them. Printing it is what most callers want; the
+#' components are there for one that needs a number rather than a line of text.
 #'
+#' @section A run that did not finish:
+#'
+#' Summarizing a partly completed run warns and still returns the summary: the
+#' folds that ran are described, and the warning says the design asked for
+#' more. A run in which every fold failed behaves the same way, describing a
+#' failed run rather than refusing to answer. That is where this differs from
+#' [collect_metrics()], which errors when no outer fold completed.
+#'
+#' @template example-setup
+#' @template example-run
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#'
 #' summary(res)
 #'
 #' @seealso [print.nested_results()], [nested_tune_grid()],
