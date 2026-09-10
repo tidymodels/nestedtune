@@ -154,6 +154,7 @@ records → M080.
 - 2026-09-10: re-audit: AC6 (reduced) — returned one instrument-binding finding on the wording fixed at the mini gate, that a branch-head-versus-branch-point comparison promises a relation between two harness reports rather than a property of the deliverable, and turns on whether each run happens to hit `test-parallel-interrupt.R:108`'s timing flake; bounded-promise and proportionality: no finding. This is AC6's second re-audit line, so the disposition went to the user, who took the reader's repair. Neither `test-ci-workflows.R` nor `test-parallel-interrupt.R` is among the ten files `git diff --name-only b07beb3 HEAD` names, so both leave the promise by construction rather than by name.
 - 2026-09-10: T7 under the amended wording — the two quiescent runs and their comparison are the ones `/milestone-review` made on this tree this session and recorded in `## Review`: branch head `FAIL 5 | PASS 9587`, `main` at `b07beb3` `FAIL 5 | PASS 9578`, the same five items (`test-ci-workflows.R:59,:64,:65,:66` and `test-parallel-interrupt.R:108`) byte-identical across the two, so the branch head adds none.
 - 2026-09-10: claim audit: not owed — internal tier.
+- 2026-09-10: step-7 approval: PR #89 approved for merge.
 
 ## Decisions
 
