@@ -160,6 +160,8 @@ row stay where they are.
 - 2026-09-09: review — all seven criteria executed with fresh evidence on head `d615311`; consistency gate clean (`cairn_validate` exit 0, `devtools::check()` Status OK, `document()` no diff, `check_pkgdown()` no problems).
 - 2026-09-09: review — three fresh-context lenses; [S] blame-history and [S] prior-review found no defect, [O] diff-bug returned fourteen findings. Six fixed at the gate (led by the artifact hop dropping `docs/.nojekyll`, confirmed against run 34426967821's artifact and `gh-pages` history), three routed to a new candidate row, five rejected with reason. No finding demonstrated an acceptance criterion failing, so the return floor did not fire.
 - 2026-09-09: review — the new candidate row put `cairn/ROADMAP.md` over its 24,000-byte budget; the widest rows were compressed in this same commit, back to 23,945 bytes over 53 lines.
+- 2026-09-09: review — PR conversation read on [#88](https://github.com/tidymodels/nestedtune/pull/88): no reviews, no conversation comments, no unresolved review threads.
+- 2026-09-09: step-7 approval: PR #88 approved for merge. The user also approved posting the drafted reply to topepo on [#30](https://github.com/tidymodels/nestedtune/pull/30) after the merge.
 
 ## Decisions
 
