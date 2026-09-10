@@ -140,6 +140,7 @@ already qualifies per panel (`R/nested-results-plot.R:249`) → unchanged. A
 - 2026-09-09: review — PR #87 opened as a draft; AC1-AC5 executed with fresh evidence and ticked; `cairn_validate` exit 0 and the r-package consistency gate clean; three fresh-context lenses returned 14 findings (13 [O], 1 [S], 0 [S]), 6 fixed on the branch, 1 dispositioned to a candidate row, 7 rejected with reasons, all logged in the Review section; no return-floor finding.
 - 2026-09-09: step-7 approval: PR #87 approved for merge.
 - 2026-09-09: CI wait on PR #87 hit the harness ceiling with 7 of 9 checks still pending (`format-suggest` and `pkgdown` green); watcher stopped, no merge made, resume via /milestone-review M077.
+- 2026-09-09: resume — PR #87 OPEN, every criterion ticked against its evidence and the approval on record, so route (c): default branch unmoved and the branch already pushed, PR conversation re-read empty, all 11 checks green, step-7 approval: PR #87 approved for merge.
 
 ## Decisions
 
@@ -334,3 +335,4 @@ test files, `devtools::document()` no diff beyond the regenerated
 
 PR conversation on #87, read once before the merge gate: no reviews, no
 conversation comments, no unresolved review threads.
+Re-read at the resumed gate: still empty on all three surfaces.
