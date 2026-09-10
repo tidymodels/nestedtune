@@ -1,0 +1,104 @@
+# Watches vctrs' development branch, because one invariant of this package
+# rests on a generic vctrs marks experimental.
+#
+# `vec_cbind_frame_ptype.nested_results()` (R/nested-results.R) is a method on
+# `vctrs::vec_cbind_frame_ptype()`, which vctrs documents as experimental. If
+# that generic is renamed, removed or given different semantics upstream, a
+# `vec_cbind()` on a results object silently stops restoring the class, and
+# nothing in a released-vctrs matrix would notice until the change reached CRAN.
+# This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
+# against it, so the break surfaces on the day it lands upstream.
+#
+# It is NOT a gating check. It reports on another project's unreleased branch,
+# so a red run here is news rather than a reason this repository's own work
+# cannot merge; it is deliberately absent from the default branch's required
+# checks.
+#
+# The `paths-ignore` list meets the same test the other workflows' copies meet:
+# a commit touching only `cairn/**`, `CLAUDE.md` or `.claude/**` changes nothing
+# the suite can notice. It is spelled out under both triggers because GitHub
+# Actions does not resolve YAML anchors in workflow files; `.github/ci-usage.py`
+# reads every copy back separately -- both triggers here and both in every other
+# workflow carrying them -- and exits non-zero if any two disagree.
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+  pull_request:
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+
+name: devel-vctrs.yaml
+
+permissions: read-all
+
+# See the matching block in R-CMD-check.yaml. Keyed on the workflow as well as
+# the ref, so cancelling a superseded run of this leg never touches a check run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+
+jobs:
+  test-devel-vctrs:
+    runs-on: ubuntu-latest
+
+    # One job cap rather than R-CMD-check.yaml's two scopes: this leg runs no
+    # `R CMD check`, so there is no check step to bound separately. Sized from
+    # the ubuntu release leg of R-CMD-check.yaml, whose job measured 23m42s end
+    # to end, 22m30s of it in the check step (run 34522794223, 2026-09-10).
+    # This leg drops that check's build and vignette phases and adds a
+    # from-source build of vctrs, so its own time is a different figure -- the
+    # comment carries the release leg's until this leg has been measured.
+    timeout-minutes: 45
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # See R-CMD-check.yaml: test files run in parallel, one worker per core,
+      # and this leg runs on ubuntu alone (4 vCPUs). Unset, testthat would use 2.
+      TESTTHAT_CPUS: 4
+      # `test_local()` does not set this the way `devtools::test()` does, and
+      # the suite's daemon and timing tests skip without it.
+      NOT_CRAN: true
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::testthat, any::pkgload
+          needs: check
+
+      # After the dependency install, so the released vctrs it pulls in as an
+      # Import is overwritten rather than installed on top of the development
+      # one.
+      - name: Install vctrs from its development branch
+        run: pak::pak("r-lib/vctrs@main")
+        shell: Rscript {0}
+
+      # The suite's verdict is about whichever upstream commit this run got, so
+      # the run's own log has to name it -- a red run read months later is
+      # unreadable without it.
+      - name: Record which vctrs this run tested against
+        run: |
+          desc <- utils::packageDescription("vctrs")
+          for (field in c("Version", "RemoteRef", "RemoteSha", "Packaged")) {
+            cat(field, ": ", format(desc[[field]]), "\n", sep = "")
+          }
+        shell: Rscript {0}
+
+      - name: Run the test suite against it
+        run: |
+          pkgload::load_all(".", quiet = TRUE)
+          testthat::test_local(stop_on_failure = TRUE)
+        shell: Rscript {0}

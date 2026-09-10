@@ -7,8 +7,8 @@
 # never used to avoid accidentally restoring a cache containing a suggested
 # dependency.
 #
-# The `paths-ignore` list is the same one R-CMD-check.yaml, test-coverage.yaml
-# and pkgdown.yaml carry, and meets the same test: a commit touching only
+# The `paths-ignore` list is the same one every other workflow carrying the
+# filter declares, and meets the same test: a commit touching only
 # `cairn/**`, `CLAUDE.md` or `.claude/**` changes nothing `R CMD check` sees.
 # It is spelled out under both triggers because GitHub Actions does not resolve
 # YAML anchors in workflow files; `.github/ci-usage.py` reads every copy back

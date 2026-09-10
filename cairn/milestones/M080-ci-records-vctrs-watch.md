@@ -94,7 +94,7 @@ dependency cache → its own row. The review remainders → M079.
       `pkgdown.yaml`; this one survived. Two further copies of the same figure
       — `stress-daemon-tests.yaml:43` and `pkgdown.yaml:69` — are corrected
       with it.
-- [ ] T4: Add the devel-vctrs leg: install vctrs from `r-lib/vctrs@main`, run
+- [x] T4: Add the devel-vctrs leg: install vctrs from `r-lib/vctrs@main`, run
       the package's test suite, trigger on `push` and `pull_request` with the
       same `paths-ignore` the other four legs carry, and give the job a cap
       sized from the release leg's measured time.
@@ -136,6 +136,8 @@ dependency cache → its own row. The review remainders → M079.
 
 - 2026-09-10: implement gate widened Scope In and T3 from one stale cap cross-reference to three, the two siblings found while writing T2 crediting R-CMD-check's check step with the same 20 minutes; no criterion changed wording and no task was added.
 - 2026-09-10: T3 — all three comments now state 30 minutes, 40 on windows, the figure `R-CMD-check.yaml:176` declares. `R-CMD-check.yaml:108`'s 20-minute mention is a past cap that killed a build, not a copy of a live one, and stays.
+
+- 2026-09-10: T4 — `.github/workflows/devel-vctrs.yaml` installs vctrs from `r-lib/vctrs@main` after the dependency install, records the version and remote sha it got, and runs `testthat::test_local(stop_on_failure = TRUE)` under `NOT_CRAN` and `TESTTHAT_CPUS: 4`; `push` and `pull_request` carry the same `paths-ignore`, and `read_paths_ignore()` now reports five workflows. Job cap 45, derived in the file from the ubuntu release leg's measured 23m42s (run 34522794223); this leg's own time is measured at T5. Four sibling header comments enumerated the filter-carrying workflows by name and counted the copies, which adding a fifth falsified, so each now points at "every other workflow carrying the filter" instead. The profile's divergence list and `paths-ignore` sentence follow at T6.
 
 ## Decisions
 
