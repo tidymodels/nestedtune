@@ -1,13 +1,13 @@
 # M079: The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2
 - **Resolves:** —
 - **Surface tier:** internal — test files, developer benchmark scripts, and code comments, none of which any consumer of the package reaches.
-- **Branch/PR:** —
+- **Branch/PR:** `m079-review-remainders`
 
 ## Goal
 
@@ -54,7 +54,11 @@ records → M080.
 - [ ] AC5: A two-run invocation of `benchmarks/profile-tests.R` and of
       `benchmarks/profile-tests-parallel.R` each emits exactly one `run 1/2:`
       count line.
-- [ ] AC6: `Rscript -e 'devtools::test()'` clean.
+- [ ] AC6: `Rscript -e 'devtools::test()'` reports no failure and no error
+      other than the four `tests/testthat/test-ci-workflows.R` already
+      reports at the branch point (`b07beb3`) — failures at lines 59, 64 and
+      65 and an error at line 66, all from `job_uses()` finding no job named
+      `pkgdown` in `pkgdown.yaml`, which M78 split into `build` and `deploy`.
 
 ## Coverage
 
@@ -67,27 +71,27 @@ records → M080.
 
 ## Tasks
 
-- [ ] T1: Restore the branch point's `control_bayes(allow_par = TRUE, seed =
+- [x] T1: Restore the branch point's `control_bayes(allow_par = TRUE, seed =
       999L)` run and its identity assertion to the merged block at
       `test-nested-tune-bayes-results.R:248-289`. Prove the assertion able to
       fail: revert the package's seed-forcing line once, record the failure's
-      condition class and message in the Review section, restore the line.
-- [ ] T2: Re-read `helper-time-budget.R`'s ledger after T1's insertion — its
+      condition class and message in the work log, restore the line.
+- [x] T2: Re-read `helper-time-budget.R`'s ledger after T1's insertion — its
       rows address call sites by `file:line`, so an insertion above a budgeted
       call renumbers them — and sum the file's declared bounds against the
       step cap before checking T1 off.
 - [ ] T3: Fix the naming at `helper-parallel.R:224-225`, where records are
       ordered by `order(pids)` and named by `sort(pids)`. Add a fixture case
-      whose answers include one with no integer `pid`; record in the Review
-      section both the aligned names the fixed helper yields and the
-      misalignment the pre-change helper yields on the same fixture.
+      whose answers include one with no integer `pid`; record in the work log
+      the aligned names the fixed helper yields, beside what the pre-change
+      helper yields on the same fixture.
 - [ ] T4: Cut the second build of the fixed-workflow hand call at
       `test-nested-workflow-map-oracles.R:22-29`. Read the build count off the
-      serial fixture-cache report's `requests` column under
+      serial fixture-cache report's `builds` column under
       `TESTTHAT_PARALLEL=FALSE`, never off a source comment, and quote that
-      column in the Review section.
+      row in the work log.
 - [ ] T5: Read each of these five comment sites against the code under it and
-      correct what has drifted, quoting each reading in the Review section:
+      correct what has drifted, quoting each reading in the work log:
       `benchmarks/time-examples.R:1,27` ("AC7", renumbered to AC6 at M74's
       re-cut); `test-nested-tune-bayes-oracles.R:431-433` (the block builds
       its own cache entry, so "the one the default oracle above built" is
@@ -101,13 +105,21 @@ records → M080.
 - [ ] T6: Remove the second, duplicate per-run count print from
       `benchmarks/profile-tests.R:130-140` and from
       `benchmarks/profile-tests-parallel.R:205-216`, keeping the in-loop print.
-- [ ] T7: `Rscript -e 'devtools::test()'` clean.
+- [ ] T7: `Rscript -e 'devtools::test()'`, with no failure and no error
+      outside the four `test-ci-workflows.R` carries at the branch point.
 
 ## Work log
 
 - 2026-09-10: created by /milestone-plan; absorbs the M74-remainders candidate row, which graduates when this milestone completes.
 - 2026-09-10: criteria audit ran in reduced mode (internal tier), fresh [O] reader; returned five findings on this milestone's criteria — four instrument-binding (AC1-AC4 each bolted a mutation demo, a before/after comparison, an evidence-provenance rule or a mandated quotation onto a deliverable promise) and one bounded-promise (AC5 quantified over source lines its procedure could not reach); all five fixed at the gate, the demonstrations moving into T1, T3 and T4 and AC5 narrowing to what the two-run invocation settles.
 - 2026-09-10: plan gate chose restoring the dropped `seed = 999L` assertion over widening an existing block's control coverage because the branch point ran exactly this pair and nothing else in `tests/` mentions 999; falsified by evidence that an overwritten explicit seed is already asserted at another site.
+- 2026-09-10: minor amendment — T1, T3, T4 and T5 said to record their demonstrations in the `## Review` section, which tracking-rules reserves to `/milestone-review`; the four now record in the work log. T4 also said the fixture-cache report's `builds` count is its `requests` column; corrected to `builds`, `requests` counting cache hits rather than builds.
+- 2026-09-10: gate — AC2's naming defect is latent, not live: `order()`'s `na.last = TRUE`, `sort()`'s NA drop and `names<-`'s NA padding cancel, so the pre-change helper already aligns on every NA fixture tried (pids 30,NA,20 / NA,30,20 / 20,30,NA / NA,NA,20 / 20,20,NA all name in true pid order). User chose to make the alignment true by construction and pin it with a fixture, AC2 unchanged, and to leave the no-pid record's name missing rather than give it a placeholder string.
+- 2026-09-10: T1 — restored the `control_bayes(allow_par = TRUE, seed = 999L)` run and `expect_identical(forced, plain)` to the merged block; file 64 pass / 0 fail. Proved able to fail by deleting `control$seed <- NULL` from `effective_control()` (`R/tuner.R:274`) once: class `expectation_failure`, message "Expected `forced` to be identical to `plain`. Differences: `attr(actual, 'procedure')$control$seed`: 999 / `attr(expected, 'procedure')$control$seed`: 1" — 999 named, so the failure is the explicit-seed one; line restored, `git diff R/tuner.R` empty.
+- 2026-09-10: T2 — `helper-time-budget.R`'s ledger addresses only `test-parallel-*.R` and `helper-parallel.R` call sites, so T1's insertion in `test-nested-tune-bayes-results.R` renumbers no row; `test-suite-hygiene.R` re-reads the ledger and sums the per-file bounds as tests, run under T7.
+
+- 2026-09-10: substantive amendment at a mini gate — AC6 and T7 narrowed from "`devtools::test()` clean" to "no failure and no error outside the four `test-ci-workflows.R` items the branch point already carries". Those four (failures at :59, :64, :65, an error at :66) fail on `main` at `b07beb3`, from `job_uses()` finding no job named `pkgdown` after M78 split that workflow into `build` and `deploy`; `.github/` being `.Rbuildignore`d hides them from `R CMD check`. Neither M079's scope nor M080's covers that file, so the repair got its own ROADMAP candidate row rather than widening M079.
+- 2026-09-10: re-audit: AC6 (reduced) — returned one bounded-promise finding, that `devtools::test()` separates failures from errors and line 66 is an error, so the drafted wording left the whole error class unbounded; fixed at the gate by binding both classes. Proportionality and instrument questions: no finding.
 
 ## Decisions
 

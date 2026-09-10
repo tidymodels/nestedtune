@@ -287,6 +287,25 @@ test_that("forced slots win, and a control built inline draws nothing the caller
   set.seed(20)
   invisible(tune::control_bayes())
   expect_false(identical(.Random.seed, before))
+
+  # The inline run leaves `seed` at the default, so it says nothing about a
+  # seed the caller SET: a control whose `seed` is a number the package would
+  # never draw is the case that shows the overwrite, and it is asserted
+  # nowhere else in the suite (M79). `effective_control()` drops the slot from
+  # the record and `tuner_control()` puts the fold's tuning seed back at the
+  # call, so 999 reaches neither the proposals nor the `procedure` attribute
+  # and the whole object still equals the no-control run.
+  set.seed(20)
+  forced <- nested_tune_bayes(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    param_info = p,
+    metrics = ms,
+    control = tune::control_bayes(allow_par = TRUE, seed = 999L)
+  )
+  expect_identical(forced, plain)
 })
 
 test_that("the procedure is part of the run's record", {
