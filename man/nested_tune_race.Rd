@@ -32,35 +32,12 @@ nested_tune_race_win_loss(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused at
-entry, before any fold runs, with condition class
-\code{nestedtune_untuned_workflow}: there is nothing for the inner loop to
-search, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a fixed workflow on the same
-nested design instead.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}; a workflow with no marker is refused, and
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
 
-\item{resamples}{A nested resampling design, from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}: a data frame whose \code{splits} column holds one
-\code{rsplit} per outer fold, whose \code{inner_resamples} column holds one \code{rset}
-with at least one row per outer fold, and whose every other column
-labels the outer folds. A label column must be named \code{id}, or \code{id}
-followed by a digit from 1 to 9 (the names rsample and tune read id
-columns by), and hold character or factor values; taken together, the
-label columns must give every outer fold a distinct label with no \code{NA}.
-Inside each inner \code{rset}, every element of its \code{splits} column is an
-\code{rsplit}; all of a fold's inner splits carry one frame, either the outer
-split's own data frame (what \code{\link[=nested_resamples]{nested_resamples()}} builds) or that split's
-analysis set (what \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds); and an inner split
-carrying the outer data frame indexes, in its \code{in_id} and any non-\code{NA}
-\code{out_id}, only rows the outer split's \code{in_id} holds, so that no inner
-analysis or assessment set reaches a row the outer fold holds out. A
-design breaking any of this, or using a bootstrap for the outer loop, is
-refused at the call, before anything is fitted, with condition class
-\code{nestedtune_bad_design} and every offending row, column, inner split or
-index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned (a specification that
-produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
-design assembled by hand can index rows its outer fold never sees.}
+\item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold, meeting the requirements
+the section on nested designs states.}
 
 \item{...}{A control object as \code{control} -- what \code{\link[finetune:control_race]{finetune::control_race()}}
 returns -- and nothing else. It reaches the inner race in every fold, and
@@ -69,18 +46,8 @@ section on differences from finetune says what becomes of each slot.
 Any other name is an error, as is an unnamed value.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. Passed unchanged to \code{\link[tune:tune_grid]{tune::tune_grid()}} on
-every outer fold, so a restricted range restricts the grid every fold
-searches. A parameter whose range is unknown until the data is seen
-(\code{mtry()}, or a \code{min_n()} finalized by row count) is finalized by tune
-on the outer fold's analysis rows -- never on the rows that fold holds
-out -- so on a \code{\link[=nested_resamples]{nested_resamples()}} design the inner call receives the
-fold's inner resamples re-pointed at its analysis set rather than the
-design's own \code{inner_resamples} element, which indexes the whole data.
-A design from \code{\link[rsample:nested_cv]{rsample::nested_cv()}} already carries the analysis set
-and is passed as it is, as is the design's element under an outer split
-that repeats a row (an evaluated \code{\link[rsample:manual_rset]{rsample::manual_rset()}}), where the
-re-pointing is ambiguous. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.}
+derive one from the workflow; the section on finalizing a parameter range
+says where a range that depends on the data is finalized.}
 
 \item{grid}{A data frame of candidate parameter values, or a positive whole
 number giving the size of a grid to generate: the design the race is
@@ -89,52 +56,20 @@ the burn-in resamples and only the survivors after that. A data frame is
 checked against the workflow before anything is fitted, as on
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}.}
 
-\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to use tune's defaults
-for the model's mode. The first metric in the set is the one \code{select}
-selects the inner candidate on.}
+\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
+set of metrics.}
 
-\item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which level
-of a two-class outcome factor is the event. It reaches both loops: the
-inner tuning run, where it decides which candidate is selected, and the
-outer scoring fit, where it decides what the reported metrics mean.
-Metrics that do not distinguish the two levels -- accuracy, \code{roc_auc},
-\code{brier_class} -- are unaffected by it; \code{sens}, \code{spec}, \code{precision} and
-their relatives are not. Ignored for a regression model, as it is in tune.}
+\item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which
+level of a two-class outcome is the event, for the inner tuning run and
+the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
-regression model, or \code{NULL} (the default) to leave the choice to tune. It
-reaches every tune call whose answer depends on it, so a dynamic or
-integrated survival metric -- \code{brier_survival()}, \code{roc_auc_survival()} and
-their relatives -- is measured at the times you name. It is ignored, with
-a warning from tune, whenever the metric set has no metric that reads it.
-tune keys that warning on the metrics rather than on the model's mode: a
-set with no survival metric draws one saying the argument is only used
-for censored regression, and a censored regression model scored only by a
-static metric such as \code{concordance_survival()} draws a different one,
-saying it is only used for dynamic or integrated survival metrics.
+regression model, or \code{NULL} (the default) to leave the choice to tune;
+the section on evaluation times says what this package refuses.}
 
-Refused here, ahead of tune: anything that is not numeric, an empty
-vector, and any element that is missing, negative or not finite. tune
-treats those unevenly, and only once a metric reads the times -- a
-character value that reads as a number, such as \code{"1"}, is coerced with
-\code{as.numeric()} and accepted, one that does not becomes missing; a
-missing, negative or infinite element is dropped with a warning; and an
-empty vector, or one that dropping has emptied, aborts -- and this package
-refuses them all at entry, before a whole run is paid for. Zero, repeated
-times and times out of order are accepted and passed on untouched, since
-tune normalizes those itself; a repeated time draws tune's warning that 0
-inappropriate evaluation time points were removed, once per tune call.}
-
-\item{select}{A \code{\link[=selection_rule]{selection_rule()}}: which of tune's three selectors each
-outer fold picks its candidate with, on that fold's inner tuning run and
-the first metric. The default, \code{selection_rule("best")}, is
-\code{\link[tune:select_best]{tune::select_best()}}; \code{selection_rule("one_std_err", ...)} and
-\code{selection_rule("pct_loss", ..., limit = )} are
-\code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}} and \code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} with
-the parameter orderings in \code{...}. Every name an ordering uses must be a
-parameter \code{object} tunes; anything but a \code{selection_rule()} is refused
-at entry. The rule is recorded, so \code{\link[=nested_final_fit]{nested_final_fit()}} applies the same
-one.}
+\item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming which of tune's selectors each
+outer fold picks its candidate with, on its own inner run and the first
+metric; the default is \code{\link[tune:select_best]{tune::select_best()}}.}
 }
 \value{
 An object of class \code{nested_results}, one row per outer fold, with

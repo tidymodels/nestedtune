@@ -15,3 +15,4 @@
 ^README\.Rmd$
 ^vignettes/articles$
 ^logo$
+^man-roxygen$

@@ -18,29 +18,9 @@ nested_fit_resamples(
 with \code{\link[tune:tune]{tune::tune()}}: every value fixed, as \code{\link[tune:fit_resamples]{tune::fit_resamples()}} takes
 it. A workflow carrying a marker is refused at entry.}
 
-\item{resamples}{A nested resampling design, from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}: a data frame whose \code{splits} column holds one
-\code{rsplit} per outer fold, whose \code{inner_resamples} column holds one \code{rset}
-with at least one row per outer fold, and whose every other column
-labels the outer folds. A label column must be named \code{id}, or \code{id}
-followed by a digit from 1 to 9 (the names rsample and tune read id
-columns by), and hold character or factor values; taken together, the
-label columns must give every outer fold a distinct label with no \code{NA}.
-Inside each inner \code{rset}, every element of its \code{splits} column is an
-\code{rsplit}; all of a fold's inner splits carry one frame, either the outer
-split's own data frame (what \code{\link[=nested_resamples]{nested_resamples()}} builds) or that split's
-analysis set (what \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds); and an inner split
-carrying the outer data frame indexes, in its \code{in_id} and any non-\code{NA}
-\code{out_id}, only rows the outer split's \code{in_id} holds, so that no inner
-analysis or assessment set reaches a row the outer fold holds out. A
-design breaking any of this, or using a bootstrap for the outer loop, is
-refused at the call, before anything is fitted, with condition class
-\code{nestedtune_bad_design} and every offending row, column, inner split or
-index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned (a specification that
-produces no \code{rset}, or an empty one, gives a design that cannot be run,
-where \code{\link[=nested_resamples]{nested_resamples()}} refuses one at construction), and because a
-design assembled by hand can index rows its outer fold never sees.}
+\item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold, meeting the requirements
+the section on nested designs states.}
 
 \item{...}{A control object as \code{control} -- what
 \code{\link[tune:control_resamples]{tune::control_resamples()}} returns -- and nothing else. Two of its
@@ -58,28 +38,8 @@ level of a two-class outcome factor is the event, as on
 outer scoring fit, where it decides what the reported metrics mean.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
-regression model, or \code{NULL} (the default) to leave the choice to tune. It
-reaches every tune call whose answer depends on it, so a dynamic or
-integrated survival metric -- \code{brier_survival()}, \code{roc_auc_survival()} and
-their relatives -- is measured at the times you name. It is ignored, with
-a warning from tune, whenever the metric set has no metric that reads it.
-tune keys that warning on the metrics rather than on the model's mode: a
-set with no survival metric draws one saying the argument is only used
-for censored regression, and a censored regression model scored only by a
-static metric such as \code{concordance_survival()} draws a different one,
-saying it is only used for dynamic or integrated survival metrics.
-
-Refused here, ahead of tune: anything that is not numeric, an empty
-vector, and any element that is missing, negative or not finite. tune
-treats those unevenly, and only once a metric reads the times -- a
-character value that reads as a number, such as \code{"1"}, is coerced with
-\code{as.numeric()} and accepted, one that does not becomes missing; a
-missing, negative or infinite element is dropped with a warning; and an
-empty vector, or one that dropping has emptied, aborts -- and this package
-refuses them all at entry, before a whole run is paid for. Zero, repeated
-times and times out of order are accepted and passed on untouched, since
-tune normalizes those itself; a repeated time draws tune's warning that 0
-inappropriate evaluation time points were removed, once per tune call.}
+regression model, or \code{NULL} (the default) to leave the choice to tune;
+the section on evaluation times says what this package refuses.}
 }
 \value{
 An object of class \code{nested_results}, one row per outer fold, with
