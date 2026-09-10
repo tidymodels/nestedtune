@@ -343,3 +343,76 @@ before evidence was gathered. PR #89 already open; `gh pr create` skipped.
   pass 9587 | fail 4 | skip 0 | WALL 225.0 s`. `grep -c '^run 1/2:'` returns 1
   on each log. Each script's other `run 1/2` line is the progress line, which
   carries no colon and no counts, and each run's `run 2/2:` line follows.
+
+**Consistency gate — clean, both halves.** Universal: `cairn_validate.py` exit
+0, every check PASS, 18 `references staleness` advisories and no `release
+window` advisory; no `DESIGN.md` principle changed, so `cairn_impact.py` was
+skipped. Toolchain (`r-package` profile): `devtools::document()` left the tree
+unchanged; `pkgdown::check_pkgdown()` reported no problems;
+`devtools::check()` `Status: OK`, 0 errors / 0 warnings / 0 notes in 8m 58s;
+`air format --check` clean on every `.R` file the branch touches. `README.Rmd`
+and `README.md` last changed in the same commit (`28c3b14`) and neither is in
+this diff; `NEWS.md` needs no entry, the tier being internal.
+
+**Independent review — three-lens fan-out**, fresh context, distinct evidence
+bases. The two [S] lenses converged on the [O] lens's top items; the merged,
+de-duplicated list is below, ranked as the [O] lens ranked it. Round 1's six
+findings are all present in it.
+
+- **[S] blame-history: 5 findings**, every one a duplicate of the merged list.
+  Its clean list: T6's removal preserves the in-loop reporting M76 added, T3's
+  reordering contradicts no recorded decision, and the AC7→AC6 and BC12
+  site-naming fixes match M74's recorded follow-ups O6 and O11.
+- **[S] prior-review: 5 findings**, all duplicates, each rooted in an archived
+  M74/M76 review lesson. GitHub probe: one real inline comment repo-wide, on a
+  workflow file this branch does not touch, and no inline comments on the PRs
+  that touched these files — no thread walk warranted. It declined to flag
+  M079's supersession of O4 and O7 as a contradiction, reading it as a
+  documented reversal under IP4.
+- **[O] diff-bug: 15 findings.**
+
+  1. `helper-orchestration.R:103-108` — `fit_resamples_results()` still says
+     "the recipe step id is drawn from the stream", contradicting the branch's
+     own new comment at `:78-80`; the first `set.seed(seed)` at `:110` it
+     justifies is now inert. Verified: `fixed_workflow()` carries `id =
+     "pca_fixed"`, `det_nested()` reseeds itself and `reg_metrics()` draws
+     nothing.
+  2. AC6 as amended binds failures in two test files in practice — of the ten
+     files the diff names, five are outside `tests/`, and testthat attributes a
+     failure to the test file rather than to a helper.
+  3. `helper-orchestration.R:2598-2604` — `wset_results()`'s "the recipe step
+     ids are drawn from the stream" and its `force(data)` rationale hold for
+     `wset_two()`, which still draws through `det_workflow()` (verified: no `id
+     =` there), and not for `wset_fixed()`.
+  4. `helper-orchestration.R:2535-2536` — `plain_workflow()`'s "no recipe step
+     id drawn from the stream" contrast no longer distinguishes it from
+     `fixed_workflow()`.
+  5. AC2 promises a property of `daemon_state_snapshot()`, but the new block
+     drives `name_by_pid()` directly; dropping the call at `helper-parallel.R:219`
+     would leave the block green. The naming logic itself the lens traced and
+     found correct.
+  6. `helper-time-budget.R:61-62` — "the ledger's only rows carrying a `times`
+     above 1" is a universal claim the cited `grep 'times = 2L'` cannot check;
+     it misses a `times = 3L` row and self-matches the comment. The substance is
+     accurate (verified: `:767` and `:847`, both BC12's, are the only rows above
+     the default).
+  7. `cairn/ROADMAP.md:4` — the hygiene stamp claims 23,460 bytes; `wc -c`
+     reports 23,327.
+  8. `test-nested-tune-bayes-results.R:296-307` — the restored run is live and
+     un-memoised, paying back suite time M74 spent, with no seconds recorded.
+     The assertion's logic the lens traced and found sound.
+  9. `test-suite-hygiene.R` — the new block is the file's first that reads no
+     source, and the header still enumerates only the parse-token rules.
+  10. AC3's "the five `fn` blocks" undercounts; `MAP_FNS` holds six and the
+      promise holds a fortiori.
+  11. `helper-orchestration.R:74-78` pins `2 builds / 6 requests` and `1 / 6`,
+      whose 6 is `length(MAP_FNS)` and drifts if an orchestrator is added.
+  12. The `test-parallel-interrupt.R:108` flake got no candidate row, though the
+      work log said it was worth one (verified: no ROADMAP row mentions it).
+  13. AC5 was unticked with no Review evidence when the lens read the file —
+      resolved since; AC5's evidence is above.
+  14. `benchmarks/profile-tests.R:128` keeps a `cat("\n")` whose counterpart the
+      parallel script lost with the removed block.
+  15. `helper-parallel.R:227-229`'s "Were `order()`'s `na.last` ever `FALSE`"
+      describes an argument as if it were a setting; the mechanism it states is
+      correct.
