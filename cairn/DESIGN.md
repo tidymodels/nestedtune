@@ -421,6 +421,19 @@ execution in RR01, and tune 1.x seeded differently (D-012).
 
 ## Known issues
 
+- Two rough edges in the figures, accepted at M077's gates and recorded as
+  deliberate in `R/nested-results-plot.R`. `panel_breaks()` sees only a
+  panel's limits, and on ggplot2 4.0.3 a two-panel `free_y` figure gets
+  byte-identical limits on every call, so `panel_owner()` cannot tell two
+  parameters spanning one interval apart and breaks the tie first-in-order,
+  one parameter taking the other's whole-number ticks; identifying a panel
+  apart from its limits reaches the single view too.
+  `set_short_average_line()` takes `k` from every workflow but counts only
+  those with per-fold rows, so a three-workflow set where two failed every
+  fold and the survivor is short reads "1 of 3 workflows averages...".
+  `milestones/archive/M077-set-view-coverage.md` and git own the gates'
+  measurements and line references.
+
 - A `nested_results` altered by hand, or one saved before M38's label record,
   is not refused at entry, and its readers may fail with an unclassed error.
   `check_results_record()` (`R/checks.R`) tests the class, the `inside` and
