@@ -1688,11 +1688,11 @@ check_workflow_identity <- function(
 # A preprocessor of another kind is reported as the kind, since nothing
 # below it is comparable.
 identity_difference <- function(recorded, given) {
-  rk <- recorded$preprocessor$kind
-  gk <- given$preprocessor$kind
+  rk <- preprocessor_kind_label(recorded$preprocessor$kind)
+  gk <- preprocessor_kind_label(given$preprocessor$kind)
   if (!identical(rk, gk)) {
     return(cli::format_inline(
-      "The preprocessor differs: a {rk} was recorded, and a {gk} was given."
+      "The preprocessor differs: {rk} was recorded, and {gk} was given."
     ))
   }
   d <- first_difference(recorded, given)
@@ -1724,6 +1724,16 @@ identity_difference <- function(recorded, given) {
     },
     "."
   ))
+}
+
+preprocessor_kind_label <- function(kind) {
+  switch(
+    kind,
+    formula = "a formula",
+    variables = "a variables selection",
+    recipe = "a recipe",
+    paste("a", kind)
+  )
 }
 
 first_difference <- function(recorded, given, path = character()) {
