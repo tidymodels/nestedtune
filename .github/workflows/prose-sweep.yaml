@@ -1,0 +1,71 @@
+# The prose sweep as a check a pull request meets: every gating mode of
+# `benchmarks/sweep-prose.R` over the guides, README.Rmd and the roxygen
+# sources, red on any hit. The same six invocations run locally from
+# tests/testthat/test-sweep-prose.R; under `R CMD check` that test skips,
+# because the built tarball carries no `benchmarks/`, so this workflow is the
+# leg that gates a PR opened without a local test run.
+#
+# See the matching block in R-CMD-check.yaml; every copy of this list must stay
+# identical, which `.github/ci-usage.py` enforces by comparing each block it
+# parses against the others and refusing to run when they differ.
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+  pull_request:
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+  # `push` above fires on the default branch alone and a PR opens at the
+  # merge gate, so a branch is swept on demand: `gh workflow run
+  # prose-sweep.yaml --ref <branch>`. The dispatch is how the planted-defect
+  # runs the M088 work log records were made.
+  workflow_dispatch:
+
+name: prose-sweep.yaml
+
+permissions: read-all
+
+# See the matching block in R-CMD-check.yaml. Keyed on the workflow as well as
+# the ref, so cancelling a superseded sweep never touches another check.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+
+jobs:
+  prose-sweep:
+    runs-on: ubuntu-latest
+    # The script is base R with no package dependency, so the job is a
+    # checkout, an R install and six short runs. The six invocations took
+    # 1.4 s together on the maintainer's machine at 8b4c2eb (2026-09-11),
+    # and `setup-r` on a warm runner is about a minute; 10 is a hang cap,
+    # not headroom.
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-r@v2
+
+      # One step per mode, so a red run names the mode on the job summary.
+      - name: Sentence length (pages)
+        run: Rscript benchmarks/sweep-prose.R
+
+      - name: Backtick spans (pages)
+        run: Rscript benchmarks/sweep-prose.R --spans
+
+      - name: Plain clauses (pages)
+        run: Rscript benchmarks/sweep-prose.R --plain
+
+      - name: Sentence length (roxygen)
+        run: Rscript benchmarks/sweep-prose.R --roxygen
+
+      - name: Backtick spans (roxygen)
+        run: Rscript benchmarks/sweep-prose.R --roxygen --spans
+
+      - name: Plain clauses (roxygen)
+        run: Rscript benchmarks/sweep-prose.R --roxygen --plain

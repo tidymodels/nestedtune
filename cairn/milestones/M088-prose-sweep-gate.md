@@ -38,7 +38,7 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 ## Tasks
 
 - [x] T1: Extend `tests/testthat/test-sweep-prose.R` (M086) with the real-source block: the non-empty `--paragraphs` assertions first, then the six invocations, each asserted `clean`; the skip reason unchanged.
-- [ ] T2: Write `.github/workflows/prose-sweep.yaml` on the shape of `R-CMD-check.yaml` (concurrency block, the `paths-ignore` filter on both triggers, a job cap with its measurement in a comment, `setup-r` with no package install beyond base R); `python3 .github/ci-usage.py` accepts the filter.
+- [x] T2: Write `.github/workflows/prose-sweep.yaml` on the shape of `R-CMD-check.yaml` (concurrency block, the `paths-ignore` filter on both triggers, a job cap with its measurement in a comment, `setup-r` with no package install beyond base R); `python3 .github/ci-usage.py` accepts the filter.
 - [ ] T3: Push a commit adding a semicolon sentence to `README.Rmd`, record the red run id in the work log, revert it, record the green run id.
 - [ ] T4: Edit `cairn/PROFILE.md`: the `verify` line, the `consistency-gate` line, and `prose-sweep.yaml` in the `test-doctrine` filter list.
 - [ ] T5: `devtools::check()` clean; `cairn_validate` clean.
@@ -51,6 +51,8 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - 2026-09-11: plan gate chose mechanical enforcement over a profile rule alone because the session hook already states the rules and M084 and M085 left 66 semicolons on the help pages, which no clause of theirs bound; falsified by nothing short of the sweeps never firing across ten merged PRs.
 
 - 2026-09-11: T1 done. The real-source block asserts `--paragraphs` non-empty for the six pages and `--roxygen --paragraphs` for `R/nested-tune-grid.R`, then the six invocations `clean`; 34 pass. Discrimination shown locally: one appended semicolon sentence in `README.Rmd` fails the `--plain` leg with `README.Rmd:90: semicolon: …`, reverted.
+- 2026-09-11: T2 done. `prose-sweep.yaml`: the filter on both triggers, concurrency block, a 10-minute job cap (six sweeps 1.4 s locally at 8b4c2eb, no package install), one step per mode; `ci-usage.py`'s parser reads the filter and lists the workflow with the five others, no disagreement.
+- 2026-09-11: minor amendment. The `push` trigger fires on the default branch alone and the PR opens at review, so T3's runs need a `workflow_dispatch` trigger on the workflow, run with `gh workflow run prose-sweep.yaml --ref m088-prose-sweep-gate`; AC2's wording holds as written.
 
 ## Decisions
 
