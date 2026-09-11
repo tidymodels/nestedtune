@@ -39,8 +39,8 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 
 - [x] T1: Extend `tests/testthat/test-sweep-prose.R` (M086) with the real-source block: the non-empty `--paragraphs` assertions first, then the six invocations, each asserted `clean`; the skip reason unchanged.
 - [x] T2: Write `.github/workflows/prose-sweep.yaml` on the shape of `R-CMD-check.yaml` (concurrency block, the `paths-ignore` filter on both triggers, a job cap with its measurement in a comment, `setup-r` with no package install beyond base R); `python3 .github/ci-usage.py` accepts the filter.
-- [ ] T3: Push a commit adding a semicolon sentence to `README.Rmd`, record the red run id in the work log, revert it, record the green run id.
-- [ ] T4: Edit `cairn/PROFILE.md`: the `verify` line, the `consistency-gate` line, and `prose-sweep.yaml` in the `test-doctrine` filter list.
+- [x] T3: Push a commit adding a semicolon sentence to `README.Rmd`, record the red run id in the work log, revert it, record the green run id.
+- [x] T4: Edit `cairn/PROFILE.md`: the `verify` line, the `consistency-gate` line, and `prose-sweep.yaml` in the `test-doctrine` filter list.
 - [ ] T5: `devtools::check()` clean; `cairn_validate` clean.
 
 ## Work log
@@ -54,6 +54,8 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - 2026-09-11: T2 done. `prose-sweep.yaml`: the filter on both triggers, concurrency block, a 10-minute job cap (six sweeps 1.4 s locally at 8b4c2eb, no package install), one step per mode; `ci-usage.py`'s parser reads the filter and lists the workflow with the five others, no disagreement.
 - 2026-09-11: minor amendment. The `push` trigger fires on the default branch alone and the PR opens at review, so T3's runs need a `workflow_dispatch` trigger on the workflow, run with `gh workflow run prose-sweep.yaml --ref m088-prose-sweep-gate`; AC2's wording holds as written.
 - 2026-09-11: the dispatch route failed, GitHub's API refusing a workflow absent from the default branch (HTTP 404). Superseding the line above: the `workflow_dispatch` trigger is removed and `push` carries no `branches` filter, so every branch push runs the sweep; the deviation from the other workflows' shape is stated in the yaml comment.
+- 2026-09-11: T3 done. Planted commit 012f42a (one semicolon sentence appended to `README.Rmd`): run 34653377391 failed at the `Plain clauses (pages)` step, its log reading `README.Rmd:90: semicolon: …`, `1 hit(s)`. Revert commit e5f7d40: run 34653536495 succeeded, six steps clean. The baseline run 34653331312 on 313dc84 was cancelled by the planted push, as the concurrency block states.
+- 2026-09-11: T4 done. `PROFILE.md`: the `verify` line naming `--plain` (and `--roxygen --plain`) before a prose-touching task is checked off, the consistency-gate line listing the six sweeps, `prose-sweep.yaml` in the filter list.
 
 ## Decisions
 
