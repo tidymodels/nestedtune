@@ -47,7 +47,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - [x] T4: Rewrite `vignettes/tuners.Rmd` and `vignettes/results.Rmd` the same way.
 - [x] T5: Rewrite `vignettes/articles/parallel.Rmd` and `README.Rmd` the same way; `devtools::build_readme()`.
 - [ ] T6: Record `wc -w` per page at the branch point and at the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
-- [ ] T7: Write `cairn/surveys/M086-reader-prompt.md`: the check-mode instructions (rule numbers from `references/rule-catalog.md`, the six page paths, the withheld files) that review hands unchanged to a fresh reader at each pass.
+- [x] T7: Write `cairn/surveys/M086-reader-prompt.md`: the check-mode instructions (rule numbers from `references/rule-catalog.md`, the six page paths, the withheld files) that review hands unchanged to a fresh reader at each pass.
 
 ## Work log
 
@@ -61,6 +61,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: T3 done. `nested-cv.Rmd` (5 sentences) and `estimate.Rmd` (4 sentences, two of them list-item continuation lines whose list-item line the sweep drops: the modals on those items were rewritten too). The reference intro is untouched. Every counterfactual modal restated without one, so the falsifier in the plan-gate line below did not fire and the exclusion list stays as seeded.
 - 2026-09-11: T4 done. `tuners.Rmd` (3 sentences), `results.Rmd` (3 sentences).
 - 2026-09-11: T5 done. `parallel.Rmd` (4 sentences), `README.Rmd` (1 list-item continuation, `, racing` read as a comma-ing hit); `devtools::build_readme()` re-knitted `README.md`, a two-line diff. Default, `--spans` and `--plain` sweeps print `clean` over the six pages.
+- 2026-09-11: T7 done. `cairn/surveys/M086-reader-prompt.md` holds the check-mode block review hands unchanged to a fresh reader each pass. T6 in progress: `wc -w` at the branch point b84cbcb / at head: nested-cv 1798/1800, estimate 1408/1405, tuners 2187/2184, results 1836/1837, parallel 804/801, README 367/370 (every page within 110%); one NEWS bullet added; `devtools::check()` and the claim audit are running, their results pending in this checkpoint.
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 ## Decisions
