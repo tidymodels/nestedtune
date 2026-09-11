@@ -1,13 +1,13 @@
 # M085: The help pages read on one pass for a tune_grid user
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M84
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** #91 closes
 - **Surface tier:** user-facing — every exported topic's help page
-- **Branch/PR:** —
+- **Branch/PR:** `m085-help-pages-plain-prose`
 
 ## Goal
 
