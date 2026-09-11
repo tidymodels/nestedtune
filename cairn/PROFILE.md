@@ -9,10 +9,8 @@ The R-package toolchain: devtools/roxygen/testthat/pkgdown, CRAN release.
 Run by `/milestone-implement` (per task) and `/hotfix` (gate-lite):
 - After roxygen changes: `Rscript -e 'devtools::document()'`.
 - After code changes, before a task is checked off: `Rscript -e 'devtools::test()'` clean.
-- Before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off:
-  `Rscript benchmarks/sweep-prose.R --plain` clean, and `--roxygen --plain` after roxygen changes.
-- `/hotfix` gate-lite: `devtools::test()` clean; `devtools::document()` if
-  roxygen changed; `devtools::check()` if anything structural was touched.
+- Before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off: `Rscript benchmarks/sweep-prose.R --plain` clean, and `--roxygen --plain` after roxygen changes.
+- `/hotfix` gate-lite: `devtools::test()` clean; `devtools::document()` if roxygen changed; `devtools::check()` if anything structural was touched.
 
 ## consistency-gate
 Toolchain checks `/milestone-review` runs *in addition to* the universal
@@ -26,8 +24,7 @@ cairn-file checks (`cairn_validate`, coverage completeness, `cairn_impact`):
 - The declared changelog (`## changelog` slot) has an entry for this milestone's user-visible changes (no milestone numbers in user-facing text).
 - New top-level files have `.Rbuildignore` entries (check `check()` NOTEs).
 - Full check at review: `Rscript -e 'devtools::check()'` clean (0 errors, 0 warnings; justify NOTEs).
-- The six gating prose sweeps clean: `Rscript benchmarks/sweep-prose.R`, `--spans`, `--plain`, and each of the
-  three with `--roxygen` (also run by `prose-sweep.yaml` and `tests/testthat/test-sweep-prose.R`).
+- The six gating prose sweeps clean: `Rscript benchmarks/sweep-prose.R`, `--spans`, `--plain`, and each of the three with `--roxygen` (also run by `prose-sweep.yaml` and `tests/testthat/test-sweep-prose.R`).
 
 ## test-doctrine
 R-mechanical test expectations layered on the universal "What gets a test"
