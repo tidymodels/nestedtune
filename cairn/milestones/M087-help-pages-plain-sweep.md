@@ -41,7 +41,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - [ ] T2: Rewrite the final-fit pages — `R/nested-final-fit.R`, `R/nested-final-fit-print.R`, `R/nested-final-fit-predict.R`, `R/nested-final-fit-extract.R` — the same way.
 - [ ] T3: Rewrite the results pages — `R/nested-results.R`, `R/nested-results-print.R`, `R/nested-results-set.R`, `R/nested-results-collect.R`, `R/nested-results-plot.R`, `R/nested-results-agreement.R`, `R/extract-procedure.R`, `R/selection-rule.R`, `R/nested-resamples.R` — and any file the sweep still lists, the same way.
 - [ ] T4: `devtools::document()`; record the `#'` line count at the branch point and the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
-- [ ] T5: Write `cairn/surveys/M087-reader-prompt.md`: the check-mode instructions, the `tools::Rd2txt` rendering command over `man/*.Rd`, and the withheld files, handed unchanged to a fresh reader at each review pass.
+- [x] T5: Write `cairn/surveys/M087-reader-prompt.md`: the check-mode instructions, the `tools::Rd2txt` rendering command over `man/*.Rd`, and the withheld files, handed unchanged to a fresh reader at each review pass.
 
 ## Work log
 
@@ -50,6 +50,8 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - 2026-09-11: plan gate chose a second milestone for the help pages over folding them into M086 because the roxygen surface holds about four times the guides' hits and M085 took a full milestone at a smaller clause set; falsified by M086 finishing with more than a session to spare, in which case M087's tasks fold into the next docs milestone.
 
 - 2026-09-11: /milestone-implement started; branch cut from origin/main at 047fe5f; branch point: `--roxygen --plain` 127 hits (72 semicolon, 30 modal, 24 comma-ing, 1 slop), `#'` count 2718 (AC2 cap 2989); question gate skipped, the plan leaving no choice open.
+- 2026-09-11: T5 done: `cairn/surveys/M087-reader-prompt.md` written in M086's shape, rendering `man/*.Rd` through `tools::Rd2txt` to `/tmp/nestedtune-rd/` (the command tested on `nested_tune_grid.Rd`); withheld: this file, `cairn/surveys/`, `R/`, `man-roxygen/`, the sweep output.
+- 2026-09-11: T1 and T2+T3 delegated to two [O] subagents in parallel over disjoint file sets; diffs verified by the session before each checkpoint.
 
 ## Decisions
 
