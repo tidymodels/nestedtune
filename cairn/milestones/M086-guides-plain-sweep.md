@@ -1,6 +1,6 @@
 # M086: The guides and README pass the plain-English sweep
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - [x] T3: Rewrite `vignettes/nested-cv.Rmd` and `vignettes/estimate.Rmd` until `--plain` is clean over them, keeping the default and `--spans` sweeps clean; the reference intro is not edited.
 - [x] T4: Rewrite `vignettes/tuners.Rmd` and `vignettes/results.Rmd` the same way.
 - [x] T5: Rewrite `vignettes/articles/parallel.Rmd` and `README.Rmd` the same way; `devtools::build_readme()`.
-- [ ] T6: Record `wc -w` per page at the branch point and at the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
+- [x] T6: Record `wc -w` per page at the branch point and at the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
 - [x] T7: Write `cairn/surveys/M086-reader-prompt.md`: the check-mode instructions (rule numbers from `references/rule-catalog.md`, the six page paths, the withheld files) that review hands unchanged to a fresh reader at each pass.
 
 ## Work log
@@ -63,6 +63,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: T5 done. `parallel.Rmd` (4 sentences), `README.Rmd` (1 list-item continuation, `, racing` read as a comma-ing hit); `devtools::build_readme()` re-knitted `README.md`, a two-line diff. Default, `--spans` and `--plain` sweeps print `clean` over the six pages.
 - 2026-09-11: T7 done. `cairn/surveys/M086-reader-prompt.md` holds the check-mode block review hands unchanged to a fresh reader each pass. T6 in progress: `wc -w` at the branch point b84cbcb / at head: nested-cv 1798/1800, estimate 1408/1405, tuners 2187/2184, results 1836/1837, parallel 804/801, README 367/370 (every page within 110%); one NEWS bullet added; `devtools::check()` and the claim audit are running, their results pending in this checkpoint.
 - 2026-09-11: claim audit: 38 claims read, 2 corrected — benchmarks/sweep-prose.R (the `--pages` header line claimed every mode; `--roxygen` ignores it), NEWS.md (the bullet claimed no `-ing` word after a comma; the exclusion list lets eight through). Both re-read once by the same reader and cleared.
+- 2026-09-11: T6 done. `devtools::check()`: 0 errors, 0 warnings, 0 notes (run at dc492bb; the two later commits touch only a `.Rbuildignore`d header comment and NEWS wording). `devtools::test()` at head: FAIL 0, PASS 9795. Status set to review.
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 ## Decisions
