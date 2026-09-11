@@ -222,8 +222,8 @@ collect_inner_metrics(res)
 
 `collect_predictions()` stacks `.predictions` the same way, one row per
 held-out row of every completed fold. That table is where a plot of
-predicted against observed, or a per-observation loss, would start. It
-refuses a run that did not save predictions, naming the control slot to
+predicted against observed, or a per-observation loss, starts. It
+refuses a run that did not save predictions, and names the control slot to
 set. `collect_extracts()` does the same for `.extracts`, one row per fold.
 
 ```{r collect-predictions}
@@ -304,7 +304,7 @@ that ran.
 
 On a run with a failed fold, the readers answer over the folds that
 completed. `summary()`, the collect functions and `agreement()` each warn
-once, saying how many folds the answer covers; `?collect_selections` names
+once and say how many folds the answer covers. `?collect_selections` names
 the warning's class. The one collect function that does not warn is
 `collect_notes()`, which reads every fold. `autoplot()` leaves the failed
 fold's place on its axis empty.
