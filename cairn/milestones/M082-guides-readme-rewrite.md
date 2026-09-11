@@ -1,13 +1,13 @@
 # M082: The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M081
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** #91 closes
 - **Surface tier:** user-facing — the vignettes, the site articles, README and NEWS ship with the package and on the site
-- **Branch/PR:** —
+- **Branch/PR:** `m082-guides-readme-rewrite`
 
 ## Goal
 
