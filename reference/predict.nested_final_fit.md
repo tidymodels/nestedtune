@@ -1,9 +1,10 @@
 # Predict with the final model
 
-[`predict()`](https://rdrr.io/r/stats/predict.html) and
+You can call [`predict()`](https://rdrr.io/r/stats/predict.html) and
 [`augment()`](https://generics.r-lib.org/reference/augment.html) on a
-`nested_final_fit` are the trained workflow's own methods, reached
-without extracting it first: each returns what the same call on
+`nested_final_fit` directly: they are the trained workflow's own
+methods, reached without extracting it first. Each returns what the same
+call on
 [`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)`(x)`
 returns.
 
@@ -32,8 +33,8 @@ augment(x, new_data, eval_time = NULL, ...)
 
   Passed to
   [`workflows::predict.workflow()`](https://workflows.tidymodels.org/reference/predict-workflow.html)
-  unchanged. `type` selects the prediction type (`"numeric"`, `"class"`,
-  `"prob"`, `"survival"`, ...), with the workflow's default when `NULL`.
+  unchanged. `type` selects the prediction type, such as `"numeric"`,
+  `"prob"` or `"survival"`, with the workflow's default when left unset.
 
 - ...:
 
@@ -62,17 +63,16 @@ model is a regression.
 
 ## What the dots accept
 
-[`predict()`](https://rdrr.io/r/stats/predict.html) forwards them:
-`level` with `type = "conf_int"` for an interval, or `eval_time` with
-`type = "survival"`. A name outside parsnip's own short list of predict
-arguments is refused by parsnip, and a listed one the model cannot use
-for the `type` asked is passed on and may be ignored.
+[`predict()`](https://rdrr.io/r/stats/predict.html) forwards them, for
+example `level` with `type = "conf_int"` for an interval. `eval_time`
+with `type = "survival"` is another. A name outside parsnip's own short
+list of predict arguments is refused by parsnip. A listed one the model
+cannot use for the `type` asked is passed on and may be ignored.
 
-[`augment()`](https://generics.r-lib.org/reference/augment.html) fences
-them instead. Workflows' own
-[`augment()`](https://generics.r-lib.org/reference/augment.html) method
-passes an unread argument on to parsnip, which ignores it, so refusing
-it here is the only way it is refused at all.
+[`augment()`](https://generics.r-lib.org/reference/augment.html) refuses
+the dots instead, and that refusal is the only one there is: workflows'
+own [`augment()`](https://generics.r-lib.org/reference/augment.html)
+method passes an unread argument on to parsnip, which ignores it.
 
 ## Residuals on the training rows are not performance
 

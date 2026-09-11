@@ -1,22 +1,23 @@
 # Nested cross-validation with racing inside
 
-`nested_tune_race_anova()` and `nested_tune_race_win_loss()` run the
-outer loop of nested cross-validation with finetune's two racing tuners,
+`nested_tune_race_anova()` and `nested_tune_race_win_loss()` give you an
+honest score for a model you tune with finetune's two racing tuners,
 [`finetune::tune_race_anova()`](https://finetune.tidymodels.org/reference/tune_race_anova.html)
 and
-[`finetune::tune_race_win_loss()`](https://finetune.tidymodels.org/reference/tune_race_win_loss.html),
-as the inner tuner. For each outer fold the race scores every candidate
-in `grid` on the first `burn_in` inner resamples, drops the candidates
-that are already clearly worse than the best (by a repeated-measures
-ANOVA, or by a Bradley-Terry model of pairwise wins and losses), scores
-the survivors on the remaining resamples, and then selects, finalizes,
-fits and scores on the outer split as
+[`finetune::tune_race_win_loss()`](https://finetune.tidymodels.org/reference/tune_race_win_loss.html).
+Each is
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-does. That page is the reference for everything the racers share with
-the other orchestrators.
+with the inner tuner swapped, and that page is the reference for
+everything the racers share with the other orchestrators. For each outer
+fold the race scores every candidate in `grid` on the first `burn_in`
+inner resamples. It then drops the candidates that are already clearly
+worse than the best, by a repeated-measures ANOVA or by a Bradley-Terry
+model of pairwise wins and losses. The survivors are scored on the
+remaining resamples, and the fold then selects, finalizes, fits and
+scores on the outer split as the grid page describes.
 
 The estimate describes the race-and-fit procedure as a whole and is
-reported for it; the model to deploy comes from
+reported for it. The model to deploy comes from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
 which races the same grid once more on all the data.
 
@@ -55,8 +56,8 @@ nested_tune_race_win_loss(
   A
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
-  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html);
-  a workflow with no marker is refused, and
+  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html).
+  A workflow with no marker is refused;
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   scores one on the same design.
 
@@ -66,8 +67,8 @@ nested_tune_race_win_loss(
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   or
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
-  one row per outer fold, meeting the requirements the section on nested
-  designs states.
+  one row per outer fold. The section on nested designs says what the
+  design must hold.
 
 - ...:
 
@@ -81,15 +82,15 @@ nested_tune_race_win_loss(
 
   A
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
-  object, or `NULL` to let tune derive one from the workflow; the
+  object, or `NULL` to let tune derive one from the workflow. The
   section on finalizing a parameter range says where a range that
   depends on the data is finalized.
 
 - grid:
 
   A data frame of candidate parameter values, or a positive whole number
-  giving the size of a grid to generate, the design the race is offered;
-  a data frame must have one column per tuned parameter and no other
+  for the size of a grid to generate, the design the race is offered. A
+  data frame must have one column per tuned parameter and no other
   column.
 
 - metrics:
@@ -101,13 +102,13 @@ nested_tune_race_win_loss(
 - event_level:
 
   `"first"` (the default) or `"second"`, naming which level of a
-  two-class outcome is the event, for the inner tuning run and the outer
-  scoring fit alike.
+  two-class outcome is the event. It applies to the inner tuning run and
+  the outer scoring fit alike.
 
 - eval_time:
 
   A numeric vector of evaluation times for a censored regression model,
-  or `NULL` (the default) to leave the choice to tune; the section on
+  or `NULL` (the default) to leave the choice to tune. The section on
   evaluation times says what this package refuses.
 
 - select:
@@ -115,16 +116,16 @@ nested_tune_race_win_loss(
   A
   [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
   naming which of tune's selectors each outer fold picks its candidate
-  with, on its own inner run and the first metric; the default is
+  with, on its own inner run and the first metric. The default is
   [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html).
 
 ## Value
 
 A `nested_results` with one row per outer fold and the columns
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-documents. The `procedure` record names the tuner (`"tune_race_anova"`
-or `"tune_race_win_loss"`) and holds the `grid` beside the arguments
-every orchestrator records; the section below says what `.inner_metrics`
+documents. The `procedure` record names the tuner, `"tune_race_anova"`
+or `"tune_race_win_loss"`, and holds the `grid` beside the arguments
+every orchestrator records. The section below says what `.inner_metrics`
 and the recorded grid mean on a race.
 
 ## Details
@@ -140,17 +141,17 @@ Each fold's `.inner_metrics` holds every candidate its race scored,
 eliminated candidates included:
 `tune::collect_metrics(<the race>, all_configs = TRUE)`, where
 finetune's own default keeps the survivors alone. In that table `n` is
-the number of inner resamples each candidate was scored on, the full
-inner resample count for a candidate that survived to the end and fewer
-for one eliminated along the way. The recorded `grid`, in the
+the number of inner resamples each candidate was scored on. A candidate
+that survived to the end has the full inner resample count, and one
+eliminated along the way has fewer. The recorded `grid`, in the
 `procedure` record and as `attr(x, "grid")`, is the design the race was
-offered, exactly as given; what each candidate ran is `n`. A candidate
+offered, exactly as given. What each candidate ran is `n`. A candidate
 that failed on every inner resample is absent, and its failure is in
 `.notes`.
 
-A race draws from the generator even with a deterministic engine: with
-`randomize = TRUE` (finetune's default) the inner resamples are shuffled
-before the burn-in, so which resamples the burn-in uses, and with it
+A race draws from the generator even with a deterministic engine. With
+`randomize = TRUE`, finetune's default, the inner resamples are shuffled
+before the burn-in. So which resamples the burn-in uses, and with it
 which candidates are eliminated when, comes from the fold's tuning seed.
 On the parallel path every daemon's library must hold finetune, which
 the loop attaches in each daemon before the first fold is sent, warning
@@ -163,10 +164,10 @@ no `seed` argument. On entry the function draws `2 * n` seeds in a
 single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
 number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
 step and element `2 * i` for its outer fit, each applied with the
-generator kind pinned. A fold's seed depends on its position and not on
-the order the folds run in, so the same seed gives the same result
-serially and in parallel, at any number of daemons. The two seeds are
-kept on the result as `.tuning_seed` and `.outer_fit_seed`, and
+generator kind pinned. A fold's seed depends on its position, not on the
+order the folds run in. So the same seed gives the same result serially
+and in parallel, at any number of daemons. The two seeds are kept on the
+result as `.tuning_seed` and `.outer_fit_seed`, and
 [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 shows how to reproduce one fold by hand from them.
 
@@ -184,13 +185,13 @@ be pinned by any R-side scheme, here or in tune.
 
 ## Differences from calling finetune directly
 
-There is no `control` formal, but a
+There is no `control` formal. A
 [`finetune::control_race()`](https://finetune.tidymodels.org/reference/control_race.html)
 passed through `...` as `control` reaches the inner race in every fold
-and the final fit that re-runs the result:
-`control = control_race(burn_in = 2)`, say, on a design with three inner
-resamples. What runs is the control passed, or finetune's default when
-none is, with the slots this package forces overwritten; the result
+and the final fit that re-runs the result.
+`control = control_race(burn_in = 2)`, say, fits a design with three
+inner resamples. What runs is the control passed, or finetune's default
+when none is, with the slots this package forces overwritten. The result
 records that effective control as `extract_procedure(res)$control`.
 Every slot of `control_race()` falls under one of seven headings.
 
@@ -199,45 +200,53 @@ run at `allow_par = FALSE`, whatever the control carries, because
 parallelism belongs over the outer folds.
 
 **Settable as its own argument: `event_level`.** The argument is the one
-place the level is set, as on the grid page: a control at finetune's
+place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
 entry, naming both. `grid` and `eval_time` are the racing functions' own
 arguments rather than control slots, offered here as arguments and
 reaching them unchanged.
 
-**Refused: none.** No slot is refused on its own. What is refused at
-entry is a control of another class (a `control_grid()`, which finetune
-itself would accept here), the `event_level` conflict above, and a
-`burn_in` no fold's inner design can meet: finetune refuses a race whose
-resample count is not greater than `burn_in`, and this package refuses
-the whole call before any fold runs when any outer fold's inner `rset`
-would be, naming the count and the burn-in. `control_race()` defaults
-`burn_in` to 3, so a design with three inner resamples needs
+**Refused: none.** No slot is refused on its own. Three things are
+refused at entry. The first is a control of another class, such as a
+`control_grid()` that finetune itself would accept here. The second is
+the `event_level` conflict above, and the third a `burn_in` no fold's
+inner design can meet. finetune refuses a race whose resample count is
+not greater than `burn_in`. This package refuses the whole call before
+any fold runs when any outer fold's inner `rset` would be refused,
+naming the count and the burn-in. `control_race()` defaults `burn_in` to
+3, so a design with three inner resamples needs
 `control = control_race(burn_in = 2)` or fewer.
 
 **Passed through: `burn_in`, `alpha`, `num_ties`, `randomize`,
 `verbose_elim`, `verbose`, `pkgs`, `parallel_over`, `workflow_size`.**
-Each reaches the race as given. `burn_in`, `alpha`, `num_ties` and
-`randomize` govern each fold's race as they would a direct call: how
-many resamples every candidate is scored on before elimination starts,
-the significance level an elimination needs, how many rounds two tied
-survivors are given before one is dropped, and whether the resamples are
-shuffled first. `verbose_elim` prints finetune's elimination log from a
-serial run, once per fold, and from a mirai daemon where nothing shows
-it; `verbose` likewise. `pkgs`, `parallel_over` and `workflow_size`
-behave as the grid page describes, `parallel_over` included. This
-classification was read on finetune 1.3.0; the version that added
+Each reaches the race as given:
+
+- `burn_in`, `alpha`, `num_ties` and `randomize` govern each fold's race
+  as they would a direct call. `burn_in` is how many resamples every
+  candidate is scored on before elimination starts. `alpha` is the
+  significance level an elimination needs. `num_ties` is how many rounds
+  two tied survivors are given before one is dropped. `randomize` is
+  whether the resamples are shuffled first.
+
+- `verbose_elim` prints finetune's elimination log from a serial run,
+  once per fold, and from a mirai daemon where nothing shows it;
+  `verbose` likewise.
+
+- `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
+  describes, `parallel_over` included.
+
+This classification was read on finetune 1.3.0. The version that added
 `workflow_size` to `control_race()` is not named in finetune's NEWS, and
 the `>= 1.0.1` floor this package declares does not require it.
 
 **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
-outer fit as well as the race, and the outer fit's predictions and
-extracts are kept as `.predictions` and `.extracts` in the shape the
-grid page describes; the race's own are still discarded.
+outer fit as well as the race. The outer fit's predictions and extracts
+are kept as `.predictions` and `.extracts` in the shape the grid page
+describes; the race's own are still discarded.
 
 **Not returned: `save_workflow`.** It lands on the inner race result a
-fold record discards, so setting it costs the work and returns nothing;
-the final fit keeps its race as `$tuning`, where what it saved is
+fold record discards, so setting it costs the work and returns nothing.
+The final fit keeps its race as `$tuning`, where what it saved is
 reachable.
 
 **Inert: `backend_options`.** Backend options with no parallel backend
@@ -245,28 +254,28 @@ to reach, since `allow_par` is forced off.
 
 ## Nested designs
 
-`resamples` is a data frame whose `splits` column holds one `rsplit` per
-outer fold, whose `inner_resamples` column holds one `rset` with at
-least one row per outer fold, and whose every other column labels the
-outer folds. A label column is named `id`, or `id` followed by a digit
-from 1 to 9, and holds character or factor values; together the label
-columns give every outer fold a distinct label with no `NA`.
+`resamples` is a data frame with one row per outer fold. Its `splits`
+column holds that fold's `rsplit`, its `inner_resamples` column holds an
+`rset` with at least one row, and every other column labels the fold. A
+label column is named `id`, or `id` followed by a digit from 1 to 9, and
+holds character or factor values. Together the label columns give every
+outer fold a distinct label with no `NA`.
 
-Inside each inner `rset`, every element of `splits` is an `rsplit`, and
-all of a fold's inner splits carry one frame: either the outer split's
-own data frame (what
+Inside each inner `rset`, every element of `splits` is an `rsplit`. All
+of a fold's inner splits carry one data frame: either the outer split's
+own frame, as
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-builds) or that split's analysis set (what
+builds, or that split's analysis set, as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds). An inner split carrying the outer data frame indexes, in its
-`in_id` and any non-`NA` `out_id`, only rows the outer split's `in_id`
-holds, so no inner analysis or assessment set reaches a row the outer
-fold holds out.
+builds. An inner split carrying the outer frame may index only rows the
+outer split's `in_id` holds, in its `in_id` and any non-`NA` `out_id`.
+So no inner analysis or assessment set reaches a row the outer fold
+holds out.
 
 A design breaking any of this, or using a bootstrap for the outer loop,
-is refused before anything is fitted, with condition class
-`nestedtune_bad_design` and every offending row, column, inner split or
-index named. The checks exist because
+is refused before anything is fitted. The error has condition class
+`nestedtune_bad_design` and names every offending row, column, inner
+split or index. The checks exist because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.
@@ -274,44 +283,43 @@ design assembled by hand can index rows its outer fold never sees.
 ## Finalizing a parameter range
 
 `param_info` is passed unchanged to the inner tuning call on every outer
-fold, so a restricted range restricts what every fold searches. A
-parameter whose range is unknown until the data is seen (`mtry()`, or a
-`min_n()` finalized by row count) is finalized by tune on the outer
-fold's analysis rows, never on the rows that fold holds out. On a
+fold, so a restricted range restricts what every fold searches. Some
+ranges are unknown until the data is seen: `mtry()`, or a `min_n()`
+finalized by row count. tune finalizes such a range on the outer fold's
+analysis rows, never on the rows that fold holds out. On a
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
 design the inner call therefore receives the fold's inner resamples
-re-pointed at its analysis set rather than the design's own
-`inner_resamples` element, which indexes the whole data. A design from
+re-pointed at its analysis set, not the design's own `inner_resamples`
+element, which indexes the whole data. A design from
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-already carries the analysis set and is passed as it is, as is the
-design's element under an outer split that repeats a row (an evaluated
-[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)),
+already carries the analysis set and is passed as it is. So is the
+design's element under an outer split that repeats a row, an evaluated
+[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html),
 where the re-pointing is ambiguous.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 finalizes on the full data.
 
 ## Evaluation times
 
-`eval_time` reaches every tune call whose answer depends on it, so a
-dynamic or integrated survival metric (`brier_survival()`,
-`roc_auc_survival()` and their relatives) is measured at the times you
-name. It is ignored, with a warning from tune, whenever the metric set
-has no metric that reads it; tune keys that warning on the metrics
-rather than on the model's mode.
+`eval_time` reaches every tune call whose answer depends on it. So a
+dynamic or integrated survival metric, `brier_survival()`,
+`roc_auc_survival()` and their relatives, is measured at the times you
+name. When the metric set has no metric that reads it, tune ignores it
+with a warning; tune keys that warning on the metrics, not on the
+model's mode.
 
 Refused here, ahead of tune: anything that is not numeric, an empty
 vector, and any element that is missing, negative or not finite. tune
-treats those unevenly and only once a metric reads the times, so this
-package refuses them all at entry, before a whole run is paid for. Zero,
-repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself; a repeated time draws
-tune's warning that 0 inappropriate evaluation time points were removed,
-once per tune call.
+treats those unevenly, and only once a metric reads the times, so they
+are refused at entry, before a whole run is paid for. Zero, repeated
+times and times out of order are accepted and passed on untouched, since
+tune normalizes those itself. A repeated time draws tune's warning that
+0 inappropriate evaluation time points were removed, once per tune call.
 
-The selector `select` names is called without `eval_time`. Left unset it
+The selection rule is applied without `eval_time`. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here, so passing them again would change
-no choice and would repeat tune's message about which time it took.
+with, which are the ones named here. Passing them again would change no
+choice, and would repeat tune's message about which time it took.
 
 ## See also
 

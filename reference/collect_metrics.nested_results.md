@@ -1,8 +1,10 @@
 # Collect the metrics from a nested resampling run
 
-Reports the nested cross-validation estimate: what the tune-and-fit
-procedure achieves on data it never saw. It is not the performance of
-any model you have in hand.
+Reports the nested cross-validation estimate from a
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+run or one of its siblings: what the tune-and-fit procedure achieves on
+data it never saw. It is not the performance of any model you have in
+hand.
 
 ## Usage
 
@@ -41,11 +43,11 @@ mean. Unsummarized, there is one row per outer fold and metric.
 
 A metric measured at several evaluation times (`eval_time` on
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md))
-gets a row per time in both shapes, and is never averaged across times.
+gets a row per time in both shapes. It is never averaged across times.
 Both shapes carry a `.eval_time` column exactly when the run was scored
 by a dynamic or integrated survival metric, as tune's own
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-does; a static metric's row beside one holds `NA` there.
+does. A static metric's row beside one holds `NA` there.
 
 ## Folds that failed
 
@@ -70,16 +72,17 @@ many there were. It measures the precision of that mean, not the
 fold-to-fold spread, which is larger by the same square-root factor. It
 is not a confidence interval, and one should not be built from it.
 
-That is a limit of the statistics, not of this implementation. Outer
-fold scores are not independent, since any two folds share most of their
-training rows, so a standard error computed as though they were can
-misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
-proved that no universally unbiased estimator of a k-fold estimate's
-variance exists to put in its place. Gauran, Ombao and Yu (2025)
-measured the cost inside a nested design: several of their test
-statistics with a variance-based denominator rejected a true null far
-above the nominal 5% they ran at (36% and 40% in their worst cells), and
-they advise against such denominators.
+You cannot get a valid standard error from the fold scores. That limit
+is the statistics', not this implementation's. Outer fold scores are not
+independent, since any two folds share most of their training rows. A
+standard error computed as though they were can misstate the
+uncertainty, usually downward. Bengio and Grandvalet (2004) proved that
+no universally unbiased estimator of a k-fold estimate's variance exists
+to put in its place. Gauran, Ombao and Yu (2025) measured the cost
+inside a nested design. Several of their test statistics with a
+variance-based denominator rejected a true null far above the nominal 5%
+they ran at, 36% and 40% in their worst cells. They advise against such
+denominators.
 
 Both results concern quantities close to this column rather than this
 column exactly. Bengio and Grandvalet study a k-fold estimate built from
@@ -101,7 +104,7 @@ data. *arXiv:2408.03138*.
 ## See also
 
 [`collect_metrics.nested_results_set()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
-for the same reader on a workflow-set run
+for the same function on a workflow-set run
 
 ## Examples
 

@@ -1,10 +1,10 @@
-# Extract the candidates a final fit actually scored
+# Extract the parameter settings a final fit actually scored
 
-Returns the candidate parameter settings
+Returns the candidates, the parameter settings
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)'s
 tuning run evaluated. It is the full-data counterpart of the candidate
-set each outer fold's `.inner_metrics` table describes, derived the same
-way, so the two can be compared directly.
+set each outer fold's `.inner_metrics` table describes. It is derived
+the same way, so the two can be compared directly.
 
 ## Usage
 
@@ -30,19 +30,17 @@ A tibble with one row per candidate scored, carrying one column per
 tuned parameter plus tune's `.config` label, and `.iter` where the
 search iterated. It is the distinct parameter rows of the run's
 [`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-table: everything tune wrote per metric is dropped (`.metric`,
-`.estimator`, `mean`, `n`, `std_err`, and `.eval_time` where a dynamic
-survival metric was scored), so a candidate has one row here however
-many evaluation times it was scored at. The times and the scores are in
-`collect_metrics(extract_tune_results(x))`. A fit that ran no tuning
-scored no candidate and is refused with condition class
-`nestedtune_no_tuning_run`.
+table, with everything tune wrote per metric dropped. So a candidate has
+one row here however many evaluation times it was scored at. The times
+and the scores are in `collect_metrics(extract_tune_results(x))`. A fit
+that ran no tuning scored no candidate and is refused with condition
+class `nestedtune_no_tuning_run`.
 
 ## Scored, not asked for
 
 A `grid` given as a size is expanded by tune and may reach fewer
-candidates than the number requested, and a candidate that failed
-everywhere scored nothing.
+candidates than the number requested. A candidate that failed everywhere
+scored nothing.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 gives the full account of how the two records diverge under
 `.inner_metrics`, and it holds here too.

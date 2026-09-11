@@ -1,14 +1,15 @@
 # Score a workflow with nothing to tune on a nested design
 
-`nested_fit_resamples()` runs the outer loop of a nested design for a
-workflow whose parameters are all fixed: for each outer fold it fits the
-workflow on the fold's analysis set and scores it on the assessment set
-with
-[`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html),
-skipping the inner stage, since there is nothing to search. It is
+`nested_fit_resamples()` gives you the score of a workflow with nothing
+to tune on the same outer folds a tuned workflow scores on. It runs the
+outer loop of a nested design with the inner stage skipped, since there
+is nothing to search. For each outer fold it fits the workflow on the
+fold's analysis set and scores it on the assessment set with
+[`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html).
+It is
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-with the inner tuner removed, so a fixed workflow and a tuned one score
-on identical outer folds and their per-fold metrics join by fold label.
+with the inner tuner removed. So a fixed workflow and a tuned one score
+on identical outer folds, and their per-fold metrics join by fold label.
 That page is the reference for everything the orchestrators share.
 
 Use it for the baseline a tuned procedure is compared against. A plain
@@ -40,7 +41,7 @@ nested_fit_resamples(
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html),
   every value fixed as
   [`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
-  takes it; a workflow carrying a marker is refused at entry.
+  takes it. A workflow carrying a marker is refused at entry.
 
 - resamples:
 
@@ -48,8 +49,8 @@ nested_fit_resamples(
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   or
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
-  one row per outer fold, meeting the requirements the section on nested
-  designs states.
+  one row per outer fold. The section on nested designs says what the
+  design must hold.
 
 - ...:
 
@@ -63,7 +64,7 @@ nested_fit_resamples(
 
   A
   [`yardstick::metric_set()`](https://yardstick.tidymodels.org/reference/metric_set.html),
-  or `NULL` to use tune's defaults for the model's mode; there is no
+  or `NULL` to use tune's defaults for the model's mode. There is no
   inner run to select on, so the set's order carries no weight here.
 
 - event_level:
@@ -75,7 +76,7 @@ nested_fit_resamples(
 - eval_time:
 
   A numeric vector of evaluation times for a censored regression model,
-  or `NULL` (the default) to leave the choice to tune; anything not
+  or `NULL` (the default) to leave the choice to tune. Anything not
   numeric, an empty vector, or an element that is missing, negative or
   not finite is refused at entry.
 
@@ -88,21 +89,21 @@ zero-row, zero-column tibble on every completed fold and `NULL` on a
 failed one. `.inner_metrics` is a zero-row table with tune's summary
 columns and no parameter column. `.tuning_seed` holds the seed the loop
 drew for the fold's tuning step, consumed by nothing. There is no `grid`
-attribute, and the `procedure` record names the tuner `"fit_resamples"`
-with no `grid`, `param_info` or `select` entry.
+attribute. The `procedure` record names the tuner `"fit_resamples"`, and
+holds no grid, parameter set or selection rule.
 
 ## One door for a fixed workflow, one for a tuned one
 
 A workflow that still carries a
 [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html)
 marker is refused at entry with condition class
-`nestedtune_tuned_workflow`, naming the five orchestrators that tune;
-each of those refuses a workflow with no marker, with class
+`nestedtune_tuned_workflow`, naming the five orchestrators that tune.
+Each of those refuses a workflow with no marker, with class
 `nestedtune_untuned_workflow`, naming this one.
 
-## What the readers answer
+## What the reading functions answer
 
-Every reader of a `nested_results` answers on the result.
+Every function that reads a `nested_results` answers on the result.
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [`summary()`](https://rdrr.io/r/base/summary.html),
 [`print()`](https://rdrr.io/r/base/print.html),
@@ -110,12 +111,12 @@ Every reader of a `nested_results` answers on the result.
 [collect_predictions()](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
 and
 [collect_extracts()](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
-read what the outer fits produced;
+read what the outer fits produced.
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-return zero rows; `autoplot(type = "performance")` draws the fold
+return zero rows. `autoplot(type = "performance")` draws the fold
 scores, where `autoplot(type = "parameters")` refuses with class
 `nestedtune_no_tuned_parameters`, there being nothing to draw.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
@@ -129,10 +130,10 @@ no `seed` argument. On entry the function draws `2 * n` seeds in a
 single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
 number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
 step and element `2 * i` for its outer fit, each applied with the
-generator kind pinned. A fold's seed depends on its position and not on
-the order the folds run in, so the same seed gives the same result
-serially and in parallel, at any number of daemons. The two seeds are
-kept on the result as `.tuning_seed` and `.outer_fit_seed`, and
+generator kind pinned. A fold's seed depends on its position, not on the
+order the folds run in. So the same seed gives the same result serially
+and in parallel, at any number of daemons. The two seeds are kept on the
+result as `.tuning_seed` and `.outer_fit_seed`, and
 [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 shows how to reproduce one fold by hand from them.
 
@@ -150,21 +151,20 @@ be pinned by any R-side scheme, here or in tune.
 
 ## The two seeds on a run with no tuning
 
-The same `2 * n` seeds are drawn as on a tuned run, so a tuned run under
-the same session seed on the same design shares each fold's outer-fit
-seed with this one, and the record keeps one layout across the six
-orchestrators. The tuning seed is drawn and consumed by nothing, and is
-recorded as drawn rather than as `NA` so the two seed columns read the
+A tuned run under the same session seed on the same design shares each
+fold's outer-fit seed with this one. The same `2 * n` seeds are drawn as
+on a tuned run. The record keeps one layout across the six
+orchestrators. The tuning seed is drawn and consumed by nothing. It is
+recorded as drawn rather than as `NA`, so the two seed columns read the
 same on every result. Fold `i` is exactly
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
 of `object` on `resamples$splits[[i]]` under `res$.outer_fit_seed[[i]]`,
-applied as
-[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-shows, with no tuning line before it.
+with no tuning line before it. The seed is applied as the grid page
+shows.
 
 ## Differences from calling tune directly
 
-There is no `control` formal, but a
+There is no `control` formal. A
 [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html)
 passed through `...` as `control` is recorded, and two of its slots
 reach the outer fit. What is recorded is the control passed, or tune's
@@ -174,35 +174,36 @@ default when none is, with the slots this package forces overwritten, as
 and
 [`tune::control_last_fit()`](https://tune.tidymodels.org/reference/control_last_fit.html)
 one class, so any of the three is accepted here as the same object.
+
 Every slot of `control_resamples()` falls under one of seven headings,
-most under the last, because the one tune call a fold makes here is the
-outer scoring fit, whose own control this package builds.
+most under the last. The one tune call a fold makes here is the outer
+scoring fit, whose own control this package builds.
 
 **Forced: `allow_par`.** The outer fit runs at `allow_par = FALSE`
 whatever the control carries, since parallelism belongs over the outer
 folds.
 
 **Settable as its own argument: `event_level`.** The argument is the one
-place the level is set: a control at tune's default takes it, and a
-control naming another level is refused at entry, naming both.
-`eval_time` is offered the same way, for the same reason.
+place the level is set. A control at tune's default takes it. A control
+naming another level is refused at entry, and the refusal names both
+levels. `eval_time` is offered the same way, for the same reason.
 
-**Refused: none.** No slot is refused on its own; a control of another
-class (a `control_bayes()`) is refused at entry, as is the `event_level`
-conflict above.
+**Refused: none.** No slot is refused on its own. A control of another
+class, such as a `control_bayes()`, is refused at entry, as is the
+`event_level` conflict above.
 
 **Passed through: none.** There is no inner tuning call for a slot to be
 passed through to.
 
 **Kept from the outer fit: `save_pred`, `extract`.** With
-`save_pred = TRUE` the result carries a `.predictions` list column, each
-completed fold's predictions on its assessment rows as
+`save_pred = TRUE` the result carries a `.predictions` list column: each
+completed fold's predictions on its assessment rows, as
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
-returns them; with `extract` a function, an `.extracts` list column
-holding the function's value on each completed fold's fitted workflow.
-Here there is no inner run whose predictions and extracts are discarded;
-the outer fit's are the only ones, and they are still discarded on a run
-that did not ask.
+returns them. With `extract` a function, it carries an `.extracts` list
+column holding the function's value on each completed fold's fitted
+workflow. Here there is no inner run whose predictions and extracts are
+discarded. The outer fit's are the only ones, and they are still
+discarded on a run that did not ask.
 
 **Not returned: none.** Nothing an inner run would have saved exists to
 be withheld.
@@ -211,34 +212,34 @@ be withheld.
 `backend_options`, `workflow_size`.** Each governs an inner tuning call
 this function never makes. The outer fit runs under
 [`tune::control_last_fit()`](https://tune.tidymodels.org/reference/control_last_fit.html)
-at the level and parallelism above, which reads none of these; the
+at the level and parallelism above, which reads none of these. The
 workflow's packages are required at entry, and the fitted workflow is
 reached through `extract`.
 
 ## Nested designs
 
-`resamples` is a data frame whose `splits` column holds one `rsplit` per
-outer fold, whose `inner_resamples` column holds one `rset` with at
-least one row per outer fold, and whose every other column labels the
-outer folds. A label column is named `id`, or `id` followed by a digit
-from 1 to 9, and holds character or factor values; together the label
-columns give every outer fold a distinct label with no `NA`.
+`resamples` is a data frame with one row per outer fold. Its `splits`
+column holds that fold's `rsplit`, its `inner_resamples` column holds an
+`rset` with at least one row, and every other column labels the fold. A
+label column is named `id`, or `id` followed by a digit from 1 to 9, and
+holds character or factor values. Together the label columns give every
+outer fold a distinct label with no `NA`.
 
-Inside each inner `rset`, every element of `splits` is an `rsplit`, and
-all of a fold's inner splits carry one frame: either the outer split's
-own data frame (what
+Inside each inner `rset`, every element of `splits` is an `rsplit`. All
+of a fold's inner splits carry one data frame: either the outer split's
+own frame, as
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-builds) or that split's analysis set (what
+builds, or that split's analysis set, as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds). An inner split carrying the outer data frame indexes, in its
-`in_id` and any non-`NA` `out_id`, only rows the outer split's `in_id`
-holds, so no inner analysis or assessment set reaches a row the outer
-fold holds out.
+builds. An inner split carrying the outer frame may index only rows the
+outer split's `in_id` holds, in its `in_id` and any non-`NA` `out_id`.
+So no inner analysis or assessment set reaches a row the outer fold
+holds out.
 
 A design breaking any of this, or using a bootstrap for the outer loop,
-is refused before anything is fitted, with condition class
-`nestedtune_bad_design` and every offending row, column, inner split or
-index named. The checks exist because
+is refused before anything is fitted. The error has condition class
+`nestedtune_bad_design` and names every offending row, column, inner
+split or index. The checks exist because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.

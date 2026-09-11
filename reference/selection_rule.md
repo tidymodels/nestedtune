@@ -1,4 +1,4 @@
-# Choose the rule each fold selects its candidate by
+# Choose the rule each fold selects its parameters by
 
 Builds the object the `select` argument of
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
@@ -38,9 +38,10 @@ selection_rule(rule = c("best", "one_std_err", "pct_loss"), ..., limit = NULL)
 
 ## Value
 
-A list of class `selection_rule` with elements `rule`, `order` (the
-expressions in `...`, empty for `"best"`) and `limit` (`NULL` outside
-`"pct_loss"`). Printing shows the three on one line.
+A list of class `selection_rule` with elements `rule`, `order` and
+`limit`. `order` holds the expressions in `...`, empty for `"best"`.
+`limit` is `NULL` outside `"pct_loss"`. Printing shows the three on one
+line.
 
 ## The three rules
 
@@ -59,8 +60,8 @@ does.
 An ordering is a parameter name, wrapped in
 [`dplyr::desc()`](https://dplyr.tidyverse.org/reference/desc.html) where
 a larger value is the simpler model. Each must be a bare name or a call,
-never a string or a number, which would order nothing, and none may be
-named, so a misspelled `limit` is refused instead of read as an
+never a string or a number, which would order nothing. None may be
+named. That way a misspelled `limit` is refused instead of read as an
 ordering. Every name must be a parameter the workflow tunes, which the
 orchestrators check when the run starts.
 

@@ -35,10 +35,11 @@ print(x, ...)
 
 ## The procedure line
 
-The line says what ran beside what was asked for. A grid search or a
-race is named with the number of candidates it scored. An iterating
-search is named with the initial candidates scored and requested and the
-iterations completed and requested, since it can score fewer initial
+The line under the heading tells you what ran: the procedure, meaning
+the tuner and its counts. A grid search or a race is named with the
+number of candidates, parameter settings, it scored. An iterating search
+is named with the initial candidates scored and requested and the
+iterations completed and requested. It can score fewer initial
 candidates than `initial` names and can stop short of `iter`.
 
 Where nothing was tuned the line reads "no tuning", the selection line

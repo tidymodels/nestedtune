@@ -1,11 +1,13 @@
 # Stack a per-fold column of a nested resampling run across the outer folds
 
-A `nested_results` keeps three of its records as one table per outer
-fold, in list columns: what went wrong (`.notes`), what the fold's inner
-tuning selected (`.selected`), and everything that tuning scored
-(`.inner_metrics`). These readers stack one such column into a single
-table, the design's fold labels first, so every row says which fold it
-came from.
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+`collect_selections()` and `collect_inner_metrics()` each give you one
+of a run's per-fold records as a single table. A `nested_results` keeps
+three such records as one table per outer fold, in list columns. They
+are what went wrong (`.notes`), what the fold's inner tuning selected
+(`.selected`), and everything that tuning scored (`.inner_metrics`).
+Each function stacks one column across the folds, the design's fold
+labels first, so every row says which fold it came from.
 
 - [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   stacks `.notes` over every outer fold, failed folds included. A
@@ -19,8 +21,8 @@ came from.
   result gives no rows, since no fold selected anything.
 
 - `collect_inner_metrics()` stacks `.inner_metrics`: one row per
-  candidate, metric, and iteration where the tuner iterates, that a
-  completed fold's inner tuning scored.
+  candidate, a parameter setting, and metric that a completed fold's
+  inner tuning scored, and per iteration where the tuner iterates.
 
 ## Usage
 
@@ -60,20 +62,18 @@ are.
 
 ## What the columns are
 
-The label columns are read from the object's record rather than
-recognized by name: `id` on a plain v-fold design, `id` and `id2` on a
-repeated one. Then come the stacked tables' own columns, over the union
-of what any stacked fold carries. A fold lacking one holds `NA` there,
-exactly as a fold whose recorded value is `NA` does, so the two cannot
-be told apart.
+The first columns are the design's fold labels: `id` on a plain v-fold
+design, `id` and `id2` on a repeated one, read from the object's record
+rather than recognized by name. Then come the stacked tables' own
+columns, over the union of what any stacked fold carries. A fold lacking
+one holds `NA` there, exactly as a fold whose recorded value is `NA`
+does, so the two cannot be told apart.
 
-For
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-the stacked columns are tune's `location`, `type`, `note` and `trace`,
-and a run that recorded no note gives no rows with those columns. A
-stacked table carrying a column named like a label column, say a
-parameter whose id is `id`, is refused with class
-`nestedtune_collect_name_collision`.
+stacks tune's four note columns, from `location` to `trace`. A run that
+recorded no note gives no rows with those columns. A stacked table
+carrying a column named like a label column, say a parameter whose id is
+`id`, is refused with class `nestedtune_collect_name_collision`.
 
 ## Which folds are read
 
@@ -83,8 +83,8 @@ completed, as
 and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 do. A run with some folds failed is stacked over the rest, with one
-warning of class `nestedtune_partial_summary` naming the missing folds;
-a run in which no fold completed is an error of class
+warning of class `nestedtune_partial_summary` naming the missing folds.
+A run in which no fold completed is an error of class
 `nestedtune_no_completed_folds`.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 reads every fold and warns about none.
@@ -92,8 +92,8 @@ reads every fold and warns about none.
 ## Reading `.config`
 
 The `.config` of a selection or an inner-metrics row is kept as the fold
-recorded it. It labels a candidate inside that one fold's tuning run: a
-selected row's `.config` is found among the same fold's rows in
+recorded it. It labels a candidate inside that one fold's tuning run. So
+a selected row's `.config` is found among the same fold's rows in
 `collect_inner_metrics()`. Since folds can search different candidates,
 it identifies nothing across them, which is why
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
@@ -105,7 +105,7 @@ leaves it out.
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md),
 [`collect_metrics.nested_results_set()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
-for the same readers on a workflow-set run
+for the same functions on a workflow-set run
 
 ## Examples
 

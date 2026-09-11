@@ -47,12 +47,12 @@ design.
 - [`autoplot(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
   : Plot a nested cross-validation result
 - [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-  : Tabulate how often each candidate was selected across the outer
-  folds
+  : Tabulate how often each parameter setting was selected across the
+  outer folds
 - [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  : Extract the record of the procedure that ran
+  : Extract the record of what ran
 - [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  : Choose the rule each fold selects its candidate by
+  : Choose the rule each fold selects its parameters by
 - [`collect_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_selections(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_inner_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
@@ -89,7 +89,7 @@ field on the results.
 - [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
   : Extract the tuning run a final fit was selected from
 - [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
-  : Extract the candidates a final fit actually scored
+  : Extract the parameter settings a final fit actually scored
 
 ## Re-exports
 

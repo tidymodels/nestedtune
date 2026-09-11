@@ -1,14 +1,15 @@
 # Build a nested resampling design without copying the data per outer fold
 
-`nested_resamples()` builds the nested resampling structure the
-orchestrators take: one row per outer fold, with that fold's inner
+`nested_resamples()` builds the nested resampling design
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and its siblings take: one row per outer fold, with that fold's inner
 resamples beside it. It is
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)'s
 structure, and for the same seed and the same specifications it selects
 the same rows.
 
 What differs is what the splits point at. rsample's inner splits index a
-fresh copy of each outer fold's analysis set; these index the one data
+fresh copy of each outer fold's analysis set. These index the one data
 frame you already have, so the design's size barely grows with the fold
 count.
 
@@ -50,11 +51,12 @@ outer split.
 
 ## Differences from rsample
 
+Code written for an rsample split keeps working.
 [`rsample::analysis()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
 and
 [`rsample::assessment()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
-return identical frames, attributes included, and each inner split keeps
-the class and the resample id rsample gives it, so
+return identical frames, attributes included. Each inner split keeps the
+class and the resample id rsample gives it, so
 [`labels()`](https://rdrr.io/r/base/labels.html) and
 [`rsample::add_resample_id()`](https://rsample.tidymodels.org/reference/add_resample_id.html)
 behave the same.
@@ -65,6 +67,7 @@ analysis and the inner assessment set, which makes the estimate invalid.
 
 ## Memory
 
+What you save is one copy of the analysis set per outer fold.
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 evaluates the inner specification against `as.data.frame(split)`, so
 every outer fold holds its own copy of that fold's analysis set.
@@ -74,8 +77,8 @@ The index vectors remain, as they do in rsample; the copies are gone.
 
 Sizes below are multiples of the source data, measured on
 [`mlbench::LetterRecognition`](https://rdrr.io/pkg/mlbench/man/LetterRecognition.html)
-(20000 x 17) with five inner folds under rsample 1.3.2 and R 4.6.1, and
-recorded on 2026-07-25 beside the check
+(20000 x 17) with five inner folds under rsample 1.3.2 and R 4.6.1. They
+were recorded on 2026-07-25 beside the check
 `tests/testthat/test-nested-resamples-memory.R` makes of them:
 
 |  |  |  |

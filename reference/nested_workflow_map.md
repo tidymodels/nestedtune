@@ -1,19 +1,23 @@
 # Run every workflow of a workflow set through one nested design
 
-`nested_workflow_map()` takes a
+`nested_workflow_map()` gives you nested estimates for every workflow of
+a
 [`workflowsets::workflow_set()`](https://workflowsets.tidymodels.org/reference/workflow_set.html)
-and the name of one of the six orchestrators, and runs each workflow of
-the set, in the set's order, through that orchestrator on one nested
-design. It is shaped like
+on one nested design, so you can compare model families on the same
+folds. It takes the set and the name of one of the six orchestrators,
+the loop functions
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+lists. It runs each workflow of the set through that orchestrator, in
+the set's order. It is shaped like
 [`workflowsets::workflow_map()`](https://workflowsets.tidymodels.org/reference/workflow_map.html):
 the orchestrator's arguments come through `...`, and an entry in the
 set's `option` column overrides the same-named argument for that
 workflow alone.
 
 It returns a `nested_results_set`, a tibble with one row per workflow
-holding its id, the workflow and its `nested_results`, so a comparison
-across model families reads off one object with the workflow id beside
-the fold labels.
+holding its id, the workflow and its `nested_results`. A comparison
+across model families then reads off one object, with the workflow id
+beside the fold labels.
 
 ## Usage
 
@@ -29,10 +33,11 @@ nested_workflow_map(object, fn = "nested_tune_grid", ...)
 
 - fn:
 
-  The name of the orchestrator to run each workflow through, one of
+  The name of the orchestrator to run each workflow through:
   `"nested_tune_grid"` (the default), `"nested_tune_bayes"`,
-  `"nested_tune_race_anova"`, `"nested_tune_race_win_loss"`,
-  `"nested_tune_sim_anneal"` or `"nested_fit_resamples"`.
+  `"nested_tune_race_anova"` or `"nested_tune_race_win_loss"`.
+  `"nested_tune_sim_anneal"` and `"nested_fit_resamples"` are the other
+  two.
 
 - ...:
 
@@ -46,32 +51,33 @@ nested_workflow_map(object, fn = "nested_tune_grid", ...)
 
 A `nested_results_set`: a tibble of class
 `c("nested_results_set", "tbl_df", "tbl", "data.frame")` with one row
-per workflow in the set's order and three columns, `wflow_id` (the set's
-id), `workflow` (the workflow, as the set held it) and `result` (its
-`nested_results`, as the orchestrator that ran returned it), with `fn`
-kept as an attribute. It does not carry the `workflow_set` class, so
+per workflow in the set's order and three columns. `wflow_id` is the
+set's id, `workflow` the workflow as the set held it, and `result` its
+`nested_results` as the orchestrator that ran returned it. `fn` is kept
+as an attribute. It does not carry the `workflow_set` class, so
 [`workflowsets::rank_results()`](https://workflowsets.tidymodels.org/reference/rank_results.html)
 and
 [`tune::fit_best()`](https://tune.tidymodels.org/reference/fit_best.html)
-refuse it: a ranking of the set's workflows by their nested estimates,
+refuse it. A ranking of the set's workflows by their nested estimates,
 and a fit of the best, would be a selection the outer loop did not nest
 (see
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)).
 
 ## What the set answers
 
+Six reading functions stack each workflow's table under a `wflow_id`
+column:
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [collect_predictions()](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
 and
-[collect_extracts()](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
-stack each workflow's table under a `wflow_id` column;
+[collect_extracts()](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md).
 [`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
-with an `id` returns one workflow;
+with an `id` returns one workflow, and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-with an `id` fits one workflow by its own record; and
+with an `id` fits one workflow by its own record.
 [`print()`](https://rdrr.io/r/base/print.html) shows the orchestrator
 and each workflow's completed fold count. The `result` column of the set
 given as `object` is not read: this function returns its results as its
@@ -84,26 +90,26 @@ A workflow with no parameter marked by
 runs through
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
 whatever `fn` names, since the five tuning orchestrators refuse it at
-entry: a baseline beside tuned models on the same folds is the
+entry. A baseline beside tuned models on the same folds is the
 comparison a set exists for, and each element's record names the
 procedure that ran. Every other workflow runs through `fn`.
 
 For each workflow the merged arguments are narrowed to what its
-orchestrator accepts (its formals other than `object`, and, for a
-workflow that runs through `fn`, the `control` in `...`), so a `grid` in
+orchestrator accepts: its formals other than `object`, and, for a
+workflow that runs through `fn`, the `control` in `...`. So a `grid` in
 `...` reaches the tuned workflows and not the fixed one. A control's
 class is `fn`'s own, and
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-refuses a racing, Bayesian or annealing control by that class, so a
-fixed workflow routed there does not take the `control` in `...`: it
+refuses a racing, Bayesian or annealing control by that class. So a
+fixed workflow routed there does not take the `control` in `...`. It
 runs under tune's default
 [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html)
 unless its `option` entry names one, which is where a `save_pred` or
 `extract` for the baseline goes.
 
 A name that the orchestrator `fn` names does not take is refused at
-entry, since a typo would otherwise be narrowed away for every workflow;
-a name in a workflow's `option` entry that the orchestrator it routes to
+entry, since a typo would otherwise be narrowed away for every workflow.
+A name in a workflow's `option` entry that the orchestrator it routes to
 does not take is refused naming the workflow. Under
 `fn = "nested_fit_resamples"` every workflow must be fixed: one carrying
 a marker is refused at entry, naming it, as that orchestrator refuses
@@ -113,8 +119,8 @@ it.
 
 Seed the session before the call, as before any orchestrator. The
 generator state the call holds once its entry checks have run is
-reinstated before each workflow, so every workflow's fold `i` runs under
-the same two seeds and each element is
+reinstated before each workflow. So every workflow's fold `i` runs under
+the same two seeds. Each element is
 [`identical()`](https://rdrr.io/r/base/identical.html) to the
 orchestrator called by hand on that workflow, with the same arguments,
 after the same [`set.seed()`](https://rdrr.io/r/base/Random.html). Under
@@ -127,36 +133,44 @@ workflow.
 
 ## Warnings and errors from one workflow
 
-An orchestrator warns when some of its outer folds failed, and a reader
-warns when it summarizes a partial run. Inside a set those warnings are
-raised with the workflow's id at the front of the message, under the
-same condition class, so a user who never calls a reader still learns
-which workflow lost folds. An error an orchestrator raises for one
-workflow (a `grid` that names a parameter that workflow does not tune, a
-control of the wrong class) is raised the same way, when that workflow's
-turn comes; the workflows before it have run by then. What is raised is
-the original condition object, its class vector, its `parent` and the
-cause chain, its bullets and every field a handler reads unchanged, with
-`Workflow "<id>": ` written in front of the first line of its message
-and this function, or the reader, as its call.
+An orchestrator warns when some of its outer folds failed, and a reading
+function warns when it summarizes a partial run. Inside a set those
+warnings are raised with the workflow's id at the front of the message,
+under the same condition class. So a user who never calls a reading
+function still learns which workflow lost folds.
+
+An error an orchestrator raises for one workflow is raised the same way,
+when that workflow's turn comes. A `grid` that names a parameter that
+workflow does not tune is one such error; a control of the wrong class
+is another. The workflows before it have run by then. What is raised is
+the original condition object, with `Workflow "<id>": ` written in front
+of the first line of its message and this function, or the reading
+function, as its call. Its class vector, its `parent` and the cause
+chain, its bullets and every field a handler reads are unchanged.
 
 ## Subsetting
 
-Each row's `nested_results` describes its own run whole, so a subset of
-the set that keeps rows of the run answers for the workflows it holds.
-An operation keeps the class and the `fn` attribute when its result
-holds `wflow_id`, `workflow` and `result` under those names with none
-repeated, at least one row, no `wflow_id` repeated, and each row's three
-values identical to the row of that id in the operation's first
-data-frame argument. So rows dropped or reordered and columns added keep
-the class:
+You can take a subset of the set and it still answers for the workflows
+it holds, since each row's `nested_results` describes its own run whole.
+An operation keeps the class and the `fn` attribute when its result:
+
+- holds the three columns under those names, none repeated;
+
+- has at least one row, with no `wflow_id` repeated;
+
+- has each row's three values identical to the row of that id in the
+  operation's first data-frame argument.
+
+So rows dropped or reordered and columns added keep the class.
 [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
-[`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html),
-[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+[`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)
+and
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+do, and so does
 [`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
-with the set first, `x[i, ]` and
+with the set first. So do `x[i, ]` and
 [`vctrs::vec_slice()`](https://vctrs.r-lib.org/reference/vec_slice.html)
-on a kept subset hand back a set whose readers,
+on a kept subset. What they hand back is a set whose reading functions,
 [`summary()`](https://rdrr.io/r/base/summary.html),
 [`print()`](https://rdrr.io/r/base/print.html),
 [`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
@@ -164,11 +178,12 @@ and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 answer for the rows in hand alone.
 
-Anything else comes back a plain tibble without the attribute: a record
-column dropped or renamed, no row left, a `wflow_id` repeated
-(`x[c(1, 1), ]`, `rbind(x, x)`, `dplyr::bind_rows(x, x)`), a row that is
-not the run's own (a `result` replaced, a row bound in from another set
-or a bare table),
+Anything else comes back a plain tibble without the attribute. That
+covers a record column dropped or renamed, no row left, and a `wflow_id`
+repeated, as by `x[c(1, 1), ]`, `rbind(x, x)` or
+`dplyr::bind_rows(x, x)`. It also covers a row that is not the run's
+own, whether a `result` replaced or a row bound in from another set or a
+bare table. And it covers
 [`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
 with a table first, and a direct
 [`vctrs::vec_cbind()`](https://vctrs.r-lib.org/reference/vec_bind.html),

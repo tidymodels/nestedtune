@@ -1,13 +1,14 @@
 # Summarize a nested cross-validation result
 
-Answers what the run means: how much of the requested outer design ran,
-which outer folds failed and at which stage, what each fold's inner
-tuning selected, and the estimate across the folds that completed.
+Answers what the run means. It says how much of the requested outer
+design ran, and which outer folds failed at which stage. It also says
+what each fold's inner tuning selected, and the estimate across the
+folds that completed.
 
 The selection lines are the part nothing else in the ecosystem shows.
-Outer folds that chose different parameters mean the tuning procedure is
-unstable on this data, which averaging the metrics hides, so the summary
-marks it.
+Outer folds that chose different parameters mean the tuning procedure,
+tune then select, is unstable on this data. Averaging the metrics hides
+that, so the summary marks it.
 
 ## Usage
 
@@ -39,12 +40,21 @@ print(x, ...)
 ## Value
 
 [`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
-class `summary.nested_results`: a list holding the outer resampling
-scheme's label, the requested and completed fold counts, the failed
-folds with the stage each failed at, what the completed folds selected,
-the candidates each searched, and the metric estimates averaged over
-them. Printing it is what most callers want; the components are there
-for one that needs a number rather than a line of text.
+class `summary.nested_results`, a list holding:
+
+- the outer resampling scheme's label;
+
+- the requested and completed fold counts;
+
+- the failed folds, with the stage each failed at;
+
+- what the completed folds selected, and the candidates, the parameter
+  settings, each searched;
+
+- the metric estimates averaged over them.
+
+Printing it is what most callers want; the components are there for one
+that needs a number rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
 

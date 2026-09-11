@@ -2,8 +2,9 @@
 
 Returns the tuning result that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-chose its parameters from: the record of what selection saw when the
-procedure was re-run on the complete dataset.
+chose its parameters from. It is the record of what selection saw when
+the recorded procedure, tune, select and fit, was re-run on the complete
+dataset.
 
 ## Usage
 
@@ -31,10 +32,10 @@ refused with condition class `nestedtune_no_tuning_run`.
 
 ## What its numbers are, and are not
 
-The returned object answers
+Do not report the metrics this object gives you. It answers
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 and hands its metrics over unqualified. Each of them was computed on the
-resamples that chose the candidate it describes, which makes it a
+resamples that chose the parameter setting it describes. That makes it a
 selection-time quantity, optimistically biased as a claim about the
 model this final fit produced.
 

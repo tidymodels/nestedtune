@@ -1,14 +1,15 @@
 # Summarize a final fit
 
-Gives the pieces the print method renders as values: the full-data
-tuning run the selection came from, which search ran it and at what
-counts, how many candidates it scored, and which parameter values it
+[`summary()`](https://rdrr.io/r/base/summary.html) gives you the facts
+of the final fit as values rather than printed lines. Those are the
+full-data tuning run the selection came from, which search ran it and at
+what counts, how many parameter settings it scored, and which values it
 chose.
 
 The `estimate` component is always `NULL`, and that is the point. The
 stored tuning run's metrics are selection-time quantities, so this
 object records the absence of a performance number rather than leaving
-the name out; see
+the name out. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for the number to report instead.
 
@@ -41,30 +42,39 @@ print(x, ...)
 ## Value
 
 [`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
-class `summary.nested_final_fit`: a list holding the tuning run's
-resampling label (`tuning_label`), the tuner that ran (`tuner`:
-`"tune_grid"`, `"tune_bayes"`, `"tune_race_anova"`,
-`"tune_race_win_loss"`, `"tune_sim_anneal"` or `"fit_resamples"`), the
-number of candidates that run scored (`candidates`), the iterating
-tuners' counts (`initial` and `initial_requested`,
-`iterations_completed` and `iterations_requested`), the parameter values
-selection chose (`selection`), and an `estimate` component that is
-always `NULL`. Printing it is what most callers want; the components are
-there for a caller that needs a value rather than a line of text.
+class `summary.nested_final_fit`, a list with these components:
+
+- `tuning_label`, the tuning run's resampling label;
+
+- `tuner`, the name of the tune or finetune function that ran, as
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  records it;
+
+- `candidates`, the number of parameter settings that run scored;
+
+- `initial` and `initial_requested`, `iterations_completed` and
+  `iterations_requested`, the iterating tuners' counts;
+
+- `selection`, the parameter values selection chose;
+
+- `estimate`, always `NULL`.
+
+Printing it is what most callers want; the components are there for a
+caller that needs a value rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
 
 ## Components that are absent
 
 The four counts are `NULL` on a grid or a racing fit, which iterate over
-nothing, and are carried rather than dropped for the reason `estimate`
-is. The scored figures are read from the candidate record and the
-requested ones from the procedure; a run whose candidate record cannot
-be derived reports its scored figures as zero rather than failing to
-print.
+nothing. They are carried rather than dropped, for the reason `estimate`
+is. The scored figures are counted from the tuning run's metrics table,
+and the requested ones are the counts the search was called with. A run
+whose metrics table cannot be read reports its scored figures as zero
+rather than failing to print.
 
-Where nothing was tuned there is no run to describe: `tuning_label` is
-`NULL`, `candidates` is `0`, and `selection` is empty.
+Where nothing was tuned there is no run to describe, so `tuning_label`
+is `NULL` and `candidates` is `0`. `selection` is empty.
 
 ## See also
 

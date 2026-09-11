@@ -1,8 +1,10 @@
 # Print a workflow-set run
 
-Shows the orchestrator the set ran through and how many workflows it
-holds, then one line per workflow: its id, how many of its outer folds
-completed, and the procedure that ran for it.
+Shows which loop function the set ran through,
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+or a sibling, and how many workflows it holds. Then it prints one line
+per workflow: its id, how many of its outer folds completed, and the
+label of the tuner that ran for it.
 
 ## Usage
 

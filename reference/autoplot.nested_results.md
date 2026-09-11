@@ -1,11 +1,15 @@
 # Plot a nested cross-validation result
 
-Two views of a `nested_results`, both drawing one point per outer fold,
-with the folds in design order.
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+shows you whether the outer folds agreed, and how each scored: two views
+of a `nested_results`, both drawing one point per outer fold, with the
+folds in design order.
 
 `type = "parameters"`, the default, shows what each outer fold's inner
-tuning selected. A flat row of points means the folds agreed; points at
-different heights mean they disagreed, so the tuning procedure is
+tuning selected on a
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+run or a sibling's. A flat row of points means the folds agreed. Points
+at different heights mean they disagreed, so the tuning procedure is
 unstable on this data, which averaging the metrics hides.
 
 `type = "performance"` shows each outer fold's score on its held-out
@@ -60,21 +64,21 @@ refuse it. A run in which no completed fold selected a parameter, such
 as a
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
 result, is refused under `type = "parameters"` with class
-`nestedtune_no_tuned_parameters`, while `type = "performance"` draws it.
+`nestedtune_no_tuned_parameters`. `type = "performance"` draws it.
 
 ## What the labels say
 
-The subtitle gives how much of the requested design ran. How many folds
-stand behind a panel is said on the panel instead, since it varies
-between them: a panel reading `mtry (2 of 3 chose)` or
+Panels can draw on different fold counts, so each panel says how many
+folds stand behind it, and the subtitle says how much of the requested
+design ran. A panel reading `mtry (2 of 3 chose)` or
 `rmse (from 2 folds)` had fewer than the run completed, and an
 unqualified one had them all. A requested metric that no completed fold
 could score keeps an empty panel rather than disappearing.
 
 The selected-value axis is numeric when every value drawn is a number
-and discrete otherwise, since one axis cannot be both and
-character-valued parameters are ordinary. On that discrete axis a fold
-that selected `NA` draws a point at `NA` rather than no point.
+and discrete otherwise. One axis cannot be both, and character-valued
+parameters are ordinary. On that discrete axis a fold that selected `NA`
+draws a point at `NA` rather than no point.
 
 ## See also
 
