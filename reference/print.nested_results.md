@@ -6,14 +6,6 @@ pointer to
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
 for what the run means.
 
-Printing also says when the folds were not choosing from the same menu.
-A grid given as a size is expanded per fold, under that fold's own seed,
-so a continuous parameter leaves every fold with its own candidates,
-which changes how the selections
-[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
-reports should be read. The line reports each fold's candidate count and
-appears only when the sets actually differ.
-
 ## Usage
 
 ``` r
@@ -25,33 +17,39 @@ print(x, ..., n = NULL, width = NULL)
 
 - x:
 
-  A `nested_results` object from
+  A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or
-  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md).
+  or one of its siblings.
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored, so `n` and `width` must be spelled out in full.
+  Not used; must be empty, so `n` and `width` must be given by name in
+  full.
 
 - n:
 
-  Number of rows to show, passed to the tibble printing of the outer
-  folds. `NULL`, the default, leaves it to tibble: every row when there
-  are fewer than the `print_max` option allows, and otherwise the
-  `print_min` option's count with a footer saying how many more there
-  are. `Inf` shows every fold.
+  Number of fold rows to show, passed to tibble's printing. `NULL`, the
+  default, leaves the choice to tibble and its `print_max` and
+  `print_min` options; `Inf` shows every fold.
 
 - width:
 
-  Width of text output to generate for the rows, passed to the tibble
-  printing. `NULL`, the default, uses the `width` option. Columns that
-  do not fit are listed in the footer under their names.
+  Width of the printed rows, passed to tibble's printing. `NULL`, the
+  default, uses the `width` option, and columns that do not fit are
+  named in the footer.
 
 ## Value
 
 `x`, invisibly.
+
+## When the folds searched different candidates
+
+When two or more completed folds scored different candidate sets,
+printing adds a line giving each fold's candidate count, and only then.
+A grid given as a size is the usual cause: it is expanded once per fold,
+under that fold's own seed, so a continuous parameter leaves every fold
+with candidates of its own. It matters for reading the selections: folds
+that disagreed were not choosing from the same menu.
 
 ## See also
 
@@ -64,11 +62,8 @@ print(x, ..., n = NULL, width = NULL)
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -77,10 +72,8 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
 res
 #> 
 #> ── Nested cross-validation results ────────────────────────────────────

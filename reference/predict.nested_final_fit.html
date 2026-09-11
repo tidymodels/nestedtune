@@ -77,28 +77,21 @@ what the same call on <code><a href="https://hardhat.tidymodels.org/reference/ha
 
 
 <dt id="arg-type-opts">type, opts<a class="anchor" aria-label="anchor" href="#arg-type-opts"></a></dt>
-<dd><p>Passed to the workflow's <a href="https://workflows.tidymodels.org/reference/predict-workflow.html" class="external-link">predict()</a>
-method unchanged; <code>type</code> selects the prediction type (<code>"numeric"</code>,
-<code>"class"</code>, <code>"prob"</code>, <code>"survival"</code>, ...), with the workflow's default
-when <code>NULL</code>.</p></dd>
+<dd><p>Passed to <code><a href="https://workflows.tidymodels.org/reference/predict-workflow.html" class="external-link">workflows::predict.workflow()</a></code> unchanged.
+<code>type</code> selects the prediction type (<code>"numeric"</code>, <code>"class"</code>, <code>"prob"</code>,
+<code>"survival"</code>, ...), with the workflow's default when <code>NULL</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>For <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, further arguments passed on to the model's
-predict method through the workflow – <code>level</code> with <code>type = "conf_int"</code>
-for an interval, or <code>eval_time</code> with <code>type = "survival"</code>; a name outside
-parsnip's own short list of predict arguments is refused by parsnip, and
-a listed one the model cannot use for the <code>type</code> asked is passed on and
-may be ignored. For <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code>, not used;
-must be empty. Here the two diverge: workflows' own <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> method
-passes an unknown argument on to parsnip, which ignores it, so this
-method refuses it instead of letting it vanish.</p></dd>
+<dd><p>For <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, further arguments for the model's predict
+method, passed on through the workflow. For <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code>, not used; must
+be empty.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
-<dd><p>For censored-regression models, the time or times at
-which to evaluate survival probabilities; passed to the workflow's
-<code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> method. Ignored otherwise.</p></dd>
+<dd><p>For censored regression, the time or times at which to
+evaluate survival probabilities, passed to the workflow's <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code>
+method. Ignored otherwise.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -109,18 +102,28 @@ prediction columns followed by the columns of <code>new_data</code>, with a <cod
 column where the outcome is present and the model is a regression.</p>
     </div>
     <div class="section level2">
+    <h2 id="what-the-dots-accept">What the dots accept<a class="anchor" aria-label="anchor" href="#what-the-dots-accept"></a></h2>
+
+
+
+<p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> forwards them: <code>level</code> with <code>type = "conf_int"</code> for an
+interval, or <code>eval_time</code> with <code>type = "survival"</code>. A name outside parsnip's
+own short list of predict arguments is refused by parsnip, and a listed one
+the model cannot use for the <code>type</code> asked is passed on and may be ignored.</p>
+<p><code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> fences them instead. Workflows' own <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> method passes
+an unread argument on to parsnip, which ignores it, so refusing it here is
+the only way it is refused at all.</p>
+    </div>
+    <div class="section level2">
     <h2 id="residuals-on-the-training-rows-are-not-performance">Residuals on the training rows are not performance<a class="anchor" aria-label="anchor" href="#residuals-on-the-training-rows-are-not-performance"></a></h2>
 
 
 
 <p>Augmenting the rows this model was fit on gives in-sample residuals. They
-describe how the model fits the data it has already seen, and are not
-this model's performance on data it has not. The number to report is
-<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> on the results object the fit was built from – the
-result of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> or one of its siblings – which estimates
-the error of the whole tune-and-fit procedure on rows no part of it
-touched. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why the model has no honest number
-of its own.</p>
+say how the model fits data it has already seen, not how it does on data it
+has not. The number to report is <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> on the results object
+the fit was built from; see <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why this model has no
+number of its own.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -132,11 +135,8 @@ of its own.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/step_pca.html" class="external-link">step_pca</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_predictors</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  num_comp <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/step_pca.html" class="external-link">step_pca</a></span><span class="op">(</span><span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_predictors</a></span><span class="op">(</span><span class="op">)</span>, num_comp <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow</a></span><span class="op">(</span><span class="va">rec</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
@@ -145,12 +145,10 @@ of its own.</p>
 <span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_final_fit.html">nested_final_fit</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final</span>, new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .pred</span>

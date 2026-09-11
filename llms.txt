@@ -142,8 +142,8 @@ means](https://nestedtune.tidymodels.org/articles/estimate.html).
 
 ## Nested resampling
 
-Build a nested resampling design whose size does not grow by a copy of
-the data for every outer fold.
+Build the design the outer loop runs on: one outer fold per row, with
+that fold’s inner resamples beside it, and no copy of the data per fold.
 
 - [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   : Build a nested resampling design without copying the data per outer
@@ -151,24 +151,22 @@ the data for every outer fold.
 
 ## Running the loop
 
-Tune on each outer fold’s inner resamples, select, then fit and score on
-the outer split, and keep what each fold chose; score a workflow with
-nothing to tune on the same outer splits; or run every workflow of a
-workflow set through one design and read the results under each id.
+Tune on each outer fold’s inner resamples, select a candidate, then fit
+and score it on the outer split, keeping what every fold chose. A
+workflow with nothing to tune and a whole workflow set run on the same
+design.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  : Run the nested cross-validation loop
+  : Nested cross-validation with a grid search inside
 - [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-  : Run the nested cross-validation loop with Bayesian optimization
-  inside
+  : Nested cross-validation with Bayesian optimization inside
 - [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
   [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-  : Run the nested cross-validation loop with racing inside
+  : Nested cross-validation with racing inside
 - [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-  : Run the nested cross-validation loop with simulated annealing inside
+  : Nested cross-validation with simulated annealing inside
 - [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  : Score a workflow with nothing to tune on the outer folds of a nested
-  design
+  : Score a workflow with nothing to tune on a nested design
 - [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
   : Run every workflow of a workflow set through one nested design
 - [`collect_metrics(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
@@ -214,9 +212,9 @@ workflow set through one design and read the results under each id.
 
 ## The final model
 
-Run the same tuning procedure once more with the whole dataset in hand,
-and get back the model to deploy, as its own object, never a field on
-the results.
+Run the recorded tuning procedure once more with the whole dataset in
+hand and get back the model to deploy. It is its own object, never a
+field on the results.
 
 - [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   : Fit the final model after nested cross-validation

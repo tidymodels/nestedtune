@@ -1,16 +1,10 @@
 # Extract the candidates a final fit actually scored
 
-Returns the candidate parameter settings that
+Returns the candidate parameter settings
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)'s
-tuning run actually evaluated: the full-data counterpart of the
-candidate set each outer fold's `.inner_metrics` table describes on a
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-result, derived the same way from the run's
-[`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-table, so a Bayesian final fit's table carries the `.iter` column that
-path's tables do.
+tuning run evaluated. It is the full-data counterpart of the candidate
+set each outer fold's `.inner_metrics` table describes, derived the same
+way, so the two can be compared directly.
 
 ## Usage
 
@@ -27,42 +21,36 @@ extract_scored_candidates(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used; must be empty. Passing an argument here raises an error
+  instead of leaving it silently ignored.
 
 ## Value
 
 A tibble with one row per candidate scored, carrying one column per
-tuned parameter plus tune's `.config` label for the candidate, and
-`.iter` on a Bayesian fit. It is the distinct parameter rows of the
-run's
+tuned parameter plus tune's `.config` label, and `.iter` where the
+search iterated. It is the distinct parameter rows of the run's
 [`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-table with those labels: the same shape one element of a result's
-`.inner_metrics` column reduces to when its metric columns are dropped,
-so the two can be compared directly. Everything tune wrote per metric is
-dropped: `.metric`, `.estimator`, `mean`, `n`, `std_err`, and on a fit
-that scored a dynamic survival metric the `.eval_time` column, so a
-candidate has one row here however many evaluation times it was scored
-at. The times and the scores are in
-`collect_metrics(extract_tune_results(x))`. A fit built from a
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result scored no candidate and is refused with condition class
+table: everything tune wrote per metric is dropped (`.metric`,
+`.estimator`, `mean`, `n`, `std_err`, and `.eval_time` where a dynamic
+survival metric was scored), so a candidate has one row here however
+many evaluation times it was scored at. The times and the scores are in
+`collect_metrics(extract_tune_results(x))`. A fit that ran no tuning
+scored no candidate and is refused with condition class
 `nestedtune_no_tuning_run`.
 
-This is what was **scored**, not what was **asked for**. A `grid` given
-as a size is expanded by tune and may reach fewer candidates than the
-number requested; a candidate that failed everywhere scored nothing. See
-the `.inner_metrics` discussion in
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-for the full account of how the two records diverge, which holds here
-too: this record is derived the same way.
+## Scored, not asked for
 
-One pointer there does **not** carry over. A candidate that failed on
-every inner resample is missing from this table, and on a
+A `grid` given as a size is expanded by tune and may reach fewer
+candidates than the number requested, and a candidate that failed
+everywhere scored nothing.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-result its failure is recorded in that object's `.notes` column. A
-`nested_final_fit` has no such column. Look instead inside the tuning
-run itself: `tune::collect_notes(extract_tune_results(x))`.
+gives the full account of how the two records diverge under
+`.inner_metrics`, and it holds here too.
+
+One pointer there does not carry over. A candidate that failed on every
+inner resample is missing from this table, and a `nested_final_fit` has
+no `.notes` column to record it in. Look inside the run itself:
+`tune::collect_notes(extract_tune_results(x))`.
 
 ## See also
 
@@ -75,11 +63,8 @@ run itself: `tune::collect_notes(extract_tune_results(x))`.
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -88,12 +73,10 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
 extract_scored_candidates(final)
 #> # A tibble: 2 × 2
 #>   num_comp .config        

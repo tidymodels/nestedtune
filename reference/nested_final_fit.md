@@ -1,21 +1,16 @@
 # Fit the final model after nested cross-validation
 
-`nested_final_fit()` runs the tuning procedure a nested run recorded
-once more, with the whole dataset in hand: it re-evaluates the design's
-inner resampling specification against every row, tunes with
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html),
-[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html),
-one of finetune's racers or
-[`finetune::tune_sim_anneal()`](https://finetune.tidymodels.org/reference/tune_sim_anneal.html)
-under the arguments the results object carries, selects a candidate by
-the
-[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-it recorded, finalizes the workflow, and fits it on all the data. The
-result is the model to deploy, built by the same search the estimate you
-report describes. On a
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result there is no search to re-run: the workflow is fitted as given on
-all the data.
+`nested_final_fit()` runs the procedure a nested run recorded once more,
+with the whole dataset in hand. It rebuilds the inner resamples on every
+row, tunes with the recorded tuner, selects by the recorded
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
+finalizes the workflow and fits it on all the data.
+
+What comes back is the model to deploy. It carries no performance number
+of its own: the number to report is
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+on the results object you passed in, for the reason the section on what
+to report gives.
 
 ## Usage
 
@@ -27,87 +22,31 @@ nested_final_fit(object, results, ..., id = NULL)
 
 - object:
 
-  A
+  The
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
-  with at least one parameter marked for tuning with
-  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html):
-  the workflow the nested run was built around; or a
-  `nested_results_set` from
-  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md),
-  with `id` naming the workflow to fit (see `id`). For a grid or a
-  racing procedure it is checked against the recorded grid the way
-  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  checked it, so a different workflow is refused here rather than by
-  tune one tuning run later. For a
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  result the workflow has no marker, and one carrying a marker is
-  refused here with class `nestedtune_tuned_workflow`, as that
-  orchestrator refused it.
+  the nested run was built around, or a `nested_results_set` from
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  with `id` naming the workflow to fit. A workflow is checked against
+  the record before anything is fitted.
 
 - results:
 
   The `nested_results` object from
-  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-  or
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  whose estimate you will report for this model. Everything the re-run
-  needs is read from it: the design's inner resampling specification,
-  recorded on the result as the design stored it; the data, which every
-  split references; and the procedure – the tuner and its own arguments
-  (`grid`; `iter`, `initial` and `objective`; or `iter` and `initial`)
-  with `param_info`, `event_level`, `eval_time` and `select`, the
-  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  the folds selected by, and the metric set. A `param_info` parameter
-  whose range is unknown until the data is seen is finalized here on the
-  full data – every row is this model's training data – where each outer
-  fold of the nested run finalized it on that fold's analysis rows
-  alone, so the final model's candidate range can exceed any fold's. A
-  results object that carries no such record (one built by an earlier
-  version of nestedtune, or from a design assembled by hand rather than
-  by
-  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  or
-  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)),
-  one that is no longer a `nested_results` (an operation that added or
-  removed rows returns a plain tibble), and one with no rows are each
-  refused before any fitting, with condition class
-  `nestedtune_bad_results`. A results object in which no outer fold
-  completed is refused next, with condition class
-  `nestedtune_no_completed_folds`: there is no estimate to report a
-  model with, and [`summary()`](https://rdrr.io/r/base/summary.html) on
-  the object lists the stage each fold failed at. That is the class
-  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-  [autoplot()](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
-  and
-  [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-  refuse the same object with. A run in which some folds failed is
-  fitted; its estimate is
-  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)'s,
-  with that function's partial-run warning.
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  or one of its siblings whose estimate you will report for this model.
+  Everything the re-run needs is read from it.
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored – in particular the former `grid`, `param_info`,
-  `metrics`, `event_level` and `eval_time` arguments, which now come
-  from `results`.
+  Not used; must be empty. The former `grid`, `param_info`, `metrics`,
+  `event_level` and `eval_time` arguments now come from `results`, so
+  passing one here is an error.
 
 - id:
 
-  For a `nested_results_set` as `object` (what
-  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-  returns), the `wflow_id` of the workflow to fit; `results` is then
-  left missing, since the set holds each workflow's record beside it,
-  and the fit is
-  `nested_final_fit(extract_workflow(object, id), object$result[[i]])`.
-  An `id` naming no row is refused with class `nestedtune_unknown_id`; a
-  set given with `results` supplied, a set given with no `id`, or an
-  `id` given with a workflow as `object`, with class
-  `nestedtune_bad_final_fit_args`. `NULL`, the default, for a workflow.
+  For a `nested_results_set` as `object`, the `wflow_id` of the workflow
+  to fit; `results` is then left missing. `NULL`, the default, for a
+  plain workflow.
 
 ## Value
 
@@ -120,9 +59,8 @@ directly, and
 returns the workflow itself), `selected` (the parameters chosen),
 `tuning` (the tuning run they were chosen from), `tuning_seed` and
 `fit_seed` (the two seeds that reproduce it), and `procedure` (the
-record re-run, as `results` carried it). From a
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result, `selected` is an empty table, `tuning` is `NULL`, and
+record re-run, as `results` carried it). Where nothing was tuned,
+`selected` is an empty table, `tuning` is `NULL`, and
 [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
 and
 [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
@@ -133,137 +71,185 @@ no tuning ran.
 
 The procedure a nested estimate describes is "resample this dataset by
 the inner specification, tune, select, fit", and the dataset that
-procedure is meant to be applied to is all of yours. So the final model
-comes from running it again with nothing held out: the same convention
-as cross-validating a model and then refitting on everything, one level
-up.
+procedure is meant for is all of yours. So the final model comes from
+running it again with nothing held out: the same convention as
+cross-validating a model and then refitting on everything, one level up.
 
-The outer folds play no part. Their selections are not pooled or voted
-on: they belong to the estimate, which describes the procedure across
-the instability those selections reveal, and not to this model.
+The outer folds play no part here. Their selections belong to the
+estimate, which describes the procedure across the instability those
+selections reveal; they are not pooled or voted on to build this model.
+
+## The results object
+
+`results` supplies three things: the inner resampling specification the
+design stored, the data every split references, and the `procedure`
+record. The record names the tuner and that tuner's own arguments
+(`grid`; `iter`, `initial` and `objective`; or `iter` and `initial`)
+along with `param_info`, `event_level`, `eval_time` and `select`, the
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+the folds selected by. The metric set travels beside it, as
+`attr(results, "metrics")`.
+[`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+shows you the record.
+
+A `param_info` parameter whose range is unknown until the data is seen
+is finalized here on the full data, since every row is this model's
+training data. Each outer fold of the nested run finalized it on that
+fold's analysis rows alone, so this model's candidate range can be wider
+than any fold's.
+
+A run in which some folds failed is still fitted. Its estimate is
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)'s,
+with that function's partial-run warning.
+
+## Fitting one workflow of a set
+
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+returns a `nested_results_set` holding each workflow beside its own
+results. Pass the set as `object`, name the row with `id`, and leave
+`results` missing; the fit is then
+`nested_final_fit(extract_workflow(object, id), object$result[[i]])`,
+with the workflow and its record read off one row so the two cannot be
+mispaired.
+
+## What is refused
+
+Where the record names a tuner that takes a grid, `object` is judged
+against the recorded grid as
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+judged it, so a workflow other than the one the estimate was built
+around is refused here rather than by tune a whole tuning run later.
+Where nothing was tuned (see
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)),
+the workflow must carry no
+[`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html)
+marker, and one that does is refused with class
+`nestedtune_tuned_workflow`.
+
+A `results` object carrying no record (one built by an earlier version
+of nestedtune, or from a design assembled by hand rather than by
+[`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+or
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)),
+one that is no longer a `nested_results` (an operation that added or
+removed rows returns a plain tibble), and one with no rows are each
+refused before any fitting, with condition class
+`nestedtune_bad_results`. One in which no outer fold completed is
+refused next, with class `nestedtune_no_completed_folds`: there is no
+estimate to report the model with, and
+[`summary()`](https://rdrr.io/r/base/summary.html) lists the stage each
+fold failed at. That is the class
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[autoplot()](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
+and
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+refuse it with.
+
+An `id` naming no row of a set is refused with class
+`nestedtune_unknown_id`. A set given with `results` supplied, a set
+given with no `id`, and an `id` given beside a plain workflow are each
+refused with class `nestedtune_bad_final_fit_args`.
 
 ## What to report
 
-Report the estimate from
+The estimate
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object you handed over – the result of
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or one of its siblings – as this model's performance. The model and the
-estimate come from one search by construction: the procedure is read
-from that object and cannot be restated here. That number estimates the
-k-fold test error of the whole tune-and-fit procedure that produced this
-model, measured on data no part of the procedure ever touched. Expect it
-to run slightly pessimistic: each outer fold trains on its analysis rows
-alone, so every model it scores is built on less data than this one.
-Varma and Simon (2006) measured a 4.2-point overshoot from that effect
-at n = 40, and Wilimitis and Walsh (2023) about 1-2% of AUROC on 41,121
-records. The offset shrinks with fold size and is not a correction to
-apply.
-
-The model in hand has no honest number of its own. Everything computable
-from its training data was consumed by selection or by fitting,
-**including the resampling metrics inside the tuning run stored on this
-object**: those are selection-time quantities, optimistically biased as
-a performance claim, and
+returns from the results object you handed over describes the whole
+tune-and-fit procedure that produced this model, measured on rows no
+part of that procedure ever saw, and it is the number to report for this
+model. The model has no performance number of its own, the metrics
+inside the tuning run stored on it included: those were computed on the
+resamples that chose the candidate, which makes them selection-time
+quantities, optimistically biased as a claim about this model, and
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on `x$tuning` will hand them over without saying so. They are kept
-because they are the record of what selection saw, not because they
-describe this model.
+on `x$tuning` hands them over without saying so. Expect the nested
+estimate to run slightly pessimistic instead, since each outer fold
+trained on its analysis rows alone: Varma and Simon (2006) measured a
+4.2-point overshoot at n = 40, and Wilimitis and Walsh (2023) about 1 to
+2 percent of AUROC on 41,121 records. That offset shrinks with fold size
+and is not a correction to apply.
 
-Two things the nested estimate does not say. It is marginal over
-selection, not conditional on the parameters this model happens to
-carry, so it is not a claim about this configuration specifically. And
-it describes new data drawn like your training data, not a different
-population, and not a model retrained at a different size.
+Two things the estimate does not say. It is marginal over selection
+rather than conditional on the parameters this model happens to carry,
+so it makes no claim about this configuration in particular. And it
+describes new data drawn like your training data, not a different
+population, and not a model retrained at another size.
 
 If the outer folds disagreed about the best parameters, report that too.
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; there is
-no `seed` argument. On entry the function draws two seeds in a single
-`sample.int(.Machine$integer.max, 2)` call. The first covers building
-the inner resamples *and* tuning; the second covers the final fit. Both
-are applied with the generator kind pinned, and both are returned on the
-object.
+Seed the session before the call; there is no `seed` argument. Two seeds
+are drawn on entry and applied with the generator kind pinned: the first
+builds the inner resamples and tunes, the second fits. Both are kept on
+the object, and the caller's generator state is put back on the way out,
+so two calls with no [`set.seed()`](https://rdrr.io/r/base/Random.html)
+between them give the same model, as repeated
+[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+calls do.
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+covers the rest, including what an R-side seed cannot pin.
 
-The run is reproducible by hand from those two seeds and the record
-`extract_procedure(fit)` returns, every value below being one that
-record holds (or, for `metrics`, `attr(results, "metrics")`); the tuning
-call is the one the record names, and `control` is the record's own –
-the control the run was given, or tune's default, with the slots the
-orchestrator forces already applied:
+You can redo the run by hand from those two seeds and the record
+[`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+returns. Every value below comes from that record, except `metrics`,
+which is `attr(results, "metrics")`. Only the tuning line changes with
+the tuner; `control` is the record's own, the control the run was given
+or tune's default, with the slots this package forces already applied.
 
     set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     inner <- <the design's `inside` specification>(data)
     control <- extract_procedure(fit)$control
-    # a grid procedure: the recorded control, untouched
+    # A grid search takes the recorded control untouched. So does a race,
+    # ANOVA or win/loss: its own draws, the resample order under `randomize`,
+    # come from the stream the tuning seed set.
     tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
       metrics = metrics, eval_time = eval_time, control = control)
-    # a racing procedure, ANOVA or win/loss: the race's own draws -- the
-    # resample order under `randomize` -- come from the stream the tuning
-    # seed set, so the recorded `control_race()` is likewise untouched
     tuned <- tune_race_anova(object, inner, grid = grid, param_info = param_info,
       metrics = metrics, eval_time = eval_time, control = control)
     tuned <- tune_race_win_loss(object, inner, grid = grid, param_info = param_info,
       metrics = metrics, eval_time = eval_time, control = control)
-    # an annealing procedure: the perturbations draw from the same stream, and
-    # `control_sim_anneal()` has no seed slot, so the recorded control is
-    # again untouched
+    # Annealing draws its perturbations from that stream too, and
+    # `control_sim_anneal()` has no seed slot, so again nothing is set.
     tuned <- tune_sim_anneal(object, inner, iter = iter, initial = initial,
       param_info = param_info, metrics = metrics, eval_time = eval_time,
       control = control)
-    # a Bayesian procedure, the one branch that alters the control: the
-    # Gaussian process is seeded from the tuning seed, the rule
-    # nested_tune_bayes() fixes for every fold, so the recorded control --
-    # which carries no seed -- takes it here, and only here
+    # Bayesian optimization is the one branch that sets a slot: its Gaussian
+    # process takes the tuning seed, the rule every outer fold used, and the
+    # recorded control carries no seed of its own.
     control$seed <- fit$tuning_seed
     tuned <- tune_bayes(object, inner, iter = iter, initial = initial,
       objective = objective, param_info = param_info, metrics = metrics,
       eval_time = eval_time, control = control)
     final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
-      # under the recorded default select; select_by_one_std_err() or
-      # select_by_pct_loss() with the recorded orderings and limit otherwise
+      # Under the recorded default rule; select_by_one_std_err() or
+      # select_by_pct_loss() with the recorded orderings and limit otherwise.
     set.seed(fit$fit_seed, kind = "Mersenne-Twister",
              normal.kind = "Inversion", sample.kind = "Rejection")
     fit(final, data)
 
-A result from
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-re-runs no tuning call. Both seeds are still drawn, so the object's seed
-layout is the one above; the first is consumed by nothing, the inner
-specification is not re-evaluated, and the whole recipe is
-`fit(object, data)` under the second seed.
+Where nothing was tuned there is no such line to redo. Both seeds are
+still drawn, so the object's seed layout is the one above, but the first
+is consumed by nothing, the inner specification is left unevaluated, and
+the whole recipe is `fit(object, data)` under the second seed.
 
-Building the resamples sits *inside* the first seed's scope, not before
-it: constructing an `rset` draws from the generator, so a version that
-built them earlier would still be reproducible from the session seed but
-no longer from the two seeds above.
-
-The caller's RNG state and generator kind are restored on exit,
-including when the call errors. One consequence worth knowing: two
-consecutive calls with no
-[`set.seed()`](https://rdrr.io/r/base/Random.html) between them return
-identical results, exactly as repeated
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-calls do.
-
-This binds randomness that flows through R's generator. Engines that
-randomize outside it (kernlab's SVMs, the deep-learning engines) cannot
-be pinned by any R-side scheme, here or in tune.
+Building the resamples sits inside the first seed's scope rather than
+before it. Constructing an `rset` draws from the generator, so a version
+that built them earlier would still be reproducible from the session
+seed, but no longer from the two seeds above.
 
 ## The inner specification is re-evaluated
 
 A nested design stores its `inside` argument as an unevaluated call, the
 nested run records it on its result, and this function evaluates it
-again, against the whole dataset, in the environment you call from, not
-the one the design was built in.
+again, against the whole dataset, in the environment you call from
+rather than the one the design was built in.
 
 Write it with literal arguments. `inside = vfold_cv(v = 5)` is
 re-evaluated identically anywhere. `inside = vfold_cv(v = k)` is not: if
-`k` is gone by the time you call this, you get an error naming the
-specification, and if some *other* `k` is in scope you silently get a
+`k` is gone by the time you call this you get an error naming the
+specification, and if some other `k` is in scope you silently get a
 different design. Building a design inside a function that parameterizes
 its resampling is the common way to meet this.
 
@@ -288,11 +274,8 @@ evaluation in health care: Tutorial. *JMIR AI*, 2, e49023.
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -301,10 +284,11 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
-# The estimate: what the procedure achieves.
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+set.seed(3)
+final <- nested_final_fit(wf, res)
+# The estimate: what the procedure achieves, and the number to report.
 collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err
@@ -312,9 +296,7 @@ collect_metrics(res)
 #> 1 rmse    standard   2.98      2  0.459 
 #> 2 rsq     standard   0.747     2  0.0691
 
-# The model: what you deploy. Report the estimate above for it.
-set.seed(3)
-final <- nested_final_fit(wf, res)
+# The model: what you deploy.
 final
 #> 
 #> ── Nested cross-validation final fit ──────────────────────────────────

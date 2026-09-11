@@ -30,30 +30,23 @@ augment(x, new_data, eval_time = NULL, ...)
 
 - type, opts:
 
-  Passed to the workflow's
-  [predict()](https://workflows.tidymodels.org/reference/predict-workflow.html)
-  method unchanged; `type` selects the prediction type (`"numeric"`,
-  `"class"`, `"prob"`, `"survival"`, ...), with the workflow's default
-  when `NULL`.
+  Passed to
+  [`workflows::predict.workflow()`](https://workflows.tidymodels.org/reference/predict-workflow.html)
+  unchanged. `type` selects the prediction type (`"numeric"`, `"class"`,
+  `"prob"`, `"survival"`, ...), with the workflow's default when `NULL`.
 
 - ...:
 
   For [`predict()`](https://rdrr.io/r/stats/predict.html), further
-  arguments passed on to the model's predict method through the workflow
-  – `level` with `type = "conf_int"` for an interval, or `eval_time`
-  with `type = "survival"`; a name outside parsnip's own short list of
-  predict arguments is refused by parsnip, and a listed one the model
-  cannot use for the `type` asked is passed on and may be ignored. For
+  arguments for the model's predict method, passed on through the
+  workflow. For
   [`augment()`](https://generics.r-lib.org/reference/augment.html), not
-  used; must be empty. Here the two diverge: workflows' own
-  [`augment()`](https://generics.r-lib.org/reference/augment.html)
-  method passes an unknown argument on to parsnip, which ignores it, so
-  this method refuses it instead of letting it vanish.
+  used; must be empty.
 
 - eval_time:
 
-  For censored-regression models, the time or times at which to evaluate
-  survival probabilities; passed to the workflow's
+  For censored regression, the time or times at which to evaluate
+  survival probabilities, passed to the workflow's
   [`augment()`](https://generics.r-lib.org/reference/augment.html)
   method. Ignored otherwise.
 
@@ -67,18 +60,29 @@ returns the workflow's prediction columns followed by the columns of
 `new_data`, with a `.resid` column where the outcome is present and the
 model is a regression.
 
+## What the dots accept
+
+[`predict()`](https://rdrr.io/r/stats/predict.html) forwards them:
+`level` with `type = "conf_int"` for an interval, or `eval_time` with
+`type = "survival"`. A name outside parsnip's own short list of predict
+arguments is refused by parsnip, and a listed one the model cannot use
+for the `type` asked is passed on and may be ignored.
+
+[`augment()`](https://generics.r-lib.org/reference/augment.html) fences
+them instead. Workflows' own
+[`augment()`](https://generics.r-lib.org/reference/augment.html) method
+passes an unread argument on to parsnip, which ignores it, so refusing
+it here is the only way it is refused at all.
+
 ## Residuals on the training rows are not performance
 
 Augmenting the rows this model was fit on gives in-sample residuals.
-They describe how the model fits the data it has already seen, and are
-not this model's performance on data it has not. The number to report is
+They say how the model fits data it has already seen, not how it does on
+data it has not. The number to report is
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object the fit was built from – the result of
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or one of its siblings – which estimates the error of the whole
-tune-and-fit procedure on rows no part of it touched. See
+on the results object the fit was built from; see
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for why the model has no honest number of its own.
+for why this model has no number of its own.
 
 ## See also
 
@@ -92,11 +96,8 @@ for why the model has no honest number of its own.
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -105,12 +106,10 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
 predict(final, new_data = mtcars[1:3, ])
 #> # A tibble: 3 × 1
 #>   .pred

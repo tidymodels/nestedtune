@@ -1,6 +1,7 @@
 # Extract one workflow of a workflow-set run
 
-Extract one workflow of a workflow-set run
+Returns the workflow the set holds under one `wflow_id`, as it was
+given, with nothing fitted or finalized.
 
 ## Usage
 
@@ -38,19 +39,25 @@ the set is refused with class `nestedtune_unknown_id`.
 
 ``` r
 data(mtcars)
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-wset <- workflowsets::workflow_set(
-  preproc = list(none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
+
 set.seed(1)
 folds <- nested_resamples(
   mtcars,
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
+
 set.seed(2)
-res <- nested_workflow_map(wset, resamples = folds)
+res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
 extract_workflow(res, "none_lm")
 #> ══ Workflow ═══════════════════════════════════════════════════════════
 #> Preprocessor: Recipe

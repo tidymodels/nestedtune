@@ -1,11 +1,16 @@
 # Build a nested resampling design without copying the data per outer fold
 
-`nested_resamples()` builds the same nested resampling structure as
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
-but stores index vectors into the original data instead of a
-materialized analysis set for every outer fold. For the same seed and
-the same specifications it produces the same splits; what changes is the
-size of the object that holds them.
+`nested_resamples()` builds the nested resampling structure the
+orchestrators take: one row per outer fold, with that fold's inner
+resamples beside it. It is
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)'s
+structure, and for the same seed and the same specifications it selects
+the same rows.
+
+What differs is what the splits point at. rsample's inner splits index a
+fresh copy of each outer fold's analysis set; these index the one data
+frame you already have, so the design's size barely grows with the fold
+count.
 
 ## Usage
 
@@ -21,20 +26,19 @@ nested_resamples(data, outside, inside, ...)
 
 - outside:
 
-  The outer resampling specification, given either as an unevaluated
-  call such as `vfold_cv(v = 5)` or as an already-evaluated `rset`
-  object.
+  The outer resampling, as an unevaluated call such as `vfold_cv(v = 5)`
+  or as an `rset` already built on `data`.
 
 - inside:
 
-  The inner resampling specification, given as an unevaluated call such
-  as `vfold_cv(v = 5)`. Unlike `outside`, this cannot be an existing
-  object, because it is evaluated once per outer fold.
+  The inner resampling, as an unevaluated call such as
+  `vfold_cv(v = 5)`. It is evaluated once per outer fold, so an existing
+  object is refused.
 
 - ...:
 
-  Not used; must be empty. All three arguments above are required, so
-  the barrier is what turns a mistyped fourth into an error.
+  Not used; must be empty. The three arguments above are all required,
+  so a mistyped fourth is an error here.
 
 ## Value
 
@@ -44,40 +48,49 @@ returns, so methods written against those keep working. It is the outer
 `rset` with an `inner_resamples` list column added, one inner `rset` per
 outer split.
 
-## Details
-
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-evaluates the inner specification against `as.data.frame(split)`, so
-each outer fold's inner resamples reference their own copy of that
-fold's analysis set. Object size therefore grows by roughly one copy of
-the data for every outer fold. `nested_resamples()` evaluates the inner
-specification the same way, against the same transient frame, but keeps
-only the row indices it produces and remaps them onto the original data,
-so the inner splits reference the single shared copy the caller already
-has.
-
 ## Differences from rsample
 
-The splits select the same rows.
 [`rsample::analysis()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
 and
 [`rsample::assessment()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
-return identical frames, attributes included, and each inner split
-carries the class and the resample id rsample gives it, so
+return identical frames, attributes included, and each inner split keeps
+the class and the resample id rsample gives it, so
 [`labels()`](https://rdrr.io/r/base/labels.html) and
 [`rsample::add_resample_id()`](https://rsample.tidymodels.org/reference/add_resample_id.html)
-behave the same. What differs is what the splits point at: nestedtune's
-index the original data, rsample's index a materialized copy of each
-outer fold's analysis set. One behavior differs on purpose.
+behave the same.
 
-An **outer bootstrap is refused**, not warned about. The same
-observation can otherwise land in both the inner analysis and the inner
-assessment set, which makes the design invalid rather than merely
-unusual.
+One behavior differs on purpose: an outer bootstrap is refused rather
+than warned about. The same row can otherwise land in both the inner
+analysis and the inner assessment set, which makes the estimate invalid.
+
+## Memory
+
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+evaluates the inner specification against `as.data.frame(split)`, so
+every outer fold holds its own copy of that fold's analysis set.
+`nested_resamples()` runs the same specification against the same frame,
+keeps only the row indices it produces, and points them back at `data`.
+The index vectors remain, as they do in rsample; the copies are gone.
+
+Sizes below are multiples of the source data, measured on
+[`mlbench::LetterRecognition`](https://rdrr.io/pkg/mlbench/man/LetterRecognition.html)
+(20000 x 17) with five inner folds under rsample 1.3.2 and R 4.6.1, and
+recorded on 2026-07-25 beside the check
+`tests/testthat/test-nested-resamples-memory.R` makes of them:
+
+|  |  |  |
+|----|----|----|
+| outer folds | [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html) | `nested_resamples()` |
+| 2 | 2.2x | 1.2x |
+| 5 | 5.6x | 1.7x |
+| 10 | 11.4x | 2.6x |
+| 50 | 57.5x | 10.0x |
 
 ## See also
 
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+which takes the design and runs the outer loop
 
 ## Examples
 
@@ -85,12 +98,12 @@ unusual.
 data(mtcars)
 
 set.seed(1)
-folds <- nested_resamples(
-  mtcars,
+design <- nested_resamples(
+  data = mtcars,
   outside = rsample::vfold_cv(v = 3),
   inside = rsample::vfold_cv(v = 3)
 )
-folds
+design
 #> # Nested resampling:
 #> #  outer: 3-fold cross-validation
 #> #  inner: 3-fold cross-validation
@@ -102,7 +115,7 @@ folds
 #> 3 <split [22/10]> Fold3 <vfold [3 × 2]>
 
 # Each element of inner_resamples is an ordinary rset.
-folds$inner_resamples[[1]]
+design$inner_resamples[[1]]
 #> #  3-fold cross-validation 
 #> # A tibble: 3 × 2
 #>   splits         id   

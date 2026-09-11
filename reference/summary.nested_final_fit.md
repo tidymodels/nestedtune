@@ -1,21 +1,16 @@
 # Summarize a final fit
 
-Answers what the final fit means: the full-data tuning run the selection
-came from, which procedure ran it and at what counts, how many
-candidates that run scored, which parameter values it selected, and
-where this model's honest performance estimate lives.
+Gives the pieces the print method renders as values: the full-data
+tuning run the selection came from, which search ran it and at what
+counts, how many candidates it scored, and which parameter values it
+chose.
 
-The estimate component is always `NULL`, and that is the point. The
-tuning run stored on the object has metrics, but selection consumed them
-and they are optimistically biased as a claim about this model; the
-nested estimate on the results object the fit was built from – the
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-result – is the one to report (IP3). The absence is carried as a
-component rather than left out, so a caller reading the summary meets a
-recorded fact instead of a missing name; the four Bayesian counts are
-carried as `NULL` on a grid fit for the same reason.
+The `estimate` component is always `NULL`, and that is the point. The
+stored tuning run's metrics are selection-time quantities, so this
+object records the absence of a performance number rather than leaving
+the name out; see
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+for the number to report instead.
 
 ## Usage
 
@@ -36,8 +31,8 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used; must be empty. Passing an argument here raises an error
+  instead of leaving it silently ignored.
 
 - x:
 
@@ -46,25 +41,30 @@ print(x, ...)
 ## Value
 
 [`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
-class `summary.nested_final_fit`: a list holding the full-data tuning
-run's resampling label (`tuning_label`), the tuner that ran (`tuner`:
+class `summary.nested_final_fit`: a list holding the tuning run's
+resampling label (`tuning_label`), the tuner that ran (`tuner`:
 `"tune_grid"`, `"tune_bayes"`, `"tune_race_anova"`,
 `"tune_race_win_loss"`, `"tune_sim_anneal"` or `"fit_resamples"`), the
 number of candidates that run scored (`candidates`), the iterating
 tuners' counts (`initial` and `initial_requested`,
-`iterations_completed` and `iterations_requested`, each `NULL` on a grid
-or a racing fit; the scored figures are read from the candidate record,
-the requested ones from the procedure, and a run whose candidate record
-cannot be derived reports its scored figures as zero rather than failing
-to print), the parameter values selection chose (`selection`), and an
-`estimate` component that is always `NULL`. A fit built from a
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result ran no tuning: its `tuning_label` is `NULL`, `candidates` is `0`
-and `selection` is empty. Printing it is what most callers want; the
-components are there for a caller that needs a value rather than a line
-of text.
+`iterations_completed` and `iterations_requested`), the parameter values
+selection chose (`selection`), and an `estimate` component that is
+always `NULL`. Printing it is what most callers want; the components are
+there for a caller that needs a value rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
+
+## Components that are absent
+
+The four counts are `NULL` on a grid or a racing fit, which iterate over
+nothing, and are carried rather than dropped for the reason `estimate`
+is. The scored figures are read from the candidate record and the
+requested ones from the procedure; a run whose candidate record cannot
+be derived reports its scored figures as zero rather than failing to
+print.
+
+Where nothing was tuned there is no run to describe: `tuning_label` is
+`NULL`, `candidates` is `0`, and `selection` is empty.
 
 ## See also
 
@@ -78,11 +78,8 @@ of text.
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -91,12 +88,10 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
 summary(final)
 #> 
 #> ── Nested cross-validation final fit ──────────────────────────────────

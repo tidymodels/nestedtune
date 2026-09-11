@@ -1,27 +1,26 @@
 # Stack a per-fold column of a nested resampling run across the outer folds
 
-A `nested_results` object keeps three of its records as one table per
-outer fold, in list columns: what went wrong (`.notes`), what the fold's
-inner tuning selected (`.selected`), and everything that tuning scored
-(`.inner_metrics`). These three readers stack one such column into a
-single table, with the columns the design labelled its folds with placed
-first, so the rows of every fold are read at once and each row says
-which fold it came from.
+A `nested_results` keeps three of its records as one table per outer
+fold, in list columns: what went wrong (`.notes`), what the fold's inner
+tuning selected (`.selected`), and everything that tuning scored
+(`.inner_metrics`). These readers stack one such column into a single
+table, the design's fold labels first, so every row says which fold it
+came from.
 
 - [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-  stacks `.notes` over every outer fold, failed folds included – a
-  failed fold's notes are the reason to ask, and a completed fold's can
-  carry an error note too, from an `extract` that failed on it (see
+  stacks `.notes` over every outer fold, failed folds included. A
+  completed fold can carry an error note too, from an `extract` that
+  failed on it (see
   [`collect_extracts()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)).
 
-- `collect_selections()` stacks `.selected` over the folds that
-  completed: one row per completed fold. A
+- `collect_selections()` stacks `.selected`: one row per completed fold.
+  A
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  result gives zero rows, since no fold selected anything.
+  result gives no rows, since no fold selected anything.
 
-- `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
-  completed: one row per candidate (and per metric, and per iteration
-  where the tuner iterates) that each fold's inner tuning scored.
+- `collect_inner_metrics()` stacks `.inner_metrics`: one row per
+  candidate, metric, and iteration where the tuner iterates, that a
+  completed fold's inner tuning scored.
 
 ## Usage
 
@@ -44,7 +43,7 @@ collect_notes(x, ...)
 
 - x:
 
-  A `nested_results` object from
+  A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   or one of its siblings.
 
@@ -55,47 +54,50 @@ collect_notes(x, ...)
 
 ## Value
 
-A tibble. The first columns are the design's fold labels, read from the
-object's record rather than recognized by name: `id` on a plain v-fold
-design, `id` and `id2` on a repeated one. Then the columns of the
-stacked tables, as the list column holds them, over the union of the
-columns any stacked fold carries; a fold lacking one of them holds `NA`
-there, in the same way as a fold whose recorded value is `NA`, so the
-two are not told apart. For
+A tibble whose first columns are the design's fold labels and whose
+remaining columns come from the stacked tables. See What the columns
+are.
+
+## What the columns are
+
+The label columns are read from the object's record rather than
+recognized by name: `id` on a plain v-fold design, `id` and `id2` on a
+repeated one. Then come the stacked tables' own columns, over the union
+of what any stacked fold carries. A fold lacking one holds `NA` there,
+exactly as a fold whose recorded value is `NA` does, so the two cannot
+be told apart.
+
+For
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-those are tune's `location`, `type`, `note` and `trace`, and a run that
-recorded no note gives zero rows with the same columns. A stacked table
-carrying a column named like a fold label column (a parameter given the
-id `id`) is refused with condition class
+the stacked columns are tune's `location`, `type`, `note` and `trace`,
+and a run that recorded no note gives no rows with those columns. A
+stacked table carrying a column named like a label column, say a
+parameter whose id is `id`, is refused with class
 `nestedtune_collect_name_collision`.
 
-## Details
+## Which folds are read
 
 `collect_selections()` and `collect_inner_metrics()` read the folds that
-completed, the rule
+completed, as
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-follow. A run in which some outer folds failed is stacked over the folds
-that completed, with one warning of class `nestedtune_partial_summary`
-saying which folds are missing; a run in which no fold completed is an
-error with condition class `nestedtune_no_completed_folds`, the class
-every summary of such an object refuses with.
+do. A run with some folds failed is stacked over the rest, with one
+warning of class `nestedtune_partial_summary` naming the missing folds;
+a run in which no fold completed is an error of class
+`nestedtune_no_completed_folds`.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reads every fold and warns about none of them.
+reads every fold and warns about none.
 
-The `.config` column of a selection or an inner-metrics row is kept as
-the fold recorded it. It labels a candidate within *that fold's own*
-inner tuning run – a selected row's `.config` is found among the same
-fold's rows in `collect_inner_metrics()` – and is not an identity across
-folds, which can search different candidate sets. That is why
+## Reading `.config`
+
+The `.config` of a selection or an inner-metrics row is kept as the fold
+recorded it. It labels a candidate inside that one fold's tuning run: a
+selected row's `.config` is found among the same fold's rows in
+`collect_inner_metrics()`. Since folds can search different candidates,
+it identifies nothing across them, which is why
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-leaves it out and these readers keep it.
-
-A user of tune will recognize
-[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html):
-it is tune's generic, and this method answers for a `nested_results` the
-way tune's answers for a `tune_results`.
+leaves it out.
 
 ## See also
 
@@ -110,11 +112,8 @@ for the same readers on a workflow-set run
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -123,10 +122,8 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
 collect_selections(res)
 #> # A tibble: 2 × 3
 #>   id    num_comp .config        

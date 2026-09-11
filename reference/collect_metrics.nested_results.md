@@ -1,6 +1,8 @@
 # Collect the metrics from a nested resampling run
 
-Collect the metrics from a nested resampling run
+Reports the nested cross-validation estimate: what the tune-and-fit
+procedure achieves on data it never saw. It is not the performance of
+any model you have in hand.
 
 ## Usage
 
@@ -13,10 +15,9 @@ collect_metrics(x, ..., summarize = TRUE)
 
 - x:
 
-  A `nested_results` object from
+  A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or
-  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md).
+  or one of its siblings.
 
 - ...:
 
@@ -30,68 +31,62 @@ collect_metrics(x, ..., summarize = TRUE)
 
 ## Value
 
-A tibble. Summarized, one row per metric – and, for a metric measured at
-evaluation times, per evaluation time – with the mean across outer
-folds, the number of folds contributing, and the standard error of that
-mean. Unsummarized, one row per outer fold and metric – and per
-evaluation time, where a metric was measured at several. Both carry a
-`.eval_time` column exactly when the run was scored by a dynamic or
-integrated survival metric, as tune's own
+A tibble, described under What the two shapes hold.
+
+## What the two shapes hold
+
+Summarized, there is one row per metric, with the mean across outer
+folds, the number of folds `n` behind it, and the standard error of that
+mean. Unsummarized, there is one row per outer fold and metric.
+
+A metric measured at several evaluation times (`eval_time` on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md))
+gets a row per time in both shapes, and is never averaged across times.
+Both shapes carry a `.eval_time` column exactly when the run was scored
+by a dynamic or integrated survival metric, as tune's own
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-does; on a static metric's row beside one, it is `NA`.
+does; a static metric's row beside one holds `NA` there.
 
-## Details
+## Folds that failed
 
-The summarized value is the nested cross-validation estimate: what the
-tune-and-fit procedure achieves on data it never saw. It is not the
-performance of any model you have in hand.
+Only the outer folds that completed are read, and `n` counts the folds
+behind each row, so an estimate is never reported as though the whole
+design had run. Failed folds are dropped with a warning naming them.
 
-Only the outer folds that completed are summarized, and `n` counts the
-folds contributing to each row, so a run with failures never reports its
-estimate as though the whole design had run. Those folds are dropped
-with a warning naming them; when no fold completed at all, this errors
-instead of returning `NA`, with condition class
-`nestedtune_no_completed_folds` – the class
+A run in which no fold completed is an error of class
+`nestedtune_no_completed_folds`, rather than a table of `NA`. It is the
+class
 [autoplot()](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 refuse such an object with.
 
-A metric measured at several evaluation times (`eval_time` on
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md))
-is summarized per time, never averaged across them: each row's `mean` is
-over the fold estimates at the time it names.
-
 ## Reading `std_err`
 
 `std_err` is the standard error of the mean across outer folds: the
-standard deviation of the per-fold scores divided by the square root of
-how many there were. It is the precision of that mean, not the
+standard deviation of the per-fold scores over the square root of how
+many there were. It measures the precision of that mean, not the
 fold-to-fold spread, which is larger by the same square-root factor. It
-is **not** a confidence interval for the estimate, and one should not be
-built from it.
+is not a confidence interval, and one should not be built from it.
 
-That is a limit of the statistics rather than of this implementation.
-Outer fold scores are not independent (any two folds share most of their
-training rows), so a standard error computed as though they were can
-misstate the uncertainty, typically downward. Bengio and Grandvalet
-(2004) proved there is no universally unbiased estimator of a k-fold
-cross-validation estimate's variance to put in its place. Gauran, Ombao
-and Yu (2025) measured what that costs inside a nested design: several
-of their test statistics built on a variance-based denominator rejected
-a true null far more often than the nominal 5% they were run at (36% and
-40% in the worst cells they report), and they recommend against such
-denominators outright.
+That is a limit of the statistics, not of this implementation. Outer
+fold scores are not independent, since any two folds share most of their
+training rows, so a standard error computed as though they were can
+misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
+proved that no universally unbiased estimator of a k-fold estimate's
+variance exists to put in its place. Gauran, Ombao and Yu (2025)
+measured the cost inside a nested design: several of their test
+statistics with a variance-based denominator rejected a true null far
+above the nominal 5% they ran at (36% and 40% in their worst cells), and
+they advise against such denominators.
 
-Both results are about closely related quantities rather than this
-column exactly: Bengio and Grandvalet study the variance of a k-fold
-estimate built from per-observation losses, and Gauran and colleagues
-work inside ridge and LASSO designs. Neither gap rescues the column: no
-interval here is oracle-backed, which is the practical point.
-
-The column is reported because `tune` reports it and users expect the
-shape; no inferential claim is made with it.
+Both results concern quantities close to this column rather than this
+column exactly. Bengio and Grandvalet study a k-fold estimate built from
+per-observation losses, and Gauran and colleagues work inside ridge and
+LASSO designs. Neither gap rescues the column: no interval here is
+oracle-backed. It is reported because tune reports it, and no
+inferential claim is made with it.
 
 ## References
 
@@ -113,11 +108,8 @@ for the same reader on a workflow-set run
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -126,10 +118,9 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
+# The estimate, then the per-fold scores behind it.
 collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err

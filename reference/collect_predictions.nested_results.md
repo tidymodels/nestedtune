@@ -2,18 +2,17 @@
 
 A run whose control asked for them keeps, per outer fold, the
 predictions its finalized model made on the fold's assessment rows
-(`.predictions`, under `save_pred = TRUE`) and the value the control's
+(`.predictions`, under `save_pred = TRUE`) and whatever the control's
 `extract` function returned for the fold's fitted workflow
-(`.extracts`). These two readers, methods on tune's generics, stack one
-such column into a single table with the columns the design labelled its
-folds with placed first.
+(`.extracts`). These two methods on tune's generics stack one such
+column into a single table, the design's fold labels first.
 
 - [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-  stacks `.predictions` over the folds that completed: one row per
-  assessment row of every completed fold, the columns as
+  gives one row per assessment row of every completed fold, with the
+  columns
   [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
-  produced them (the outcome, `.pred` or the class columns, `.row` and
-  `.config`).
+  produced: the outcome, `.pred` or the class columns, `.row` and
+  `.config`.
 
 - [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   gives one row per completed fold, the fold's value in an `.extracts`
@@ -34,50 +33,42 @@ collect_extracts(x, ...)
 
 - x:
 
-  A `nested_results` object from
-  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or one of its siblings, run with a control that asked for the column.
+  A `nested_results` run with a control that asked for the column. See
+  [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+  for what the object is.
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored. tune's `summarize` and `parameters` arguments
-  are not offered.
+  Not used; must be empty. tune's `summarize` and `parameters` arguments
+  are not offered here.
 
 ## Value
 
-A tibble. The first columns are the design's fold labels, read from the
-object's record: `id` on a plain v-fold design, `id` and `id2` on a
-repeated one. Then, for
-[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-the columns of the stacked prediction tables over the union of the
-columns any fold carries, `NA` where a fold lacks one; for
-[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-the `.extracts` list column. A prediction table carrying a column named
-like a fold label column is refused with condition class
+A tibble: the design's fold labels (`id`, and `id2` on a repeated
+design), then the stacked prediction columns, or the `.extracts` list
+column.
+
+## Folds that failed, and columns not saved
+
+Both readers take the folds that completed, as
+[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+does, warning once with class `nestedtune_partial_summary` on a partial
+run and erroring with class `nestedtune_no_completed_folds` when no fold
+completed.
+
+An object whose recorded control did not ask for the column, or that no
+longer carries it, is refused with class `nestedtune_column_not_saved`,
+and the message names the control slot to set. A prediction table
+carrying a column named like a fold label column is refused with class
 `nestedtune_collect_name_collision`.
 
-## Details
+## Which predictions these are
 
-Both read the folds that completed, the rule
-[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-and
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-follow: a partial run is stacked over the completed folds with one
-warning of class `nestedtune_partial_summary`, and a run in which no
-fold completed is an error of class `nestedtune_no_completed_folds`. An
-object whose run's control did not ask for `.predictions` or
-`.extracts`, read from the recorded procedure, or that no longer carries
-the column, is refused with condition class
-`nestedtune_column_not_saved`, the message naming the slot to set.
-
-The predictions are the outer fit's on each fold's assessment rows, so
-on a v-fold outer design every row of the data appears once per repeat
-in
-[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)'s
-table; on a bootstrap or Monte Carlo outer design a row appears as often
-as it was held out. The inner tuning run's predictions and extracts,
-which the same two slots also save inside tune, are not kept.
+They are the outer fit's, on each fold's assessment rows. On a v-fold
+outer design every row of the data therefore appears once per repeat; on
+a Monte Carlo design a row appears as often as it was held out. The
+inner tuning run's own predictions and extracts, which the same two
+control slots save inside tune, are not kept.
 
 ## See also
 
@@ -92,11 +83,8 @@ for the same readers on a workflow-set run
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -105,7 +93,7 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+# Ask the control to keep the predictions and a coefficient extract.
 set.seed(2)
 res <- nested_tune_grid(
   wf,

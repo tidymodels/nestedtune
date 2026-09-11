@@ -1,14 +1,15 @@
 # Stack each workflow's table of a workflow-set run under its id
 
-The six readers of a `nested_results` answer on a `nested_results_set`,
-what
+The six readers of a `nested_results` also answer on a
+`nested_results_set`, what
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-returns: each calls its single-workflow method on every element and
-binds the tables in the set's order, with a `wflow_id` column first.
+returns. Each calls its single-workflow method on every element and
+binds the tables in the set's order, under a `wflow_id` column placed
+first.
+
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-gives one row per workflow and metric summarized, or per workflow, outer
-fold and metric with `summarize = FALSE`, where `wflow_id` stands ahead
-of the fold label columns;
+gives one row per workflow and metric, or per workflow, outer fold and
+metric with `summarize = FALSE`.
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
@@ -48,8 +49,8 @@ collect_extracts(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used; must be empty, so an argument given here is an error and not
+  a silent no-op.
 
 - summarize:
 
@@ -64,29 +65,35 @@ returns for each element, bound in the set's order over the union of the
 elements' columns, `NA` where an element lacks one (`NULL` in a list
 column). An element whose table has no rows contributes none.
 
-## Details
+## Workflows and folds that failed
 
-Five of the readers read the folds that completed, as they do on one
-workflow. A workflow in which no outer fold completed is left out of
-their tables while another workflow completed one, with one warning of
-class `nestedtune_partial_summary` naming it; a workflow in which some
-folds failed contributes the folds that ran, with that reader's own
-partial-run warning raised once for it, the workflow's id at the front
-of the message; and a set in which no workflow completed a fold is
-refused with class `nestedtune_no_completed_folds`.
+Five of the readers take the folds that completed, as they do on one
+workflow. A workflow with some folds failed contributes the folds that
+ran, and that reader's own partial-run warning is raised once for it
+with the workflow's id in front of the message. A workflow in which no
+fold completed is left out while another workflow completed one, warned
+about with class `nestedtune_partial_summary`. A set in which no
+workflow completed a fold is refused with class
+`nestedtune_no_completed_folds`.
+
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+is the exception: it reads every workflow, including those in which no
+fold completed, and refuses nothing, since a failed workflow's notes are
+the reason to ask.
+
+## Columns not saved, and colliding ids
+
+A control reaches each workflow of a set through the call's `...` or
+through its own `option` entry, so one workflow can have kept what
+another did not.
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 and
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-then refuse a set in which a workflow that would contribute rows did not
-keep the column, with class `nestedtune_column_not_saved` naming it: on
-a set a control reaches each workflow through the call's `...` or its
-own `option` entry, so one workflow can have kept what another did not.
-[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reads every workflow, those in which no fold completed included, and
-refuses nothing: a failed workflow's notes are the reason to ask.
+therefore refuse a set in which a workflow that would contribute rows
+lacks the column, with class `nestedtune_column_not_saved` naming it.
 
-An element's table already carrying a `wflow_id` column – a parameter
-given that id – is refused with class
+An element's table that already has a `wflow_id` column, a parameter
+given that id, is refused with class
 `nestedtune_collect_name_collision`.
 
 ## See also
@@ -106,12 +113,9 @@ and
 ``` r
 data(mtcars)
 
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
-wset <- workflowsets::workflow_set(
-  preproc = list(pca = tuned, none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -119,10 +123,14 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
 
 set.seed(2)
 res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
-
 collect_metrics(res)
 #> # A tibble: 4 × 6
 #>   wflow_id .metric .estimator  mean     n std_err

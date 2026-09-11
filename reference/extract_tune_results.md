@@ -1,10 +1,6 @@
 # Extract the tuning run a final fit was selected from
 
-Returns the
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-or
-[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
-result that
+Returns the tuning result that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 chose its parameters from: the record of what selection saw when the
 procedure was re-run on the complete dataset.
@@ -24,39 +20,28 @@ extract_tune_results(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used; must be empty. Passing an argument here raises an error
+  instead of leaving it silently ignored.
 
 ## Value
 
 The stored `tune_results` object, unchanged. It is tune's own object, so
-tune's generics apply to it directly. A fit built from a
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result ran no tuning and is refused with condition class
-`nestedtune_no_tuning_run`.
+tune's generics apply to it directly; a fit that ran no tuning is
+refused with condition class `nestedtune_no_tuning_run`.
 
 ## What its numbers are, and are not
 
 The returned object answers
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-and will hand its metrics over without qualifying them. Every one of
-them is a **selection-time** quantity: it was computed on the resamples
-that chose the candidate it describes, which makes it optimistically
-biased as a claim about the model this final fit produced. Nothing in
-that object is this model's performance.
-
-Report the nested estimate instead:
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object the fit was built from, the
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-result. That number is measured on data no part of the tune-and-fit
-procedure ever saw, which is what makes it an honest description of the
-procedure that produced your model.
+and hands its metrics over unqualified. Each of them was computed on the
+resamples that chose the candidate it describes, which makes it a
+selection-time quantity, optimistically biased as a claim about the
+model this final fit produced.
 
-The run is kept because it is the record of what selection saw, not
-because it describes the model.
+The nested estimate is the honest one, and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+says why. This run is kept because it is the record of what selection
+saw, not because it describes the model.
 
 ## See also
 
@@ -69,11 +54,8 @@ because it describes the model.
 ``` r
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -82,12 +64,10 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
 extract_tune_results(final)
 #> # Tuning results
 #> # 2-fold cross-validation 

@@ -46,7 +46,7 @@
     <div class="section level2">
       <h2 id="nested-resampling">Nested resampling<a class="anchor" aria-label="anchor" href="#nested-resampling"></a></h2>
 
-      <div class="section-desc"><p>Build a nested resampling design whose size does not grow by a copy of the data for every outer fold.</p></div>
+      <div class="section-desc"><p>Build the design the outer loop runs on: one outer fold per row, with that fold’s inner resamples beside it, and no copy of the data per fold.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -62,7 +62,7 @@
       </dl></div><div class="section level2">
       <h2 id="running-the-loop">Running the loop<a class="anchor" aria-label="anchor" href="#running-the-loop"></a></h2>
 
-      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select, then fit and score on the outer split, and keep what each fold chose; score a workflow with nothing to tune on the same outer splits; or run every workflow of a workflow set through one design and read the results under each id.</p></div>
+      <div class="section-desc"><p>Tune on each outer fold’s inner resamples, select a candidate, then fit and score it on the outer split, keeping what every fold chose. A workflow with nothing to tune and a whole workflow set run on the same design.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -74,35 +74,35 @@
           <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>
 
         </dt>
-        <dd>Run the nested cross-validation loop</dd>
+        <dd>Nested cross-validation with a grid search inside</dd>
 
         <dt>
 
           <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>
 
         </dt>
-        <dd>Run the nested cross-validation loop with Bayesian optimization inside</dd>
+        <dd>Nested cross-validation with Bayesian optimization inside</dd>
 
         <dt>
 
           <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code> <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>
 
         </dt>
-        <dd>Run the nested cross-validation loop with racing inside</dd>
+        <dd>Nested cross-validation with racing inside</dd>
 
         <dt>
 
           <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code>
 
         </dt>
-        <dd>Run the nested cross-validation loop with simulated annealing inside</dd>
+        <dd>Nested cross-validation with simulated annealing inside</dd>
 
         <dt>
 
           <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
 
         </dt>
-        <dd>Score a workflow with nothing to tune on the outer folds of a nested design</dd>
+        <dd>Score a workflow with nothing to tune on a nested design</dd>
 
         <dt>
 
@@ -204,7 +204,7 @@
       </dl></div><div class="section level2">
       <h2 id="the-final-model">The final model<a class="anchor" aria-label="anchor" href="#the-final-model"></a></h2>
 
-      <div class="section-desc"><p>Run the same tuning procedure once more with the whole dataset in hand, and get back the model to deploy, as its own object, never a field on the results.</p></div>
+      <div class="section-desc"><p>Run the recorded tuning procedure once more with the whole dataset in hand and get back the model to deploy. It is its own object, never a field on the results.</p></div>
 
       <dl></dl></div><div class="section level2">
 

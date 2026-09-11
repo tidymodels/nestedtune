@@ -1,15 +1,15 @@
 # Summarize, plot and tabulate a workflow-set run
 
-The three readers of one workflow's run answer on a
+The three readers of one workflow's run also answer on a
 `nested_results_set`, what
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-returns, each workflow's view keyed by its `wflow_id`.
+returns, keyed by `wflow_id`.
 [`summary()`](https://rdrr.io/r/base/summary.html) summarizes every
-workflow;
+workflow,
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 draws the two views of
 [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
-across the workflows; and
+across them, and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 stacks each workflow's selection table under its id.
 
@@ -40,8 +40,8 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used; must be empty, so an argument given here is an error and not
+  a silent no-op.
 
 - type:
 
@@ -52,72 +52,89 @@ print(x, ...)
 ## Value
 
 [`summary()`](https://rdrr.io/r/base/summary.html) returns a
-`summary.nested_results_set`: a list of one
+`summary.nested_results_set`,
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) a
+`ggplot` object, and
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+a tibble. The three sections below say what each one holds.
+
+## What [`summary()`](https://rdrr.io/r/base/summary.html) holds
+
+A list of one
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
 object per workflow, named by `wflow_id` in the set's order, each the
 summary of that workflow's run called alone, with the orchestrator's
-name as the list's `fn` attribute. Its print shows the orchestrator and
-the workflow count, then one section per workflow holding that run's
-design, failed folds, selected parameters and estimate, and the note on
-what a nested estimate describes once at the end.
+name as the list's `fn` attribute.
 
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-returns a `ggplot` object. Under `type = "performance"` the workflows
-stand along the x axis inside one panel per metric, one point per
-completed outer fold's score and a dashed rule at each workflow's nested
-estimate, the value
+Printing it shows the orchestrator and the workflow count, then one
+section per workflow holding that run's design, failed folds, selected
+parameters and estimate, and once at the end the note on what a nested
+estimate describes.
+
+## What [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) draws
+
+Under `type = "performance"` the workflows stand along the x axis inside
+one panel per metric, with one point per completed outer fold's score
+and a dashed rule at each workflow's nested estimate, the value
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reports for it on the set; the panels are named as the single view names
-them. Under `type = "parameters"` there is one panel per workflow and
-tuned parameter, in the set's order, labelled by the id and then the
-single view's label for that parameter, with the outer folds along the x
-axis, so each panel asks the single view's question of one workflow. The
+reports for it on the set.
+
+Under `type = "parameters"` there is one panel per workflow and tuned
+parameter, in the set's order, labelled by the id and then by the single
+view's label for that parameter, with the outer folds along the x axis.
+Each panel asks the single view's question of one workflow. The
 selected-value axis is decided over every workflow's values at once:
 numeric when all are numbers, discrete otherwise. A workflow with
-nothing to tune contributes no panel.
+nothing to tune draws no panel.
 
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-returns a tibble: `wflow_id`, then one column per parameter any
-workflow's completed fold selected, then `n` and `prop`, with each
-workflow's rows as
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-on that run alone gives them, in the set's order, `NA` in a column that
-workflow's run does not tune; inside a workflow's own rows `NA` keeps
-the meaning
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-gives it there, a fold that recorded no value for the parameter. A
-workflow with nothing to tune contributes no row.
+## What [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md) returns
 
-## Details
+`wflow_id`, then one column per parameter any workflow's completed fold
+selected, then `n` and `prop`, with each workflow's rows as
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+on that run alone gives them, in the set's order. A column a workflow
+does not tune holds `NA` in its rows; within a workflow's rows `NA`
+keeps the meaning
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+gives it, a fold that recorded no value. A workflow with nothing to tune
+contributes no row.
 
-The three readers follow the fold-state rules of the set's
+## Workflows that failed
+
+The three follow the fold-state rules of the set's
 [collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md).
-A workflow in which some outer folds failed is read over the folds that
-ran, with one warning of class `nestedtune_partial_summary` naming it. A
-workflow in which no fold completed is still summarized by
+A workflow with some folds failed is read over the folds that ran,
+warned about once with class `nestedtune_partial_summary`.
+
+A workflow in which no fold completed is still summarized by
 [`summary()`](https://rdrr.io/r/base/summary.html), which describes a
-failed run rather than refusing; the performance view keeps its slot on
-the x axis and draws nothing for it, the parameters view draws no panel
+failed run rather than refusing. The performance view keeps its slot on
+the x axis and draws nothing there, the parameters view draws no panel
 for it, and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-leaves it out, each warning once naming it. A set in which no workflow
-completed a fold is refused by the plots and by
+leaves it out, each warning once and naming it. A set in which no
+workflow completed a fold is refused by the plots and by
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-with class `nestedtune_no_completed_folds`. A set in which no workflow's
-completed fold recorded a selected parameter is refused under
+with class `nestedtune_no_completed_folds`, and one in which no
+completed fold selected a parameter is refused under
 `type = "parameters"` with class `nestedtune_no_tuned_parameters`.
 
-The performance view's subtitle names the workflow and fold counts and
-then, each on a line of its own and only when there is one to name, how
-many workflows did not complete every fold and how many rest a metric's
-average on fewer folds than they completed;
+## Counting what contributed
+
+The performance view's subtitle gives the workflow and fold counts,
+then, on a line of its own and only when there is one to name, how many
+workflows did not complete every fold and how many averaged a metric
+over fewer folds than they completed.
 [`summary()`](https://rdrr.io/r/base/summary.html) names the folds and
-prints each workflow's count per metric. The two counts are separate: a
-workflow that ran whole can still be named by the second, since a
-completed fold can score `NA` on one metric while scoring the others,
-and a metric no completed fold scored is counted there while drawing no
-rule. A tuned parameter whose id is `wflow_id` cannot be tabulated
-beside the set's own column and is refused with class
+prints each workflow's count per metric.
+
+The two counts are separate. A workflow that ran whole can still be
+named by the second, since a completed fold can score `NA` on one metric
+while scoring the others, and a metric no completed fold scored is
+counted there while drawing no rule.
+
+A tuned parameter whose id is `wflow_id` cannot be tabulated beside the
+set's own column and is refused with class
 `nestedtune_collect_name_collision`; one whose id is `n` or `prop` is
 refused as
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
@@ -136,12 +153,9 @@ refuses it, the workflow named in front.
 ``` r
 data(mtcars)
 
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
-wset <- workflowsets::workflow_set(
-  preproc = list(pca = tuned, none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -149,10 +163,14 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
 
 set.seed(2)
 res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
-
 summary(res)
 #> 
 #> ── Nested cross-validation results for a workflow set ─────────────────
@@ -191,7 +209,7 @@ agreement(res)
 #>   wflow_id num_comp     n  prop
 #>   <chr>       <int> <int> <dbl>
 #> 1 pca_lm          1     2     1
-autoplot(res)
+autoplot(res, type = "parameters")
 
 autoplot(res, type = "performance")
 ```
