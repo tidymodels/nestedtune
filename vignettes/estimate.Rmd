@@ -23,7 +23,7 @@ cost. The worked example is `vignette("nested-cv")`.
 
 Tuning by cross-validation scores every candidate on the same resamples and
 keeps the one that scored best. The best of a set of noisy numbers is biased
-upward, so the winner's score carries the selection along with it and
+toward looking good, so the winner's score carries the selection along with it and
 overstates what the model will do on new data, by an amount nothing in the
 output reveals. At a small sample size the bias is small next to resampling
 noise, so the number is not reliably better-looking either; the structural
@@ -52,7 +52,7 @@ fresh data drawn like the training data.
 Two quantities it is not. It is not the risk of the deployed model, which is
 built afterwards on all the rows and whose own error nothing in a nested run
 estimates. And it is not the same quantity averaged over training sets,
-which is usually what a reader has in mind: Luo and Barber (2026) prove that
+since Luo and Barber (2026) prove that
 any assumption-free test of it needs a dataset many times larger than the
 training size, so this package offers no test of it. Nor is it a claim about the parameter values the deployed model
 carries, or about a different population or sample size.
@@ -65,7 +65,7 @@ on less data than the model finally deployed, and less data usually means
 worse predictions. Varma and Simon (2006) separate this training-size component, whose sign can go either way,
 from the selection-driven component, which is always optimistic.
 
-Two measurements give a sense of the size. Varma and Simon (2006) found a
+Varma and Simon (2006) found a
 nested estimate of 54.2% against a true 50.0% on null data with 40 samples,
 a 4.2-point overshoot they attribute to training on 39 rows rather than 40.
 Wilimitis and Walsh (2023), on 41,121 hospital visits, found nested
@@ -81,9 +81,8 @@ and never a licence to adjust the reported figure upward.
 
 `std_err` is the standard error of the mean across the outer folds: the
 standard deviation of the fold scores divided by the square root of their
-number. It is not the fold-to-fold spread, which is larger by that factor,
-and quoting it as though it described the folds understates their
-disagreement; `collect_metrics(res, summarize = FALSE)` gives the per-fold
+number. It is not the fold-to-fold spread, which is larger by that
+factor; `collect_metrics(res, summarize = FALSE)` gives the per-fold
 scores. It is also not a confidence interval. This package ships no inference on the
 nested estimate.
 
@@ -101,8 +100,7 @@ between two nested estimates is a reason to look closer, never a result.
 The same covers a set of workflows run through one design with
 `nested_workflow_map()`. Picking the workflow with the best estimate is a
 selection step the outer loop did not nest, so the package registers no
-ranking or best-workflow method for the set, and the chosen workflow's
-estimate is what a comparison read, never what choosing it achieves.
+ranking or best-workflow method for the set.
 
 ## Disagreement between folds
 
@@ -124,8 +122,11 @@ and Tibshirani (2009) found the optimism of a tuned cross-validation score
 material only when the features vastly outnumber the observations: under 3
 points on pure noise with 400 observations and 100 features, against a
 minimum error rate of 0.384 for a true 0.5 with 40 observations and 1000
-features. Wide data, a big grid, and a preprocessing step the loop has to
-redo are where the bias is largest.
+features, where an SVM read 0.475 and a tree 0.498, so even there it depends
+on the learner. That paper's own remedy is a cheap correction to the flat
+score rather than nesting; it is cited for where the bias lives. Wide data,
+a big grid, and a preprocessing step the loop has to redo are where the bias
+is largest.
 
 It removes little when the data is tall and the search is small. Wilimitis
 and Walsh (2023) ran that case, 41,121 visits and a modest grid, and nesting

@@ -290,12 +290,14 @@ collect_notes(failed) |>
 
 A fold can also complete and carry notes, when an inner resample failed but
 tuning still returned a candidate from the resamples that ran. `summary()`,
-`collect_metrics()`, `agreement()` and the stacking readers answer on a run
-with a failed fold over the folds that completed, and warn once with class
-`nestedtune_partial_summary` saying how many the summary covers; `autoplot()`
-leaves the failed fold's place on its axis empty. A run in which no fold
-completed is refused by every reader but `summary()`, because there is no
-estimate to report for a design that did not execute.
+`collect_metrics()`, `agreement()`, `collect_selections()` and
+`collect_inner_metrics()` answer on a run with a failed fold over the folds
+that completed, and warn once with class `nestedtune_partial_summary` saying
+how many the summary covers; `collect_notes()` reads every fold and warns
+about none; `autoplot()` leaves the failed fold's place on its axis empty. A
+run in which no fold completed is refused by those readers and by
+`nested_final_fit()`, except `summary()` and `collect_notes()`, because there
+is no estimate to report for a design that did not execute.
 
 ## Subsetting with dplyr
 

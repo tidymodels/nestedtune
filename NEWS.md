@@ -82,7 +82,11 @@
   completed, warning once with class `nestedtune_partial_summary` on a
   partial run.
 
-* Two site-only articles and two further vignettes are added. The parallel
+* `tidymodels` joins Suggests. Every vignette attaches it before `nestedtune`,
+  behind a guard that ends the page with one notice when it or another of the
+  page's optional packages is absent.
+
+* The parallel article and three further vignettes are added. The parallel
   article runs the guide's loop on two mirai daemons and shows the result
   identical to the serial run; `vignette("results")` reads every column and
   reader of the results object; `vignette("tuners")` runs the Bayesian,
@@ -187,7 +191,8 @@
 
 * Every `nested_results` carries a `procedure` attribute recording the tuner
   that ran, its own arguments, and `param_info`, `event_level` and
-  `eval_time`, which travels with the class and is shed with it.
+  `eval_time`, which travels with the class and is shed with it. The metric
+  set travels beside it as `attr(x, "metrics")`, absent when none was passed.
 
 * `agreement()` reports how often each candidate was selected across the
   outer folds: one row per distinct combination of selected values, with

@@ -152,8 +152,8 @@ bayes_iter <- range(bayes$.inner_metrics[[1]]$.iter)
 The `.iter` column says which stage each candidate came from: `.iter` of
 `r bayes_iter[1]` marks the initial set, and the proposals run up to
 `r bayes_iter[2]`. A `tune::control_bayes()` passed as `control` reaches the
-inner call in every fold, and one that stops the search early shows here as
-a fold whose `.iter` stops short of `iter`; `?nested_tune_bayes` says which
+inner call in every fold, and one that stops the search early shows in this
+column as a fold whose `.iter` stops short of `iter`; `?nested_tune_bayes` says which
 of its slots this package sets for itself.
 
 ## Racing
@@ -348,7 +348,7 @@ nested_fit_resamples(wf, folds)
 
 A comparison across model families needs every family scored on the same
 outer folds. `nested_workflow_map()` takes a `workflow_set()` and the name
-of one tuning function, and runs each workflow of the set through it on one
+of one orchestrator, and runs each workflow of the set through it on one
 design, so the results come back side by side. Here the set holds the random
 forest above, a linear model on the same predictors with nothing to tune,
 and a linear model on principal components whose count is tuned. The

@@ -266,9 +266,8 @@ tibble(
 )
 ```
 
-The selection-time score was computed on the resamples that chose the
-winner, so it is not an estimate of performance on anything, whichever side
-of the nested estimate it lands on; `vignette("estimate")` says why. It
+The selection-time score is not an estimate of performance on anything,
+whichever side of the nested estimate it lands on. It
 stays on the object as the record of what selection saw, and tune's readers
 hand it over without a warning. That is why the results object and the final
 fit both refuse tune's ranking generics rather than answering them. On the
@@ -286,14 +285,14 @@ select_best(final, metric = "rmse")
 ## Reproducibility
 
 Seed the session before the call, as elsewhere in tidymodels; neither
-function takes a seed of its own. Each draws a tuning seed and an outer-fit
-seed for every fold from the session state at entry, fixed by the fold's
-position in the design rather than by the order the folds happen to run in,
-and stores them on the result. So the same seed gives the same answer whether
-the folds run serially or on a pool of workers, and any one fold can be
-reproduced by hand. The final fit carries the two seeds it ran under as
-`tuning_seed` and `fit_seed`, and the caller's own random state is put back
-as it was found.
+function takes a seed of its own. `nested_tune_grid()` draws a tuning seed
+and an outer-fit seed for every fold from the session state at entry, fixed
+by the fold's position in the design rather than by the order the folds
+happen to run in, and stores them on the result. So the same seed gives the
+same answer whether the folds run serially or on a pool of workers, and any
+one fold can be reproduced by hand. `nested_final_fit()` draws one pair the
+same way and carries it as `tuning_seed` and `fit_seed`, and both functions
+put the caller's own random state back as it was found.
 
 ```{r seeds}
 res$.tuning_seed
