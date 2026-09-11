@@ -96,12 +96,12 @@ nested estimate.
 
 Suppose you run the loop on two workflows and one comes back lower. Nothing
 in the output says whether the difference is real, because there is no
-valid interval to subtract. Bayle et al. (2026) give a sharper reason not
-to build one. A cross-validation interval for one procedure is valid when
-that procedure is stable, meaning one changed training row moves its errors
-little. Two procedures can each be stable while their difference is not,
-and the difference is what needs the interval. That is worst when the two
-procedures are similar. A gap between two nested
+valid interval to subtract. Bayle et al. (2026) give a sharper reason. A
+cross-validation interval for one procedure is valid when that procedure is
+stable, meaning the shift from changing one training row is small next to
+the spread of its errors. Two procedures can each be stable while their
+difference is not, and the difference is what needs the interval. That is
+worst when the two procedures are similar. A gap between two nested
 estimates is a reason to look closer, never a result.
 
 The same holds for a set of workflows run through one design with

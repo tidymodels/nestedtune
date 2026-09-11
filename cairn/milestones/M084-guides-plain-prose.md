@@ -1,6 +1,6 @@
 # M084: The guides and README read on one pass for a tune_grid user
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -73,6 +73,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 - 2026-09-11: /milestone-review ran on `fb85d5b`; AC1, AC2, AC4, AC5, AC6 verified and the consistency gate passed; AC3 failed: review's fresh reader listed ten paragraphs (the Review section names each), and the 2026-09-10 decision made a non-empty list a defect return. Defect return 1 of this milestone. Status back to in-progress; the three review lenses' findings are logged in the Review section for the next pass's triage.
 - 2026-09-11: /milestone-implement resumed. Gate chose fixing the reader's ten paragraphs and holding AC3 as written over narrowing AC3 or one more implement-side reader; and, of the lens findings, fixing O1, O2, O4 (the three overclaims), O3 (script line numbers) and O8 (NEWS), leaving O5 (the frozen intro), O6 (pre-existing), O7 (absorbed by the README rewrite), O9, O11-O14 as rejected or noted; O10's counts are superseded by this line's.
 - 2026-09-11: return pass done. All ten paragraphs rewritten (results' failed-fold paragraph split at the some-versus-none boundary; parallel's opening split in two; the README now opens with the reader's tuning problem); tuners:320 says the readers answer on the baseline as on a tuned run, tuners:354 names six functions with `nested_fit_resamples()` included, results lists the eight readers that call `check_any_completed()`; the two NEWS bullets merged into one; `strip_spans()` keeps a span's line breaks, shown on a synthetic page where the old script reported line 5 and the new reports line 6. Sweep clean, idioms clean, banned grep no hit over prose, word counts 1288 / 1393 / 1327 / 1374 / 549 / 242; `README.md` re-knit.
+- 2026-09-11: claim audit: 30 claims read, 3 corrected — vignettes/estimate.Rmd (the stability gloss named absolute stability; now the shift from one changed row next to the spread of the errors, the ratio `references/bayle2026.md` states), NEWS.md (the merged bullet claimed the sentence cap and the orchestrator ban for NEWS.md itself; now scoped to the six pages, with only the one-page-with-links claim covering this file). The re-read ran in a fresh [O] reader, agent continuation being disabled; both hold. Sweep clean, estimate 1397 words. No R code changed, so the verify slot's test run is not owed; review runs check(). Status set to review.
 
 ## Review
 
