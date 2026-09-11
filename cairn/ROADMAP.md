@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-11 (twelfth pass, at M086's merge: M086 archived and its row set done, M83's row pruned to keep three terminal rows, eight candidate rows compressed for the byte budget, the #91 row noting the posted comment, one LESSONS line added and the M81 line's M84 extension corrected to D-061; both files within caps.)_
+_Last hygiene check: 2026-09-11 (twelfth pass, at M086's merge: M086 archived and its row set done, M83's row pruned, eight candidate rows compressed for the byte budget, the #91 row noting the posted comment, one LESSONS line added and the M81 line corrected to D-061; both files within caps.)_
 
 ## Milestones
 
