@@ -9,11 +9,13 @@
 # storing it would copy the data onto every record (GP4). What is recorded
 # instead is a deparsed description: the model specification's class, engine,
 # mode and arguments, and the preprocessor by kind, with random ids, quosure
-# environments and the data left out. An expression is recorded as written,
-# so `num_comp = k` records `k` and not the value `k` was bound to: two
-# workflows that differ only in what a name outside them was bound to read
-# as one, deliberately, since the identity is a check on the code the user
-# handed over and not a re-run of it.
+# environments and the data left out. A model argument is recorded as
+# written, so `penalty = p` records `p` and not the value `p` was bound to:
+# two workflows that differ only in what a name outside them was bound to
+# read as one, deliberately, since the identity is a check on the code the
+# user handed over and not a re-run of it. A recipe step's settings are the
+# exception (see `preprocessor_identity()` below): recipes evaluates them
+# when the step is added, so they are recorded by value.
 
 workflow_identity <- function(object) {
   list(
@@ -28,8 +30,9 @@ workflow_identity <- function(object) {
 # `model_spec`), engine, mode, and the main and engine arguments. parsnip
 # holds both argument sets as quosures whether they were given in the
 # constructor or through `set_args()` and `set_engine()` afterwards, so the
-# two routes deparse alike. `eng_args` is NULL until `set_engine()` is given
-# one, and an empty list once it was; both read as no engine arguments.
+# two routes deparse alike. `eng_args` is NULL on a fresh specification and
+# an empty quosure list once `set_engine()` has been called, whether or not
+# an engine argument was given; both read as no engine arguments.
 model_identity <- function(spec) {
   list(
     class = class(spec)[[1L]],

@@ -12,8 +12,8 @@
 #'
 #' Returns the `procedure` record a nested result carries, the tune, select
 #' and fit steps as they were set. It says which tuner ran, that tuner's
-#' own arguments, and the control as it took effect. A [nested_final_fit()]
-#' carries the record it re-ran.
+#' own arguments, the control as it took effect, and the workflow the run
+#' was given. A [nested_final_fit()] carries the record it re-ran.
 #'
 #' Reading this record is how you see what a final fit will do before you
 #' ask for one. A final fit built from a results object re-runs exactly
@@ -25,8 +25,8 @@
 #'
 #' @return The stored record, unchanged: a flat named list with `tuner`,
 #'   that tuner's own arguments, the arguments every loop function shares,
-#'   and `control` as it took effect. The section below says what each
-#'   holds.
+#'   `control` as it took effect, and the `workflow` identity. The section
+#'   below says what each holds.
 #'
 #' @section What the record holds:
 #'
@@ -47,6 +47,17 @@
 #' and no `select`, since no parameter set was read and no rule applied.
 #' See "Differences from calling tune directly" on each loop function's
 #' help page for what those slots are.
+#'
+#' `workflow` is the identity of the workflow the run was given: the
+#' model's type, engine, mode and arguments, and the preprocessor, each in
+#' deparsed form. A formula or a variables selection is held as written.
+#' A recipe is held as its steps in order, with each step's selectors and
+#' settings, and its random step ids left out. The workflow object itself
+#' is not stored, and no data rows are. A model argument is held as
+#' written, so a name bound outside the workflow is held as that name and
+#' not as its value. [nested_final_fit()] compares the workflow it is
+#' handed against this entry and refuses one that differs, with class
+#' `nestedtune_workflow_mismatch`.
 #'
 #' On a `nested_results` the record travels as an attribute of the object.
 #' On a `nested_final_fit` it is the record the fit re-ran, which is the

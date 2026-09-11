@@ -106,7 +106,14 @@ naming convention.
   tuner and its arguments — over the whole dataset, so the model and the
   estimate come from one search by construction (D-041), and answers none of
   tune's ranking or collecting generics, so no number it holds can be read as
-  the model's score (D-014).
+  the model's score (D-014). Every procedure record carries the canonical
+  identity of the workflow the run was given — `workflow_identity()`
+  (`R/workflow-identity.R`), the model specification and the preprocessor
+  deparsed, with recipe step ids, quosure environments and the recipe
+  template left out — and the final fit refuses a workflow whose identity
+  differs, with class `nestedtune_workflow_mismatch`, after the grid and
+  marker checks and before any seed is drawn (`check_workflow_identity()`,
+  M83); a record without the entry is refused as one from an earlier version.
 
 ## Conventions
 

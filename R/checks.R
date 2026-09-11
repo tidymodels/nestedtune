@@ -1654,9 +1654,11 @@ check_final_fit_set_args <- function(
 # this catches every other difference -- model type, engine, mode, an
 # argument, the preprocessor's kind or any part of it -- and names the first
 # part that differs, with the recorded and the given form beside it. The
-# identity is a deparsed description (R/workflow-identity.R), so what is
-# compared is the code the two workflows were built from, not what a name
-# outside them was bound to.
+# identity is a deparsed description (R/workflow-identity.R), so a model
+# argument is compared as the code it was written as, and not as what a
+# name outside the workflow was bound to. A recipe step's settings are the
+# exception: recipes evaluates them when the step is added, so they are
+# compared by value.
 check_workflow_identity <- function(
   object,
   recorded,

@@ -74,6 +74,11 @@ A workflow that still carries a \code{\link[tune:tune]{tune::tune()}} marker is 
 entry with condition class \code{nestedtune_tuned_workflow}, naming the five
 orchestrators that tune. Each of those refuses a workflow with no
 marker, with class \code{nestedtune_untuned_workflow}, naming this one.
+
+The final fit ties the workflow to the record as well. The result
+records the identity of the workflow it ran under, and
+\code{\link[=nested_final_fit]{nested_final_fit()}} refuses a workflow whose identity differs, as its
+"What is refused" section says.
 }
 
 \section{What the reading functions answer}{
