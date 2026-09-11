@@ -250,7 +250,14 @@ roxygen_openings <- function(paras) {
   out
 }
 
-split_runs <- function(text, keep, line, block = NULL, tag = NULL, titled = NULL) {
+split_runs <- function(
+  text,
+  keep,
+  line,
+  block = NULL,
+  tag = NULL,
+  titled = NULL
+) {
   paras <- list()
   run <- integer()
   flush <- function() {
