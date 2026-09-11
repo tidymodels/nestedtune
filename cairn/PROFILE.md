@@ -9,8 +9,8 @@ The R-package toolchain: devtools/roxygen/testthat/pkgdown, CRAN release.
 Run by `/milestone-implement` (per task) and `/hotfix` (gate-lite):
 - After roxygen changes: `Rscript -e 'devtools::document()'`.
 - After code changes, before a task is checked off: `Rscript -e 'devtools::test()'` clean.
-- `/hotfix` gate-lite: `devtools::test()` clean; `devtools::document()` if
-  roxygen changed; `devtools::check()` if anything structural was touched.
+- Before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off: `Rscript benchmarks/sweep-prose.R --plain` clean, and `--roxygen --plain` after roxygen changes.
+- `/hotfix` gate-lite: `devtools::test()` clean; `devtools::document()` if roxygen changed; `devtools::check()` if anything structural was touched.
 
 ## consistency-gate
 Toolchain checks `/milestone-review` runs *in addition to* the universal
@@ -24,6 +24,7 @@ cairn-file checks (`cairn_validate`, coverage completeness, `cairn_impact`):
 - The declared changelog (`## changelog` slot) has an entry for this milestone's user-visible changes (no milestone numbers in user-facing text).
 - New top-level files have `.Rbuildignore` entries (check `check()` NOTEs).
 - Full check at review: `Rscript -e 'devtools::check()'` clean (0 errors, 0 warnings; justify NOTEs).
+- The six gating prose sweeps clean: `Rscript benchmarks/sweep-prose.R`, `--spans`, `--plain`, and each of the three with `--roxygen` (also run by `prose-sweep.yaml` and `tests/testthat/test-sweep-prose.R`).
 
 ## test-doctrine
 R-mechanical test expectations layered on the universal "What gets a test"
@@ -39,15 +40,15 @@ rules in tracking-rules:
 - CI starts from the usethis pair: `check-standard` runs `R CMD check` across platforms (a normal CI check — see the
   merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
   `.Rbuildignore`d.
-- Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80). **A `concurrency` block** cancels a
+- Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80, M88). **A `concurrency` block** cancels a
   superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
   `paths-ignore` filter** on both triggers of `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
-  `pkgdown.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
+  `pkgdown.yaml`, `prose-sweep.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
   check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
   `pull_request` against the whole PR diff. **Hang caps** turn a hang into a failed job with a timestamp; every figure
   stays in the workflow declaring it. `R-CMD-check.yaml` bounds its job and its `check-r-package` step separately, the
-  step higher on windows; `test-coverage.yaml`, `R-CMD-check-hard.yaml` (M57) and `devel-vctrs.yaml` each bound one
-  job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own measurements and rationale.
+  step higher on windows; `test-coverage.yaml`, `R-CMD-check-hard.yaml` (M57), `devel-vctrs.yaml` and `prose-sweep.yaml`
+  (M88, its `push` with no `branches` filter, the yaml saying why) each bound one job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own measurements and rationale.
   The step bound is the guarantee, both pre-M14 hangs having sat in `test_check("nestedtune")` (52 minutes under `R
   CMD check`, 40 under `covr`), which is why each workflow carries its own; the job bound covers the devel leg's
   from-source dependency build, which a smaller one once killed before cache-save. A step bound is not free headroom:
