@@ -14,142 +14,144 @@ knitr::opts_chunk$set(
 )
 ```
 
-This page runs no code. It says why a tuned model's own score is not an
-estimate, which quantity the nested number is, how to read the standard
-error beside it, why the outer folds disagree, and when nesting is worth its
-cost. The worked example is `vignette("nested-cv")`.
+This page runs no code. It says why a tuned model's own score cannot be
+trusted, which quantity the nested number describes, and how to read its
+standard error. It also covers fold disagreement and when nesting is worth
+its cost. The worked example is `vignette("nested-cv")`.
 
 ## The case for nesting
 
-Tuning by cross-validation scores every candidate on the same resamples and
-keeps the one that scored best. The best of a set of noisy numbers is biased
-toward looking good, so the winner's score carries the selection along with it and
-overstates what the model will do on new data, by an amount nothing in the
-output reveals. At a small sample size the bias is small next to resampling
-noise, so the number is not reliably better-looking either; the structural
-argument is the reason to distrust it, not its sign. That is why the results
-object and the final fit both refuse tune's ranking generics such as
-`show_best()`.
+When you tune with cross-validation, you try several settings, the
+candidates, and keep the one with the best score. Scores are noisy, and the
+best of several noisy numbers tends to look better than it is. So the
+winner's score overstates what the model will do on new data, by an amount
+nothing in the output reveals.
 
-Nested cross-validation puts the whole tune-and-fit procedure inside a
-second, outer resampling loop. Each outer fold tunes from scratch on its own
-analysis rows, fits the winner there, and scores it once on assessment rows
-the tuning never saw. The mean of those outer scores is the estimate.
+At a small sample size the noise is large, so the winner's score may not
+even look better than an honest one. Distrust it for how it was chosen, not
+for which way it is off. That is why the results object and the final fit
+both refuse tune's ranking functions such as `show_best()`.
+
+Nested cross-validation scores the whole tuning procedure, meaning every
+step you run on the data: resample, tune, pick a setting, fit. Nesting puts
+that procedure inside a second, outer resampling loop. Each outer fold tunes
+from scratch on its own analysis rows, fits the chosen setting there, and
+scores that fit once on assessment rows the tuning never saw. The mean of
+those outer scores is the estimate.
 
 The number `collect_metrics()` reports describes the whole tune-and-fit
 procedure: resample, tune, select, fit. That is the number to report. The
 model fitted at the end for deployment is a separate object, and it has no
-performance number of its own, because everything computable from its
-training data was used up in selecting and fitting it.
+performance number of its own. Everything computable from its training data
+was used up in selecting and fitting it.
 
 ## The quantity estimated
 
-The estimate is of the k-fold test error of the tune-and-fit procedure
-(Bayle et al., 2026): the error of resampling, tuning, selecting and
-fitting, on the particular analysis sets these folds drew, then predicting
-fresh data drawn like the training data.
+Bayle et al. (2026) call the quantity the k-fold test error of the
+procedure. It is the error you get from resampling, tuning, selecting and
+fitting on the analysis sets these folds drew, then predicting fresh data
+drawn like the training data.
 
-Two quantities it is not. It is not the risk of the deployed model, which is
-built afterwards on all the rows and whose own error nothing in a nested run
-estimates. And it is not the same quantity averaged over training sets,
-since Luo and Barber (2026) prove that
-any assumption-free test of it needs a dataset many times larger than the
-training size, so this package offers no test of it. Nor is it a claim about the parameter values the deployed model
-carries, or about a different population or sample size.
+Two things it is not. It is not the error of the deployed model, which is
+built afterwards on all the rows and estimated by nothing here. It is also not the same quantity averaged over all the
+training sets you might have drawn. Luo and Barber (2026) prove that any
+assumption-free test of that averaged quantity needs a dataset many times
+larger than the training set. So this package offers no test of it. Nor is
+the estimate a claim about the parameter values the deployed model carries,
+or about a different population or sample size.
 
 ## A slight pessimism
 
 The number tends to look a little worse than the procedure deserves. Every
 outer fold trains on its analysis rows only, so every model scored is built
-on less data than the model finally deployed, and less data usually means
-worse predictions. Varma and Simon (2006) separate this training-size component, whose sign can go either way,
-from the selection-driven component, which is always optimistic.
+on less data than the model you finally deploy. Less data usually means
+worse predictions. Varma and Simon (2006) separate this training-size
+effect, which can go either way, from the selection effect, which is always
+optimistic.
 
-Varma and Simon (2006) found a
-nested estimate of 54.2% against a true 50.0% on null data with 40 samples,
-a 4.2-point overshoot they attribute to training on 39 rows rather than 40.
-Wilimitis and Walsh (2023), on 41,121 hospital visits, found nested
-cross-validation among the most pessimistic methods they compared, by
-roughly 1 to 2% of AUROC and 5 to 9% of AUPR against a held-out benchmark,
-though the same study reports a cell where the nested estimate came out
-optimistic instead.
+Varma and Simon (2006) ran nested cross-validation on null data with 40
+samples, where the true error is 50.0%, and got 54.2%. They attribute the
+4.2-point overshoot to training on 39 rows rather than 40. Wilimitis and
+Walsh (2023) compared methods on 41,121 hospital visits against a held-out
+benchmark. Nested cross-validation was among the most pessimistic, by
+roughly 1 to 2% of AUROC and 5 to 9% of AUPR. The same study reports one
+cell where the nested estimate came out optimistic instead.
 
-The gap is a property of the estimator, not a prediction about any one run,
-and never a licence to adjust the reported figure upward.
+The gap is a property of the estimator, not a prediction about any one run.
+It is never a licence to adjust the reported figure upward.
 
 ## The standard error
 
-`std_err` is the standard error of the mean across the outer folds: the
-standard deviation of the fold scores divided by the square root of their
-number. It is not the fold-to-fold spread, which is larger by that
-factor; `collect_metrics(res, summarize = FALSE)` gives the per-fold
-scores. It is also not a confidence interval. This package ships no inference on the
+`std_err` is the standard error of the mean across the outer folds. It is
+the standard deviation of the fold scores divided by the square root of
+their number. It is not the fold-to-fold spread, which is larger by that
+factor. `collect_metrics(res, summarize = FALSE)` gives the per-fold scores.
+It is also not a confidence interval. This package ships no inference on the
 nested estimate.
 
 ## Comparing two workflows
 
-If the loop is run on two workflows and one comes back lower, nothing in the
-output says whether the difference is real, because there is no valid
-interval here to subtract. Bayle et al. (2026) give a sharper reason not to
-reach for one: the stability condition that makes a single procedure's
-cross-validation interval valid can fail for the difference between two
-procedures even when it holds for each, and it fails hardest when the two
-are similar. A gap
-between two nested estimates is a reason to look closer, never a result.
+Suppose you run the loop on two workflows and one comes back lower. Nothing
+in the output says whether the difference is real, because there is no
+valid interval to subtract. Bayle et al. (2026) give a sharper reason not
+to build one. A cross-validation interval for one procedure is valid when
+that procedure is stable. The difference between two procedures can fail
+that condition even when each procedure meets it, and it fails hardest when
+the two are similar. A gap between two nested estimates is a reason to look
+closer, never a result.
 
-The same covers a set of workflows run through one design with
+The same holds for a set of workflows run through one design with
 `nested_workflow_map()`. Picking the workflow with the best estimate is a
-selection step the outer loop did not nest, so the package registers no
-ranking or best-workflow method for the set.
+selection step the outer loop did not nest. So the package offers no
+ranking or best-workflow function for the set.
 
 ## Disagreement between folds
 
-The results object keeps every fold's choice. When the folds split over a parameter, the data does not
-pick its value clearly, so whichever value the final model carries was not
-strongly preferred by the evidence. That is not a defect in the estimate,
-which already averages over this variability. It is a defect in any story
-about the selected parameters being the right ones.
+The results object keeps every fold's choice. When the folds split over a
+parameter, the data does not pick its value clearly. Whichever value the
+final model carries was not strongly preferred by the evidence. That is not
+a defect in the estimate, which already averages over this variability. It
+is a defect in any story about the selected parameters being the right
+ones.
 
-Disagreement is expected wherever the candidates perform about equally well:
-as two candidates' predictions converge, which of them wins any particular
-fold becomes close to a coin flip (Bayle et al., 2026).
+Disagreement is expected wherever the candidates perform about equally
+well. As two candidates' predictions converge, which of them wins any
+particular fold becomes close to a coin flip (Bayle et al., 2026).
 
 ## The cost of nesting
 
-What decides whether nesting pays is how much room the selection step had to
-overfit. It removes most when the search is large relative to the data. Tibshirani
-and Tibshirani (2009) found the optimism of a tuned cross-validation score
-material only when the features vastly outnumber the observations: under 3
-points on pure noise with 400 observations and 100 features, against a
-minimum error rate of 0.384 for a true 0.5 with 40 observations and 1000
-features, where an SVM read 0.475 and a tree 0.498, so even there it depends
-on the learner. That paper's own remedy is a cheap correction to the flat
-score rather than nesting; it is cited for where the bias lives. Wide data,
-a big grid, and a preprocessing step the loop has to redo are where the bias
-is largest.
+Whether nesting pays depends on how much room the selection step had to
+overfit. Tibshirani and Tibshirani (2009) found the optimism of a tuned
+cross-validation score material only when the features vastly outnumber the
+observations. On pure noise with 400 observations and 100 features, the
+optimism was under 3 points. With 40 observations and 1000 features, where
+the true error rate is 0.5, the lowest tuned score read 0.384. Even there
+the learner mattered: an SVM read 0.475 and a tree 0.498. That paper's
+remedy is a correction, not nesting; it is cited for where the bias lives.
+Wide data, a big grid, and a preprocessing step the
+loop has to redo are where the bias is largest.
 
-It removes little when the data is tall and the search is small. Wilimitis
-and Walsh (2023) ran that case, 41,121 visits and a modest grid, and nesting
-bought nothing but the pessimism above at a cost that grew quadratically in
-the fold count. Their recommendation, and this package's, is to nest when
-the feature space is wide relative to the sample, when many algorithms and
-parameters are in play, and when the compute is affordable.
+Nesting removes little when the data is tall and the search is small. Wilimitis
+and Walsh (2023) ran that case, 41,121 visits and a modest grid. Nesting
+bought nothing but the pessimism above, at a cost that grew quadratically in
+the fold count. Their advice, and this package's, is to nest when the
+feature space is wide relative to the sample, the search covers many
+algorithms and parameters, and the compute is affordable.
 
 Small data is not fine without it. Vabalas et al. (2019) simulated pure
-noise, where the honest accuracy is 50%, and found flat cross-validation
-still reporting better than chance at a sample size of 1000, while nested
+noise, where the honest accuracy is 50%. Flat cross-validation still
+reported better than chance at a sample size of 1000. Nested
 cross-validation was indistinguishable from chance at 96.5% of the sample
 sizes tested. The bias thins with sample size and does not disappear.
 
 ## Feature selection inside the workflow
 
-Vabalas et al. (2019) also compared leaving feature selection outside the
-loop against leaving parameter tuning outside it, and the first was far more
-damaging. This package orchestrates tuning, so a pipeline that selects
-features must put that step in the recipe inside the workflow it hands over.
-Everything in the workflow is re-estimated inside every fold. Anything done
-to the data before the call is not, and no result here can tell that it
-happened.
+Vabalas et al. (2019) also compared two mistakes: leaving feature selection
+outside the loop, and leaving parameter tuning outside it. The first was far
+more damaging. The loop here re-estimates the whole workflow inside every
+fold, so a pipeline that selects features must put that step in the recipe
+of the workflow it hands over. Anything done to the data before the call is
+not re-estimated, and no result here can tell that it happened.
 
 ## References
 
