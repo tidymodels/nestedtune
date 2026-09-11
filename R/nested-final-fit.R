@@ -17,9 +17,9 @@
 #' @description
 #' `nested_final_fit()` builds the model you deploy after a nested run. It
 #' runs the recorded procedure, tune, select and fit, once more with the
-#' whole dataset in hand. That means rebuilding the inner resamples on every
-#' row, tuning with the recorded tuner, selecting by the recorded
-#' [selection_rule()], and fitting the finalized workflow on all the data.
+#' whole dataset in hand. That means it rebuilds the inner resamples on every
+#' row, tunes with the recorded tuner, selects by the recorded
+#' [selection_rule()], and fits the finalized workflow on all the data.
 #'
 #' What comes back is the model to deploy. It carries no performance number
 #' of its own. The number to report is [collect_metrics()] on the results
@@ -32,11 +32,11 @@
 #' @param results The `nested_results` object from [nested_tune_grid()] or one
 #'   of its siblings whose estimate you will report for this model. Everything
 #'   the re-run needs is read from it.
-#' @param ... Not used; must be empty. Everything the re-run needs, the grid
+#' @param ... Not used. It must be empty. Everything the re-run needs, the grid
 #'   and the metrics included, now comes from `results`, so passing an
 #'   argument here is an error.
 #' @param id For a `nested_results_set` as `object`, the `wflow_id` of the
-#'   workflow to fit; `results` is then left missing. `NULL`, the default, for
+#'   workflow to fit. `results` is then left missing. `NULL`, the default, for
 #'   a plain workflow.
 #'
 #' @return An object of class `nested_final_fit`. Its elements are:
@@ -170,7 +170,7 @@
 #'
 #' @section Reproducibility:
 #'
-#' Seed the session before the call; there is no `seed` argument. Two seeds
+#' Seed the session before the call. There is no `seed` argument. Two seeds
 #' are drawn on entry and applied with the generator kind pinned: the first
 #' builds the inner resamples and tunes, the second fits. Both are kept on
 #' the object, and the caller's generator state is put back on the way out.
@@ -226,8 +226,8 @@
 #'
 #' Building the resamples sits inside the first seed's scope rather than
 #' before it. Constructing an `rset` draws from the generator. A version
-#' that built them earlier would still be reproducible from the session
-#' seed, but no longer from the two seeds above.
+#' that built them earlier stays reproducible from the session seed, but
+#' not from the two seeds above.
 #'
 #' @section The inner specification is re-evaluated:
 #'

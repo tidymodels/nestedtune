@@ -15,17 +15,17 @@
 #' accessors that reach what selection saw.
 #'
 #' No performance number appears. The stored tuning run has metrics, but
-#' selection consumed them; see [nested_final_fit()] for why they are not this
+#' selection consumed them. See [nested_final_fit()] for why they are not this
 #' model's performance and the nested estimate is.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used; must be empty. Passing an argument here raises an
+#' @param ... Not used. It must be empty. Passing an argument here raises an
 #'   error instead of leaving it silently ignored.
 #' @return `x`, invisibly.
 #'
 #' @section The procedure line:
 #'
-#' The line under the heading tells you what ran: the procedure, meaning
+#' The line under the heading tells you what ran: the procedure, which is
 #' the tuner and its counts. A grid search or a race is named with the number of
 #' candidates, parameter settings, it scored. An iterating search is named
 #' with the initial candidates scored and requested and the iterations
@@ -108,16 +108,16 @@ print.nested_final_fit <- function(x, ...) {
 #' `summary()` returns an object of class `summary.nested_final_fit`, a list
 #' with these components:
 #'
-#' - `tuning_label`, the tuning run's resampling label;
+#' - `tuning_label`, the tuning run's resampling label
 #' - `tuner`, the name of the tune or finetune function that ran, as
-#'   [extract_procedure()] records it;
-#' - `candidates`, the number of parameter settings that run scored;
+#'   [extract_procedure()] records it
+#' - `candidates`, the number of parameter settings that run scored
 #' - `initial` and `initial_requested`, `iterations_completed` and
-#'   `iterations_requested`, the iterating tuners' counts;
-#' - `selection`, the parameter values selection chose;
-#' - `estimate`, always `NULL`.
+#'   `iterations_requested`, the iterating tuners' counts
+#' - `selection`, the parameter values selection chose
+#' - `estimate`, always `NULL`
 #'
-#' Printing it is what most callers want; the components are there for a
+#' Printing it is what most callers want. The components are there for a
 #' caller that needs a value rather than a line of text.
 #'
 #' @section Components that are absent:
