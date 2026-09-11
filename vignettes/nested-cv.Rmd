@@ -266,13 +266,14 @@ tibble(
 )
 ```
 
-The selection-time score was computed on the very resamples that chose the
+The selection-time score was computed on the resamples that chose the
 winner, so it is not an estimate of performance on anything, whichever side
-of the nested estimate it lands on. It stays on the object as the record of
-what selection saw, and tune's readers hand it over without a warning. That
-is why the results object and the final fit both refuse tune's ranking
-generics rather than answering them. On the loop's results they would rank
-outer folds, and on the final fit there is one model and nothing to rank.
+of the nested estimate it lands on; `vignette("estimate")` says why. It
+stays on the object as the record of what selection saw, and tune's readers
+hand it over without a warning. That is why the results object and the final
+fit both refuse tune's ranking generics rather than answering them. On the
+loop's results they would rank outer folds, and on the final fit there is
+one model and nothing to rank.
 
 ```{r refusals, error = TRUE}
 show_best(res, metric = "rmse")
