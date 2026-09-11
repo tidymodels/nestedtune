@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-11 (eleventh pass, at M083's merge: M083 archived and its row set done, M82's row pruned to keep three terminal rows, the M83 candidate row compressed for the byte budget, one LESSONS line added, the M60 lesson trimmed to its half `devtools::check()` does not enforce and the M77 line pruned; both files within their line and byte caps.)_
+_Last hygiene check: 2026-09-11 (eleventh pass, at M083's merge: M083 archived and its row set done, M82's row pruned to keep three terminal rows, four candidate rows compressed for the byte budget, one LESSONS line added, the M60 lesson trimmed to what `check()` does not enforce, the M77 line pruned; both files within caps.)_
 
 ## Milestones
 
