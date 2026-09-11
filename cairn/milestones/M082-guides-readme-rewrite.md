@@ -46,7 +46,7 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 - [x] T3: Rewrite `estimate.Rmd` in plain prose as the theory page: the estimand, the bias direction with its cited figures (`:73-83`), `std_err`, the no-comparison rule, when nesting is worth it (`:168-197` shortened), feature selection, References kept. (RB tripwire: ip-touching)
 - [x] T4: Rewrite `tuners.Rmd` as choosing a tuner (one example per tuner, the workflow-set run) with `:307-344` and `:429-471` removed, pointing at the help pages M081 rewrote.
 - [x] T5: Rewrite `results.Rmd` as reading the results: readers, summary, plots, agreement, a short failed-fold note in place of `:254-376`, dplyr rules; the survival example (`:416-564`) removed.
-- [ ] T6: Rewrite `articles/parallel.Rmd` (start daemons, same call, same result, when it pays) and `README.Rmd` to the AC5 shape; re-knit `README.md`.
+- [x] T6: Rewrite `articles/parallel.Rmd` (start daemons, same call, same result, when it pays) and `README.Rmd` to the AC5 shape; re-knit `README.md`.
 - [ ] T7: Rewrite `NEWS.md` bullets to one or two sentences each, the heading and the pinned id-column sentence kept.
 - [ ] T8: Run the AC2 and AC4 commands and the sweep script, fix every hit, render the pages (`devtools::build_vignettes()` or `pkgdown::build_articles()`), `devtools::check()`; NEWS entry for the docs change.
 
@@ -61,6 +61,7 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 - 2026-09-10: T3: `estimate.Rmd` rewritten (1397 prose words, from 2071): the case for nesting, the no-subtraction rule and feature selection in full, the six citations and every figure they carry kept, the IP3 paragraph as decided, headings noun phrases; the selection-time paragraph on `nested-cv.Rmd` cut to one sentence with a link. Three counting passes were needed to reach the cap; renders clean.
 - 2026-09-10: T4: `tuners.Rmd` rewritten (1262 prose words, from 1781): the control-through-`...` and what-differs sections gone, each tuner's page named for its control slots, the `nested_fit_resamples()` baseline moved in from the guide with its join against the Bayesian run's per-fold scores, the fit count and seeding each one sentence with a link; renders clean.
 - 2026-09-10: T5: `results.Rmd` rewritten (1274 prose words, from 1749): the survival example and its five chunks gone, `event_level` and `eval_time` one closing paragraph pointing at `?nested_tune_grid`, the failed-fold section cut to the run, the failed fold's notes and one paragraph on how the readers answer; renders clean.
+- 2026-09-10: T6: `articles/parallel.Rmd` rewritten (529 prose words, from 1343): the pre-flight, wire, `load_all()` and interrupt sections gone with one sentence pointing at `?nested_tune_grid`'s parallel section, the no-dispatcher chunks gone with them; `README.Rmd` to the AC5 shape (201 prose words, from 414), the Why section and memory table gone, the example attaching tidymodels; `README.md` re-knit by `devtools::build_readme()`. The "Learn more" list is a lead-in line and a list rather than a heading, so AC4's heading test and AC5's name both hold.
 
 ## Decisions
 
