@@ -1,6 +1,6 @@
 # M081: The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ Rewrite every help page so a tidymodels user meets one-sentence argument entries
 - [x] T3: Rewrite the five sibling orchestrators (`R/nested-tune-bayes.R`, `nested-tune-race.R`, `nested-tune-sim-anneal.R`, `nested-fit-resamples.R`, `nested-workflow-map.R`) onto `@inheritParams` of their wrapped function and of `nested_tune_grid`, `@inheritSection` for the shared sections, one-sentence overrides for `param_info`, `iter`, `initial` and `grid`, and their own control-slot contents.
 - [x] T4: Rewrite `R/nested-final-fit.R` (`results` at `:38` is 266 words, `object` at `:29`, `id` at `:71`) and its methods in `nested-final-fit-print.R`, `nested-final-fit-predict.R`, `nested-final-fit-extract.R` and `extract-procedure.R`, keeping the IP3 paragraph. (RB tripwire: ip-touching)
 - [x] T5: Rewrite the reader topics (`nested-results.R`, `nested-results-collect.R`, `nested-results-print.R`, `nested-results-plot.R`, `nested-results-agreement.R`, `nested-results-set.R`, `selection-rule.R`, `nested-resamples.R` with the README memory table under Details, `nestedtune-package.R`, `reexports.R`) and the `desc:` blurbs of `_pkgdown.yml`.
-- [ ] T6: Run the AC1, AC3, AC4 and AC5 procedures, fix every hit, and show the AC3 script able to fail (over `c5638cf` it reports at least one hit); `devtools::document()`, `devtools::run_examples()`, the four Rd-reading test files, `devtools::test()`, `devtools::check()`; NEWS entry.
+- [x] T6: Run the AC1, AC3, AC4 and AC5 procedures, fix every hit, and show the AC3 script able to fail (over `c5638cf` it reports at least one hit); `devtools::document()`, `devtools::run_examples()`, the four Rd-reading test files, `devtools::test()`, `devtools::check()`; NEWS entry.
 
 ## Work log
 
@@ -67,6 +67,9 @@ Rewrite every help page so a tidymodels user meets one-sentence argument entries
 - 2026-09-10: re-audit: AC3 (full) — four findings (undefined "roxygen block" and normalization, unmarked control-slot exemption, unprocedured second sentence; plus a suggested `c5638cf` falsifier, moved into T6's text rather than the criterion).
 - 2026-09-10: re-audit: AC3 (full) — four findings: `grep -c` ambiguity plus unescaped regex metacharacters, sentence 3's unprocedured "each page", the falsifier missing from T6's text, and "uncommitted" as an instrument property. This second line is the stop; the disposition went to the user.
 - 2026-09-10: AC3 amended (Substantive, mini gate + stop): the user chose the four fixes; the criterion now counts prose windows only, names the normalization, counts each templated text with `grep -F -c` summed across the files, and verifies the control-slot clause by `test-control-slots.R` under AC7. Coverage unchanged (AC3 → T1, T6).
+- 2026-09-10: T6: AC1, AC3 (prose windows), AC4 (both halves) and AC5 report 0 hits over the whole package; the AC3 script over `c5638cf` reports 46, so it can fail; the three distinctive lines count 1 apiece; `devtools::document()` clean; `devtools::run_examples()` and the full `devtools::test()` suite pass (exit 0, no failures); `pkgdown::check_pkgdown()` no problems; `devtools::check()` 0 errors, 0 warnings, 0 notes on the second run (the first reported one NOTE for a stray, gitignored `Rplots.pdf` my example runs had written at the top level, deleted before the re-run). NEWS entry written.
+- 2026-09-10: claim audit: 209 claims read, 3 corrected — NEWS.md. Deviation: the corrected bullet was re-read by a second fresh [O] reader rather than the same one, since agent messaging is disabled in this session (`SendMessage` unavailable); the re-read found 0 incorrect in 6 claims.
+- 2026-09-10: status set to review; every task ticked.
 
 ## Decisions
 
