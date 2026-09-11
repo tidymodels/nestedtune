@@ -11,13 +11,13 @@ coverage](https://codecov.io/gh/tidymodels/nestedtune/graph/badge.svg)](https://
 <!-- badges: end -->
 
 nestedtune runs nested cross-validation for tidymodels workflows. It
-builds a nested resampling design, tunes each outer fold on its own
-inner resamples with tune or finetune, scores the fold’s winner on rows
-the tuning never saw, and keeps what every fold chose. The mean of the
-outer scores estimates how the whole tune-and-fit procedure performs on
-new data. The model to deploy is fitted afterwards by the same procedure
-on all the data, as a separate object with no performance number of its
-own.
+builds a nested resampling design. It tunes each outer fold on its own
+inner resamples with tune or finetune, then scores the fold’s winner on
+rows the tuning never saw. It keeps what every fold chose. The mean of
+the outer scores estimates how the whole tune-and-fit procedure,
+resample, tune, select and fit, performs on new data. The model to
+deploy is fitted afterwards by the same procedure on all the data. It is
+a separate object with no performance number of its own.
 
 ## Installation
 

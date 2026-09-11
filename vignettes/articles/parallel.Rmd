@@ -14,15 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-Nested cross-validation fits many models, and the outer folds are
-independent of one another. `nested_tune_grid()` and its siblings run those
-folds on [mirai](https://mirai.r-lib.org/) daemons when a pool is connected,
-and serially otherwise. Nothing in the call changes between the two. This
-page starts a pool of two daemons, runs the getting-started guide's loop on
-it, shows the result identical to the same run made serially, and says when
-a pool pays. What the call checks before it dispatches, what it sends to
-each daemon, and what happens on an interrupt are under the parallel section
-of `?nested_tune_grid`.
+Nested cross-validation fits many models. The outer folds do not depend on
+one another, so they can run at the same time. `nested_tune_grid()` and its
+siblings run them on [mirai](https://mirai.r-lib.org/) daemons, separate R
+processes, when a pool of them is connected, and one after another
+otherwise. Nothing in the call changes between the two. This page starts a
+pool of two daemons and runs the getting-started guide's loop on it. It
+shows the result identical to the same run made serially, and says when a
+pool pays. The parallel section of `?nested_tune_grid` says what the call
+checks before it dispatches, what it sends to each daemon, and what happens
+on an interrupt.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "mirai", "ranger")
@@ -61,7 +62,8 @@ library(nestedtune)
 
 These are the guide's, unchanged: five outer folds of `mtcars`, five inner
 folds under each, a random forest with two parameters marked for tuning, and
-a grid of six candidates. `vignette("nested-cv")` walks through each of them.
+a grid of six candidates, the settings to try. `vignette("nested-cv")` walks
+through each of them.
 
 ```{r design}
 set.seed(1)
@@ -95,16 +97,15 @@ mirai::status()$connections
 ```
 
 Each daemon is a separate R process. It loads nestedtune and the packages
-the workflow needs from an installed library, and the first parallel call
-after starting a pool is the slow one, since it is what makes each daemon
-load the tidymodels stack.
+the workflow needs from an installed library. So the first parallel call
+after starting a pool is the slow one, since it makes each daemon load the
+tidymodels stack.
 
 ## The same call
 
-With a pool connected the outer folds are dispatched to the daemons, and
-each fold's inner tuning runs serially on its daemon, because parallelism
-inside a fold on top of parallelism across folds would oversubscribe the
-cores.
+With a pool connected, the outer folds are sent to the daemons. Each fold's
+inner tuning runs serially on its daemon. Parallelism inside a fold on top
+of parallelism across folds would oversubscribe the cores.
 
 ```{r run-parallel}
 set.seed(2)
@@ -128,7 +129,8 @@ mirai::status()$connections
 Each outer fold's seeds are drawn from the session state at entry, fixed by
 the fold's position in the design, before anything is dispatched, as
 `vignette("nested-cv")` explains under Reproducibility. So the serial run
-under the same seed is the same procedure on the same resamples.
+under the same seed is the same procedure, the same tune-and-fit steps, on
+the same resamples.
 
 ```{r run-serial}
 set.seed(2)
@@ -149,7 +151,7 @@ same
 `identical()` on the outer scores, the selections and the tuning seeds
 returns `r all(same)` for each, and which run used daemons is not
 recoverable from either. That is what lets a pool be a matter of the session
-rather than of the analysis: a script gives the same answer on a laptop with
+rather than of the analysis. A script gives the same answer on a laptop with
 no daemons and on a workstation with many.
 
 ## A pool's payoff
