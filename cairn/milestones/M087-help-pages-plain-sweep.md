@@ -25,7 +25,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 
 - [x] AC1: `Rscript benchmarks/sweep-prose.R --roxygen --plain` reports every roxygen prose sentence (the script's `--roxygen` prose definition) matching a plain clause, in the same form as M086 AC1, and at the milestone's head prints `clean` and exits 0.
 - [x] AC2: `Rscript benchmarks/sweep-prose.R --roxygen` and `Rscript benchmarks/sweep-prose.R --roxygen --spans` print `clean` and exit 0, and `grep -c "^#'"` summed over `R/*.R` and `man-roxygen/*.R` is at most 110% of its value at the branch point.
-- [ ] AC3: one fresh-context reading per review pass of the rendered help pages (`man/*.Rd` through `tools::Rd2txt`) in the SimpleEnglish skill's check mode, in M086 AC5's entry form, by a reader withheld this milestone file and the `--roxygen --plain` output, saved as `cairn/surveys/M087-reader-review.md`; every entry triaged at the review gate as fixed or rejected with a reason, never rerun after fixes within a pass.
+- [x] AC3: one fresh-context reading per review pass of the rendered help pages (`man/*.Rd` through `tools::Rd2txt`) in the SimpleEnglish skill's check mode, in M086 AC5's entry form, by a reader withheld this milestone file and the `--roxygen --plain` output, saved as `cairn/surveys/M087-reader-review.md`; every entry triaged at the review gate as fixed or rejected with a reason, never rerun after fixes within a pass.
 - [x] AC4: `Rscript -e 'devtools::document()'` produces no diff; `Rscript -e 'devtools::check()'` reports 0 errors, 0 warnings, 0 notes; `NEWS.md` carries one bullet for the rewrite.
 
 ## Coverage
@@ -60,6 +60,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - 2026-09-11: first `devtools::check()` 0 errors, 0 warnings, 0 notes (6m51s), run on the tree at a316e35 plus `man/` and NEWS, before the four claim-audit edits; a second check at 578e6fd's tree is logged in the next line.
 - 2026-09-11: second `devtools::check()` at the head 0 errors, 0 warnings, 0 notes (6m36s); T4 done; all tasks checked; status set to review.
 - 2026-09-11: /milestone-review pass 1: AC1, AC2, AC4 verified at b328643; three-lens fan-out and the AC3 reader ran; fix-now edits landed at 06a319c; `devtools::check()` re-run at 06a319c 0 errors, 0 warnings, 0 notes (6m43s).
+- 2026-09-11: step-7 approval: m087-help-pages-plain-sweep approved for merge. The gate accepted the reader and reviewer triage as recorded and the #91 partial comment.
 
 ## Decisions
 
@@ -70,7 +71,7 @@ Pass 1, 2026-09-11, branch head b328643, origin/main at 047fe5f (the branch poin
 - AC1 evidence: `Rscript benchmarks/sweep-prose.R --roxygen --plain` printed `clean` and exited 0 at the head. Verified.
 - AC2 evidence: `--roxygen` and `--roxygen --spans` each printed `clean` and exited 0. The `grep -c "^#'"` sum over `R/*.R` and `man-roxygen/*.R` is 2727 at the head against 2718 at 047fe5f (100.3%, cap 2989). Verified.
 - AC4 evidence: `devtools::document()` at the head left `git status` empty. The run noted that the installed roxygen2 8.0.0 is older than the 8.1.0 DESCRIPTION records, a mismatch that predates this branch. `devtools::check()` at the head: 0 errors, 0 warnings, 0 notes (6m54s). `NEWS.md` carries one bullet for the rewrite. Verified.
-- AC3 evidence: one [O] fresh reader ran the `cairn/surveys/M087-reader-prompt.md` block over the 28 rendered pages, withheld this file, `cairn/surveys/`, `R/`, `man-roxygen/` and the sweep output. Report saved as `cairn/surveys/M087-reader-review.md`: 234 entries (rule 3.6 passive voice 101, rule 3.5 `-ing` verbs 48, rule 6.3 the 25-word cap 43, rule 4.2 omitted words 24, rule 9.4 since→because 12, rule 3.4 present perfect 3, rule 1.7 nouns as verbs 2, rule 9.1 restructure 1). Triage at the gate is below. Verified once the gate accepts the triage.
+- AC3 evidence: one [O] fresh reader ran the `cairn/surveys/M087-reader-prompt.md` block over the 28 rendered pages, withheld this file, `cairn/surveys/`, `R/`, `man-roxygen/` and the sweep output. Report saved as `cairn/surveys/M087-reader-review.md`: 234 entries (rule 3.6 passive voice 101, rule 3.5 `-ing` verbs 48, rule 6.3 the 25-word cap 43, rule 4.2 omitted words 24, rule 9.4 since→because 12, rule 3.4 present perfect 3, rule 1.7 nouns as verbs 2, rule 9.1 restructure 1). Triage at the gate is below. The gate accepted the triage as recorded. Verified.
 
 Reader triage (proposed, decided at the gate):
 - Fixed: the 12 since→because entries, plus the four other roxygen `since` sites the reader did not list, so no help page reads `since` for `because`. The 3 present-perfect entries (`can have kept` → `can keep`, `once every candidate has failed` → `after every candidate failed`, `once its entry checks have run` → `after its entry checks ran`). Entry 21, the dangling `refuse such an object with` sentence, recast.
