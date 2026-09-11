@@ -7,7 +7,7 @@
 - **Principles touched:** IP3
 - **Resolves:** #91 partial (the help-page half; the issue stays open and closes only on human review, never by a PR keyword; the PR body references the issue without a closing keyword, and no comment is posted on the issue by any cairn step)
 - **Surface tier:** user-facing — every exported topic's help page
-- **Branch/PR:** `m085-help-pages-plain-prose`
+- **Branch/PR:** `m085-help-pages-plain-prose` · https://github.com/tidymodels/nestedtune/pull/96
 
 ## Goal
 
