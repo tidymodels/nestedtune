@@ -23,8 +23,8 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 
 ## Acceptance criteria
 
-- [ ] AC1: `Rscript benchmarks/sweep-prose.R --roxygen --plain` reports every roxygen prose sentence (the script's `--roxygen` prose definition) matching a plain clause, in the same form as M086 AC1, and at the milestone's head prints `clean` and exits 0.
-- [ ] AC2: `Rscript benchmarks/sweep-prose.R --roxygen` and `Rscript benchmarks/sweep-prose.R --roxygen --spans` print `clean` and exit 0, and `grep -c "^#'"` summed over `R/*.R` and `man-roxygen/*.R` is at most 110% of its value at the branch point.
+- [x] AC1: `Rscript benchmarks/sweep-prose.R --roxygen --plain` reports every roxygen prose sentence (the script's `--roxygen` prose definition) matching a plain clause, in the same form as M086 AC1, and at the milestone's head prints `clean` and exits 0.
+- [x] AC2: `Rscript benchmarks/sweep-prose.R --roxygen` and `Rscript benchmarks/sweep-prose.R --roxygen --spans` print `clean` and exit 0, and `grep -c "^#'"` summed over `R/*.R` and `man-roxygen/*.R` is at most 110% of its value at the branch point.
 - [ ] AC3: one fresh-context reading per review pass of the rendered help pages (`man/*.Rd` through `tools::Rd2txt`) in the SimpleEnglish skill's check mode, in M086 AC5's entry form, by a reader withheld this milestone file and the `--roxygen --plain` output, saved as `cairn/surveys/M087-reader-review.md`; every entry triaged at the review gate as fixed or rejected with a reason, never rerun after fixes within a pass.
 - [ ] AC4: `Rscript -e 'devtools::document()'` produces no diff; `Rscript -e 'devtools::check()'` reports 0 errors, 0 warnings, 0 notes; `NEWS.md` carries one bullet for the rewrite.
 
@@ -63,3 +63,8 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 ## Decisions
 
 ## Review
+
+Pass 1, 2026-09-11, branch head b328643, origin/main at 047fe5f (the branch point; main has not moved).
+
+- AC1 evidence: `Rscript benchmarks/sweep-prose.R --roxygen --plain` printed `clean` and exited 0 at the head. Verified.
+- AC2 evidence: `--roxygen` and `--roxygen --spans` each printed `clean` and exited 0. The `grep -c "^#'"` sum over `R/*.R` and `man-roxygen/*.R` is 2727 at the head against 2718 at 047fe5f (100.3%, cap 2989). Verified.
