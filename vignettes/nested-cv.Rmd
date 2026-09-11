@@ -275,11 +275,10 @@ tibble(
 ```
 
 The selection-time score is not an estimate of performance on anything.
-It can land above or below the nested estimate, and neither tells you
-anything. It stays on
-the object as a record of what selection saw. tune's functions hand it over
-without a warning. That is why the results object and the final fit
-both refuse tune's ranking functions such as `show_best()`. On the loop's
+Whether it lands above or below the nested estimate means nothing either.
+It stays on the object as a record of what selection saw. tune's functions
+would hand it over without a warning, so the results object and the final
+fit both refuse tune's ranking functions such as `show_best()`. On the loop's
 results they would rank outer folds. On the final fit there is one model and
 nothing to rank.
 
@@ -300,8 +299,8 @@ state. One seeds that fold's tuning and the other its outer fit. Both are
 stored on the result. A fold's seeds depend on its
 position in the design, not on the order the folds happen to run in. So the
 same seed gives the same answer whether the folds run serially or on a pool
-of workers. Any one fold can also be reproduced by hand. `nested_final_fit()`
-draws one pair the same way and carries it as `tuning_seed` and `fit_seed`.
+of workers. `nested_final_fit()` draws one pair the same way and carries it
+as `tuning_seed` and `fit_seed`.
 Both functions put your random state back as they found it.
 
 ```{r seeds}

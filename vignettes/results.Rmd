@@ -181,11 +181,12 @@ workflow. A fold that failed holds `NULL` in either column.
 res$.predictions[[1]]
 ```
 
-The description of the run itself is stored on the object as attributes
-rather than columns. `extract_procedure()` returns it as the procedure, the
-record of what ran. That record names which tuner ran, that tuner's own
-arguments such as the grid, and the control as it took effect.
-`nested_final_fit()` reruns what the record describes on the whole dataset.
+You will sometimes want to know exactly what ran: which tuner, its own
+arguments such as the grid, and the control as it took effect. That
+description is stored on the object as attributes rather than columns.
+`extract_procedure()` returns that description, which this package calls
+the procedure. `nested_final_fit()` reruns what it describes on the whole
+dataset.
 
 ## The readers
 
@@ -353,8 +354,9 @@ design, so it stops describing itself. To read a partial run, read the run
 itself: `collect_metrics(failed)` already averages the folds that completed,
 and warns that it did.
 
-Two arguments went unused on this page. `event_level` names which level of
-a two-class outcome is the event. `eval_time` names the times at which a
-censored-regression run is scored. Both are described on
+If your outcome has two classes, or your model is scored at censoring
+times, two arguments this page did not use apply. `event_level` names
+which level of a two-class outcome is the event. `eval_time` names the
+times at which a censored-regression run is scored. Both are described on
 `?nested_tune_grid`. The second adds an `.eval_time` column to `.metrics`
 and to everything `collect_metrics()` reports.
