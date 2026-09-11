@@ -62,6 +62,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: T4 done. `tuners.Rmd` (3 sentences), `results.Rmd` (3 sentences).
 - 2026-09-11: T5 done. `parallel.Rmd` (4 sentences), `README.Rmd` (1 list-item continuation, `, racing` read as a comma-ing hit); `devtools::build_readme()` re-knitted `README.md`, a two-line diff. Default, `--spans` and `--plain` sweeps print `clean` over the six pages.
 - 2026-09-11: T7 done. `cairn/surveys/M086-reader-prompt.md` holds the check-mode block review hands unchanged to a fresh reader each pass. T6 in progress: `wc -w` at the branch point b84cbcb / at head: nested-cv 1798/1800, estimate 1408/1405, tuners 2187/2184, results 1836/1837, parallel 804/801, README 367/370 (every page within 110%); one NEWS bullet added; `devtools::check()` and the claim audit are running, their results pending in this checkpoint.
+- 2026-09-11: claim audit: 38 claims read, 2 corrected — benchmarks/sweep-prose.R (the `--pages` header line claimed every mode; `--roxygen` ignores it), NEWS.md (the bullet claimed no `-ing` word after a comma; the exclusion list lets eight through). Both re-read once by the same reader and cleared.
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 ## Decisions

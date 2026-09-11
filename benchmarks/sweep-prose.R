@@ -52,8 +52,9 @@
 #                      phrases (the `slop` vector below holds it)
 #   Rscript benchmarks/sweep-prose.R --pages <path>...
 #       the paths after `--pages`, up to the next `--` option, replace the
-#       page list above for any mode; a page is read with or without a
-#       YAML header
+#       page list above in every mode but `--roxygen`, which reads `R/` and
+#       `man-roxygen/` regardless; a page is read with or without a YAML
+#       header
 #   Rscript benchmarks/sweep-prose.R --roxygen [--terms|--spans|--openings|--paragraphs]
 #       the same checks over roxygen prose in `R/*.R` and
 #       `man-roxygen/*.R`: the bodies of `@title`, `@description`,
