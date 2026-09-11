@@ -7,22 +7,19 @@
 \method{print}{nested_results}(x, ..., n = NULL, width = NULL)
 }
 \arguments{
-\item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
+siblings.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored, so \code{n} and \code{width} must be spelled out in
-full.}
+\item{...}{Not used; must be empty, so \code{n} and \code{width} must be given by
+name in full.}
 
-\item{n}{Number of rows to show, passed to the tibble printing of the outer
-folds. \code{NULL}, the default, leaves it to tibble: every row when there are
-fewer than the \code{print_max} option allows, and otherwise the \code{print_min}
-option's count with a footer saying how many more there are. \code{Inf} shows
-every fold.}
+\item{n}{Number of fold rows to show, passed to tibble's printing. \code{NULL},
+the default, leaves the choice to tibble and its \code{print_max} and
+\code{print_min} options; \code{Inf} shows every fold.}
 
-\item{width}{Width of text output to generate for the rows, passed to the
-tibble printing. \code{NULL}, the default, uses the \code{width} option. Columns that
-do not fit are listed in the footer under their names.}
+\item{width}{Width of the printed rows, passed to tibble's printing.
+\code{NULL}, the default, uses the \code{width} option, and columns that do not fit
+are named in the footer.}
 }
 \value{
 \code{x}, invisibly.
@@ -31,24 +28,24 @@ do not fit are listed in the footer under their names.}
 Shows the object: its outer folds as the tibble rows they are, the outer
 resampling scheme it came from, how many folds did not complete, and a
 pointer to \code{\link[=summary.nested_results]{summary.nested_results()}} for what the run means.
-
-Printing also says when the folds were not choosing from the same menu. A
-grid given as a size is expanded per fold, under that fold's own seed, so a
-continuous parameter leaves every fold with its own candidates, which
-changes how the selections \code{\link[=summary.nested_results]{summary.nested_results()}} reports should be
-read. The line
-reports each fold's candidate count and appears only when the sets actually
-differ.
 }
+\section{When the folds searched different candidates}{
+
+
+When two or more completed folds scored different candidate sets, printing
+adds a line giving each fold's candidate count, and only then. A grid given
+as a size is the usual cause: it is expanded once per fold, under that
+fold's own seed, so a continuous parameter leaves every fold with
+candidates of its own. It matters for reading the selections: folds that
+disagreed were not choosing from the same menu.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -57,10 +54,12 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 res
 \dontshow{\}) # examplesIf}
 }

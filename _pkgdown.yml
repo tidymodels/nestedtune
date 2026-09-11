@@ -29,17 +29,16 @@ articles:
 reference:
 - title: Nested resampling
   desc: >
-    Build a nested resampling design whose size does not grow by a copy of the
-    data for every outer fold.
+    Build the design the outer loop runs on: one outer fold per row, with that
+    fold's inner resamples beside it, and no copy of the data per fold.
   contents:
   - nested_resamples
 
 - title: Running the loop
   desc: >
-    Tune on each outer fold's inner resamples, select, then fit and score on
-    the outer split, and keep what each fold chose; score a workflow with
-    nothing to tune on the same outer splits; or run every workflow of a
-    workflow set through one design and read the results under each id.
+    Tune on each outer fold's inner resamples, select a candidate, then fit and
+    score it on the outer split, keeping what every fold chose. A workflow with
+    nothing to tune and a whole workflow set run on the same design.
   contents:
   - nested_tune_grid
   - nested_tune_bayes
@@ -63,8 +62,8 @@ reference:
 
 - title: The final model
   desc: >
-    Run the same tuning procedure once more with the whole dataset in hand,
-    and get back the model to deploy, as its own object, never a field on
+    Run the recorded tuning procedure once more with the whole dataset in hand
+    and get back the model to deploy. It is its own object, never a field on
     the results.
   contents:
   - nested_final_fit

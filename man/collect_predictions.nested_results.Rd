@@ -10,66 +10,63 @@
 \method{collect_extracts}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings, run with a control that asked for the column.}
+\item{x}{A \code{nested_results} run with a control that asked for the column.
+See \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}} for what the object is.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored. tune's \code{summarize} and \code{parameters}
-arguments are not offered.}
+\item{...}{Not used; must be empty. tune's \code{summarize} and \code{parameters}
+arguments are not offered here.}
 }
 \value{
-A tibble. The first columns are the design's fold labels, read from
-the object's record: \code{id} on a plain v-fold design, \code{id} and \code{id2} on a
-repeated one. Then, for \code{collect_predictions()}, the columns of the
-stacked prediction tables over the union of the columns any fold
-carries, \code{NA} where a fold lacks one; for \code{collect_extracts()}, the
-\code{.extracts} list column. A prediction table carrying a column named like
-a fold label column is refused with condition class
-\code{nestedtune_collect_name_collision}.
+A tibble: the design's fold labels (\code{id}, and \code{id2} on a repeated
+design), then the stacked prediction columns, or the \code{.extracts} list
+column.
 }
 \description{
 A run whose control asked for them keeps, per outer fold, the predictions
 its finalized model made on the fold's assessment rows (\code{.predictions},
-under \code{save_pred = TRUE}) and the value the control's \code{extract} function
-returned for the fold's fitted workflow (\code{.extracts}). These two readers,
-methods on tune's generics, stack one such column into a single table with
-the columns the design labelled its folds with placed first.
+under \code{save_pred = TRUE}) and whatever the control's \code{extract} function
+returned for the fold's fitted workflow (\code{.extracts}). These two methods on
+tune's generics stack one such column into a single table, the design's fold
+labels first.
 \itemize{
-\item \code{collect_predictions()} stacks \code{.predictions} over the folds that
-completed: one row per assessment row of every completed fold, the
-columns as \code{tune::last_fit()} produced them (the outcome, \code{.pred} or the
-class columns, \code{.row} and \code{.config}).
-\item \code{collect_extracts()} gives one row per completed fold, the fold's value
-in an \code{.extracts} list column. A completed fold whose extract function
+\item \code{collect_predictions()} gives one row per assessment row of every
+completed fold, with the columns \code{tune::last_fit()} produced: the outcome,
+\code{.pred} or the class columns, \code{.row} and \code{.config}.
+\item \code{collect_extracts()} gives one row per completed fold, the fold's value in
+an \code{.extracts} list column. A completed fold whose extract function
 errored holds \code{NULL} there, and its \code{.notes} say why.
 }
 }
-\details{
-Both read the folds that completed, the rule \code{\link[=collect_selections]{collect_selections()}} and
-\code{\link[=collect_metrics]{collect_metrics()}} follow: a partial run is stacked over the completed
-folds with one warning of class \code{nestedtune_partial_summary}, and a run in
-which no fold completed is an error of class
-\code{nestedtune_no_completed_folds}. An object whose run's control did not ask
-for \code{.predictions} or \code{.extracts}, read from the recorded procedure, or
-that no longer carries the column, is refused with condition class
-\code{nestedtune_column_not_saved}, the message naming the slot to set.
+\section{Folds that failed, and columns not saved}{
 
-The predictions are the outer fit's on each fold's assessment rows, so on
-a v-fold outer design every row of the data appears once per repeat in
-\code{collect_predictions()}'s table; on a bootstrap or Monte Carlo outer
-design a row appears as often as it was held out. The inner tuning run's
-predictions and extracts, which the same two slots also save inside tune,
-are not kept.
+
+Both readers take the folds that completed, as \code{\link[=collect_selections]{collect_selections()}} does,
+warning once with class \code{nestedtune_partial_summary} on a partial run and
+erroring with class \code{nestedtune_no_completed_folds} when no fold completed.
+
+An object whose recorded control did not ask for the column, or that no
+longer carries it, is refused with class \code{nestedtune_column_not_saved}, and
+the message names the control slot to set. A prediction table carrying a
+column named like a fold label column is refused with class
+\code{nestedtune_collect_name_collision}.
 }
+
+\section{Which predictions these are}{
+
+
+They are the outer fit's, on each fold's assessment rows. On a v-fold outer
+design every row of the data therefore appears once per repeat; on a
+Monte Carlo design a row appears as often as it was held out.
+The inner tuning run's own predictions and extracts, which the same two
+control slots save inside tune, are not kept.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -78,7 +75,9 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+# Ask the control to keep the predictions and a coefficient extract.
 set.seed(2)
 res <- nested_tune_grid(
   wf,

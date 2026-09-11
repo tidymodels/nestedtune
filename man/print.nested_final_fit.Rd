@@ -9,33 +9,61 @@
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty. Passing an argument here raises an
+error instead of leaving it silently ignored.}
 }
 \value{
 \code{x}, invisibly.
 }
 \description{
-Reports which parameters the full-data tuning run selected, says where this
-model's performance estimate actually comes from, and names the accessors
-that reach what selection saw.
+Shows what the full-data search was, which parameters it selected, and
+where this model's performance estimate comes from. It also names the
+accessors that reach what selection saw.
 
-No performance number is shown. The tuning run stored on the object has
-metrics, but they were consumed by selection and are optimistically biased as
-a claim about this model; the nested estimate on the results object the fit
-was built from -- the result of \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings -- is the one to report (IP3).
+No performance number appears. The stored tuning run has metrics, but
+selection consumed them; see \code{\link[=nested_final_fit]{nested_final_fit()}} for why they are not this
+model's performance and the nested estimate is.
+}
+\section{The procedure line}{
 
-The procedure line says what the full-data search was, as what ran beside
-what was asked for: for a grid or a racing procedure the candidates
-scored, the search named; for a
-Bayesian one the initial candidates scored and requested, and the
-iterations completed and requested, since \code{\link[tune:tune_bayes]{tune::tune_bayes()}} may score
-fewer initial candidates than \code{initial} names and stop short of \code{iter}.
-A fit built from a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no search: its
-procedure line reads "no tuning", its selection line "nothing to select",
-and the note says that \code{\link[=extract_tune_results]{extract_tune_results()}} and
-\code{\link[=extract_scored_candidates]{extract_scored_candidates()}} refuse it.
+
+The line says what ran beside what was asked for. A grid search or a race
+is named with the number of candidates it scored. An iterating search is
+named with the initial candidates scored and requested and the iterations
+completed and requested, since it can score fewer initial candidates than
+\code{initial} names and can stop short of \code{iter}.
+
+Where nothing was tuned the line reads "no tuning", the selection line
+reads "nothing to select", and the note says that \code{\link[=extract_tune_results]{extract_tune_results()}}
+and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}} refuse the object.
+}
+
+\examples{
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+data(mtcars)
+
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
+
+set.seed(1)
+folds <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
+)
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+set.seed(2)
+res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+set.seed(3)
+final <- nested_final_fit(wf, res)
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+final
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},

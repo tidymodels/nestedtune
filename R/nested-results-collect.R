@@ -13,83 +13,62 @@
 #' Stack a per-fold column of a nested resampling run across the outer folds
 #'
 #' @description
-#' A `nested_results` object keeps three of its records as one table per outer
-#' fold, in list columns: what went wrong (`.notes`), what the fold's inner
-#' tuning selected (`.selected`), and everything that tuning scored
-#' (`.inner_metrics`). These three readers stack one such column into a single
-#' table, with the columns the design labelled its folds with placed first, so
-#' the rows of every fold are read at once and each row says which fold it
-#' came from.
+#' A `nested_results` keeps three of its records as one table per outer fold,
+#' in list columns: what went wrong (`.notes`), what the fold's inner tuning
+#' selected (`.selected`), and everything that tuning scored
+#' (`.inner_metrics`). These readers stack one such column into a single table,
+#' the design's fold labels first, so every row says which fold it came from.
 #'
 #' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
-#'   included -- a failed fold's notes are the reason to ask, and a completed
-#'   fold's can carry an error note too, from an `extract` that failed on it
-#'   (see [`collect_extracts()`][collect_predictions.nested_results]).
-#' * `collect_selections()` stacks `.selected` over the folds that completed:
-#'   one row per completed fold. A [nested_fit_resamples()] result gives zero
-#'   rows, since no fold selected anything.
-#' * `collect_inner_metrics()` stacks `.inner_metrics` over the folds that
-#'   completed: one row per candidate (and per metric, and per iteration
-#'   where the tuner iterates) that each fold's inner tuning scored.
+#'   included. A completed fold can carry an error note too, from an `extract`
+#'   that failed on it (see
+#'   [`collect_extracts()`][collect_predictions.nested_results]).
+#' * `collect_selections()` stacks `.selected`: one row per completed fold. A
+#'   [nested_fit_resamples()] result gives no rows, since no fold selected
+#'   anything.
+#' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per candidate,
+#'   metric, and iteration where the tuner iterates, that a completed fold's
+#'   inner tuning scored.
 #'
-#' @param x A `nested_results` object from [nested_tune_grid()] or one of its
-#'   siblings.
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
+#' @inheritParams collect_metrics.nested_results
 #'
-#' @return A tibble. The first columns are the design's fold labels, read from
-#'   the object's record rather than recognized by name: `id` on a plain
-#'   v-fold design, `id` and `id2` on a repeated one. Then the columns of the
-#'   stacked tables, as the list column holds them, over the union of the
-#'   columns any stacked fold carries; a fold lacking one of them holds `NA`
-#'   there, in the same way as a fold whose recorded value is `NA`, so the
-#'   two are not told apart. For `collect_notes()` those are tune's
-#'   `location`, `type`, `note` and `trace`, and a run that recorded no note
-#'   gives zero rows with the same columns. A stacked table carrying a column
-#'   named like a fold label column (a parameter given the id `id`) is
-#'   refused with condition class `nestedtune_collect_name_collision`.
+#' @return A tibble whose first columns are the design's fold labels and whose
+#'   remaining columns come from the stacked tables. See What the columns are.
 #'
-#' @details
+#' @section What the columns are:
+#'
+#' The label columns are read from the object's record rather than recognized
+#' by name: `id` on a plain v-fold design, `id` and `id2` on a repeated one.
+#' Then come the stacked tables' own columns, over the union of what any
+#' stacked fold carries. A fold lacking one holds `NA` there, exactly as a fold
+#' whose recorded value is `NA` does, so the two cannot be told apart.
+#'
+#' For `collect_notes()` the stacked columns are tune's `location`, `type`,
+#' `note` and `trace`, and a run that recorded no note gives no rows with those
+#' columns. A stacked table carrying a column named like a label column, say a
+#' parameter whose id is `id`, is refused with class
+#' `nestedtune_collect_name_collision`.
+#'
+#' @section Which folds are read:
+#'
 #' `collect_selections()` and `collect_inner_metrics()` read the folds that
-#' completed, the rule [collect_metrics()] and [agreement()] follow. A run in
-#' which some outer folds failed is stacked over the folds that completed,
-#' with one warning of class `nestedtune_partial_summary` saying which folds
-#' are missing; a run in which no fold completed is an error with condition
-#' class `nestedtune_no_completed_folds`, the class every summary of such an
-#' object refuses with. `collect_notes()` reads every fold and warns about
-#' none of them.
+#' completed, as [collect_metrics()] and [agreement()] do. A run with some
+#' folds failed is stacked over the rest, with one warning of class
+#' `nestedtune_partial_summary` naming the missing folds; a run in which no
+#' fold completed is an error of class `nestedtune_no_completed_folds`.
+#' `collect_notes()` reads every fold and warns about none.
 #'
-#' The `.config` column of a selection or an inner-metrics row is kept as the
-#' fold recorded it. It labels a candidate within *that fold's own* inner
-#' tuning run -- a selected row's `.config` is found among the same fold's
-#' rows in `collect_inner_metrics()` -- and is not an identity across folds,
-#' which can search different candidate sets. That is why [agreement()]
-#' leaves it out and these readers keep it.
+#' @section Reading `.config`:
 #'
-#' A user of tune will recognize `collect_notes()`: it is tune's generic, and
-#' this method answers for a `nested_results` the way tune's answers for a
-#' `tune_results`.
+#' The `.config` of a selection or an inner-metrics row is kept as the fold
+#' recorded it. It labels a candidate inside that one fold's tuning run: a
+#' selected row's `.config` is found among the same fold's rows in
+#' `collect_inner_metrics()`. Since folds can search different candidates, it
+#' identifies nothing across them, which is why [agreement()] leaves it out.
 #'
+#' @template example-setup
+#' @template example-run
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#'
 #' collect_selections(res)
 #' collect_inner_metrics(res)
 #' collect_notes(res)
@@ -194,68 +173,50 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' @description
 #' A run whose control asked for them keeps, per outer fold, the predictions
 #' its finalized model made on the fold's assessment rows (`.predictions`,
-#' under `save_pred = TRUE`) and the value the control's `extract` function
-#' returned for the fold's fitted workflow (`.extracts`). These two readers,
-#' methods on tune's generics, stack one such column into a single table with
-#' the columns the design labelled its folds with placed first.
+#' under `save_pred = TRUE`) and whatever the control's `extract` function
+#' returned for the fold's fitted workflow (`.extracts`). These two methods on
+#' tune's generics stack one such column into a single table, the design's fold
+#' labels first.
 #'
-#' * `collect_predictions()` stacks `.predictions` over the folds that
-#'   completed: one row per assessment row of every completed fold, the
-#'   columns as `tune::last_fit()` produced them (the outcome, `.pred` or the
-#'   class columns, `.row` and `.config`).
-#' * `collect_extracts()` gives one row per completed fold, the fold's value
-#'   in an `.extracts` list column. A completed fold whose extract function
+#' * `collect_predictions()` gives one row per assessment row of every
+#'   completed fold, with the columns `tune::last_fit()` produced: the outcome,
+#'   `.pred` or the class columns, `.row` and `.config`.
+#' * `collect_extracts()` gives one row per completed fold, the fold's value in
+#'   an `.extracts` list column. A completed fold whose extract function
 #'   errored holds `NULL` there, and its `.notes` say why.
 #'
-#' @param x A `nested_results` object from [nested_tune_grid()] or one of its
-#'   siblings, run with a control that asked for the column.
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored. tune's `summarize` and `parameters`
-#'   arguments are not offered.
+#' @param x A `nested_results` run with a control that asked for the column.
+#'   See [collect_metrics.nested_results()] for what the object is.
+#' @param ... Not used; must be empty. tune's `summarize` and `parameters`
+#'   arguments are not offered here.
 #'
-#' @return A tibble. The first columns are the design's fold labels, read from
-#'   the object's record: `id` on a plain v-fold design, `id` and `id2` on a
-#'   repeated one. Then, for `collect_predictions()`, the columns of the
-#'   stacked prediction tables over the union of the columns any fold
-#'   carries, `NA` where a fold lacks one; for `collect_extracts()`, the
-#'   `.extracts` list column. A prediction table carrying a column named like
-#'   a fold label column is refused with condition class
-#'   `nestedtune_collect_name_collision`.
+#' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated
+#'   design), then the stacked prediction columns, or the `.extracts` list
+#'   column.
 #'
-#' @details
-#' Both read the folds that completed, the rule [collect_selections()] and
-#' [collect_metrics()] follow: a partial run is stacked over the completed
-#' folds with one warning of class `nestedtune_partial_summary`, and a run in
-#' which no fold completed is an error of class
-#' `nestedtune_no_completed_folds`. An object whose run's control did not ask
-#' for `.predictions` or `.extracts`, read from the recorded procedure, or
-#' that no longer carries the column, is refused with condition class
-#' `nestedtune_column_not_saved`, the message naming the slot to set.
+#' @section Folds that failed, and columns not saved:
 #'
-#' The predictions are the outer fit's on each fold's assessment rows, so on
-#' a v-fold outer design every row of the data appears once per repeat in
-#' `collect_predictions()`'s table; on a bootstrap or Monte Carlo outer
-#' design a row appears as often as it was held out. The inner tuning run's
-#' predictions and extracts, which the same two slots also save inside tune,
-#' are not kept.
+#' Both readers take the folds that completed, as [collect_selections()] does,
+#' warning once with class `nestedtune_partial_summary` on a partial run and
+#' erroring with class `nestedtune_no_completed_folds` when no fold completed.
 #'
+#' An object whose recorded control did not ask for the column, or that no
+#' longer carries it, is refused with class `nestedtune_column_not_saved`, and
+#' the message names the control slot to set. A prediction table carrying a
+#' column named like a fold label column is refused with class
+#' `nestedtune_collect_name_collision`.
+#'
+#' @section Which predictions these are:
+#'
+#' They are the outer fit's, on each fold's assessment rows. On a v-fold outer
+#' design every row of the data therefore appears once per repeat; on a
+#' Monte Carlo design a row appears as often as it was held out.
+#' The inner tuning run's own predictions and extracts, which the same two
+#' control slots save inside tune, are not kept.
+#'
+#' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
+#' # Ask the control to keep the predictions and a coefficient extract.
 #' set.seed(2)
 #' res <- nested_tune_grid(
 #'   wf,

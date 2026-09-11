@@ -7,58 +7,58 @@
 agreement(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
+siblings.}
 
 \item{...}{Not used; must be empty. An argument passed here is an error
 rather than silently ignored.}
 }
 \value{
-A tibble with one column per parameter any completed fold's
-selection recorded, holding the values as the folds selected them,
-followed by \code{n}, the number of completed outer folds that selected that
-combination, and \code{prop}, \code{n} divided by the number of completed outer
-folds. Rows are ordered by \code{n} decreasing, ties in the order the
-combination first appears among the object's rows. Every completed fold is
-counted once, so when the table has rows \code{sum(n)} is the number of
-completed folds. tune's \code{.config} label is not a column: it names a
-candidate within one fold's own tuning run, and folds can search different
-grids.
-
-A completed fold whose selection carries no value for a parameter is
-counted under \code{NA} for that parameter, in the same row as a fold that
-selected \code{NA} for it; \code{\link[=summary.nested_results]{summary.nested_results()}} reports the two apart. A
-workflow with nothing to tune gives a tibble with columns \code{n} and \code{prop}
-and no rows. A parameter whose id is \code{n} or \code{prop} cannot be tabulated,
-because its column would collide with the counts, and is an error.
-
-A run in which some outer folds failed is tabulated over the folds that
-completed, with a warning saying so; a run in which no fold completed is an
-error with condition class \code{nestedtune_no_completed_folds}, as it is for
-\code{\link[=collect_metrics]{collect_metrics()}}, \link[=autoplot.nested_results]{autoplot()} and
-\code{\link[=nested_final_fit]{nested_final_fit()}}.
+A tibble with one column per parameter any completed fold selected,
+then \code{n}, the number of completed folds that chose that combination, and
+\code{prop}, \code{n} over the number of completed folds. Rows run from the largest
+\code{n} down, ties in the order the combination first appears.
 }
 \description{
-Each outer fold of a nested resampling run tunes on its own inner resamples
-and selects one candidate. \code{agreement()} counts those selections: one row per
-distinct combination of selected parameter values, with how many completed
-outer folds chose it and what proportion of them that is, most frequent
-first.
+Each outer fold tunes on its own inner resamples and selects one candidate.
+\code{agreement()} counts those selections: one row per distinct combination of
+selected parameter values, most frequent first.
 
-The most frequent combination is \strong{not} the final model's parameters.
-The outer folds describe how stable the tuning procedure's choice is; the
-model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the same
-procedure once more on the whole dataset and selects for itself.
+The most frequent combination is not the final model's parameters. The folds
+say how stable the tuning procedure's choice is; the model to deploy comes
+from \code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the procedure once more on the whole
+dataset and selects for itself.
 }
+\section{How the folds are counted}{
+
+
+Every completed fold is counted once, so \code{sum(n)} is the number of completed
+folds whenever the table has rows. A run with some folds failed is tabulated
+over the rest, with a warning saying so, and a run in which none completed
+is an error of class \code{nestedtune_no_completed_folds}, as it is for
+\code{\link[=collect_metrics]{collect_metrics()}}, \link[=autoplot.nested_results]{autoplot()} and
+\code{\link[=nested_final_fit]{nested_final_fit()}}.
+
+tune's \code{.config} is not a column here: it labels a candidate inside one
+fold's own tuning run, and folds can search different grids.
+}
+
+\section{Missing and colliding values}{
+
+
+A completed fold whose selection carries no value for a parameter is counted
+under \code{NA} for it, in the same row as a fold that selected \code{NA};
+\code{\link[=summary.nested_results]{summary.nested_results()}} tells the two apart. A workflow with nothing to
+tune gives columns \code{n} and \code{prop} and no rows. A parameter whose id is \code{n}
+or \code{prop} would collide with the counts and is an error.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -67,10 +67,12 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 agreement(res)
 \dontshow{\}) # examplesIf}
 }

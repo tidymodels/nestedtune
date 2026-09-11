@@ -9,16 +9,15 @@ nested_resamples(data, outside, inside, ...)
 \arguments{
 \item{data}{A data frame.}
 
-\item{outside}{The outer resampling specification, given either as an
-unevaluated call such as \code{vfold_cv(v = 5)} or as an already-evaluated
-\code{rset} object.}
+\item{outside}{The outer resampling, as an unevaluated call such as
+\code{vfold_cv(v = 5)} or as an \code{rset} already built on \code{data}.}
 
-\item{inside}{The inner resampling specification, given as an unevaluated
-call such as \code{vfold_cv(v = 5)}. Unlike \code{outside}, this cannot be an
-existing object, because it is evaluated once per outer fold.}
+\item{inside}{The inner resampling, as an unevaluated call such as
+\code{vfold_cv(v = 5)}. It is evaluated once per outer fold, so an existing
+object is refused.}
 
-\item{...}{Not used; must be empty. All three arguments above are required,
-so the barrier is what turns a mistyped fourth into an error.}
+\item{...}{Not used; must be empty. The three arguments above are all
+required, so a mistyped fourth is an error here.}
 }
 \value{
 An object of class \code{nested_resamples}, which also carries the classes
@@ -27,52 +26,65 @@ working. It is the outer \code{rset} with an \code{inner_resamples} list column
 added, one inner \code{rset} per outer split.
 }
 \description{
-\code{nested_resamples()} builds the same nested resampling structure as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, but stores index vectors into the original data
-instead of a materialized analysis set for every outer fold. For the same
-seed and the same specifications it produces the same splits; what changes is
-the size of the object that holds them.
-}
-\details{
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} evaluates the inner specification against
-\code{as.data.frame(split)}, so each outer fold's inner resamples reference their
-own copy of that fold's analysis set. Object size therefore grows by roughly
-one copy of the data for every outer fold. \code{nested_resamples()} evaluates the
-inner specification the same way, against the same transient frame, but keeps
-only the row indices it produces and remaps them onto the original data, so
-the inner splits reference the single shared copy the caller already has.
+\code{nested_resamples()} builds the nested resampling structure the orchestrators
+take: one row per outer fold, with that fold's inner resamples beside it. It
+is \code{\link[rsample:nested_cv]{rsample::nested_cv()}}'s structure, and for the same seed and the same
+specifications it selects the same rows.
+
+What differs is what the splits point at. rsample's inner splits index a
+fresh copy of each outer fold's analysis set; these index the one data frame
+you already have, so the design's size barely grows with the fold count.
 }
 \section{Differences from rsample}{
 
 
-The splits select the same rows. \code{\link[rsample:analysis]{rsample::analysis()}} and
-\code{\link[rsample:assessment]{rsample::assessment()}} return identical frames, attributes included, and
-each inner split carries the class and the resample id rsample gives it, so
-\code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same. What differs is
-what the splits point at: nestedtune's index the original data, rsample's
-index a materialized copy of each outer fold's analysis set. One behavior
-differs on purpose.
+\code{\link[rsample:analysis]{rsample::analysis()}} and \code{\link[rsample:assessment]{rsample::assessment()}} return identical frames,
+attributes included, and each inner split keeps the class and the resample id
+rsample gives it, so \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the
+same.
 
-An \strong{outer bootstrap is refused}, not warned about. The same observation can
-otherwise land in both the inner analysis and the inner assessment set, which
-makes the design invalid rather than merely unusual.
+One behavior differs on purpose: an outer bootstrap is refused rather than
+warned about. The same row can otherwise land in both the inner analysis and
+the inner assessment set, which makes the estimate invalid.
+}
+
+\section{Memory}{
+
+
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} evaluates the inner specification against
+\code{as.data.frame(split)}, so every outer fold holds its own copy of that fold's
+analysis set. \code{nested_resamples()} runs the same specification against the
+same frame, keeps only the row indices it produces, and points them back at
+\code{data}. The index vectors remain, as they do in rsample; the copies are gone.
+
+Sizes below are multiples of the source data, measured on
+\code{mlbench::LetterRecognition} (20000 x 17) with five inner folds under
+rsample 1.3.2 and R 4.6.1, and recorded on 2026-07-25 beside the check
+\code{tests/testthat/test-nested-resamples-memory.R} makes of them:\tabular{rrr}{
+   outer folds \tab \code{rsample::nested_cv()} \tab \code{nested_resamples()} \cr
+   2 \tab 2.2x \tab 1.2x \cr
+   5 \tab 5.6x \tab 1.7x \cr
+   10 \tab 11.4x \tab 2.6x \cr
+   50 \tab 57.5x \tab 10.0x \cr
+}
 }
 
 \examples{
 data(mtcars)
 
 set.seed(1)
-folds <- nested_resamples(
-  mtcars,
+design <- nested_resamples(
+  data = mtcars,
   outside = rsample::vfold_cv(v = 3),
   inside = rsample::vfold_cv(v = 3)
 )
-folds
+design
 
 # Each element of inner_resamples is an ordinary rset.
-folds$inner_resamples[[1]]
+design$inner_resamples[[1]]
 
 }
 \seealso{
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}}, which takes the
+design and runs the outer loop
 }

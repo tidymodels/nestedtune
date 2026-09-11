@@ -21,88 +21,109 @@
 the print method, the \code{summary.nested_results_set} that \code{summary()}
 returns.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty, so an argument given here is an error
+and not a silent no-op.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.}
 }
 \value{
-\code{summary()} returns a \code{summary.nested_results_set}: a list of one
-\code{\link[=summary.nested_results]{summary.nested_results()}} object per workflow, named by \code{wflow_id} in
-the set's order, each the summary of that workflow's run called alone,
-with the orchestrator's name as the list's \code{fn} attribute. Its print
-shows the orchestrator and the workflow count, then one section per
-workflow holding that run's design, failed folds, selected parameters
-and estimate, and the note on what a nested estimate describes once at
-the end.
-
-\code{autoplot()} returns a \code{ggplot} object. Under \code{type = "performance"}
-the workflows stand along the x axis inside one panel per metric, one
-point per completed outer fold's score and a dashed rule at each
-workflow's nested estimate, the value \code{\link[=collect_metrics]{collect_metrics()}} reports for it
-on the set; the panels are named as the single view names them. Under
-\code{type = "parameters"} there is one panel per workflow and tuned
-parameter, in the set's order, labelled by the id and then the single
-view's label for that parameter, with the outer folds along the x axis,
-so each panel asks the single view's question of one workflow. The
-selected-value axis is decided over every workflow's values at once:
-numeric when all are numbers, discrete otherwise. A workflow with
-nothing to tune contributes no panel.
-
-\code{agreement()} returns a tibble: \code{wflow_id}, then one column per
-parameter any workflow's completed fold selected, then \code{n} and \code{prop},
-with each workflow's rows as \code{\link[=agreement]{agreement()}} on that run alone gives them,
-in the set's order, \code{NA} in a column that workflow's run does not
-tune; inside a workflow's own rows \code{NA} keeps the meaning \code{\link[=agreement]{agreement()}}
-gives it there, a fold that recorded no value for the parameter. A
-workflow with nothing to tune contributes no row.
+\code{summary()} returns a \code{summary.nested_results_set}, \code{autoplot()} a \code{ggplot}
+object, and \code{agreement()} a tibble. The three sections below say what each
+one holds.
 }
 \description{
-The three readers of one workflow's run answer on a \code{nested_results_set},
-what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns, each workflow's view keyed by its
-\code{wflow_id}. \code{summary()} summarizes every workflow; \code{autoplot()} draws
-the two views of \code{\link[=autoplot.nested_results]{autoplot.nested_results()}} across the workflows; and
-\code{\link[=agreement]{agreement()}} stacks each workflow's selection table under its id.
+The three readers of one workflow's run also answer on a
+\code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns, keyed by
+\code{wflow_id}. \code{summary()} summarizes every workflow, \code{autoplot()} draws the
+two views of \code{\link[=autoplot.nested_results]{autoplot.nested_results()}} across them, and \code{\link[=agreement]{agreement()}}
+stacks each workflow's selection table under its id.
 }
-\details{
-The three readers follow the fold-state rules of the set's
-\link[=collect_metrics.nested_results_set]{collect_metrics()}. A workflow in
-which some outer folds failed is read over the folds that ran, with one
-warning of class \code{nestedtune_partial_summary} naming it. A workflow in
-which no fold completed is still summarized by \code{summary()}, which
-describes a failed run rather than refusing; the performance view keeps
-its slot on the x axis and draws nothing for it, the parameters view
-draws no panel for it, and \code{agreement()} leaves it out, each warning
-once naming it. A set in which
-no workflow completed a fold is refused by the plots and by
-\code{agreement()} with class \code{nestedtune_no_completed_folds}. A set in which
-no workflow's completed fold recorded a selected parameter is refused
-under \code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}.
+\section{What \code{summary()} holds}{
 
-The performance view's subtitle names the workflow and fold counts and
-then, each on a line of its own and only when there is one to name, how
-many workflows did not complete every fold and how many rest a metric's
-average on fewer folds than they completed; \code{summary()} names the folds
-and prints each workflow's count per metric. The two counts are
-separate: a workflow that ran whole can still be named by the second,
-since a completed fold can score \code{NA} on one metric while scoring the
-others, and a metric no completed fold scored is counted there while
-drawing no rule. A tuned parameter whose id is \code{wflow_id} cannot be
-tabulated beside the set's own column and is refused with class
+
+A list of one \code{\link[=summary.nested_results]{summary.nested_results()}} object per workflow, named by
+\code{wflow_id} in the set's order, each the summary of that workflow's run
+called alone, with the orchestrator's name as the list's \code{fn} attribute.
+
+Printing it shows the orchestrator and the workflow count, then one section
+per workflow holding that run's design, failed folds, selected parameters
+and estimate, and once at the end the note on what a nested estimate
+describes.
+}
+
+\section{What \code{autoplot()} draws}{
+
+
+Under \code{type = "performance"} the workflows stand along the x axis inside one
+panel per metric, with one point per completed outer fold's score and a
+dashed rule at each workflow's nested estimate, the value
+\code{\link[=collect_metrics]{collect_metrics()}} reports for it on the set.
+
+Under \code{type = "parameters"} there is one panel per workflow and tuned
+parameter, in the set's order, labelled by the id and then by the single
+view's label for that parameter, with the outer folds along the x axis. Each
+panel asks the single view's question of one workflow. The selected-value
+axis is decided over every workflow's values at once: numeric when all are
+numbers, discrete otherwise. A workflow with nothing to tune draws no panel.
+}
+
+\section{What \code{agreement()} returns}{
+
+
+\code{wflow_id}, then one column per parameter any workflow's completed fold
+selected, then \code{n} and \code{prop}, with each workflow's rows as \code{\link[=agreement]{agreement()}} on
+that run alone gives them, in the set's order. A column a workflow does not
+tune holds \code{NA} in its rows; within a workflow's rows \code{NA} keeps the meaning
+\code{\link[=agreement]{agreement()}} gives it, a fold that recorded no value. A workflow with
+nothing to tune contributes no row.
+}
+
+\section{Workflows that failed}{
+
+
+The three follow the fold-state rules of the set's
+\link[=collect_metrics.nested_results_set]{collect_metrics()}. A workflow with
+some folds failed is read over the folds that ran, warned about once with
+class \code{nestedtune_partial_summary}.
+
+A workflow in which no fold completed is still summarized by \code{summary()},
+which describes a failed run rather than refusing. The performance view
+keeps its slot on the x axis and draws nothing there, the parameters view
+draws no panel for it, and \code{agreement()} leaves it out, each warning once
+and naming it. A set in which no workflow completed a fold is refused by the
+plots and by \code{agreement()} with class \code{nestedtune_no_completed_folds}, and
+one in which no completed fold selected a parameter is refused under
+\code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}.
+}
+
+\section{Counting what contributed}{
+
+
+The performance view's subtitle gives the workflow and fold counts, then, on
+a line of its own and only when there is one to name, how many workflows did
+not complete every fold and how many averaged a metric over fewer folds than
+they completed. \code{summary()} names the folds and prints each workflow's count
+per metric.
+
+The two counts are separate. A workflow that ran whole can still be named by
+the second, since a completed fold can score \code{NA} on one metric while
+scoring the others, and a metric no completed fold scored is counted there
+while drawing no rule.
+
+A tuned parameter whose id is \code{wflow_id} cannot be tabulated beside the
+set's own column and is refused with class
 \code{nestedtune_collect_name_collision}; one whose id is \code{n} or \code{prop} is
 refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.
 }
+
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
-wset <- workflowsets::workflow_set(
-  preproc = list(pca = tuned, none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -110,13 +131,21 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
 
 set.seed(2)
 res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
 summary(res)
 agreement(res)
-autoplot(res)
+autoplot(res, type = "parameters")
 autoplot(res, type = "performance")
 \dontshow{\}) # examplesIf}
 }

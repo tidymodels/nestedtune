@@ -7,8 +7,8 @@
 \method{autoplot}{nested_results}(object, type = c("parameters", "performance"), ...)
 }
 \arguments{
-\item{object}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one
-of its siblings, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} included.}
+\item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
+siblings, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} included.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}.}
@@ -20,51 +20,56 @@ rather than silently ignored.}
 A \code{ggplot} object.
 }
 \description{
-Two views of a \code{nested_results} object, both drawing one point per outer
-fold with the folds in design order.
+Two views of a \code{nested_results}, both drawing one point per outer fold, with
+the folds in design order.
 
 \code{type = "parameters"}, the default, shows what each outer fold's inner
 tuning selected. A flat row of points means the folds agreed; points at
-different heights mean they disagreed, and the tuning procedure is unstable
-on this data, which averaging the metrics hides. This is the view nothing
-else in the ecosystem offers.
+different heights mean they disagreed, so the tuning procedure is unstable
+on this data, which averaging the metrics hides.
 
 \code{type = "performance"} shows each outer fold's score on its held-out
-assessment set, with a rule at the nested estimate: the same value
+assessment set, with a rule at the nested estimate, the value
 \code{\link[=collect_metrics]{collect_metrics()}} reports.
 }
-\details{
+\section{Folds with nothing to draw}{
+
+
 An outer fold that failed keeps its place on the x axis and draws no point,
-as does a fold that completed without recording a value for a parameter.
-Neither is imputed and neither is dropped from the axis, so the shortfall is
-visible in the figure itself. A run in which no fold completed is refused
-with condition class \code{nestedtune_no_completed_folds}, as
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}} and \code{\link[=nested_final_fit]{nested_final_fit()}} refuse it. A
-run in which no completed fold recorded a selected parameter -- a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result -- is refused under \code{type = "parameters"}
-with condition class \code{nestedtune_no_tuned_parameters}, and
+as does one that completed without recording a value for a parameter.
+Nothing is imputed and nothing leaves the axis, so the shortfall shows in
+the figure.
+
+A run in which no fold completed is refused with class
+\code{nestedtune_no_completed_folds}, as \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}} and
+\code{\link[=nested_final_fit]{nested_final_fit()}} refuse it. A run in which no completed fold selected a
+parameter, such as a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result, is refused under
+\code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}, while
 \code{type = "performance"} draws it.
-
-The subtitle states how much of the requested design ran. Contribution is
-counted per panel instead, because it differs between them: a panel says so
-when fewer folds contributed to it than completed, as in \verb{mtry (2 of 3 chose)} or \verb{rmse (from 2 folds)}; an unqualified panel means every
-completed fold contributed. A requested metric that no completed fold
-could score keeps an empty panel rather than disappearing.
-
-The selected-value axis is numeric when every value drawn is a number, and
-discrete otherwise: a single axis cannot be both, and character-valued
-tuning parameters are ordinary. A fold that selected \code{NA} is a value on that
-discrete axis rather than an absent point.
 }
+
+\section{What the labels say}{
+
+
+The subtitle gives how much of the requested design ran. How many folds
+stand behind a panel is said on the panel instead, since it varies between
+them: a panel reading \verb{mtry (2 of 3 chose)} or \verb{rmse (from 2 folds)} had
+fewer than the run completed, and an unqualified one had them all. A
+requested metric that no completed fold could score keeps an empty panel
+rather than disappearing.
+
+The selected-value axis is numeric when every value drawn is a number and
+discrete otherwise, since one axis cannot be both and character-valued
+parameters are ordinary. On that discrete axis a fold that selected \code{NA}
+draws a point at \code{NA} rather than no point.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -73,10 +78,12 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 autoplot(res)
 autoplot(res, type = "performance")
 \dontshow{\}) # examplesIf}

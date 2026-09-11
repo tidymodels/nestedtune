@@ -14,41 +14,45 @@
 
 #' Choose the rule each fold selects its candidate by
 #'
-#' Builds the object the `select` argument of [nested_tune_grid()],
-#' [nested_tune_bayes()], [nested_tune_race_anova()],
-#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] takes. It
-#' names one of tune's three selectors and carries what that selector needs.
-#' Every outer fold applies the rule to its own inner tuning run, with
-#' `metric` the first metric of the run, and the results object records the
-#' rule so [nested_final_fit()] applies the same one to the full-data run.
+#' @description
+#' Builds the object the `select` argument of [nested_tune_grid()] and its
+#' siblings takes. It names one of tune's three selectors and carries what that
+#' selector needs.
 #'
-#' @param rule The selector, one of `"best"` ([tune::select_best()], the
-#'   default: the candidate with the best mean on the first metric),
-#'   `"one_std_err"` ([tune::select_by_one_std_err()]: the simplest candidate
-#'   within one standard error of the best) or `"pct_loss"`
-#'   ([tune::select_by_pct_loss()]: the simplest candidate whose loss against
-#'   the best is under `limit` percent).
+#' Every outer fold applies the rule to its own inner tuning run, on the first
+#' metric of that run. The result records the rule, so [nested_final_fit()]
+#' selects the same way on the full data.
+#'
+#' @param rule The selector: `"best"` (the default), `"one_std_err"` or
+#'   `"pct_loss"`. The section below says what each one picks.
 #' @param ... For `"one_std_err"` and `"pct_loss"`, one or more bare
 #'   expressions ordering the candidates from simplest to most complex, as
-#'   tune's selectors take them: parameter names, wrapped in [dplyr::desc()]
-#'   where a larger value is simpler. At least one is required for those two
-#'   rules, and none is accepted for `"best"`, which [tune::select_best()]
-#'   refuses. Each must be a bare name or a call, never a string or a
-#'   number, which would order nothing; and none may be named, so a
-#'   misspelled `limit` is refused rather than taken as an ordering. Each
-#'   name must be a parameter the workflow tunes; the orchestrators check
-#'   that at entry.
-#' @param limit For `"pct_loss"` only, the acceptable loss of performance
-#'   against the best candidate, in percent, a single non-negative number;
-#'   left `NULL` it takes tune's default of 2. Refused with the other two
-#'   rules, which have no limit.
+#'   tune's selectors take them. At least one is required for those rules, and
+#'   `"best"` accepts none.
+#' @param limit For `"pct_loss"` only, the acceptable loss against the best
+#'   candidate, in percent, as a single non-negative number. Left `NULL` it
+#'   takes tune's default of 2, and the other rules refuse it.
 #'
-#' @return A list of class `selection_rule` with elements `rule`, the name
-#'   given; `order`, the expressions in `...` as a list, empty for `"best"`;
-#'   and `limit`, the limit for `"pct_loss"` and `NULL` otherwise. The
-#'   expressions are captured, not evaluated, and carry no environment, so
-#'   the object is the same wherever it is built. Printing shows the three on
-#'   one line.
+#' @return A list of class `selection_rule` with elements `rule`, `order` (the
+#'   expressions in `...`, empty for `"best"`) and `limit` (`NULL` outside
+#'   `"pct_loss"`). Printing shows the three on one line.
+#'
+#' @section The three rules:
+#'
+#' `"best"` takes the candidate with the best mean on the first metric, as
+#' [tune::select_best()] does. `"one_std_err"` takes the simplest candidate
+#' within one standard error of the best, as [tune::select_by_one_std_err()]
+#' does. `"pct_loss"` takes the simplest candidate whose loss against the best
+#' stays under `limit` percent, as [tune::select_by_pct_loss()] does.
+#'
+#' @section Writing an ordering:
+#'
+#' An ordering is a parameter name, wrapped in [dplyr::desc()] where a larger
+#' value is the simpler model. Each must be a bare name or a call, never a
+#' string or a number, which would order nothing, and none may be named, so a
+#' misspelled `limit` is refused instead of read as an ordering. Every name
+#' must be a parameter the workflow tunes, which the orchestrators check when
+#' the run starts.
 #'
 #' @examples
 #' selection_rule()

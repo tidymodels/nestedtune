@@ -9,54 +9,47 @@ extract_scored_candidates(x, ...)
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty. Passing an argument here raises an
+error instead of leaving it silently ignored.}
 }
 \value{
 A tibble with one row per candidate scored, carrying one column per
-tuned parameter plus tune's \code{.config} label for the candidate, and \code{.iter}
-on a Bayesian fit. It is the distinct parameter rows of the run's
-\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table with those labels: the same shape one
-element of a result's \code{.inner_metrics} column reduces to when its metric
-columns are dropped, so the two can be compared directly. Everything
-tune wrote per metric is dropped: \code{.metric}, \code{.estimator}, \code{mean}, \code{n},
-\code{std_err}, and on a fit that scored a dynamic survival metric the
-\code{.eval_time} column, so a candidate has one row here however many
-evaluation times it was scored at. The times and the scores are in
-\code{collect_metrics(extract_tune_results(x))}. A fit built from a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result scored no candidate and is refused with
-condition class \code{nestedtune_no_tuning_run}.
-
-This is what was \strong{scored}, not what was \strong{asked for}. A \code{grid} given as
-a size is expanded by tune and may reach fewer candidates than the number
-requested; a candidate that failed everywhere scored nothing. See the
-\code{.inner_metrics} discussion in \code{\link[=nested_tune_grid]{nested_tune_grid()}} for the full account
-of how the two records diverge, which holds here too: this record is
-derived the same way.
-
-One pointer there does \strong{not} carry over. A candidate that failed on every
-inner resample is missing from this table, and on a \code{nested_tune_grid()}
-result its failure is recorded in that object's \code{.notes} column. A
-\code{nested_final_fit} has no such column. Look instead inside the tuning run
-itself: \code{tune::collect_notes(extract_tune_results(x))}.
+tuned parameter plus tune's \code{.config} label, and \code{.iter} where the search
+iterated. It is the distinct parameter rows of the run's
+\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table: everything tune wrote per metric is
+dropped (\code{.metric}, \code{.estimator}, \code{mean}, \code{n}, \code{std_err}, and
+\code{.eval_time} where a dynamic survival metric was scored), so a candidate
+has one row here however many evaluation times it was scored at. The
+times and the scores are in \code{collect_metrics(extract_tune_results(x))}. A
+fit that ran no tuning scored no candidate and is refused with condition
+class \code{nestedtune_no_tuning_run}.
 }
 \description{
-Returns the candidate parameter settings that \code{\link[=nested_final_fit]{nested_final_fit()}}'s tuning
-run actually evaluated: the full-data counterpart of the candidate set each
-outer fold's \code{.inner_metrics} table describes on a \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} result, derived the same way from the run's
-\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table, so a Bayesian final fit's table carries the
-\code{.iter} column that path's tables do.
+Returns the candidate parameter settings \code{\link[=nested_final_fit]{nested_final_fit()}}'s tuning run
+evaluated. It is the full-data counterpart of the candidate set each outer
+fold's \code{.inner_metrics} table describes, derived the same way, so the two
+can be compared directly.
 }
+\section{Scored, not asked for}{
+
+
+A \code{grid} given as a size is expanded by tune and may reach fewer candidates
+than the number requested, and a candidate that failed everywhere scored
+nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of how the two records
+diverge under \code{.inner_metrics}, and it holds here too.
+
+One pointer there does not carry over. A candidate that failed on every
+inner resample is missing from this table, and a \code{nested_final_fit} has no
+\code{.notes} column to record it in. Look inside the run itself:
+\code{tune::collect_notes(extract_tune_results(x))}.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -65,12 +58,16 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 extract_scored_candidates(final)
 \dontshow{\}) # examplesIf}
 }

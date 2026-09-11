@@ -12,56 +12,55 @@
 \arguments{
 \item{object}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty. Passing an argument here raises an
+error instead of leaving it silently ignored.}
 
 \item{x}{A \code{summary.nested_final_fit} object from
 \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}}.}
 }
 \value{
 \code{summary()} returns an object of class \code{summary.nested_final_fit}: a list
-holding the full-data tuning run's resampling label (\code{tuning_label}), the
-tuner that ran (\code{tuner}: \code{"tune_grid"}, \code{"tune_bayes"}, \code{"tune_race_anova"},
-\code{"tune_race_win_loss"}, \code{"tune_sim_anneal"} or \code{"fit_resamples"}), the number of
-candidates that run scored (\code{candidates}), the iterating tuners' counts
-(\code{initial} and \code{initial_requested}, \code{iterations_completed} and
-\code{iterations_requested}, each \code{NULL} on a grid or a racing fit; the scored figures are
-read from the candidate record, the requested ones from the procedure, and
-a run whose candidate record cannot be derived reports its scored figures
-as zero rather than failing to print), the
-parameter values selection chose (\code{selection}), and an \code{estimate}
-component that is always \code{NULL}. A fit built from a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no tuning: its \code{tuning_label} is
-\code{NULL}, \code{candidates} is \code{0} and \code{selection} is empty. Printing it is what most callers want;
-the components are there for a caller that needs a value rather than a
-line of text.
+holding the tuning run's resampling label (\code{tuning_label}), the tuner that
+ran (\code{tuner}: \code{"tune_grid"}, \code{"tune_bayes"}, \code{"tune_race_anova"},
+\code{"tune_race_win_loss"}, \code{"tune_sim_anneal"} or \code{"fit_resamples"}), the
+number of candidates that run scored (\code{candidates}), the iterating tuners'
+counts (\code{initial} and \code{initial_requested}, \code{iterations_completed} and
+\code{iterations_requested}), the parameter values selection chose
+(\code{selection}), and an \code{estimate} component that is always \code{NULL}. Printing
+it is what most callers want; the components are there for a caller that
+needs a value rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-Answers what the final fit means: the full-data tuning run the selection
-came from, which procedure ran it and at what counts, how many candidates
-that run scored, which parameter values it selected, and where this
-model's honest performance estimate lives.
+Gives the pieces the print method renders as values: the full-data tuning
+run the selection came from, which search ran it and at what counts, how
+many candidates it scored, and which parameter values it chose.
 
-The estimate component is always \code{NULL}, and that is the point. The tuning
-run stored on the object has metrics, but selection consumed them and they
-are optimistically biased as a claim about this model; the nested estimate
-on the results object the fit was built from -- the \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} result -- is the one to report (IP3). The absence is
-carried as a component rather than left out, so a caller reading the
-summary meets a recorded fact instead of a missing name; the four Bayesian
-counts are carried as \code{NULL} on a grid fit for the same reason.
+The \code{estimate} component is always \code{NULL}, and that is the point. The
+stored tuning run's metrics are selection-time quantities, so this object
+records the absence of a performance number rather than leaving the name
+out; see \code{\link[=nested_final_fit]{nested_final_fit()}} for the number to report instead.
 }
+\section{Components that are absent}{
+
+
+The four counts are \code{NULL} on a grid or a racing fit, which iterate over
+nothing, and are carried rather than dropped for the reason \code{estimate} is.
+The scored figures are read from the candidate record and the requested
+ones from the procedure; a run whose candidate record cannot be derived
+reports its scored figures as zero rather than failing to print.
+
+Where nothing was tuned there is no run to describe: \code{tuning_label} is
+\code{NULL}, \code{candidates} is \code{0}, and \code{selection} is empty.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -70,12 +69,16 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 summary(final)
 \dontshow{\}) # examplesIf}
 }

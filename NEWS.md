@@ -1,5 +1,18 @@
 # nestedtune 0.0.0.9000
 
+* Every help page is rewritten for a tidymodels user. Argument entries are
+  at most two sentences, with the detail under section headings of their
+  own; the orchestrator pages inherit the arguments they share with the
+  tune, finetune and workflowsets function each wraps, or with
+  `nested_tune_grid()` where that page already carries them, and the sibling
+  pages that take the design pull the nested-design section, and those that
+  take `param_info` the finalization section, in from `?nested_tune_grid`
+  rather than restating them. The example setup and the orchestrators'
+  Reproducibility section each live once, in a `man-roxygen/` template; the
+  shared setup is written with `|>`, and every
+  example runs under `R CMD check` instead of sitting in `\donttest{}`.
+  `?nested_resamples` gains the memory table the README carries.
+
 * The documentation site no longer carries pages built from files internal
   to the repository. pkgdown renders every root and `.github/` markdown file
   it does not already own, which had put this repository's agent instructions

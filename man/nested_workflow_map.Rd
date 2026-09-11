@@ -7,26 +7,18 @@
 nested_workflow_map(object, fn = "nested_tune_grid", ...)
 }
 \arguments{
-\item{object}{A \code{\link[workflowsets:workflow_set]{workflowsets::workflow_set()}}: one workflow per row,
-untrained, with \code{wflow_id}, \code{info}, \code{option} and \code{result} columns as
-\code{\link[workflowsets:workflow_set]{workflowsets::workflow_set()}} and \code{\link[workflowsets:as_workflow_set]{workflowsets::as_workflow_set()}}
-build them. The \code{result} column is not read: this function returns its
-results as its own object rather than filling the set's column.}
+\item{object}{A workflow set.}
 
 \item{fn}{The name of the orchestrator to run each workflow through, one
 of \code{"nested_tune_grid"} (the default), \code{"nested_tune_bayes"},
 \code{"nested_tune_race_anova"}, \code{"nested_tune_race_win_loss"},
-\code{"nested_tune_sim_anneal"} or \code{"nested_fit_resamples"}. The package's
-own names, not tune's.}
+\code{"nested_tune_sim_anneal"} or \code{"nested_fit_resamples"}.}
 
-\item{...}{The orchestrator's arguments, every one named: the nested
-design as \code{resamples} (required), and any of that orchestrator's other
-arguments -- \code{grid}, \code{param_info}, \code{metrics}, \code{event_level},
-\code{eval_time}, \code{select}, \code{iter}, \code{initial}, \code{objective} -- and a
-\code{control} as it takes one through its own \code{...}. An entry of the set's
-\code{option} column overrides the same-named argument for its workflow. A
-name the orchestrator \code{fn} names does not take is refused, as is an
-unnamed argument and a call with no \code{resamples}.}
+\item{...}{The orchestrator's arguments, every one named: the nested design
+as \code{resamples} (required), any of its other arguments, and a \code{control}
+as it takes one through its own \code{...}. A name the orchestrator \code{fn}
+names does not take is refused, as is an unnamed argument or a call with
+no \code{resamples}.}
 }
 \value{
 A \code{nested_results_set}: a tibble of class
@@ -38,14 +30,7 @@ set's id), \code{workflow} (the workflow, as the set held it) and \code{result}
 so \code{\link[workflowsets:rank_results]{workflowsets::rank_results()}} and \code{\link[tune:fit_best]{tune::fit_best()}} refuse it: a
 ranking of the set's workflows by their nested estimates, and a fit of
 the best, would be a selection the outer loop did not nest (see
-\code{vignette("estimate")}). What it answers: \code{\link[=collect_metrics]{collect_metrics()}},
-\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_inner_metrics]{collect_inner_metrics()}}, \code{\link[=collect_notes]{collect_notes()}},
-\link[=collect_predictions.nested_results]{collect_predictions()} and
-\link[=collect_predictions.nested_results]{collect_extracts()} stack each
-workflow's table under a \code{wflow_id} column; \code{\link[=extract_workflow]{extract_workflow()}} with an
-\code{id} returns one workflow; \code{\link[=nested_final_fit]{nested_final_fit()}} with an \code{id} fits one
-workflow by its own record; and \code{print()} shows the orchestrator and
-each workflow's completed fold count.
+\code{vignette("estimate")}).
 }
 \description{
 \code{nested_workflow_map()} takes a \code{\link[workflowsets:workflow_set]{workflowsets::workflow_set()}} and the name
@@ -53,12 +38,27 @@ of one of the six orchestrators, and runs each workflow of the set, in the
 set's order, through that orchestrator on one nested design. It is shaped
 like \code{\link[workflowsets:workflow_map]{workflowsets::workflow_map()}}: the orchestrator's arguments come
 through \code{...}, and an entry in the set's \code{option} column overrides the
-same-named argument for that workflow alone. It returns a
-\code{nested_results_set}, a tibble with one row per workflow holding its id,
-the workflow and its \code{nested_results}, so the comparison a user makes
+same-named argument for that workflow alone.
+
+It returns a \code{nested_results_set}, a tibble with one row per workflow
+holding its id, the workflow and its \code{nested_results}, so a comparison
 across model families reads off one object with the workflow id beside
 the fold labels.
 }
+\section{What the set answers}{
+
+
+\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_inner_metrics]{collect_inner_metrics()}},
+\code{\link[=collect_notes]{collect_notes()}}, \link[=collect_predictions.nested_results]{collect_predictions()}
+and \link[=collect_predictions.nested_results]{collect_extracts()} stack each
+workflow's table under a \code{wflow_id} column; \code{\link[=extract_workflow]{extract_workflow()}} with an
+\code{id} returns one workflow; \code{\link[=nested_final_fit]{nested_final_fit()}} with an \code{id} fits one
+workflow by its own record; and \code{print()} shows the orchestrator and each
+workflow's completed fold count. The \code{result} column of the set given as
+\code{object} is not read: this function returns its results as its own object
+rather than filling that column.
+}
+
 \section{Routing}{
 
 
@@ -66,22 +66,24 @@ A workflow with no parameter marked by \code{\link[tune:tune]{tune::tune()}} run
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} whatever \code{fn} names, since the five tuning
 orchestrators refuse it at entry: a baseline beside tuned models on the
 same folds is the comparison a set exists for, and each element's record
-names the procedure that ran. Every other workflow runs through \code{fn}. For
-each workflow the merged arguments are narrowed to what its orchestrator
-accepts -- its formals other than \code{object}, and, for a workflow that runs
-through \code{fn}, the \code{control} in \code{...} -- so a \code{grid} in \code{...} reaches the
-tuned workflows and not the fixed one. A control's class is \code{fn}'s own,
-and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} refuses a racing, Bayesian or annealing
-control by that class, so a fixed workflow routed there does not take the
-\code{control} in \code{...}: it runs under tune's default
+names the procedure that ran. Every other workflow runs through \code{fn}.
+
+For each workflow the merged arguments are narrowed to what its
+orchestrator accepts (its formals other than \code{object}, and, for a workflow
+that runs through \code{fn}, the \code{control} in \code{...}), so a \code{grid} in \code{...}
+reaches the tuned workflows and not the fixed one. A control's class is
+\code{fn}'s own, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} refuses a racing, Bayesian or
+annealing control by that class, so a fixed workflow routed there does not
+take the \code{control} in \code{...}: it runs under tune's default
 \code{\link[tune:control_resamples]{tune::control_resamples()}} unless its \code{option} entry names one, which is
-where a \code{save_pred} or \code{extract} for the baseline goes. A name that the
-orchestrator \code{fn} names does not take
-is refused at entry (a typo would otherwise be narrowed away for every
-workflow); a name in a workflow's \code{option} entry that the orchestrator it
-routes to does not take is refused naming the workflow. Under
-\code{fn = "nested_fit_resamples"} every workflow must be fixed: one carrying
-a marker is refused at entry, naming it, as that orchestrator refuses it.
+where a \code{save_pred} or \code{extract} for the baseline goes.
+
+A name that the orchestrator \code{fn} names does not take is refused at entry,
+since a typo would otherwise be narrowed away for every workflow; a name
+in a workflow's \code{option} entry that the orchestrator it routes to does not
+take is refused naming the workflow. Under \code{fn = "nested_fit_resamples"}
+every workflow must be fixed: one carrying a marker is refused at entry,
+naming it, as that orchestrator refuses it.
 }
 
 \section{Seeds}{
@@ -92,71 +94,64 @@ generator state the call holds once its entry checks have run is
 reinstated before each workflow, so every workflow's fold \code{i} runs under
 the same two seeds and each element is \code{identical()} to the orchestrator
 called by hand on that workflow, with the same arguments, after the same
-\code{set.seed()}. Under a stochastic engine the workflows are therefore
-paired on seeds as well as on folds. The caller's state is put back on
-exit, and a session that had never drawn is left with no state, as it
-was found. Each element runs its folds in parallel exactly as its
-orchestrator does: a running mirai pool is used for every workflow's
-folds, one round of folds per workflow.
+\code{set.seed()}. Under a stochastic engine the workflows are therefore paired
+on seeds as well as on folds. The caller's state is put back on exit, and
+a session that had never drawn is left with no state, as it was found.
+Each element runs its folds in parallel exactly as its orchestrator does:
+a running mirai pool is used for every workflow's folds, one round of
+folds per workflow.
 }
 
-\section{Warnings from one workflow}{
+\section{Warnings and errors from one workflow}{
 
 
 An orchestrator warns when some of its outer folds failed, and a reader
 warns when it summarizes a partial run. Inside a set those warnings are
 raised with the workflow's id at the front of the message, under the same
 condition class, so a user who never calls a reader still learns which
-workflow lost folds. An error an orchestrator raises for one workflow --
-a \code{grid} that names a parameter that workflow does not tune, a control of
-the wrong class -- is raised the same way, when that workflow's turn
-comes; the workflows before it have run by then. What is raised is the
-original condition object: its class vector, its \code{parent} and the cause
-chain printed under it, its bullets and every field a handler reads come
-through unchanged, with \verb{Workflow "<id>": } written in front of the
-first line of its message and this function, or the reader, as its
-call.
+workflow lost folds. An error an orchestrator raises for one workflow (a
+\code{grid} that names a parameter that workflow does not tune, a control of
+the wrong class) is raised the same way, when that workflow's turn comes;
+the workflows before it have run by then. What is raised is the original
+condition object, its class vector, its \code{parent} and the cause chain, its
+bullets and every field a handler reads unchanged, with \verb{Workflow "<id>": } written in front of the first line of its message and this function, or
+the reader, as its call.
 }
 
 \section{Subsetting}{
 
 
 Each row's \code{nested_results} describes its own run whole, so a subset of
-the set that keeps rows of the run answers for the workflows it holds.
-An operation keeps the class and the \code{fn} attribute when its result
-holds \code{wflow_id}, \code{workflow} and \code{result} under those names with none
-repeated, at least one row, no \code{wflow_id} repeated, and each row's three
-values identical to the row of that id in the operation's first
-data-frame argument: rows dropped or reordered and columns added keep
-the class, so \code{dplyr::filter()}, \code{dplyr::arrange()}, \code{dplyr::mutate()},
-\code{dplyr::bind_cols()} with the set first, \code{x[i, ]} and
-\code{vctrs::vec_slice()} on a kept subset hand back a set whose readers,
-\code{summary()}, \code{print()}, \code{extract_workflow()} and \code{\link[=nested_final_fit]{nested_final_fit()}}
-answer for the rows in hand alone. Anything else comes back a plain
-tibble without the attribute: a record column dropped or renamed, no
-row left, a \code{wflow_id} repeated (\code{x[c(1, 1), ]}, \code{rbind(x, x)},
-\code{dplyr::bind_rows(x, x)}), a row that is not the run's own (a
-\code{result} replaced, a row bound in from another set or a bare table),
-\code{dplyr::bind_cols()} with a table first, and a direct
+the set that keeps rows of the run answers for the workflows it holds. An
+operation keeps the class and the \code{fn} attribute when its result holds
+\code{wflow_id}, \code{workflow} and \code{result} under those names with none repeated,
+at least one row, no \code{wflow_id} repeated, and each row's three values
+identical to the row of that id in the operation's first data-frame
+argument. So rows dropped or reordered and columns added keep the class:
+\code{dplyr::filter()}, \code{dplyr::arrange()}, \code{dplyr::mutate()},
+\code{dplyr::bind_cols()} with the set first, \code{x[i, ]} and \code{vctrs::vec_slice()}
+on a kept subset hand back a set whose readers, \code{summary()}, \code{print()},
+\code{extract_workflow()} and \code{\link[=nested_final_fit]{nested_final_fit()}} answer for the rows in hand
+alone.
+
+Anything else comes back a plain tibble without the attribute: a record
+column dropped or renamed, no row left, a \code{wflow_id} repeated (\code{x[c(1, 1), ]}, \code{rbind(x, x)}, \code{dplyr::bind_rows(x, x)}), a row that is not the run's
+own (a \code{result} replaced, a row bound in from another set or a bare
+table), \code{dplyr::bind_cols()} with a table first, and a direct
 \code{vctrs::vec_cbind()}, which finalizes to a tibble before the rule is
 asked. Replacing a value under the class with \verb{$<-} or \verb{[[<-} is not
 checked, as it is not on a \code{nested_results}. \code{dplyr::group_by()},
 \code{dplyr::rowwise()} and \code{tibble::as_tibble()} return a grouped, a rowwise
-and a plain tibble that is not a set and still carries the \code{fn}
-attribute, as they do on a \code{nested_results}.
+and a plain tibble that is not a set and still carries the \code{fn} attribute.
 }
 
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-# One tuned workflow and one baseline, on the same nested design.
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
-wset <- workflowsets::workflow_set(
-  preproc = list(pca = tuned, none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -164,13 +159,18 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
 
 set.seed(2)
-res <- nested_workflow_map(
-  wset,
-  resamples = folds,
-  grid = data.frame(num_comp = 1:2)
-)
+res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
 res
 collect_metrics(res)
 

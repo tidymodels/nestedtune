@@ -14,24 +14,17 @@
 
 \item{new_data}{A data frame of new observations to predict.}
 
-\item{type, opts}{Passed to the workflow's \link[workflows:predict.workflow]{predict()}
-method unchanged; \code{type} selects the prediction type (\code{"numeric"},
-\code{"class"}, \code{"prob"}, \code{"survival"}, ...), with the workflow's default
-when \code{NULL}.}
+\item{type, opts}{Passed to \code{\link[workflows:predict.workflow]{workflows::predict.workflow()}} unchanged.
+\code{type} selects the prediction type (\code{"numeric"}, \code{"class"}, \code{"prob"},
+\code{"survival"}, ...), with the workflow's default when \code{NULL}.}
 
-\item{...}{For \code{predict()}, further arguments passed on to the model's
-predict method through the workflow -- \code{level} with \code{type = "conf_int"}
-for an interval, or \code{eval_time} with \code{type = "survival"}; a name outside
-parsnip's own short list of predict arguments is refused by parsnip, and
-a listed one the model cannot use for the \code{type} asked is passed on and
-may be ignored. For \code{augment()}, not used;
-must be empty. Here the two diverge: workflows' own \code{augment()} method
-passes an unknown argument on to parsnip, which ignores it, so this
-method refuses it instead of letting it vanish.}
+\item{...}{For \code{predict()}, further arguments for the model's predict
+method, passed on through the workflow. For \code{augment()}, not used; must
+be empty.}
 
-\item{eval_time}{For censored-regression models, the time or times at
-which to evaluate survival probabilities; passed to the workflow's
-\code{augment()} method. Ignored otherwise.}
+\item{eval_time}{For censored regression, the time or times at which to
+evaluate survival probabilities, passed to the workflow's \code{augment()}
+method. Ignored otherwise.}
 }
 \value{
 \code{predict()} returns the tibble of predictions the workflow's
@@ -44,28 +37,35 @@ column where the outcome is present and the model is a regression.
 workflow's own methods, reached without extracting it first: each returns
 what the same call on \code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
 }
+\section{What the dots accept}{
+
+
+\code{predict()} forwards them: \code{level} with \code{type = "conf_int"} for an
+interval, or \code{eval_time} with \code{type = "survival"}. A name outside parsnip's
+own short list of predict arguments is refused by parsnip, and a listed one
+the model cannot use for the \code{type} asked is passed on and may be ignored.
+
+\code{augment()} fences them instead. Workflows' own \code{augment()} method passes
+an unread argument on to parsnip, which ignores it, so refusing it here is
+the only way it is refused at all.
+}
+
 \section{Residuals on the training rows are not performance}{
 
 
 Augmenting the rows this model was fit on gives in-sample residuals. They
-describe how the model fits the data it has already seen, and are not
-this model's performance on data it has not. The number to report is
-\code{\link[=collect_metrics]{collect_metrics()}} on the results object the fit was built from -- the
-result of \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its siblings -- which estimates
-the error of the whole tune-and-fit procedure on rows no part of it
-touched. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why the model has no honest number
-of its own.
+say how the model fits data it has already seen, not how it does on data it
+has not. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results object
+the fit was built from; see \code{\link[=nested_final_fit]{nested_final_fit()}} for why this model has no
+number of its own.
 }
 
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -74,12 +74,16 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 predict(final, new_data = mtcars[1:3, ])
 predict(final, new_data = mtcars[1:3, ], type = "conf_int", level = 0.9)
 augment(final, new_data = mtcars[1:3, ])

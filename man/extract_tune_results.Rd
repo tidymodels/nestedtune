@@ -9,48 +9,38 @@ extract_tune_results(x, ...)
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty. Passing an argument here raises an
+error instead of leaving it silently ignored.}
 }
 \value{
-The stored \code{tune_results} object, unchanged. It is tune's own object,
-so tune's generics apply to it directly. A fit built from a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result ran no tuning and is refused with
-condition class \code{nestedtune_no_tuning_run}.
+The stored \code{tune_results} object, unchanged. It is tune's own
+object, so tune's generics apply to it directly; a fit that ran no tuning
+is refused with condition class \code{nestedtune_no_tuning_run}.
 }
 \description{
-Returns the \code{\link[tune:tune_grid]{tune::tune_grid()}} or \code{\link[tune:tune_bayes]{tune::tune_bayes()}} result that
-\code{\link[=nested_final_fit]{nested_final_fit()}} chose its parameters from: the record of what
-selection saw when the procedure was re-run on the complete dataset.
+Returns the tuning result that \code{\link[=nested_final_fit]{nested_final_fit()}} chose its parameters
+from: the record of what selection saw when the procedure was re-run on the
+complete dataset.
 }
 \section{What its numbers are, and are not}{
 
 
-The returned object answers \code{collect_metrics()}, and will hand its metrics
-over without qualifying them. Every one of them is a \strong{selection-time}
-quantity: it was computed on the resamples that chose the candidate it
-describes, which makes it optimistically biased as a claim about the model
-this final fit produced. Nothing in that object is this model's performance.
+The returned object answers \code{collect_metrics()} and hands its metrics over
+unqualified. Each of them was computed on the resamples that chose the
+candidate it describes, which makes it a selection-time quantity,
+optimistically biased as a claim about the model this final fit produced.
 
-Report the nested estimate instead: \code{collect_metrics()} on the results
-object the fit was built from, the \code{\link[=nested_tune_grid]{nested_tune_grid()}} or
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} result. That number is measured on data no part of the
-tune-and-fit procedure ever saw, which is what makes it an honest description
-of the procedure that produced your model.
-
-The run is kept because it is the record of what selection saw, not because
-it describes the model.
+The nested estimate is the honest one, and \code{\link[=nested_final_fit]{nested_final_fit()}} says why.
+This run is kept because it is the record of what selection saw, not
+because it describes the model.
 }
 
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -59,12 +49,16 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(3)
 final <- nested_final_fit(wf, res)
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 extract_tune_results(final)
 \dontshow{\}) # examplesIf}
 }

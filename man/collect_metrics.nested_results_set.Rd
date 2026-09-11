@@ -24,8 +24,8 @@
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty, so an argument given here is an error
+and not a silent no-op.}
 
 \item{summarize}{Whether to average each workflow's per-fold metrics
 (\code{TRUE}, the default) or return them one row per outer fold (\code{FALSE}),
@@ -38,47 +38,52 @@ union of the elements' columns, \code{NA} where an element lacks one (\code{NULL
 in a list column). An element whose table has no rows contributes none.
 }
 \description{
-The six readers of a \code{nested_results} answer on a \code{nested_results_set},
-what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns: each calls its single-workflow
-method on every element and binds the tables in the set's order, with a
-\code{wflow_id} column first. \code{collect_metrics()} gives one row per workflow
-and metric summarized, or per workflow, outer fold and metric with
-\code{summarize = FALSE}, where \code{wflow_id} stands ahead of the fold label
-columns; \code{collect_selections()}, \code{collect_inner_metrics()},
-\code{collect_notes()}, \code{collect_predictions()} and \code{collect_extracts()} stack
-their per-fold tables the same way.
-}
-\details{
-Five of the readers read the folds that completed, as they do on one
-workflow. A workflow in which no outer fold completed is left out of
-their tables while another workflow completed one, with one warning of
-class \code{nestedtune_partial_summary} naming it; a workflow in which some
-folds failed contributes the folds that ran, with that reader's own
-partial-run warning raised once for it, the workflow's id at the front of
-the message; and a set in which no workflow completed a fold is refused
-with class \code{nestedtune_no_completed_folds}. \code{collect_predictions()} and
-\code{collect_extracts()} then refuse a set in which a workflow that would
-contribute rows did not keep the column, with class
-\code{nestedtune_column_not_saved} naming it: on a set a control reaches each
-workflow through the call's \code{...} or its own \code{option} entry, so one
-workflow can have kept what another did not. \code{collect_notes()} reads
-every workflow, those in which no fold completed included, and refuses
-nothing: a failed workflow's notes are the reason to ask.
+The six readers of a \code{nested_results} also answer on a \code{nested_results_set},
+what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns. Each calls its single-workflow method
+on every element and binds the tables in the set's order, under a \code{wflow_id}
+column placed first.
 
-An element's table already carrying a \code{wflow_id} column -- a parameter
-given that id -- is refused with class
-\code{nestedtune_collect_name_collision}.
+\code{collect_metrics()} gives one row per workflow and metric, or per workflow,
+outer fold and metric with \code{summarize = FALSE}. \code{collect_selections()},
+\code{collect_inner_metrics()}, \code{collect_notes()}, \code{collect_predictions()} and
+\code{collect_extracts()} stack their per-fold tables the same way.
 }
+\section{Workflows and folds that failed}{
+
+
+Five of the readers take the folds that completed, as they do on one
+workflow. A workflow with some folds failed contributes the folds that ran,
+and that reader's own partial-run warning is raised once for it with the
+workflow's id in front of the message. A workflow in which no fold completed
+is left out while another workflow completed one, warned about with class
+\code{nestedtune_partial_summary}. A set in which no workflow completed a fold is
+refused with class \code{nestedtune_no_completed_folds}.
+
+\code{collect_notes()} is the exception: it reads every workflow, including those
+in which no fold completed, and refuses nothing, since a failed workflow's
+notes are the reason to ask.
+}
+
+\section{Columns not saved, and colliding ids}{
+
+
+A control reaches each workflow of a set through the call's \code{...} or through
+its own \code{option} entry, so one workflow can have kept what another did not.
+\code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
+which a workflow that would contribute rows lacks the column, with class
+\code{nestedtune_column_not_saved} naming it.
+
+An element's table that already has a \code{wflow_id} column, a parameter given
+that id, is refused with class \code{nestedtune_collect_name_collision}.
+}
+
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::recipe(mpg ~ ., data = mtcars)
-tuned <- recipes::step_pca(rec, recipes::all_predictors(), num_comp = tune::tune())
-wset <- workflowsets::workflow_set(
-  preproc = list(pca = tuned, none = rec),
-  models = list(lm = parsnip::linear_reg())
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -86,10 +91,18 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
+# One tuned workflow and one baseline, on the same nested design.
+wset <- workflowsets::workflow_set(
+  preproc = list(pca = rec, none = recipes::recipe(mpg ~ ., data = mtcars)),
+  models = list(lm = parsnip::linear_reg())
+)
 
 set.seed(2)
 res <- nested_workflow_map(wset, resamples = folds, grid = data.frame(num_comp = 1:2))
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick", "workflowsets"))) withAutoprint(\{ # examplesIf}
 collect_metrics(res)
 collect_metrics(res, summarize = FALSE)
 collect_selections(res)

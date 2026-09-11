@@ -7,51 +7,58 @@
 extract_procedure(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} object from one of the orchestrators, or a
-\code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
+siblings, or a \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used; must be empty. Passing an argument here raises an
+error instead of leaving it silently ignored.}
 }
 \value{
-The stored record, unchanged: a flat named list with \code{tuner}, the
-name of the tune or finetune function that ran (\code{"tune_grid"},
-\code{"tune_bayes"}, \code{"tune_race_anova"}, \code{"tune_race_win_loss"},
-\code{"tune_sim_anneal"}, or \code{"fit_resamples"} from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}});
-that tuner's own arguments (\code{grid} for the grid and
-racing tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian tuner;
-\code{iter} and \code{initial} for simulated annealing; none for the plain fit);
-the arguments every orchestrator shares, \code{param_info}, \code{event_level},
-\code{eval_time} and \code{select}, the \code{\link[=selection_rule]{selection_rule()}} each fold selected by,
-as they were given; and \code{control}, the control object the run was given,
-or tune's default when none was, with the slots this package forces
-already applied, and on a Bayesian result with \code{seed} left out. A
-\code{"fit_resamples"} record carries no \code{param_info} and no \code{select}: no
-parameter set was read and no rule applied. See "Differences from
-calling tune directly" on each orchestrator's help page for what those
-slots are.
-
-On a \code{nested_results} the record travels as an attribute of the object;
-on a \code{nested_final_fit} it is the record the fit re-ran, which is the
-record of the results object it was built from.
+The stored record, unchanged: a flat named list with \code{tuner}, that
+tuner's own arguments, the arguments every orchestrator shares
+(\code{param_info}, \code{event_level}, \code{eval_time} and \code{select}) as they were
+given, and \code{control} as it took effect. The section below says what each
+holds.
 }
 \description{
-Returns the \code{procedure} record a \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}},
-\code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}}, \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} or
-\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} result carries, or the one a \code{\link[=nested_final_fit]{nested_final_fit()}}
-re-ran: which tuner ran, that tuner's own arguments, and the control as it
-took effect. A final fit built from a results object re-runs exactly what
-this record describes.
+Returns the \code{procedure} record a nested result carries, or the one a
+\code{\link[=nested_final_fit]{nested_final_fit()}} re-ran: which tuner ran, that tuner's own arguments,
+and the control as it took effect.
 }
+\details{
+A final fit built from a results object re-runs exactly what this record
+describes, so reading it is how you see what a fit will do before you ask
+for one.
+}
+\section{What the record holds}{
+
+
+\code{tuner} names the tune or finetune function that ran: \code{"tune_grid"},
+\code{"tune_bayes"}, \code{"tune_race_anova"}, \code{"tune_race_win_loss"},
+\code{"tune_sim_anneal"}, or \code{"fit_resamples"} for a run with nothing to tune.
+Beside it sit that tuner's own arguments: \code{grid} for the grid and racing
+tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian one; \code{iter} and
+\code{initial} for simulated annealing; none for the plain fit.
+
+\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{control} is the
+control object the run was given, or tune's default when none was, with the
+slots this package forces already applied, and with \code{seed} left out on a
+Bayesian result. A \code{"fit_resamples"} record carries no \code{param_info} and no
+\code{select}, since no parameter set was read and no rule applied. See
+"Differences from calling tune directly" on each orchestrator's help page
+for what those slots are.
+
+On a \code{nested_results} the record travels as an attribute of the object. On
+a \code{nested_final_fit} it is the record the fit re-ran, which is the record of
+the results object it was built from.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::step_pca(
-  recipes::recipe(mpg ~ ., data = mtcars),
-  recipes::all_predictors(),
-  num_comp = tune::tune()
-)
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
 set.seed(1)
@@ -60,15 +67,20 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+set.seed(3)
+final <- nested_final_fit(wf, res)
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 procedure <- extract_procedure(res)
 procedure$tuner
 procedure$control$allow_par
 
-set.seed(3)
-final <- nested_final_fit(wf, res)
 identical(extract_procedure(final)$tuner, procedure$tuner)
 \dontshow{\}) # examplesIf}
 }

@@ -10,32 +10,36 @@
 #' Print a final fit
 #'
 #' @description
-#' Reports which parameters the full-data tuning run selected, says where this
-#' model's performance estimate actually comes from, and names the accessors
-#' that reach what selection saw.
+#' Shows what the full-data search was, which parameters it selected, and
+#' where this model's performance estimate comes from. It also names the
+#' accessors that reach what selection saw.
 #'
-#' No performance number is shown. The tuning run stored on the object has
-#' metrics, but they were consumed by selection and are optimistically biased as
-#' a claim about this model; the nested estimate on the results object the fit
-#' was built from -- the result of [nested_tune_grid()] or one of its
-#' siblings -- is the one to report (IP3).
-#'
-#' The procedure line says what the full-data search was, as what ran beside
-#' what was asked for: for a grid or a racing procedure the candidates
-#' scored, the search named; for a
-#' Bayesian one the initial candidates scored and requested, and the
-#' iterations completed and requested, since [tune::tune_bayes()] may score
-#' fewer initial candidates than `initial` names and stop short of `iter`.
-#' A fit built from a [nested_fit_resamples()] result ran no search: its
-#' procedure line reads "no tuning", its selection line "nothing to select",
-#' and the note says that [extract_tune_results()] and
-#' [extract_scored_candidates()] refuse it.
+#' No performance number appears. The stored tuning run has metrics, but
+#' selection consumed them; see [nested_final_fit()] for why they are not this
+#' model's performance and the nested estimate is.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
-#'
+#' @param ... Not used; must be empty. Passing an argument here raises an
+#'   error instead of leaving it silently ignored.
 #' @return `x`, invisibly.
+#'
+#' @section The procedure line:
+#'
+#' The line says what ran beside what was asked for. A grid search or a race
+#' is named with the number of candidates it scored. An iterating search is
+#' named with the initial candidates scored and requested and the iterations
+#' completed and requested, since it can score fewer initial candidates than
+#' `initial` names and can stop short of `iter`.
+#'
+#' Where nothing was tuned the line reads "no tuning", the selection line
+#' reads "nothing to select", and the note says that [extract_tune_results()]
+#' and [extract_scored_candidates()] refuse the object.
+#'
+#' @template example-setup
+#' @template example-run
+#' @template example-final
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' final
 #'
 #' @seealso [summary.nested_final_fit()], [nested_final_fit()],
 #'   [nested_tune_grid()], [extract_tune_results()],
@@ -86,64 +90,45 @@ print.nested_final_fit <- function(x, ...) {
 #' Summarize a final fit
 #'
 #' @description
-#' Answers what the final fit means: the full-data tuning run the selection
-#' came from, which procedure ran it and at what counts, how many candidates
-#' that run scored, which parameter values it selected, and where this
-#' model's honest performance estimate lives.
+#' Gives the pieces the print method renders as values: the full-data tuning
+#' run the selection came from, which search ran it and at what counts, how
+#' many candidates it scored, and which parameter values it chose.
 #'
-#' The estimate component is always `NULL`, and that is the point. The tuning
-#' run stored on the object has metrics, but selection consumed them and they
-#' are optimistically biased as a claim about this model; the nested estimate
-#' on the results object the fit was built from -- the [nested_tune_grid()] or
-#' [nested_tune_bayes()] result -- is the one to report (IP3). The absence is
-#' carried as a component rather than left out, so a caller reading the
-#' summary meets a recorded fact instead of a missing name; the four Bayesian
-#' counts are carried as `NULL` on a grid fit for the same reason.
+#' The `estimate` component is always `NULL`, and that is the point. The
+#' stored tuning run's metrics are selection-time quantities, so this object
+#' records the absence of a performance number rather than leaving the name
+#' out; see [nested_final_fit()] for the number to report instead.
 #'
 #' @param object A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used; must be empty. An argument passed here is an error
-#'   rather than silently ignored.
+#' @inheritParams print.nested_final_fit
 #'
 #' @return
 #' `summary()` returns an object of class `summary.nested_final_fit`: a list
-#' holding the full-data tuning run's resampling label (`tuning_label`), the
-#' tuner that ran (`tuner`: `"tune_grid"`, `"tune_bayes"`, `"tune_race_anova"`,
-#' `"tune_race_win_loss"`, `"tune_sim_anneal"` or `"fit_resamples"`), the number of
-#' candidates that run scored (`candidates`), the iterating tuners' counts
-#' (`initial` and `initial_requested`, `iterations_completed` and
-#' `iterations_requested`, each `NULL` on a grid or a racing fit; the scored figures are
-#' read from the candidate record, the requested ones from the procedure, and
-#' a run whose candidate record cannot be derived reports its scored figures
-#' as zero rather than failing to print), the
-#' parameter values selection chose (`selection`), and an `estimate`
-#' component that is always `NULL`. A fit built from a
-#' [nested_fit_resamples()] result ran no tuning: its `tuning_label` is
-#' `NULL`, `candidates` is `0` and `selection` is empty. Printing it is what most callers want;
-#' the components are there for a caller that needs a value rather than a
-#' line of text.
+#' holding the tuning run's resampling label (`tuning_label`), the tuner that
+#' ran (`tuner`: `"tune_grid"`, `"tune_bayes"`, `"tune_race_anova"`,
+#' `"tune_race_win_loss"`, `"tune_sim_anneal"` or `"fit_resamples"`), the
+#' number of candidates that run scored (`candidates`), the iterating tuners'
+#' counts (`initial` and `initial_requested`, `iterations_completed` and
+#' `iterations_requested`), the parameter values selection chose
+#' (`selection`), and an `estimate` component that is always `NULL`. Printing
+#' it is what most callers want; the components are there for a caller that
+#' needs a value rather than a line of text.
 #'
+#' @section Components that are absent:
+#'
+#' The four counts are `NULL` on a grid or a racing fit, which iterate over
+#' nothing, and are carried rather than dropped for the reason `estimate` is.
+#' The scored figures are read from the candidate record and the requested
+#' ones from the procedure; a run whose candidate record cannot be derived
+#' reports its scored figures as zero rather than failing to print.
+#'
+#' Where nothing was tuned there is no run to describe: `tuning_label` is
+#' `NULL`, `candidates` is `0`, and `selection` is empty.
+#'
+#' @template example-setup
+#' @template example-run
+#' @template example-final
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
-#' data(mtcars)
-#'
-#' rec <- recipes::step_pca(
-#'   recipes::recipe(mpg ~ ., data = mtcars),
-#'   recipes::all_predictors(),
-#'   num_comp = tune::tune()
-#' )
-#' wf <- workflows::workflow(rec, parsnip::linear_reg())
-#'
-#' set.seed(1)
-#' folds <- nested_resamples(
-#'   mtcars,
-#'   outside = rsample::vfold_cv(v = 2),
-#'   inside = rsample::vfold_cv(v = 2)
-#' )
-#'
-#' set.seed(2)
-#' res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
-#' set.seed(3)
-#' final <- nested_final_fit(wf, res)
-#'
 #' summary(final)
 #'
 #' @seealso [print.nested_final_fit()], [nested_final_fit()],
@@ -157,8 +142,7 @@ summary.nested_final_fit <- function(object, ...) {
 #' @rdname summary.nested_final_fit
 #' @param x A `summary.nested_final_fit` object from
 #'   [summary.nested_final_fit()].
-#' @return
-#' `print()` returns `x`, invisibly.
+#' @return `print()` returns `x`, invisibly.
 #' @export
 print.summary.nested_final_fit <- function(x, ...) {
   rlang::check_dots_empty()
