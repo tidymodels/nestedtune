@@ -1,6 +1,6 @@
 # M083: Every nested result records the workflow it ran under, and the final fit refuses any other
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -59,6 +59,8 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - 2026-09-11: T3 done: `check_workflow_identity()` with `identity_difference()` naming the first differing part (kind, model type, engine, mode, an argument, roles, step count, a step's type, selector or setting), wired after `check_tuned_workflow()` and before `sample.int()`; `check_results_record()` asks for the `workflow` entry through the earlier-version origin, its message pluralized for a record missing both late entries. Suite 9646 pass, 0 fail. The checker was appended with a shell heredoc rather than the Edit tool, so it is absent from that turn's edit card.
 - 2026-09-11: T4 done: the AC2 probe matrix (fifteen probes over the fit_resamples, tune_grid and tune_bayes records plus two formula records on lm and `null_model()` for the formula, mode and engine-argument-removed axes), the check-order block, the AC3 same-fit comparison on two records built with `linear_reg(engine = "lm", penalty = 1)`, the AC4 stripped-record refusals and the set path; 150 assertions. Two suite-only failures on the way: a probe built on `decision_tree()`/rpart was refused by the package check for `pec` when the worker had loaded censored's engine registrations, so the extra records use lm and the null model. Suite 9769 pass, 0 fail.
 - 2026-09-11: T5 done: `?nested_final_fit` "What is refused" (identity paragraph, four refused shapes), `?extract_procedure` (`workflow` entry, description and return), `?nested_fit_resamples` "One door" section, DESIGN Architecture final-fit entry, one NEWS bullet; `sweep-prose.R --roxygen` and `--spans` clean; `document()` rewrote three Rd files; `devtools::check()` 0 errors, 0 warnings, 0 notes in 6m35s.
+- 2026-09-11: claim audit: 41 claims read, 3 corrected — R/checks.R, R/workflow-identity.R (all three in code comments: two overstated "recorded as written" for recipe step settings, one misdescribed parsnip's `eng_args` slot). The re-read cleared two; the reader's own replacement for the third was wrong as applied, its second replacement is in place and, under the one-pass rule, was not re-read.
+- 2026-09-11: all tasks done; status set to review.
 
 ## Decisions
 

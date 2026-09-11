@@ -31,8 +31,9 @@ workflow_identity <- function(object) {
 # holds both argument sets as quosures whether they were given in the
 # constructor or through `set_args()` and `set_engine()` afterwards, so the
 # two routes deparse alike. `eng_args` is NULL on a fresh specification and
-# an empty quosure list once `set_engine()` has been called, whether or not
-# an engine argument was given; both read as no engine arguments.
+# a quosure list once `set_engine()` has been called -- empty when no engine
+# argument was given; NULL and the empty list both read as no engine
+# arguments.
 model_identity <- function(spec) {
   list(
     class = class(spec)[[1L]],
