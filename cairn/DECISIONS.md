@@ -1769,6 +1769,12 @@ standing ROADMAP row. Falsified by GitHub making `permissions:` accept an
 expression, or by the organization adopting a build-then-publish split
 upstream, either of which would let the file return to a shared blob.
 
+### D-061 (2026-09-11): a readability acceptance criterion binds mechanical proxies and a triaged fresh-reader report, never a pass rule on what the reader lists — settles the criterion shape M084's AC3 failed under twice, and reaches M085's AC3 at its next gate
+
+**Context:** M084's AC3 required a fresh reader's empty list; thirteen reads gave lists of 1 to 22 with no two alike, and two review passes returned on it. RR07 (`cairn/reviews/archive/RR07-readability-criterion.md`) shows the verdict is undecidable at any reader count or aggregation: the recurrent paragraphs sit near a one-half flag rate and rewrites move flags sideways.
+**Decision:** a prose milestone's readability criterion names script checks calibrated so the reference text passes (sentence cap, term first-use, name density, page openings), a diff check that the plan's listed paragraphs changed, and one fresh-reader report per review pass, withheld the survey, every entry triaged at the gate and never rerun after fixes. No criterion binds the report's contents; a pass rule on a reader panel is a candidate row awaiting a calibration run.
+**Consequences:** M084's AC3 takes RR07's text verbatim; M085's AC3, written in the empty-list form, is amended to this shape at its next gate; a mechanical clause the reference text fails is fixed in the clause, never by editing the reference.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
