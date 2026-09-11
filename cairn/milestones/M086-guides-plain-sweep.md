@@ -67,6 +67,7 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 - 2026-09-11: step-7 approval: m086-guides-plain-sweep approved for merge; the #91 partial comment authorized.
+- 2026-09-11: PR #98 opened; format-suggest red on the new R files, fixed by `air format` (whitespace only, sweeps and fixture test re-run clean), pushed.
 ## Decisions
 
 ## Review
