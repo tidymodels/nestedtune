@@ -41,8 +41,8 @@ jobs:
     # The script is base R with no package dependency, so the job is a
     # checkout, an R install and six short runs. The six invocations took
     # 1.4 s together on the maintainer's machine at 8b4c2eb (2026-09-11),
-    # and `setup-r` on a warm runner is about a minute; 10 is a hang cap,
-    # not headroom.
+    # and the whole job ran in 46 s on e5f7d40 (job of run 34653536495,
+    # 2026-09-11); 10 is a hang cap, not headroom.
     timeout-minutes: 10
 
     steps:
