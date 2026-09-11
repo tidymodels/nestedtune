@@ -1,5 +1,6 @@
-# The prose sweep over the user-facing pages: a sentence cap and a first-use
-# locator for the package's own words.
+# The prose sweep over the user-facing pages: a sentence cap, a span cap, a
+# first-use locator for the package's own words, each page's opening
+# sentence and its paragraph partition; the Modes block below names each.
 #
 # Pages: the four guides and the parallel article under `vignettes/`, and
 # `README.Rmd`. Prose is what is left after the YAML header (everything

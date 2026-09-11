@@ -87,7 +87,7 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 
 ## The pool
 
-Parallelism is switched on by connecting daemons and off by disconnecting
+You switch parallelism on by connecting daemons and off by disconnecting
 them. There is no argument on the loop functions for it. `mirai::daemons()`
 starts the pool, and `mirai::status()` reports how many daemons are
 connected. With two or more connected, the folds go out to the daemons;

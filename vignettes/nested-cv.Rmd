@@ -91,7 +91,7 @@ folds
 
 Each row is one outer fold. `splits` holds the outer split, and
 `inner_resamples` holds an ordinary `rset` built from that fold's analysis
-rows alone, which is all the tuning for that fold gets to see.
+rows alone. That is all the tuning for that fold gets to see.
 
 ```{r inner}
 folds$inner_resamples[[1]]
@@ -99,9 +99,7 @@ folds$inner_resamples[[1]]
 
 `mtcars` has `r nrow(mtcars)` rows, which keeps this page fast to build.
 This example is here because it builds in seconds, not because it needs
-nesting. Nesting removes the most bias when the data has many more columns
-than rows and the grid is large. `vignette("estimate")` says when it is
-worth the cost.
+nesting. `vignette("estimate")` says when nesting is worth its cost.
 
 ## The model and the grid
 
@@ -133,13 +131,12 @@ expensive, and that product is where the cost lives.
 `nested_tune_grid()` drives the outer loop. For each outer fold it calls
 `tune::tune_grid()` on that fold's inner resamples, the call you would make
 by hand, with parallelism off and the fold's seed set. It then picks the
-best candidate by the first metric. If you
-would rather pick by another of tune's selectors, the `select` argument
-takes a `selection_rule()` naming it. It finalizes the
-workflow with that candidate, fits it on the fold's analysis rows, and
-scores it on the assessment rows. Every statistical step is tune's. This
-package adds the loop, the seeding, and a result that keeps what each fold
-chose.
+best candidate by the first metric. It finalizes the workflow with that
+candidate, fits it on the fold's analysis rows, and scores it on the
+assessment rows. If you would rather pick by another of tune's selectors,
+the `select` argument takes a `selection_rule()` naming it. Every
+statistical step is tune's. This package adds the loop, the seeding, and a
+result that keeps what each fold chose.
 
 ```{r run}
 set.seed(2)
@@ -278,9 +275,10 @@ tibble(
 
 The selection-time score is not an estimate of performance on anything.
 Whether it lands above or below the nested estimate means nothing either.
-It stays on the object as a record of what selection saw. `show_best()`
-handed it over above because it was given tune's own object, which does not
-warn. Ask the same of `res` or of `final` and both refuse, as the two chunks
+It stays on the object as a record of what selection saw.
+
+`show_best()` handed it over above because it was given tune's own object,
+which does not warn. Ask `res` or `final` and both refuse, as the two chunks
 below show. On the loop's results, tune's ranking functions would rank outer
 folds. On the final fit there is one model and nothing to rank.
 

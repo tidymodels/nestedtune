@@ -322,8 +322,9 @@ extract_procedure(baseline)$tuner
 collect_metrics(baseline)
 ```
 
-Every function that reads a tuned result also reads the baseline. The one
-exception is the parameters plot, which has nothing to draw. The baseline's
+Every function that reads a tuned result reads the baseline the same way,
+under the same control settings. The one exception is the parameters plot,
+which has nothing to draw. The baseline's
 `.selected` column holds an empty table on every fold, since nothing was
 chosen, so `collect_selections()` and `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:
