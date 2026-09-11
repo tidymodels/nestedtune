@@ -7,7 +7,7 @@
 - **Principles touched:** IP3
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the vignettes, the parallel article and the README
-- **Branch/PR:** `m084-guides-plain-prose`
+- **Branch/PR:** `m084-guides-plain-prose` · https://github.com/tidymodels/nestedtune/pull/94
 
 ## Goal
 
