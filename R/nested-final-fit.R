@@ -95,20 +95,40 @@
 #'
 #' @section What is refused:
 #'
-#' A workflow other than the one the estimate was built around is refused
-#' here where the record names a tuner that takes a grid. `object` is then
-#' judged against the recorded grid as [nested_tune_grid()] judged it,
-#' rather than by tune a whole tuning run later. Where nothing was tuned (see
+#' A workflow whose model or preprocessor differs from the one the estimate
+#' was built around is refused here, before anything is fitted. Where the
+#' record names a tuner that
+#' takes a grid, `object` is first judged against the recorded grid as
+#' [nested_tune_grid()] judged it. Where nothing was tuned (see
 #' [nested_fit_resamples()]), the workflow must carry no [tune::tune()]
 #' marker, and one that does is refused with class
 #' `nestedtune_tuned_workflow`.
 #'
-#' Three shapes of `results` are refused before any fitting, with condition
+#' Every record then carries the identity of the model specification and
+#' the preprocessor it ran under (see "What the record holds" on
+#' [extract_procedure()]), and `object` is compared against it. A workflow
+#' whose identity differs is refused with class
+#' `nestedtune_workflow_mismatch`, and the message names the first part
+#' that differs. The identity compares the model's type, engine, mode and
+#' arguments, and the preprocessor. A formula or a variables selection is
+#' compared as written. A recipe is compared as its steps in order, with
+#' each step's selectors and settings. It does not distinguish a model
+#' argument given as a name from the same name bound to another value,
+#' since the argument is recorded as written. A recipe setting that is a
+#' function is compared as its body, so two functions with one body that
+#' close over different values are not distinguished either. It does not
+#' read case weights or a postprocessor, so a workflow that differs there
+#' alone is accepted. A workflow rebuilt from the same code passes, even
+#' though its recipe step ids differ.
+#'
+#' Four shapes of `results` are refused before any fitting, with condition
 #' class `nestedtune_bad_results`. One carries no record: it was built by an
 #' earlier version of nestedtune, or from a design assembled by hand rather
-#' than by [nested_resamples()] or [rsample::nested_cv()]. One is no longer
-#' a `nested_results`, because an operation that added or removed rows
-#' returned a plain tibble. And one has no rows.
+#' than by [nested_resamples()] or [rsample::nested_cv()]. One carries a
+#' record from an earlier version, with no selection rule or no workflow
+#' identity in it. One is
+#' no longer a `nested_results`, because an operation that added or removed
+#' rows returned a plain tibble. And one has no rows.
 #'
 #' A results object in which no outer fold completed is refused next, with class
 #' `nestedtune_no_completed_folds`. There is no estimate to report the model
@@ -284,6 +304,12 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
   if (!tuner_selects(procedure$tuner)) {
     check_tuned_workflow(object)
   }
+  # The workflow itself, against the identity the run recorded (M83): the
+  # grid and marker checks above catch a workflow tuning different names
+  # and name the exact column or marker, so they run first; this catches
+  # every other difference, and runs before the seeds below are drawn, so a
+  # refusal leaves the caller's generator state untouched.
+  check_workflow_identity(object, procedure$workflow)
   inside <- attr(results, "inside")
   # Absent rather than NULL when the run was given none; either way tune picks.
   metrics <- attr(results, "metrics")
@@ -364,7 +390,8 @@ final_fit_worker <- function(
       event_level = event_level,
       eval_time = eval_time,
       select = NULL,
-      control = control
+      control = control,
+      workflow = workflow_identity(object)
     )
     return(new_nested_final_fit(
       fitted,
@@ -415,7 +442,8 @@ final_fit_worker <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select,
-    control = control
+    control = control,
+    workflow = workflow_identity(object)
   )
   new_nested_final_fit(fitted, selected, tuned, seeds, procedure)
 }

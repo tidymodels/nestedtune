@@ -31,7 +31,8 @@ stub_results <- function(
       event_level = "first",
       eval_time = NULL,
       select = selection_rule(),
-      control = control
+      control = control,
+      workflow = workflow_identity(det_workflow(make_reg_data()))
     )
   )
 }

@@ -552,7 +552,8 @@ nested_loop <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select,
-    control = control
+    control = control,
+    workflow = workflow_identity(object)
   )
   out <- new_nested_results(resamples, folds, seeds, grid, metrics, procedure)
   warn_failed_folds(out, call = call)

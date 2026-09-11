@@ -755,7 +755,8 @@ results_from <- function(design) {
       event_level = "first",
       eval_time = NULL,
       select = selection_rule(),
-      control = effective_control("tune_grid", NULL, "first")
+      control = effective_control("tune_grid", NULL, "first"),
+      workflow = workflow_identity(det_workflow(make_reg_data()))
     )
   )
 }

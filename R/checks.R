@@ -777,16 +777,17 @@ check_grid_params <- function(
 # is the same on each -- stop, and go back to an object the orchestrator
 # produced -- and the message carries which shape it was.
 #
-# Three origins reach here, and the messages name them. An operation outside
+# Four origins reach here, and the messages name them. An operation outside
 # the class's invariants -- rows added or removed -- returns a bare tibble
 # (R/nested-results.R), so `res[0, ]` and `filter(res, ...)` arrive as "not a
 # nested_results", never as a classed object missing its record. A classed
 # object with no `inside` has two indistinguishable origins, because an
 # attribute cannot hold NULL: a result built before the specification was
 # recorded, and one built from a design that carried none. A record whose
-# procedure holds no selection rule was built before the rule was recorded
-# (M69), and is refused the same way rather than fitted under a rule the
-# folds may not have used (D-041 declined migration). And a classed object
+# procedure holds no selection rule, or no workflow identity, was built
+# before that entry was recorded (M69, M83), and is refused the same way
+# rather than fitted under a rule or a workflow the folds may not have used
+# (D-041 declined migration). And a classed object
 # with the record and no rows is a prototype: it describes a run and holds
 # no data to re-run it on.
 check_results_record <- function(results, call = rlang::caller_env()) {
@@ -812,18 +813,30 @@ check_results_record <- function(results, call = rlang::caller_env()) {
   # nothing (M70, D-057) records no rule, and is not asked for one.
   has_select <- is.list(procedure) &&
     (!tuner_selects(procedure$tuner) || is_selection_rule(procedure$select))
-  if (!rlang::is_call(inside) || !is.list(procedure) || !has_select) {
+  # The workflow identity (M83) is the same shape of absence as the rule: an
+  # entry of the procedure that an earlier version did not record.
+  has_workflow <- is.list(procedure) && is.list(procedure[["workflow"]])
+  if (
+    !rlang::is_call(inside) ||
+      !is.list(procedure) ||
+      !has_select ||
+      !has_workflow
+  ) {
     absent <- c(
       if (!rlang::is_call(inside)) "inner resampling specification",
       if (!is.list(procedure)) {
         "tuning procedure"
-      } else if (!has_select) {
-        "selection rule"
+      } else {
+        c(
+          if (!has_select) "selection rule",
+          if (!has_workflow) "record of the workflow"
+        )
       }
     )
-    origin <- if (identical(absent, "selection rule")) {
-      "It was built by an earlier version of nestedtune, before the rule \\
-       was recorded."
+    later_entries <- c("selection rule", "record of the workflow")
+    origin <- if (all(absent %in% later_entries)) {
+      "It was built by an earlier version of nestedtune, before the \\
+       {absent} {?was/were} recorded."
     } else {
       "It was built by an earlier version of nestedtune, or from a design \\
        assembled by hand rather than by {.fn nested_resamples} or \\
@@ -1633,5 +1646,191 @@ check_final_fit_set_args <- function(
     ),
     class = "nestedtune_bad_final_fit_args",
     call = call
+  )
+}
+
+# The workflow handed to the final fit, against the identity the run
+# recorded (M83). The grid-column and tune() marker checks run first and
+# catch a workflow tuning different names, naming the column or the marker;
+# this catches every other difference -- model type, engine, mode, an
+# argument, the preprocessor's kind or any part of it -- and names the first
+# part that differs, with the recorded and the given form beside it. The
+# identity is a deparsed description (R/workflow-identity.R), so a model
+# argument is compared as the code it was written as, and not as what a
+# name outside the workflow was bound to. A recipe step's settings are the
+# exception: recipes evaluates them when the step is added, so they are
+# compared by value, save a function, which is compared as its body.
+check_workflow_identity <- function(
+  object,
+  recorded,
+  call = rlang::caller_env()
+) {
+  given <- workflow_identity(object)
+  if (identical(given, recorded)) {
+    return(invisible(object))
+  }
+  d <- identity_difference(recorded, given)
+  # `d` is interpolated as a value, never spliced into the message: a
+  # deparsed setting can hold a brace, which cli would otherwise read as an
+  # expression of its own.
+  cli::cli_abort(
+    c(
+      "{.arg object} is not the workflow the nested run in {.arg results} \\
+       was built around.",
+      x = "{d}",
+      i = "Hand over the workflow the nested run in {.arg results} was \\
+           built around."
+    ),
+    class = "nestedtune_workflow_mismatch",
+    call = call
+  )
+}
+
+# The first part of the identity that differs, as one sentence: its name in
+# the user's terms, then the recorded and the given form. The two identities
+# are walked in parallel; a list whose element names or count differ is
+# reported at that level (an argument set on one side only, a step added or
+# removed), and otherwise the walk descends to the first leaf that differs.
+# A preprocessor of another kind is reported as the kind, since nothing
+# below it is comparable.
+identity_difference <- function(recorded, given) {
+  rk <- preprocessor_kind_label(recorded$preprocessor$kind)
+  gk <- preprocessor_kind_label(given$preprocessor$kind)
+  if (!identical(rk, gk)) {
+    return(cli::format_inline(
+      "The preprocessor differs: {rk} was recorded, and {gk} was given."
+    ))
+  }
+  d <- first_difference(recorded, given)
+  if (is.null(d)) {
+    # `identical()` told the two apart on something the walk does not read
+    # (an attribute, or NULL against empty names); named rather than left
+    # as a sentence with empty slots.
+    return(paste(
+      "The workflow differs from the recorded one in a part the comparison",
+      "cannot name."
+    ))
+  }
+  part <- identity_part(d$path, recorded)
+  if (identical(d$kind, "value")) {
+    return(cli::format_inline(
+      "{part} differs: recorded {.val {d$recorded}}, given {.val {d$given}}."
+    ))
+  }
+  if (identical(d$kind, "count")) {
+    return(cli::format_inline(
+      "{part} differs: {d$recorded} recorded, {d$given} given."
+    ))
+  }
+  only_recorded <- setdiff(d$recorded, d$given)
+  only_given <- setdiff(d$given, d$recorded)
+  cli::format_inline(paste0(
+    "{part} differ: ",
+    if (length(only_recorded) > 0L) {
+      "{.val {only_recorded}} {?is/are} recorded and not given"
+    },
+    if (length(only_recorded) > 0L && length(only_given) > 0L) ", and ",
+    if (length(only_given) > 0L) {
+      "{.val {only_given}} {?is/are} given and not recorded"
+    },
+    if (length(only_recorded) == 0L && length(only_given) == 0L) {
+      "recorded in the order {.val {d$recorded}}, given in the order \\
+       {.val {d$given}}"
+    },
+    "."
+  ))
+}
+
+preprocessor_kind_label <- function(kind) {
+  switch(
+    kind,
+    formula = "a formula",
+    variables = "a variables selection",
+    recipe = "a recipe",
+    paste("a", kind)
+  )
+}
+
+first_difference <- function(recorded, given, path = character()) {
+  if (is.list(recorded) && is.list(given)) {
+    rn <- names(recorded)
+    gn <- names(given)
+    named <- !is.null(rn) && any(nzchar(rn)) || !is.null(gn) && any(nzchar(gn))
+    if (named && !identical(rn, gn)) {
+      return(list(path = path, kind = "names", recorded = rn, given = gn))
+    }
+    if (length(recorded) != length(given)) {
+      return(list(
+        path = path,
+        kind = "count",
+        recorded = length(recorded),
+        given = length(given)
+      ))
+    }
+    for (i in seq_along(recorded)) {
+      label <- if (named) rn[[i]] else as.character(i)
+      d <- first_difference(recorded[[i]], given[[i]], c(path, label))
+      if (!is.null(d)) {
+        return(d)
+      }
+    }
+    return(NULL)
+  }
+  if (identical(recorded, given)) {
+    return(NULL)
+  }
+  list(path = path, kind = "value", recorded = recorded, given = given)
+}
+
+# The user's name for a path into the identity. `recorded` supplies a
+# step's type, so a step is named as "step 2 (step_pca)" rather than by
+# position alone.
+identity_part <- function(path, recorded) {
+  at <- function(i) if (length(path) >= i) path[[i]] else NA_character_
+  if (identical(at(1L), "model")) {
+    return(switch(
+      at(2L),
+      class = "The model type",
+      engine = "The model's engine",
+      mode = "The model's mode",
+      args = if (is.na(at(3L))) {
+        "The model's arguments"
+      } else {
+        sprintf("The model's argument `%s`", at(3L))
+      },
+      eng_args = if (is.na(at(3L))) {
+        "The model's engine arguments"
+      } else {
+        sprintf("The model's engine argument `%s`", at(3L))
+      },
+      "The model"
+    ))
+  }
+  switch(
+    at(2L),
+    formula = "The formula",
+    outcomes = "The variables selection's outcomes",
+    predictors = "The variables selection's predictors",
+    roles = "The recipe's variables and roles",
+    steps = {
+      if (is.na(at(3L))) {
+        return("The recipe's step count")
+      }
+      i <- as.integer(at(3L))
+      type <- recorded$preprocessor$steps[[i]]$type
+      step <- sprintf("The recipe's step %d (%s)", i, type)
+      switch(
+        at(4L),
+        type = sprintf("The recipe's step %d's type", i),
+        terms = paste(step, "selector"),
+        settings = if (is.na(at(5L))) {
+          paste(step, "settings")
+        } else {
+          sprintf("%s setting `%s`", step, at(5L))
+        },
+        step
+      )
+    },
+    "The preprocessor"
   )
 }

@@ -52,6 +52,11 @@
 #' orchestrators that tune. Each of those refuses a workflow with no
 #' marker, with class `nestedtune_untuned_workflow`, naming this one.
 #'
+#' The final fit ties the workflow to the record as well. The result
+#' records the identity of the workflow it ran under, and
+#' [nested_final_fit()] refuses a workflow whose identity differs, as its
+#' "What is refused" section says.
+#'
 #' @section What the reading functions answer:
 #'
 #' Every function that reads a `nested_results` answers on the result.
