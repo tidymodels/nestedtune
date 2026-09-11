@@ -67,7 +67,8 @@ test_that("the six gating sweeps are clean over the real sources", {
   }
   # `system2()` runs from the working directory, and the script reads its
   # page list relative to the package root
-  withr::local_dir(root)
+  old <- setwd(root)
+  on.exit(setwd(old), add = TRUE)
 
   # the domain is non-empty: every page and the roxygen source list at
   # least one paragraph, so a clean sweep below is a sweep over prose
