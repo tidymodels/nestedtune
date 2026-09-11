@@ -129,12 +129,12 @@ expensive, and that product is where the cost lives.
 ## Running the loop
 
 `nested_tune_grid()` drives the outer loop. For each outer fold it calls
-`tune::tune_grid()` on that fold's inner resamples, the call you would make
+`tune::tune_grid()` on that fold's inner resamples, the same call you make
 by hand, with parallelism off and the fold's seed set. It then picks the
 best candidate by the first metric. It finalizes the workflow with that
 candidate, fits it on the fold's analysis rows, and scores it on the
-assessment rows. If you would rather pick by another of tune's selectors,
-the `select` argument takes a `selection_rule()` naming it. Every
+assessment rows. To pick by another of tune's selectors, pass a `selection_rule()` naming
+it as the `select` argument. Every
 statistical step is tune's. This package adds the loop, the seeding, and a
 result that keeps what each fold chose.
 
@@ -187,8 +187,8 @@ n_min_n <- n_distinct(selected$min_n)
 
 Across `r nrow(res)` outer folds, `mtry` took `r n_mtry` distinct selected
 values and `min_n` took `r n_min_n`. Most tools throw this away. nestedtune
-keeps it, because it is information about the procedure rather than noise in
-it.
+keeps the spread, because it is information about the procedure rather than
+noise in it.
 
 `autoplot()` draws those same selections, one panel per tuned parameter and
 one point per outer fold. A flat row means the folds agreed. Scatter means
@@ -247,7 +247,7 @@ final
 ```
 
 The outer folds play no part here. Their selections are not pooled or voted
-on; they belong to the estimate.
+on. They belong to the estimate.
 
 The object predicts directly. `predict()` and `augment()` on it are the
 trained workflow's own methods, and `extract_workflow()` returns the workflow
@@ -279,8 +279,9 @@ It stays on the object as a record of what selection saw.
 
 `show_best()` handed it over above because it was given tune's own object,
 which does not warn. Ask `res` or `final` and both refuse, as the two chunks
-below show. On the loop's results, tune's ranking functions would rank outer
-folds. On the final fit there is one model and nothing to rank.
+below show. On the loop's results, tune's ranking functions have nothing to
+rank but outer folds, and the estimate is not a ranking of folds. On the
+final fit there is one model and nothing to rank.
 
 ```{r refusals, error = TRUE}
 show_best(res, metric = "rmse")
@@ -351,4 +352,4 @@ cat(sprintf(
 Three things make it honest. The estimate is attributed to the procedure and
 not to the model. The instability is reported rather than hidden. The
 deployed model is described as what it is: the same procedure applied to all
-the data, carrying no performance claim of its own.
+the data, with no performance claim of its own.
