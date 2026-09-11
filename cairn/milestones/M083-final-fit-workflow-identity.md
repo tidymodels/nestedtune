@@ -1,13 +1,13 @@
 # M083: Every nested result records the workflow it ran under, and the final fit refuses any other
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP4, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — an exported record entry and an exported function's refusal
-- **Branch/PR:** —
+- **Branch/PR:** `m083-final-fit-workflow-identity`
 
 ## Goal
 
@@ -39,7 +39,7 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 
 ## Tasks
 
-- [ ] T1: `workflow_identity(object)` in a new `R/workflow-identity.R`: model part from `extract_spec_parsnip()` (class, engine, mode, `args` and `eng_args` deparsed after `rlang::quo_squash()`), preprocessor part from `extract_preprocessor()` by kind (formula deparsed; variables deparsed; recipe as each step's class, its `terms` deparsed and its non-id fields deparsed, `template`, `id` and environments dropped). Tests first: rebuilt-fixture stability, `set_args()` route, 90-row versus 900-row equality and size (AC3, AC5).
+- [x] T1: `workflow_identity(object)` in a new `R/workflow-identity.R`: model part from `extract_spec_parsnip()` (class, engine, mode, `args` and `eng_args` deparsed after `rlang::quo_squash()`), preprocessor part from `extract_preprocessor()` by kind (formula deparsed; variables deparsed; recipe as each step's class, its `terms` deparsed and its non-id fields deparsed, `template`, `id` and environments dropped). Tests first: rebuilt-fixture stability, `set_args()` route, 90-row versus 900-row equality and size (AC3, AC5).
 - [ ] T2: Record it: `new_procedure()` (`R/tuner.R:302`) takes `workflow` and adds it to the shared entries; `procedure_tuner()`'s `shared` vector (`R/tuner.R:336`) lists `workflow` so it is never forwarded as a tuner argument; the orchestrator entry in `R/nested-tune-grid.R:522` and both `new_procedure()` calls in `R/nested-final-fit.R` pass the identity. Test over the six registry entries and one set row (AC1).
 - [ ] T3: `check_workflow_identity(object, recorded, call)` in `R/checks.R`, aborting with `nestedtune_workflow_mismatch` and naming the differing part; wired into `nested_final_fit()` after `check_tuned_workflow()` and before `sample.int()` (`R/nested-final-fit.R:296`); `check_results_record()` requires the `workflow` entry through its earlier-version branch (AC2, AC4).
 - [ ] T4: `tests/testthat/test-nested-final-fit-identity.R`: the AC2 probe matrix on the three records, the AC3 same-fit comparison, the AC4 old-record refusal (a record with the entry stripped) and the set path, generator-state checks by `.Random.seed` before and after.
@@ -53,6 +53,8 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - 2026-09-10: plan gate chose a canonical deparsed fingerprint over storing the workflow and comparing with `identical()` because the M12 lesson and a hand check show rebuilt recipes differ in step ids and quosure frames, and the recipe template would copy the data (GP4); falsified by a workflow pair the fingerprint calls equal whose fits differ.
 - 2026-09-10: plan gate chose refusing a pre-milestone results object over skipping the check because D-041 declined migration and IP4 records positively; falsified by a user needing a saved result carried across the change.
 - 2026-09-10: plan gate chose running the identity check after the grid and marker checks over before them because those refusals name the exact column or marker; falsified by a user report that the earlier message misled them about which workflow to hand over.
+- 2026-09-11: implement started on `m083-final-fit-workflow-identity`; question gate skipped, nothing open (the plan gate fixed the record shape, refusal order, fingerprint and no-migration stance; no dependency change).
+- 2026-09-11: T1 done: `R/workflow-identity.R` and `test-workflow-identity.R` (27 assertions); suite 9619 pass, 0 fail. Found by execution: recipes stores a step setting by value (`num_comp = k` records `1L`), parsnip stores a model argument as written (`penalty = p` records `p`), so the help page's "not distinguished" clause holds for model arguments alone; the test file states both.
 
 ## Decisions
 
