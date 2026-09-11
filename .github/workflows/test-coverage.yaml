@@ -53,13 +53,37 @@ jobs:
           extra-packages: any::covr, any::xml2
           needs: coverage
 
+      # tests/testthat/helper-covr.R points COVERAGE_DIR at the sidecar directory
+      # below, so the test workers and the daemons they start write their trace
+      # files there instead of into install_path, where a daemon killed inside
+      # covr's exit finalizer once left a truncated file that broke the merge
+      # inside package_coverage(). The sidecar is merged here, skipping any file
+      # that cannot be read: a killed daemon costs its own counts, not the job.
+      # merge_coverage() is covr's own internal merge, applied to the same
+      # objects it would have read itself. The directory name is shared with
+      # that helper; change both together.
       - name: Test coverage
         run: |
+          install_path <- file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
           cov <- covr::package_coverage(
             quiet = FALSE,
             clean = FALSE,
-            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+            install_path = install_path
           )
+          sidecar <- list.files(
+            file.path(install_path, "daemon-traces"),
+            pattern = "^covr_trace_",
+            full.names = TRUE
+          )
+          traces <- lapply(sidecar, function(f) {
+            tryCatch(as.list(readRDS(f)), error = function(e) NULL)
+          })
+          skipped <- sidecar[vapply(traces, is.null, logical(1))]
+          if (length(skipped)) {
+            message("skipped unreadable trace file(s): ", paste(basename(skipped), collapse = ", "))
+          }
+          message(length(sidecar) - length(skipped), " sidecar trace file(s) merged")
+          cov <- covr:::merge_coverage(c(list(cov), Filter(Negate(is.null), traces)))
           print(cov)
           covr::to_cobertura(cov)
         shell: Rscript {0}

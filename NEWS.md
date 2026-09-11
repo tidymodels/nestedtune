@@ -1,5 +1,10 @@
 # nestedtune 0.0.0.9000
 
+* The coverage job no longer fails after every test passed. Daemons started
+  by the test suite write their coverage traces to a directory of their own,
+  and the job merges those traces afterwards, skipping any file a daemon was
+  killed in the middle of writing.
+
 * Every help page now passes the same plain-English sweep as the
   guides: no semicolon, no contraction, no `has been` or `have been`, none
   of the words should, may, might, could and would, no word ending in -ing
