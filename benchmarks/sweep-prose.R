@@ -42,7 +42,14 @@ pages <- c(
 )
 
 strip_spans <- function(text) {
-  text <- gsub("`[^`]*`", "", text, perl = TRUE)
+  # a backtick span is replaced by the line breaks it contains, so a span
+  # crossing a line break leaves the line count, and every later
+  # sentence's reported line, unchanged
+  m <- gregexpr("`[^`]*`", text, perl = TRUE)
+  regmatches(text, m) <- lapply(
+    regmatches(text, m),
+    function(s) gsub("[^\n]", "", s)
+  )
   if (roxygen) {
     text <- gsub("\\\\code\\{[^}]*\\}", "", text, perl = TRUE)
     text <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", text, perl = TRUE)
@@ -155,7 +162,7 @@ split_runs <- function(text, keep, line, block = NULL) {
 # line the sentence's first word sits on.
 sentences <- function(para) {
   # spans are stripped over the joined paragraph, since one can cross a
-  # line break; a line swallowed that way lends its words to the line above
+  # line break; strip_spans() keeps the breaks, so pieces and lines align
   pieces <- strsplit(strip_spans(paste(para$text, collapse = "\n")), "\n")[[1]]
   tokens <- character()
   at <- integer()

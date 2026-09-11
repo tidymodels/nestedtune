@@ -14,16 +14,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-Nested cross-validation fits many models. The outer folds do not depend on
-one another, so they can run at the same time. `nested_tune_grid()` and its
-siblings run them on [mirai](https://mirai.r-lib.org/) daemons, separate R
-processes, when a pool of daemons is connected. Without a pool, the folds
-run one after another. Nothing in the call changes between the two. This page starts a
-pool of two daemons and runs the getting-started guide's loop on it. It
-then shows that the result is identical to the same run made serially.
-Last, it says when a pool pays. The parallel section of `?nested_tune_grid` says what the call
-checks before it dispatches, what it sends to each daemon, and what happens
-on an interrupt.
+A nested run fits many models, and you may want it to finish sooner. The
+outer folds do not depend on one another, so they can run at the same time.
+`nested_tune_grid()` and its siblings run them on
+[mirai](https://mirai.r-lib.org/) daemons, separate R processes, when a
+pool of daemons is connected. Without a pool, the folds run one after
+another. Nothing in the call changes between the two.
+
+This page starts a pool of two daemons and runs the getting-started guide's
+loop on it. It then shows that the result is identical to the same run made
+serially. Last, it says when a pool pays. The parallel section of
+`?nested_tune_grid` says what the call checks before it dispatches, what it
+sends to each daemon, and what happens on an interrupt.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "mirai", "ranger")
@@ -150,9 +152,8 @@ same
 
 `identical()` on the outer scores, the selections and the tuning seeds
 returns `r all(same)` for each. Neither result records whether daemons
-were used. That is what lets a pool be a matter of the session
-rather than of the analysis. A script gives the same answer on a laptop with
-no daemons and on a workstation with many.
+were used, so a script gives the same answer on a laptop with no daemons
+and on a workstation with many.
 
 ## A pool's payoff
 

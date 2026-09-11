@@ -30,8 +30,8 @@ returns, and the final fit built from it, both refuse tune's ranking
 functions such as `show_best()`.
 
 At a small sample size the noise is large, so the winner's score may not
-even look better than an honest one. Distrust it for how it was chosen, not
-for which way it is off.
+even look better than an honest one. Distrust it for how it was chosen,
+whether it came out high or low.
 
 Nested cross-validation scores the whole tuning procedure, meaning every
 step you run on the data: resample, tune, pick a setting, fit. Nesting puts
@@ -56,9 +56,10 @@ data.
 Four things it is not. It is not the error of the deployed model, which is
 built afterwards on all the rows and estimated by nothing here. It says
 nothing about whether the deployed model's parameter values are the right
-ones. It is not about a different population or sample size. And it is not that error averaged over every
-training set you might have drawn, which would describe the method rather
-than this data. Luo and Barber (2026) prove
+ones. It says nothing about more rows or data from another source, since
+it ran on this training set alone. And it is not
+that error averaged over every training set you might have drawn, which
+would describe the method rather than this data. Luo and Barber (2026) prove
 that any assumption-free test of that averaged quantity needs a dataset
 many times larger than the training set. So this package offers none.
 
@@ -97,10 +98,11 @@ Suppose you run the loop on two workflows and one comes back lower. Nothing
 in the output says whether the difference is real, because there is no
 valid interval to subtract. Bayle et al. (2026) give a sharper reason not
 to build one. A cross-validation interval for one procedure is valid when
-that procedure is stable. The difference between two procedures can fail
-that condition even when each procedure meets it. The failure is worst when
-the two procedures are similar. A gap between two nested estimates is a reason to look
-closer, never a result.
+that procedure is stable, meaning one changed training row moves its errors
+little. Two procedures can each be stable while their difference is not,
+and the difference is what needs the interval. That is worst when the two
+procedures are similar. A gap between two nested
+estimates is a reason to look closer, never a result.
 
 The same holds for a set of workflows run through one design with
 `nested_workflow_map()`. Picking the workflow with the best estimate is a
@@ -110,15 +112,13 @@ ranking or best-workflow function for the set.
 ## Disagreement between folds
 
 When the folds split over a parameter, the data does not pick its value
-clearly. Whichever value the
-final model carries was not strongly preferred by the evidence. That is not
-a defect in the estimate, which already averages over this variability. It
-is a defect in any story about the selected parameters being the right
-ones.
+clearly. The evidence did not strongly prefer the value the final model
+carries. The estimate is fine, since it already averages over this
+variability. What suffers is any story about the selected parameters being
+the right ones.
 
-Disagreement is expected wherever the candidates perform about equally
-well. As two candidates' predictions converge, which of them wins any
-particular fold becomes close to a coin flip (Bayle et al., 2026).
+As two candidates' predictions converge, which one wins a given fold
+becomes close to a coin flip (Bayle et al., 2026).
 
 ## The cost of nesting
 

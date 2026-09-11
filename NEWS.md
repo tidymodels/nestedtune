@@ -1,14 +1,10 @@
 # nestedtune 0.0.0.9000
 
-* The four guides, the parallel article and the README are rewritten for a
-  reader who has run `tune_grid()` and never nested: no prose sentence runs
-  past 30 words, each page says what it means by a procedure or a
-  candidate where it first uses the word, and the word "orchestrator" no
-  longer appears on any of them.
-
 * The four guides, the parallel article, the README and this file are
-  rewritten in plain prose for someone running nested cross-validation, with
-  each explanation on one page and a link from the others. The site-only
+  rewritten for someone who has run `tune_grid()` and never nested: each
+  explanation on one page with a link from the others, no prose sentence
+  over 30 words, the words "procedure" and "candidate" set up on each page
+  before it relies on them, and the word "orchestrator" gone. The site-only
   article "Why nest: a simulation" and its simulation script are removed;
   the estimate page's cited measurements make the same point.
 

@@ -134,8 +134,9 @@ bayes
 
 The print notes that the folds did not search the same grid. Each fold
 scored the same number of candidates, but not the same ones, because each
-fold proposes candidates from its own scores. The note is there so that no
-one mistakes the selections for a vote over shared candidates.
+fold proposes candidates from its own scores. With a grid, every fold picks
+from the same list, so you can count how many folds chose each candidate.
+Here no two folds saw the same list, and the note says so.
 The fit count follows the arithmetic in `vignette("nested-cv")`, with the
 candidates per fold now `initial + iter`.
 
@@ -317,8 +318,9 @@ extract_procedure(baseline)$tuner
 collect_metrics(baseline)
 ```
 
-The functions that read a result answer on the baseline, except the
-parameters plot, which has nothing to draw. Its `.selected` column holds an empty
+The functions that read a result answer on the baseline as they do on a
+tuned run, except the parameters plot, which has nothing to draw. Its
+`.selected` column holds an empty
 table on every fold, since nothing was chosen, so `collect_selections()` and
 `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:
@@ -352,7 +354,8 @@ nested_fit_resamples(wf, folds)
 
 A comparison across model families needs every family scored on the same
 outer folds. `nested_workflow_map()` takes a `workflow_set()` and the name
-of one of the tuning functions above. It runs each workflow of the set
+of one of the six functions above, `nested_fit_resamples()` included. It
+runs each workflow of the set
 through that function on one design, so the results come back side by side.
 Here the set holds three workflows. They are the random forest above, a
 linear model on the same predictors with nothing to tune, and a linear model
