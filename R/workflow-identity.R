@@ -43,7 +43,7 @@ model_identity <- function(spec) {
     engine = spec$engine,
     mode = spec$mode,
     args = deparse_settings(spec$args),
-    eng_args = eng_args[order(names(eng_args))]
+    eng_args = eng_args[order(names(eng_args), method = "radix")]
   )
 }
 
@@ -56,7 +56,9 @@ model_identity <- function(spec) {
 # `levels` and `ptype` are read from it). A step holds its settings as
 # values, not as the expressions written -- `num_comp = k` stores what `k`
 # was bound to -- so a recipe setting is compared by value where a model
-# argument is compared as written.
+# argument is compared as written. A setting that is a function is the
+# exception to that: it is deparsed as its body, and the values it closes
+# over are not read, so two functions with one body read as one setting.
 preprocessor_identity <- function(pre) {
   if (rlang::is_formula(pre)) {
     return(list(kind = "formula", formula = deparse_one(pre)))
@@ -113,9 +115,11 @@ deparse_settings <- function(x) {
 # One value in canonical deparsed form: a quosure is squashed first, so its
 # environment is gone and only the expression is kept; an environment reads
 # as one token, since its identity is never what the user wrote; an
-# unclassed list is deparsed element by element, so a nested setting (a
-# step's `options`) keeps its shape; anything else is `deparse()`d on one
-# line, which keeps `2L` and `2` apart, as parsnip and recipes keep them.
+# unclassed list, or a list of quosures (a `step_mutate()`'s `inputs`), is
+# deparsed element by element, so a nested setting (a step's `options`)
+# keeps its shape and each expression reads as written; anything else is
+# `deparse()`d on one line, which keeps `2L` and `2` apart, as parsnip and
+# recipes keep them.
 deparse_one <- function(x) {
   if (rlang::is_quosure(x)) {
     x <- rlang::quo_squash(x)
@@ -125,6 +129,9 @@ deparse_one <- function(x) {
   }
   if (rlang::is_formula(x)) {
     attr(x, ".Environment") <- NULL
+  }
+  if (rlang::is_quosures(x)) {
+    return(deparse_settings(unclass(x)))
   }
   if (is.list(x) && !is.object(x)) {
     return(deparse_settings(x))

@@ -117,16 +117,19 @@ arguments, and the preprocessor. A formula or a variables selection is
 compared as written. A recipe is compared as its steps in order, with
 each step's selectors and settings. It does not distinguish a model
 argument given as a name from the same name bound to another value,
-since the argument is recorded as written. It does not read case
-weights or a postprocessor, so a workflow that differs there alone is
-accepted. A workflow rebuilt from the same code passes, even though its
-recipe step ids differ.
+since the argument is recorded as written. A recipe setting that is a
+function is compared as its body, so two functions with one body that
+close over different values are not distinguished either. It does not
+read case weights or a postprocessor, so a workflow that differs there
+alone is accepted. A workflow rebuilt from the same code passes, even
+though its recipe step ids differ.
 
 Four shapes of \code{results} are refused before any fitting, with condition
 class \code{nestedtune_bad_results}. One carries no record: it was built by an
 earlier version of nestedtune, or from a design assembled by hand rather
 than by \code{\link[=nested_resamples]{nested_resamples()}} or \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. One carries a
-record from an earlier version, with no workflow identity in it. One is
+record from an earlier version, with no selection rule or no workflow
+identity in it. One is
 no longer a \code{nested_results}, because an operation that added or removed
 rows returned a plain tibble. And one has no rows.
 

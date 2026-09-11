@@ -1659,7 +1659,7 @@ check_final_fit_set_args <- function(
 # argument is compared as the code it was written as, and not as what a
 # name outside the workflow was bound to. A recipe step's settings are the
 # exception: recipes evaluates them when the step is added, so they are
-# compared by value.
+# compared by value, save a function, which is compared as its body.
 check_workflow_identity <- function(
   object,
   recorded,

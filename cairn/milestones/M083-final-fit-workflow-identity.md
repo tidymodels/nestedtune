@@ -69,6 +69,8 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - 2026-09-11: amendment gate on T7 (return-adjacent widening, D-118): the user held AC1 and AC2 as written over widening them to case weights and the postprocessor; T7 re-cut as a prose narrowing (minor amendment), F1 filed as a candidate row. No criterion text changed, so no re-audit reader ran. T7 done: NEWS and the two help pages bound the identity to the model specification and the preprocessor and name what is not read.
 - 2026-09-11: claim audit: 86 claims read, 0 corrected — R/workflow-identity.R, R/checks.R, R/nested-final-fit.R, R/extract-procedure.R, R/nested-fit-resamples.R, R/tuner.R, NEWS.md, the two identity test files. Two stale unmodified lines the reader flagged were fixed after the audit: the origin count above `check_results_record()` and "flat" in `extract_procedure()`'s return.
 - 2026-09-11: return tasks done; suite 9782 pass, 0 fail; `document()` regenerated two Rd files; `sweep-prose.R --roxygen` and `--spans` clean; status set to review.
+- 2026-09-11: review, second pass: six criteria verified on `bdc9290`, suite 9782/0, check 0/0/0; eight findings, four fixed at the gate (G2, G3, G5, G7), one to the candidate row (G1), three rejected (G4, G6, G8).
+- 2026-09-11: step-7 approval: m083-final-fit-workflow-identity approved for merge
 
 ## Decisions
 
@@ -120,3 +122,5 @@ Second-pass review, three lenses. The prior-review lens confirms F2 to F5 fixed 
 - G6: `recipe_roles()` reads `var_info`, so `y ~ .` over a frame with another column is another identity. Disposition: at the gate.
 - G7: `?nested_final_fit`'s earlier-version shape names the missing workflow identity and not the missing selection rule the same branch refuses. Pre-existing omission the edit re-asserted. Disposition: at the gate.
 - G8: a work-log line cites a plugin doctrine id (`D-118`) that the repo's `DECISIONS.md` does not hold. Disposition: at the gate.
+
+Second-pass gate dispositions, 2026-09-11. G2, G3, G5 and G7 fixed now on the branch: the help page and two comments say a function-valued setting is compared as its body, engine arguments sort under radix order, a list of quosures is deparsed element by element, and the earlier-version shape names the selection rule too. G1 absorbed into the case-weights candidate row. G4 rejected: a vector spliced into a step expression is the user's own literal, not the training frame, and AC5 holds. G6 rejected: a recipe over a frame with another column is another recipe, and the roles are part of it. G8 rejected: the id names the plugin rule the gate followed, and work-log lines are never edited. Merge approved.
