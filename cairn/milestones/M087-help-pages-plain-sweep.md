@@ -69,3 +69,24 @@ Pass 1, 2026-09-11, branch head b328643, origin/main at 047fe5f (the branch poin
 - AC1 evidence: `Rscript benchmarks/sweep-prose.R --roxygen --plain` printed `clean` and exited 0 at the head. Verified.
 - AC2 evidence: `--roxygen` and `--roxygen --spans` each printed `clean` and exited 0. The `grep -c "^#'"` sum over `R/*.R` and `man-roxygen/*.R` is 2727 at the head against 2718 at 047fe5f (100.3%, cap 2989). Verified.
 - AC4 evidence: `devtools::document()` at the head left `git status` empty. The run noted that the installed roxygen2 8.0.0 is older than the 8.1.0 DESCRIPTION records, a mismatch that predates this branch. `devtools::check()` at the head: 0 errors, 0 warnings, 0 notes (6m54s). `NEWS.md` carries one bullet for the rewrite. Verified.
+- AC3 evidence: one [O] fresh reader ran the `cairn/surveys/M087-reader-prompt.md` block over the 28 rendered pages, withheld this file, `cairn/surveys/`, `R/`, `man-roxygen/` and the sweep output. Report saved as `cairn/surveys/M087-reader-review.md`: 234 entries (rule 3.6 passive voice 101, rule 3.5 `-ing` verbs 48, rule 6.3 the 25-word cap 43, rule 4.2 omitted words 24, rule 9.4 since→because 12, rule 3.4 present perfect 3, rule 1.7 nouns as verbs 2, rule 9.1 restructure 1). Triage at the gate is below. Verified once the gate accepts the triage.
+
+Reader triage (proposed, decided at the gate):
+- Fixed: the 12 since→because entries, plus the four other roxygen `since` sites the reader did not list, so no help page reads `since` for `because`. The 3 present-perfect entries (`can have kept` → `can keep`, `once every candidate has failed` → `after every candidate failed`, `once its entry checks have run` → `after its entry checks ran`). Entry 21, the dangling `refuse such an object with` sentence, recast.
+- Rejected, the 25-word cap (43 entries): the milestone's cap is 30 words, the M086 decision the reference intro fixed.
+- Rejected, rule 4.2 omitted words (24 entries): article and `that` insertion is outside the sweep's clauses and the pages read on one pass without them.
+- Rejected, rule 1.7 (2 entries): `error` and `errored` as verbs are the R idiom every page uses for a raised condition.
+- Follow-up: the 149 passive-voice and `-ing`-verb entries (rules 3.6 and 3.5) join the #91 candidate row at hygiene, beside M086's 49 of the same shape.
+
+Reviewer findings (three lenses, ranked by each lens, every finding listed):
+- [O] diff-bug 1, confirmed against `check_race_burn_in()`: "when finetune refuses any outer fold's inner `rset`" named an event the package's own check pre-empts. Fixed: "when any outer fold's inner `rset` meets that condition". The [S] blame-history lens reported the same site as its first finding.
+- [O] diff-bug 2 and [S] blame-history 2: "A version that built them earlier stays reproducible" asserts a hypothetical in the present. Fixed: "Were they built earlier, the run reproduces from the session seed alone, not from the two seeds above."
+- [O] diff-bug 3: "Left alone, a fold's proposals then depend" reads as fact. Fixed: "Were the slot left alone, a fold's proposals depend".
+- [O] diff-bug 4: "A named one is refused" reaches past a sentence for its referent. Fixed: "An ordering given a name is refused."
+- [O] diff-bug 5: "nothing it saves exists to be withheld" gives a verb to a run that does not exist. Fixed: "there is nothing to withhold".
+- [O] diff-bug 6: the `extract_procedure()` list items end without a period while the workflow-map list keeps them. Rejected: markdown list items without terminators are the common shape, and no reader entry named it.
+- [O] diff-bug 7: the NEWS bullet's "is rewritten" overclaims for the two pages that already passed. Fixed: "now passes".
+- [O] diff-bug 8: ragged short lines inside four rewritten paragraphs. Rejected: no rendering effect, a style point.
+- [S] prior-PR-comments: no prior-review finding contradicted; the GitHub inline-comment probe found human comments, none on the touched files. Zero findings.
+
+Post-fix re-run at 06a319c: `document()` ran twice, the second writing nothing and `git status` empty. The three roxygen sweeps printed `clean`. The `#'` count is 2728 (cap 2989). The `devtools::check()` result is logged in the work log.
