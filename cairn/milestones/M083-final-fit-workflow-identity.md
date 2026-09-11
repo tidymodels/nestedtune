@@ -1,6 +1,6 @@
 # M083: Every nested result records the workflow it ran under, and the final fit refuses any other
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - [x] T4: `tests/testthat/test-nested-final-fit-identity.R`: the AC2 probe matrix on the three records, the AC3 same-fit comparison, the AC4 old-record refusal (a record with the entry stripped) and the set path, generator-state checks by `.Random.seed` before and after.
 - [x] T5: Help pages (`R/nested-final-fit.R:91`, `R/extract-procedure.R`, `R/nested-fit-resamples.R:47`), DESIGN.md Architecture (`cairn/DESIGN.md:99`), a NEWS bullet; `devtools::check()` 0/0/0.
 - [x] T6 (review return, F2): `check_workflow_identity()` hands the differing part to `cli_abort()` as a data value, so a deparsed value with a brace is not interpolated again. Regression test first: `step_mutate(x2 = {x * 2})` recorded against `{x * 3}` given must raise `nestedtune_workflow_mismatch` naming the setting.
-- [ ] T7 (review return, F1 and F7): amend AC1 through the implement gate so the identity also covers case weights (`add_case_weights()`) and the postprocessor (`add_tailor()`); `workflow_identity()` records both, `identity_difference()` names them, AC2 gains a case-weights probe and a postprocessor probe; NEWS and the help pages at `R/nested-final-fit.R:98`, `R/extract-procedure.R:51` state the widened coverage.
+- [x] T7 (review return, F1 and F7, re-cut at the amendment gate): the criteria hold; NEWS and the help pages at `R/nested-final-fit.R:98`, `R/extract-procedure.R:51` bound the identity to the model specification and the preprocessor and say case weights and a postprocessor are not read; case weights and the postprocessor filed as a ROADMAP candidate row.
 - [x] T8 (review return, F3 to F5): `deparse_settings()` sorts engine arguments by name, with a test that the two orders pass; `check_workflow_identity()` falls back to a fixed sentence when the walk finds no differing leaf; `check_results_record()` reads the entry with `[["workflow"]]`.
 
 ## Work log
@@ -66,6 +66,9 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - 2026-09-11: all tasks done; status set to review.
 - 2026-09-11: review, defect return 1 of this milestone: AC2 failed on a step setting containing a brace, the refusal raising cli's `rlib_error_3_0` instead of `nestedtune_workflow_mismatch` (F2, reproduced at review). Six criteria green on fresh evidence, gate clean, suite 9769/0, check 0/0/0. Gate added T6, T7 (AC1 amendment for case weights and the postprocessor, F1/F7) and T8 (F3 to F5); F6, F8, F9 rejected. Status back to in-progress.
 - 2026-09-11: implement resumed on the branch for the return; main unmoved. T6 done: the difference sentence is interpolated as a value (`x = "{d}"`), regression test on `step_mutate(x5 = {x1 * 2})` against `{x1 * 3}` asserting the mismatch class and both deparsed values. T8 done: engine arguments sorted by name, a fixed sentence when the walk places no difference, `[["workflow"]]` on the record read; two tests. Identity files 33 and 157 assertions, green. AC2's review tick removed, its evidence predating the fix.
+- 2026-09-11: amendment gate on T7 (return-adjacent widening, D-118): the user held AC1 and AC2 as written over widening them to case weights and the postprocessor; T7 re-cut as a prose narrowing (minor amendment), F1 filed as a candidate row. No criterion text changed, so no re-audit reader ran. T7 done: NEWS and the two help pages bound the identity to the model specification and the preprocessor and name what is not read.
+- 2026-09-11: claim audit: 86 claims read, 0 corrected — R/workflow-identity.R, R/checks.R, R/nested-final-fit.R, R/extract-procedure.R, R/nested-fit-resamples.R, R/tuner.R, NEWS.md, the two identity test files. Two stale unmodified lines the reader flagged were fixed after the audit: the origin count above `check_results_record()` and "flat" in `extract_procedure()`'s return.
+- 2026-09-11: return tasks done; suite 9782 pass, 0 fail; `document()` regenerated two Rd files; `sweep-prose.R --roxygen` and `--spans` clean; status set to review.
 
 ## Decisions
 

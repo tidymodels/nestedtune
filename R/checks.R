@@ -777,16 +777,17 @@ check_grid_params <- function(
 # is the same on each -- stop, and go back to an object the orchestrator
 # produced -- and the message carries which shape it was.
 #
-# Three origins reach here, and the messages name them. An operation outside
+# Four origins reach here, and the messages name them. An operation outside
 # the class's invariants -- rows added or removed -- returns a bare tibble
 # (R/nested-results.R), so `res[0, ]` and `filter(res, ...)` arrive as "not a
 # nested_results", never as a classed object missing its record. A classed
 # object with no `inside` has two indistinguishable origins, because an
 # attribute cannot hold NULL: a result built before the specification was
 # recorded, and one built from a design that carried none. A record whose
-# procedure holds no selection rule was built before the rule was recorded
-# (M69), and is refused the same way rather than fitted under a rule the
-# folds may not have used (D-041 declined migration). And a classed object
+# procedure holds no selection rule, or no workflow identity, was built
+# before that entry was recorded (M69, M83), and is refused the same way
+# rather than fitted under a rule or a workflow the folds may not have used
+# (D-041 declined migration). And a classed object
 # with the record and no rows is a prototype: it describes a run and holds
 # no data to re-run it on.
 check_results_record <- function(results, call = rlang::caller_env()) {
