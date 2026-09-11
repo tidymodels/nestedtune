@@ -34,7 +34,7 @@ derive one from the workflow; the section on finalizing a parameter range
 says where a range that depends on the data is finalized.}
 
 \item{grid}{A data frame of candidate parameter values, or a positive whole
-number giving the size of a grid for tune to generate. A data frame must
+number giving the size of a grid for tune to generate; a data frame must
 have one column per tuned parameter and no other column.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
