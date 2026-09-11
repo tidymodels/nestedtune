@@ -531,3 +531,12 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   construction is the unbuilt remedy, and capturing the frame instead would
   retain it, which GP4 argues against; `rsample::nested_cv()` designs are not
   affected. Routed from candidates 2026-09-03; added 2026-07-26 — RR02 B1.
+- The guides and help pages keep passive-voice sentences and `-ing` verb
+  forms where the plain sweep's clauses do not bind them: the SimpleEnglish
+  check-mode readers listed 49 such entries on the guides
+  (`cairn/surveys/M086-reader-review.md`, rules 3.6 and 3.5) and 149 on the
+  help pages (`cairn/surveys/M087-reader-review.md`). Accepted at M087's
+  hygiene: the sweep binds the six plain clauses and the 30-word cap, and no
+  pass rule reads what a reader lists (D-061); a later prose milestone that
+  adds a voice clause to `benchmarks/sweep-prose.R` retires this entry.
+  Routed from the #91 candidate row 2026-09-11.

@@ -1,22 +1,21 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-11 (twelfth pass, M086 merged: M086 archived and its row set done, M83's row pruned, eight candidate rows compressed for the byte budget, the #91 row updated, one LESSONS line added, the M81 line corrected; both files within caps.)_
+_Last hygiene check: 2026-09-11 (thirteenth pass, M087 merged: M087 archived and its row set done, M84's row pruned, the #91 row narrowed and its reader entries routed to DESIGN Known issues, one LESSONS line added and the M61 line trimmed; both files within caps.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M86 | The guides and README pass the plain-English sweep | done | — | high | milestones/archive/M086-guides-plain-sweep.md |
-| M87 | The help pages pass the plain-English sweep | review | M86 | high | milestones/M087-help-pages-plain-sweep.md |
+| M87 | The help pages pass the plain-English sweep | done | M86 | high | milestones/archive/M087-help-pages-plain-sweep.md |
 | M88 | Prose that fails the sweep cannot merge | planned | M86, M87 | normal | milestones/M088-prose-sweep-gate.md |
-| M84 | The guides and README read on one pass for a tune_grid user | done | — | high | milestones/archive/M084-guides-plain-prose.md |
 | M85 | The help pages read on one pass for a tune_grid user | done | M84 | high | milestones/archive/M085-help-pages-plain-prose.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
-- What #91 still asks for after M84-M87: `@param` entries inherited from tune's own pages with the nested qualifications in Details, the guides' use of "you" (M82 dropped its cap; the SimpleEnglish rule names the actor), and roxygen templates for text repeated across pages, and the 49 passive-voice and -ing-verb entries of M86's pass-1 reader report (`cairn/surveys/M086-reader-review.md`, rules 3.6 and 3.5) — added 2026-09-11 at M86/M87's plan gate, extended at M86's review gate ([#91](https://github.com/tidymodels/nestedtune/issues/91) stays open; M86's merge posted the one comment naming the guides half and this row). Promote on the issue author's PR offer landing, or on the next help-page milestone
+- What #91 still asks for after M84-M87: `@param` entries inherited from tune's own pages with the nested qualifications in Details, the guides' use of "you" (M82 dropped its cap; the SimpleEnglish rule names the actor), and roxygen templates for text repeated across pages — added 2026-09-11 at M86/M87's plan gate, dispositioned at M87's hygiene (the passive-voice and -ing-verb reader entries went to DESIGN Known issues; [#91](https://github.com/tidymodels/nestedtune/issues/91) stays open, each merge posting one comment). Promote on the issue author's PR offer landing, or on the next help-page milestone
 - The workflow identity does not read case weights, a postprocessor, or what a function-valued step setting closes over, so a workflow differing there alone passes the final fit's check — added 2026-09-11 at M83's gates (`milestones/archive/M083-final-fit-workflow-identity.md`). Recording the first two reads `pre$actions$case_weights$col` and `post$actions$tailor`, tailor in Suggests. Promote on a user fitting with any of the three, or on the next milestone touching `R/workflow-identity.R`
 - A panel-rate readability pass rule: three fresh readers scoring every paragraph on a closed (a)/(b)/(c) rubric, the reference intro scored blind as a control, pass at most n paragraphs flagged by two of three — added 2026-09-11 at M84's RR07 ingest (`milestones/archive/` will hold RR07; recommendation 5, consider). RR07 shows an open-list empty-reader criterion is undecidable and that this shape needs one calibration run to set n. Promote when a prose milestone wants a pass rule on a reader rather than a triaged report, and can spend the calibration run
 - `benchmarks/sweep-prose.R` counts list-item continuation lines and README badge lines as prose, and an indented fence or a multi-line HTML comment would leak in — added 2026-09-11 at M84's review gate (Q1, Q2, P6, O11-O13 in M84's archive summary). `--paragraphs` hands the reader README fragments and an over-cap list item is uncatchable; the script follows M84 AC1's prose definition, so the fix starts at that definition. Promote at the next prose milestone that reuses the script
