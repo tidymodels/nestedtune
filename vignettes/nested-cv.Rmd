@@ -23,7 +23,7 @@ more detail.
 Nested cross-validation fixes this by scoring the whole tuning procedure
 rather than the winner alone. It splits the data into outer folds. Within
 each outer fold it tunes using only the analysis rows, fits the winning
-setting on those rows, and scores that fit on the assessment rows, which the
+setting on those rows, and scores that fit on the assessment rows the
 tuning never saw. The average of those outer scores is an honest estimate of
 how well tune-then-fit works on new data.
 
@@ -32,9 +32,10 @@ in a write-up. The model you fit at the end on all the data is a separate
 object. It has no score of its own, because every row it was trained on was
 already used to choose and fit it.
 
-This page walks from a design to a write-up. `vignette("results")` reads
-everything the results object holds, `vignette("tuners")` swaps in the other
-inner searches and scores a workflow with nothing to tune, and the
+This page walks from a design to a write-up. The other pages go deeper.
+`vignette("results")` reads everything the results object holds.
+`vignette("tuners")` swaps in the other inner searches and scores a workflow
+with nothing to tune. The
 [parallel article](https://nestedtune.tidymodels.org/articles/parallel.html)
 runs the same call on a pool of workers.
 
@@ -98,13 +99,14 @@ folds$inner_resamples[[1]]
 
 `mtcars` has `r nrow(mtcars)` rows, which keeps this page fast to build.
 Nesting removes the most bias on wide data searched hard, and
-`vignette("estimate")` says when it is worth the cost; this example is here
+`vignette("estimate")` says when it is worth the cost. This example is here
 because it builds in seconds.
 
 ## The model and the grid
 
 Anything tune can tune, this can tune. Here it is a random forest with two
-parameters marked for tuning, and an explicit grid of candidates.
+parameters marked for tuning, and an explicit grid of candidates, the
+settings to try.
 
 ```{r workflow}
 rf <- rand_forest(mtry = tune(), min_n = tune(), trees = 500) |>
@@ -127,11 +129,13 @@ cross-validation is expensive, and that product is where the cost lives.
 ## Running the loop
 
 `nested_tune_grid()` drives the outer loop. For each outer fold it calls
-`tune::tune_grid()` on that fold's inner resamples, selects a candidate by
-the `select` rule (the best by the first metric unless `selection_rule()`
-says otherwise), finalizes the workflow, and fits and scores it on the outer
-split. Every statistical step is tune's. This package adds the loop, the
-seeding, and a result that keeps what each fold chose.
+`tune::tune_grid()` on that fold's inner resamples, the same call you would
+make by hand. It then picks the best candidate by the first metric, unless a
+`selection_rule()` passed as `select` says otherwise. It finalizes the
+workflow with that candidate, fits it on the fold's analysis rows, and
+scores it on the assessment rows. Every statistical step is tune's. This
+package adds the loop, the seeding, and a result that keeps what each fold
+chose.
 
 ```{r run}
 set.seed(2)
@@ -194,8 +198,8 @@ autoplot(res)
 ```
 
 A parameter the folds agree on is one the data picks clearly. A parameter
-they split over is one whose value is largely arbitrary at this sample size,
-which is expected wherever the candidates perform about equally well;
+they split over is one whose value is largely arbitrary at this sample size.
+That is expected wherever the candidates perform about equally well, and
 `vignette("estimate")` gives the mechanism.
 
 The per-fold scores are worth a look for the same reason:
@@ -268,13 +272,13 @@ tibble(
 )
 ```
 
-The selection-time score is not an estimate of performance on anything,
-whichever side of the nested estimate it lands on. It
-stays on the object as the record of what selection saw, and tune's readers
-hand it over without a warning. That is why the results object and the final
-fit both refuse tune's ranking generics rather than answering them. On the
-loop's results they would rank outer folds, and on the final fit there is
-one model and nothing to rank.
+The selection-time score is not an estimate of performance on anything.
+That holds whichever side of the nested estimate it lands on. It stays on
+the object as a record of what selection saw, and tune's functions hand it
+over without a warning. That is why the results object and the final fit
+both refuse tune's ranking functions such as `show_best()`. On the loop's
+results they would rank outer folds. On the final fit there is one model and
+nothing to rank.
 
 ```{r refusals, error = TRUE}
 show_best(res, metric = "rmse")
@@ -286,15 +290,15 @@ select_best(final, metric = "rmse")
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; neither
-function takes a seed of its own. `nested_tune_grid()` draws a tuning seed
-and an outer-fit seed for every fold from the session state at entry, fixed
-by the fold's position in the design rather than by the order the folds
-happen to run in, and stores them on the result. So the same seed gives the
-same answer whether the folds run serially or on a pool of workers, and any
-one fold can be reproduced by hand. `nested_final_fit()` draws one pair the
-same way and carries it as `tuning_seed` and `fit_seed`, and both functions
-put the caller's own random state back as it was found.
+Seed the session before the call, as elsewhere in tidymodels. Neither
+function takes a seed of its own. At entry, `nested_tune_grid()` draws two
+seeds for every fold from the session state, one for tuning and one for the
+outer fit, and stores them on the result. A fold's seeds depend on its
+position in the design, not on the order the folds happen to run in. So the
+same seed gives the same answer whether the folds run serially or on a pool
+of workers. Any one fold can also be reproduced by hand. `nested_final_fit()`
+draws one pair the same way and carries it as `tuning_seed` and `fit_seed`.
+Both functions put your random state back as they found it.
 
 ```{r seeds}
 res$.tuning_seed
@@ -342,6 +346,6 @@ cat(sprintf(
 ```
 
 Three things make it honest. The estimate is attributed to the procedure and
-not to the model, the instability is reported rather than hidden, and the
+not to the model. The instability is reported rather than hidden. The
 deployed model is described as what it is: the same procedure applied to all
 the data, carrying no performance claim of its own.
