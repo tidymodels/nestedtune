@@ -43,9 +43,9 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 
 - [x] T1: Add `--pages <path>...` and `--plain` to `benchmarks/sweep-prose.R` (header: the clause list, the `ing` exclusion list, the slop list copied from `word-swaps.md`); a clause reports by name; `--pages` accepts a page without a YAML header. Calibrate on a scratch file holding the reference intro (AC2) before touching a page.
 - [x] T2: Write `tests/testthat/fixtures/sweep-prose-plain.Rmd` (header comment: hand-authored, one sentence per clause, no generator or seed) and `tests/testthat/test-sweep-prose.R` (AC3); the test locates the script through `testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")` and skips when it is absent.
-- [ ] T3: Rewrite `vignettes/nested-cv.Rmd` and `vignettes/estimate.Rmd` until `--plain` is clean over them, keeping the default and `--spans` sweeps clean; the reference intro is not edited.
-- [ ] T4: Rewrite `vignettes/tuners.Rmd` and `vignettes/results.Rmd` the same way.
-- [ ] T5: Rewrite `vignettes/articles/parallel.Rmd` and `README.Rmd` the same way; `devtools::build_readme()`.
+- [x] T3: Rewrite `vignettes/nested-cv.Rmd` and `vignettes/estimate.Rmd` until `--plain` is clean over them, keeping the default and `--spans` sweeps clean; the reference intro is not edited.
+- [x] T4: Rewrite `vignettes/tuners.Rmd` and `vignettes/results.Rmd` the same way.
+- [x] T5: Rewrite `vignettes/articles/parallel.Rmd` and `README.Rmd` the same way; `devtools::build_readme()`.
 - [ ] T6: Record `wc -w` per page at the branch point and at the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
 - [ ] T7: Write `cairn/surveys/M086-reader-prompt.md`: the check-mode instructions (rule numbers from `references/rule-catalog.md`, the six page paths, the withheld files) that review hands unchanged to a fresh reader at each pass.
 
@@ -58,6 +58,9 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: /milestone-implement started; branch `m086-guides-plain-sweep` cut from `main` at b84cbcb. Question gate skipped: nothing the plan left open changes the work. One call made in passing: a slop hit reports as `slop (<phrase>)`, so the clause name stays `slop` and the reader sees the phrase.
 - 2026-09-11: T1 done. `--plain` reports one line per clause a sentence matches; `--pages` takes the paths up to the next `--` option. The reference intro (`git show 0d8611e:vignettes/nested-cv.Rmd | sed -n '17,33p'`, byte-identical scratch file) prints `clean` with no change to the `ing` exclusion list. Baseline over the six pages: 21 hits (11 modal, 6 comma-ing, 3 semicolon, 1 modal+comma-ing on one sentence; 0 slop, 0 contraction, 0 has-been).
 - 2026-09-11: T2 done. Fixture `tests/testthat/fixtures/sweep-prose-plain.Rmd` (headerless, so it also exercises the no-YAML path) and `tests/testthat/test-sweep-prose.R`; `devtools::test(filter = "sweep-prose")` passes 13 expectations, skips under `R CMD check` because `benchmarks/` is `.Rbuildignore`d.
+- 2026-09-11: T3 done. `nested-cv.Rmd` (5 sentences) and `estimate.Rmd` (4 sentences, two of them list-item continuation lines whose list-item line the sweep drops: the modals on those items were rewritten too). The reference intro is untouched. Every counterfactual modal restated without one, so the falsifier in the plan-gate line below did not fire and the exclusion list stays as seeded.
+- 2026-09-11: T4 done. `tuners.Rmd` (3 sentences), `results.Rmd` (3 sentences).
+- 2026-09-11: T5 done. `parallel.Rmd` (4 sentences), `README.Rmd` (1 list-item continuation, `, racing` read as a comma-ing hit); `devtools::build_readme()` re-knitted `README.md`, a two-line diff. Default, `--spans` and `--plain` sweeps print `clean` over the six pages.
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 ## Decisions
