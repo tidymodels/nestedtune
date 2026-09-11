@@ -11,7 +11,7 @@
 #'
 #' [nested_tune_grid()], [nested_tune_bayes()], [nested_tune_race_anova()],
 #' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] run the outer
-#' loop with one of tune's or finetune's search methods inside;
+#' loop with one of tune's or finetune's search methods inside.
 #' [nested_fit_resamples()] scores a workflow with nothing to tune on the same
 #' design, and [nested_workflow_map()] runs a whole workflow set through it.
 #'

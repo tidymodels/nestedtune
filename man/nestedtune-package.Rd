@@ -18,7 +18,7 @@ inner resamples, without copying the data per fold.
 
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} run the outer
-loop with one of tune's or finetune's search methods inside;
+loop with one of tune's or finetune's search methods inside.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a workflow with nothing to tune on the same
 design, and \code{\link[=nested_workflow_map]{nested_workflow_map()}} runs a whole workflow set through it.
 

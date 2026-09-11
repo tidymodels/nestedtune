@@ -20,12 +20,12 @@ nested_tune_bayes(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}; a workflow with no marker is refused, and
+for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused;
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold, meeting the requirements
-the section on nested designs states.}
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
+designs says what the design must hold.}
 
 \item{...}{A control object from \code{\link[tune:control_bayes]{tune::control_bayes()}}, as \code{control},
 and nothing else; every argument after \code{...} is matched by name. The
@@ -35,8 +35,8 @@ section on differences from tune says what becomes of each slot.}
 the section on the iterations says what \code{0} does.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow; the section on finalizing a parameter range
-says where a range that depends on the data is finalized.}
+derive one from the workflow. The section on finalizing a parameter
+range says where a range that depends on the data is finalized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -50,16 +50,16 @@ candidate the Gaussian process proposes next: \code{\link[tune:exp_improve]{tune
 default), \code{\link[tune:prob_improve]{tune::prob_improve()}} or \code{\link[tune:conf_bound]{tune::conf_bound()}}.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which
-level of a two-class outcome is the event, for the inner tuning run and
-the outer scoring fit alike.}
+level of a two-class outcome is the event. It applies to the inner
+tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
-regression model, or \code{NULL} (the default) to leave the choice to tune;
-the section on evaluation times says what this package refuses.}
+regression model, or \code{NULL} (the default) to leave the choice to tune.
+The section on evaluation times says what this package refuses.}
 
 \item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming which of tune's selectors each
 outer fold picks its candidate with, on its own inner run and the first
-metric; the default is \code{\link[tune:select_best]{tune::select_best()}}.}
+metric. The default is \code{\link[tune:select_best]{tune::select_best()}}.}
 }
 \value{
 A \code{nested_results} with one row per outer fold and the columns
@@ -120,9 +120,9 @@ Seed the session before the call, as elsewhere in tidymodels; there is no
 \code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
 outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
 element \code{2 * i} for its outer fit, each applied with the generator kind
-pinned. A fold's seed depends on its position and not on the order the
-folds run in, so the same seed gives the same result serially and in
-parallel, at any number of daemons. The two seeds are kept on the result as
+pinned. A fold's seed depends on its position, not on the order the folds
+run in. So the same seed gives the same result serially and in parallel,
+at any number of daemons. The two seeds are kept on the result as
 \code{.tuning_seed} and \code{.outer_fit_seed}, and \code{?nested_tune_grid} shows how to
 reproduce one fold by hand from them.
 
@@ -198,68 +198,69 @@ is reachable.
 \section{Nested designs}{
 
 
-\code{resamples} is a data frame whose \code{splits} column holds one \code{rsplit} per
-outer fold, whose \code{inner_resamples} column holds one \code{rset} with at least
-one row per outer fold, and whose every other column labels the outer
-folds. A label column is named \code{id}, or \code{id} followed by a digit from 1 to
-9, and holds character or factor values; together the label columns give
-every outer fold a distinct label with no \code{NA}.
+\code{resamples} is a data frame with one row per outer fold. Its \code{splits}
+column holds that fold's \code{rsplit}, its \code{inner_resamples} column holds an
+\code{rset} with at least one row, and every other column labels the fold. A
+label column is named \code{id}, or \code{id} followed by a digit from 1 to 9, and
+holds character or factor values. Together the label columns give every
+outer fold a distinct label with no \code{NA}.
 
-Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit}, and all
-of a fold's inner splits carry one frame: either the outer split's own data
-frame (what \code{\link[=nested_resamples]{nested_resamples()}} builds) or that split's analysis set (what
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds). An inner split carrying the outer data frame
-indexes, in its \code{in_id} and any non-\code{NA} \code{out_id}, only rows the outer
-split's \code{in_id} holds, so no inner analysis or assessment set reaches a row
-the outer fold holds out.
+Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit}. All
+of a fold's inner splits carry one data frame: either the outer split's
+own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
+as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
+may index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
+any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
+row the outer fold holds out.
 
 A design breaking any of this, or using a bootstrap for the outer loop, is
-refused before anything is fitted, with condition class
-\code{nestedtune_bad_design} and every offending row, column, inner split or
-index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design
-whatever its \code{inside} argument returned, and because a design assembled by
-hand can index rows its outer fold never sees.
+refused before anything is fitted. The error has condition class
+\code{nestedtune_bad_design} and names every offending row, column, inner
+split or index. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
+design whatever its \code{inside} argument returned, and because a design
+assembled by hand can index rows its outer fold never sees.
 }
 
 \section{Finalizing a parameter range}{
 
 
 \code{param_info} is passed unchanged to the inner tuning call on every outer
-fold, so a restricted range restricts what every fold searches. A parameter
-whose range is unknown until the data is seen (\code{mtry()}, or a \code{min_n()}
-finalized by row count) is finalized by tune on the outer fold's analysis
-rows, never on the rows that fold holds out. On a \code{\link[=nested_resamples]{nested_resamples()}}
-design the inner call therefore receives the fold's inner resamples
-re-pointed at its analysis set rather than the design's own
+fold, so a restricted range restricts what every fold searches. Some
+ranges are unknown until the data is seen: \code{mtry()}, or a \code{min_n()}
+finalized by row count. tune finalizes such a range on the outer fold's
+analysis rows, never on the rows that fold holds out. On a
+\code{\link[=nested_resamples]{nested_resamples()}} design the inner call therefore receives the fold's
+inner resamples re-pointed at its analysis set, not the design's own
 \code{inner_resamples} element, which indexes the whole data. A design from
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} already carries the analysis set and is passed as it
-is, as is the design's element under an outer split that repeats a row (an
-evaluated \code{\link[rsample:manual_rset]{rsample::manual_rset()}}), where the re-pointing is ambiguous.
-\code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} already carries the analysis set and is passed as
+it is. So is the design's element under an outer split that repeats a
+row, an evaluated \code{\link[rsample:manual_rset]{rsample::manual_rset()}}, where the re-pointing is
+ambiguous. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.
 }
 
 \section{Evaluation times}{
 
 
-\code{eval_time} reaches every tune call whose answer depends on it, so a
-dynamic or integrated survival metric (\code{brier_survival()},
-\code{roc_auc_survival()} and their relatives) is measured at the times you name.
-It is ignored, with a warning from tune, whenever the metric set has no
-metric that reads it; tune keys that warning on the metrics rather than on
-the model's mode.
+\code{eval_time} reaches every tune call whose answer depends on it. So a
+dynamic or integrated survival metric, \code{brier_survival()},
+\code{roc_auc_survival()} and their relatives, is measured at the times you
+name. When the metric set has no metric that reads it, tune ignores it
+with a warning; tune keys that warning on the metrics, not on the
+model's mode.
 
-Refused here, ahead of tune: anything that is not numeric, an empty vector,
-and any element that is missing, negative or not finite. tune treats those
-unevenly and only once a metric reads the times, so this package refuses
-them all at entry, before a whole run is paid for. Zero, repeated times and
-times out of order are accepted and passed on untouched, since tune
-normalizes those itself; a repeated time draws tune's warning that 0
-inappropriate evaluation time points were removed, once per tune call.
+This package refuses some values ahead of tune: anything that is not
+numeric, an empty vector, and any element that is missing, negative or
+not finite. tune treats those unevenly, and only once a metric reads the
+times, so they are refused at entry, before a whole run is paid for.
+Zero, repeated times and times out of order are accepted and passed on
+untouched, since tune normalizes those itself. A repeated time draws
+tune's warning that 0 inappropriate evaluation time points were removed,
+once per tune call.
 
-The selector \code{select} names is called without \code{eval_time}. Left unset it
-selects at the first of the evaluation times the tuning run was built with,
-which are the ones named here, so passing them again would change no choice
-and would repeat tune's message about which time it took.
+The selector \code{select} names is called without \code{eval_time}. Left unset,
+it selects at the first of the evaluation times the tuning run was built
+with, which are the ones named here. Passing them again would change no
+choice and would repeat tune's message about which time it took.
 }
 
 \examples{

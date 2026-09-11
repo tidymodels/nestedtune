@@ -88,17 +88,13 @@ export(selection_rule)
 importFrom(dplyr,dplyr_reconstruct)
 importFrom(ggplot2,autoplot)
 importFrom(rlang,.data)
-importFrom(tune,
-  augment,
-  collect_extracts,
-  collect_metrics,
-  collect_notes,
-  collect_predictions,
-  extract_workflow
-)
-importFrom(vctrs,
-  vec_cast,
-  vec_cbind_frame_ptype,
-  vec_ptype2,
-  vec_restore
-)
+importFrom(tune,augment)
+importFrom(tune,collect_extracts)
+importFrom(tune,collect_metrics)
+importFrom(tune,collect_notes)
+importFrom(tune,collect_predictions)
+importFrom(tune,extract_workflow)
+importFrom(vctrs,vec_cast)
+importFrom(vctrs,vec_cbind_frame_ptype)
+importFrom(vctrs,vec_ptype2)
+importFrom(vctrs,vec_restore)

@@ -19,8 +19,8 @@ with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tun
 it; a workflow carrying a marker is refused at entry.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold, meeting the requirements
-the section on nested designs states.}
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
+designs says what the design must hold.}
 
 \item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as
 \code{control}, and nothing else; every argument after \code{...} is matched by
@@ -98,9 +98,9 @@ Seed the session before the call, as elsewhere in tidymodels; there is no
 \code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
 outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
 element \code{2 * i} for its outer fit, each applied with the generator kind
-pinned. A fold's seed depends on its position and not on the order the
-folds run in, so the same seed gives the same result serially and in
-parallel, at any number of daemons. The two seeds are kept on the result as
+pinned. A fold's seed depends on its position, not on the order the folds
+run in. So the same seed gives the same result serially and in parallel,
+at any number of daemons. The two seeds are kept on the result as
 \code{.tuning_seed} and \code{.outer_fit_seed}, and \code{?nested_tune_grid} shows how to
 reproduce one fold by hand from them.
 
@@ -180,27 +180,27 @@ fitted workflow is reached through \code{extract}.
 \section{Nested designs}{
 
 
-\code{resamples} is a data frame whose \code{splits} column holds one \code{rsplit} per
-outer fold, whose \code{inner_resamples} column holds one \code{rset} with at least
-one row per outer fold, and whose every other column labels the outer
-folds. A label column is named \code{id}, or \code{id} followed by a digit from 1 to
-9, and holds character or factor values; together the label columns give
-every outer fold a distinct label with no \code{NA}.
+\code{resamples} is a data frame with one row per outer fold. Its \code{splits}
+column holds that fold's \code{rsplit}, its \code{inner_resamples} column holds an
+\code{rset} with at least one row, and every other column labels the fold. A
+label column is named \code{id}, or \code{id} followed by a digit from 1 to 9, and
+holds character or factor values. Together the label columns give every
+outer fold a distinct label with no \code{NA}.
 
-Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit}, and all
-of a fold's inner splits carry one frame: either the outer split's own data
-frame (what \code{\link[=nested_resamples]{nested_resamples()}} builds) or that split's analysis set (what
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds). An inner split carrying the outer data frame
-indexes, in its \code{in_id} and any non-\code{NA} \code{out_id}, only rows the outer
-split's \code{in_id} holds, so no inner analysis or assessment set reaches a row
-the outer fold holds out.
+Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit}. All
+of a fold's inner splits carry one data frame: either the outer split's
+own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
+as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
+may index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
+any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
+row the outer fold holds out.
 
 A design breaking any of this, or using a bootstrap for the outer loop, is
-refused before anything is fitted, with condition class
-\code{nestedtune_bad_design} and every offending row, column, inner split or
-index named. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design
-whatever its \code{inside} argument returned, and because a design assembled by
-hand can index rows its outer fold never sees.
+refused before anything is fitted. The error has condition class
+\code{nestedtune_bad_design} and names every offending row, column, inner
+split or index. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
+design whatever its \code{inside} argument returned, and because a design
+assembled by hand can index rows its outer fold never sees.
 }
 
 \examples{
