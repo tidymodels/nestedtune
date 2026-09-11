@@ -124,9 +124,10 @@ print.nested_final_fit <- function(x, ...) {
 #'
 #' The four counts are `NULL` on a grid or a racing fit, which iterate over
 #' nothing. They are carried rather than dropped, for the reason `estimate`
-#' is. The scored figures are read from the candidate record and the
-#' requested ones from the procedure. A run whose candidate record cannot be
-#' derived reports its scored figures as zero rather than failing to print.
+#' is. The scored figures are counted from the tuning run's metrics table,
+#' and the requested ones are the counts the search was called with. A run
+#' whose metrics table cannot be read reports its scored figures as zero
+#' rather than failing to print.
 #'
 #' Where nothing was tuned there is no run to describe, so `tuning_label`
 #' is `NULL` and `candidates` is `0`. `selection` is empty.
