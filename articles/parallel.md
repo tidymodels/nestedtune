@@ -7,13 +7,10 @@ and its siblings run those folds on [mirai](https://mirai.r-lib.org/)
 daemons when a pool is connected, and serially otherwise. Nothing in the
 call changes between the two. This page starts a pool of two daemons,
 runs the getting-started guide’s loop on it, shows the result identical
-to the same run made serially, and then goes through what the parallel
-path checks before it dispatches, what it sends to each daemon, what to
-do while developing the package, and how a run stops.
-
-[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-carries the reference version of each of those under its parallel
-section. This page shows them running.
+to the same run made serially, and says when a pool pays. What the call
+checks before it dispatches, what it sends to each daemon, and what
+happens on an interrupt are under the parallel section of
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
 
 ``` r
 
@@ -48,7 +45,7 @@ wf <- workflow(mpg ~ ., rf)
 grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 ```
 
-## Starting a pool
+## The pool
 
 Parallelism is switched on by connecting daemons and off by
 disconnecting them. There is no argument on the loop functions for it.
@@ -66,36 +63,17 @@ mirai::status()$connections
 #> [1] 2
 ```
 
-Each daemon is a separate R process. It does not inherit the options,
-library paths, or environment variables this session set after it was
-launched, and it loads nestedtune from an installed library rather than
-from this session. Both points matter below.
+Each daemon is a separate R process. It loads nestedtune and the
+packages the workflow needs from an installed library, and the first
+parallel call after starting a pool is the slow one, since it is what
+makes each daemon load the tidymodels stack.
 
-## The pre-flight
+## The same call
 
-Before any fold is dispatched, the call asks every connected daemon
-whether it can load nestedtune, whether its copy defines the same
-internal functions this session’s copy does, and whether it can load
-each package the workflow and the tuner need, here parsnip, workflows
-and ranger. A daemon that fails any of those stops the call with a
-message naming how many daemons are affected and what is missing, rather
-than letting the run go ahead and every fold come back as an opaque
-worker failure. A daemon that does not answer within the bound is
-reported as a non-response, which is a different message, so a slow
-daemon is never told to install a package it already has. The bound is
-thirty seconds by default and is an R option,
-`nestedtune.preflight_timeout`, in milliseconds.
-
-That first round trip is also what makes each daemon load the tidymodels
-stack, so the first parallel call after starting a pool is the slow one.
-Later calls in the same session reuse what the daemons already loaded.
-
-## Running the loop
-
-The call is the guide’s call. With a pool connected the outer folds are
-dispatched to the daemons, and each fold’s inner tuning runs serially on
-its daemon, because parallelism inside a fold on top of parallelism
-across folds would oversubscribe the cores.
+With a pool connected the outer folds are dispatched to the daemons, and
+each fold’s inner tuning runs serially on its daemon, because
+parallelism inside a fold on top of parallelism across folds would
+oversubscribe the cores.
 
 ``` r
 
@@ -121,13 +99,8 @@ par_res
 #>   each one selected, and the estimate across them.
 ```
 
-The result carries no mark of how it was computed. That is deliberate,
-and the serial run below shows what it buys.
-
-## Stopping the pool
-
-`mirai::daemons(0)` disconnects the daemons. After it the same call runs
-serially.
+The result carries no mark of how it was computed. `mirai::daemons(0)`
+disconnects the daemons, and after it the same call runs serially.
 
 ``` r
 
@@ -137,14 +110,13 @@ mirai::status()$connections
 #> [1] 0
 ```
 
-## The same run, serially
+## The same result
 
-The seed is the same, so the serial run is the same procedure on the
-same resamples. Each outer fold draws its tuning seed from the session
-state at entry, by its position in the design, before anything is
-dispatched, and each daemon then pins the same generator kind the serial
-path uses. So the fold’s inner tuning sees the same random stream
-whichever process runs it.
+Each outer fold’s seeds are drawn from the session state at entry, fixed
+by the fold’s position in the design, before anything is dispatched, as
+[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
+explains under Reproducibility. So the serial run under the same seed is
+the same procedure on the same resamples.
 
 ``` r
 
@@ -167,127 +139,21 @@ same
 ```
 
 [`identical()`](https://rdrr.io/r/base/identical.html) on the outer
-scores, the selections and the tuning seeds returns TRUE for each: the
-scores, the selections and the seeds match, and which run used daemons
-is not recoverable from either. That is what lets a pool be a matter of
-the session rather than of the analysis: a script gives the same answer
-on a laptop with no daemons and on a workstation with many.
+scores, the selections and the tuning seeds returns TRUE for each, and
+which run used daemons is not recoverable from either. That is what lets
+a pool be a matter of the session rather than of the analysis: a script
+gives the same answer on a laptop with no daemons and on a workstation
+with many.
 
-## What crosses the wire
-
-A fold’s payload is its outer split, its inner resamples and its two
-seeds; the workflow, the grid and the tuner’s settings travel beside it.
-Every split in a design indexes one shared copy of the data, but
-serializing does not preserve that sharing, so sending the splits as
-they are would send one copy of the data per split. The data is
-therefore stripped from each split before dispatch and refilled on the
-daemon, and what crosses is the fold’s row indices plus one copy of the
-data per fold. Two things this does not reach, both of them objects you
-supply rather than anything the package builds. A recipe keeps a copy of
-the data it was created with, and a formula carries the environment it
-was written in, so a workflow built inside a function that holds a large
-object sends that object with every fold. The recipe’s copy is the
-recipe’s own record and travels with every fold; building the workflow
-at the top level avoids the second.
-
-## Developing against daemons
-
-Daemons load nestedtune from an installed library. Under
-`devtools::load_all()` the host session runs the source tree, and the
-daemons cannot see it. With no installed copy in the library, the
-pre-flight stops the call. When the library does hold one, the daemons
-run that copy, which may be older than the source the host is running.
-The pre-flight catches the case where the older copy is missing a
-function the host’s copy has, and asks you to reinstall and restart the
-pool. A running daemon keeps the namespace it already loaded, so
-reinstalling underneath it changes nothing until the pool is restarted.
-
-For development, prime the daemons with the source tree instead:
-
-``` r
-
-mirai::everywhere(pkgload::load_all("path/to/nestedtune"))
-```
-
-## Interrupting and cancelling
-
-Pressing interrupt at the console while folds are outstanding unwinds
-the blocking wait, restores the random-number state, and asks the
-daemons to stop the folds they have not finished, so the pool goes idle
-rather than computing results nobody will read. Stopping is a request. A
-fold already inside a compiled fitting routine may not be interruptible,
-and one that has nearly finished may simply finish. Nothing about an
-interrupted run is recorded, because a fold that was never given a
-chance to run has not failed.
-
-Cancelling needs mirai’s dispatcher, the process that hands tasks to
-daemons and can recall them. `mirai::daemons(n)` starts one by default.
-A pool started with `dispatcher = FALSE` has no dispatcher, so the
-request cannot reach the daemons and the outstanding folds run to
-completion. The results of such a pool are correct, and it is not
-refused. What it lacks is the ability to stop, and the call says so at
-dispatch with a warning of class `nestedtune_pool_not_cancellable`, once
-per run.
-
-Here is that pool. The first chunk runs the loop on it with the warning
-muted and checks the result against the serial run. The second repeats
-the call and catches the warning with
-[`rlang::catch_cnd()`](https://rlang.r-lib.org/reference/catch_cnd.html)
-to show its class.
-
-``` r
-
-mirai::daemons(2, dispatcher = FALSE)
-
-set.seed(2)
-
-nd_res <- nested_tune_grid(wf, folds, grid = grid)
-
-identical(nd_res$.metrics, ser_res$.metrics)
-#> [1] TRUE
-```
-
-``` r
-
-set.seed(2)
-
-caught <- rlang::catch_cnd(
-  nested_tune_grid(wf, folds, grid = grid),
-  classes = "nestedtune_pool_not_cancellable"
-)
-
-class(caught)
-#> [1] "nestedtune_pool_not_cancellable" "rlang_warning"                  
-#> [3] "warning"                         "condition"
-
-mirai::daemons(0)
-```
-
-The message itself names the remedy: restart the pool with
-`mirai::daemons(n)`, which starts a dispatcher by default.
-
-    These mirai daemons were started without a dispatcher, so this run
-    cannot be cancelled.
-    ℹ Interrupting it returns control to you, but the outer folds keep
-      computing on the pool and their results are never read.
-    ℹ For a pool that stops when you do, restart it with
-      `mirai::daemons(n)`, which starts a dispatcher by default.
-
-One case the call cannot tell apart is documented rather than guessed
-at. Calling `mirai::daemons(0)` while folds are outstanding produces
-exactly what a daemon dying mid-fold produces, so tearing the pool down
-that way is recorded as fold failures rather than as a cancellation. The
-other folds keep their results.
-
-## What this example cannot show
+## A pool’s payoff
 
 `mtcars` has 32 rows and the grid has 6 points, so each fold takes a
 fraction of a second, and two daemons loading the tidymodels stack cost
 more than the folds save. This page shows the parallel path working and
 its result matching the serial one, not a speedup. The speedup arrives
 where the folds are expensive: larger data, a bigger grid, a slower
-engine, or preprocessing the loop has to redo in every fold. The
-arithmetic in
+engine, or preprocessing the loop has to redo in every fold. The fit
+count in
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
 says where the cost lives, and what is parallel here is the outer loop
 over that cost.

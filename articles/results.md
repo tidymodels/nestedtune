@@ -1,14 +1,13 @@
 # Reading the results
 
-Every driver in this package returns the same kind of object, a
+Every tuning function in this package returns the same kind of object, a
 `nested_results`, and the getting-started guide,
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md),
 reads the print, the summary, the estimate, the selections and both
-plots off it. This page reads the whole object. It walks the columns one
-at a time, runs each of the readers on one result, shows what a run
-looks like when one outer fold fails, says which dplyr verbs keep the
-class and which shed it, and ends with the two arguments the runs above
-do not use, `event_level` and `eval_time`.
+plots off it. This page reads the whole object: the columns one at a
+time, each of the readers on one result, what a run looks like when one
+outer fold fails, and which dplyr verbs keep the class and which shed
+it.
 
 ``` r
 
@@ -21,7 +20,7 @@ library(nestedtune)
 The design, the workflow and the grid are the guide’s, unchanged: five
 outer folds of `mtcars`, five inner folds under each, and a random
 forest with two parameters marked for tuning. One thing is added: a
-control passed through `...` asks each fold’s outer fit to keep its
+control passed as `control` asks each fold’s outer fit to keep its
 predictions, so this page can show that column and the reader that
 stacks it.
 
@@ -73,7 +72,7 @@ res
 #>   each one selected, and the estimate across them.
 ```
 
-## What the columns hold
+## The columns
 
 The object is a tibble with one row per outer fold, and the print above
 shows the columns that fit, its footer naming the rest. Each holds one
@@ -192,13 +191,9 @@ res$.completed
 ```
 
 `.tuning_seed` and `.outer_fit_seed` are the two seeds each fold ran
-under, drawn at entry and fixed by the fold’s position in the design.
-The guide’s reproducibility section shows how to restore them, and the
-help pages for
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-give the recipe for replaying one fold by hand.
+under, drawn at entry and fixed by the fold’s position in the design, as
+[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
+explains under Reproducibility.
 
 ``` r
 
@@ -240,9 +235,7 @@ res$.predictions[[1]]
 The description of the run itself rides on the object as attributes
 rather than columns;
 [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-returns the one that records what ran, and
-[`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
-reads it.
+returns the one that records what ran.
 
 ## The readers
 
@@ -277,8 +270,7 @@ summary(res)
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 is the estimate as a table, the mean and standard error of the outer
 scores. With `summarize = FALSE` it is the outer scores themselves, one
-row per fold and metric, which is each fold’s `.metrics` rows, less
-`.config`, with the fold label beside them.
+row per fold and metric, with the fold label beside them.
 
 ``` r
 
@@ -345,9 +337,9 @@ collect_inner_metrics(res)
 
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks `.predictions` the same way, one row per held-out row of every
-completed fold with the fold label beside it, which is where a plot of
-predicted against observed, or a per-observation loss, would start. It
-refuses a run that did not save them, naming the slot to set;
+completed fold, which is where a plot of predicted against observed, or
+a per-observation loss, would start. It refuses a run that did not save
+them, naming the slot to set;
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 does the same for `.extracts`, one row per fold.
 
@@ -389,6 +381,8 @@ agreement(res)
 #> 2     5     2     2   0.4
 ```
 
+## The plots
+
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 draws the same two facts. The default view is the selections, one panel
 per tuned parameter and one point per outer fold.
@@ -416,17 +410,16 @@ autoplot(res, type = "performance")
 score on its assessment rows and a dashed line at the mean across
 folds.](results_files/figure-html/autoplot-performance-1.png)
 
-## When a fold fails
+## A failed fold
 
 A fold that fails does not end the run. The other folds keep their
 results, and the fold that failed is recorded rather than dropped. To
-show that on the guide’s run, the workflow below adds one preprocessing
-step a careful reader might write anyway: a range check on horsepower,
-which refuses to predict for a car whose horsepower lies outside the
-range the model was trained on, beyond a small slack. One car, the
-Maserati Bora, has far more horsepower than any other in `mtcars`, 335
-against 264 for the next. The fold that holds it out cannot score it,
-and that fold fails.
+show that, the workflow below adds a range check on horsepower, which
+refuses to predict for a car whose horsepower lies outside the range the
+model was trained on. One car, the Maserati Bora, has far more
+horsepower than any other in `mtcars`, so the fold that holds it out
+cannot score it, and that fold fails. The chunk mutes tune’s progress
+messages and keeps its warnings.
 
 ``` r
 
@@ -447,38 +440,16 @@ failed <- nested_tune_grid(wf_checked, folds, grid = grid)
 #> ✖ Failed: "Fold1".
 #> ℹ See `x$.notes` for what went wrong.
 
-stopifnot(sum(!failed$.completed) == 1L)
-```
-
-``` r
-
 failed
-#> 
-#> ── Nested cross-validation results ────────────────────────────────────
-#> Outer resamples: 5-fold cross-validation
-#> # A tibble: 5 × 9
-#>   splits         id    .metrics .selected .inner_metrics    .notes  
-#>   <list>         <chr> <list>   <list>    <list>            <list>  
-#> 1 <split [25/7]> Fold1 <tibble> <NULL>    <tibble [12 × 8]> <tibble>
-#> 2 <split [25/7]> Fold2 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
-#> 3 <split [26/6]> Fold3 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
-#> 4 <split [26/6]> Fold4 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
-#> 5 <split [26/6]> Fold5 <tibble> <tibble>  <tibble [12 × 8]> <tibble>
-#> # ℹ 3 more variables: .completed <lgl>, .tuning_seed <int>,
-#> #   .outer_fit_seed <int>
-#> ✖ 1 of 5 outer folds did not complete.
-#> ℹ Use `summary()` for what the run means: which folds failed, what
-#>   each one selected, and the estimate across them.
 ```
 
-The run warns twice as it finishes: tune’s own warning from the outer
-fit that produced nothing, then this package’s, naming the fold. The
-chunk mutes tune’s progress messages and keeps its warnings. The print
-counts the failure, `.completed` is `FALSE` for the fold that failed,
-and its `.notes` say where.
+The print counts the failure, `.completed` is `FALSE` for the fold that
+failed, and its `.notes` say where.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks every fold’s `.notes` into one table with the fold label beside
-them, so the failed fold’s notes are the rows carrying its label.
+them; the first row for the failed fold is this package’s own note, its
+`location` naming the stage, and the rows after it are tune’s notes
+about the cause.
 
 ``` r
 
@@ -486,14 +457,9 @@ failed_id <- failed |>
   filter(!.completed) |>
   pull(id)
 
-failed_id
-#> [1] "Fold1"
-
-notes <- collect_notes(failed)
-
-failed_notes <- filter(notes, id == failed_id)
-
-select(failed_notes, location, type, note)
+collect_notes(failed) |>
+  filter(id == failed_id) |>
+  select(location, type, note)
 #> # A tibble: 2 × 3
 #>   location                                      type  note             
 #>   <chr>                                         <chr> <chr>            
@@ -501,136 +467,29 @@ select(failed_notes, location, type, note)
 #> 2 outer fit: preprocessor 1/1 (prediction data) error "\u001b[1m\u001b…
 ```
 
-The first row is this package’s own note, and its `location` names the
-stage: Fold1 failed at the outer fit, the fit and score on the outer
-split, after its inner tuning had finished. The rows after it are tune’s
-notes about the cause, relabelled with the stage they came from. A fold
-that fails during inner tuning reads the same way with `inner tuning` as
-the stage.
-
-A fold can also complete and carry notes. The Maserati sits in the
-analysis set of every other fold, so each of those folds had one inner
-resample that held it out, and the range check refused that resample for
-every candidate. Some folds carry a second note of the same kind from
-the low end of the range, an inner resample that held out a car with
-less horsepower than any it trained on. Tuning still returned a
-candidate, from the inner resamples that ran, and the fold finished. Its
-notes say so. Counting the stacked notes by fold shows how many each
-carries (a fold with none would be absent from the count), and the first
-fold in the table other than the failed one reads like this:
-
-``` r
-
-count(notes, id)
-#> # A tibble: 5 × 2
-#>   id        n
-#>   <chr> <int>
-#> 1 Fold1     2
-#> 2 Fold2     2
-#> 3 Fold3     1
-#> 4 Fold4     1
-#> 5 Fold5     1
-
-noted_id <- notes |>
-  filter(id != failed_id) |>
-  slice(1) |>
-  pull(id)
-
-noted_id
-#> [1] "Fold2"
-
-notes |>
-  filter(id == noted_id) |>
-  select(location, type, note)
-#> # A tibble: 2 × 3
-#>   location                                                 type  note  
-#>   <chr>                                                    <chr> <chr> 
-#> 1 inner tuning (Fold3): preprocessor 1/1 (prediction data) error "\u00…
-#> 2 inner tuning (Fold5): preprocessor 1/1 (prediction data) error "\u00…
-```
-
-The label in parentheses names the inner resample, a fold of this outer
-fold’s own inner design, not another outer fold. So `.completed` being
-`TRUE` beside a non-empty `.notes` means exactly this: the fold worked,
-on less than the whole inner design it was given.
-
-[`summary()`](https://rdrr.io/r/base/summary.html) on a run with a
-failed fold still answers, and warns first. The first chunk below
-catches the warning with
-[`rlang::catch_cnd()`](https://rlang.r-lib.org/reference/catch_cnd.html)
-to show its class and its message. The second prints the summary, with
-the warning muted.
-
-``` r
-
-partial_warning <- rlang::catch_cnd(
-  summary(failed),
-  classes = "nestedtune_partial_summary"
-)
-
-class(partial_warning)
-#> [1] "nestedtune_partial_summary" "rlang_warning"             
-#> [3] "warning"                    "condition"
-
-cat(conditionMessage(partial_warning))
-#> ! This summary covers 4 of 5 outer folds.
-#> ✖ Failed: "Fold1".
-#> ℹ It describes the folds that ran, not the design that was requested.
-```
-
-``` r
-
-summary(failed)
-#> 
-#> ── Nested cross-validation results ────────────────────────────────────
-#> Outer resamples: 5-fold cross-validation
-#> Outer folds: 5 requested, 4 completed
-#> ✖ Fold1 failed during outer fit.
-#> ℹ See the `.notes` column of the results object for what went wrong.
-#> 
-#> ── Selected parameters ──
-#> 
-#> ! mtry: 8, 5, 8, 2 (folds disagree)
-#> ! min_n: 10, 2, 2, 2 (folds disagree)
-#> 
-#> ── Estimate (4 of 5 outer folds) ──
-#> 
-#> rmse (standard): 2.95
-#> rsq (standard): 0.814
-#> 
-#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
-#>   you can deploy. Build that with `nested_final_fit()`, and report
-#>   this estimate as what its procedure achieves.
-```
-
-The warning’s class lets a script catch it and decide what a partial run
-is worth. The message names how many folds the summary covers and how
-many the design asked for, and the summary itself describes the folds
-that ran: the selections are those 4 folds’ selections, and the estimate
-is the mean over their 4 scores, with the failed fold absent rather than
-filled in.
+A fold can also complete and carry notes, when an inner resample failed
+but tuning still returned a candidate from the resamples that ran.
+[`summary()`](https://rdrr.io/r/base/summary.html),
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 and
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-warn the same way, and
+answer on a run with a failed fold over the folds that completed, and
+warn once with class `nestedtune_partial_summary` saying how many the
+summary covers;
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+reads every fold and warns about none;
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 leaves the failed fold’s place on its axis empty. A run in which no fold
-completed is different:
-[`summary()`](https://rdrr.io/r/base/summary.html) still describes it,
-but
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
-[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
-[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-and
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-refuse it, because there is no estimate to report for a design that did
-not execute.
+completed is refused by those readers and by
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+except [`summary()`](https://rdrr.io/r/base/summary.html) and
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+because there is no estimate to report for a design that did not
+execute.
 
-## What dplyr keeps and what it sheds
+## Subsetting with dplyr
 
 The object is a tibble, so dplyr’s verbs work on it, and one rule
 decides what they hand back: a verb that only reorders the rows or adds
@@ -670,142 +529,15 @@ class(res[, "id"])
 Both of those hand back the data and nothing more: a plain tibble print,
 no summary of the run, no
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html).
-That is the point. A table that has lost a fold, or lost the columns the
-run wrote, cannot describe itself as a five-fold design, so it stops
-describing itself. To read a partial run, read the run:
-`collect_metrics(failed)` already averages the folds that completed, and
-warns that it did.
+A table that has lost a fold, or lost the columns the run wrote, cannot
+describe itself as a five-fold design, so it stops describing itself. To
+read a partial run, read the run: `collect_metrics(failed)` already
+averages the folds that completed, and warns that it did.
 
-## Two more arguments: `event_level` and `eval_time`
-
-Every tuning driver takes two more arguments than the runs above used,
-and both reach tune untouched;
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-takes neither, and reads both back from the results object.
-`event_level` is for classification: it names which level of the outcome
-factor counts as the event, `"first"` unless you say otherwise, and it
-sets the same slot on the inner tuning and on the outer scoring fit at
-once. A regression or censored-regression run ignores it, as tune does.
-`eval_time` is for censored regression, and it changes the shape of the
-result, so the rest of this section runs one.
-
-``` r
-
-set.seed(51)
-
-n <- 180
-x1 <- rnorm(n)
-x2 <- rnorm(n)
-lp <- 0.9 * x1 - 0.6 * x2
-early <- rbinom(n, 1, 0.45)
-event_time <- ifelse(
-  early == 1,
-  runif(n, 0.02, 0.6) * exp(-lp / 6),
-  rlnorm(n, meanlog = log(15) - lp, sdlog = 0.8)
-)
-censor_time <- runif(n, 3, 60)
-
-surv_df <- tibble(
-  time = pmin(event_time, censor_time),
-  event = as.numeric(event_time <= censor_time),
-  x1 = x1,
-  x2 = x2
-)
-```
-
-The data is simulated: two predictors, a time, and an event indicator
-that is zero where the observation was censored before its event. The
-model is a parametric survival regression whose one tunable is the
-distribution of the event times, and the grid names three.
-
-``` r
-
-library(censored)
-
-surv_spec <- survival_reg(dist = tune()) |>
-  set_engine("survival") |>
-  set_mode("censored regression")
-
-surv_wf <- workflow(survival::Surv(time, event) ~ x1 + x2, surv_spec)
-
-surv_grid <- tibble(dist = c("weibull", "lognormal", "exponential"))
-```
-
-A dynamic survival metric is evaluated at a time: the Brier score at one
-time asks how well the model predicts who has survived to that point. So
-the metric has one value per time, and `eval_time` is where the times
-are given. They reach the inner tuning, which selects on the first of
-them and warns once per fold to say so (the chunk mutes those warnings),
-and the outer scoring fit, which scores at each.
-
-``` r
-
-set.seed(61)
-
-surv_folds <- nested_resamples(
-  surv_df,
-  outside = vfold_cv(v = 3),
-  inside = vfold_cv(v = 3)
-)
-
-set.seed(62)
-
-surv_res <- nested_tune_grid(
-  surv_wf,
-  surv_folds,
-  grid = surv_grid,
-  metrics = metric_set(brier_survival),
-  eval_time = c(0.5, 10)
-)
-
-collect_metrics(surv_res)
-#> # A tibble: 2 × 6
-#>   .metric        .estimator .eval_time  mean     n std_err
-#>   <chr>          <chr>           <dbl> <dbl> <int>   <dbl>
-#> 1 brier_survival standard          0.5 0.251     3 0.00584
-#> 2 brier_survival standard         10   0.222     3 0.00901
-```
-
-The estimate carries an `.eval_time` column, and has one row per metric
-and time: the Brier score at 0.5 and at 10, each the mean over the outer
-folds of that fold’s score at that time. The per-fold table carries the
-same column, and so does each fold’s `.metrics`.
-
-``` r
-
-collect_metrics(surv_res, summarize = FALSE)
-#> # A tibble: 6 × 5
-#>   id    .metric        .estimator .eval_time .estimate
-#>   <chr> <chr>          <chr>           <dbl>     <dbl>
-#> 1 Fold1 brier_survival standard          0.5     0.259
-#> 2 Fold1 brier_survival standard         10       0.230
-#> 3 Fold2 brier_survival standard          0.5     0.240
-#> 4 Fold2 brier_survival standard         10       0.204
-#> 5 Fold3 brier_survival standard          0.5     0.255
-#> 6 Fold3 brier_survival standard         10       0.231
-
-surv_res$.selected[[1]]
-#> # A tibble: 1 × 2
-#>   dist      .config        
-#>   <chr>     <chr>          
-#> 1 lognormal pre0_mod2_post0
-```
-
-Everything else reads as before.
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-counts the selected distributions the way it counted `mtry` above:
-
-``` r
-
-agreement(surv_res)
-#> # A tibble: 2 × 3
-#>   dist          n  prop
-#>   <chr>     <int> <dbl>
-#> 1 lognormal     2 0.667
-#> 2 weibull       1 0.333
-```
-
-[`summary()`](https://rdrr.io/r/base/summary.html) and the default
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-read the same `.selected` column, and `autoplot(type = "performance")`
-draws one panel per metric and time.
+Two arguments the runs on this page did not use, `event_level` for a
+two-class outcome and `eval_time` for a censored-regression run scored
+at named times, are described on
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md);
+the second adds an `.eval_time` column to `.metrics` and to everything
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+reports.

@@ -53,7 +53,6 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
     <li><a class="dropdown-item" href="articles/parallel.html">Running the outer loop in parallel</a></li>
-    <li><a class="dropdown-item" href="articles/why-nest.html">Why nest: a simulation</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -78,8 +77,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Nested cross-validation for the tidymodels ecosystem.</p>
-<p>Start with <a href="https://nestedtune.tidymodels.org/articles/nested-cv.html">Nested cross-validation</a>, which walks from a nested design to a write-up. Then read <a href="https://nestedtune.tidymodels.org/articles/estimate.html">What the estimate means</a>: which quantity the nested number estimates, what to report instead of your model’s own score, and how to read disagreement between outer folds.</p>
+<p>nestedtune runs nested cross-validation for tidymodels workflows. It builds a nested resampling design, tunes each outer fold on its own inner resamples with tune or finetune, scores the fold’s winner on rows the tuning never saw, and keeps what every fold chose. The mean of the outer scores estimates how the whole tune-and-fit procedure performs on new data. The model to deploy is fitted afterwards by the same procedure on all the data, as a separate object with no performance number of its own.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -88,86 +86,31 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"tidymodels/nestedtune"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="building-a-nested-resampling-design">Building a nested resampling design<a class="anchor" aria-label="anchor" href="#building-a-nested-resampling-design"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p><code><a href="reference/nested_resamples.html">nested_resamples()</a></code> builds the same structure as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>: an outer resampling with an inner resampling attached to each outer fold, without keeping a copy of the data for every outer fold.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span>
 <span>  <span class="va">mtcars</span>,</span>
-<span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span>  outside <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  inside <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">folds</span><span class="op">$</span><span class="va">inner_resamples</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p>For the same seed and the same specifications the splits select the same rows as rsample’s: <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">analysis()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">assessment()</a></code> return identical frames, and each inner split carries the same class and resample id, so anything dispatching on those keeps working. What differs is what the splits point at: the original data rather than a materialized copy per outer fold.</p>
-</div>
-<div class="section level2">
-<h2 id="why">Why<a class="anchor" aria-label="anchor" href="#why"></a>
-</h2>
-<p><code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> evaluates the inner specification against <code>as.data.frame(split)</code>, so every outer fold’s inner resamples reference their own materialized copy of that fold’s analysis set. Object size therefore grows by roughly one copy of the data per outer fold (<a href="https://github.com/tidymodels/rsample/issues/283" class="external-link">rsample#283</a>).</p>
-<p><code><a href="reference/nested_resamples.html">nested_resamples()</a></code> evaluates the inner specification against the same frame, keeps only the row indices it produces, and remaps them onto the original data. Measured on <code><a href="https://rdrr.io/pkg/mlbench/man/LetterRecognition.html" class="external-link">mlbench::LetterRecognition</a></code> (20000 × 17) with a five-fold inner resampling, as multiples of the source data size:</p>
-<table class="table">
-<thead><tr>
-<th align="right">outer folds</th>
-<th align="right"><code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code></th>
-<th align="right"><code><a href="reference/nested_resamples.html">nested_resamples()</a></code></th>
-</tr></thead>
-<tbody>
-<tr>
-<td align="right">2</td>
-<td align="right">2.2×</td>
-<td align="right">1.2×</td>
-</tr>
-<tr>
-<td align="right">5</td>
-<td align="right">5.6×</td>
-<td align="right">1.7×</td>
-</tr>
-<tr>
-<td align="right">10</td>
-<td align="right">11.4×</td>
-<td align="right">2.6×</td>
-</tr>
-<tr>
-<td align="right">50</td>
-<td align="right">57.5×</td>
-<td align="right">10.0×</td>
-</tr>
-</tbody>
-</table>
-<p>What remains is the index vectors, which rsample stores too; the copies of the data are gone.</p>
-</div>
-<div class="section level2">
-<h2 id="running-the-nested-loop">Running the nested loop<a class="anchor" aria-label="anchor" href="#running-the-nested-loop"></a>
-</h2>
-<p><code><a href="reference/nested_tune_grid.html">nested_tune_grid()</a></code> tunes on each outer fold’s inner resamples, selects, fits on the outer analysis set, and scores on the outer assessment set, keeping what each fold chose. <code><a href="reference/nested_final_fit.html">nested_final_fit()</a></code> takes that result and runs the procedure it recorded once more with the whole dataset in hand, and gives back the model to deploy as its own object.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org" class="external-link">rsample</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/workflows" class="external-link">workflows</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow</a></span><span class="op">(</span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu">workflow</span><span class="op">(</span></span>
 <span>  <span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>,</span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
+<span>  <span class="fu">rand_forest</span><span class="op">(</span>mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>mtry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">5L</span>, <span class="fl">8L</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">10L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span>
-<span>  <span class="va">mtcars</span>,</span>
-<span>  outside <span class="op">=</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  inside <span class="op">=</span> <span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The estimate: what the whole tune-and-fit procedure achieves. Report this.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The estimate for the procedure. Report this.</span></span>
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 2 × 5</span></span>
 <span><span class="co">#&gt;   .metric .estimator  mean     n std_err</span></span>
@@ -175,7 +118,7 @@
 <span><span class="co">#&gt; 1 rmse    standard   2.46      5  0.445 </span></span>
 <span><span class="co">#&gt; 2 rsq     standard   0.844     5  0.0267</span></span>
 <span></span>
-<span><span class="co"># The model: what you deploy. It has no performance number of its own.</span></span>
+<span><span class="co"># The model to deploy, fitted by the same procedure on all the data.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nested_final_fit.html">nested_final_fit</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">res</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final</span>, new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -185,7 +128,19 @@
 <span><span class="co">#&gt; 1  20.9</span></span>
 <span><span class="co">#&gt; 2  20.9</span></span>
 <span><span class="co">#&gt; 3  23.8</span></span></code></pre></div>
-<p>What to write up is the subject of <a href="https://nestedtune.tidymodels.org/articles/nested-cv.html">the guide</a>. Why the estimate belongs to the procedure rather than to the model is the subject of <a href="https://nestedtune.tidymodels.org/articles/estimate.html">What the estimate means</a>.</p>
+<p>Learn more:</p>
+<ul>
+<li>
+<a href="https://nestedtune.tidymodels.org/articles/nested-cv.html">Nested cross-validation</a>, the path from a design to a write-up.</li>
+<li>
+<a href="https://nestedtune.tidymodels.org/articles/estimate.html">What the estimate means</a>, which quantity the nested number is and what it is not.</li>
+<li>
+<a href="https://nestedtune.tidymodels.org/articles/tuners.html">Choosing the inner tuner</a>, the Bayesian, racing and annealing searches and a set of workflows on one design.</li>
+<li>
+<a href="https://nestedtune.tidymodels.org/articles/results.html">Reading the results</a>, every column and reader of the results object.</li>
+<li>
+<a href="https://nestedtune.tidymodels.org/articles/parallel.html">Running the outer loop in parallel</a>, the same call on a pool of mirai daemons.</li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
