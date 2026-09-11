@@ -14,21 +14,23 @@ knitr::opts_chunk$set(
 )
 ```
 
-A model tuned by cross-validation comes with a score for the winning
-candidate, and that candidate was kept because it scored best, so the score
-overstates what the model will do on new data; `vignette("estimate")` makes
-the case for nesting and says what the nested number means.
+When you tune a model with cross-validation, you try several settings and
+keep the one with the best score. That score is optimistic. You picked the
+winner because it scored well, so some of its score is luck, and the same
+number will not hold up on new data. `vignette("estimate")` explains why in
+more detail.
 
-Nested cross-validation puts the whole tune-and-fit procedure inside an outer
-resampling loop. Each outer fold tunes on its own analysis rows, fits the
-winner there, and scores it once on assessment rows the tuning never saw. The
-mean of those outer scores is the estimate.
+Nested cross-validation fixes this by scoring the whole tuning procedure
+rather than the winner alone. It splits the data into outer folds. Within
+each outer fold it tunes using only the analysis rows, fits the winning
+setting on those rows, and scores that fit on the assessment rows, which the
+tuning never saw. The average of those outer scores is an honest estimate of
+how well tune-then-fit works on new data.
 
-The number `collect_metrics()` reports describes the whole tune-and-fit
-procedure: resample, tune, select, fit. That is the number to report. The
-model fitted at the end for deployment is a separate object, and it has no
-performance number of its own, because everything computable from its
-training data was used up in selecting and fitting it.
+That average is what `collect_metrics()` reports, and it is the number to put
+in a write-up. The model you fit at the end on all the data is a separate
+object. It has no score of its own, because every row it was trained on was
+already used to choose and fit it.
 
 This page walks from a design to a write-up. `vignette("results")` reads
 everything the results object holds, `vignette("tuners")` swaps in the other
