@@ -1,17 +1,16 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-11 (ninth pass, at M084's merge: M084 archived and its row set done, M80's row pruned to keep three terminal rows, one LESSONS line added and the M18 and M55 lessons pruned for the byte budget, the published-site and variance rows compressed for ROADMAP's, no lesson retired; both files within their line and byte caps.)_
+_Last hygiene check: 2026-09-11 (tenth pass, at M085's merge: M085 archived and its row set done, M81's row pruned to keep three terminal rows, one LESSONS line added and the M66 lesson pruned for the byte budget, no lesson retired; both files within their line and byte caps.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M84 | The guides and README read on one pass for a tune_grid user | done | — | high | milestones/archive/M084-guides-plain-prose.md |
-| M85 | The help pages read on one pass for a tune_grid user | review | M84 | high | milestones/M085-help-pages-plain-prose.md |
+| M85 | The help pages read on one pass for a tune_grid user | done | M84 | high | milestones/archive/M085-help-pages-plain-prose.md |
 | M83 | Every nested result records the workflow it ran under, and the final fit refuses any other | planned | — | normal | milestones/M083-final-fit-workflow-identity.md |
 | M82 | The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone | done | — | high | milestones/archive/M082-guides-readme-rewrite.md |
-| M81 | The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples | done | — | high | milestones/archive/M081-help-pages-rewrite.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
