@@ -243,6 +243,30 @@ evaluated \code{\link[rsample:manual_rset]{rsample::manual_rset()}}), where the 
 \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.
 }
 
+\section{Evaluation times}{
+
+
+\code{eval_time} reaches every tune call whose answer depends on it, so a
+dynamic or integrated survival metric (\code{brier_survival()},
+\code{roc_auc_survival()} and their relatives) is measured at the times you name.
+It is ignored, with a warning from tune, whenever the metric set has no
+metric that reads it; tune keys that warning on the metrics rather than on
+the model's mode.
+
+Refused here, ahead of tune: anything that is not numeric, an empty vector,
+and any element that is missing, negative or not finite. tune treats those
+unevenly and only once a metric reads the times, so this package refuses
+them all at entry, before a whole run is paid for. Zero, repeated times and
+times out of order are accepted and passed on untouched, since tune
+normalizes those itself; a repeated time draws tune's warning that 0
+inappropriate evaluation time points were removed, once per tune call.
+
+The selector \code{select} names is called without \code{eval_time}. Left unset it
+selects at the first of the evaluation times the tuning run was built with,
+which are the ones named here, so passing them again would change no choice
+and would repeat tune's message about which time it took.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

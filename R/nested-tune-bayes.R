@@ -20,6 +20,8 @@
 #' @param ... A control object from [tune::control_bayes()], as `control`,
 #'   and nothing else; every argument after `...` is matched by name. The
 #'   section on differences from tune says what becomes of each slot.
+#' @param iter The number of search iterations, a non-negative whole number;
+#'   the section on the iterations says what `0` does.
 #' @param initial The number of candidates each fold scores before the first
 #'   iteration, a whole number of at least 2; a `tune_results` object, which
 #'   tune also accepts here, is refused.
@@ -62,6 +64,7 @@
 #'
 #' @inheritSection nested_tune_grid Nested designs
 #' @inheritSection nested_tune_grid Finalizing a parameter range
+#' @inheritSection nested_tune_grid Evaluation times
 #'
 #' @template section-reproducibility
 #'

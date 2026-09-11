@@ -29,6 +29,10 @@
 #' @param event_level `"first"` (the default) or `"second"`, naming which
 #'   level of a two-class outcome is the event in the one tune call a fold
 #'   makes, the outer scoring fit.
+#' @param eval_time A numeric vector of evaluation times for a censored
+#'   regression model, or `NULL` (the default) to leave the choice to tune;
+#'   anything not numeric, an empty vector, or an element that is missing,
+#'   negative or not finite is refused at entry.
 #'
 #' @return A `nested_results` with one row per outer fold and the columns
 #'   [nested_tune_grid()] documents, three of them holding what no tuning

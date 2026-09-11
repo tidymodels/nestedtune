@@ -37,11 +37,12 @@
 #'
 #' @section When the folds searched different candidates:
 #'
-#' A grid given as a size is expanded once per fold, under that fold's own
-#' seed, so a continuous parameter leaves every fold with candidates of its
-#' own. Printing then adds a line giving each fold's candidate count, and only
-#' then. It matters for reading the selections: folds that disagreed were not
-#' choosing from the same menu.
+#' When two or more completed folds scored different candidate sets, printing
+#' adds a line giving each fold's candidate count, and only then. A grid given
+#' as a size is the usual cause: it is expanded once per fold, under that
+#' fold's own seed, so a continuous parameter leaves every fold with
+#' candidates of its own. It matters for reading the selections: folds that
+#' disagreed were not choosing from the same menu.
 #'
 #' @template example-setup
 #' @template example-run

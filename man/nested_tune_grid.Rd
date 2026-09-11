@@ -272,7 +272,8 @@ with the rule's orderings and limit.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
          normal.kind = "Inversion", sample.kind = "Rejection")
 tuned <- tune_grid(object, resamples$inner_resamples[[i]], grid = grid,
-                   metrics = metrics, eval_time = eval_time,
+                   param_info = param_info, metrics = metrics,
+                   eval_time = eval_time,
                    control = extract_procedure(res)$control)
 final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
 set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
@@ -286,6 +287,10 @@ The siblings differ only in the tuning line: \code{\link[tune:tune_bayes]{tune::
 \code{iter}, \code{initial} and \code{objective}, finetune's racers with \code{grid}, or
 \code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}} with \code{iter} and \code{initial}, each with the
 recorded control, and for \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} no tuning line at all.
+A Bayesian fold also gives that control the fold's tuning seed before the
+call, \code{control$seed <- res$.tuning_seed[[i]]}: \code{\link[tune:control_bayes]{tune::control_bayes()}}
+otherwise draws the seed for its Gaussian process proposals from the
+stream, and the recorded control carries none.
 }
 
 \section{When a fold fails}{
@@ -342,6 +347,9 @@ Each fold is sent one copy of the data, not one per inner split. A
 resampling split carries the whole frame it indexes, and serializing a fold
 for a daemon would not preserve the single shared copy the design holds, so
 each fold's splits are emptied before dispatch and refilled on the worker.
+On a \code{\link[=nested_resamples]{nested_resamples()}} design that is one copy per fold; a design from
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} holds an analysis frame per outer fold, so each fold
+also carries its own, still once rather than once per inner split.
 A recipe keeps a copy of the data it was created with, and a formula
 carries the environment it was written in, so a workflow built inside a
 function that holds a large object sends that object with every fold;

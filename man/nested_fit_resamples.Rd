@@ -37,7 +37,8 @@ makes, the outer scoring fit.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune;
-the section on evaluation times says what this package refuses.}
+anything not numeric, an empty vector, or an element that is missing,
+negative or not finite is refused at entry.}
 }
 \value{
 A \code{nested_results} with one row per outer fold and the columns

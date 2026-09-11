@@ -56,7 +56,7 @@ column named like a fold label column is refused with class
 
 They are the outer fit's, on each fold's assessment rows. On a v-fold outer
 design every row of the data therefore appears once per repeat; on a
-bootstrap or Monte Carlo design a row appears as often as it was held out.
+Monte Carlo design a row appears as often as it was held out.
 The inner tuning run's own predictions and extracts, which the same two
 control slots save inside tune, are not kept.
 }

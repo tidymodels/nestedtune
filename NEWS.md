@@ -5,10 +5,11 @@
   own; the orchestrator pages inherit the arguments they share with the
   tune, finetune and workflowsets function each wraps, or with
   `nested_tune_grid()` where that page already carries them, and the sibling
-  pages pull the nested-design section, and the finalization section where
-  it applies, in from `?nested_tune_grid` rather than restating them. The
-  example setup and the Reproducibility section each live once, in a
-  `man-roxygen/` template; the shared setup is written with `|>`, and every
+  pages that take the design pull the nested-design section, and those that
+  take `param_info` the finalization section, in from `?nested_tune_grid`
+  rather than restating them. The example setup and the orchestrators'
+  Reproducibility section each live once, in a `man-roxygen/` template; the
+  shared setup is written with `|>`, and every
   example runs under `R CMD check` instead of sitting in `\donttest{}`.
   `?nested_resamples` gains the memory table the README carries.
 
