@@ -1,6 +1,6 @@
 # M081: The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -77,6 +77,7 @@ Rewrite every help page so a tidymodels user meets one-sentence argument entries
 - 2026-09-10: `nested_tune_bayes`'s local `param_info` override dropped; the tag now inherits `nested_tune_grid`'s one-sentence entry pointing at the finalizing section, and the page's own refusal paragraph stays under the iterations section. `document()` regenerated the Rd; AC1, AC3 and AC5 report 0 hits; the four Rd-reading test files pass; only `#'` lines changed under `R/`.
 - 2026-09-10: re-audit: AC2 (full) — satisfied as written on the branch; five notes: the "no `@param` tag" clause quantifies over every tag while the check sentence names nine (repair: the check reads every tag); the inherited finalizing section on `nested_tune_bayes` agrees with the page's own iterations section only when read together (a page observation, put to the user); `...` versus "own signature", "or from `nested_tune_grid`" vacuous on that page, and the racing topic's two functions (harmless, rejected). Second line on AC2: the stop; the disposition goes to the user.
 - 2026-09-10: AC2 amended (Substantive, return gate + stop): the user chose the second reader's text with the check sentence widened to every `@param` tag, and keeping both finalizing sections on the bayes page. The clause now binds the nine names a topic takes in its own signature, defines a sentence, has each sibling pull in the section for each of `resamples` and `param_info` it takes, and bans requirement and finalization statements from every tag. Coverage unchanged (AC2 → T2, T3). Claim audit: the return's added lines are two semicolon joins and no new claim, so the earlier pass stands.
+- 2026-09-10: `devtools::check()` after the return's three roxygen edits: 0 errors, 0 warnings, 0 notes (7m18s); `document()` leaves the tree clean. Status set to review for the second pass.
 
 ## Decisions
 
