@@ -66,7 +66,10 @@ test_that("the six gating sweeps are clean over the real sources", {
     list(status = attr(out, "status"), lines = out)
   }
   # `system2()` runs from the working directory, and the script reads its
-  # page list relative to the package root
+  # page list relative to the package root. The `on.exit()` restores it on
+  # every exit, which matters under parallel files: a worker runs several
+  # files in one process, and `test-suite-hygiene.R` resolves `test_path()`
+  # against the working directory.
   old <- setwd(root)
   on.exit(setwd(old), add = TRUE)
 

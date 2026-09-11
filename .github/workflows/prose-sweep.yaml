@@ -3,7 +3,9 @@
 # sources, red on any hit. The same six invocations run locally from
 # tests/testthat/test-sweep-prose.R; under `R CMD check` that test skips,
 # because the built tarball carries no `benchmarks/`, so this workflow is the
-# leg that gates a PR opened without a local test run.
+# leg that runs on a PR opened without a local test run. No status check is
+# required by branch protection here; what stops a red run merging is the
+# merge clause in cairn/PROFILE.md (never merge red or pending CI).
 #
 # See the matching block in R-CMD-check.yaml; every copy of this list must stay
 # identical, which `.github/ci-usage.py` enforces by comparing each block it
@@ -41,8 +43,8 @@ jobs:
     # The script is base R with no package dependency, so the job is a
     # checkout, an R install and six short runs. The six invocations took
     # 1.4 s together on the maintainer's machine at 8b4c2eb (2026-09-11),
-    # and the whole job ran in 46 s on e5f7d40 (job of run 34653536495,
-    # 2026-09-11); 10 is a hang cap, not headroom.
+    # and the whole job ran in 46 s on e5f7d40 (job 103440877732 of run
+    # 34653536495, 2026-09-11); 10 is a hang cap, not headroom.
     timeout-minutes: 10
 
     steps:
@@ -51,20 +53,27 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
 
       # One step per mode, so a red run names the mode on the job summary.
+      # Every mode runs even after an earlier one hits, so one red run reports
+      # the whole extent; the job stays red because a failed step fails it.
       - name: Sentence length (pages)
         run: Rscript benchmarks/sweep-prose.R
 
       - name: Backtick spans (pages)
+        if: ${{ !cancelled() }}
         run: Rscript benchmarks/sweep-prose.R --spans
 
       - name: Plain clauses (pages)
+        if: ${{ !cancelled() }}
         run: Rscript benchmarks/sweep-prose.R --plain
 
       - name: Sentence length (roxygen)
+        if: ${{ !cancelled() }}
         run: Rscript benchmarks/sweep-prose.R --roxygen
 
       - name: Backtick spans (roxygen)
+        if: ${{ !cancelled() }}
         run: Rscript benchmarks/sweep-prose.R --roxygen --spans
 
       - name: Plain clauses (roxygen)
+        if: ${{ !cancelled() }}
         run: Rscript benchmarks/sweep-prose.R --roxygen --plain
