@@ -59,6 +59,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - 2026-09-11: T4 checkpoint, half done: `document()` regenerated 26 `man/*.Rd` and a second run produced no diff; NEWS bullet added; `#'` count 2727 (cap 2989); `devtools::check()` still running at this commit, its result to be logged before T4 is ticked.
 - 2026-09-11: first `devtools::check()` 0 errors, 0 warnings, 0 notes (6m51s), run on the tree at a316e35 plus `man/` and NEWS, before the four claim-audit edits; a second check at 578e6fd's tree is logged in the next line.
 - 2026-09-11: second `devtools::check()` at the head 0 errors, 0 warnings, 0 notes (6m36s); T4 done; all tasks checked; status set to review.
+- 2026-09-11: /milestone-review pass 1: AC1, AC2, AC4 verified at b328643; three-lens fan-out and the AC3 reader ran; fix-now edits landed at 06a319c; `devtools::check()` re-run at 06a319c 0 errors, 0 warnings, 0 notes (6m43s).
 
 ## Decisions
 
@@ -89,4 +90,4 @@ Reviewer findings (three lenses, ranked by each lens, every finding listed):
 - [O] diff-bug 8: ragged short lines inside four rewritten paragraphs. Rejected: no rendering effect, a style point.
 - [S] prior-PR-comments: no prior-review finding contradicted; the GitHub inline-comment probe found human comments, none on the touched files. Zero findings.
 
-Post-fix re-run at 06a319c: `document()` ran twice, the second writing nothing and `git status` empty. The three roxygen sweeps printed `clean`. The `#'` count is 2728 (cap 2989). The `devtools::check()` result is logged in the work log.
+Post-fix re-run at 06a319c: `document()` ran twice, the second writing nothing and `git status` empty. The three roxygen sweeps printed `clean`. The `#'` count is 2728 (cap 2989). `devtools::check()` at 06a319c: 0 errors, 0 warnings, 0 notes (6m43s).
