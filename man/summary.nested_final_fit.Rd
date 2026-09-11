@@ -19,40 +19,46 @@ error instead of leaving it silently ignored.}
 \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}}.}
 }
 \value{
-\code{summary()} returns an object of class \code{summary.nested_final_fit}: a list
-holding the tuning run's resampling label (\code{tuning_label}), the tuner that
-ran (\code{tuner}: \code{"tune_grid"}, \code{"tune_bayes"}, \code{"tune_race_anova"},
-\code{"tune_race_win_loss"}, \code{"tune_sim_anneal"} or \code{"fit_resamples"}), the
-number of candidates that run scored (\code{candidates}), the iterating tuners'
-counts (\code{initial} and \code{initial_requested}, \code{iterations_completed} and
-\code{iterations_requested}), the parameter values selection chose
-(\code{selection}), and an \code{estimate} component that is always \code{NULL}. Printing
-it is what most callers want; the components are there for a caller that
-needs a value rather than a line of text.
+\code{summary()} returns an object of class \code{summary.nested_final_fit}, a list
+with these components:
+\itemize{
+\item \code{tuning_label}, the tuning run's resampling label;
+\item \code{tuner}, the name of the tune or finetune function that ran, as
+\code{\link[=extract_procedure]{extract_procedure()}} records it;
+\item \code{candidates}, the number of parameter settings that run scored;
+\item \code{initial} and \code{initial_requested}, \code{iterations_completed} and
+\code{iterations_requested}, the iterating tuners' counts;
+\item \code{selection}, the parameter values selection chose;
+\item \code{estimate}, always \code{NULL}.
+}
+
+Printing it is what most callers want; the components are there for a
+caller that needs a value rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-Gives the pieces the print method renders as values: the full-data tuning
-run the selection came from, which search ran it and at what counts, how
-many candidates it scored, and which parameter values it chose.
+Gives the pieces the print method renders, as values. Those are the
+full-data tuning run the selection came from, which search ran it and at
+what counts, how many parameter settings it scored, and which values it
+chose.
 
 The \code{estimate} component is always \code{NULL}, and that is the point. The
 stored tuning run's metrics are selection-time quantities, so this object
 records the absence of a performance number rather than leaving the name
-out; see \code{\link[=nested_final_fit]{nested_final_fit()}} for the number to report instead.
+out. See \code{\link[=nested_final_fit]{nested_final_fit()}} for the number to report instead.
 }
 \section{Components that are absent}{
 
 
 The four counts are \code{NULL} on a grid or a racing fit, which iterate over
-nothing, and are carried rather than dropped for the reason \code{estimate} is.
-The scored figures are read from the candidate record and the requested
-ones from the procedure; a run whose candidate record cannot be derived
-reports its scored figures as zero rather than failing to print.
+nothing. They are carried rather than dropped, for the reason \code{estimate}
+is. The scored figures are read from the candidate record and the
+requested ones from the procedure. A run whose candidate record cannot be
+derived reports its scored figures as zero rather than failing to print.
 
-Where nothing was tuned there is no run to describe: \code{tuning_label} is
-\code{NULL}, \code{candidates} is \code{0}, and \code{selection} is empty.
+Where nothing was tuned there is no run to describe, so \code{tuning_label}
+is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty.
 }
 
 \examples{

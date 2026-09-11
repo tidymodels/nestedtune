@@ -27,10 +27,11 @@ model's performance and the nested estimate is.
 \section{The procedure line}{
 
 
-The line says what ran beside what was asked for. A grid search or a race
-is named with the number of candidates it scored. An iterating search is
-named with the initial candidates scored and requested and the iterations
-completed and requested, since it can score fewer initial candidates than
+The line names the procedure that ran, the tuner and its counts, beside
+what was asked for. A grid search or a race is named with the number of
+candidates, parameter settings, it scored. An iterating search is named
+with the initial candidates scored and requested and the iterations
+completed and requested. It can score fewer initial candidates than
 \code{initial} names and can stop short of \code{iter}.
 
 Where nothing was tuned the line reads "no tuning", the selection line

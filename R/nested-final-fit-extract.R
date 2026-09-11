@@ -24,8 +24,8 @@
 #' Extract the tuning run a final fit was selected from
 #'
 #' Returns the tuning result that [nested_final_fit()] chose its parameters
-#' from: the record of what selection saw when the procedure was re-run on the
-#' complete dataset.
+#' from. It is the record of what selection saw when the recorded procedure,
+#' tune, select and fit, was re-run on the complete dataset.
 #'
 #' @inheritParams print.nested_final_fit
 #'
@@ -37,7 +37,7 @@
 #'
 #' The returned object answers `collect_metrics()` and hands its metrics over
 #' unqualified. Each of them was computed on the resamples that chose the
-#' candidate it describes, which makes it a selection-time quantity,
+#' parameter setting it describes. That makes it a selection-time quantity,
 #' optimistically biased as a claim about the model this final fit produced.
 #'
 #' The nested estimate is the honest one, and [nested_final_fit()] says why.
@@ -85,24 +85,23 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
   x$tuning
 }
 
-#' Extract the candidates a final fit actually scored
+#' Extract the parameter settings a final fit actually scored
 #'
-#' Returns the candidate parameter settings [nested_final_fit()]'s tuning run
-#' evaluated. It is the full-data counterpart of the candidate set each outer
-#' fold's `.inner_metrics` table describes, derived the same way, so the two
-#' can be compared directly.
+#' Returns the candidates, the parameter settings [nested_final_fit()]'s
+#' tuning run evaluated. It is the full-data counterpart of the candidate
+#' set each outer fold's `.inner_metrics` table describes, derived the same
+#' way, so the two can be compared directly.
 #'
 #' @inheritParams print.nested_final_fit
 #' @return A tibble with one row per candidate scored, carrying one column per
 #'   tuned parameter plus tune's `.config` label, and `.iter` where the search
 #'   iterated. It is the distinct parameter rows of the run's
-#'   [tune::collect_metrics()] table: everything tune wrote per metric is
-#'   dropped (`.metric`, `.estimator`, `mean`, `n`, `std_err`, and
-#'   `.eval_time` where a dynamic survival metric was scored), so a candidate
-#'   has one row here however many evaluation times it was scored at. The
-#'   times and the scores are in `collect_metrics(extract_tune_results(x))`. A
-#'   fit that ran no tuning scored no candidate and is refused with condition
-#'   class `nestedtune_no_tuning_run`.
+#'   [tune::collect_metrics()] table, with everything tune wrote per metric
+#'   dropped. So a candidate has one row here however many evaluation times
+#'   it was scored at. The times and the scores are in
+#'   `collect_metrics(extract_tune_results(x))`. A fit that ran no tuning
+#'   scored no candidate and is refused with condition class
+#'   `nestedtune_no_tuning_run`.
 #'
 #' @section Scored, not asked for:
 #'

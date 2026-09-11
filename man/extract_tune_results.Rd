@@ -19,15 +19,15 @@ is refused with condition class \code{nestedtune_no_tuning_run}.
 }
 \description{
 Returns the tuning result that \code{\link[=nested_final_fit]{nested_final_fit()}} chose its parameters
-from: the record of what selection saw when the procedure was re-run on the
-complete dataset.
+from. It is the record of what selection saw when the recorded procedure,
+tune, select and fit, was re-run on the complete dataset.
 }
 \section{What its numbers are, and are not}{
 
 
 The returned object answers \code{collect_metrics()} and hands its metrics over
 unqualified. Each of them was computed on the resamples that chose the
-candidate it describes, which makes it a selection-time quantity,
+parameter setting it describes. That makes it a selection-time quantity,
 optimistically biased as a claim about the model this final fit produced.
 
 The nested estimate is the honest one, and \code{\link[=nested_final_fit]{nested_final_fit()}} says why.
