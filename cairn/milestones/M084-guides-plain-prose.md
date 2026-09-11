@@ -25,7 +25,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 
 - [x] AC1: No prose sentence on `vignettes/nested-cv.Rmd`, `estimate.Rmd`, `tuners.Rmd`, `results.Rmd`, `articles/parallel.Rmd` or `README.Rmd` exceeds 30 words. Prose is what is left after the YAML header (everything between the first two `^---$` lines), fenced chunks, HTML comment lines, heading lines and list-item lines (`^\s*[-*] `) are dropped and backtick spans and inline `r` spans are removed; `et al.`, `e.g.`, `i.e.` and `vs.` are joined before splitting at `.`, `?` or `!` followed by whitespace or end of text. Evidence: `Rscript benchmarks/sweep-prose.R` prints every hit as `file:line` and exits 0.
 - [x] AC2: On each of the six pages, each of the words `procedure`, `orchestrator` and `candidate` (whole word, any case, plural included) and, on `results.Rmd`, `reader` either does not appear in prose or first appears in a sentence that says what it names on that page. Evidence: the script's `--terms` mode prints each page's first occurrence per word as `file:line`, and each printed sentence is read.
-- [ ] AC3: Every prose paragraph of the six pages meets (a)-(e). Verified by a reader with no authorship of the text, given the standard and the six pages, reporting every paragraph it cannot follow on one read; the 30 paragraphs `surveys/M084-survey.md` lists are the minimum probe set, read first, and the reader's list is empty.
+- [ ] AC3: No prose paragraph of the six pages, the accepted intro of `nested-cv.Rmd` (lines 17-33) excepted as the standard itself, costs a fresh reader a third read, and none of the 30 paragraphs `cairn/surveys/M084-survey.md` lists is reported for clause (a), (b) or (c). A paragraph is a run of consecutive non-blank lines of AC1's prose, a list block counting as one; the survey identifies each of its 30 by quoted opening words and line as they stand at the branch head when the reader runs, refreshed in place after each rewrite. Evidence: a reader with no authorship of the text, given the standard and the six pages, reads the 30 first, then every other paragraph, reports its paragraph count per page, and reports every paragraph it cannot follow on one read with the clause it fails and whether a third read was needed; an entry silent on that counts as needing one, and the reader's own severity notes change nothing. Clauses (d) and (e) are decided by AC2 and AC1, not by this reader; every other reported paragraph is a review finding, not a failure of this criterion.
 - [x] AC4: M082's checks minus its "you" cap: over the AC1 prose `grep -nE -- '--|—|contract|invariant|rests on'` returns no hit; `Rscript benchmarks/sweep-vignette-idioms.R` exits 0; the word counts by `awk '/^```/{f=!f;next} !f' <file> | wc -w` are at most 1500 / 1400 / 1500 / 1500 / 700 / 350 in the AC1 file order; every heading is a noun phrase.
 - [x] AC5: `nested-cv.Rmd` and `estimate.Rmd` each keep one paragraph saying the estimate describes the tune-and-fit procedure, that it is the number to report, and that the final model has no performance number of its own (IP3's documentation obligation). (RB tripwire: ip-touching)
 - [x] AC6: `pkgdown::build_articles()` renders every page without error, a second `devtools::build_readme()` leaves `README.md` unchanged, and `devtools::check()` reports 0 errors, 0 warnings, 0 notes.
@@ -34,7 +34,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 
 - AC1 → T1, T2, T3, T4, T5, T6
 - AC2 → T1, T2, T3, T4, T5, T6
-- AC3 → T2, T3, T4, T5, T6, T7
+- AC3 → T2, T3, T4, T5, T6, T7, T9
 - AC4 → T2, T3, T4, T5, T6, T8
 - AC5 → T2, T3
 - AC6 → T8
@@ -47,8 +47,9 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 - [x] T4: Rewrite `results.Rmd`'s nine listed paragraphs (survey §2) and flagged sentences; "reader", "procedure" and "record" set up in the page's own terms before use.
 - [x] T5: Rewrite `tuners.Rmd`'s nine listed paragraphs (survey §3) and flagged sentences; "orchestrator" replaced or set up.
 - [x] T6: Rewrite `articles/parallel.Rmd`'s opening paragraph (survey §5) and `README.Rmd`'s opening paragraph; re-knit `README.md`.
-- [x] T7: Spawn the AC3 reader with the standard, the six pages and the survey list; fix every paragraph it reports; rerun until its list is empty; record each run's count in the work log.
+- [x] T7: Spawn the AC3 reader with the standard, the six pages and the survey list; fix every paragraph it reports; rerun until it passes AC3; record each run's count in the work log.
 - [x] T8: Run the AC1, AC2 and AC4 commands, `pkgdown::build_articles()`, `devtools::build_readme()` twice, `devtools::check()`; NEWS bullet.
+- [ ] T9: Refresh the survey's 30 entries to their current opening words and lines at the branch head; fix the pass-2 reader's 17 paragraphs, the README's "every step from resampling to the final fit" wording, and results' partial-run warning list; run the AC3 reader and fix what fails it.
 
 ## Work log
 
@@ -124,3 +125,7 @@ Independent review, pass 2, logged for triage at whichever gate comes next:
 
 Return 2: AC3 not verified; status back to in-progress. Defect returns on this milestone: 2. Nothing pushed, no PR.
 - 2026-09-11: review's return-2 chip chose narrowing AC3 by amendment at /milestone-implement, then fixing this pass's list, over holding AC3 as written, a Fable brief, or stopping; the brief stays offered per instance. The plan gate recorded no alternative for AC3, so the thrash rule's same-criterion clause routes to the amendment gate.
+- 2026-09-11: /milestone-implement resumed for the amendment. Mini gate adopted a narrowed AC3 (survey paragraphs and the mechanical clauses as hard failures, the rest logged) over holding it, keeping (a)/(b) as hard failures, or dropping the read-count rule; a second chip chose one reader over two.
+- 2026-09-11: re-audit: AC3 (full) — seven findings: the headline over-promised against the pass rule; the criterion bound the report rather than the pages; (d) and (e) judged twice by disagreeing instruments; "three reads" an unverifiable self-report with no rule for a missing count; the survey's line numbers stale; the survey path wrong; reader variance unbounded (settled at the chip: one reader). Six fixed in the wording, one settled.
+- 2026-09-11: re-audit: AC3 (full) — five findings on the revised wording: 11 of the survey's 30 quoted openings no longer on the pages (fix: refresh the survey in place before the run, T9); no paragraph-partition procedure (fix: defined in the text); "reported at all" collided with the (d)/(e) exemption (fix: "for clause (a), (b) or (c)"); the frozen intro inside the domain (fix: excepted); no severity floor (fix: the reader's own notes change nothing). Second re-audit line, so further churn goes to the user.
+- 2026-09-11: amendment: AC3 rewritten to the text the file now carries, shown verbatim at the gate; T7's loop condition edited to match; T9 added and mapped under AC3. Plan-owned body 53 lines.
