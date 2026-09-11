@@ -709,7 +709,7 @@ new_tbl <- function(cols) {
 #'   siblings.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
-#' @param ... Not used; must be empty. An argument passed here is an error
+#' @param ... Not used. It must be empty. An argument passed here is an error
 #'   rather than silently ignored.
 #'
 #' @return A tibble, described under What the two shapes hold.
@@ -735,8 +735,8 @@ new_tbl <- function(cols) {
 #'
 #' A run in which no fold completed is an error of class
 #' `nestedtune_no_completed_folds`, rather than a table of `NA`. It is the
-#' class [autoplot()][autoplot.nested_results], [agreement()] and
-#' [nested_final_fit()] refuse such an object with.
+#' class named in the refusal that [autoplot()][autoplot.nested_results],
+#' [agreement()] and [nested_final_fit()] give such an object.
 #'
 #' @section Reading `std_err`:
 #'
@@ -744,11 +744,11 @@ new_tbl <- function(cols) {
 #' deviation of the per-fold scores over the square root of how many there
 #' were. It measures the precision of that mean, not the fold-to-fold spread,
 #' which is larger by the same square-root factor. It is not a confidence
-#' interval, and one should not be built from it.
+#' interval, and you must not build one from it.
 #'
 #' You cannot get a valid standard error from the fold scores. That limit
 #' is the statistics', not this implementation's. Outer fold scores are not
-#' independent, since any two folds share most of their training rows. A
+#' independent, because any two folds share most of their training rows. A
 #' standard error computed as though they were can
 #' misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
 #' proved that no universally unbiased estimator of a k-fold estimate's

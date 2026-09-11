@@ -23,7 +23,7 @@ it. A workflow carrying a marker is refused at entry.}
 designs says what the design must hold.}
 
 \item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as
-\code{control}, and nothing else; every argument after \code{...} is matched by
+\code{control}, and nothing else. Every argument after \code{...} is matched by
 name. The section on differences from tune says what becomes of each
 slot.}
 
@@ -31,7 +31,7 @@ slot.}
 defaults for the model's mode. There is no inner run to select on, so
 the set's order carries no weight here.}
 
-\item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which
+\item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event in the one tune call a fold
 makes, the outer scoring fit.}
 
@@ -54,7 +54,7 @@ grid, parameter set or selection rule.
 \description{
 \code{nested_fit_resamples()} gives you the score of a workflow with nothing
 to tune on the same outer folds a tuned workflow scores on. It runs the
-outer loop of a nested design with the inner stage skipped, since there
+outer loop of a nested design with the inner stage skipped, because there
 is nothing to search. For each outer fold it fits the workflow on the
 fold's analysis set and scores it on the assessment set with
 \code{\link[tune:last_fit]{tune::last_fit()}}. It is \code{\link[=nested_tune_grid]{nested_tune_grid()}} with the inner tuner
@@ -64,16 +64,16 @@ reference for everything the orchestrators share.
 
 Use it for the baseline a tuned procedure is compared against. A plain
 \code{rset} of outer folds is what
-\code{\link[tune:fit_resamples]{tune::fit_resamples()}} already serves; what this function adds is the
+\code{\link[tune:fit_resamples]{tune::fit_resamples()}} already serves. What this function adds is the
 same nested design, so the two runs' folds are the same rows.
 }
 \section{One door for a fixed workflow, one for a tuned one}{
 
 
 A workflow that still carries a \code{\link[tune:tune]{tune::tune()}} marker is refused at
-entry with condition class \code{nestedtune_tuned_workflow}, naming the five
-orchestrators that tune. Each of those refuses a workflow with no
-marker, with class \code{nestedtune_untuned_workflow}, naming this one.
+entry with condition class \code{nestedtune_tuned_workflow}, which names the
+five orchestrators that tune. Each of those refuses a workflow with no
+marker, with class \code{nestedtune_untuned_workflow}, which names this one.
 
 The final fit ties the workflow to the record as well. The result
 records the identity of the workflow it ran under, and
@@ -99,7 +99,7 @@ every row, with no tuning run.
 \section{Reproducibility}{
 
 
-Seed the session before the call, as elsewhere in tidymodels; there is no
+Seed the session before the call, as elsewhere in tidymodels. There is no
 \code{seed} argument. On entry the function draws \code{2 * n} seeds in a single
 \code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
 outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
@@ -150,7 +150,7 @@ most under the last. The one tune call a fold makes here is the outer
 scoring fit, whose own control this package builds.
 
 \strong{Forced: \code{allow_par}.} The outer fit runs at \code{allow_par = FALSE}
-whatever the control carries, since parallelism belongs over the outer
+whatever the control carries, because parallelism belongs over the outer
 folds.
 
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
@@ -174,8 +174,8 @@ completed fold's fitted workflow. Here there is no inner run whose
 predictions and extracts are discarded. The outer fit's are the only
 ones, and they are still discarded on a run that did not ask.
 
-\strong{Not returned: none.} Nothing an inner run would have saved exists to be
-withheld.
+\strong{Not returned: none.} There is no inner run, so there is nothing to
+withhold.
 
 \strong{Inert: \code{verbose}, \code{pkgs}, \code{save_workflow}, \code{parallel_over},
 \code{backend_options}, \code{workflow_size}.} Each governs an inner tuning call
@@ -199,7 +199,7 @@ Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit
 of a fold's inner splits carry one data frame: either the outer split's
 own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
 as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
-may index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
+must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
 any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
 row the outer fold holds out.
 

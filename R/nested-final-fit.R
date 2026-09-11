@@ -17,9 +17,9 @@
 #' @description
 #' `nested_final_fit()` builds the model you deploy after a nested run. It
 #' runs the recorded procedure, tune, select and fit, once more with the
-#' whole dataset in hand. That means rebuilding the inner resamples on every
-#' row, tuning with the recorded tuner, selecting by the recorded
-#' [selection_rule()], and fitting the finalized workflow on all the data.
+#' whole dataset in hand. That means it rebuilds the inner resamples on every
+#' row, tunes with the recorded tuner, selects by the recorded
+#' [selection_rule()], and fits the finalized workflow on all the data.
 #'
 #' What comes back is the model to deploy. It carries no performance number
 #' of its own. The number to report is [collect_metrics()] on the results
@@ -32,11 +32,11 @@
 #' @param results The `nested_results` object from [nested_tune_grid()] or one
 #'   of its siblings whose estimate you will report for this model. Everything
 #'   the re-run needs is read from it.
-#' @param ... Not used; must be empty. Everything the re-run needs, the grid
+#' @param ... Not used. It must be empty. Everything the re-run needs, the grid
 #'   and the metrics included, now comes from `results`, so passing an
 #'   argument here is an error.
 #' @param id For a `nested_results_set` as `object`, the `wflow_id` of the
-#'   workflow to fit; `results` is then left missing. `NULL`, the default, for
+#'   workflow to fit. `results` is then left missing. `NULL`, the default, for
 #'   a plain workflow.
 #'
 #' @return An object of class `nested_final_fit`. Its elements are:
@@ -76,7 +76,7 @@
 #' you the record.
 #'
 #' A `param_info` parameter whose range is unknown until the data is seen
-#' is finalized here on the full data, since every row is this model's
+#' is finalized here on the full data, because every row is this model's
 #' training data. Each outer fold of the nested run finalized it on that
 #' fold's analysis rows alone, so this model's candidate range can be wider
 #' than any fold's.
@@ -114,7 +114,7 @@
 #' compared as written. A recipe is compared as its steps in order, with
 #' each step's selectors and settings. It does not distinguish a model
 #' argument given as a name from the same name bound to another value,
-#' since the argument is recorded as written. A recipe setting that is a
+#' because the argument is recorded as written. A recipe setting that is a
 #' function is compared as its body, so two functions with one body that
 #' close over different values are not distinguished either. It does not
 #' read case weights or a postprocessor, so a workflow that differs there
@@ -153,7 +153,7 @@
 #' biased as a claim about this model. `collect_metrics()` on `x$tuning`
 #' hands them over without saying so.
 #'
-#' Expect the nested estimate to run slightly pessimistic instead, since
+#' Expect the nested estimate to run slightly pessimistic instead, because
 #' each outer fold trained on its analysis rows alone. Varma and Simon
 #' (2006) measured a 4.2-point overshoot at n = 40, and Wilimitis and Walsh
 #' (2023) about 1 to 2 percent of AUROC on 41,121 records. That offset
@@ -170,7 +170,7 @@
 #'
 #' @section Reproducibility:
 #'
-#' Seed the session before the call; there is no `seed` argument. Two seeds
+#' Seed the session before the call. There is no `seed` argument. Two seeds
 #' are drawn on entry and applied with the generator kind pinned: the first
 #' builds the inner resamples and tunes, the second fits. Both are kept on
 #' the object, and the caller's generator state is put back on the way out.
@@ -225,9 +225,9 @@
 #' The whole recipe is `fit(object, data)` under the second seed.
 #'
 #' Building the resamples sits inside the first seed's scope rather than
-#' before it. Constructing an `rset` draws from the generator. A version
-#' that built them earlier would still be reproducible from the session
-#' seed, but no longer from the two seeds above.
+#' before it. Constructing an `rset` draws from the generator. Were they
+#' built earlier, the run reproduces from the session seed alone, not from
+#' the two seeds above.
 #'
 #' @section The inner specification is re-evaluated:
 #'

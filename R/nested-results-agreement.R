@@ -46,7 +46,7 @@
 #' under `NA` for it, in the same row as a fold that selected `NA`.
 #' [summary.nested_results()] tells the two apart. A workflow with nothing to
 #' tune gives columns `n` and `prop` and no rows. A parameter whose id is `n`
-#' or `prop` would collide with the counts and is an error.
+#' or `prop` collides with the counts and is an error.
 #'
 #' @template example-setup
 #' @template example-run

@@ -16,7 +16,7 @@ nested_resamples(data, outside, inside, ...)
 \code{vfold_cv(v = 5)}. It is evaluated once per outer fold, so an existing
 object is refused.}
 
-\item{...}{Not used; must be empty. The three arguments above are all
+\item{...}{Not used. It must be empty. The three arguments above are all
 required, so a mistyped fourth is an error here.}
 }
 \value{
@@ -58,7 +58,8 @@ What you save is one copy of the analysis set per outer fold.
 \code{as.data.frame(split)}, so every outer fold holds its own copy of that fold's
 analysis set. \code{nested_resamples()} runs the same specification against the
 same frame, keeps only the row indices it produces, and points them back at
-\code{data}. The index vectors remain, as they do in rsample; the copies are gone.
+\code{data}. The index vectors remain, as they do in rsample, but the copies are
+gone.
 
 Sizes below are multiples of the source data, measured on
 \code{mlbench::LetterRecognition} (20000 x 17) with five inner folds under

@@ -27,7 +27,7 @@
 #'   that failed on it (see
 #'   [`collect_extracts()`][collect_predictions.nested_results]).
 #' * `collect_selections()` stacks `.selected`: one row per completed fold. A
-#'   [nested_fit_resamples()] result gives no rows, since no fold selected
+#'   [nested_fit_resamples()] result gives no rows, because no fold selected
 #'   anything.
 #' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per
 #'   candidate, a parameter setting, and metric that a completed fold's
@@ -67,7 +67,7 @@
 #' The `.config` of a selection or an inner-metrics row is kept as the fold
 #' recorded it. It labels a candidate inside that one fold's tuning run. So
 #' a selected row's `.config` is found among the same fold's rows in
-#' `collect_inner_metrics()`. Since folds can search different candidates, it
+#' `collect_inner_metrics()`. Because folds can search different candidates, it
 #' identifies nothing across them, which is why [agreement()] leaves it out.
 #'
 #' @template example-setup
@@ -193,7 +193,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' @param x A `nested_results` run with a control that asked for the column.
 #'   See [collect_metrics.nested_results()] for what the object is.
-#' @param ... Not used; must be empty. tune's `summarize` and `parameters`
+#' @param ... Not used. It must be empty. tune's `summarize` and `parameters`
 #'   arguments are not offered here.
 #'
 #' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated

@@ -25,11 +25,11 @@
 #' means.
 #'
 #' @inheritParams collect_metrics.nested_results
-#' @param ... Not used; must be empty, so `n` and `width` must be given by
+#' @param ... Not used. It must be empty, so `n` and `width` must be given by
 #'   name in full.
 #' @param n Number of fold rows to show, passed to tibble's printing. `NULL`,
 #'   the default, leaves the choice to tibble and its `print_max` and
-#'   `print_min` options; `Inf` shows every fold.
+#'   `print_min` options. `Inf` shows every fold.
 #' @param width Width of the printed rows, passed to tibble's printing.
 #'   `NULL`, the default, uses the `width` option, and columns that do not fit
 #'   are named in the footer.
@@ -40,7 +40,7 @@
 #'
 #' Folds can score different candidate sets, the parameter settings each
 #' inner search tried. When two or more completed folds did, and only then,
-#' printing adds a line giving each fold's candidate count. A grid given as
+#' the print adds a line with each fold's candidate count. A grid given as
 #' a size is the usual cause. It is expanded once per fold, under that
 #' fold's own seed, so a continuous parameter leaves every fold with
 #' candidates of its own. It matters for reading the selections: folds that
@@ -137,21 +137,21 @@ print_failure_count <- function(x) {
 #' `summary()` returns an object of class `summary.nested_results`, a list
 #' holding:
 #'
-#' - the outer resampling scheme's label;
-#' - the requested and completed fold counts;
-#' - the failed folds, with the stage each failed at;
+#' - the outer resampling scheme's label
+#' - the requested and completed fold counts
+#' - the failed folds, with the stage each failed at
 #' - what the completed folds selected, and the candidates, the parameter
-#'   settings, each searched;
-#' - the metric estimates averaged over them.
+#'   settings, each searched
+#' - the metric estimates averaged over them
 #'
-#' Printing it is what most callers want; the components are there for one
+#' Printing it is what most callers want. The components are there for one
 #' that needs a number rather than a line of text.
 #'
 #' @section A run that did not finish:
 #'
 #' Summarizing a partly completed run warns and still returns the summary: the
 #' folds that ran are described, and the warning says the design asked for
-#' more. A run in which every fold failed behaves the same way, describing a
+#' more. A run in which every fold failed behaves the same way and describes a
 #' failed run rather than refusing to answer. That is where this differs from
 #' [collect_metrics()], which errors when no outer fold completed.
 #'

@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. Passing an argument here raises an
+\item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 }
 \value{
@@ -21,13 +21,13 @@ where this model's performance estimate comes from. It also names the
 accessors that reach what selection saw.
 
 No performance number appears. The stored tuning run has metrics, but
-selection consumed them; see \code{\link[=nested_final_fit]{nested_final_fit()}} for why they are not this
+selection consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why they are not this
 model's performance and the nested estimate is.
 }
 \section{The procedure line}{
 
 
-The line under the heading tells you what ran: the procedure, meaning
+The line under the heading tells you what ran: the procedure, which is
 the tuner and its counts. A grid search or a race is named with the number of
 candidates, parameter settings, it scored. An iterating search is named
 with the initial candidates scored and requested and the iterations

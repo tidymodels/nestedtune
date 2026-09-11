@@ -10,12 +10,12 @@
 \item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings.}
 
-\item{...}{Not used; must be empty, so \code{n} and \code{width} must be given by
+\item{...}{Not used. It must be empty, so \code{n} and \code{width} must be given by
 name in full.}
 
 \item{n}{Number of fold rows to show, passed to tibble's printing. \code{NULL},
 the default, leaves the choice to tibble and its \code{print_max} and
-\code{print_min} options; \code{Inf} shows every fold.}
+\code{print_min} options. \code{Inf} shows every fold.}
 
 \item{width}{Width of the printed rows, passed to tibble's printing.
 \code{NULL}, the default, uses the \code{width} option, and columns that do not fit
@@ -35,7 +35,7 @@ means.
 
 Folds can score different candidate sets, the parameter settings each
 inner search tried. When two or more completed folds did, and only then,
-printing adds a line giving each fold's candidate count. A grid given as
+the print adds a line with each fold's candidate count. A grid given as
 a size is the usual cause. It is expanded once per fold, under that
 fold's own seed, so a continuous parameter leaves every fold with
 candidates of its own. It matters for reading the selections: folds that

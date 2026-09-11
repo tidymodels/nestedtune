@@ -1,6 +1,6 @@
 #' @section Reproducibility:
 #'
-#' Seed the session before the call, as elsewhere in tidymodels; there is no
+#' Seed the session before the call, as elsewhere in tidymodels. There is no
 #' `seed` argument. On entry the function draws `2 * n` seeds in a single
 #' `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the number of
 #' outer folds. Fold `i` uses element `2 * i - 1` for its tuning step and

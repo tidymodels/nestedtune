@@ -9,13 +9,13 @@ extract_scored_candidates(x, ...)
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. Passing an argument here raises an
+\item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 }
 \value{
-A tibble with one row per candidate scored, carrying one column per
-tuned parameter plus tune's \code{.config} label, and \code{.iter} where the search
-iterated. It is the distinct parameter rows of the run's
+A tibble with one row per candidate scored. Each row has one column
+per tuned parameter plus tune's \code{.config} label, and \code{.iter} where the
+search iterated. It is the distinct parameter rows of the run's
 \code{\link[tune:collect_metrics]{tune::collect_metrics()}} table, with everything tune wrote per metric
 dropped. So a candidate has one row here however many evaluation times
 it was scored at. The times and the scores are in
@@ -32,9 +32,10 @@ the same way, so the two can be compared directly.
 \section{Scored, not asked for}{
 
 
-A \code{grid} given as a size is expanded by tune and may reach fewer candidates
-than the number requested. A candidate that failed everywhere scored
-nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of how the two records
+A \code{grid} given as a size is expanded by tune, and the expansion sometimes
+reaches fewer candidates than the number requested. A candidate that failed
+everywhere scored nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of
+how the two records
 diverge under \code{.inner_metrics}, and it holds here too.
 
 One pointer there does not carry over. A candidate that failed on every

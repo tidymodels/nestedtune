@@ -9,7 +9,7 @@
 #' workflow, and fits and scores it on the outer split. The grid page is
 #' the reference for everything the two share: the design, the seeds,
 #' failed folds, parallel execution and what an operation on the result
-#' may do.
+#' does.
 #'
 #' The estimate describes the whole search-and-fit procedure rather than
 #' any one model, and is reported for the procedure. The model to deploy
@@ -19,14 +19,14 @@
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
 #' @param ... A control object from [tune::control_bayes()], as `control`,
-#'   and nothing else; every argument after `...` is matched by name. The
+#'   and nothing else. Every argument after `...` is matched by name. The
 #'   section on differences from tune says what becomes of each slot.
-#' @param iter The number of search iterations, a non-negative whole number;
-#'   the section on the iterations says what `0` does.
+#' @param iter The number of search iterations, a non-negative whole number.
+#'   The section on the iterations says what `0` does.
 #' @param initial The number of candidates each fold scores before the first
-#'   iteration, a whole number of at least 2; a `tune_results` object, which
+#'   iteration, a whole number of at least 2. A `tune_results` object, which
 #'   tune also accepts here, is refused.
-#' @param objective An acquisition function from tune, deciding which
+#' @param objective An acquisition function from tune. It decides which
 #'   candidate the Gaussian process proposes next: [tune::exp_improve()] (the
 #'   default), [tune::prob_improve()] or [tune::conf_bound()].
 #'
@@ -46,13 +46,13 @@
 #' it with [tune::tune_grid()] under the fold's own tuning seed. A
 #' `tune_results` object is refused as `initial` because one tuning run
 #' cannot serve every outer fold: its candidates were scored on resamples
-#' that may hold a fold's assessment rows.
+#' that can hold a fold's assessment rows.
 #'
 #' Each iteration proposes one candidate and scores it on the fold's inner
 #' resamples. `iter = 0` scores the initial candidates and proposes
 #' nothing. The run is then [nested_tune_grid()] on the space-filling grid
 #' those candidates form. tune stops a fold's search early when no
-#' unscored candidate remains, saying so on the console. It also stops
+#' unscored candidate remains, and says so on the console. It also stops
 #' after ten consecutive iterations without improvement, its `no_improve`
 #' default, settable through the control. The fold then completes with the
 #' candidates scored so far, and nothing about the early stop reaches
@@ -84,29 +84,29 @@
 #' **Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls a
 #' fold makes, because parallelism belongs over the outer folds. `seed` is
 #' the slot that drives the Gaussian process's proposals. tune draws it
-#' from the stream when it is not given. Left alone, a fold's proposals
-#' would then depend on how much of the stream tune had consumed before
+#' from the stream when it is not given. Were the slot left alone, a fold's
+#' proposals depend on how much of the stream tune consumed before
 #' reaching it. Here the control is given the fold's own tuning seed, the number
 #' `.tuning_seed` reports, whatever the control carried.
 #'
 #' **Settable as its own argument: `event_level`.** The argument is the one
 #' place the level is set, as on the grid page. A control at tune's default
-#' takes it, and a control naming another level is refused at entry,
-#' naming both. `iter`, `initial` and `objective` are arguments of
+#' takes it, and a control naming another level is refused at entry, with
+#' a refusal that names both. `iter`, `initial` and `objective` are arguments of
 #' `tune_bayes()` rather than control slots, offered here as arguments and
 #' reaching it unchanged. So is `eval_time`.
 #'
 #' **Refused: none.** No slot is refused on its own. What is refused at
 #' entry is a control of another class, such as a `control_grid()` that
-#' tune itself would accept here, and the `event_level` conflict above.
+#' tune itself accepts here, and the `event_level` conflict above.
 #'
 #' **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
 #' `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
 #' `workflow_size`.** Each reaches `tune_bayes()` as given:
 #'
-#' - `no_improve` and `uncertain` govern each fold's search as they would a
-#'   direct call, so a fold may stop short of `iter`; its `.inner_metrics`
-#'   records how far it went.
+#' - `no_improve` and `uncertain` govern each fold's search as they do in a
+#'   direct call, so a fold sometimes stops short of `iter`. Its
+#'   `.inner_metrics` records how far it went.
 #' - `time_limit` stops a search by the clock. Two runs under the same seed
 #'   can then stop at different iterations on different machines, which is
 #'   outside what the seeds can promise.

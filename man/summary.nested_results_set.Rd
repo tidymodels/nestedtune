@@ -17,11 +17,11 @@
 \method{print}{summary.nested_results_set}(x, ...)
 }
 \arguments{
-\item{x, object}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}; for
+\item{x, object}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}. For
 the print method, the \code{summary.nested_results_set} that \code{summary()}
 returns.}
 
-\item{...}{Not used; must be empty, so an argument given here is an error
+\item{...}{Not used. It must be empty, so an argument given here is an error
 and not a silent no-op.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
@@ -118,7 +118,7 @@ workflow and fold counts. \code{summary()} names the folds and prints each
 workflow's count per metric.
 
 The two counts are separate. A workflow that ran whole can still be
-named by the second, since a completed fold can score \code{NA} on one metric
+named by the second, because a completed fold can score \code{NA} on one metric
 while scoring the others. A metric no completed fold scored is counted
 there while drawing no rule.
 }

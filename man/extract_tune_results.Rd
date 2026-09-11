@@ -9,12 +9,12 @@ extract_tune_results(x, ...)
 \arguments{
 \item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. Passing an argument here raises an
+\item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 }
 \value{
 The stored \code{tune_results} object, unchanged. It is tune's own
-object, so tune's generics apply to it directly; a fit that ran no tuning
+object, so tune's generics apply to it directly. A fit that ran no tuning
 is refused with condition class \code{nestedtune_no_tuning_run}.
 }
 \description{

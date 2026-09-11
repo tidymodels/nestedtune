@@ -13,7 +13,7 @@
 \item{x}{A \code{nested_results} run with a control that asked for the column.
 See \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}} for what the object is.}
 
-\item{...}{Not used; must be empty. tune's \code{summarize} and \code{parameters}
+\item{...}{Not used. It must be empty. tune's \code{summarize} and \code{parameters}
 arguments are not offered here.}
 }
 \value{

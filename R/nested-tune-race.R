@@ -19,14 +19,14 @@
 #' which races the same grid once more on all the data.
 #'
 #' @details
-#' Both functions need finetune installed; `nested_tune_race_anova()` also
+#' Both functions need finetune installed. `nested_tune_race_anova()` also
 #' needs lme4, which fits the ANOVA, and `nested_tune_race_win_loss()`
 #' BradleyTerry2, which fits the win/loss model. A missing package is refused
 #' at entry, before any fold runs.
 #'
 #' @inheritParams nested_tune_grid
 #' @param ... A control object from [finetune::control_race()], as
-#'   `control`, and nothing else; every argument after `...` is matched by
+#'   `control`, and nothing else. Every argument after `...` is matched by
 #'   name. The section on differences from finetune says what becomes of each
 #'   slot.
 #' @param grid A data frame of candidate parameter values, or a positive whole
@@ -57,8 +57,8 @@
 #' `randomize = TRUE`, finetune's default, the inner resamples are shuffled
 #' before the burn-in. So which resamples the burn-in uses, and with it
 #' which candidates are eliminated when, comes from the fold's tuning seed.
-#' On the parallel path every daemon's library must hold finetune, which
-#' the loop attaches in each daemon before the first fold is sent, warning
+#' On the parallel path every daemon's library must hold finetune. The loop
+#' attaches it in each daemon before the first fold is sent, and warns
 #' where it cannot.
 #'
 #' @inheritSection nested_tune_grid Nested designs
@@ -85,18 +85,20 @@
 #' **Settable as its own argument: `event_level`.** The argument is the one
 #' place the level is set, as on the grid page. A control at finetune's
 #' default takes it, and a control naming another level is refused at
-#' entry, naming both. `grid` and `eval_time` are the racing functions' own
+#' entry, with a refusal that names both. `grid` and `eval_time` are the
+#' racing functions' own
 #' arguments rather than control slots, offered here as arguments and
 #' reaching them unchanged.
 #'
 #' **Refused: none.** No slot is refused on its own. Three things are
 #' refused at entry. The first is a control of another class, such as a
-#' `control_grid()` that finetune itself would accept here. The second is
+#' `control_grid()` that finetune itself accepts here. The second is
 #' the `event_level` conflict above, and the third a `burn_in` no fold's
 #' inner design can meet. finetune refuses
 #' a race whose resample count is not greater than `burn_in`. This package
 #' refuses the whole call before any fold runs when any outer fold's inner
-#' `rset` would be refused, naming the count and the burn-in.
+#' `rset` meets that condition, and the refusal names the count and the
+#' burn-in.
 #' `control_race()` defaults `burn_in` to 3, so a design with three inner
 #' resamples needs `control = control_race(burn_in = 2)` or fewer.
 #'
@@ -105,13 +107,13 @@
 #' Each reaches the race as given:
 #'
 #' - `burn_in`, `alpha`, `num_ties` and `randomize` govern each fold's race
-#'   as they would a direct call. `burn_in` is how many resamples every
+#'   as they do in a direct call. `burn_in` is how many resamples every
 #'   candidate is scored on before elimination starts. `alpha` is the
 #'   significance level an elimination needs. `num_ties` is how many rounds
 #'   two tied survivors are given before one is dropped. `randomize` is
 #'   whether the resamples are shuffled first.
 #' - `verbose_elim` prints finetune's elimination log from a serial run,
-#'   once per fold, and from a mirai daemon where nothing shows it;
+#'   once per fold, and from a mirai daemon where nothing shows it.
 #'   `verbose` likewise.
 #' - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
 #'   describes, `parallel_over` included.
@@ -123,7 +125,7 @@
 #' **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
 #' outer fit as well as the race. The outer fit's predictions and extracts
 #' are kept as `.predictions` and `.extracts` in the shape the grid page
-#' describes; the race's own are still discarded.
+#' describes, and the race's own are still discarded.
 #'
 #' **Not returned: `save_workflow`.** It lands on the inner race result a
 #' fold record discards, so setting it costs the work and returns nothing.
@@ -131,7 +133,7 @@
 #' reachable.
 #'
 #' **Inert: `backend_options`.** Backend options with no parallel backend to
-#' reach, since `allow_par` is forced off.
+#' reach, because `allow_par` is forced off.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))

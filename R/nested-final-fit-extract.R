@@ -30,7 +30,7 @@
 #' @inheritParams print.nested_final_fit
 #'
 #' @return The stored `tune_results` object, unchanged. It is tune's own
-#'   object, so tune's generics apply to it directly; a fit that ran no tuning
+#'   object, so tune's generics apply to it directly. A fit that ran no tuning
 #'   is refused with condition class `nestedtune_no_tuning_run`.
 #'
 #' @section What its numbers are, and are not:
@@ -94,9 +94,9 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #' the same way, so the two can be compared directly.
 #'
 #' @inheritParams print.nested_final_fit
-#' @return A tibble with one row per candidate scored, carrying one column per
-#'   tuned parameter plus tune's `.config` label, and `.iter` where the search
-#'   iterated. It is the distinct parameter rows of the run's
+#' @return A tibble with one row per candidate scored. Each row has one column
+#'   per tuned parameter plus tune's `.config` label, and `.iter` where the
+#'   search iterated. It is the distinct parameter rows of the run's
 #'   [tune::collect_metrics()] table, with everything tune wrote per metric
 #'   dropped. So a candidate has one row here however many evaluation times
 #'   it was scored at. The times and the scores are in
@@ -106,9 +106,10 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'
 #' @section Scored, not asked for:
 #'
-#' A `grid` given as a size is expanded by tune and may reach fewer candidates
-#' than the number requested. A candidate that failed everywhere scored
-#' nothing. [nested_tune_grid()] gives the full account of how the two records
+#' A `grid` given as a size is expanded by tune, and the expansion sometimes
+#' reaches fewer candidates than the number requested. A candidate that failed
+#' everywhere scored nothing. [nested_tune_grid()] gives the full account of
+#' how the two records
 #' diverge under `.inner_metrics`, and it holds here too.
 #'
 #' One pointer there does not carry over. A candidate that failed on every

@@ -8,7 +8,7 @@ _Last hygiene check: 2026-09-11 (twelfth pass, M086 merged: M086 archived and it
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M86 | The guides and README pass the plain-English sweep | done | — | high | milestones/archive/M086-guides-plain-sweep.md |
-| M87 | The help pages pass the plain-English sweep | planned | M86 | high | milestones/M087-help-pages-plain-sweep.md |
+| M87 | The help pages pass the plain-English sweep | review | M86 | high | milestones/M087-help-pages-plain-sweep.md |
 | M88 | Prose that fails the sweep cannot merge | planned | M86, M87 | normal | milestones/M088-prose-sweep-gate.md |
 | M84 | The guides and README read on one pass for a tune_grid user | done | — | high | milestones/archive/M084-guides-plain-prose.md |
 | M85 | The help pages read on one pass for a tune_grid user | done | M84 | high | milestones/archive/M085-help-pages-plain-prose.md |

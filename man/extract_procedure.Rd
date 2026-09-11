@@ -10,7 +10,7 @@ extract_procedure(x, ...)
 \item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings, or a \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. Passing an argument here raises an
+\item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 }
 \value{
@@ -36,11 +36,11 @@ what the record describes.
 \code{tuner} names the tune or finetune function that ran, with that tuner's
 own arguments beside it:
 \itemize{
-\item \code{"tune_grid"}, with \code{grid};
-\item \code{"tune_race_anova"} or \code{"tune_race_win_loss"}, also with \code{grid};
-\item \code{"tune_bayes"}, with \code{iter}, \code{initial} and \code{objective};
-\item \code{"tune_sim_anneal"}, with \code{iter} and \code{initial};
-\item \code{"fit_resamples"}, for a run with nothing to tune, with none.
+\item \code{"tune_grid"}, with \code{grid}
+\item \code{"tune_race_anova"} or \code{"tune_race_win_loss"}, also with \code{grid}
+\item \code{"tune_bayes"}, with \code{iter}, \code{initial} and \code{objective}
+\item \code{"tune_sim_anneal"}, with \code{iter} and \code{initial}
+\item \code{"fit_resamples"}, for a run with nothing to tune, with none
 }
 
 \code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{param_info},
@@ -48,7 +48,7 @@ own arguments beside it:
 control object the run was given, or tune's default when none was, with
 the slots this package forces already applied. On a Bayesian result
 \code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info}
-and no \code{select}, since no parameter set was read and no rule applied.
+and no \code{select}, because no parameter set was read and no rule applied.
 See "Differences from calling tune directly" on each loop function's
 help page for what those slots are.
 

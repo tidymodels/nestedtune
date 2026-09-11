@@ -20,7 +20,7 @@ nested_tune_bayes(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused;
+for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused, and
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
@@ -28,11 +28,11 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 designs says what the design must hold.}
 
 \item{...}{A control object from \code{\link[tune:control_bayes]{tune::control_bayes()}}, as \code{control},
-and nothing else; every argument after \code{...} is matched by name. The
+and nothing else. Every argument after \code{...} is matched by name. The
 section on differences from tune says what becomes of each slot.}
 
-\item{iter}{The number of search iterations, a non-negative whole number;
-the section on the iterations says what \code{0} does.}
+\item{iter}{The number of search iterations, a non-negative whole number.
+The section on the iterations says what \code{0} does.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
 derive one from the workflow. The section on finalizing a parameter
@@ -42,15 +42,15 @@ range says where a range that depends on the data is finalized.}
 set of metrics.}
 
 \item{initial}{The number of candidates each fold scores before the first
-iteration, a whole number of at least 2; a \code{tune_results} object, which
+iteration, a whole number of at least 2. A \code{tune_results} object, which
 tune also accepts here, is refused.}
 
-\item{objective}{An acquisition function from tune, deciding which
+\item{objective}{An acquisition function from tune. It decides which
 candidate the Gaussian process proposes next: \code{\link[tune:exp_improve]{tune::exp_improve()}} (the
 default), \code{\link[tune:prob_improve]{tune::prob_improve()}} or \code{\link[tune:conf_bound]{tune::conf_bound()}}.}
 
-\item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which
-level of a two-class outcome is the event. It applies to the inner
+\item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
+level of a two-class outcome is the event, and applies to the inner
 tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
@@ -80,7 +80,7 @@ more, one at a time. It then selects by \code{select}, finalizes the
 workflow, and fits and scores it on the outer split. The grid page is
 the reference for everything the two share: the design, the seeds,
 failed folds, parallel execution and what an operation on the result
-may do.
+does.
 
 The estimate describes the whole search-and-fit procedure rather than
 any one model, and is reported for the procedure. The model to deploy
@@ -95,13 +95,13 @@ from the parameter ranges with \code{\link[dials:grid_space_filling]{dials::grid
 it with \code{\link[tune:tune_grid]{tune::tune_grid()}} under the fold's own tuning seed. A
 \code{tune_results} object is refused as \code{initial} because one tuning run
 cannot serve every outer fold: its candidates were scored on resamples
-that may hold a fold's assessment rows.
+that can hold a fold's assessment rows.
 
 Each iteration proposes one candidate and scores it on the fold's inner
 resamples. \code{iter = 0} scores the initial candidates and proposes
 nothing. The run is then \code{\link[=nested_tune_grid]{nested_tune_grid()}} on the space-filling grid
 those candidates form. tune stops a fold's search early when no
-unscored candidate remains, saying so on the console. It also stops
+unscored candidate remains, and says so on the console. It also stops
 after ten consecutive iterations without improvement, its \code{no_improve}
 default, settable through the control. The fold then completes with the
 candidates scored so far, and nothing about the early stop reaches
@@ -117,7 +117,7 @@ failure. Finalize the range on the data first.
 \section{Reproducibility}{
 
 
-Seed the session before the call, as elsewhere in tidymodels; there is no
+Seed the session before the call, as elsewhere in tidymodels. There is no
 \code{seed} argument. On entry the function draws \code{2 * n} seeds in a single
 \code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
 outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
@@ -153,29 +153,29 @@ package forces overwritten. The result records that effective control,
 \strong{Forced: \code{allow_par}, \code{seed}.} \code{allow_par = FALSE} on both tune calls a
 fold makes, because parallelism belongs over the outer folds. \code{seed} is
 the slot that drives the Gaussian process's proposals. tune draws it
-from the stream when it is not given. Left alone, a fold's proposals
-would then depend on how much of the stream tune had consumed before
+from the stream when it is not given. Were the slot left alone, a fold's
+proposals depend on how much of the stream tune consumed before
 reaching it. Here the control is given the fold's own tuning seed, the number
 \code{.tuning_seed} reports, whatever the control carried.
 
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
 place the level is set, as on the grid page. A control at tune's default
-takes it, and a control naming another level is refused at entry,
-naming both. \code{iter}, \code{initial} and \code{objective} are arguments of
+takes it, and a control naming another level is refused at entry, with
+a refusal that names both. \code{iter}, \code{initial} and \code{objective} are arguments of
 \code{tune_bayes()} rather than control slots, offered here as arguments and
 reaching it unchanged. So is \code{eval_time}.
 
 \strong{Refused: none.} No slot is refused on its own. What is refused at
 entry is a control of another class, such as a \code{control_grid()} that
-tune itself would accept here, and the \code{event_level} conflict above.
+tune itself accepts here, and the \code{event_level} conflict above.
 
 \strong{Passed through: \code{no_improve}, \code{uncertain}, \code{time_limit}, \code{verbose},
 \code{verbose_iter}, \code{save_gp_scoring}, \code{pkgs}, \code{parallel_over},
 \code{workflow_size}.} Each reaches \code{tune_bayes()} as given:
 \itemize{
-\item \code{no_improve} and \code{uncertain} govern each fold's search as they would a
-direct call, so a fold may stop short of \code{iter}; its \code{.inner_metrics}
-records how far it went.
+\item \code{no_improve} and \code{uncertain} govern each fold's search as they do in a
+direct call, so a fold sometimes stops short of \code{iter}. Its
+\code{.inner_metrics} records how far it went.
 \item \code{time_limit} stops a search by the clock. Two runs under the same seed
 can then stop at different iterations on different machines, which is
 outside what the seeds can promise.
@@ -215,7 +215,7 @@ Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit
 of a fold's inner splits carry one data frame: either the outer split's
 own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
 as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
-may index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
+must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
 any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
 row the outer fold holds out.
 
@@ -251,7 +251,7 @@ ambiguous. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the 
 dynamic or integrated survival metric, \code{brier_survival()},
 \code{roc_auc_survival()} and their relatives, is measured at the times you
 name. When the metric set has no metric that reads it, tune ignores it
-with a warning; tune keys that warning on the metrics, not on the
+with a warning. tune keys that warning on the metrics, not on the
 model's mode.
 
 Refused here, ahead of tune: anything that is not numeric, an empty
@@ -259,14 +259,14 @@ vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself. A repeated time draws
+untouched, because tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 
 The selection rule is applied without \code{eval_time}. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again would change no
-choice, and would repeat tune's message about which time it took.
+with, which are the ones named here. Passing them again changes no
+choice, and repeats tune's message about which time it took.
 }
 
 \examples{

@@ -50,8 +50,9 @@
 #'
 #' An ordering is a parameter name, wrapped in [dplyr::desc()] where a larger
 #' value is the simpler model. Each must be a bare name or a call, never a
-#' string or a number, which would order nothing. None may be named. That
-#' way a misspelled `limit` is refused instead of read as an ordering. Every name
+#' string or a number, which orders nothing. An ordering given a name is
+#' refused. That way a misspelled `limit` is refused instead of read as an
+#' ordering. Every name
 #' must be a parameter the workflow tunes, which the orchestrators check when
 #' the run starts.
 #'
