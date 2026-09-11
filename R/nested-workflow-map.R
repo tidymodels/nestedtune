@@ -44,7 +44,7 @@
 #'   kept as an attribute. It does not carry the `workflow_set` class, so
 #'   [workflowsets::rank_results()] and [tune::fit_best()] refuse it. A
 #'   ranking of the set's workflows by their nested estimates, and a fit of
-#'   the best, would be a selection the outer loop did not nest (see
+#'   the best, makes a selection the outer loop did not nest (see
 #'   `vignette("estimate")`).
 #'
 #' @section What the set answers:
@@ -80,11 +80,12 @@
 #' is where a `save_pred` or `extract` for the baseline goes.
 #'
 #' A name that the orchestrator `fn` names does not take is refused at
-#' entry, since a typo would otherwise be narrowed away for every workflow.
+#' entry, because narrowing otherwise drops a misspelled name for every
+#' workflow without a message.
 #' A name in a workflow's `option` entry that the orchestrator it routes to
 #' does not take is refused naming the workflow. Under
-#' `fn = "nested_fit_resamples"` every workflow must be fixed: one carrying
-#' a marker is refused at entry, naming it, as that orchestrator refuses
+#' `fn = "nested_fit_resamples"` every workflow must be fixed. One carrying
+#' a marker is refused at entry by name, as that orchestrator refuses
 #' it.
 #'
 #' @section Seeds:
@@ -112,7 +113,7 @@
 #' An error an
 #' orchestrator raises for one workflow is raised the same way, when that
 #' workflow's turn comes. A `grid` that names a parameter that workflow
-#' does not tune is one such error; a control of the wrong class is
+#' does not tune is one such error, and a control of the wrong class is
 #' another. The workflows before it have run by then. What is raised is
 #' the original condition
 #' object, with `Workflow "<id>": ` written in front of the first line of
@@ -126,8 +127,8 @@
 #' it holds, since each row's `nested_results` describes its own run whole.
 #' An operation keeps the class and the `fn` attribute when its result:
 #'
-#' - holds the three columns under those names, none repeated;
-#' - has at least one row, with no `wflow_id` repeated;
+#' - holds the three columns under those names, none repeated.
+#' - has at least one row, with no `wflow_id` repeated.
 #' - has each row's three values identical to the row of that id in the
 #'   operation's first data-frame argument.
 #'

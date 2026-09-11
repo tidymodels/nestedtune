@@ -13,7 +13,7 @@
 #'
 #' Use it for the baseline a tuned procedure is compared against. A plain
 #' `rset` of outer folds is what
-#' [tune::fit_resamples()] already serves; what this function adds is the
+#' [tune::fit_resamples()] already serves. What this function adds is the
 #' same nested design, so the two runs' folds are the same rows.
 #'
 #' @inheritParams nested_tune_grid
@@ -21,13 +21,13 @@
 #'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
 #'   it. A workflow carrying a marker is refused at entry.
 #' @param ... A control object from [tune::control_resamples()], as
-#'   `control`, and nothing else; every argument after `...` is matched by
+#'   `control`, and nothing else. Every argument after `...` is matched by
 #'   name. The section on differences from tune says what becomes of each
 #'   slot.
 #' @param metrics A [yardstick::metric_set()], or `NULL` to use tune's
 #'   defaults for the model's mode. There is no inner run to select on, so
 #'   the set's order carries no weight here.
-#' @param event_level `"first"` (the default) or `"second"`, naming which
+#' @param event_level `"first"` (the default) or `"second"`. It names which
 #'   level of a two-class outcome is the event in the one tune call a fold
 #'   makes, the outer scoring fit.
 #' @param eval_time A numeric vector of evaluation times for a censored
@@ -48,9 +48,9 @@
 #' @section One door for a fixed workflow, one for a tuned one:
 #'
 #' A workflow that still carries a [tune::tune()] marker is refused at
-#' entry with condition class `nestedtune_tuned_workflow`, naming the five
-#' orchestrators that tune. Each of those refuses a workflow with no
-#' marker, with class `nestedtune_untuned_workflow`, naming this one.
+#' entry with condition class `nestedtune_tuned_workflow`, which names the
+#' five orchestrators that tune. Each of those refuses a workflow with no
+#' marker, with class `nestedtune_untuned_workflow`, which names this one.
 #'
 #' The final fit ties the workflow to the record as well. The result
 #' records the identity of the workflow it ran under, and
@@ -124,8 +124,8 @@
 #' predictions and extracts are discarded. The outer fit's are the only
 #' ones, and they are still discarded on a run that did not ask.
 #'
-#' **Not returned: none.** Nothing an inner run would have saved exists to be
-#' withheld.
+#' **Not returned: none.** There is no inner run, so nothing it saves exists
+#' to be withheld.
 #'
 #' **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
 #' `backend_options`, `workflow_size`.** Each governs an inner tuning call

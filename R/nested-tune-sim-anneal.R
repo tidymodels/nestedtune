@@ -4,7 +4,7 @@
 #' `nested_tune_sim_anneal()` gives you an honest score for a model you
 #' tune with [finetune::tune_sim_anneal()]. It is [nested_tune_grid()] with
 #' the inner tuner swapped, and that page is the reference for everything
-#' the orchestrators share; [nested_tune_bayes()] is this function's
+#' the orchestrators share. [nested_tune_bayes()] is this function's
 #' nearest sibling. For each outer fold it scores `initial` candidates on
 #' that fold's inner resamples. Then for `iter` iterations it perturbs the
 #' current candidate, scores the perturbation, and keeps it or falls back
@@ -16,7 +16,7 @@
 #' which runs the recorded search once more on all the data.
 #'
 #' @details
-#' finetune must be installed; a missing package is refused at entry, before
+#' finetune must be installed. A missing package is refused at entry, before
 #' any fold runs.
 #'
 #' @inheritParams nested_tune_grid
@@ -24,10 +24,10 @@
 #' @param ... A control object from [finetune::control_sim_anneal()] as
 #'   `control` and nothing else, matched by name. The section on differences
 #'   from finetune says what becomes of each slot.
-#' @param iter The number of search iterations, a whole number of at least 1;
-#'   the section on the iterations says why `0` is refused.
+#' @param iter The number of search iterations, a whole number of at least 1.
+#'   The section on the iterations says why `0` is refused.
 #' @param initial The number of candidates each fold scores before the first
-#'   iteration, a whole number of at least 1 (finetune's default); a
+#'   iteration, a whole number of at least 1 (finetune's default). A
 #'   `tune_results` object, which finetune also accepts here, is refused.
 #'
 #' @return A `nested_results` shaped as [nested_tune_grid()] documents, one
@@ -62,8 +62,8 @@
 #' tuning seed, and each perturbation is drawn from the stream that seed
 #' started. [finetune::control_sim_anneal()] has no seed slot, so nothing
 #' is injected into the control. On the parallel path every daemon's
-#' library must hold finetune, which the loop attaches in each daemon
-#' before the first fold is sent, warning where it cannot.
+#' library must hold finetune. The loop attaches it in each daemon
+#' before the first fold is sent, and warns where it cannot.
 #'
 #' @inheritSection nested_tune_grid Nested designs
 #' @inheritSection nested_tune_grid Finalizing a parameter range
@@ -84,8 +84,8 @@
 #' falls under one of seven headings.
 #'
 #' **Forced: `allow_par`.** The inner search and the outer scoring fit both
-#' run at `allow_par = FALSE`, whatever the control carries; parallelism
-#' belongs over the outer folds.
+#' run at `allow_par = FALSE`, whatever the control carries, because
+#' parallelism belongs over the outer folds.
 #'
 #' **Settable as its own argument: `event_level`.** Set through the
 #' argument alone, as on the grid page. A control at finetune's default
@@ -96,7 +96,7 @@
 #'
 #' **Refused: none.** No slot is refused on its own. What is refused at
 #' entry is a control of another class, such as a `control_bayes()` that
-#' finetune itself would run under, and the `event_level` conflict above.
+#' finetune itself runs under, and the `event_level` conflict above.
 #'
 #' **Passed through: `no_improve`, `restart`, `radius`, `flip`,
 #' `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
@@ -106,7 +106,7 @@
 #' - `no_improve` and `restart` set when a search stops or restarts from
 #'   its best candidate. `radius` and `flip` set how far and how a
 #'   perturbation moves, and `cooling_coef` how the acceptance probability
-#'   cools. All five govern each fold's search as they would a direct call.
+#'   cools. All five govern each fold's search as they do in a direct call.
 #' - `time_limit` is a wall-clock stop, and a wall-clock stop makes the
 #'   candidate set depend on the machine. Two runs under the same seed can
 #'   stop at different iterations, which is outside what the seeds can
@@ -126,7 +126,7 @@
 #'
 #' **Kept from the outer fit: `save_pred`, `extract`.** Both reach the
 #' outer fit, whose predictions and extracts come back as `.predictions`
-#' and `.extracts`; the grid page has the shape. The inner search's are
+#' and `.extracts`, in the shape the grid page gives. The inner search's are
 #' still discarded.
 #'
 #' **Not returned: `save_workflow`, `save_history`.** `save_workflow` lands
