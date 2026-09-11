@@ -15,11 +15,12 @@ knitr::opts_chunk$set(
 ```
 
 Every tuning function in this package returns the same kind of object, a
-`nested_results`, and the getting-started guide, `vignette("nested-cv")`,
-reads the print, the summary, the estimate, the selections and both plots
-off it. This page reads the whole object: the columns one at a time, each
-of the readers on one result, what a run looks like when one outer fold
-fails, and which dplyr verbs keep the class and which shed it.
+`nested_results`. The getting-started guide, `vignette("nested-cv")`, prints
+it, summarizes it, and reads the estimate, the selections and both plots off
+it. This page reads the whole object. It goes through the columns one at a
+time, then the readers, the functions such as `collect_metrics()` that turn
+the columns into tables. It then shows what a run looks like when one outer
+fold fails, and which dplyr verbs keep the class and which shed it.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "ranger")
@@ -56,11 +57,12 @@ library(nestedtune)
 
 ## The run
 
-The design, the workflow and the grid are the guide's, unchanged: five outer
-folds of `mtcars`, five inner folds under each, and a random forest with two
-parameters marked for tuning. One thing is added: a control passed as
-`control` asks each fold's outer fit to keep its predictions, so this page
-can show that column and the reader that stacks it.
+The design, the workflow and the grid are the guide's, unchanged. There are
+five outer folds of `mtcars`, five inner folds under each, and a random
+forest with two parameters marked for tuning. One thing is added. A
+`control_grid()` with `save_pred = TRUE` asks each fold's outer fit to keep
+its predictions, so this page can show that column and the function that
+stacks it.
 
 ```{r design}
 set.seed(1)
@@ -135,7 +137,7 @@ res$.selected[[1]]
 
 `.inner_metrics` is the whole table the inner search scored, every candidate
 on every inner resample, averaged. It is what the fold's selection was made
-from; `collect_inner_metrics()` stacks it across folds, and
+from. `collect_inner_metrics()` stacks it across folds, and
 `vignette("tuners")` shows how its shape differs by search.
 
 ```{r inner-metrics}
@@ -164,10 +166,10 @@ drawn at entry and fixed by the fold's position in the design, as
 select(res, .tuning_seed, .outer_fit_seed)
 ```
 
-`.predictions` is there because the control asked for it: each completed
-fold's predictions on its assessment rows, as `tune::last_fit()` returns
-them, with `.row` naming the row of the data. A run under the default
-control has no such column, and a run whose control sets `extract` to a
+`.predictions` is there because the control asked for it. It holds each
+completed fold's predictions on its assessment rows, as `tune::last_fit()`
+returns them, with `.row` naming the row of the data. A run under the
+default control has no such column. A run whose control sets `extract` to a
 function has an `.extracts` column beside it, holding what that function
 returned for each fold's fitted workflow. A fold that failed holds `NULL`
 in either.
@@ -176,8 +178,11 @@ in either.
 res$.predictions[[1]]
 ```
 
-The description of the run itself rides on the object as attributes rather
-than columns; `extract_procedure()` returns the one that records what ran.
+The description of the run itself is stored on the object as attributes
+rather than columns. `extract_procedure()` returns the procedure, the record
+of what ran: which tuner, that tuner's own arguments such as the grid, and
+the control as it took effect. `nested_final_fit()` repeats that record on
+the whole dataset.
 
 ## The readers
 
@@ -198,11 +203,11 @@ collect_metrics(res)
 collect_metrics(res, summarize = FALSE)
 ```
 
-`collect_selections()` and `collect_inner_metrics()` stack `.selected` and
-`.inner_metrics` over the folds that completed, with the fold label beside
-each row, so what every fold chose and everything every fold scored are read
-as one table each. `collect_notes()`, further down, does the same for
-`.notes` over every fold.
+`collect_selections()` stacks `.selected` over the folds that completed,
+with the fold label beside each row, so what every fold chose is one table.
+`collect_inner_metrics()` does the same for `.inner_metrics`, so everything
+every fold scored is one table. `collect_notes()`, further down, does the
+same for `.notes` over every fold.
 
 ```{r collect-stacked}
 collect_selections(res)
@@ -211,10 +216,10 @@ collect_inner_metrics(res)
 ```
 
 `collect_predictions()` stacks `.predictions` the same way, one row per
-held-out row of every completed fold, which is where a plot of predicted
-against observed, or a per-observation loss, would start. It refuses a run
-that did not save them, naming the slot to set; `collect_extracts()` does
-the same for `.extracts`, one row per fold.
+held-out row of every completed fold. That table is where a plot of
+predicted against observed, or a per-observation loss, would start. It
+refuses a run that did not save predictions, naming the control slot to
+set. `collect_extracts()` does the same for `.extracts`, one row per fold.
 
 ```{r collect-predictions}
 collect_predictions(res)
@@ -272,11 +277,11 @@ failed <- nested_tune_grid(wf_checked, folds, grid = grid)
 failed
 ```
 
-The print counts the failure, `.completed` is `FALSE` for the fold that
+The print counts the failure. `.completed` is `FALSE` for the fold that
 failed, and its `.notes` say where. `collect_notes()` stacks every fold's
-`.notes` into one table with the fold label beside them; the first row for
-the failed fold is this package's own note, its `location` naming the stage,
-and the rows after it are tune's notes about the cause.
+`.notes` into one table with the fold label beside them. The first row for
+the failed fold is this package's own note, its `location` naming the
+stage. The rows after it are tune's notes about the cause.
 
 ```{r failed-notes}
 failed_id <- failed |>
@@ -288,25 +293,27 @@ collect_notes(failed) |>
   select(location, type, note)
 ```
 
-A fold can also complete and carry notes, when an inner resample failed but
-tuning still returned a candidate from the resamples that ran. `summary()`,
-`collect_metrics()`, `agreement()`, `collect_selections()` and
-`collect_inner_metrics()` answer on a run with a failed fold over the folds
-that completed, and warn once with class `nestedtune_partial_summary` saying
-how many the summary covers; `collect_notes()` reads every fold and warns
-about none; `autoplot()` leaves the failed fold's place on its axis empty. A
-run in which no fold completed is refused by those readers and by
-`nested_final_fit()`, except `summary()` and `collect_notes()`, because there
-is no estimate to report for a design that did not execute.
+A fold can also complete and still carry notes. That happens when an inner
+resample failed but tuning still returned a candidate from the resamples
+that ran.
+
+On a run with a failed fold, the readers answer over the folds that
+completed. `summary()`, `collect_metrics()`, `agreement()`,
+`collect_selections()` and `collect_inner_metrics()` each warn once, with
+class `nestedtune_partial_summary`, saying how many folds the answer covers.
+`collect_notes()` reads every fold and warns about none. `autoplot()` leaves
+the failed fold's place on its axis empty. A run in which no fold completed
+has no estimate to report, so those readers and `nested_final_fit()` refuse
+it. `summary()` and `collect_notes()` still answer on such a run.
 
 ## Subsetting with dplyr
 
-The object is a tibble, so dplyr's verbs work on it, and one rule decides
-what they hand back: a verb that only reorders the rows or adds or reorders
-columns returns a `nested_results`, and a verb that adds or removes a row, or
-drops or overwrites one of the columns above, returns a bare tibble, because
-an object that no longer holds what the run produced cannot answer for the
-run. Adding a column keeps the class.
+The object is a tibble, so dplyr's verbs work on it. One rule decides what
+they hand back. A verb that only reorders the rows, or adds or reorders
+columns, returns a `nested_results`. A verb that adds or removes a row, or
+drops or overwrites one of the columns above, returns a bare tibble. An
+object that no longer holds what the run produced cannot answer for the run.
+So adding a column keeps the class.
 
 ```{r dplyr-mutate}
 with_position <- mutate(res, position = row_number())
@@ -323,8 +330,8 @@ completed_only <- filter(failed, .completed)
 class(completed_only)
 ```
 
-So does a column subset that leaves the run's record behind, through base
-`[` rather than a dplyr verb, since the same rule governs it.
+So does a column subset that drops the columns the run wrote, here through
+base `[` rather than a dplyr verb, since the same rule governs it.
 
 ```{r subset}
 class(res[, "id"])
@@ -333,12 +340,12 @@ class(res[, "id"])
 Both of those hand back the data and nothing more: a plain tibble print, no
 summary of the run, no `collect_metrics()`. A table that has lost a fold, or
 lost the columns the run wrote, cannot describe itself as a five-fold
-design, so it stops describing itself. To read a partial run, read the run:
-`collect_metrics(failed)` already averages the folds that completed, and
-warns that it did.
+design, so it stops describing itself. To read a partial run, read the run
+itself: `collect_metrics(failed)` already averages the folds that completed,
+and warns that it did.
 
-Two arguments the runs on this page did not use, `event_level` for a
-two-class outcome and `eval_time` for a censored-regression run scored at
-named times, are described on `?nested_tune_grid`; the second adds an
-`.eval_time` column to `.metrics` and to everything `collect_metrics()`
-reports.
+Two arguments went unused on this page. `event_level` names which level of
+a two-class outcome is the event, and `eval_time` names the times at which
+a censored-regression run is scored. Both are described on
+`?nested_tune_grid`. The second adds an `.eval_time` column to `.metrics`
+and to everything `collect_metrics()` reports.
