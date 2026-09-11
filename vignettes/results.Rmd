@@ -319,11 +319,11 @@ still answer on such a run.
 ## Subsetting with dplyr
 
 The object is a tibble, so dplyr's verbs work on it. One rule decides what
-they hand back. A verb that only reorders the rows, or adds or reorders
-columns, returns a `nested_results`. A verb that adds or removes a row, or
-drops or overwrites one of the columns above, returns a bare tibble. An
-object that no longer holds what the run produced cannot answer for the run.
-So adding a column keeps the class.
+they hand back: an object that no longer holds what the run produced cannot
+answer for the run. So a verb that only reorders the rows, or adds or
+reorders columns, returns a `nested_results`. A verb that adds or removes a
+row, or drops or overwrites one of the columns above, returns a bare
+tibble. Adding a column, as below, keeps the class.
 
 ```{r dplyr-mutate}
 with_position <- mutate(res, position = row_number())

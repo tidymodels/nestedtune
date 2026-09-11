@@ -25,9 +25,7 @@ When you tune with cross-validation, you try several settings, the
 candidates, and keep the one with the best score. Scores are noisy, and the
 best of several noisy numbers tends to look better than it is. So the
 winner's score overstates what the model will do on new data, by an amount
-nothing in the output reveals. That is why the results object this package
-returns, and the final fit built from it, both refuse tune's ranking
-functions such as `show_best()`.
+nothing in the output reveals.
 
 At a small sample size the noise is large, so the winner's score may not
 even look better than an honest one. Distrust it for how it was chosen,
@@ -49,8 +47,8 @@ was used up in selecting and fitting it.
 ## The quantity estimated
 
 Take the four steps, resample, tune, select, fit, as one procedure. The
-number is its error when run on each fold's training rows and scored on
-fresh data. Bayle et al. (2026) call that the k-fold test error of the
+number `collect_metrics()` reports is that procedure's error when run on
+each fold's training rows and scored on fresh data. Bayle et al. (2026) call that the k-fold test error of the
 procedure.
 
 Four things it is not. First, it is not the error of the deployed model,
@@ -59,9 +57,9 @@ Second, it is not a verdict on that model's parameter values. Third, it is
 not about more rows or other data, since it ran on this training set alone.
 Fourth, it is not that error averaged over every training set you might
 have drawn, which would describe the method rather than this data. Luo and
-Barber (2026) prove
-that any assumption-free test of that averaged quantity needs a dataset
-many times larger than the training set. So this package offers none.
+Barber (2026) prove that any assumption-free test of that method-level
+quantity needs a dataset many times larger than the training set. So this
+package offers none.
 
 ## A slight pessimism
 
@@ -100,14 +98,16 @@ valid interval to subtract. Bayle et al. (2026) give a sharper reason. A
 cross-validation interval for one procedure is valid when that procedure is
 stable. Stable means that changing one training row shifts its errors by
 little, compared with how spread out those errors are. Two procedures can
-each be stable while their difference is not. The difference is what needs
-the interval, and that failure is worst when the two are similar. A gap
-between two nested estimates is a reason to look closer, never a result.
+each be stable while their difference is not, and the difference is what
+the interval would have to cover. Its instability is worst when the two
+procedures are similar. A gap between two nested estimates is a reason to
+look closer, never a result.
 
 The same holds for a set of workflows run through one design with
-`nested_workflow_map()`. Picking the workflow with the best estimate is a
-selection step the outer loop did not nest. So the package offers no
-ranking or best-workflow function for the set.
+`nested_workflow_map()`. Choosing the workflow with the best estimate is
+itself a selection, made on the same scores, and no outer loop scored that
+choice. So the package offers no ranking or best-workflow function for the
+set.
 
 ## Disagreement between folds
 
@@ -126,11 +126,11 @@ Whether nesting pays depends on how much room the selection step had to
 overfit. Tibshirani and Tibshirani (2009) measured that room on pure noise,
 where the true error rate is 0.5. With 400 observations and 100 features,
 the tuned score was under 3 points too good. With 40 observations and 1000
-features, the lowest tuned score read 0.384, 11.6 points too good. Even
-there the learner mattered: an SVM was 2.5 points too good and a tree only
-0.2. That paper's remedy is
-a correction, not nesting. In short, the bias is largest with wide data, a
-big grid, and a preprocessing step the loop has to redo.
+features, the best tuned score read 0.384, which is 11.6 points below the
+true 0.5. Even there the learner mattered: an SVM was 2.5 points too good
+and a tree only 0.2. In short, the bias is largest with wide data, a big
+grid, and a preprocessing step the loop has to redo. That paper's remedy is
+a correction, not nesting.
 
 Nesting removes little when the data is tall and the search is small. Wilimitis
 and Walsh (2023) ran that case, 41,121 visits and a modest grid. Nesting

@@ -136,10 +136,11 @@ The print notes that the folds did not search the same grid. Each fold
 scored the same number of candidates, but not the same ones, because each
 fold proposes candidates from its own scores. With a grid, every fold picks
 from the same list, so you can count how many folds chose each candidate.
-Here no two folds saw the same list, and the note says so. The guide
-multiplied outer folds by inner resamples by grid rows to count fits. Here
-the same count uses `initial + iter` candidates per fold in place of the
-grid's rows.
+Here no two folds saw the same list, and the note says so.
+
+The guide multiplied outer folds by inner resamples by grid rows to count
+fits. Here the same count uses `initial + iter` candidates per fold in
+place of the grid's rows.
 
 `.inner_metrics` holds what the search inside one fold saw. Here is the
 first fold's:
