@@ -52,7 +52,7 @@
 #' A control reaches each workflow of a set through the call's `...` or through
 #' its own `option` entry, so one workflow can have kept what another did not.
 #' `collect_predictions()` and `collect_extracts()` therefore refuse a set in
-#' which a workflow that contributes rows lacks the column. The refusal
+#' which a workflow with completed folds lacks the column. The refusal
 #' has class `nestedtune_column_not_saved` and names the workflow.
 #'
 #' An element's table that already has a `wflow_id` column, a parameter given

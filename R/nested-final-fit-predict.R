@@ -48,7 +48,7 @@
 #' for an interval. `eval_time` with `type = "survival"` is another. A name
 #' outside parsnip's own short list of predict arguments is refused by
 #' parsnip. A listed one the model cannot use for the `type` asked is passed
-#' on, and parsnip decides whether to ignore it.
+#' on, and whether it has any effect is parsnip's business, not this method's.
 #'
 #' `augment()` refuses the dots instead, and that refusal is the only one
 #' there is: workflows' own `augment()` method passes an unread argument on

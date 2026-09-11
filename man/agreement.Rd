@@ -10,7 +10,7 @@ agreement(x, ...)
 \item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
+\item{...}{Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.}
 }
 \value{
@@ -53,7 +53,7 @@ A completed fold whose selection carries no value for a parameter is counted
 under \code{NA} for it, in the same row as a fold that selected \code{NA}.
 \code{\link[=summary.nested_results]{summary.nested_results()}} tells the two apart. A workflow with nothing to
 tune gives columns \code{n} and \code{prop} and no rows. A parameter whose id is \code{n}
-or \code{prop} would collide with the counts and is an error.
+or \code{prop} collides with the counts and is an error.
 }
 
 \examples{

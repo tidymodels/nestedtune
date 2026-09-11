@@ -32,7 +32,7 @@ nested_tune_race_win_loss(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused;
+for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused, and
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
@@ -40,7 +40,7 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 designs says what the design must hold.}
 
 \item{...}{A control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as
-\code{control}, and nothing else; every argument after \code{...} is matched by
+\code{control}, and nothing else. Every argument after \code{...} is matched by
 name. The section on differences from finetune says what becomes of each
 slot.}
 
@@ -56,8 +56,8 @@ column.}
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
 
-\item{event_level}{\code{"first"} (the default) or \code{"second"}, naming which
-level of a two-class outcome is the event. It applies to the inner
+\item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
+level of a two-class outcome is the event, and applies to the inner
 tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
@@ -94,7 +94,7 @@ reported for it. The model to deploy comes from \code{\link[=nested_final_fit]{n
 which races the same grid once more on all the data.
 }
 \details{
-Both functions need finetune installed; \code{nested_tune_race_anova()} also
+Both functions need finetune installed. \code{nested_tune_race_anova()} also
 needs lme4, which fits the ANOVA, and \code{nested_tune_race_win_loss()}
 BradleyTerry2, which fits the win/loss model. A missing package is refused
 at entry, before any fold runs.
@@ -116,15 +116,15 @@ A race draws from the generator even with a deterministic engine. With
 \code{randomize = TRUE}, finetune's default, the inner resamples are shuffled
 before the burn-in. So which resamples the burn-in uses, and with it
 which candidates are eliminated when, comes from the fold's tuning seed.
-On the parallel path every daemon's library must hold finetune, which
-the loop attaches in each daemon before the first fold is sent, warning
+On the parallel path every daemon's library must hold finetune. The loop
+attaches it in each daemon before the first fold is sent, and warns
 where it cannot.
 }
 
 \section{Reproducibility}{
 
 
-Seed the session before the call, as elsewhere in tidymodels; there is no
+Seed the session before the call, as elsewhere in tidymodels. There is no
 \code{seed} argument. On entry the function draws \code{2 * n} seeds in a single
 \code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
 outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
@@ -164,18 +164,20 @@ parallelism belongs over the outer folds.
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, naming both. \code{grid} and \code{eval_time} are the racing functions' own
+entry, with a refusal that names both. \code{grid} and \code{eval_time} are the
+racing functions' own
 arguments rather than control slots, offered here as arguments and
 reaching them unchanged.
 
 \strong{Refused: none.} No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
-\code{control_grid()} that finetune itself would accept here. The second is
+\code{control_grid()} that finetune itself accepts here. The second is
 the \code{event_level} conflict above, and the third a \code{burn_in} no fold's
 inner design can meet. finetune refuses
 a race whose resample count is not greater than \code{burn_in}. This package
-refuses the whole call before any fold runs when any outer fold's inner
-\code{rset} would be refused, naming the count and the burn-in.
+refuses the whole call before any fold runs when finetune refuses any
+outer fold's inner \code{rset}, and the refusal names the count and the
+burn-in.
 \code{control_race()} defaults \code{burn_in} to 3, so a design with three inner
 resamples needs \code{control = control_race(burn_in = 2)} or fewer.
 
@@ -184,13 +186,13 @@ resamples needs \code{control = control_race(burn_in = 2)} or fewer.
 Each reaches the race as given:
 \itemize{
 \item \code{burn_in}, \code{alpha}, \code{num_ties} and \code{randomize} govern each fold's race
-as they would a direct call. \code{burn_in} is how many resamples every
+as they do in a direct call. \code{burn_in} is how many resamples every
 candidate is scored on before elimination starts. \code{alpha} is the
 significance level an elimination needs. \code{num_ties} is how many rounds
 two tied survivors are given before one is dropped. \code{randomize} is
 whether the resamples are shuffled first.
 \item \code{verbose_elim} prints finetune's elimination log from a serial run,
-once per fold, and from a mirai daemon where nothing shows it;
+once per fold, and from a mirai daemon where nothing shows it.
 \code{verbose} likewise.
 \item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
 describes, \code{parallel_over} included.
@@ -203,7 +205,7 @@ the \verb{>= 1.0.1} floor this package declares does not require it.
 \strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
 outer fit as well as the race. The outer fit's predictions and extracts
 are kept as \code{.predictions} and \code{.extracts} in the shape the grid page
-describes; the race's own are still discarded.
+describes, and the race's own are still discarded.
 
 \strong{Not returned: \code{save_workflow}.} It lands on the inner race result a
 fold record discards, so setting it costs the work and returns nothing.
@@ -228,7 +230,7 @@ Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit
 of a fold's inner splits carry one data frame: either the outer split's
 own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
 as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
-may index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
+must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
 any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
 row the outer fold holds out.
 
@@ -264,7 +266,7 @@ ambiguous. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the 
 dynamic or integrated survival metric, \code{brier_survival()},
 \code{roc_auc_survival()} and their relatives, is measured at the times you
 name. When the metric set has no metric that reads it, tune ignores it
-with a warning; tune keys that warning on the metrics, not on the
+with a warning. tune keys that warning on the metrics, not on the
 model's mode.
 
 Refused here, ahead of tune: anything that is not numeric, an empty
@@ -278,8 +280,8 @@ once per tune call.
 
 The selection rule is applied without \code{eval_time}. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again would change no
-choice, and would repeat tune's message about which time it took.
+with, which are the ones named here. Passing them again changes no
+choice, and repeats tune's message about which time it took.
 }
 
 \examples{

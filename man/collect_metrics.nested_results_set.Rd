@@ -24,7 +24,7 @@
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
 
-\item{...}{Not used; must be empty, so an argument given here is an error
+\item{...}{Not used. It must be empty, so an argument given here is an error
 and not a silent no-op.}
 
 \item{summarize}{Whether to average each workflow's per-fold metrics
@@ -72,7 +72,7 @@ notes are the reason to ask.
 A control reaches each workflow of a set through the call's \code{...} or through
 its own \code{option} entry, so one workflow can have kept what another did not.
 \code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
-which a workflow that would contribute rows lacks the column. The refusal
+which a workflow with completed folds lacks the column. The refusal
 has class \code{nestedtune_column_not_saved} and names the workflow.
 
 An element's table that already has a \code{wflow_id} column, a parameter given

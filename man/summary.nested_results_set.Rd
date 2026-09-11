@@ -17,11 +17,11 @@
 \method{print}{summary.nested_results_set}(x, ...)
 }
 \arguments{
-\item{x, object}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}; for
+\item{x, object}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}. For
 the print method, the \code{summary.nested_results_set} that \code{summary()}
 returns.}
 
-\item{...}{Not used; must be empty, so an argument given here is an error
+\item{...}{Not used. It must be empty, so an argument given here is an error
 and not a silent no-op.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or

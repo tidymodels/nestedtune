@@ -16,12 +16,12 @@ anything is fitted.}
 of its siblings whose estimate you will report for this model. Everything
 the re-run needs is read from it.}
 
-\item{...}{Not used; must be empty. Everything the re-run needs, the grid
+\item{...}{Not used. It must be empty. Everything the re-run needs, the grid
 and the metrics included, now comes from \code{results}, so passing an
 argument here is an error.}
 
 \item{id}{For a \code{nested_results_set} as \code{object}, the \code{wflow_id} of the
-workflow to fit; \code{results} is then left missing. \code{NULL}, the default, for
+workflow to fit. \code{results} is then left missing. \code{NULL}, the default, for
 a plain workflow.}
 }
 \value{
@@ -44,9 +44,9 @@ says no tuning ran.
 \description{
 \code{nested_final_fit()} builds the model you deploy after a nested run. It
 runs the recorded procedure, tune, select and fit, once more with the
-whole dataset in hand. That means rebuilding the inner resamples on every
-row, tuning with the recorded tuner, selecting by the recorded
-\code{\link[=selection_rule]{selection_rule()}}, and fitting the finalized workflow on all the data.
+whole dataset in hand. That means it rebuilds the inner resamples on every
+row, tunes with the recorded tuner, selects by the recorded
+\code{\link[=selection_rule]{selection_rule()}}, and fits the finalized workflow on all the data.
 
 What comes back is the model to deploy. It carries no performance number
 of its own. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results
@@ -177,7 +177,7 @@ If the outer folds disagreed about the best parameters, report that too.
 \section{Reproducibility}{
 
 
-Seed the session before the call; there is no \code{seed} argument. Two seeds
+Seed the session before the call. There is no \code{seed} argument. Two seeds
 are drawn on entry and applied with the generator kind pinned: the first
 builds the inner resamples and tunes, the second fits. Both are kept on
 the object, and the caller's generator state is put back on the way out.
@@ -232,8 +232,8 @@ The whole recipe is \code{fit(object, data)} under the second seed.
 
 Building the resamples sits inside the first seed's scope rather than
 before it. Constructing an \code{rset} draws from the generator. A version
-that built them earlier would still be reproducible from the session
-seed, but no longer from the two seeds above.
+that built them earlier stays reproducible from the session seed, but
+not from the two seeds above.
 }
 
 \section{The inner specification is re-evaluated}{

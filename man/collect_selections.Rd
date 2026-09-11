@@ -22,7 +22,7 @@ collect_inner_metrics(x, ...)
 \item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
+\item{...}{Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.}
 }
 \value{

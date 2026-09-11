@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
 
-\item{...}{Not used; must be empty.}
+\item{...}{Not used. It must be empty.}
 }
 \value{
 \code{x}, unchanged and invisible.

@@ -19,8 +19,8 @@
 \code{"survival"}, with the workflow's default when left unset.}
 
 \item{...}{For \code{predict()}, further arguments for the model's predict
-method, passed on through the workflow. For \code{augment()}, not used; must
-be empty.}
+method, passed on through the workflow. For \code{augment()}, not used. It
+must be empty.}
 
 \item{eval_time}{For censored regression, the time or times at which to
 evaluate survival probabilities, passed to the workflow's \code{augment()}
@@ -45,7 +45,7 @@ extracting it first. Each returns what the same call on
 for an interval. \code{eval_time} with \code{type = "survival"} is another. A name
 outside parsnip's own short list of predict arguments is refused by
 parsnip. A listed one the model cannot use for the \code{type} asked is passed
-on and may be ignored.
+on, and whether it has any effect is parsnip's business, not this method's.
 
 \code{augment()} refuses the dots instead, and that refusal is the only one
 there is: workflows' own \code{augment()} method passes an unread argument on
@@ -58,7 +58,7 @@ to parsnip, which ignores it.
 Augmenting the rows this model was fit on gives in-sample residuals. They
 say how the model fits data it has already seen, not how it does on data it
 has not. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results object
-the fit was built from; see \code{\link[=nested_final_fit]{nested_final_fit()}} for why this model has no
+the fit was built from. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why this model has no
 number of its own.
 }
 

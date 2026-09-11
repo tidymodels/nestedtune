@@ -13,7 +13,7 @@
 \item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings.}
 
-\item{...}{Not used; must be empty. An argument passed here is an error
+\item{...}{Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.}
 
 \item{x}{A \code{summary.nested_results} object from \code{\link[=summary.nested_results]{summary.nested_results()}}.}
@@ -22,15 +22,15 @@ rather than silently ignored.}
 \code{summary()} returns an object of class \code{summary.nested_results}, a list
 holding:
 \itemize{
-\item the outer resampling scheme's label;
-\item the requested and completed fold counts;
-\item the failed folds, with the stage each failed at;
+\item the outer resampling scheme's label
+\item the requested and completed fold counts
+\item the failed folds, with the stage each failed at
 \item what the completed folds selected, and the candidates, the parameter
-settings, each searched;
-\item the metric estimates averaged over them.
+settings, each searched
+\item the metric estimates averaged over them
 }
 
-Printing it is what most callers want; the components are there for one
+Printing it is what most callers want. The components are there for one
 that needs a number rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.
@@ -51,7 +51,7 @@ that, so the summary marks it.
 
 Summarizing a partly completed run warns and still returns the summary: the
 folds that ran are described, and the warning says the design asked for
-more. A run in which every fold failed behaves the same way, describing a
+more. A run in which every fold failed behaves the same way and describes a
 failed run rather than refusing to answer. That is where this differs from
 \code{\link[=collect_metrics]{collect_metrics()}}, which errors when no outer fold completed.
 }

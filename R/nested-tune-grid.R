@@ -262,7 +262,8 @@
 #' candidate has failed, and the outer fit does not raise at all: it hands
 #' back a result with no metrics. Both are recorded as failures here. A fold
 #' can also complete and carry notes. When only some of a fold's inner
-#' resamples fail, the run still returns a candidate and the fold completes.
+#' resamples fail, the inner tuning still returns a candidate and the fold
+#' completes.
 #' It finished on less of the inner design than was asked for, and the
 #' notes say so.
 #'

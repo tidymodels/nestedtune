@@ -11,7 +11,7 @@
 
 \item{id}{The \code{wflow_id} of the workflow to return, one of \code{x$wflow_id}.}
 
-\item{...}{Not used; must be empty.}
+\item{...}{Not used. It must be empty.}
 }
 \value{
 The workflow, untrained, as the set held it. An \code{id} naming no

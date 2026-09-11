@@ -12,7 +12,7 @@
 \arguments{
 \item{object}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used; must be empty. Passing an argument here raises an
+\item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 
 \item{x}{A \code{summary.nested_final_fit} object from
@@ -22,17 +22,17 @@ error instead of leaving it silently ignored.}
 \code{summary()} returns an object of class \code{summary.nested_final_fit}, a list
 with these components:
 \itemize{
-\item \code{tuning_label}, the tuning run's resampling label;
+\item \code{tuning_label}, the tuning run's resampling label
 \item \code{tuner}, the name of the tune or finetune function that ran, as
-\code{\link[=extract_procedure]{extract_procedure()}} records it;
-\item \code{candidates}, the number of parameter settings that run scored;
+\code{\link[=extract_procedure]{extract_procedure()}} records it
+\item \code{candidates}, the number of parameter settings that run scored
 \item \code{initial} and \code{initial_requested}, \code{iterations_completed} and
-\code{iterations_requested}, the iterating tuners' counts;
-\item \code{selection}, the parameter values selection chose;
-\item \code{estimate}, always \code{NULL}.
+\code{iterations_requested}, the iterating tuners' counts
+\item \code{selection}, the parameter values selection chose
+\item \code{estimate}, always \code{NULL}
 }
 
-Printing it is what most callers want; the components are there for a
+Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.

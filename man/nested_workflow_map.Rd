@@ -30,7 +30,7 @@ set's id, \code{workflow} the workflow as the set held it, and \code{result} its
 kept as an attribute. It does not carry the \code{workflow_set} class, so
 \code{\link[workflowsets:rank_results]{workflowsets::rank_results()}} and \code{\link[tune:fit_best]{tune::fit_best()}} refuse it. A
 ranking of the set's workflows by their nested estimates, and a fit of
-the best, would be a selection the outer loop did not nest (see
+the best, makes a selection the outer loop did not nest (see
 \code{vignette("estimate")}).
 }
 \description{
@@ -85,11 +85,12 @@ there does not take the \code{control} in \code{...}. It runs under tune's defau
 is where a \code{save_pred} or \code{extract} for the baseline goes.
 
 A name that the orchestrator \code{fn} names does not take is refused at
-entry, since a typo would otherwise be narrowed away for every workflow.
+entry, because narrowing otherwise drops a misspelled name for every
+workflow without a message.
 A name in a workflow's \code{option} entry that the orchestrator it routes to
 does not take is refused naming the workflow. Under
-\code{fn = "nested_fit_resamples"} every workflow must be fixed: one carrying
-a marker is refused at entry, naming it, as that orchestrator refuses
+\code{fn = "nested_fit_resamples"} every workflow must be fixed. One carrying
+a marker is refused at entry by name, as that orchestrator refuses
 it.
 }
 
@@ -121,7 +122,7 @@ reading function still learns which workflow lost folds.
 An error an
 orchestrator raises for one workflow is raised the same way, when that
 workflow's turn comes. A \code{grid} that names a parameter that workflow
-does not tune is one such error; a control of the wrong class is
+does not tune is one such error, and a control of the wrong class is
 another. The workflows before it have run by then. What is raised is
 the original condition
 object, with \verb{Workflow "<id>": } written in front of the first line of
@@ -137,8 +138,8 @@ You can take a subset of the set and it still answers for the workflows
 it holds, since each row's \code{nested_results} describes its own run whole.
 An operation keeps the class and the \code{fn} attribute when its result:
 \itemize{
-\item holds the three columns under those names, none repeated;
-\item has at least one row, with no \code{wflow_id} repeated;
+\item holds the three columns under those names, none repeated.
+\item has at least one row, with no \code{wflow_id} repeated.
 \item has each row's three values identical to the row of that id in the
 operation's first data-frame argument.
 }

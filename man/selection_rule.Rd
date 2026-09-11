@@ -49,7 +49,7 @@ stays under \code{limit} percent, as \code{\link[tune:select_by_pct_loss]{tune::
 
 An ordering is a parameter name, wrapped in \code{\link[dplyr:desc]{dplyr::desc()}} where a larger
 value is the simpler model. Each must be a bare name or a call, never a
-string or a number, which would order nothing. None may be named. That
+string or a number, which orders nothing. A named one is refused. That
 way a misspelled \code{limit} is refused instead of read as an ordering. Every name
 must be a parameter the workflow tunes, which the orchestrators check when
 the run starts.
