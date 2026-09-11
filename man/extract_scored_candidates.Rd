@@ -2,7 +2,7 @@
 % Please edit documentation in R/nested-final-fit-extract.R
 \name{extract_scored_candidates}
 \alias{extract_scored_candidates}
-\title{Extract the candidates a final fit actually scored}
+\title{Extract the parameter settings a final fit actually scored}
 \usage{
 extract_scored_candidates(x, ...)
 }
@@ -16,25 +16,24 @@ error instead of leaving it silently ignored.}
 A tibble with one row per candidate scored, carrying one column per
 tuned parameter plus tune's \code{.config} label, and \code{.iter} where the search
 iterated. It is the distinct parameter rows of the run's
-\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table: everything tune wrote per metric is
-dropped (\code{.metric}, \code{.estimator}, \code{mean}, \code{n}, \code{std_err}, and
-\code{.eval_time} where a dynamic survival metric was scored), so a candidate
-has one row here however many evaluation times it was scored at. The
-times and the scores are in \code{collect_metrics(extract_tune_results(x))}. A
-fit that ran no tuning scored no candidate and is refused with condition
-class \code{nestedtune_no_tuning_run}.
+\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table, with everything tune wrote per metric
+dropped. So a candidate has one row here however many evaluation times
+it was scored at. The times and the scores are in
+\code{collect_metrics(extract_tune_results(x))}. A fit that ran no tuning
+scored no candidate and is refused with condition class
+\code{nestedtune_no_tuning_run}.
 }
 \description{
-Returns the candidate parameter settings \code{\link[=nested_final_fit]{nested_final_fit()}}'s tuning run
-evaluated. It is the full-data counterpart of the candidate set each outer
-fold's \code{.inner_metrics} table describes, derived the same way, so the two
-can be compared directly.
+Returns the candidates, the parameter settings \code{\link[=nested_final_fit]{nested_final_fit()}}'s
+tuning run evaluated. It is the full-data counterpart of the candidate
+set each outer fold's \code{.inner_metrics} table describes. It is derived
+the same way, so the two can be compared directly.
 }
 \section{Scored, not asked for}{
 
 
 A \code{grid} given as a size is expanded by tune and may reach fewer candidates
-than the number requested, and a candidate that failed everywhere scored
+than the number requested. A candidate that failed everywhere scored
 nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of how the two records
 diverge under \code{.inner_metrics}, and it holds here too.
 

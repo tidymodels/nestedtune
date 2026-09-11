@@ -15,8 +15,8 @@
 \item{new_data}{A data frame of new observations to predict.}
 
 \item{type, opts}{Passed to \code{\link[workflows:predict.workflow]{workflows::predict.workflow()}} unchanged.
-\code{type} selects the prediction type (\code{"numeric"}, \code{"class"}, \code{"prob"},
-\code{"survival"}, ...), with the workflow's default when \code{NULL}.}
+\code{type} selects the prediction type, such as \code{"numeric"}, \code{"prob"} or
+\code{"survival"}, with the workflow's default when left unset.}
 
 \item{...}{For \code{predict()}, further arguments for the model's predict
 method, passed on through the workflow. For \code{augment()}, not used; must
@@ -33,21 +33,23 @@ prediction columns followed by the columns of \code{new_data}, with a \code{.res
 column where the outcome is present and the model is a regression.
 }
 \description{
-\code{predict()} and \code{augment()} on a \code{nested_final_fit} are the trained
-workflow's own methods, reached without extracting it first: each returns
-what the same call on \code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
+You can call \code{predict()} and \code{augment()} on a \code{nested_final_fit}
+directly: they are the trained workflow's own methods, reached without
+extracting it first. Each returns what the same call on
+\code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
 }
 \section{What the dots accept}{
 
 
-\code{predict()} forwards them: \code{level} with \code{type = "conf_int"} for an
-interval, or \code{eval_time} with \code{type = "survival"}. A name outside parsnip's
-own short list of predict arguments is refused by parsnip, and a listed one
-the model cannot use for the \code{type} asked is passed on and may be ignored.
+\code{predict()} forwards them, for example \code{level} with \code{type = "conf_int"}
+for an interval. \code{eval_time} with \code{type = "survival"} is another. A name
+outside parsnip's own short list of predict arguments is refused by
+parsnip. A listed one the model cannot use for the \code{type} asked is passed
+on and may be ignored.
 
-\code{augment()} fences them instead. Workflows' own \code{augment()} method passes
-an unread argument on to parsnip, which ignores it, so refusing it here is
-the only way it is refused at all.
+\code{augment()} refuses the dots instead, and that refusal is the only one
+there is: workflows' own \code{augment()} method passes an unread argument on
+to parsnip, which ignores it.
 }
 
 \section{Residuals on the training rows are not performance}{

@@ -20,13 +20,15 @@ rather than silently ignored.}
 A \code{ggplot} object.
 }
 \description{
-Two views of a \code{nested_results}, both drawing one point per outer fold, with
-the folds in design order.
+\code{autoplot()} shows you whether the outer folds agreed, and how each
+scored: two views of a \code{nested_results}, both drawing one point per
+outer fold, with the folds in design order.
 
 \code{type = "parameters"}, the default, shows what each outer fold's inner
-tuning selected. A flat row of points means the folds agreed; points at
-different heights mean they disagreed, so the tuning procedure is unstable
-on this data, which averaging the metrics hides.
+tuning selected on a \code{\link[=nested_tune_grid]{nested_tune_grid()}} run or a sibling's. A flat row
+of points means the folds agreed. Points at different heights mean they
+disagreed, so the tuning procedure is unstable on this data, which
+averaging the metrics hides.
 
 \code{type = "performance"} shows each outer fold's score on its held-out
 assessment set, with a rule at the nested estimate, the value
@@ -44,22 +46,21 @@ A run in which no fold completed is refused with class
 \code{nestedtune_no_completed_folds}, as \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}} and
 \code{\link[=nested_final_fit]{nested_final_fit()}} refuse it. A run in which no completed fold selected a
 parameter, such as a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result, is refused under
-\code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}, while
+\code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}.
 \code{type = "performance"} draws it.
 }
 
 \section{What the labels say}{
 
 
-The subtitle gives how much of the requested design ran. How many folds
-stand behind a panel is said on the panel instead, since it varies between
-them: a panel reading \verb{mtry (2 of 3 chose)} or \verb{rmse (from 2 folds)} had
-fewer than the run completed, and an unqualified one had them all. A
-requested metric that no completed fold could score keeps an empty panel
-rather than disappearing.
+Panels can draw on different fold counts, so each panel says how many
+folds stand behind it, and the subtitle says how much of the requested
+design ran. A panel reading \verb{mtry (2 of 3 chose)} or \verb{rmse (from 2 folds)} had fewer than the run completed, and an unqualified one had
+them all. A requested metric that no completed fold could score keeps
+an empty panel rather than disappearing.
 
-The selected-value axis is numeric when every value drawn is a number and
-discrete otherwise, since one axis cannot be both and character-valued
+The selected-value axis is numeric when every value drawn is a number
+and discrete otherwise. One axis cannot be both, and character-valued
 parameters are ordinary. On that discrete axis a fold that selected \code{NA}
 draws a point at \code{NA} rather than no point.
 }

@@ -5,9 +5,9 @@
 #' `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the number of
 #' outer folds. Fold `i` uses element `2 * i - 1` for its tuning step and
 #' element `2 * i` for its outer fit, each applied with the generator kind
-#' pinned. A fold's seed depends on its position and not on the order the
-#' folds run in, so the same seed gives the same result serially and in
-#' parallel, at any number of daemons. The two seeds are kept on the result as
+#' pinned. A fold's seed depends on its position, not on the order the folds
+#' run in. So the same seed gives the same result serially and in parallel,
+#' at any number of daemons. The two seeds are kept on the result as
 #' `.tuning_seed` and `.outer_fit_seed`, and `?nested_tune_grid` shows how to
 #' reproduce one fold by hand from them.
 #'

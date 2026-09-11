@@ -7,8 +7,9 @@
 \title{nestedtune: Nested Cross-Validation for Tidymodels}
 \description{
 nestedtune runs nested cross-validation with tidymodels objects. The outer
-loop scores the whole tune-and-fit procedure on data that procedure never
-saw, and the inner tuning on each outer fold is done by tune and finetune.
+loop scores the whole procedure, tune, select and fit, on data that the
+procedure never saw. The inner tuning on each outer fold is done by tune
+and finetune.
 What this package adds is the loop, the seeds, and a result that keeps what
 every fold chose.
 }
@@ -18,7 +19,7 @@ inner resamples, without copying the data per fold.
 
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} run the outer
-loop with one of tune's or finetune's search methods inside;
+loop with one of tune's or finetune's search methods inside.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a workflow with nothing to tune on the same
 design, and \code{\link[=nested_workflow_map]{nested_workflow_map()}} runs a whole workflow set through it.
 

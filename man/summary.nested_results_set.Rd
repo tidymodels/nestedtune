@@ -28,55 +28,64 @@ and not a silent no-op.}
 \code{"performance"}, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.}
 }
 \value{
-\code{summary()} returns a \code{summary.nested_results_set}, \code{autoplot()} a \code{ggplot}
-object, and \code{agreement()} a tibble. The three sections below say what each
-one holds.
+\code{summary()} returns a \code{summary.nested_results_set} and \code{autoplot()} a
+\code{ggplot} object. \code{\link[=agreement]{agreement()}} returns a tibble. The three sections
+below say what each one holds.
 }
 \description{
-The three readers of one workflow's run also answer on a
-\code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns, keyed by
-\code{wflow_id}. \code{summary()} summarizes every workflow, \code{autoplot()} draws the
-two views of \code{\link[=autoplot.nested_results]{autoplot.nested_results()}} across them, and \code{\link[=agreement]{agreement()}}
-stacks each workflow's selection table under its id.
+The three ways of reading one workflow's run, \code{summary()}, \code{autoplot()}
+and \code{agreement()}, also answer on a \code{nested_results_set}, what
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} returns. Each is keyed by \code{wflow_id}.
+\code{summary()} summarizes every workflow, \code{autoplot()} draws the two views
+of \code{\link[=autoplot.nested_results]{autoplot.nested_results()}} across them, and \code{\link[=agreement]{agreement()}} stacks
+each workflow's selection table under its id.
 }
 \section{What \code{summary()} holds}{
 
 
 A list of one \code{\link[=summary.nested_results]{summary.nested_results()}} object per workflow, named by
-\code{wflow_id} in the set's order, each the summary of that workflow's run
-called alone, with the orchestrator's name as the list's \code{fn} attribute.
+\code{wflow_id} in the set's order. Each is the summary of that workflow's
+run called alone. The name of the loop function the set ran through is
+the list's \code{fn} attribute.
 
-Printing it shows the orchestrator and the workflow count, then one section
-per workflow holding that run's design, failed folds, selected parameters
-and estimate, and once at the end the note on what a nested estimate
-describes.
+Printing it shows that function's name and the workflow count, then one
+section per workflow. Each section holds that run's design, failed
+folds, selected parameters and estimate. The note on what a nested
+estimate describes is printed once, at the end.
 }
 
 \section{What \code{autoplot()} draws}{
 
 
-Under \code{type = "performance"} the workflows stand along the x axis inside one
-panel per metric, with one point per completed outer fold's score and a
-dashed rule at each workflow's nested estimate, the value
-\code{\link[=collect_metrics]{collect_metrics()}} reports for it on the set.
+Under \code{type = "performance"} the workflows stand along the x axis inside
+one panel per metric. Each panel has one point per completed outer
+fold's score and a dashed rule at each workflow's nested estimate, the
+value \code{\link[=collect_metrics]{collect_metrics()}} reports for it on the set.
 
 Under \code{type = "parameters"} there is one panel per workflow and tuned
-parameter, in the set's order, labelled by the id and then by the single
-view's label for that parameter, with the outer folds along the x axis. Each
-panel asks the single view's question of one workflow. The selected-value
-axis is decided over every workflow's values at once: numeric when all are
-numbers, discrete otherwise. A workflow with nothing to tune draws no panel.
+parameter, in the set's order, with the outer folds along the x axis.
+Each panel is the one-workflow view, \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}'s, for
+that workflow and parameter. It is labelled by the id and then by that
+view's label for the parameter, and asks that view's question of one
+workflow. The selected-value axis is decided over every workflow's values at
+once: numeric when all are numbers, discrete otherwise. A workflow with
+nothing to tune draws no panel.
 }
 
 \section{What \code{agreement()} returns}{
 
 
 \code{wflow_id}, then one column per parameter any workflow's completed fold
-selected, then \code{n} and \code{prop}, with each workflow's rows as \code{\link[=agreement]{agreement()}} on
-that run alone gives them, in the set's order. A column a workflow does not
-tune holds \code{NA} in its rows; within a workflow's rows \code{NA} keeps the meaning
-\code{\link[=agreement]{agreement()}} gives it, a fold that recorded no value. A workflow with
-nothing to tune contributes no row.
+selected, then \code{n} and \code{prop}. Each workflow's rows are as \code{\link[=agreement]{agreement()}}
+on that run alone gives them, in the set's order. A column a workflow
+does not tune holds \code{NA} in its rows. Within a workflow's rows \code{NA}
+keeps the meaning \code{\link[=agreement]{agreement()}} gives it, a fold that recorded no value.
+A workflow with nothing to tune contributes no row.
+
+A tuned parameter whose id is \code{wflow_id} cannot be tabulated beside the
+set's own column and is refused with class
+\code{nestedtune_collect_name_collision}. One whose id is \code{n} or \code{prop} is
+refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.
 }
 
 \section{Workflows that failed}{
@@ -84,37 +93,34 @@ nothing to tune contributes no row.
 
 The three follow the fold-state rules of the set's
 \link[=collect_metrics.nested_results_set]{collect_metrics()}. A workflow with
-some folds failed is read over the folds that ran, warned about once with
-class \code{nestedtune_partial_summary}.
+some folds failed is read over the folds that ran, warned about once
+with class \code{nestedtune_partial_summary}.
 
-A workflow in which no fold completed is still summarized by \code{summary()},
-which describes a failed run rather than refusing. The performance view
-keeps its slot on the x axis and draws nothing there, the parameters view
-draws no panel for it, and \code{agreement()} leaves it out, each warning once
-and naming it. A set in which no workflow completed a fold is refused by the
-plots and by \code{agreement()} with class \code{nestedtune_no_completed_folds}, and
-one in which no completed fold selected a parameter is refused under
-\code{type = "parameters"} with class \code{nestedtune_no_tuned_parameters}.
+A workflow in which no fold completed is still summarized by
+\code{summary()}, which describes a failed run rather than refusing. The
+performance view keeps its slot on the x axis and draws nothing there,
+and the parameters view draws no panel for it. \code{agreement()} leaves it
+out. Each warns once and names it. A set in which no workflow completed
+a fold is refused by the plots and by \code{agreement()} with class
+\code{nestedtune_no_completed_folds}. One in which no completed fold selected
+a parameter is refused under \code{type = "parameters"} with class
+\code{nestedtune_no_tuned_parameters}.
 }
 
 \section{Counting what contributed}{
 
 
-The performance view's subtitle gives the workflow and fold counts, then, on
-a line of its own and only when there is one to name, how many workflows did
-not complete every fold and how many averaged a metric over fewer folds than
-they completed. \code{summary()} names the folds and prints each workflow's count
-per metric.
+Two shortfall counts can appear under the subtitle, each on a line of
+its own and only when there is one to name. One is how many workflows
+did not complete every fold. The other is how many averaged a metric
+over fewer folds than they completed. The subtitle itself gives the
+workflow and fold counts. \code{summary()} names the folds and prints each
+workflow's count per metric.
 
-The two counts are separate. A workflow that ran whole can still be named by
-the second, since a completed fold can score \code{NA} on one metric while
-scoring the others, and a metric no completed fold scored is counted there
-while drawing no rule.
-
-A tuned parameter whose id is \code{wflow_id} cannot be tabulated beside the
-set's own column and is refused with class
-\code{nestedtune_collect_name_collision}; one whose id is \code{n} or \code{prop} is
-refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.
+The two counts are separate. A workflow that ran whole can still be
+named by the second, since a completed fold can score \code{NA} on one metric
+while scoring the others. A metric no completed fold scored is counted
+there while drawing no rule.
 }
 
 \examples{

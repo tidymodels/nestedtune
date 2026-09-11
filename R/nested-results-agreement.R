@@ -7,17 +7,20 @@
 # procedure's choices, and the final model's parameters come from
 # nested_final_fit() running the same procedure on the whole data (D-014).
 
-#' Tabulate how often each candidate was selected across the outer folds
+#' Tabulate how often each parameter setting was selected across the outer folds
 #'
 #' @description
-#' Each outer fold tunes on its own inner resamples and selects one candidate.
-#' `agreement()` counts those selections: one row per distinct combination of
-#' selected parameter values, most frequent first.
+#' `agreement()` tells you how often the outer folds agreed on what to
+#' select. Each outer fold tunes on its own inner resamples and selects one
+#' candidate, one parameter setting. `agreement()` counts those selections:
+#' one row per distinct combination of selected parameter values, most
+#' frequent first.
 #'
-#' The most frequent combination is not the final model's parameters. The folds
-#' say how stable the tuning procedure's choice is; the model to deploy comes
-#' from [nested_final_fit()], which runs the procedure once more on the whole
-#' dataset and selects for itself.
+#' The most frequent combination is not the final model's parameters. The
+#' tuning procedure is tune then select, and the folds say how stable its
+#' choice is. The model to deploy comes from [nested_final_fit()], which
+#' runs the procedure once more on the whole dataset and selects for
+#' itself.
 #'
 #' @inheritParams collect_metrics.nested_results
 #' @return A tibble with one column per parameter any completed fold selected,
@@ -27,20 +30,20 @@
 #'
 #' @section How the folds are counted:
 #'
-#' Every completed fold is counted once, so `sum(n)` is the number of completed
-#' folds whenever the table has rows. A run with some folds failed is tabulated
-#' over the rest, with a warning saying so, and a run in which none completed
-#' is an error of class `nestedtune_no_completed_folds`, as it is for
-#' [collect_metrics()], [autoplot()][autoplot.nested_results] and
+#' Failed folds are left out, so `sum(n)` counts the completed folds whenever
+#' the table has rows, each counted once. A run with some folds failed is
+#' tabulated over the rest, with a warning saying so. A run in which none
+#' completed is an error of class `nestedtune_no_completed_folds`, as it is
+#' for [collect_metrics()], [autoplot()][autoplot.nested_results] and
 #' [nested_final_fit()].
 #'
-#' tune's `.config` is not a column here: it labels a candidate inside one
-#' fold's own tuning run, and folds can search different grids.
+#' Looking for tune's `.config`? It is not a column here: it labels a
+#' candidate inside one fold's own tuning run, and folds can differ in grid.
 #'
 #' @section Missing and colliding values:
 #'
 #' A completed fold whose selection carries no value for a parameter is counted
-#' under `NA` for it, in the same row as a fold that selected `NA`;
+#' under `NA` for it, in the same row as a fold that selected `NA`.
 #' [summary.nested_results()] tells the two apart. A workflow with nothing to
 #' tune gives columns `n` and `prop` and no rows. A parameter whose id is `n`
 #' or `prop` would collide with the counts and is an error.

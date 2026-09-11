@@ -1,19 +1,21 @@
 #' Nested cross-validation with racing inside
 #'
 #' @description
-#' `nested_tune_race_anova()` and `nested_tune_race_win_loss()` run the outer
-#' loop of nested cross-validation with finetune's two racing tuners,
-#' [finetune::tune_race_anova()] and [finetune::tune_race_win_loss()], as the
-#' inner tuner. For each outer fold the race scores every candidate in `grid`
-#' on the first `burn_in` inner resamples, drops the candidates that are
-#' already clearly worse than the best (by a repeated-measures ANOVA, or by a
-#' Bradley-Terry model of pairwise wins and losses), scores the survivors on
-#' the remaining resamples, and then selects, finalizes, fits and scores on
-#' the outer split as [nested_tune_grid()] does. That page is the reference
-#' for everything the racers share with the other orchestrators.
+#' `nested_tune_race_anova()` and `nested_tune_race_win_loss()` give you an
+#' honest score for a model you tune with finetune's two racing tuners,
+#' [finetune::tune_race_anova()] and [finetune::tune_race_win_loss()]. Each
+#' is [nested_tune_grid()] with the inner tuner swapped, and that page is
+#' the reference for everything the racers share with the other
+#' orchestrators. For each outer fold the race scores every candidate in
+#' `grid` on the first `burn_in` inner resamples. It then drops the
+#' candidates that are already clearly worse than the best, by a
+#' repeated-measures ANOVA or by a Bradley-Terry model of pairwise wins and
+#' losses. The survivors are scored on the remaining resamples, and the
+#' fold then selects, finalizes, fits and scores on the outer split as the
+#' grid page describes.
 #'
 #' The estimate describes the race-and-fit procedure as a whole and is
-#' reported for it; the model to deploy comes from [nested_final_fit()],
+#' reported for it. The model to deploy comes from [nested_final_fit()],
 #' which races the same grid once more on all the data.
 #'
 #' @details
@@ -28,15 +30,15 @@
 #'   name. The section on differences from finetune says what becomes of each
 #'   slot.
 #' @param grid A data frame of candidate parameter values, or a positive whole
-#'   number giving the size of a grid to generate, the design the race is
-#'   offered; a data frame must have one column per tuned parameter and no
-#'   other column.
+#'   number for the size of a grid to generate, the design the race is
+#'   offered. A data frame must have one column per tuned parameter and no other
+#'   column.
 #'
 #' @return A `nested_results` with one row per outer fold and the columns
-#'   [nested_tune_grid()] documents. The `procedure` record names the tuner
-#'   (`"tune_race_anova"` or `"tune_race_win_loss"`) and holds the `grid`
-#'   beside the arguments every orchestrator records; the section below says
-#'   what `.inner_metrics` and the recorded grid mean on a race.
+#'   [nested_tune_grid()] documents. The `procedure` record names the tuner,
+#'   `"tune_race_anova"` or `"tune_race_win_loss"`, and holds the `grid`
+#'   beside the arguments every orchestrator records. The section below
+#'   says what `.inner_metrics` and the recorded grid mean on a race.
 #'
 #' @section What a race records:
 #'
@@ -44,20 +46,20 @@
 #' eliminated candidates included: `tune::collect_metrics(<the race>,
 #' all_configs = TRUE)`, where finetune's own default keeps the survivors
 #' alone. In that table `n` is the number of inner resamples each candidate
-#' was scored on, the full inner resample count for a candidate that survived
-#' to the end and fewer for one eliminated along the way. The recorded
-#' `grid`, in the `procedure` record and as `attr(x, "grid")`, is the design
-#' the race was offered, exactly as given; what each candidate ran is `n`. A
-#' candidate that failed on every inner resample is absent, and its failure
-#' is in `.notes`.
+#' was scored on. A candidate that survived to the end has the full inner
+#' resample count, and one eliminated along the way has fewer. The recorded
+#' `grid`, in the `procedure` record and as `attr(x, "grid")`, is the
+#' design the race was offered, exactly as given. What each candidate ran
+#' is `n`. A candidate that failed on every inner resample is absent, and
+#' its failure is in `.notes`.
 #'
-#' A race draws from the generator even with a deterministic engine: with
-#' `randomize = TRUE` (finetune's default) the inner resamples are shuffled
-#' before the burn-in, so which resamples the burn-in uses, and with it which
-#' candidates are eliminated when, comes from the fold's tuning seed. On the
-#' parallel path every daemon's library must hold finetune, which the loop
-#' attaches in each daemon before the first fold is sent, warning where it
-#' cannot.
+#' A race draws from the generator even with a deterministic engine. With
+#' `randomize = TRUE`, finetune's default, the inner resamples are shuffled
+#' before the burn-in. So which resamples the burn-in uses, and with it
+#' which candidates are eliminated when, comes from the fold's tuning seed.
+#' On the parallel path every daemon's library must hold finetune, which
+#' the loop attaches in each daemon before the first fold is sent, warning
+#' where it cannot.
 #'
 #' @inheritSection nested_tune_grid Nested designs
 #' @inheritSection nested_tune_grid Finalizing a parameter range
@@ -67,59 +69,66 @@
 #'
 #' @section Differences from calling finetune directly:
 #'
-#' There is no `control` formal, but a [finetune::control_race()] passed
+#' There is no `control` formal. A [finetune::control_race()] passed
 #' through `...` as `control` reaches the inner race in every fold and the
-#' final fit that re-runs the result: `control = control_race(burn_in = 2)`,
-#' say, on a design with three inner resamples. What runs is the control
-#' passed, or finetune's default when none is, with the slots this package
-#' forces overwritten; the result records that effective control as
-#' `extract_procedure(res)$control`. Every slot of `control_race()` falls
-#' under one of seven headings.
+#' final fit that re-runs the result. `control = control_race(burn_in =
+#' 2)`, say, fits a design with three inner resamples. What runs is the
+#' control passed, or finetune's default when none is, with the slots this
+#' package forces overwritten. The result records that effective control
+#' as `extract_procedure(res)$control`. Every slot of `control_race()`
+#' falls under one of seven headings.
 #'
-#' **Forced: `allow_par`.** The inner race and the outer scoring fit both run
-#' at `allow_par = FALSE`, whatever the control carries, because parallelism
-#' belongs over the outer folds.
+#' **Forced: `allow_par`.** The inner race and the outer scoring fit both
+#' run at `allow_par = FALSE`, whatever the control carries, because
+#' parallelism belongs over the outer folds.
 #'
 #' **Settable as its own argument: `event_level`.** The argument is the one
-#' place the level is set, as on the grid page: a control at finetune's
-#' default takes it, and a control naming another level is refused at entry,
-#' naming both. `grid` and `eval_time` are the racing functions' own
+#' place the level is set, as on the grid page. A control at finetune's
+#' default takes it, and a control naming another level is refused at
+#' entry, naming both. `grid` and `eval_time` are the racing functions' own
 #' arguments rather than control slots, offered here as arguments and
 #' reaching them unchanged.
 #'
-#' **Refused: none.** No slot is refused on its own. What is refused at entry
-#' is a control of another class (a `control_grid()`, which finetune itself
-#' would accept here), the `event_level` conflict above, and a `burn_in` no
-#' fold's inner design can meet: finetune refuses a race whose resample count
-#' is not greater than `burn_in`, and this package refuses the whole call
-#' before any fold runs when any outer fold's inner `rset` would be, naming
-#' the count and the burn-in. `control_race()` defaults `burn_in` to 3, so a
-#' design with three inner resamples needs `control = control_race(burn_in =
-#' 2)` or fewer.
+#' **Refused: none.** No slot is refused on its own. Three things are
+#' refused at entry. The first is a control of another class, such as a
+#' `control_grid()` that finetune itself would accept here. The second is
+#' the `event_level` conflict above, and the third a `burn_in` no fold's
+#' inner design can meet. finetune refuses
+#' a race whose resample count is not greater than `burn_in`. This package
+#' refuses the whole call before any fold runs when any outer fold's inner
+#' `rset` would be refused, naming the count and the burn-in.
+#' `control_race()` defaults `burn_in` to 3, so a design with three inner
+#' resamples needs `control = control_race(burn_in = 2)` or fewer.
 #'
 #' **Passed through: `burn_in`, `alpha`, `num_ties`, `randomize`,
 #' `verbose_elim`, `verbose`, `pkgs`, `parallel_over`, `workflow_size`.**
-#' Each reaches the race as given. `burn_in`, `alpha`, `num_ties` and
-#' `randomize` govern each fold's race as they would a direct call: how many
-#' resamples every candidate is scored on before elimination starts, the
-#' significance level an elimination needs, how many rounds two tied
-#' survivors are given before one is dropped, and whether the resamples are
-#' shuffled first. `verbose_elim` prints finetune's elimination log from a
-#' serial run, once per fold, and from a mirai daemon where nothing shows it;
-#' `verbose` likewise. `pkgs`, `parallel_over` and `workflow_size` behave as
-#' the grid page describes, `parallel_over` included. This classification was
-#' read on finetune 1.3.0; the version that added `workflow_size` to
-#' `control_race()` is not named in finetune's NEWS, and the `>= 1.0.1` floor
-#' this package declares does not require it.
+#' Each reaches the race as given:
+#'
+#' - `burn_in`, `alpha`, `num_ties` and `randomize` govern each fold's race
+#'   as they would a direct call. `burn_in` is how many resamples every
+#'   candidate is scored on before elimination starts. `alpha` is the
+#'   significance level an elimination needs. `num_ties` is how many rounds
+#'   two tied survivors are given before one is dropped. `randomize` is
+#'   whether the resamples are shuffled first.
+#' - `verbose_elim` prints finetune's elimination log from a serial run,
+#'   once per fold, and from a mirai daemon where nothing shows it;
+#'   `verbose` likewise.
+#' - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
+#'   describes, `parallel_over` included.
+#'
+#' This classification was read on finetune 1.3.0. The version that added
+#' `workflow_size` to `control_race()` is not named in finetune's NEWS, and
+#' the `>= 1.0.1` floor this package declares does not require it.
 #'
 #' **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
-#' outer fit as well as the race, and the outer fit's predictions and
-#' extracts are kept as `.predictions` and `.extracts` in the shape the grid
-#' page describes; the race's own are still discarded.
+#' outer fit as well as the race. The outer fit's predictions and extracts
+#' are kept as `.predictions` and `.extracts` in the shape the grid page
+#' describes; the race's own are still discarded.
 #'
-#' **Not returned: `save_workflow`.** It lands on the inner race result a fold
-#' record discards, so setting it costs the work and returns nothing; the
-#' final fit keeps its race as `$tuning`, where what it saved is reachable.
+#' **Not returned: `save_workflow`.** It lands on the inner race result a
+#' fold record discards, so setting it costs the work and returns nothing.
+#' The final fit keeps its race as `$tuning`, where what it saved is
+#' reachable.
 #'
 #' **Inert: `backend_options`.** Backend options with no parallel backend to
 #' reach, since `allow_par` is forced off.

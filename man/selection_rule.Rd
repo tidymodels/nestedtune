@@ -2,7 +2,7 @@
 % Please edit documentation in R/selection-rule.R
 \name{selection_rule}
 \alias{selection_rule}
-\title{Choose the rule each fold selects its candidate by}
+\title{Choose the rule each fold selects its parameters by}
 \usage{
 selection_rule(rule = c("best", "one_std_err", "pct_loss"), ..., limit = NULL)
 }
@@ -20,9 +20,10 @@ candidate, in percent, as a single non-negative number. Left \code{NULL} it
 takes tune's default of 2, and the other rules refuse it.}
 }
 \value{
-A list of class \code{selection_rule} with elements \code{rule}, \code{order} (the
-expressions in \code{...}, empty for \code{"best"}) and \code{limit} (\code{NULL} outside
-\code{"pct_loss"}). Printing shows the three on one line.
+A list of class \code{selection_rule} with elements \code{rule}, \code{order} and
+\code{limit}. \code{order} holds the expressions in \code{...}, empty for \code{"best"}.
+\code{limit} is \code{NULL} outside \code{"pct_loss"}. Printing shows the three on one
+line.
 }
 \description{
 Builds the object the \code{select} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} and its
@@ -48,8 +49,8 @@ stays under \code{limit} percent, as \code{\link[tune:select_by_pct_loss]{tune::
 
 An ordering is a parameter name, wrapped in \code{\link[dplyr:desc]{dplyr::desc()}} where a larger
 value is the simpler model. Each must be a bare name or a call, never a
-string or a number, which would order nothing, and none may be named, so a
-misspelled \code{limit} is refused instead of read as an ordering. Every name
+string or a number, which would order nothing. None may be named. That
+way a misspelled \code{limit} is refused instead of read as an ordering. Every name
 must be a parameter the workflow tunes, which the orchestrators check when
 the run starts.
 }
