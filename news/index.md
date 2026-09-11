@@ -2,6 +2,21 @@
 
 ## nestedtune 0.0.0.9000
 
+- Every result records the model specification and the preprocessor of
+  the workflow it ran under, as the `workflow` entry of the record
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  returns. The entry holds the model’s type, engine, mode and arguments,
+  and the preprocessor, in deparsed form, with recipe step ids and the
+  data left out. Case weights and a postprocessor are not part of the
+  entry.
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  compares the workflow it is handed against that entry and refuses one
+  whose model or preprocessor differs, with class
+  `nestedtune_workflow_mismatch`, naming the part that differs. A
+  workflow rebuilt from the same code is accepted. A results object
+  saved before this entry existed is refused as one from an earlier
+  version.
+
 - Every help page is rewritten for someone who has run `tune_grid()` and
   never nested: no roxygen sentence over 30 words, no sentence naming
   more than four code spans, each page opening on what the reader gets

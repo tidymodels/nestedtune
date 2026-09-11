@@ -159,6 +159,10 @@ grid, parameter set or selection rule.</p>
 entry with condition class <code>nestedtune_tuned_workflow</code>, naming the five
 orchestrators that tune. Each of those refuses a workflow with no
 marker, with class <code>nestedtune_untuned_workflow</code>, naming this one.</p>
+<p>The final fit ties the workflow to the record as well. The result
+records the identity of the workflow it ran under, and
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> refuses a workflow whose identity differs, as its
+"What is refused" section says.</p>
     </div>
     <div class="section level2">
     <h2 id="what-the-reading-functions-answer">What the reading functions answer<a class="anchor" aria-label="anchor" href="#what-the-reading-functions-answer"></a></h2>
