@@ -1,13 +1,13 @@
 # M088: Prose that fails the sweep cannot merge
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M086, M087
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a CI job, a test and profile slots over the repo's own documentation sources
-- **Branch/PR:** —
+- **Branch/PR:** m088-prose-sweep-gate
 
 ## Goal
 
