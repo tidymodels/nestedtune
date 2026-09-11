@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+You want to know what the nested number means and how far to trust it.
 This page runs no code. It says why a tuned model's own score cannot be
 trusted, which quantity the nested number describes, and how to read its
 standard error. It also covers fold disagreement and when nesting is worth
@@ -35,8 +36,7 @@ Nested cross-validation scores the whole tuning procedure, meaning every
 step you run on the data: resample, tune, pick a setting, fit. Nesting puts
 that procedure inside a second, outer resampling loop. Each outer fold tunes
 from scratch on its own analysis rows, fits the chosen setting there, and
-scores that fit once on assessment rows the tuning never saw. The mean of
-those outer scores is the estimate.
+scores that fit once on assessment rows the tuning never saw.
 
 The number `collect_metrics()` reports describes the whole tune-and-fit
 procedure: resample, tune, select, fit. That is the number to report. The
@@ -53,13 +53,13 @@ procedure.
 
 Four things it is not. First, it is not the error of the deployed model,
 which is built afterwards on all the rows and estimated by nothing here.
-Second, it is not a verdict on that model's parameter values. Third, it is
-not about more rows or other data, since it ran on this training set alone.
-Fourth, it is not that error averaged over every training set you might
-have drawn, which would describe the method rather than this data. Luo and
-Barber (2026) prove that any assumption-free test of that method-level
-quantity needs a dataset many times larger than the training set. So this
-package offers none.
+Second, it is not a verdict on that model's parameter values. Third, it does
+not say what a larger or a different training set would give, since it ran
+on this one alone. Fourth, it is not that error averaged over every training
+set you might have drawn, which would describe the method rather than this
+data. Luo and Barber (2026) prove that any assumption-free test of that
+method-level quantity needs a dataset many times larger than the training
+set. So this package offers no such test.
 
 ## A slight pessimism
 
@@ -112,8 +112,7 @@ set.
 ## Disagreement between folds
 
 When the folds split over a parameter, the data does not pick its value
-clearly. The evidence did not strongly prefer the value the final model
-carries. The estimate is fine, since it already averages over this
+clearly. The estimate is fine, since it already averages over this
 variability. What suffers is any story about the selected parameters being
 the right ones.
 
@@ -126,9 +125,9 @@ Whether nesting pays depends on how much room the selection step had to
 overfit. Tibshirani and Tibshirani (2009) measured that room on pure noise,
 where the true error rate is 0.5. With 400 observations and 100 features,
 the tuned score was under 3 points too good. With 40 observations and 1000
-features, the best tuned score read 0.384, which is 11.6 points below the
-true 0.5. Even there the learner mattered: an SVM was 2.5 points too good
-and a tree only 0.2. In short, the bias is largest with wide data, a big
+features, the best tuned score of nearest shrunken centroids read 0.384,
+which is 11.6 points below the true 0.5. Even there the learner mattered:
+an SVM was 2.5 points too good and a tree only 0.2. In short, the bias is largest with wide data, a big
 grid, and a preprocessing step the loop has to redo. That paper's remedy is
 a correction, not nesting.
 

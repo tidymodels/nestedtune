@@ -277,11 +277,11 @@ tibble(
 
 The selection-time score is not an estimate of performance on anything.
 Whether it lands above or below the nested estimate means nothing either.
-It stays on the object as a record of what selection saw. tune's functions
-would hand it over without a warning, so the results object and the final
-fit both refuse tune's ranking functions such as `show_best()`. On the loop's
-results those functions would rank outer folds. On the final fit there is
-one model and nothing to rank.
+It stays on the object as a record of what selection saw. `show_best()`
+handed it over above because it was given tune's own object, which does not
+warn. Ask the same of `res` or of `final` and both refuse, as the two chunks
+below show. On the loop's results, tune's ranking functions would rank outer
+folds. On the final fit there is one model and nothing to rank.
 
 ```{r refusals, error = TRUE}
 show_best(res, metric = "rmse")

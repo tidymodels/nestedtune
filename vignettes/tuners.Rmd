@@ -14,9 +14,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-The getting-started guide, `vignette("nested-cv")`, tunes each outer fold
-over a fixed grid with `nested_tune_grid()`. That is one of five ways the
-inner search can run. The other four are tune's Bayesian optimization,
+You want the inner search to run some other way than over a fixed grid, or
+to score a workflow with nothing to tune. The getting-started guide,
+`vignette("nested-cv")`, tunes each outer fold over a fixed grid with
+`nested_tune_grid()`. That is one of five ways the inner search can run. The other four are tune's Bayesian optimization,
 finetune's two racing methods, and finetune's simulated annealing. Each has
 a function in this package that takes the same design and workflow and
 returns the same kind of object. This page runs all four on the guide's example and

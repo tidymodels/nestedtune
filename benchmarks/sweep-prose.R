@@ -17,6 +17,17 @@
 #       each page's first prose sentence containing `procedure`,
 #       `orchestrator` or `candidate` (whole word, any case, plural included),
 #       and `reader` on results.Rmd, as `file:line: <word>: <text>`; exits 0
+#   Rscript benchmarks/sweep-prose.R --spans
+#       every prose sentence naming more than 4 backtick spans, inline `r`
+#       spans excluded, as `file:line: <k> spans: <text>` with each span
+#       shown as `•`; exits 1 on any hit
+#   Rscript benchmarks/sweep-prose.R --openings
+#       the first prose sentence of each page, badge lines (`[![`) dropped
+#       first, as `file:line: <text>`; exits 0
+#   Rscript benchmarks/sweep-prose.R --paragraphs
+#       every prose paragraph of each page, as `file:first-last: <opening
+#       words>`, `first` and `last` the lines of the paragraph's extent;
+#       exits 0
 #   Rscript benchmarks/sweep-prose.R --roxygen [--terms]
 #       the same two checks over roxygen prose in `R/*.R` and
 #       `man-roxygen/*.R`: the bodies of `@title`, `@description`,
@@ -29,7 +40,12 @@
 args <- commandArgs(trailingOnly = TRUE)
 roxygen <- "--roxygen" %in% args
 terms <- "--terms" %in% args
+spans <- "--spans" %in% args
+openings <- "--openings" %in% args
+paragraphs <- "--paragraphs" %in% args
 cap <- 30L
+span_cap <- 4L
+mark <- "•"
 words <- c("procedure", "orchestrator", "candidate")
 
 pages <- c(
@@ -41,14 +57,23 @@ pages <- c(
   "README.Rmd"
 )
 
-strip_spans <- function(text) {
+strip_spans <- function(text, count = FALSE) {
   # a backtick span is replaced by the line breaks it contains, so a span
   # crossing a line break leaves the line count, and every later
-  # sentence's reported line, unchanged
+  # sentence's reported line, unchanged; with `count`, a span that is not
+  # an inline `r` span leaves one mark behind as well, so the spans a
+  # sentence names can be counted after splitting
   m <- gregexpr("`[^`]*`", text, perl = TRUE)
   regmatches(text, m) <- lapply(
     regmatches(text, m),
-    function(s) gsub("[^\n]", "", s)
+    function(s) {
+      kept <- gsub("[^\n]", "", s)
+      if (count) {
+        named <- !grepl("^`r\\s", s)
+        kept[named] <- paste0(mark, kept[named])
+      }
+      kept
+    }
   )
   if (roxygen) {
     text <- gsub("\\\\code\\{[^}]*\\}", "", text, perl = TRUE)
@@ -62,9 +87,12 @@ strip_spans <- function(text) {
 
 # Prose paragraphs of one .Rmd page: a list, one element per paragraph,
 # each a data frame of (line, text) for the lines it holds.
-rmd_paragraphs <- function(path) {
+rmd_paragraphs <- function(path, badges = TRUE) {
   lines <- readLines(path, warn = FALSE)
   keep <- rep(TRUE, length(lines))
+  if (!badges) {
+    keep[grepl("^\\[!\\[", lines)] <- FALSE
+  }
   yaml <- which(grepl("^---$", lines))
   if (length(yaml) >= 2L) {
     keep[yaml[1]:yaml[2]] <- FALSE
@@ -160,10 +188,11 @@ split_runs <- function(text, keep, line, block = NULL) {
 
 # Sentences of one paragraph: a data frame of (line, n, text), `line` the
 # line the sentence's first word sits on.
-sentences <- function(para) {
+sentences <- function(para, count = FALSE) {
   # spans are stripped over the joined paragraph, since one can cross a
   # line break; strip_spans() keeps the breaks, so pieces and lines align
-  pieces <- strsplit(strip_spans(paste(para$text, collapse = "\n")), "\n")[[1]]
+  joined <- strip_spans(paste(para$text, collapse = "\n"), count = count)
+  pieces <- strsplit(joined, "\n")[[1]]
   tokens <- character()
   at <- integer()
   for (k in seq_along(pieces)) {
@@ -183,14 +212,16 @@ sentences <- function(para) {
   ends[length(tokens)] <- TRUE
   stop_at <- which(ends)
   start_at <- c(1L, stop_at[-length(stop_at)] + 1L)
+  text <- vapply(
+    seq_along(start_at),
+    function(j) paste(tokens[start_at[j]:stop_at[j]], collapse = " "),
+    character(1)
+  )
   data.frame(
     line = at[start_at],
     n = stop_at - start_at + 1L,
-    text = vapply(
-      seq_along(start_at),
-      function(j) paste(tokens[start_at[j]:stop_at[j]], collapse = " "),
-      character(1)
-    ),
+    spans = lengths(regmatches(text, gregexpr(mark, text, fixed = TRUE))),
+    text = text,
     block = if ("block" %in% names(para)) para$block[1] else NA_integer_
   )
 }
@@ -204,12 +235,32 @@ files <- if (roxygen) {
 
 hits <- 0L
 for (f in files) {
-  paras <- if (roxygen) roxygen_paragraphs(f) else rmd_paragraphs(f)
-  sents <- do.call(rbind, lapply(paras, sentences))
+  paras <- if (roxygen) {
+    roxygen_paragraphs(f)
+  } else {
+    rmd_paragraphs(f, badges = !openings)
+  }
+  if (paragraphs) {
+    for (p in paras) {
+      opening <- strsplit(trimws(p$text[1]), "\\s+")[[1]]
+      opening <- paste(opening[seq_len(min(8L, length(opening)))], collapse = " ")
+      cat(sprintf("%s:%d-%d: %s\n", f, p$line[1], p$line[nrow(p)], opening))
+    }
+    next
+  }
+  sents <- do.call(rbind, lapply(paras, sentences, count = spans))
   if (is.null(sents) || !nrow(sents)) {
     next
   }
-  if (terms) {
+  if (openings) {
+    cat(sprintf("%s:%d: %s\n", f, sents$line[1], sents$text[1]))
+  } else if (spans) {
+    over <- which(sents$spans > span_cap)
+    for (i in over) {
+      cat(sprintf("%s:%d: %d spans: %s\n", f, sents$line[i], sents$spans[i], sents$text[i]))
+    }
+    hits <- hits + length(over)
+  } else if (terms) {
     look <- words
     if (roxygen || basename(f) == "results.Rmd") {
       look <- c(look, "reader")
@@ -232,7 +283,7 @@ for (f in files) {
   }
 }
 
-if (!terms) {
+if (!terms && !openings && !paragraphs) {
   cat(if (hits == 0L) "clean\n" else sprintf("%d hit(s)\n", hits))
   quit(status = as.integer(hits > 0L))
 }

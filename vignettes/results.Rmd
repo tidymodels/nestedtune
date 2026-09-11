@@ -14,7 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-Every tuning function in this package returns the same kind of object, a
+You have a results object and want to know what is in it. Every tuning
+function in this package returns the same kind of object, a
 `nested_results`. The getting-started guide, `vignette("nested-cv")`, prints
 it, summarizes it, and reads the estimate, the selections and both plots off
 it. This page reads the whole object. It goes through the columns one at a
@@ -302,19 +303,16 @@ resample failed but tuning still returned a candidate from the resamples
 that ran.
 
 On a run with a failed fold, the readers answer over the folds that
-completed. `summary()`, `collect_metrics()`, `collect_predictions()`,
-`collect_extracts()`, `agreement()`, `collect_selections()` and
-`collect_inner_metrics()` each warn once, with class
-`nestedtune_partial_summary`, saying how many folds the answer covers.
-`collect_notes()` reads every fold and warns about none. `autoplot()` leaves
-the failed fold's place on its axis empty.
+completed. `summary()`, the collect functions and `agreement()` each warn
+once, saying how many folds the answer covers; `?collect_selections` names
+the warning's class. The one collect function that does not warn is
+`collect_notes()`, which reads every fold. `autoplot()` leaves the failed
+fold's place on its axis empty.
 
 A run in which no fold completed is a different case. It has no estimate to
-report, so every reader that needs a completed fold refuses it:
-`collect_metrics()`, `collect_predictions()`, `collect_extracts()`,
-`agreement()`, `collect_selections()`, `collect_inner_metrics()`,
-`autoplot()` and `nested_final_fit()`. `summary()` and `collect_notes()`
-still answer on such a run.
+report. The print and `summary()` still describe it, and `collect_notes()`
+still lists its notes. Every other reader refuses it, and so does
+`nested_final_fit()`.
 
 ## Subsetting with dplyr
 
