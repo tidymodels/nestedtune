@@ -30,15 +30,15 @@
 #'
 #' @section How the folds are counted:
 #'
-#' Every completed fold is counted once, so `sum(n)` is the number of completed
-#' folds whenever the table has rows. A run with some folds failed is
+#' Failed folds are left out, so `sum(n)` counts the completed folds whenever
+#' the table has rows, each counted once. A run with some folds failed is
 #' tabulated over the rest, with a warning saying so. A run in which none
 #' completed is an error of class `nestedtune_no_completed_folds`, as it is
 #' for [collect_metrics()], [autoplot()][autoplot.nested_results] and
 #' [nested_final_fit()].
 #'
-#' tune's `.config` is not a column here: it labels a candidate inside one
-#' fold's own tuning run, and folds can search different grids.
+#' Looking for tune's `.config`? It is not a column here: it labels a
+#' candidate inside one fold's own tuning run, and folds can differ in grid.
 #'
 #' @section Missing and colliding values:
 #'

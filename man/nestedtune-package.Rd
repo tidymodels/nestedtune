@@ -7,8 +7,9 @@
 \title{nestedtune: Nested Cross-Validation for Tidymodels}
 \description{
 nestedtune runs nested cross-validation with tidymodels objects. The outer
-loop scores the whole tune-and-fit procedure on data that procedure never
-saw, and the inner tuning on each outer fold is done by tune and finetune.
+loop scores the whole procedure, tune, select and fit, on data that the
+procedure never saw. The inner tuning on each outer fold is done by tune
+and finetune.
 What this package adds is the loop, the seeds, and a result that keeps what
 every fold chose.
 }

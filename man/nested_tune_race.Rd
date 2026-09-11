@@ -50,7 +50,7 @@ range says where a range that depends on the data is finalized.}
 
 \item{grid}{A data frame of candidate parameter values, or a positive whole
 number for the size of a grid to generate, the design the race is
-offered. A data frame has one column per tuned parameter and no other
+offered. A data frame must have one column per tuned parameter and no other
 column.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard

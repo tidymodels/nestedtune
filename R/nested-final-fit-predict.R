@@ -28,8 +28,8 @@
 #' @param object,x A `nested_final_fit` object from [nested_final_fit()].
 #' @param new_data A data frame of new observations to predict.
 #' @param type,opts Passed to [workflows::predict.workflow()] unchanged.
-#'   `type` selects the prediction type, such as `"numeric"` or `"prob"`,
-#'   with the workflow's default when `NULL`.
+#'   `type` selects the prediction type, such as `"numeric"`, `"prob"` or
+#'   `"survival"`, with the workflow's default when left unset.
 #' @param eval_time For censored regression, the time or times at which to
 #'   evaluate survival probabilities, passed to the workflow's `augment()`
 #'   method. Ignored otherwise.
@@ -50,9 +50,9 @@
 #' parsnip. A listed one the model cannot use for the `type` asked is passed
 #' on and may be ignored.
 #'
-#' `augment()` fences them instead. Workflows' own `augment()` method passes
-#' an unread argument on to parsnip, which ignores it. So refusing it here
-#' is the only way it is refused at all.
+#' `augment()` refuses the dots instead, and that refusal is the only one
+#' there is: workflows' own `augment()` method passes an unread argument on
+#' to parsnip, which ignores it.
 #'
 #' @section Residuals on the training rows are not performance:
 #'

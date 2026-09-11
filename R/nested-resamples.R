@@ -28,10 +28,10 @@
 #'
 #' @section Differences from rsample:
 #'
-#' [rsample::analysis()] and [rsample::assessment()] return identical frames,
-#' attributes included. Each inner split keeps the class and the resample
-#' id rsample gives it, so `labels()` and [rsample::add_resample_id()]
-#' behave the same.
+#' Code written for an rsample split keeps working. [rsample::analysis()]
+#' and [rsample::assessment()] return identical frames, attributes included.
+#' Each inner split keeps the class and the resample id rsample gives it, so
+#' `labels()` and [rsample::add_resample_id()] behave the same.
 #'
 #' One behavior differs on purpose: an outer bootstrap is refused rather than
 #' warned about. The same row can otherwise land in both the inner analysis and

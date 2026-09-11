@@ -144,12 +144,12 @@ each outer fold trained on its analysis rows alone. Varma and Simon
 (2023) about 1 to 2 percent of AUROC on 41,121 records. That offset
 shrinks with fold size and is not a correction to apply.
 
-Two things the estimate does not say. It is marginal over selection: it
-averages over what each fold's tuning chose, rather than being
-conditional on the parameters this model happens to carry. So it makes
-no claim about this configuration in particular. And it describes new
-data drawn like your training data, not a different population, and not
-a model retrained at another size.
+Two things the estimate does not say. This model carries one parameter
+setting, but the estimate makes no claim about that setting in
+particular. It is marginal over selection: it averages over what each
+fold's tuning chose. And it describes new data drawn like your training
+data, not a different population, and not a model retrained at another
+size.
 
 If the outer folds disagreed about the best parameters, report that too.
 }

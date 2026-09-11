@@ -122,8 +122,8 @@
 #'
 #' @section Subsetting:
 #'
-#' Each row's `nested_results` describes its own run whole, so a subset of
-#' the set that keeps rows of the run answers for the workflows it holds.
+#' You can take a subset of the set and it still answers for the workflows
+#' it holds, since each row's `nested_results` describes its own run whole.
 #' An operation keeps the class and the `fn` attribute when its result:
 #'
 #' - holds the three columns under those names, none repeated;

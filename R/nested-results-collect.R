@@ -214,9 +214,9 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' @section Which predictions these are:
 #'
-#' They are the outer fit's, on each fold's assessment rows. On a v-fold outer
-#' design every row of the data therefore appears once per repeat. On a
-#' Monte Carlo design a row appears as often as it was held out.
+#' Will a row appear twice? On a v-fold outer design each row appears once
+#' per repeat. On a Monte Carlo design it appears as often as it was held
+#' out. These are the outer fit's predictions on the assessment rows.
 #' The inner tuning run's own predictions and extracts, which the same two
 #' control slots save inside tune, are not kept.
 #'

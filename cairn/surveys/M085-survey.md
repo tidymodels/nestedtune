@@ -15,9 +15,9 @@ _Owned by M085; the AC3 (iii) probe set. Each entry is one paragraph, identified
 - :129 "The selection rule is applied without `eval_time`. Left" — e
 - :136 "tune leaves the choice of candidate to a" — e
 - :150 "Two records describe the grid, and they answer" — e
-- :172 "`attr(x, "metrics")` holds the `metrics` argument, and is"metrics")` holds the `metrics` argument, and is" — d e
+- :172 "`attr(x, "metrics")` holds the `metrics` argument, and is" — d e
 - :188 "The fold-label columns are the ones the resampling" — d
-- :203 "It is one rule, reached through four doors." — e
+- :203 "One rule covers every verb that subsets or combines" — e
 - :220 "Fold `i` is exactly the code below. On" — e
 - :242 "The siblings differ only in the tuning line." — e
 - :253 "A fold that fails does not end the" — e
@@ -51,7 +51,7 @@ _Owned by M085; the AC3 (iii) probe set. Each entry is one paragraph, identified
 - :247 "Under `type = "parameters"` there is one panel" — d e
 - :258 "`wflow_id`, then one column per parameter any workflow's" — c e
 - :277 "A workflow in which no fold completed is" — e
-- :289 "The performance view's subtitle gives the workflow and" — e
+- :289 "Two shortfall counts can appear under the subtitle" — e
 - :265 "A tuned parameter whose id is `wflow_id` cannot" (moved from the counting section to the `agreement()` section in T6) — e
 - :317 "Shows which loop function the set ran through," — d
 
@@ -64,7 +64,7 @@ _Owned by M085; the AC3 (iii) probe set. Each entry is one paragraph, identified
 - :82 "A name that the orchestrator `fn` names does" — c
 - :92 "Seed the session before the call, as before" (was the Seeds header at `0d8611e:84`) — e
 - :106 "An orchestrator warns when some of its outer" (was the Warnings header at `0d8611e:98`) — e
-- :125 "Each row's `nested_results` describes its own run whole," (was the Subsetting header at `0d8611e:113`) — e
+- :125 "You can take a subset of the set and it still answers" (was the Subsetting header at `0d8611e:113`) — e
 - :141 "Anything else comes back a plain tibble without" — e
 
 ## `R/nested-fit-resamples.R` — 8 of 20
@@ -72,7 +72,7 @@ _Owned by M085; the AC3 (iii) probe set. Each entry is one paragraph, identified
 - :38 "A `nested_results` with one row per outer fold" — c
 - :50 "A workflow that still carries a [tune::tune()] marker" — d e
 - :57 "Every function that reads a `nested_results` answers on" — e
-- :74 "The same `2 * n` seeds are drawn" — d e
+- :74 "A tuned run under the same session seed" — d e
 - :85 "There is no `control` formal. A [tune::control_resamples()] passed" — e
 - :113 "**Kept from the outer fit: `save_pred`, `extract`.** With" — e
 - :125 "**Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`," — c
@@ -105,13 +105,13 @@ _Owned by M085; the AC3 (iii) probe set. Each entry is one paragraph, identified
 - `R/extract-procedure.R` (3 of 8): :13 "Returns the `procedure` record a nested result carries" — d · :26 "The stored record, unchanged: a flat named list" — d · :42 "`select` is the [selection_rule()] each fold selected by" — e
 - `R/nested-final-fit-extract.R` (3 of 10): :26 "Returns the tuning result that [nested_final_fit()] chose its" — d · :91 "Returns the candidates, the parameter settings [nested_final_fit()]'s" — d e · :97 "A tibble with one row per candidate scored," — e
 - `R/nested-final-fit-print.R` (3 of 16): :28 "The line under the heading tells you what" (was the section header at `0d8611e:27`) — e · :108 "`summary()` returns an object of class `summary.nested_final_fit`, a" — e · :125 "The four counts are `NULL` on a grid" — c d
-- `R/nested-resamples.R` (3 of 12): :4 "`nested_resamples()` builds the nested resampling design" — d · :31 "[rsample::analysis()] and [rsample::assessment()] return identical frames" — e · :49 "Sizes below are multiples of the source data," — e
+- `R/nested-resamples.R` (3 of 12): :4 "`nested_resamples()` builds the nested resampling design" — d · :31 "Code written for an rsample split keeps working." — e · :49 "Sizes below are multiples of the source data," — e
 - `R/nested-results-collect.R` (3 of 20): :16 "`collect_notes()`, `collect_selections()` and `collect_inner_metrics()`" — d · :32 "* `collect_inner_metrics()` stacks `.inner_metrics`: one row per" — c · :178 "`collect_predictions()` and `collect_extracts()` give you the outer" — e
-- `R/nested-results.R` (2 of 13): :723 "A metric measured at several evaluation times" — c e · :749 "That is a limit of the statistics, not" — e
-- `R/nested-results-plot.R` (2 of 11): :45 "A run in which no fold completed is" — e · :54 "The subtitle gives how much of the requested" — c e
+- `R/nested-results.R` (2 of 13): :723 "A metric measured at several evaluation times" — c e · :749 "You cannot get a valid standard error" — e
+- `R/nested-results-plot.R` (2 of 11): :45 "A run in which no fold completed is" — e · :54 "Panels can draw on different fold counts" — c e
 - `R/nested-results-print.R` (2 of 15): :22 "Shows the object: its outer folds as the" — d · :41 "Folds can score different candidate sets, the parameter" — c
 - `R/nested-final-fit-predict.R` (1 of 11): :47 "`predict()` forwards them, for example `level` with" — c
-- `R/nested-results-agreement.R` (1 of 7): :33 "Every completed fold is counted once, so `sum(n)`" — e
+- `R/nested-results-agreement.R` (1 of 7): :33 "Failed folds are left out, so `sum(n)`" — e
 - `R/selection-rule.R` (1 of 9): :51 "An ordering is a parameter name, wrapped in" — e
 
 Total: 107 of 343 at survey time. `orchestrator` first appeared cold at `0d8611e` in `nested-resamples.R:4`, `nested-tune-grid.R:156`, `nested-tune-bayes.R:32`, `nested-tune-race.R:35`, `nested-tune-sim-anneal.R:32`, `nested-fit-resamples.R:49`, `nested-workflow-map.R:12`, `nested-results-set.R:227`, `extract-procedure.R:25`.

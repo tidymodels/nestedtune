@@ -180,10 +180,10 @@
 #'
 #' @section Operations on the result:
 #'
-#' The result follows the rules tune states for its own results objects.
-#' Rows may be reordered but never added or removed. Columns may be added
-#' or reordered. Every column named under Value must still be present,
-#' holding the values it held.
+#' You can reorder rows and add or reorder columns, and the result stays a
+#' `nested_results`. Those are the rules tune states for its own results
+#' objects. Rows are never added or removed. Every column named under Value
+#' must still be present, holding the values it held.
 #'
 #' The fold-label columns are the ones the resampling design named, and
 #' `nested_tune_grid()` records them when it builds the result. So a column
@@ -200,11 +200,11 @@
 #' above. A three-row object cannot describe itself as the ten-fold design
 #' it was cut from, so it stops describing itself and hands back the data.
 #'
-#' It is one rule, reached through four doors. dplyr's verbs and `[` reach
-#' it through a `dplyr_reconstruct()` method. vctrs' own verbs,
-#' `vec_slice()`, `vec_rbind()`, `vec_c()` and the others, reach it through
-#' `vec_restore()`. And `rbind()` and `rename()`, which reach neither
-#' generic, have methods of their own. Two places the doors part.
+#' One rule covers every verb that subsets or combines a result. dplyr's
+#' verbs and `[` reach it through a `dplyr_reconstruct()` method. vctrs'
+#' own verbs, `vec_slice()`, `vec_rbind()`, `vec_c()` and the others, reach
+#' it through `vec_restore()`. And `rbind()` and `rename()`, which reach
+#' neither generic, have methods of their own. Two cases differ.
 #' `vctrs::vec_rbind(x)` and `vctrs::vec_c(x)` hand back a bare tibble even
 #' with nothing to combine with, where `dplyr::bind_rows(x)` keeps the
 #' class. And `bind_cols()` and `vec_cbind()` build their answer on the

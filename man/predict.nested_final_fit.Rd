@@ -15,8 +15,8 @@
 \item{new_data}{A data frame of new observations to predict.}
 
 \item{type, opts}{Passed to \code{\link[workflows:predict.workflow]{workflows::predict.workflow()}} unchanged.
-\code{type} selects the prediction type, such as \code{"numeric"} or \code{"prob"},
-with the workflow's default when \code{NULL}.}
+\code{type} selects the prediction type, such as \code{"numeric"}, \code{"prob"} or
+\code{"survival"}, with the workflow's default when left unset.}
 
 \item{...}{For \code{predict()}, further arguments for the model's predict
 method, passed on through the workflow. For \code{augment()}, not used; must
@@ -47,9 +47,9 @@ outside parsnip's own short list of predict arguments is refused by
 parsnip. A listed one the model cannot use for the \code{type} asked is passed
 on and may be ignored.
 
-\code{augment()} fences them instead. Workflows' own \code{augment()} method passes
-an unread argument on to parsnip, which ignores it. So refusing it here
-is the only way it is refused at all.
+\code{augment()} refuses the dots instead, and that refusal is the only one
+there is: workflows' own \code{augment()} method passes an unread argument on
+to parsnip, which ignores it.
 }
 
 \section{Residuals on the training rows are not performance}{

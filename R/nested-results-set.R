@@ -286,12 +286,12 @@ stack_set <- function(
 #'
 #' @section Counting what contributed:
 #'
-#' The performance view's subtitle gives the workflow and fold counts. Two
-#' shortfalls then each take a line of their own, only when there is one
-#' to name. One is how many workflows did not complete every fold. The
-#' other is how many averaged a metric over fewer folds than they
-#' completed. `summary()` names the folds and prints each workflow's count
-#' per metric.
+#' Two shortfall counts can appear under the subtitle, each on a line of
+#' its own and only when there is one to name. One is how many workflows
+#' did not complete every fold. The other is how many averaged a metric
+#' over fewer folds than they completed. The subtitle itself gives the
+#' workflow and fold counts. `summary()` names the folds and prints each
+#' workflow's count per metric.
 #'
 #' The two counts are separate. A workflow that ran whole can still be
 #' named by the second, since a completed fold can score `NA` on one metric

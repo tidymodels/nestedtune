@@ -35,15 +35,15 @@ itself.
 \section{How the folds are counted}{
 
 
-Every completed fold is counted once, so \code{sum(n)} is the number of completed
-folds whenever the table has rows. A run with some folds failed is
+Failed folds are left out, so \code{sum(n)} counts the completed folds whenever
+the table has rows, each counted once. A run with some folds failed is
 tabulated over the rest, with a warning saying so. A run in which none
 completed is an error of class \code{nestedtune_no_completed_folds}, as it is
 for \code{\link[=collect_metrics]{collect_metrics()}}, \link[=autoplot.nested_results]{autoplot()} and
 \code{\link[=nested_final_fit]{nested_final_fit()}}.
 
-tune's \code{.config} is not a column here: it labels a candidate inside one
-fold's own tuning run, and folds can search different grids.
+Looking for tune's \code{.config}? It is not a column here: it labels a
+candidate inside one fold's own tuning run, and folds can differ in grid.
 }
 
 \section{Missing and colliding values}{

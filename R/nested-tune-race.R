@@ -31,7 +31,7 @@
 #'   slot.
 #' @param grid A data frame of candidate parameter values, or a positive whole
 #'   number for the size of a grid to generate, the design the race is
-#'   offered. A data frame has one column per tuned parameter and no other
+#'   offered. A data frame must have one column per tuned parameter and no other
 #'   column.
 #'
 #' @return A `nested_results` with one row per outer fold and the columns

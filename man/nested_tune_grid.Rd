@@ -219,10 +219,10 @@ orchestrator.
 \section{Operations on the result}{
 
 
-The result follows the rules tune states for its own results objects.
-Rows may be reordered but never added or removed. Columns may be added
-or reordered. Every column named under Value must still be present,
-holding the values it held.
+You can reorder rows and add or reorder columns, and the result stays a
+\code{nested_results}. Those are the rules tune states for its own results
+objects. Rows are never added or removed. Every column named under Value
+must still be present, holding the values it held.
 
 The fold-label columns are the ones the resampling design named, and
 \code{nested_tune_grid()} records them when it builds the result. So a column
@@ -239,11 +239,11 @@ that drops a fold, \code{bind_rows()}, \code{x[1, ]}, dropping one of the column
 above. A three-row object cannot describe itself as the ten-fold design
 it was cut from, so it stops describing itself and hands back the data.
 
-It is one rule, reached through four doors. dplyr's verbs and \code{[} reach
-it through a \code{dplyr_reconstruct()} method. vctrs' own verbs,
-\code{vec_slice()}, \code{vec_rbind()}, \code{vec_c()} and the others, reach it through
-\code{vec_restore()}. And \code{rbind()} and \code{rename()}, which reach neither
-generic, have methods of their own. Two places the doors part.
+One rule covers every verb that subsets or combines a result. dplyr's
+verbs and \code{[} reach it through a \code{dplyr_reconstruct()} method. vctrs'
+own verbs, \code{vec_slice()}, \code{vec_rbind()}, \code{vec_c()} and the others, reach
+it through \code{vec_restore()}. And \code{rbind()} and \code{rename()}, which reach
+neither generic, have methods of their own. Two cases differ.
 \code{vctrs::vec_rbind(x)} and \code{vctrs::vec_c(x)} hand back a bare tibble even
 with nothing to combine with, where \code{dplyr::bind_rows(x)} keeps the
 class. And \code{bind_cols()} and \code{vec_cbind()} build their answer on the

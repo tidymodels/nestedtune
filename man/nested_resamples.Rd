@@ -40,10 +40,10 @@ count.
 \section{Differences from rsample}{
 
 
-\code{\link[rsample:analysis]{rsample::analysis()}} and \code{\link[rsample:assessment]{rsample::assessment()}} return identical frames,
-attributes included. Each inner split keeps the class and the resample
-id rsample gives it, so \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}}
-behave the same.
+Code written for an rsample split keeps working. \code{\link[rsample:analysis]{rsample::analysis()}}
+and \code{\link[rsample:assessment]{rsample::assessment()}} return identical frames, attributes included.
+Each inner split keeps the class and the resample id rsample gives it, so
+\code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same.
 
 One behavior differs on purpose: an outer bootstrap is refused rather than
 warned about. The same row can otherwise land in both the inner analysis and

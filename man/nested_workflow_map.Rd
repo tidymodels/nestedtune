@@ -133,8 +133,8 @@ every field a handler reads are unchanged.
 \section{Subsetting}{
 
 
-Each row's \code{nested_results} describes its own run whole, so a subset of
-the set that keeps rows of the run answers for the workflows it holds.
+You can take a subset of the set and it still answers for the workflows
+it holds, since each row's \code{nested_results} describes its own run whole.
 An operation keeps the class and the \code{fn} attribute when its result:
 \itemize{
 \item holds the three columns under those names, none repeated;

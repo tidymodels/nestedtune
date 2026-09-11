@@ -119,9 +119,9 @@ pinned by any R-side scheme, here or in tune.
 \section{The two seeds on a run with no tuning}{
 
 
-The same \code{2 * n} seeds are drawn as on a tuned run. So a tuned run under
-the same session seed on the same design shares each fold's outer-fit
-seed with this one. The record keeps one layout across the six
+A tuned run under the same session seed on the same design shares each
+fold's outer-fit seed with this one. The same \code{2 * n} seeds are drawn
+as on a tuned run. The record keeps one layout across the six
 orchestrators. The tuning seed is drawn and consumed by nothing. It is
 recorded as drawn rather than as \code{NA}, so the two seed columns read the
 same on every result. Fold \code{i} is exactly \code{\link[tune:last_fit]{tune::last_fit()}} of \code{object}

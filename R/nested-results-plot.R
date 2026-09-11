@@ -51,12 +51,12 @@
 #'
 #' @section What the labels say:
 #'
-#' The subtitle gives how much of the requested design ran. Each panel says
-#' how many folds stand behind it, since that varies between panels. A
-#' panel reading `mtry (2 of 3 chose)` or `rmse (from 2 folds)` had fewer
-#' than the run completed, and an unqualified one had them all. A requested
-#' metric that no completed fold could score keeps an empty panel rather
-#' than disappearing.
+#' Panels can draw on different fold counts, so each panel says how many
+#' folds stand behind it, and the subtitle says how much of the requested
+#' design ran. A panel reading `mtry (2 of 3 chose)` or `rmse (from 2
+#' folds)` had fewer than the run completed, and an unqualified one had
+#' them all. A requested metric that no completed fold could score keeps
+#' an empty panel rather than disappearing.
 #'
 #' The selected-value axis is numeric when every value drawn is a number
 #' and discrete otherwise. One axis cannot be both, and character-valued

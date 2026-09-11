@@ -26,9 +26,9 @@ own arguments, and the control as it took effect. A \code{\link[=nested_final_fi
 carries the record it re-ran.
 }
 \details{
-A final fit built from a results object re-runs exactly what this
-record describes. Reading it is how you see what a fit will do before
-you ask for one.
+Reading this record is how you see what a final fit will do before you
+ask for one. A final fit built from a results object re-runs exactly
+what the record describes.
 }
 \section{What the record holds}{
 

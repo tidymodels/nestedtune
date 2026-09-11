@@ -746,9 +746,10 @@ new_tbl <- function(cols) {
 #' which is larger by the same square-root factor. It is not a confidence
 #' interval, and one should not be built from it.
 #'
-#' That is a limit of the statistics, not of this implementation. Outer
-#' fold scores are not independent, since any two folds share most of their
-#' training rows. A standard error computed as though they were can
+#' You cannot get a valid standard error from the fold scores. That limit
+#' is the statistics', not this implementation's. Outer fold scores are not
+#' independent, since any two folds share most of their training rows. A
+#' standard error computed as though they were can
 #' misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
 #' proved that no universally unbiased estimator of a k-fold estimate's
 #' variance exists to put in its place. Gauran, Ombao and Yu (2025)

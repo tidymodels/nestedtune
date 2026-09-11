@@ -15,9 +15,9 @@
 #' own arguments, and the control as it took effect. A [nested_final_fit()]
 #' carries the record it re-ran.
 #'
-#' A final fit built from a results object re-runs exactly what this
-#' record describes. Reading it is how you see what a fit will do before
-#' you ask for one.
+#' Reading this record is how you see what a final fit will do before you
+#' ask for one. A final fit built from a results object re-runs exactly
+#' what the record describes.
 #'
 #' @param x A `nested_results` object from [nested_tune_grid()] or one of its
 #'   siblings, or a `nested_final_fit` object from [nested_final_fit()].
