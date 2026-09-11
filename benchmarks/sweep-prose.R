@@ -207,7 +207,8 @@ sentences <- function(para, count = FALSE) {
   }
   ends <- grepl("[.?!][\"')*]*$", tokens)
   low <- tolower(tokens)
-  abbrev <- low %in% c("e.g.", "i.e.", "vs.") |
+  abbrev <- low %in%
+    c("e.g.", "i.e.", "vs.") |
     (low == "al." & c("", low[-length(low)]) == "et")
   ends <- ends & !abbrev
   ends[length(tokens)] <- TRUE
@@ -228,8 +229,10 @@ sentences <- function(para, count = FALSE) {
 }
 
 files <- if (roxygen) {
-  c(list.files("R", "\\.R$", full.names = TRUE),
-    list.files("man-roxygen", "\\.R$", full.names = TRUE))
+  c(
+    list.files("R", "\\.R$", full.names = TRUE),
+    list.files("man-roxygen", "\\.R$", full.names = TRUE)
+  )
 } else {
   pages
 }
@@ -244,7 +247,10 @@ for (f in files) {
   if (paragraphs) {
     for (p in paras) {
       opening <- strsplit(trimws(p$text[1]), "\\s+")[[1]]
-      opening <- paste(opening[seq_len(min(8L, length(opening)))], collapse = " ")
+      opening <- paste(
+        opening[seq_len(min(8L, length(opening)))],
+        collapse = " "
+      )
       cat(sprintf("%s:%d-%d: %s\n", f, p$line[1], p$line[nrow(p)], opening))
     }
     next
@@ -258,7 +264,13 @@ for (f in files) {
   } else if (spans) {
     over <- which(sents$spans > span_cap)
     for (i in over) {
-      cat(sprintf("%s:%d: %d spans: %s\n", f, sents$line[i], sents$spans[i], sents$text[i]))
+      cat(sprintf(
+        "%s:%d: %d spans: %s\n",
+        f,
+        sents$line[i],
+        sents$spans[i],
+        sents$text[i]
+      ))
     }
     hits <- hits + length(over)
   } else if (terms) {
@@ -278,7 +290,13 @@ for (f in files) {
   } else {
     over <- which(sents$n > cap)
     for (i in over) {
-      cat(sprintf("%s:%d: %d words: %s\n", f, sents$line[i], sents$n[i], sents$text[i]))
+      cat(sprintf(
+        "%s:%d: %d words: %s\n",
+        f,
+        sents$line[i],
+        sents$n[i],
+        sents$text[i]
+      ))
     }
     hits <- hits + length(over)
   }
