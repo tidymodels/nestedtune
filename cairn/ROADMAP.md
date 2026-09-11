@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-11 (thirteenth pass, M087 merged: M087 archived and its row set done, M84's row pruned, the #91 row narrowed and its reader entries routed to DESIGN Known issues, one LESSONS line added and the M61 line trimmed; both files within caps.)_
+_Last hygiene check: 2026-09-11 (fourteenth pass, M088 merged: M088 archived and its row set done, M85's row pruned, the M85 LESSONS line trimmed and the M50 line extended; both files within caps.)_
 
 ## Milestones
 
@@ -9,8 +9,7 @@ _Last hygiene check: 2026-09-11 (thirteenth pass, M087 merged: M087 archived and
 |---|---|---|---|---|---|
 | M86 | The guides and README pass the plain-English sweep | done | — | high | milestones/archive/M086-guides-plain-sweep.md |
 | M87 | The help pages pass the plain-English sweep | done | M86 | high | milestones/archive/M087-help-pages-plain-sweep.md |
-| M88 | Prose that fails the sweep cannot merge | review | M86, M87 | normal | milestones/M088-prose-sweep-gate.md |
-| M85 | The help pages read on one pass for a tune_grid user | done | M84 | high | milestones/archive/M085-help-pages-plain-prose.md |
+| M88 | Prose that fails the sweep cannot merge | done | M86, M87 | normal | milestones/archive/M088-prose-sweep-gate.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
