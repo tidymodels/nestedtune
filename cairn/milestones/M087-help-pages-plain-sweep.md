@@ -1,13 +1,13 @@
 # M087: The help pages pass the plain-English sweep
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M086
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — every exported help page
-- **Branch/PR:** —
+- **Branch/PR:** `m087-help-pages-plain-sweep`
 
 ## Goal
 
@@ -48,6 +48,8 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - 2026-09-11: created by /milestone-plan.
 - 2026-09-11: criteria audit ran in full mode (the M086 work log holds the shared findings); M087-specific: the reader reads `man/*.Rd` while fixes land in roxygen, which AC4's no-diff `document()` pins; `grep -c "^#'"` counts `@examples` lines too, accepted as a bounded proxy for growth.
 - 2026-09-11: plan gate chose a second milestone for the help pages over folding them into M086 because the roxygen surface holds about four times the guides' hits and M085 took a full milestone at a smaller clause set; falsified by M086 finishing with more than a session to spare, in which case M087's tasks fold into the next docs milestone.
+
+- 2026-09-11: /milestone-implement started; branch cut from origin/main at 047fe5f; branch point: `--roxygen --plain` 127 hits (72 semicolon, 30 modal, 24 comma-ing, 1 slop), `#'` count 2718 (AC2 cap 2989); question gate skipped, the plan leaving no choice open.
 
 ## Decisions
 
