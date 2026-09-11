@@ -7,7 +7,7 @@
 - **Principles touched:** IP4, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — an exported record entry and an exported function's refusal
-- **Branch/PR:** `m083-final-fit-workflow-identity`
+- **Branch/PR:** `m083-final-fit-workflow-identity` · https://github.com/tidymodels/nestedtune/pull/97
 
 ## Goal
 
