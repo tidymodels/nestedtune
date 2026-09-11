@@ -23,9 +23,9 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 
 ## Acceptance criteria
 
-- [ ] AC1: `tests/testthat/test-sweep-prose.R` runs the six gating invocations over the real pages and roxygen sources, asserts each prints `clean`, and first asserts `--paragraphs` lists at least one paragraph for each of the six pages and `--roxygen --paragraphs` at least one for `R/nested-tune-grid.R`; it skips with the reason `sweep-prose.R not in the source tree` when the script is absent from the package root testthat resolves.
-- [ ] AC2: `.github/workflows/prose-sweep.yaml` runs on `push` and `pull_request` with the `paths-ignore` filter `cairn/**`, `CLAUDE.md`, `.claude/**` on both triggers, executes the six gating invocations, and is shown to discriminate: a run on a commit of the milestone branch that adds one sentence containing a semicolon to `README.Rmd` fails, and a run on the commit reverting it passes.
-- [ ] AC3: `cairn/PROFILE.md`'s `verify` slot names `Rscript benchmarks/sweep-prose.R --plain` (and `--roxygen --plain` after roxygen changes) as a check before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off; its `consistency-gate` slot lists the six gating invocations clean; and its `test-doctrine` filter list names `prose-sweep.yaml` beside the five workflows it names today.
+- [x] AC1: `tests/testthat/test-sweep-prose.R` runs the six gating invocations over the real pages and roxygen sources, asserts each prints `clean`, and first asserts `--paragraphs` lists at least one paragraph for each of the six pages and `--roxygen --paragraphs` at least one for `R/nested-tune-grid.R`; it skips with the reason `sweep-prose.R not in the source tree` when the script is absent from the package root testthat resolves.
+- [x] AC2: `.github/workflows/prose-sweep.yaml` runs on `push` and `pull_request` with the `paths-ignore` filter `cairn/**`, `CLAUDE.md`, `.claude/**` on both triggers, executes the six gating invocations, and is shown to discriminate: a run on a commit of the milestone branch that adds one sentence containing a semicolon to `README.Rmd` fails, and a run on the commit reverting it passes.
+- [x] AC3: `cairn/PROFILE.md`'s `verify` slot names `Rscript benchmarks/sweep-prose.R --plain` (and `--roxygen --plain` after roxygen changes) as a check before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off; its `consistency-gate` slot lists the six gating invocations clean; and its `test-doctrine` filter list names `prose-sweep.yaml` beside the five workflows it names today.
 - [ ] AC4: `Rscript -e 'devtools::check()'` reports 0 errors, 0 warnings, 0 notes.
 
 ## Coverage
@@ -64,3 +64,7 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 ## Decisions
 
 ## Review
+
+- 2026-09-11 AC1: `devtools::test(filter = "sweep-prose")` at 630a822: 34 pass, 0 fail, 0 skip. The real-source block asserts `--paragraphs` non-empty for the six pages (131 lines listed) and `--roxygen --paragraphs` for `R/nested-tune-grid.R` (55 lines), then the six invocations `clean`. The skip reason in the file reads `sweep-prose.R not in the source tree`, and the skip fires under `R CMD check` (AC4's run). Verified.
+- 2026-09-11 AC2: `prose-sweep.yaml` read: `push` and `pull_request` both carry `paths-ignore` of `cairn/**`, `CLAUDE.md`, `.claude/**`, and six steps run one invocation each. Run 34653377391 on 012f42a (one semicolon sentence added to `README.Rmd`) concluded `failure` at the `Plain clauses (pages)` step. Run 34653536495 on e5f7d40 (the revert) concluded `success`. Verified.
+- 2026-09-11 AC3: `PROFILE.md` read: `verify` names `Rscript benchmarks/sweep-prose.R --plain` (and `--roxygen --plain` after roxygen changes) before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off. `consistency-gate` lists the six invocations clean. The `test-doctrine` filter list names `prose-sweep.yaml` beside the five. Verified.
