@@ -20,10 +20,6 @@
 #' @param ... A control object from [tune::control_bayes()], as `control`,
 #'   and nothing else; every argument after `...` is matched by name. The
 #'   section on differences from tune says what becomes of each slot.
-#' @param param_info A [dials::parameters()] object, or `NULL` to let tune
-#'   derive one from the workflow; a range that is unknown until the data is
-#'   seen must be finalized first with [dials::finalize()], since
-#'   [tune::tune_bayes()] refuses it.
 #' @param initial The number of candidates each fold scores before the first
 #'   iteration, a whole number of at least 2; a `tune_results` object, which
 #'   tune also accepts here, is refused.

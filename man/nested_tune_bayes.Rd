@@ -34,9 +34,8 @@ section on differences from tune says what becomes of each slot.}
 \item{iter}{The maximum number of search iterations.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow; a range that is unknown until the data is
-seen must be finalized first with \code{\link[dials:finalize]{dials::finalize()}}, since
-\code{\link[tune:tune_bayes]{tune::tune_bayes()}} refuses it.}
+derive one from the workflow; the section on finalizing a parameter range
+says where a range that depends on the data is finalized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
