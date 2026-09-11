@@ -16,17 +16,13 @@ knitr::opts_chunk$set(
 
 The getting-started guide, `vignette("nested-cv")`, tunes each outer fold
 over a fixed grid with `nested_tune_grid()`. That is one of five ways the
-inner search can run. The other four are tune's Bayesian optimization and
+inner search can run. The other four are tune's Bayesian optimization,
 finetune's two racing methods and its simulated annealing, and each has a
-driver here that takes the same design and workflow and returns the same
-kind of object. This page runs all four on the guide's example, shows what
-each fold records about its search, shows how a tune control object reaches
-the inner call, and says what differs from calling tune or finetune
-directly. A workflow with nothing to tune takes none of the five: each
-refuses it at entry and names `nested_fit_resamples()`, which
-`vignette("nested-cv")` shows scoring a fixed workflow on the same design.
-The last section runs a baseline and two tuned workflows through one design
-in one call, with `nested_workflow_map()`.
+function here that takes the same design and workflow and returns the same
+kind of object. This page runs all four on the guide's example and shows
+what each fold records about its search. It then scores a workflow with
+nothing to tune on the same folds, and runs a baseline and two tuned
+workflows through one design in one call with `nested_workflow_map()`.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "ranger")
@@ -96,13 +92,12 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 ```
 
 The grid tuner and the racers score the candidates they are given. The
-Bayesian and annealing searches propose their own candidates instead, and to
-do that they need to know each parameter's range. The default range of
-`mtry` is not known until the data is seen, so a search over it fails at
-inner tuning in every fold with the message that `mtry` must be a parameter
-object without unknowns. The parameter set below fixes that range by hand,
-and bounds `min_n` to the grid's range too, because its default runs past
-the size of an inner analysis set here.
+Bayesian and annealing searches propose their own candidates, and to do that
+they need each parameter's range. The default range of `mtry` is not known
+until the data is seen, so a search over it fails at inner tuning in every
+fold. The parameter set below fixes that range by hand, and bounds `min_n`
+to the grid's range too, because its default runs past the size of an inner
+analysis set here.
 
 ```{r param-info}
 params <- update(
@@ -118,8 +113,8 @@ params
 
 `nested_tune_bayes()` runs `tune::tune_bayes()` inside each outer fold. The
 search starts from a small space-filling set of candidates, scores them on
-the inner resamples, and then proposes one new candidate per iteration from a
-Gaussian process fitted to the scores so far. `initial` and `iter` are the
+the inner resamples, and then proposes one new candidate per iteration from
+a Gaussian process fitted to the scores so far. `initial` and `iter` are the
 sizes of those two stages, kept small here so the page builds quickly.
 
 ```{r bayes}
@@ -136,16 +131,12 @@ bayes <- nested_tune_bayes(
 bayes
 ```
 
-Each fold scored `r 4 + 3` candidates on `r nrow(folds$inner_resamples[[1]])`
-inner resamples, which is `r nrow(folds$inner_resamples[[1]]) * (4 + 3)` fits
-per outer fold for tuning, against the
-`r nrow(folds$inner_resamples[[1]]) * nrow(grid)` the guide's grid costs. The
-print above notes that the folds did not search the same grid: the same
-number of candidates each, but not the same ones. That is the nature of the
-search rather than a fault: each fold proposes candidates from
-its own scores, so no two folds need score the same set, and the note is
-there so that a reader of the summary does not mistake the selections for a
-vote over shared candidates.
+The print notes that the folds did not search the same grid: the same
+number of candidates each, but not the same ones, because each fold proposes
+candidates from its own scores. The note is there so that a reader of the
+summary does not mistake the selections for a vote over shared candidates.
+The fit count follows the arithmetic in `vignette("nested-cv")`, with the
+candidates per fold now `initial + iter`.
 
 `.inner_metrics` holds what the search inside one fold saw. Here is the
 first fold's:
@@ -160,8 +151,10 @@ bayes_iter <- range(bayes$.inner_metrics[[1]]$.iter)
 
 The `.iter` column says which stage each candidate came from: `.iter` of
 `r bayes_iter[1]` marks the initial set, and the proposals run up to
-`r bayes_iter[2]`. A control that stops the search early, shown further
-down, is visible here as a fold whose `.iter` stops short of `iter`.
+`r bayes_iter[2]`. A `tune::control_bayes()` passed as `control` reaches the
+inner call in every fold, and one that stops the search early shows here as
+a fold whose `.iter` stops short of `iter`; `?nested_tune_bayes` says which
+of its slots this package sets for itself.
 
 ## Racing
 
@@ -170,8 +163,9 @@ score every candidate on a few inner resamples first. From then on, after
 each further resample, a candidate that is clearly worse than the current
 best is dropped, so the fits that a full grid search would spend on losing
 candidates are saved. `nested_tune_race_anova()` decides with a repeated
-measures ANOVA fitted by `lme4`, and `nested_tune_race_win_loss()` with a
-Bradley-Terry model of pairwise wins fitted by `BradleyTerry2`.
+measures ANOVA fitted by lme4, and `nested_tune_race_win_loss()` with a
+Bradley-Terry model of pairwise wins fitted by BradleyTerry2. Both refuse at
+entry when a package their race needs is not installed.
 
 ```{r race-notice, eval = !has_race, echo = FALSE, results = "asis"}
 absent <- c("finetune", "lme4", "BradleyTerry2")
@@ -206,8 +200,8 @@ A fold's `.inner_metrics` from a race is the whole grid, and the `n` column
 says how many inner resamples each candidate was scored on before it was
 dropped or the race ended. `collect_inner_metrics()` stacks those tables
 with the fold label beside them, so summing `n` over one metric's rows
-counts the fits each fold spent on tuning. The fold that spent the fewest
-is the one where elimination did the most work:
+counts the fits each fold spent on tuning. The fold that spent the fewest is
+the one where elimination did the most work:
 
 ```{r race-anova-inner, eval = has_race}
 fits_per_fold <- collect_inner_metrics(race) |>
@@ -266,9 +260,8 @@ collect_inner_metrics(win_loss) |>
 outer fold. Like the Bayesian search it proposes its own candidates and
 needs the parameter set above, but each proposal is a small random move from
 the current candidate, accepted when it scores better and sometimes when it
-scores worse. finetune prints a log of every move by default; the control
-passed below keeps the page quiet, and is the first use here of the `...`
-that the next section describes.
+scores worse. finetune prints a log of every move by default, and the
+control passed below keeps the page quiet.
 
 ```{r anneal, eval = has_finetune}
 set.seed(5)
@@ -291,64 +284,72 @@ anneal_iter <- range(anneal$.inner_metrics[[1]]$.iter)
 
 ```{r anneal-prose, eval = has_finetune, echo = FALSE, results = "asis"}
 cat(sprintf(
-  paste0(
-    "`.iter` runs from %d, the initial candidates, to %d. Each fold scored ",
-    "%d candidates on %d inner resamples, %d fits for tuning, the same as ",
-    "the guide's grid.\n"
-  ),
+  "`.iter` runs from %d, the initial candidates, to %d.\n",
   anneal_iter[1],
-  anneal_iter[2],
-  3 + 3,
-  nrow(folds$inner_resamples[[1]]),
-  nrow(folds$inner_resamples[[1]]) * (3 + 3)
+  anneal_iter[2]
 ))
 ```
 
-## Passing a control through `...`
+Seeding is the same on all five: seed the session before the call, and the
+same seed gives the same result serially and in parallel, as
+`vignette("nested-cv")` explains under Reproducibility.
 
-None of the four drivers on this page has a `control` argument of its own. A
-control object of the matching kind, `control_bayes()` for the Bayesian driver,
-`finetune::control_race()` and `finetune::control_sim_anneal()` for the
-others, is passed as `control` through `...`, and reaches the inner tuning
-call in every fold. Here the Bayesian run is repeated under a control that
-stops a fold's search after three proposals in a row bring no improvement.
+## A workflow with nothing to tune
 
-```{r control}
-set.seed(6)
+A tuned procedure is usually compared with something simpler, such as the
+same model with its parameters fixed. `nested_fit_resamples()` scores such a
+workflow on the same nested design. It runs the same outer loop with the
+inner stage removed, so each fold fits the workflow as given on its analysis
+rows and scores it once on its assessment rows, and the record says no
+tuning ran. What the shared design buys is that the two runs score on
+identical folds.
 
-stopped <- nested_tune_bayes(
-  wf,
-  folds,
-  param_info = params,
-  initial = 4,
-  iter = 3,
-  control = control_bayes(verbose = FALSE, no_improve = 3)
-)
+```{r baseline}
+fixed_rf <- rand_forest(mtry = 2L, min_n = 10L, trees = 500) |>
+  set_engine("ranger") |>
+  set_mode("regression")
 
-procedure <- extract_procedure(stopped)
-procedure
+set.seed(2)
+baseline <- nested_fit_resamples(workflow(mpg ~ ., fixed_rf), folds)
+
+extract_procedure(baseline)$tuner
+collect_metrics(baseline)
 ```
 
-This record says what ran, and a final fit built
-from this result re-runs exactly that. Its `control` element is the control
-as it took effect, not as it was passed. Two of its slots are this package's
-to set. `allow_par` is `r procedure$control$allow_par` whatever the control
-said, because parallelism belongs over the outer folds, and a second pool
-inside each fold would contend with the first. `event_level` is set once, by
-the driver's own argument: a control left at tune's default takes that
-argument's level, and a control naming a level that is neither tune's
-default nor the argument's is refused at entry, naming both. One slot is
-missing from the record. `seed` is dropped, because the Bayesian search's
-seed is the fold's tuning seed, which the fold's own `.tuning_seed` column
-already holds, and the driver puts it back on the control at the point the
-inner call is made.
+Every reader answers on the baseline. Its `.selected` column holds an empty
+table on every fold, since nothing was chosen, so `collect_selections()` and
+`agreement()` return zero rows. The per-fold metrics join those of a tuned
+run by fold label:
+
+```{r baseline-join}
+collect_metrics(bayes, summarize = FALSE) |>
+  filter(.metric == "rmse") |>
+  select(id, tuned = .estimate) |>
+  left_join(
+    collect_metrics(baseline, summarize = FALSE) |>
+      filter(.metric == "rmse") |>
+      select(id, fixed = .estimate),
+    by = "id"
+  )
+```
+
+Read the table fold by fold rather than as one difference, since two nested
+estimates cannot be subtracted to compare procedures, for the reasons
+`vignette("estimate")` gives. The two doors are exclusive: a workflow
+carrying a `tune()` marker is refused by `nested_fit_resamples()`, and a
+workflow with none is refused by the five tuning functions, each naming the
+other.
+
+```{r baseline-refusal, error = TRUE}
+nested_fit_resamples(wf, folds)
+```
 
 ## A set of workflows on one design
 
 A comparison across model families needs every family scored on the same
 outer folds. `nested_workflow_map()` takes a `workflow_set()` and the name
-of one driver, and runs each workflow of the set through it on one design,
-so the results come back side by side. Here the set holds the random
+of one tuning function, and runs each workflow of the set through it on one
+design, so the results come back side by side. Here the set holds the random
 forest above, a linear model on the same predictors with nothing to tune,
 and a linear model on principal components whose count is tuned. The
 forest's grid goes in the call; the components workflow cannot use it, so
@@ -378,34 +379,33 @@ mapped
 
 The baseline has nothing to tune, so it ran through `nested_fit_resamples()`
 whatever `fn` named, and the print says so beside its id. Each row's
-`result` is the object the named driver returns for that workflow, called by
-hand with the same arguments under the same seed, so everything the earlier
-sections read off one result reads off a row here.
+`result` is the object the named function returns for that workflow, called
+by hand with the same arguments under the same seed, so everything the
+earlier sections read off one result reads off a row here.
 
 ```{r wset-metrics}
 collect_metrics(mapped)
 ```
 
 `collect_metrics()` stacks each workflow's estimate under its id, and the
-other readers stack their tables the same way. The three readers of one
-result answer on the set too. `summary()` summarizes every workflow, one
-section per id under one heading for the set.
+other readers stack their tables the same way. `summary()` summarizes every
+workflow, one section per id under one heading for the set.
 
 ```{r wset-summary}
 summary(mapped)
 ```
 
-`agreement()` stacks each workflow's selection table under its id, with
-the parameter columns ahead of the counts; the baseline tuned nothing and
-has no row.
+`agreement()` stacks each workflow's selection table under its id, with the
+parameter columns ahead of the counts; the baseline tuned nothing and has no
+row.
 
 ```{r wset-agreement}
 agreement(mapped)
 ```
 
 The performance view puts the workflows along one axis inside a panel per
-metric, so the estimates are read across it, each marked by a dashed rule
-at that workflow's `collect_metrics()` mean.
+metric, each marked by a dashed rule at that workflow's `collect_metrics()`
+mean.
 
 ```{r wset-performance, fig.width = 7, fig.height = 3.6, fig.alt = "Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate."}
 autoplot(mapped, type = "performance")
@@ -420,52 +420,7 @@ workflow; the baseline has no panel.
 autoplot(mapped)
 ```
 
-What the set does not offer
-is a ranking of its workflows or a fit of the best one: choosing among them
-by these estimates would be a selection the outer loop did not nest, and
-`vignette("estimate")` says why. The final fit for one workflow of the set
-is `nested_final_fit(mapped, id = "forest")`.
-
-## What differs from calling tune or finetune directly
-
-Every statistical step is tune's or finetune's, and the driver adds the loop
-around it. The differences a caller meets are these.
-
-A control reaches the inner call through `...`, as above. Apart from the
-three slots the previous section names, everything on it passes through as
-given, including the slots that stop a search early, which is why one fold's
-`.inner_metrics` can be shorter than another's.
-
-The search's own settings are arguments here rather than control slots.
-`iter`, `initial` and `objective` on the Bayesian driver, `iter` and
-`initial` on annealing, and `grid` on the racers reach the inner call
-unchanged, with one narrowing: `initial` is a count, and an earlier tuning
-result, which tune and finetune both accept there, is refused.
-
-What comes back from the inner call is its metrics table and its selection,
-never the tuning object itself. `.inner_metrics` is that table, the whole
-grid for a race, and `.selected` is the candidate the `select` rule picked
-on it by the first metric: `selection_rule("best")` by default, or tune's
-one-standard-error or percent-loss rule with the parameter orderings the
-rule names. The rule is recorded with the procedure, and the final fit
-selects by it.
-So a control's `save_workflow` slot costs its work inside every fold and
-returns nothing on a nested run, and `extract` and `save_pred` reach the
-result through the outer fit alone: a fold's `.predictions` and `.extracts`
-are what its outer fit produced, never the inner run's. The final fit keeps
-its tuning run whole, and that is where the inner run's results are
-reachable. The annealing control's `save_history` slot writes finetune's
-search history to a file in the temporary directory of the process that
-tuned, each fold overwriting the last, and nothing of it reaches the result
-or the final fit.
-
-The racing and annealing drivers refuse at entry when a package their
-search needs is not installed, rather than one outer loop's worth of work
-later when finetune would ask for it, and the racers refuse a `burn_in` that
-no fold's inner design can meet before any fold runs.
-
-Seeding is the guide's contract on all four: seed the session before the
-call, and each fold gets its own tuning and fitting seeds, all drawn from
-that state at entry,
-so the same seed gives the same result serially and in parallel. The help
-page of each driver gives the exact hand-replication recipe for one fold.
+What the set does not offer is a ranking of its workflows or a fit of the
+best one, since choosing among them by these estimates would be a selection
+the outer loop did not nest, as `vignette("estimate")` says. The final fit
+for one workflow of the set is `nested_final_fit(mapped, id = "forest")`.
