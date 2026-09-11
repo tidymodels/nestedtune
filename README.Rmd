@@ -86,5 +86,3 @@ Learn more:
   every column of the results object and every function that reads it.
 - [Running the outer loop in parallel](https://nestedtune.tidymodels.org/articles/parallel.html),
   the same call on a pool of mirai daemons.
-
-This sentence has a semicolon; the sweep must name it.
