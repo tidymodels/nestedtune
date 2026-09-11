@@ -30,11 +30,12 @@ A tibble whose first columns are the design's fold labels and whose
 remaining columns come from the stacked tables. See What the columns are.
 }
 \description{
-A \code{nested_results} keeps three of its records as one table per outer fold,
-in list columns: what went wrong (\code{.notes}), what the fold's inner tuning
-selected (\code{.selected}), and everything that tuning scored
-(\code{.inner_metrics}). These readers stack one such column into a single table,
-the design's fold labels first, so every row says which fold it came from.
+A \code{nested_results} keeps three of its records as one table per outer
+fold, in list columns. They are what went wrong (\code{.notes}), what the
+fold's inner tuning selected (\code{.selected}), and everything that tuning
+scored (\code{.inner_metrics}). These functions stack one such column into a
+single table, the design's fold labels first, so every row says which
+fold it came from.
 \itemize{
 \item \code{collect_notes()} stacks \code{.notes} over every outer fold, failed folds
 included. A completed fold can carry an error note too, from an \code{extract}
@@ -43,9 +44,9 @@ that failed on it (see
 \item \code{collect_selections()} stacks \code{.selected}: one row per completed fold. A
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows, since no fold selected
 anything.
-\item \code{collect_inner_metrics()} stacks \code{.inner_metrics}: one row per candidate,
-metric, and iteration where the tuner iterates, that a completed fold's
-inner tuning scored.
+\item \code{collect_inner_metrics()} stacks \code{.inner_metrics}: one row per
+candidate, a parameter setting, and metric that a completed fold's
+inner tuning scored, and per iteration where the tuner iterates.
 }
 }
 \section{What the columns are}{
@@ -57,9 +58,9 @@ Then come the stacked tables' own columns, over the union of what any
 stacked fold carries. A fold lacking one holds \code{NA} there, exactly as a fold
 whose recorded value is \code{NA} does, so the two cannot be told apart.
 
-For \code{collect_notes()} the stacked columns are tune's \code{location}, \code{type},
-\code{note} and \code{trace}, and a run that recorded no note gives no rows with those
-columns. A stacked table carrying a column named like a label column, say a
+\code{collect_notes()} stacks tune's four note columns, from \code{location} to
+\code{trace}. A run that recorded no note gives no rows with those columns. A
+stacked table carrying a column named like a label column, say a
 parameter whose id is \code{id}, is refused with class
 \code{nestedtune_collect_name_collision}.
 }
@@ -70,7 +71,7 @@ parameter whose id is \code{id}, is refused with class
 \code{collect_selections()} and \code{collect_inner_metrics()} read the folds that
 completed, as \code{\link[=collect_metrics]{collect_metrics()}} and \code{\link[=agreement]{agreement()}} do. A run with some
 folds failed is stacked over the rest, with one warning of class
-\code{nestedtune_partial_summary} naming the missing folds; a run in which no
+\code{nestedtune_partial_summary} naming the missing folds. A run in which no
 fold completed is an error of class \code{nestedtune_no_completed_folds}.
 \code{collect_notes()} reads every fold and warns about none.
 }
@@ -112,6 +113,6 @@ collect_notes(res)
 }
 \seealso{
 \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
-\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same readers on a
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same functions on a
 workflow-set run
 }

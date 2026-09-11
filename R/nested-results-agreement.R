@@ -7,17 +7,19 @@
 # procedure's choices, and the final model's parameters come from
 # nested_final_fit() running the same procedure on the whole data (D-014).
 
-#' Tabulate how often each candidate was selected across the outer folds
+#' Tabulate how often each parameter setting was selected across the outer folds
 #'
 #' @description
-#' Each outer fold tunes on its own inner resamples and selects one candidate.
-#' `agreement()` counts those selections: one row per distinct combination of
-#' selected parameter values, most frequent first.
+#' Each outer fold tunes on its own inner resamples and selects one
+#' candidate, one parameter setting. `agreement()` counts those selections:
+#' one row per distinct combination of selected parameter values, most
+#' frequent first.
 #'
-#' The most frequent combination is not the final model's parameters. The folds
-#' say how stable the tuning procedure's choice is; the model to deploy comes
-#' from [nested_final_fit()], which runs the procedure once more on the whole
-#' dataset and selects for itself.
+#' The most frequent combination is not the final model's parameters. The
+#' folds say how stable the choice of the tuning procedure, tune then
+#' select, is. The model to deploy comes from [nested_final_fit()], which
+#' runs the procedure once more on the whole dataset and selects for
+#' itself.
 #'
 #' @inheritParams collect_metrics.nested_results
 #' @return A tibble with one column per parameter any completed fold selected,
@@ -28,10 +30,10 @@
 #' @section How the folds are counted:
 #'
 #' Every completed fold is counted once, so `sum(n)` is the number of completed
-#' folds whenever the table has rows. A run with some folds failed is tabulated
-#' over the rest, with a warning saying so, and a run in which none completed
-#' is an error of class `nestedtune_no_completed_folds`, as it is for
-#' [collect_metrics()], [autoplot()][autoplot.nested_results] and
+#' folds whenever the table has rows. A run with some folds failed is
+#' tabulated over the rest, with a warning saying so. A run in which none
+#' completed is an error of class `nestedtune_no_completed_folds`, as it is
+#' for [collect_metrics()], [autoplot()][autoplot.nested_results] and
 #' [nested_final_fit()].
 #'
 #' tune's `.config` is not a column here: it labels a candidate inside one

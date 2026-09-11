@@ -25,16 +25,18 @@ are named in the footer.}
 \code{x}, invisibly.
 }
 \description{
-Shows the object: its outer folds as the tibble rows they are, the outer
-resampling scheme it came from, how many folds did not complete, and a
-pointer to \code{\link[=summary.nested_results]{summary.nested_results()}} for what the run means.
+Shows the object: its outer folds as the tibble rows they are, and the
+outer resampling scheme it came from. It also says how many folds did
+not complete, and points to \code{\link[=summary.nested_results]{summary.nested_results()}} for what the run
+means.
 }
 \section{When the folds searched different candidates}{
 
 
-When two or more completed folds scored different candidate sets, printing
-adds a line giving each fold's candidate count, and only then. A grid given
-as a size is the usual cause: it is expanded once per fold, under that
+Folds can score different candidate sets, the parameter settings each
+inner search tried. When two or more completed folds did, and only then,
+printing adds a line giving each fold's candidate count. A grid given as
+a size is the usual cause. It is expanded once per fold, under that
 fold's own seed, so a continuous parameter leaves every fold with
 candidates of its own. It matters for reading the selections: folds that
 disagreed were not choosing from the same menu.

@@ -19,9 +19,10 @@
 #' Print a nested cross-validation result
 #'
 #' @description
-#' Shows the object: its outer folds as the tibble rows they are, the outer
-#' resampling scheme it came from, how many folds did not complete, and a
-#' pointer to [summary.nested_results()] for what the run means.
+#' Shows the object: its outer folds as the tibble rows they are, and the
+#' outer resampling scheme it came from. It also says how many folds did
+#' not complete, and points to [summary.nested_results()] for what the run
+#' means.
 #'
 #' @inheritParams collect_metrics.nested_results
 #' @param ... Not used; must be empty, so `n` and `width` must be given by
@@ -37,9 +38,10 @@
 #'
 #' @section When the folds searched different candidates:
 #'
-#' When two or more completed folds scored different candidate sets, printing
-#' adds a line giving each fold's candidate count, and only then. A grid given
-#' as a size is the usual cause: it is expanded once per fold, under that
+#' Folds can score different candidate sets, the parameter settings each
+#' inner search tried. When two or more completed folds did, and only then,
+#' printing adds a line giving each fold's candidate count. A grid given as
+#' a size is the usual cause. It is expanded once per fold, under that
 #' fold's own seed, so a continuous parameter leaves every fold with
 #' candidates of its own. It matters for reading the selections: folds that
 #' disagreed were not choosing from the same menu.
@@ -118,24 +120,32 @@ print_failure_count <- function(x) {
 #' Summarize a nested cross-validation result
 #'
 #' @description
-#' Answers what the run means: how much of the requested outer design ran,
-#' which outer folds failed and at which stage, what each fold's inner tuning
-#' selected, and the estimate across the folds that completed.
+#' Answers what the run means. It says how much of the requested outer
+#' design ran, and which outer folds failed at which stage. It also says
+#' what each fold's inner tuning selected, and the estimate across the
+#' folds that completed.
 #'
-#' The selection lines are the part nothing else in the ecosystem shows. Outer
-#' folds that chose different parameters mean the tuning procedure is unstable
-#' on this data, which averaging the metrics hides, so the summary marks it.
+#' The selection lines are the part nothing else in the ecosystem shows.
+#' Outer folds that chose different parameters mean the tuning procedure,
+#' tune then select, is unstable on this data. Averaging the metrics hides
+#' that, so the summary marks it.
 #'
 #' @param object A `nested_results` from [nested_tune_grid()] or one of its
 #'   siblings.
 #' @inheritParams collect_metrics.nested_results
 #' @return
-#' `summary()` returns an object of class `summary.nested_results`: a list
-#' holding the outer resampling scheme's label, the requested and completed
-#' fold counts, the failed folds with the stage each failed at, what the
-#' completed folds selected, the candidates each searched, and the metric
-#' estimates averaged over them. Printing it is what most callers want; the
-#' components are there for one that needs a number rather than a line of text.
+#' `summary()` returns an object of class `summary.nested_results`, a list
+#' holding:
+#'
+#' - the outer resampling scheme's label;
+#' - the requested and completed fold counts;
+#' - the failed folds, with the stage each failed at;
+#' - what the completed folds selected, and the candidates, the parameter
+#'   settings, each searched;
+#' - the metric estimates averaged over them.
+#'
+#' Printing it is what most callers want; the components are there for one
+#' that needs a number rather than a line of text.
 #'
 #' @section A run that did not finish:
 #'

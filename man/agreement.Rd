@@ -2,7 +2,7 @@
 % Please edit documentation in R/nested-results-agreement.R
 \name{agreement}
 \alias{agreement}
-\title{Tabulate how often each candidate was selected across the outer folds}
+\title{Tabulate how often each parameter setting was selected across the outer folds}
 \usage{
 agreement(x, ...)
 }
@@ -20,23 +20,25 @@ then \code{n}, the number of completed folds that chose that combination, and
 \code{n} down, ties in the order the combination first appears.
 }
 \description{
-Each outer fold tunes on its own inner resamples and selects one candidate.
-\code{agreement()} counts those selections: one row per distinct combination of
-selected parameter values, most frequent first.
+Each outer fold tunes on its own inner resamples and selects one
+candidate, one parameter setting. \code{agreement()} counts those selections:
+one row per distinct combination of selected parameter values, most
+frequent first.
 
-The most frequent combination is not the final model's parameters. The folds
-say how stable the tuning procedure's choice is; the model to deploy comes
-from \code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the procedure once more on the whole
-dataset and selects for itself.
+The most frequent combination is not the final model's parameters. The
+folds say how stable the choice of the tuning procedure, tune then
+select, is. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which
+runs the procedure once more on the whole dataset and selects for
+itself.
 }
 \section{How the folds are counted}{
 
 
 Every completed fold is counted once, so \code{sum(n)} is the number of completed
-folds whenever the table has rows. A run with some folds failed is tabulated
-over the rest, with a warning saying so, and a run in which none completed
-is an error of class \code{nestedtune_no_completed_folds}, as it is for
-\code{\link[=collect_metrics]{collect_metrics()}}, \link[=autoplot.nested_results]{autoplot()} and
+folds whenever the table has rows. A run with some folds failed is
+tabulated over the rest, with a warning saying so. A run in which none
+completed is an error of class \code{nestedtune_no_completed_folds}, as it is
+for \code{\link[=collect_metrics]{collect_metrics()}}, \link[=autoplot.nested_results]{autoplot()} and
 \code{\link[=nested_final_fit]{nested_final_fit()}}.
 
 tune's \code{.config} is not a column here: it labels a candidate inside one

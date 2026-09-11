@@ -12,7 +12,7 @@
 # quosures, for the same reason: an expression carries no environment onto
 # the wire or into the cache.
 
-#' Choose the rule each fold selects its candidate by
+#' Choose the rule each fold selects its parameters by
 #'
 #' @description
 #' Builds the object the `select` argument of [nested_tune_grid()] and its
@@ -33,9 +33,10 @@
 #'   candidate, in percent, as a single non-negative number. Left `NULL` it
 #'   takes tune's default of 2, and the other rules refuse it.
 #'
-#' @return A list of class `selection_rule` with elements `rule`, `order` (the
-#'   expressions in `...`, empty for `"best"`) and `limit` (`NULL` outside
-#'   `"pct_loss"`). Printing shows the three on one line.
+#' @return A list of class `selection_rule` with elements `rule`, `order` and
+#'   `limit`. `order` holds the expressions in `...`, empty for `"best"`.
+#'   `limit` is `NULL` outside `"pct_loss"`. Printing shows the three on one
+#'   line.
 #'
 #' @section The three rules:
 #'
@@ -49,7 +50,7 @@
 #'
 #' An ordering is a parameter name, wrapped in [dplyr::desc()] where a larger
 #' value is the simpler model. Each must be a bare name or a call, never a
-#' string or a number, which would order nothing, and none may be named, so a
+#' string or a number, which would order nothing. None may be named, so a
 #' misspelled `limit` is refused instead of read as an ordering. Every name
 #' must be a parameter the workflow tunes, which the orchestrators check when
 #' the run starts.

@@ -19,23 +19,32 @@ rather than silently ignored.}
 \item{x}{A \code{summary.nested_results} object from \code{\link[=summary.nested_results]{summary.nested_results()}}.}
 }
 \value{
-\code{summary()} returns an object of class \code{summary.nested_results}: a list
-holding the outer resampling scheme's label, the requested and completed
-fold counts, the failed folds with the stage each failed at, what the
-completed folds selected, the candidates each searched, and the metric
-estimates averaged over them. Printing it is what most callers want; the
-components are there for one that needs a number rather than a line of text.
+\code{summary()} returns an object of class \code{summary.nested_results}, a list
+holding:
+\itemize{
+\item the outer resampling scheme's label;
+\item the requested and completed fold counts;
+\item the failed folds, with the stage each failed at;
+\item what the completed folds selected, and the candidates, the parameter
+settings, each searched;
+\item the metric estimates averaged over them.
+}
+
+Printing it is what most callers want; the components are there for one
+that needs a number rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-Answers what the run means: how much of the requested outer design ran,
-which outer folds failed and at which stage, what each fold's inner tuning
-selected, and the estimate across the folds that completed.
+Answers what the run means. It says how much of the requested outer
+design ran, and which outer folds failed at which stage. It also says
+what each fold's inner tuning selected, and the estimate across the
+folds that completed.
 
-The selection lines are the part nothing else in the ecosystem shows. Outer
-folds that chose different parameters mean the tuning procedure is unstable
-on this data, which averaging the metrics hides, so the summary marks it.
+The selection lines are the part nothing else in the ecosystem shows.
+Outer folds that chose different parameters mean the tuning procedure,
+tune then select, is unstable on this data. Averaging the metrics hides
+that, so the summary marks it.
 }
 \section{A run that did not finish}{
 

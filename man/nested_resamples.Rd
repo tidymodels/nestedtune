@@ -26,22 +26,24 @@ working. It is the outer \code{rset} with an \code{inner_resamples} list column
 added, one inner \code{rset} per outer split.
 }
 \description{
-\code{nested_resamples()} builds the nested resampling structure the orchestrators
-take: one row per outer fold, with that fold's inner resamples beside it. It
-is \code{\link[rsample:nested_cv]{rsample::nested_cv()}}'s structure, and for the same seed and the same
-specifications it selects the same rows.
+\code{nested_resamples()} builds the nested resampling design
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} and its siblings take: one row per outer fold, with
+that fold's inner resamples beside it. It is \code{\link[rsample:nested_cv]{rsample::nested_cv()}}'s
+structure, and for the same seed and the same specifications it selects
+the same rows.
 
 What differs is what the splits point at. rsample's inner splits index a
-fresh copy of each outer fold's analysis set; these index the one data frame
-you already have, so the design's size barely grows with the fold count.
+fresh copy of each outer fold's analysis set. These index the one data
+frame you already have, so the design's size barely grows with the fold
+count.
 }
 \section{Differences from rsample}{
 
 
 \code{\link[rsample:analysis]{rsample::analysis()}} and \code{\link[rsample:assessment]{rsample::assessment()}} return identical frames,
-attributes included, and each inner split keeps the class and the resample id
-rsample gives it, so \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the
-same.
+attributes included. Each inner split keeps the class and the resample
+id rsample gives it, so \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}}
+behave the same.
 
 One behavior differs on purpose: an outer bootstrap is refused rather than
 warned about. The same row can otherwise land in both the inner analysis and
@@ -59,8 +61,8 @@ same frame, keeps only the row indices it produces, and points them back at
 
 Sizes below are multiples of the source data, measured on
 \code{mlbench::LetterRecognition} (20000 x 17) with five inner folds under
-rsample 1.3.2 and R 4.6.1, and recorded on 2026-07-25 beside the check
-\code{tests/testthat/test-nested-resamples-memory.R} makes of them:\tabular{rrr}{
+rsample 1.3.2 and R 4.6.1. They were recorded on 2026-07-25 beside the
+check \code{tests/testthat/test-nested-resamples-memory.R} makes of them:\tabular{rrr}{
    outer folds \tab \code{rsample::nested_cv()} \tab \code{nested_resamples()} \cr
    2 \tab 2.2x \tab 1.2x \cr
    5 \tab 5.6x \tab 1.7x \cr

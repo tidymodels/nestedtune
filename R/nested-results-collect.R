@@ -13,11 +13,12 @@
 #' Stack a per-fold column of a nested resampling run across the outer folds
 #'
 #' @description
-#' A `nested_results` keeps three of its records as one table per outer fold,
-#' in list columns: what went wrong (`.notes`), what the fold's inner tuning
-#' selected (`.selected`), and everything that tuning scored
-#' (`.inner_metrics`). These readers stack one such column into a single table,
-#' the design's fold labels first, so every row says which fold it came from.
+#' A `nested_results` keeps three of its records as one table per outer
+#' fold, in list columns. They are what went wrong (`.notes`), what the
+#' fold's inner tuning selected (`.selected`), and everything that tuning
+#' scored (`.inner_metrics`). These functions stack one such column into a
+#' single table, the design's fold labels first, so every row says which
+#' fold it came from.
 #'
 #' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
 #'   included. A completed fold can carry an error note too, from an `extract`
@@ -26,9 +27,9 @@
 #' * `collect_selections()` stacks `.selected`: one row per completed fold. A
 #'   [nested_fit_resamples()] result gives no rows, since no fold selected
 #'   anything.
-#' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per candidate,
-#'   metric, and iteration where the tuner iterates, that a completed fold's
-#'   inner tuning scored.
+#' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per
+#'   candidate, a parameter setting, and metric that a completed fold's
+#'   inner tuning scored, and per iteration where the tuner iterates.
 #'
 #' @inheritParams collect_metrics.nested_results
 #'
@@ -43,9 +44,9 @@
 #' stacked fold carries. A fold lacking one holds `NA` there, exactly as a fold
 #' whose recorded value is `NA` does, so the two cannot be told apart.
 #'
-#' For `collect_notes()` the stacked columns are tune's `location`, `type`,
-#' `note` and `trace`, and a run that recorded no note gives no rows with those
-#' columns. A stacked table carrying a column named like a label column, say a
+#' `collect_notes()` stacks tune's four note columns, from `location` to
+#' `trace`. A run that recorded no note gives no rows with those columns. A
+#' stacked table carrying a column named like a label column, say a
 #' parameter whose id is `id`, is refused with class
 #' `nestedtune_collect_name_collision`.
 #'
@@ -54,7 +55,7 @@
 #' `collect_selections()` and `collect_inner_metrics()` read the folds that
 #' completed, as [collect_metrics()] and [agreement()] do. A run with some
 #' folds failed is stacked over the rest, with one warning of class
-#' `nestedtune_partial_summary` naming the missing folds; a run in which no
+#' `nestedtune_partial_summary` naming the missing folds. A run in which no
 #' fold completed is an error of class `nestedtune_no_completed_folds`.
 #' `collect_notes()` reads every fold and warns about none.
 #'
@@ -74,7 +75,7 @@
 #' collect_notes(res)
 #'
 #' @seealso [collect_metrics()], [agreement()], [summary.nested_results()],
-#'   [collect_metrics.nested_results_set()] for the same readers on a
+#'   [collect_metrics.nested_results_set()] for the same functions on a
 #'   workflow-set run
 #' @name collect_selections
 #' @export
@@ -171,16 +172,16 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' Stack the outer fit's predictions or extracts across the outer folds
 #'
 #' @description
-#' A run whose control asked for them keeps, per outer fold, the predictions
-#' its finalized model made on the fold's assessment rows (`.predictions`,
-#' under `save_pred = TRUE`) and whatever the control's `extract` function
-#' returned for the fold's fitted workflow (`.extracts`). These two methods on
-#' tune's generics stack one such column into a single table, the design's fold
-#' labels first.
+#' A run whose control asked for them keeps two more records per outer
+#' fold. `.predictions`, under `save_pred = TRUE`, holds the predictions its
+#' finalized model made on the fold's assessment rows. `.extracts` holds
+#' whatever the control's `extract` function returned for the fold's fitted
+#' workflow. These two methods on tune's generics stack one such column
+#' into a single table, the design's fold labels first.
 #'
 #' * `collect_predictions()` gives one row per assessment row of every
-#'   completed fold, with the columns `tune::last_fit()` produced: the outcome,
-#'   `.pred` or the class columns, `.row` and `.config`.
+#'   completed fold, with the columns `tune::last_fit()` produced: the
+#'   outcome, the prediction columns, `.row` and `.config`.
 #' * `collect_extracts()` gives one row per completed fold, the fold's value in
 #'   an `.extracts` list column. A completed fold whose extract function
 #'   errored holds `NULL` there, and its `.notes` say why.
@@ -196,13 +197,13 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' @section Folds that failed, and columns not saved:
 #'
-#' Both readers take the folds that completed, as [collect_selections()] does,
-#' warning once with class `nestedtune_partial_summary` on a partial run and
-#' erroring with class `nestedtune_no_completed_folds` when no fold completed.
+#' Both take the folds that completed, as [collect_selections()] does. They
+#' warn once with class `nestedtune_partial_summary` on a partial run and
+#' error with class `nestedtune_no_completed_folds` when no fold completed.
 #'
 #' An object whose recorded control did not ask for the column, or that no
-#' longer carries it, is refused with class `nestedtune_column_not_saved`, and
-#' the message names the control slot to set. A prediction table carrying a
+#' longer carries it, is refused with class `nestedtune_column_not_saved`.
+#' The message names the control slot to set. A prediction table carrying a
 #' column named like a fold label column is refused with class
 #' `nestedtune_collect_name_collision`.
 #'
@@ -232,7 +233,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' collect_extracts(res)
 #'
 #' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()],
-#'   [collect_metrics.nested_results_set()] for the same readers on a
+#'   [collect_metrics.nested_results_set()] for the same functions on a
 #'   workflow-set run
 #' @name collect_predictions.nested_results
 NULL

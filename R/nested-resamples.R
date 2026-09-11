@@ -1,14 +1,16 @@
 #' Build a nested resampling design without copying the data per outer fold
 #'
 #' @description
-#' `nested_resamples()` builds the nested resampling structure the orchestrators
-#' take: one row per outer fold, with that fold's inner resamples beside it. It
-#' is [rsample::nested_cv()]'s structure, and for the same seed and the same
-#' specifications it selects the same rows.
+#' `nested_resamples()` builds the nested resampling design
+#' [nested_tune_grid()] and its siblings take: one row per outer fold, with
+#' that fold's inner resamples beside it. It is [rsample::nested_cv()]'s
+#' structure, and for the same seed and the same specifications it selects
+#' the same rows.
 #'
 #' What differs is what the splits point at. rsample's inner splits index a
-#' fresh copy of each outer fold's analysis set; these index the one data frame
-#' you already have, so the design's size barely grows with the fold count.
+#' fresh copy of each outer fold's analysis set. These index the one data
+#' frame you already have, so the design's size barely grows with the fold
+#' count.
 #'
 #' @param data A data frame.
 #' @param outside The outer resampling, as an unevaluated call such as
@@ -27,9 +29,9 @@
 #' @section Differences from rsample:
 #'
 #' [rsample::analysis()] and [rsample::assessment()] return identical frames,
-#' attributes included, and each inner split keeps the class and the resample id
-#' rsample gives it, so `labels()` and [rsample::add_resample_id()] behave the
-#' same.
+#' attributes included. Each inner split keeps the class and the resample
+#' id rsample gives it, so `labels()` and [rsample::add_resample_id()]
+#' behave the same.
 #'
 #' One behavior differs on purpose: an outer bootstrap is refused rather than
 #' warned about. The same row can otherwise land in both the inner analysis and
@@ -45,8 +47,8 @@
 #'
 #' Sizes below are multiples of the source data, measured on
 #' `mlbench::LetterRecognition` (20000 x 17) with five inner folds under
-#' rsample 1.3.2 and R 4.6.1, and recorded on 2026-07-25 beside the check
-#' `tests/testthat/test-nested-resamples-memory.R` makes of them:
+#' rsample 1.3.2 and R 4.6.1. They were recorded on 2026-07-25 beside the
+#' check `tests/testthat/test-nested-resamples-memory.R` makes of them:
 #'
 #' | outer folds | `rsample::nested_cv()` | `nested_resamples()` |
 #' |-:|-:|-:|
