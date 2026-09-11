@@ -364,7 +364,8 @@ final_fit_worker <- function(
       event_level = event_level,
       eval_time = eval_time,
       select = NULL,
-      control = control
+      control = control,
+      workflow = workflow_identity(object)
     )
     return(new_nested_final_fit(
       fitted,
@@ -415,7 +416,8 @@ final_fit_worker <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select,
-    control = control
+    control = control,
+    workflow = workflow_identity(object)
   )
   new_nested_final_fit(fitted, selected, tuned, seeds, procedure)
 }
