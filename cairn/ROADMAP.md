@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-10 (eighth pass, at M082's merge: M082 archived and
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M84 | The guides and README read on one pass for a tune_grid user | planned | — | high | milestones/M084-guides-plain-prose.md |
+| M84 | The guides and README read on one pass for a tune_grid user | in-progress | — | high | milestones/M084-guides-plain-prose.md |
 | M85 | The help pages read on one pass for a tune_grid user | planned | M84 | high | milestones/M085-help-pages-plain-prose.md |
 | M83 | Every nested result records the workflow it ran under, and the final fit refuses any other | planned | — | normal | milestones/M083-final-fit-workflow-identity.md |
 | M82 | The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone | done | — | high | milestones/archive/M082-guides-readme-rewrite.md |

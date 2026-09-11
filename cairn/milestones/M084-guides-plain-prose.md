@@ -1,13 +1,13 @@
 # M084: The guides and README read on one pass for a tune_grid user
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the vignettes, the parallel article and the README
-- **Branch/PR:** —
+- **Branch/PR:** `m084-guides-plain-prose`
 
 ## Goal
 
@@ -41,7 +41,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 
 ## Tasks
 
-- [ ] T1: Write `benchmarks/sweep-prose.R`: the AC1 extraction and sentence splitter over the six pages, printing over-cap sentences as `file:line`; a `--terms` mode printing each page's first occurrence of the AC2 words; a `--roxygen` mode for M85 over `#'` lines with the tag rules M85 AC1 states. Header comment states both modes. Run it on the current pages and record the hit counts in the work log.
+- [x] T1: Write `benchmarks/sweep-prose.R`: the AC1 extraction and sentence splitter over the six pages, printing over-cap sentences as `file:line`; a `--terms` mode printing each page's first occurrence of the AC2 words; a `--roxygen` mode for M85 over `#'` lines with the tag rules M85 AC1 states. Header comment states both modes. Run it on the current pages and record the hit counts in the work log.
 - [ ] T2: Rewrite `estimate.Rmd`'s eight listed paragraphs (survey §1) and every sentence the script flags; the IP3 paragraph kept; "procedure" set up where the page first uses it. (RB tripwire: ip-touching)
 - [ ] T3: Rewrite `nested-cv.Rmd`'s three listed paragraphs (survey §4) and flagged sentences; the intro at lines 17-33 untouched; the IP3 paragraph kept. (RB tripwire: ip-touching)
 - [ ] T4: Rewrite `results.Rmd`'s nine listed paragraphs (survey §2) and flagged sentences; "reader", "procedure" and "record" set up in the page's own terms before use.
@@ -57,3 +57,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 - 2026-09-10: plan gate chose dropping M082's `you|your <= 5` cap over keeping it, because the accepted intro uses second person seven times and the impersonal sentences the cap produced are the ones the user rejected; falsified by a maintainer's read finding the second-person pages sound machine-written again (issue #91's original note).
 - 2026-09-10: plan gate chose two milestones (guides, then help pages) over one, because the two surfaces total 137 failing paragraphs over 26 files, past the sizing tripwire, and the help pages should inherit the term choices the guides settle; falsified by the help-page rewrite needing terms the guides never set up.
 - 2026-09-10: plan gate chose leaving NEWS out over adding it, because its 77 bullets are consolidated at the first release anyway; falsified by a release walk that keeps the bullets as they are.
+- 2026-09-10: /milestone-implement started; branch `m084-guides-plain-prose` cut from pushed `main` at `2fc728f`.
+- 2026-09-10: implement gate chose replacing `orchestrator` with plain words (the function name, or "the tuning functions") over defining it per page, so M85 inherits no new term; falsified by the help pages needing one noun for the five functions.
+- 2026-09-10: implement gate chose splitting the 36-word sentence of `estimate.Rmd`'s IP3 paragraph in place, the three claims kept as written, over a Fable brief; the split is shown verbatim at the T2 checkpoint.
+- 2026-09-10: T1 done. `benchmarks/sweep-prose.R` on the pages at `2fc728f`: 45 sentences over 30 words (nested-cv 5, estimate 15, tuners 10, results 10, parallel 4, README 1); `--terms` finds `orchestrator` cold on tuners:350 only, `reader` cold on results:20; `--roxygen`: 142 hits for M85. Spans are stripped over the joined paragraph, since a backtick span can cross a line break.
