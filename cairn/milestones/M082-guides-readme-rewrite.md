@@ -1,6 +1,6 @@
 # M082: The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M081
 - **Driving RR:** —
@@ -48,7 +48,7 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 - [x] T5: Rewrite `results.Rmd` as reading the results: readers, summary, plots, agreement, a short failed-fold note in place of `:254-376`, dplyr rules; the survival example (`:416-564`) removed.
 - [x] T6: Rewrite `articles/parallel.Rmd` (start daemons, same call, same result, when it pays) and `README.Rmd` to the AC5 shape; re-knit `README.md`.
 - [x] T7: Rewrite `NEWS.md` bullets to one or two sentences each, the heading and the pinned id-column sentence kept.
-- [ ] T8: Run the AC2 and AC4 commands and the sweep script, fix every hit, render the pages (`devtools::build_vignettes()` or `pkgdown::build_articles()`), `devtools::check()`; NEWS entry for the docs change.
+- [x] T8: Run the AC2 and AC4 commands and the sweep script, fix every hit, render the pages (`devtools::build_vignettes()` or `pkgdown::build_articles()`), `devtools::check()`; NEWS entry for the docs change.
 
 ## Work log
 
@@ -66,6 +66,7 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 - 2026-09-10: substantive amendment at a mini gate, user accepted: AC4 gains the clause "then filtered by `grep -vE '^---$\|^<!--.*-->$'` to drop the YAML front-matter delimiters and HTML comment lines", because the grep as written hit the YAML `---` delimiters on every page and README's three HTML comment lines and nothing else; the four checks are unchanged. With the filter the grep returns no hit on any of the seven files.
 - 2026-09-10: re-audit: AC4 (full) — nothing blocking; the reader noted the heading clause is decided by reading rather than a command (as the plan-gate wording already was), the filter is asserted without a probe of its own, and the YAML front-matter body stays inside the extracted prose.
 - 2026-09-10: claim audit: 118 claims read, 1 corrected — `vignettes/nested-cv.Rmd` (the closing Reproducibility sentence said both help pages give a one-fold recipe; `?nested_final_fit`'s redoes the full-data run from its two seeds, and the sentence now says so). Three claims the reader left unverified at runtime, each consistent with the help page or test that pins it: the memory figures (`?nested_resamples`, `test-nested-resamples-memory.R`), the set plot's partial-fold subtitle, and the daemon bullets (`?nested_tune_grid`'s parallel section). Deviation: the reader could not be re-messaged for its one re-read (no message tool in this session), so the corrected sentence was read against `man/nested_final_fit.Rd:145-160` inline.
+- 2026-09-10: T8: AC2 counts 1200 / 1397 / 1262 / 1274 / 528 / 201 against caps 1500 / 1400 / 1500 / 1500 / 700 / 350; the amended AC4 grep returns no hit on any of the seven files, the you/your count is 0 on every file but `NEWS.md` (1), every heading a noun phrase, `Rscript benchmarks/sweep-vignette-idioms.R` prints `clean` and exits 0; the five AC3 headings absent by grep; every page rendered by `rmarkdown::render()` during its task; `devtools::check()` at `acd7b0b` 0 errors, 0 warnings, 0 notes (10m 8s, vignettes rebuilt) — the one commit after it, `d989055`, changes one prose sentence and a tracking file. NEWS entry is the top bullet. Status set to review.
 
 ## Decisions
 
