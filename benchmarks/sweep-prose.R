@@ -101,6 +101,9 @@ if ("--pages" %in% args) {
   if (length(stop_at)) {
     rest <- rest[seq_len(stop_at[1] - 1L)]
   }
+  if (!length(rest)) {
+    stop("--pages names no path", call. = FALSE)
+  }
   pages <- rest
 }
 
@@ -161,19 +164,21 @@ plain_clauses <- function(text) {
   out
 }
 
-strip_spans <- function(text, count = FALSE) {
+strip_spans <- function(text, count = FALSE, all = FALSE) {
   # a backtick span is replaced by the line breaks it contains, so a span
   # crossing a line break leaves the line count, and every later
   # sentence's reported line, unchanged; with `count`, a span that is not
   # an inline `r` span leaves one mark behind as well, so the spans a
-  # sentence names can be counted after splitting
+  # sentence names can be counted after splitting; with `all`, every span
+  # leaves the mark, so the words on either side of it never join into a
+  # match the page does not hold (`has \`x\` been` is not `has been`)
   m <- gregexpr("`[^`]*`", text, perl = TRUE)
   regmatches(text, m) <- lapply(
     regmatches(text, m),
     function(s) {
       kept <- gsub("[^\n]", "", s)
-      if (count) {
-        named <- !grepl("^`r\\s", s)
+      if (count || all) {
+        named <- all | !grepl("^`r\\s", s)
         kept[named] <- paste0(mark, kept[named])
       }
       kept
@@ -382,10 +387,10 @@ split_runs <- function(
 
 # Sentences of one paragraph: a data frame of (line, n, text), `line` the
 # line the sentence's first word sits on.
-sentences <- function(para, count = FALSE) {
+sentences <- function(para, count = FALSE, all = FALSE) {
   # spans are stripped over the joined paragraph, since one can cross a
   # line break; strip_spans() keeps the breaks, so pieces and lines align
-  joined <- strip_spans(paste(para$text, collapse = "\n"), count = count)
+  joined <- strip_spans(paste(para$text, collapse = "\n"), count = count, all = all)
   pieces <- strsplit(joined, "\n")[[1]]
   tokens <- character()
   at <- integer()
@@ -458,7 +463,7 @@ for (f in files) {
     }
     next
   }
-  sents <- do.call(rbind, lapply(paras, sentences, count = spans))
+  sents <- do.call(rbind, lapply(paras, sentences, count = spans, all = plain))
   if (is.null(sents) || !nrow(sents)) {
     next
   }

@@ -187,8 +187,8 @@ n_min_n <- n_distinct(selected$min_n)
 
 Across `r nrow(res)` outer folds, `mtry` took `r n_mtry` distinct selected
 values and `min_n` took `r n_min_n`. Most tools throw this away. nestedtune
-keeps it, because it is information about the procedure rather than noise in
-it.
+keeps the spread, because it is information about the procedure rather than
+noise in it.
 
 `autoplot()` draws those same selections, one panel per tuned parameter and
 one point per outer fold. A flat row means the folds agreed. Scatter means
@@ -279,8 +279,9 @@ It stays on the object as a record of what selection saw.
 
 `show_best()` handed it over above because it was given tune's own object,
 which does not warn. Ask `res` or `final` and both refuse, as the two chunks
-below show. On the loop's results, the only thing tune's ranking functions can rank
-is outer folds. On the final fit there is one model and nothing to rank.
+below show. On the loop's results, tune's ranking functions have nothing to
+rank but outer folds, and the estimate is not a ranking of folds. On the
+final fit there is one model and nothing to rank.
 
 ```{r refusals, error = TRUE}
 show_best(res, metric = "rmse")

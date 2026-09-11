@@ -1,6 +1,7 @@
 <!-- Hand-authored fixture for tests/testthat/test-sweep-prose.R: one sentence
 per plain clause of benchmarks/sweep-prose.R, one sentence with every marker
-inside backtick spans, and one near-miss sentence. No generator, no seed. -->
+inside backtick spans, and one near-miss sentence per clause. No generator,
+no seed. -->
 
 The outer loop scores the fit; the inner loop picks the setting.
 
@@ -17,4 +18,12 @@ The estimate is just an average.
 
 The spans `a; b`, `don't`, `has been`, `should`, `, making` and `just` are code.
 
-Maybe the tuning is shouldering the cost, the tuning has not been the reader's problem.
+Maybe the tuning is the cost.
+
+The tuning is shouldering the cost.
+
+The tuning has not been the cost.
+
+The cost is paid, the tuning is not.
+
+The cost is the reader's problem.

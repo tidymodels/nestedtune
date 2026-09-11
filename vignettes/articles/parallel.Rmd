@@ -101,7 +101,7 @@ mirai::status()$connections
 
 Each daemon is a separate R process. It loads nestedtune and the packages
 the workflow needs from an installed library. So the first parallel call
-after starting a pool is the slow one, since it makes each daemon load the
+after starting a pool is the slow one, because it makes each daemon load the
 tidymodels stack.
 
 ## The same call

@@ -56,7 +56,7 @@ Four things it is not.
 - It is not the error of the deployed model, which is built afterwards on
   all the rows and estimated by nothing here.
 - It is not a verdict on that model's parameter values.
-- It does not say what a larger or a different training set gives, since
+- It does not say what a larger or a different training set gives, because
   it ran on this one alone.
 - It is not that error averaged over every training set the same source
   can produce, which describes the method rather than this data. Luo and
@@ -82,7 +82,7 @@ roughly 1 to 2% of AUROC and 5 to 9% of AUPR. The same study reports one
 cell where the nested estimate came out optimistic instead.
 
 The gap is a property of the estimator, not a prediction about any one run.
-It is never a licence to adjust the reported figure upward.
+It is never a license to adjust the reported figure upward.
 
 ## The standard error
 
@@ -115,7 +115,7 @@ set.
 ## Disagreement between folds
 
 When the folds split over a parameter, the data does not pick its value
-clearly. The estimate is fine, since it already averages over this
+clearly. The estimate is fine, because it already averages over this
 variability. What suffers is any story about the selected parameters being
 the right ones.
 

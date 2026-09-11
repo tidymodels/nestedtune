@@ -325,7 +325,7 @@ collect_metrics(baseline)
 Every function that reads a tuned result reads the baseline the same way,
 under the same control settings. The one exception is the parameters plot,
 which has nothing to draw. The baseline's
-`.selected` column holds an empty table on every fold, since nothing was
+`.selected` column holds an empty table on every fold, because nothing was
 chosen, so `collect_selections()` and `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:
 
@@ -425,11 +425,11 @@ autoplot(mapped, type = "performance")
 ```
 
 The parameters view keeps the outer folds on the x axis and gives each
-workflow's tuned parameter its own panel, labelled by the id. So each
+workflow's tuned parameter its own panel, labeled by the id. So each
 workflow gets its own answer to whether the folds agreed. The baseline has
 no panel.
 
-```{r wset-parameters, fig.width = 7, fig.height = 3.6, fig.alt = "One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected."}
+```{r wset-parameters, fig.width = 7, fig.height = 3.6, fig.alt = "One panel per tuned parameter and workflow, labeled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected."}
 autoplot(mapped)
 ```
 

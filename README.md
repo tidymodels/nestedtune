@@ -11,7 +11,7 @@ coverage](https://codecov.io/gh/tidymodels/nestedtune/graph/badge.svg)](https://
 <!-- badges: end -->
 
 You tune a model with cross-validation and keep the setting with the
-best score. That score is optimistic, since you picked the winner for
+best score. That score is optimistic, because you picked the winner for
 scoring well. nestedtune gives you an honest number instead. It builds a
 nested resampling design. It tunes each outer fold on its own inner
 resamples with tune or finetune. It selects the fold’s winner, fits it,
