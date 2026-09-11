@@ -29,6 +29,31 @@
 #       every prose paragraph of each page, as `file:first-last: <opening
 #       words>`, `first` and `last` the lines of the paragraph's extent;
 #       exits 0
+#   Rscript benchmarks/sweep-prose.R --plain
+#       every prose sentence matching a plain clause, as
+#       `file:line: <clause name>: <text>`, one line per clause matched,
+#       `line` the line the sentence starts on; exits 1 on any hit. The
+#       clauses, each matching whole words in any case, with a backtick
+#       span never part of a match:
+#         semicolon    a `;`
+#         contraction  a word ending `n't`, `'re`, `'ll`, `'ve`, `'d` or
+#                      `'m` (a straight or a curly apostrophe)
+#         has been     `has been` or `have been`
+#         modal        `should`, `may`, `might`, `could` or `would`
+#         comma-ing    a comma, one space, then a word ending `ing` that is
+#                      not on the exclusion list: including, during,
+#                      according, regarding, nothing, something, anything,
+#                      everything
+#         slop         a phrase on the slop list, reported as
+#                      `slop (<phrase>)`; the list is the left column of
+#                      the SimpleEnglish skill's `references/word-swaps.md`
+#                      with parenthetical qualifiers dropped and
+#                      `/`-separated alternatives split into their own
+#                      phrases (the `slop` vector below holds it)
+#   Rscript benchmarks/sweep-prose.R --pages <path>...
+#       the paths after `--pages`, up to the next `--` option, replace the
+#       page list above for any mode; a page is read with or without a
+#       YAML header
 #   Rscript benchmarks/sweep-prose.R --roxygen [--terms|--spans|--openings|--paragraphs]
 #       the same checks over roxygen prose in `R/*.R` and
 #       `man-roxygen/*.R`: the bodies of `@title`, `@description`,
@@ -54,6 +79,7 @@ terms <- "--terms" %in% args
 spans <- "--spans" %in% args
 openings <- "--openings" %in% args
 paragraphs <- "--paragraphs" %in% args
+plain <- "--plain" %in% args
 cap <- 30L
 span_cap <- 4L
 mark <- "•"
@@ -67,6 +93,72 @@ pages <- c(
   "vignettes/articles/parallel.Rmd",
   "README.Rmd"
 )
+if ("--pages" %in% args) {
+  from <- match("--pages", args) + 1L
+  rest <- args[seq.int(from, length.out = max(0L, length(args) - from + 1L))]
+  stop_at <- which(startsWith(rest, "--"))
+  if (length(stop_at)) {
+    rest <- rest[seq_len(stop_at[1] - 1L)]
+  }
+  pages <- rest
+}
+
+ing_exclusions <- c(
+  "including", "during", "according", "regarding",
+  "nothing", "something", "anything", "everything"
+)
+slop <- c(
+  "leverage", "utilize", "in order to", "prior to", "ensure",
+  "it is worth noting that", "it's important to",
+  "simply", "just", "easily", "seamless", "seamlessly", "effortlessly",
+  "robust", "powerful", "comprehensive", "performant", "functionality",
+  "enables you to", "allows you to", "is designed to", "aims to",
+  "facilitate", "dive into", "delve into", "when it comes to",
+  "in the event that", "due to the fact that", "as needed", "as necessary",
+  "and/or", "e.g.", "i.e.", "etc.", "gracefully handles", "out of the box",
+  "under the hood", "blazingly fast", "streamline", "plethora", "myriad",
+  "addresses the issue", "tackles", "pivotal", "crucial", "crucially",
+  "paramount", "tapestry", "testament", "synergy", "interplay", "intricate",
+  "vibrant", "nuanced", "multifaceted", "realm", "landscape",
+  "groundbreaking", "cutting-edge", "state-of-the-art", "innovative",
+  "unprecedented", "transformative", "game-changer", "revolutionize",
+  "showcase", "underscore", "emphasize", "foster", "empower", "bolster",
+  "harness", "enhance", "elevate", "furthermore", "moreover",
+  "in conclusion", "in summary", "at the end of the day", "embark",
+  "endeavor", "meticulous", "meticulously", "holistic", "paradigm",
+  "navigate", "boasts", "nestled", "in the heart of", "bustling",
+  "that being said", "notwithstanding", "I hope this helps", "let's dive in"
+)
+
+# The plain clauses one sentence matches, by name, in the order above; a
+# slop hit carries its phrase.
+plain_clauses <- function(text) {
+  out <- character()
+  if (grepl(";", text, fixed = TRUE)) {
+    out <- c(out, "semicolon")
+  }
+  if (grepl("(?<=\\w)(n['\u2019]t|['\u2019](re|ll|ve|d|m))(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+    out <- c(out, "contraction")
+  }
+  if (grepl("(?<!\\w)(has|have) been(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+    out <- c(out, "has been")
+  }
+  if (grepl("(?<!\\w)(should|may|might|could|would)(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+    out <- c(out, "modal")
+  }
+  m <- regmatches(text, gregexpr(", (\\w+ing)(?!\\w)", text, perl = TRUE))[[1]]
+  m <- tolower(sub("^, ", "", m))
+  if (any(!m %in% ing_exclusions)) {
+    out <- c(out, "comma-ing")
+  }
+  for (phrase in slop) {
+    pat <- paste0("(?<!\\w)", gsub("([.\\/])", "\\\\\\1", phrase), "(?!\\w)")
+    if (grepl(pat, text, perl = TRUE, ignore.case = TRUE)) {
+      out <- c(out, sprintf("slop (%s)", phrase))
+    }
+  }
+  out
+}
 
 strip_spans <- function(text, count = FALSE) {
   # a backtick span is replaced by the line breaks it contains, so a span
@@ -383,6 +475,14 @@ for (f in files) {
       ))
     }
     hits <- hits + length(over)
+  } else if (plain) {
+    for (i in seq_len(nrow(sents))) {
+      found <- plain_clauses(sents$text[i])
+      for (name in found) {
+        cat(sprintf("%s:%d: %s: %s\n", f, sents$line[i], name, sents$text[i]))
+      }
+      hits <- hits + length(found)
+    }
   } else if (terms) {
     look <- words
     if (roxygen || basename(f) == "results.Rmd") {

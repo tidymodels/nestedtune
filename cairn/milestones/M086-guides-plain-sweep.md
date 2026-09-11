@@ -1,13 +1,13 @@
 # M086: The guides and README pass the plain-English sweep
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the four guides, the parallel article and the README are the package's reader-facing pages
-- **Branch/PR:** —
+- **Branch/PR:** `m086-guides-plain-sweep`
 
 ## Goal
 
@@ -41,8 +41,8 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 
 ## Tasks
 
-- [ ] T1: Add `--pages <path>...` and `--plain` to `benchmarks/sweep-prose.R` (header: the clause list, the `ing` exclusion list, the slop list copied from `word-swaps.md`); a clause reports by name; `--pages` accepts a page without a YAML header. Calibrate on a scratch file holding the reference intro (AC2) before touching a page.
-- [ ] T2: Write `tests/testthat/fixtures/sweep-prose-plain.Rmd` (header comment: hand-authored, one sentence per clause, no generator or seed) and `tests/testthat/test-sweep-prose.R` (AC3); the test locates the script through `testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")` and skips when it is absent.
+- [x] T1: Add `--pages <path>...` and `--plain` to `benchmarks/sweep-prose.R` (header: the clause list, the `ing` exclusion list, the slop list copied from `word-swaps.md`); a clause reports by name; `--pages` accepts a page without a YAML header. Calibrate on a scratch file holding the reference intro (AC2) before touching a page.
+- [x] T2: Write `tests/testthat/fixtures/sweep-prose-plain.Rmd` (header comment: hand-authored, one sentence per clause, no generator or seed) and `tests/testthat/test-sweep-prose.R` (AC3); the test locates the script through `testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")` and skips when it is absent.
 - [ ] T3: Rewrite `vignettes/nested-cv.Rmd` and `vignettes/estimate.Rmd` until `--plain` is clean over them, keeping the default and `--spans` sweeps clean; the reference intro is not edited.
 - [ ] T4: Rewrite `vignettes/tuners.Rmd` and `vignettes/results.Rmd` the same way.
 - [ ] T5: Rewrite `vignettes/articles/parallel.Rmd` and `README.Rmd` the same way; `devtools::build_readme()`.
@@ -55,6 +55,9 @@ Definitions this file and M087/M088 share. "The six pages" are `vignettes/nested
 - 2026-09-11: criteria audit ran in full mode over M086 and M087 (fresh reader, none of the criteria its own). Must-fix findings, all fixed before writing: withheld survey files nothing created (AC5 now withholds this file and the `--plain` output); the fixture lacked the provenance clause `cairn/PROFILE.md` requires (AC3); AC3's probes were one exemplar per clause (mixed case, a wrapped sentence and near-miss silence added); AC2 did not say `--pages` reads a headerless page. Judgment calls settled: an exclusion list for non-verb `ing` words after a comma (`, including` at `R/nested-final-fit.R:179` is a correct sentence); the slop list's qualified entries split into plain phrases; D-061's "listed paragraphs changed" diff check is subsumed by AC1, since a listed sentence must change to pass.
 - 2026-09-11: plan gate chose the 30-word cap over the SimpleEnglish skill's 25-word cap because the reference intro has a 29-word sentence and the M084 lesson forbids editing the reference to fit a clause; falsified by a fresh-reader report flagging a 26-30-word sentence in the intro for length.
 - 2026-09-11: plan gate chose flagging `would`, `may`, `might`, `could` and `should` over leaving counterfactual modals alone because the skill's rule 5 names them and the reference intro uses none; falsified by a counterfactual sentence that no rewrite states without a modal, which then goes on the exclusion list.
+- 2026-09-11: /milestone-implement started; branch `m086-guides-plain-sweep` cut from `main` at b84cbcb. Question gate skipped: nothing the plan left open changes the work. One call made in passing: a slop hit reports as `slop (<phrase>)`, so the clause name stays `slop` and the reader sees the phrase.
+- 2026-09-11: T1 done. `--plain` reports one line per clause a sentence matches; `--pages` takes the paths up to the next `--` option. The reference intro (`git show 0d8611e:vignettes/nested-cv.Rmd | sed -n '17,33p'`, byte-identical scratch file) prints `clean` with no change to the `ing` exclusion list. Baseline over the six pages: 21 hits (11 modal, 6 comma-ing, 3 semicolon, 1 modal+comma-ing on one sentence; 0 slop, 0 contraction, 0 has-been).
+- 2026-09-11: T2 done. Fixture `tests/testthat/fixtures/sweep-prose-plain.Rmd` (headerless, so it also exercises the no-YAML path) and `tests/testthat/test-sweep-prose.R`; `devtools::test(filter = "sweep-prose")` passes 13 expectations, skips under `R CMD check` because `benchmarks/` is `.Rbuildignore`d.
 - 2026-09-11: plan gate chose the SimpleEnglish check-mode reader as the per-pass report over a rule-numbered pass bar because D-061 forbids binding a reader's list; falsified by nothing short of a superseding decision entry.
 
 ## Decisions
