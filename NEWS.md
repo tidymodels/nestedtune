@@ -1,1002 +1,428 @@
 # nestedtune 0.0.0.9000
 
-* Every help page is rewritten for a tidymodels user. Argument entries are
-  at most two sentences, with the detail under section headings of their
-  own; the orchestrator pages inherit the arguments they share with the
-  tune, finetune and workflowsets function each wraps, or with
-  `nested_tune_grid()` where that page already carries them, and the sibling
-  pages that take the design pull the nested-design section, and those that
-  take `param_info` the finalization section, in from `?nested_tune_grid`
-  rather than restating them. The example setup and the orchestrators'
-  Reproducibility section each live once, in a `man-roxygen/` template; the
-  shared setup is written with `|>`, and every
-  example runs under `R CMD check` instead of sitting in `\donttest{}`.
-  `?nested_resamples` gains the memory table the README carries.
+* The four guides, the parallel article, the README and this file are
+  rewritten in plain prose for someone running nested cross-validation, with
+  each explanation on one page and a link from the others. The site-only
+  article "Why nest: a simulation" and its simulation script are removed;
+  the estimate page's cited measurements make the same point.
+
+* Every help page is rewritten for a tidymodels user: argument entries of at
+  most two sentences, detail under section headings, the arguments an
+  orchestrator shares with the tune, finetune or workflowsets function it
+  wraps inherited from that page, and examples written with `|>` that run
+  under `R CMD check`. `?nested_resamples` carries the memory table the
+  README used to.
 
 * The documentation site no longer carries pages built from files internal
-  to the repository. pkgdown renders every root and `.github/` markdown file
-  it does not already own, which had put this repository's agent instructions
-  and a CI cost measurement on the site, in its sitemap and in its search
-  index. The site build now removes those sources before it runs, and fails
-  if any tracked markdown file in the repository other than `README.md`,
-  `NEWS.md`, `LICENSE.md`, `.github/CODE_OF_CONDUCT.md` or
-  `.github/CONTRIBUTING.md` gets a page at the top level of the built site.
-  The two pages that were already published have been removed.
+  to the repository, and its build fails if any tracked markdown file other
+  than the README, this file, the licence, the code of conduct or the
+  contributing guide gets a top-level page.
 
-* `autoplot()` on a `nested_results_set` with `type = "performance"` gains
-  a subtitle sentence counting the workflows that rest a metric's average
-  on fewer outer folds than the workflow completed, and sending the reader
-  to `summary()` for which metric and how many folds. A completed fold can
-  score `NA` on one metric while scoring the others, so this is a separate
-  count from the one naming the workflows that did not complete every fold,
-  and a figure can carry both sentences. A metric that no completed fold
-  scored is counted here too: it draws no rule and reports no average.
+* `autoplot()` on a `nested_results_set` with `type = "performance"` adds a
+  subtitle sentence counting the workflows whose average for a metric comes
+  from fewer outer folds than the workflow completed, pointing at `summary()`
+  for which metric and how many folds.
 
-* The help-page examples that build a tuning run use two outer and two
-  inner folds of `mtcars` and a `num_comp` grid of 1:2 (the racing page
-  keeps five inner folds, since a race needs more inner resamples than
-  its burn-in of 2), so the pages run in about half the time; which
-  functions each example calls is unchanged.
-
-* A `nested_results_set` keeps its class only while every row is one of
-  the run's own workflows. Rows dropped or reordered and columns added keep
-  the class, so `dplyr::filter()`, `dplyr::arrange()`, `dplyr::mutate()`,
-  `dplyr::bind_cols()` with the set first, `x[i, ]` and
-  `vctrs::vec_slice()` hand back a set whose readers, `summary()`,
-  `print()`, `extract_workflow()` and `nested_final_fit()` answer for the
-  rows in hand alone; a record column dropped or renamed, no row left, a
-  repeated `wflow_id`, a row not the run's own, `dplyr::bind_cols()` with
-  a table first and a direct `vctrs::vec_cbind()` give a plain tibble
-  without the `fn` attribute. A warning or error raised for one workflow
-  is the original condition object, its class vector, `parent`, bullets
-  and data fields kept, with `Workflow "<id>": ` in front of the first
-  line of its message.
+* A `nested_results_set` keeps its class only while every row is one of the
+  run's own workflows, so dropping or reordering rows and adding columns keep
+  it and a record column dropped or renamed, a repeated `wflow_id` or a row
+  not the run's own give a plain tibble. A warning or error raised for one
+  workflow is the original condition with `Workflow "<id>": ` in front of its
+  message.
 
 * `summary()`, `autoplot()` and `agreement()` answer on a
-  `nested_results_set`, each workflow's view keyed by its `wflow_id`.
-  `summary()` returns a list of one `summary.nested_results` per workflow,
-  named by id in the set's order, each identical to the workflow's own
-  summary, with the orchestrator as an attribute; its print shows one
-  heading for the set and one section per workflow, the note on what a
-  nested estimate describes once at the end. `autoplot(type =
-  "performance")` puts the workflows along the x axis inside one panel per
-  metric, one point per completed outer fold's score and a dashed rule at each
-  workflow's `collect_metrics()` mean, an all-failed workflow keeping an
-  empty slot; `autoplot(type = "parameters")` draws one panel per workflow
-  and tuned parameter, labelled `"<id>: <parameter>"`, over one axis
-  decided across every workflow's values. `agreement()` stacks each
-  workflow's table under `wflow_id` with the parameter columns ahead of `n`
-  and `prop`. A workflow with a failed fold warns once with
-  `nestedtune_partial_summary` naming it; a set with no completed fold is
-  refused by the plots and the table with `nestedtune_no_completed_folds`;
-  a parameter whose id is `wflow_id` is refused with
-  `nestedtune_collect_name_collision`.
+  `nested_results_set`, each workflow's view keyed by its `wflow_id`:
+  `summary()` returns one summary per workflow and prints one section each,
+  the performance plot puts the workflows along the x axis inside a panel
+  per metric, the parameters plot draws a panel per workflow and tuned
+  parameter, and `agreement()` stacks each workflow's table under
+  `wflow_id`.
 
 * `nested_workflow_map()` runs every workflow of a
-  `workflowsets::workflow_set()` through one nested design in one call,
-  shaped like `workflowsets::workflow_map()`: `fn` names one of the six
-  orchestrators, the orchestrator's arguments come through `...` with the
-  design as `resamples`, and an entry of the set's `option` column overrides
-  the same-named argument for its workflow alone. A workflow with no
-  `tune()` marker runs through `nested_fit_resamples()` whatever `fn` names,
-  with the arguments narrowed to what that orchestrator takes; a `control`
-  in `...` reaches only the workflows that run through `fn`. The generator
-  state at entry is reinstated before each workflow, so every workflow's
-  fold `i` runs under the same two seeds and each element is identical to
-  the orchestrator called by hand on that workflow; the caller's state is
-  put back on exit. It returns a `nested_results_set`, a tibble of
-  `wflow_id`, `workflow` and `result` with one `nested_results` per row,
-  which does not carry the `workflow_set` class, so
-  `workflowsets::rank_results()` and `tune::fit_best()` refuse it. The six
-  `collect_*()` readers stack each workflow's table under a `wflow_id`
-  column in the set's order; a workflow in which no fold completed is left
-  out with a `nestedtune_partial_summary` warning naming it, a workflow's
-  own partial-run warning and failed-fold warning are raised with its id at
-  the front, and `collect_notes()` reads every workflow. `print()` shows the
-  orchestrator and each workflow's completed fold count;
-  `extract_workflow(x, id)` returns one workflow; and
-  `nested_final_fit(x, id = )` fits one workflow by its own record. Entry
-  refusals name their class: `nestedtune_bad_workflow_set`,
-  `nestedtune_bad_fn`, `nestedtune_bad_dots` (a name the orchestrator does
-  not take, an unnamed argument, or no `resamples`),
-  `nestedtune_bad_option` (naming the workflow), `nestedtune_tuned_workflow`
-  under `fn = "nested_fit_resamples"`, and `nestedtune_unknown_id` on the
-  extractor and the final fit. `workflowsets` joins Suggests; no package
-  code calls it.
+  `workflowsets::workflow_set()` through one nested design in one call, with
+  `fn` naming the orchestrator, the orchestrator's arguments in `...`, and
+  the set's `option` column overriding an argument for one workflow. It
+  returns a `nested_results_set`, one `nested_results` per row, whose
+  `collect_*()` readers stack each workflow's table under `wflow_id`, and
+  `nested_final_fit(x, id = )` fits one workflow by its own record;
+  `workflowsets` joins Suggests.
 
 * `nested_fit_resamples()` scores a workflow with nothing to tune on the
-  outer folds of a nested design: the same outer loop as `nested_tune_grid()`
-  with the inner stage removed, so a fixed workflow and a tuned one run on
-  identical outer folds and their per-fold metrics join by fold label. It is
-  shaped like `tune::fit_resamples()` (`metrics`, `event_level`, `eval_time`,
-  and a `tune::control_resamples()` through `...`), and returns a
-  `nested_results` whose record says no tuning ran: `.selected` is an empty
-  table on every completed fold, `.inner_metrics` a zero-row table, and
-  `extract_procedure(res)` names the tuner `"fit_resamples"` with no `grid`,
-  `param_info` or `select`. Every reader answers on it; `agreement()`,
-  `collect_selections()` and `collect_inner_metrics()` return zero rows, and
-  `autoplot(type = "parameters")` refuses with class
-  `nestedtune_no_tuned_parameters`. `nested_final_fit()` accepts the result
-  and fits the workflow as given on every row; `extract_tune_results()` and
-  `extract_scored_candidates()` refuse that fit with class
-  `nestedtune_no_tuning_run`.
+  outer folds of a nested design, the same outer loop with the inner stage
+  removed, so a fixed workflow and a tuned one score on identical folds. Its
+  result answers every reader, with `.selected` empty on every fold and
+  `extract_procedure()` naming the tuner `"fit_resamples"`.
 
 * The five tuning orchestrators refuse a workflow with no `tune()` marker at
   entry, with class `nestedtune_untuned_workflow`, naming
-  `nested_fit_resamples()`; before, such a workflow ran through
-  `nested_tune_grid()` with tune's warning on every fold and failed every
-  fold on the iterating tuners. `nested_fit_resamples()` refuses a workflow
-  carrying a marker with class `nestedtune_tuned_workflow`, naming the five.
+  `nested_fit_resamples()`, which in turn refuses a workflow carrying a
+  marker with class `nestedtune_tuned_workflow`.
 
-* A `select` argument on `nested_tune_grid()`, `nested_tune_bayes()`,
-  `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and
-  `nested_tune_sim_anneal()` names the rule each outer fold selects its
-  candidate by. It takes the new `selection_rule()`: `"best"` (the default,
-  `tune::select_best()`), or `"one_std_err"` and `"pct_loss"`
-  (`tune::select_by_one_std_err()` and `tune::select_by_pct_loss()`) with
-  the parameter orderings as bare expressions and, for the percent-loss rule,
-  a `limit`. Each fold applies the rule to its own inner run on the first
-  metric; the rule is recorded as `extract_procedure(res)$select`, and
-  `nested_final_fit()` selects by the recorded rule. The constructor refuses
-  a rule outside the three, an ordering with `"best"` or none with the other
-  two, and a `limit` outside the percent-loss rule or that is not a single
-  non-negative number; the orchestrators refuse anything but a
-  `selection_rule()` and an ordering naming a parameter the workflow does not
-  tune, at entry. A results object saved before the rule was recorded is
-  refused by `nested_final_fit()` with class `nestedtune_bad_results`.
+* A `select` argument on the five tuning orchestrators names the rule each
+  outer fold selects its candidate by, built by the new `selection_rule()`:
+  `"best"` by default, or `"one_std_err"` and `"pct_loss"` with the
+  parameter orderings tune's rules take. The rule is recorded as
+  `extract_procedure(res)$select` and `nested_final_fit()` selects by it.
 
-* `save_pred` and `extract` on a control passed through `...` now reach the
-  outer fit. With `save_pred = TRUE` the results object carries a
-  `.predictions` list column, each completed fold's predictions on its
-  assessment rows as `tune::last_fit()` returns them; with `extract` a
-  function, an `.extracts` list column holding the function's value on each
-  completed fold's fitted workflow. A failed fold holds `NULL` in each, and a
-  fold whose extract errored stays completed with `NULL` there and a note at
-  location `"outer extract"`. Both columns are part of the record the dplyr
-  and vctrs invariants read, and neither exists on a run that did not ask.
-  `collect_predictions()` and `collect_extracts()`, tune's generics
-  re-exported with a method here, stack them with the design's fold labels
-  over the folds that completed, the second as one row per fold with an
-  `.extracts` list column; an object whose run did not ask for the column,
-  or that no longer carries it, is refused with class
-  `nestedtune_column_not_saved`, naming the slot to set. The help pages
-  classify the two slots under "Kept from the outer fit"; `save_workflow` and
-  `save_history` stay "Not returned".
+* `save_pred` and `extract` on a control passed as `control` reach the outer
+  fit, adding a `.predictions` or `.extracts` list column to the result, and
+  `collect_predictions()` and `collect_extracts()` stack them with the fold
+  labels over the folds that completed. A run that did not ask for the
+  column is refused with class `nestedtune_column_not_saved`.
 
-* A new accessor, `extract_procedure()`, returns the record of what ran, the
-  tuner, its arguments and the control as it took effect, from a results
-  object and from a final fit alike. The help pages and the tuners vignette
-  reach the record through it rather than by the attribute or list slot that
-  holds it. Its default method refuses any other object with class
-  `nestedtune_no_extract_method`, naming both classes that answer.
+* `extract_procedure()` returns the record of what ran, the tuner, its
+  arguments and the control as it took effect, from a results object and
+  from a final fit alike.
 
-* The em dash is gone from the text the package publishes: the results
-  print's line on folds that searched different grids, the help pages, the
-  reference index, this file and the README.
+* The em dash is gone from every text the package publishes.
 
-* The three code vignettes and the two site articles attach `tidymodels`, new in
-  Suggests, before `nestedtune`, behind a guard that ends the page with one
-  notice naming whichever of it and the page's other optional packages is
-  absent, and read the results object through the package's readers and
-  dplyr: `collect_selections()` for the guide's fold-by-selection table,
-  `collect_notes()` for a failed fold's and a completed fold's notes on the
-  results page, `collect_inner_metrics()` for the fits each racing fold spent
-  on the tuners page, `extract_tune_results()` with `show_best()` for the
-  selection-time score, and `rlang::catch_cnd()` where a page shows a
-  warning's class. No shown chunk on those pages calls the apply family,
-  `do.call()`, `withCallingHandlers()` or `data.frame()` any more.
+* Three readers stack a per-fold list column into one table with the design's
+  fold labels beside it: `collect_notes()` over every outer fold, and
+  `collect_selections()` and `collect_inner_metrics()` over the folds that
+  completed, warning once with class `nestedtune_partial_summary` on a
+  partial run.
 
-* Three new readers stack a per-fold list column of a `nested_results` into
-  one table with the design's fold labels beside it, read from the object's
-  record so a repeated design gives `id` and `id2`. `collect_notes()`, tune's
-  generic re-exported with a method here, stacks `.notes` over every outer
-  fold; the package's own `collect_selections()` and `collect_inner_metrics()`
-  stack `.selected` and `.inner_metrics` over the folds that completed, warn
-  once with class `nestedtune_partial_summary` on a partial run, and refuse a
-  run in which no fold completed with class `nestedtune_no_completed_folds`.
-  The stacked columns are the union across folds, `NA` where a fold lacks one,
-  `.config` kept as each fold recorded it. Their default methods refuse other
-  objects with class `nestedtune_no_collect_method`.
+* Two site-only articles and two further vignettes are added. The parallel
+  article runs the guide's loop on two mirai daemons and shows the result
+  identical to the serial run; `vignette("results")` reads every column and
+  reader of the results object; `vignette("tuners")` runs the Bayesian,
+  racing and annealing searches on the guide's design; and
+  `vignette("estimate")` says what the nested number estimates, leaving
+  `vignette("nested-cv")` as the getting-started path.
 
-* A new site-only article, "Why nest: a simulation" (`articles/why-nest` on
-  the package site, not shipped in the package), reads a stored simulation in
-  which each replicate draws wide data with no signal, tunes a small neural
-  network over a grid, and records the best candidate's cross-validation
-  accuracy from a flat `tune::tune_grid()` run beside the estimate from
-  `nested_tune_grid()`. The page prints the design, both medians and the
-  distance of each from the true accuracy from the stored object, and draws
-  both distributions across replicates against a line at the truth. The
-  script that produces the store, `vignettes/articles/why-nest-sim.R`, is
-  not shipped either and says at its head what it needs.
+* The tuning orchestrators refuse a malformed `resamples` design at the
+  call, before any fold runs, with class `nestedtune_bad_design`, naming
+  every offending fold, split, index or column: an inner element that is not
+  an `rsplit` or `rset`, an inner split over a frame other than the outer
+  split's own or its analysis set, an inner split indexing a row its outer
+  fold holds out, an empty inner design, an `NA` or repeated label, and a
+  label column that is not character or factor or not named `id` or `id`
+  followed by a digit. Designs from `nested_resamples()` and
+  `rsample::nested_cv()` pass unchanged.
 
-* A new site-only article, "Running the outer loop in parallel"
-  (`articles/parallel` on the package site, not shipped in the package),
-  starts two mirai daemons, runs the getting-started guide's loop on them,
-  shows `identical()` on the outer scores, the selections and the tuning
-  seeds against the same run made serially returning `TRUE`, and walks the
-  daemon pre-flight, what crosses the wire to each daemon, developing
-  against daemons under `devtools::load_all()`, interrupting a run, and the
-  `nestedtune_pool_not_cancellable` warning a pool started without a
-  dispatcher raises. The page builds only where mirai and ranger are
-  installed, and is one notice otherwise.
-
-* A new vignette, `vignette("results")` ("Reading the results"), reads the
-  `nested_results` object: one sentence and an executed peek per column,
-  `summary()`, `collect_metrics()` with and without `summarize = FALSE`,
-  `agreement()` and both `autoplot()` views; a run in which one outer fold
-  fails on a `recipes::check_range()` step, that fold's `.notes`, and the
-  `nestedtune_partial_summary` warning `summary()` raises over it; which
-  dplyr operations keep the class and which shed it; and a censored-regression
-  run with `eval_time` at two times whose `collect_metrics()` carries
-  `.eval_time`, with `event_level` explained beside it. The censored-regression
-  section runs only where censored and survival are installed, and is one
-  notice otherwise.
-
-* A new vignette, `vignette("tuners")` ("Choosing the inner tuner"), runs
-  `nested_tune_bayes()`, `nested_tune_race_anova()`,
-  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()` on the
-  getting-started guide's design and workflow, prints what one fold's
-  `.inner_metrics` records for each, passes a `tune::control_bayes()` through
-  `...` and reads the recorded `procedure`, and says what differs from calling
-  tune or finetune directly. The racing sections build only where finetune,
-  lme4 and BradleyTerry2 are installed, and the annealing section where
-  finetune is.
-
-* The guide `vignette("nested-cv")` is now the getting-started path alone:
-  design, loop, what to report, what each fold chose, the final fit,
-  reproducibility and the write-up. What the nested estimate means moved to a
-  new page, `vignette("estimate")`: which quantity it estimates, why it tends
-  to run a little pessimistic, what `std_err` is and is not, why two nested
-  estimates cannot be subtracted to compare workflows, why the outer folds
-  disagree, and when nesting is worth its cost. The new page runs no code.
-
-* `nested_tune_grid()`, `nested_tune_bayes()`, `nested_tune_race_anova()`,
-  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()` refuse a
-  `resamples` design at the call, before any fold runs, in three further
-  shapes, under the same `nestedtune_bad_design` class: an element of some
-  fold's inner `splits` list that is not an `rsplit`; a fold whose inner
-  splits do not all carry one frame that is the outer split's own data frame
-  (as `nested_resamples()` builds them) or that split's analysis set (as
-  `rsample::nested_cv()` builds them); and an inner split carrying the outer
-  data frame whose `in_id`, or non-`NA` `out_id`, holds a row index outside
-  the outer split's `in_id`. Each refusal names every offending fold, split
-  and index. Before, an inner design over another frame was tuned as given
-  serially and sent down a slower path in parallel, and a hand-built inner
-  split indexing a row its outer fold holds out ran to completion. Designs
-  from `nested_resamples()` and `rsample::nested_cv()`, on a data frame or a
-  tibble, and one whose outer `rset` repeats a row, pass unchanged.
-
-* Before any fold is dispatched to mirai daemons, the startup check now asks
+* Before any fold is dispatched to mirai daemons, the startup check asks
   every daemon for each package the workflow and the tuner need, and stops
-  when one cannot load one of them, naming how many daemons are affected and
-  which packages: the `nestedtune_daemons_missing_pkgs` refusal, or the
-  existing `nestedtune_daemons_cannot_load` one when a daemon also cannot
-  load nestedtune itself, both under `nestedtune_daemons_unusable`. Before,
-  such a pool was warned about and then failed every fold sent to that
-  daemon. The host's own entry check widens the same way: a package the
-  workflow needs that is not installed here -- a recipe step's as well as the
-  engine's -- is refused at entry by every tuning driver and by
-  `nested_final_fit()`, under the `nestedtune_pkg_not_installed` class the
-  tuner refusals already carry, with an `install.packages()` call to paste.
+  with class `nestedtune_daemons_missing_pkgs` naming how many daemons are
+  affected and which packages. The host's own entry check refuses a package
+  the workflow needs that is not installed, a recipe step's as well as the
+  engine's, under `nestedtune_pkg_not_installed` with an `install.packages()`
+  call to paste.
 
 * `extract_tune_results()` and `extract_scored_candidates()` on an object
-  they have no method for -- a `nested_results`, a list, a number -- now
-  signal the `nestedtune_no_extract_method` refusal naming that object
-  whatever else was passed in `...`. Before, a stray argument was reported
-  first and the object not at all.
+  they have no method for signal `nestedtune_no_extract_method` naming that
+  object, whatever else was passed in `...`.
 
-* Three compatibility changes to the `nested_results` class. Printing the
-  columnless type token `vctrs::vec_cbind_frame_ptype()` hands back no
-  longer errors, and writes the banner and the rows alone: neither the
-  outer-label line nor a fold count. A column add that leaves two columns
-  sharing a record column's name -- `vctrs::vec_cbind()` or
-  `dplyr::bind_cols()` with `.name_repair = "minimal"` -- returns a bare
-  tibble carrying none of the run's attributes, as a repair that moves the
-  column already did; two columns outside the record sharing a name leave
-  the object as it is. And `names<-`, the door `dplyr::rename()` uses,
-  keeps the object and every attribute intact when each record column keeps
-  its name, a rename that duplicates a name outside the record included,
-  and returns a bare tibble when a record column is renamed or a column
-  outside the record takes one's name.
+* Printing the columnless type token `vctrs::vec_cbind_frame_ptype()` hands
+  back writes the banner and the rows alone. A column add that leaves two
+  columns sharing a record column's name returns a bare tibble, and
+  `names<-` keeps the object intact when each record column keeps its name
+  and returns a bare tibble when one is renamed or shadowed.
 
-* `nested_tune_grid()`, `nested_tune_bayes()`, `nested_tune_race_anova()`,
-  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()` refuse a
-  `resamples` design at the call, before any fold runs, in three new shapes:
-  an inner `rset` with no rows; an `NA` label, or two outer folds carrying the
-  same label; and a label column -- any column beside `splits` and
-  `inner_resamples` -- that is not character or factor, or whose name is not
-  `id` or `id` followed by a digit from 1 to 9, the names rsample's and
-  tune's own readers find id columns by. Every design refusal, the six that
-  existed included (not a nested design, no outer folds, no `id` column, an
-  outer bootstrap, a `splits` element that is not an `rsplit`, an
-  `inner_resamples` element that is not an `rset`), now carries the condition
-  class `nestedtune_bad_design`, and a refusal names every offending row or
-  column rather than the first it found. Designs from `nested_resamples()`
-  and `rsample::nested_cv()` pass unchanged.
-
-* On a `nested_resamples()` design, every inner tuning call now sees only its
+* On a `nested_resamples()` design, every inner tuning call sees only its
   outer fold's analysis rows, so a `param_info` parameter whose range tune
-  finalizes from the data -- `mtry()`, or a `min_n()` finalized by row
-  count -- is finalized without the rows that fold holds out, as it already
-  was on an `rsample::nested_cv()` design. Before, tune read the whole data
-  frame the design's inner splits index: on a 200-row frame with five outer
-  folds, a `min_n` finalized at half the row count searched candidates up to
-  100 where the fold's 160 analysis rows give 80. The candidates such a run
-  searches, and so its selections and estimate, change; a `param_info` with
-  no unknown range, a data-frame `grid`, a `nested_cv()` design, and an
-  outer split that repeats a row are unaffected, and `nested_tune_grid()` on the two designs built under one
-  seed now returns identical `.inner_metrics` and `.metrics`. This applies to
-  `nested_tune_grid()`, both racing functions and `nested_tune_sim_anneal()`;
-  `nested_tune_bayes()` refuses an unknown range before any frame is read,
-  as before. `nested_final_fit()` still finalizes on the full data, which is
-  the final model's own training data. The design object does not change; a
-  running fold holds one copy of its analysis set for the tuning call.
+  finalizes from the data is finalized without the rows that fold holds out,
+  as it already was on an `rsample::nested_cv()` design. The candidates such
+  a run searches, and so its selections and estimate, change from earlier
+  development versions; `nested_final_fit()` still finalizes on the full
+  data.
 
 * `nested_final_fit()` refuses a results object in which no outer fold
-  completed, with condition class `nestedtune_no_completed_folds`: such a run
-  has no estimate to report a model with, and the message points at
-  `summary()` on the object, which lists the stage each fold failed at. The
-  refusal comes after the three `nestedtune_bad_results` refusals and before
-  anything is fitted or drawn. `collect_metrics()`, `autoplot()` and
-  `agreement()` already refused the same object; their error now carries the
-  same class, so the fact is catchable one way at every door. A run in which
-  some folds failed is fitted as before.
+  completed, with class `nestedtune_no_completed_folds`, the class
+  `collect_metrics()`, `autoplot()` and `agreement()` raise on the same
+  object.
 
-* `nested_tune_sim_anneal()` runs the outer loop of nested cross-validation
-  with finetune's simulated annealing inside: each outer fold scores
-  `initial` space-filling candidates on its inner resamples, then for `iter`
-  iterations perturbs the current candidate and keeps or discards the result
-  by finetune's annealing rule. It is `nested_tune_bayes()`'s sibling: the
-  same arguments less `objective`, `initial` defaulting to 1 (finetune's
-  default; at least 1 rather than the Bayesian sibling's 2), and a
-  `finetune::control_sim_anneal()` through `...` as `control`. Each fold's
-  `.inner_metrics` carries `.iter`, `0` on the initial candidates. Refused
-  at entry, before any fold runs: finetune not installed
-  (`nestedtune_pkg_not_installed`); `iter` below 1 (`nestedtune_bad_iter`)
-  -- finetune 1.3.0 runs two iterations at `iter = 0`, not none, so the 0
-  the Bayesian sibling accepts is refused here; `initial` below 1 or a
-  `tune_results` (`nestedtune_bad_initial`); a control that is not a
-  `control_sim_anneal()` (`nestedtune_bad_control`). `control_sim_anneal()`
-  defaults `verbose_iter` to `TRUE`, which prints finetune's annealing log
-  from every fold of a serial run; pass `control =
-  control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
-  `nested_final_fit()` on an annealing result runs the search again on the
-  full data and prints the initial and iteration counts that ran beside the
-  ones requested, as it does for a Bayesian result (#35).
+* `nested_tune_sim_anneal()` runs the outer loop with finetune's simulated
+  annealing inside: each fold scores `initial` candidates on its inner
+  resamples, then perturbs the current candidate for `iter` iterations, with
+  a `finetune::control_sim_anneal()` passed as `control`. `iter` below 1 and
+  `initial` below 1 or given as a `tune_results` are refused at entry, and
+  `control_sim_anneal(verbose_iter = FALSE)` keeps a serial run quiet (#35).
 
 * `nested_tune_race_anova()` and `nested_tune_race_win_loss()` run the outer
-  loop of nested cross-validation with finetune's two racing tuners inside:
-  each outer fold scores every candidate in `grid` on `burn_in` inner
-  resamples (shuffled first under `control_race()`'s default `randomize =
-  TRUE`), drops the candidates already clearly worse than the best, and
-  scores the survivors on the rest. They take `nested_tune_grid()`'s
-  arguments, and a `finetune::control_race()` through `...` as `control`.
-  Each fold's `.inner_metrics` holds every candidate its race scored,
-  eliminated candidates included (`tune::collect_metrics(<race>, all_configs
-  = TRUE)`), with `n` the number of inner resamples each was scored on;
-  `attr(x, "grid")` and the `procedure` record hold the grid as offered.
-  Refused at entry, before any fold runs: finetune not installed, lme4 (for
-  the ANOVA race) or BradleyTerry2 (for the win/loss race) not installed
-  (`nestedtune_pkg_not_installed`); a control that is not a `control_race()`
-  (`nestedtune_bad_control`); and an inner design in any outer fold with no
-  more resamples than the control's `burn_in` (`nestedtune_bad_burn_in`) --
-  `control_race()` defaults `burn_in` to 3, so a design with three inner
-  resamples needs `control = control_race(burn_in = 2)`. `nested_final_fit()`
-  on a racing result races the recorded grid again on the full data, and
-  `extract_scored_candidates()` on that fit lists every candidate the race
-  scored. finetune, lme4 and BradleyTerry2 join Suggests (#35).
+  loop with finetune's two racing tuners inside, taking
+  `nested_tune_grid()`'s arguments and a `finetune::control_race()` as
+  `control`; each fold's `.inner_metrics` holds every candidate its race
+  scored with `n` the inner resamples each was scored on. A package the race
+  needs that is not installed, a control of the wrong kind, and an inner
+  design with no more resamples than the control's `burn_in` are refused at
+  entry; finetune, lme4 and BradleyTerry2 join Suggests (#35).
 
-* Breaking: each outer fold of a `nested_results` now carries its inner
-  tuning run's metrics as `.inner_metrics` -- `tune::collect_metrics()` of
-  that fold's run, one row per candidate and metric with `.metric`,
-  `.estimator`, `mean`, `n`, `std_err` and `.config`, plus `.iter` from
-  `nested_tune_bayes()` -- in
-  place of the `.grid` column, which held the candidates alone. The
-  candidates a fold searched are the table's distinct parameter rows, so
-  nothing `.grid` recorded is lost, and a Bayesian search's trajectory or a
-  fold's best candidate can now be computed from the object. A fold that
-  tuned and then failed its outer fit keeps its table; a fold that scored
-  nothing carries a zero-row table under a completed fold's columns. The
-  column is part of the record the dplyr and vctrs invariants check, as
-  `.grid` was. `.selected` is unchanged. `extract_scored_candidates()` on a
-  `nested_final_fit` keeps its candidate columns and `.config`, and no longer
-  carries `.eval_time` on a fit that scored a dynamic survival metric -- the
-  column held one arbitrary evaluation time per candidate; the times are in
-  `collect_metrics(extract_tune_results(x))` (#57).
+* Each outer fold of a `nested_results` carries its inner tuning run's
+  metrics as `.inner_metrics`, `tune::collect_metrics()` of that fold's run
+  with one row per candidate and metric, plus `.iter` from the iterating
+  searches. A fold that scored nothing carries a zero-row table, and
+  `extract_scored_candidates()` no longer carries `.eval_time` (#57).
 
-* `nested_tune_grid()` and `nested_tune_bayes()` now take a control object
-  through `...` -- `control = tune::control_grid(...)` on the first,
-  `control = tune::control_bayes(...)` on the second -- and pass it to the
-  inner tuning call in every fold; `nested_final_fit()` re-runs under the
-  control the result recorded, `attr(res, "procedure")$control`. The slots
-  this package forces are overwritten rather than refused: `allow_par` is
-  `FALSE`, and the Bayesian `seed` is each fold's tuning seed, so a control
-  setting either yields the run the default gives. `event_level` stays an
-  argument, and a control naming a level that is neither tune's default nor
-  the argument's is refused at entry, as is a control that is not what the
-  matching `tune::control_*()` returns (condition class
-  `nestedtune_bad_control`) and any other name or an unnamed value in `...`
-  (`nestedtune_bad_dots`). `no_improve`, `uncertain` and `time_limit` reach
-  `tune::tune_bayes()` this way. Each help page now classifies every slot of
-  its control object under one of six headings: forced, settable as its own
-  argument, refused, passed through, not returned, inert (#33, #35).
+* `nested_tune_grid()` and `nested_tune_bayes()` take a control object
+  passed as `control`, `tune::control_grid()` or `tune::control_bayes()`,
+  and pass it to the inner tuning call in every fold, with `allow_par`
+  forced to `FALSE` and the Bayesian `seed` set to each fold's tuning seed.
+  A control of the wrong kind is refused with class `nestedtune_bad_control`,
+  and any other name or an unnamed value in `...` with `nestedtune_bad_dots`
+  (#33, #35).
 
-* Breaking: `nested_final_fit()` now takes the `nested_results` object in
-  place of the design and the procedure -- `nested_final_fit(object,
-  results)` -- and re-runs the procedure that result recorded: the design's
-  inner resampling specification, now carried on every `nested_results` as
-  its `inside` attribute, the tuner and its arguments from the `procedure`
-  attribute, the metric set, and the data every split references. The
-  former `grid`, `param_info`, `metrics`, `event_level` and `eval_time`
-  arguments are gone, so the model and the estimate you report for it come
-  from one search by construction; a Bayesian result re-runs
-  `tune::tune_bayes()` with its Gaussian process seeded from the fit's
-  tuning seed, exactly as each outer fold was. A results object with no such
-  record (built by an earlier version, or from a design assembled by hand),
-  one that is no longer a `nested_results` (an operation that changed the
-  rows returns a plain tibble), or one with no rows is refused before any
-  fitting, with condition class `nestedtune_bad_results`. Not migrated.
+* `nested_final_fit()` takes the workflow and the `nested_results` object,
+  `nested_final_fit(object, results)`, and re-runs the procedure that result
+  recorded: the design's inner resampling specification, the tuner and its
+  arguments, the metric set and the selection rule. A results object with no
+  such record, one that is no longer a `nested_results`, or one with no rows
+  is refused before any fitting with class `nestedtune_bad_results`.
 
-* `predict()` and `augment()` now work directly on a `nested_final_fit`,
-  returning what the same call on `extract_workflow(final)` returns; the
-  `extract_workflow()` route still works. `augment` is re-exported so the
-  call needs no other package attached. `predict()` passes further arguments
-  (`level`, `eval_time`, ...) through to the model, where parsnip refuses
-  a name it does not recognise; `augment()` takes `new_data` and `eval_time` only
-  and refuses anything else, where workflows' own method would let it
-  vanish. The help page says what residuals on the training rows are not.
+* `predict()` and `augment()` work directly on a `nested_final_fit`,
+  returning what the same call on `extract_workflow(final)` returns; `augment`
+  is re-exported. `augment()` takes `new_data` and `eval_time` only and
+  refuses anything else.
 
 * `print()` and `summary()` on a `nested_final_fit` name the procedure that
-  ran: the candidates scored for a grid search; for a Bayesian search the
-  initial candidates and iterations, each as what ran beside what was
-  requested. The summary carries those counts as components, `NULL` on a
-  grid fit, and a `tuner` component; the printed pointer to the estimate now
-  names the results object the fit was built from rather than one
-  orchestrator. The object gains a `procedure` element, and
-  `extract_scored_candidates()` on a Bayesian final fit carries `.iter`.
+  ran: the candidates scored for a grid search, and for an iterating search
+  the initial candidates and iterations, each as what ran beside what was
+  requested.
 
-* `nested_tune_bayes()` runs the outer loop of nested cross-validation with
-  `tune::tune_bayes()` as the inner tuner. On each outer fold it scores
-  `initial` space-filling candidates on the fold's inner resamples, lets a
-  Gaussian process propose up to `iter` more under `objective`, selects the
-  best,
-  and fits and scores the outer split -- what `nested_tune_grid()` does around
-  `tune::tune_grid()`, through the same loop, so the seed contract, the
-  parallel path, the results object and its methods are shared. Two rules are
-  its own. The Gaussian process is seeded from the fold's tuning seed, so a
-  fold reproduces from its `.tuning_seed` alone, and `iter = 0` gives the
-  numbers `nested_tune_grid()` gives on the same space-filling grid. And
-  `initial` is a count only: a `tune_results` object, which tune accepts
-  there, is refused, since one tuning run cannot serve every outer fold.
-  `iter`, `initial` and `objective` are refused at entry, each with its own
-  condition class, unless a single non-negative whole number, a single whole
-  number of at least 2, and an acquisition function.
+* `nested_tune_bayes()` runs the outer loop with `tune::tune_bayes()` as the
+  inner tuner, scoring `initial` space-filling candidates on each fold's
+  inner resamples and letting a Gaussian process propose up to `iter` more
+  under `objective`. The Gaussian process is seeded from the fold's tuning
+  seed, so a fold reproduces from its `.tuning_seed` alone, and `initial` is
+  a count only, since one tuning run cannot serve every outer fold.
 
-* Each fold's `.grid` from `nested_tune_bayes()` carries an `.iter` column
-  naming the search iteration each candidate was proposed in, `0` for the
-  initial candidates. The candidates-searched line `print()` shows and the
-  candidate counts `summary()` holds count those rows.
-
-* Every `nested_results`, from either orchestrator, carries a `procedure`
-  attribute: a named list of the tuner that ran (`"tune_grid"` or
-  `"tune_bayes"`), its own arguments (`grid`, or `iter`, `initial` and
-  `objective`), and `param_info`, `event_level` and `eval_time`. It travels
-  with the class through the dplyr and vctrs doors and is shed with it. A
-  Bayesian result has no `grid` attribute. The `grid` and `metrics`
-  attributes of a grid result are as they were.
+* Every `nested_results` carries a `procedure` attribute recording the tuner
+  that ran, its own arguments, and `param_info`, `event_level` and
+  `eval_time`, which travels with the class and is shed with it.
 
 * `agreement()` reports how often each candidate was selected across the
-  outer folds of a `nested_results`: one row per distinct combination of
-  selected parameter values, with `n`, the number of completed outer folds that
-  chose it, and `prop`, that count over the completed fold count, most frequent
-  first. A fold with no recorded value for a parameter is counted under `NA`,
-  and a partial run is tabulated over the folds that completed, with a warning
-  saying so. The most frequent combination is not the final model's
-  parameters; `nested_final_fit()` selects those for itself.
+  outer folds: one row per distinct combination of selected values, with
+  `n` and `prop` over the completed folds, most frequent first. The most
+  frequent combination is not the final model's parameters.
 
 * `print()` on a `nested_results` accepts `n` and `width` and passes them to
-  the rendering of the outer-fold rows, so `print(res, n = Inf)` shows every
-  fold of a run of more than twenty and `print(res, width = 40)` narrows the
-  table.
-  Both are matched by full name only; any other argument is still refused.
-  Previously `print(res, n = 25)` was an error.
+  the rendering of the outer-fold rows, matched by full name only.
 
-* The failure advice a `nested_results` summary prints now names the results
-  object's `.notes` column. Previously it read `x$.notes`, and `x` inside the
-  summary's print method is the summary itself, which has no such column.
+* `nested_tune_grid()` takes an `eval_time` argument, passed to every tune
+  call whose answer depends on it, so a censored regression workflow scored
+  by a dynamic survival metric is measured at the times named. A metric
+  measured at several times is summarized per time by `collect_metrics()`
+  and `summary()` in an `.eval_time` column and drawn one panel per time by
+  `autoplot(type = "performance")`.
 
-* `nested_tune_grid()` and `nested_final_fit()` gain an `eval_time` argument,
-  passed on to every `tune` call whose answer depends on it, so a censored
-  regression workflow scored by a dynamic or integrated survival metric is
-  measured at the times you name rather than at whatever tune picks. It is
-  refused ahead of tune when it is not numeric, is empty, or has an element
-  that is missing, negative or not finite; zero, repeated times and times out
-  of order are passed on untouched for tune to normalize. A metric measured at
-  several evaluation times is summarized per time by `collect_metrics()` and
-  `summary()`, each row naming its time in a `.eval_time` column, and drawn
-  one panel per time by `autoplot(type = "performance")`, so estimates at
-  different times are never averaged together; a run scored by no survival
-  metric keeps the columns it had. Previously neither function took the
-  argument and neither could reach it.
+* `summary()` on a `nested_final_fit` reports the full-data tuning run's
+  resampling scheme, the candidates it scored and the values selection
+  chose, and says, where a number would be, that this model has no
+  performance estimate of its own and the nested estimate is the one to
+  report.
 
-* `summary()` on a `nested_final_fit` returns a `summary.nested_final_fit`
-  object holding the full-data tuning run's resampling scheme, the number of
-  candidates that run scored, the parameter values selection chose, and an
-  `estimate` component that is always `NULL`, so a caller can reach a value
-  without re-deriving it from the fit. Printing it
-  reports those under headings and says, where the number would be, that this
-  model has no performance estimate of its own and that the nested estimate is
-  the one to report. Previously `summary()` on a final fit fell through to the
-  default method and printed a table of the object's five internal components.
-  `print()` on a final fit is unchanged.
+* Printing a `nested_results` shows the object: its outer folds as the
+  tibble rows they are, the resampling scheme, a count of the folds that did
+  not complete, and a note when the folds did not all search the same grid.
+  Printing never warns and never errors, a run in which no fold completed
+  included.
 
-* Breaking: printing a `nested_results` now shows the object: its outer folds
-  as the tibble rows they are, the resampling scheme it came from, a count of
-  the folds that did not complete, and a note when the folds did not all search
-  the same grid. Everything else printing used to report has moved behind
-  `summary()`: which folds failed and at which stage, what each fold's inner
-  tuning selected, the estimate across the folds that completed, and the
-  sentence saying a nested estimate describes the procedure rather than a model
-  you can deploy. Previously `print()` reported all of that and never showed a
-  single row of the object.
-
-* `summary()` on a `nested_results` returns a `summary.nested_results` object
-  holding the requested and completed fold counts, the failed folds with the
-  stage each failed at, the values the completed folds selected for each tuned
-  parameter, and the metric estimates averaged across them, so a caller can
-  reach a number without re-deriving it from the columns. Summarizing a run
-  that only partly completed warns and still returns the summary; summarizing
-  one where every fold failed does the same, where `collect_metrics()` refuses
-  outright.
+* `summary()` on a `nested_results` returns an object holding the requested
+  and completed fold counts, the failed folds with the stage each failed at,
+  the values the completed folds selected, and the metric estimates over the
+  folds that completed. A partial run warns and still returns the summary,
+  and one where every fold failed does the same.
 
 * A `nested_results` whose record of its fold-label columns cannot label its
-  rows (because the record is empty, or names a column the object no longer
-  carries) now names each fold by its row position. Previously the first two
-  cases made printing raise, and a record naming several columns of which some
-  were absent produced a truncated label such as `Fold1, `.
+  rows names each fold by its row position.
 
-* Breaking: an operation that changes which outer folds a `nested_results`
-  holds now returns a plain tibble instead of a `nested_results`. `slice()`,
-  `head()`, `x[1, ]`, `x[-1, ]`, a `filter()` that drops a failed fold and
-  `bind_rows()` all take this branch, and so does dropping any of the columns
-  the run is recorded in. Previously `dplyr::slice(x, 1)` returned a one-row
-  object still headed `Outer resamples: 3-fold cross-validation` and still
-  reporting three outer folds attempted, and `x[1, ]` returned a one-row
-  object that went on claiming to be a results object.
+* An operation that changes which outer folds a `nested_results` holds
+  returns a plain tibble: `slice()`, `head()`, `x[1, ]`, a `filter()` that
+  drops a fold, `bind_rows()`, and dropping any of the columns the run is
+  recorded in. Reordering rows with `arrange()`, adding a column with
+  `mutate()` or `bind_cols()`, reordering columns with `relocate()`, and a
+  `left_join()` that matches one row apiece keep the class and the run's
+  record.
 
-  Operations that leave the set of folds alone keep the class and the run's
-  record: reordering rows with `arrange()`, adding a column with `mutate()` or
-  `bind_cols()`, reordering columns with `relocate()`, and a `left_join()` that
-  matches one row apiece. These are the invariants `tune` declares on its own
-  results objects.
+* The same rule covers the vctrs verbs and base `rbind()`:
+  `vctrs::vec_slice(x, 1)`, `vctrs::vec_rbind()`, `vctrs::vec_c()` and
+  `rbind()` return a plain tibble, while reordering rows with `vec_slice()`
+  and adding a column with `vctrs::vec_cbind(x, extra)` keep the class.
+  `vec_cbind()` and `bind_cols()` build on the first argument's type, so with
+  the results object second they return a plain tibble.
 
-* Breaking: the same rule now covers the vctrs verbs and base `rbind()`.
-  `vctrs::vec_slice(x, 1)`, `vctrs::vec_rbind(x, x)`, `vctrs::vec_c(x, x)` and
-  `rbind(x, x)` each return a plain tibble. Previously all four handed back an
-  object still carrying the class and still reporting the fold counts of the
-  object it was built from: `rbind(x, x)` gave six rows still headed as a
-  3-fold run. Reordering rows with `vctrs::vec_slice(x, c(2, 1, 3))` keeps the
-  class, and so does adding a column with `vctrs::vec_cbind()`, which now
-  answers exactly as `dplyr::bind_cols()` does. Both build on the first
-  argument's type, so `vec_cbind(x, extra)` and `bind_cols(x, extra)` keep the
-  class while `vec_cbind(extra, x)` and `bind_cols(extra, x)` return plain
-  tibbles holding the same columns. `vctrs::vec_rbind()` and `vctrs::vec_c()`
-  return a plain tibble even when given one argument and nothing to combine it
-  with, where `dplyr::bind_rows(x)` keeps the class.
+* `dplyr::rename()` moving one of the columns the run is recorded in returns
+  a plain tibble.
 
-* Breaking: `dplyr::rename()` moving one of the columns the run is recorded in
-  now returns a plain tibble. Previously it returned a `nested_results` that no
-  longer had that column: `rename()` renames through `names<-`, which reaches
-  neither dplyr's reconstruction nor vctrs'.
+* `dplyr` and `vctrs` are hard dependencies; both were already installed
+  alongside nestedtune through `tune`.
 
-* `vctrs` is now a hard dependency. It was already installed alongside
-  nestedtune, since `dplyr` requires it.
+* A results object records the columns its resampling design labelled the
+  folds with, so a column you add is read as a fold label only when the
+  design itself carries a column of that name. Before, the fold-label
+  columns were worked out from the column names, so adding `id_extra`
+  reported the folds as `Fold1, x`.
 
-* `dplyr` is now a hard dependency. It was already installed alongside
-  nestedtune, since `tune` requires it.
+* Replacing a fold-label column with a value that cannot be ordered, as
+  `dplyr::mutate(x, id = list(c(1, 2), 3, 4))` does, returns a plain tibble
+  rather than failing inside the class rule.
 
-* Fixed fold labels in `collect_metrics(summarize = FALSE)` and in the
-  partial-run warning, and the rule that decides whether an operation keeps the
-  `nested_results` class. Both worked out an object's fold-label columns from
-  its column names, so a column you added was treated as one of the design's
-  whenever its name looked like one. Adding `id_extra` reported the folds as
-  `Fold1, x` rather than `Fold1`; adding `id2` to a result from a plain v-fold
-  design and then removing it again returned a plain tibble, where the same
-  round trip on `extra` did not; and adding a list column named `id0` to a
-  result from a repeated design failed with `unimplemented type 'list' in
-  'listgreater'`. A results object now records the columns its resampling
-  design labelled the folds with, so a column you add is read as a fold label
-  only when the design itself carries a column of that name.
+* The packages a workflow declares are attached inside each mirai daemon
+  before any fold is dispatched, so a recipe with unqualified selectors such
+  as `all_numeric_predictors()` resolves on a worker as it does serially.
 
-* Fixed an error from replacing a fold-label column with a value that cannot be
-  ordered. `dplyr::mutate(x, id = list(c(1, 2), 3, 4))` failed with
-  `unimplemented type 'list' in 'orderVector1'`, raised from inside the rule
-  and naming nothing the caller had done. It returns a plain tibble now, which
-  is what replacing a column the run is recorded in has always meant.
+* `nested_tune_grid()`, `nested_final_fit()` and `nested_resamples()` take
+  `...` immediately after their required arguments, so `grid`, `metrics` and
+  `param_info` must be named and a mistyped or unsupported argument is an
+  error naming the function it was passed to. Every method the package
+  registers whose `...` is documented as unused refuses an argument the same
+  way.
 
-* Fixed a failure where every outer fold errored under parallel processing if
-  the workflow's recipe used unqualified selectors such as
-  `all_numeric_predictors()`. The packages a workflow declares are now attached
-  inside each `mirai` daemon before any fold is dispatched, so a selector that
-  resolves from your own attached packages resolves on a worker too. The same
-  call ran without error when no daemons were running, which is what made the
-  failure look like a parallel-only quirk.
+* `collect_metrics()` on a `nested_results` takes `summarize` after `...`,
+  matching tune's own method, so it must be named.
 
-* Breaking: `nested_tune_grid()`, `nested_final_fit()` and `nested_resamples()`
-  now take `...` immediately after their required arguments, so `grid`,
-  `metrics` and `param_info` must be named. A call that passed them by position
-  needs updating, and so does one that abbreviated a name: R does not
-  partial-match an argument that follows `...`, so `metrics` can no longer be
-  written `met`. In exchange, a mistyped or unsupported argument is now an
-  error naming the function it was passed to, instead of being ignored. Every
-  method the package registers whose `...` is documented as unused refuses an
-  argument the same way.
+* `nested_tune_grid()` takes `param_info`, passed unchanged to
+  `tune::tune_grid()` on every outer fold, and refuses one that is not a
+  `dials::parameters()` object before the first fold is fitted.
 
-* Breaking: `collect_metrics()` on a `nested_results` object takes `summarize`
-  after `...`, matching tune's own method, so it must be named.
-
-* `nested_tune_grid()` and `nested_final_fit()` gain `param_info`, passed
-  unchanged to `tune::tune_grid()`, on every outer fold and on the parallel
-  path as well as the serial one. Restricting a parameter's range restricts the
-  grid every fold searches. A `param_info` that is not a `dials::parameters()`
-  object is refused before the first fold is fitted.
-
-* `nested_tune_grid()` and `nested_final_fit()` gain `event_level`, naming
-  which level of a two-class outcome factor counts as the event. It reaches the
-  inner tuning run on both functions, and on `nested_tune_grid()` the outer
-  scoring fit as well, which the package sent no settings to before, so a
-  reported `sens` or `spec` was computed against the first level whatever the
-  inner run had been told. Metrics that do not distinguish the two levels, such
-  as `roc_auc` and `accuracy`, are unaffected. A value that is not `"first"` or
+* `nested_tune_grid()` takes `event_level`, naming which level of a two-class
+  outcome factor counts as the event, and sends it to the inner tuning run
+  and the outer scoring fit alike. A value that is not `"first"` or
   `"second"` is refused before the first fold is fitted.
 
-* The documentation site now builds with the tidymodels organization's shared
-  pkgdown theme, and the organization's contributing guide and code of conduct
-  have joined the repository and build as pages of the site. The README says on
-  its face that the interface is experimental.
+* The documentation site builds with the tidymodels organization's shared
+  pkgdown theme, and the organization's contributing guide and code of
+  conduct build as pages of the site.
 
-* The package has moved to the tidymodels organization. It now lives at
-  <https://github.com/tidymodels/nestedtune>, its documentation site is served
-  at <https://nestedtune.tidymodels.org/>, and `DESCRIPTION`, the README badges
-  and the installation instructions name those addresses. The old repository
-  address redirects to the new one; the old documentation address does not, so
-  a bookmark of the site needs updating.
+* The package has moved to the tidymodels organization, at
+  <https://github.com/tidymodels/nestedtune> with its documentation site at
+  <https://nestedtune.tidymodels.org/>. The old repository address redirects;
+  the old documentation address does not.
 
-* The documentation now names the quantity a nested run estimates, instead of
-  describing it. `collect_metrics()` estimates the k-fold test error of the
-  whole tune-and-fit procedure on the analysis sets the outer folds drew,
-  which is neither the risk of the model you deploy nor the same quantity
-  averaged over datasets, and the help page and the guide both say so.
+* A parallel run refuses to start when a daemon is holding an older install
+  of nestedtune, with class `nestedtune_daemons_incompatible`, naming the
+  functions its copy is missing and the fix: reinstall, then restart the
+  pool. A running daemon keeps the version it has already loaded, so
+  reinstalling underneath one changes nothing.
 
-* `collect_metrics()` help now explains why its `std_err` column is not a
-  confidence interval and why no interval is offered: outer fold scores share
-  most of their training rows, so a standard error computed as though they were
-  independent can misstate the uncertainty, typically downward, and there is no
-  universally unbiased replacement to substitute. Published measurements of what
-  that costs are cited.
+* A parallel run started on a pool that cannot be cancelled, one from
+  `mirai::daemons(n, dispatcher = FALSE)`, warns once at the start of the run
+  with class `nestedtune_pool_not_cancellable`. Its results are correct; what
+  the pool lacks is the ability to stop on an interrupt.
 
-* The nested cross-validation guide gains sources for its claim that the
-  estimate runs slightly pessimistic, a warning against reading a gap between
-  two nested estimates as a result, an explanation of why folds disagreeing
-  about a parameter is expected rather than alarming, and a new section on when
-  nesting is worth its cost and when it is not.
+* Running the outer folds in parallel sends each fold one copy of the data
+  instead of one copy per inner resample, the splits being emptied before
+  dispatch and refilled on the daemon. Results are unchanged, and the serial
+  path is untouched.
 
-* A parallel run now refuses to start when a worker is holding an older install
-  of nestedtune, instead of failing every fold with an opaque error. Workers are
-  separate R processes, and the outer loop reaches into each one's own copy of
-  the package by name, so a worker whose copy predates a function the loop
-  needs loads the package quite happily and then dies on every fold. The startup
-  check now asks each worker which of this session's internal functions its copy
-  is missing, and the error names them, along with the fix: reinstall, then
-  restart the pool. The restart matters: a running worker keeps the version it
-  has already loaded, so reinstalling underneath one changes nothing.
+* The object `nested_final_fit()` returns has two accessors for the tuning
+  run behind it: `extract_tune_results()` returns that run, and
+  `extract_scored_candidates()` the candidate settings it scored. Every
+  metric inside that run was computed on the resamples that chose the
+  candidate it describes, so it is not the model's performance.
 
-* A parallel run started on a worker pool that cannot be cancelled now says so,
-  once, at the start of the run. `mirai::daemons(n)` gives you a pool that stops
-  when you interrupt; `mirai::daemons(n, dispatcher = FALSE)` gives you one that
-  does not, and the two are indistinguishable from the outside. On the second
-  kind, interrupting a run hands you back your prompt while the outer folds
-  carry on computing results nobody will read. Previously only the documentation
-  mentioned this. The pool is not refused (its results are correct, and only
-  the ability to stop it is missing), so this is a warning, of class
-  `nestedtune_pool_not_cancellable`.
-
-* Running the outer folds in parallel now sends each fold one copy of your data
-  instead of one copy per inner resample. A split carries the whole frame it
-  indexes, and sending a fold to a worker serializes it, which does not preserve
-  the single shared copy the design holds in memory, so a design with five
-  inner resamples was putting six copies of the data on the wire for every outer
-  fold. The splits are now emptied before dispatch and refilled on the worker.
-  On a five-fold design over a 5,000-row frame this took a run from 25.7 MB to
-  4.7 MB. Results are unchanged: the objects each fold receives are identical to
-  the ones a serial run passes, and the serial path is untouched.
-
-* The object `nested_final_fit()` returns now has two named accessors for the
-  tuning run behind it. `extract_tune_results()` returns that run (the record
-  of what parameter selection actually saw when the procedure was re-run on
-  your whole dataset), and `extract_scored_candidates()` returns the candidate
-  settings it scored, in the same shape as the per-fold `.grid` tables on a
-  `nested_tune_grid()` result, so the two can be compared directly. Both were
-  reachable before only by reaching into the object's internals. Note what the
-  first one's numbers are worth: every metric inside that tuning run was
-  computed on the resamples that chose the candidate it describes, so it
-  flatters this model and is not its performance. The nested estimate from
-  `collect_metrics()` on the `nested_tune_grid()` result remains the number to
-  report. Handing either accessor an object it cannot answer for (a
-  `nested_tune_grid()` result, say) now produces an error saying so, rather
-  than R's bare "no applicable method".
-
-* `nested_tune_grid()` results now record which parameter candidates each outer
-  fold actually searched, in a new `.grid` column holding one table per fold.
-  Until now the object recorded only the grid you *asked* for, and the two are
-  routinely different: a grid size is expanded by tune and can reach fewer
-  candidates than you requested (asking for 20 on a parameter with four
-  reachable values searches four), and a candidate that fails scores nothing.
-  Folds can also differ from each other, because expanding a size draws from
-  the random number generator and each fold is seeded separately, so tuning a
-  continuous parameter with `grid = 10` leaves every fold searching its own
-  candidates. Printing a result now says so when it happens, reporting each
-  fold's candidate count, which matters when you are reading the per-fold
-  selections: folds that disagree may not have been choosing from the same set.
-  A fold that failed keeps whatever it managed to score, and one that scored
-  nothing carries an empty table. A candidate that failed on every inner
-  resample is absent from `.grid` and recorded in `.notes` instead; tune keeps
-  no other record of it.
-
-* The object `nested_tune_grid()` returns now documents the two attributes it
-  has always carried. `attr(x, "grid")` and `attr(x, "metrics")` record what
-  the run was asked to do: `grid` holds the argument as you gave it, so it is
-  a grid size rather than a table of candidates whenever you passed a size,
-  and it is not a record of which candidates were evaluated; `metrics` is
-  absent rather than `NULL` when you passed no metric set. Subsetting rows
-  leaves both unchanged.
-
-* `nested_tune_grid()` and `nested_final_fit()` now refuse a malformed design
-  before fitting anything, naming the column and the position of the first
-  offending element. A design whose `splits` or `inner_resamples` column held
-  something other than a split or a resampling object used to cost a full run
-  and come back reporting that every outer fold had failed, or, on
-  `nested_final_fit()`, fail with a message from base R that named nothing you
-  wrote. `rsample::nested_cv()` builds such a design without complaint when its
-  `inside` argument produces no `rset`, which is the usual way to arrive at one.
-  A design either function refuses, both refuse.
-
-* `nested_tune_grid()` and `nested_final_fit()` now also refuse a workflow that
-  has a model but no preprocessor, pointing at `workflows::add_formula()`,
-  `add_recipe()`, and `add_variables()`. This is the counterpart of the
-  no-model refusal below, and it used to fail once per outer fold with an error
-  raised inside `workflows`.
+* `nested_tune_grid()` and `nested_final_fit()` refuse a workflow that has a
+  model but no preprocessor, pointing at `workflows::add_formula()`,
+  `add_recipe()` and `add_variables()`, and a workflow with no model,
+  pointing at `workflows::add_model()`.
 
 * When `nested_final_fit()` cannot re-run a design's stored inner
-  specification, the error now names your call rather than an internal
-  function of the package.
+  specification, the error names the caller's call rather than an internal
+  function.
 
-* `nested_resamples()` now refuses an `inside` specification that does not
-  produce an `rset`. Passing one used to build a design anyway: its
-  `inner_resamples` column held whatever the specification returned, nothing
-  complained, and the first sign of trouble was an error from deep inside R the
-  next time the design was printed or used.
+* `nested_resamples()` refuses an `inside` specification that does not
+  produce an `rset`.
 
-* When a resampling specification fails to evaluate, the error now names the
-  specification that was tried instead of deparsing your data into the message.
-  Both `outside` and `inside` had the data frame written into the call being
-  evaluated, so a failure on a small 30×2 frame already produced around 1,200
-  characters that were mostly your own numbers, growing from there: long enough
-  to bury the actual problem. Such a failure is now also wrapped in a
-  nestedtune error carrying the original as its cause, so code matching on the
-  underlying package's condition class or on the whole message string sees a
-  different condition than before.
+* When a resampling specification fails to evaluate, the error names the
+  specification that was tried instead of deparsing the data into the
+  message, and is wrapped in a nestedtune error carrying the original as its
+  cause.
 
-* `nested_tune_grid()` and `nested_final_fit()` now say for themselves that a
-  workflow has no model in it, and point at `workflows::add_model()`. A
-  workflow carrying only a preprocessor (the easiest one to build by accident)
-  used to fail with an error raised inside `workflows`, naming a call you
-  never wrote, while every other bad `object` named yours. An entirely empty
-  workflow is refused the same way and says which of the two it is.
+* The reference pages and the vignettes are built into a documentation
+  website, rebuilt whenever a change lands on the default branch that the
+  package itself can see.
 
-* The documentation website now actually publishes. The job that pushes the
-  built site had no copy of the repository to work in, so the first build to
-  reach the default branch failed at the publishing step and no site was ever
-  served.
+* Interrupting a parallel run asks the folds already sent to the daemons to
+  stop, so the pool goes idle rather than computing results nobody will read.
+  Cancelling needs mirai's dispatcher, which `mirai::daemons(n)` starts by
+  default, and a fold already inside a compiled fitting routine may not be
+  interruptible.
 
-* The reference pages and `vignette("nested-cv")` are now built into a
-  documentation website, rebuilt whenever a change lands on the default branch
-  that the package itself can see. `DESCRIPTION` and the README have pointed
-  at a documentation site since the guide was added; it goes live once GitHub
-  Pages is switched on for the repository.
+* The check that runs before parallel dispatch asks every connected daemon
+  whether it can load the package, and a daemon that does not answer is
+  reported as a non-response, class `nestedtune_daemons_no_response`, rather
+  than as one that cannot load the package, class
+  `nestedtune_daemons_cannot_load`. Both also carry
+  `nestedtune_daemons_unusable`.
 
-* Interrupting a parallel run now asks the folds it had already sent to the
-  workers to stop. Before, the interrupt gave you your prompt back but left
-  those folds computing: work whose results nobody would ever read, on the
-  very pool you were about to reuse, until it finished on its own. However the
-  call is left once its folds are dispatched, the outstanding ones are now
-  cancelled on the way out and the pool goes idle shortly after. Two limits:
-  cancelling needs mirai's dispatcher, which `mirai::daemons(n)` starts by
-  default and `mirai::daemons(n, dispatcher = FALSE)` does not, so on such a
-  pool the folds still run to completion; and a fold already inside a compiled
-  fitting routine may not be interruptible.
+* The wait for that check is settable with
+  `options(nestedtune.preflight_timeout = <milliseconds>)`, a single
+  positive, finite number, 30 seconds by default. The first parallel call
+  after starting a cold pool is the slow one, since it is what makes each
+  daemon load the package.
 
-* The check that runs before parallel dispatch now asks every connected daemon
-  whether it can load the package, instead of asking one and believing it for
-  all of them. In a pool whose daemons differ (one respawned, or started
-  against a different library), a single loadable daemon used to pass the
-  check for the whole pool, and every fold that ran elsewhere came back as an
-  opaque worker failure. The check now names how many daemons are affected
-  and stops.
+* Cancelling a parallel run stops it, raising a `nestedtune_cancelled`
+  condition that inherits from `nestedtune_interrupted` and returning
+  nothing, with the caller's RNG state restored. Calling `mirai::daemons(0)`
+  while folds are outstanding is recorded as fold failures instead, since it
+  produces exactly what a daemon dying mid-fold produces.
 
-* A daemon that does not answer that check is now reported as a non-response
-  rather than as one that cannot load the package, so a merely slow daemon is no
-  longer met with advice to install what you already have. The two failures
-  raise `nestedtune_daemons_cannot_load` and `nestedtune_daemons_no_response`;
-  both also carry `nestedtune_daemons_unusable`, so a handler that only cares
-  that the check failed can catch either, and code already handling the former
-  keeps working unchanged.
+* `autoplot()` draws a nested cross-validation result. The default view puts
+  one point per outer fold at the value that fold's inner tuning selected,
+  one panel per tuned parameter, and `type = "performance"` draws each outer
+  fold's score with a dashed line at the nested estimate, read from the same
+  place `collect_metrics()` reads it.
 
-* The wait for that check, previously fixed at 30 seconds, is now settable with
-  `options(nestedtune.preflight_timeout = <milliseconds>)`. The default is
-  unchanged, and no statistical result depends on it. It must be a single
-  positive, finite number: an unbounded wait would restore the hang the bound
-  exists to turn into an error.
+* Both views keep every outer fold that was attempted on the axis, a fold
+  that failed leaving a visible gap. The subtitle says how much of the
+  requested design ran, and each panel says when fewer folds contributed to
+  it than completed, as `mtry (2 of 3 chose)` or `rmse (from 2 folds)`.
 
-* One consequence worth knowing: because the check now waits for every daemon
-  rather than whichever answers first, the first parallel call after starting a
-  cold pool is the slow one: it is what makes each daemon load the package,
-  and on a loaded machine that can exceed the default 30 seconds. Raise the
-  option if you meet a non-response you do not believe. Later calls in the same
-  session reuse what the daemons already loaded.
-
-* Cancelling a parallel run now stops it, instead of returning an estimate over
-  whatever had finished. Previously the tasks that were stopped before they ran
-  came back looking like folds that had been attempted and failed, so the run
-  completed and reported a number for a design that never executed. It now
-  raises a `nestedtune_cancelled` condition and returns nothing, with your RNG
-  state restored. That condition inherits from `nestedtune_interrupted`, so code
-  already handling a stopped run keeps working unchanged.
-
-* One case is deliberately left as it was, and is now documented: calling
-  `mirai::daemons(0)` while folds are still outstanding produces exactly what a
-  worker dying mid-fold produces, with nothing to tell the two apart. It stays
-  recorded as fold failures, because treating it as a cancellation would throw
-  away every completed fold whenever a single worker died.
-
-* `autoplot()` now draws a nested cross-validation result. Its default view puts
-  one point per outer fold at the value that fold's inner tuning selected, one
-  panel per tuned parameter: a flat row means the folds agreed, and scatter means
-  they disagreed and the value your deployed model carries was largely arbitrary.
-  Printing has said this in words since the last release; now you can see it.
-
-* `autoplot(x, type = "performance")` draws each outer fold's score with a dashed
-  line at the nested estimate. That line is the number `collect_metrics()`
-  reports, read from the same place rather than recomputed, so the figure and the
-  summary cannot disagree. Its subtitle says the estimate describes the
-  tune-and-fit procedure rather than a model you can deploy, so the caveat
-  travels with a figure exported into a slide or a paper.
-
-* Both views keep every outer fold that was *attempted* on the axis. A fold that
-  failed, or one that completed without recording a value for a parameter, leaves
-  a visible gap rather than being quietly dropped or drawn at an invented value.
-
-* The subtitle says how much of the requested design ran, and each panel says
-  when fewer folds contributed to it than completed: `mtry (2 of 3 chose)`,
-  `rmse (from 2 folds)`. Counting per panel rather than per figure is what keeps
-  the claim true: a parameter only some folds chose a value for would otherwise
-  read as unanimity, and a metric one fold could not score would read as an
-  estimate from more folds than it had. A metric no completed fold could score
-  keeps an empty panel rather than vanishing from the figure.
-
-* `ggplot2` is now a hard dependency. Plotting a run where no outer fold
+* `ggplot2` is a hard dependency. Plotting a run where no outer fold
   completed, or asking for the parameters view of a design with no tuned
   parameters, is refused with a message saying which it was.
 
-* `nested_tune_grid()` now runs its outer folds in parallel. Start workers with
-  `mirai::daemons(n)` before the call and the loop uses them; there is no
-  argument to set, and no daemons means the serial behaviour is unchanged.
-  Inner tuning still runs serially, because nesting parallelism inside
-  parallelism oversubscribes cores.
+* `nested_tune_grid()` runs its outer folds in parallel when mirai daemons
+  are connected, with no argument to set, and inner tuning stays serial
+  because nesting parallelism inside parallelism oversubscribes cores.
+  Parallel results are identical to serial ones, because each fold's seeds
+  are drawn before the loop starts and assigned by position.
 
-* Parallel results are identical to serial ones. The same seed gives the same
-  answer at any number of workers, because each fold's seeds are drawn before
-  the loop starts and assigned by position: a fold's result depends on where it
-  sits in the design, never on which worker ran it. A fold whose worker dies is
-  recorded as a failed fold like any other, and the run finishes.
-
-* `?nested_tune_grid` gains a "Parallel execution" section covering what workers
-  do and do not inherit from your session, and why the package must be installed
-  where they can load it.
-
-* A new guide, `vignette("nested-cv")`, runs the whole path (build a nested
-  design, run the loop, read what each fold selected, fit the model to
-  deploy) as code you can run, and says plainly what to report for that model
-  and why.
-  It puts the nested estimate next to the selection-time score users are most
-  tempted to report, and closes with a worked write-up. Every number in its
-  prose is produced when the vignette is built, so a claim that stops being true
-  fails the check rather than ageing quietly.
-
-* New `nested_final_fit()` builds the model you actually deploy. It runs the
-  same tuning procedure the nested estimate describes, this time with the whole
-  dataset in hand: it re-evaluates the design's inner resampling specification
-  against every row, tunes, selects, and fits. Reach the trained workflow with
-  `extract_workflow()`.
-
-* The final model is a separate object rather than a field on the results, and
-  it carries no performance number of its own. Report the estimate from
-  `collect_metrics()` on the `nested_tune_grid()` result for it: the
-  documentation says why, and what that number does and does not claim.
-  `collect_metrics()`, `show_best()`, and `select_best()` deliberately refuse a
-  final fit rather than returning something that reads as its score.
+* `nested_final_fit()` builds the model to deploy by running the same tuning
+  procedure the nested estimate describes with the whole dataset in hand,
+  and returns it as a separate object carrying no performance number of its
+  own. `collect_metrics()`, `show_best()` and `select_best()` refuse a final
+  fit rather than returning something that reads as its score.
 
 * Because the inner resampling specification is stored unevaluated and
-  re-evaluated at final-fit time, write it with literal arguments:
-  `inside = vfold_cv(v = 5)`, not `inside = vfold_cv(v = k)`. A specification
-  whose variables have gone out of scope now fails with a message naming it.
+  re-evaluated at final-fit time, it is written with literal arguments,
+  `inside = vfold_cv(v = 5)` rather than `inside = vfold_cv(v = k)`. A
+  specification whose variables have gone out of scope fails with a message
+  naming it.
 
-* Nested results now print as a report on the run rather than as a table of
-  list columns. It names the outer resampling scheme, says how many folds were
-  requested and how many completed, names any fold that failed along with the
-  stage it failed at, and gives the estimate across the folds that contributed.
+* An outer fold that fails does not end the run: the remaining folds still
+  run, `.completed` marks the failed one, and `.notes` says which stage
+  failed and why, carrying tune's own notes about the cause. A fold that
+  completes on only part of its inner design keeps the notes explaining what
+  was lost.
 
-* Printing shows what each outer fold's inner tuning selected, marking whether
-  the folds agreed on a parameter or disagreed about it and, when they
-  disagreed, listing every fold's choice. Disagreement means the tuning
-  procedure is unstable on this data, which averaging the metrics would hide.
+* `nested_tune_grid()` checks a data-frame `grid` against the workflow before
+  fitting anything, refusing by name a column that is not marked for tuning
+  or a tuned parameter with no column.
 
-* Printing also states plainly that the estimate describes the tune-and-fit
-  procedure rather than a model you can deploy: the caveat now travels with
-  the number instead of living only in the documentation.
+* `collect_metrics()` summarizes only the outer folds that completed, warns
+  naming the ones that did not, and errors rather than returning `NA` when
+  none completed.
 
-* Printing never warns and never errors, including for a run where no outer
-  fold completed at all. `collect_metrics()` still does both: asking for a
-  summary of a design that did not run deserves a condition, while describing
-  an object does not.
-
-* An outer fold that fails no longer ends the run. The remaining folds still
-  run, and the failed one is recorded rather than thrown away: `.completed`
-  marks it, and `.notes` says which stage failed and why, carrying tune's own
-  notes about the underlying cause. This matters because both stages can fail
-  quietly: inner tuning only raises once every candidate has failed, and the
-  outer fit does not raise at all.
-
-* A fold that completes on only part of its inner design now keeps the notes
-  explaining what was lost. `.completed` being `TRUE` alongside a non-empty
-  `.notes` means the fold worked, but chose its parameters on less of the inner
-  design than was requested.
-
-* `nested_tune_grid()` now checks a data-frame `grid` against the workflow
-  before fitting anything: a column that is not marked for tuning, or a tuned
-  parameter with no column, is refused immediately and by name. Either mistake
-  is wrong for every fold rather than for one, so it is reported as what it
-  is (an error in the call) instead of as an entire design failing.
-
-* `collect_metrics()` now summarizes only the outer folds that completed, warns
-  naming the ones that did not, and errors rather than returning `NA` when none
-  completed. An estimate is never reported as though it came from a design that
-  did not run.
-
-* Added `nested_tune_grid()`, which runs the nested cross-validation loop end to
-  end. For each outer fold it tunes on that fold's inner resamples with
-  `tune::tune_grid()`, selects the best candidate, finalizes the workflow, and
-  fits and scores it on the outer split. The result keeps each fold's chosen
-  parameters alongside its metrics, so disagreement between folds (selection
-  instability) is visible rather than averaged away.
-
-* Added a `collect_metrics()` method for those results, returning either the
-  per-fold metrics or their summary across outer folds.
+* `nested_tune_grid()` runs the nested cross-validation loop end to end: for
+  each outer fold it tunes on that fold's inner resamples with
+  `tune::tune_grid()`, selects a candidate, finalizes the workflow, and fits
+  and scores it on the outer split. The result keeps each fold's chosen
+  parameters alongside its metrics, so disagreement between folds is visible
+  rather than averaged away, and `collect_metrics()` returns the per-fold
+  metrics or their summary across outer folds.
 
 * `nested_tune_grid()` is reproducible from a single `set.seed()` before the
-  call. It derives one tuning seed and one outer-fit seed per fold up front, so
-  a fold's result depends on its position in the design rather than on the order
-  folds happen to run in, and it leaves the caller's random-number state exactly
-  as it found it.
+  call: it derives one tuning seed and one outer-fit seed per fold up front,
+  so a fold's result depends on its position in the design rather than on
+  the order folds run in, and it leaves the caller's random-number state as
+  it found it.
 
-* Added `nested_resamples()`, a constructor for nested resampling designs that
-  does not keep a copy of the data for every outer fold. For the same seed and
-  the same specifications it selects the same rows as `rsample::nested_cv()`:
-  `analysis()` and `assessment()` return identical frames, and each inner split
-  carries the same class and resample id. On a 20000-row dataset with a
-  five-fold inner resampling, a 50-fold outer design holds 10× the source data
-  rather than 57×.
+* `nested_resamples()` builds a nested resampling design without keeping a
+  copy of the data for every outer fold, selecting the same rows as
+  `rsample::nested_cv()` for the same seed and specifications. On a
+  20000-row dataset with a five-fold inner resampling, a 50-fold outer design
+  holds 10× the source data rather than 57×.
 
-* `nested_resamples()` refuses an outer bootstrap rather than warning about it.
-  The same observation can otherwise land in both the inner analysis and the
-  inner assessment set, which makes the design invalid rather than unusual.
+* `nested_resamples()` refuses an outer bootstrap, since the same observation
+  can otherwise land in both the inner analysis and the inner assessment
+  set.
