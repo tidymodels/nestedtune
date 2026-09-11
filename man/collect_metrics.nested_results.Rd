@@ -49,8 +49,8 @@ had run. Failed folds are dropped with a warning naming them.
 
 A run in which no fold completed is an error of class
 \code{nestedtune_no_completed_folds}, rather than a table of \code{NA}. It is the
-class \link[=autoplot.nested_results]{autoplot()}, \code{\link[=agreement]{agreement()}} and
-\code{\link[=nested_final_fit]{nested_final_fit()}} refuse such an object with.
+class named in the refusal that \link[=autoplot.nested_results]{autoplot()},
+\code{\link[=agreement]{agreement()}} and \code{\link[=nested_final_fit]{nested_final_fit()}} give such an object.
 }
 
 \section{Reading \code{std_err}}{
@@ -64,7 +64,7 @@ interval, and you must not build one from it.
 
 You cannot get a valid standard error from the fold scores. That limit
 is the statistics', not this implementation's. Outer fold scores are not
-independent, since any two folds share most of their training rows. A
+independent, because any two folds share most of their training rows. A
 standard error computed as though they were can
 misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
 proved that no universally unbiased estimator of a k-fold estimate's

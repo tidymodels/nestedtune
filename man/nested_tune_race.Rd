@@ -175,8 +175,8 @@ refused at entry. The first is a control of another class, such as a
 the \code{event_level} conflict above, and the third a \code{burn_in} no fold's
 inner design can meet. finetune refuses
 a race whose resample count is not greater than \code{burn_in}. This package
-refuses the whole call before any fold runs when finetune refuses any
-outer fold's inner \code{rset}, and the refusal names the count and the
+refuses the whole call before any fold runs when any outer fold's inner
+\code{rset} meets that condition, and the refusal names the count and the
 burn-in.
 \code{control_race()} defaults \code{burn_in} to 3, so a design with three inner
 resamples needs \code{control = control_race(burn_in = 2)} or fewer.
@@ -213,7 +213,7 @@ The final fit keeps its race as \verb{$tuning}, where what it saved is
 reachable.
 
 \strong{Inert: \code{backend_options}.} Backend options with no parallel backend to
-reach, since \code{allow_par} is forced off.
+reach, because \code{allow_par} is forced off.
 }
 
 \section{Nested designs}{
@@ -274,7 +274,7 @@ vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself. A repeated time draws
+untouched, because tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 

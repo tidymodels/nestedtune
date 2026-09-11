@@ -268,7 +268,7 @@ vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself. A repeated time draws
+untouched, because tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 

@@ -96,8 +96,8 @@
 #' the `event_level` conflict above, and the third a `burn_in` no fold's
 #' inner design can meet. finetune refuses
 #' a race whose resample count is not greater than `burn_in`. This package
-#' refuses the whole call before any fold runs when finetune refuses any
-#' outer fold's inner `rset`, and the refusal names the count and the
+#' refuses the whole call before any fold runs when any outer fold's inner
+#' `rset` meets that condition, and the refusal names the count and the
 #' burn-in.
 #' `control_race()` defaults `burn_in` to 3, so a design with three inner
 #' resamples needs `control = control_race(burn_in = 2)` or fewer.
@@ -133,7 +133,7 @@
 #' reachable.
 #'
 #' **Inert: `backend_options`.** Backend options with no parallel backend to
-#' reach, since `allow_par` is forced off.
+#' reach, because `allow_par` is forced off.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))

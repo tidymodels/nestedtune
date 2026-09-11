@@ -54,7 +54,7 @@ grid, parameter set or selection rule.
 \description{
 \code{nested_fit_resamples()} gives you the score of a workflow with nothing
 to tune on the same outer folds a tuned workflow scores on. It runs the
-outer loop of a nested design with the inner stage skipped, since there
+outer loop of a nested design with the inner stage skipped, because there
 is nothing to search. For each outer fold it fits the workflow on the
 fold's analysis set and scores it on the assessment set with
 \code{\link[tune:last_fit]{tune::last_fit()}}. It is \code{\link[=nested_tune_grid]{nested_tune_grid()}} with the inner tuner
@@ -150,7 +150,7 @@ most under the last. The one tune call a fold makes here is the outer
 scoring fit, whose own control this package builds.
 
 \strong{Forced: \code{allow_par}.} The outer fit runs at \code{allow_par = FALSE}
-whatever the control carries, since parallelism belongs over the outer
+whatever the control carries, because parallelism belongs over the outer
 folds.
 
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
@@ -174,8 +174,8 @@ completed fold's fitted workflow. Here there is no inner run whose
 predictions and extracts are discarded. The outer fit's are the only
 ones, and they are still discarded on a run that did not ask.
 
-\strong{Not returned: none.} There is no inner run, so nothing it saves exists
-to be withheld.
+\strong{Not returned: none.} There is no inner run, so there is nothing to
+withhold.
 
 \strong{Inert: \code{verbose}, \code{pkgs}, \code{save_workflow}, \code{parallel_over},
 \code{backend_options}, \code{workflow_size}.} Each governs an inner tuning call

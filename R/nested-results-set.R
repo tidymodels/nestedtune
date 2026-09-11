@@ -44,13 +44,13 @@
 #' `nestedtune_no_completed_folds`.
 #'
 #' `collect_notes()` is the exception: it reads every workflow, including those
-#' in which no fold completed, and refuses nothing, since a failed workflow's
+#' in which no fold completed, and refuses nothing, because a failed workflow's
 #' notes are the reason to ask.
 #'
 #' @section Columns not saved, and colliding ids:
 #'
 #' A control reaches each workflow of a set through the call's `...` or through
-#' its own `option` entry, so one workflow can have kept what another did not.
+#' its own `option` entry, so one workflow can keep what another did not.
 #' `collect_predictions()` and `collect_extracts()` therefore refuse a set in
 #' which a workflow with completed folds lacks the column. The refusal
 #' has class `nestedtune_column_not_saved` and names the workflow.
@@ -294,7 +294,7 @@ stack_set <- function(
 #' workflow's count per metric.
 #'
 #' The two counts are separate. A workflow that ran whole can still be
-#' named by the second, since a completed fold can score `NA` on one metric
+#' named by the second, because a completed fold can score `NA` on one metric
 #' while scoring the others. A metric no completed fold scored is counted
 #' there while drawing no rule.
 #'

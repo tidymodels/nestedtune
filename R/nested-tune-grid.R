@@ -122,7 +122,7 @@
 #' treats those unevenly, and only once a metric reads the
 #' times, so they are refused at entry, before a whole run is paid for.
 #' Zero, repeated times and times out of order are accepted and passed on
-#' untouched, since tune normalizes those itself. A repeated time draws
+#' untouched, because tune normalizes those itself. A repeated time draws
 #' tune's warning that 0 inappropriate evaluation time points were removed,
 #' once per tune call.
 #'
@@ -258,8 +258,8 @@
 #' of folds attempted and the number completed are stored as the
 #' `folds_attempted` and `folds_completed` attributes.
 #'
-#' Both stages can fail quietly. Inner tuning raises only once every
-#' candidate has failed, and the outer fit does not raise at all: it hands
+#' Both stages can fail quietly. Inner tuning raises only after every
+#' candidate failed, and the outer fit does not raise at all: it hands
 #' back a result with no metrics. Both are recorded as failures here. A fold
 #' can also complete and carry notes. When only some of a fold's inner
 #' resamples fail, the inner tuning still returns a candidate and the fold
@@ -329,7 +329,7 @@
 #'   internal function this session's copy defines. If any daemon cannot,
 #'   the call stops and names how many are affected and what is missing. A
 #'   daemon holding an older install loads the package and then fails every
-#'   fold. The remedy is to reinstall and restart the pool, since a running
+#'   fold. The remedy is to reinstall and restart the pool, because a running
 #'   daemon keeps the namespace it has already loaded.
 #' - A daemon that does not answer is reported as a non-response, not as a
 #'   missing package. The check waits 30 seconds by default. Set

@@ -153,8 +153,8 @@ package forces overwritten. The result records that effective control,
 \strong{Forced: \code{allow_par}, \code{seed}.} \code{allow_par = FALSE} on both tune calls a
 fold makes, because parallelism belongs over the outer folds. \code{seed} is
 the slot that drives the Gaussian process's proposals. tune draws it
-from the stream when it is not given. Left alone, a fold's proposals
-then depend on how much of the stream tune consumed before
+from the stream when it is not given. Were the slot left alone, a fold's
+proposals depend on how much of the stream tune consumed before
 reaching it. Here the control is given the fold's own tuning seed, the number
 \code{.tuning_seed} reports, whatever the control carried.
 
@@ -259,7 +259,7 @@ vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself. A repeated time draws
+untouched, because tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 

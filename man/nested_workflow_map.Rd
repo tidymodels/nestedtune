@@ -69,7 +69,7 @@ that column.
 
 
 A workflow with no parameter marked by \code{\link[tune:tune]{tune::tune()}} runs through
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} whatever \code{fn} names, since the five tuning
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} whatever \code{fn} names, because the five tuning
 orchestrators refuse it at entry. A baseline beside tuned models on the
 same folds is the comparison a set exists for, and each element's record
 names the procedure that ran. Every other workflow runs through \code{fn}.
@@ -98,7 +98,7 @@ it.
 
 
 Seed the session before the call, as before any orchestrator. The
-generator state the call holds once its entry checks have run is
+generator state the call holds after its entry checks ran is
 reinstated before each workflow. So every workflow's fold \code{i} runs
 under the same two seeds. Each element is \code{identical()} to the
 orchestrator called by hand on that workflow, with the same arguments,
@@ -135,7 +135,7 @@ every field a handler reads are unchanged.
 
 
 You can take a subset of the set and it still answers for the workflows
-it holds, since each row's \code{nested_results} describes its own run whole.
+it holds, because each row's \code{nested_results} describes its own run whole.
 An operation keeps the class and the \code{fn} attribute when its result:
 \itemize{
 \item holds the three columns under those names, none repeated.

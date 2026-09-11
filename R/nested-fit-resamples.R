@@ -3,7 +3,7 @@
 #' @description
 #' `nested_fit_resamples()` gives you the score of a workflow with nothing
 #' to tune on the same outer folds a tuned workflow scores on. It runs the
-#' outer loop of a nested design with the inner stage skipped, since there
+#' outer loop of a nested design with the inner stage skipped, because there
 #' is nothing to search. For each outer fold it fits the workflow on the
 #' fold's analysis set and scores it on the assessment set with
 #' [tune::last_fit()]. It is [nested_tune_grid()] with the inner tuner
@@ -100,7 +100,7 @@
 #' scoring fit, whose own control this package builds.
 #'
 #' **Forced: `allow_par`.** The outer fit runs at `allow_par = FALSE`
-#' whatever the control carries, since parallelism belongs over the outer
+#' whatever the control carries, because parallelism belongs over the outer
 #' folds.
 #'
 #' **Settable as its own argument: `event_level`.** The argument is the one
@@ -124,8 +124,8 @@
 #' predictions and extracts are discarded. The outer fit's are the only
 #' ones, and they are still discarded on a run that did not ask.
 #'
-#' **Not returned: none.** There is no inner run, so nothing it saves exists
-#' to be withheld.
+#' **Not returned: none.** There is no inner run, so there is nothing to
+#' withhold.
 #'
 #' **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
 #' `backend_options`, `workflow_size`.** Each governs an inner tuning call

@@ -44,7 +44,7 @@ included. A completed fold can carry an error note too, from an \code{extract}
 that failed on it (see
 \code{\link[=collect_predictions.nested_results]{collect_extracts()}}).
 \item \code{collect_selections()} stacks \code{.selected}: one row per completed fold. A
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows, since no fold selected
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows, because no fold selected
 anything.
 \item \code{collect_inner_metrics()} stacks \code{.inner_metrics}: one row per
 candidate, a parameter setting, and metric that a completed fold's
@@ -85,7 +85,7 @@ fold completed is an error of class \code{nestedtune_no_completed_folds}.
 The \code{.config} of a selection or an inner-metrics row is kept as the fold
 recorded it. It labels a candidate inside that one fold's tuning run. So
 a selected row's \code{.config} is found among the same fold's rows in
-\code{collect_inner_metrics()}. Since folds can search different candidates, it
+\code{collect_inner_metrics()}. Because folds can search different candidates, it
 identifies nothing across them, which is why \code{\link[=agreement]{agreement()}} leaves it out.
 }
 

@@ -735,8 +735,8 @@ new_tbl <- function(cols) {
 #'
 #' A run in which no fold completed is an error of class
 #' `nestedtune_no_completed_folds`, rather than a table of `NA`. It is the
-#' class [autoplot()][autoplot.nested_results], [agreement()] and
-#' [nested_final_fit()] refuse such an object with.
+#' class named in the refusal that [autoplot()][autoplot.nested_results],
+#' [agreement()] and [nested_final_fit()] give such an object.
 #'
 #' @section Reading `std_err`:
 #'
@@ -748,7 +748,7 @@ new_tbl <- function(cols) {
 #'
 #' You cannot get a valid standard error from the fold scores. That limit
 #' is the statistics', not this implementation's. Outer fold scores are not
-#' independent, since any two folds share most of their training rows. A
+#' independent, because any two folds share most of their training rows. A
 #' standard error computed as though they were can
 #' misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
 #' proved that no universally unbiased estimator of a k-fold estimate's

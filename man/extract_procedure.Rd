@@ -48,7 +48,7 @@ own arguments beside it:
 control object the run was given, or tune's default when none was, with
 the slots this package forces already applied. On a Bayesian result
 \code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info}
-and no \code{select}, since no parameter set was read and no rule applied.
+and no \code{select}, because no parameter set was read and no rule applied.
 See "Differences from calling tune directly" on each loop function's
 help page for what those slots are.
 

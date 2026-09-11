@@ -62,7 +62,7 @@ workflow completed a fold is refused with class
 \code{nestedtune_no_completed_folds}.
 
 \code{collect_notes()} is the exception: it reads every workflow, including those
-in which no fold completed, and refuses nothing, since a failed workflow's
+in which no fold completed, and refuses nothing, because a failed workflow's
 notes are the reason to ask.
 }
 
@@ -70,7 +70,7 @@ notes are the reason to ask.
 
 
 A control reaches each workflow of a set through the call's \code{...} or through
-its own \code{option} entry, so one workflow can have kept what another did not.
+its own \code{option} entry, so one workflow can keep what another did not.
 \code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
 which a workflow with completed folds lacks the column. The refusal
 has class \code{nestedtune_column_not_saved} and names the workflow.

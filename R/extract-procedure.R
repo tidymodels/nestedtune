@@ -44,7 +44,7 @@
 #' control object the run was given, or tune's default when none was, with
 #' the slots this package forces already applied. On a Bayesian result
 #' `seed` is left out. A `"fit_resamples"` record carries no `param_info`
-#' and no `select`, since no parameter set was read and no rule applied.
+#' and no `select`, because no parameter set was read and no rule applied.
 #' See "Differences from calling tune directly" on each loop function's
 #' help page for what those slots are.
 #'

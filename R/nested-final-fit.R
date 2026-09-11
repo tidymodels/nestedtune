@@ -76,7 +76,7 @@
 #' you the record.
 #'
 #' A `param_info` parameter whose range is unknown until the data is seen
-#' is finalized here on the full data, since every row is this model's
+#' is finalized here on the full data, because every row is this model's
 #' training data. Each outer fold of the nested run finalized it on that
 #' fold's analysis rows alone, so this model's candidate range can be wider
 #' than any fold's.
@@ -114,7 +114,7 @@
 #' compared as written. A recipe is compared as its steps in order, with
 #' each step's selectors and settings. It does not distinguish a model
 #' argument given as a name from the same name bound to another value,
-#' since the argument is recorded as written. A recipe setting that is a
+#' because the argument is recorded as written. A recipe setting that is a
 #' function is compared as its body, so two functions with one body that
 #' close over different values are not distinguished either. It does not
 #' read case weights or a postprocessor, so a workflow that differs there
@@ -153,7 +153,7 @@
 #' biased as a claim about this model. `collect_metrics()` on `x$tuning`
 #' hands them over without saying so.
 #'
-#' Expect the nested estimate to run slightly pessimistic instead, since
+#' Expect the nested estimate to run slightly pessimistic instead, because
 #' each outer fold trained on its analysis rows alone. Varma and Simon
 #' (2006) measured a 4.2-point overshoot at n = 40, and Wilimitis and Walsh
 #' (2023) about 1 to 2 percent of AUROC on 41,121 records. That offset
@@ -225,9 +225,9 @@
 #' The whole recipe is `fit(object, data)` under the second seed.
 #'
 #' Building the resamples sits inside the first seed's scope rather than
-#' before it. Constructing an `rset` draws from the generator. A version
-#' that built them earlier stays reproducible from the session seed, but
-#' not from the two seeds above.
+#' before it. Constructing an `rset` draws from the generator. Were they
+#' built earlier, the run reproduces from the session seed alone, not from
+#' the two seeds above.
 #'
 #' @section The inner specification is re-evaluated:
 #'

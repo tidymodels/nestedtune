@@ -118,7 +118,7 @@ workflow and fold counts. \code{summary()} names the folds and prints each
 workflow's count per metric.
 
 The two counts are separate. A workflow that ran whole can still be
-named by the second, since a completed fold can score \code{NA} on one metric
+named by the second, because a completed fold can score \code{NA} on one metric
 while scoring the others. A metric no completed fold scored is counted
 there while drawing no rule.
 }
