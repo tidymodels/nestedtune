@@ -142,9 +142,18 @@ pca_workflow <- function(
   workflows::workflow(rec, model)
 }
 
-ns_workflow <- function(d, first = "x1", second = "x2", df2 = tune::tune("df2")) {
+ns_workflow <- function(
+  d,
+  first = "x1",
+  second = "x2",
+  df2 = tune::tune("df2")
+) {
   rec <- recipes::step_ns(
-    recipes::step_ns(base_recipe(d), !!rlang::sym(first), deg_free = tune::tune("df1")),
+    recipes::step_ns(
+      base_recipe(d),
+      !!rlang::sym(first),
+      deg_free = tune::tune("df1")
+    ),
     !!rlang::sym(second),
     deg_free = df2
   )
@@ -209,7 +218,10 @@ test_that("AC2: the model axes are refused on the three records", {
 
   # A different engine.
   expect_mismatch(
-    workflows::update_model(det_workflow(d), parsnip::linear_reg(engine = "glm")),
+    workflows::update_model(
+      det_workflow(d),
+      parsnip::linear_reg(engine = "glm")
+    ),
     grid,
     "The model's engine differs: recorded \"lm\", given \"glm\""
   )
@@ -474,11 +486,17 @@ test_that("AC3: a rebuilt workflow is accepted and gives the same fit", {
     expect_false(identical(case$orig, case$rebuilt))
     expect_false(identical(case$orig, case$assembled))
     expect_identical(
-      check_workflow_identity(case$rebuilt, extract_procedure(case$res)$workflow),
+      check_workflow_identity(
+        case$rebuilt,
+        extract_procedure(case$res)$workflow
+      ),
       case$rebuilt
     )
     expect_identical(
-      check_workflow_identity(case$assembled, extract_procedure(case$res)$workflow),
+      check_workflow_identity(
+        case$assembled,
+        extract_procedure(case$res)$workflow
+      ),
       case$assembled
     )
 

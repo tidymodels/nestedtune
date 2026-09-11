@@ -71,6 +71,7 @@ Record a canonical identity of the workflow on every orchestrator's procedure re
 - 2026-09-11: return tasks done; suite 9782 pass, 0 fail; `document()` regenerated two Rd files; `sweep-prose.R --roxygen` and `--spans` clean; status set to review.
 - 2026-09-11: review, second pass: six criteria verified on `bdc9290`, suite 9782/0, check 0/0/0; eight findings, four fixed at the gate (G2, G3, G5, G7), one to the candidate row (G1), three rejected (G4, G6, G8).
 - 2026-09-11: step-7 approval: m083-final-fit-workflow-identity approved for merge
+- 2026-09-11: PR #97 opened; `format-suggest` red on line breaks in the two new test files, `air format .` run and pushed, CI re-run on the new head.
 
 ## Decisions
 

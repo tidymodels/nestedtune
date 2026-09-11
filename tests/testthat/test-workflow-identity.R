@@ -42,7 +42,10 @@ test_that("AC3: arguments given through set_args() and set_engine() read as thos
   )
   after <- workflows::workflow(
     y ~ x1 + x2,
-    parsnip::set_args(parsnip::set_engine(parsnip::linear_reg(), "lm"), penalty = 1)
+    parsnip::set_args(
+      parsnip::set_engine(parsnip::linear_reg(), "lm"),
+      penalty = 1
+    )
   )
   expect_identical(workflow_identity(in_call), workflow_identity(after))
 
@@ -135,7 +138,13 @@ test_that("the identity names the model and the preprocessor as the criteria des
   expect_identical(id$preprocessor$kind, "recipe")
   expect_identical(
     id$preprocessor$roles,
-    list(x1 = "predictor", x2 = "predictor", x3 = "predictor", x4 = "predictor", y = "outcome")
+    list(
+      x1 = "predictor",
+      x2 = "predictor",
+      x3 = "predictor",
+      x4 = "predictor",
+      y = "outcome"
+    )
   )
   step <- id$preprocessor$steps[[1L]]
   expect_identical(step$type, "step_pca")
@@ -183,7 +192,10 @@ test_that("a model argument is recorded as written, and a recipe setting as the 
     workflow_identity(step(1L))$preprocessor$steps[[1L]]$settings$num_comp,
     "1L"
   )
-  expect_false(identical(workflow_identity(step(1L)), workflow_identity(step(2L))))
+  expect_false(identical(
+    workflow_identity(step(1L)),
+    workflow_identity(step(2L))
+  ))
   expect_false(identical(
     workflow_identity(fixed_workflow(d)),
     workflow_identity(det_workflow(d))
