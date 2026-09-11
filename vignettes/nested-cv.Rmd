@@ -131,8 +131,9 @@ expensive, and that product is where the cost lives.
 ## Running the loop
 
 `nested_tune_grid()` drives the outer loop. For each outer fold it calls
-`tune::tune_grid()` on that fold's inner resamples, the same call you would
-make by hand. It then picks the best candidate by the first metric. If you
+`tune::tune_grid()` on that fold's inner resamples, the call you would make
+by hand, with parallelism off and the fold's seed set. It then picks the
+best candidate by the first metric. If you
 would rather pick by another of tune's selectors, the `select` argument
 takes a `selection_rule()` naming it. It finalizes the
 workflow with that candidate, fits it on the fold's analysis rows, and

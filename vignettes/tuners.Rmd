@@ -137,7 +137,7 @@ The print notes that the folds did not search the same grid. Each fold
 scored the same number of candidates, but not the same ones, because each
 fold proposes candidates from its own scores. With a grid, every fold picks
 from the same list, so you can count how many folds chose each candidate.
-Here no two folds saw the same list, and the note says so.
+Here the folds did not all see the same list, and the note says so.
 
 The guide multiplied outer folds by inner resamples by grid rows to count
 fits. Here the same count uses `initial + iter` candidates per fold in
@@ -202,7 +202,7 @@ race
 ```
 
 A race's `.inner_metrics` looks complete but is not. Every candidate in the
-grid has a row, yet the rows rest on different numbers of resamples. The
+grid has a row, yet the rows can rest on different numbers of resamples. The
 `n` column says how many inner resamples each candidate was scored on
 before it was dropped or the race ended. `collect_inner_metrics()` stacks those tables
 with the fold label beside them. So summing `n` over one metric's rows

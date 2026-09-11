@@ -139,7 +139,7 @@ res$.selected[[1]]
 ```
 
 `.inner_metrics` is the whole table the inner search scored: one row per
-candidate, its score averaged over the inner resamples. It is what the
+candidate and metric, its score averaged over the inner resamples. It is what the
 fold's selection was made from. `collect_inner_metrics()` stacks it across folds, and
 `vignette("tuners")` shows how its shape differs by search.
 

@@ -36,8 +36,8 @@ _A plan-time survey, owned by M084 and read by its AC3; `cairn/surveys/` holds s
 
 ## §4 `vignettes/nested-cv.Rmd` (from line 35) — 3 of 25
 - :133 "`nested_tune_grid()` drives the outer loop." — e
-- :278 "The selection-time score is not an estimate of performance on anything" — c e
-- :296 "Seed the session before the call, as elsewhere in tidymodels" — c e
+- :279 "The selection-time score is not an estimate of performance on anything" — c e
+- :297 "Seed the session before the call, as elsewhere in tidymodels" — c e
 
 ## §5 `vignettes/articles/parallel.Rmd` — 1 of 9, and `README.Rmd`
 - :17 "A nested run fits many models, and you may want it to finish sooner" — c e
