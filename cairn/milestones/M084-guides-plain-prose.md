@@ -1,6 +1,6 @@
 # M084: The guides and README read on one pass for a tune_grid user
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 - [x] T5: Rewrite `tuners.Rmd`'s nine listed paragraphs (survey §3) and flagged sentences; "orchestrator" replaced or set up.
 - [x] T6: Rewrite `articles/parallel.Rmd`'s opening paragraph (survey §5) and `README.Rmd`'s opening paragraph; re-knit `README.md`.
 - [x] T7: Spawn the AC3 reader with the standard, the six pages and the survey list; fix every paragraph it reports; rerun until its list is empty; record each run's count in the work log.
-- [ ] T8: Run the AC1, AC2 and AC4 commands, `pkgdown::build_articles()`, `devtools::build_readme()` twice, `devtools::check()`; NEWS bullet.
+- [x] T8: Run the AC1, AC2 and AC4 commands, `pkgdown::build_articles()`, `devtools::build_readme()` twice, `devtools::check()`; NEWS bullet.
 
 ## Work log
 
@@ -69,3 +69,4 @@ Rewrite every paragraph of the four guides, the parallel article and the README 
 - 2026-09-10: T7: nine fresh [O] readers, each given the standard, the six pages and the survey list; paragraphs reported per run 15, 2, 5, 8, 4, 3, 3, 1, 2, every one fixed in the same turn (39 in all: sentence splits, glosses for `candidate` on results and parallel, "flat" and "reader" replaced on estimate and tuners, the Tibshirani figures restated in points off the true 0.5, the "four things it is not" list reordered). The sweep stays clean after every run.
 - 2026-09-10: user chose stopping T7 after run 9 over a tenth run, an unbounded loop, or amending AC3 to a threshold: fresh readers report one to three new first-read stumbles per run and the count does not converge, review's own reader decides AC3, and a non-empty list there returns as a defect. AC3's text is unchanged.
 - 2026-09-10: claim audit: 63 claims read, 2 corrected — vignettes/results.Rmd (the wholly-failed-run sentence named `summary()` among the refusing readers; now lists the six that refuse), vignettes/tuners.Rmd ("every function that reads a result answers on the baseline" omitted the parameters plot's refusal; now names it). The re-read ran in a fresh [O] reader rather than the same one, since agent continuation is disabled in this session; both corrected lines hold.
+- 2026-09-10: T8 done on the final tree (`a58cf6a` plus nothing uncommitted): sweep clean and exit 0; `--terms` first uses all glossing sentences; the AC4 grep hits only the README's three HTML comment lines; idiom sweep clean; word counts 1272 / 1389 / 1293 / 1357 / 556 / 218; every heading a noun phrase; `pkgdown::build_articles()` exit 0 (pandoc deprecation warnings only); a second `devtools::build_readme()` left `README.md` unchanged; `devtools::check()` 0 errors, 0 warnings, 0 notes in 9m 21s. NEWS bullet added. Status set to review.
