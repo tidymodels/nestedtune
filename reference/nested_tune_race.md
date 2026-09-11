@@ -57,7 +57,7 @@ nested_tune_race_win_loss(
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html).
-  A workflow with no marker is refused;
+  A workflow with no marker is refused, and
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   scores one on the same design.
 
@@ -74,7 +74,7 @@ nested_tune_race_win_loss(
 
   A control object from
   [`finetune::control_race()`](https://finetune.tidymodels.org/reference/control_race.html),
-  as `control`, and nothing else; every argument after `...` is matched
+  as `control`, and nothing else. Every argument after `...` is matched
   by name. The section on differences from finetune says what becomes of
   each slot.
 
@@ -101,9 +101,9 @@ nested_tune_race_win_loss(
 
 - event_level:
 
-  `"first"` (the default) or `"second"`, naming which level of a
-  two-class outcome is the event. It applies to the inner tuning run and
-  the outer scoring fit alike.
+  `"first"` (the default) or `"second"`. It names which level of a
+  two-class outcome is the event, and applies to the inner tuning run
+  and the outer scoring fit alike.
 
 - eval_time:
 
@@ -130,7 +130,7 @@ and the recorded grid mean on a race.
 
 ## Details
 
-Both functions need finetune installed; `nested_tune_race_anova()` also
+Both functions need finetune installed. `nested_tune_race_anova()` also
 needs lme4, which fits the ANOVA, and `nested_tune_race_win_loss()`
 BradleyTerry2, which fits the win/loss model. A missing package is
 refused at entry, before any fold runs.
@@ -153,13 +153,13 @@ A race draws from the generator even with a deterministic engine. With
 `randomize = TRUE`, finetune's default, the inner resamples are shuffled
 before the burn-in. So which resamples the burn-in uses, and with it
 which candidates are eliminated when, comes from the fold's tuning seed.
-On the parallel path every daemon's library must hold finetune, which
-the loop attaches in each daemon before the first fold is sent, warning
+On the parallel path every daemon's library must hold finetune. The loop
+attaches it in each daemon before the first fold is sent, and warns
 where it cannot.
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; there is
+Seed the session before the call, as elsewhere in tidymodels. There is
 no `seed` argument. On entry the function draws `2 * n` seeds in a
 single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
 number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
@@ -202,19 +202,19 @@ parallelism belongs over the outer folds.
 **Settable as its own argument: `event_level`.** The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, naming both. `grid` and `eval_time` are the racing functions' own
-arguments rather than control slots, offered here as arguments and
-reaching them unchanged.
+entry, with a refusal that names both. `grid` and `eval_time` are the
+racing functions' own arguments rather than control slots, offered here
+as arguments and reaching them unchanged.
 
 **Refused: none.** No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
-`control_grid()` that finetune itself would accept here. The second is
-the `event_level` conflict above, and the third a `burn_in` no fold's
-inner design can meet. finetune refuses a race whose resample count is
-not greater than `burn_in`. This package refuses the whole call before
-any fold runs when any outer fold's inner `rset` would be refused,
-naming the count and the burn-in. `control_race()` defaults `burn_in` to
-3, so a design with three inner resamples needs
+`control_grid()` that finetune itself accepts here. The second is the
+`event_level` conflict above, and the third a `burn_in` no fold's inner
+design can meet. finetune refuses a race whose resample count is not
+greater than `burn_in`. This package refuses the whole call before any
+fold runs when any outer fold's inner `rset` meets that condition, and
+the refusal names the count and the burn-in. `control_race()` defaults
+`burn_in` to 3, so a design with three inner resamples needs
 `control = control_race(burn_in = 2)` or fewer.
 
 **Passed through: `burn_in`, `alpha`, `num_ties`, `randomize`,
@@ -222,14 +222,14 @@ naming the count and the burn-in. `control_race()` defaults `burn_in` to
 Each reaches the race as given:
 
 - `burn_in`, `alpha`, `num_ties` and `randomize` govern each fold's race
-  as they would a direct call. `burn_in` is how many resamples every
+  as they do in a direct call. `burn_in` is how many resamples every
   candidate is scored on before elimination starts. `alpha` is the
   significance level an elimination needs. `num_ties` is how many rounds
   two tied survivors are given before one is dropped. `randomize` is
   whether the resamples are shuffled first.
 
 - `verbose_elim` prints finetune's elimination log from a serial run,
-  once per fold, and from a mirai daemon where nothing shows it;
+  once per fold, and from a mirai daemon where nothing shows it.
   `verbose` likewise.
 
 - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
@@ -242,7 +242,7 @@ the `>= 1.0.1` floor this package declares does not require it.
 **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
 outer fit as well as the race. The outer fit's predictions and extracts
 are kept as `.predictions` and `.extracts` in the shape the grid page
-describes; the race's own are still discarded.
+describes, and the race's own are still discarded.
 
 **Not returned: `save_workflow`.** It lands on the inner race result a
 fold record discards, so setting it costs the work and returns nothing.
@@ -250,7 +250,7 @@ The final fit keeps its race as `$tuning`, where what it saved is
 reachable.
 
 **Inert: `backend_options`.** Backend options with no parallel backend
-to reach, since `allow_par` is forced off.
+to reach, because `allow_par` is forced off.
 
 ## Nested designs
 
@@ -267,7 +267,7 @@ own frame, as
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
 builds, or that split's analysis set, as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds. An inner split carrying the outer frame may index only rows the
+builds. An inner split carrying the outer frame must index only rows the
 outer split's `in_id` holds, in its `in_id` and any non-`NA` `out_id`.
 So no inner analysis or assessment set reaches a row the outer fold
 holds out.
@@ -305,21 +305,22 @@ finalizes on the full data.
 dynamic or integrated survival metric, `brier_survival()`,
 `roc_auc_survival()` and their relatives, is measured at the times you
 name. When the metric set has no metric that reads it, tune ignores it
-with a warning; tune keys that warning on the metrics, not on the
+with a warning. tune keys that warning on the metrics, not on the
 model's mode.
 
 Refused here, ahead of tune: anything that is not numeric, an empty
 vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the times, so they
 are refused at entry, before a whole run is paid for. Zero, repeated
-times and times out of order are accepted and passed on untouched, since
-tune normalizes those itself. A repeated time draws tune's warning that
-0 inappropriate evaluation time points were removed, once per tune call.
+times and times out of order are accepted and passed on untouched,
+because tune normalizes those itself. A repeated time draws tune's
+warning that 0 inappropriate evaluation time points were removed, once
+per tune call.
 
 The selection rule is applied without `eval_time`. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again would change no
-choice, and would repeat tune's message about which time it took.
+with, which are the ones named here. Passing them again changes no
+choice, and repeats tune's message about which time it took.
 
 ## See also
 

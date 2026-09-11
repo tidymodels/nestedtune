@@ -99,7 +99,7 @@ per-fold tables the same way.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty, so an argument given here is an error
+<dd><p>Not used. It must be empty, so an argument given here is an error
 and not a silent no-op.</p></dd>
 
 
@@ -131,7 +131,7 @@ about with class <code>nestedtune_partial_summary</code>. A set in which no
 workflow completed a fold is refused with class
 <code>nestedtune_no_completed_folds</code>.</p>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code> is the exception: it reads every workflow, including those
-in which no fold completed, and refuses nothing, since a failed workflow's
+in which no fold completed, and refuses nothing, because a failed workflow's
 notes are the reason to ask.</p>
     </div>
     <div class="section level2">
@@ -140,9 +140,9 @@ notes are the reason to ask.</p>
 
 
 <p>A control reaches each workflow of a set through the call's <code>...</code> or through
-its own <code>option</code> entry, so one workflow can have kept what another did not.
+its own <code>option</code> entry, so one workflow can keep what another did not.
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> and <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> therefore refuse a set in
-which a workflow that would contribute rows lacks the column. The refusal
+which a workflow with completed folds lacks the column. The refusal
 has class <code>nestedtune_column_not_saved</code> and names the workflow.</p>
 <p>An element's table that already has a <code>wflow_id</code> column, a parameter given
 that id, is refused with class <code>nestedtune_collect_name_collision</code>.</p>

@@ -23,7 +23,7 @@ collect_metrics(x, ..., summarize = TRUE)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
+  Not used. It must be empty. An argument passed here is an error rather
   than silently ignored.
 
 - summarize:
@@ -57,12 +57,12 @@ design had run. Failed folds are dropped with a warning naming them.
 
 A run in which no fold completed is an error of class
 `nestedtune_no_completed_folds`, rather than a table of `NA`. It is the
-class
+class named in the refusal that
 [autoplot()](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md),
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-refuse such an object with.
+give such an object.
 
 ## Reading `std_err`
 
@@ -70,11 +70,11 @@ refuse such an object with.
 standard deviation of the per-fold scores over the square root of how
 many there were. It measures the precision of that mean, not the
 fold-to-fold spread, which is larger by the same square-root factor. It
-is not a confidence interval, and one should not be built from it.
+is not a confidence interval, and you must not build one from it.
 
 You cannot get a valid standard error from the fold scores. That limit
 is the statistics', not this implementation's. Outer fold scores are not
-independent, since any two folds share most of their training rows. A
+independent, because any two folds share most of their training rows. A
 standard error computed as though they were can misstate the
 uncertainty, usually downward. Bengio and Grandvalet (2004) proved that
 no universally unbiased estimator of a k-fold estimate's variance exists

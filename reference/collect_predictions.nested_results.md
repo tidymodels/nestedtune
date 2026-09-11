@@ -42,8 +42,8 @@ collect_extracts(x, ...)
 
 - ...:
 
-  Not used; must be empty. tune's `summarize` and `parameters` arguments
-  are not offered here.
+  Not used. It must be empty. tune's `summarize` and `parameters`
+  arguments are not offered here.
 
 ## Value
 

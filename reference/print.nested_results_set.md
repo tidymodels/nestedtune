@@ -22,7 +22,7 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty.
+  Not used. It must be empty.
 
 ## Value
 

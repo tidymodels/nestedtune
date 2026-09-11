@@ -87,7 +87,7 @@ out. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. Passing an argument here raises an
+<dd><p>Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.</p></dd>
 
 
@@ -99,15 +99,15 @@ error instead of leaving it silently ignored.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> returns an object of class <code>summary.nested_final_fit</code>, a list
-with these components:</p><ul><li><p><code>tuning_label</code>, the tuning run's resampling label;</p></li>
+with these components:</p><ul><li><p><code>tuning_label</code>, the tuning run's resampling label</p></li>
 <li><p><code>tuner</code>, the name of the tune or finetune function that ran, as
-<code><a href="extract_procedure.html">extract_procedure()</a></code> records it;</p></li>
-<li><p><code>candidates</code>, the number of parameter settings that run scored;</p></li>
+<code><a href="extract_procedure.html">extract_procedure()</a></code> records it</p></li>
+<li><p><code>candidates</code>, the number of parameter settings that run scored</p></li>
 <li><p><code>initial</code> and <code>initial_requested</code>, <code>iterations_completed</code> and
-<code>iterations_requested</code>, the iterating tuners' counts;</p></li>
-<li><p><code>selection</code>, the parameter values selection chose;</p></li>
-<li><p><code>estimate</code>, always <code>NULL</code>.</p></li>
-</ul><p>Printing it is what most callers want; the components are there for a
+<code>iterations_requested</code>, the iterating tuners' counts</p></li>
+<li><p><code>selection</code>, the parameter values selection chose</p></li>
+<li><p><code>estimate</code>, always <code>NULL</code></p></li>
+</ul><p>Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.</p>
 <p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> returns <code>x</code>, invisibly.</p>
     </div>

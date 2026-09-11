@@ -18,7 +18,7 @@ labels first, so every row says which fold it came from.
 - `collect_selections()` stacks `.selected`: one row per completed fold.
   A
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  result gives no rows, since no fold selected anything.
+  result gives no rows, because no fold selected anything.
 
 - `collect_inner_metrics()` stacks `.inner_metrics`: one row per
   candidate, a parameter setting, and metric that a completed fold's
@@ -51,7 +51,7 @@ collect_notes(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
+  Not used. It must be empty. An argument passed here is an error rather
   than silently ignored.
 
 ## Value
@@ -94,8 +94,8 @@ reads every fold and warns about none.
 The `.config` of a selection or an inner-metrics row is kept as the fold
 recorded it. It labels a candidate inside that one fold's tuning run. So
 a selected row's `.config` is found among the same fold's rows in
-`collect_inner_metrics()`. Since folds can search different candidates,
-it identifies nothing across them, which is why
+`collect_inner_metrics()`. Because folds can search different
+candidates, it identifies nothing across them, which is why
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
 leaves it out.
 

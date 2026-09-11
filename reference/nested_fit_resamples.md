@@ -2,9 +2,9 @@
 
 `nested_fit_resamples()` gives you the score of a workflow with nothing
 to tune on the same outer folds a tuned workflow scores on. It runs the
-outer loop of a nested design with the inner stage skipped, since there
-is nothing to search. For each outer fold it fits the workflow on the
-fold's analysis set and scores it on the assessment set with
+outer loop of a nested design with the inner stage skipped, because
+there is nothing to search. For each outer fold it fits the workflow on
+the fold's analysis set and scores it on the assessment set with
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html).
 It is
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
@@ -15,7 +15,7 @@ That page is the reference for everything the orchestrators share.
 Use it for the baseline a tuned procedure is compared against. A plain
 `rset` of outer folds is what
 [`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
-already serves; what this function adds is the same nested design, so
+already serves. What this function adds is the same nested design, so
 the two runs' folds are the same rows.
 
 ## Usage
@@ -56,7 +56,7 @@ nested_fit_resamples(
 
   A control object from
   [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html),
-  as `control`, and nothing else; every argument after `...` is matched
+  as `control`, and nothing else. Every argument after `...` is matched
   by name. The section on differences from tune says what becomes of
   each slot.
 
@@ -69,7 +69,7 @@ nested_fit_resamples(
 
 - event_level:
 
-  `"first"` (the default) or `"second"`, naming which level of a
+  `"first"` (the default) or `"second"`. It names which level of a
   two-class outcome is the event in the one tune call a fold makes, the
   outer scoring fit.
 
@@ -97,9 +97,9 @@ holds no grid, parameter set or selection rule.
 A workflow that still carries a
 [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html)
 marker is refused at entry with condition class
-`nestedtune_tuned_workflow`, naming the five orchestrators that tune.
-Each of those refuses a workflow with no marker, with class
-`nestedtune_untuned_workflow`, naming this one.
+`nestedtune_tuned_workflow`, which names the five orchestrators that
+tune. Each of those refuses a workflow with no marker, with class
+`nestedtune_untuned_workflow`, which names this one.
 
 The final fit ties the workflow to the record as well. The result
 records the identity of the workflow it ran under, and
@@ -131,7 +131,7 @@ run.
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; there is
+Seed the session before the call, as elsewhere in tidymodels. There is
 no `seed` argument. On entry the function draws `2 * n` seeds in a
 single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
 number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
@@ -186,7 +186,7 @@ most under the last. The one tune call a fold makes here is the outer
 scoring fit, whose own control this package builds.
 
 **Forced: `allow_par`.** The outer fit runs at `allow_par = FALSE`
-whatever the control carries, since parallelism belongs over the outer
+whatever the control carries, because parallelism belongs over the outer
 folds.
 
 **Settable as its own argument: `event_level`.** The argument is the one
@@ -211,8 +211,8 @@ workflow. Here there is no inner run whose predictions and extracts are
 discarded. The outer fit's are the only ones, and they are still
 discarded on a run that did not ask.
 
-**Not returned: none.** Nothing an inner run would have saved exists to
-be withheld.
+**Not returned: none.** There is no inner run, so there is nothing to
+withhold.
 
 **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
 `backend_options`, `workflow_size`.** Each governs an inner tuning call
@@ -237,7 +237,7 @@ own frame, as
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
 builds, or that split's analysis set, as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds. An inner split carrying the outer frame may index only rows the
+builds. An inner split carrying the outer frame must index only rows the
 outer split's `in_id` holds, in its `in_id` and any non-`NA` `out_id`.
 So no inner analysis or assessment set reaches a row the outer fold
 holds out.

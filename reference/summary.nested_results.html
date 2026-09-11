@@ -88,7 +88,7 @@ siblings.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. An argument passed here is an error
+<dd><p>Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.</p></dd>
 
 
@@ -99,13 +99,13 @@ rather than silently ignored.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> returns an object of class <code>summary.nested_results</code>, a list
-holding:</p><ul><li><p>the outer resampling scheme's label;</p></li>
-<li><p>the requested and completed fold counts;</p></li>
-<li><p>the failed folds, with the stage each failed at;</p></li>
+holding:</p><ul><li><p>the outer resampling scheme's label</p></li>
+<li><p>the requested and completed fold counts</p></li>
+<li><p>the failed folds, with the stage each failed at</p></li>
 <li><p>what the completed folds selected, and the candidates, the parameter
-settings, each searched;</p></li>
-<li><p>the metric estimates averaged over them.</p></li>
-</ul><p>Printing it is what most callers want; the components are there for one
+settings, each searched</p></li>
+<li><p>the metric estimates averaged over them</p></li>
+</ul><p>Printing it is what most callers want. The components are there for one
 that needs a number rather than a line of text.</p>
 <p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> returns <code>x</code>, invisibly.</p>
     </div>
@@ -116,7 +116,7 @@ that needs a number rather than a line of text.</p>
 
 <p>Summarizing a partly completed run warns and still returns the summary: the
 folds that ran are described, and the warning says the design asked for
-more. A run in which every fold failed behaves the same way, describing a
+more. A run in which every fold failed behaves the same way and describes a
 failed run rather than refusing to answer. That is where this differs from
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>, which errors when no outer fold completed.</p>
     </div>

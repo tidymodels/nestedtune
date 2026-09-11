@@ -21,13 +21,13 @@ extract_tune_results(x, ...)
 
 - ...:
 
-  Not used; must be empty. Passing an argument here raises an error
+  Not used. It must be empty. Passing an argument here raises an error
   instead of leaving it silently ignored.
 
 ## Value
 
 The stored `tune_results` object, unchanged. It is tune's own object, so
-tune's generics apply to it directly; a fit that ran no tuning is
+tune's generics apply to it directly. A fit that ran no tuning is
 refused with condition class `nestedtune_no_tuning_run`.
 
 ## What its numbers are, and are not

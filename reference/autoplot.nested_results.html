@@ -99,7 +99,7 @@ siblings, <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. An argument passed here is an error
+<dd><p>Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.</p></dd>
 
 </dl></div>
@@ -131,7 +131,7 @@ parameter, such as a <code><a href="nested_fit_resamples.html">nested_fit_resamp
 <p>Panels can draw on different fold counts, so each panel says how many
 folds stand behind it, and the subtitle says how much of the requested
 design ran. A panel reading <code>mtry (2 of 3 chose)</code> or <code>rmse (from 2 folds)</code> had fewer than the run completed, and an unqualified one had
-them all. A requested metric that no completed fold could score keeps
+them all. A requested metric that no completed fold scored keeps
 an empty panel rather than disappearing.</p>
 <p>The selected-value axis is numeric when every value drawn is a number
 and discrete otherwise. One axis cannot be both, and character-valued

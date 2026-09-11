@@ -23,7 +23,7 @@ extract_workflow(x, id, ...)
 
 - ...:
 
-  Not used; must be empty.
+  Not used. It must be empty.
 
 ## Value
 

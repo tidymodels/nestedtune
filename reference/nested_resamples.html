@@ -97,7 +97,7 @@ object is refused.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. The three arguments above are all
+<dd><p>Not used. It must be empty. The three arguments above are all
 required, so a mistyped fourth is an error here.</p></dd>
 
 </dl></div>
@@ -131,7 +131,8 @@ the inner assessment set, which makes the estimate invalid.</p>
 <code>as.data.frame(split)</code>, so every outer fold holds its own copy of that fold's
 analysis set. <code>nested_resamples()</code> runs the same specification against the
 same frame, keeps only the row indices it produces, and points them back at
-<code>data</code>. The index vectors remain, as they do in rsample; the copies are gone.</p>
+<code>data</code>. The index vectors remain, as they do in rsample, but the copies are
+gone.</p>
 <p>Sizes below are multiples of the source data, measured on
 <code><a href="https://rdrr.io/pkg/mlbench/man/LetterRecognition.html" class="external-link">mlbench::LetterRecognition</a></code> (20000 x 17) with five inner folds under
 rsample 1.3.2 and R 4.6.1. They were recorded on 2026-07-25 beside the

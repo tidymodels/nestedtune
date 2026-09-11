@@ -71,15 +71,15 @@ the same way, so the two can be compared directly.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. Passing an argument here raises an
+<dd><p>Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with one row per candidate scored, carrying one column per
-tuned parameter plus tune's <code>.config</code> label, and <code>.iter</code> where the search
-iterated. It is the distinct parameter rows of the run's
+    <p>A tibble with one row per candidate scored. Each row has one column
+per tuned parameter plus tune's <code>.config</code> label, and <code>.iter</code> where the
+search iterated. It is the distinct parameter rows of the run's
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">tune::collect_metrics()</a></code> table, with everything tune wrote per metric
 dropped. So a candidate has one row here however many evaluation times
 it was scored at. The times and the scores are in
@@ -92,9 +92,10 @@ scored no candidate and is refused with condition class
 
 
 
-<p>A <code>grid</code> given as a size is expanded by tune and may reach fewer candidates
-than the number requested. A candidate that failed everywhere scored
-nothing. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> gives the full account of how the two records
+<p>A <code>grid</code> given as a size is expanded by tune, and the expansion sometimes
+reaches fewer candidates than the number requested. A candidate that failed
+everywhere scored nothing. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> gives the full account of
+how the two records
 diverge under <code>.inner_metrics</code>, and it holds here too.</p>
 <p>One pointer there does not carry over. A candidate that failed on every
 inner resample is missing from this table, and a <code>nested_final_fit</code> has no

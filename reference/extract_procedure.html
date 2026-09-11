@@ -72,7 +72,7 @@ siblings, or a <code>nested_final_fit</code> object from <code><a href="nested_f
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. Passing an argument here raises an
+<dd><p>Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.</p></dd>
 
 </dl></div>
@@ -95,17 +95,17 @@ what the record describes.</p>
 
 
 <p><code>tuner</code> names the tune or finetune function that ran, with that tuner's
-own arguments beside it:</p><ul><li><p><code>"tune_grid"</code>, with <code>grid</code>;</p></li>
-<li><p><code>"tune_race_anova"</code> or <code>"tune_race_win_loss"</code>, also with <code>grid</code>;</p></li>
-<li><p><code>"tune_bayes"</code>, with <code>iter</code>, <code>initial</code> and <code>objective</code>;</p></li>
-<li><p><code>"tune_sim_anneal"</code>, with <code>iter</code> and <code>initial</code>;</p></li>
-<li><p><code>"fit_resamples"</code>, for a run with nothing to tune, with none.</p></li>
+own arguments beside it:</p><ul><li><p><code>"tune_grid"</code>, with <code>grid</code></p></li>
+<li><p><code>"tune_race_anova"</code> or <code>"tune_race_win_loss"</code>, also with <code>grid</code></p></li>
+<li><p><code>"tune_bayes"</code>, with <code>iter</code>, <code>initial</code> and <code>objective</code></p></li>
+<li><p><code>"tune_sim_anneal"</code>, with <code>iter</code> and <code>initial</code></p></li>
+<li><p><code>"fit_resamples"</code>, for a run with nothing to tune, with none</p></li>
 </ul><p><code>select</code> is the <code><a href="selection_rule.html">selection_rule()</a></code> each fold selected by. <code>param_info</code>,
 <code>event_level</code> and <code>eval_time</code> are as they were given. <code>control</code> is the
 control object the run was given, or tune's default when none was, with
 the slots this package forces already applied. On a Bayesian result
 <code>seed</code> is left out. A <code>"fit_resamples"</code> record carries no <code>param_info</code>
-and no <code>select</code>, since no parameter set was read and no rule applied.
+and no <code>select</code>, because no parameter set was read and no rule applied.
 See "Differences from calling tune directly" on each loop function's
 help page for what those slots are.</p>
 <p><code>workflow</code> is the identity of the model specification and the

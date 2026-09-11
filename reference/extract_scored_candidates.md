@@ -21,12 +21,12 @@ extract_scored_candidates(x, ...)
 
 - ...:
 
-  Not used; must be empty. Passing an argument here raises an error
+  Not used. It must be empty. Passing an argument here raises an error
   instead of leaving it silently ignored.
 
 ## Value
 
-A tibble with one row per candidate scored, carrying one column per
+A tibble with one row per candidate scored. Each row has one column per
 tuned parameter plus tune's `.config` label, and `.iter` where the
 search iterated. It is the distinct parameter rows of the run's
 [`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
@@ -38,9 +38,9 @@ class `nestedtune_no_tuning_run`.
 
 ## Scored, not asked for
 
-A `grid` given as a size is expanded by tune and may reach fewer
-candidates than the number requested. A candidate that failed everywhere
-scored nothing.
+A `grid` given as a size is expanded by tune, and the expansion
+sometimes reaches fewer candidates than the number requested. A
+candidate that failed everywhere scored nothing.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 gives the full account of how the two records diverge under
 `.inner_metrics`, and it holds here too.

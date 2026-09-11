@@ -6,7 +6,7 @@ tune with
 It is
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 with the inner tuner swapped, and that page is the reference for
-everything the orchestrators share;
+everything the orchestrators share.
 [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
 is this function's nearest sibling. For each outer fold it scores
 `initial` candidates on that fold's inner resamples. Then for `iter`
@@ -45,7 +45,7 @@ nested_tune_sim_anneal(
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html).
-  A workflow with no marker is refused;
+  A workflow with no marker is refused, and
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   scores one on the same design.
 
@@ -67,7 +67,7 @@ nested_tune_sim_anneal(
 
 - iter:
 
-  The number of search iterations, a whole number of at least 1; the
+  The number of search iterations, a whole number of at least 1. The
   section on the iterations says why `0` is refused.
 
 - param_info:
@@ -87,14 +87,14 @@ nested_tune_sim_anneal(
 - initial:
 
   The number of candidates each fold scores before the first iteration,
-  a whole number of at least 1 (finetune's default); a `tune_results`
+  a whole number of at least 1 (finetune's default). A `tune_results`
   object, which finetune also accepts here, is refused.
 
 - event_level:
 
-  `"first"` (the default) or `"second"`, naming which level of a
-  two-class outcome is the event. It applies to the inner tuning run and
-  the outer scoring fit alike.
+  `"first"` (the default) or `"second"`. It names which level of a
+  two-class outcome is the event, and applies to the inner tuning run
+  and the outer scoring fit alike.
 
 - eval_time:
 
@@ -124,7 +124,7 @@ every orchestrator records.
 
 ## Details
 
-finetune must be installed; a missing package is refused at entry,
+finetune must be installed. A missing package is refused at entry,
 before any fold runs.
 
 ## The initial candidates and the iterations
@@ -155,13 +155,13 @@ tuning seed, and each perturbation is drawn from the stream that seed
 started.
 [`finetune::control_sim_anneal()`](https://finetune.tidymodels.org/reference/control_sim_anneal.html)
 has no seed slot, so nothing is injected into the control. On the
-parallel path every daemon's library must hold finetune, which the loop
-attaches in each daemon before the first fold is sent, warning where it
-cannot.
+parallel path every daemon's library must hold finetune. The loop
+attaches it in each daemon before the first fold is sent, and warns
+where it cannot.
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; there is
+Seed the session before the call, as elsewhere in tidymodels. There is
 no `seed` argument. On entry the function draws `2 * n` seeds in a
 single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
 number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
@@ -199,8 +199,8 @@ control as `extract_procedure(res)$control`. Every slot of
 `control_sim_anneal()` falls under one of seven headings.
 
 **Forced: `allow_par`.** The inner search and the outer scoring fit both
-run at `allow_par = FALSE`, whatever the control carries; parallelism
-belongs over the outer folds.
+run at `allow_par = FALSE`, whatever the control carries, because
+parallelism belongs over the outer folds.
 
 **Settable as its own argument: `event_level`.** Set through the
 argument alone, as on the grid page. A control at finetune's default
@@ -211,7 +211,7 @@ and reaching it unchanged.
 
 **Refused: none.** No slot is refused on its own. What is refused at
 entry is a control of another class, such as a `control_bayes()` that
-finetune itself would run under, and the `event_level` conflict above.
+finetune itself runs under, and the `event_level` conflict above.
 
 **Passed through: `no_improve`, `restart`, `radius`, `flip`,
 `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
@@ -221,7 +221,7 @@ given:
 - `no_improve` and `restart` set when a search stops or restarts from
   its best candidate. `radius` and `flip` set how far and how a
   perturbation moves, and `cooling_coef` how the acceptance probability
-  cools. All five govern each fold's search as they would a direct call.
+  cools. All five govern each fold's search as they do in a direct call.
 
 - `time_limit` is a wall-clock stop, and a wall-clock stop makes the
   candidate set depend on the machine. Two runs under the same seed can
@@ -244,8 +244,8 @@ require it.
 
 **Kept from the outer fit: `save_pred`, `extract`.** Both reach the
 outer fit, whose predictions and extracts come back as `.predictions`
-and `.extracts`; the grid page has the shape. The inner search's are
-still discarded.
+and `.extracts`, in the shape the grid page gives. The inner search's
+are still discarded.
 
 **Not returned: `save_workflow`, `save_history`.** `save_workflow` lands
 on the inner `tune_results` a fold record discards, so setting it costs
@@ -274,7 +274,7 @@ own frame, as
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
 builds, or that split's analysis set, as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds. An inner split carrying the outer frame may index only rows the
+builds. An inner split carrying the outer frame must index only rows the
 outer split's `in_id` holds, in its `in_id` and any non-`NA` `out_id`.
 So no inner analysis or assessment set reaches a row the outer fold
 holds out.
@@ -312,21 +312,22 @@ finalizes on the full data.
 dynamic or integrated survival metric, `brier_survival()`,
 `roc_auc_survival()` and their relatives, is measured at the times you
 name. When the metric set has no metric that reads it, tune ignores it
-with a warning; tune keys that warning on the metrics, not on the
+with a warning. tune keys that warning on the metrics, not on the
 model's mode.
 
 Refused here, ahead of tune: anything that is not numeric, an empty
 vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the times, so they
 are refused at entry, before a whole run is paid for. Zero, repeated
-times and times out of order are accepted and passed on untouched, since
-tune normalizes those itself. A repeated time draws tune's warning that
-0 inappropriate evaluation time points were removed, once per tune call.
+times and times out of order are accepted and passed on untouched,
+because tune normalizes those itself. A repeated time draws tune's
+warning that 0 inappropriate evaluation time points were removed, once
+per tune call.
 
 The selection rule is applied without `eval_time`. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again would change no
-choice, and would repeat tune's message about which time it took.
+with, which are the ones named here. Passing them again changes no
+choice, and repeats tune's message about which time it took.
 
 ## See also
 

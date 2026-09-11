@@ -42,7 +42,7 @@ augment(x, new_data, eval_time = NULL, ...)
   arguments for the model's predict method, passed on through the
   workflow. For
   [`augment()`](https://generics.r-lib.org/reference/augment.html), not
-  used; must be empty.
+  used. It must be empty.
 
 - eval_time:
 
@@ -67,7 +67,8 @@ model is a regression.
 example `level` with `type = "conf_int"` for an interval. `eval_time`
 with `type = "survival"` is another. A name outside parsnip's own short
 list of predict arguments is refused by parsnip. A listed one the model
-cannot use for the `type` asked is passed on and may be ignored.
+cannot use for the `type` asked is passed on, and whether it has any
+effect is parsnip's business, not this method's.
 
 [`augment()`](https://generics.r-lib.org/reference/augment.html) refuses
 the dots instead, and that refusal is the only one there is: workflows'
@@ -80,7 +81,7 @@ Augmenting the rows this model was fit on gives in-sample residuals.
 They say how the model fits data it has already seen, not how it does on
 data it has not. The number to report is
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object the fit was built from; see
+on the results object the fit was built from. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for why this model has no number of its own.
 

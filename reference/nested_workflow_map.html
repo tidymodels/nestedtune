@@ -123,7 +123,7 @@ set's id, <code>workflow</code> the workflow as the set held it, and <code>resul
 kept as an attribute. It does not carry the <code>workflow_set</code> class, so
 <code><a href="https://workflowsets.tidymodels.org/reference/rank_results.html" class="external-link">workflowsets::rank_results()</a></code> and <code><a href="https://tune.tidymodels.org/reference/fit_best.html" class="external-link">tune::fit_best()</a></code> refuse it. A
 ranking of the set's workflows by their nested estimates, and a fit of
-the best, would be a selection the outer loop did not nest (see
+the best, makes a selection the outer loop did not nest (see
 <code><a href="../articles/estimate.html">vignette("estimate")</a></code>).</p>
     </div>
     <div class="section level2">
@@ -149,7 +149,7 @@ that column.</p>
 
 
 <p>A workflow with no parameter marked by <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code> runs through
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> whatever <code>fn</code> names, since the five tuning
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> whatever <code>fn</code> names, because the five tuning
 orchestrators refuse it at entry. A baseline beside tuned models on the
 same folds is the comparison a set exists for, and each element's record
 names the procedure that ran. Every other workflow runs through <code>fn</code>.</p>
@@ -163,11 +163,12 @@ there does not take the <code>control</code> in <code>...</code>. It runs under 
 <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code> unless its <code>option</code> entry names one, which
 is where a <code>save_pred</code> or <code>extract</code> for the baseline goes.</p>
 <p>A name that the orchestrator <code>fn</code> names does not take is refused at
-entry, since a typo would otherwise be narrowed away for every workflow.
+entry, because narrowing otherwise drops a misspelled name for every
+workflow without a message.
 A name in a workflow's <code>option</code> entry that the orchestrator it routes to
 does not take is refused naming the workflow. Under
-<code>fn = "nested_fit_resamples"</code> every workflow must be fixed: one carrying
-a marker is refused at entry, naming it, as that orchestrator refuses
+<code>fn = "nested_fit_resamples"</code> every workflow must be fixed. One carrying
+a marker is refused at entry by name, as that orchestrator refuses
 it.</p>
     </div>
     <div class="section level2">
@@ -176,7 +177,7 @@ it.</p>
 
 
 <p>Seed the session before the call, as before any orchestrator. The
-generator state the call holds once its entry checks have run is
+generator state the call holds after its entry checks ran is
 reinstated before each workflow. So every workflow's fold <code>i</code> runs
 under the same two seeds. Each element is <code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code> to the
 orchestrator called by hand on that workflow, with the same arguments,
@@ -200,7 +201,7 @@ reading function still learns which workflow lost folds.</p>
 <p>An error an
 orchestrator raises for one workflow is raised the same way, when that
 workflow's turn comes. A <code>grid</code> that names a parameter that workflow
-does not tune is one such error; a control of the wrong class is
+does not tune is one such error, and a control of the wrong class is
 another. The workflows before it have run by then. What is raised is
 the original condition
 object, with <code>Workflow "&lt;id&gt;": </code> written in front of the first line of
@@ -214,9 +215,9 @@ every field a handler reads are unchanged.</p>
 
 
 <p>You can take a subset of the set and it still answers for the workflows
-it holds, since each row's <code>nested_results</code> describes its own run whole.
-An operation keeps the class and the <code>fn</code> attribute when its result:</p><ul><li><p>holds the three columns under those names, none repeated;</p></li>
-<li><p>has at least one row, with no <code>wflow_id</code> repeated;</p></li>
+it holds, because each row's <code>nested_results</code> describes its own run whole.
+An operation keeps the class and the <code>fn</code> attribute when its result:</p><ul><li><p>holds the three columns under those names, none repeated.</p></li>
+<li><p>has at least one row, with no <code>wflow_id</code> repeated.</p></li>
 <li><p>has each row's three values identical to the row of that id in the
 operation's first data-frame argument.</p></li>
 </ul><p>So rows dropped or reordered and columns added keep the

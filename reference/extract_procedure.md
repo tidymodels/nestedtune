@@ -24,7 +24,7 @@ extract_procedure(x, ...)
 
 - ...:
 
-  Not used; must be empty. Passing an argument here raises an error
+  Not used. It must be empty. Passing an argument here raises an error
   instead of leaving it silently ignored.
 
 ## Value
@@ -45,15 +45,15 @@ what the record describes.
 `tuner` names the tune or finetune function that ran, with that tuner's
 own arguments beside it:
 
-- `"tune_grid"`, with `grid`;
+- `"tune_grid"`, with `grid`
 
-- `"tune_race_anova"` or `"tune_race_win_loss"`, also with `grid`;
+- `"tune_race_anova"` or `"tune_race_win_loss"`, also with `grid`
 
-- `"tune_bayes"`, with `iter`, `initial` and `objective`;
+- `"tune_bayes"`, with `iter`, `initial` and `objective`
 
-- `"tune_sim_anneal"`, with `iter` and `initial`;
+- `"tune_sim_anneal"`, with `iter` and `initial`
 
-- `"fit_resamples"`, for a run with nothing to tune, with none.
+- `"fit_resamples"`, for a run with nothing to tune, with none
 
 `select` is the
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
@@ -61,10 +61,10 @@ each fold selected by. `param_info`, `event_level` and `eval_time` are
 as they were given. `control` is the control object the run was given,
 or tune's default when none was, with the slots this package forces
 already applied. On a Bayesian result `seed` is left out. A
-`"fit_resamples"` record carries no `param_info` and no `select`, since
-no parameter set was read and no rule applied. See "Differences from
-calling tune directly" on each loop function's help page for what those
-slots are.
+`"fit_resamples"` record carries no `param_info` and no `select`,
+because no parameter set was read and no rule applied. See "Differences
+from calling tune directly" on each loop function's help page for what
+those slots are.
 
 `workflow` is the identity of the model specification and the
 preprocessor the run was given: the model's type, engine, mode and

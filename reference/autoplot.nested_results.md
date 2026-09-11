@@ -40,7 +40,7 @@ autoplot(object, type = c("parameters", "performance"), ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
+  Not used. It must be empty. An argument passed here is an error rather
   than silently ignored.
 
 ## Value
@@ -73,7 +73,7 @@ folds stand behind it, and the subtitle says how much of the requested
 design ran. A panel reading `mtry (2 of 3 chose)` or
 `rmse (from 2 folds)` had fewer than the run completed, and an
 unqualified one had them all. A requested metric that no completed fold
-could score keeps an empty panel rather than disappearing.
+scored keeps an empty panel rather than disappearing.
 
 The selected-value axis is numeric when every value drawn is a number
 and discrete otherwise. One axis cannot be both, and character-valued

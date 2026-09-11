@@ -73,7 +73,7 @@ siblings.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. An argument passed here is an error
+<dd><p>Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.</p></dd>
 
 
@@ -111,8 +111,8 @@ behind each row, so an estimate is never reported as though the whole design
 had run. Failed folds are dropped with a warning naming them.</p>
 <p>A run in which no fold completed is an error of class
 <code>nestedtune_no_completed_folds</code>, rather than a table of <code>NA</code>. It is the
-class <a href="autoplot.nested_results.html">autoplot()</a>, <code><a href="agreement.html">agreement()</a></code> and
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> refuse such an object with.</p>
+class named in the refusal that <a href="autoplot.nested_results.html">autoplot()</a>,
+<code><a href="agreement.html">agreement()</a></code> and <code><a href="nested_final_fit.html">nested_final_fit()</a></code> give such an object.</p>
     </div>
     <div class="section level2">
     <h2 id="reading-std-err">Reading <code>std_err</code><a class="anchor" aria-label="anchor" href="#reading-std-err"></a></h2>
@@ -123,10 +123,10 @@ class <a href="autoplot.nested_results.html">autoplot()</a>, <code><a href="agre
 deviation of the per-fold scores over the square root of how many there
 were. It measures the precision of that mean, not the fold-to-fold spread,
 which is larger by the same square-root factor. It is not a confidence
-interval, and one should not be built from it.</p>
+interval, and you must not build one from it.</p>
 <p>You cannot get a valid standard error from the fold scores. That limit
 is the statistics', not this implementation's. Outer fold scores are not
-independent, since any two folds share most of their training rows. A
+independent, because any two folds share most of their training rows. A
 standard error computed as though they were can
 misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
 proved that no universally unbiased estimator of a k-fold estimate's

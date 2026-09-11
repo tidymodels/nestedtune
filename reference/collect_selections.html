@@ -12,7 +12,7 @@ included. A completed fold can carry an error note too, from an extract
 that failed on it (see
 collect_extracts()).
 collect_selections() stacks .selected: one row per completed fold. A
-nested_fit_resamples() result gives no rows, since no fold selected
+nested_fit_resamples() result gives no rows, because no fold selected
 anything.
 collect_inner_metrics() stacks .inner_metrics: one row per
 candidate, a parameter setting, and metric that a completed fold's
@@ -31,7 +31,7 @@ included. A completed fold can carry an error note too, from an extract
 that failed on it (see
 collect_extracts()).
 collect_selections() stacks .selected: one row per completed fold. A
-nested_fit_resamples() result gives no rows, since no fold selected
+nested_fit_resamples() result gives no rows, because no fold selected
 anything.
 collect_inner_metrics() stacks .inner_metrics: one row per
 candidate, a parameter setting, and metric that a completed fold's
@@ -95,7 +95,7 @@ included. A completed fold can carry an error note too, from an <code>extract</c
 that failed on it (see
 <code><a href="collect_predictions.nested_results.html">collect_extracts()</a></code>).</p></li>
 <li><p><code>collect_selections()</code> stacks <code>.selected</code>: one row per completed fold. A
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> result gives no rows, since no fold selected
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> result gives no rows, because no fold selected
 anything.</p></li>
 <li><p><code>collect_inner_metrics()</code> stacks <code>.inner_metrics</code>: one row per
 candidate, a parameter setting, and metric that a completed fold's
@@ -128,7 +128,7 @@ siblings.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty. An argument passed here is an error
+<dd><p>Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.</p></dd>
 
 </dl></div>
@@ -174,7 +174,7 @@ fold completed is an error of class <code>nestedtune_no_completed_folds</code>.
 <p>The <code>.config</code> of a selection or an inner-metrics row is kept as the fold
 recorded it. It labels a candidate inside that one fold's tuning run. So
 a selected row's <code>.config</code> is found among the same fold's rows in
-<code>collect_inner_metrics()</code>. Since folds can search different candidates, it
+<code>collect_inner_metrics()</code>. Because folds can search different candidates, it
 identifies nothing across them, which is why <code><a href="agreement.html">agreement()</a></code> leaves it out.</p>
     </div>
     <div class="section level2">

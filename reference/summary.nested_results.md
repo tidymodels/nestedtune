@@ -30,7 +30,7 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
+  Not used. It must be empty. An argument passed here is an error rather
   than silently ignored.
 
 - x:
@@ -42,18 +42,18 @@ print(x, ...)
 [`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
 class `summary.nested_results`, a list holding:
 
-- the outer resampling scheme's label;
+- the outer resampling scheme's label
 
-- the requested and completed fold counts;
+- the requested and completed fold counts
 
-- the failed folds, with the stage each failed at;
+- the failed folds, with the stage each failed at
 
 - what the completed folds selected, and the candidates, the parameter
-  settings, each searched;
+  settings, each searched
 
-- the metric estimates averaged over them.
+- the metric estimates averaged over them
 
-Printing it is what most callers want; the components are there for one
+Printing it is what most callers want. The components are there for one
 that needs a number rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
@@ -62,8 +62,8 @@ that needs a number rather than a line of text.
 
 Summarizing a partly completed run warns and still returns the summary:
 the folds that ran are described, and the warning says the design asked
-for more. A run in which every fold failed behaves the same way,
-describing a failed run rather than refusing to answer. That is where
+for more. A run in which every fold failed behaves the same way and
+describes a failed run rather than refusing to answer. That is where
 this differs from
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 which errors when no outer fold completed.

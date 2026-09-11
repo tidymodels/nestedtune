@@ -45,8 +45,8 @@ collect_extracts(x, ...)
 
 - ...:
 
-  Not used; must be empty, so an argument given here is an error and not
-  a silent no-op.
+  Not used. It must be empty, so an argument given here is an error and
+  not a silent no-op.
 
 - summarize:
 
@@ -75,20 +75,20 @@ which no workflow completed a fold is refused with class
 
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 is the exception: it reads every workflow, including those in which no
-fold completed, and refuses nothing, since a failed workflow's notes are
-the reason to ask.
+fold completed, and refuses nothing, because a failed workflow's notes
+are the reason to ask.
 
 ## Columns not saved, and colliding ids
 
 A control reaches each workflow of a set through the call's `...` or
-through its own `option` entry, so one workflow can have kept what
-another did not.
+through its own `option` entry, so one workflow can keep what another
+did not.
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 and
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-therefore refuse a set in which a workflow that would contribute rows
-lacks the column. The refusal has class `nestedtune_column_not_saved`
-and names the workflow.
+therefore refuse a set in which a workflow with completed folds lacks
+the column. The refusal has class `nestedtune_column_not_saved` and
+names the workflow.
 
 An element's table that already has a `wflow_id` column, a parameter
 given that id, is refused with class

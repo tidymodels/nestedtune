@@ -115,8 +115,9 @@ stays under <code>limit</code> percent, as <code><a href="https://tune.tidymodel
 
 <p>An ordering is a parameter name, wrapped in <code><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">dplyr::desc()</a></code> where a larger
 value is the simpler model. Each must be a bare name or a call, never a
-string or a number, which would order nothing. None may be named. That
-way a misspelled <code>limit</code> is refused instead of read as an ordering. Every name
+string or a number, which orders nothing. An ordering given a name is
+refused. That way a misspelled <code>limit</code> is refused instead of read as an
+ordering. Every name
 must be a parameter the workflow tunes, which the orchestrators check when
 the run starts.</p>
     </div>

@@ -123,7 +123,7 @@ which races the same grid once more on all the data.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with at least one parameter marked
-for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>. A workflow with no marker is refused;
+for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>. A workflow with no marker is refused, and
 <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores one on the same design.</p></dd>
 
 
@@ -135,7 +135,7 @@ designs says what the design must hold.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code>, as
-<code>control</code>, and nothing else; every argument after <code>...</code> is matched by
+<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
 name. The section on differences from finetune says what becomes of each
 slot.</p></dd>
 
@@ -159,8 +159,8 @@ set of metrics.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
-<dd><p><code>"first"</code> (the default) or <code>"second"</code>, naming which
-level of a two-class outcome is the event. It applies to the inner
+<dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
+level of a two-class outcome is the event, and applies to the inner
 tuning run and the outer scoring fit alike.</p></dd>
 
 
@@ -186,7 +186,7 @@ says what <code>.inner_metrics</code> and the recorded grid mean on a race.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Both functions need finetune installed; <code>nested_tune_race_anova()</code> also
+    <p>Both functions need finetune installed. <code>nested_tune_race_anova()</code> also
 needs lme4, which fits the ANOVA, and <code>nested_tune_race_win_loss()</code>
 BradleyTerry2, which fits the win/loss model. A missing package is refused
 at entry, before any fold runs.</p>
@@ -209,8 +209,8 @@ its failure is in <code>.notes</code>.</p>
 <code>randomize = TRUE</code>, finetune's default, the inner resamples are shuffled
 before the burn-in. So which resamples the burn-in uses, and with it
 which candidates are eliminated when, comes from the fold's tuning seed.
-On the parallel path every daemon's library must hold finetune, which
-the loop attaches in each daemon before the first fold is sent, warning
+On the parallel path every daemon's library must hold finetune. The loop
+attaches it in each daemon before the first fold is sent, and warns
 where it cannot.</p>
     </div>
     <div class="section level2">
@@ -218,7 +218,7 @@ where it cannot.</p>
 
 
 
-<p>Seed the session before the call, as elsewhere in tidymodels; there is no
+<p>Seed the session before the call, as elsewhere in tidymodels. There is no
 <code>seed</code> argument. On entry the function draws <code>2 * n</code> seeds in a single
 <code>sample.int(.Machine$integer.max, 2 * n)</code> call, where <code>n</code> is the number of
 outer folds. Fold <code>i</code> uses element <code>2 * i - 1</code> for its tuning step and
@@ -255,29 +255,31 @@ parallelism belongs over the outer folds.</p>
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, naming both. <code>grid</code> and <code>eval_time</code> are the racing functions' own
+entry, with a refusal that names both. <code>grid</code> and <code>eval_time</code> are the
+racing functions' own
 arguments rather than control slots, offered here as arguments and
 reaching them unchanged.</p>
 <p><strong>Refused: none.</strong> No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
-<code>control_grid()</code> that finetune itself would accept here. The second is
+<code>control_grid()</code> that finetune itself accepts here. The second is
 the <code>event_level</code> conflict above, and the third a <code>burn_in</code> no fold's
 inner design can meet. finetune refuses
 a race whose resample count is not greater than <code>burn_in</code>. This package
 refuses the whole call before any fold runs when any outer fold's inner
-<code>rset</code> would be refused, naming the count and the burn-in.
+<code>rset</code> meets that condition, and the refusal names the count and the
+burn-in.
 <code>control_race()</code> defaults <code>burn_in</code> to 3, so a design with three inner
 resamples needs <code>control = control_race(burn_in = 2)</code> or fewer.</p>
 <p><strong>Passed through: <code>burn_in</code>, <code>alpha</code>, <code>num_ties</code>, <code>randomize</code>,
 <code>verbose_elim</code>, <code>verbose</code>, <code>pkgs</code>, <code>parallel_over</code>, <code>workflow_size</code>.</strong>
 Each reaches the race as given:</p><ul><li><p><code>burn_in</code>, <code>alpha</code>, <code>num_ties</code> and <code>randomize</code> govern each fold's race
-as they would a direct call. <code>burn_in</code> is how many resamples every
+as they do in a direct call. <code>burn_in</code> is how many resamples every
 candidate is scored on before elimination starts. <code>alpha</code> is the
 significance level an elimination needs. <code>num_ties</code> is how many rounds
 two tied survivors are given before one is dropped. <code>randomize</code> is
 whether the resamples are shuffled first.</p></li>
 <li><p><code>verbose_elim</code> prints finetune's elimination log from a serial run,
-once per fold, and from a mirai daemon where nothing shows it;
+once per fold, and from a mirai daemon where nothing shows it.
 <code>verbose</code> likewise.</p></li>
 <li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
 describes, <code>parallel_over</code> included.</p></li>
@@ -287,13 +289,13 @@ the <code>&gt;= 1.0.1</code> floor this package declares does not require it.</p
 <p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
 outer fit as well as the race. The outer fit's predictions and extracts
 are kept as <code>.predictions</code> and <code>.extracts</code> in the shape the grid page
-describes; the race's own are still discarded.</p>
+describes, and the race's own are still discarded.</p>
 <p><strong>Not returned: <code>save_workflow</code>.</strong> It lands on the inner race result a
 fold record discards, so setting it costs the work and returns nothing.
 The final fit keeps its race as <code>$tuning</code>, where what it saved is
 reachable.</p>
 <p><strong>Inert: <code>backend_options</code>.</strong> Backend options with no parallel backend to
-reach, since <code>allow_par</code> is forced off.</p>
+reach, because <code>allow_par</code> is forced off.</p>
     </div>
     <div class="section level2">
     <h2 id="nested-designs">Nested designs<a class="anchor" aria-label="anchor" href="#nested-designs"></a></h2>
@@ -310,7 +312,7 @@ outer fold a distinct label with no <code>NA</code>.</p>
 of a fold's inner splits carry one data frame: either the outer split's
 own frame, as <code><a href="nested_resamples.html">nested_resamples()</a></code> builds, or that split's analysis set,
 as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds. An inner split carrying the outer frame
-may index only rows the outer split's <code>in_id</code> holds, in its <code>in_id</code> and
+must index only rows the outer split's <code>in_id</code> holds, in its <code>in_id</code> and
 any non-<code>NA</code> <code>out_id</code>. So no inner analysis or assessment set reaches a
 row the outer fold holds out.</p>
 <p>A design breaking any of this, or using a bootstrap for the outer loop, is
@@ -347,20 +349,20 @@ ambiguous. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> f
 dynamic or integrated survival metric, <code>brier_survival()</code>,
 <code>roc_auc_survival()</code> and their relatives, is measured at the times you
 name. When the metric set has no metric that reads it, tune ignores it
-with a warning; tune keys that warning on the metrics, not on the
+with a warning. tune keys that warning on the metrics, not on the
 model's mode.</p>
 <p>Refused here, ahead of tune: anything that is not numeric, an empty
 vector, and any element that is missing, negative or not finite. tune
 treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
-untouched, since tune normalizes those itself. A repeated time draws
+untouched, because tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.</p>
 <p>The selection rule is applied without <code>eval_time</code>. Left unset, it
 selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again would change no
-choice, and would repeat tune's message about which time it took.</p>
+with, which are the ones named here. Passing them again changes no
+choice, and repeats tune's message about which time it took.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

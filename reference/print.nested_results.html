@@ -73,14 +73,14 @@ siblings.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty, so <code>n</code> and <code>width</code> must be given by
+<dd><p>Not used. It must be empty, so <code>n</code> and <code>width</code> must be given by
 name in full.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
 <dd><p>Number of fold rows to show, passed to tibble's printing. <code>NULL</code>,
 the default, leaves the choice to tibble and its <code>print_max</code> and
-<code>print_min</code> options; <code>Inf</code> shows every fold.</p></dd>
+<code>print_min</code> options. <code>Inf</code> shows every fold.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
@@ -100,7 +100,7 @@ are named in the footer.</p></dd>
 
 <p>Folds can score different candidate sets, the parameter settings each
 inner search tried. When two or more completed folds did, and only then,
-printing adds a line giving each fold's candidate count. A grid given as
+the print adds a line with each fold's candidate count. A grid given as
 a size is the usual cause. It is expanded once per fold, under that
 fold's own seed, so a continuous parameter leaves every fold with
 candidates of its own. It matters for reading the selections: folds that

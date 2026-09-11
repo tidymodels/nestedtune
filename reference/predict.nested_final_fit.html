@@ -86,8 +86,8 @@ extracting it first. Each returns what the same call on
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>For <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, further arguments for the model's predict
-method, passed on through the workflow. For <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code>, not used; must
-be empty.</p></dd>
+method, passed on through the workflow. For <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code>, not used. It
+must be empty.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
@@ -112,7 +112,7 @@ column where the outcome is present and the model is a regression.</p>
 for an interval. <code>eval_time</code> with <code>type = "survival"</code> is another. A name
 outside parsnip's own short list of predict arguments is refused by
 parsnip. A listed one the model cannot use for the <code>type</code> asked is passed
-on and may be ignored.</p>
+on, and whether it has any effect is parsnip's business, not this method's.</p>
 <p><code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> refuses the dots instead, and that refusal is the only one
 there is: workflows' own <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> method passes an unread argument on
 to parsnip, which ignores it.</p>
@@ -125,7 +125,7 @@ to parsnip, which ignores it.</p>
 <p>Augmenting the rows this model was fit on gives in-sample residuals. They
 say how the model fits data it has already seen, not how it does on data it
 has not. The number to report is <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> on the results object
-the fit was built from; see <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why this model has no
+the fit was built from. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why this model has no
 number of its own.</p>
     </div>
     <div class="section level2">

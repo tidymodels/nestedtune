@@ -29,7 +29,7 @@ agreement(x, ...)
 
 - ...:
 
-  Not used; must be empty. An argument passed here is an error rather
+  Not used. It must be empty. An argument passed here is an error rather
   than silently ignored.
 
 ## Value
@@ -61,8 +61,8 @@ A completed fold whose selection carries no value for a parameter is
 counted under `NA` for it, in the same row as a fold that selected `NA`.
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
 tells the two apart. A workflow with nothing to tune gives columns `n`
-and `prop` and no rows. A parameter whose id is `n` or `prop` would
-collide with the counts and is an error.
+and `prop` and no rows. A parameter whose id is `n` or `prop` collides
+with the counts and is an error.
 
 ## See also
 

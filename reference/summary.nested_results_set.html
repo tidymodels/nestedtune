@@ -83,13 +83,13 @@ each workflow's selection table under its id.</p>
 
 
 <dl><dt id="arg-x-object">x, object<a class="anchor" aria-label="anchor" href="#arg-x-object"></a></dt>
-<dd><p>A <code>nested_results_set</code> from <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>; for
+<dd><p>A <code>nested_results_set</code> from <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>. For
 the print method, the <code>summary.nested_results_set</code> that <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>
 returns.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used; must be empty, so an argument given here is an error
+<dd><p>Not used. It must be empty, so an argument given here is an error
 and not a silent no-op.</p></dd>
 
 
@@ -183,7 +183,7 @@ over fewer folds than they completed. The subtitle itself gives the
 workflow and fold counts. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> names the folds and prints each
 workflow's count per metric.</p>
 <p>The two counts are separate. A workflow that ran whole can still be
-named by the second, since a completed fold can score <code>NA</code> on one metric
+named by the second, because a completed fold can score <code>NA</code> on one metric
 while scoring the others. A metric no completed fold scored is counted
 there while drawing no rule.</p>
     </div>

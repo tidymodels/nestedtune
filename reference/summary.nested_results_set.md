@@ -38,14 +38,14 @@ print(x, ...)
 - x, object:
 
   A `nested_results_set` from
-  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md);
-  for the print method, the `summary.nested_results_set` that
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md).
+  For the print method, the `summary.nested_results_set` that
   [`summary()`](https://rdrr.io/r/base/summary.html) returns.
 
 - ...:
 
-  Not used; must be empty, so an argument given here is an error and not
-  a silent no-op.
+  Not used. It must be empty, so an argument given here is an error and
+  not a silent no-op.
 
 - type:
 
@@ -144,9 +144,9 @@ workflow and fold counts.
 prints each workflow's count per metric.
 
 The two counts are separate. A workflow that ran whole can still be
-named by the second, since a completed fold can score `NA` on one metric
-while scoring the others. A metric no completed fold scored is counted
-there while drawing no rule.
+named by the second, because a completed fold can score `NA` on one
+metric while scoring the others. A metric no completed fold scored is
+counted there while drawing no rule.
 
 ## See also
 

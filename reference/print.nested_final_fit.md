@@ -5,7 +5,7 @@ where this model's performance estimate comes from. It also names the
 accessors that reach what selection saw.
 
 No performance number appears. The stored tuning run has metrics, but
-selection consumed them; see
+selection consumed them. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for why they are not this model's performance and the nested estimate
 is.
@@ -26,7 +26,7 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty. Passing an argument here raises an error
+  Not used. It must be empty. Passing an argument here raises an error
   instead of leaving it silently ignored.
 
 ## Value
@@ -35,7 +35,7 @@ print(x, ...)
 
 ## The procedure line
 
-The line under the heading tells you what ran: the procedure, meaning
+The line under the heading tells you what ran: the procedure, which is
 the tuner and its counts. A grid search or a race is named with the
 number of candidates, parameter settings, it scored. An iterating search
 is named with the initial candidates scored and requested and the

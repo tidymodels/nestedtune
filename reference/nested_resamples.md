@@ -38,8 +38,8 @@ nested_resamples(data, outside, inside, ...)
 
 - ...:
 
-  Not used; must be empty. The three arguments above are all required,
-  so a mistyped fourth is an error here.
+  Not used. It must be empty. The three arguments above are all
+  required, so a mistyped fourth is an error here.
 
 ## Value
 
@@ -73,7 +73,8 @@ evaluates the inner specification against `as.data.frame(split)`, so
 every outer fold holds its own copy of that fold's analysis set.
 `nested_resamples()` runs the same specification against the same frame,
 keeps only the row indices it produces, and points them back at `data`.
-The index vectors remain, as they do in rsample; the copies are gone.
+The index vectors remain, as they do in rsample, but the copies are
+gone.
 
 Sizes below are multiples of the source data, measured on
 [`mlbench::LetterRecognition`](https://rdrr.io/pkg/mlbench/man/LetterRecognition.html)

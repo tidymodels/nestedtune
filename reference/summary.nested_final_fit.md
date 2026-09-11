@@ -32,7 +32,7 @@ print(x, ...)
 
 - ...:
 
-  Not used; must be empty. Passing an argument here raises an error
+  Not used. It must be empty. Passing an argument here raises an error
   instead of leaving it silently ignored.
 
 - x:
@@ -44,22 +44,22 @@ print(x, ...)
 [`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
 class `summary.nested_final_fit`, a list with these components:
 
-- `tuning_label`, the tuning run's resampling label;
+- `tuning_label`, the tuning run's resampling label
 
 - `tuner`, the name of the tune or finetune function that ran, as
   [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it;
+  records it
 
-- `candidates`, the number of parameter settings that run scored;
+- `candidates`, the number of parameter settings that run scored
 
 - `initial` and `initial_requested`, `iterations_completed` and
-  `iterations_requested`, the iterating tuners' counts;
+  `iterations_requested`, the iterating tuners' counts
 
-- `selection`, the parameter values selection chose;
+- `selection`, the parameter values selection chose
 
-- `estimate`, always `NULL`.
+- `estimate`, always `NULL`
 
-Printing it is what most callers want; the components are there for a
+Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.

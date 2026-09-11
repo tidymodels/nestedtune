@@ -23,14 +23,14 @@ print(x, ..., n = NULL, width = NULL)
 
 - ...:
 
-  Not used; must be empty, so `n` and `width` must be given by name in
-  full.
+  Not used. It must be empty, so `n` and `width` must be given by name
+  in full.
 
 - n:
 
   Number of fold rows to show, passed to tibble's printing. `NULL`, the
   default, leaves the choice to tibble and its `print_max` and
-  `print_min` options; `Inf` shows every fold.
+  `print_min` options. `Inf` shows every fold.
 
 - width:
 
@@ -46,7 +46,7 @@ print(x, ..., n = NULL, width = NULL)
 
 Folds can score different candidate sets, the parameter settings each
 inner search tried. When two or more completed folds did, and only then,
-printing adds a line giving each fold's candidate count. A grid given as
+the print adds a line with each fold's candidate count. A grid given as
 a size is the usual cause. It is expanded once per fold, under that
 fold's own seed, so a continuous parameter leaves every fold with
 candidates of its own. It matters for reading the selections: folds that
