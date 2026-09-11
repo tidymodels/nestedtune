@@ -1,6 +1,6 @@
 # M087: The help pages pass the plain-English sweep
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M086
 - **Driving RR:** —
@@ -40,7 +40,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - [x] T1: Rewrite the orchestrator pages — `R/nested-tune-grid.R` (36 marker lines at the branch point), `R/nested-tune-bayes.R`, `R/nested-tune-sim-anneal.R`, `R/nested-tune-race.R`, `R/nested-fit-resamples.R`, `R/nested-workflow-map.R` and `man-roxygen/*.R` — until `--roxygen --plain` lists nothing in them; list items lose their `;` terminators rather than gaining a rewrite; keep `--roxygen` and `--roxygen --spans` clean.
 - [x] T2: Rewrite the final-fit pages — `R/nested-final-fit.R`, `R/nested-final-fit-print.R`, `R/nested-final-fit-predict.R`, `R/nested-final-fit-extract.R` — the same way.
 - [x] T3: Rewrite the results pages — `R/nested-results.R`, `R/nested-results-print.R`, `R/nested-results-set.R`, `R/nested-results-collect.R`, `R/nested-results-plot.R`, `R/nested-results-agreement.R`, `R/extract-procedure.R`, `R/selection-rule.R`, `R/nested-resamples.R` — and any file the sweep still lists, the same way.
-- [ ] T4: `devtools::document()`; record the `#'` line count at the branch point and the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
+- [x] T4: `devtools::document()`; record the `#'` line count at the branch point and the head in the work log; one `NEWS.md` bullet; `devtools::check()` clean.
 - [x] T5: Write `cairn/surveys/M087-reader-prompt.md`: the check-mode instructions, the `tools::Rd2txt` rendering command over `man/*.Rd`, and the withheld files, handed unchanged to a fresh reader at each review pass.
 
 ## Work log
@@ -58,6 +58,7 @@ The plain clauses, the reference intro and the sweep's prose definition are as M
 - 2026-09-11: claim audit: 70 claims read, 4 corrected — R/nested-results-set.R ("a workflow that contributes rows" → "with completed folds", the refusal firing before any row exists), R/selection-rule.R ("Do not name any of them" → "A named one is refused", `check_dots_unnamed()`), R/nested-final-fit-predict.R (parsnip is not shown to be the decider), R/nested-tune-grid.R ("the run" → "the inner tuning" as the subject that returns a candidate).
 - 2026-09-11: T4 checkpoint, half done: `document()` regenerated 26 `man/*.Rd` and a second run produced no diff; NEWS bullet added; `#'` count 2727 (cap 2989); `devtools::check()` still running at this commit, its result to be logged before T4 is ticked.
 - 2026-09-11: first `devtools::check()` 0 errors, 0 warnings, 0 notes (6m51s), run on the tree at a316e35 plus `man/` and NEWS, before the four claim-audit edits; a second check at 578e6fd's tree is logged in the next line.
+- 2026-09-11: second `devtools::check()` at the head 0 errors, 0 warnings, 0 notes (6m36s); T4 done; all tasks checked; status set to review.
 
 ## Decisions
 
