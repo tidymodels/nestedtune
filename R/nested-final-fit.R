@@ -96,9 +96,9 @@
 #' @section What is refused:
 #'
 #' A workflow other than the one the estimate was built around is refused
-#' here, not by tune a whole tuning run later. Where the record names a
-#' tuner that takes a grid, `object` is judged against the recorded grid as
-#' [nested_tune_grid()] judged it. Where nothing was tuned (see
+#' here where the record names a tuner that takes a grid. `object` is then
+#' judged against the recorded grid as [nested_tune_grid()] judged it,
+#' rather than by tune a whole tuning run later. Where nothing was tuned (see
 #' [nested_fit_resamples()]), the workflow must carry no [tune::tune()]
 #' marker, and one that does is refused with class
 #' `nestedtune_tuned_workflow`.

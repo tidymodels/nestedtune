@@ -99,9 +99,9 @@ mispaired.
 
 
 A workflow other than the one the estimate was built around is refused
-here, not by tune a whole tuning run later. Where the record names a
-tuner that takes a grid, \code{object} is judged against the recorded grid as
-\code{\link[=nested_tune_grid]{nested_tune_grid()}} judged it. Where nothing was tuned (see
+here where the record names a tuner that takes a grid. \code{object} is then
+judged against the recorded grid as \code{\link[=nested_tune_grid]{nested_tune_grid()}} judged it,
+rather than by tune a whole tuning run later. Where nothing was tuned (see
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}), the workflow must carry no \code{\link[tune:tune]{tune::tune()}}
 marker, and one that does is refused with class
 \code{nestedtune_tuned_workflow}.
