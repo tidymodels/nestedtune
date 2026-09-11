@@ -184,14 +184,14 @@ lives.</p>
 </h2>
 <p><code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> drives the outer loop. For each outer
 fold it calls <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> on that fold’s inner
-resamples, the call you would make by hand, with parallelism off and the
+resamples, the same call you make by hand, with parallelism off and the
 fold’s seed set. It then picks the best candidate by the first metric.
 It finalizes the workflow with that candidate, fits it on the fold’s
-analysis rows, and scores it on the assessment rows. If you would rather
-pick by another of tune’s selectors, the <code>select</code> argument
-takes a <code><a href="../reference/selection_rule.html">selection_rule()</a></code> naming it. Every statistical step
-is tune’s. This package adds the loop, the seeding, and a result that
-keeps what each fold chose.</p>
+analysis rows, and scores it on the assessment rows. To pick by another
+of tune’s selectors, pass a <code><a href="../reference/selection_rule.html">selection_rule()</a></code> naming it as
+the <code>select</code> argument. Every statistical step is tune’s. This
+package adds the loop, the seeding, and a result that keeps what each
+fold chose.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -280,8 +280,8 @@ stacks them, with the fold each came from beside it.</p>
 <span><span class="va">n_min_n</span> <span class="op">&lt;-</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">selected</span><span class="op">$</span><span class="va">min_n</span><span class="op">)</span></span></code></pre></div>
 <p>Across 5 outer folds, <code>mtry</code> took 2 distinct selected
 values and <code>min_n</code> took 1. Most tools throw this away.
-nestedtune keeps it, because it is information about the procedure
-rather than noise in it.</p>
+nestedtune keeps the spread, because it is information about the
+procedure rather than noise in it.</p>
 <p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> draws those same selections, one panel per
 tuned parameter and one point per outer fold. A flat row means the folds
 agreed. Scatter means they did not.</p>
@@ -363,7 +363,7 @@ one search.</p>
 <span><span class="co">#&gt;   metric reachable through the first is a selection-time quantity,</span></span>
 <span><span class="co">#&gt;   optimistically biased as a claim about this model.</span></span></code></pre></div>
 <p>The outer folds play no part here. Their selections are not pooled or
-voted on; they belong to the estimate.</p>
+voted on. They belong to the estimate.</p>
 <p>The object predicts directly. <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and
 <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> on it are the trained workflow’s own methods, and
 <code><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow()</a></code> returns the workflow itself.</p>
@@ -405,8 +405,9 @@ saw.</p>
 <p><code>show_best()</code> handed it over above because it was given
 tune’s own object, which does not warn. Ask <code>res</code> or
 <code>final</code> and both refuse, as the two chunks below show. On the
-loop’s results, tune’s ranking functions would rank outer folds. On the
-final fit there is one model and nothing to rank.</p>
+loop’s results, tune’s ranking functions have nothing to rank but outer
+folds, and the estimate is not a ranking of folds. On the final fit
+there is one model and nothing to rank.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `show_best()`:</span></span></span>
@@ -464,7 +465,7 @@ selected mtry = 2 and min_n = 2.</p>
 <p>Three things make it honest. The estimate is attributed to the
 procedure and not to the model. The instability is reported rather than
 hidden. The deployed model is described as what it is: the same
-procedure applied to all the data, carrying no performance claim of its
+procedure applied to all the data, with no performance claim of its
 own.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

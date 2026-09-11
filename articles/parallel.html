@@ -80,13 +80,11 @@
 
     
     
-<p>A nested run fits many models, and you may want it to finish sooner.
-The outer folds do not depend on one another, so they can run at the
-same time. <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> and its siblings run them on
-<a href="https://mirai.r-lib.org/" class="external-link">mirai</a> daemons, separate R
-processes, when a pool of daemons is connected. Without a pool, the
-folds run one after another. Nothing in the call changes between the
-two.</p>
+<p>A nested run fits many models, and you can make it finish sooner. The
+outer folds do not depend on one another, so they can run at the same
+time. <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> and its siblings run them on <a href="https://mirai.r-lib.org/" class="external-link">mirai</a> daemons, separate R processes,
+when a pool of daemons is connected. Without a pool, the folds run one
+after another. Nothing in the call changes between the two.</p>
 <p>This page starts a pool of two daemons and runs the getting-started
 guide’s loop on it. It then shows that the result is identical to the
 same run made serially. Last, it says when a pool pays. The parallel
@@ -128,7 +126,7 @@ each of them.</p>
 disconnecting them. There is no argument on the loop functions for it.
 <code><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">mirai::daemons()</a></code> starts the pool, and
 <code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">mirai::status()</a></code> reports how many daemons are connected.
-With two or more connected, the folds go out to the daemons; with fewer,
+With two or more connected, the folds go out to the daemons. With fewer,
 they run in the session, the same rule tune uses.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
@@ -137,16 +135,15 @@ they run in the session, the same rule tune uses.</p>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 <p>Each daemon is a separate R process. It loads nestedtune and the
 packages the workflow needs from an installed library. So the first
-parallel call after starting a pool is the slow one, since it makes each
-daemon load the tidymodels stack.</p>
+parallel call after starting a pool is the slow one, because it makes
+each daemon load the tidymodels stack.</p>
 </div>
 <div class="section level2">
 <h2 id="the-same-call">The same call<a class="anchor" aria-label="anchor" href="#the-same-call"></a>
 </h2>
 <p>With a pool connected, the outer folds are sent to the daemons. Each
 fold’s inner tuning runs serially on its daemon. Parallelism inside a
-fold on top of parallelism across folds would oversubscribe the
-cores.</p>
+fold on top of parallelism across folds oversubscribes the cores.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -184,8 +181,8 @@ same call runs serially.</p>
 before anything is dispatched. A fold’s seeds depend on its position in
 the design, as <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains under
 Reproducibility. So a serial run under the same seed repeats the
-parallel run: the same procedure, meaning the same tune-and-fit steps,
-on the same resamples.</p>
+parallel run: the same procedure, the same tune-and-fit steps, on the
+same resamples.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>

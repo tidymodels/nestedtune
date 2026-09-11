@@ -15,16 +15,15 @@ the best of several noisy numbers tends to look better than it is. So
 the winner’s score overstates what the model will do on new data, by an
 amount nothing in the output reveals.
 
-At a small sample size the noise is large, so the winner’s score may not
-even look better than an honest one. Distrust it for how it was chosen,
-whether it came out high or low.
+At a small sample size the noise is large, so the winner’s score can
+come out no better than an honest one. Distrust it for how it was
+chosen, whether it came out high or low.
 
-Nested cross-validation scores the whole tuning procedure, meaning every
-step you run on the data: resample, tune, pick a setting, fit. Nesting
-puts that procedure inside a second, outer resampling loop. Each outer
-fold tunes from scratch on its own analysis rows, fits the chosen
-setting there, and scores that fit once on assessment rows the tuning
-never saw.
+Nested cross-validation scores the whole tuning procedure, every step
+you run on the data: resample, tune, pick a setting, fit. Nesting puts
+that procedure inside a second, outer resampling loop. Each outer fold
+tunes from scratch on its own analysis rows, fits the chosen setting
+there, and scores that fit once on assessment rows the tuning never saw.
 
 The number
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
@@ -48,10 +47,10 @@ Four things it is not.
 - It is not the error of the deployed model, which is built afterwards
   on all the rows and estimated by nothing here.
 - It is not a verdict on that model’s parameter values.
-- It does not say what a larger or a different training set would give,
-  since it ran on this one alone.
-- It is not that error averaged over every training set you might have
-  drawn, which would describe the method rather than this data. Luo and
+- It does not say what a larger or a different training set gives,
+  because it ran on this one alone.
+- It is not that error averaged over every training set the same source
+  can produce, which describes the method rather than this data. Luo and
   Barber (2026) prove that any assumption-free test of that method-level
   quantity needs a dataset many times larger than the training set. So
   this package offers no such test.
@@ -75,7 +74,7 @@ study reports one cell where the nested estimate came out optimistic
 instead.
 
 The gap is a property of the estimator, not a prediction about any one
-run. It is never a licence to adjust the reported figure upward.
+run. It is never a license to adjust the reported figure upward.
 
 ## The standard error
 
@@ -95,9 +94,9 @@ reason. A cross-validation interval for one procedure is valid when that
 procedure is stable. Stable means that changing one training row shifts
 its errors by little, compared with how spread out those errors are. Two
 procedures can each be stable while their difference is not, and the
-difference is what the interval would have to cover. That difference is
-least stable when the two procedures are similar. A gap between two
-nested estimates is a reason to look closer, never a result.
+difference is what the interval has to cover. That difference is least
+stable when the two procedures are similar. A gap between two nested
+estimates is a reason to look closer, never a result.
 
 The same holds for a set of workflows run through one design with
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md).
@@ -108,7 +107,7 @@ offers no ranking or best-workflow function for the set.
 ## Disagreement between folds
 
 When the folds split over a parameter, the data does not pick its value
-clearly. The estimate is fine, since it already averages over this
+clearly. The estimate is fine, because it already averages over this
 variability. What suffers is any story about the selected parameters
 being the right ones.
 

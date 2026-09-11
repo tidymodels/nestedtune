@@ -163,7 +163,7 @@ says which of its slots this package sets for itself.
 The two racing methods in finetune take the same grid the guide uses and
 score every candidate on a few inner resamples first. After each further
 resample, a candidate that is clearly worse than the current best is
-dropped. That saves the fits a full grid search would spend on losing
+dropped. That saves the fits a full grid search spends on losing
 candidates.
 [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
 decides with a repeated measures ANOVA fitted by lme4.
@@ -354,7 +354,8 @@ collect_metrics(baseline)
 Every function that reads a tuned result reads the baseline the same
 way, under the same control settings. The one exception is the
 parameters plot, which has nothing to draw. The baseline’s `.selected`
-column holds an empty table on every fold, since nothing was chosen, so
+column holds an empty table on every fold, because nothing was chosen,
+so
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
@@ -459,7 +460,7 @@ The baseline has nothing to tune. So it ran through
 instead of the function that `fn` names, and the print says so beside
 its id. Each row’s `result` is the object the named function returns for
 that workflow. Calling that function by hand, with the same arguments
-and the same seed, would give the same object. So each row can be read
+and the same seed, gives the same object. So each row can be read
 exactly as the earlier sections read a single result.
 
 ``` r
@@ -564,7 +565,7 @@ one point per outer fold and a dashed rule at each workflow's nested
 estimate.](tuners_files/figure-html/wset-performance-1.png)
 
 The parameters view keeps the outer folds on the x axis and gives each
-workflow’s tuned parameter its own panel, labelled by the id. So each
+workflow’s tuned parameter its own panel, labeled by the id. So each
 workflow gets its own answer to whether the folds agreed. The baseline
 has no panel.
 
@@ -573,13 +574,13 @@ has no panel.
 autoplot(mapped)
 ```
 
-![One panel per tuned parameter and workflow, labelled by the workflow
+![One panel per tuned parameter and workflow, labeled by the workflow
 id, with the outer folds along the x axis and one point per fold at the
 value it selected.](tuners_files/figure-html/wset-parameters-1.png)
 
 What the set does not offer is a ranking of its workflows or a fit of
-the best one. Choosing among them by these estimates would be a
-selection the outer loop did not nest, as
+the best one. Choosing among them by these estimates is a selection the
+outer loop did not nest, as
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
 says. The final fit for one workflow of the set is
 `nested_final_fit(mapped, id = "forest")`.

@@ -347,8 +347,8 @@ collect_inner_metrics(res)
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks `.predictions` the same way, one row per held-out row of every
 completed fold. That table is where a plot of predicted against
-observed, or a per-observation loss, would start. It refuses a run that
-did not save predictions, naming the control slot to set.
+observed, or a per-observation loss, starts. It refuses a run that did
+not save predictions, and names the control slot to set.
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 does the same for `.extracts`, one row per fold.
 
@@ -375,8 +375,8 @@ collect_predictions(res)
 counts the selections. Each row is one distinct combination the folds
 chose. `n` is how many completed folds chose it, and `prop` is that
 count as a share of the completed folds. The most frequent row describes
-how stable the tuning procedure’s choice was on this data. It is not the
-final model’s parameters, which come from
+how stable the tuning procedure’s choice was on this data. That row is
+not the final model’s parameters, which come from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 running the procedure once more on the whole dataset.
 
@@ -484,7 +484,7 @@ On a run with a failed fold, the readers answer over the folds that
 completed. [`summary()`](https://rdrr.io/r/base/summary.html), the
 collect functions and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-each warn once, saying how many folds the answer covers;
+each warn once and say how many folds the answer covers.
 [`?collect_selections`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 names the warning’s class. The one collect function that does not warn
 is
@@ -531,7 +531,7 @@ class(completed_only)
 ```
 
 Dropping the columns the run wrote sheds it too, here through base `[`
-rather than a dplyr verb, since the same rule governs it.
+rather than a dplyr verb, because the same rule governs it.
 
 ``` r
 
@@ -542,7 +542,7 @@ class(res[, "id"])
 Both of those hand back the data and nothing more: a plain tibble print,
 no summary of the run, no
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html).
-A table that has lost a fold, or lost the columns the run wrote, cannot
+A table that lost a fold, or lost the columns the run wrote, cannot
 describe itself as a five-fold design, so it stops describing itself. To
 read a partial run, read the run itself: `collect_metrics(failed)`
 already averages the folds that completed, and warns that it did.

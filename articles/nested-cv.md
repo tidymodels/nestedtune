@@ -125,15 +125,15 @@ cross-validation is expensive, and that product is where the cost lives.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 drives the outer loop. For each outer fold it calls
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-on that fold’s inner resamples, the call you would make by hand, with
+on that fold’s inner resamples, the same call you make by hand, with
 parallelism off and the fold’s seed set. It then picks the best
 candidate by the first metric. It finalizes the workflow with that
 candidate, fits it on the fold’s analysis rows, and scores it on the
-assessment rows. If you would rather pick by another of tune’s
-selectors, the `select` argument takes a
+assessment rows. To pick by another of tune’s selectors, pass a
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-naming it. Every statistical step is tune’s. This package adds the loop,
-the seeding, and a result that keeps what each fold chose.
+naming it as the `select` argument. Every statistical step is tune’s.
+This package adds the loop, the seeding, and a result that keeps what
+each fold chose.
 
 ``` r
 
@@ -238,8 +238,8 @@ n_min_n <- n_distinct(selected$min_n)
 ```
 
 Across 5 outer folds, `mtry` took 2 distinct selected values and `min_n`
-took 1. Most tools throw this away. nestedtune keeps it, because it is
-information about the procedure rather than noise in it.
+took 1. Most tools throw this away. nestedtune keeps the spread, because
+it is information about the procedure rather than noise in it.
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 draws those same selections, one panel per tuned parameter and one point
@@ -347,7 +347,7 @@ final
 ```
 
 The outer folds play no part here. Their selections are not pooled or
-voted on; they belong to the estimate.
+voted on. They belong to the estimate.
 
 The object predicts directly.
 [`predict()`](https://rdrr.io/r/stats/predict.html) and
@@ -401,8 +401,9 @@ either. It stays on the object as a record of what selection saw.
 `show_best()` handed it over above because it was given tune’s own
 object, which does not warn. Ask `res` or `final` and both refuse, as
 the two chunks below show. On the loop’s results, tune’s ranking
-functions would rank outer folds. On the final fit there is one model
-and nothing to rank.
+functions have nothing to rank but outer folds, and the estimate is not
+a ranking of folds. On the final fit there is one model and nothing to
+rank.
 
 ``` r
 
@@ -474,4 +475,4 @@ report:
 Three things make it honest. The estimate is attributed to the procedure
 and not to the model. The instability is reported rather than hidden.
 The deployed model is described as what it is: the same procedure
-applied to all the data, carrying no performance claim of its own.
+applied to all the data, with no performance claim of its own.

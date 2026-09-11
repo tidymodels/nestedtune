@@ -1,6 +1,6 @@
 # Running the outer loop in parallel
 
-A nested run fits many models, and you may want it to finish sooner. The
+A nested run fits many models, and you can make it finish sooner. The
 outer folds do not depend on one another, so they can run at the same
 time.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
@@ -59,7 +59,7 @@ them. There is no argument on the loop functions for it.
 starts the pool, and
 [`mirai::status()`](https://mirai.r-lib.org/reference/status.html)
 reports how many daemons are connected. With two or more connected, the
-folds go out to the daemons; with fewer, they run in the session, the
+folds go out to the daemons. With fewer, they run in the session, the
 same rule tune uses.
 
 ``` r
@@ -72,14 +72,14 @@ mirai::status()$connections
 
 Each daemon is a separate R process. It loads nestedtune and the
 packages the workflow needs from an installed library. So the first
-parallel call after starting a pool is the slow one, since it makes each
-daemon load the tidymodels stack.
+parallel call after starting a pool is the slow one, because it makes
+each daemon load the tidymodels stack.
 
 ## The same call
 
 With a pool connected, the outer folds are sent to the daemons. Each
 fold’s inner tuning runs serially on its daemon. Parallelism inside a
-fold on top of parallelism across folds would oversubscribe the cores.
+fold on top of parallelism across folds oversubscribes the cores.
 
 ``` r
 
@@ -123,8 +123,8 @@ before anything is dispatched. A fold’s seeds depend on its position in
 the design, as
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
 explains under Reproducibility. So a serial run under the same seed
-repeats the parallel run: the same procedure, meaning the same
-tune-and-fit steps, on the same resamples.
+repeats the parallel run: the same procedure, the same tune-and-fit
+steps, on the same resamples.
 
 ``` r
 

@@ -77,7 +77,7 @@
 </div>
 <!-- badges: start -->
 
-<p>You tune a model with cross-validation and keep the setting with the best score. That score is optimistic, since you picked the winner for scoring well. nestedtune gives you an honest number instead. It builds a nested resampling design. It tunes each outer fold on its own inner resamples with tune or finetune. It selects the fold’s winner, fits it, and scores that fit on rows the tuning never saw. It keeps what every fold chose.</p>
+<p>You tune a model with cross-validation and keep the setting with the best score. That score is optimistic, because you picked the winner for scoring well. nestedtune gives you an honest number instead. It builds a nested resampling design. It tunes each outer fold on its own inner resamples with tune or finetune. It selects the fold’s winner, fits it, and scores that fit on rows the tuning never saw. It keeps what every fold chose.</p>
 <p>Those steps together, resample, tune, select, fit, are the procedure. The mean of the outer scores estimates how well that procedure performs on new data. The model to deploy is fitted afterwards by the same procedure on all the data. It is a separate object with no performance number of its own.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -136,7 +136,7 @@
 <li>
 <a href="https://nestedtune.tidymodels.org/articles/estimate.html">What the estimate means</a>, which quantity the nested number is and what it is not.</li>
 <li>
-<a href="https://nestedtune.tidymodels.org/articles/tuners.html">Choosing the inner tuner</a>, the Bayesian, racing and annealing searches and a set of workflows on one design.</li>
+<a href="https://nestedtune.tidymodels.org/articles/tuners.html">Choosing the inner tuner</a>, the Bayesian search, the two racing searches, simulated annealing and a set of workflows on one design.</li>
 <li>
 <a href="https://nestedtune.tidymodels.org/articles/results.html">Reading the results</a>, every column of the results object and every function that reads it.</li>
 <li>

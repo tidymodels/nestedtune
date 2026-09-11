@@ -2,6 +2,13 @@
 
 ## nestedtune 0.0.0.9000
 
+- The four guides, the parallel article and the README are rewritten to
+  pass a plain-English sweep: no semicolon, no contraction, no
+  `has been` or `have been`, none of the words should, may, might, could
+  and would, no word ending in -ing after a comma other than a few
+  prepositions and pronouns (including, during, nothing), and none of a
+  list of filler words and phrases, in any prose sentence.
+
 - Every result records the model specification and the preprocessor of
   the workflow it ran under, as the `workflow` entry of the record
   [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)

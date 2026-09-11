@@ -358,8 +358,8 @@ the same for <code>.notes</code> over every fold.</p>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> stacks <code>.predictions</code>
 the same way, one row per held-out row of every completed fold. That
 table is where a plot of predicted against observed, or a
-per-observation loss, would start. It refuses a run that did not save
-predictions, naming the control slot to set.
+per-observation loss, starts. It refuses a run that did not save
+predictions, and names the control slot to set.
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> does the same for
 <code>.extracts</code>, one row per fold.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -382,9 +382,9 @@ predictions, naming the control slot to set.
 distinct combination the folds chose. <code>n</code> is how many
 completed folds chose it, and <code>prop</code> is that count as a share
 of the completed folds. The most frequent row describes how stable the
-tuning procedure’s choice was on this data. It is not the final model’s
-parameters, which come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> running the
-procedure once more on the whole dataset.</p>
+tuning procedure’s choice was on this data. That row is not the final
+model’s parameters, which come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>
+running the procedure once more on the whole dataset.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
@@ -461,8 +461,8 @@ inner resample failed but tuning still returned a candidate from the
 resamples that ran.</p>
 <p>On a run with a failed fold, the readers answer over the folds that
 completed. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, the collect functions and
-<code><a href="../reference/agreement.html">agreement()</a></code> each warn once, saying how many folds the
-answer covers; <code><a href="../reference/collect_selections.html">?collect_selections</a></code> names the warning’s
+<code><a href="../reference/agreement.html">agreement()</a></code> each warn once and say how many folds the
+answer covers. <code><a href="../reference/collect_selections.html">?collect_selections</a></code> names the warning’s
 class. The one collect function that does not warn is
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>, which reads every fold.
 <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> leaves the failed fold’s place on its axis
@@ -495,14 +495,14 @@ that completed on the run above, which removes one row.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">completed_only</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
 <p>Dropping the columns the run wrote sheds it too, here through base
-<code>[</code> rather than a dplyr verb, since the same rule governs
+<code>[</code> rather than a dplyr verb, because the same rule governs
 it.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
 <p>Both of those hand back the data and nothing more: a plain tibble
 print, no summary of the run, no <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>. A table
-that has lost a fold, or lost the columns the run wrote, cannot describe
+that lost a fold, or lost the columns the run wrote, cannot describe
 itself as a five-fold design, so it stops describing itself. To read a
 partial run, read the run itself: <code>collect_metrics(failed)</code>
 already averages the folds that completed, and warns that it did.</p>

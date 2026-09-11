@@ -221,8 +221,8 @@ says which of its slots this package sets for itself.</p>
 <p>The two racing methods in finetune take the same grid the guide uses
 and score every candidate on a few inner resamples first. After each
 further resample, a candidate that is clearly worse than the current
-best is dropped. That saves the fits a full grid search would spend on
-losing candidates. <code><a href="../reference/nested_tune_race.html">nested_tune_race_anova()</a></code> decides with a
+best is dropped. That saves the fits a full grid search spends on losing
+candidates. <code><a href="../reference/nested_tune_race.html">nested_tune_race_anova()</a></code> decides with a
 repeated measures ANOVA fitted by lme4.
 <code><a href="../reference/nested_tune_race.html">nested_tune_race_win_loss()</a></code> decides with a Bradley-Terry
 model of pairwise wins fitted by BradleyTerry2. Both refuse at entry
@@ -388,8 +388,8 @@ folds.</p>
 <p>Every function that reads a tuned result reads the baseline the same
 way, under the same control settings. The one exception is the
 parameters plot, which has nothing to draw. The baseline’s
-<code>.selected</code> column holds an empty table on every fold, since
-nothing was chosen, so <code><a href="../reference/collect_selections.html">collect_selections()</a></code> and
+<code>.selected</code> column holds an empty table on every fold,
+because nothing was chosen, so <code><a href="../reference/collect_selections.html">collect_selections()</a></code> and
 <code><a href="../reference/agreement.html">agreement()</a></code> return zero rows. The per-fold metrics join
 those of a tuned run by fold label:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -477,8 +477,8 @@ cannot use that grid, so its own grid goes in the set’s
 <code>fn</code> names, and the print says so beside its id. Each row’s
 <code>result</code> is the object the named function returns for that
 workflow. Calling that function by hand, with the same arguments and the
-same seed, would give the same object. So each row can be read exactly
-as the earlier sections read a single result.</p>
+same seed, gives the same object. So each row can be read exactly as the
+earlier sections read a single result.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
@@ -560,17 +560,17 @@ metric. A dashed rule marks each workflow’s
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span>, type <span class="op">=</span> <span class="st">"performance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tuners_files/figure-html/wset-performance-1.png" class="r-plt" alt="Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate." width="672"></p>
 <p>The parameters view keeps the outer folds on the x axis and gives
-each workflow’s tuned parameter its own panel, labelled by the id. So
+each workflow’s tuned parameter its own panel, labeled by the id. So
 each workflow gets its own answer to whether the folds agreed. The
 baseline has no panel.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tuners_files/figure-html/wset-parameters-1.png" class="r-plt" alt="One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected." width="672"></p>
+<p><img src="tuners_files/figure-html/wset-parameters-1.png" class="r-plt" alt="One panel per tuned parameter and workflow, labeled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected." width="672"></p>
 <p>What the set does not offer is a ranking of its workflows or a fit of
-the best one. Choosing among them by these estimates would be a
-selection the outer loop did not nest, as
-<code><a href="../articles/estimate.html">vignette("estimate")</a></code> says. The final fit for one workflow
-of the set is <code>nested_final_fit(mapped, id = "forest")</code>.</p>
+the best one. Choosing among them by these estimates is a selection the
+outer loop did not nest, as <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says. The
+final fit for one workflow of the set is
+<code>nested_final_fit(mapped, id = "forest")</code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
