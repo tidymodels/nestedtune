@@ -1,17 +1,16 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-10 (sixth pass, at M080's merge: M080 archived and its row set done, M76's row pruned to keep three terminal rows, the CI-records and pkgdown-ordering-test rows graduated with it, and two rows added for its cache-key and schedule findings.)_
+_Last hygiene check: 2026-09-10 (seventh pass, at M081's merge: M081 archived and its row set done, M78's row pruned to keep three terminal rows, one LESSONS line added, the M07 line trimmed to its unenforced half and the M59 and M63 cli lines consolidated to hold the caps; no candidate rows touched.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M81 | The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples | review | — | high | milestones/M081-help-pages-rewrite.md |
 | M82 | The guides, README and NEWS are written for someone running nested cross-validation, and the page that served the author is gone | planned | M81 | high | milestones/M082-guides-readme-rewrite.md |
+| M81 | The help pages read for a tidymodels user: one-sentence arguments, shared text once, piped examples | done | — | high | milestones/archive/M081-help-pages-rewrite.md |
 | M80 | The CI records name the workflows that exist and stop copying their caps, and a leg watches the development vctrs one invariant rests on | done | — | normal | milestones/archive/M080-ci-records-vctrs-watch.md |
 | M79 | The suite asserts the seed it forces, names its daemon records by the pid each holds, and its comments describe the code they sit on | done | — | normal | milestones/archive/M079-review-remainders.md |
-| M78 | The site build runs no repository code under a writable token, and the published site carries nothing the repository keeps to itself | done | — | high | milestones/archive/M078-pkgdown-workflow-safety.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
