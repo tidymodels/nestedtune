@@ -308,8 +308,8 @@ invisible(nested_final_fit(wf, res))
 identical(before, .Random.seed)
 ```
 
-`?nested_tune_grid` and `?nested_final_fit` give the recipe for reproducing
-one fold by hand.
+`?nested_tune_grid` gives the recipe for reproducing one fold by hand, and
+`?nested_final_fit` the one for redoing the final fit from its two seeds.
 
 ## The write-up
 
