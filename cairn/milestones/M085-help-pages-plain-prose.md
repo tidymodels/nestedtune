@@ -5,7 +5,7 @@
 - **Depends on:** M84
 - **Driving RR:** —
 - **Principles touched:** IP3
-- **Resolves:** #91 closes
+- **Resolves:** #91 partial (the help-page half; the issue stays open and closes only on human review, never by a PR keyword)
 - **Surface tier:** user-facing — every exported topic's help page
 - **Branch/PR:** `m085-help-pages-plain-prose`
 
@@ -55,3 +55,4 @@ Rewrite every roxygen paragraph that a tidymodels user who has run `tune_grid()`
 - 2026-09-10: criteria audit ran in full mode (shared with M84; see its work log); for this file it fixed the tag rule (an included list) and posed the term-setup site at the gate.
 - 2026-09-10: plan gate chose setting each package word up once on `?nested_tune_grid` with a link from other pages over defining it in every block, because a per-block setup repeats across about 40 topics and the shared sections cover only three arguments; falsified by a reader of a sibling page reporting the word as cold despite the link.
 - 2026-09-11: amendment owed before implementation (D-061, from M84's RR07 at `reviews/archive/RR07-readability-criterion.md`): AC3's "the reader's list is empty" form failed M84 twice and is undecidable (thirteen reads, lists of 1 to 22, never empty). At the next gate AC3 takes M84's final shape, adapted to help pages: script checks calibrated so a reference passes (span cap and openings over the roxygen or `Rd2txt` text, alongside AC1 and AC2), a diff check that the 107 survey paragraphs changed, and one fresh-reader report per review pass, withheld the survey, every entry triaged at the gate and never rerun after fixes; T6's rerun-until-empty loop goes with it. Open at that gate: `\arguments` items held to (c)-(e) only, and which text the paragraph partition runs over.
+- 2026-09-11: started by /milestone-implement on `m085-help-pages-plain-prose` from `de8494b`. User override at session start: M085 does not close #91; the issue closes only on human review, so the header's `Resolves:` slot reads partial and the PR body carries no closing keyword. Branch-point counts: `--roxygen` 142 sentences over 30 words (37 in `nested-tune-grid.R`), `--roxygen --spans` 50 sentences over four spans, 305 roxygen paragraphs in the `--paragraphs` partition.
