@@ -67,6 +67,46 @@ test_that("AC3: arguments given through set_args() and set_engine() read as thos
   )
 })
 
+test_that("engine arguments given in another order read as the same", {
+  # parsnip holds engine arguments in call order, so the two orders below
+  # are different lists and were refused as such (review return, F3); the
+  # identity sorts them by name.
+  a <- parsnip::set_engine(
+    parsnip::rand_forest(),
+    "ranger",
+    num.threads = 1,
+    seed = 2
+  )
+  b <- parsnip::set_engine(
+    parsnip::rand_forest(),
+    "ranger",
+    seed = 2,
+    num.threads = 1
+  )
+  expect_false(identical(a$eng_args, b$eng_args))
+  expect_identical(model_identity(a), model_identity(b))
+  expect_identical(names(model_identity(a)$eng_args), c("num.threads", "seed"))
+})
+
+test_that("a difference the walk cannot place is named as such", {
+  # Two identities that `identical()` tells apart on an attribute the walk
+  # does not read (names NULL against names character(0) on an empty list)
+  # gave a sentence with empty slots (review return, F4).
+  recorded <- list(
+    model = list(class = "linear_reg", eng_args = list()),
+    preprocessor = list(kind = "formula", formula = "y ~ x")
+  )
+  given <- recorded
+  given$model$eng_args <- rlang::set_names(list(), character())
+  expect_false(identical(recorded, given))
+  expect_null(first_difference(recorded, given))
+  expect_match(
+    identity_difference(recorded, given),
+    "in a part the comparison cannot name",
+    fixed = TRUE
+  )
+})
+
 test_that("AC5: the identity carries no data rows", {
   skip_if_no_engines()
 

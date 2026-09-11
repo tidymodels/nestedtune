@@ -389,6 +389,34 @@ test_that("AC2: the identity check runs after the record, grid and marker checks
   )
 })
 
+test_that("AC2: a setting written with braces is refused with the mismatch class", {
+  # The difference sentence is built by cli and then handed to
+  # `cli_abort()`, which interpolates its message once more: a deparsed
+  # value holding a brace was read as a cli expression and the refusal
+  # raised cli's own error in place of the mismatch (review return, F2).
+  skip_if_no_engines()
+  d <- make_reg_data()
+  brace_workflow <- function(k) {
+    rec <- recipes::step_mutate(base_recipe(d), x5 = {
+      x1 * !!k
+    })
+    workflows::workflow(rec, parsnip::linear_reg())
+  }
+  set.seed(36)
+  res <- nested_fit_resamples(
+    brace_workflow(2),
+    final_nested(d),
+    metrics = reg_metrics()
+  )
+  cnd <- expect_mismatch(
+    brace_workflow(3),
+    res,
+    "The recipe's step 1 (step_mutate) setting `inputs` differs"
+  )
+  expect_match(conditionMessage(cnd), "x1 * 2", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "x1 * 3", fixed = TRUE)
+})
+
 # AC3: a workflow rebuilt from the same code passes, and fits the same.
 
 test_that("AC3: a rebuilt workflow is accepted and gives the same fit", {

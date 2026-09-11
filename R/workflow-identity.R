@@ -33,14 +33,17 @@ workflow_identity <- function(object) {
 # two routes deparse alike. `eng_args` is NULL on a fresh specification and
 # a quosure list once `set_engine()` has been called -- empty when no engine
 # argument was given; NULL and the empty list both read as no engine
-# arguments.
+# arguments. Engine arguments are held in call order, so they are sorted by
+# name: two calls naming the same arguments in another order are one
+# specification.
 model_identity <- function(spec) {
+  eng_args <- deparse_settings(spec$eng_args)
   list(
     class = class(spec)[[1L]],
     engine = spec$engine,
     mode = spec$mode,
     args = deparse_settings(spec$args),
-    eng_args = deparse_settings(spec$eng_args)
+    eng_args = eng_args[order(names(eng_args))]
   )
 }
 

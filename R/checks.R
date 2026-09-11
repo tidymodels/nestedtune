@@ -814,7 +814,7 @@ check_results_record <- function(results, call = rlang::caller_env()) {
     (!tuner_selects(procedure$tuner) || is_selection_rule(procedure$select))
   # The workflow identity (M83) is the same shape of absence as the rule: an
   # entry of the procedure that an earlier version did not record.
-  has_workflow <- is.list(procedure) && is.list(procedure$workflow)
+  has_workflow <- is.list(procedure) && is.list(procedure[["workflow"]])
   if (
     !rlang::is_call(inside) ||
       !is.list(procedure) ||
@@ -1669,11 +1669,14 @@ check_workflow_identity <- function(
     return(invisible(object))
   }
   d <- identity_difference(recorded, given)
+  # `d` is interpolated as a value, never spliced into the message: a
+  # deparsed setting can hold a brace, which cli would otherwise read as an
+  # expression of its own.
   cli::cli_abort(
     c(
       "{.arg object} is not the workflow the nested run in {.arg results} \\
        was built around.",
-      x = d,
+      x = "{d}",
       i = "Hand over the workflow the nested run in {.arg results} was \\
            built around."
     ),
@@ -1698,6 +1701,15 @@ identity_difference <- function(recorded, given) {
     ))
   }
   d <- first_difference(recorded, given)
+  if (is.null(d)) {
+    # `identical()` told the two apart on something the walk does not read
+    # (an attribute, or NULL against empty names); named rather than left
+    # as a sentence with empty slots.
+    return(paste(
+      "The workflow differs from the recorded one in a part the comparison",
+      "cannot name."
+    ))
+  }
   part <- identity_part(d$path, recorded)
   if (identical(d$kind, "value")) {
     return(cli::format_inline(
