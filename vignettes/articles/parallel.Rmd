@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-A nested run fits many models, and you may want it to finish sooner. The
+A nested run fits many models, and you can make it finish sooner. The
 outer folds do not depend on one another, so they can run at the same time.
 `nested_tune_grid()` and its siblings run them on
 [mirai](https://mirai.r-lib.org/) daemons, separate R processes, when a
@@ -90,8 +90,8 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 You switch parallelism on by connecting daemons and off by disconnecting
 them. There is no argument on the loop functions for it. `mirai::daemons()`
 starts the pool, and `mirai::status()` reports how many daemons are
-connected. With two or more connected, the folds go out to the daemons;
-with fewer, they run in the session, the same rule tune uses.
+connected. With two or more connected, the folds go out to the daemons.
+With fewer, they run in the session, the same rule tune uses.
 
 ```{r daemons}
 mirai::daemons(2)
@@ -108,7 +108,7 @@ tidymodels stack.
 
 With a pool connected, the outer folds are sent to the daemons. Each fold's
 inner tuning runs serially on its daemon. Parallelism inside a fold on top
-of parallelism across folds would oversubscribe the cores.
+of parallelism across folds oversubscribes the cores.
 
 ```{r run-parallel}
 set.seed(2)
@@ -133,7 +133,7 @@ Each outer fold's seeds are drawn from the session state at entry, before
 anything is dispatched. A fold's seeds depend on its position in the
 design, as `vignette("nested-cv")` explains under Reproducibility. So a
 serial run under the same seed repeats the parallel run: the same
-procedure, meaning the same tune-and-fit steps, on the same resamples.
+procedure, the same tune-and-fit steps, on the same resamples.
 
 ```{r run-serial}
 set.seed(2)

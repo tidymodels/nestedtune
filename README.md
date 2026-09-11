@@ -85,8 +85,8 @@ Learn more:
   which quantity the nested number is and what it is not.
 - [Choosing the inner
   tuner](https://nestedtune.tidymodels.org/articles/tuners.html), the
-  Bayesian, racing and annealing searches and a set of workflows on one
-  design.
+  Bayesian search, the two racing searches, simulated annealing and a
+  set of workflows on one design.
 - [Reading the
   results](https://nestedtune.tidymodels.org/articles/results.html),
   every column of the results object and every function that reads it.
