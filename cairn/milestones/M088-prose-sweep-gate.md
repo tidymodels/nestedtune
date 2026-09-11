@@ -1,6 +1,6 @@
 # M088: Prose that fails the sweep cannot merge
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M086, M087
 - **Driving RR:** —
@@ -41,7 +41,7 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - [x] T2: Write `.github/workflows/prose-sweep.yaml` on the shape of `R-CMD-check.yaml` (concurrency block, the `paths-ignore` filter on both triggers, a job cap with its measurement in a comment, `setup-r` with no package install beyond base R); `python3 .github/ci-usage.py` accepts the filter.
 - [x] T3: Push a commit adding a semicolon sentence to `README.Rmd`, record the red run id in the work log, revert it, record the green run id.
 - [x] T4: Edit `cairn/PROFILE.md`: the `verify` line, the `consistency-gate` line, and `prose-sweep.yaml` in the `test-doctrine` filter list.
-- [ ] T5: `devtools::check()` clean; `cairn_validate` clean.
+- [x] T5: `devtools::check()` clean; `cairn_validate` clean.
 
 ## Work log
 
@@ -56,6 +56,10 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - 2026-09-11: the dispatch route failed, GitHub's API refusing a workflow absent from the default branch (HTTP 404). Superseding the line above: the `workflow_dispatch` trigger is removed and `push` carries no `branches` filter, so every branch push runs the sweep; the deviation from the other workflows' shape is stated in the yaml comment.
 - 2026-09-11: T3 done. Planted commit 012f42a (one semicolon sentence appended to `README.Rmd`): run 34653377391 failed at the `Plain clauses (pages)` step, its log reading `README.Rmd:90: semicolon: …`, `1 hit(s)`. Revert commit e5f7d40: run 34653536495 succeeded, six steps clean. The baseline run 34653331312 on 313dc84 was cancelled by the planted push, as the concurrency block states.
 - 2026-09-11: T4 done. `PROFILE.md`: the `verify` line naming `--plain` (and `--roxygen --plain`) before a prose-touching task is checked off, the consistency-gate line listing the six sweeps, `prose-sweep.yaml` in the filter list.
+- 2026-09-11: T5 done. The first `devtools::check()` warned on an undeclared `withr` use in the new test; replaced with base `setwd()` (89af8e8) rather than a dependency change. Second check at 89af8e8: 0 errors, 0 warnings, 0 notes, 6m48s; `cairn_validate` all checks passed (18 advisories, pre-existing references staleness).
+- 2026-09-11: claim audit: not owed — internal tier.
+- 2026-09-11: the SimpleEnglish lint hook flagged `ROADMAP.md`, `PROFILE.md` and this file on every edit; the counts are pre-existing and the flagged sections are plan-owned or history, left untouched.
+- 2026-09-11: status → review.
 
 ## Decisions
 
