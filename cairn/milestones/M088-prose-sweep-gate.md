@@ -60,6 +60,7 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - 2026-09-11: claim audit: not owed — internal tier.
 - 2026-09-11: the SimpleEnglish lint hook flagged `ROADMAP.md`, `PROFILE.md` and this file on every edit; the counts are pre-existing and the flagged sections are plan-owned or history, left untouched.
 - 2026-09-11: status → review.
+- 2026-09-11: step-7 approval: m088-prose-sweep-gate approved for merge.
 
 ## Decisions
 
