@@ -33,31 +33,33 @@ as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_result
 }
 \value{
 A tibble: \code{wflow_id} first, then the columns the single-workflow
-reader returns for each element, bound in the set's order over the
-union of the elements' columns, \code{NA} where an element lacks one (\code{NULL}
-in a list column). An element whose table has no rows contributes none.
+method returns for each element, bound in the set's order over the
+union of the elements' columns. Where an element lacks a column its
+rows hold \code{NA}, or \code{NULL} in a list column. An element whose table has
+no rows contributes none.
 }
 \description{
-The six readers of a \code{nested_results} also answer on a \code{nested_results_set},
-what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns. Each calls its single-workflow method
-on every element and binds the tables in the set's order, under a \code{wflow_id}
-column placed first.
+The six reading functions of a \code{nested_results} also answer on a
+\code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns. Each calls
+its single-workflow method on every element and binds the tables in the
+set's order, under a \code{wflow_id} column placed first.
 
-\code{collect_metrics()} gives one row per workflow and metric, or per workflow,
-outer fold and metric with \code{summarize = FALSE}. \code{collect_selections()},
-\code{collect_inner_metrics()}, \code{collect_notes()}, \code{collect_predictions()} and
-\code{collect_extracts()} stack their per-fold tables the same way.
+\code{collect_metrics()} gives one row per workflow and metric, or per
+workflow, outer fold and metric with \code{summarize = FALSE}. The other
+five, from \code{collect_selections()} to \code{collect_extracts()}, stack their
+per-fold tables the same way.
 }
 \section{Workflows and folds that failed}{
 
 
-Five of the readers take the folds that completed, as they do on one
-workflow. A workflow with some folds failed contributes the folds that ran,
-and that reader's own partial-run warning is raised once for it with the
-workflow's id in front of the message. A workflow in which no fold completed
-is left out while another workflow completed one, warned about with class
-\code{nestedtune_partial_summary}. A set in which no workflow completed a fold is
-refused with class \code{nestedtune_no_completed_folds}.
+Five of the six take the folds that completed, as they do on one
+workflow. A workflow with some folds failed contributes the folds that
+ran. That function's own partial-run warning is raised once for it,
+with the workflow's id in front of the message. A workflow in which no
+fold completed is left out while another workflow completed one, warned
+about with class \code{nestedtune_partial_summary}. A set in which no
+workflow completed a fold is refused with class
+\code{nestedtune_no_completed_folds}.
 
 \code{collect_notes()} is the exception: it reads every workflow, including those
 in which no fold completed, and refuses nothing, since a failed workflow's

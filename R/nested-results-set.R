@@ -9,15 +9,15 @@
 #' Stack each workflow's table of a workflow-set run under its id
 #'
 #' @description
-#' The six readers of a `nested_results` also answer on a `nested_results_set`,
-#' what [nested_workflow_map()] returns. Each calls its single-workflow method
-#' on every element and binds the tables in the set's order, under a `wflow_id`
-#' column placed first.
+#' The six reading functions of a `nested_results` also answer on a
+#' `nested_results_set`, what [nested_workflow_map()] returns. Each calls
+#' its single-workflow method on every element and binds the tables in the
+#' set's order, under a `wflow_id` column placed first.
 #'
-#' `collect_metrics()` gives one row per workflow and metric, or per workflow,
-#' outer fold and metric with `summarize = FALSE`. `collect_selections()`,
-#' `collect_inner_metrics()`, `collect_notes()`, `collect_predictions()` and
-#' `collect_extracts()` stack their per-fold tables the same way.
+#' `collect_metrics()` gives one row per workflow and metric, or per
+#' workflow, outer fold and metric with `summarize = FALSE`. The other
+#' five, from `collect_selections()` to `collect_extracts()`, stack their
+#' per-fold tables the same way.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param ... Not used; must be empty, so an argument given here is an error
@@ -27,19 +27,21 @@
 #'   as on [collect_metrics.nested_results()].
 #'
 #' @return A tibble: `wflow_id` first, then the columns the single-workflow
-#'   reader returns for each element, bound in the set's order over the
-#'   union of the elements' columns, `NA` where an element lacks one (`NULL`
-#'   in a list column). An element whose table has no rows contributes none.
+#'   method returns for each element, bound in the set's order over the
+#'   union of the elements' columns. Where an element lacks a column its
+#'   rows hold `NA`, or `NULL` in a list column. An element whose table has
+#'   no rows contributes none.
 #'
 #' @section Workflows and folds that failed:
 #'
-#' Five of the readers take the folds that completed, as they do on one
-#' workflow. A workflow with some folds failed contributes the folds that ran,
-#' and that reader's own partial-run warning is raised once for it with the
-#' workflow's id in front of the message. A workflow in which no fold completed
-#' is left out while another workflow completed one, warned about with class
-#' `nestedtune_partial_summary`. A set in which no workflow completed a fold is
-#' refused with class `nestedtune_no_completed_folds`.
+#' Five of the six take the folds that completed, as they do on one
+#' workflow. A workflow with some folds failed contributes the folds that
+#' ran. That function's own partial-run warning is raised once for it,
+#' with the workflow's id in front of the message. A workflow in which no
+#' fold completed is left out while another workflow completed one, warned
+#' about with class `nestedtune_partial_summary`. A set in which no
+#' workflow completed a fold is refused with class
+#' `nestedtune_no_completed_folds`.
 #'
 #' `collect_notes()` is the exception: it reads every workflow, including those
 #' in which no fold completed, and refuses nothing, since a failed workflow's
@@ -203,11 +205,12 @@ stack_set <- function(
 #' Summarize, plot and tabulate a workflow-set run
 #'
 #' @description
-#' The three readers of one workflow's run also answer on a
-#' `nested_results_set`, what [nested_workflow_map()] returns, keyed by
-#' `wflow_id`. `summary()` summarizes every workflow, `autoplot()` draws the
-#' two views of [autoplot.nested_results()] across them, and [agreement()]
-#' stacks each workflow's selection table under its id.
+#' The three ways of reading one workflow's run, `summary()`, `autoplot()`
+#' and `agreement()`, also answer on a `nested_results_set`, what
+#' [nested_workflow_map()] returns. Each is keyed by `wflow_id`.
+#' `summary()` summarizes every workflow, `autoplot()` draws the two views
+#' of [autoplot.nested_results()] across them, and [agreement()] stacks
+#' each workflow's selection table under its id.
 #'
 #' @param x,object A `nested_results_set` from [nested_workflow_map()]; for
 #'   the print method, the `summary.nested_results_set` that `summary()`
@@ -218,76 +221,80 @@ stack_set <- function(
 #'   and not a silent no-op.
 #'
 #' @return
-#' `summary()` returns a `summary.nested_results_set`, `autoplot()` a `ggplot`
-#' object, and `agreement()` a tibble. The three sections below say what each
-#' one holds.
+#' `summary()` returns a `summary.nested_results_set` and `autoplot()` a
+#' `ggplot` object. [agreement()] returns a tibble. The three sections
+#' below say what each one holds.
 #'
 #' @section What `summary()` holds:
 #'
 #' A list of one [summary.nested_results()] object per workflow, named by
-#' `wflow_id` in the set's order, each the summary of that workflow's run
-#' called alone, with the orchestrator's name as the list's `fn` attribute.
+#' `wflow_id` in the set's order. Each is the summary of that workflow's
+#' run called alone. The name of the loop function the set ran through is
+#' the list's `fn` attribute.
 #'
-#' Printing it shows the orchestrator and the workflow count, then one section
-#' per workflow holding that run's design, failed folds, selected parameters
-#' and estimate, and once at the end the note on what a nested estimate
-#' describes.
+#' Printing it shows that function's name and the workflow count, then one
+#' section per workflow. Each section holds that run's design, failed
+#' folds, selected parameters and estimate. The note on what a nested
+#' estimate describes is printed once, at the end.
 #'
 #' @section What `autoplot()` draws:
 #'
-#' Under `type = "performance"` the workflows stand along the x axis inside one
-#' panel per metric, with one point per completed outer fold's score and a
-#' dashed rule at each workflow's nested estimate, the value
-#' [collect_metrics()] reports for it on the set.
+#' Under `type = "performance"` the workflows stand along the x axis inside
+#' one panel per metric. Each panel has one point per completed outer
+#' fold's score and a dashed rule at each workflow's nested estimate, the
+#' value [collect_metrics()] reports for it on the set.
 #'
 #' Under `type = "parameters"` there is one panel per workflow and tuned
-#' parameter, in the set's order, labelled by the id and then by the single
-#' view's label for that parameter, with the outer folds along the x axis. Each
-#' panel asks the single view's question of one workflow. The selected-value
-#' axis is decided over every workflow's values at once: numeric when all are
-#' numbers, discrete otherwise. A workflow with nothing to tune draws no panel.
+#' parameter, in the set's order, with the outer folds along the x axis.
+#' Each panel is labelled by the id and then by the single view's label for
+#' that parameter, and asks the single view's question of one workflow.
+#' The selected-value axis is decided over every workflow's values at
+#' once: numeric when all are numbers, discrete otherwise. A workflow with
+#' nothing to tune draws no panel.
 #'
 #' @section What `agreement()` returns:
 #'
 #' `wflow_id`, then one column per parameter any workflow's completed fold
-#' selected, then `n` and `prop`, with each workflow's rows as [agreement()] on
-#' that run alone gives them, in the set's order. A column a workflow does not
-#' tune holds `NA` in its rows; within a workflow's rows `NA` keeps the meaning
-#' [agreement()] gives it, a fold that recorded no value. A workflow with
-#' nothing to tune contributes no row.
+#' selected, then `n` and `prop`. Each workflow's rows are as [agreement()]
+#' on that run alone gives them, in the set's order. A column a workflow
+#' does not tune holds `NA` in its rows. Within a workflow's rows `NA`
+#' keeps the meaning [agreement()] gives it, a fold that recorded no value.
+#' A workflow with nothing to tune contributes no row.
 #'
 #' @section Workflows that failed:
 #'
 #' The three follow the fold-state rules of the set's
 #' [collect_metrics()][collect_metrics.nested_results_set]. A workflow with
-#' some folds failed is read over the folds that ran, warned about once with
-#' class `nestedtune_partial_summary`.
+#' some folds failed is read over the folds that ran, warned about once
+#' with class `nestedtune_partial_summary`.
 #'
-#' A workflow in which no fold completed is still summarized by `summary()`,
-#' which describes a failed run rather than refusing. The performance view
-#' keeps its slot on the x axis and draws nothing there, the parameters view
-#' draws no panel for it, and `agreement()` leaves it out, each warning once
-#' and naming it. A set in which no workflow completed a fold is refused by the
-#' plots and by `agreement()` with class `nestedtune_no_completed_folds`, and
-#' one in which no completed fold selected a parameter is refused under
-#' `type = "parameters"` with class `nestedtune_no_tuned_parameters`.
+#' A workflow in which no fold completed is still summarized by
+#' `summary()`, which describes a failed run rather than refusing. The
+#' performance view keeps its slot on the x axis and draws nothing there,
+#' and the parameters view draws no panel for it. `agreement()` leaves it
+#' out. Each warns once and names it. A set in which no workflow completed
+#' a fold is refused by the plots and by `agreement()` with class
+#' `nestedtune_no_completed_folds`. One in which no completed fold selected
+#' a parameter is refused under `type = "parameters"` with class
+#' `nestedtune_no_tuned_parameters`.
 #'
 #' @section Counting what contributed:
 #'
-#' The performance view's subtitle gives the workflow and fold counts, then, on
-#' a line of its own and only when there is one to name, how many workflows did
-#' not complete every fold and how many averaged a metric over fewer folds than
-#' they completed. `summary()` names the folds and prints each workflow's count
+#' The performance view's subtitle gives the workflow and fold counts. Two
+#' shortfalls then each take a line of their own, only when there is one
+#' to name. One is how many workflows did not complete every fold. The
+#' other is how many averaged a metric over fewer folds than they
+#' completed. `summary()` names the folds and prints each workflow's count
 #' per metric.
 #'
-#' The two counts are separate. A workflow that ran whole can still be named by
-#' the second, since a completed fold can score `NA` on one metric while
-#' scoring the others, and a metric no completed fold scored is counted there
-#' while drawing no rule.
+#' The two counts are separate. A workflow that ran whole can still be
+#' named by the second, since a completed fold can score `NA` on one metric
+#' while scoring the others. A metric no completed fold scored is counted
+#' there while drawing no rule.
 #'
 #' A tuned parameter whose id is `wflow_id` cannot be tabulated beside the
 #' set's own column and is refused with class
-#' `nestedtune_collect_name_collision`; one whose id is `n` or `prop` is
+#' `nestedtune_collect_name_collision`. One whose id is `n` or `prop` is
 #' refused as [agreement()] refuses it, the workflow named in front.
 #'
 #' @template example-setup
@@ -306,9 +313,10 @@ NULL
 #' Print a workflow-set run
 #'
 #' @description
-#' Shows the orchestrator the set ran through and how many workflows it holds,
-#' then one line per workflow: its id, how many of its outer folds completed,
-#' and the procedure that ran for it.
+#' Shows which loop function the set ran through, [nested_tune_grid()] or a
+#' sibling, and how many workflows it holds. Then it prints one line per
+#' workflow: its id, how many of its outer folds completed, and the label
+#' of the tuner that ran for it.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param ... Not used; must be empty.

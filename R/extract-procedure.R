@@ -8,46 +8,49 @@
 # a `procedure()` function would collide with the variable the tuners
 # vignette binds and leave the `extract_` idiom.
 
-#' Extract the record of the procedure that ran
+#' Extract the record of what ran
 #'
-#' Returns the `procedure` record a nested result carries, or the one a
-#' [nested_final_fit()] re-ran: which tuner ran, that tuner's own arguments,
-#' and the control as it took effect.
+#' Returns the `procedure` record a nested result carries, the tune, select
+#' and fit steps as they were set. It says which tuner ran, that tuner's
+#' own arguments, and the control as it took effect. A [nested_final_fit()]
+#' carries the record it re-ran.
 #'
-#' A final fit built from a results object re-runs exactly what this record
-#' describes, so reading it is how you see what a fit will do before you ask
-#' for one.
+#' A final fit built from a results object re-runs exactly what this
+#' record describes. Reading it is how you see what a fit will do before
+#' you ask for one.
 #'
 #' @param x A `nested_results` object from [nested_tune_grid()] or one of its
 #'   siblings, or a `nested_final_fit` object from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit
 #'
-#' @return The stored record, unchanged: a flat named list with `tuner`, that
-#'   tuner's own arguments, the arguments every orchestrator shares
-#'   (`param_info`, `event_level`, `eval_time` and `select`) as they were
-#'   given, and `control` as it took effect. The section below says what each
+#' @return The stored record, unchanged: a flat named list with `tuner`,
+#'   that tuner's own arguments, the arguments every loop function shares,
+#'   and `control` as it took effect. The section below says what each
 #'   holds.
 #'
 #' @section What the record holds:
 #'
-#' `tuner` names the tune or finetune function that ran: `"tune_grid"`,
-#' `"tune_bayes"`, `"tune_race_anova"`, `"tune_race_win_loss"`,
-#' `"tune_sim_anneal"`, or `"fit_resamples"` for a run with nothing to tune.
-#' Beside it sit that tuner's own arguments: `grid` for the grid and racing
-#' tuners; `iter`, `initial` and `objective` for the Bayesian one; `iter` and
-#' `initial` for simulated annealing; none for the plain fit.
+#' `tuner` names the tune or finetune function that ran, with that tuner's
+#' own arguments beside it:
 #'
-#' `select` is the [selection_rule()] each fold selected by. `control` is the
-#' control object the run was given, or tune's default when none was, with the
-#' slots this package forces already applied, and with `seed` left out on a
-#' Bayesian result. A `"fit_resamples"` record carries no `param_info` and no
-#' `select`, since no parameter set was read and no rule applied. See
-#' "Differences from calling tune directly" on each orchestrator's help page
-#' for what those slots are.
+#' - `"tune_grid"`, with `grid`;
+#' - `"tune_race_anova"` or `"tune_race_win_loss"`, also with `grid`;
+#' - `"tune_bayes"`, with `iter`, `initial` and `objective`;
+#' - `"tune_sim_anneal"`, with `iter` and `initial`;
+#' - `"fit_resamples"`, for a run with nothing to tune, with none.
 #'
-#' On a `nested_results` the record travels as an attribute of the object. On
-#' a `nested_final_fit` it is the record the fit re-ran, which is the record of
-#' the results object it was built from.
+#' `select` is the [selection_rule()] each fold selected by. `param_info`,
+#' `event_level` and `eval_time` are as they were given. `control` is the
+#' control object the run was given, or tune's default when none was, with
+#' the slots this package forces already applied, and with `seed` left out
+#' on a Bayesian result. A `"fit_resamples"` record carries no `param_info`
+#' and no `select`, since no parameter set was read and no rule applied.
+#' See "Differences from calling tune directly" on each loop function's
+#' help page for what those slots are.
+#'
+#' On a `nested_results` the record travels as an attribute of the object.
+#' On a `nested_final_fit` it is the record the fit re-ran, which is the
+#' record of the results object it was built from.
 #'
 #' @template example-setup
 #' @template example-run

@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract-procedure.R
 \name{extract_procedure}
 \alias{extract_procedure}
-\title{Extract the record of the procedure that ran}
+\title{Extract the record of what ran}
 \usage{
 extract_procedure(x, ...)
 }
@@ -14,43 +14,47 @@ siblings, or a \code{nested_final_fit} object from \code{\link[=nested_final_fit
 error instead of leaving it silently ignored.}
 }
 \value{
-The stored record, unchanged: a flat named list with \code{tuner}, that
-tuner's own arguments, the arguments every orchestrator shares
-(\code{param_info}, \code{event_level}, \code{eval_time} and \code{select}) as they were
-given, and \code{control} as it took effect. The section below says what each
+The stored record, unchanged: a flat named list with \code{tuner},
+that tuner's own arguments, the arguments every loop function shares,
+and \code{control} as it took effect. The section below says what each
 holds.
 }
 \description{
-Returns the \code{procedure} record a nested result carries, or the one a
-\code{\link[=nested_final_fit]{nested_final_fit()}} re-ran: which tuner ran, that tuner's own arguments,
-and the control as it took effect.
+Returns the \code{procedure} record a nested result carries, the tune, select
+and fit steps as they were set. It says which tuner ran, that tuner's
+own arguments, and the control as it took effect. A \code{\link[=nested_final_fit]{nested_final_fit()}}
+carries the record it re-ran.
 }
 \details{
-A final fit built from a results object re-runs exactly what this record
-describes, so reading it is how you see what a fit will do before you ask
-for one.
+A final fit built from a results object re-runs exactly what this
+record describes. Reading it is how you see what a fit will do before
+you ask for one.
 }
 \section{What the record holds}{
 
 
-\code{tuner} names the tune or finetune function that ran: \code{"tune_grid"},
-\code{"tune_bayes"}, \code{"tune_race_anova"}, \code{"tune_race_win_loss"},
-\code{"tune_sim_anneal"}, or \code{"fit_resamples"} for a run with nothing to tune.
-Beside it sit that tuner's own arguments: \code{grid} for the grid and racing
-tuners; \code{iter}, \code{initial} and \code{objective} for the Bayesian one; \code{iter} and
-\code{initial} for simulated annealing; none for the plain fit.
+\code{tuner} names the tune or finetune function that ran, with that tuner's
+own arguments beside it:
+\itemize{
+\item \code{"tune_grid"}, with \code{grid};
+\item \code{"tune_race_anova"} or \code{"tune_race_win_loss"}, also with \code{grid};
+\item \code{"tune_bayes"}, with \code{iter}, \code{initial} and \code{objective};
+\item \code{"tune_sim_anneal"}, with \code{iter} and \code{initial};
+\item \code{"fit_resamples"}, for a run with nothing to tune, with none.
+}
 
-\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{control} is the
-control object the run was given, or tune's default when none was, with the
-slots this package forces already applied, and with \code{seed} left out on a
-Bayesian result. A \code{"fit_resamples"} record carries no \code{param_info} and no
-\code{select}, since no parameter set was read and no rule applied. See
-"Differences from calling tune directly" on each orchestrator's help page
-for what those slots are.
+\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{param_info},
+\code{event_level} and \code{eval_time} are as they were given. \code{control} is the
+control object the run was given, or tune's default when none was, with
+the slots this package forces already applied, and with \code{seed} left out
+on a Bayesian result. A \code{"fit_resamples"} record carries no \code{param_info}
+and no \code{select}, since no parameter set was read and no rule applied.
+See "Differences from calling tune directly" on each loop function's
+help page for what those slots are.
 
-On a \code{nested_results} the record travels as an attribute of the object. On
-a \code{nested_final_fit} it is the record the fit re-ran, which is the record of
-the results object it was built from.
+On a \code{nested_results} the record travels as an attribute of the object.
+On a \code{nested_final_fit} it is the record the fit re-ran, which is the
+record of the results object it was built from.
 }
 
 \examples{
