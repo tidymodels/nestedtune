@@ -41,7 +41,7 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 
 ## Tasks
 
-- [ ] T1: Delete the three why-nest files, their `_pkgdown.yml` row and any `vignette()` or site link naming the page (`grep -rn why-nest vignettes/ README.Rmd _pkgdown.yml`); confirm `nnet` is not in `DESCRIPTION` (it is not at `c5638cf`).
+- [x] T1: Delete the three why-nest files, their `_pkgdown.yml` row and any `vignette()` or site link naming the page (`grep -rn why-nest vignettes/ README.Rmd _pkgdown.yml`); confirm `nnet` is not in `DESCRIPTION` (it is not at `c5638cf`).
 - [ ] T2: Rewrite `nested-cv.Rmd` as the getting-started page: design, run, read, final fit, write-up; the "Where this example sits" section (`:361`) and the `show_best()` aside (`:334-343`) removed; the IP3 paragraph kept. (RB tripwire: ip-touching)
 - [ ] T3: Rewrite `estimate.Rmd` in plain prose as the theory page: the estimand, the bias direction with its cited figures (`:73-83`), `std_err`, the no-comparison rule, when nesting is worth it (`:168-197` shortened), feature selection, References kept. (RB tripwire: ip-touching)
 - [ ] T4: Rewrite `tuners.Rmd` as choosing a tuner (one example per tuner, the workflow-set run) with `:307-344` and `:429-471` removed, pointing at the help pages M081 rewrote.
@@ -56,7 +56,13 @@ Rewrite the four guides, the parallel article, README and NEWS in plain prose fo
 - 2026-09-10: criteria audit ran in full mode ([O] fresh reader, shared with M081): `nnet` found absent from Suggests, so no dependency decision; the NEWS heading and the pinned id-column sentence kept; the prose extraction stated once and both greps run over it; the five-explanation clause narrowed to those five; the sweep-script clause now names its line.
 - 2026-09-10: plan gate chose deleting the why-nest article over keeping it trimmed because the user is fine dropping it if not needed and the estimate page's cited figures make the same point; the user asked to keep some theory, so `estimate.Rmd` keeps its citations at a 1400-word cap rather than the 900-word rules-of-thumb cut proposed; falsified by a reader asking for the simulation the article showed.
 - 2026-09-10: plan gate chose including NEWS over a candidate row because it is in the same register and ships with the package; falsified by nothing, a deferral would have been a roadmap fact.
+- 2026-09-10: implement started on `m082-guides-readme-rewrite`; gate took all four recommendations (see Decisions). T1: the three why-nest files and their `_pkgdown.yml` row deleted, no other reference to the page outside `NEWS.md` (T7) and the CI baseline record; `nnet` absent from DESCRIPTION; `pkgdown::check_pkgdown()` clean.
 
 ## Decisions
+
+- 2026-09-10 (implement gate): the five shared explanations are homed as follows: the case for nesting, the no-subtraction rule and feature selection inside the workflow on `estimate.Rmd`; the fit-count arithmetic and the seeding paragraph on `nested-cv.Rmd`. Every other page gets at most one sentence and a `vignette()` link. Chosen because the theory page is where a reader goes for the argument and the getting-started page for the mechanics.
+- 2026-09-10 (implement gate): the `nested_fit_resamples()` baseline moves from `nested-cv.Rmd` to `tuners.Rmd` as a short section before the workflow-set run, so the getting-started page is design, run, read, final fit, write-up and the tuners page holds every way of running the loop.
+- 2026-09-10 (implement gate): NEWS drops a bullet whose behavior a later bullet replaced (the `.grid` column, the print-as-report shape, the why-nest article, the pre-record fold-label rule) rather than shortening it, since no release has shipped and the file describes what 0.0.0.9000 does; the heading and the pinned id-column sentence stay.
+- 2026-09-10 (implement gate): the IP3 paragraph on `nested-cv.Rmd` and `estimate.Rmd` is, on both: "The number `collect_metrics()` reports describes the whole tune-and-fit procedure: resample, tune, select, fit. That is the number to report. The model fitted at the end for deployment is a separate object, and it has no performance number of its own, because everything computable from its training data was used up in selecting and fitting it." Escalation was offered on the ip-touching tripwire and declined.
 
 ## Review
