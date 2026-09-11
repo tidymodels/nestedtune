@@ -108,30 +108,110 @@ if ("--pages" %in% args) {
 }
 
 ing_exclusions <- c(
-  "including", "during", "according", "regarding",
-  "nothing", "something", "anything", "everything"
+  "including",
+  "during",
+  "according",
+  "regarding",
+  "nothing",
+  "something",
+  "anything",
+  "everything"
 )
 slop <- c(
-  "leverage", "utilize", "in order to", "prior to", "ensure",
-  "it is worth noting that", "it's important to",
-  "simply", "just", "easily", "seamless", "seamlessly", "effortlessly",
-  "robust", "powerful", "comprehensive", "performant", "functionality",
-  "enables you to", "allows you to", "is designed to", "aims to",
-  "facilitate", "dive into", "delve into", "when it comes to",
-  "in the event that", "due to the fact that", "as needed", "as necessary",
-  "and/or", "e.g.", "i.e.", "etc.", "gracefully handles", "out of the box",
-  "under the hood", "blazingly fast", "streamline", "plethora", "myriad",
-  "addresses the issue", "tackles", "pivotal", "crucial", "crucially",
-  "paramount", "tapestry", "testament", "synergy", "interplay", "intricate",
-  "vibrant", "nuanced", "multifaceted", "realm", "landscape",
-  "groundbreaking", "cutting-edge", "state-of-the-art", "innovative",
-  "unprecedented", "transformative", "game-changer", "revolutionize",
-  "showcase", "underscore", "emphasize", "foster", "empower", "bolster",
-  "harness", "enhance", "elevate", "furthermore", "moreover",
-  "in conclusion", "in summary", "at the end of the day", "embark",
-  "endeavor", "meticulous", "meticulously", "holistic", "paradigm",
-  "navigate", "boasts", "nestled", "in the heart of", "bustling",
-  "that being said", "notwithstanding", "I hope this helps", "let's dive in"
+  "leverage",
+  "utilize",
+  "in order to",
+  "prior to",
+  "ensure",
+  "it is worth noting that",
+  "it's important to",
+  "simply",
+  "just",
+  "easily",
+  "seamless",
+  "seamlessly",
+  "effortlessly",
+  "robust",
+  "powerful",
+  "comprehensive",
+  "performant",
+  "functionality",
+  "enables you to",
+  "allows you to",
+  "is designed to",
+  "aims to",
+  "facilitate",
+  "dive into",
+  "delve into",
+  "when it comes to",
+  "in the event that",
+  "due to the fact that",
+  "as needed",
+  "as necessary",
+  "and/or",
+  "e.g.",
+  "i.e.",
+  "etc.",
+  "gracefully handles",
+  "out of the box",
+  "under the hood",
+  "blazingly fast",
+  "streamline",
+  "plethora",
+  "myriad",
+  "addresses the issue",
+  "tackles",
+  "pivotal",
+  "crucial",
+  "crucially",
+  "paramount",
+  "tapestry",
+  "testament",
+  "synergy",
+  "interplay",
+  "intricate",
+  "vibrant",
+  "nuanced",
+  "multifaceted",
+  "realm",
+  "landscape",
+  "groundbreaking",
+  "cutting-edge",
+  "state-of-the-art",
+  "innovative",
+  "unprecedented",
+  "transformative",
+  "game-changer",
+  "revolutionize",
+  "showcase",
+  "underscore",
+  "emphasize",
+  "foster",
+  "empower",
+  "bolster",
+  "harness",
+  "enhance",
+  "elevate",
+  "furthermore",
+  "moreover",
+  "in conclusion",
+  "in summary",
+  "at the end of the day",
+  "embark",
+  "endeavor",
+  "meticulous",
+  "meticulously",
+  "holistic",
+  "paradigm",
+  "navigate",
+  "boasts",
+  "nestled",
+  "in the heart of",
+  "bustling",
+  "that being said",
+  "notwithstanding",
+  "I hope this helps",
+  "let's dive in"
 )
 
 # The plain clauses one sentence matches, by name, in the order above; a
@@ -141,13 +221,34 @@ plain_clauses <- function(text) {
   if (grepl(";", text, fixed = TRUE)) {
     out <- c(out, "semicolon")
   }
-  if (grepl("(?<=\\w)(n['\u2019]t|['\u2019](re|ll|ve|d|m))(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+  if (
+    grepl(
+      "(?<=\\w)(n['\u2019]t|['\u2019](re|ll|ve|d|m))(?!\\w)",
+      text,
+      perl = TRUE,
+      ignore.case = TRUE
+    )
+  ) {
     out <- c(out, "contraction")
   }
-  if (grepl("(?<!\\w)(has|have) been(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+  if (
+    grepl(
+      "(?<!\\w)(has|have) been(?!\\w)",
+      text,
+      perl = TRUE,
+      ignore.case = TRUE
+    )
+  ) {
     out <- c(out, "has been")
   }
-  if (grepl("(?<!\\w)(should|may|might|could|would)(?!\\w)", text, perl = TRUE, ignore.case = TRUE)) {
+  if (
+    grepl(
+      "(?<!\\w)(should|may|might|could|would)(?!\\w)",
+      text,
+      perl = TRUE,
+      ignore.case = TRUE
+    )
+  ) {
     out <- c(out, "modal")
   }
   m <- regmatches(text, gregexpr(", (\\w+ing)(?!\\w)", text, perl = TRUE))[[1]]
@@ -390,7 +491,11 @@ split_runs <- function(
 sentences <- function(para, count = FALSE, all = FALSE) {
   # spans are stripped over the joined paragraph, since one can cross a
   # line break; strip_spans() keeps the breaks, so pieces and lines align
-  joined <- strip_spans(paste(para$text, collapse = "\n"), count = count, all = all)
+  joined <- strip_spans(
+    paste(para$text, collapse = "\n"),
+    count = count,
+    all = all
+  )
   pieces <- strsplit(joined, "\n")[[1]]
   tokens <- character()
   at <- integer()

@@ -22,7 +22,13 @@ test_that("--plain names each clause once and stays silent on spans and near-mis
   clause_lines <- function(name) {
     grep(sprintf("^%s:[0-9]+: %s", fixture, name), hits, value = TRUE)
   }
-  for (name in c("semicolon", "contraction", "has been", "modal", "comma-ing")) {
+  for (name in c(
+    "semicolon",
+    "contraction",
+    "has been",
+    "modal",
+    "comma-ing"
+  )) {
     expect_length(clause_lines(paste0(name, ": ")), 1L)
   }
   expect_length(clause_lines("slop \\(just\\): "), 1L)
