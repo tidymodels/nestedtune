@@ -44,3 +44,65 @@ test_that("--plain names each clause once and stays silent on spans and near-mis
   expect_false(any(grepl("shouldering", hits, fixed = TRUE)))
   expect_identical(tail(out, 1), "6 hit(s)")
 })
+
+# The six gating modes over the real pages and roxygen sources. Under
+# `R CMD check` the tests run from the built tarball, which `.Rbuildignore`
+# strips `benchmarks/` from, so this block skips there; the source tree and
+# `.github/workflows/prose-sweep.yaml` are where it runs.
+
+test_that("the six gating sweeps are clean over the real sources", {
+  script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
+  skip_if_not(file.exists(script), "sweep-prose.R not in the source tree")
+  script <- normalizePath(script)
+  root <- normalizePath(testthat::test_path("..", ".."))
+
+  sweep <- function(...) {
+    out <- suppressWarnings(system2(
+      "Rscript",
+      c(script, ...),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+    list(status = attr(out, "status"), lines = out)
+  }
+  # `system2()` runs from the working directory, and the script reads its
+  # page list relative to the package root
+  withr::local_dir(root)
+
+  # the domain is non-empty: every page and the roxygen source list at
+  # least one paragraph, so a clean sweep below is a sweep over prose
+  pages <- c(
+    "README.Rmd",
+    "vignettes/articles/parallel.Rmd",
+    "vignettes/estimate.Rmd",
+    "vignettes/nested-cv.Rmd",
+    "vignettes/results.Rmd",
+    "vignettes/tuners.Rmd"
+  )
+  paragraphs <- sweep("--paragraphs")
+  expect_null(paragraphs$status)
+  for (page in pages) {
+    expect_true(
+      any(startsWith(paragraphs$lines, paste0(page, ":"))),
+      label = sprintf("`--paragraphs` lists a paragraph for %s", page)
+    )
+  }
+  roxygen <- sweep("--roxygen", "--paragraphs")
+  expect_null(roxygen$status)
+  expect_true(any(startsWith(roxygen$lines, "R/nested-tune-grid.R:")))
+
+  modes <- list(
+    character(),
+    "--spans",
+    "--plain",
+    "--roxygen",
+    c("--roxygen", "--spans"),
+    c("--roxygen", "--plain")
+  )
+  for (mode in modes) {
+    result <- sweep(mode)
+    label <- paste(c("sweep-prose.R", mode), collapse = " ")
+    expect_null(result$status, label = label)
+    expect_identical(result$lines, "clean", label = label)
+  }
+})

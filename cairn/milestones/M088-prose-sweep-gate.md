@@ -37,7 +37,7 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 
 ## Tasks
 
-- [ ] T1: Extend `tests/testthat/test-sweep-prose.R` (M086) with the real-source block: the non-empty `--paragraphs` assertions first, then the six invocations, each asserted `clean`; the skip reason unchanged.
+- [x] T1: Extend `tests/testthat/test-sweep-prose.R` (M086) with the real-source block: the non-empty `--paragraphs` assertions first, then the six invocations, each asserted `clean`; the skip reason unchanged.
 - [ ] T2: Write `.github/workflows/prose-sweep.yaml` on the shape of `R-CMD-check.yaml` (concurrency block, the `paths-ignore` filter on both triggers, a job cap with its measurement in a comment, `setup-r` with no package install beyond base R); `python3 .github/ci-usage.py` accepts the filter.
 - [ ] T3: Push a commit adding a semicolon sentence to `README.Rmd`, record the red run id in the work log, revert it, record the green run id.
 - [ ] T4: Edit `cairn/PROFILE.md`: the `verify` line, the `consistency-gate` line, and `prose-sweep.yaml` in the `test-doctrine` filter list.
@@ -49,6 +49,8 @@ The six gating invocations are `Rscript benchmarks/sweep-prose.R`, `--spans`, `-
 - 2026-09-11: criteria audit ran in reduced mode (bounded-promise, proportionality and instrument questions). Must-fix, fixed: AC1 named `--paragraphs` for `R/nested-tune-grid.R`, which the non-roxygen mode lists nothing for (now `--roxygen --paragraphs`); the profile's named filter list would have gone stale (AC3 now adds `prose-sweep.yaml`). Noted: the semicolon probe exercises the `--plain` leg only, one exemplar for the wiring.
 - 2026-09-11: plan gate chose a CI workflow plus the test plus the profile slots over the test and slots alone because a PR opened without a local test run is otherwise caught only by the coverage leg, which never gates; falsified by the workflow's minutes exceeding what `.github/ci-usage.py` shows the suite saving, in which case the workflow folds into an existing leg.
 - 2026-09-11: plan gate chose mechanical enforcement over a profile rule alone because the session hook already states the rules and M084 and M085 left 66 semicolons on the help pages, which no clause of theirs bound; falsified by nothing short of the sweeps never firing across ten merged PRs.
+
+- 2026-09-11: T1 done. The real-source block asserts `--paragraphs` non-empty for the six pages and `--roxygen --paragraphs` for `R/nested-tune-grid.R`, then the six invocations `clean`; 34 pass. Discrimination shown locally: one appended semicolon sentence in `README.Rmd` fails the `--plain` leg with `README.Rmd:90: semicolon: …`, reverted.
 
 ## Decisions
 
