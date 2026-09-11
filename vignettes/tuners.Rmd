@@ -291,8 +291,8 @@ cat(sprintf(
 ))
 ```
 
-Seeding is the same on all five: seed the session before the call, and the
-same seed gives the same result serially and in parallel, as
+Seeding is the same on all five. Seed the session before the call. The same
+seed gives the same result serially and in parallel, as
 `vignette("nested-cv")` explains under Reproducibility.
 
 ## A workflow with nothing to tune
@@ -317,7 +317,7 @@ extract_procedure(baseline)$tuner
 collect_metrics(baseline)
 ```
 
-Every reader answers on the baseline. Its `.selected` column holds an empty
+Every function that reads a result answers on the baseline. Its `.selected` column holds an empty
 table on every fold, since nothing was chosen, so `collect_selections()` and
 `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:
@@ -336,10 +336,12 @@ collect_metrics(bayes, summarize = FALSE) |>
 
 Read the table fold by fold rather than as one difference. Two nested
 estimates cannot be subtracted to compare procedures, for the reasons
-`vignette("estimate")` gives. The two kinds of function do not overlap. A
-workflow carrying a `tune()` marker is refused by `nested_fit_resamples()`,
-and a workflow with none is refused by the five tuning functions, each
-naming the other.
+`vignette("estimate")` gives.
+
+`nested_fit_resamples()` and the five tuning functions do not overlap.
+`nested_fit_resamples()` refuses a workflow carrying a `tune()` marker. The
+five tuning functions refuse a workflow with none. Each refusal names the
+function to use instead.
 
 ```{r baseline-refusal, error = TRUE}
 nested_fit_resamples(wf, folds)
@@ -379,11 +381,12 @@ mapped <- nested_workflow_map(
 mapped
 ```
 
-The baseline has nothing to tune, so it ran through `nested_fit_resamples()`
-whatever `fn` named, and the print says so beside its id. Each row's
-`result` is the object the named function returns for that workflow. It is
-the same object a call by hand with the same arguments under the same seed
-would give. So everything the earlier sections read off one result reads
+The baseline has nothing to tune. So it ran through `nested_fit_resamples()`
+instead of the function that `fn` names, and the print says so beside its
+id. Each row's
+`result` is the object the named function returns for that workflow.
+Calling that function by hand, with the same arguments and the same seed,
+would give the same object. So everything the earlier sections read off one result reads
 off a row here.
 
 ```{r wset-metrics}
@@ -391,7 +394,7 @@ collect_metrics(mapped)
 ```
 
 `collect_metrics()` stacks each workflow's estimate under its id, and the
-other readers stack their tables the same way. `summary()` summarizes every
+other collect functions stack their tables the same way. `summary()` summarizes every
 workflow, one section per id under one heading for the set.
 
 ```{r wset-summary}
@@ -399,25 +402,25 @@ summary(mapped)
 ```
 
 `agreement()` stacks each workflow's selection table under its id, with the
-parameter columns ahead of the counts; the baseline tuned nothing and has no
+parameter columns ahead of the counts. The baseline tuned nothing and has no
 row.
 
 ```{r wset-agreement}
 agreement(mapped)
 ```
 
-The performance view puts the workflows along one axis inside a panel per
-metric, each marked by a dashed rule at that workflow's `collect_metrics()`
-mean.
+`autoplot()` has the same two views as on one result. The performance view
+puts the workflows along one axis inside a panel per metric. A dashed rule
+marks each workflow's `collect_metrics()` mean.
 
 ```{r wset-performance, fig.width = 7, fig.height = 3.6, fig.alt = "Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate."}
 autoplot(mapped, type = "performance")
 ```
 
 The parameters view keeps the outer folds on the x axis and gives each
-workflow's tuned parameter its own panel, labelled by the id. So the
-question of one result, whether the folds agreed, is asked once per
-workflow. The baseline has no panel.
+workflow's tuned parameter its own panel, labelled by the id. So each
+workflow gets its own answer to whether the folds agreed. The baseline has
+no panel.
 
 ```{r wset-parameters, fig.width = 7, fig.height = 3.6, fig.alt = "One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected."}
 autoplot(mapped)

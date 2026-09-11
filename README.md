@@ -13,11 +13,11 @@ coverage](https://codecov.io/gh/tidymodels/nestedtune/graph/badge.svg)](https://
 nestedtune runs nested cross-validation for tidymodels workflows. It
 builds a nested resampling design. It tunes each outer fold on its own
 inner resamples with tune or finetune, then scores the fold’s winner on
-rows the tuning never saw. It keeps what every fold chose. The mean of
-the outer scores estimates how the whole tune-and-fit procedure,
-resample, tune, select and fit, performs on new data. The model to
-deploy is fitted afterwards by the same procedure on all the data. It is
-a separate object with no performance number of its own.
+rows the tuning never saw. It keeps what every fold chose. The procedure
+is every step above: resample, tune, select, fit. The mean of the outer
+scores estimates how well that whole procedure performs on new data. The
+model to deploy is fitted afterwards by the same procedure on all the
+data. It is a separate object with no performance number of its own.
 
 ## Installation
 
@@ -84,7 +84,7 @@ Learn more:
   design.
 - [Reading the
   results](https://nestedtune.tidymodels.org/articles/results.html),
-  every column and reader of the results object.
+  every column of the results object and every function that reads it.
 - [Running the outer loop in
   parallel](https://nestedtune.tidymodels.org/articles/parallel.html),
   the same call on a pool of mirai daemons.

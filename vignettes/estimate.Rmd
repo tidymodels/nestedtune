@@ -25,12 +25,13 @@ When you tune with cross-validation, you try several settings, the
 candidates, and keep the one with the best score. Scores are noisy, and the
 best of several noisy numbers tends to look better than it is. So the
 winner's score overstates what the model will do on new data, by an amount
-nothing in the output reveals.
+nothing in the output reveals. That is why the results object this package
+returns, and the final fit built from it, both refuse tune's ranking
+functions such as `show_best()`.
 
 At a small sample size the noise is large, so the winner's score may not
 even look better than an honest one. Distrust it for how it was chosen, not
-for which way it is off. That is why the results object and the final fit
-both refuse tune's ranking functions such as `show_best()`.
+for which way it is off.
 
 Nested cross-validation scores the whole tuning procedure, meaning every
 step you run on the data: resample, tune, pick a setting, fit. Nesting puts
@@ -48,17 +49,18 @@ was used up in selecting and fitting it.
 ## The quantity estimated
 
 Bayle et al. (2026) call the quantity the k-fold test error of the
-procedure. It is the error you get from resampling, tuning, selecting and
-fitting on the analysis sets these folds drew, then predicting fresh data
-drawn like the training data.
+procedure. It is the error of running those four steps on the training rows
+each outer fold saw, then predicting fresh data drawn like the training
+data.
 
-Two things it is not. It is not the error of the deployed model, which is
-built afterwards on all the rows and estimated by nothing here. It is also not the same quantity averaged over all the
-training sets you might have drawn. Luo and Barber (2026) prove that any
-assumption-free test of that averaged quantity needs a dataset many times
-larger than the training set. So this package offers no test of it. Nor is
-the estimate a claim about the parameter values the deployed model carries,
-or about a different population or sample size.
+Four things it is not. It is not the error of the deployed model, which is
+built afterwards on all the rows and estimated by nothing here. It says
+nothing about whether the deployed model's parameter values are the right
+ones. It is not about a different population or sample size. And it is not that error averaged over every
+training set you might have drawn, which would describe the method rather
+than this data. Luo and Barber (2026) prove
+that any assumption-free test of that averaged quantity needs a dataset
+many times larger than the training set. So this package offers none.
 
 ## A slight pessimism
 
@@ -96,8 +98,8 @@ in the output says whether the difference is real, because there is no
 valid interval to subtract. Bayle et al. (2026) give a sharper reason not
 to build one. A cross-validation interval for one procedure is valid when
 that procedure is stable. The difference between two procedures can fail
-that condition even when each procedure meets it, and it fails hardest when
-the two are similar. A gap between two nested estimates is a reason to look
+that condition even when each procedure meets it. The failure is worst when
+the two procedures are similar. A gap between two nested estimates is a reason to look
 closer, never a result.
 
 The same holds for a set of workflows run through one design with
@@ -107,8 +109,8 @@ ranking or best-workflow function for the set.
 
 ## Disagreement between folds
 
-The results object keeps every fold's choice. When the folds split over a
-parameter, the data does not pick its value clearly. Whichever value the
+When the folds split over a parameter, the data does not pick its value
+clearly. Whichever value the
 final model carries was not strongly preferred by the evidence. That is not
 a defect in the estimate, which already averages over this variability. It
 is a defect in any story about the selected parameters being the right
@@ -121,15 +123,14 @@ particular fold becomes close to a coin flip (Bayle et al., 2026).
 ## The cost of nesting
 
 Whether nesting pays depends on how much room the selection step had to
-overfit. Tibshirani and Tibshirani (2009) found the optimism of a tuned
-cross-validation score material only when the features vastly outnumber the
-observations. On pure noise with 400 observations and 100 features, the
-optimism was under 3 points. With 40 observations and 1000 features, where
-the true error rate is 0.5, the lowest tuned score read 0.384. Even there
-the learner mattered: an SVM read 0.475 and a tree 0.498. That paper's
-remedy is a correction, not nesting; it is cited for where the bias lives.
-Wide data, a big grid, and a preprocessing step the
-loop has to redo are where the bias is largest.
+overfit. Tibshirani and Tibshirani (2009) measured that room on pure noise,
+where the true error rate is 0.5. With 400 observations and 100 features,
+the tuned score was under 3 points too good. With 40 observations and 1000
+features, the lowest tuned score read 0.384, 11.6 points too good. Even
+there the learner mattered: an SVM was 2.5 points too good and a tree only
+0.2. That paper's remedy is
+a correction, not nesting. In short, the bias is largest with wide data, a
+big grid, and a preprocessing step the loop has to redo.
 
 Nesting removes little when the data is tall and the search is small. Wilimitis
 and Walsh (2023) ran that case, 41,121 visits and a modest grid. Nesting
@@ -138,9 +139,9 @@ the fold count. Their advice, and this package's, is to nest when the
 feature space is wide relative to the sample, the search covers many
 algorithms and parameters, and the compute is affordable.
 
-Small data is not fine without it. Vabalas et al. (2019) simulated pure
-noise, where the honest accuracy is 50%. Flat cross-validation still
-reported better than chance at a sample size of 1000. Nested
+Small data is not safe without nesting. Vabalas et al. (2019) simulated
+pure noise, where the honest accuracy is 50%. Cross-validation without
+nesting still reported better than chance at a sample size of 1000. Nested
 cross-validation was indistinguishable from chance at 96.5% of the sample
 sizes tested. The bias thins with sample size and does not disappear.
 
@@ -149,9 +150,9 @@ sizes tested. The bias thins with sample size and does not disappear.
 Vabalas et al. (2019) also compared two mistakes: leaving feature selection
 outside the loop, and leaving parameter tuning outside it. The first was far
 more damaging. The loop here re-estimates the whole workflow inside every
-fold, so a pipeline that selects features must put that step in the recipe
-of the workflow it hands over. Anything done to the data before the call is
-not re-estimated, and no result here can tell that it happened.
+fold. So if your pipeline selects features, put that step in the recipe
+inside the workflow you pass in. Anything done to the data before the call
+is not re-estimated. No result here can tell that it happened.
 
 ## References
 

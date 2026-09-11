@@ -59,7 +59,9 @@ library(nestedtune)
 
 The design, the workflow and the grid are the guide's, unchanged. There are
 five outer folds of `mtcars`, five inner folds under each, and a random
-forest with two parameters marked for tuning. One thing is added. A
+forest with two parameters marked for tuning. The grid's six rows are the
+candidates, the settings each fold's inner tuning tries. One thing is
+added. A
 `control_grid()` with `save_pred = TRUE` asks each fold's outer fit to keep
 its predictions, so this page can show that column and the function that
 stacks it.
@@ -97,9 +99,9 @@ res
 
 ## The columns
 
-The object is a tibble with one row per outer fold, and the print above
-shows the columns that fit, its footer naming the rest. Each holds one piece
-of what that fold did.
+The object is a tibble with one row per outer fold. The print above shows
+the columns that fit its width, and its footer names the rest. Each column
+holds one piece of what that fold did.
 
 ```{r columns}
 names(res)
@@ -181,8 +183,8 @@ res$.predictions[[1]]
 The description of the run itself is stored on the object as attributes
 rather than columns. `extract_procedure()` returns the procedure, the record
 of what ran: which tuner, that tuner's own arguments such as the grid, and
-the control as it took effect. `nested_final_fit()` repeats that record on
-the whole dataset.
+the control as it took effect. `nested_final_fit()` reruns what that record
+describes on the whole dataset.
 
 ## The readers
 
@@ -225,9 +227,9 @@ set. `collect_extracts()` does the same for `.extracts`, one row per fold.
 collect_predictions(res)
 ```
 
-`agreement()` counts the selections: one row per distinct combination the
-folds chose, with how many completed folds chose it, `n`, and that count as
-a share of the completed folds, `prop`. The most frequent row describes how
+`agreement()` counts the selections. Each row is one distinct combination
+the folds chose. `n` is how many completed folds chose it, and `prop` is
+that count as a share of the completed folds. The most frequent row describes how
 stable the tuning procedure's choice was on this data. It is not the final
 model's parameters, which come from `nested_final_fit()` running the
 procedure once more on the whole dataset.
@@ -259,8 +261,8 @@ and the fold that failed is recorded rather than dropped. To show that, the
 workflow below adds a range check on horsepower, which refuses to predict
 for a car whose horsepower lies outside the range the model was trained on.
 One car, the Maserati Bora, has far more horsepower than any other in
-`mtcars`, so the fold that holds it out cannot score it, and that fold
-fails. The chunk mutes tune's progress messages and keeps its warnings.
+`mtcars`. The fold that holds it out cannot score it, so that fold fails.
+The chunk mutes tune's progress messages and keeps its warnings.
 
 ```{r failed-recipe}
 rec <- recipe(mpg ~ ., data = mtcars) |>
@@ -330,8 +332,8 @@ completed_only <- filter(failed, .completed)
 class(completed_only)
 ```
 
-So does a column subset that drops the columns the run wrote, here through
-base `[` rather than a dplyr verb, since the same rule governs it.
+Dropping the columns the run wrote sheds it too, here through base `[`
+rather than a dplyr verb, since the same rule governs it.
 
 ```{r subset}
 class(res[, "id"])
@@ -345,7 +347,7 @@ itself: `collect_metrics(failed)` already averages the folds that completed,
 and warns that it did.
 
 Two arguments went unused on this page. `event_level` names which level of
-a two-class outcome is the event, and `eval_time` names the times at which
-a censored-regression run is scored. Both are described on
+a two-class outcome is the event. `eval_time` names the times at which a
+censored-regression run is scored. Both are described on
 `?nested_tune_grid`. The second adds an `.eval_time` column to `.metrics`
 and to everything `collect_metrics()` reports.

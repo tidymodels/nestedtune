@@ -98,9 +98,10 @@ folds$inner_resamples[[1]]
 ```
 
 `mtcars` has `r nrow(mtcars)` rows, which keeps this page fast to build.
-Nesting removes the most bias on wide data searched hard, and
-`vignette("estimate")` says when it is worth the cost. This example is here
-because it builds in seconds.
+This example is here because it builds in seconds, not because it needs
+nesting. Nesting removes the most bias when the data has many more columns
+than rows and the grid is large. `vignette("estimate")` says when it is
+worth the cost.
 
 ## The model and the grid
 
@@ -274,8 +275,8 @@ tibble(
 
 The selection-time score is not an estimate of performance on anything.
 That holds whichever side of the nested estimate it lands on. It stays on
-the object as a record of what selection saw, and tune's functions hand it
-over without a warning. That is why the results object and the final fit
+the object as a record of what selection saw. tune's functions hand it over
+without a warning. That is why the results object and the final fit
 both refuse tune's ranking functions such as `show_best()`. On the loop's
 results they would rank outer folds. On the final fit there is one model and
 nothing to rank.
@@ -291,9 +292,10 @@ select_best(final, metric = "rmse")
 ## Reproducibility
 
 Seed the session before the call, as elsewhere in tidymodels. Neither
-function takes a seed of its own. At entry, `nested_tune_grid()` draws two
-seeds for every fold from the session state, one for tuning and one for the
-outer fit, and stores them on the result. A fold's seeds depend on its
+`nested_tune_grid()` nor `nested_final_fit()` takes a seed of its own. At
+entry, `nested_tune_grid()` draws two seeds per fold from the session
+state. One seeds that fold's tuning and the other its outer fit. Both are
+stored on the result. A fold's seeds depend on its
 position in the design, not on the order the folds happen to run in. So the
 same seed gives the same answer whether the folds run serially or on a pool
 of workers. Any one fold can also be reproduced by hand. `nested_final_fit()`
