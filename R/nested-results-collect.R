@@ -13,12 +13,14 @@
 #' Stack a per-fold column of a nested resampling run across the outer folds
 #'
 #' @description
-#' A `nested_results` keeps three of its records as one table per outer
-#' fold, in list columns. They are what went wrong (`.notes`), what the
-#' fold's inner tuning selected (`.selected`), and everything that tuning
-#' scored (`.inner_metrics`). These functions stack one such column into a
-#' single table, the design's fold labels first, so every row says which
-#' fold it came from.
+#' `collect_notes()`, `collect_selections()` and `collect_inner_metrics()`
+#' each give you one of a run's per-fold records as a single table. A
+#' `nested_results` keeps three such records as one table per outer fold,
+#' in list columns. They are what went wrong (`.notes`), what the fold's
+#' inner tuning selected (`.selected`), and everything that tuning scored
+#' (`.inner_metrics`). Each function stacks one column across the folds,
+#' the design's fold labels first, so every row says which fold it came
+#' from.
 #'
 #' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
 #'   included. A completed fold can carry an error note too, from an `extract`
@@ -38,8 +40,9 @@
 #'
 #' @section What the columns are:
 #'
-#' The label columns are read from the object's record rather than recognized
-#' by name: `id` on a plain v-fold design, `id` and `id2` on a repeated one.
+#' The first columns are the design's fold labels: `id` on a plain v-fold
+#' design, `id` and `id2` on a repeated one, read from the object's record
+#' rather than recognized by name.
 #' Then come the stacked tables' own columns, over the union of what any
 #' stacked fold carries. A fold lacking one holds `NA` there, exactly as a fold
 #' whose recorded value is `NA` does, so the two cannot be told apart.
@@ -62,8 +65,8 @@
 #' @section Reading `.config`:
 #'
 #' The `.config` of a selection or an inner-metrics row is kept as the fold
-#' recorded it. It labels a candidate inside that one fold's tuning run: a
-#' selected row's `.config` is found among the same fold's rows in
+#' recorded it. It labels a candidate inside that one fold's tuning run. So
+#' a selected row's `.config` is found among the same fold's rows in
 #' `collect_inner_metrics()`. Since folds can search different candidates, it
 #' identifies nothing across them, which is why [agreement()] leaves it out.
 #'
@@ -172,9 +175,11 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' Stack the outer fit's predictions or extracts across the outer folds
 #'
 #' @description
-#' A run whose control asked for them keeps two more records per outer
-#' fold. `.predictions`, under `save_pred = TRUE`, holds the predictions its
-#' finalized model made on the fold's assessment rows. `.extracts` holds
+#' `collect_predictions()` and `collect_extracts()` give you the outer
+#' fit's predictions or extracts as one table across the folds. A run whose
+#' control asked for them keeps two more records per outer fold.
+#' `.predictions`, under `save_pred = TRUE`, holds the predictions the
+#' fold's finalized model made on its assessment rows. `.extracts` holds
 #' whatever the control's `extract` function returned for the fold's fitted
 #' workflow. These two methods on tune's generics stack one such column
 #' into a single table, the design's fold labels first.
@@ -210,7 +215,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' @section Which predictions these are:
 #'
 #' They are the outer fit's, on each fold's assessment rows. On a v-fold outer
-#' design every row of the data therefore appears once per repeat; on a
+#' design every row of the data therefore appears once per repeat. On a
 #' Monte Carlo design a row appears as often as it was held out.
 #' The inner tuning run's own predictions and extracts, which the same two
 #' control slots save inside tune, are not kept.

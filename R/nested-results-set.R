@@ -9,8 +9,8 @@
 #' Stack each workflow's table of a workflow-set run under its id
 #'
 #' @description
-#' The six reading functions of a `nested_results` also answer on a
-#' `nested_results_set`, what [nested_workflow_map()] returns. Each calls
+#' You read a `nested_results_set`, what [nested_workflow_map()] returns,
+#' with the same six functions that read one workflow's run. Each calls
 #' its single-workflow method on every element and binds the tables in the
 #' set's order, under a `wflow_id` column placed first.
 #'
@@ -27,15 +27,15 @@
 #'   as on [collect_metrics.nested_results()].
 #'
 #' @return A tibble: `wflow_id` first, then the columns the single-workflow
-#'   method returns for each element, bound in the set's order over the
-#'   union of the elements' columns. Where an element lacks a column its
-#'   rows hold `NA`, or `NULL` in a list column. An element whose table has
-#'   no rows contributes none.
+#'   method returns for each element. The rows are bound in the set's order
+#'   over the union of the elements' columns. Where an element lacks a
+#'   column its rows hold `NA`, or `NULL` in a list column. An element whose
+#'   table has no rows contributes none.
 #'
 #' @section Workflows and folds that failed:
 #'
-#' Five of the six take the folds that completed, as they do on one
-#' workflow. A workflow with some folds failed contributes the folds that
+#' Failed folds are left out, as on one workflow: five of the six take the
+#' folds that completed. A workflow with some folds failed contributes the folds that
 #' ran. That function's own partial-run warning is raised once for it,
 #' with the workflow's id in front of the message. A workflow in which no
 #' fold completed is left out while another workflow completed one, warned
@@ -52,8 +52,8 @@
 #' A control reaches each workflow of a set through the call's `...` or through
 #' its own `option` entry, so one workflow can have kept what another did not.
 #' `collect_predictions()` and `collect_extracts()` therefore refuse a set in
-#' which a workflow that would contribute rows lacks the column, with class
-#' `nestedtune_column_not_saved` naming it.
+#' which a workflow that would contribute rows lacks the column. The refusal
+#' has class `nestedtune_column_not_saved` and names the workflow.
 #'
 #' An element's table that already has a `wflow_id` column, a parameter given
 #' that id, is refused with class `nestedtune_collect_name_collision`.
@@ -246,9 +246,10 @@ stack_set <- function(
 #'
 #' Under `type = "parameters"` there is one panel per workflow and tuned
 #' parameter, in the set's order, with the outer folds along the x axis.
-#' Each panel is labelled by the id and then by the single view's label for
-#' that parameter, and asks the single view's question of one workflow.
-#' The selected-value axis is decided over every workflow's values at
+#' Each panel is the one-workflow view, [autoplot.nested_results()]'s, for
+#' that workflow and parameter. It is labelled by the id and then by that
+#' view's label for the parameter, and asks that view's question of one
+#' workflow. The selected-value axis is decided over every workflow's values at
 #' once: numeric when all are numbers, discrete otherwise. A workflow with
 #' nothing to tune draws no panel.
 #'
@@ -260,6 +261,11 @@ stack_set <- function(
 #' does not tune holds `NA` in its rows. Within a workflow's rows `NA`
 #' keeps the meaning [agreement()] gives it, a fold that recorded no value.
 #' A workflow with nothing to tune contributes no row.
+#'
+#' A tuned parameter whose id is `wflow_id` cannot be tabulated beside the
+#' set's own column and is refused with class
+#' `nestedtune_collect_name_collision`. One whose id is `n` or `prop` is
+#' refused as [agreement()] refuses it, the workflow named in front.
 #'
 #' @section Workflows that failed:
 #'
@@ -291,11 +297,6 @@ stack_set <- function(
 #' named by the second, since a completed fold can score `NA` on one metric
 #' while scoring the others. A metric no completed fold scored is counted
 #' there while drawing no rule.
-#'
-#' A tuned parameter whose id is `wflow_id` cannot be tabulated beside the
-#' set's own column and is refused with class
-#' `nestedtune_collect_name_collision`. One whose id is `n` or `prop` is
-#' refused as [agreement()] refuses it, the workflow named in front.
 #'
 #' @template example-setup
 #' @template example-set

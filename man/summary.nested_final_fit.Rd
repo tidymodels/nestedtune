@@ -38,10 +38,10 @@ caller that needs a value rather than a line of text.
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-Gives the pieces the print method renders, as values. Those are the
-full-data tuning run the selection came from, which search ran it and at
-what counts, how many parameter settings it scored, and which values it
-chose.
+\code{summary()} gives you the facts of the final fit as values rather than
+printed lines. Those are the full-data tuning run the selection came
+from, which search ran it and at what counts, how many parameter
+settings it scored, and which values it chose.
 
 The \code{estimate} component is always \code{NULL}, and that is the point. The
 stored tuning run's metrics are selection-time quantities, so this object

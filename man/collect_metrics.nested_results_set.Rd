@@ -33,14 +33,14 @@ as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_result
 }
 \value{
 A tibble: \code{wflow_id} first, then the columns the single-workflow
-method returns for each element, bound in the set's order over the
-union of the elements' columns. Where an element lacks a column its
-rows hold \code{NA}, or \code{NULL} in a list column. An element whose table has
-no rows contributes none.
+method returns for each element. The rows are bound in the set's order
+over the union of the elements' columns. Where an element lacks a
+column its rows hold \code{NA}, or \code{NULL} in a list column. An element whose
+table has no rows contributes none.
 }
 \description{
-The six reading functions of a \code{nested_results} also answer on a
-\code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns. Each calls
+You read a \code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns,
+with the same six functions that read one workflow's run. Each calls
 its single-workflow method on every element and binds the tables in the
 set's order, under a \code{wflow_id} column placed first.
 
@@ -52,8 +52,8 @@ per-fold tables the same way.
 \section{Workflows and folds that failed}{
 
 
-Five of the six take the folds that completed, as they do on one
-workflow. A workflow with some folds failed contributes the folds that
+Failed folds are left out, as on one workflow: five of the six take the
+folds that completed. A workflow with some folds failed contributes the folds that
 ran. That function's own partial-run warning is raised once for it,
 with the workflow's id in front of the message. A workflow in which no
 fold completed is left out while another workflow completed one, warned
@@ -72,8 +72,8 @@ notes are the reason to ask.
 A control reaches each workflow of a set through the call's \code{...} or through
 its own \code{option} entry, so one workflow can have kept what another did not.
 \code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
-which a workflow that would contribute rows lacks the column, with class
-\code{nestedtune_column_not_saved} naming it.
+which a workflow that would contribute rows lacks the column. The refusal
+has class \code{nestedtune_column_not_saved} and names the workflow.
 
 An element's table that already has a \code{wflow_id} column, a parameter given
 that id, is refused with class \code{nestedtune_collect_name_collision}.

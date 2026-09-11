@@ -99,8 +99,8 @@ that may hold a fold's assessment rows.
 
 Each iteration proposes one candidate and scores it on the fold's inner
 resamples. \code{iter = 0} scores the initial candidates and proposes
-nothing, which makes the run \code{\link[=nested_tune_grid]{nested_tune_grid()}} on the space-filling
-grid those candidates form. tune stops a fold's search early when no
+nothing. The run is then \code{\link[=nested_tune_grid]{nested_tune_grid()}} on the space-filling grid
+those candidates form. tune stops a fold's search early when no
 unscored candidate remains, saying so on the console. It also stops
 after ten consecutive iterations without improvement, its \code{no_improve}
 default, settable through the control. The fold then completes with the
@@ -169,7 +169,9 @@ reaching it unchanged. So is \code{eval_time}.
 entry is a control of another class, such as a \code{control_grid()} that
 tune itself would accept here, and the \code{event_level} conflict above.
 
-\strong{Passed through.} Nine slots reach \code{tune_bayes()} as given:
+\strong{Passed through: \code{no_improve}, \code{uncertain}, \code{time_limit}, \code{verbose},
+\code{verbose_iter}, \code{save_gp_scoring}, \code{pkgs}, \code{parallel_over},
+\code{workflow_size}.} Each reaches \code{tune_bayes()} as given:
 \itemize{
 \item \code{no_improve} and \code{uncertain} govern each fold's search as they would a
 direct call, so a fold may stop short of \code{iter}; its \code{.inner_metrics}
@@ -252,19 +254,19 @@ name. When the metric set has no metric that reads it, tune ignores it
 with a warning; tune keys that warning on the metrics, not on the
 model's mode.
 
-This package refuses some values ahead of tune: anything that is not
-numeric, an empty vector, and any element that is missing, negative or
-not finite. tune treats those unevenly, and only once a metric reads the
+Refused here, ahead of tune: anything that is not numeric, an empty
+vector, and any element that is missing, negative or not finite. tune
+treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
 untouched, since tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 
-The selector \code{select} names is called without \code{eval_time}. Left unset,
-it selects at the first of the evaluation times the tuning run was built
+The selection rule is applied without \code{eval_time}. Left unset, it
+selects at the first of the evaluation times the tuning run was built
 with, which are the ones named here. Passing them again would change no
-choice and would repeat tune's message about which time it took.
+choice, and would repeat tune's message about which time it took.
 }
 
 \examples{

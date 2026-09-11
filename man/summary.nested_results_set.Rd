@@ -64,9 +64,10 @@ value \code{\link[=collect_metrics]{collect_metrics()}} reports for it on the se
 
 Under \code{type = "parameters"} there is one panel per workflow and tuned
 parameter, in the set's order, with the outer folds along the x axis.
-Each panel is labelled by the id and then by the single view's label for
-that parameter, and asks the single view's question of one workflow.
-The selected-value axis is decided over every workflow's values at
+Each panel is the one-workflow view, \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}'s, for
+that workflow and parameter. It is labelled by the id and then by that
+view's label for the parameter, and asks that view's question of one
+workflow. The selected-value axis is decided over every workflow's values at
 once: numeric when all are numbers, discrete otherwise. A workflow with
 nothing to tune draws no panel.
 }
@@ -80,6 +81,11 @@ on that run alone gives them, in the set's order. A column a workflow
 does not tune holds \code{NA} in its rows. Within a workflow's rows \code{NA}
 keeps the meaning \code{\link[=agreement]{agreement()}} gives it, a fold that recorded no value.
 A workflow with nothing to tune contributes no row.
+
+A tuned parameter whose id is \code{wflow_id} cannot be tabulated beside the
+set's own column and is refused with class
+\code{nestedtune_collect_name_collision}. One whose id is \code{n} or \code{prop} is
+refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.
 }
 
 \section{Workflows that failed}{
@@ -115,11 +121,6 @@ The two counts are separate. A workflow that ran whole can still be
 named by the second, since a completed fold can score \code{NA} on one metric
 while scoring the others. A metric no completed fold scored is counted
 there while drawing no rule.
-
-A tuned parameter whose id is \code{wflow_id} cannot be tabulated beside the
-set's own column and is refused with class
-\code{nestedtune_collect_name_collision}. One whose id is \code{n} or \code{prop} is
-refused as \code{\link[=agreement]{agreement()}} refuses it, the workflow named in front.
 }
 
 \examples{

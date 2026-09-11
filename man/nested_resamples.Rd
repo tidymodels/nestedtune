@@ -53,6 +53,7 @@ the inner assessment set, which makes the estimate invalid.
 \section{Memory}{
 
 
+What you save is one copy of the analysis set per outer fold.
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} evaluates the inner specification against
 \code{as.data.frame(split)}, so every outer fold holds its own copy of that fold's
 analysis set. \code{nested_resamples()} runs the same specification against the

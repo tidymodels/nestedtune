@@ -50,8 +50,8 @@
 #'
 #' `iter = 0` is refused. finetune 1.3.0 iterates over
 #' `(existing_iter + 1):iter`, which at `iter = 0` is `1:0`, so it runs two
-#' iterations rather than none, where [tune::tune_bayes()] at `iter = 0`
-#' proposes nothing. finetune stops a fold's search early after
+#' iterations rather than none. [tune::tune_bayes()] at `iter = 0` proposes
+#' nothing. finetune stops a fold's search early after
 #' `no_improve` consecutive iterations without improvement, or when
 #' `time_limit` is reached. `no_improve` is `Inf` by default, so never,
 #' unless the control sets it. The fold completes with the candidates
@@ -98,7 +98,10 @@
 #' entry is a control of another class, such as a `control_bayes()` that
 #' finetune itself would run under, and the `event_level` conflict above.
 #'
-#' **Passed through.** Eleven slots reach `tune_sim_anneal()` as given:
+#' **Passed through: `no_improve`, `restart`, `radius`, `flip`,
+#' `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
+#' `parallel_over`, `workflow_size`.** Each reaches `tune_sim_anneal()` as
+#' given:
 #'
 #' - `no_improve` and `restart` set when a search stops or restarts from
 #'   its best candidate. `radius` and `flip` set how far and how a

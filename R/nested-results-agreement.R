@@ -10,14 +10,15 @@
 #' Tabulate how often each parameter setting was selected across the outer folds
 #'
 #' @description
-#' Each outer fold tunes on its own inner resamples and selects one
+#' `agreement()` tells you how often the outer folds agreed on what to
+#' select. Each outer fold tunes on its own inner resamples and selects one
 #' candidate, one parameter setting. `agreement()` counts those selections:
 #' one row per distinct combination of selected parameter values, most
 #' frequent first.
 #'
 #' The most frequent combination is not the final model's parameters. The
-#' folds say how stable the choice of the tuning procedure, tune then
-#' select, is. The model to deploy comes from [nested_final_fit()], which
+#' tuning procedure is tune then select, and the folds say how stable its
+#' choice is. The model to deploy comes from [nested_final_fit()], which
 #' runs the procedure once more on the whole dataset and selects for
 #' itself.
 #'
@@ -42,7 +43,7 @@
 #' @section Missing and colliding values:
 #'
 #' A completed fold whose selection carries no value for a parameter is counted
-#' under `NA` for it, in the same row as a fold that selected `NA`;
+#' under `NA` for it, in the same row as a fold that selected `NA`.
 #' [summary.nested_results()] tells the two apart. A workflow with nothing to
 #' tune gives columns `n` and `prop` and no rows. A parameter whose id is `n`
 #' or `prop` would collide with the counts and is an error.

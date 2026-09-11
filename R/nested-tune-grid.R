@@ -18,7 +18,8 @@
 #' and that model has no performance number of its own.
 #'
 #' @details
-#' Four siblings run the same outer loop with another search inside:
+#' The same outer loop runs with other searches inside. Four siblings run
+#' it with another search:
 #' [nested_tune_bayes()], [nested_tune_race_anova()],
 #' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()]. A fifth,
 #' [nested_fit_resamples()], runs it for a workflow with nothing to tune.
@@ -116,19 +117,19 @@
 #' with a warning; tune keys that warning on the metrics, not on the
 #' model's mode.
 #'
-#' This package refuses some values ahead of tune: anything that is not
-#' numeric, an empty vector, and any element that is missing, negative or
-#' not finite. tune treats those unevenly, and only once a metric reads the
+#' Refused here, ahead of tune: anything that is not numeric, an empty
+#' vector, and any element that is missing, negative or not finite. tune
+#' treats those unevenly, and only once a metric reads the
 #' times, so they are refused at entry, before a whole run is paid for.
 #' Zero, repeated times and times out of order are accepted and passed on
 #' untouched, since tune normalizes those itself. A repeated time draws
 #' tune's warning that 0 inappropriate evaluation time points were removed,
 #' once per tune call.
 #'
-#' The selector `select` names is called without `eval_time`. Left unset,
-#' it selects at the first of the evaluation times the tuning run was built
+#' The selection rule is applied without `eval_time`. Left unset, it
+#' selects at the first of the evaluation times the tuning run was built
 #' with, which are the ones named here. Passing them again would change no
-#' choice and would repeat tune's message about which time it took.
+#' choice, and would repeat tune's message about which time it took.
 #'
 #' @section Selecting a candidate:
 #'
@@ -169,7 +170,9 @@
 #' completed fold's columns, never `NULL`.
 #'
 #' `attr(x, "metrics")` holds the `metrics` argument, and is absent when
-#' none was supplied. The `procedure` record, which [extract_procedure()]
+#' none was supplied.
+#'
+#' The `procedure` record, which [extract_procedure()]
 #' returns, names the tuner (`"tune_grid"` here) and that tuner's own
 #' arguments (`grid` here). It also holds `param_info`, `event_level`,
 #' `eval_time`, `select` and the effective control, on the result of every
@@ -303,7 +306,9 @@
 #' worker. On a [nested_resamples()] design that is one copy per fold. A
 #' design from [rsample::nested_cv()] holds an analysis frame per outer
 #' fold, so each fold also carries its own, still once rather than once per
-#' inner split. A recipe keeps a copy of the data it was created with, and
+#' inner split.
+#'
+#' A recipe keeps a copy of the data it was created with, and
 #' a formula carries the environment it was written in. So a workflow built
 #' inside a function that holds a large object sends that object with every
 #' fold; building the workflow at the top level avoids that.
@@ -351,7 +356,9 @@
 #' classified, so an ordinary interrupt propagates with no nestedtune class
 #' attached. Either way the caller's RNG state is restored. The outstanding
 #' folds are cancelled on the way out, so the pool goes idle rather than
-#' computing folds nobody will read. Cancelling needs mirai's dispatcher,
+#' computing folds nobody will read.
+#'
+#' Cancelling needs mirai's dispatcher,
 #' which `mirai::daemons(n)` starts by default. A pool started with
 #' `dispatcher = FALSE` cannot be stopped this way, and you are told so at
 #' dispatch by a warning of class `nestedtune_pool_not_cancellable`, once
@@ -379,9 +386,9 @@
 #' is the one place the level is set. A control left at tune's default takes
 #' the argument's level. A control naming a level that is neither tune's
 #' default nor the argument's is refused at entry, naming both. `eval_time`
-#' is offered the same way, though it is an argument of `tune_grid()` and
-#' `last_fit()` rather than a control slot, and for the same reason: it
-#' changes a number the caller is shown.
+#' is offered the same way, for the same reason: it changes a number the
+#' caller is shown. It is an argument of `tune_grid()` and `last_fit()`
+#' rather than a control slot.
 #'
 #' **Refused: none.** No slot is refused on its own. What is refused at
 #' entry is a control of another class, such as a `control_bayes()` that
@@ -396,7 +403,7 @@
 #' where nothing shows it. `pkgs` is required before fitting on the serial
 #' path as on the parallel one. `parallel_over` is not inert at
 #' `allow_par = FALSE`. It still chooses how tune loops over resamples and
-#' candidates, and with it the seed each model fit starts from, so a
+#' candidates, and with it the seed each model fit starts from. So a
 #' stochastic engine's numbers differ between `"resamples"` and
 #' `"everything"`. `workflow_size` is the size past which tune remarks on a
 #' workflow `save_workflow` keeps.

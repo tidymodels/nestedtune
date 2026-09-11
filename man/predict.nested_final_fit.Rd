@@ -33,9 +33,10 @@ prediction columns followed by the columns of \code{new_data}, with a \code{.res
 column where the outcome is present and the model is a regression.
 }
 \description{
-\code{predict()} and \code{augment()} on a \code{nested_final_fit} are the trained
-workflow's own methods, reached without extracting it first. Each returns
-what the same call on \code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
+You can call \code{predict()} and \code{augment()} on a \code{nested_final_fit}
+directly: they are the trained workflow's own methods, reached without
+extracting it first. Each returns what the same call on
+\code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
 }
 \section{What the dots accept}{
 
@@ -47,8 +48,8 @@ parsnip. A listed one the model cannot use for the \code{type} asked is passed
 on and may be ignored.
 
 \code{augment()} fences them instead. Workflows' own \code{augment()} method passes
-an unread argument on to parsnip, which ignores it, so refusing it here is
-the only way it is refused at all.
+an unread argument on to parsnip, which ignores it. So refusing it here
+is the only way it is refused at all.
 }
 
 \section{Residuals on the training rows are not performance}{

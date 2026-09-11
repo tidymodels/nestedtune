@@ -29,14 +29,24 @@
 #       every prose paragraph of each page, as `file:first-last: <opening
 #       words>`, `first` and `last` the lines of the paragraph's extent;
 #       exits 0
-#   Rscript benchmarks/sweep-prose.R --roxygen [--terms]
-#       the same two checks over roxygen prose in `R/*.R` and
+#   Rscript benchmarks/sweep-prose.R --roxygen [--terms|--spans|--openings|--paragraphs]
+#       the same checks over roxygen prose in `R/*.R` and
 #       `man-roxygen/*.R`: the bodies of `@title`, `@description`,
 #       `@details`, `@param`, `@return` and `@section` and the untagged lines
 #       belonging to them, every other tag and every `@examples` block
-#       excluded; `[link]` targets and `\code{}` spans removed as well. With
+#       excluded, and fenced code and pipe-table lines inside those bodies
+#       dropped, as is the bold run-in heading of each paragraph in a
+#       section titled `Differences from calling ... directly` (the
+#       classification index `test-control-slots.R` parses); `[link]`
+#       targets and `\code{}` spans removed as well. With
 #       `--terms`, first occurrences are per roxygen block, `reader` read on
-#       every file.
+#       every file. With `--openings`, one sentence per block in `R/*.R`
+#       that has a description paragraph after its title paragraph: the
+#       first sentence of the earliest such paragraph, a description
+#       paragraph being one tagged `description` that is not the block's
+#       title (a block opening with an explicit `@description` has no
+#       title, so its first paragraph counts). With `--paragraphs`, every
+#       roxygen prose paragraph, a list item its own paragraph.
 
 args <- commandArgs(trailingOnly = TRUE)
 roxygen <- "--roxygen" %in% args
@@ -115,41 +125,67 @@ rmd_paragraphs <- function(path, badges = TRUE) {
 }
 
 # Roxygen prose paragraphs of one .R file, grouped as above; a `block`
-# column carries the block's first line for the per-block term locator.
+# column carries the block's first line for the per-block term locator, a
+# `tag` column the roxygen tag the paragraph belongs to, and `titled`
+# whether the block opened with an untagged title line.
 roxygen_paragraphs <- function(path) {
   lines <- readLines(path, warn = FALSE)
   is_rox <- grepl("^\\s*#'", lines)
   body <- sub("^\\s*#'\\s?", "", lines)
   keep <- rep(FALSE, length(lines))
   block <- rep(NA_integer_, length(lines))
+  tags <- rep(NA_character_, length(lines))
+  titled <- rep(NA, length(lines))
   included <- c("title", "description", "details", "param", "return", "section")
+  differences <- rep(FALSE, length(lines))
   in_block <- FALSE
+  fenced <- FALSE
   tag <- "description"
   start <- NA_integer_
+  has_title <- FALSE
+  in_differences <- FALSE
   for (i in seq_along(lines)) {
     if (!is_rox[i]) {
       in_block <- FALSE
+      fenced <- FALSE
+      in_differences <- FALSE
       next
     }
     if (!in_block) {
       in_block <- TRUE
       tag <- "description"
       start <- i
+      has_title <- !grepl("^@", body[i])
     }
     block[i] <- start
+    titled[i] <- has_title
     m <- regmatches(body[i], regexpr("^@[a-zA-Z]+", body[i]))
     if (length(m)) {
       tag <- sub("^@", "", m)
+      fenced <- FALSE
       body[i] <- sub("^@[a-zA-Z]+\\s*", "", body[i])
       if (tag == "param") {
         body[i] <- sub("^\\S+\\s*", "", body[i])
       } else if (tag == "section") {
+        in_differences <- grepl("^Differences from calling", body[i])
         body[i] <- sub("^[^:]*:\\s*", "", body[i])
+      } else {
+        in_differences <- FALSE
       }
+    }
+    tags[i] <- tag
+    differences[i] <- in_differences
+    # fenced code and pipe-table lines inside a prose body are not prose
+    if (grepl("^\\s*```", body[i])) {
+      fenced <- !fenced
+      next
+    }
+    if (fenced || grepl("^\\s*\\|", body[i])) {
+      next
     }
     keep[i] <- tag %in% included && nzchar(trimws(body[i]))
   }
-  paras <- split_runs(body, keep, seq_along(lines), block)
+  paras <- split_runs(body, keep, seq_along(lines), block, tags, titled)
   # a list item starts its own paragraph
   out <- list()
   for (p in paras) {
@@ -157,13 +193,64 @@ roxygen_paragraphs <- function(path) {
     cut <- sort(unique(c(1L, starts)))
     ends <- c(cut[-1] - 1L, nrow(p))
     for (k in seq_along(cut)) {
-      out[[length(out) + 1L]] <- p[cut[k]:ends[k], , drop = FALSE]
+      q <- p[cut[k]:ends[k], , drop = FALSE]
+      if (differences[q$line[1]]) {
+        q$text <- drop_run_in_heading(q$text)
+      }
+      out[[length(out) + 1L]] <- q
     }
   }
   out
 }
 
-split_runs <- function(text, keep, line, block = NULL) {
+# The bold run-in heading a Differences paragraph opens with, removed with
+# its line breaks kept, so the paragraph's line count and every later
+# sentence's reported line stay as they were.
+drop_run_in_heading <- function(text) {
+  joined <- paste(text, collapse = "\n")
+  m <- regexpr("^\\s*\\*\\*[^*]+\\*\\*", joined, perl = TRUE)
+  if (m > 0) {
+    regmatches(joined, m) <- gsub("[^\n]", "", regmatches(joined, m))
+  }
+  pieces <- strsplit(joined, "\n")[[1]]
+  c(pieces, rep("", length(text) - length(pieces)))
+}
+
+# The opening sentence of each roxygen block in `R/*.R` with a description
+# paragraph after its title paragraph: a data frame of (block, line, text),
+# one row per such block, or NULL where a file has none.
+roxygen_openings <- function(paras) {
+  if (!length(paras)) {
+    return(NULL)
+  }
+  blocks <- vapply(paras, function(p) p$block[1], integer(1))
+  out <- NULL
+  for (b in unique(blocks)) {
+    in_block <- paras[blocks == b]
+    is_desc <- vapply(
+      in_block,
+      function(p) identical(p$tag[1], "description"),
+      logical(1)
+    )
+    # the title paragraph is the block's first when the block opened with
+    # an untagged line; a block opening on `@description` has none
+    if (in_block[[1]]$titled[1]) {
+      is_desc[1] <- FALSE
+    }
+    k <- which(is_desc)
+    if (!length(k)) {
+      next
+    }
+    s <- sentences(in_block[[k[1]]])
+    if (is.null(s)) {
+      next
+    }
+    out <- rbind(out, data.frame(block = b, line = s$line[1], text = s$text[1]))
+  }
+  out
+}
+
+split_runs <- function(text, keep, line, block = NULL, tag = NULL, titled = NULL) {
   paras <- list()
   run <- integer()
   flush <- function() {
@@ -171,6 +258,12 @@ split_runs <- function(text, keep, line, block = NULL) {
       p <- data.frame(line = line[run], text = text[run])
       if (!is.null(block)) {
         p$block <- block[run]
+      }
+      if (!is.null(tag)) {
+        p$tag <- tag[run]
+      }
+      if (!is.null(titled)) {
+        p$titled <- titled[run]
       }
       paras[[length(paras) + 1L]] <<- p
     }
@@ -252,6 +345,16 @@ for (f in files) {
         collapse = " "
       )
       cat(sprintf("%s:%d-%d: %s\n", f, p$line[1], p$line[nrow(p)], opening))
+    }
+    next
+  }
+  if (openings && roxygen) {
+    if (!startsWith(f, "R/")) {
+      next
+    }
+    op <- roxygen_openings(paras)
+    for (i in seq_len(NROW(op))) {
+      cat(sprintf("%s:%d: %s\n", f, op$line[i], op$text[i]))
     }
     next
   }

@@ -88,7 +88,8 @@ to deploy by running the recorded procedure once more on all the data,
 and that model has no performance number of its own.
 }
 \details{
-Four siblings run the same outer loop with another search inside:
+The same outer loop runs with other searches inside. Four siblings run
+it with another search:
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. A fifth,
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, runs it for a workflow with nothing to tune.
@@ -149,19 +150,19 @@ name. When the metric set has no metric that reads it, tune ignores it
 with a warning; tune keys that warning on the metrics, not on the
 model's mode.
 
-This package refuses some values ahead of tune: anything that is not
-numeric, an empty vector, and any element that is missing, negative or
-not finite. tune treats those unevenly, and only once a metric reads the
+Refused here, ahead of tune: anything that is not numeric, an empty
+vector, and any element that is missing, negative or not finite. tune
+treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
 untouched, since tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 
-The selector \code{select} names is called without \code{eval_time}. Left unset,
-it selects at the first of the evaluation times the tuning run was built
+The selection rule is applied without \code{eval_time}. Left unset, it
+selects at the first of the evaluation times the tuning run was built
 with, which are the ones named here. Passing them again would change no
-choice and would repeat tune's message about which time it took.
+choice, and would repeat tune's message about which time it took.
 }
 
 \section{Selecting a candidate}{
@@ -206,7 +207,9 @@ fold that scored no candidate at all carries a zero-row table with a
 completed fold's columns, never \code{NULL}.
 
 \code{attr(x, "metrics")} holds the \code{metrics} argument, and is absent when
-none was supplied. The \code{procedure} record, which \code{\link[=extract_procedure]{extract_procedure()}}
+none was supplied.
+
+The \code{procedure} record, which \code{\link[=extract_procedure]{extract_procedure()}}
 returns, names the tuner (\code{"tune_grid"} here) and that tuner's own
 arguments (\code{grid} here). It also holds \code{param_info}, \code{event_level},
 \code{eval_time}, \code{select} and the effective control, on the result of every
@@ -369,7 +372,9 @@ So each fold's splits are emptied before dispatch and refilled on the
 worker. On a \code{\link[=nested_resamples]{nested_resamples()}} design that is one copy per fold. A
 design from \code{\link[rsample:nested_cv]{rsample::nested_cv()}} holds an analysis frame per outer
 fold, so each fold also carries its own, still once rather than once per
-inner split. A recipe keeps a copy of the data it was created with, and
+inner split.
+
+A recipe keeps a copy of the data it was created with, and
 a formula carries the environment it was written in. So a workflow built
 inside a function that holds a large object sends that object with every
 fold; building the workflow at the top level avoids that.
@@ -418,7 +423,9 @@ console unwinds the blocking wait before any worker's value is
 classified, so an ordinary interrupt propagates with no nestedtune class
 attached. Either way the caller's RNG state is restored. The outstanding
 folds are cancelled on the way out, so the pool goes idle rather than
-computing folds nobody will read. Cancelling needs mirai's dispatcher,
+computing folds nobody will read.
+
+Cancelling needs mirai's dispatcher,
 which \code{mirai::daemons(n)} starts by default. A pool started with
 \code{dispatcher = FALSE} cannot be stopped this way, and you are told so at
 dispatch by a warning of class \code{nestedtune_pool_not_cancellable}, once
@@ -448,9 +455,9 @@ the inner \code{control_grid()} and the outer \code{control_last_fit()} alike, a
 is the one place the level is set. A control left at tune's default takes
 the argument's level. A control naming a level that is neither tune's
 default nor the argument's is refused at entry, naming both. \code{eval_time}
-is offered the same way, though it is an argument of \code{tune_grid()} and
-\code{last_fit()} rather than a control slot, and for the same reason: it
-changes a number the caller is shown.
+is offered the same way, for the same reason: it changes a number the
+caller is shown. It is an argument of \code{tune_grid()} and \code{last_fit()}
+rather than a control slot.
 
 \strong{Refused: none.} No slot is refused on its own. What is refused at
 entry is a control of another class, such as a \code{control_bayes()} that
@@ -465,7 +472,7 @@ beside the progress the outer loop reports, and from a mirai daemon
 where nothing shows it. \code{pkgs} is required before fitting on the serial
 path as on the parallel one. \code{parallel_over} is not inert at
 \code{allow_par = FALSE}. It still chooses how tune loops over resamples and
-candidates, and with it the seed each model fit starts from, so a
+candidates, and with it the seed each model fit starts from. So a
 stochastic engine's numbers differ between \code{"resamples"} and
 \code{"everything"}. \code{workflow_size} is the size past which tune remarks on a
 workflow \code{save_workflow} keeps.

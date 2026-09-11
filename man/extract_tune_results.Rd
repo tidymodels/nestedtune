@@ -25,8 +25,9 @@ tune, select and fit, was re-run on the complete dataset.
 \section{What its numbers are, and are not}{
 
 
-The returned object answers \code{collect_metrics()} and hands its metrics over
-unqualified. Each of them was computed on the resamples that chose the
+Do not report the metrics this object gives you. It answers
+\code{collect_metrics()} and hands its metrics over unqualified. Each of them
+was computed on the resamples that chose the
 parameter setting it describes. That makes it a selection-time quantity,
 optimistically biased as a claim about the model this final fit produced.
 

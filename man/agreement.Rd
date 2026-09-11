@@ -20,14 +20,15 @@ then \code{n}, the number of completed folds that chose that combination, and
 \code{n} down, ties in the order the combination first appears.
 }
 \description{
-Each outer fold tunes on its own inner resamples and selects one
+\code{agreement()} tells you how often the outer folds agreed on what to
+select. Each outer fold tunes on its own inner resamples and selects one
 candidate, one parameter setting. \code{agreement()} counts those selections:
 one row per distinct combination of selected parameter values, most
 frequent first.
 
 The most frequent combination is not the final model's parameters. The
-folds say how stable the choice of the tuning procedure, tune then
-select, is. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which
+tuning procedure is tune then select, and the folds say how stable its
+choice is. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which
 runs the procedure once more on the whole dataset and selects for
 itself.
 }
@@ -49,7 +50,7 @@ fold's own tuning run, and folds can search different grids.
 
 
 A completed fold whose selection carries no value for a parameter is counted
-under \code{NA} for it, in the same row as a fold that selected \code{NA};
+under \code{NA} for it, in the same row as a fold that selected \code{NA}.
 \code{\link[=summary.nested_results]{summary.nested_results()}} tells the two apart. A workflow with nothing to
 tune gives columns \code{n} and \code{prop} and no rows. A parameter whose id is \code{n}
 or \code{prop} would collide with the counts and is an error.

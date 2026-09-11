@@ -20,9 +20,10 @@
 
 #' Predict with the final model
 #'
-#' `predict()` and `augment()` on a `nested_final_fit` are the trained
-#' workflow's own methods, reached without extracting it first. Each returns
-#' what the same call on [extract_workflow()]`(x)` returns.
+#' You can call `predict()` and `augment()` on a `nested_final_fit`
+#' directly: they are the trained workflow's own methods, reached without
+#' extracting it first. Each returns what the same call on
+#' [extract_workflow()]`(x)` returns.
 #'
 #' @param object,x A `nested_final_fit` object from [nested_final_fit()].
 #' @param new_data A data frame of new observations to predict.
@@ -50,8 +51,8 @@
 #' on and may be ignored.
 #'
 #' `augment()` fences them instead. Workflows' own `augment()` method passes
-#' an unread argument on to parsnip, which ignores it, so refusing it here is
-#' the only way it is refused at all.
+#' an unread argument on to parsnip, which ignores it. So refusing it here
+#' is the only way it is refused at all.
 #'
 #' @section Residuals on the training rows are not performance:
 #'

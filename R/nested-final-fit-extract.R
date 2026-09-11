@@ -35,8 +35,9 @@
 #'
 #' @section What its numbers are, and are not:
 #'
-#' The returned object answers `collect_metrics()` and hands its metrics over
-#' unqualified. Each of them was computed on the resamples that chose the
+#' Do not report the metrics this object gives you. It answers
+#' `collect_metrics()` and hands its metrics over unqualified. Each of them
+#' was computed on the resamples that chose the
 #' parameter setting it describes. That makes it a selection-time quantity,
 #' optimistically biased as a claim about the model this final fit produced.
 #'
@@ -89,8 +90,8 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'
 #' Returns the candidates, the parameter settings [nested_final_fit()]'s
 #' tuning run evaluated. It is the full-data counterpart of the candidate
-#' set each outer fold's `.inner_metrics` table describes, derived the same
-#' way, so the two can be compared directly.
+#' set each outer fold's `.inner_metrics` table describes. It is derived
+#' the same way, so the two can be compared directly.
 #'
 #' @inheritParams print.nested_final_fit
 #' @return A tibble with one row per candidate scored, carrying one column per
@@ -106,7 +107,7 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #' @section Scored, not asked for:
 #'
 #' A `grid` given as a size is expanded by tune and may reach fewer candidates
-#' than the number requested, and a candidate that failed everywhere scored
+#' than the number requested. A candidate that failed everywhere scored
 #' nothing. [nested_tune_grid()] gives the full account of how the two records
 #' diverge under `.inner_metrics`, and it holds here too.
 #'

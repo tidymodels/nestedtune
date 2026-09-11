@@ -7,12 +7,12 @@
 #' is nothing to search. For each outer fold it fits the workflow on the
 #' fold's analysis set and scores it on the assessment set with
 #' [tune::last_fit()]. It is [nested_tune_grid()] with the inner tuner
-#' removed, so a fixed workflow and a tuned one score on identical outer
-#' folds and their per-fold metrics join by fold label. That page is the
+#' removed. So a fixed workflow and a tuned one score on identical outer
+#' folds, and their per-fold metrics join by fold label. That page is the
 #' reference for everything the orchestrators share.
 #'
-#' Use it for the baseline a tuned procedure, tune, select and fit, is
-#' compared against. A plain `rset` of outer folds is what
+#' Use it for the baseline a tuned procedure is compared against. A plain
+#' `rset` of outer folds is what
 #' [tune::fit_resamples()] already serves; what this function adds is the
 #' same nested design, so the two runs' folds are the same rows.
 #'
@@ -88,19 +88,20 @@
 #' when none is, with the slots this package forces overwritten, as
 #' `extract_procedure(res)$control`. tune gives `control_resamples()`,
 #' [tune::control_grid()] and [tune::control_last_fit()] one class, so any
-#' of the three is accepted here as the same object. Every slot of
-#' `control_resamples()` falls under one of seven headings, most under the
-#' last. The one tune call a fold makes here is the outer scoring fit,
-#' whose own control this package builds.
+#' of the three is accepted here as the same object.
+#'
+#' Every slot of `control_resamples()` falls under one of seven headings,
+#' most under the last. The one tune call a fold makes here is the outer
+#' scoring fit, whose own control this package builds.
 #'
 #' **Forced: `allow_par`.** The outer fit runs at `allow_par = FALSE`
 #' whatever the control carries, since parallelism belongs over the outer
 #' folds.
 #'
 #' **Settable as its own argument: `event_level`.** The argument is the one
-#' place the level is set: a control at tune's default takes it, and a
-#' control naming another level is refused at entry, naming both.
-#' `eval_time` is offered the same way, for the same reason.
+#' place the level is set. A control at tune's default takes it. A control
+#' naming another level is refused at entry, and the refusal names both
+#' levels. `eval_time` is offered the same way, for the same reason.
 #'
 #' **Refused: none.** No slot is refused on its own. A control of another
 #' class, such as a `control_bayes()`, is refused at entry, as is the
@@ -121,9 +122,9 @@
 #' **Not returned: none.** Nothing an inner run would have saved exists to be
 #' withheld.
 #'
-#' **Inert: the rest.** `verbose`, `pkgs`, `save_workflow` and
-#' `parallel_over` each govern an inner tuning call this function never
-#' makes. So do `backend_options` and `workflow_size`. The outer fit runs
+#' **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
+#' `backend_options`, `workflow_size`.** Each governs an inner tuning call
+#' this function never makes. The outer fit runs
 #' under [tune::control_last_fit()] at the level and parallelism above,
 #' which reads none of these. The workflow's packages are required at
 #' entry, and the fitted workflow is reached through `extract`.

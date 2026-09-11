@@ -25,8 +25,8 @@
 #'
 #' @section The procedure line:
 #'
-#' The line names the procedure that ran, the tuner and its counts, beside
-#' what was asked for. A grid search or a race is named with the number of
+#' The first line tells you what ran: the procedure, the tuner and its
+#' counts, beside what was asked for. A grid search or a race is named with the number of
 #' candidates, parameter settings, it scored. An iterating search is named
 #' with the initial candidates scored and requested and the iterations
 #' completed and requested. It can score fewer initial candidates than
@@ -91,10 +91,10 @@ print.nested_final_fit <- function(x, ...) {
 #' Summarize a final fit
 #'
 #' @description
-#' Gives the pieces the print method renders, as values. Those are the
-#' full-data tuning run the selection came from, which search ran it and at
-#' what counts, how many parameter settings it scored, and which values it
-#' chose.
+#' `summary()` gives you the facts of the final fit as values rather than
+#' printed lines. Those are the full-data tuning run the selection came
+#' from, which search ran it and at what counts, how many parameter
+#' settings it scored, and which values it chose.
 #'
 #' The `estimate` component is always `NULL`, and that is the point. The
 #' stored tuning run's metrics are selection-time quantities, so this object

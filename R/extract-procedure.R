@@ -42,8 +42,8 @@
 #' `select` is the [selection_rule()] each fold selected by. `param_info`,
 #' `event_level` and `eval_time` are as they were given. `control` is the
 #' control object the run was given, or tune's default when none was, with
-#' the slots this package forces already applied, and with `seed` left out
-#' on a Bayesian result. A `"fit_resamples"` record carries no `param_info`
+#' the slots this package forces already applied. On a Bayesian result
+#' `seed` is left out. A `"fit_resamples"` record carries no `param_info`
 #' and no `select`, since no parameter set was read and no rule applied.
 #' See "Differences from calling tune directly" on each loop function's
 #' help page for what those slots are.

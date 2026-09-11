@@ -107,7 +107,9 @@
 #' reading function warns when it summarizes a partial run. Inside a set
 #' those warnings are raised with the workflow's id at the front of the
 #' message, under the same condition class. So a user who never calls a
-#' reading function still learns which workflow lost folds. An error an
+#' reading function still learns which workflow lost folds.
+#'
+#' An error an
 #' orchestrator raises for one workflow is raised the same way, when that
 #' workflow's turn comes. A `grid` that names a parameter that workflow
 #' does not tune is one such error; a control of the wrong class is
@@ -122,11 +124,14 @@
 #'
 #' Each row's `nested_results` describes its own run whole, so a subset of
 #' the set that keeps rows of the run answers for the workflows it holds.
-#' An operation keeps the class and the `fn` attribute when its result
-#' holds the three columns under those names with none repeated, at least
-#' one row, and no `wflow_id` repeated. Each row's three values must also
-#' be identical to the row of that id in the operation's first data-frame
-#' argument. So rows dropped or reordered and columns added keep the
+#' An operation keeps the class and the `fn` attribute when its result:
+#'
+#' - holds the three columns under those names, none repeated;
+#' - has at least one row, with no `wflow_id` repeated;
+#' - has each row's three values identical to the row of that id in the
+#'   operation's first data-frame argument.
+#'
+#' So rows dropped or reordered and columns added keep the
 #' class. `dplyr::filter()`, `dplyr::arrange()` and `dplyr::mutate()` do,
 #' and so does `dplyr::bind_cols()` with the set first. So do `x[i, ]` and
 #' `vctrs::vec_slice()` on a kept subset. What they hand back is a set

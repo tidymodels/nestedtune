@@ -39,6 +39,7 @@
 #'
 #' @section Memory:
 #'
+#' What you save is one copy of the analysis set per outer fold.
 #' [rsample::nested_cv()] evaluates the inner specification against
 #' `as.data.frame(split)`, so every outer fold holds its own copy of that fold's
 #' analysis set. `nested_resamples()` runs the same specification against the

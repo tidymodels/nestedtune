@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* Every help page is rewritten for someone who has run `tune_grid()` and
+  never nested: no roxygen sentence over 30 words, no sentence naming more
+  than four code spans, each page opening on what the reader gets from it,
+  and the words "procedure", "orchestrator" and "candidate" set up once on
+  `?nested_tune_grid` and either set up again or preceded by a link to that
+  page wherever another page uses them. `extract_scored_candidates()`,
+  `agreement()`, `selection_rule()` and `extract_procedure()` have new
+  titles; nothing else about any page's arguments or behaviour changed.
+
 * The four guides, the parallel article and the README are rewritten for
   someone who has run `tune_grid()` and never nested: no prose sentence over
   30 words, the words "procedure" and "candidate" set up on each page before

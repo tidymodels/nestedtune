@@ -97,8 +97,8 @@ the fold's inner resamples.
 
 \code{iter = 0} is refused. finetune 1.3.0 iterates over
 \code{(existing_iter + 1):iter}, which at \code{iter = 0} is \code{1:0}, so it runs two
-iterations rather than none, where \code{\link[tune:tune_bayes]{tune::tune_bayes()}} at \code{iter = 0}
-proposes nothing. finetune stops a fold's search early after
+iterations rather than none. \code{\link[tune:tune_bayes]{tune::tune_bayes()}} at \code{iter = 0} proposes
+nothing. finetune stops a fold's search early after
 \code{no_improve} consecutive iterations without improvement, or when
 \code{time_limit} is reached. \code{no_improve} is \code{Inf} by default, so never,
 unless the control sets it. The fold completes with the candidates
@@ -165,7 +165,10 @@ and reaching it unchanged.
 entry is a control of another class, such as a \code{control_bayes()} that
 finetune itself would run under, and the \code{event_level} conflict above.
 
-\strong{Passed through.} Eleven slots reach \code{tune_sim_anneal()} as given:
+\strong{Passed through: \code{no_improve}, \code{restart}, \code{radius}, \code{flip},
+\code{cooling_coef}, \code{time_limit}, \code{verbose}, \code{verbose_iter}, \code{pkgs},
+\code{parallel_over}, \code{workflow_size}.} Each reaches \code{tune_sim_anneal()} as
+given:
 \itemize{
 \item \code{no_improve} and \code{restart} set when a search stops or restarts from
 its best candidate. \code{radius} and \code{flip} set how far and how a
@@ -260,19 +263,19 @@ name. When the metric set has no metric that reads it, tune ignores it
 with a warning; tune keys that warning on the metrics, not on the
 model's mode.
 
-This package refuses some values ahead of tune: anything that is not
-numeric, an empty vector, and any element that is missing, negative or
-not finite. tune treats those unevenly, and only once a metric reads the
+Refused here, ahead of tune: anything that is not numeric, an empty
+vector, and any element that is missing, negative or not finite. tune
+treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
 untouched, since tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 
-The selector \code{select} names is called without \code{eval_time}. Left unset,
-it selects at the first of the evaluation times the tuning run was built
+The selection rule is applied without \code{eval_time}. Left unset, it
+selects at the first of the evaluation times the tuning run was built
 with, which are the ones named here. Passing them again would change no
-choice and would repeat tune's message about which time it took.
+choice, and would repeat tune's message about which time it took.
 }
 
 \examples{

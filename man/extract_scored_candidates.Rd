@@ -26,14 +26,14 @@ scored no candidate and is refused with condition class
 \description{
 Returns the candidates, the parameter settings \code{\link[=nested_final_fit]{nested_final_fit()}}'s
 tuning run evaluated. It is the full-data counterpart of the candidate
-set each outer fold's \code{.inner_metrics} table describes, derived the same
-way, so the two can be compared directly.
+set each outer fold's \code{.inner_metrics} table describes. It is derived
+the same way, so the two can be compared directly.
 }
 \section{Scored, not asked for}{
 
 
 A \code{grid} given as a size is expanded by tune and may reach fewer candidates
-than the number requested, and a candidate that failed everywhere scored
+than the number requested. A candidate that failed everywhere scored
 nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of how the two records
 diverge under \code{.inner_metrics}, and it holds here too.
 

@@ -22,9 +22,11 @@ design), then the stacked prediction columns, or the \code{.extracts} list
 column.
 }
 \description{
-A run whose control asked for them keeps two more records per outer
-fold. \code{.predictions}, under \code{save_pred = TRUE}, holds the predictions its
-finalized model made on the fold's assessment rows. \code{.extracts} holds
+\code{collect_predictions()} and \code{collect_extracts()} give you the outer
+fit's predictions or extracts as one table across the folds. A run whose
+control asked for them keeps two more records per outer fold.
+\code{.predictions}, under \code{save_pred = TRUE}, holds the predictions the
+fold's finalized model made on its assessment rows. \code{.extracts} holds
 whatever the control's \code{extract} function returned for the fold's fitted
 workflow. These two methods on tune's generics stack one such column
 into a single table, the design's fold labels first.
@@ -55,7 +57,7 @@ column named like a fold label column is refused with class
 
 
 They are the outer fit's, on each fold's assessment rows. On a v-fold outer
-design every row of the data therefore appears once per repeat; on a
+design every row of the data therefore appears once per repeat. On a
 Monte Carlo design a row appears as often as it was held out.
 The inner tuning run's own predictions and extracts, which the same two
 control slots save inside tune, are not kept.

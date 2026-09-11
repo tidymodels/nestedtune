@@ -46,8 +46,8 @@ own arguments beside it:
 \code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{param_info},
 \code{event_level} and \code{eval_time} are as they were given. \code{control} is the
 control object the run was given, or tune's default when none was, with
-the slots this package forces already applied, and with \code{seed} left out
-on a Bayesian result. A \code{"fit_resamples"} record carries no \code{param_info}
+the slots this package forces already applied. On a Bayesian result
+\code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info}
 and no \code{select}, since no parameter set was read and no rule applied.
 See "Differences from calling tune directly" on each loop function's
 help page for what those slots are.

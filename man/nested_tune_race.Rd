@@ -179,7 +179,9 @@ refuses the whole call before any fold runs when any outer fold's inner
 \code{control_race()} defaults \code{burn_in} to 3, so a design with three inner
 resamples needs \code{control = control_race(burn_in = 2)} or fewer.
 
-\strong{Passed through.} Nine slots reach the race as given:
+\strong{Passed through: \code{burn_in}, \code{alpha}, \code{num_ties}, \code{randomize},
+\code{verbose_elim}, \code{verbose}, \code{pkgs}, \code{parallel_over}, \code{workflow_size}.}
+Each reaches the race as given:
 \itemize{
 \item \code{burn_in}, \code{alpha}, \code{num_ties} and \code{randomize} govern each fold's race
 as they would a direct call. \code{burn_in} is how many resamples every
@@ -265,19 +267,19 @@ name. When the metric set has no metric that reads it, tune ignores it
 with a warning; tune keys that warning on the metrics, not on the
 model's mode.
 
-This package refuses some values ahead of tune: anything that is not
-numeric, an empty vector, and any element that is missing, negative or
-not finite. tune treats those unevenly, and only once a metric reads the
+Refused here, ahead of tune: anything that is not numeric, an empty
+vector, and any element that is missing, negative or not finite. tune
+treats those unevenly, and only once a metric reads the
 times, so they are refused at entry, before a whole run is paid for.
 Zero, repeated times and times out of order are accepted and passed on
 untouched, since tune normalizes those itself. A repeated time draws
 tune's warning that 0 inappropriate evaluation time points were removed,
 once per tune call.
 
-The selector \code{select} names is called without \code{eval_time}. Left unset,
-it selects at the first of the evaluation times the tuning run was built
+The selection rule is applied without \code{eval_time}. Left unset, it
+selects at the first of the evaluation times the tuning run was built
 with, which are the ones named here. Passing them again would change no
-choice and would repeat tune's message about which time it took.
+choice, and would repeat tune's message about which time it took.
 }
 
 \examples{

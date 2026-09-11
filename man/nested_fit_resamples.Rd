@@ -58,12 +58,12 @@ outer loop of a nested design with the inner stage skipped, since there
 is nothing to search. For each outer fold it fits the workflow on the
 fold's analysis set and scores it on the assessment set with
 \code{\link[tune:last_fit]{tune::last_fit()}}. It is \code{\link[=nested_tune_grid]{nested_tune_grid()}} with the inner tuner
-removed, so a fixed workflow and a tuned one score on identical outer
-folds and their per-fold metrics join by fold label. That page is the
+removed. So a fixed workflow and a tuned one score on identical outer
+folds, and their per-fold metrics join by fold label. That page is the
 reference for everything the orchestrators share.
 
-Use it for the baseline a tuned procedure, tune, select and fit, is
-compared against. A plain \code{rset} of outer folds is what
+Use it for the baseline a tuned procedure is compared against. A plain
+\code{rset} of outer folds is what
 \code{\link[tune:fit_resamples]{tune::fit_resamples()}} already serves; what this function adds is the
 same nested design, so the two runs' folds are the same rows.
 }
@@ -138,19 +138,20 @@ outer fit. What is recorded is the control passed, or tune's default
 when none is, with the slots this package forces overwritten, as
 \code{extract_procedure(res)$control}. tune gives \code{control_resamples()},
 \code{\link[tune:control_grid]{tune::control_grid()}} and \code{\link[tune:control_last_fit]{tune::control_last_fit()}} one class, so any
-of the three is accepted here as the same object. Every slot of
-\code{control_resamples()} falls under one of seven headings, most under the
-last. The one tune call a fold makes here is the outer scoring fit,
-whose own control this package builds.
+of the three is accepted here as the same object.
+
+Every slot of \code{control_resamples()} falls under one of seven headings,
+most under the last. The one tune call a fold makes here is the outer
+scoring fit, whose own control this package builds.
 
 \strong{Forced: \code{allow_par}.} The outer fit runs at \code{allow_par = FALSE}
 whatever the control carries, since parallelism belongs over the outer
 folds.
 
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
-place the level is set: a control at tune's default takes it, and a
-control naming another level is refused at entry, naming both.
-\code{eval_time} is offered the same way, for the same reason.
+place the level is set. A control at tune's default takes it. A control
+naming another level is refused at entry, and the refusal names both
+levels. \code{eval_time} is offered the same way, for the same reason.
 
 \strong{Refused: none.} No slot is refused on its own. A control of another
 class, such as a \code{control_bayes()}, is refused at entry, as is the
@@ -171,9 +172,9 @@ ones, and they are still discarded on a run that did not ask.
 \strong{Not returned: none.} Nothing an inner run would have saved exists to be
 withheld.
 
-\strong{Inert: the rest.} \code{verbose}, \code{pkgs}, \code{save_workflow} and
-\code{parallel_over} each govern an inner tuning call this function never
-makes. So do \code{backend_options} and \code{workflow_size}. The outer fit runs
+\strong{Inert: \code{verbose}, \code{pkgs}, \code{save_workflow}, \code{parallel_over},
+\code{backend_options}, \code{workflow_size}.} Each governs an inner tuning call
+this function never makes. The outer fit runs
 under \code{\link[tune:control_last_fit]{tune::control_last_fit()}} at the level and parallelism above,
 which reads none of these. The workflow's packages are required at
 entry, and the fitted workflow is reached through \code{extract}.

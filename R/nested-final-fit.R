@@ -67,13 +67,13 @@
 #'
 #' @section The results object:
 #'
-#' `results` supplies three things: the inner resampling specification the
-#' design stored, the data every split references, and the `procedure`
-#' record. The record names the tuner and that tuner's own arguments, the
-#' grid or the iteration counts. It also holds `param_info`, `event_level`,
-#' `eval_time` and `select`, the [selection_rule()] the folds selected by.
-#' The metric set travels beside it, as `attr(results, "metrics")`.
-#' [extract_procedure()] shows you the record.
+#' `results` supplies the inner resampling specification the design stored,
+#' the data every split references, the `procedure` record, and the metric
+#' set as `attr(results, "metrics")`. The record names the tuner and that
+#' tuner's own arguments, the grid or the iteration counts. It also holds
+#' `param_info`, `event_level`, `eval_time` and `select`, the
+#' [selection_rule()] the folds selected by. [extract_procedure()] shows
+#' you the record.
 #'
 #' A `param_info` parameter whose range is unknown until the data is seen
 #' is finalized here on the full data, since every row is this model's
@@ -95,10 +95,10 @@
 #'
 #' @section What is refused:
 #'
-#' Where the record names a tuner that takes a grid, `object` is judged
-#' against the recorded grid as [nested_tune_grid()] judged it. So a
-#' workflow other than the one the estimate was built around is refused
-#' here, not by tune a whole tuning run later. Where nothing was tuned (see
+#' A workflow other than the one the estimate was built around is refused
+#' here, not by tune a whole tuning run later. Where the record names a
+#' tuner that takes a grid, `object` is judged against the recorded grid as
+#' [nested_tune_grid()] judged it. Where nothing was tuned (see
 #' [nested_fit_resamples()]), the workflow must carry no [tune::tune()]
 #' marker, and one that does is refused with class
 #' `nestedtune_tuned_workflow`.
@@ -108,8 +108,9 @@
 #' earlier version of nestedtune, or from a design assembled by hand rather
 #' than by [nested_resamples()] or [rsample::nested_cv()]. One is no longer
 #' a `nested_results`, because an operation that added or removed rows
-#' returned a plain tibble. And one has no rows. A results object in which
-#' no outer fold completed is refused next, with class
+#' returned a plain tibble. And one has no rows.
+#'
+#' A results object in which no outer fold completed is refused next, with class
 #' `nestedtune_no_completed_folds`. There is no estimate to report the model
 #' with, and `summary()` lists the stage each fold failed at. That is the
 #' class [collect_metrics()], [autoplot()][autoplot.nested_results] and
@@ -130,18 +131,20 @@
 #' tuning run stored on it. They were computed on the resamples that chose
 #' the candidate, so they are selection-time quantities, optimistically
 #' biased as a claim about this model. `collect_metrics()` on `x$tuning`
-#' hands them over without saying so. Expect the nested estimate to run
-#' slightly pessimistic instead, since each outer fold trained on its
-#' analysis rows alone. Varma and Simon (2006) measured a 4.2-point
-#' overshoot at n = 40, and Wilimitis and Walsh (2023) about 1 to 2 percent
-#' of AUROC on 41,121 records. That offset shrinks with fold size and is not
-#' a correction to apply.
+#' hands them over without saying so.
 #'
-#' Two things the estimate does not say. It is marginal over selection
-#' rather than conditional on the parameters this model happens to carry,
-#' so it makes no claim about this configuration in particular. And it
-#' describes new data drawn like your training data, not a different
-#' population, and not a model retrained at another size.
+#' Expect the nested estimate to run slightly pessimistic instead, since
+#' each outer fold trained on its analysis rows alone. Varma and Simon
+#' (2006) measured a 4.2-point overshoot at n = 40, and Wilimitis and Walsh
+#' (2023) about 1 to 2 percent of AUROC on 41,121 records. That offset
+#' shrinks with fold size and is not a correction to apply.
+#'
+#' Two things the estimate does not say. It is marginal over selection: it
+#' averages over what each fold's tuning chose, rather than being
+#' conditional on the parameters this model happens to carry. So it makes
+#' no claim about this configuration in particular. And it describes new
+#' data drawn like your training data, not a different population, and not
+#' a model retrained at another size.
 #'
 #' If the outer folds disagreed about the best parameters, report that too.
 #'
@@ -198,8 +201,8 @@
 #'
 #' Where nothing was tuned there is no such line to redo. Both seeds are
 #' still drawn, so the object's seed layout is the one above. But the first
-#' is consumed by nothing, the inner specification is left unevaluated, and
-#' the whole recipe is `fit(object, data)` under the second seed.
+#' is consumed by nothing and the inner specification is left unevaluated.
+#' The whole recipe is `fit(object, data)` under the second seed.
 #'
 #' Building the resamples sits inside the first seed's scope rather than
 #' before it. Constructing an `rset` draws from the generator. A version

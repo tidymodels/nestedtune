@@ -20,8 +20,9 @@ rather than silently ignored.}
 A \code{ggplot} object.
 }
 \description{
-Two views of a \code{nested_results}, both drawing one point per outer fold, with
-the folds in design order.
+\code{autoplot()} shows you whether the outer folds agreed, and how each
+scored: two views of a \code{nested_results}, both drawing one point per
+outer fold, with the folds in design order.
 
 \code{type = "parameters"}, the default, shows what each outer fold's inner
 tuning selected on a \code{\link[=nested_tune_grid]{nested_tune_grid()}} run or a sibling's. A flat row
@@ -52,15 +53,15 @@ parameter, such as a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
 \section{What the labels say}{
 
 
-The subtitle gives how much of the requested design ran. How many folds
-stand behind a panel is said on the panel instead, since it varies
-between them. A panel reading \verb{mtry (2 of 3 chose)} or
-\verb{rmse (from 2 folds)} had fewer than the run completed, and an
-unqualified one had them all. A requested metric that no completed fold
-could score keeps an empty panel rather than disappearing.
+The subtitle gives how much of the requested design ran. Each panel says
+how many folds stand behind it, since that varies between panels. A
+panel reading \verb{mtry (2 of 3 chose)} or \verb{rmse (from 2 folds)} had fewer
+than the run completed, and an unqualified one had them all. A requested
+metric that no completed fold could score keeps an empty panel rather
+than disappearing.
 
-The selected-value axis is numeric when every value drawn is a number and
-discrete otherwise, since one axis cannot be both and character-valued
+The selected-value axis is numeric when every value drawn is a number
+and discrete otherwise. One axis cannot be both, and character-valued
 parameters are ordinary. On that discrete axis a fold that selected \code{NA}
 draws a point at \code{NA} rather than no point.
 }

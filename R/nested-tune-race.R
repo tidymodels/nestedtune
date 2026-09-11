@@ -100,7 +100,9 @@
 #' `control_race()` defaults `burn_in` to 3, so a design with three inner
 #' resamples needs `control = control_race(burn_in = 2)` or fewer.
 #'
-#' **Passed through.** Nine slots reach the race as given:
+#' **Passed through: `burn_in`, `alpha`, `num_ties`, `randomize`,
+#' `verbose_elim`, `verbose`, `pkgs`, `parallel_over`, `workflow_size`.**
+#' Each reaches the race as given:
 #'
 #' - `burn_in`, `alpha`, `num_ties` and `randomize` govern each fold's race
 #'   as they would a direct call. `burn_in` is how many resamples every

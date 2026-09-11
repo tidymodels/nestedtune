@@ -50,8 +50,8 @@
 #'
 #' Each iteration proposes one candidate and scores it on the fold's inner
 #' resamples. `iter = 0` scores the initial candidates and proposes
-#' nothing, which makes the run [nested_tune_grid()] on the space-filling
-#' grid those candidates form. tune stops a fold's search early when no
+#' nothing. The run is then [nested_tune_grid()] on the space-filling grid
+#' those candidates form. tune stops a fold's search early when no
 #' unscored candidate remains, saying so on the console. It also stops
 #' after ten consecutive iterations without improvement, its `no_improve`
 #' default, settable through the control. The fold then completes with the
@@ -100,7 +100,9 @@
 #' entry is a control of another class, such as a `control_grid()` that
 #' tune itself would accept here, and the `event_level` conflict above.
 #'
-#' **Passed through.** Nine slots reach `tune_bayes()` as given:
+#' **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
+#' `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
+#' `workflow_size`.** Each reaches `tune_bayes()` as given:
 #'
 #' - `no_improve` and `uncertain` govern each fold's search as they would a
 #'   direct call, so a fold may stop short of `iter`; its `.inner_metrics`
