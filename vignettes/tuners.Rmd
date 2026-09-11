@@ -317,7 +317,8 @@ extract_procedure(baseline)$tuner
 collect_metrics(baseline)
 ```
 
-Every function that reads a result answers on the baseline. Its `.selected` column holds an empty
+The functions that read a result answer on the baseline, except the
+parameters plot, which has nothing to draw. Its `.selected` column holds an empty
 table on every fold, since nothing was chosen, so `collect_selections()` and
 `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:

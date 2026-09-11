@@ -305,8 +305,10 @@ completed. `summary()`, `collect_metrics()`, `agreement()`,
 class `nestedtune_partial_summary`, saying how many folds the answer covers.
 `collect_notes()` reads every fold and warns about none. `autoplot()` leaves
 the failed fold's place on its axis empty. A run in which no fold completed
-has no estimate to report, so those readers and `nested_final_fit()` refuse
-it. `summary()` and `collect_notes()` still answer on such a run.
+has no estimate to report. `collect_metrics()`, `agreement()`,
+`collect_selections()`, `collect_inner_metrics()`, `autoplot()` and
+`nested_final_fit()` refuse it. `summary()` and `collect_notes()` still
+answer on such a run.
 
 ## Subsetting with dplyr
 
