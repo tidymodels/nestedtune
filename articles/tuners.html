@@ -80,16 +80,18 @@
 
     
     
-<p>The getting-started guide, <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code>, tunes
-each outer fold over a fixed grid with <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code>.
-That is one of five ways the inner search can run. The other four are
-tune’s Bayesian optimization, finetune’s two racing methods and its
-simulated annealing, and each has a function here that takes the same
+<p>You want the inner search to run some other way than over a fixed
+grid, or to score a workflow with nothing to tune. The getting-started
+guide, <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code>, tunes each outer fold over a
+fixed grid with <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code>. That is one of five
+ways the inner search can run. The other four are tune’s Bayesian
+optimization, finetune’s two racing methods, and finetune’s simulated
+annealing. Each has a function in this package that takes the same
 design and workflow and returns the same kind of object. This page runs
 all four on the guide’s example and shows what each fold records about
 its search. It then scores a workflow with nothing to tune on the same
-folds, and runs a baseline and two tuned workflows through one design in
-one call with <code><a href="../reference/nested_workflow_map.html">nested_workflow_map()</a></code>.</p>
+folds. Last, it runs a baseline and two tuned workflows through one
+design in one call with <code><a href="../reference/nested_workflow_map.html">nested_workflow_map()</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
@@ -115,14 +117,14 @@ with two parameters marked for tuning.</p>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu">workflow</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">rf</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>mtry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">5L</span>, <span class="fl">8L</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">10L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The grid tuner and the racers score the candidates they are given.
-The Bayesian and annealing searches propose their own candidates, and to
-do that they need each parameter’s range. The default range of
-<code>mtry</code> is not known until the data is seen, so a search over
-it fails at inner tuning in every fold. The parameter set below fixes
-that range by hand, and bounds <code>min_n</code> to the grid’s range
-too, because its default runs past the size of an inner analysis set
-here.</p>
+<p>The grid tuner and the racers score the candidates they are given,
+the settings in the grid. The Bayesian and annealing searches propose
+their own candidates, and to do that they need each parameter’s range.
+The default range of <code>mtry</code> is not known until the data is
+seen, so a search over it fails at inner tuning in every fold. The
+parameter set below fixes that range by hand. It also bounds
+<code>min_n</code> to the grid’s range, because its default runs past
+the size of an inner analysis set here.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="fu">extract_parameter_set_dials</span><span class="op">(</span><span class="va">wf</span><span class="op">)</span>,</span>
@@ -143,10 +145,10 @@ here.</p>
 </h2>
 <p><code><a href="../reference/nested_tune_bayes.html">nested_tune_bayes()</a></code> runs <code><a href="https://tune.tidymodels.org/reference/tune_bayes.html" class="external-link">tune::tune_bayes()</a></code>
 inside each outer fold. The search starts from a small space-filling set
-of candidates, scores them on the inner resamples, and then proposes one
-new candidate per iteration from a Gaussian process fitted to the scores
-so far. <code>initial</code> and <code>iter</code> are the sizes of
-those two stages, kept small here so the page builds quickly.</p>
+of candidates and scores them on the inner resamples. It then proposes
+one new candidate per iteration, from a Gaussian process fitted to the
+scores so far. <code>initial</code> and <code>iter</code> are the sizes
+of those two stages, kept small here so the page builds quickly.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -175,13 +177,15 @@ those two stages, kept small here so the page builds quickly.</p>
 <span><span class="co">#&gt;   same grid</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
-<p>The print notes that the folds did not search the same grid: the same
-number of candidates each, but not the same ones, because each fold
-proposes candidates from its own scores. The note is there so that a
-reader of the summary does not mistake the selections for a vote over
-shared candidates. The fit count follows the arithmetic in
-<code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code>, with the candidates per fold now
-<code>initial + iter</code>.</p>
+<p>The print notes that the folds did not search the same grid. Each
+fold scored the same number of candidates, but not the same ones,
+because each fold proposes candidates from its own scores. With a grid,
+every fold picks from the same list, so you can count how many folds
+chose each candidate. Here the folds did not all see the same list, and
+the note says so.</p>
+<p>The guide multiplied outer folds by inner resamples by grid rows to
+count fits. Here the same count uses <code>initial + iter</code>
+candidates per fold in place of the grid’s rows.</p>
 <p><code>.inner_metrics</code> holds what the search inside one fold
 saw. Here is the first fold’s:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -204,26 +208,25 @@ saw. Here is the first fold’s:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     3    10 rmse    standard   2.99      5  0.515  iter3           3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     3    10 rsq     standard   0.786     5  0.117  iter3           3</span></span></code></pre></div>
 <p>The <code>.iter</code> column says which stage each candidate came
-from: <code>.iter</code> of 0 marks the initial set, and the proposals
-run up to 3. A <code><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">tune::control_bayes()</a></code> passed as
-<code>control</code> reaches the inner call in every fold, and one that
-stops the search early shows in this column as a fold whose
-<code>.iter</code> stops short of <code>iter</code>;
-<code><a href="../reference/nested_tune_bayes.html">?nested_tune_bayes</a></code> says which of its slots this package
-sets for itself.</p>
+from. An <code>.iter</code> of 0 marks the initial set, and the
+proposals run up to 3. A <code><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">tune::control_bayes()</a></code> passed as
+<code>control</code> reaches the inner call in every fold. If the
+control stops a fold’s search early, that fold’s <code>.iter</code>
+values stop short of <code>iter</code>. <code><a href="../reference/nested_tune_bayes.html">?nested_tune_bayes</a></code>
+says which of its slots this package sets for itself.</p>
 </div>
 <div class="section level2">
 <h2 id="racing">Racing<a class="anchor" aria-label="anchor" href="#racing"></a>
 </h2>
 <p>The two racing methods in finetune take the same grid the guide uses
-and score every candidate on a few inner resamples first. From then on,
-after each further resample, a candidate that is clearly worse than the
-current best is dropped, so the fits that a full grid search would spend
-on losing candidates are saved. <code><a href="../reference/nested_tune_race.html">nested_tune_race_anova()</a></code>
-decides with a repeated measures ANOVA fitted by lme4, and
-<code><a href="../reference/nested_tune_race.html">nested_tune_race_win_loss()</a></code> with a Bradley-Terry model of
-pairwise wins fitted by BradleyTerry2. Both refuse at entry when a
-package their race needs is not installed.</p>
+and score every candidate on a few inner resamples first. After each
+further resample, a candidate that is clearly worse than the current
+best is dropped. That saves the fits a full grid search would spend on
+losing candidates. <code><a href="../reference/nested_tune_race.html">nested_tune_race_anova()</a></code> decides with a
+repeated measures ANOVA fitted by lme4.
+<code><a href="../reference/nested_tune_race.html">nested_tune_race_win_loss()</a></code> decides with a Bradley-Terry
+model of pairwise wins fitted by BradleyTerry2. Both refuse at entry
+when a package their race needs is not installed.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
@@ -245,11 +248,12 @@ package their race needs is not installed.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .outer_fit_seed &lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
-<p>A fold’s <code>.inner_metrics</code> from a race is the whole grid,
-and the <code>n</code> column says how many inner resamples each
-candidate was scored on before it was dropped or the race ended.
-<code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> stacks those tables with the fold
-label beside them, so summing <code>n</code> over one metric’s rows
+<p>A race’s <code>.inner_metrics</code> looks complete but is not. Every
+candidate in the grid has a row, yet the rows can rest on different
+numbers of resamples. The <code>n</code> column says how many inner
+resamples each candidate was scored on before it was dropped or the race
+ended. <code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> stacks those tables with the
+fold label beside them. So summing <code>n</code> over one metric’s rows
 counts the fits each fold spent on tuning. The fold that spent the
 fewest is the one where elimination did the most work:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -315,8 +319,8 @@ fits per fold:</p>
 </h2>
 <p><code><a href="../reference/nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> runs
 <code><a href="https://finetune.tidymodels.org/reference/tune_sim_anneal.html" class="external-link">finetune::tune_sim_anneal()</a></code> inside each outer fold. Like
-the Bayesian search it proposes its own candidates and needs the
-parameter set above, but each proposal is a small random move from the
+the Bayesian search, it proposes its own candidates and needs the
+parameter set above. Each proposal is a small random move from the
 current candidate, accepted when it scores better and sometimes when it
 scores worse. finetune prints a log of every move by default, and the
 control passed below keeps the page quiet.</p>
@@ -349,19 +353,20 @@ control passed below keeps the page quiet.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     5     6 rmse    standard   2.82      5  0.475  Iter3           3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     5     6 rsq     standard   0.823     5  0.102  Iter3           3</span></span></code></pre></div>
 <p><code>.iter</code> runs from 0, the initial candidates, to 3.</p>
-<p>Seeding is the same on all five: seed the session before the call,
-and the same seed gives the same result serially and in parallel, as
+<p>Seeding is the same on all five. Seed the session before the call.
+The same seed gives the same result serially and in parallel, as
 <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains under Reproducibility.</p>
 </div>
 <div class="section level2">
 <h2 id="a-workflow-with-nothing-to-tune">A workflow with nothing to tune<a class="anchor" aria-label="anchor" href="#a-workflow-with-nothing-to-tune"></a>
 </h2>
-<p>A tuned procedure is usually compared with something simpler, such as
-the same model with its parameters fixed.
-<code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> scores such a workflow on the same
-nested design. It runs the same outer loop with the inner stage removed,
-so each fold fits the workflow as given on its analysis rows and scores
-it once on its assessment rows, and the record says no tuning ran. What
+<p>A tuned procedure, the whole resample-tune-select-fit sequence, is
+usually compared with something simpler, such as the same model with its
+parameters fixed. <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> scores such a
+workflow on the same nested design. It runs the same outer loop with the
+inner stage removed. Each fold fits the workflow as given on its
+analysis rows and scores it once on its assessment rows.
+<code><a href="../reference/extract_procedure.html">extract_procedure()</a></code> on the result says no tuning ran. What
 the shared design buys is that the two runs score on identical
 folds.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -380,11 +385,13 @@ folds.</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rmse    standard   2.75      5  0.576 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> rsq     standard   0.827     5  0.027<span style="text-decoration: underline;">4</span></span></span></code></pre></div>
-<p>Every reader answers on the baseline. Its <code>.selected</code>
-column holds an empty table on every fold, since nothing was chosen, so
-<code><a href="../reference/collect_selections.html">collect_selections()</a></code> and <code><a href="../reference/agreement.html">agreement()</a></code> return
-zero rows. The per-fold metrics join those of a tuned run by fold
-label:</p>
+<p>Every function that reads a tuned result reads the baseline the same
+way, under the same control settings. The one exception is the
+parameters plot, which has nothing to draw. The baseline’s
+<code>.selected</code> column holds an empty table on every fold, since
+nothing was chosen, so <code><a href="../reference/collect_selections.html">collect_selections()</a></code> and
+<code><a href="../reference/agreement.html">agreement()</a></code> return zero rows. The per-fold metrics join
+those of a tuned run by fold label:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">bayes</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -403,12 +410,14 @@ label:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Fold3  2.49  1.81</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Fold4  1.79  1.82</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Fold5  3.71  4.43</span></span></code></pre></div>
-<p>Read the table fold by fold rather than as one difference, since two
-nested estimates cannot be subtracted to compare procedures, for the
-reasons <code><a href="../articles/estimate.html">vignette("estimate")</a></code> gives. The two doors are
-exclusive: a workflow carrying a <code>tune()</code> marker is refused
-by <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code>, and a workflow with none is
-refused by the five tuning functions, each naming the other.</p>
+<p>Read the table fold by fold rather than as one difference. Two nested
+estimates cannot be subtracted to compare procedures, for the reasons
+<code><a href="../articles/estimate.html">vignette("estimate")</a></code> gives.</p>
+<p><code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> and the five tuning functions do
+not overlap. <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> refuses a workflow
+carrying a <code>tune()</code> marker. The five tuning functions refuse
+a workflow with none. Each refusal names the function to use
+instead.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/nested_fit_resamples.html">nested_fit_resamples</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">folds</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `nested_fit_resamples()`:</span></span></span>
@@ -425,13 +434,15 @@ refused by the five tuning functions, each naming the other.</p>
 </h2>
 <p>A comparison across model families needs every family scored on the
 same outer folds. <code><a href="../reference/nested_workflow_map.html">nested_workflow_map()</a></code> takes a
-<code>workflow_set()</code> and the name of one orchestrator, and runs
-each workflow of the set through it on one design, so the results come
-back side by side. Here the set holds the random forest above, a linear
-model on the same predictors with nothing to tune, and a linear model on
-principal components whose count is tuned. The forest’s grid goes in the
-call; the components workflow cannot use it, so its own grid goes in the
-set’s <code>option</code> column with <code>option_add()</code>.</p>
+<code>workflow_set()</code> and the name of one of the six functions
+above, <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> included. It runs each
+workflow of the set through that function on one design, so the results
+come back side by side. Here the set holds three workflows. They are the
+random forest above, a linear model on the same predictors with nothing
+to tune, and a linear model on principal components whose count is
+tuned. The forest’s grid goes in the call. The components workflow
+cannot use that grid, so its own grid goes in the set’s
+<code>option</code> column with <code>option_add()</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">step_pca</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span>, num_comp <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
@@ -461,12 +472,13 @@ set’s <code>option</code> column with <code>option_add()</code>.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">"components"</span>: 5 of 5 outer folds completed (grid search)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `collect_metrics()` for every workflow's estimate under its id,</span></span>
 <span><span class="co">#&gt;   and `x$result[[i]]` for one workflow's run.</span></span></code></pre></div>
-<p>The baseline has nothing to tune, so it ran through
-<code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> whatever <code>fn</code> named, and
-the print says so beside its id. Each row’s <code>result</code> is the
-object the named function returns for that workflow, called by hand with
-the same arguments under the same seed, so everything the earlier
-sections read off one result reads off a row here.</p>
+<p>The baseline has nothing to tune. So it ran through
+<code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> instead of the function that
+<code>fn</code> names, and the print says so beside its id. Each row’s
+<code>result</code> is the object the named function returns for that
+workflow. Calling that function by hand, with the same arguments and the
+same seed, would give the same object. So each row can be read exactly
+as the earlier sections read a single result.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
@@ -479,7 +491,7 @@ sections read off one result reads off a row here.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> components rmse    standard   3.15      5  0.385 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> components rsq     standard   0.757     5  0.066<span style="text-decoration: underline;">6</span></span></span></code></pre></div>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> stacks each workflow’s estimate under
-its id, and the other readers stack their tables the same way.
+its id, and the other collect functions stack their tables the same way.
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> summarizes every workflow, one section per id
 under one heading for the set.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -530,7 +542,7 @@ under one heading for the set.</p>
 <span><span class="co">#&gt;   you can deploy. Build that with `nested_final_fit()`, and report</span></span>
 <span><span class="co">#&gt;   this estimate as what its procedure achieves.</span></span></code></pre></div>
 <p><code><a href="../reference/agreement.html">agreement()</a></code> stacks each workflow’s selection table under
-its id, with the parameter columns ahead of the counts; the baseline
+its id, with the parameter columns ahead of the counts. The baseline
 tuned nothing and has no row.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span>
@@ -540,21 +552,22 @@ tuned nothing and has no row.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> forest         5     2       <span style="color: #BB0000;">NA</span>     3   0.6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> forest         8     2       <span style="color: #BB0000;">NA</span>     2   0.4</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> components    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        1     5   1</span></span></code></pre></div>
-<p>The performance view puts the workflows along one axis inside a panel
-per metric, each marked by a dashed rule at that workflow’s
+<p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> has the same two views as on one result. The
+performance view puts the workflows along one axis inside a panel per
+metric. A dashed rule marks each workflow’s
 <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> mean.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span>, type <span class="op">=</span> <span class="st">"performance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tuners_files/figure-html/wset-performance-1.png" class="r-plt" alt="Two panels, one per metric, with the three workflows along the x axis, one point per outer fold and a dashed rule at each workflow's nested estimate." width="672"></p>
 <p>The parameters view keeps the outer folds on the x axis and gives
-each workflow’s tuned parameter its own panel, labelled by the id, so
-the question of one result, whether the folds agreed, is asked once per
-workflow; the baseline has no panel.</p>
+each workflow’s tuned parameter its own panel, labelled by the id. So
+each workflow gets its own answer to whether the folds agreed. The
+baseline has no panel.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mapped</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tuners_files/figure-html/wset-parameters-1.png" class="r-plt" alt="One panel per tuned parameter and workflow, labelled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected." width="672"></p>
 <p>What the set does not offer is a ranking of its workflows or a fit of
-the best one, since choosing among them by these estimates would be a
+the best one. Choosing among them by these estimates would be a
 selection the outer loop did not nest, as
 <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says. The final fit for one workflow
 of the set is <code>nested_final_fit(mapped, id = "forest")</code>.</p>

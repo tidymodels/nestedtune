@@ -1,13 +1,16 @@
 # Reading the results
 
-Every tuning function in this package returns the same kind of object, a
-`nested_results`, and the getting-started guide,
+You have a results object and want to know what is in it. Every tuning
+function in this package returns the same kind of object, a
+`nested_results`. The getting-started guide,
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md),
-reads the print, the summary, the estimate, the selections and both
-plots off it. This page reads the whole object: the columns one at a
-time, each of the readers on one result, what a run looks like when one
-outer fold fails, and which dplyr verbs keep the class and which shed
-it.
+prints it, summarizes it, and reads the estimate, the selections and
+both plots off it. This page reads the whole object. It goes through the
+columns one at a time, then the readers, the functions such as
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+that turn the columns into tables. It then shows what a run looks like
+when one outer fold fails, and which dplyr verbs keep the class and
+which shed it.
 
 ``` r
 
@@ -17,12 +20,13 @@ library(nestedtune)
 
 ## The run
 
-The design, the workflow and the grid are the guide’s, unchanged: five
-outer folds of `mtcars`, five inner folds under each, and a random
-forest with two parameters marked for tuning. One thing is added: a
-control passed as `control` asks each fold’s outer fit to keep its
-predictions, so this page can show that column and the reader that
-stacks it.
+The design, the workflow and the grid are the guide’s, unchanged. There
+are five outer folds of `mtcars`, five inner folds under each, and a
+random forest with two parameters marked for tuning. The grid’s six rows
+are the candidates, the settings each fold’s inner tuning tries. One
+thing is added. A `control_grid()` with `save_pred = TRUE` asks each
+fold’s outer fit to keep its predictions, so this page can show that
+column and the function that stacks it.
 
 ``` r
 
@@ -74,9 +78,9 @@ res
 
 ## The columns
 
-The object is a tibble with one row per outer fold, and the print above
-shows the columns that fit, its footer naming the rest. Each holds one
-piece of what that fold did.
+The object is a tibble with one row per outer fold. The print above
+shows the columns that fit its width, and its footer names the rest.
+Each column holds one piece of what that fold did.
 
 ``` r
 
@@ -87,8 +91,8 @@ names(res)
 #> [10] ".outer_fit_seed"
 ```
 
-`splits` is the fold’s outer split, an ordinary rsample split whose
-analysis rows the tuning saw and whose assessment rows scored the fold’s
+`splits` is the fold’s outer split, an ordinary rsample split. The
+tuning saw its analysis rows, and its assessment rows scored the fold’s
 model.
 
 ``` r
@@ -143,9 +147,9 @@ res$.selected[[1]]
 #> 1     8     2 pre0_mod5_post0
 ```
 
-`.inner_metrics` is the whole table the inner search scored, every
-candidate on every inner resample, averaged. It is what the fold’s
-selection was made from;
+`.inner_metrics` is the whole table the inner search scored: one row per
+candidate and metric, its score averaged over the inner resamples. It is
+what the fold’s selection was made from.
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 stacks it across folds, and
 [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
@@ -208,14 +212,16 @@ select(res, .tuning_seed, .outer_fit_seed)
 #> 5   2046114256      1910444850
 ```
 
-`.predictions` is there because the control asked for it: each completed
-fold’s predictions on its assessment rows, as
+`.predictions` is there because the control above set
+`save_pred = TRUE`. It holds each completed fold’s predictions on its
+assessment rows, as
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
 returns them, with `.row` naming the row of the data. A run under the
-default control has no such column, and a run whose control sets
-`extract` to a function has an `.extracts` column beside it, holding
-what that function returned for each fold’s fitted workflow. A fold that
-failed holds `NULL` in either.
+default control has no such column.
+
+A control that sets `extract` to a function adds an `.extracts` column
+the same way. It holds what that function returned for each fold’s
+fitted workflow. A fold that failed holds `NULL` in either column.
 
 ``` r
 
@@ -232,10 +238,13 @@ res$.predictions[[1]]
 #> 7  15    15.0    31 pre0_mod0_post0
 ```
 
-The description of the run itself rides on the object as attributes
-rather than columns;
+You will sometimes want to know exactly what ran: which tuner, its own
+arguments such as the grid, and the control as it took effect. That
+description is stored on the object as attributes rather than columns.
 [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-returns the one that records what ran.
+returns that description, which this package calls the procedure.
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+reruns what it describes on the whole dataset.
 
 ## The readers
 
@@ -298,11 +307,11 @@ collect_metrics(res, summarize = FALSE)
 ```
 
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-and
+stacks `.selected` over the folds that completed, with the fold label
+beside each row, so what every fold chose is one table.
 [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-stack `.selected` and `.inner_metrics` over the folds that completed,
-with the fold label beside each row, so what every fold chose and
-everything every fold scored are read as one table each.
+does the same for `.inner_metrics`, so everything every fold scored is
+one table.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 further down, does the same for `.notes` over every fold.
 
@@ -337,9 +346,9 @@ collect_inner_metrics(res)
 
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks `.predictions` the same way, one row per held-out row of every
-completed fold, which is where a plot of predicted against observed, or
-a per-observation loss, would start. It refuses a run that did not save
-them, naming the slot to set;
+completed fold. That table is where a plot of predicted against
+observed, or a per-observation loss, would start. It refuses a run that
+did not save predictions, naming the control slot to set.
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 does the same for `.extracts`, one row per fold.
 
@@ -363,10 +372,10 @@ collect_predictions(res)
 ```
 
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-counts the selections: one row per distinct combination the folds chose,
-with how many completed folds chose it, `n`, and that count as a share
-of the completed folds, `prop`. The most frequent row describes how
-stable the tuning procedure’s choice was on this data. It is not the
+counts the selections. Each row is one distinct combination the folds
+chose. `n` is how many completed folds chose it, and `prop` is that
+count as a share of the completed folds. The most frequent row describes
+how stable the tuning procedure’s choice was on this data. It is not the
 final model’s parameters, which come from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 running the procedure once more on the whole dataset.
@@ -414,12 +423,12 @@ folds.](results_files/figure-html/autoplot-performance-1.png)
 
 A fold that fails does not end the run. The other folds keep their
 results, and the fold that failed is recorded rather than dropped. To
-show that, the workflow below adds a range check on horsepower, which
-refuses to predict for a car whose horsepower lies outside the range the
-model was trained on. One car, the Maserati Bora, has far more
-horsepower than any other in `mtcars`, so the fold that holds it out
-cannot score it, and that fold fails. The chunk mutes tune’s progress
-messages and keeps its warnings.
+show that, the workflow below adds a range check on horsepower. The
+check refuses to predict for a car whose horsepower is outside the range
+seen in training. One car, the Maserati Bora, has far more horsepower
+than any other in `mtcars`. The fold that holds it out cannot score it,
+so that fold fails. The chunk mutes tune’s progress messages and keeps
+its warnings.
 
 ``` r
 
@@ -443,13 +452,13 @@ failed <- nested_tune_grid(wf_checked, folds, grid = grid)
 failed
 ```
 
-The print counts the failure, `.completed` is `FALSE` for the fold that
+The print counts the failure. `.completed` is `FALSE` for the fold that
 failed, and its `.notes` say where.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stacks every fold’s `.notes` into one table with the fold label beside
-them; the first row for the failed fold is this package’s own note, its
-`location` naming the stage, and the rows after it are tune’s notes
-about the cause.
+them. The first row for the failed fold is this package’s own note, its
+`location` naming the stage. The rows after it are tune’s notes about
+the cause.
 
 ``` r
 
@@ -467,36 +476,40 @@ collect_notes(failed) |>
 #> 2 outer fit: preprocessor 1/1 (prediction data) error "\u001b[1m\u001b…
 ```
 
-A fold can also complete and carry notes, when an inner resample failed
-but tuning still returned a candidate from the resamples that ran.
-[`summary()`](https://rdrr.io/r/base/summary.html),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
-[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-and
-[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-answer on a run with a failed fold over the folds that completed, and
-warn once with class `nestedtune_partial_summary` saying how many the
-summary covers;
-[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reads every fold and warns about none;
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-leaves the failed fold’s place on its axis empty. A run in which no fold
-completed is refused by those readers and by
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-except [`summary()`](https://rdrr.io/r/base/summary.html) and
+A fold can also complete and still carry notes. That happens when an
+inner resample failed but tuning still returned a candidate from the
+resamples that ran.
+
+On a run with a failed fold, the readers answer over the folds that
+completed. [`summary()`](https://rdrr.io/r/base/summary.html), the
+collect functions and
+[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
+each warn once, saying how many folds the answer covers;
+[`?collect_selections`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+names the warning’s class. The one collect function that does not warn
+is
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-because there is no estimate to report for a design that did not
-execute.
+which reads every fold.
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+leaves the failed fold’s place on its axis empty.
+
+A run in which no fold completed is a different case. It has no estimate
+to report. The print and
+[`summary()`](https://rdrr.io/r/base/summary.html) still describe it,
+and
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+still lists its notes. Every other reader refuses it, and so does
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
 
 ## Subsetting with dplyr
 
-The object is a tibble, so dplyr’s verbs work on it, and one rule
-decides what they hand back: a verb that only reorders the rows or adds
-or reorders columns returns a `nested_results`, and a verb that adds or
-removes a row, or drops or overwrites one of the columns above, returns
-a bare tibble, because an object that no longer holds what the run
-produced cannot answer for the run. Adding a column keeps the class.
+The object is a tibble, so dplyr’s verbs work on it. One rule decides
+what they hand back: an object that no longer holds what the run
+produced cannot answer for the run. So a verb that only reorders the
+rows, or adds or reorders columns, returns a `nested_results`. A verb
+that adds or removes a row, or drops or overwrites one of the columns
+above, returns a bare tibble. Adding a column, as below, keeps the
+class.
 
 ``` r
 
@@ -517,8 +530,8 @@ class(completed_only)
 #> [1] "tbl_df"     "tbl"        "data.frame"
 ```
 
-So does a column subset that leaves the run’s record behind, through
-base `[` rather than a dplyr verb, since the same rule governs it.
+Dropping the columns the run wrote sheds it too, here through base `[`
+rather than a dplyr verb, since the same rule governs it.
 
 ``` r
 
@@ -531,13 +544,15 @@ no summary of the run, no
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html).
 A table that has lost a fold, or lost the columns the run wrote, cannot
 describe itself as a five-fold design, so it stops describing itself. To
-read a partial run, read the run: `collect_metrics(failed)` already
-averages the folds that completed, and warns that it did.
+read a partial run, read the run itself: `collect_metrics(failed)`
+already averages the folds that completed, and warns that it did.
 
-Two arguments the runs on this page did not use, `event_level` for a
-two-class outcome and `eval_time` for a censored-regression run scored
-at named times, are described on
-[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md);
-the second adds an `.eval_time` column to `.metrics` and to everything
+If your outcome has two classes, or your model is scored at censoring
+times, two arguments this page did not use apply. `event_level` names
+which level of a two-class outcome is the event. `eval_time` names the
+times at which a censored-regression run is scored. Both are described
+on
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+The second adds an `.eval_time` column to `.metrics` and to everything
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 reports.

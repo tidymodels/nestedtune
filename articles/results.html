@@ -80,25 +80,30 @@
 
     
     
-<p>Every tuning function in this package returns the same kind of
-object, a <code>nested_results</code>, and the getting-started guide,
-<code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code>, reads the print, the summary, the
-estimate, the selections and both plots off it. This page reads the
-whole object: the columns one at a time, each of the readers on one
-result, what a run looks like when one outer fold fails, and which dplyr
-verbs keep the class and which shed it.</p>
+<p>You have a results object and want to know what is in it. Every
+tuning function in this package returns the same kind of object, a
+<code>nested_results</code>. The getting-started guide,
+<code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code>, prints it, summarizes it, and reads
+the estimate, the selections and both plots off it. This page reads the
+whole object. It goes through the columns one at a time, then the
+readers, the functions such as <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> that turn
+the columns into tables. It then shows what a run looks like when one
+outer fold fails, and which dplyr verbs keep the class and which shed
+it.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-run">The run<a class="anchor" aria-label="anchor" href="#the-run"></a>
 </h2>
-<p>The design, the workflow and the grid are the guide’s, unchanged:
-five outer folds of <code>mtcars</code>, five inner folds under each,
-and a random forest with two parameters marked for tuning. One thing is
-added: a control passed as <code>control</code> asks each fold’s outer
-fit to keep its predictions, so this page can show that column and the
-reader that stacks it.</p>
+<p>The design, the workflow and the grid are the guide’s, unchanged.
+There are five outer folds of <code>mtcars</code>, five inner folds
+under each, and a random forest with two parameters marked for tuning.
+The grid’s six rows are the candidates, the settings each fold’s inner
+tuning tries. One thing is added. A <code>control_grid()</code> with
+<code>save_pred = TRUE</code> asks each fold’s outer fit to keep its
+predictions, so this page can show that column and the function that
+stacks it.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -145,9 +150,9 @@ reader that stacks it.</p>
 <div class="section level2">
 <h2 id="the-columns">The columns<a class="anchor" aria-label="anchor" href="#the-columns"></a>
 </h2>
-<p>The object is a tibble with one row per outer fold, and the print
-above shows the columns that fit, its footer naming the rest. Each holds
-one piece of what that fold did.</p>
+<p>The object is a tibble with one row per outer fold. The print above
+shows the columns that fit its width, and its footer names the rest.
+Each column holds one piece of what that fold did.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "splits"          "id"              ".metrics"       </span></span>
@@ -155,8 +160,8 @@ one piece of what that fold did.</p>
 <span><span class="co">#&gt;  [7] ".predictions"    ".completed"      ".tuning_seed"   </span></span>
 <span><span class="co">#&gt; [10] ".outer_fit_seed"</span></span></code></pre></div>
 <p><code>splits</code> is the fold’s outer split, an ordinary rsample
-split whose analysis rows the tuning saw and whose assessment rows
-scored the fold’s model.</p>
+split. The tuning saw its analysis rows, and its assessment rows scored
+the fold’s model.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">splits</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; &lt;Analysis/Assess/Total&gt;</span></span>
@@ -190,10 +195,11 @@ read.</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     8     2 pre0_mod5_post0</span></span></code></pre></div>
 <p><code>.inner_metrics</code> is the whole table the inner search
-scored, every candidate on every inner resample, averaged. It is what
-the fold’s selection was made from; <code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code>
-stacks it across folds, and <code><a href="../articles/tuners.html">vignette("tuners")</a></code> shows how
-its shape differs by search.</p>
+scored: one row per candidate and metric, its score averaged over the
+inner resamples. It is what the fold’s selection was made from.
+<code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> stacks it across folds, and
+<code><a href="../articles/tuners.html">vignette("tuners")</a></code> shows how its shape differs by
+search.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">.inner_metrics</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 8</span></span></span>
@@ -237,14 +243,15 @@ under Reproducibility.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>   <span style="text-decoration: underline;">2</span>010<span style="text-decoration: underline;">156</span>236       226<span style="text-decoration: underline;">245</span>929</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>   <span style="text-decoration: underline;">1</span>118<span style="text-decoration: underline;">907</span>979      <span style="text-decoration: underline;">1</span>740<span style="text-decoration: underline;">692</span>099</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>   <span style="text-decoration: underline;">2</span>046<span style="text-decoration: underline;">114</span>256      <span style="text-decoration: underline;">1</span>910<span style="text-decoration: underline;">444</span>850</span></span></code></pre></div>
-<p><code>.predictions</code> is there because the control asked for it:
-each completed fold’s predictions on its assessment rows, as
-<code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code> returns them, with <code>.row</code>
-naming the row of the data. A run under the default control has no such
-column, and a run whose control sets <code>extract</code> to a function
-has an <code>.extracts</code> column beside it, holding what that
-function returned for each fold’s fitted workflow. A fold that failed
-holds <code>NULL</code> in either.</p>
+<p><code>.predictions</code> is there because the control above set
+<code>save_pred = TRUE</code>. It holds each completed fold’s
+predictions on its assessment rows, as <code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code>
+returns them, with <code>.row</code> naming the row of the data. A run
+under the default control has no such column.</p>
+<p>A control that sets <code>extract</code> to a function adds an
+<code>.extracts</code> column the same way. It holds what that function
+returned for each fold’s fitted workflow. A fold that failed holds
+<code>NULL</code> in either column.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">.predictions</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 4</span></span></span>
@@ -257,9 +264,12 @@ holds <code>NULL</code> in either.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  26    25.2    27 pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  15.8  16.1    29 pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>  15    15.0    31 pre0_mod0_post0</span></span></code></pre></div>
-<p>The description of the run itself rides on the object as attributes
-rather than columns; <code><a href="../reference/extract_procedure.html">extract_procedure()</a></code> returns the one
-that records what ran.</p>
+<p>You will sometimes want to know exactly what ran: which tuner, its
+own arguments such as the grid, and the control as it took effect. That
+description is stored on the object as attributes rather than columns.
+<code><a href="../reference/extract_procedure.html">extract_procedure()</a></code> returns that description, which this
+package calls the procedure. <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> reruns what
+it describes on the whole dataset.</p>
 </div>
 <div class="section level2">
 <h2 id="the-readers">The readers<a class="anchor" aria-label="anchor" href="#the-readers"></a>
@@ -313,12 +323,12 @@ row per fold and metric, with the fold label beside them.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Fold4 rsq     standard       0.766</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Fold5 rmse    standard       3.69 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold5 rsq     standard       0.911</span></span></code></pre></div>
-<p><code><a href="../reference/collect_selections.html">collect_selections()</a></code> and
-<code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> stack <code>.selected</code> and
-<code>.inner_metrics</code> over the folds that completed, with the fold
-label beside each row, so what every fold chose and everything every
-fold scored are read as one table each. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>,
-further down, does the same for <code>.notes</code> over every fold.</p>
+<p><code><a href="../reference/collect_selections.html">collect_selections()</a></code> stacks <code>.selected</code> over
+the folds that completed, with the fold label beside each row, so what
+every fold chose is one table. <code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> does
+the same for <code>.inner_metrics</code>, so everything every fold
+scored is one table. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>, further down, does
+the same for <code>.notes</code> over every fold.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
@@ -346,10 +356,11 @@ further down, does the same for <code>.notes</code> over every fold.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold1     8     2 rsq     standard   0.834     5  0.094<span style="text-decoration: underline;">2</span> pre0_mod5_…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> stacks <code>.predictions</code>
-the same way, one row per held-out row of every completed fold, which is
-where a plot of predicted against observed, or a per-observation loss,
-would start. It refuses a run that did not save them, naming the slot to
-set; <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> does the same for
+the same way, one row per held-out row of every completed fold. That
+table is where a plot of predicted against observed, or a
+per-observation loss, would start. It refuses a run that did not save
+predictions, naming the control slot to set.
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> does the same for
 <code>.extracts</code>, one row per fold.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
@@ -367,11 +378,11 @@ set; <code><a href="https://tune.tidymodels.org/reference/collect_predictions.ht
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Fold2  18.7  17.0     5 pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Fold2  15.2  16.6    14 pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 22 more rows</span></span></span></code></pre></div>
-<p><code><a href="../reference/agreement.html">agreement()</a></code> counts the selections: one row per distinct
-combination the folds chose, with how many completed folds chose it,
-<code>n</code>, and that count as a share of the completed folds,
-<code>prop</code>. The most frequent row describes how stable the tuning
-procedure’s choice was on this data. It is not the final model’s
+<p><code><a href="../reference/agreement.html">agreement()</a></code> counts the selections. Each row is one
+distinct combination the folds chose. <code>n</code> is how many
+completed folds chose it, and <code>prop</code> is that count as a share
+of the completed folds. The most frequent row describes how stable the
+tuning procedure’s choice was on this data. It is not the final model’s
 parameters, which come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> running the
 procedure once more on the whole dataset.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -403,12 +414,12 @@ point per fold, with a dashed line at the mean that
 </h2>
 <p>A fold that fails does not end the run. The other folds keep their
 results, and the fold that failed is recorded rather than dropped. To
-show that, the workflow below adds a range check on horsepower, which
-refuses to predict for a car whose horsepower lies outside the range the
-model was trained on. One car, the Maserati Bora, has far more
-horsepower than any other in <code>mtcars</code>, so the fold that holds
-it out cannot score it, and that fold fails. The chunk mutes tune’s
-progress messages and keeps its warnings.</p>
+show that, the workflow below adds a range check on horsepower. The
+check refuses to predict for a car whose horsepower is outside the range
+seen in training. One car, the Maserati Bora, has far more horsepower
+than any other in <code>mtcars</code>. The fold that holds it out cannot
+score it, so that fold fails. The chunk mutes tune’s progress messages
+and keeps its warnings.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">check_range</span><span class="op">(</span><span class="va">hp</span><span class="op">)</span></span>
@@ -425,12 +436,12 @@ progress messages and keeps its warnings.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> See `x$.notes` for what went wrong.</span></span>
 <span></span>
 <span><span class="va">failed</span></span></code></pre></div>
-<p>The print counts the failure, <code>.completed</code> is
+<p>The print counts the failure. <code>.completed</code> is
 <code>FALSE</code> for the fold that failed, and its <code>.notes</code>
 say where. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code> stacks every fold’s
-<code>.notes</code> into one table with the fold label beside them; the
+<code>.notes</code> into one table with the fold label beside them. The
 first row for the failed fold is this package’s own note, its
-<code>location</code> naming the stage, and the rows after it are tune’s
+<code>location</code> naming the stage. The rows after it are tune’s
 notes about the cause.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed_id</span> <span class="op">&lt;-</span> <span class="va">failed</span> <span class="op">|&gt;</span></span>
@@ -445,30 +456,32 @@ notes about the cause.</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> outer fit                                     error <span style="color: #949494;">"</span>The outer fit p…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> outer fit: preprocessor 1/1 (prediction data) error <span style="color: #949494;">"</span>\u001b[1m\u001b…</span></span></code></pre></div>
-<p>A fold can also complete and carry notes, when an inner resample
-failed but tuning still returned a candidate from the resamples that
-ran. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>,
-<code><a href="../reference/agreement.html">agreement()</a></code>, <code><a href="../reference/collect_selections.html">collect_selections()</a></code> and
-<code><a href="../reference/collect_selections.html">collect_inner_metrics()</a></code> answer on a run with a failed fold
-over the folds that completed, and warn once with class
-<code>nestedtune_partial_summary</code> saying how many the summary
-covers; <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code> reads every fold and warns about
-none; <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> leaves the failed fold’s place on its axis
-empty. A run in which no fold completed is refused by those readers and
-by <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>, except <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and
-<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>, because there is no estimate to report for
-a design that did not execute.</p>
+<p>A fold can also complete and still carry notes. That happens when an
+inner resample failed but tuning still returned a candidate from the
+resamples that ran.</p>
+<p>On a run with a failed fold, the readers answer over the folds that
+completed. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, the collect functions and
+<code><a href="../reference/agreement.html">agreement()</a></code> each warn once, saying how many folds the
+answer covers; <code><a href="../reference/collect_selections.html">?collect_selections</a></code> names the warning’s
+class. The one collect function that does not warn is
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code>, which reads every fold.
+<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> leaves the failed fold’s place on its axis
+empty.</p>
+<p>A run in which no fold completed is a different case. It has no
+estimate to report. The print and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> still describe
+it, and <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes()</a></code> still lists its notes. Every other
+reader refuses it, and so does <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="subsetting-with-dplyr">Subsetting with dplyr<a class="anchor" aria-label="anchor" href="#subsetting-with-dplyr"></a>
 </h2>
-<p>The object is a tibble, so dplyr’s verbs work on it, and one rule
-decides what they hand back: a verb that only reorders the rows or adds
-or reorders columns returns a <code>nested_results</code>, and a verb
-that adds or removes a row, or drops or overwrites one of the columns
-above, returns a bare tibble, because an object that no longer holds
-what the run produced cannot answer for the run. Adding a column keeps
-the class.</p>
+<p>The object is a tibble, so dplyr’s verbs work on it. One rule decides
+what they hand back: an object that no longer holds what the run
+produced cannot answer for the run. So a verb that only reorders the
+rows, or adds or reorders columns, returns a
+<code>nested_results</code>. A verb that adds or removes a row, or drops
+or overwrites one of the columns above, returns a bare tibble. Adding a
+column, as below, keeps the class.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">with_position</span> <span class="op">&lt;-</span> <span class="fu">mutate</span><span class="op">(</span><span class="va">res</span>, position <span class="op">=</span> <span class="fu">row_number</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -481,9 +494,9 @@ that completed on the run above, which removes one row.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">completed_only</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
-<p>So does a column subset that leaves the run’s record behind, through
-base <code>[</code> rather than a dplyr verb, since the same rule
-governs it.</p>
+<p>Dropping the columns the run wrote sheds it too, here through base
+<code>[</code> rather than a dplyr verb, since the same rule governs
+it.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
@@ -491,13 +504,15 @@ governs it.</p>
 print, no summary of the run, no <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>. A table
 that has lost a fold, or lost the columns the run wrote, cannot describe
 itself as a five-fold design, so it stops describing itself. To read a
-partial run, read the run: <code>collect_metrics(failed)</code> already
-averages the folds that completed, and warns that it did.</p>
-<p>Two arguments the runs on this page did not use,
-<code>event_level</code> for a two-class outcome and
-<code>eval_time</code> for a censored-regression run scored at named
-times, are described on <code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code>; the second adds
-an <code>.eval_time</code> column to <code>.metrics</code> and to
+partial run, read the run itself: <code>collect_metrics(failed)</code>
+already averages the folds that completed, and warns that it did.</p>
+<p>If your outcome has two classes, or your model is scored at censoring
+times, two arguments this page did not use apply.
+<code>event_level</code> names which level of a two-class outcome is the
+event. <code>eval_time</code> names the times at which a
+censored-regression run is scored. Both are described on
+<code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code>. The second adds an
+<code>.eval_time</code> column to <code>.metrics</code> and to
 everything <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

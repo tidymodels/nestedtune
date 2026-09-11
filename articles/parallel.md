@@ -1,16 +1,21 @@
 # Running the outer loop in parallel
 
-Nested cross-validation fits many models, and the outer folds are
-independent of one another.
+A nested run fits many models, and you may want it to finish sooner. The
+outer folds do not depend on one another, so they can run at the same
+time.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and its siblings run those folds on [mirai](https://mirai.r-lib.org/)
-daemons when a pool is connected, and serially otherwise. Nothing in the
-call changes between the two. This page starts a pool of two daemons,
-runs the getting-started guide’s loop on it, shows the result identical
-to the same run made serially, and says when a pool pays. What the call
-checks before it dispatches, what it sends to each daemon, and what
-happens on an interrupt are under the parallel section of
-[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+and its siblings run them on [mirai](https://mirai.r-lib.org/) daemons,
+separate R processes, when a pool of daemons is connected. Without a
+pool, the folds run one after another. Nothing in the call changes
+between the two.
+
+This page starts a pool of two daemons and runs the getting-started
+guide’s loop on it. It then shows that the result is identical to the
+same run made serially. Last, it says when a pool pays. The parallel
+section of
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+says what the call checks before it dispatches, what it sends to each
+daemon, and what happens on an interrupt.
 
 ``` r
 
@@ -20,9 +25,10 @@ library(nestedtune)
 
 ## The design and the workflow
 
-These are the guide’s, unchanged: five outer folds of `mtcars`, five
-inner folds under each, a random forest with two parameters marked for
-tuning, and a grid of six candidates.
+These are the guide’s, unchanged. There are five outer folds of
+`mtcars`, five inner folds under each, and a random forest with two
+parameters marked for tuning. The grid holds six candidates, the
+settings to try.
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
 walks through each of them.
 
@@ -47,13 +53,14 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 
 ## The pool
 
-Parallelism is switched on by connecting daemons and off by
-disconnecting them. There is no argument on the loop functions for it.
+You switch parallelism on by connecting daemons and off by disconnecting
+them. There is no argument on the loop functions for it.
 [`mirai::daemons()`](https://mirai.r-lib.org/reference/daemons.html)
 starts the pool, and
 [`mirai::status()`](https://mirai.r-lib.org/reference/status.html)
-reports how many daemons are connected. Two or more is the threshold,
-the same one tune uses.
+reports how many daemons are connected. With two or more connected, the
+folds go out to the daemons; with fewer, they run in the session, the
+same rule tune uses.
 
 ``` r
 
@@ -64,16 +71,15 @@ mirai::status()$connections
 ```
 
 Each daemon is a separate R process. It loads nestedtune and the
-packages the workflow needs from an installed library, and the first
-parallel call after starting a pool is the slow one, since it is what
-makes each daemon load the tidymodels stack.
+packages the workflow needs from an installed library. So the first
+parallel call after starting a pool is the slow one, since it makes each
+daemon load the tidymodels stack.
 
 ## The same call
 
-With a pool connected the outer folds are dispatched to the daemons, and
-each fold’s inner tuning runs serially on its daemon, because
-parallelism inside a fold on top of parallelism across folds would
-oversubscribe the cores.
+With a pool connected, the outer folds are sent to the daemons. Each
+fold’s inner tuning runs serially on its daemon. Parallelism inside a
+fold on top of parallelism across folds would oversubscribe the cores.
 
 ``` r
 
@@ -112,11 +118,13 @@ mirai::status()$connections
 
 ## The same result
 
-Each outer fold’s seeds are drawn from the session state at entry, fixed
-by the fold’s position in the design, before anything is dispatched, as
+Each outer fold’s seeds are drawn from the session state at entry,
+before anything is dispatched. A fold’s seeds depend on its position in
+the design, as
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-explains under Reproducibility. So the serial run under the same seed is
-the same procedure on the same resamples.
+explains under Reproducibility. So a serial run under the same seed
+repeats the parallel run: the same procedure, meaning the same
+tune-and-fit steps, on the same resamples.
 
 ``` r
 
@@ -139,21 +147,18 @@ same
 ```
 
 [`identical()`](https://rdrr.io/r/base/identical.html) on the outer
-scores, the selections and the tuning seeds returns TRUE for each, and
-which run used daemons is not recoverable from either. That is what lets
-a pool be a matter of the session rather than of the analysis: a script
-gives the same answer on a laptop with no daemons and on a workstation
-with many.
+scores, the selections and the tuning seeds returns TRUE for each.
+Neither result records whether daemons were used, so a script gives the
+same answer on a laptop with no daemons and on a workstation with many.
 
 ## A pool’s payoff
 
 `mtcars` has 32 rows and the grid has 6 points, so each fold takes a
-fraction of a second, and two daemons loading the tidymodels stack cost
-more than the folds save. This page shows the parallel path working and
-its result matching the serial one, not a speedup. The speedup arrives
-where the folds are expensive: larger data, a bigger grid, a slower
-engine, or preprocessing the loop has to redo in every fold. The fit
-count in
+fraction of a second. Two daemons loading the tidymodels stack cost more
+than the folds save. This page shows the parallel path working and its
+result matching the serial one, not a speedup. The speedup arrives where
+the folds are expensive: larger data, a bigger grid, a slower engine, or
+preprocessing the loop has to redo in every fold. The fit count in
 [`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-says where the cost lives, and what is parallel here is the outer loop
-over that cost.
+says where the cost lives. A pool splits that cost across the outer
+folds.

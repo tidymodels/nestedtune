@@ -2,12 +2,14 @@
 
 ## nestedtune 0.0.0.9000
 
-- The four guides, the parallel article, the README and this file are
-  rewritten in plain prose for someone running nested cross-validation,
-  with each explanation on one page and a link from the others. The
-  site-only article “Why nest: a simulation” and its simulation script
-  are removed; the estimate page’s cited measurements make the same
-  point.
+- The four guides, the parallel article and the README are rewritten for
+  someone who has run `tune_grid()` and never nested: no prose sentence
+  over 30 words, the words “procedure” and “candidate” set up on each
+  page before it relies on them, and the word “orchestrator” gone. Those
+  pages, and this file, keep each explanation on one page with a link
+  from the others. The site-only article “Why nest: a simulation” and
+  its simulation script are removed; the estimate page’s cited
+  measurements make the same point.
 
 - Every help page is rewritten for a tidymodels user: argument entries
   of at most two sentences, detail under section headings, the arguments

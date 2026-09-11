@@ -11,8 +11,8 @@ Nested cross-validation fixes this by scoring the whole tuning procedure
 rather than the winner alone. It splits the data into outer folds.
 Within each outer fold it tunes using only the analysis rows, fits the
 winning setting on those rows, and scores that fit on the assessment
-rows, which the tuning never saw. The average of those outer scores is
-an honest estimate of how well tune-then-fit works on new data.
+rows the tuning never saw. The average of those outer scores is an
+honest estimate of how well tune-then-fit works on new data.
 
 That average is what
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
@@ -21,12 +21,12 @@ the end on all the data is a separate object. It has no score of its
 own, because every row it was trained on was already used to choose and
 fit it.
 
-This page walks from a design to a write-up.
+This page walks from a design to a write-up. The other pages go deeper.
 [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
-reads everything the results object holds,
+reads everything the results object holds.
 [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
 swaps in the other inner searches and scores a workflow with nothing to
-tune, and the [parallel
+tune. The [parallel
 article](https://nestedtune.tidymodels.org/articles/parallel.html) runs
 the same call on a pool of workers.
 
@@ -68,7 +68,7 @@ folds
 
 Each row is one outer fold. `splits` holds the outer split, and
 `inner_resamples` holds an ordinary `rset` built from that fold’s
-analysis rows alone, which is all the tuning for that fold gets to see.
+analysis rows alone. That is all the tuning for that fold gets to see.
 
 ``` r
 
@@ -84,16 +84,16 @@ folds$inner_resamples[[1]]
 #> 5 <split [20/5]> Fold5
 ```
 
-`mtcars` has 32 rows, which keeps this page fast to build. Nesting
-removes the most bias on wide data searched hard, and
+`mtcars` has 32 rows, which keeps this page fast to build. This example
+is here because it builds in seconds, not because it needs nesting.
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
-says when it is worth the cost; this example is here because it builds
-in seconds.
+says when nesting is worth its cost.
 
 ## The model and the grid
 
 Anything tune can tune, this can tune. Here it is a random forest with
-two parameters marked for tuning, and an explicit grid of candidates.
+two parameters marked for tuning, and an explicit grid of candidates,
+the settings to try.
 
 ``` r
 
@@ -115,7 +115,8 @@ grid
 ```
 
 That is 6 candidates, each resampled inside every outer fold. The run
-below fits 5 outer folds times 5 inner resamples times 6 candidates, 150
+below has 5 outer folds. Each outer fold tunes on 5 inner resamples, and
+each inner resample scores all 6 candidates. That multiplies out to 150
 models for tuning, plus one per outer fold for scoring. Nested
 cross-validation is expensive, and that product is where the cost lives.
 
@@ -124,12 +125,15 @@ cross-validation is expensive, and that product is where the cost lives.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 drives the outer loop. For each outer fold it calls
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-on that fold’s inner resamples, selects a candidate by the `select` rule
-(the best by the first metric unless
+on that fold’s inner resamples, the call you would make by hand, with
+parallelism off and the fold’s seed set. It then picks the best
+candidate by the first metric. It finalizes the workflow with that
+candidate, fits it on the fold’s analysis rows, and scores it on the
+assessment rows. If you would rather pick by another of tune’s
+selectors, the `select` argument takes a
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-says otherwise), finalizes the workflow, and fits and scores it on the
-outer split. Every statistical step is tune’s. This package adds the
-loop, the seeding, and a result that keeps what each fold chose.
+naming it. Every statistical step is tune’s. This package adds the loop,
+the seeding, and a result that keeps what each fold chose.
 
 ``` r
 
@@ -253,8 +257,8 @@ selected.](nested-cv_files/figure-html/autoplot-parameters-1.png)
 
 A parameter the folds agree on is one the data picks clearly. A
 parameter they split over is one whose value is largely arbitrary at
-this sample size, which is expected wherever the candidates perform
-about equally well;
+this sample size. That is expected wherever the candidates perform about
+equally well, and
 [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
 gives the mechanism.
 
@@ -287,11 +291,11 @@ c(sd = sd(fold_rmse), std_err = sd(fold_rmse) / sqrt(length(fold_rmse)))
 #> 1.0002719 0.4473352
 ```
 
-The first number is how much the folds differ from each other, and the
+The first number is how much the folds differ from each other. The
 second is the `std_err` that
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reports, the precision of their mean. Quoting the second as though it
-described the folds understates their disagreement. The other
+reports, which is the precision of their mean. Quoting the second as
+though it described the folds understates their disagreement. The other
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 view draws that spread, with a dashed line at the nested estimate.
 
@@ -305,7 +309,7 @@ dashed line at the mean across
 folds.](nested-cv_files/figure-html/autoplot-performance-1.png)
 
 A tuned procedure is usually compared with something simpler, such as
-the same model with its parameters fixed, and
+the same model with its parameters fixed.
 [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
 scores such a workflow on these same folds with
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md).
@@ -390,13 +394,15 @@ tibble(
 #> 2 best selection-time score      2.58
 ```
 
-The selection-time score is not an estimate of performance on anything,
-whichever side of the nested estimate it lands on. It stays on the
-object as the record of what selection saw, and tune’s readers hand it
-over without a warning. That is why the results object and the final fit
-both refuse tune’s ranking generics rather than answering them. On the
-loop’s results they would rank outer folds, and on the final fit there
-is one model and nothing to rank.
+The selection-time score is not an estimate of performance on anything.
+Whether it lands above or below the nested estimate means nothing
+either. It stays on the object as a record of what selection saw.
+
+`show_best()` handed it over above because it was given tune’s own
+object, which does not warn. Ask `res` or `final` and both refuse, as
+the two chunks below show. On the loop’s results, tune’s ranking
+functions would rank outer folds. On the final fit there is one model
+and nothing to rank.
 
 ``` r
 
@@ -414,19 +420,20 @@ select_best(final, metric = "rmse")
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels; neither
-function takes a seed of its own.
+Seed the session before the call, as elsewhere in tidymodels. Neither
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-draws a tuning seed and an outer-fit seed for every fold from the
-session state at entry, fixed by the fold’s position in the design
-rather than by the order the folds happen to run in, and stores them on
-the result. So the same seed gives the same answer whether the folds run
-serially or on a pool of workers, and any one fold can be reproduced by
-hand.
+nor
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+takes a seed of its own. At entry,
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+draws two seeds per fold from the session state. One seeds that fold’s
+tuning and the other its outer fit. Both are stored on the result. A
+fold’s seeds depend on its position in the design, not on the order the
+folds happen to run in. So the same seed gives the same answer whether
+the folds run serially or on a pool of workers.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 draws one pair the same way and carries it as `tuning_seed` and
-`fit_seed`, and both functions put the caller’s own random state back as
-it was found.
+`fit_seed`. Both functions put your random state back as they found it.
 
 ``` r
 
@@ -465,6 +472,6 @@ report:
 > full dataset, which selected mtry = 2 and min_n = 2.
 
 Three things make it honest. The estimate is attributed to the procedure
-and not to the model, the instability is reported rather than hidden,
-and the deployed model is described as what it is: the same procedure
+and not to the model. The instability is reported rather than hidden.
+The deployed model is described as what it is: the same procedure
 applied to all the data, carrying no performance claim of its own.

@@ -80,26 +80,30 @@
 
     
     
-<p>Nested cross-validation fits many models, and the outer folds are
-independent of one another. <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> and its
-siblings run those folds on <a href="https://mirai.r-lib.org/" class="external-link">mirai</a>
-daemons when a pool is connected, and serially otherwise. Nothing in the
-call changes between the two. This page starts a pool of two daemons,
-runs the getting-started guide’s loop on it, shows the result identical
-to the same run made serially, and says when a pool pays. What the call
-checks before it dispatches, what it sends to each daemon, and what
-happens on an interrupt are under the parallel section of
-<code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code>.</p>
+<p>A nested run fits many models, and you may want it to finish sooner.
+The outer folds do not depend on one another, so they can run at the
+same time. <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> and its siblings run them on
+<a href="https://mirai.r-lib.org/" class="external-link">mirai</a> daemons, separate R
+processes, when a pool of daemons is connected. Without a pool, the
+folds run one after another. Nothing in the call changes between the
+two.</p>
+<p>This page starts a pool of two daemons and runs the getting-started
+guide’s loop on it. It then shows that the result is identical to the
+same run made serially. Last, it says when a pool pays. The parallel
+section of <code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> says what the call checks
+before it dispatches, what it sends to each daemon, and what happens on
+an interrupt.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-design-and-the-workflow">The design and the workflow<a class="anchor" aria-label="anchor" href="#the-design-and-the-workflow"></a>
 </h2>
-<p>These are the guide’s, unchanged: five outer folds of
-<code>mtcars</code>, five inner folds under each, a random forest with
-two parameters marked for tuning, and a grid of six candidates.
-<code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> walks through each of them.</p>
+<p>These are the guide’s, unchanged. There are five outer folds of
+<code>mtcars</code>, five inner folds under each, and a random forest
+with two parameters marked for tuning. The grid holds six candidates,
+the settings to try. <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> walks through
+each of them.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -120,28 +124,29 @@ two parameters marked for tuning, and a grid of six candidates.
 <div class="section level2">
 <h2 id="the-pool">The pool<a class="anchor" aria-label="anchor" href="#the-pool"></a>
 </h2>
-<p>Parallelism is switched on by connecting daemons and off by
+<p>You switch parallelism on by connecting daemons and off by
 disconnecting them. There is no argument on the loop functions for it.
 <code><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">mirai::daemons()</a></code> starts the pool, and
-<code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">mirai::status()</a></code> reports how many daemons are connected. Two
-or more is the threshold, the same one tune uses.</p>
+<code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">mirai::status()</a></code> reports how many daemons are connected.
+With two or more connected, the folds go out to the daemons; with fewer,
+they run in the session, the same rule tune uses.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">status</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">connections</span></span>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 <p>Each daemon is a separate R process. It loads nestedtune and the
-packages the workflow needs from an installed library, and the first
-parallel call after starting a pool is the slow one, since it is what
-makes each daemon load the tidymodels stack.</p>
+packages the workflow needs from an installed library. So the first
+parallel call after starting a pool is the slow one, since it makes each
+daemon load the tidymodels stack.</p>
 </div>
 <div class="section level2">
 <h2 id="the-same-call">The same call<a class="anchor" aria-label="anchor" href="#the-same-call"></a>
 </h2>
-<p>With a pool connected the outer folds are dispatched to the daemons,
-and each fold’s inner tuning runs serially on its daemon, because
-parallelism inside a fold on top of parallelism across folds would
-oversubscribe the cores.</p>
+<p>With a pool connected, the outer folds are sent to the daemons. Each
+fold’s inner tuning runs serially on its daemon. Parallelism inside a
+fold on top of parallelism across folds would oversubscribe the
+cores.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -176,10 +181,11 @@ same call runs serially.</p>
 <h2 id="the-same-result">The same result<a class="anchor" aria-label="anchor" href="#the-same-result"></a>
 </h2>
 <p>Each outer fold’s seeds are drawn from the session state at entry,
-fixed by the fold’s position in the design, before anything is
-dispatched, as <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains under
-Reproducibility. So the serial run under the same seed is the same
-procedure on the same resamples.</p>
+before anything is dispatched. A fold’s seeds depend on its position in
+the design, as <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains under
+Reproducibility. So a serial run under the same seed repeats the
+parallel run: the same procedure, meaning the same tune-and-fit steps,
+on the same resamples.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -195,23 +201,21 @@ procedure on the same resamples.</p>
 <span><span class="co">#&gt;     metrics    selected tuning_seed </span></span>
 <span><span class="co">#&gt;        TRUE        TRUE        TRUE</span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code> on the outer scores, the selections and the
-tuning seeds returns TRUE for each, and which run used daemons is not
-recoverable from either. That is what lets a pool be a matter of the
-session rather than of the analysis: a script gives the same answer on a
-laptop with no daemons and on a workstation with many.</p>
+tuning seeds returns TRUE for each. Neither result records whether
+daemons were used, so a script gives the same answer on a laptop with no
+daemons and on a workstation with many.</p>
 </div>
 <div class="section level2">
 <h2 id="a-pools-payoff">A pool’s payoff<a class="anchor" aria-label="anchor" href="#a-pools-payoff"></a>
 </h2>
 <p><code>mtcars</code> has 32 rows and the grid has 6 points, so each
-fold takes a fraction of a second, and two daemons loading the
-tidymodels stack cost more than the folds save. This page shows the
-parallel path working and its result matching the serial one, not a
-speedup. The speedup arrives where the folds are expensive: larger data,
-a bigger grid, a slower engine, or preprocessing the loop has to redo in
-every fold. The fit count in <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> says
-where the cost lives, and what is parallel here is the outer loop over
-that cost.</p>
+fold takes a fraction of a second. Two daemons loading the tidymodels
+stack cost more than the folds save. This page shows the parallel path
+working and its result matching the serial one, not a speedup. The
+speedup arrives where the folds are expensive: larger data, a bigger
+grid, a slower engine, or preprocessing the loop has to redo in every
+fold. The fit count in <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> says where the
+cost lives. A pool splits that cost across the outer folds.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
