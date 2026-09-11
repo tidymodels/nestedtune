@@ -1,6 +1,6 @@
 # M085: The help pages read on one pass for a tune_grid user
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M84
 - **Driving RR:** —
@@ -72,6 +72,7 @@ Rewrite every roxygen paragraph that a tidymodels user who has run `tune_grid()`
 - 2026-09-11: review pass 1 at `717d762` (defect return 1 of this milestone): AC2 fails on one block. The `summary.nested_final_fit` block (`R/nested-final-fit-print.R:91-140`) first uses `candidate` and `procedure` at line 127 ("read from the candidate record and the requested ones from the procedure"), a sentence that sets neither word up, and the block links `[nested_tune_grid()]` nowhere. AC1, AC4 and AC5 verified and ticked; AC3 (i)-(iii) and the AC6 document, test-file and pkgdown parts verified, their ticks withheld for the parts not taken (the AC3 (iv) reader is once per pass and was not spawned; `devtools::check()` was stopped unfinished at the return). Status → in-progress; the independent reviewers were not spawned this pass.
 - 2026-09-11: return 1 fixed. The `summary.nested_final_fit` "Components that are absent" sentence is rewritten without `candidate` or `procedure`. It now says the scored figures are counted from the tuning run's metrics table and the requested ones are the counts the search was called with. `--roxygen --terms` prints no occurrence of either word in that block. `--roxygen` and `--roxygen --spans` are clean, the four pinned test files pass (148, 177, 80, 156), and the banned-word grep is empty.
 - 2026-09-11: claim audit: 4 claims read, 0 corrected — `R/nested-final-fit-print.R` (a delta read by a fresh reader over the return's added lines only; the branch pass above stands).
+- 2026-09-11: `devtools::check()` at `5725b71`: 0 errors, 0 warnings, 0 notes (7m 59s); tree clean after `document()`. Status → review for pass 2.
 - 2026-09-11: T7 done at `708140f`. `--roxygen` and `--roxygen --spans` clean; `--roxygen --terms` read (`procedure`, `orchestrator`, `candidate` set up on `?nested_tune_grid`; every other block sets the word up in its sentence or links the grid page earlier; `reader` absent); AC4: 105 argument items within two sentences and 50 words, no recurring three-line prose window, no `%>%`, no nested `step_*()` first argument, the banned-word grep empty over `#'` lines, `man/*.Rd` and `_pkgdown.yml`, `devtools::run_examples()` exit 0 over 322 example lines; `devtools::check()` 0 errors, 0 warnings, 0 notes (9m 13s; an earlier run NOTEd an `Rplots.pdf` the example run left at top level, gitignored and removed); the four pinned test files pass; `pkgdown::check_pkgdown()` clean; NEWS bullet added. Status → review.
 
 ## Review
