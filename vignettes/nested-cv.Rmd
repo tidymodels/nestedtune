@@ -217,9 +217,9 @@ fold_rmse <- per_fold |>
 c(sd = sd(fold_rmse), std_err = sd(fold_rmse) / sqrt(length(fold_rmse)))
 ```
 
-The first number is how much the folds differ from each other, and the
-second is the `std_err` that `collect_metrics()` reports, the precision of
-their mean. Quoting the second as though it described the folds understates
+The first number is how much the folds differ from each other. The second
+is the `std_err` that `collect_metrics()` reports, which is the precision
+of their mean. Quoting the second as though it described the folds understates
 their disagreement. The other `autoplot()` view draws that spread, with a
 dashed line at the nested estimate.
 
@@ -228,7 +228,7 @@ autoplot(res, type = "performance")
 ```
 
 A tuned procedure is usually compared with something simpler, such as the
-same model with its parameters fixed, and `vignette("tuners")` scores such a
+same model with its parameters fixed. `vignette("tuners")` scores such a
 workflow on these same folds with `nested_fit_resamples()`.
 
 ## The model to deploy

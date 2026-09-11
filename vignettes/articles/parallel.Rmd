@@ -90,7 +90,8 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 Parallelism is switched on by connecting daemons and off by disconnecting
 them. There is no argument on the loop functions for it. `mirai::daemons()`
 starts the pool, and `mirai::status()` reports how many daemons are
-connected. Two or more is the threshold, the same one tune uses.
+connected. With two or more connected, the folds go out to the daemons;
+with fewer, they run in the session, the same rule tune uses.
 
 ```{r daemons}
 mirai::daemons(2)

@@ -107,8 +107,8 @@ holds one piece of what that fold did.
 names(res)
 ```
 
-`splits` is the fold's outer split, an ordinary rsample split whose analysis
-rows the tuning saw and whose assessment rows scored the fold's model.
+`splits` is the fold's outer split, an ordinary rsample split. The tuning
+saw its analysis rows, and its assessment rows scored the fold's model.
 
 ```{r splits}
 res$splits[[1]]
@@ -137,9 +137,9 @@ of the tuned parameters. It is what `collect_selections()`, `summary()`,
 res$.selected[[1]]
 ```
 
-`.inner_metrics` is the whole table the inner search scored, every candidate
-on every inner resample, averaged. It is what the fold's selection was made
-from. `collect_inner_metrics()` stacks it across folds, and
+`.inner_metrics` is the whole table the inner search scored: one row per
+candidate, its score averaged over the inner resamples. It is what the
+fold's selection was made from. `collect_inner_metrics()` stacks it across folds, and
 `vignette("tuners")` shows how its shape differs by search.
 
 ```{r inner-metrics}
@@ -168,23 +168,24 @@ drawn at entry and fixed by the fold's position in the design, as
 select(res, .tuning_seed, .outer_fit_seed)
 ```
 
-`.predictions` is there because the control asked for it. It holds each
-completed fold's predictions on its assessment rows, as `tune::last_fit()`
-returns them, with `.row` naming the row of the data. A run under the
-default control has no such column. A run whose control sets `extract` to a
-function has an `.extracts` column beside it, holding what that function
-returned for each fold's fitted workflow. A fold that failed holds `NULL`
-in either.
+`.predictions` is there because the control above set `save_pred = TRUE`.
+It holds each completed fold's predictions on its assessment rows, as
+`tune::last_fit()` returns them, with `.row` naming the row of the data. A
+run under the default control has no such column.
+
+A control that sets `extract` to a function adds an `.extracts` column the
+same way. It holds what that function returned for each fold's fitted
+workflow. A fold that failed holds `NULL` in either column.
 
 ```{r predictions}
 res$.predictions[[1]]
 ```
 
 The description of the run itself is stored on the object as attributes
-rather than columns. `extract_procedure()` returns the procedure, the record
-of what ran: which tuner, that tuner's own arguments such as the grid, and
-the control as it took effect. `nested_final_fit()` reruns what that record
-describes on the whole dataset.
+rather than columns. `extract_procedure()` returns it as the procedure, the
+record of what ran. That record names which tuner ran, that tuner's own
+arguments such as the grid, and the control as it took effect.
+`nested_final_fit()` reruns what the record describes on the whole dataset.
 
 ## The readers
 
@@ -258,8 +259,8 @@ autoplot(res, type = "performance")
 
 A fold that fails does not end the run. The other folds keep their results,
 and the fold that failed is recorded rather than dropped. To show that, the
-workflow below adds a range check on horsepower, which refuses to predict
-for a car whose horsepower lies outside the range the model was trained on.
+workflow below adds a range check on horsepower. The check refuses to
+predict for a car whose horsepower is outside the range seen in training.
 One car, the Maserati Bora, has far more horsepower than any other in
 `mtcars`. The fold that holds it out cannot score it, so that fold fails.
 The chunk mutes tune's progress messages and keeps its warnings.
@@ -300,9 +301,10 @@ resample failed but tuning still returned a candidate from the resamples
 that ran.
 
 On a run with a failed fold, the readers answer over the folds that
-completed. `summary()`, `collect_metrics()`, `agreement()`,
-`collect_selections()` and `collect_inner_metrics()` each warn once, with
-class `nestedtune_partial_summary`, saying how many folds the answer covers.
+completed. `summary()`, `collect_metrics()`, `collect_predictions()`,
+`collect_extracts()`, `agreement()`, `collect_selections()` and
+`collect_inner_metrics()` each warn once, with class
+`nestedtune_partial_summary`, saying how many folds the answer covers.
 `collect_notes()` reads every fold and warns about none. `autoplot()` leaves
 the failed fold's place on its axis empty.
 

@@ -48,16 +48,15 @@ was used up in selecting and fitting it.
 
 ## The quantity estimated
 
-Bayle et al. (2026) call the quantity the k-fold test error of the
-procedure. It is the error of running those four steps on the training rows
-each outer fold saw, then predicting fresh data drawn like the training
-data.
+The number is the error of the four steps, resample, tune, select, fit, run
+on each outer fold's training rows and scored on fresh data. Bayle et al.
+(2026) call that the k-fold test error of the procedure.
 
 Four things it is not. It is not the error of the deployed model, which is
 built afterwards on all the rows and estimated by nothing here. It says
 nothing about whether the deployed model's parameter values are the right
-ones. It says nothing about more rows or data from another source, since
-it ran on this training set alone. And it is not
+ones. It says nothing about more rows or other data, since it ran on this
+training set alone. And it is not
 that error averaged over every training set you might have drawn, which
 would describe the method rather than this data. Luo and Barber (2026) prove
 that any assumption-free test of that averaged quantity needs a dataset
@@ -98,11 +97,11 @@ Suppose you run the loop on two workflows and one comes back lower. Nothing
 in the output says whether the difference is real, because there is no
 valid interval to subtract. Bayle et al. (2026) give a sharper reason. A
 cross-validation interval for one procedure is valid when that procedure is
-stable, meaning the shift from changing one training row is small next to
-the spread of its errors. Two procedures can each be stable while their
-difference is not, and the difference is what needs the interval. That is
-worst when the two procedures are similar. A gap between two nested
-estimates is a reason to look closer, never a result.
+stable. Stable means that changing one training row shifts its errors by
+little, compared with how spread out those errors are. Two procedures can
+each be stable while their difference, the thing that needs the interval,
+is not, and that failure is worst when they are similar. A gap between two
+nested estimates is a reason to look closer, never a result.
 
 The same holds for a set of workflows run through one design with
 `nested_workflow_map()`. Picking the workflow with the best estimate is a
@@ -135,15 +134,15 @@ big grid, and a preprocessing step the loop has to redo.
 Nesting removes little when the data is tall and the search is small. Wilimitis
 and Walsh (2023) ran that case, 41,121 visits and a modest grid. Nesting
 bought nothing but the pessimism above, at a cost that grew quadratically in
-the fold count. Their advice, and this package's, is to nest when the
-feature space is wide relative to the sample, the search covers many
-algorithms and parameters, and the compute is affordable.
+the fold count. Their advice, and this package's: nest when there are many
+features for the sample size and the search is wide, if you can afford the
+compute.
 
 Small data is not safe without nesting. Vabalas et al. (2019) simulated
 pure noise, where the honest accuracy is 50%. Cross-validation without
 nesting still reported better than chance at a sample size of 1000. Nested
-cross-validation was indistinguishable from chance at 96.5% of the sample
-sizes tested. The bias thins with sample size and does not disappear.
+cross-validation stayed at chance at 96.5% of the sample sizes they tried,
+almost all of them. The bias thins with sample size and does not disappear.
 
 ## Feature selection inside the workflow
 

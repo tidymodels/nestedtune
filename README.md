@@ -15,11 +15,11 @@ best score. That score is optimistic, since you picked the winner for
 scoring well. nestedtune gives you an honest number instead. It builds a
 nested resampling design. It tunes each outer fold on its own inner
 resamples with tune or finetune, then scores the fold’s winner on rows
-the tuning never saw. It keeps what every fold chose. The mean of the
-outer scores estimates how well the whole procedure, every step from
-resampling to the final fit, performs on new data. The model to deploy
-is fitted afterwards by the same procedure on all the data. It is a
-separate object with no performance number of its own.
+the tuning never saw. It keeps what every fold chose. Those steps
+together, resample, tune, select, fit, are the procedure. The mean of
+the outer scores estimates how well that procedure performs on new data.
+The model to deploy is fitted afterwards by the same procedure on all
+the data. It is a separate object with no performance number of its own.
 
 ## Installation
 

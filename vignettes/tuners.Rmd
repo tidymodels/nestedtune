@@ -136,9 +136,9 @@ The print notes that the folds did not search the same grid. Each fold
 scored the same number of candidates, but not the same ones, because each
 fold proposes candidates from its own scores. With a grid, every fold picks
 from the same list, so you can count how many folds chose each candidate.
-Here no two folds saw the same list, and the note says so.
-The fit count follows the arithmetic in `vignette("nested-cv")`, with the
-candidates per fold now `initial + iter`.
+Here no two folds saw the same list, and the note says so. The fit count
+is the guide's arithmetic with `initial + iter` candidates per fold in
+place of the grid's rows.
 
 `.inner_metrics` holds what the search inside one fold saw. Here is the
 first fold's:
@@ -154,8 +154,8 @@ bayes_iter <- range(bayes$.inner_metrics[[1]]$.iter)
 The `.iter` column says which stage each candidate came from. An `.iter` of
 `r bayes_iter[1]` marks the initial set, and the proposals run up to
 `r bayes_iter[2]`. A `tune::control_bayes()` passed as `control` reaches the
-inner call in every fold. One that stops the search early shows in this
-column as a fold whose `.iter` stops short of `iter`. `?nested_tune_bayes`
+inner call in every fold. If the control stops a fold's search early, that
+fold's `.iter` values stop short of `iter`. `?nested_tune_bayes`
 says which of its slots this package sets for itself.
 
 ## Racing
@@ -318,11 +318,10 @@ extract_procedure(baseline)$tuner
 collect_metrics(baseline)
 ```
 
-The functions that read a result answer on the baseline as they do on a
-tuned run, except the parameters plot, which has nothing to draw. Its
-`.selected` column holds an empty
-table on every fold, since nothing was chosen, so `collect_selections()` and
-`agreement()` return zero rows. The per-fold metrics join those of a tuned
+Every function that reads a tuned result also reads the baseline. The one
+exception is the parameters plot, which has nothing to draw. The baseline's
+`.selected` column holds an empty table on every fold, since nothing was
+chosen, so `collect_selections()` and `agreement()` return zero rows. The per-fold metrics join those of a tuned
 run by fold label:
 
 ```{r baseline-join}
@@ -387,11 +386,10 @@ mapped
 
 The baseline has nothing to tune. So it ran through `nested_fit_resamples()`
 instead of the function that `fn` names, and the print says so beside its
-id. Each row's
-`result` is the object the named function returns for that workflow.
-Calling that function by hand, with the same arguments and the same seed,
-would give the same object. So everything the earlier sections read off one result reads
-off a row here.
+id. Each row's `result` is the object the named function returns for that
+workflow. Calling that function by hand, with the same arguments and the
+same seed, would give the same object. So each row can be read exactly as
+the earlier sections read a single result.
 
 ```{r wset-metrics}
 collect_metrics(mapped)
