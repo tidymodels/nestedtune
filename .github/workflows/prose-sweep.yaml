@@ -8,9 +8,13 @@
 # See the matching block in R-CMD-check.yaml; every copy of this list must stay
 # identical, which `.github/ci-usage.py` enforces by comparing each block it
 # parses against the others and refusing to run when they differ.
+#
+# Unlike the other workflows, `push` here carries no `branches` filter: the
+# job costs about a minute, and a PR opens only at the merge gate, so a sweep
+# on every branch push is what tells the author about a hit before then. The
+# concurrency block below keeps a burst of pushes to one branch at one run.
 on:
   push:
-    branches: [main, master]
     paths-ignore:
       - 'cairn/**'
       - 'CLAUDE.md'
@@ -20,11 +24,6 @@ on:
       - 'cairn/**'
       - 'CLAUDE.md'
       - '.claude/**'
-  # `push` above fires on the default branch alone and a PR opens at the
-  # merge gate, so a branch is swept on demand: `gh workflow run
-  # prose-sweep.yaml --ref <branch>`. The dispatch is how the planted-defect
-  # runs the M088 work log records were made.
-  workflow_dispatch:
 
 name: prose-sweep.yaml
 
