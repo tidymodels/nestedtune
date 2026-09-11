@@ -18,7 +18,7 @@
 #' @param inside The inner resampling, as an unevaluated call such as
 #'   `vfold_cv(v = 5)`. It is evaluated once per outer fold, so an existing
 #'   object is refused.
-#' @param ... Not used; must be empty. The three arguments above are all
+#' @param ... Not used. It must be empty. The three arguments above are all
 #'   required, so a mistyped fourth is an error here.
 #'
 #' @return An object of class `nested_resamples`, which also carries the classes
@@ -44,7 +44,8 @@
 #' `as.data.frame(split)`, so every outer fold holds its own copy of that fold's
 #' analysis set. `nested_resamples()` runs the same specification against the
 #' same frame, keeps only the row indices it produces, and points them back at
-#' `data`. The index vectors remain, as they do in rsample; the copies are gone.
+#' `data`. The index vectors remain, as they do in rsample, but the copies are
+#' gone.
 #'
 #' Sizes below are multiples of the source data, measured on
 #' `mlbench::LetterRecognition` (20000 x 17) with five inner folds under

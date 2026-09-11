@@ -33,11 +33,11 @@
 #' `tuner` names the tune or finetune function that ran, with that tuner's
 #' own arguments beside it:
 #'
-#' - `"tune_grid"`, with `grid`;
-#' - `"tune_race_anova"` or `"tune_race_win_loss"`, also with `grid`;
-#' - `"tune_bayes"`, with `iter`, `initial` and `objective`;
-#' - `"tune_sim_anneal"`, with `iter` and `initial`;
-#' - `"fit_resamples"`, for a run with nothing to tune, with none.
+#' - `"tune_grid"`, with `grid`
+#' - `"tune_race_anova"` or `"tune_race_win_loss"`, also with `grid`
+#' - `"tune_bayes"`, with `iter`, `initial` and `objective`
+#' - `"tune_sim_anneal"`, with `iter` and `initial`
+#' - `"fit_resamples"`, for a run with nothing to tune, with none
 #'
 #' `select` is the [selection_rule()] each fold selected by. `param_info`,
 #' `event_level` and `eval_time` are as they were given. `control` is the

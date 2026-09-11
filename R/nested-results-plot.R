@@ -55,7 +55,7 @@
 #' folds stand behind it, and the subtitle says how much of the requested
 #' design ran. A panel reading `mtry (2 of 3 chose)` or `rmse (from 2
 #' folds)` had fewer than the run completed, and an unqualified one had
-#' them all. A requested metric that no completed fold could score keeps
+#' them all. A requested metric that no completed fold scored keeps
 #' an empty panel rather than disappearing.
 #'
 #' The selected-value axis is numeric when every value drawn is a number

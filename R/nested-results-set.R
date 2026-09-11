@@ -20,7 +20,7 @@
 #' per-fold tables the same way.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
-#' @param ... Not used; must be empty, so an argument given here is an error
+#' @param ... Not used. It must be empty, so an argument given here is an error
 #'   and not a silent no-op.
 #' @param summarize Whether to average each workflow's per-fold metrics
 #'   (`TRUE`, the default) or return them one row per outer fold (`FALSE`),
@@ -52,7 +52,7 @@
 #' A control reaches each workflow of a set through the call's `...` or through
 #' its own `option` entry, so one workflow can have kept what another did not.
 #' `collect_predictions()` and `collect_extracts()` therefore refuse a set in
-#' which a workflow that would contribute rows lacks the column. The refusal
+#' which a workflow that contributes rows lacks the column. The refusal
 #' has class `nestedtune_column_not_saved` and names the workflow.
 #'
 #' An element's table that already has a `wflow_id` column, a parameter given
@@ -212,12 +212,12 @@ stack_set <- function(
 #' of [autoplot.nested_results()] across them, and [agreement()] stacks
 #' each workflow's selection table under its id.
 #'
-#' @param x,object A `nested_results_set` from [nested_workflow_map()]; for
+#' @param x,object A `nested_results_set` from [nested_workflow_map()]. For
 #'   the print method, the `summary.nested_results_set` that `summary()`
 #'   returns.
 #' @param type Which view to draw: `"parameters"` (the default) or
 #'   `"performance"`, as on [autoplot.nested_results()].
-#' @param ... Not used; must be empty, so an argument given here is an error
+#' @param ... Not used. It must be empty, so an argument given here is an error
 #'   and not a silent no-op.
 #'
 #' @return
@@ -320,7 +320,7 @@ NULL
 #' of the tuner that ran for it.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
-#' @param ... Not used; must be empty.
+#' @param ... Not used. It must be empty.
 #'
 #' @return `x`, unchanged and invisible.
 #'
@@ -387,7 +387,7 @@ orchestrator_label <- function(name) {
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param id The `wflow_id` of the workflow to return, one of `x$wflow_id`.
-#' @param ... Not used; must be empty.
+#' @param ... Not used. It must be empty.
 #'
 #' @return The workflow, untrained, as the set held it. An `id` naming no
 #'   row of the set is refused with class `nestedtune_unknown_id`.

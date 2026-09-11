@@ -193,7 +193,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' @param x A `nested_results` run with a control that asked for the column.
 #'   See [collect_metrics.nested_results()] for what the object is.
-#' @param ... Not used; must be empty. tune's `summarize` and `parameters`
+#' @param ... Not used. It must be empty. tune's `summarize` and `parameters`
 #'   arguments are not offered here.
 #'
 #' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated

@@ -709,7 +709,7 @@ new_tbl <- function(cols) {
 #'   siblings.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
-#' @param ... Not used; must be empty. An argument passed here is an error
+#' @param ... Not used. It must be empty. An argument passed here is an error
 #'   rather than silently ignored.
 #'
 #' @return A tibble, described under What the two shapes hold.
@@ -744,7 +744,7 @@ new_tbl <- function(cols) {
 #' deviation of the per-fold scores over the square root of how many there
 #' were. It measures the precision of that mean, not the fold-to-fold spread,
 #' which is larger by the same square-root factor. It is not a confidence
-#' interval, and one should not be built from it.
+#' interval, and you must not build one from it.
 #'
 #' You cannot get a valid standard error from the fold scores. That limit
 #' is the statistics', not this implementation's. Outer fold scores are not
