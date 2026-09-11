@@ -7,7 +7,7 @@
 - **Principles touched:** —
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the four guides, the parallel article and the README are the package's reader-facing pages
-- **Branch/PR:** `m086-guides-plain-sweep`
+- **Branch/PR:** `m086-guides-plain-sweep` · https://github.com/tidymodels/nestedtune/pull/98
 
 ## Goal
 
