@@ -44,7 +44,7 @@
 - [x] T1: Add `--list-pages` and `--list-gating` to `benchmarks/sweep-prose.R`. Each reads the one declaration the script holds. Document both in the header's Modes block.
 - [x] T2: Rewrite the real-pages block of `tests/testthat/test-sweep-prose.R`. It reads `--list-pages` for its page list and `--list-gating` for its `modes` list. Both hardcoded copies go.
 - [x] T3: Replace the mode enumeration in the `consistency-gate` slot of `cairn/PROFILE.md` with a pointer at `--list-gating`. Leave the `verify` slot's two plain modes as they are.
-- [ ] T4: Compare `--list-gating` against the workflow's six steps and record the comparison. Update the yaml comment to say that the script owns the list.
+- [x] T4: Compare `--list-gating` against the workflow's six steps and record the comparison. Update the yaml comment to say that the script owns the list.
 - [ ] T5: Run `Rscript -e 'devtools::test()'`, then `Rscript -e 'devtools::check()'`, then the six gating sweeps, then `air format --check` on the touched R files.
 
 ## Work log
@@ -57,6 +57,7 @@
 - 2026-09-12: question gate chose full command lines for `--list-gating`. The output then compares line for line against the workflow's `run:` lines. It also chose the effective page list for `--list-pages`, so `--pages` replaces it as in every other mode.
 - 2026-09-12: T1 done. `benchmarks/sweep-prose.R` gained a `gating` vector and the two listing modes, both exiting 0, and the header's Modes block documents them. Suite clean, 9854 passing.
 - 2026-09-12: T2 done. The real-pages block reads `--list-pages` and `--list-gating` and names no page path. What it states independently is shape: six pages that exist, six invocations, one of them bare, three reading roxygen. Suite clean, 9862 passing.
+- 2026-09-12: T4 done. `diff <(Rscript benchmarks/sweep-prose.R --list-gating) <(sed -n 's/^ *run: //p' .github/workflows/prose-sweep.yaml)` is empty, so the six steps are the six invocations in that order and the job runs no other sweep step. The yaml comment now names the script's `gating` vector as the one declaration and the steps as its one accepted copy.
 - 2026-09-12: T3 done. The `consistency-gate` slot names no sweep mode. It tells the reader to run each command `--list-gating` prints. The `verify` slot's two plain modes are untouched.
 - 2026-09-12: both new reads proved able to fail. A `--plain` swapped to `--openings` in the `gating` vector turned the block red naming that mode. A page dropped from `pages` turned it red on the count.
 
