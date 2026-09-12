@@ -24,7 +24,7 @@ cairn-file checks (`cairn_validate`, coverage completeness, `cairn_impact`):
 - The declared changelog (`## changelog` slot) has an entry for this milestone's user-visible changes (no milestone numbers in user-facing text).
 - New top-level files have `.Rbuildignore` entries (check `check()` NOTEs).
 - Full check at review: `Rscript -e 'devtools::check()'` clean (0 errors, 0 warnings; justify NOTEs).
-- The six gating prose sweeps clean: `Rscript benchmarks/sweep-prose.R`, `--spans`, `--plain`, and each of the three with `--roxygen` (also run by `prose-sweep.yaml` and `tests/testthat/test-sweep-prose.R`).
+- Every gating prose sweep clean: run each command `Rscript benchmarks/sweep-prose.R --list-gating` prints. The script owns that list. `prose-sweep.yaml` and `tests/testthat/test-sweep-prose.R` read it from there.
 
 ## test-doctrine
 R-mechanical test expectations layered on the universal "What gets a test"
