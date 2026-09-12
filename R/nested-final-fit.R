@@ -148,7 +148,7 @@
 #' produced this model, measured on rows no part of that procedure ever
 #' saw. It is the number to report for this model, and no second number is
 #' computed on the model itself. The metrics inside the tuning run stored
-#' on it are not one either. They were computed on the resamples that chose
+#' on it are not a number to report. They were computed on the resamples that chose
 #' the candidate, so they are selection-time quantities, optimistically
 #' biased as a claim about this model. `collect_metrics()` on `x$tuning`
 #' hands them over without saying so.

@@ -43,10 +43,10 @@ printed lines. Those are the full-data tuning run the selection came
 from, which search ran it and at what counts, how many parameter
 settings it scored, and which values it chose.
 
-The \code{estimate} component is always \code{NULL}, and that is the point. The
-stored tuning run's metrics are selection-time quantities, so this object
-records the absence of a performance number rather than leaving the name
-out. See \code{\link[=nested_final_fit]{nested_final_fit()}} for the number to report instead.
+The \code{estimate} component is always \code{NULL}. The number to report for this
+model is the nested estimate on the results object the fit was built
+from, and the stored tuning run's metrics are selection-time quantities.
+See \code{\link[=nested_final_fit]{nested_final_fit()}} for the number to report.
 }
 \section{Components that are absent}{
 

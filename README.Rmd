@@ -24,18 +24,19 @@ knitr::opts_chunk$set(
 You tune a model with cross-validation, keep the setting with the best
 score, and then score that setting once on a held-out test set. That test
 score is one number from one split of the data, and nothing in it says
-whether the split is representative. The tuning score is worse: it is
-optimistic, because you picked the winner for scoring well. nestedtune
-scores the whole tune-and-fit procedure on several outer splits instead.
-It tunes each outer fold on its own inner resamples with tune or finetune,
-fits the fold's winner, and scores that fit on rows the tuning never saw.
-It keeps what every fold chose.
+whether the split is representative. nestedtune scores the whole
+tune-and-fit procedure on several outer splits instead. The outer scores
+give the mean across those splits and show how far the score moves from
+one split to the next. Each outer fold tunes on its own inner resamples
+with tune or finetune, so no outer score is the score that picked its
+fold's winner. The score that picks a winner tends to be optimistic,
+because the winner was picked for scoring well. nestedtune keeps what
+every fold chose.
 
 The mean of the outer scores is the number to report for the model you
-deploy. The spread across folds shows how far one split can move that
-number. The deployed model is the same procedure run once more on all the
-data, so the estimate is its number, and there is no second one to
-compute.
+deploy. The deployed model is the same procedure run once more on all the
+data. The estimate is the number to report for it, and there is no second
+one to compute.
 
 ## Installation
 

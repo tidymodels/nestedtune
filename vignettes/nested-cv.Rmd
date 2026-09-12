@@ -333,7 +333,8 @@ cat(sprintf(
     "estimated RMSE of %.2f (SE %.2f) for the procedure. Across those %d ",
     "folds, selection took %d distinct values of `mtry` and %d of `min_n`. ",
     "The deployed model was produced by applying the same procedure to the ",
-    "full dataset, which selected mtry = %d and min_n = %d."
+    "full dataset, which selected mtry = %d and min_n = %d. The estimate ",
+    "above is the number reported for that model."
   ),
   nrow(grid),
   nrow(folds$inner_resamples[[1]]),
@@ -349,8 +350,8 @@ cat(sprintf(
 ))
 ```
 
-Three things make it honest. The estimate is the number reported for the
-deployed model, and it is attributed to the procedure that built that
-model. The instability is reported rather than hidden. The deployed model
-is described as what it is: the same procedure applied to all the data,
-with the estimate as its number.
+Three things make it honest. The estimate describes the procedure that
+built the deployed model, and it is the number reported for that model.
+The instability is reported rather than hidden. The deployed model is
+described as what it is: the same procedure applied to all the data, so
+there is no second number to compute for it.

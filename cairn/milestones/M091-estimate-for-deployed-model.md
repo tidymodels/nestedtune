@@ -1,6 +1,6 @@
 # M091: The docs give the nested estimate as the number to report for the deployed model
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,7 +21,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 
 ## Acceptance criteria
 
-- [ ] AC1: Each of the ten prose extents T1 to T4 name, by file and line range at `27b4efd`, differs in prose from its text at that commit. Evidence: for each extent, its lines from `git show 27b4efd:<file>` and the paragraph at HEAD in its place are shown with whitespace collapsed, and are unequal. The HEAD paragraph is the run `Rscript benchmarks/sweep-prose.R --paragraphs` prints for that line.
+- [ ] AC1: Each of ten prose extents at `27b4efd` differs in text from the extent that replaces it at HEAD, both compared with whitespace collapsed. These ranges supersede the ranges T1 to T4 name. Each old extent is a line range from `git show 27b4efd:<file>` that starts and ends on a paragraph or list-item edge. Each HEAD extent is the paragraph `Rscript benchmarks/sweep-prose.R --paragraphs` prints with the opening named for it, or, for the README list item, that item's two lines. The pairs, old range then HEAD opening: vignettes/estimate.Rmd 25-29, "You tune with cross-validation". vignettes/estimate.Rmd 41-45, "The number `collect_metrics()` reports is the number to". vignettes/estimate.Rmd 49-52, "The number `collect_metrics()` reports is the procedure's error". vignettes/estimate.Rmd 54-65, "The estimate has a scope.". vignettes/nested-cv.Rmd 235-239, "The estimate above is the number to report.". vignettes/nested-cv.Rmd 352-355, "Three things make it honest.". README.Rmd 24-34, the two paragraphs opening "You tune a model with cross-validation" and "The mean of the outer scores". README.Rmd 80-81, the list item opening "- [What the estimate means]" and its one wrapped line. vignettes/results.Rmd 233-238, "`agreement()` counts the selections.". vignettes/tuners.Rmd 436-439, "What the set does not offer". The README chunk comments at 67 and 70 are outside this criterion. Evidence: both sides of each pair with their line ranges, whitespace collapsed, shown unequal.
 - [x] AC2: On `README.Rmd`, `vignettes/estimate.Rmd` and `vignettes/nested-cv.Rmd`, the first prose sentence saying what the reader reports for the deployed model comes before the first prose line matching `grep -nE -i 'is not|has no|no performance'`. On `vignettes/results.Rmd` and `vignettes/tuners.Rmd`, the first prose sentence mentioning the deployed model says what number to report for it. Prose is the output of `awk '/^```/{f=!f;next} !f' <file>` with the YAML header dropped (the first two `^---$` lines and what lies between). Evidence: `file:line` and the quoted sentence at each site.
 - [ ] AC3: `README.Rmd`'s opening and the first paragraph of `vignettes/estimate.Rmd`'s case-for-nesting section each state three facts before the selection-bias explanation. Tuning with cross-validation and then scoring the winner once on a test set gives one score from one split. The outer folds give the mean and how far the score moves between splits. Each outer fold tunes on its own, so no outer score is a winner's own score. Every sentence names its referent (no "the usual path" without saying of what) and carries no interpolated list of steps. Evidence: the sentences quoted with `file:line`.
 - [ ] AC4: `vignettes/nested-cv.Rmd` and `vignettes/estimate.Rmd` each keep one paragraph that says three things (IP3's documentation obligation). The estimate describes the tune-and-fit procedure. It is the number to report for the model the user deploys. The deployed model is that same procedure run on all the data, so there is no second number to compute for it. Evidence: the two paragraphs quoted. (RB tripwire: ip-touching)
@@ -31,13 +31,13 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 
 ## Coverage
 
-- AC1 → T1, T2, T3, T4
-- AC2 → T1, T2, T3, T4
-- AC3 → T1, T3
-- AC4 → T1, T2
-- AC5 → T1, T2, T3, T4, T5
-- AC6 → T5
-- AC7 → T6, T7
+- AC1 → T1, T2, T3, T4, T8
+- AC2 → T1, T2, T3, T4, T8
+- AC3 → T1, T3, T8
+- AC4 → T1, T2, T8
+- AC5 → T1, T2, T3, T4, T5, T8
+- AC6 → T5, T8
+- AC7 → T6, T7, T8
 
 ## Tasks
 
@@ -48,6 +48,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - [x] T5: Help pages and print. Roxygen at `R/nested-final-fit.R:24-26` and `:146-150`, `R/nested-final-fit-print.R:14-19` and `:101`, `R/nested-tune-grid.R:14-18`, `R/nested-results.R:705`, `R/nested-results-agreement.R:19`. The printed message at `R/nested-final-fit-print.R:58-60` and `:365-367` is one string used twice, so hoist it to one constant. Update `tests/testthat/test-nested-final-fit-print.R:19`, `:100` and `:158` to the new message, re-accept `_snaps/nested-final-fit-print.md`, run `devtools::document()`. `Rscript benchmarks/sweep-prose.R --roxygen --plain` clean.
 - [x] T6: Run every AC7 command and record each result in the work log. Make sure that `git diff 27b4efd -- cairn/DESIGN.md` is empty.
 - [x] T7: Write the reader prompt as one work-log line: the two AC7 questions, the five page paths, and the instruction to list paragraphs with one line of reason each. Review takes the report from it unchanged.
+- [x] T8: Review return 1 fixes. README.Rmd's opening states the one-split, mean-and-spread and fold-tunes-on-its-own facts before the sentence on the winner's optimistic score (AC3). nested-cv.Rmd's honesty paragraph states all three AC4 facts. `?print.nested_final_fit` says the estimate describes the procedure that produced the model (AC6). Fix the reviewer findings on lines this branch added. These are the spread claims, the "its number" phrasing IP3 forbids and the stale `augment()` and `summary()` help. They also include the unclear tuning-metrics referent, the stale comments, the long lines and the split inline code. Re-run every AC7 command except the reader report, which review takes.
 
 ## Work log
 
@@ -71,6 +72,14 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - 2026-09-12: claim audit: 28 claims read, 0 corrected — README.Rmd, README.md, vignettes/estimate.Rmd, vignettes/nested-cv.Rmd, vignettes/results.Rmd, vignettes/tuners.Rmd, R/nested-final-fit.R, R/nested-final-fit-print.R, R/nested-tune-grid.R, R/nested-results.R, R/nested-results-agreement.R, man/, tests. The reader's one non-claim note, a comment line over 80 columns, was rewrapped at `601da58`.
 - 2026-09-12: all tasks checked, verify clean. Status set to review.
 - 2026-09-12: review return 1 (defect return, count 1). AC3 fails on README.Rmd, because the mean-and-spread and fold-tunes-on-its-own facts come after the selection-bias sentence at 27-29 and the no-winner's-score fact is absent. AC4 fails on nested-cv.Rmd, because no one paragraph states all three facts. AC6 fails on `?print.nested_final_fit`, which never says the estimate describes the procedure that produced the model. AC1's evidence recipe prints no HEAD paragraph for the README link blurb, a list item, and needs a gated amendment. Evidence and 19 untriaged reviewer findings are in the Review section. Status back to in-progress.
+- 2026-09-12: re-audit: AC1 (full) — the first proposed wording kept old ranges off paragraph edges (estimate.Rmd 22-28, 40-44, 54-64, README.Rmd 25-34 and 81-82), so some pairs differed without a rewrite, dropped "prose" from the count of ten and left the list-item extent to judgment. The wording was rebuilt on verified edges with HEAD openings.
+- 2026-09-12: re-audit: AC1 (full) — nothing blocking. Three minor points: the HEAD side means the raw lines of the printed range and not the backtick-stripped prose, "differs in text" checks a touch and not content, and T1 and T3 still name the old ranges, which the amended text supersedes. Review compares raw lines.
+- 2026-09-12: amendment return: AC1 — "Each old extent is a line range from `git show 27b4efd:<file>` that starts and ends on a paragraph or list-item edge. Each HEAD extent is the paragraph `Rscript benchmarks/sweep-prose.R --paragraphs` prints with the opening named for it, or, for the README list item, that item's two lines." The user adopted it at the mini gate. It does not widen the promise.
+- 2026-09-12: minor amendment: T8 added for the review-return fixes, and every Coverage line now names T8.
+- 2026-09-12: claim audit: 42 claims read, 4 corrected — README.Rmd, README.md, vignettes/estimate.Rmd, vignettes/nested-cv.Rmd, vignettes/results.Rmd, vignettes/tuners.Rmd, R/nested-final-fit.R, R/nested-final-fit-print.R, R/nested-final-fit-predict.R, R/nested-results-agreement.R, R/nested-results.R, R/nested-tune-grid.R, man/, tests. The four were "no outer score is the score of a winner picked for scoring well" (README and estimate.Rmd), an unqualified "optimistic" (README), "that workflow's row above" (tuners.Rmd) and a print-file comment naming an Estimate heading the plain print lacks.
+- 2026-09-12: T8 done. README.Rmd's opening now gives the one-split, mean-and-spread and fold-tunes-on-its-own facts before the sentence on the winner's score. nested-cv.Rmd's honesty paragraph states all three AC4 facts, and its write-up template now ties the estimate to the deployed model. `?print.nested_final_fit` says the estimate describes the procedure. Reviewer findings 3 to 6 and 13 to 17 and the blame reviewer's two were fixed. Findings 7 and 8 were fixed with the template and the "its number" rewording. Findings 9 to 12 were left for review triage, except 11 and 12, which the README and estimate.Rmd rewrites removed.
+- 2026-09-12: T8 checks. All six gating sweeps exit 0. Word counts 300 / 1444 / 1303 / 1439 / 1399. A second `devtools::build_readme()` left `README.md` unchanged. `pkgdown::build_articles()` exit 0. `devtools::check()` 0 errors, 0 warnings, 0 notes (9m 31s). The AC5 grep is empty on all ten files. `git diff 27b4efd -- cairn/DESIGN.md` is empty.
+- 2026-09-12: all tasks checked, verify clean. Status set to review.
 
 ## Decisions
 

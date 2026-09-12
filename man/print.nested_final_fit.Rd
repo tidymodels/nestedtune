@@ -21,7 +21,8 @@ which number to report for this model. It also names the accessors that
 reach what selection saw.
 
 The number to report is the nested estimate from the results object the
-fit was built from, and the print says so. The stored tuning run has
+fit was built from, and the print says so. That estimate describes the
+procedure that produced this model. The stored tuning run has
 metrics, but selection consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why
 they are not this model's performance and the nested estimate is.
 }

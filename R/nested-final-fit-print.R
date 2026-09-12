@@ -7,7 +7,7 @@
 # saying where this model's honest estimate lives, because a print method is
 # where a user meets the object.
 
-# The one sentence both the print method and the summary print say under
+# The message the print method shows and the summary print shows under
 # Estimate (IP3): the number to report for this model lives on the results
 # object, and it describes the procedure that produced the model.
 final_fit_estimate_msg <- "Report the nested estimate from \\
@@ -23,7 +23,8 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' reach what selection saw.
 #'
 #' The number to report is the nested estimate from the results object the
-#' fit was built from, and the print says so. The stored tuning run has
+#' fit was built from, and the print says so. That estimate describes the
+#' procedure that produced this model. The stored tuning run has
 #' metrics, but selection consumed them. See [nested_final_fit()] for why
 #' they are not this model's performance and the nested estimate is.
 #'
@@ -101,10 +102,10 @@ print.nested_final_fit <- function(x, ...) {
 #' from, which search ran it and at what counts, how many parameter
 #' settings it scored, and which values it chose.
 #'
-#' The `estimate` component is always `NULL`, and that is the point. The
-#' stored tuning run's metrics are selection-time quantities, so this object
-#' records the absence of a performance number rather than leaving the name
-#' out. See [nested_final_fit()] for the number to report instead.
+#' The `estimate` component is always `NULL`. The number to report for this
+#' model is the nested estimate on the results object the fit was built
+#' from, and the stored tuning run's metrics are selection-time quantities.
+#' See [nested_final_fit()] for the number to report.
 #'
 #' @param object A `nested_final_fit` object from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit
@@ -174,9 +175,8 @@ print.summary.nested_final_fit <- function(x, ...) {
 #
 # `estimate` is carried and set to NULL rather than omitted. The number to
 # report for this object lives on the results object (IP3), and recording
-# that positively is the
-# same habit IP4 asks of the loop: what is true is written down, never left to
-# be inferred from a name that is not there.
+# that positively is the same habit IP4 asks of the loop: what is true is
+# written down, never left to be inferred from a name that is not there.
 new_summary_nested_final_fit <- function(x) {
   candidates <- scored_candidates(x$tuning)
   counts <- procedure_counts(candidates, x$procedure)

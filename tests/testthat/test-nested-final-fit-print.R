@@ -202,8 +202,8 @@ test_that("a summary with nothing to report drops the lines it cannot fill", {
 
   expect_match(out, "No tuned parameters")
   expect_no_match(out, "Full-data tuning")
-  # The heading and its sentence stand whether or not anything was tuned: this
-  # object never has an estimate, and that is what the section exists to say.
+  # The heading and its message stand whether or not anything was tuned: the
+  # section names the number to report for this model either way.
   expect_match(out, "number to report for\\s+this\\s+model")
 })
 

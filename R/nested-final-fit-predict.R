@@ -59,8 +59,8 @@
 #' Augmenting the rows this model was fit on gives in-sample residuals. They
 #' say how the model fits data it has already seen, not how it does on data it
 #' has not. The number to report is [collect_metrics()] on the results object
-#' the fit was built from. See [nested_final_fit()] for why this model has no
-#' number of its own.
+#' the fit was built from. See [nested_final_fit()] for why that is the
+#' number to report for this model.
 #'
 #' @template example-setup
 #' @template example-run

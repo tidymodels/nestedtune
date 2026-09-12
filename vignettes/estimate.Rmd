@@ -22,14 +22,14 @@ its cost. The worked example is `vignette("nested-cv")`.
 
 ## The case for nesting
 
-Most people tune with cross-validation, keep the best setting, and score
-it once on a held-out test set. That test score is one number from one
-split of the data. Nothing in it says whether the split is representative.
-Nested cross-validation scores the same tune-and-fit steps on several
-outer splits instead. It reports the mean across those splits and how far
-the score moves from one split to the next. Each outer split also tunes on
-its own, so no outer score is the score of a winner picked for scoring
-well.
+You tune with cross-validation, keep the best setting, and score it once
+on a held-out test set. That test score is one number from one split of
+the data. Nothing in it says whether the split is representative. Nested
+cross-validation scores the same tune-and-fit steps on several outer
+splits instead. Its outer scores give the mean across those splits and
+show how far the score moves from one split to the next. Each outer split
+also tunes on its own, so no outer score is the score that picked its
+split's winner.
 
 When you tune with cross-validation, you try several settings, the
 candidates, and keep the one with the best score. Scores are noisy, and the
@@ -49,8 +49,8 @@ never saw.
 The number `collect_metrics()` reports is the number to report for the
 model you deploy. It describes the whole tune-and-fit procedure, measured
 on rows the procedure never saw. The deployed model is that same procedure
-run once more on all the data. So the estimate is its number, and there is
-no second one to compute for it.
+run once more on all the data, so there is no second number to compute for
+it.
 
 ## The quantity estimated
 
@@ -63,8 +63,8 @@ itself, because everything the data can say went into building it. The
 estimate is not a verdict on the parameter values that one run chose. It
 does not say what a larger or a different training set gives, because the
 procedure ran on this one alone. And it is the error on this data, not
-that error averaged over every training set the same source can produce. That average
-describes the method rather than this data. Luo and Barber (2026) prove
+that error averaged over every training set the same source can produce.
+That average describes the method rather than this data. Luo and Barber (2026) prove
 that any assumption-free test of that method-level quantity needs a
 dataset many times larger than the training set. So this package offers
 no such test.
