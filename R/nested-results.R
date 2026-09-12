@@ -702,8 +702,9 @@ new_tbl <- function(cols) {
 #' @description
 #' Reports the nested cross-validation estimate from a [nested_tune_grid()]
 #' run or one of its siblings: what the tune-and-fit procedure achieves on
-#' data it never saw. It is not the performance of any model you have in
-#' hand.
+#' data it never saw. It is the number to report for the model you deploy,
+#' which [nested_final_fit()] builds by running that procedure once more on
+#' all the data.
 #'
 #' @param x A `nested_results` from [nested_tune_grid()] or one of its
 #'   siblings.

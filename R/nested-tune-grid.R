@@ -15,7 +15,7 @@
 #' whole procedure, not any one fitted model, and it is the number to
 #' report. No model is returned here. [nested_final_fit()] builds the model
 #' to deploy by running the recorded procedure once more on all the data,
-#' and that model has no performance number of its own.
+#' and the estimate is the number to report for that model.
 #'
 #' @details
 #' The same outer loop runs with other searches inside. Four siblings run

@@ -8,9 +8,9 @@
       Procedure: grid search, 3 candidates scored
       Selected: num_comp = 3
       
-      i This model has no performance estimate of its own. Report the nested estimate
-        from `collect_metrics()` on the results object this fit was built from, which
-        describes the procedure that produced it.
+      i Report the nested estimate from `collect_metrics()` on the results object
+        this fit was built from. It describes the procedure that produced this model,
+        and it is the number to report for this model.
       i Compare the parameters above with `.selected` from that run. Outer folds
         choosing differently is selection instability, and it is information about
         the procedure rather than noise.
@@ -36,9 +36,9 @@
       
       -- Estimate --
       
-      i This model has no performance estimate of its own. Report the nested estimate
-        from `collect_metrics()` on the results object this fit was built from, which
-        describes the procedure that produced it.
+      i Report the nested estimate from `collect_metrics()` on the results object
+        this fit was built from. It describes the procedure that produced this model,
+        and it is the number to report for this model.
       i The tuning run above has metrics, but selection consumed them.
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.
@@ -54,9 +54,9 @@
       iterations completed (2 requested)
       Selected: df1 = 1, df2 = 2
       
-      i This model has no performance estimate of its own. Report the nested estimate
-        from `collect_metrics()` on the results object this fit was built from, which
-        describes the procedure that produced it.
+      i Report the nested estimate from `collect_metrics()` on the results object
+        this fit was built from. It describes the procedure that produced this model,
+        and it is the number to report for this model.
       i Compare the parameters above with `.selected` from that run. Outer folds
         choosing differently is selection instability, and it is information about
         the procedure rather than noise.
@@ -84,9 +84,9 @@
       
       -- Estimate --
       
-      i This model has no performance estimate of its own. Report the nested estimate
-        from `collect_metrics()` on the results object this fit was built from, which
-        describes the procedure that produced it.
+      i Report the nested estimate from `collect_metrics()` on the results object
+        this fit was built from. It describes the procedure that produced this model,
+        and it is the number to report for this model.
       i The tuning run above has metrics, but selection consumed them.
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.

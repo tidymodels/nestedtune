@@ -17,12 +17,13 @@ error instead of leaving it silently ignored.}
 }
 \description{
 Shows what the full-data search was, which parameters it selected, and
-where this model's performance estimate comes from. It also names the
-accessors that reach what selection saw.
+which number to report for this model. It also names the accessors that
+reach what selection saw.
 
-No performance number appears. The stored tuning run has metrics, but
-selection consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why they are not this
-model's performance and the nested estimate is.
+The number to report is the nested estimate from the results object the
+fit was built from, and the print says so. The stored tuning run has
+metrics, but selection consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why
+they are not this model's performance and the nested estimate is.
 }
 \section{The procedure line}{
 

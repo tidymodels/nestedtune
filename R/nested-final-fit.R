@@ -21,9 +21,9 @@
 #' row, tunes with the recorded tuner, selects by the recorded
 #' [selection_rule()], and fits the finalized workflow on all the data.
 #'
-#' What comes back is the model to deploy. It carries no performance number
-#' of its own. The number to report is [collect_metrics()] on the results
-#' object you passed in, for the reason the section on what to report gives.
+#' What comes back is the model to deploy. The number to report for it is
+#' [collect_metrics()] on the results object you passed in, for the reason
+#' the section on what to report gives.
 #'
 #' @param object The [workflows::workflow()] the nested run was built around,
 #'   or a `nested_results_set` from [nested_workflow_map()] with `id` naming
@@ -146,9 +146,9 @@
 #' Report the estimate [collect_metrics()] returns from the results object
 #' you handed over. It describes the whole tune-and-fit procedure that
 #' produced this model, measured on rows no part of that procedure ever
-#' saw. It is the number to report for this model. The model has no
-#' performance number of its own. That includes the metrics inside the
-#' tuning run stored on it. They were computed on the resamples that chose
+#' saw. It is the number to report for this model, and no second number is
+#' computed on the model itself. The metrics inside the tuning run stored
+#' on it are not one either. They were computed on the resamples that chose
 #' the candidate, so they are selection-time quantities, optimistically
 #' biased as a claim about this model. `collect_metrics()` on `x$tuning`
 #' hands them over without saying so.
