@@ -435,5 +435,6 @@ autoplot(mapped)
 
 What the set does not offer is a ranking of its workflows or a fit of the
 best one. Choosing among them by these estimates is a selection the
-outer loop did not nest, as `vignette("estimate")` says. The final fit
-for one workflow of the set is `nested_final_fit(mapped, id = "forest")`.
+outer loop did not nest, as `vignette("estimate")` says. The model to
+deploy for one workflow of the set is `nested_final_fit(mapped, id =
+"forest")`, and that workflow's row above is the number to report for it.
