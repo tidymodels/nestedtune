@@ -7,7 +7,8 @@
 # dropped: the YAML header, everything between the first two `---` lines;
 # a fenced chunk with both its fence lines, the fence carrying leading
 # whitespace or not; an HTML comment, from a line opening with `<!--`
-# through the line holding `-->`; a badge line, one opening `[![`; a
+# through the line holding `-->`, or that opening line alone where no
+# `-->` follows it; a badge line, one opening `[![`; a
 # heading line, one opening `#`; and a list item, bulleted or numbered
 # (`[-*] ` or `[0-9]+. `, indented or not), together with the lines it
 # wraps onto, which run to the next blank line. A paragraph is a run of
@@ -310,8 +311,8 @@ rmd_paragraphs <- function(path) {
   if (length(yaml) >= 2L) {
     keep[yaml[1]:yaml[2]] <- FALSE
   }
-  # a fenced chunk, its fence line indented or not, is not prose; the YAML
-  # header is already out, so a `---` inside it never opens a fence
+  # a fenced chunk, its fence line indented or not, is not prose; the loop
+  # skips the YAML header, so a fence line inside it opens nothing
   fenced <- FALSE
   for (i in seq_along(lines)) {
     if (!keep[i]) {
@@ -326,14 +327,20 @@ rmd_paragraphs <- function(path) {
   }
   # an HTML comment runs from the line it opens on through the line holding
   # `-->`; a comment opened partway through a line of prose is not a comment
-  # line and leaves that line alone
+  # line and leaves that line alone. An opener with no `-->` under it closes
+  # nothing, so only its own line goes: a page is never silently emptied of
+  # the prose a sweep would otherwise read.
   open <- FALSE
   for (i in seq_along(lines)) {
     if (!keep[i]) {
       next
     }
     if (!open && grepl("^\\s*<!--", lines[i])) {
-      open <- TRUE
+      rest <- which(keep & seq_along(lines) >= i)
+      open <- any(grepl("-->", lines[rest], fixed = TRUE))
+      if (!open) {
+        keep[i] <- FALSE
+      }
     }
     if (open) {
       keep[i] <- FALSE
@@ -345,9 +352,14 @@ rmd_paragraphs <- function(path) {
   keep[grepl("^\\[!\\[", lines)] <- FALSE
   keep[grepl("^#", lines)] <- FALSE
   # a list item, bulleted or numbered, takes the lines it wraps onto with it;
-  # the run ends at the next blank line whatever those lines are indented by
+  # the run ends at the next blank line whatever those lines are indented by.
+  # A line already dropped is not read, so an item-shaped line inside the
+  # YAML header or a fenced chunk opens no run and takes no prose with it.
   item <- FALSE
   for (i in seq_along(lines)) {
+    if (!keep[i]) {
+      next
+    }
     if (!nzchar(trimws(lines[i]))) {
       item <- FALSE
       next

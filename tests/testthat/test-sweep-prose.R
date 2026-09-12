@@ -117,6 +117,59 @@ test_that("the parse drops every planted leak and keeps the prose beside it", {
   expect_identical(bare$lines, "clean")
 })
 
+# A dropped line never takes prose with it: the two shapes where the parse
+# could go quiet over a page rather than leak into it, each on a written page
+# rather than the committed fixture, which the block above counts paragraphs
+# on.
+
+test_that("an unclosed comment and a dropped item-shaped line take no prose", {
+  script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
+  skip_if_not(file.exists(script), "sweep-prose.R not in the source tree")
+
+  # base R rather than withr, which is deliberately not a dependency here
+  pages <- character()
+  on.exit(unlink(pages), add = TRUE)
+  plain <- function(text) {
+    page <- tempfile(fileext = ".Rmd")
+    pages <<- c(pages, page)
+    writeLines(text, page)
+    out <- suppressWarnings(system2(
+      "Rscript",
+      c(script, "--plain", "--pages", page),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+    as.character(sub("^.*:([0-9]+): ", "\\1: ", out))
+  }
+
+  # an opener with no `-->` under it closes nothing, so the prose below it is
+  # still read; a closed comment still takes its whole body
+  expect_identical(
+    plain(c("<!-- an opener with no closer", "", "It should be read.")),
+    c("3: modal: It should be read.", "1 hit(s)")
+  )
+  expect_identical(
+    plain(c("<!-- an opener", "It should not be read.", "-->")),
+    "clean"
+  )
+
+  # an item-shaped line the parser already dropped opens no run: it is read
+  # neither in the YAML header nor inside a fenced chunk
+  expect_identical(
+    plain(c("---", "author:", "  - Someone", "---", "It should be read.")),
+    c("5: modal: It should be read.", "1 hit(s)")
+  )
+  expect_identical(
+    plain(c("```yaml", "- an item shaped line", "```", "It should be read.")),
+    c("4: modal: It should be read.", "1 hit(s)")
+  )
+  # a real list item still takes the lines it wraps onto
+  expect_identical(
+    plain(c("- An item", "  it should not be read.")),
+    "clean"
+  )
+})
+
 # The six gating modes over the real pages and roxygen sources. Under
 # `R CMD check` the tests run from the built tarball, which `.Rbuildignore`
 # strips `benchmarks/` from, so this block skips there; the source tree and
