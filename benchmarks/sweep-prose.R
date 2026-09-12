@@ -58,8 +58,10 @@
 #                      `/`-separated alternatives split into their own
 #                      phrases (the `slop` vector below holds it)
 #   Rscript benchmarks/sweep-prose.R --list-pages
-#       the page list this run sweeps, one path per line, so `--pages`
-#       replaces it here as it does in every other mode; exits 0
+#       the page list the page modes sweep, one path per line, so `--pages`
+#       replaces it here as it does in every other mode; `--roxygen` does
+#       not change it, as that mode reads `R/` and `man-roxygen/` instead;
+#       exits 0
 #   Rscript benchmarks/sweep-prose.R --list-gating
 #       the gating invocations, one command per line: the modes that exit
 #       non-zero on a hit, over the pages and over the roxygen sources.

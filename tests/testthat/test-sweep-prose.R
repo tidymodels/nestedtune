@@ -206,12 +206,14 @@ test_that("the six gating sweeps are clean over the real sources", {
   expect_null(listed$status)
   pages <- listed$lines
   expect_length(pages, 6L)
+  expect_equal(anyDuplicated(pages), 0L)
   expect_true(all(file.exists(pages)))
 
   # so do the gating invocations, each the script call and its flags
   listed <- sweep("--list-gating")
   expect_null(listed$status)
   expect_length(listed$lines, 6L)
+  expect_equal(anyDuplicated(listed$lines), 0L)
   expect_true(all(
     startsWith(listed$lines, "Rscript benchmarks/sweep-prose.R")
   ))
