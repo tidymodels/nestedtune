@@ -3,10 +3,16 @@
 # sentence and its paragraph partition; the Modes block below names each.
 #
 # Pages: the four guides and the parallel article under `vignettes/`, and
-# `README.Rmd`. Prose is what is left after the YAML header (everything
-# between the first two `---` lines), fenced chunks, HTML comment lines,
-# heading lines and list-item lines are dropped and backtick spans (inline
-# `r` spans included) are removed. Sentences split at `.`, `?` or `!`
+# `README.Rmd`. Prose is what is left of a page once these lines are
+# dropped: the YAML header, everything between the first two `---` lines;
+# a fenced chunk with both its fence lines, the fence carrying leading
+# whitespace or not; an HTML comment, from a line opening with `<!--`
+# through the line holding `-->`; a badge line, one opening `[![`; a
+# heading line, one opening `#`; and a list item, bulleted or numbered
+# (`[-*] ` or `[0-9]+. `, indented or not), together with the lines it
+# wraps onto, which run to the next blank line. A paragraph is a run of
+# the lines left, and any dropped line ends one. Backtick spans (inline
+# `r` spans included) are then removed. Sentences split at `.`, `?` or `!`
 # followed by whitespace or the end of the text, with `et al.`, `e.g.`,
 # `i.e.` and `vs.` joined first; a word is a whitespace-separated token.
 #
@@ -23,12 +29,12 @@
 #       spans excluded, as `file:line: <k> spans: <text>` with each span
 #       shown as `•`; exits 1 on any hit
 #   Rscript benchmarks/sweep-prose.R --openings
-#       the first prose sentence of each page, badge lines (`[![`) dropped
-#       first, as `file:line: <text>`; exits 0
+#       the first prose sentence of each page, as `file:line: <text>`;
+#       exits 0
 #   Rscript benchmarks/sweep-prose.R --paragraphs
 #       every prose paragraph of each page, as `file:first-last: <opening
-#       words>`, `first` and `last` the lines of the paragraph's extent;
-#       exits 0
+#       words>`, `first` and `last` the lines of the paragraph's extent, so
+#       the partition above can be read off a page; exits 0
 #   Rscript benchmarks/sweep-prose.R --plain
 #       every prose sentence matching a plain clause, as
 #       `file:line: <clause name>: <text>`, one line per clause matched,
