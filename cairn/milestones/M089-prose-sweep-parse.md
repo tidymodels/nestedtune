@@ -45,7 +45,7 @@
 - [x] T2: Rewrite `rmd_paragraphs()` in `benchmarks/sweep-prose.R`. Drop a badge line in every mode. Match a fence line that carries leading whitespace. Drop every line of an HTML comment from its opening line through the line holding `-->`. Drop a bulleted or numbered list-item line together with the continuation lines up to the next blank line.
 - [x] T3: Rewrite the script header's prose definition and its `--openings` and `--paragraphs` mode entries, so that they state the partition T2 implements. Read each sentence against T1's fixture output.
 - [x] T4: Add one `test_that()` block over the fixture. Each expectation names the plant it covers, the straddling marker included.
-- [ ] T5: Run `--paragraphs` and AC3's grep over the six pages, and run the six gating sweeps. Record every output.
+- [x] T5: Run `--paragraphs` and AC3's grep over the six pages, and run the six gating sweeps. Record every output.
 - [ ] T6: Run `Rscript -e 'devtools::test()'`, then `Rscript -e 'devtools::check()'`, then `air format --check` on the two touched R files.
 
 ## Work log
@@ -61,6 +61,7 @@
 - 2026-09-11: T2 rewrote `rmd_paragraphs()`, and the `badges` argument went with it. Over the fixture `--paragraphs` now lists two paragraphs, at lines 11 and 25, so no planted line sits in a printed extent. `--plain` reports the straddling modal at line 11 alone and the bare sweep prints `clean`. Over the six pages `--paragraphs` lists 122 paragraphs. None holds a badge, comment, fence or list-item line. None opens on the line after an item. The nine paragraphs the branch point named are gone. The six gating sweeps print `clean` and exit 0. `devtools::test()` clean, 9826 pass. `air format --check` clean.
 - 2026-09-11: T3 restated the header's prose definition as the partition T2 implements, and dropped the badge clause from the `--openings` entry. Each clause was read against an execution. The fixture covers the comment, badge, fence, bulleted and numbered clauses. A scratch page covered the YAML, heading and indented-item clauses, its only paragraph the closing prose line. `devtools::test()` clean, 9826 pass. `air format --check` clean.
 - 2026-09-11: T4 added one `test_that()` block over the parse fixture, naming each plant by a string only that plant carries. No paragraph extent holds the badge, comment-body, indented-fence, bulleted-wrap or numbered-item line. The straddling modal is the one clause reported, at the right line. The bare sweep prints `clean`. The block is shown able to fail. Over the same fixture the branch-point script at `584f41d` lists 8 paragraphs rather than 2. It prints 4 `--plain` lines rather than 2, and ends the bare sweep on `1 hit(s)`. Suite 9849 pass, up 23 from 9826. `air format --check` clean.
+- 2026-09-11: T5 re-ran AC3's comparison and the six gating sweeps at the head. `--paragraphs` lists 122 paragraphs over the six pages, and a script crossing every extent with AC3's grep finds 0 violations. Counts per page: README 3, parallel 10, estimate 25, nested-cv 29, results 31, tuners 24, so no page's domain is empty. All six gating sweeps print `clean` and exit 0.
 
 ## Decisions
 
