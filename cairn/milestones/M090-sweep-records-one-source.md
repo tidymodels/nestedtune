@@ -1,13 +1,13 @@
 # M090: The sweep's page list and gating modes each have one source
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M089
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — the sweep's own page and mode records, none of them shipped in the built package
-- **Branch/PR:** —
+- **Branch/PR:** `m090-sweep-records-one-source`
 
 ## Goal
 
@@ -41,7 +41,7 @@
 
 ## Tasks
 
-- [ ] T1: Add `--list-pages` and `--list-gating` to `benchmarks/sweep-prose.R`. Each reads the one declaration the script holds. Document both in the header's Modes block.
+- [x] T1: Add `--list-pages` and `--list-gating` to `benchmarks/sweep-prose.R`. Each reads the one declaration the script holds. Document both in the header's Modes block.
 - [ ] T2: Rewrite the real-pages block of `tests/testthat/test-sweep-prose.R`. It reads `--list-pages` for its page list and `--list-gating` for its `modes` list. Both hardcoded copies go.
 - [ ] T3: Replace the mode enumeration in the `consistency-gate` slot of `cairn/PROFILE.md` with a pointer at `--list-gating`. Leave the `verify` slot's two plain modes as they are.
 - [ ] T4: Compare `--list-gating` against the workflow's six steps and record the comparison. Update the yaml comment to say that the script owns the list.
@@ -53,6 +53,9 @@
 - 2026-09-11: the duplication read at `c4bb5f9`. The page list sits in `benchmarks/sweep-prose.R` and again in `tests/testthat/test-sweep-prose.R`. The six gating invocations sit in the workflow's steps, in the test's `modes` list, and in the `consistency-gate` slot of `cairn/PROFILE.md`. The `verify` slot names two of the six, which is a subset rather than a copy.
 - 2026-09-11: plan gate chose removing the duplicate lists over adding a mode that compares them, because a copy removed needs no checker. Falsified by the workflow's six steps drifting from the script's declaration unnoticed.
 - 2026-09-11: plan gate chose keeping the workflow's six named steps over collapsing them into one. A red run then names the failing mode on the job summary. Falsified by those six steps drifting from the script's list.
+- 2026-09-12: implement started on `m090-sweep-records-one-source`, cut from `origin/main` at `6436ebf`.
+- 2026-09-12: question gate chose full command lines for `--list-gating`. The output then compares line for line against the workflow's `run:` lines. It also chose the effective page list for `--list-pages`, so `--pages` replaces it as in every other mode.
+- 2026-09-12: T1 done. `benchmarks/sweep-prose.R` gained a `gating` vector and the two listing modes, both exiting 0, and the header's Modes block documents them. Suite clean, 9854 passing.
 
 ## Decisions
 

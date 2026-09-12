@@ -57,6 +57,15 @@
 #                      with parenthetical qualifiers dropped and
 #                      `/`-separated alternatives split into their own
 #                      phrases (the `slop` vector below holds it)
+#   Rscript benchmarks/sweep-prose.R --list-pages
+#       the page list this run sweeps, one path per line, so `--pages`
+#       replaces it here as it does in every other mode; exits 0
+#   Rscript benchmarks/sweep-prose.R --list-gating
+#       the gating invocations, one command per line: the modes that exit
+#       non-zero on a hit, over the pages and over the roxygen sources.
+#       `.github/workflows/prose-sweep.yaml` runs one step per line and
+#       `tests/testthat/test-sweep-prose.R` reads the list from here;
+#       exits 0
 #   Rscript benchmarks/sweep-prose.R --pages <path>...
 #       the paths after `--pages`, up to the next `--` option, replace the
 #       page list above in every mode but `--roxygen`, which reads `R/` and
@@ -112,6 +121,27 @@ if ("--pages" %in% args) {
     stop("--pages names no path", call. = FALSE)
   }
   pages <- rest
+}
+
+# The gating invocations: the modes that exit non-zero on a hit, over both
+# domains. `.github/workflows/prose-sweep.yaml` runs one step per line and
+# `tests/testthat/test-sweep-prose.R` reads this list through `--list-gating`.
+gating <- c(
+  "Rscript benchmarks/sweep-prose.R",
+  "Rscript benchmarks/sweep-prose.R --spans",
+  "Rscript benchmarks/sweep-prose.R --plain",
+  "Rscript benchmarks/sweep-prose.R --roxygen",
+  "Rscript benchmarks/sweep-prose.R --roxygen --spans",
+  "Rscript benchmarks/sweep-prose.R --roxygen --plain"
+)
+
+if ("--list-pages" %in% args) {
+  cat(paste0(pages, "\n"), sep = "")
+  quit(status = 0L)
+}
+if ("--list-gating" %in% args) {
+  cat(paste0(gating, "\n"), sep = "")
+  quit(status = 0L)
 }
 
 ing_exclusions <- c(
