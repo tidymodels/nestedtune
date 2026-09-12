@@ -25,10 +25,10 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: `tests/testthat/test-sweep-prose.R` names no page path of its own. Its real-pages block takes the page list from the script. Evidence: `grep -nE 'vignettes/|README\.Rmd' tests/testthat/test-sweep-prose.R` returns nothing, and the block passes under `devtools::test()`.
-- [ ] AC2: The script prints its two lists on request. `Rscript benchmarks/sweep-prose.R --list-pages` prints the six page paths, one per line. `Rscript benchmarks/sweep-prose.R --list-gating` prints the six gating invocations, one per line. Both exit 0. Evidence: the two outputs.
-- [ ] AC3: The `consistency-gate` slot of `cairn/PROFILE.md` enumerates no sweep mode. It names the script's listing instead. Evidence: `sed -n '/^## consistency-gate/,/^## /p' cairn/PROFILE.md | grep -nE '\-\-(spans|plain|roxygen|terms|openings|paragraphs|list-)'` returns only the line that names the listing mode.
-- [ ] AC4: `.github/workflows/prose-sweep.yaml` runs one step per invocation that `--list-gating` prints, and no other sweep step. Evidence: the mode's output compared line by line against `grep -n 'sweep-prose.R' .github/workflows/prose-sweep.yaml`, both outputs recorded in this file's Review section.
+- [x] AC1: `tests/testthat/test-sweep-prose.R` names no page path of its own. Its real-pages block takes the page list from the script. Evidence: `grep -nE 'vignettes/|README\.Rmd' tests/testthat/test-sweep-prose.R` returns nothing, and the block passes under `devtools::test()`.
+- [x] AC2: The script prints its two lists on request. `Rscript benchmarks/sweep-prose.R --list-pages` prints the six page paths, one per line. `Rscript benchmarks/sweep-prose.R --list-gating` prints the six gating invocations, one per line. Both exit 0. Evidence: the two outputs.
+- [x] AC3: The `consistency-gate` slot of `cairn/PROFILE.md` enumerates no sweep mode. It names the script's listing instead. Evidence: `sed -n '/^## consistency-gate/,/^## /p' cairn/PROFILE.md | grep -nE '\-\-(spans|plain|roxygen|terms|openings|paragraphs|list-)'` returns only the line that names the listing mode.
+- [x] AC4: `.github/workflows/prose-sweep.yaml` runs one step per invocation that `--list-gating` prints, and no other sweep step. Evidence: the mode's output compared line by line against `grep -n 'sweep-prose.R' .github/workflows/prose-sweep.yaml`, both outputs recorded in this file's Review section.
 - [ ] AC5: The six gating sweeps print `clean` and exit 0. `Rscript -e 'devtools::test()'` runs clean. `Rscript -e 'devtools::check()'` reports 0 errors, 0 warnings and 0 notes.
 
 ## Coverage
@@ -66,3 +66,10 @@
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-09-12 on `m090-sweep-records-one-source` at `46ac2a6`. `origin/main` had not moved since the branch was cut.
+
+- AC1: `grep -nE 'vignettes/|README\.Rmd' tests/testthat/test-sweep-prose.R` printed nothing (exit 1). `devtools::test(filter = "sweep-prose")` ran FAIL 0, WARN 0, SKIP 0, PASS 70, so the real-pages block ran and passed in the source tree.
+- AC2: `--list-pages` printed six paths, one per line (`vignettes/nested-cv.Rmd`, `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd`, `vignettes/articles/parallel.Rmd`, `README.Rmd`), exit 0. `--list-gating` printed six invocations, one per line: the bare call, `--spans`, `--plain`, `--roxygen`, `--roxygen --spans`, `--roxygen --plain`, exit 0.
+- AC3: the slot grep returned one line, slot line 13, the bullet telling the reader to run each command `--list-gating` prints. No other mode flag appears in the slot.
+- AC4: `grep -n 'sweep-prose.R'` on the yaml returned comment lines 2, 4, 59 and 60. It also returned six `run:` lines, 66, 70, 74, 78, 82 and 86. Those six read, in order, the bare call, `--spans`, `--plain`, `--roxygen`, `--roxygen --spans`, `--roxygen --plain`, the same six lines `--list-gating` prints. `diff` of the mode's output against every `run:` line in the file was empty. The file holds six `run:` lines in all, so the job runs no other sweep step.
