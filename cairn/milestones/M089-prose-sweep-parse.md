@@ -1,6 +1,6 @@
 # M089: The prose sweep reads as prose only what its definition names
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@
 - [x] T3: Rewrite the script header's prose definition and its `--openings` and `--paragraphs` mode entries, so that they state the partition T2 implements. Read each sentence against T1's fixture output.
 - [x] T4: Add one `test_that()` block over the fixture. Each expectation names the plant it covers, the straddling marker included.
 - [x] T5: Run `--paragraphs` and AC3's grep over the six pages, and run the six gating sweeps. Record every output.
-- [ ] T6: Run `Rscript -e 'devtools::test()'`, then `Rscript -e 'devtools::check()'`, then `air format --check` on the two touched R files.
+- [x] T6: Run `Rscript -e 'devtools::test()'`, then `Rscript -e 'devtools::check()'`, then `air format --check` on the two touched R files.
 
 ## Work log
 
@@ -62,6 +62,9 @@
 - 2026-09-11: T3 restated the header's prose definition as the partition T2 implements, and dropped the badge clause from the `--openings` entry. Each clause was read against an execution. The fixture covers the comment, badge, fence, bulleted and numbered clauses. A scratch page covered the YAML, heading and indented-item clauses, its only paragraph the closing prose line. `devtools::test()` clean, 9826 pass. `air format --check` clean.
 - 2026-09-11: T4 added one `test_that()` block over the parse fixture, naming each plant by a string only that plant carries. No paragraph extent holds the badge, comment-body, indented-fence, bulleted-wrap or numbered-item line. The straddling modal is the one clause reported, at the right line. The bare sweep prints `clean`. The block is shown able to fail. Over the same fixture the branch-point script at `584f41d` lists 8 paragraphs rather than 2. It prints 4 `--plain` lines rather than 2, and ends the bare sweep on `1 hit(s)`. Suite 9849 pass, up 23 from 9826. `air format --check` clean.
 - 2026-09-11: T5 re-ran AC3's comparison and the six gating sweeps at the head. `--paragraphs` lists 122 paragraphs over the six pages, and a script crossing every extent with AC3's grep finds 0 violations. Counts per page: README 3, parallel 10, estimate 25, nested-cv 29, results 31, tuners 24, so no page's domain is empty. All six gating sweeps print `clean` and exit 0.
+- 2026-09-11: T6 ran the full checks. `devtools::test()` clean at 9849 pass. `devtools::check()` returns status OK in 9m 36s, 0 errors, 0 warnings, 0 notes, its own test run 836s OK. `air format --check` clean on `benchmarks/sweep-prose.R` and `tests/testthat/test-sweep-prose.R`.
+- 2026-09-11: claim audit: not owed — internal tier.
+- 2026-09-11: no plan amendment was needed. Every task landed as planned, and no acceptance criterion changed.
 
 ## Decisions
 
