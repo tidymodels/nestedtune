@@ -1,15 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-12 (M089's pass: the prose-sweep parse milestone archived, M086's row pruned under terminal-row retention, one candidate row added for the partition's remaining costs. No lesson was retired, so the sweep lesson's new clause was paid for by consolidating the M04 and M59 cli lessons into one line and trimming three others; LESSONS 48 lines / 19,981 bytes, ROADMAP 55 / 23,296. validate green.)_
+_Last hygiene check: 2026-09-12 (M090's pass: the sweep-records milestone archived, M87's row pruned under terminal-row retention. No lesson added or retired. validate green.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M90 | The sweep's page list and gating modes each have one source | review | M89 | normal | milestones/M090-sweep-records-one-source.md |
+| M90 | The sweep's page list and gating modes each have one source | done | M89 | normal | milestones/archive/M090-sweep-records-one-source.md |
 | M89 | The prose sweep reads as prose only what its definition names | done | — | high | milestones/archive/M089-prose-sweep-parse.md |
-| M87 | The help pages pass the plain-English sweep | done | M86 | high | milestones/archive/M087-help-pages-plain-sweep.md |
 | M88 | Prose that fails the sweep cannot merge | done | M86, M87 | normal | milestones/archive/M088-prose-sweep-gate.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
