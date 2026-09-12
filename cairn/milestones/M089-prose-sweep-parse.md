@@ -68,6 +68,7 @@
 - 2026-09-12: review checkpoint, partial. AC1-AC4 verified with fresh evidence and ticked. AC5's `devtools::test()` and `devtools::check()` run is still in flight, and the diff-bug lens is still reading; the blame-history and prior-review lenses each reported no findings. `cairn_validate` green, `air format --check` clean on the two touched R files.
 - 2026-09-12: every acceptance criterion verified with fresh evidence and ticked. Consistency gate green. Three lenses ran; two reported no findings and the diff-bug lens returned eleven, all reproduced or read against the implementation, none failing a criterion inside its named procedure's domain. Pre-gate checkpoint.
 - 2026-09-12: gate triage applied. Findings 1, 2 and 7 fixed in `rmd_paragraphs()` and its header, with one further `test_that()` block guarding the two parse fixes, shown able to fail by reverting each in turn. Findings 3-6, 9 and 10 went to one candidate row; 8 rejected as pre-existing; 11 no action. The fixture, AC3's comparison and the six gating sweeps are unchanged by the fixes.
+- 2026-09-12: step-7 approval: m089-prose-sweep-parse approved for merge.
 
 ## Decisions
 
@@ -115,5 +116,5 @@ Findings 1 and 2 are fixed in `rmd_paragraphs()`. An opener with no `-->` under 
 
 One further `test_that()` block guards both, on pages written in the test rather than on the committed fixture, whose paragraph count the block above asserts. Each of the two fixes was reverted in turn and the block failed: reverting the list-loop guard fails two expectations, reverting the comment lookahead fails one.
 
-Re-verification after the fixes: the fixture's `--paragraphs`, `--plain` and bare-sweep outputs are unchanged, so AC1 and AC2 stand. AC3's comparison still gives 122 paragraphs over the six pages with 0 holding an excluded line and 0 opening after a list item. The six gating sweeps still print `clean` and exit 0. `air format --check` clean on both touched files.
+Re-verification after the fixes: the fixture's `--paragraphs`, `--plain` and bare-sweep outputs are unchanged, so AC1 and AC2 stand. AC3's comparison still gives 122 paragraphs over the six pages with 0 holding an excluded line and 0 opening after a list item. The six gating sweeps still print `clean` and exit 0. `air format --check` clean on both touched files. AC5 re-run after the fixes: `devtools::test()` ends `[ FAIL 0 | WARN 0 | SKIP 0 | PASS 9854 ]`, up 5 from 9849 on the new block, and `devtools::check()` returns `Status: OK`, 0 errors, 0 warnings, 0 notes.
 
