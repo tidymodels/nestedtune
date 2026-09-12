@@ -42,7 +42,7 @@
 ## Tasks
 
 - [x] T1: Write `tests/testthat/fixtures/sweep-prose-parse.Rmd`. It carries a badge line and an indented fence whose body holds a plain-clause marker. It carries a three-line HTML comment with a marker on its middle line. It carries a wrapped bulleted item whose continuation line holds a marker. It carries a numbered item whose sentence runs past the 30-word cap. It carries one marker straddling a backtick span, which must still be reported. Run the branch-point script over the fixture and record each plant's output in the work log.
-- [ ] T2: Rewrite `rmd_paragraphs()` in `benchmarks/sweep-prose.R`. Drop a badge line in every mode. Match a fence line that carries leading whitespace. Drop every line of an HTML comment from its opening line through the line holding `-->`. Drop a bulleted or numbered list-item line together with the continuation lines up to the next blank line.
+- [x] T2: Rewrite `rmd_paragraphs()` in `benchmarks/sweep-prose.R`. Drop a badge line in every mode. Match a fence line that carries leading whitespace. Drop every line of an HTML comment from its opening line through the line holding `-->`. Drop a bulleted or numbered list-item line together with the continuation lines up to the next blank line.
 - [ ] T3: Rewrite the script header's prose definition and its `--openings` and `--paragraphs` mode entries, so that they state the partition T2 implements. Read each sentence against T1's fixture output.
 - [ ] T4: Add one `test_that()` block over the fixture. Each expectation names the plant it covers, the straddling marker included.
 - [ ] T5: Run `--paragraphs` and AC3's grep over the six pages, and run the six gating sweeps. Record every output.
@@ -58,6 +58,7 @@
 
 - 2026-09-11: implement gate settled two parser rules. An HTML comment drops only from a line that starts with the opener, so prose before a trailing comment stays swept. A list item's continuation run ends at the next blank line whatever the indent, the rule T2 states.
 - 2026-09-11: T1 fixture written, branch-point output recorded over it. `--paragraphs` lists eight paragraphs, one per plant. They sit at lines 2-3, 5, 8-9, 11, 13-16, 19, 21-23 and 25. `--plain` reports three modal clauses, at lines 8, 11 and 19, and exits 1. The bare sweep reports the numbered item's 37-word sentence at line 21 and exits 1. The indented fence's own modal is not reported, backtick-span stripping swallowing the fence body as the plan gate measured. `devtools::test()` clean, 9826 pass.
+- 2026-09-11: T2 rewrote `rmd_paragraphs()`, and the `badges` argument went with it. Over the fixture `--paragraphs` now lists two paragraphs, at lines 11 and 25, so no planted line sits in a printed extent. `--plain` reports the straddling modal at line 11 alone and the bare sweep prints `clean`. Over the six pages `--paragraphs` lists 122 paragraphs. None holds a badge, comment, fence or list-item line. None opens on the line after an item. The nine paragraphs the branch point named are gone. The six gating sweeps print `clean` and exit 0. `devtools::test()` clean, 9826 pass. `air format --check` clean.
 
 ## Decisions
 

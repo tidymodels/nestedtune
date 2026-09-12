@@ -297,28 +297,62 @@ strip_spans <- function(text, count = FALSE, all = FALSE) {
 
 # Prose paragraphs of one .Rmd page: a list, one element per paragraph,
 # each a data frame of (line, text) for the lines it holds.
-rmd_paragraphs <- function(path, badges = TRUE) {
+rmd_paragraphs <- function(path) {
   lines <- readLines(path, warn = FALSE)
   keep <- rep(TRUE, length(lines))
-  if (!badges) {
-    keep[grepl("^\\[!\\[", lines)] <- FALSE
-  }
   yaml <- which(grepl("^---$", lines))
   if (length(yaml) >= 2L) {
     keep[yaml[1]:yaml[2]] <- FALSE
   }
+  # a fenced chunk, its fence line indented or not, is not prose; the YAML
+  # header is already out, so a `---` inside it never opens a fence
   fenced <- FALSE
   for (i in seq_along(lines)) {
-    if (grepl("^```", lines[i])) {
+    if (!keep[i]) {
+      next
+    }
+    if (grepl("^\\s*```", lines[i])) {
       fenced <- !fenced
       keep[i] <- FALSE
     } else if (fenced) {
       keep[i] <- FALSE
     }
   }
-  keep[grepl("^\\s*<!--", lines)] <- FALSE
+  # an HTML comment runs from the line it opens on through the line holding
+  # `-->`; a comment opened partway through a line of prose is not a comment
+  # line and leaves that line alone
+  open <- FALSE
+  for (i in seq_along(lines)) {
+    if (!keep[i]) {
+      next
+    }
+    if (!open && grepl("^\\s*<!--", lines[i])) {
+      open <- TRUE
+    }
+    if (open) {
+      keep[i] <- FALSE
+      if (grepl("-->", lines[i], fixed = TRUE)) {
+        open <- FALSE
+      }
+    }
+  }
+  keep[grepl("^\\[!\\[", lines)] <- FALSE
   keep[grepl("^#", lines)] <- FALSE
-  keep[grepl("^\\s*[-*] ", lines)] <- FALSE
+  # a list item, bulleted or numbered, takes the lines it wraps onto with it;
+  # the run ends at the next blank line whatever those lines are indented by
+  item <- FALSE
+  for (i in seq_along(lines)) {
+    if (!nzchar(trimws(lines[i]))) {
+      item <- FALSE
+      next
+    }
+    if (grepl("^\\s*([-*]|[0-9]+\\.) ", lines[i])) {
+      item <- TRUE
+    }
+    if (item) {
+      keep[i] <- FALSE
+    }
+  }
   keep[!nzchar(trimws(lines))] <- FALSE
   split_runs(lines, keep, seq_along(lines))
 }
@@ -545,7 +579,7 @@ for (f in files) {
   paras <- if (roxygen) {
     roxygen_paragraphs(f)
   } else {
-    rmd_paragraphs(f, badges = !openings)
+    rmd_paragraphs(f)
   }
   if (paragraphs) {
     for (p in paras) {
