@@ -62,6 +62,8 @@
 - 2026-09-12: T4 done. `diff <(Rscript benchmarks/sweep-prose.R --list-gating) <(sed -n 's/^ *run: //p' .github/workflows/prose-sweep.yaml)` is empty, so the six steps are the six invocations in that order and the job runs no other sweep step. The yaml comment now names the script's `gating` vector as the one declaration and the steps as its one accepted copy.
 - 2026-09-12: T3 done. The `consistency-gate` slot names no sweep mode. It tells the reader to run each command `--list-gating` prints. The `verify` slot's two plain modes are untouched.
 - 2026-09-12: both new reads proved able to fail. A `--plain` swapped to `--openings` in the `gating` vector turned the block red naming that mode. A page dropped from `pages` turned it red on the count.
+- 2026-09-12: review: AC1-AC5 verified, three reviewers, 13 findings. O1-O4 fixed at the gate, the rest rejected or on an existing candidate row.
+- 2026-09-12: step-7 approval: m090-sweep-records-one-source approved for merge, with findings 1-4 fixed first.
 
 ## Decisions
 
@@ -89,4 +91,6 @@ Independent review: three fresh reviewers, because the diff touches executable f
 - O8: `test-sweep-prose.R:218-221`. The flag parse splits on spaces, so a quoted argument in a future gating line splits wrong.
 - O9: `test-sweep-prose.R:181`. The test name still says "six". If a mode is added, the name is a third place to edit.
 - S2: the workflow steps and `--list-gating` stay matched only by hand. That is the milestone's Out item and the ROADMAP candidate row this plan wrote.
-- P: no prior-review evidence contradicted. The diff closes the M088 review point that the test and the profile each copied the lists.
+- P: no prior-review evidence contradicted.
+
+Dispositions at the merge gate, 2026-09-12. O1, O3: fixed now at `2b8178b`. The real-pages block asserts `anyDuplicated()` is 0 on both lists. A `--plain` line swapped for a second `--spans` turned the block red on the gating check. `README.Rmd` in place of `vignettes/tuners.Rmd` turned it red on the pages check. The restored tree passed 72 checks. O2: fixed now. The slot says the test reads the list and the yaml keeps a copy checked by hand. The AC3 grep still returns that one line. O4: fixed now. The header says `--roxygen` does not change the page list. O5: rejected, because ignoring flags a mode does not use is the script's existing habit. O6: rejected, a harmless error on a malformed call. O7: rejected, because the question gate chose the effective list, and the test checks that the default paths exist. O8: rejected, because no gating line carries a quoted argument. O9: rejected, a test name the count assertions already back. S2: follow-up, the existing ROADMAP candidate row about the workflow steps. No finding returned status. The diff closes the M088 review point that the test and the profile each copied the lists.
