@@ -10,19 +10,21 @@
 coverage](https://codecov.io/gh/tidymodels/nestedtune/graph/badge.svg)](https://app.codecov.io/gh/tidymodels/nestedtune)
 <!-- badges: end -->
 
-You tune a model with cross-validation and keep the setting with the
-best score. That score is optimistic, because you picked the winner for
-scoring well. nestedtune gives you an honest number instead. It builds a
-nested resampling design. It tunes each outer fold on its own inner
-resamples with tune or finetune. It selects the fold’s winner, fits it,
-and scores that fit on rows the tuning never saw. It keeps what every
-fold chose.
+You tune a model with cross-validation, keep the setting with the best
+score, and then score that setting once on a held-out test set. That
+test score is one number from one split of the data, and nothing in it
+says whether the split is representative. The tuning score is worse: it
+is optimistic, because you picked the winner for scoring well.
+nestedtune scores the whole tune-and-fit procedure on several outer
+splits instead. It tunes each outer fold on its own inner resamples with
+tune or finetune, fits the fold’s winner, and scores that fit on rows
+the tuning never saw. It keeps what every fold chose.
 
-Those steps together, resample, tune, select, fit, are the procedure.
-The mean of the outer scores estimates how well that procedure performs
-on new data. The model to deploy is fitted afterwards by the same
-procedure on all the data. It is a separate object with no performance
-number of its own.
+The mean of the outer scores is the number to report for the model you
+deploy. The spread across folds shows how far one split can move that
+number. The deployed model is the same procedure run once more on all
+the data, so the estimate is its number, and there is no second one to
+compute.
 
 ## Installation
 
@@ -55,7 +57,7 @@ grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 set.seed(2)
 res <- nested_tune_grid(wf, folds, grid = grid)
 
-# The estimate for the procedure. Report this.
+# The number to report for the model you deploy.
 collect_metrics(res)
 #> # A tibble: 2 × 5
 #>   .metric .estimator  mean     n std_err
@@ -63,7 +65,7 @@ collect_metrics(res)
 #> 1 rmse    standard   2.46      5  0.445 
 #> 2 rsq     standard   0.844     5  0.0267
 
-# The model to deploy, fitted by the same procedure on all the data.
+# The model to deploy, the same procedure run once more on all the data.
 set.seed(3)
 final <- nested_final_fit(wf, res)
 predict(final, new_data = mtcars[1:3, ])
@@ -82,7 +84,7 @@ Learn more:
   the path from a design to a write-up.
 - [What the estimate
   means](https://nestedtune.tidymodels.org/articles/estimate.html),
-  which quantity the nested number is and what it is not.
+  which quantity the nested number is and how far to trust it.
 - [Choosing the inner
   tuner](https://nestedtune.tidymodels.org/articles/tuners.html), the
   Bayesian search, the two racing searches, simulated annealing and a
