@@ -7,6 +7,7 @@ _Last hygiene check: 2026-09-12 (M090's pass: the sweep-records milestone archiv
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M91 | The docs give the nested estimate as the number to report for the deployed model | planned | — | high | milestones/M091-estimate-for-deployed-model.md |
 | M90 | The sweep's page list and gating modes each have one source | done | M89 | normal | milestones/archive/M090-sweep-records-one-source.md |
 | M89 | The prose sweep reads as prose only what its definition names | done | — | high | milestones/archive/M089-prose-sweep-parse.md |
 | M88 | Prose that fails the sweep cannot merge | done | M86, M87 | normal | milestones/archive/M088-prose-sweep-gate.md |
