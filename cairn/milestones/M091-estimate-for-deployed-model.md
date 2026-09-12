@@ -47,7 +47,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - [x] T4: `vignettes/results.Rmd` 233-238 and `vignettes/tuners.Rmd` 436-439: the first mention of the deployed model on each page says what to report for it. Sweep clean.
 - [x] T5: Help pages and print. Roxygen at `R/nested-final-fit.R:24-26` and `:146-150`, `R/nested-final-fit-print.R:14-19` and `:101`, `R/nested-tune-grid.R:14-18`, `R/nested-results.R:705`, `R/nested-results-agreement.R:19`. The printed message at `R/nested-final-fit-print.R:58-60` and `:365-367` is one string used twice, so hoist it to one constant. Update `tests/testthat/test-nested-final-fit-print.R:19`, `:100` and `:158` to the new message, re-accept `_snaps/nested-final-fit-print.md`, run `devtools::document()`. `Rscript benchmarks/sweep-prose.R --roxygen --plain` clean.
 - [ ] T6: Run every AC7 command and record each result in the work log. Make sure that `git diff 27b4efd -- cairn/DESIGN.md` is empty.
-- [ ] T7: Write the reader prompt as one work-log line: the two AC7 questions, the five page paths, and the instruction to list paragraphs with one line of reason each. Review takes the report from it unchanged.
+- [x] T7: Write the reader prompt as one work-log line: the two AC7 questions, the five page paths, and the instruction to list paragraphs with one line of reason each. Review takes the report from it unchanged.
 
 ## Work log
 
@@ -63,6 +63,9 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - 2026-09-12: T3 done. README's two opening paragraphs, the two chunk comments and the estimate link blurb rewritten to the drafts; `devtools::build_readme()` re-knit `README.md` with only those changes. Three sweeps clean, 289 words.
 
 - 2026-09-12: T5 done. The printed message is now one constant, `final_fit_estimate_msg`, used by both print sites. Seven roxygen sites and two code comments reworded, five `man/` pages regenerated. Minor amendment: a third `expect_match` at test line 207 carried the old phrase and was updated with the two the plan named, and the three matches allow a line wrap inside "this model", since cli wraps there at the test width. Snapshot re-accepted. Full suite 9864 pass, 0 fail. Three roxygen sweeps clean. The AC5 grep is empty over the five R files. The test-file substitution went through `sed` rather than Edit.
+
+- 2026-09-12: T7 reader prompt, for review to hand to one reader with no authorship of the text: "Read these five pages in order: README.Rmd, vignettes/estimate.Rmd, vignettes/nested-cv.Rmd, vignettes/results.Rmd, vignettes/tuners.Rmd. Answer two questions in one sentence each. (1) After reading, what number do you report for the model you deploy? (2) Would you run nested cross-validation rather than report the tuned score? Then list every paragraph that made nested cross-validation sound not worth running, as file:line and one line of reason each. Do not edit anything."
+- 2026-09-12: T6 results so far. All six gating sweeps exit 0. Word counts 289 / 1450 / 1301 / 1439 / 1398 against 350 / 1450 / 1500 / 1500 / 1500. `git diff 27b4efd -- cairn/DESIGN.md` is empty. A second `devtools::build_readme()` left `README.md` unchanged. `pkgdown::build_articles()` wrote all five article pages with no error. `devtools::check()` result recorded on the next line.
 
 ## Decisions
 
