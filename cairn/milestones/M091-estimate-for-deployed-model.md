@@ -41,7 +41,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 
 ## Tasks
 
-- [ ] T1: `vignettes/estimate.Rmd`: rewrite four extents at `27b4efd`. Lines 22-28: the case for nesting opens with the AC3 facts, then the selection-bias paragraph. Lines 40-44: the IP3 paragraph (AC4). Lines 49-52: the quantity estimated leads with what the reader reports. Lines 54-64: the "Four things it is not" list becomes a scope paragraph after the positive claim, its four facts kept. Keep every citation. `Rscript benchmarks/sweep-prose.R --plain` clean.
+- [x] T1: `vignettes/estimate.Rmd`: rewrite four extents at `27b4efd`. Lines 22-28: the case for nesting opens with the AC3 facts, then the selection-bias paragraph. Lines 40-44: the IP3 paragraph (AC4). Lines 49-52: the quantity estimated leads with what the reader reports. Lines 54-64: the "Four things it is not" list becomes a scope paragraph after the positive claim, its four facts kept. Keep every citation. `Rscript benchmarks/sweep-prose.R --plain` clean.
 - [ ] T2: `vignettes/nested-cv.Rmd`: rewrite 235-238 (the final-fit section opens with what the reader now has and reports) and 352-355 (the honesty paragraph, AC4). Read 322-345, the write-up template. Change it only if its "for the procedure" sentence contradicts the new paragraphs. Sweep clean.
 - [ ] T3: `README.Rmd`: rewrite 25-34 (the two opening paragraphs, AC3 and the report sentence), the chunk comments at 67 and 70, and the link blurb at 81-82 ("what it is not"). `devtools::build_readme()`, and commit `README.md` with it. Sweep clean.
 - [ ] T4: `vignettes/results.Rmd` 233-238 and `vignettes/tuners.Rmd` 436-439: the first mention of the deployed model on each page says what to report for it. Sweep clean.
@@ -55,6 +55,8 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - 2026-09-12: plan gate chose the paired framing (one test split versus several outer splits, tied to each fold tuning on its own) over the split contrast alone because alone it argues for plain repeated cross-validation, not nesting. Falsified by a reader report finding the tuning half redundant. The user rejected the gate's draft sentences for unclear referents and interpolated step lists, so the text is written at implement under AC3's referent rule and the sweep.
 - 2026-09-12: plan gate chose the help pages and print message in scope over a candidate row. This was the user's decision against the plan's recommendation, so the pages, the help and the print say one thing.
 - 2026-09-12: plan gate declined Fable escalation on the ip-touching tripwire (AC4). IP3's text is unchanged and the paragraph states its three facts in a positive order. M082 declined the same.
+
+- 2026-09-12: T1 done. The four estimate.Rmd extents rewritten to the gate's drafts. The page came in at 1549 words against the 1450 cap, so the old nesting paragraph was folded into the procedure definition, the duplicate report sentence and the "whole sequence" sentence dropped, and five small cuts made elsewhere. Now 1450 words. Default, `--spans` and `--plain` sweeps clean. One edit went through a script rather than Edit, against the tracking rule, and the later edits used Edit.
 
 ## Decisions
 
