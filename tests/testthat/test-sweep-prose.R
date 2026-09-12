@@ -170,10 +170,13 @@ test_that("an unclosed comment and a dropped item-shaped line take no prose", {
   )
 })
 
-# The six gating modes over the real pages and roxygen sources. Under
-# `R CMD check` the tests run from the built tarball, which `.Rbuildignore`
-# strips `benchmarks/` from, so this block skips there; the source tree and
-# `.github/workflows/prose-sweep.yaml` are where it runs.
+# The gating modes over the real pages and roxygen sources. The script owns
+# both lists and this block names neither: `--list-pages` gives the pages and
+# `--list-gating` gives the invocations. What is stated here instead of read
+# off the script is their shape, so a list that emptied or lost a mode is
+# still a failure. Under `R CMD check` the tests run from the built tarball,
+# which `.Rbuildignore` strips `benchmarks/` from, so this block skips there;
+# the source tree and `.github/workflows/prose-sweep.yaml` are where it runs.
 
 test_that("the six gating sweeps are clean over the real sources", {
   script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
@@ -198,16 +201,32 @@ test_that("the six gating sweeps are clean over the real sources", {
   old <- setwd(root)
   on.exit(setwd(old), add = TRUE)
 
+  # the page list comes from the script; its shape is stated here
+  listed <- sweep("--list-pages")
+  expect_null(listed$status)
+  pages <- listed$lines
+  expect_length(pages, 6L)
+  expect_equal(anyDuplicated(pages), 0L)
+  expect_true(all(file.exists(pages)))
+
+  # so do the gating invocations, each the script call and its flags
+  listed <- sweep("--list-gating")
+  expect_null(listed$status)
+  expect_length(listed$lines, 6L)
+  expect_equal(anyDuplicated(listed$lines), 0L)
+  expect_true(all(
+    startsWith(listed$lines, "Rscript benchmarks/sweep-prose.R")
+  ))
+  flags <- sub("^Rscript benchmarks/sweep-prose\\.R *", "", listed$lines)
+  modes <- lapply(flags, function(f) {
+    if (nzchar(f)) strsplit(f, " +")[[1]] else character()
+  })
+  # one sweep carries no flag, and three of the six read the roxygen sources
+  expect_length(Filter(function(m) !length(m), modes), 1L)
+  expect_length(Filter(function(m) "--roxygen" %in% m, modes), 3L)
+
   # the domain is non-empty: every page and the roxygen source list at
   # least one paragraph, so a clean sweep below is a sweep over prose
-  pages <- c(
-    "README.Rmd",
-    "vignettes/articles/parallel.Rmd",
-    "vignettes/estimate.Rmd",
-    "vignettes/nested-cv.Rmd",
-    "vignettes/results.Rmd",
-    "vignettes/tuners.Rmd"
-  )
   paragraphs <- sweep("--paragraphs")
   expect_null(paragraphs$status)
   for (page in pages) {
@@ -220,14 +239,6 @@ test_that("the six gating sweeps are clean over the real sources", {
   expect_null(roxygen$status)
   expect_true(any(startsWith(roxygen$lines, "R/nested-tune-grid.R:")))
 
-  modes <- list(
-    character(),
-    "--spans",
-    "--plain",
-    "--roxygen",
-    c("--roxygen", "--spans"),
-    c("--roxygen", "--plain")
-  )
   for (mode in modes) {
     result <- sweep(mode)
     label <- paste(c("sweep-prose.R", mode), collapse = " ")

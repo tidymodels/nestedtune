@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-12 (M089's pass: the prose-sweep parse milestone ar
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M90 | The sweep's page list and gating modes each have one source | planned | M89 | normal | milestones/M090-sweep-records-one-source.md |
+| M90 | The sweep's page list and gating modes each have one source | review | M89 | normal | milestones/M090-sweep-records-one-source.md |
 | M89 | The prose sweep reads as prose only what its definition names | done | — | high | milestones/archive/M089-prose-sweep-parse.md |
 | M87 | The help pages pass the plain-English sweep | done | M86 | high | milestones/archive/M087-help-pages-plain-sweep.md |
 | M88 | Prose that fails the sweep cannot merge | done | M86, M87 | normal | milestones/archive/M088-prose-sweep-gate.md |

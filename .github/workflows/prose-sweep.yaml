@@ -55,6 +55,13 @@ jobs:
       # One step per mode, so a red run names the mode on the job summary.
       # Every mode runs even after an earlier one hits, so one red run reports
       # the whole extent; the job stays red because a failed step fails it.
+      #
+      # `benchmarks/sweep-prose.R` owns the list: its `gating` vector is the
+      # one declaration, and `Rscript benchmarks/sweep-prose.R --list-gating`
+      # prints it, one command per line, in this order. The steps below are
+      # the one accepted copy of it, kept so the job summary names the mode
+      # that went red. A step added, removed or reworded here is checked
+      # against `--list-gating` by hand.
       - name: Sentence length (pages)
         run: Rscript benchmarks/sweep-prose.R
 
