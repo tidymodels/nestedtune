@@ -1,6 +1,6 @@
 # M091: The docs give the nested estimate as the number to report for the deployed model
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - [x] T3: `README.Rmd`: rewrite 25-34 (the two opening paragraphs, AC3 and the report sentence), the chunk comments at 67 and 70, and the link blurb at 81-82 ("what it is not"). `devtools::build_readme()`, and commit `README.md` with it. Sweep clean.
 - [x] T4: `vignettes/results.Rmd` 233-238 and `vignettes/tuners.Rmd` 436-439: the first mention of the deployed model on each page says what to report for it. Sweep clean.
 - [x] T5: Help pages and print. Roxygen at `R/nested-final-fit.R:24-26` and `:146-150`, `R/nested-final-fit-print.R:14-19` and `:101`, `R/nested-tune-grid.R:14-18`, `R/nested-results.R:705`, `R/nested-results-agreement.R:19`. The printed message at `R/nested-final-fit-print.R:58-60` and `:365-367` is one string used twice, so hoist it to one constant. Update `tests/testthat/test-nested-final-fit-print.R:19`, `:100` and `:158` to the new message, re-accept `_snaps/nested-final-fit-print.md`, run `devtools::document()`. `Rscript benchmarks/sweep-prose.R --roxygen --plain` clean.
-- [ ] T6: Run every AC7 command and record each result in the work log. Make sure that `git diff 27b4efd -- cairn/DESIGN.md` is empty.
+- [x] T6: Run every AC7 command and record each result in the work log. Make sure that `git diff 27b4efd -- cairn/DESIGN.md` is empty.
 - [x] T7: Write the reader prompt as one work-log line: the two AC7 questions, the five page paths, and the instruction to list paragraphs with one line of reason each. Review takes the report from it unchanged.
 
 ## Work log
@@ -66,6 +66,10 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 
 - 2026-09-12: T7 reader prompt, for review to hand to one reader with no authorship of the text: "Read these five pages in order: README.Rmd, vignettes/estimate.Rmd, vignettes/nested-cv.Rmd, vignettes/results.Rmd, vignettes/tuners.Rmd. Answer two questions in one sentence each. (1) After reading, what number do you report for the model you deploy? (2) Would you run nested cross-validation rather than report the tuned score? Then list every paragraph that made nested cross-validation sound not worth running, as file:line and one line of reason each. Do not edit anything."
 - 2026-09-12: T6 results so far. All six gating sweeps exit 0. Word counts 289 / 1450 / 1301 / 1439 / 1398 against 350 / 1450 / 1500 / 1500 / 1500. `git diff 27b4efd -- cairn/DESIGN.md` is empty. A second `devtools::build_readme()` left `README.md` unchanged. `pkgdown::build_articles()` wrote all five article pages with no error. `devtools::check()` result recorded on the next line.
+
+- 2026-09-12: T6 done. `devtools::check()` 0 errors, 0 warnings, 0 notes (9m 50s). The check ran on the T5 tree before the comment rewrap at `601da58`, a comment-only change.
+- 2026-09-12: claim audit: 28 claims read, 0 corrected — README.Rmd, README.md, vignettes/estimate.Rmd, vignettes/nested-cv.Rmd, vignettes/results.Rmd, vignettes/tuners.Rmd, R/nested-final-fit.R, R/nested-final-fit-print.R, R/nested-tune-grid.R, R/nested-results.R, R/nested-results-agreement.R, man/, tests. The reader's one non-claim note, a comment line over 80 columns, was rewrapped at `601da58`.
+- 2026-09-12: all tasks checked, verify clean. Status set to review.
 
 ## Decisions
 
