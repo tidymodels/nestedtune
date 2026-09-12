@@ -173,7 +173,8 @@ print.summary.nested_final_fit <- function(x, ...) {
 # scheme to name, and the line is dropped rather than invented.
 #
 # `estimate` is carried and set to NULL rather than omitted. The number to
-# report for this object lives on the results object (IP3), and recording that positively is the
+# report for this object lives on the results object (IP3), and recording
+# that positively is the
 # same habit IP4 asks of the loop: what is true is written down, never left to
 # be inferred from a name that is not there.
 new_summary_nested_final_fit <- function(x) {
