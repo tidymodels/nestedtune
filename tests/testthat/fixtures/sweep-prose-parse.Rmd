@@ -1,0 +1,25 @@
+<!-- Hand-authored fixture for tests/testthat/test-sweep-prose.R: one planted
+leak per parse rule of benchmarks/sweep-prose.R, and one sentence whose clause
+marker sits across a backtick span. No generator, no seed. -->
+
+[![R-CMD-check](https://example.org/badge.svg)](https://example.org/run)
+
+<!-- The line above plants a badge.
+This middle line would be read as a modal clause once the comment is swept.
+The comment closes on this line. -->
+
+The reader takes the `id` columns and should read every fold from them.
+
+  ```r
+  # an indented fence whose body should never be read as prose
+  x <- 1
+  ```
+
+- The outer fold holds its own rows, and the estimate it gives
+  should be read as the procedure's error rather than the model's.
+
+1. The numbered item runs a very long sentence past the cap so that the sweep
+   reports it as ordinary prose with far more than thirty separate words
+   counted across the whole of its wrapped extent right here.
+
+The page ends on a short prose line.

@@ -45,6 +45,131 @@ test_that("--plain names each clause once and stays silent on spans and near-mis
   expect_identical(tail(out, 1), "6 hit(s)")
 })
 
+# The parse over a second hand-authored fixture: one planted leak per class
+# of line the prose definition excludes, and one sentence whose clause marker
+# sits across a backtick span, which the sweep must still report.
+
+test_that("the parse drops every planted leak and keeps the prose beside it", {
+  script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
+  skip_if_not(file.exists(script), "sweep-prose.R not in the source tree")
+  fixture <- testthat::test_path("fixtures", "sweep-prose-parse.Rmd")
+  lines <- readLines(fixture)
+
+  sweep <- function(...) {
+    out <- suppressWarnings(system2(
+      "Rscript",
+      c(script, ..., "--pages", fixture),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+    list(status = attr(out, "status"), lines = out)
+  }
+
+  # the line a plant sits on, found by a string only that plant carries
+  at <- function(text) {
+    i <- grep(text, lines, fixed = TRUE)
+    expect_length(i, 1L)
+    i
+  }
+  plants <- list(
+    badge = at("[![R-CMD-check]"),
+    `comment body` = at("This middle line would be read"),
+    `indented fence` = at("an indented fence whose body"),
+    `bulleted wrap` = at("should be read as the procedure's error"),
+    `numbered item` = at("reports it as ordinary prose with far more")
+  )
+  straddle <- at("The reader takes the")
+  closing <- at("The page ends on a short prose line.")
+
+  paragraphs <- sweep("--paragraphs")
+  expect_null(paragraphs$status)
+  extents <- regmatches(
+    paragraphs$lines,
+    regexec("^.*:([0-9]+)-([0-9]+): ", paragraphs$lines)
+  )
+  covered <- unlist(lapply(extents, function(m) {
+    seq.int(as.integer(m[2]), as.integer(m[3]))
+  }))
+  for (name in names(plants)) {
+    expect_false(
+      plants[[name]] %in% covered,
+      label = sprintf("a paragraph's extent holds the %s plant", name)
+    )
+  }
+  # the domain is non-empty, and the two prose paragraphs are the only ones
+  expect_true(straddle %in% covered)
+  expect_true(closing %in% covered)
+  expect_length(paragraphs$lines, 2L)
+
+  # the marker across the backtick span is still reported, and it is the
+  # only clause the page yields
+  plain <- sweep("--plain")
+  expect_identical(plain$status, 1L)
+  expect_length(plain$lines, 2L)
+  expect_match(plain$lines[1], sprintf("^%s:%d: modal: ", fixture, straddle))
+  expect_match(plain$lines[1], "should read every fold from them\\.$")
+  expect_identical(plain$lines[2], "1 hit(s)")
+
+  # the numbered item's over-cap sentence is the only one past the cap, and
+  # it is gone with the item
+  bare <- sweep()
+  expect_null(bare$status)
+  expect_identical(bare$lines, "clean")
+})
+
+# A dropped line never takes prose with it: the two shapes where the parse
+# could go quiet over a page rather than leak into it, each on a written page
+# rather than the committed fixture, which the block above counts paragraphs
+# on.
+
+test_that("an unclosed comment and a dropped item-shaped line take no prose", {
+  script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
+  skip_if_not(file.exists(script), "sweep-prose.R not in the source tree")
+
+  # base R rather than withr, which is deliberately not a dependency here
+  pages <- character()
+  on.exit(unlink(pages), add = TRUE)
+  plain <- function(text) {
+    page <- tempfile(fileext = ".Rmd")
+    pages <<- c(pages, page)
+    writeLines(text, page)
+    out <- suppressWarnings(system2(
+      "Rscript",
+      c(script, "--plain", "--pages", page),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+    as.character(sub("^.*:([0-9]+): ", "\\1: ", out))
+  }
+
+  # an opener with no `-->` under it closes nothing, so the prose below it is
+  # still read; a closed comment still takes its whole body
+  expect_identical(
+    plain(c("<!-- an opener with no closer", "", "It should be read.")),
+    c("3: modal: It should be read.", "1 hit(s)")
+  )
+  expect_identical(
+    plain(c("<!-- an opener", "It should not be read.", "-->")),
+    "clean"
+  )
+
+  # an item-shaped line the parser already dropped opens no run: it is read
+  # neither in the YAML header nor inside a fenced chunk
+  expect_identical(
+    plain(c("---", "author:", "  - Someone", "---", "It should be read.")),
+    c("5: modal: It should be read.", "1 hit(s)")
+  )
+  expect_identical(
+    plain(c("```yaml", "- an item shaped line", "```", "It should be read.")),
+    c("4: modal: It should be read.", "1 hit(s)")
+  )
+  # a real list item still takes the lines it wraps onto
+  expect_identical(
+    plain(c("- An item", "  it should not be read.")),
+    "clean"
+  )
+})
+
 # The six gating modes over the real pages and roxygen sources. Under
 # `R CMD check` the tests run from the built tarball, which `.Rbuildignore`
 # strips `benchmarks/` from, so this block skips there; the source tree and

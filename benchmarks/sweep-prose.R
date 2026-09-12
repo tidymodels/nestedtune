@@ -3,10 +3,17 @@
 # sentence and its paragraph partition; the Modes block below names each.
 #
 # Pages: the four guides and the parallel article under `vignettes/`, and
-# `README.Rmd`. Prose is what is left after the YAML header (everything
-# between the first two `---` lines), fenced chunks, HTML comment lines,
-# heading lines and list-item lines are dropped and backtick spans (inline
-# `r` spans included) are removed. Sentences split at `.`, `?` or `!`
+# `README.Rmd`. Prose is what is left of a page once these lines are
+# dropped: the YAML header, everything between the first two `---` lines;
+# a fenced chunk with both its fence lines, the fence carrying leading
+# whitespace or not; an HTML comment, from a line opening with `<!--`
+# through the line holding `-->`, or that opening line alone where no
+# `-->` follows it; a badge line, one opening `[![`; a
+# heading line, one opening `#`; and a list item, bulleted or numbered
+# (`[-*] ` or `[0-9]+. `, indented or not), together with the lines it
+# wraps onto, which run to the next blank line. A paragraph is a run of
+# the lines left, and any dropped line ends one. Backtick spans (inline
+# `r` spans included) are then removed. Sentences split at `.`, `?` or `!`
 # followed by whitespace or the end of the text, with `et al.`, `e.g.`,
 # `i.e.` and `vs.` joined first; a word is a whitespace-separated token.
 #
@@ -23,12 +30,12 @@
 #       spans excluded, as `file:line: <k> spans: <text>` with each span
 #       shown as `•`; exits 1 on any hit
 #   Rscript benchmarks/sweep-prose.R --openings
-#       the first prose sentence of each page, badge lines (`[![`) dropped
-#       first, as `file:line: <text>`; exits 0
+#       the first prose sentence of each page, as `file:line: <text>`;
+#       exits 0
 #   Rscript benchmarks/sweep-prose.R --paragraphs
 #       every prose paragraph of each page, as `file:first-last: <opening
-#       words>`, `first` and `last` the lines of the paragraph's extent;
-#       exits 0
+#       words>`, `first` and `last` the lines of the paragraph's extent, so
+#       the partition above can be read off a page; exits 0
 #   Rscript benchmarks/sweep-prose.R --plain
 #       every prose sentence matching a plain clause, as
 #       `file:line: <clause name>: <text>`, one line per clause matched,
@@ -297,28 +304,73 @@ strip_spans <- function(text, count = FALSE, all = FALSE) {
 
 # Prose paragraphs of one .Rmd page: a list, one element per paragraph,
 # each a data frame of (line, text) for the lines it holds.
-rmd_paragraphs <- function(path, badges = TRUE) {
+rmd_paragraphs <- function(path) {
   lines <- readLines(path, warn = FALSE)
   keep <- rep(TRUE, length(lines))
-  if (!badges) {
-    keep[grepl("^\\[!\\[", lines)] <- FALSE
-  }
   yaml <- which(grepl("^---$", lines))
   if (length(yaml) >= 2L) {
     keep[yaml[1]:yaml[2]] <- FALSE
   }
+  # a fenced chunk, its fence line indented or not, is not prose; the loop
+  # skips the YAML header, so a fence line inside it opens nothing
   fenced <- FALSE
   for (i in seq_along(lines)) {
-    if (grepl("^```", lines[i])) {
+    if (!keep[i]) {
+      next
+    }
+    if (grepl("^\\s*```", lines[i])) {
       fenced <- !fenced
       keep[i] <- FALSE
     } else if (fenced) {
       keep[i] <- FALSE
     }
   }
-  keep[grepl("^\\s*<!--", lines)] <- FALSE
+  # an HTML comment runs from the line it opens on through the line holding
+  # `-->`; a comment opened partway through a line of prose is not a comment
+  # line and leaves that line alone. An opener with no `-->` under it closes
+  # nothing, so only its own line goes: a page is never silently emptied of
+  # the prose a sweep would otherwise read.
+  open <- FALSE
+  for (i in seq_along(lines)) {
+    if (!keep[i]) {
+      next
+    }
+    if (!open && grepl("^\\s*<!--", lines[i])) {
+      rest <- which(keep & seq_along(lines) >= i)
+      open <- any(grepl("-->", lines[rest], fixed = TRUE))
+      if (!open) {
+        keep[i] <- FALSE
+      }
+    }
+    if (open) {
+      keep[i] <- FALSE
+      if (grepl("-->", lines[i], fixed = TRUE)) {
+        open <- FALSE
+      }
+    }
+  }
+  keep[grepl("^\\[!\\[", lines)] <- FALSE
   keep[grepl("^#", lines)] <- FALSE
-  keep[grepl("^\\s*[-*] ", lines)] <- FALSE
+  # a list item, bulleted or numbered, takes the lines it wraps onto with it;
+  # the run ends at the next blank line whatever those lines are indented by.
+  # A line already dropped is not read, so an item-shaped line inside the
+  # YAML header or a fenced chunk opens no run and takes no prose with it.
+  item <- FALSE
+  for (i in seq_along(lines)) {
+    if (!keep[i]) {
+      next
+    }
+    if (!nzchar(trimws(lines[i]))) {
+      item <- FALSE
+      next
+    }
+    if (grepl("^\\s*([-*]|[0-9]+\\.) ", lines[i])) {
+      item <- TRUE
+    }
+    if (item) {
+      keep[i] <- FALSE
+    }
+  }
   keep[!nzchar(trimws(lines))] <- FALSE
   split_runs(lines, keep, seq_along(lines))
 }
@@ -545,7 +597,7 @@ for (f in files) {
   paras <- if (roxygen) {
     roxygen_paragraphs(f)
   } else {
-    rmd_paragraphs(f, badges = !openings)
+    rmd_paragraphs(f)
   }
   if (paragraphs) {
     for (p in paras) {
