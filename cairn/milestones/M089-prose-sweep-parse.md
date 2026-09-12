@@ -1,13 +1,13 @@
 # M089: The prose sweep reads as prose only what its definition names
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a development checker over the repo's own page sources, kept out of the built package by `.Rbuildignore`
-- **Branch/PR:** —
+- **Branch/PR:** `m089-prose-sweep-parse`
 
 ## Goal
 
@@ -41,7 +41,7 @@
 
 ## Tasks
 
-- [ ] T1: Write `tests/testthat/fixtures/sweep-prose-parse.Rmd`. It carries a badge line and an indented fence whose body holds a plain-clause marker. It carries a three-line HTML comment with a marker on its middle line. It carries a wrapped bulleted item whose continuation line holds a marker. It carries a numbered item whose sentence runs past the 30-word cap. It carries one marker straddling a backtick span, which must still be reported. Run the branch-point script over the fixture and record each plant's output in the work log.
+- [x] T1: Write `tests/testthat/fixtures/sweep-prose-parse.Rmd`. It carries a badge line and an indented fence whose body holds a plain-clause marker. It carries a three-line HTML comment with a marker on its middle line. It carries a wrapped bulleted item whose continuation line holds a marker. It carries a numbered item whose sentence runs past the 30-word cap. It carries one marker straddling a backtick span, which must still be reported. Run the branch-point script over the fixture and record each plant's output in the work log.
 - [ ] T2: Rewrite `rmd_paragraphs()` in `benchmarks/sweep-prose.R`. Drop a badge line in every mode. Match a fence line that carries leading whitespace. Drop every line of an HTML comment from its opening line through the line holding `-->`. Drop a bulleted or numbered list-item line together with the continuation lines up to the next blank line.
 - [ ] T3: Rewrite the script header's prose definition and its `--openings` and `--paragraphs` mode entries, so that they state the partition T2 implements. Read each sentence against T1's fixture output.
 - [ ] T4: Add one `test_that()` block over the fixture. Each expectation names the plant it covers, the straddling marker included.
@@ -55,6 +55,9 @@
 - 2026-09-11: the plan-gate criteria audit ran in reduced mode and returned four findings over both milestones. A list-item promise quantifying over every input narrowed to the fixture's planted cases. A cross-commit comparison of nine invocations carrying a hand-written exemption became AC3's single-commit promise. A criterion binding the script's own header prose was dropped, and the header rewrite became T3. For M090, one `grep` widened to read a profile slot whole.
 - 2026-09-11: plan gate chose repairing the parse leaks over also sweeping list items, because the checker then keeps the promise it already makes. Falsified by a sentence over the cap, or failing a plain clause, shipping inside a list item on a page.
 - 2026-09-11: plan gate chose dropping numbered list items from prose over leaving them swept as they are today. A numbered and a bulleted item are one construct, and the stated definition excludes both. Falsified by a page that wants its numbered steps swept while its bullets are not.
+
+- 2026-09-11: implement gate settled two parser rules. An HTML comment drops only from a line that starts with the opener, so prose before a trailing comment stays swept. A list item's continuation run ends at the next blank line whatever the indent, the rule T2 states.
+- 2026-09-11: T1 fixture written, branch-point output recorded over it. `--paragraphs` lists eight paragraphs, one per plant. They sit at lines 2-3, 5, 8-9, 11, 13-16, 19, 21-23 and 25. `--plain` reports three modal clauses, at lines 8, 11 and 19, and exits 1. The bare sweep reports the numbered item's 37-word sentence at line 21 and exits 1. The indented fence's own modal is not reported, backtick-span stripping swallowing the fence body as the plan gate measured. `devtools::test()` clean, 9826 pass.
 
 ## Decisions
 

@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-11 (sixteenth pass, /cairn-triage over 41 candidate
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M89 | The prose sweep reads as prose only what its definition names | planned | — | high | milestones/M089-prose-sweep-parse.md |
+| M89 | The prose sweep reads as prose only what its definition names | in-progress | — | high | milestones/M089-prose-sweep-parse.md |
 | M90 | The sweep's page list and gating modes each have one source | planned | M89 | normal | milestones/M090-sweep-records-one-source.md |
 | M86 | The guides and README pass the plain-English sweep | done | — | high | milestones/archive/M086-guides-plain-sweep.md |
 | M87 | The help pages pass the plain-English sweep | done | M86 | high | milestones/archive/M087-help-pages-plain-sweep.md |
