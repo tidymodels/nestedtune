@@ -1,13 +1,13 @@
 # M091: The docs give the nested estimate as the number to report for the deployed model
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** —
 - **Surface tier:** user-facing — README, the four guides, three help pages and a print method
-- **Branch/PR:** —
+- **Branch/PR:** m091-estimate-for-deployed-model
 
 ## Goal
 
