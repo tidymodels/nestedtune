@@ -67,6 +67,8 @@ test_that("AC4: the print names the procedure as no tuning and the selection as 
   expect_no_match(text, "candidates scored", fixed = TRUE)
   expect_match(text, "No tuning ran", fixed = TRUE)
   expect_match(text, "extract_workflow()", fixed = TRUE)
+  expect_match(text, "number to report for\\s+this\\s+model")
+  expect_match(text, "describes\\s+the\\s+procedure\\s+that\\s+produced")
 
   s <- summary(fit)
   expect_identical(s$tuner, "fit_resamples")

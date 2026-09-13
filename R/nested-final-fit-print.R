@@ -7,16 +7,27 @@
 # saying where this model's honest estimate lives, because a print method is
 # where a user meets the object.
 
+# The message the print method shows and the summary print shows under
+# Estimate (IP3): the number to report for this model lives on the results
+# object, and it describes the procedure that produced the model.
+final_fit_estimate_msg <- "Report the nested estimate from \\
+  {.code collect_metrics()} on the results object this fit was built from. \\
+  It describes the procedure that produced this model, and it is the number \\
+  to report for this model."
+
 #' Print a final fit
 #'
 #' @description
 #' Shows what the full-data search was, which parameters it selected, and
-#' where this model's performance estimate comes from. It also names the
-#' accessors that reach what selection saw.
+#' which number to report for this model. It also names the accessors that
+#' reach what selection saw.
 #'
-#' No performance number appears. The stored tuning run has metrics, but
-#' selection consumed them. See [nested_final_fit()] for why they are not this
-#' model's performance and the nested estimate is.
+#' The number to report is the nested estimate [collect_metrics()] returns
+#' from the results object the fit was built from, and the print says so.
+#' That estimate describes the procedure that produced this model. The
+#' stored tuning run has metrics, but selection consumed them. See
+#' [nested_final_fit()] for why those metrics are not the number to report
+#' and the nested estimate is.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
 #' @param ... Not used. It must be empty. Passing an argument here raises an
@@ -54,11 +65,7 @@ print.nested_final_fit <- function(x, ...) {
   cli::cli_text("Procedure: {procedure_label(new_summary_nested_final_fit(x))}")
   cli::cli_text("Selected: {selected_label(x$selected)}")
   cli::cli_text("")
-  estimate <- c(
-    i = "This model has no performance estimate of its own. Report the nested \\
-         estimate from {.code collect_metrics()} on the results object this \\
-         fit was built from, which describes the procedure that produced it."
-  )
+  estimate <- c(i = final_fit_estimate_msg)
   # A fit that ran no tuning (M70) has no selection to compare and no run
   # to reach: the two accessors refuse it, and the print says so rather
   # than pointing at them.
@@ -96,10 +103,13 @@ print.nested_final_fit <- function(x, ...) {
 #' from, which search ran it and at what counts, how many parameter
 #' settings it scored, and which values it chose.
 #'
-#' The `estimate` component is always `NULL`, and that is the point. The
-#' stored tuning run's metrics are selection-time quantities, so this object
-#' records the absence of a performance number rather than leaving the name
-#' out. See [nested_final_fit()] for the number to report instead.
+#' The `estimate` component is always `NULL`, because the number to report
+#' for this model is not stored on it. That number is the nested estimate
+#' [collect_metrics()] returns from the results object the fit was built
+#' from. The stored tuning run's metrics are selection-time quantities, so
+#' they do not fill the slot. See [nested_final_fit()] for the reason. The
+#' name is kept rather than left out, so the object states where that
+#' number is instead of leaving you to infer it from a missing name.
 #'
 #' @param object A `nested_final_fit` object from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit
@@ -167,10 +177,10 @@ print.summary.nested_final_fit <- function(x, ...) {
 # does for the loop -- a run whose tuning object cannot describe itself has no
 # scheme to name, and the line is dropped rather than invented.
 #
-# `estimate` is carried and set to NULL rather than omitted. This object has no
-# performance estimate of its own (IP3), and recording that positively is the
-# same habit IP4 asks of the loop: what is true is written down, never left to
-# be inferred from a name that is not there.
+# `estimate` is carried and set to NULL rather than omitted. The number to
+# report for this object lives on the results object (IP3), and recording
+# that positively is the same habit IP4 asks of the loop: what is true is
+# written down, never left to be inferred from a name that is not there.
 new_summary_nested_final_fit <- function(x) {
   candidates <- scored_candidates(x$tuning)
   counts <- procedure_counts(candidates, x$procedure)
@@ -356,15 +366,13 @@ print_final_selection <- function(s) {
 }
 
 # IP3, under the heading a reader looking for a number goes to first. The
-# heading is where the number would be, so the sentence saying there is none
-# and where the real one lives is what stands in its place. No value from the
+# heading is where the number would be, so the message naming the number to
+# report and where it lives is what stands in its place. No value from the
 # stored tuning run appears here or anywhere in this method.
 print_final_estimate <- function(s) {
   cli::cli_h2("Estimate")
   cli::cli_bullets(c(
-    i = "This model has no performance estimate of its own. Report the nested \\
-         estimate from {.code collect_metrics()} on the results object this \\
-         fit was built from, which describes the procedure that produced it.",
+    i = final_fit_estimate_msg,
     i = "The tuning run above has metrics, but selection consumed them. \\
          {.fn extract_tune_results} reaches them, and every one is a \\
          selection-time quantity, optimistically biased as a claim about this \\

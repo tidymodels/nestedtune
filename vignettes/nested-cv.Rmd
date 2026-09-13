@@ -27,10 +27,10 @@ setting on those rows, and scores that fit on the assessment rows the
 tuning never saw. The average of those outer scores is an honest estimate of
 how well tune-then-fit works on new data.
 
-That average is what `collect_metrics()` reports, and it is the number to put
-in a write-up. The model you fit at the end on all the data is a separate
-object. It has no score of its own, because every row it was trained on was
-already used to choose and fit it.
+That average is what `collect_metrics()` reports, and it is the number to
+report for the model you deploy. That model is the same procedure run once
+more on all the data. No second score is computed on it, because every row
+it was trained on was already used to choose and fit it.
 
 This page walks from a design to a write-up. The other pages go deeper.
 `vignette("results")` reads everything the results object holds.
@@ -232,9 +232,9 @@ workflow on these same folds with `nested_fit_resamples()`.
 
 ## The model to deploy
 
-Nothing above produced a model to predict with, and that is deliberate. The
-model is built by running the same procedure once more with the whole
-dataset in hand. The procedure is read from `res` (the inner resampling
+The estimate above is the number to report. The model to predict with
+comes next. It is built by running the same procedure once more with the
+whole dataset in hand. The procedure is read from `res` (the inner resampling
 specification, the grid, the metrics, the selection rule), so the model and
 the estimate come from one search.
 
@@ -333,7 +333,8 @@ cat(sprintf(
     "estimated RMSE of %.2f (SE %.2f) for the procedure. Across those %d ",
     "folds, selection took %d distinct values of `mtry` and %d of `min_n`. ",
     "The deployed model was produced by applying the same procedure to the ",
-    "full dataset, which selected mtry = %d and min_n = %d."
+    "full dataset, which selected mtry = %d and min_n = %d. That RMSE ",
+    "is the number reported for that model."
   ),
   nrow(grid),
   nrow(folds$inner_resamples[[1]]),
@@ -349,7 +350,8 @@ cat(sprintf(
 ))
 ```
 
-Three things make it honest. The estimate is attributed to the procedure and
-not to the model. The instability is reported rather than hidden. The
-deployed model is described as what it is: the same procedure applied to all
-the data, with no performance claim of its own.
+Three things make it honest. The estimate describes the procedure that
+built the deployed model, and it is the number reported for that model.
+The instability is reported rather than hidden. The deployed model is
+described as what it is: the same procedure applied to all the data, so
+there is no second number to compute for it.

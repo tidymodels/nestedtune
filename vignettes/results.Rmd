@@ -187,7 +187,8 @@ arguments such as the grid, and the control as it took effect. That
 description is stored on the object as attributes rather than columns.
 `extract_procedure()` returns that description, which this package calls
 the procedure. `nested_final_fit()` reruns what it describes on the whole
-dataset.
+dataset to build the model to deploy, and the estimate is the number to
+report for that model.
 
 ## The readers
 
@@ -233,9 +234,9 @@ collect_predictions(res)
 `agreement()` counts the selections. Each row is one distinct combination
 the folds chose. `n` is how many completed folds chose it, and `prop` is
 that count as a share of the completed folds. The most frequent row describes how
-stable the tuning procedure's choice was on this data. That row is not the final
-model's parameters, which come from `nested_final_fit()` running the
-procedure once more on the whole dataset.
+stable the tuning procedure's choice was on this data. The deployed
+model's parameters come from `nested_final_fit()` running the procedure
+once more on the whole dataset, so they can differ from that row.
 
 ```{r agreement}
 agreement(res)

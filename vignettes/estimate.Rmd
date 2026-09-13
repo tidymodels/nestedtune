@@ -22,8 +22,17 @@ its cost. The worked example is `vignette("nested-cv")`.
 
 ## The case for nesting
 
-When you tune with cross-validation, you try several settings, the
-candidates, and keep the one with the best score. Scores are noisy, and the
+You tune with cross-validation, keep the best setting, and score it once
+on a held-out test set. That test score is one number from one split of
+the data. Nothing in it says whether the split is representative. Nested
+cross-validation scores the whole tune-and-fit procedure on several outer
+folds instead. Its outer scores give the mean across those folds and
+show how far the score moves from one fold to the next. Each outer fold
+also tunes on its own, so no outer score is the score that picked its
+fold's winner.
+
+Tuning with cross-validation tries several settings, the candidates, and
+keeps the one with the best score. Scores are noisy, and the
 best of several noisy numbers tends to look better than it is. So the
 winner's score overstates what the model will do on new data, by an amount
 nothing in the output reveals.
@@ -32,37 +41,33 @@ At a small sample size the noise is large, so the winner's score can come
 out no better than an honest one. Distrust it for how it was chosen,
 whether it came out high or low.
 
-Nested cross-validation scores the whole tuning procedure, every step
-you run on the data: resample, tune, pick a setting, fit. Nesting puts
-that procedure inside a second, outer resampling loop. Each outer fold tunes
-from scratch on its own analysis rows, fits the chosen setting there, and
-scores that fit once on assessment rows the tuning never saw.
+The procedure is every step you run on the data: resample, tune, pick a
+setting, fit. Each outer fold runs it from scratch on its own analysis
+rows and scores the fitted setting once on assessment rows the tuning
+never saw.
 
-The number `collect_metrics()` reports describes the whole tune-and-fit
-procedure: resample, tune, select, fit. That is the number to report. The
-model fitted at the end for deployment is a separate object, and it has no
-performance number of its own. Everything computable from its training data
-was used up in selecting and fitting it.
+The number `collect_metrics()` reports is the number to report for the
+model you deploy. It describes the whole tune-and-fit procedure, measured
+on rows the procedure never saw. The deployed model is that same procedure
+run once more on all the data, so there is no second number to compute for
+it.
 
 ## The quantity estimated
 
-Take the four steps, resample, tune, select, fit, as one procedure. The
-number `collect_metrics()` reports is that procedure's error when run on
-each fold's training rows and scored on fresh data. Bayle et al. (2026) call that the k-fold test error of the
-procedure.
+The number `collect_metrics()` reports is the procedure's error when it
+runs on each fold's training rows and is scored on fresh data. Bayle et
+al. (2026) call that the k-fold test error of the procedure.
 
-Four things it is not.
-
-- It is not the error of the deployed model, which is built afterwards on
-  all the rows and estimated by nothing here.
-- It is not a verdict on that model's parameter values.
-- It does not say what a larger or a different training set gives, because
-  it ran on this one alone.
-- It is not that error averaged over every training set the same source
-  can produce, which describes the method rather than this data. Luo and
-  Barber (2026) prove that any assumption-free test of that method-level
-  quantity needs a dataset many times larger than the training set. So this
-  package offers no such test.
+The estimate has a scope. No score is computed on the deployed model
+itself, because everything the data can say went into building it. The
+estimate is not a verdict on the parameter values the final fit chose. It
+does not say what a larger or a different training set gives, because the
+procedure ran on this one alone. And it is the error on this data, not
+that error averaged over every training set the same source can produce.
+That average describes the method rather than this data. Luo and Barber
+(2026) prove that any assumption-free test of that method-level quantity needs a
+dataset many times larger than the training set. So this package offers
+no such test.
 
 ## A slight pessimism
 
@@ -82,7 +87,7 @@ roughly 1 to 2% of AUROC and 5 to 9% of AUPR. The same study reports one
 cell where the nested estimate came out optimistic instead.
 
 The gap is a property of the estimator, not a prediction about any one run.
-It is never a license to adjust the reported figure upward.
+It is no license to adjust the reported figure upward.
 
 ## The standard error
 
@@ -90,8 +95,8 @@ It is never a license to adjust the reported figure upward.
 the standard deviation of the fold scores divided by the square root of
 their number. It is not the fold-to-fold spread, which is larger by that
 factor. `collect_metrics(res, summarize = FALSE)` gives the per-fold scores.
-It is also not a confidence interval. This package ships no inference on the
-nested estimate.
+It is not a confidence interval, and this package ships no inference on
+the nested estimate.
 
 ## Comparing two workflows
 
@@ -107,10 +112,9 @@ two procedures are similar. A gap between two nested estimates is a reason to
 look closer, never a result.
 
 The same holds for a set of workflows run through one design with
-`nested_workflow_map()`. Choosing the workflow with the best estimate is
-itself a selection, made on the same scores, and no outer loop scored that
-choice. So the package offers no ranking or best-workflow function for the
-set.
+`nested_workflow_map()`. Choosing the best estimate is itself a selection,
+made on the same scores, that no outer loop scored, so the package offers
+no ranking or best-workflow function for the set.
 
 ## Disagreement between folds
 

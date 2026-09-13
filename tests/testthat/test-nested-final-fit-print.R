@@ -16,7 +16,8 @@ test_that("printing names the selection and where the estimate lives", {
 
   expect_match(out, "final fit")
   expect_match(out, "num_comp = ")
-  expect_match(out, "no performance estimate of its own")
+  expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
   # RR02 B3: the moment of deployment is when selection instability matters.
   expect_match(out, "\\.selected")
@@ -97,9 +98,9 @@ PRINT_AS_AGREED_M46 <- paste(
     "Procedure: grid search, 3 candidates scored",
     "Selected: num_comp = 3",
     "",
-    "i This model has no performance estimate of its own. Report the nested estimate",
-    "  from `collect_metrics()` on the results object this fit was built from, which",
-    "  describes the procedure that produced it.",
+    "i Report the nested estimate from `collect_metrics()` on the results object",
+    "  this fit was built from. It describes the procedure that produced this model,",
+    "  and it is the number to report for this model.",
     "i Compare the parameters above with `.selected` from that run. Outer folds",
     "  choosing differently is selection instability, and it is information about",
     "  the procedure rather than noise.",
@@ -155,7 +156,8 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
 
   out <- print_text(s)
   expect_match(out, "num_comp: 3")
-  expect_match(out, "no performance estimate of its own")
+  expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
 })
 
@@ -202,9 +204,10 @@ test_that("a summary with nothing to report drops the lines it cannot fill", {
 
   expect_match(out, "No tuned parameters")
   expect_no_match(out, "Full-data tuning")
-  # The heading and its sentence stand whether or not anything was tuned: this
-  # object never has an estimate, and that is what the section exists to say.
-  expect_match(out, "no performance estimate of its own")
+  # The heading and its message stand whether or not anything was tuned: the
+  # section names the number to report for this model either way.
+  expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
 })
 
 test_that("the summary report is stable", {

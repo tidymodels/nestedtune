@@ -48,9 +48,9 @@ whole dataset in hand. That means it rebuilds the inner resamples on every
 row, tunes with the recorded tuner, selects by the recorded
 \code{\link[=selection_rule]{selection_rule()}}, and fits the finalized workflow on all the data.
 
-What comes back is the model to deploy. It carries no performance number
-of its own. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results
-object you passed in, for the reason the section on what to report gives.
+What comes back is the model to deploy. The number to report for it is
+\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, for the reason
+the section on what to report gives.
 }
 \details{
 The procedure a nested estimate describes is "resample this dataset by
@@ -151,12 +151,12 @@ with class \code{nestedtune_bad_final_fit_args}.
 Report the estimate \code{\link[=collect_metrics]{collect_metrics()}} returns from the results object
 you handed over. It describes the whole tune-and-fit procedure that
 produced this model, measured on rows no part of that procedure ever
-saw. It is the number to report for this model. The model has no
-performance number of its own. That includes the metrics inside the
-tuning run stored on it. They were computed on the resamples that chose
-the candidate, so they are selection-time quantities, optimistically
-biased as a claim about this model. \code{collect_metrics()} on \code{x$tuning}
-hands them over without saying so.
+saw. It is the number to report for this model, and no second number is
+computed on the model itself. The metrics inside the tuning run stored
+on it are not a number to report. They were computed on the resamples
+that chose the candidate, so they are selection-time quantities,
+optimistically biased as a claim about this model. \code{collect_metrics()} on
+\code{x$tuning} hands them over without saying so.
 
 Expect the nested estimate to run slightly pessimistic instead, because
 each outer fold trained on its analysis rows alone. Varma and Simon

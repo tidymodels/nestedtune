@@ -26,11 +26,11 @@ candidate, one parameter setting. \code{agreement()} counts those selections:
 one row per distinct combination of selected parameter values, most
 frequent first.
 
-The most frequent combination is not the final model's parameters. The
-tuning procedure is tune then select, and the folds say how stable its
-choice is. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which
-runs the procedure once more on the whole dataset and selects for
-itself.
+The deployed model's parameters can differ from the most frequent
+combination. The tuning procedure is tune then select, and the folds say
+how stable its choice is. The model to deploy comes from
+\code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the procedure once more on the whole
+dataset and selects for itself.
 }
 \section{How the folds are counted}{
 
