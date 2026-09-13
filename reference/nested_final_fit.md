@@ -7,8 +7,7 @@ every row, tunes with the recorded tuner, selects by the recorded
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
 and fits the finalized workflow on all the data.
 
-What comes back is the model to deploy. It carries no performance number
-of its own. The number to report is
+What comes back is the model to deploy. The number to report for it is
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 on the results object you passed in, for the reason the section on what
 to report gives.
@@ -184,10 +183,11 @@ Report the estimate
 returns from the results object you handed over. It describes the whole
 tune-and-fit procedure that produced this model, measured on rows no
 part of that procedure ever saw. It is the number to report for this
-model. The model has no performance number of its own. That includes the
-metrics inside the tuning run stored on it. They were computed on the
-resamples that chose the candidate, so they are selection-time
-quantities, optimistically biased as a claim about this model.
+model, and no second number is computed on the model itself. The metrics
+inside the tuning run stored on it are not a number to report. They were
+computed on the resamples that chose the candidate, so they are
+selection-time quantities, optimistically biased as a claim about this
+model.
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 on `x$tuning` hands them over without saying so.
 
@@ -332,9 +332,9 @@ final
 #> Procedure: grid search, 2 candidates scored
 #> Selected: num_comp = 1
 #> 
-#> ℹ This model has no performance estimate of its own. Report the nested
-#>   estimate from `collect_metrics()` on the results object this fit was
-#>   built from, which describes the procedure that produced it.
+#> ℹ Report the nested estimate from `collect_metrics()` on the results
+#>   object this fit was built from. It describes the procedure that
+#>   produced this model, and it is the number to report for this model.
 #> ℹ Compare the parameters above with `.selected` from that run. Outer
 #>   folds choosing differently is selection instability, and it is
 #>   information about the procedure rather than noise.

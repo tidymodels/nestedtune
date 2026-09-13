@@ -92,9 +92,10 @@ fits the winning setting on those rows, and scores that fit on the
 assessment rows the tuning never saw. The average of those outer scores
 is an honest estimate of how well tune-then-fit works on new data.</p>
 <p>That average is what <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports, and it
-is the number to put in a write-up. The model you fit at the end on all
-the data is a separate object. It has no score of its own, because every
-row it was trained on was already used to choose and fit it.</p>
+is the number to report for the model you deploy. That model is the same
+procedure run once more on all the data. No second score is computed on
+it, because every row it was trained on was already used to choose and
+fit it.</p>
 <p>This page walks from a design to a write-up. The other pages go
 deeper. <code><a href="../articles/results.html">vignette("results")</a></code> reads everything the results
 object holds. <code><a href="../articles/tuners.html">vignette("tuners")</a></code> swaps in the other inner
@@ -335,12 +336,11 @@ folds with <code><a href="../reference/nested_fit_resamples.html">nested_fit_res
 <div class="section level2">
 <h2 id="the-model-to-deploy">The model to deploy<a class="anchor" aria-label="anchor" href="#the-model-to-deploy"></a>
 </h2>
-<p>Nothing above produced a model to predict with, and that is
-deliberate. The model is built by running the same procedure once more
-with the whole dataset in hand. The procedure is read from
-<code>res</code> (the inner resampling specification, the grid, the
-metrics, the selection rule), so the model and the estimate come from
-one search.</p>
+<p>The estimate above is the number to report. The model to predict with
+comes next. It is built by running the same procedure once more with the
+whole dataset in hand. The procedure is read from <code>res</code> (the
+inner resampling specification, the grid, the metrics, the selection
+rule), so the model and the estimate come from one search.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
@@ -352,9 +352,9 @@ one search.</p>
 <span><span class="co">#&gt; Procedure: grid search, 6 candidates scored</span></span>
 <span><span class="co">#&gt; Selected: mtry = 2, min_n = 2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This model has no performance estimate of its own. Report the nested</span></span>
-<span><span class="co">#&gt;   estimate from `collect_metrics()` on the results object this fit was</span></span>
-<span><span class="co">#&gt;   built from, which describes the procedure that produced it.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Report the nested estimate from `collect_metrics()` on the results</span></span>
+<span><span class="co">#&gt;   object this fit was built from. It describes the procedure that</span></span>
+<span><span class="co">#&gt;   produced this model, and it is the number to report for this model.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Compare the parameters above with `.selected` from that run. Outer</span></span>
 <span><span class="co">#&gt;   folds choosing differently is selection instability, and it is</span></span>
 <span><span class="co">#&gt;   information about the procedure rather than noise.</span></span>
@@ -460,13 +460,14 @@ The outer folds give an estimated RMSE of 2.49 (SE 0.45) for the
 procedure. Across those 5 folds, selection took 2 distinct values of
 <code>mtry</code> and 1 of <code>min_n</code>. The deployed model was
 produced by applying the same procedure to the full dataset, which
-selected mtry = 2 and min_n = 2.</p>
+selected mtry = 2 and min_n = 2. That RMSE is the number reported for
+that model.</p>
 </blockquote>
-<p>Three things make it honest. The estimate is attributed to the
-procedure and not to the model. The instability is reported rather than
-hidden. The deployed model is described as what it is: the same
-procedure applied to all the data, with no performance claim of its
-own.</p>
+<p>Three things make it honest. The estimate describes the procedure
+that built the deployed model, and it is the number reported for that
+model. The instability is reported rather than hidden. The deployed
+model is described as what it is: the same procedure applied to all the
+data, so there is no second number to compute for it.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

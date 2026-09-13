@@ -3,17 +3,23 @@
 printed lines. Those are the full-data tuning run the selection came
 from, which search ran it and at what counts, how many parameter
 settings it scored, and which values it chose.
-The estimate component is always NULL, and that is the point. The
-stored tuning run's metrics are selection-time quantities, so this object
-records the absence of a performance number rather than leaving the name
-out. See nested_final_fit() for the number to report instead."><meta property="og:description" content="summary() gives you the facts of the final fit as values rather than
+The estimate component is always NULL, because the number to report
+for this model is not stored on it. That number is the nested estimate
+collect_metrics() returns from the results object the fit was built
+from. The stored tuning run's metrics are selection-time quantities, so
+they do not fill the slot. See nested_final_fit() for the reason. The
+name is kept rather than left out, so the object states where that
+number is instead of leaving you to infer it from a missing name."><meta property="og:description" content="summary() gives you the facts of the final fit as values rather than
 printed lines. Those are the full-data tuning run the selection came
 from, which search ran it and at what counts, how many parameter
 settings it scored, and which values it chose.
-The estimate component is always NULL, and that is the point. The
-stored tuning run's metrics are selection-time quantities, so this object
-records the absence of a performance number rather than leaving the name
-out. See nested_final_fit() for the number to report instead."><meta property="og:image" content="https://nestedtune.tidymodels.org/logo.png"><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
+The estimate component is always NULL, because the number to report
+for this model is not stored on it. That number is the nested estimate
+collect_metrics() returns from the results object the fit was built
+from. The stored tuning run's metrics are selection-time quantities, so
+they do not fill the slot. See nested_final_fit() for the reason. The
+name is kept rather than left out, so the object states where that
+number is instead of leaving you to infer it from a missing name."><meta property="og:image" content="https://nestedtune.tidymodels.org/logo.png"><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
     <a href="#container" class="visually-hidden-focusable">Skip to content</a>
 
 
@@ -63,10 +69,13 @@ out. See nested_final_fit() for the number to report instead."><meta property="o
 printed lines. Those are the full-data tuning run the selection came
 from, which search ran it and at what counts, how many parameter
 settings it scored, and which values it chose.</p>
-<p>The <code>estimate</code> component is always <code>NULL</code>, and that is the point. The
-stored tuning run's metrics are selection-time quantities, so this object
-records the absence of a performance number rather than leaving the name
-out. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for the number to report instead.</p>
+<p>The <code>estimate</code> component is always <code>NULL</code>, because the number to report
+for this model is not stored on it. That number is the nested estimate
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> returns from the results object the fit was built
+from. The stored tuning run's metrics are selection-time quantities, so
+they do not fill the slot. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for the reason. The
+name is kept rather than left out, so the object states where that
+number is instead of leaving you to infer it from a missing name.</p>
     </div>
 
     <div class="section level2">
@@ -162,9 +171,9 @@ is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>select
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Estimate</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This model has no performance estimate of its own. Report the nested</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   estimate from `collect_metrics()` on the results object this fit was</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   built from, which describes the procedure that produced it.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Report the nested estimate from `collect_metrics()` on the results</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   object this fit was built from. It describes the procedure that</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   produced this model, and it is the number to report for this model.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The tuning run above has metrics, but selection consumed them.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   `extract_tune_results()` reaches them, and every one is a</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   selection-time quantity, optimistically biased as a claim about this</span>

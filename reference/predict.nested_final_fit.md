@@ -83,7 +83,7 @@ data it has not. The number to report is
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 on the results object the fit was built from. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for why this model has no number of its own.
+for why that is the number to report for this model.
 
 ## See also
 

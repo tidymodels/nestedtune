@@ -269,7 +269,8 @@ own arguments such as the grid, and the control as it took effect. That
 description is stored on the object as attributes rather than columns.
 <code><a href="../reference/extract_procedure.html">extract_procedure()</a></code> returns that description, which this
 package calls the procedure. <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> reruns what
-it describes on the whole dataset.</p>
+it describes on the whole dataset to build the model to deploy, and the
+estimate is the number to report for that model.</p>
 </div>
 <div class="section level2">
 <h2 id="the-readers">The readers<a class="anchor" aria-label="anchor" href="#the-readers"></a>
@@ -382,9 +383,10 @@ predictions, and names the control slot to set.
 distinct combination the folds chose. <code>n</code> is how many
 completed folds chose it, and <code>prop</code> is that count as a share
 of the completed folds. The most frequent row describes how stable the
-tuning procedure’s choice was on this data. That row is not the final
-model’s parameters, which come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>
-running the procedure once more on the whole dataset.</p>
+tuning procedure’s choice was on this data. The deployed model’s
+parameters come from <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> running the
+procedure once more on the whole dataset, so they can differ from that
+row.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/agreement.html">agreement</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>

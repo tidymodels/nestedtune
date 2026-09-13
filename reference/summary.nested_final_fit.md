@@ -6,12 +6,16 @@ full-data tuning run the selection came from, which search ran it and at
 what counts, how many parameter settings it scored, and which values it
 chose.
 
-The `estimate` component is always `NULL`, and that is the point. The
-stored tuning run's metrics are selection-time quantities, so this
-object records the absence of a performance number rather than leaving
-the name out. See
+The `estimate` component is always `NULL`, because the number to report
+for this model is not stored on it. That number is the nested estimate
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+returns from the results object the fit was built from. The stored
+tuning run's metrics are selection-time quantities, so they do not fill
+the slot. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for the number to report instead.
+for the reason. The name is kept rather than left out, so the object
+states where that number is instead of leaving you to infer it from a
+missing name.
 
 ## Usage
 
@@ -115,9 +119,9 @@ summary(final)
 #> 
 #> ── Estimate ──
 #> 
-#> ℹ This model has no performance estimate of its own. Report the nested
-#>   estimate from `collect_metrics()` on the results object this fit was
-#>   built from, which describes the procedure that produced it.
+#> ℹ Report the nested estimate from `collect_metrics()` on the results
+#>   object this fit was built from. It describes the procedure that
+#>   produced this model, and it is the number to report for this model.
 #> ℹ The tuning run above has metrics, but selection consumed them.
 #>   `extract_tune_results()` reaches them, and every one is a
 #>   selection-time quantity, optimistically biased as a claim about this

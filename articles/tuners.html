@@ -568,9 +568,11 @@ baseline has no panel.</p>
 <p><img src="tuners_files/figure-html/wset-parameters-1.png" class="r-plt" alt="One panel per tuned parameter and workflow, labeled by the workflow id, with the outer folds along the x axis and one point per fold at the value it selected." width="672"></p>
 <p>What the set does not offer is a ranking of its workflows or a fit of
 the best one. Choosing among them by these estimates is a selection the
-outer loop did not nest, as <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says. The
-final fit for one workflow of the set is
-<code>nested_final_fit(mapped, id = "forest")</code>.</p>
+outer loop did not nest, as <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says. For
+a workflow chosen before seeing these estimates, the model to deploy is
+<code>nested_final_fit(mapped, id = "forest")</code>, and that
+workflow’s rows in <code>collect_metrics(mapped)</code> are the numbers
+to report for it.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

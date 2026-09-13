@@ -18,7 +18,8 @@ returns describes that whole procedure, not any one fitted model, and it
 is the number to report. No model is returned here.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 builds the model to deploy by running the recorded procedure once more
-on all the data, and that model has no performance number of its own.
+on all the data, and the estimate is the number to report for that
+model.
 
 ## Usage
 

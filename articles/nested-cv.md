@@ -16,10 +16,10 @@ honest estimate of how well tune-then-fit works on new data.
 
 That average is what
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reports, and it is the number to put in a write-up. The model you fit at
-the end on all the data is a separate object. It has no score of its
-own, because every row it was trained on was already used to choose and
-fit it.
+reports, and it is the number to report for the model you deploy. That
+model is the same procedure run once more on all the data. No second
+score is computed on it, because every row it was trained on was already
+used to choose and fit it.
 
 This page walks from a design to a write-up. The other pages go deeper.
 [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
@@ -316,8 +316,8 @@ scores such a workflow on these same folds with
 
 ## The model to deploy
 
-Nothing above produced a model to predict with, and that is deliberate.
-The model is built by running the same procedure once more with the
+The estimate above is the number to report. The model to predict with
+comes next. It is built by running the same procedure once more with the
 whole dataset in hand. The procedure is read from `res` (the inner
 resampling specification, the grid, the metrics, the selection rule), so
 the model and the estimate come from one search.
@@ -334,9 +334,9 @@ final
 #> Procedure: grid search, 6 candidates scored
 #> Selected: mtry = 2, min_n = 2
 #> 
-#> ℹ This model has no performance estimate of its own. Report the nested
-#>   estimate from `collect_metrics()` on the results object this fit was
-#>   built from, which describes the procedure that produced it.
+#> ℹ Report the nested estimate from `collect_metrics()` on the results
+#>   object this fit was built from. It describes the procedure that
+#>   produced this model, and it is the number to report for this model.
 #> ℹ Compare the parameters above with `.selected` from that run. Outer
 #>   folds choosing differently is selection instability, and it is
 #>   information about the procedure rather than noise.
@@ -470,9 +470,11 @@ report:
 > estimated RMSE of 2.49 (SE 0.45) for the procedure. Across those 5
 > folds, selection took 2 distinct values of `mtry` and 1 of `min_n`.
 > The deployed model was produced by applying the same procedure to the
-> full dataset, which selected mtry = 2 and min_n = 2.
+> full dataset, which selected mtry = 2 and min_n = 2. That RMSE is the
+> number reported for that model.
 
-Three things make it honest. The estimate is attributed to the procedure
-and not to the model. The instability is reported rather than hidden.
-The deployed model is described as what it is: the same procedure
-applied to all the data, with no performance claim of its own.
+Three things make it honest. The estimate describes the procedure that
+built the deployed model, and it is the number reported for that model.
+The instability is reported rather than hidden. The deployed model is
+described as what it is: the same procedure applied to all the data, so
+there is no second number to compute for it.

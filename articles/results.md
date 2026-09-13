@@ -244,7 +244,8 @@ description is stored on the object as attributes rather than columns.
 [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
 returns that description, which this package calls the procedure.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-reruns what it describes on the whole dataset.
+reruns what it describes on the whole dataset to build the model to
+deploy, and the estimate is the number to report for that model.
 
 ## The readers
 
@@ -375,10 +376,11 @@ collect_predictions(res)
 counts the selections. Each row is one distinct combination the folds
 chose. `n` is how many completed folds chose it, and `prop` is that
 count as a share of the completed folds. The most frequent row describes
-how stable the tuning procedure’s choice was on this data. That row is
-not the final model’s parameters, which come from
+how stable the tuning procedure’s choice was on this data. The deployed
+model’s parameters come from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-running the procedure once more on the whole dataset.
+running the procedure once more on the whole dataset, so they can differ
+from that row.
 
 ``` r
 

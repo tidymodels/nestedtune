@@ -6,9 +6,9 @@ candidate, one parameter setting. `agreement()` counts those selections:
 one row per distinct combination of selected parameter values, most
 frequent first.
 
-The most frequent combination is not the final model's parameters. The
-tuning procedure is tune then select, and the folds say how stable its
-choice is. The model to deploy comes from
+The deployed model's parameters can differ from the most frequent
+combination. The tuning procedure is tune then select, and the folds say
+how stable its choice is. The model to deploy comes from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
 which runs the procedure once more on the whole dataset and selects for
 itself.

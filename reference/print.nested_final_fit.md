@@ -1,14 +1,17 @@
 # Print a final fit
 
 Shows what the full-data search was, which parameters it selected, and
-where this model's performance estimate comes from. It also names the
-accessors that reach what selection saw.
+which number to report for this model. It also names the accessors that
+reach what selection saw.
 
-No performance number appears. The stored tuning run has metrics, but
-selection consumed them. See
+The number to report is the nested estimate
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+returns from the results object the fit was built from, and the print
+says so. That estimate describes the procedure that produced this model.
+The stored tuning run has metrics, but selection consumed them. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for why they are not this model's performance and the nested estimate
-is.
+for why those metrics are not the number to report and the nested
+estimate is.
 
 ## Usage
 
@@ -82,9 +85,9 @@ final
 #> Procedure: grid search, 2 candidates scored
 #> Selected: num_comp = 1
 #> 
-#> ℹ This model has no performance estimate of its own. Report the nested
-#>   estimate from `collect_metrics()` on the results object this fit was
-#>   built from, which describes the procedure that produced it.
+#> ℹ Report the nested estimate from `collect_metrics()` on the results
+#>   object this fit was built from. It describes the procedure that
+#>   produced this model, and it is the number to report for this model.
 #> ℹ Compare the parameters above with `.selected` from that run. Outer
 #>   folds choosing differently is selection instability, and it is
 #>   information about the procedure rather than noise.
