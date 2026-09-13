@@ -207,6 +207,7 @@ test_that("a summary with nothing to report drops the lines it cannot fill", {
   # The heading and its message stand whether or not anything was tuned: the
   # section names the number to report for this model either way.
   expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
 })
 
 test_that("the summary report is stable", {

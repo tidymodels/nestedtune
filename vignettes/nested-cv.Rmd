@@ -333,8 +333,8 @@ cat(sprintf(
     "estimated RMSE of %.2f (SE %.2f) for the procedure. Across those %d ",
     "folds, selection took %d distinct values of `mtry` and %d of `min_n`. ",
     "The deployed model was produced by applying the same procedure to the ",
-    "full dataset, which selected mtry = %d and min_n = %d. The estimate ",
-    "above is the number reported for that model."
+    "full dataset, which selected mtry = %d and min_n = %d. That RMSE ",
+    "is the number reported for that model."
   ),
   nrow(grid),
   nrow(folds$inner_resamples[[1]]),

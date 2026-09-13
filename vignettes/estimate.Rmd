@@ -26,10 +26,10 @@ You tune with cross-validation, keep the best setting, and score it once
 on a held-out test set. That test score is one number from one split of
 the data. Nothing in it says whether the split is representative. Nested
 cross-validation scores the whole tune-and-fit procedure on several outer
-splits instead. Its outer scores give the mean across those splits and
-show how far the score moves from one split to the next. Each outer split
+folds instead. Its outer scores give the mean across those folds and
+show how far the score moves from one fold to the next. Each outer fold
 also tunes on its own, so no outer score is the score that picked its
-split's winner.
+fold's winner.
 
 Tuning with cross-validation tries several settings, the candidates, and
 keeps the one with the best score. Scores are noisy, and the
@@ -112,9 +112,9 @@ two procedures are similar. A gap between two nested estimates is a reason to
 look closer, never a result.
 
 The same holds for a set of workflows run through one design with
-`nested_workflow_map()`. Choosing the best estimate is itself a selection
-that no outer loop scored, so the package offers no ranking or
-best-workflow function for the set.
+`nested_workflow_map()`. Choosing the best estimate is itself a selection,
+made on the same scores, that no outer loop scored, so the package offers
+no ranking or best-workflow function for the set.
 
 ## Disagreement between folds
 
