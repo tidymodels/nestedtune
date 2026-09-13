@@ -199,3 +199,43 @@ Pass 3, 2026-09-13, on `8d217db`. `origin/main` is an ancestor of the branch and
 - AC4 (ticked, re-verified): estimate.Rmd:49-53 "The number `collect_metrics()` reports is the number to report for the model you deploy. It describes the whole tune-and-fit procedure, measured on rows the procedure never saw. The deployed model is that same procedure run once more on all the data, so there is no second number to compute for it." nested-cv.Rmd:353-357 "Three things make it honest. The estimate describes the procedure that built the deployed model, and it is the number reported for that model. The instability is reported rather than hidden. The deployed model is described as what it is: the same procedure applied to all the data, so there is no second number to compute for it."
 - AC5 (ticked, re-verified): the grep prints 0 lines on each of the ten files. At `27b4efd` it printed 2 lines each on README.Rmd, estimate.Rmd and nested-cv.Rmd and 3 on R/nested-final-fit-print.R.
 - AC6 (ticked): the print Estimate section (snapshot 37-41 and 85-89, from the constant at R/nested-final-fit-print.R:13-16) reads "Report the nested estimate from `collect_metrics()` on the results object this fit was built from. It describes the procedure that produced this model, and it is the number to report for this model." `?print.nested_final_fit` description 23-25: "The number to report is the nested estimate `collect_metrics()` returns from the results object the fit was built from, and the print says so. That estimate describes the procedure that produced this model." `?nested_final_fit` description 51-53 and section "What to report" 151-155 say both. `?nested_tune_grid` description 84-88 says both. `test-nested-final-fit-print.R` with `NOT_CRAN=true`: 14 tests, 0 failed, 0 errors, 0 skipped, 166 expectations. The run left no new snapshot. The snapshot diff against `main` is the message change alone.
+- AC7 (not ticked, triage pending at the gate): all six `--list-gating` commands exit 0. Word counts 292 / 1445 / 1303 / 1439 / 1401 against 350 / 1450 / 1500 / 1500 / 1500. `pkgdown::build_articles(lazy = FALSE)` exit 0, five vignettes read, no error line. Two more `devtools::build_readme()` runs left the tree clean. `devtools::check()` on `8d217db`: 0 errors, 0 warnings, 0 notes (7m 22s). The reader report and its proposed triage are below.
+
+Consistency gate, pass 3: `cairn_validate.py` exit 0 (18 references-staleness advisories). `devtools::document()` left no diff (roxygen2 8.0.0 installed against 8.1.0 required). `pkgdown::check_pkgdown()` found no problems. `git diff main -- cairn/DESIGN.md` is empty. No new top-level files. No `NEWS.md` entry, which the Scope puts out. No principle text changed, so `cairn_impact` was skipped.
+
+Reader report, pass 3 (fresh Opus reader, T7 prompt unchanged). Answer 1: report the mean of the outer-fold scores `collect_metrics(res)` returns, with `std_err` as the standard error of that mean, for the model from `nested_final_fit()`. Answer 2: nest only for many features against sample size and a wide search. For tall data with a small grid, report the tuned score and skip the compute (estimate.Rmd:141-146). Entries, with proposed dispositions:
+  1. estimate.Rmd:40-42, at small n the winner's score can be no better: reject, an accurate warning that the tuned score is unreliable either way.
+  2. estimate.Rmd:61-70, the estimate's scope and "no such test": reject, IP3 obliges the page to state it.
+  3. estimate.Rmd:74-79, the nested number is pessimistic: reject, an accurate property the page must state.
+  4. estimate.Rmd:81-87, cited overshoot with no study of the tuned score's bias beside it: reject, cited evidence kept by T1's keep-every-citation rule.
+  5. estimate.Rmd:94-99, no interval: reject, accurate, and inference is the `[low]` inference candidate row.
+  6. estimate.Rmd:103-112, estimates cannot be subtracted: reject, accurate.
+  7. estimate.Rmd:114-117, no ranking of a set: reject, accurate.
+  8. estimate.Rmd:131-139, small optimism at n=400: reject, cited evidence in the when-nesting-pays section, outside this milestone's scope.
+  9. estimate.Rmd:141-146, tall data gains little, and "quadratically in the fold count" against the outer-times-inner product: defer to the #91 candidate row with pass-2 entry 9. The quadratic wording is accurate when the outer and inner counts are equal.
+  10. nested-cv.Rmd:100-102, the example does not need nesting: reject, the example states its size.
+  11. nested-cv.Rmd:121-127, the cost: reject, accurate.
+  12. nested-cv.Rmd:201-204, selections largely arbitrary at this size: reject, accurate for 32 rows, and unchanged text.
+  13. nested-cv.Rmd:276-278, the sign of the gap means nothing: reject, accurate, and unchanged text.
+  14. tuners.Rmd:344-346, no subtraction on shared folds: reject, accurate.
+  15. tuners.Rmd:436-441, no ranking or best fit for a set: reject, accurate.
+  16. The reader noted estimate.Rmd:148-152 and README.Rmd:24-34 argue for nesting: noted, requests nothing.
+
+Independent review, pass 3, with proposed dispositions. Sonnet blame-history reviewer: no findings. Sonnet prior-review reviewer: no findings. Every pass-2 fix-now finding holds at HEAD, and every pass-2 rejection's reason is unchanged. Opus diff-bug reviewer, ranked:
+1. R/nested-final-fit.R:148-151 against 166-167: "the number to report for this model" beside "not a model retrained at another size", while the deployed model trains on all n rows. Reject: the paragraph at 156-160 states the pessimism from the smaller outer training sets.
+2. estimate.Rmd:61-70: the removed list item "not the error of the deployed model" has no replacement, so a reader can take the mean as that model's own error. Reject: pass-2 finding 4 and AC4's wording, and estimate.Rmd:57-59 defines the quantity as the procedure's error.
+3. estimate.Rmd:25-37 and README.Rmd:24-34: nothing says the optimism belongs to the tuning score and not the test-set score. Reject: README.Rmd:32-33 and estimate.Rmd:34-38 name the score that picked the winner.
+4. R/nested-final-fit-print.R:134-135: `?summary.nested_final_fit` says the NULL counts are carried "for the reason `estimate` is", and the description no longer gives a reason for keeping the name. Fix now.
+5. The "chosen before seeing this estimate" condition appears only in `?collect_metrics.nested_results` and tuners.Rmd. Reject: the condition applies where a choice among estimates exists, which is a set.
+6. Stale text the Scope does not name: the `nested_results` summary note (R/nested-results-print.R:295-297) and the plot subtitles (R/nested-results-plot.R:289, 628) say "not a model you can deploy". The sibling help pages (R/nested-tune-bayes.R:14-15, R/nested-tune-race.R:17-18, R/nested-tune-sim-anneal.R:14-15) say "reported for the procedure". Follow-up: a new candidate row.
+7. NEWS.md:240, 255 and 427 stale: noted, pass-2 finding 20 already put these on the `[low]` NEWS candidate row.
+8. nested-cv.Rmd:276 "not an estimate of performance on anything" overstates: reject, unchanged text.
+9. R/nested-final-fit-print.R:6-7 header comment "honest estimate lives": reject, pass-2 finding 19.
+10. R/nested-final-fit-print.R:13-16: "report" twice, and for a set fit the results object is the set's row. Reject the style half (pass-2 finding 13). Follow-up: the set-fit half joins finding 6's row.
+11. tuners.Rmd:438-441 reads as though `forest` is the pre-chosen workflow: reject, the id is the example's.
+12. nested-cv.Rmd:336-337: in the write-up template "The estimate above" points back into the same paragraph. Fix now.
+13. estimate.Rmd:114-117: the rewording dropped "made on the same scores", the reason the choice is biased. Fix now.
+14. estimate.Rmd:25-32 says "outer splits" and later "outer fold" for one thing. Fix now.
+15. Tests: the no-tuning print path is not asserted to show the estimate message (test-nested-final-fit-resamples.R:58-80), and the summary with nothing tuned (test-nested-final-fit-print.R:209) does not match "describes the procedure". Fix now.
+16. test-nested-final-fit-print.R:101-102 over 80 columns, and generated Rd lines: reject, the replaced lines were also over 80, and roxygen writes the Rd.
+17. No R CMD check hazard found: noted.
