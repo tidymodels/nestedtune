@@ -1,6 +1,6 @@
 # M091: The docs give the nested estimate as the number to report for the deployed model
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -36,8 +36,8 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - AC3 → T1, T3, T8
 - AC4 → T1, T2, T8
 - AC5 → T1, T2, T3, T4, T5, T8
-- AC6 → T5, T8
-- AC7 → T6, T7, T8
+- AC6 → T5, T8, T9
+- AC7 → T6, T7, T8, T9
 
 ## Tasks
 
@@ -49,6 +49,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - [x] T6: Run every AC7 command and record each result in the work log. Make sure that `git diff 27b4efd -- cairn/DESIGN.md` is empty.
 - [x] T7: Write the reader prompt as one work-log line: the two AC7 questions, the five page paths, and the instruction to list paragraphs with one line of reason each. Review takes the report from it unchanged.
 - [x] T8: Review return 1 fixes. README.Rmd's opening states the one-split, mean-and-spread and fold-tunes-on-its-own facts before the sentence on the winner's optimistic score (AC3). nested-cv.Rmd's honesty paragraph states all three AC4 facts. `?print.nested_final_fit` says the estimate describes the procedure that produced the model (AC6). Fix the reviewer findings on lines this branch added. These are the spread claims, the "its number" phrasing IP3 forbids and the stale `augment()` and `summary()` help. They also include the unclear tuning-metrics referent, the stale comments, the long lines and the split inline code. Re-run every AC7 command except the reader report, which review takes.
+- [ ] T9: Review pass 2 fixes, the fix-now findings the Review section's pass-2 list numbers 1, 2, 6, 7, 8, 10, 14, 15, 16, 17, 18 and 21. `?print.nested_final_fit` names `collect_metrics()` and no longer calls the estimate this model's performance (AC6). The tuners guide states that a set member's rows are the number to report only for a workflow chosen before seeing these estimates. Fix the README's repeated "number to report" and undefined "The estimate", the referents at estimate.Rmd:28 and :63, and the two estimate.Rmd paragraphs opening alike. Restore the dangling "high or low" clause and say again in `?summary.nested_final_fit` why `estimate` is `NULL`. Rewrap R/nested-final-fit.R:151 and estimate.Rmd:67. Add an `expect_match` on "describes the procedure". Re-run every AC7 command except the reader report.
 
 ## Work log
 
@@ -80,6 +81,7 @@ The README, the four guides, the final-fit help pages and the final-fit print me
 - 2026-09-12: T8 done. README.Rmd's opening now gives the one-split, mean-and-spread and fold-tunes-on-its-own facts before the sentence on the winner's score. nested-cv.Rmd's honesty paragraph states all three AC4 facts, and its write-up template now ties the estimate to the deployed model. `?print.nested_final_fit` says the estimate describes the procedure. Reviewer findings 3 to 6 and 13 to 17 and the blame reviewer's two were fixed. Findings 7 and 8 were fixed with the template and the "its number" rewording. Findings 9 to 12 were left for review triage, except 11 and 12, which the README and estimate.Rmd rewrites removed.
 - 2026-09-12: T8 checks. All six gating sweeps exit 0. Word counts 300 / 1444 / 1303 / 1439 / 1399. A second `devtools::build_readme()` left `README.md` unchanged. `pkgdown::build_articles()` exit 0. `devtools::check()` 0 errors, 0 warnings, 0 notes (9m 31s). The AC5 grep is empty on all ten files. `git diff 27b4efd -- cairn/DESIGN.md` is empty.
 - 2026-09-12: all tasks checked, verify clean. Status set to review.
+- 2026-09-13: review return 2 (defect return, count 2). At the pass-2 gate, Opus finding 8 showed `?print.nested_final_fit` does not name `collect_metrics()`, so AC6 fails as written. The user accepted every proposed disposition and chose the return. The twelve fix-now findings are T9. AC1 to AC5 pass on `12f7146`. Status back to in-progress.
 
 ## Decisions
 
@@ -182,3 +184,5 @@ Independent review, pass 2, with proposed dispositions. Opus diff-bug reviewer, 
 20. NEWS.md:253-256 and 427 still say the final fit has no performance estimate. Follow-up: absorb into the `[low]` NEWS candidate row.
 21. tests/testthat/test-nested-final-fit-print.R: no `expect_match` checks the "describes the procedure" half of the message. Fix now.
 Sonnet blame-history reviewer: R/nested-final-fit.R:151 (83 columns) and estimate.Rmd:67 (86 columns) come from `12f7146`, the same as findings 15 and 16. Sonnet prior-review reviewer: the same two lines, as regressions of pass-1 finding 16. Every pass-1 finding the work log marks fixed is still fixed. The one human PR thread is on workflow files outside this diff.
+
+Gate, pass 2, 2026-09-13: the user accepted every proposed disposition above, for the reader report and the reviewer findings, and chose to return the milestone for the fixes. Finding 8 fails AC6, so the return follows the return floor. The fix-now findings became T9. Finding 20 was written onto the `[low]` NEWS candidate row. Reader entry 9 goes onto the #91 candidate row at the hygiene pass, where the records-hygiene disposition rule for that row applies. The next pass takes a new reader report.
