@@ -1,16 +1,15 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-12 (M090's pass: the sweep-records milestone archived, M87's row pruned under terminal-row retention. No lesson added or retired. validate green.)_
+_Last hygiene check: 2026-09-13 (M091's pass: archived, M88's row pruned, a tall-data reader note routed to DESIGN Known issues. No lesson added or retired. validate green.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M91 | The docs give the nested estimate as the number to report for the deployed model | review | — | high | milestones/M091-estimate-for-deployed-model.md |
+| M91 | The docs give the nested estimate as the number to report for the deployed model | done | — | high | milestones/archive/M091-estimate-for-deployed-model.md |
 | M90 | The sweep's page list and gating modes each have one source | done | M89 | normal | milestones/archive/M090-sweep-records-one-source.md |
 | M89 | The prose sweep reads as prose only what its definition names | done | — | high | milestones/archive/M089-prose-sweep-parse.md |
-| M88 | Prose that fails the sweep cannot merge | done | M86, M87 | normal | milestones/archive/M088-prose-sweep-gate.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -45,7 +44,7 @@ _Last hygiene check: 2026-09-12 (M090's pass: the sweep-records milestone archiv
 - Document IP2's enforceable scope in DESIGN.md — it binds only randomness flowing through R's RNG, so engines that bypass it (kernlab SVM, keras/torch) are unreachable by any R-side scheme — added 2026-07-25 — RR01 B4; amending IP text needs a D-entry
 - What `...` still does not carry after M48: the Gaussian-process fitter's options (`corr`, `nug_thres`, `maxit`, `optim_start`, which `tune_bayes()` forwards from its own `...`) and the outer-loop `control` topepo reserved the name for in [#33](https://github.com/tidymodels/nestedtune/issues/33) — added 2026-09-02 — M48 Out, D-042. Promote on a user needing a GP option, or on a first outer-loop setting that is not its own argument
 - An `autoplot()` view of each fold's inner search trajectory over `.inner_metrics` — the best-so-far by `.iter` for a Bayesian run, which is what [#57](https://github.com/tidymodels/nestedtune/issues/57) wanted the column for — added 2026-09-02 — M49 Out (done 2026-09-02), D-019. Extended 2026-09-02 at M50/M51's plan gate: a racing view (the per-resample elimination order `finetune::plot_race()` draws is not kept by the fold record, M50 Out) and an annealing trajectory (M51 Out) join it; and a view over the out-of-fold predictions M68 keeps (M68 Out, 2026-09-06). Promote on a user asking for a plot rather than the table
-- Text M91's scope left saying the estimate is not for a model you can deploy — added 2026-09-13 at M91's review gate (pass-3 findings 6 and 10). The `nested_results` summary note (`R/nested-results-print.R`, `print_procedure_note()`) and the two plot subtitles (`R/nested-results-plot.R`) say "not a model you can deploy". The bayes, race and sim-anneal help pages say the estimate "is reported for the procedure", where `?nested_tune_grid` now says it is the number to report for the deployed model. For a fit built from a set, the final-fit print names "the results object this fit was built from" and not the workflow's rows. Promote when the next pass touches those pages or a user reads the note as saying the deployed model has no number.
+- Text outside M91's scope still framing the estimate against the deployed model — added 2026-09-13 at M91's review gate (pass-3 findings 6, 10; git's M91 file owns the lines). `print_procedure_note()` and the two plot subtitles say "not a model you can deploy". The bayes, race and sim-anneal help pages say "reported for the procedure". A set fit's print names "the results object" and not the workflow's rows. Promote on the next pass over those pages or a user misreading the note
 - Name the selection rule in `summary()` and the final fit's print when it is not the default best-by-metric rule — added 2026-09-06 — M69 Out; `extract_procedure(res)$select` reaches it. Promote on a user misreading `.selected` for lack of the rule on the printed surface
 - Dispatch a `nested_workflow_map()` run as workflow-by-fold units in one parallel round instead of one round per workflow — added 2026-09-06 at M71's plan gate — M71 Out; needs the payload to carry the workflow (`R/parallel.R`, `fold_task()`). Promote on evidence that the per-workflow rounds leave daemons idle on a user's run
 - `summarize = TRUE` on `collect_predictions()` for a `nested_results`, averaging each row's predictions across the repeats of a repeated design as tune's method does — added 2026-09-06 — M68 Out. Needs an oracle against tune's own averaging for class probabilities and votes. Promote on a user asking for it on a repeated design
