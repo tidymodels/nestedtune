@@ -22,11 +22,12 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' which number to report for this model. It also names the accessors that
 #' reach what selection saw.
 #'
-#' The number to report is the nested estimate from the results object the
-#' fit was built from, and the print says so. That estimate describes the
-#' procedure that produced this model. The stored tuning run has
-#' metrics, but selection consumed them. See [nested_final_fit()] for why
-#' they are not this model's performance and the nested estimate is.
+#' The number to report is the nested estimate [collect_metrics()] returns
+#' from the results object the fit was built from, and the print says so.
+#' That estimate describes the procedure that produced this model. The
+#' stored tuning run has metrics, but selection consumed them. See
+#' [nested_final_fit()] for why those metrics are not the number to report
+#' and the nested estimate is.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
 #' @param ... Not used. It must be empty. Passing an argument here raises an
@@ -102,10 +103,11 @@ print.nested_final_fit <- function(x, ...) {
 #' from, which search ran it and at what counts, how many parameter
 #' settings it scored, and which values it chose.
 #'
-#' The `estimate` component is always `NULL`. The number to report for this
-#' model is the nested estimate on the results object the fit was built
-#' from, and the stored tuning run's metrics are selection-time quantities.
-#' See [nested_final_fit()] for the number to report.
+#' The `estimate` component is always `NULL`, because the number to report
+#' for this model is not stored on it. That number is the nested estimate
+#' [collect_metrics()] returns from the results object the fit was built
+#' from. The stored tuning run's metrics are selection-time quantities, so
+#' they do not fill the slot. See [nested_final_fit()] for the reason.
 #'
 #' @param object A `nested_final_fit` object from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit
@@ -362,8 +364,8 @@ print_final_selection <- function(s) {
 }
 
 # IP3, under the heading a reader looking for a number goes to first. The
-# heading is where the number would be, so the sentence saying there is none
-# and where the real one lives is what stands in its place. No value from the
+# heading is where the number would be, so the message naming the number to
+# report and where it lives is what stands in its place. No value from the
 # stored tuning run appears here or anywhere in this method.
 print_final_estimate <- function(s) {
   cli::cli_h2("Estimate")

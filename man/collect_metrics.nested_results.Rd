@@ -22,9 +22,10 @@ A tibble, described under What the two shapes hold.
 \description{
 Reports the nested cross-validation estimate from a \code{\link[=nested_tune_grid]{nested_tune_grid()}}
 run or one of its siblings: what the tune-and-fit procedure achieves on
-data it never saw. It is the number to report for the model you deploy,
-which \code{\link[=nested_final_fit]{nested_final_fit()}} builds by running that procedure once more on
-all the data.
+data it never saw. For a procedure chosen before seeing this estimate, it
+is the number to report for the model you deploy.
+\code{\link[=nested_final_fit]{nested_final_fit()}} builds that model by running the procedure once more
+on all the data.
 }
 \section{What the two shapes hold}{
 

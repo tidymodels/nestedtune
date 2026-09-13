@@ -23,9 +23,8 @@ because the winner was picked for scoring well. nestedtune keeps what
 every fold chose.
 
 The mean of the outer scores is the number to report for the model you
-deploy. The deployed model is the same procedure run once more on all
-the data. The estimate is the number to report for it, and there is no
-second one to compute.
+deploy. That model is the same procedure run once more on all the data,
+so there is no second number to compute for it.
 
 ## Installation
 

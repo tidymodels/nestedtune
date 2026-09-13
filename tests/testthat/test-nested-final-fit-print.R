@@ -17,6 +17,7 @@ test_that("printing names the selection and where the estimate lives", {
   expect_match(out, "final fit")
   expect_match(out, "num_comp = ")
   expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
   # RR02 B3: the moment of deployment is when selection instability matters.
   expect_match(out, "\\.selected")
@@ -156,6 +157,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
   out <- print_text(s)
   expect_match(out, "num_comp: 3")
   expect_match(out, "number to report for\\s+this\\s+model")
+  expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
 })
 
