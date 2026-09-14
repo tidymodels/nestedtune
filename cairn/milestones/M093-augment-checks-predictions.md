@@ -55,6 +55,8 @@
 - 2026-09-14: correction to the T3 line above. `mn_log_loss` gives one value at both levels, so that control and the planted-defect result rested on a 2.2e-16 rounding difference. The metric set now adds `sens`, and the control asserts each `sens` mean moves by more than 1e-8. Rerun: 5 passes, and the planted defect gives 2 failures on a 0.561 difference.
 - 2026-09-14: T4 done. Help page and NEWS bullet updated, `devtools::document()` run. `devtools::test()` 0 failures, 10065 passes. `devtools::check()` 0 errors, 0 warnings, 0 notes. All six gating sweeps clean.
 - claim audit: 21 claims read, 1 corrected — tests/testthat/test-nested-workflow-map-readers.R
+- 2026-09-14: review found every criterion passing. Three reviewers ran, and the gate took three test-only fixes (F1, F2, F7) and rejected six findings.
+- step-7 approval: m093-augment-checks-predictions approved for merge
 
 ## Decisions
 
@@ -77,3 +79,5 @@ Branch up to date with `origin/main` at review start (no merge needed). Evidence
   - F7 (fix now): the AC2 test does not assert that the condition call is `augment()`.
   - F8 (reject): the `is.numeric()` and `anyNA()` parts overlap with other parts, so no test fails with only one of them off. The behavior is still pinned by the `na` and `no_row` tests.
   - F9 (reject): `rsample::complement()` runs twice per fold. The cost is small and has no effect on results.
+- Gate: the maintainer accepted the proposed dispositions. F1, F2 and F7 were fixed on the branch, and the other six stay rejected for the reasons above.
+- Fix-now evidence: F1 adds `expect_no_match()` for each other fold label in the five-case loop. F2 adds a test that plants a `missing` mismatch and a `.pred` data column and asserts the M93 class. F7 asserts that the call of the set refusal is `augment`. `test-augment.R` ran 20 tests with 0 failures. `test-nested-workflow-map-readers.R` ran 20 tests with 0 failures, and its 2 skips are outside the M93 tests. Planted in memory, each defect failed its test. Naming every completed fold gave 20 failures, a check moved below the name-collision block gave 2, and a wrong call on the re-signal gave 1.

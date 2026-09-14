@@ -374,6 +374,7 @@ test_that("augment() on a set keeps nestedtune_augment_predictions for a workflo
   res$result[[2L]]$.predictions[[2L]] <- preds[-1L, ]
   cnd <- rlang::catch_cnd(augment(res), "error")
   expect_s3_class(cnd, "nestedtune_augment_predictions")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "augment")
   expect_match(conditionMessage(cnd), 'Workflow "fixed"', fixed = TRUE)
   expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
 })

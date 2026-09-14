@@ -250,10 +250,26 @@ for (case in c("missing", "repeated", "na", "foreign", "no_row")) {
     res <- augment_run(d, det_nested(d))
     expect_true(all(res$.completed))
     for (i in c(1L, 3L)) {
-      expect_predictions_refused(plant_row_mismatch(res, i, case), res$id[[i]])
+      cnd <- expect_predictions_refused(
+        plant_row_mismatch(res, i, case),
+        res$id[[i]]
+      )
+      # Only the edited fold is named.
+      for (other in setdiff(res$id, res$id[[i]])) {
+        expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
+      }
     }
   })
 }
+
+test_that("a mismatch is refused before a data column named like a prediction column", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, det_nested(d))
+  planted <- plant_row_mismatch(res, 1L, "missing")
+  planted$splits[[1L]]$data$.pred <- 1
+  expect_predictions_refused(planted, res$id[[1L]])
+})
 
 test_that("a double .row with the held-out values is accepted", {
   skip_if_no_engines()
