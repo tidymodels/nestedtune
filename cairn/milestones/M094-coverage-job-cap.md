@@ -62,3 +62,17 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 - Gate, cairn: `cairn_validate.py` exits 0 with 18 references-staleness warnings, which are advisory and older than this branch.
 - Gate, `devtools::document()`: it rewrites `NAMESPACE`, collapsing the `importFrom(tune, ...)` and `importFrom(vctrs, ...)` lines into grouped calls. The same rewrite happens on a clean copy of `origin/main`. The branch touches no R code, so the drift is older than this branch. The rewrite was reverted here and goes to the gate for a disposition.
 - Gate, prose sweeps: all six commands `--list-gating` prints exit 0. `pkgdown::check_pkgdown()` finds no problems. No NEWS entry is owed, because the change has no user-visible effect. No new top-level files.
+- Gate, `devtools::check()`: 0 errors, 0 warnings, 0 notes (6 m 51 s, tests 321 s elapsed).
+- Re-measurement for review, 2026-09-14, with `gh api .../actions/runs/<id>/attempts/<n>/jobs` over the runs of 2026-09-12 to 2026-09-14: the "Test coverage" step finished in 11.9 to 18.7 minutes. Attempt 1 of run 34880462437 finished its step at 18.7 minutes and the job was then ended at 20.0 minutes. Attempt 1 of run 34875438895 was ended mid-step at 18.8 minutes. No step ran 19.5 minutes.
+- Independent review: three reviewers (diff, history, prior reviews). Findings, ranked, with the disposition proposed for the gate:
+  - F1 (diff): `.github/workflows/R-CMD-check.yaml:50` still says the coverage workflow "caps its own job at 20", now false and a cross-workflow figure. Proposed: fix now.
+  - F2 (diff): the upper figure 19.5 in `test-coverage.yaml:38` does not reproduce. The re-measurement above gives 11.9 to 18.7. Proposed: fix now.
+  - F3 (history): "ended runs that were not hung" overstates, since M14's hang was caught by this cap. Verified: attempt 1 of run 34880462437 finished its tests and was ended afterward, so the claim holds for that run. Proposed: fix now by naming that run in the F2 edit.
+  - F4 (prior reviews): the range spans heads, not the median of three attempts of one head from a LESSONS line. Proposed: reject, because that protocol is for timing criteria, and a cap is sized on the slowest recent run.
+  - F5 (diff): the comment counts setup and the step but not the steps after it, so the job cap is looser than the matched step cap. Proposed: reject, because the comment claims the figures match, which is true.
+  - F6 (diff): `test-coverage.yaml:33-34` says R-CMD-check bounds the step "rather than on its job", but that workflow has both caps. Proposed: reject, older than this branch.
+  - F7 (diff): the script's output line gives `test-coverage.yaml` without its directory and says "cap" though R-CMD-check declares two. Proposed: fix now.
+  - F8 (diff): the script header says "a capped CI job", but under `R CMD check` the step cap binds. Proposed: fix now.
+  - F9 (diff): T1's line anchors are stale after the edit. Proposed: reject, plan-owned text that records the lines before the edit.
+  - F10 (history): the script lost the M12 attribution. Proposed: reject, removed on purpose by AC2.
+  - F11 (history): no D-entry governs CI caps. Proposed: noted, nothing requested.
