@@ -45,7 +45,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - [x] T2: Subtitles at `R/nested-results-plot.R:286-290` and `:628`. Update `tests/testthat/test-nested-results-plot.R:445` and `:722`. Render and view each changed vdiffr snapshot (`performance-folds-agree`, `set-performance-three-workflows`, `set-performance-both-shortfall-sentences`) before accepting it (LESSONS, M08).
 - [x] T3: Descriptions at `R/nested-tune-bayes.R:14-17`, `R/nested-tune-race.R:17-19` and `R/nested-tune-sim-anneal.R:14-16`, with `R/nested-tune-grid.R:13-18` as the model. `devtools::document()`, then `--roxygen --plain` clean.
 - [x] T4: `final_fit_estimate_msg` at `R/nested-final-fit-print.R:13-16`, and the sentences AC5's grep locates (at planning: `R/nested-final-fit.R:24-25` and `:146`, `R/nested-final-fit-print.R:25-26` and `:106-108`, `R/nested-final-fit-predict.R:61`). Update `tests/testthat/test-nested-final-fit-print.R:21` and `:161`, add a print of a fit built from a set, re-accept `_snaps/nested-final-fit-print.md`, `devtools::document()`.
-- [ ] T5: `NEWS.md`: reword the bullets at 262-266 and 435-440, and add one bullet at the top for the changed note, subtitles, help and final-fit message.
+- [x] T5: `NEWS.md`: reword the bullets at 262-266 and 435-440, and add one bullet at the top for the changed note, subtitles, help and final-fit message.
 - [ ] T6: Run AC1's grep, AC6's command, every gating sweep, `air format --check` on touched R files, `devtools::document()`, `devtools::test()`, `devtools::check()` and the DESIGN.md diff. Record each result in the work log.
 
 ## Work log
@@ -62,6 +62,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - 2026-09-14: T2 done. Both subtitles end with the gate's 67-character line, and both tests check the last line's two facts and its length. The three vdiffr snapshots each changed one text line and were rendered and viewed before acceptance. Plot tests: 277 passed.
 - 2026-09-14: T3 done. The bayes, race and sim-anneal Descriptions now say the estimate describes the procedure and is the number to report for the model `nested_final_fit()` builds. `document()` also regrouped the tune and vctrs `importFrom` lines in `NAMESPACE`, and this commit carries that rewrite, as the NAMESPACE drift candidate row asks. The `--roxygen --plain` and `--plain` sweeps are clean.
 - 2026-09-14: T4 done. `final_fit_estimate_msg` gained the set sentence second. Five roxygen sentences that name where the number is found now carry the set case: nested-final-fit.R Description and "What to report", print Description, summary Description, and predict's residuals section. The other sweep lines are code comments, a heading, or sentences that do not name where. A new test prints and summarizes a set-built fit and a workflow-built fit. The hand-agreed print constant and 4 snapshot messages were updated. Final-fit tests: 770 passed. Both sweeps are clean.
+- 2026-09-14: T5 done. The `summary()` and `nested_final_fit()` bullets in NEWS.md name the nested estimate as the number to report, and a new top bullet covers the note, subtitles, help and final-fit message. AC6's joined-line grep prints 0.
 
 ## Decisions
 
