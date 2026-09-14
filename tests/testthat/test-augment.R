@@ -244,22 +244,29 @@ expect_predictions_refused <- function(x, labels) {
 }
 
 for (case in c("missing", "repeated", "na", "foreign", "no_row")) {
-  test_that(paste0("the `", case, "` mismatch on the first and a later fold is refused with nestedtune_augment_predictions"), {
-    skip_if_no_engines()
-    d <- make_reg_data()
-    res <- augment_run(d, det_nested(d))
-    expect_true(all(res$.completed))
-    for (i in c(1L, 3L)) {
-      cnd <- expect_predictions_refused(
-        plant_row_mismatch(res, i, case),
-        res$id[[i]]
-      )
-      # Only the edited fold is named.
-      for (other in setdiff(res$id, res$id[[i]])) {
-        expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
+  test_that(
+    paste0(
+      "the `",
+      case,
+      "` mismatch on the first and a later fold is refused with nestedtune_augment_predictions"
+    ),
+    {
+      skip_if_no_engines()
+      d <- make_reg_data()
+      res <- augment_run(d, det_nested(d))
+      expect_true(all(res$.completed))
+      for (i in c(1L, 3L)) {
+        cnd <- expect_predictions_refused(
+          plant_row_mismatch(res, i, case),
+          res$id[[i]]
+        )
+        # Only the edited fold is named.
+        for (other in setdiff(res$id, res$id[[i]])) {
+          expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
+        }
       }
     }
-  })
+  )
 }
 
 test_that("a mismatch is refused before a data column named like a prediction column", {

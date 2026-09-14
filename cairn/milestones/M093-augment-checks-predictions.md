@@ -57,6 +57,7 @@
 - claim audit: 21 claims read, 1 corrected — tests/testthat/test-nested-workflow-map-readers.R
 - 2026-09-14: review found every criterion passing. Three reviewers ran, and the gate took three test-only fixes (F1, F2, F7) and rejected six findings.
 - step-7 approval: m093-augment-checks-predictions approved for merge
+- 2026-09-14: PR #106 CI `format-suggest` failed on the unwrapped `test_that()` line in the five-case loop. `air format` rewrapped `test-augment.R` only, `air format . --check` passes, and the file reran with 20 tests and 0 failures.
 
 ## Decisions
 
