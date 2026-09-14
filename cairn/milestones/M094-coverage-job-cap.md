@@ -1,6 +1,6 @@
 # M094: The coverage job runs under a 30-minute cap
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,7 +38,7 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 ## Tasks
 
 - [x] T1: Set `timeout-minutes: 30` at `.github/workflows/test-coverage.yaml:38`. Rewrite the comment above it (lines 31-37) and keep the hang rationale. Give the step range with the procedure and date of its measurement (the derived-figures rule). Say that the figure now matches the step cap `R-CMD-check.yaml` declares for non-windows legs. Make sure that the file still parses as YAML.
-- [ ] T2: Rewrite `benchmarks/test-time-budget.R:7` and `:73` to name the workflow files that declare the caps, not a figure. PROFILE keeps every cap figure in the workflow that declares it. Do not write the key name `timeout-minutes` in those lines, because AC2's grep matches it. Run the script from the repo root.
+- [x] T2: Rewrite `benchmarks/test-time-budget.R:7` and `:73` to name the workflow files that declare the caps, not a figure. PROFILE keeps every cap figure in the workflow that declares it. Do not write the key name `timeout-minutes` in those lines, because AC2's grep matches it. Run the script from the repo root.
 
 ## Work log
 
@@ -49,6 +49,8 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 - 2026-09-14: plan gate chose 30 over 25 minutes, because 25 leaves about 4 minutes over the slowest recent step as tests grow. Falsified by the step staying under 20 minutes across the next month of runs.
 - 2026-09-14: implement started on branch m094-coverage-job-cap. The question gate was skipped, because the plan left nothing open.
 - 2026-09-14: T1 done. The job cap is 30 and the comment gives the measured step range with its procedure and date. `yaml::read_yaml()` parses the file and reads 30. `devtools::test()` was not run, because the change touches no R code.
+- 2026-09-14: T2 done. Lines 7 and 73 of the budget script now point at the workflow files, not a figure. AC2's grep found 2 lines before the edit and none after, and the script exits 0 from the repo root.
+- claim audit: not owed — internal tier
 
 ## Decisions
 
