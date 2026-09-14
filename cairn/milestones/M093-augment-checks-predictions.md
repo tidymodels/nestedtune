@@ -58,6 +58,7 @@
 - 2026-09-14: review found every criterion passing. Three reviewers ran, and the gate took three test-only fixes (F1, F2, F7) and rejected six findings.
 - step-7 approval: m093-augment-checks-predictions approved for merge
 - 2026-09-14: PR #106 CI `format-suggest` failed on the unwrapped `test_that()` line in the five-case loop. `air format` rewrapped `test-augment.R` only, `air format . --check` passes, and the file reran with 20 tests and 0 failures.
+- 2026-09-14: CI wait on PR #106 reached its timeout and was stopped. At that time 4 checks passed, `deploy` was skipped, and 8 were pending. Nothing failed, and the PR is not merged.
 
 ## Decisions
 
