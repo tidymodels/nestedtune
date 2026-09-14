@@ -49,8 +49,10 @@ row, tunes with the recorded tuner, selects by the recorded
 \code{\link[=selection_rule]{selection_rule()}}, and fits the finalized workflow on all the data.
 
 What comes back is the model to deploy. The number to report for it is
-\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, for the reason
-the section on what to report gives.
+\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, and for a fit
+built from a workflow set it is that workflow's rows of
+\code{\link[=collect_metrics]{collect_metrics()}} on the set. The section on what to report gives the
+reason.
 }
 \details{
 The procedure a nested estimate describes is "resample this dataset by
@@ -149,7 +151,8 @@ with class \code{nestedtune_bad_final_fit_args}.
 
 
 Report the estimate \code{\link[=collect_metrics]{collect_metrics()}} returns from the results object
-you handed over. It describes the whole tune-and-fit procedure that
+you handed over, and for a fit built from a workflow set, that workflow's
+rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set. It describes the whole tune-and-fit procedure that
 produced this model, measured on rows no part of that procedure ever
 saw. It is the number to report for this model, and no second number is
 computed on the model itself. The metrics inside the tuning run stored

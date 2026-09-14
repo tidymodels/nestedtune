@@ -1,6 +1,14 @@
 # Printing a final fit, and the generics it deliberately does not answer
 # (AC4, AC10).
 
+# The message's sentence for a fit built from a set, matched across the
+# console's line wraps.
+set_rows_wording <- gsub(
+  " ",
+  "\\\\s+",
+  "For a fit built from a workflow set, that is this workflow's rows of `collect_metrics\\(\\)` on the set"
+)
+
 final_for_print <- function() {
   d <- make_reg_data()
   wf <- det_workflow(d)
@@ -19,8 +27,26 @@ test_that("printing names the selection and where the estimate lives", {
   expect_match(out, "number to report for\\s+this\\s+model")
   expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
+  expect_match(out, set_rows_wording)
   # RR02 B3: the moment of deployment is when selection instability matters.
   expect_match(out, "\\.selected")
+})
+
+test_that("printing a fit built from a set and one built from a workflow names the set's rows on both", {
+  skip_if_no_engines()
+  skip_if_no_wset_fixture()
+
+  set.seed(41)
+  from_set <- nested_final_fit(wset_results("nested_tune_grid"), id = "tuned")
+  from_workflow <- final_for_print()
+
+  for (fit in list(from_set, from_workflow)) {
+    for (out in list(print_text(fit), print_text(summary(fit)))) {
+      expect_match(out, "results object this fit was built from")
+      expect_match(out, set_rows_wording)
+      expect_match(out, "number to report for\\s+this\\s+model")
+    }
+  }
 })
 
 test_that("printing shows no number from the stored tuning run", {
@@ -99,8 +125,9 @@ PRINT_AS_AGREED_M46 <- paste(
     "Selected: num_comp = 3",
     "",
     "i Report the nested estimate from `collect_metrics()` on the results object",
-    "  this fit was built from. It describes the procedure that produced this model,",
-    "  and it is the number to report for this model.",
+    "  this fit was built from. For a fit built from a workflow set, that is this",
+    "  workflow's rows of `collect_metrics()` on the set. It describes the procedure",
+    "  that produced this model, and it is the number to report for this model.",
     "i Compare the parameters above with `.selected` from that run. Outer folds",
     "  choosing differently is selection instability, and it is information about",
     "  the procedure rather than noise.",
@@ -159,6 +186,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
   expect_match(out, "number to report for\\s+this\\s+model")
   expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
+  expect_match(out, set_rows_wording)
 })
 
 test_that("AC3: the summary shows no number from the stored tuning run", {
