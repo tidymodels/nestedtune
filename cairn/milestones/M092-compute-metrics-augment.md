@@ -11,7 +11,7 @@
 - **Principles touched:** GP1, GP2, IP3
 - **Resolves:** —
 - **Surface tier:** user-facing — the milestone adds exported S3 methods on two tune generics
-- **Branch/PR:** m092-compute-metrics-augment
+- **Branch/PR:** m092-compute-metrics-augment · https://github.com/tidymodels/nestedtune/pull/105
 
 ## Goal
 
