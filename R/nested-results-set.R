@@ -124,6 +124,39 @@ collect_extracts.nested_results_set <- function(x, ...) {
   stack_set(x, collect_extracts, call = rlang::current_env())
 }
 
+#' @rdname collect_metrics.nested_results_set
+#' @param metrics,event_level As on [compute_metrics.nested_results()]. The
+#'   default `event_level` takes each workflow's recorded level.
+#' @export
+compute_metrics.nested_results_set <- function(
+  x,
+  metrics,
+  ...,
+  summarize = TRUE,
+  event_level = NULL
+) {
+  rlang::check_dots_empty()
+  stack_set(
+    x,
+    function(r) {
+      compute_metrics(
+        r,
+        metrics,
+        summarize = summarize,
+        event_level = event_level
+      )
+    },
+    call = rlang::current_env()
+  )
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+augment.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, augment, call = rlang::current_env())
+}
+
 # One reader mapped over the elements and bound under `wflow_id`.
 #
 # The element rule is the single-workflow rule applied per element: a

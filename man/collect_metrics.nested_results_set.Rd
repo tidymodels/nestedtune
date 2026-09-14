@@ -7,6 +7,8 @@
 \alias{collect_notes.nested_results_set}
 \alias{collect_predictions.nested_results_set}
 \alias{collect_extracts.nested_results_set}
+\alias{compute_metrics.nested_results_set}
+\alias{augment.nested_results_set}
 \title{Stack each workflow's table of a workflow-set run under its id}
 \usage{
 \method{collect_metrics}{nested_results_set}(x, ..., summarize = TRUE)
@@ -20,6 +22,10 @@
 \method{collect_predictions}{nested_results_set}(x, ...)
 
 \method{collect_extracts}{nested_results_set}(x, ...)
+
+\method{compute_metrics}{nested_results_set}(x, metrics, ..., summarize = TRUE, event_level = NULL)
+
+\method{augment}{nested_results_set}(x, ...)
 }
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
@@ -30,6 +36,9 @@ and not a silent no-op.}
 \item{summarize}{Whether to average each workflow's per-fold metrics
 (\code{TRUE}, the default) or return them one row per outer fold (\code{FALSE}),
 as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}.}
+
+\item{metrics, event_level}{As on \code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}. The
+default \code{event_level} takes each workflow's recorded level.}
 }
 \value{
 A tibble: \code{wflow_id} first, then the columns the single-workflow

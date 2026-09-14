@@ -311,6 +311,43 @@ test_that("AC3: an element's table carrying a wflow_id column is refused", {
   expect_no_error(collect_selections(res))
 })
 
+# compute_metrics() and augment() on the set (M92). The oracle is the one
+# above: each element's own table, the id in front, bound in set order.
+
+test_that("compute_metrics() and augment() on a set are bind_rows() of each workflow's call under wflow_id", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  res <- kept_set_results(d)
+  expect_identical(res$wflow_id, c("tuned", "fixed"))
+  ms <- yardstick::metric_set(yardstick::mae, yardstick::rsq_trad)
+
+  readers <- list(
+    compute_metrics = function(r) compute_metrics(r, ms),
+    compute_metrics_folds = function(r) {
+      compute_metrics(r, ms, summarize = FALSE)
+    },
+    augment = augment
+  )
+  for (name in names(readers)) {
+    got <- readers[[name]](res)
+    expect_identical(names(got)[[1L]], "wflow_id", info = name)
+    expect_identical(got, bind_by_id(res, readers[[name]]), info = name)
+    expect_identical(unique(got$wflow_id), res$wflow_id, info = name)
+  }
+  # Every workflow contributes one row per data row to augment().
+  expect_identical(nrow(augment(res)), 2L * nrow(d))
+})
+
+test_that("compute_metrics() and augment() on a set refuse a non-empty `...`", {
+  skip_if_no_wset_fixture()
+  res <- kept_set_results(make_reg_data())
+  expect_error(
+    compute_metrics(res, reg_metrics(), foo = 1),
+    class = "rlib_error_dots_nonempty"
+  )
+  expect_error(augment(res, foo = 1), class = "rlib_error_dots_nonempty")
+})
+
 # AC4 -------------------------------------------------------------------
 
 test_that("AC4: print names the orchestrator, the workflow count and each workflow's fold counts", {
