@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M092: A nested run answers compute_metrics() and augment()
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP2, IP3
 - **Resolves:** —
 - **Surface tier:** user-facing — the milestone adds exported S3 methods on two tune generics
-- **Branch/PR:** —
+- **Branch/PR:** m092-compute-metrics-augment
 
 ## Goal
 
@@ -61,6 +61,7 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 - 2026-09-13: criteria audit ran in full mode (fresh [O] reader). It returned 10 findings. It found that a bootstrap outer design is refused at entry, so AC5 uses a Monte Carlo design. It added `event_level` to AC1 and the repeated, NA-fold and class-probability probes to AC2. It named the classes in AC3, and added the dropped columns and a grouped design to AC4. It added the no-completed-fold case to AC5. It also scoped AC7 to each page. The repeated-design choice went to the gate.
 - 2026-09-13: plan gate chose that `augment()` refuses a design that holds a row out other than once, over averaging the repeated predictions as tune does. The averaging needs an oracle for class probabilities, which the standing `summarize = TRUE` row prices. Falsified by a user who needs `augment()` on a repeated or Monte Carlo design.
 - 2026-09-13: plan gate chose a candidate row for `conf_mat_resampled()` over a nestedtune function of the same name. That function hides tune's version when both packages are attached. Falsified by tune declining to make the function a generic while users ask for the nested version.
+- 2026-09-13: /milestone-implement started. The branch m092-compute-metrics-augment was cut from origin/main at 3761f45.
 
 ## Decisions
 
