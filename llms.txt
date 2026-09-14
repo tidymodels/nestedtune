@@ -129,6 +129,10 @@ design.
 - [`collect_predictions(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
   [`collect_extracts(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
   : Stack the outer fit's predictions or extracts across the outer folds
+- [`compute_metrics(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.md)
+  : Score the saved predictions of a nested run with a metric set
+- [`augment(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
+  : Join the held-out predictions of a nested run onto its data
 - [`print(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/print.nested_results.md)
   : Print a nested cross-validation result
 - [`summary(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
@@ -149,6 +153,8 @@ design.
   [`collect_notes(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_predictions(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_extracts(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`compute_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
+  [`augment(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   : Stack each workflow's table of a workflow-set run under its id
 - [`print(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/print.nested_results_set.md)
   : Print a workflow-set run
@@ -188,6 +194,7 @@ field on the results.
   [`extract_workflow`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`autoplot`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`augment`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`compute_metrics`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`collect_notes`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`collect_predictions`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`collect_extracts`](https://nestedtune.tidymodels.org/reference/reexports.md)

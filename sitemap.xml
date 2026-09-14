@@ -14,11 +14,13 @@
 <url><loc>https://nestedtune.tidymodels.org/index.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/news/index.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/agreement.html</loc></url>
+<url><loc>https://nestedtune.tidymodels.org/reference/augment.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/autoplot.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_selections.html</loc></url>
+<url><loc>https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_procedure.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_scored_candidates.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_tune_results.html</loc></url>

@@ -2,17 +2,21 @@
 
 You read a `nested_results_set`, what
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-returns, with the same six functions that read one workflow's run. Each
-calls its single-workflow method on every element and binds the tables
-in the set's order, under a `wflow_id` column placed first.
+returns, with the same eight functions that read one workflow's run.
+Each calls its single-workflow method on every element and binds the
+tables in the set's order, under a `wflow_id` column placed first.
 
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 gives one row per workflow and metric, or per workflow, outer fold and
-metric with `summarize = FALSE`. The other five, from
+metric with `summarize = FALSE`. The five from
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 to
-[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 stack their per-fold tables the same way.
+[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+scores each workflow's saved predictions with the metric set you give
+it. [`augment()`](https://generics.r-lib.org/reference/augment.html)
+gives each workflow's data rows with its predictions.
 
 ## Usage
 
@@ -34,6 +38,12 @@ collect_predictions(x, ...)
 
 # S3 method for class 'nested_results_set'
 collect_extracts(x, ...)
+
+# S3 method for class 'nested_results_set'
+compute_metrics(x, metrics, ..., summarize = TRUE, event_level = NULL)
+
+# S3 method for class 'nested_results_set'
+augment(x, ...)
 ```
 
 ## Arguments
@@ -54,6 +64,12 @@ collect_extracts(x, ...)
   default) or return them one row per outer fold (`FALSE`), as on
   [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
 
+- metrics, event_level:
+
+  As on
+  [`compute_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.md).
+  The default `event_level` takes each workflow's recorded level.
+
 ## Value
 
 A tibble: `wflow_id` first, then the columns the single-workflow method
@@ -64,13 +80,14 @@ rows contributes none.
 
 ## Workflows and folds that failed
 
-Failed folds are left out, as on one workflow: five of the six take the
-folds that completed. A workflow with some folds failed contributes the
-folds that ran. That function's own partial-run warning is raised once
-for it, with the workflow's id in front of the message. A workflow in
-which no fold completed is left out while another workflow completed
-one, warned about with class `nestedtune_partial_summary`. A set in
-which no workflow completed a fold is refused with class
+Failed folds are left out, as on one workflow: every function but
+[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+takes the folds that completed. A workflow with some folds failed
+contributes the folds that ran. That function's own partial-run warning
+is raised once for it, with the workflow's id in front of the message. A
+workflow in which no fold completed is left out while another workflow
+completed one, warned about with class `nestedtune_partial_summary`. A
+set in which no workflow completed a fold is refused with class
 `nestedtune_no_completed_folds`.
 
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
@@ -87,8 +104,11 @@ did not.
 and
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 therefore refuse a set in which a workflow with completed folds lacks
-the column. The refusal has class `nestedtune_column_not_saved` and
-names the workflow.
+the column. So do
+[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+and [`augment()`](https://generics.r-lib.org/reference/augment.html),
+which read `.predictions`. The refusal has class
+`nestedtune_column_not_saved` and names the workflow.
 
 An element's table that already has a `wflow_id` column, a parameter
 given that id, is refused with class
@@ -100,6 +120,8 @@ given that id, is refused with class
 [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md),
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
 [`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md),
+[`compute_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.md),
+[`augment.nested_results()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md),
 [`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
 for the set's [`summary()`](https://rdrr.io/r/base/summary.html),
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
