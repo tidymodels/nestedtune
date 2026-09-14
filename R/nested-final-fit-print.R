@@ -24,9 +24,8 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' reach what selection saw.
 #'
 #' The number to report is the nested estimate [collect_metrics()] returns
-#' from the results object the fit was built from, and for a fit built from
-#' a workflow set it is that workflow's rows of [collect_metrics()] on the
-#' set. The print says so.
+#' from the fit's results object, or, for a fit built from a workflow set,
+#' that workflow's rows of [collect_metrics()] on the set. The print says so.
 #' That estimate describes the procedure that produced this model. The
 #' stored tuning run has metrics, but selection consumed them. See
 #' [nested_final_fit()] for why those metrics are not the number to report
@@ -108,9 +107,9 @@ print.nested_final_fit <- function(x, ...) {
 #'
 #' The `estimate` component is always `NULL`, because the number to report
 #' for this model is not stored on it. That number is the nested estimate
-#' [collect_metrics()] returns from the results object the fit was built
-#' from, and for a fit built from a workflow set it is that workflow's rows
-#' of [collect_metrics()] on the set. The stored tuning run's metrics are selection-time quantities, so
+#' [collect_metrics()] returns from the fit's results object, or, for a fit
+#' built from a workflow set, that workflow's rows of [collect_metrics()] on
+#' the set. The stored tuning run's metrics are selection-time quantities, so
 #' they do not fill the slot. See [nested_final_fit()] for the reason. The
 #' name is kept rather than left out, so the object states where that
 #' number is instead of leaving you to infer it from a missing name.

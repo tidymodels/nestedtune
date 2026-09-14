@@ -49,9 +49,9 @@ row, tunes with the recorded tuner, selects by the recorded
 \code{\link[=selection_rule]{selection_rule()}}, and fits the finalized workflow on all the data.
 
 What comes back is the model to deploy. The number to report for it is
-\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, and for a fit
-built from a workflow set it is that workflow's rows of
-\code{\link[=collect_metrics]{collect_metrics()}} on the set. The section on what to report gives the
+\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, or, when you
+passed a workflow set, that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the
+set. The section on what to report gives the
 reason.
 }
 \details{

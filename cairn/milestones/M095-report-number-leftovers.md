@@ -63,6 +63,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - 2026-09-14: T3 done. The bayes, race and sim-anneal Descriptions now say the estimate describes the procedure and is the number to report for the model `nested_final_fit()` builds. `document()` also regrouped the tune and vctrs `importFrom` lines in `NAMESPACE`, and this commit carries that rewrite, as the NAMESPACE drift candidate row asks. The `--roxygen --plain` and `--plain` sweeps are clean.
 - 2026-09-14: T4 done. `final_fit_estimate_msg` gained the set sentence second. Five roxygen sentences that name where the number is found now carry the set case: nested-final-fit.R Description and "What to report", print Description, summary Description, and predict's residuals section. The other sweep lines are code comments, a heading, or sentences that do not name where. A new test prints and summarizes a set-built fit and a workflow-built fit. The hand-agreed print constant and 4 snapshot messages were updated. Final-fit tests: 770 passed. Both sweeps are clean.
 - 2026-09-14: T5 done. The `summary()` and `nested_final_fit()` bullets in NEWS.md name the nested estimate as the number to report, and a new top bullet covers the note, subtitles, help and final-fit message. AC6's joined-line grep prints 0.
+- 2026-09-14: T6 found the `--roxygen` sweep failing on four T4 sentences over 30 words. Each was shortened and kept as one sentence carrying the set case. All six gating sweeps now exit 0.
 
 ## Decisions
 

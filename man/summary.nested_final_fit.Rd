@@ -45,9 +45,9 @@ settings it scored, and which values it chose.
 
 The \code{estimate} component is always \code{NULL}, because the number to report
 for this model is not stored on it. That number is the nested estimate
-\code{\link[=collect_metrics]{collect_metrics()}} returns from the results object the fit was built
-from, and for a fit built from a workflow set it is that workflow's rows
-of \code{\link[=collect_metrics]{collect_metrics()}} on the set. The stored tuning run's metrics are selection-time quantities, so
+\code{\link[=collect_metrics]{collect_metrics()}} returns from the fit's results object, or, for a fit
+built from a workflow set, that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on
+the set. The stored tuning run's metrics are selection-time quantities, so
 they do not fill the slot. See \code{\link[=nested_final_fit]{nested_final_fit()}} for the reason. The
 name is kept rather than left out, so the object states where that
 number is instead of leaving you to infer it from a missing name.
