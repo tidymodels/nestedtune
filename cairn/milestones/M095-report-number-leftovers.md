@@ -1,6 +1,6 @@
 # M095: The summary note, plot subtitles and tuner help name the number to report for the deployed model
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - [x] T3: Descriptions at `R/nested-tune-bayes.R:14-17`, `R/nested-tune-race.R:17-19` and `R/nested-tune-sim-anneal.R:14-16`, with `R/nested-tune-grid.R:13-18` as the model. `devtools::document()`, then `--roxygen --plain` clean.
 - [x] T4: `final_fit_estimate_msg` at `R/nested-final-fit-print.R:13-16`, and the sentences AC5's grep locates (at planning: `R/nested-final-fit.R:24-25` and `:146`, `R/nested-final-fit-print.R:25-26` and `:106-108`, `R/nested-final-fit-predict.R:61`). Update `tests/testthat/test-nested-final-fit-print.R:21` and `:161`, add a print of a fit built from a set, re-accept `_snaps/nested-final-fit-print.md`, `devtools::document()`.
 - [x] T5: `NEWS.md`: reword the bullets at 262-266 and 435-440, and add one bullet at the top for the changed note, subtitles, help and final-fit message.
-- [ ] T6: Run AC1's grep, AC6's command, every gating sweep, `air format --check` on touched R files, `devtools::document()`, `devtools::test()`, `devtools::check()` and the DESIGN.md diff. Record each result in the work log.
+- [x] T6: Run AC1's grep, AC6's command, every gating sweep, `air format --check` on touched R files, `devtools::document()`, `devtools::test()`, `devtools::check()` and the DESIGN.md diff. Record each result in the work log.
 
 ## Work log
 
@@ -65,6 +65,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - 2026-09-14: T5 done. The `summary()` and `nested_final_fit()` bullets in NEWS.md name the nested estimate as the number to report, and a new top bullet covers the note, subtitles, help and final-fit message. AC6's joined-line grep prints 0.
 - 2026-09-14: T6 found the `--roxygen` sweep failing on four T4 sentences over 30 words. Each was shortened and kept as one sentence carrying the set case. All six gating sweeps now exit 0.
 - 2026-09-14: claim audit: 22 claims read, 0 corrected — NEWS.md, R/nested-final-fit.R, R/nested-final-fit-print.R, R/nested-final-fit-predict.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, R/nested-results-print.R, R/nested-results-plot.R, three test files. The reader noted that the set subtitle carries no "chosen before seeing" limit. The plan gate accepted that, because a subtitle has no room.
+- 2026-09-14: T6 done. AC1's grep prints nothing, and it matched at the plan commit. AC6's command prints 0, and it printed 1 at the plan commit. Six gating sweeps exit 0 and `air format --check` is clean. `devtools::document()` leaves no diff, and the DESIGN.md diff is empty. `devtools::test()`: 10116 passed, 0 failed. `devtools::check()`: 0 errors, 0 warnings, 0 notes. Status set to review.
 
 ## Decisions
 
