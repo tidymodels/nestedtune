@@ -364,6 +364,20 @@ test_that("compute_metrics() and augment() on a set refuse a non-empty `...`", {
   expect_error(augment(res, foo = 1), class = "rlib_error_dots_nonempty")
 })
 
+# M93: a workflow's saved predictions that do not match its held-out rows.
+test_that("augment() on a set keeps nestedtune_augment_predictions for a workflow whose saved predictions miss a held-out row, naming it", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  res <- kept_set_results(d)
+  expect_identical(res$wflow_id, c("tuned", "fixed"))
+  preds <- res$result[[2L]]$.predictions[[2L]]
+  res$result[[2L]]$.predictions[[2L]] <- preds[-1L, ]
+  cnd <- rlang::catch_cnd(augment(res), "error")
+  expect_s3_class(cnd, "nestedtune_augment_predictions")
+  expect_match(conditionMessage(cnd), 'Workflow "fixed"', fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
+})
+
 # AC4 -------------------------------------------------------------------
 
 test_that("AC4: print names the orchestrator, the workflow count and each workflow's fold counts", {
