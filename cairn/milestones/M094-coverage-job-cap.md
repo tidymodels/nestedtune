@@ -27,8 +27,8 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 
 ## Acceptance criteria
 
-- [ ] AC1: `.github/workflows/test-coverage.yaml` bounds the `test-coverage` job at `timeout-minutes: 30`.
-- [ ] AC2: `grep -nE '[0-9]+[ -]minute|1200' benchmarks/test-time-budget.R` prints nothing, and `Rscript benchmarks/test-time-budget.R` exits 0.
+- [x] AC1: `.github/workflows/test-coverage.yaml` bounds the `test-coverage` job at `timeout-minutes: 30`.
+- [x] AC2: `grep -nE '[0-9]+[ -]minute|1200' benchmarks/test-time-budget.R` prints nothing, and `Rscript benchmarks/test-time-budget.R` exits 0.
 
 ## Coverage
 
@@ -55,3 +55,10 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 ## Decisions
 
 ## Review
+
+- 2026-09-14 sync: `origin/main` is 040d301, the branch's merge base, so nothing to merge.
+- AC1 (2026-09-14): `grep -n timeout-minutes` finds one line, 43, at job indentation. `yaml::read_yaml()` parses the file. `jobs$"test-coverage"$"timeout-minutes"` is integer 30 and `test-coverage` is the only job. Pass.
+- AC2 (2026-09-14): the grep prints nothing (exit 1, no match). `Rscript benchmarks/test-time-budget.R` from the repo root exits 0, and its last lines point at the workflow files. Pass.
+- Gate, cairn: `cairn_validate.py` exits 0 with 18 references-staleness warnings, which are advisory and older than this branch.
+- Gate, `devtools::document()`: it rewrites `NAMESPACE`, collapsing the `importFrom(tune, ...)` and `importFrom(vctrs, ...)` lines into grouped calls. The same rewrite happens on a clean copy of `origin/main`. The branch touches no R code, so the drift is older than this branch. The rewrite was reverted here and goes to the gate for a disposition.
+- Gate, prose sweeps: all six commands `--list-gating` prints exit 0. `pkgdown::check_pkgdown()` finds no problems. No NEWS entry is owed, because the change has no user-visible effect. No new top-level files.
