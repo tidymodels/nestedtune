@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-14 (M092's pass: archived, D-063 added, M89's row p
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M93 | augment() refuses saved predictions that do not match what each fold held out | planned | — | normal | milestones/M093-augment-checks-predictions.md |
+| M93 | augment() refuses saved predictions that do not match what each fold held out | in-progress | — | normal | milestones/M093-augment-checks-predictions.md |
 | M92 | A nested run answers compute_metrics() and augment() | done | — | normal | milestones/archive/M092-compute-metrics-augment.md |
 | M91 | The docs give the nested estimate as the number to report for the deployed model | done | — | high | milestones/archive/M091-estimate-for-deployed-model.md |
 | M90 | The sweep's page list and gating modes each have one source | done | M89 | normal | milestones/archive/M090-sweep-records-one-source.md |

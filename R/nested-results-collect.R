@@ -645,6 +645,7 @@ augment.nested_results <- function(x, ...) {
   check_column_saved(x, ".predictions", call = call)
   data <- x$splits[[1L]]$data
   check_held_out_once(x, nrow(data), call = call)
+  check_predictions_rows(x, call = call)
   preds <- stack_fold_column(
     x,
     ".predictions",
@@ -704,6 +705,48 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
     class = "nestedtune_augment_rows",
     call = call
   )
+}
+
+# Each completed fold's saved `.row` against the rows its split held out
+# (M93). The join assigns by `.row`, so a held-out row with no entry would
+# be left missing without a word, and a repeated one would overwrite another.
+# tune 2.1.0 has no path to either short of an edit to the object, so any
+# mismatch refuses. The values are compared as whole numbers: a double
+# `.row` holding the same values is accepted.
+check_predictions_rows <- function(x, call = rlang::caller_env()) {
+  bad <- vapply(
+    which(x$.completed),
+    function(i) !predictions_match_rows(x$.predictions[[i]], x$splits[[i]]),
+    logical(1L)
+  )
+  bad <- which(x$.completed)[bad]
+  if (length(bad) == 0L) {
+    return(invisible(x))
+  }
+  labels <- fold_ids(x)[bad]
+  cli::cli_abort(
+    c(
+      "{.fn augment} needs each fold's saved predictions to hold exactly \\
+       the rows that fold held out, each once.",
+      x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
+           {?its/their} held-out rows.",
+      i = "A saved prediction table must keep its {.field .row} column as \\
+           the run returned it."
+    ),
+    class = "nestedtune_augment_predictions",
+    call = call
+  )
+}
+
+predictions_match_rows <- function(preds, split) {
+  rows <- if (is.data.frame(preds)) preds[[".row"]]
+  if (!is.numeric(rows) || anyNA(rows)) {
+    return(FALSE)
+  }
+  held <- rsample::complement(split)
+  !anyDuplicated(rows) &&
+    all(rows %in% held) &&
+    all(held %in% rows)
 }
 
 # The refusal for an object whose run did not keep the column asked for. The

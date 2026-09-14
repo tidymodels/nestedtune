@@ -199,6 +199,108 @@ test_that("non-empty `...` is refused", {
   expect_error(augment(res, parameters = 1), class = "rlib_error_dots_nonempty")
 })
 
+# ---- M93: saved predictions that do not match the held-out rows ----------
+
+# The run with fold `i`'s saved predictions replaced by `edit()` of them, the
+# way a user editing the object would leave it.
+edit_fold_predictions <- function(x, i, edit) {
+  x$.predictions[[i]] <- edit(x$.predictions[[i]])
+  x
+}
+
+# The five mismatches. Each changes one thing about `.row`: `missing` drops
+# the last entry, `repeated` appends a copy of the first, `na` appends an
+# entry whose `.row` is NA, `foreign` appends an entry for a row the fold
+# analysed rather than held out, and `no_row` removes the column.
+plant_row_mismatch <- function(x, i, case) {
+  held <- rsample::complement(x$splits[[i]])
+  analysed <- setdiff(seq_len(nrow(x$splits[[i]]$data)), held)
+  edit_fold_predictions(x, i, function(p) {
+    switch(
+      case,
+      missing = p[-nrow(p), ],
+      repeated = vctrs::vec_rbind(p, p[1L, ]),
+      na = {
+        extra <- p[1L, ]
+        extra$.row <- NA
+        vctrs::vec_rbind(p, extra)
+      },
+      foreign = {
+        extra <- p[1L, ]
+        extra$.row <- analysed[[1L]]
+        vctrs::vec_rbind(p, extra)
+      },
+      no_row = p[setdiff(names(p), ".row")]
+    )
+  })
+}
+
+expect_predictions_refused <- function(x, labels) {
+  cnd <- rlang::catch_cnd(augment(x), "error")
+  expect_s3_class(cnd, "nestedtune_augment_predictions")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
+  expect_match(conditionMessage(cnd), labels, fixed = TRUE)
+  invisible(cnd)
+}
+
+for (case in c("missing", "repeated", "na", "foreign", "no_row")) {
+  test_that(paste0("the `", case, "` mismatch on the first and a later fold is refused with nestedtune_augment_predictions"), {
+    skip_if_no_engines()
+    d <- make_reg_data()
+    res <- augment_run(d, det_nested(d))
+    expect_true(all(res$.completed))
+    for (i in c(1L, 3L)) {
+      expect_predictions_refused(plant_row_mismatch(res, i, case), res$id[[i]])
+    }
+  })
+}
+
+test_that("a double .row with the held-out values is accepted", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, det_nested(d))
+  as_double <- res
+  for (i in seq_len(nrow(res))) {
+    as_double <- edit_fold_predictions(as_double, i, function(p) {
+      p$.row <- as.double(p$.row)
+      p
+    })
+  }
+  expect_type(as_double$.predictions[[1L]]$.row, "double")
+  expect_identical(augment(as_double), augment(res))
+})
+
+test_that("on a censored-regression run, a fold missing a held-out row is refused", {
+  skip_if_no_censored()
+  d <- srv_data()
+  set.seed(4)
+  res <- suppressWarnings(memoised(nested_tune_grid(
+    srv_workflow(d),
+    srv_nested(d),
+    grid = srv_grid(),
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+  expect_type(res$.predictions[[2L]]$.pred, "list")
+  expect_predictions_refused(
+    plant_row_mismatch(res, 2L, "missing"),
+    res$id[[2L]]
+  )
+})
+
+test_that("on a run with a failed fold, a mismatch is refused before the partial-run warning", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, break_fold(det_nested(d), 2L, "inner tuning"))
+  expect_identical(res$.completed, c(TRUE, FALSE, TRUE))
+  planted <- plant_row_mismatch(res, 3L, "repeated")
+  expect_no_warning(
+    cnd <- expect_predictions_refused(planted, res$id[[3L]])
+  )
+  expect_no_match(conditionMessage(cnd), res$id[[1L]], fixed = TRUE)
+})
+
 test_that("a data column named like a prediction column is refused, not renamed", {
   skip_if_no_engines()
   d <- make_reg_data()
