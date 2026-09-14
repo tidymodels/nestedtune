@@ -112,7 +112,10 @@ predicts some rows more than once or not at all. Read its predictions
 with <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> instead.</p>
 <p>A run whose control did not set <code>save_pred = TRUE</code> is refused with class
 <code>nestedtune_column_not_saved</code>. A run in which no fold completed is
-refused with class <code>nestedtune_no_completed_folds</code>. On a run with some
+refused with class <code>nestedtune_no_completed_folds</code>. A completed fold
+whose saved predictions do not match the rows it held out is refused
+with class <code>nestedtune_augment_predictions</code>. Its <code>.row</code> column must hold
+each of those rows once and no other row. On a run with some
 failed folds, the rows those folds held out hold a missing value in
 every prediction column, with a warning of class
 <code>nestedtune_partial_summary</code>. A missing value is <code>NA</code>, or <code>NULL</code> in a
