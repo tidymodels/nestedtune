@@ -22,10 +22,10 @@
 #' [selection_rule()], and fits the finalized workflow on all the data.
 #'
 #' What comes back is the model to deploy. The number to report for it is
-#' [collect_metrics()] on the results object you passed in, or, when you
-#' passed a workflow set, that workflow's rows of [collect_metrics()] on the
-#' set. The section on what to report gives the
-#' reason.
+#' [collect_metrics()] on the results object you passed in. When you passed a
+#' workflow set, it is that workflow's rows of [collect_metrics()] on the set,
+#' for a workflow chosen before seeing the set's estimates. The section on
+#' what to report gives the reason.
 #'
 #' @param object The [workflows::workflow()] the nested run was built around,
 #'   or a `nested_results_set` from [nested_workflow_map()] with `id` naming
@@ -146,15 +146,16 @@
 #' @section What to report:
 #'
 #' Report the estimate [collect_metrics()] returns from the results object
-#' you handed over, and for a fit built from a workflow set, that workflow's
-#' rows of [collect_metrics()] on the set. It describes the whole tune-and-fit procedure that
-#' produced this model, measured on rows no part of that procedure ever
-#' saw. It is the number to report for this model, and no second number is
-#' computed on the model itself. The metrics inside the tuning run stored
-#' on it are not a number to report. They were computed on the resamples
-#' that chose the candidate, so they are selection-time quantities,
-#' optimistically biased as a claim about this model. `collect_metrics()` on
-#' `x$tuning` hands them over without saying so.
+#' you handed over. For a fit built from a workflow set, report that
+#' workflow's rows of [collect_metrics()] on the set, for a workflow chosen
+#' before seeing the set's estimates. The estimate describes the whole
+#' tune-and-fit procedure that produced this model, measured on rows no part
+#' of that procedure ever saw. It is the number to report for this model,
+#' and no second number is computed on the model itself. The metrics inside
+#' the tuning run stored on it are not a number to report. They were computed
+#' on the resamples that chose the candidate, so they are selection-time
+#' quantities, optimistically biased as a claim about this model.
+#' `collect_metrics()` on `x$tuning` hands them over without saying so.
 #'
 #' Expect the nested estimate to run slightly pessimistic instead, because
 #' each outer fold trained on its analysis rows alone. Varma and Simon

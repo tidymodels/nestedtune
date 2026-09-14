@@ -423,7 +423,7 @@ test_that("the marked estimate is the number collect_metrics reports", {
   expect_identical(rules$yintercept, summary$mean)
 })
 
-test_that("the performance view says the estimate is not a model's score", {
+test_that("the performance view names the estimate as the final fit's number to report", {
   skip_if_no_engines()
   d <- make_reg_data()
 

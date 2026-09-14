@@ -21,12 +21,12 @@ which number to report for this model. It also names the accessors that
 reach what selection saw.
 
 The number to report is the nested estimate \code{\link[=collect_metrics]{collect_metrics()}} returns
-from the fit's results object, or, for a fit built from a workflow set,
-that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set. The print says so.
-That estimate describes the procedure that produced this model. The
-stored tuning run has metrics, but selection consumed them. See
-\code{\link[=nested_final_fit]{nested_final_fit()}} for why those metrics are not the number to report
-and the nested estimate is.
+from the results object the fit was built from. For a fit built from a
+workflow set, it is that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the
+set. The print says so. That estimate describes the procedure that
+produced this model. The stored tuning run has metrics, but selection
+consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why those metrics are not the
+number to report and the nested estimate is.
 }
 \section{The procedure line}{
 

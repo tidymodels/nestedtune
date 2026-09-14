@@ -5,9 +5,10 @@
   as the number to report for the model `nested_final_fit()` builds. The
   help for `nested_tune_bayes()`, the racing tuners and
   `nested_tune_sim_anneal()` now says the same. The summary note limits
-  this to a procedure chosen before seeing the estimate. The message a final fit prints also
-  says that, for a fit built from a workflow set, the number to report is
-  that workflow's rows of `collect_metrics()` on the set.
+  this to a procedure chosen before seeing the estimate. For a fit built
+  from a workflow set, the message a final fit prints names that workflow's
+  rows of `collect_metrics()` on the set as the number to report. This
+  holds for a workflow chosen before seeing the set's estimates.
 
 * `compute_metrics()` and `augment()` now answer on a run whose control set
   `save_pred = TRUE`, and on a workflow-set run. `compute_metrics()` scores
