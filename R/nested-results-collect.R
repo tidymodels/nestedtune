@@ -500,6 +500,98 @@ score_fold <- function(preds, metrics, classes, event_level) {
   metrics(preds, truth = !!truth, estimate = !!estimate, case_weights = !!weights)
 }
 
+# The saved predictions joined onto the data rows (M92). tune's own method
+# averages a row held out more than once; this one refuses such a design
+# (plan gate, 2026-09-13), so every row it returns carries the one prediction
+# made for it. The hold-out counts are read from the splits of every fold,
+# the failed ones included, so a failed fold never makes a repeated design
+# look like a single hold-out. The columns joined are tune's `merge_pred()`
+# columns, those starting `.pred` (tune 2.1.0, read 2026-09-13), placed after
+# the outcome the way tune's `reorder_pred_cols()` places them; no `.resid`
+# is added (implement gate, 2026-09-13).
+
+#' Join the held-out predictions of a nested run onto its data
+#'
+#' @description
+#' `augment()` returns the data a nested run was given, one row per data
+#' row, with the prediction columns the outer fits made for that row when it
+#' was held out.
+#'
+#' @param x A `nested_results` run whose control set `save_pred = TRUE`.
+#' @param ... Not used. It must be empty. tune's `parameters` argument is
+#'   not offered here.
+#'
+#' @return A tibble with the data's rows in the data's order.
+#'
+#' @export
+augment.nested_results <- function(x, ...) {
+  rlang::check_dots_empty()
+  call <- rlang::current_env()
+  check_any_completed(x, action = "augment")
+  check_column_saved(x, ".predictions", call = call)
+  data <- x$splits[[1L]]$data
+  check_held_out_once(x, nrow(data), call = call)
+  preds <- stack_fold_column(
+    x,
+    ".predictions",
+    completed_only = TRUE,
+    call = call
+  )
+  pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
+  clash <- intersect(pred_cols, names(data))
+  if (length(clash) > 0L) {
+    cli::cli_abort(
+      c(
+        "Cannot join the predictions: the data carries a column named \\
+         {.val {clash}}, which is a prediction column.",
+        i = "Rename that column in the data the run was given."
+      ),
+      class = "nestedtune_collect_name_collision",
+      call = call
+    )
+  }
+  warn_partial_summary(x, noun = "table")
+
+  joined <- lapply(pred_cols, function(nm) {
+    vctrs::vec_assign(
+      vctrs::vec_init(preds[[nm]], nrow(data)),
+      preds$.row,
+      preds[[nm]]
+    )
+  })
+  names(joined) <- pred_cols
+  data <- as.list(data)
+  # A survival outcome is saved under its `Surv()` expression, which names
+  # no data column, and is then left where the data has it.
+  first <- x$.predictions[[which(x$.completed)[[1L]]]]
+  outcome <- intersect(outcome_column(first), names(data))
+  new_tbl(c(data[outcome], joined, data[setdiff(names(data), outcome)]))
+}
+
+# Each data row's count of outer assessment sets holding it, over every fold.
+check_held_out_once <- function(x, n, call = rlang::caller_env()) {
+  held <- unlist(lapply(x$splits, rsample::complement), use.names = FALSE)
+  counts <- tabulate(held, nbins = n)
+  if (all(counts == 1L)) {
+    return(invisible(x))
+  }
+  never <- sum(counts == 0L)
+  more <- sum(counts > 1L)
+  cli::cli_abort(
+    c(
+      "{.fn augment} needs an outer design that holds out every data row \\
+       exactly once.",
+      x = "This design holds out {never} row{?s} never and {more} row{?s} \\
+           more than once.",
+      i = "A repeated or Monte Carlo design predicts a row several times \\
+           or not at all. Read those predictions with \\
+           {.fn collect_predictions}."
+    ),
+    class = "nestedtune_augment_rows",
+    call = call
+  )
+}
+
 # The refusal for an object whose run did not keep the column asked for. The
 # record the readers trust is the recorded procedure's control: it says
 # whether the run asked, so a column a caller added by hand to a run that
