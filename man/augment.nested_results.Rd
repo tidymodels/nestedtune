@@ -52,7 +52,10 @@ with \code{\link[=collect_predictions]{collect_predictions()}} instead.
 
 A run whose control did not set \code{save_pred = TRUE} is refused with class
 \code{nestedtune_column_not_saved}. A run in which no fold completed is
-refused with class \code{nestedtune_no_completed_folds}. On a run with some
+refused with class \code{nestedtune_no_completed_folds}. A completed fold
+whose saved predictions do not match the rows it held out is refused
+with class \code{nestedtune_augment_predictions}. Its \code{.row} column must hold
+each of those rows once and no other row. On a run with some
 failed folds, the rows those folds held out hold a missing value in
 every prediction column, with a warning of class
 \code{nestedtune_partial_summary}. A missing value is \code{NA}, or \code{NULL} in a

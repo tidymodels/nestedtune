@@ -1,6 +1,6 @@
 # M093: augment() refuses saved predictions that do not match what each fold held out
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@
 - [x] T1: Write the AC1 tests first in `test-augment.R`. Plant each case by editing `res$.predictions[[i]]`, as `test-compute-metrics.R:92-96` edits a run. Then add a helper beside `check_held_out_once()`. For each completed fold, the helper compares `.predictions$.row` with `rsample::complement()` of the split. Call it after `check_column_saved()` (:645) and `check_held_out_once()` (:648). Call it before the name-collision check and `warn_partial_summary()` (:667). As a planted defect, turn off one part of the check at a time and see the matching test fail. Record the result in the work log. Run the earlier tests of the file without edits.
 - [x] T2: In `test-nested-workflow-map-readers.R`, edit one element of `kept_set_results()`. Assert the class and the workflow id in the message. `for_workflow()` (`R/nested-workflow-map.R:266-282`) signals errors again with the class kept, so no code change is expected. If the test fails, record the cause in the work log before you change code.
 - [x] T3: In `test-nested-workflow-map-readers.R`, build a two-workflow classification set from `cls_workflow()` and `cls_data()`. Use `skip_if_no_wset_fixture()`, the stochastic engine skip, and `memoised()`. Edit the recorded `event_level` of one element in its `procedure` attribute. Write the AC3 test. As a planted defect, make the set method drop `event_level` and see the test fail. Record the result in the work log.
-- [ ] T4: Add a sentence to the "Designs and folds refused" section of the `augment.nested_results()` help. Update the `augment()` bullet at the top of `NEWS.md`. Run `devtools::document()`, `devtools::test()`, `devtools::check()`, and every gating sweep, with the roxygen `--plain` and `--spans` modes.
+- [x] T4: Add a sentence to the "Designs and folds refused" section of the `augment.nested_results()` help. Update the `augment()` bullet at the top of `NEWS.md`. Run `devtools::document()`, `devtools::test()`, `devtools::check()`, and every gating sweep, with the roxygen `--plain` and `--spans` modes.
 
 ## Work log
 
@@ -52,5 +52,8 @@
 - 2026-09-14: T1 done. `check_predictions_rows()` has five parts: a numeric `.row`, no `NA`, no repeat, no row outside the held-out set, no held-out row absent. Planted defects: three parts turned off alone each fail their case's test. The outside-row part also catches `NA`, and the absent-row part also catches a missing column. Off in those pairs, the `na` and `no_row` tests fail. Suite 0 failures.
 - 2026-09-14: T2 done with no code change. The first run failed on the test's own pattern, `workflow "fixed"`, because the re-signalled message opens `Workflow "fixed"`. The class was kept. The file passes.
 - 2026-09-14: T3 done, test only. The set is two copies of `cls_workflow()` under `forest_a` and `forest_b`. The test ran, not skipped, with 5 passes. Planted defect: a set method with `event_level` dropped gave 2 failures, the `"second"` identity and the `"second"` against `"first"` control.
+- 2026-09-14: correction to the T3 line above. `mn_log_loss` gives one value at both levels, so that control and the planted-defect result rested on a 2.2e-16 rounding difference. The metric set now adds `sens`, and the control asserts each `sens` mean moves by more than 1e-8. Rerun: 5 passes, and the planted defect gives 2 failures on a 0.561 difference.
+- 2026-09-14: T4 done. Help page and NEWS bullet updated, `devtools::document()` run. `devtools::test()` 0 failures, 10065 passes. `devtools::check()` 0 errors, 0 warnings, 0 notes. All six gating sweeps clean.
+- claim audit: 21 claims read, 1 corrected — tests/testthat/test-nested-workflow-map-readers.R
 
 ## Decisions

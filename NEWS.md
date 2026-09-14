@@ -7,7 +7,8 @@
   inner selection again. Its `event_level` defaults to the level the run
   recorded. `augment()` joins each data row's out-of-fold prediction onto
   the data. It refuses an outer design that holds a row out other than
-  exactly once.
+  exactly once. It also refuses a fold whose saved predictions do not hold
+  exactly the rows that fold held out, each once.
 
 * The coverage job no longer fails after every test passed. Daemons started
   by the test suite write their coverage traces to a directory of their own,

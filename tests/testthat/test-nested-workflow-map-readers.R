@@ -407,7 +407,10 @@ test_that("compute_metrics() on a set scores each workflow at the event_level pa
     vapply(res$result, function(r) extract_procedure(r)$event_level, ""),
     c("second", "first")
   )
-  ms <- yardstick::metric_set(yardstick::mn_log_loss)
+  # mn_log_loss alone gives one value at both levels when the two class
+  # probabilities sum to one, so sens, which becomes spec at the other
+  # level, is what makes the level show in the table.
+  ms <- yardstick::metric_set(yardstick::mn_log_loss, yardstick::sens)
 
   for (level in list("second", NULL)) {
     reader <- function(r) compute_metrics(r, ms, event_level = level)
@@ -417,12 +420,12 @@ test_that("compute_metrics() on a set scores each workflow at the event_level pa
       info = if (is.null(level)) "NULL" else level
     )
   }
-  # The control: the level changes the scores, so a set method that dropped
+  # The control: sens changes with the level, so a set method that dropped
   # the argument would not match the stack at "second".
-  expect_false(identical(
-    compute_metrics(res, ms, event_level = "second"),
-    compute_metrics(res, ms, event_level = "first")
-  ))
+  second <- compute_metrics(res, ms, event_level = "second")
+  first <- compute_metrics(res, ms, event_level = "first")
+  is_sens <- second$.metric == "sens"
+  expect_true(all(abs(second$mean[is_sens] - first$mean[is_sens]) > 1e-8))
 })
 
 # AC4 -------------------------------------------------------------------
