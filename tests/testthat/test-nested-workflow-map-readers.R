@@ -364,6 +364,71 @@ test_that("compute_metrics() and augment() on a set refuse a non-empty `...`", {
   expect_error(augment(res, foo = 1), class = "rlib_error_dots_nonempty")
 })
 
+# M93: a workflow's saved predictions that do not match its held-out rows.
+test_that("augment() on a set keeps nestedtune_augment_predictions for a workflow whose saved predictions miss a held-out row, naming it", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  res <- kept_set_results(d)
+  expect_identical(res$wflow_id, c("tuned", "fixed"))
+  preds <- res$result[[2L]]$.predictions[[2L]]
+  res$result[[2L]]$.predictions[[2L]] <- preds[-1L, ]
+  cnd <- rlang::catch_cnd(augment(res), "error")
+  expect_s3_class(cnd, "nestedtune_augment_predictions")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "augment")
+  expect_match(conditionMessage(cnd), 'Workflow "fixed"', fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
+})
+
+# M93: two classification workflows in one set, run at the default level.
+cls_set_results <- function(data, seed = 36) {
+  wset <- workflowsets::as_workflow_set(
+    forest_a = cls_workflow(data),
+    forest_b = cls_workflow(data)
+  )
+  folds <- cls_nested(data)
+  set.seed(seed)
+  memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+}
+
+test_that("compute_metrics() on a set scores each workflow at the event_level passed, or at its own recorded level when NULL", {
+  skip_if_no_wset_fixture(stochastic = TRUE)
+  d <- cls_data()
+  res <- cls_set_results(d)
+  expect_identical(res$wflow_id, c("forest_a", "forest_b"))
+  # The first workflow's recorded level edited to "second".
+  attr(res$result[[1L]], "procedure")$event_level <- "second"
+  expect_identical(
+    vapply(res$result, function(r) extract_procedure(r)$event_level, ""),
+    c("second", "first")
+  )
+  # mn_log_loss alone gives one value at both levels when the two class
+  # probabilities sum to one, so sens, which becomes spec at the other
+  # level, is what makes the level show in the table.
+  ms <- yardstick::metric_set(yardstick::mn_log_loss, yardstick::sens)
+
+  for (level in list("second", NULL)) {
+    reader <- function(r) compute_metrics(r, ms, event_level = level)
+    expect_identical(
+      compute_metrics(res, ms, event_level = level),
+      bind_by_id(res, reader),
+      info = if (is.null(level)) "NULL" else level
+    )
+  }
+  # The control: sens changes with the level, so a set method that dropped
+  # the argument would not match the stack at "second".
+  second <- compute_metrics(res, ms, event_level = "second")
+  first <- compute_metrics(res, ms, event_level = "first")
+  is_sens <- second$.metric == "sens"
+  expect_true(all(abs(second$mean[is_sens] - first$mean[is_sens]) > 1e-8))
+})
+
 # AC4 -------------------------------------------------------------------
 
 test_that("AC4: print names the orchestrator, the workflow count and each workflow's fold counts", {
