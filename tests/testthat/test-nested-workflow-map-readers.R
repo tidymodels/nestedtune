@@ -263,6 +263,22 @@ test_that("AC3: a workflow that would contribute rows but did not keep the colum
     )
     expect_identical(rlang::call_name(conditionCall(cnd)), name, info = name)
   }
+  # compute_metrics() and augment() read `.predictions` too (M92).
+  readers <- list(
+    compute_metrics = function() compute_metrics(res, reg_metrics()),
+    augment = function() augment(res)
+  )
+  for (name in names(readers)) {
+    cnd <- rlang::catch_cnd(readers[[name]]())
+    expect_s3_class(cnd, "nestedtune_column_not_saved")
+    expect_match(
+      conditionMessage(cnd),
+      'Workflow "fixed"',
+      fixed = TRUE,
+      info = name
+    )
+    expect_identical(rlang::call_name(conditionCall(cnd)), name, info = name)
+  }
   # The other three readers do not ask for the columns.
   for (name in c(
     "collect_metrics",

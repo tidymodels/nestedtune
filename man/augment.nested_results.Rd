@@ -7,16 +7,88 @@
 \method{augment}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} run whose control set \code{save_pred = TRUE}.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
+siblings, run with \code{save_pred = TRUE} in its control.}
 
 \item{...}{Not used. It must be empty. tune's \code{parameters} argument is
-not offered here.}
+not offered here, because each fold made its predictions with the
+parameters it selected.}
 }
 \value{
-A tibble with the data's rows in the data's order.
+A tibble with the data's rows in the data's order. The outcome
+column comes first, then the prediction columns, whose names start
+with \code{.pred}, then the rest of the data's columns. A censored outcome
+is saved under its \code{Surv()} call, which names no data column, so there
+the prediction columns come first. The fold labels, \code{.row} and
+\code{.config} are not joined, and no \code{.resid} column is added.
 }
 \description{
 \code{augment()} returns the data a nested run was given, one row per data
-row, with the prediction columns the outer fits made for that row when it
-was held out.
+row, with the predictions made for that row when its outer fold held it
+out. You can plot or inspect every row's out-of-fold prediction beside
+its predictors.
+}
+\section{Which predictions these are}{
+
+
+The predictions come from the outer fits. Each outer fold tuned on its
+analysis rows, fitted the parameters it selected, and predicted its
+held-out assessment rows. So a row's prediction was made by a model
+that never saw that row.
+
+They are not predictions from the final model. That model is fitted
+on all the rows by \code{\link[=nested_final_fit]{nested_final_fit()}}, and its own \code{augment()} method
+predicts new data with it.
+}
+
+\section{Designs and folds refused}{
+
+
+The outer design must hold out every data row exactly once, as a
+v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
+design is refused with class \code{nestedtune_augment_rows}, because it
+predicts some rows more than once or not at all. Read its predictions
+with \code{\link[=collect_predictions]{collect_predictions()}} instead.
+
+A run whose control did not set \code{save_pred = TRUE} is refused with class
+\code{nestedtune_column_not_saved}. A run in which no fold completed is
+refused with class \code{nestedtune_no_completed_folds}. On a run with some
+failed folds, the rows those folds held out hold \code{NA} in every
+prediction column, with a warning of class \code{nestedtune_partial_summary}.
+A data column whose name is also a prediction column's name is refused
+with class \code{nestedtune_collect_name_collision}.
+}
+
+\examples{
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+data(mtcars)
+
+rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+wf <- workflows::workflow(rec, parsnip::linear_reg())
+
+set.seed(1)
+folds <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 2)
+)
+\dontshow{\}) # examplesIf}
+\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+set.seed(2)
+res <- nested_tune_grid(
+  wf,
+  folds,
+  grid = data.frame(num_comp = 1:2),
+  control = tune::control_grid(save_pred = TRUE)
+)
+
+augment(res)
+\dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}},
+\code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same function on a
+workflow-set run
 }

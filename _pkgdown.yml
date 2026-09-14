@@ -48,6 +48,8 @@ reference:
   - collect_metrics.nested_results
   - collect_selections
   - collect_predictions.nested_results
+  - compute_metrics.nested_results
+  - augment.nested_results
   - print.nested_results
   - summary.nested_results
   - autoplot.nested_results

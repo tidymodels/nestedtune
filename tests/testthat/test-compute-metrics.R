@@ -7,8 +7,8 @@
 # metric on each fold's rows of `collect_predictions()`, and the summary
 # computed by hand from those per-fold numbers, never from the method.
 
-# The runs, each served from the fixture cache. Every fixture builds its
-# design inline with literal arguments, so the cache keys on what was run.
+# The runs, each served from the fixture cache. The two repeated fixtures
+# build their design inline. The others take it from the `*_nested()` helpers.
 saved_reg_run <- function() {
   d <- make_reg_data()
   set.seed(2)
@@ -86,7 +86,8 @@ repeated_cls_run <- function() {
 
 # Fold 4's prediction columns emptied to NA. yardstick drops missing values
 # before scoring, so every metric on that fold has no rows to score and
-# returns NA: the NA fold AC2 asks for, reached through yardstick's own path.
+# returns NaN, which is.na() counts as missing: the NA fold AC2 asks for,
+# reached through yardstick's own path.
 with_na_fold <- function(x, fold = 4L) {
   preds <- x$.predictions[[fold]]
   for (nm in grep("^\\.pred", names(preds), value = TRUE)) {
@@ -110,7 +111,7 @@ fold_rows <- function(preds, x, i) {
 hand_per_fold <- function(x, score) {
   preds <- collect_predictions(x)
   rows <- lapply(seq_len(nrow(x)), function(i) {
-    # yardstick warns while it scores the NA fold's empty set of rows.
+    # brier_class() warns while it scores the NA fold's empty set of rows.
     out <- suppressWarnings(score(fold_rows(preds, x, i)))
     out$fold <- i
     out

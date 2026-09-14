@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-13 (M091's pass: archived, M88's row pruned, a tall
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M92 | A nested run answers compute_metrics() and augment() | in-progress | — | normal | milestones/M092-compute-metrics-augment.md |
+| M92 | A nested run answers compute_metrics() and augment() | review | — | normal | milestones/M092-compute-metrics-augment.md |
 | M91 | The docs give the nested estimate as the number to report for the deployed model | done | — | high | milestones/archive/M091-estimate-for-deployed-model.md |
 | M90 | The sweep's page list and gating modes each have one source | done | M89 | normal | milestones/archive/M090-sweep-records-one-source.md |
 | M89 | The prose sweep reads as prose only what its definition names | done | — | high | milestones/archive/M089-prose-sweep-parse.md |

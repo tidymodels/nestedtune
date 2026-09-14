@@ -326,7 +326,7 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
     "S3method(collect_inner_metrics,nested_results)" = function() {
       collect_inner_metrics(res)
     },
-    # Like the two readers above, augment() and compute_metrics() read
+    # Like collect_predictions() above, augment() and compute_metrics() read
     # `.predictions`, which this run did not keep.
     "S3method(augment,nested_results)" = function() {
       expect_error(augment(res), class = "nestedtune_column_not_saved")

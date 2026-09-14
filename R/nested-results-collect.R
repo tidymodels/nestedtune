@@ -283,7 +283,8 @@ collect_extracts.nested_results <- function(x, ...) {
 # Scoring the saved predictions again (M92). A method on tune's generic, for
 # the reason collect_predictions() is one. Each completed row of `x` is scored
 # on its own, so a repeated design's folds stay apart: tune's own method
-# groups the stacked predictions by `id` alone and merges the repeats. The
+# groups the stacked predictions by `id` alone, which on a repeated design is
+# the repeat, so it pools each repeat's folds into one score. The
 # per-fold tables then go through per_fold_metrics() and summarize_folds(),
 # the code collect_metrics() reads, so the two readers cannot disagree about
 # shape, fold labels or the handling of an NA fold. The metric set is called
@@ -294,22 +295,71 @@ collect_extracts.nested_results <- function(x, ...) {
 #' Score the saved predictions of a nested run with a metric set
 #'
 #' @description
-#' `compute_metrics()` scores the outer-fold predictions a run kept under
-#' `save_pred = TRUE` with a metric set you give it, and summarizes them the
-#' way [collect_metrics()] does. You can report a metric the run did not
-#' compute without running the nested loop again.
+#' `compute_metrics()` scores the predictions a run kept under
+#' `save_pred = TRUE` with a metric set you give it. The table it returns
+#' has the shape and the averaging of [collect_metrics()]. You get a metric
+#' the run did not compute without running the nested loop again.
 #'
-#' @param x A `nested_results` run whose control set `save_pred = TRUE`.
+#' @param x A `nested_results` from [nested_tune_grid()] or one of its
+#'   siblings, run with `save_pred = TRUE` in its control.
 #' @param metrics A [yardstick::metric_set()].
 #' @param ... Not used. It must be empty.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
-#' @param event_level For a two-class outcome, `"first"` or `"second"`: which
-#'   level is the event. The default, `NULL`, takes the level the run
-#'   recorded, so the new metrics treat the same level as the event.
+#' @param event_level For a two-class outcome, which level is the event:
+#'   `"first"` or `"second"`. The default, `NULL`, takes the level the run
+#'   recorded. tune's own method defaults to `"first"` instead.
 #'
-#' @return A tibble in the shapes [collect_metrics()] returns.
+#' @return A tibble in the two shapes [collect_metrics()] returns. Given
+#'   the metric set and the event level the run used, it is identical to
+#'   `collect_metrics(x, summarize = summarize)`.
 #'
+#' @section What is scored again, and what is not:
+#'
+#' Each outer fold kept the predictions its outer fit made on the fold's
+#' assessment rows. Those rows are scored again, fold by fold, and the
+#' per-fold scores are averaged as [collect_metrics()] averages them. A
+#' fold that scores `NA` is left out of the mean, and `n` counts the folds
+#' behind each row.
+#'
+#' The inner selection is not run again. Every fold keeps the parameters it
+#' selected under the metrics of the run, and only the scoring of its outer
+#' fit changes. A metric that is to choose the parameters has to be given
+#' to the run itself.
+#'
+#' On a repeated design each repeat of a fold is scored as its own fold.
+#'
+#' @section Refusals:
+#'
+#' A run whose control did not set `save_pred = TRUE` is refused with class
+#' `nestedtune_column_not_saved`. A `metrics` that is not a metric set is
+#' refused with class `nestedtune_bad_metrics`. A metric that reads a kind
+#' of prediction the run did not save is refused with class
+#' `nestedtune_metric_type_not_saved`. An example is a class metric such as
+#' `accuracy` on a run whose metrics read only class probabilities.
+#'
+#' A run with some failed folds is scored over the rest, with a warning of
+#' class `nestedtune_partial_summary`. A run in which no fold completed is
+#' refused with class `nestedtune_no_completed_folds`.
+#'
+#' @template example-setup
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' set.seed(2)
+#' res <- nested_tune_grid(
+#'   wf,
+#'   folds,
+#'   grid = data.frame(num_comp = 1:2),
+#'   control = tune::control_grid(save_pred = TRUE)
+#' )
+#'
+#' # The run scored rmse and rsq. Score its predictions with mae as well.
+#' compute_metrics(res, yardstick::metric_set(yardstick::mae))
+#' compute_metrics(res, yardstick::metric_set(yardstick::mae), summarize = FALSE)
+#'
+#' @seealso [collect_metrics.nested_results()],
+#'   [collect_predictions.nested_results()], [augment.nested_results()],
+#'   [collect_metrics.nested_results_set()] for the same function on a
+#'   workflow-set run
 #' @export
 compute_metrics.nested_results <- function(
   x,
@@ -514,15 +564,66 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #'
 #' @description
 #' `augment()` returns the data a nested run was given, one row per data
-#' row, with the prediction columns the outer fits made for that row when it
-#' was held out.
+#' row, with the predictions made for that row when its outer fold held it
+#' out. You can plot or inspect every row's out-of-fold prediction beside
+#' its predictors.
 #'
-#' @param x A `nested_results` run whose control set `save_pred = TRUE`.
+#' @param x A `nested_results` from [nested_tune_grid()] or one of its
+#'   siblings, run with `save_pred = TRUE` in its control.
 #' @param ... Not used. It must be empty. tune's `parameters` argument is
-#'   not offered here.
+#'   not offered here, because each fold made its predictions with the
+#'   parameters it selected.
 #'
-#' @return A tibble with the data's rows in the data's order.
+#' @return A tibble with the data's rows in the data's order. The outcome
+#'   column comes first, then the prediction columns, whose names start
+#'   with `.pred`, then the rest of the data's columns. A censored outcome
+#'   is saved under its `Surv()` call, which names no data column, so there
+#'   the prediction columns come first. The fold labels, `.row` and
+#'   `.config` are not joined, and no `.resid` column is added.
 #'
+#' @section Which predictions these are:
+#'
+#' The predictions come from the outer fits. Each outer fold tuned on its
+#' analysis rows, fitted the parameters it selected, and predicted its
+#' held-out assessment rows. So a row's prediction was made by a model
+#' that never saw that row.
+#'
+#' They are not predictions from the final model. That model is fitted
+#' on all the rows by [nested_final_fit()], and its own `augment()` method
+#' predicts new data with it.
+#'
+#' @section Designs and folds refused:
+#'
+#' The outer design must hold out every data row exactly once, as a
+#' v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
+#' design is refused with class `nestedtune_augment_rows`, because it
+#' predicts some rows more than once or not at all. Read its predictions
+#' with [collect_predictions()] instead.
+#'
+#' A run whose control did not set `save_pred = TRUE` is refused with class
+#' `nestedtune_column_not_saved`. A run in which no fold completed is
+#' refused with class `nestedtune_no_completed_folds`. On a run with some
+#' failed folds, the rows those folds held out hold `NA` in every
+#' prediction column, with a warning of class `nestedtune_partial_summary`.
+#' A data column whose name is also a prediction column's name is refused
+#' with class `nestedtune_collect_name_collision`.
+#'
+#' @template example-setup
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' set.seed(2)
+#' res <- nested_tune_grid(
+#'   wf,
+#'   folds,
+#'   grid = data.frame(num_comp = 1:2),
+#'   control = tune::control_grid(save_pred = TRUE)
+#' )
+#'
+#' augment(res)
+#'
+#' @seealso [collect_predictions.nested_results()],
+#'   [compute_metrics.nested_results()], [nested_final_fit()],
+#'   [collect_metrics.nested_results_set()] for the same function on a
+#'   workflow-set run
 #' @export
 augment.nested_results <- function(x, ...) {
   rlang::check_dots_empty()

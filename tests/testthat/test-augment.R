@@ -23,8 +23,8 @@ grouped_data <- function() {
   d
 }
 
-# The expected augment() table by hand. `failed` names the rows whose fold
-# failed, which hold NA in every prediction column.
+# The expected augment() table by hand. Rows whose fold failed have no entry
+# in collect_predictions(), so they hold NA in every prediction column.
 hand_augmented <- function(x) {
   data <- tibble::as_tibble(x$splits[[1]]$data)
   preds <- suppressWarnings(collect_predictions(x))
@@ -110,6 +110,26 @@ test_that("on a classification run, the class and probability columns are joined
     c("y", ".pred_class", ".pred_event", ".pred_other")
   )
   expect_identical(levels(aug$.pred_class), levels(d$y))
+})
+
+test_that("on a censored-regression run, whose outcome names no data column, the predictions come first", {
+  skip_if_no_censored()
+  d <- srv_data()
+  set.seed(4)
+  res <- suppressWarnings(memoised(nested_tune_grid(
+    srv_workflow(d),
+    srv_nested(d),
+    grid = srv_grid(),
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+  aug <- augment(res)
+  expect_identical(nrow(aug), nrow(d))
+  expect_identical(names(aug), c(".pred", names(d)))
+  expect_type(aug$.pred, "list")
+  preds <- collect_predictions(res)
+  expect_identical(aug$.pred, preds$.pred[match(seq_len(nrow(d)), preds$.row)])
 })
 
 # ---- AC5: refusals and failed folds --------------------------------------

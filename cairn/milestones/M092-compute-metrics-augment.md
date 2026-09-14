@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M092: A nested run answers compute_metrics() and augment()
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -53,7 +53,7 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 - [x] T1: Write the AC1-AC3 tests first in a new `tests/testthat/test-compute-metrics.R`, then add `compute_metrics.nested_results()` in `R/nested-results-collect.R`. Group the stacked predictions by the recorded fold labels, not by `id` alone, because tune's own method merges repeats. Score each fold with the metric set through yardstick, and build the per-fold shape of `per_fold_metrics()` (`R/nested-results.R`) so that `summarize_folds()` gives the summary. Do not call tune's dotted internals such as `.estimate_metrics()`, because an exported dotted symbol carries no stability promise (LESSONS, M28). Read `tune:::compute_metrics.tune_results()` for the metric-type rule and the survival path through `.pred`.
 - [x] T2: Write the AC4-AC5 tests first, then add `augment.nested_results()`. Count how often each data row is held out from the `splits` column, the failed folds included, before any join. Join on `.row` against the data of the first split. Refuse before the join with `nestedtune_augment_rows` when a count is not 1. Read `tune:::augment.tune_results()` and `merge_pred()` for the columns tune drops.
 - [x] T3: Write the AC6 test first, then add the two set methods in `R/nested-results-set.R` through `stack_set()`.
-- [ ] T4: Write the help pages and the examples, add both methods to `_pkgdown.yml`, and add the `NEWS.md` bullet. Run `devtools::document()`, `devtools::run_examples()`, every gating prose sweep and `devtools::check()`.
+- [x] T4: Write the help pages and the examples, add both methods to `_pkgdown.yml`, and add the `NEWS.md` bullet. Run `devtools::document()`, `devtools::run_examples()`, every gating prose sweep and `devtools::check()`.
 
 ## Work log
 
@@ -66,6 +66,9 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 - 2026-09-13: correction to the T1 line: test-suite-hygiene.R did not change. The new test file stopped using the `x[] <-` form its collect-site regex flags.
 - 2026-09-13: T2 done. `augment.nested_results()` counts hold-outs over every fold's split, refuses a count other than 1, and places each fold's `.pred*` columns by `.row` after the outcome. Two planted defects (placing by position, skipping the count) turned the new tests red. The Bayesian method table gained an `augment` line. Full suite: 9980 passed, 0 failed. Both prose sweeps clean.
 - 2026-09-13: T3 done. The two set methods call the element method through `stack_set()`. The tests sit in test-nested-workflow-map-readers.R beside the other set readers and reuse its `bind_by_id()` oracle. A planted defect (the set method dropping `summarize`) turned one test red. Full suite: 9995 passed, 0 failed. Both prose sweeps clean.
+- 2026-09-13: T4 done. Help pages for both methods, the set page updated from six functions to eight, two `_pkgdown.yml` rows, and a NEWS bullet. Two tests added for documented claims: augment() on a censored run, and the set refusal when a workflow kept no `.predictions`. `run_examples()` ran clean, `check_pkgdown()` found no problems, and all six gating prose sweeps are clean. `devtools::check()`: 0 errors, 0 warnings, 1 NOTE for a top-level `Rplots.pdf` that `run_examples()` wrote this session, since removed.
+- 2026-09-13: claim audit: 46 claims read, 6 corrected — R/nested-results-collect.R, tests/testthat/test-compute-metrics.R, tests/testthat/test-augment.R, tests/testthat/test-nested-tune-bayes-oracles.R
+- 2026-09-13: the six corrections are comment-only and came after `devtools::check()`. The re-read by the same reader found all six hold. Document gave no new diff, the six sweeps stayed clean, and the three touched test files passed (247 expectations). Status set to review.
 
 ## Decisions
 

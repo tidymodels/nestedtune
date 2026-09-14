@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* `compute_metrics()` and `augment()` now answer on a run whose control set
+  `save_pred = TRUE`, and on a workflow-set run. `compute_metrics()` scores
+  each outer fold's saved predictions with a metric set you give it. It
+  summarizes them as `collect_metrics()` does, and it does not run the
+  inner selection again. Its `event_level` defaults to the level the run
+  recorded. `augment()` joins each data row's out-of-fold prediction onto
+  the data. It refuses an outer design that holds a row out other than
+  exactly once.
+
 * The coverage job no longer fails after every test passed. Daemons started
   by the test suite write their coverage traces to a directory of their own,
   and the job merges those traces afterwards, skipping any file a daemon was

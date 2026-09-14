@@ -49,20 +49,22 @@ table has no rows contributes none.
 }
 \description{
 You read a \code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns,
-with the same six functions that read one workflow's run. Each calls
+with the same eight functions that read one workflow's run. Each calls
 its single-workflow method on every element and binds the tables in the
 set's order, under a \code{wflow_id} column placed first.
 
 \code{collect_metrics()} gives one row per workflow and metric, or per
-workflow, outer fold and metric with \code{summarize = FALSE}. The other
-five, from \code{collect_selections()} to \code{collect_extracts()}, stack their
-per-fold tables the same way.
+workflow, outer fold and metric with \code{summarize = FALSE}. The five
+from \code{collect_selections()} to \code{collect_extracts()} stack their
+per-fold tables the same way. \code{compute_metrics()} scores each
+workflow's saved predictions with the metric set you give it.
+\code{augment()} gives each workflow's data rows with its predictions.
 }
 \section{Workflows and folds that failed}{
 
 
-Failed folds are left out, as on one workflow: five of the six take the
-folds that completed. A workflow with some folds failed contributes the folds that
+Failed folds are left out, as on one workflow: every function but
+\code{collect_notes()} takes the folds that completed. A workflow with some folds failed contributes the folds that
 ran. That function's own partial-run warning is raised once for it,
 with the workflow's id in front of the message. A workflow in which no
 fold completed is left out while another workflow completed one, warned
@@ -81,7 +83,8 @@ notes are the reason to ask.
 A control reaches each workflow of a set through the call's \code{...} or through
 its own \code{option} entry, so one workflow can keep what another did not.
 \code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
-which a workflow with completed folds lacks the column. The refusal
+which a workflow with completed folds lacks the column. So do
+\code{compute_metrics()} and \code{augment()}, which read \code{.predictions}. The refusal
 has class \code{nestedtune_column_not_saved} and names the workflow.
 
 An element's table that already has a \code{wflow_id} column, a parameter given
@@ -123,6 +126,7 @@ collect_notes(res)
 \seealso{
 \code{\link[=nested_workflow_map]{nested_workflow_map()}}, \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}},
 \code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}},
+\code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}, \code{\link[=augment.nested_results]{augment.nested_results()}},
 \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for the set's \code{summary()}, \code{autoplot()}
 and \code{agreement()}
 }
