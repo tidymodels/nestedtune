@@ -1,13 +1,13 @@
 # M094: The coverage job runs under a 30-minute cap
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a CI job cap and a benchmark script, which no external consumer of the package relies on
-- **Branch/PR:** —
+- **Branch/PR:** m094-coverage-job-cap
 
 ## Goal
 
@@ -27,8 +27,8 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 
 ## Acceptance criteria
 
-- [ ] AC1: `.github/workflows/test-coverage.yaml` bounds the `test-coverage` job at `timeout-minutes: 30`.
-- [ ] AC2: `grep -nE '[0-9]+[ -]minute|1200' benchmarks/test-time-budget.R` prints nothing, and `Rscript benchmarks/test-time-budget.R` exits 0.
+- [x] AC1: `.github/workflows/test-coverage.yaml` bounds the `test-coverage` job at `timeout-minutes: 30`.
+- [x] AC2: `grep -nE '[0-9]+[ -]minute|1200' benchmarks/test-time-budget.R` prints nothing, and `Rscript benchmarks/test-time-budget.R` exits 0.
 
 ## Coverage
 
@@ -37,8 +37,8 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 
 ## Tasks
 
-- [ ] T1: Set `timeout-minutes: 30` at `.github/workflows/test-coverage.yaml:38`. Rewrite the comment above it (lines 31-37) and keep the hang rationale. Give the step range with the procedure and date of its measurement (the derived-figures rule). Say that the figure now matches the step cap `R-CMD-check.yaml` declares for non-windows legs. Make sure that the file still parses as YAML.
-- [ ] T2: Rewrite `benchmarks/test-time-budget.R:7` and `:73` to name the workflow files that declare the caps, not a figure. PROFILE keeps every cap figure in the workflow that declares it. Do not write the key name `timeout-minutes` in those lines, because AC2's grep matches it. Run the script from the repo root.
+- [x] T1: Set `timeout-minutes: 30` at `.github/workflows/test-coverage.yaml:38`. Rewrite the comment above it (lines 31-37) and keep the hang rationale. Give the step range with the procedure and date of its measurement (the derived-figures rule). Say that the figure now matches the step cap `R-CMD-check.yaml` declares for non-windows legs. Make sure that the file still parses as YAML.
+- [x] T2: Rewrite `benchmarks/test-time-budget.R:7` and `:73` to name the workflow files that declare the caps, not a figure. PROFILE keeps every cap figure in the workflow that declares it. Do not write the key name `timeout-minutes` in those lines, because AC2's grep matches it. Run the script from the repo root.
 
 ## Work log
 
@@ -47,7 +47,36 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 - 2026-09-14: a re-audit of the revised wording found that the grep word `minute` matched `timeout-minutes`, so the pattern became `[0-9]+[ -]minute|1200`.
 - 2026-09-14: plan gate chose a 30-minute cap over skipping slow test files under covr. The workers are already busy, and skipping changes what the coverage report measures. Falsified by the step nearing 30 minutes on the default branch, or by a hang that costs a review because 30 minutes let it run.
 - 2026-09-14: plan gate chose 30 over 25 minutes, because 25 leaves about 4 minutes over the slowest recent step as tests grow. Falsified by the step staying under 20 minutes across the next month of runs.
+- 2026-09-14: implement started on branch m094-coverage-job-cap. The question gate was skipped, because the plan left nothing open.
+- 2026-09-14: T1 done. The job cap is 30 and the comment gives the measured step range with its procedure and date. `yaml::read_yaml()` parses the file and reads 30. `devtools::test()` was not run, because the change touches no R code.
+- 2026-09-14: T2 done. Lines 7 and 73 of the budget script now point at the workflow files, not a figure. AC2's grep found 2 lines before the edit and none after, and the script exits 0 from the repo root.
+- claim audit: not owed — internal tier
+- 2026-09-14: review fixed findings F1, F2, F3, F7 and F8 at the gate. They are comment and output text in both workflows and the budget script.
+- step-7 approval: m094-coverage-job-cap approved for merge
 
 ## Decisions
 
 ## Review
+
+- 2026-09-14 sync: `origin/main` is 040d301, the branch's merge base, so nothing to merge.
+- AC1 (2026-09-14): `grep -n timeout-minutes` finds one line, 43, at job indentation. `yaml::read_yaml()` parses the file. `jobs$"test-coverage"$"timeout-minutes"` is integer 30 and `test-coverage` is the only job. Pass.
+- AC2 (2026-09-14): the grep prints nothing (exit 1, no match). `Rscript benchmarks/test-time-budget.R` from the repo root exits 0, and its last lines point at the workflow files. Pass.
+- Gate, cairn: `cairn_validate.py` exits 0 with 18 references-staleness warnings, which are advisory and older than this branch.
+- Gate, `devtools::document()`: it rewrites `NAMESPACE`, collapsing the `importFrom(tune, ...)` and `importFrom(vctrs, ...)` lines into grouped calls. The same rewrite happens on a clean copy of `origin/main`. The branch touches no R code, so the drift is older than this branch. The rewrite was reverted here and goes to the gate for a disposition.
+- Gate, prose sweeps: all six commands `--list-gating` prints exit 0. `pkgdown::check_pkgdown()` finds no problems. No NEWS entry is owed, because the change has no user-visible effect. No new top-level files.
+- Gate, `devtools::check()`: 0 errors, 0 warnings, 0 notes (6 m 51 s, tests 321 s elapsed).
+- Re-measurement for review, 2026-09-14, with `gh api .../actions/runs/<id>/attempts/<n>/jobs` over the runs of 2026-09-12 to 2026-09-14: the "Test coverage" step finished in 11.9 to 18.7 minutes. Attempt 1 of run 34880462437 finished its step at 18.7 minutes and the job was then ended at 20.0 minutes. Attempt 1 of run 34875438895 was ended mid-step at 18.8 minutes. No step ran 19.5 minutes.
+- Independent review: three reviewers (diff, history, prior reviews). Findings, ranked, with the disposition proposed for the gate:
+  - F1 (diff): `.github/workflows/R-CMD-check.yaml:50` still says the coverage workflow "caps its own job at 20", now false and a cross-workflow figure. Proposed: fix now.
+  - F2 (diff): the upper figure 19.5 in `test-coverage.yaml:38` does not reproduce. The re-measurement above gives 11.9 to 18.7. Proposed: fix now.
+  - F3 (history): "ended runs that were not hung" overstates, since M14's hang was caught by this cap. Verified: attempt 1 of run 34880462437 finished its tests and was ended afterward, so the claim holds for that run. Proposed: fix now by naming that run in the F2 edit.
+  - F4 (prior reviews): the range spans heads, not the median of three attempts of one head from a LESSONS line. Proposed: reject, because that protocol is for timing criteria, and a cap is sized on the slowest recent run.
+  - F5 (diff): the comment counts setup and the step but not the steps after it, so the job cap is looser than the matched step cap. Proposed: reject, because the comment claims the figures match, which is true.
+  - F6 (diff): `test-coverage.yaml:33-34` says R-CMD-check bounds the step "rather than on its job", but that workflow has both caps. Proposed: reject, older than this branch.
+  - F7 (diff): the script's output line gives `test-coverage.yaml` without its directory and says "cap" though R-CMD-check declares two. Proposed: fix now.
+  - F8 (diff): the script header says "a capped CI job", but under `R CMD check` the step cap binds. Proposed: fix now.
+  - F9 (diff): T1's line anchors are stale after the edit. Proposed: reject, plan-owned text that records the lines before the edit.
+  - F10 (history): the script lost the M12 attribution. Proposed: reject, removed on purpose by AC2.
+  - F11 (history): no D-entry governs CI caps. Proposed: noted, nothing requested.
+- Gate triage (2026-09-14): the user accepted the proposals. F1, F2, F3, F7 and F8 were fixed on the branch, and F4, F5, F6, F9 and F10 were rejected for the reasons above. F11 is noted. The NAMESPACE drift becomes a candidate row at hygiene.
+- After the fixes: AC1's parse reads 30 at job level, and both edited workflows parse. AC2's grep prints nothing and the script exits 0. `test-suite-hygiene.R` passes.
