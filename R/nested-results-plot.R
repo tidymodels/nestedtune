@@ -280,13 +280,13 @@ plot_performance <- function(x) {
     ggplot2::labs(
       title = "Nested cross-validation estimate",
       # IP3, and the reason this line is in the subtitle rather than in the help
-      # page: ggplot2 renders a subtitle into the image, so the caveat survives
+      # page: ggplot2 renders a subtitle into the image, so the sentence survives
       # the figure being exported into a slide or a paper, where the console
       # session and the documentation do not travel with it.
       subtitle = paste0(
         design_line(x),
-        " The line marks the nested estimate.\nIt describes the tune-and-fit ",
-        "procedure, not a model you can deploy."
+        " The line marks the nested estimate.\nIt describes the procedure ",
+        "and is the final fit's number to report."
       ),
       x = "Outer fold",
       y = "Score on the held-out outer fold"
@@ -625,7 +625,7 @@ plot_set_performance <- function(x, call) {
         " Each line marks a workflow's nested estimate.",
         set_shortfall_line(x),
         set_short_average_line(x, summaries),
-        "\nIt describes the tune-and-fit procedure, not a model you can deploy."
+        "\nIt describes the procedure and is the final fit's number to report."
       ),
       x = "Workflow",
       y = "Score on the held-out outer fold"
