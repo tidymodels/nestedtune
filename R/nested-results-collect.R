@@ -603,8 +603,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' A run whose control did not set `save_pred = TRUE` is refused with class
 #' `nestedtune_column_not_saved`. A run in which no fold completed is
 #' refused with class `nestedtune_no_completed_folds`. On a run with some
-#' failed folds, the rows those folds held out hold `NA` in every
-#' prediction column, with a warning of class `nestedtune_partial_summary`.
+#' failed folds, the rows those folds held out hold a missing value in
+#' every prediction column, with a warning of class
+#' `nestedtune_partial_summary`. A missing value is `NA`, or `NULL` in a
+#' list column such as the `.pred` of a censored-regression run.
 #' A data column whose name is also a prediction column's name is refused
 #' with class `nestedtune_collect_name_collision`.
 #'

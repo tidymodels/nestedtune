@@ -69,6 +69,8 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 - 2026-09-13: T4 done. Help pages for both methods, the set page updated from six functions to eight, two `_pkgdown.yml` rows, and a NEWS bullet. Two tests added for documented claims: augment() on a censored run, and the set refusal when a workflow kept no `.predictions`. `run_examples()` ran clean, `check_pkgdown()` found no problems, and all six gating prose sweeps are clean. `devtools::check()`: 0 errors, 0 warnings, 1 NOTE for a top-level `Rplots.pdf` that `run_examples()` wrote this session, since removed.
 - 2026-09-13: claim audit: 46 claims read, 6 corrected — R/nested-results-collect.R, tests/testthat/test-compute-metrics.R, tests/testthat/test-augment.R, tests/testthat/test-nested-tune-bayes-oracles.R
 - 2026-09-13: the six corrections are comment-only and came after `devtools::check()`. The re-read by the same reader found all six hold. Document gave no new diff, the six sweeps stayed clean, and the three touched test files passed (247 expectations). Status set to review.
+- 2026-09-13: /milestone-review: all seven criteria verified, consistency gate clean, three reviewers ran. Findings 2 and 6 fixed on the branch at the gate. Findings 1, 3, 4 and 5 go to the hygiene pass, and finding 7 was rejected.
+- 2026-09-13: step-7 approval: m092-compute-metrics-augment approved for merge
 
 ## Decisions
 
@@ -106,3 +108,10 @@ Independent review (three fresh reviewers):
   7. `summarize = NA`, `summarize = "no"` and a missing `metrics` give base R errors with no class. This matches `collect_metrics.nested_results()`.
   - Note: the order of `augment()` prediction columns can differ from tune's order for a censored run that saved both `.pred` and `.pred_time`.
   - Note: the prediction-type check reads only the first completed fold.
+
+Triage at the merge gate (user choice, 2026-09-13):
+- Finding 2, fix now: the help page of `augment.nested_results()` now says a missing value is `NA`, or `NULL` in a list column. A probe on the censored fixture with fold 2 marked failed gave `NULL` in all 60 held-out rows and 0 `NA`.
+- Finding 6, fix now: a test in test-compute-metrics.R scores `mn_log_loss` and `brier_class` at `event_level = "second"` on a run that recorded "first". It compares the result with yardstick by hand on `.pred_other`. A planted defect that ignored the given level turned it red. The file has 15 tests, 0 failed. test-augment.R has 11 tests, 0 failed. The six sweeps are clean.
+- Findings 1, 3 and 4, follow-up: one candidate row at the hygiene pass.
+- Finding 5, follow-up: a DECISIONS.md entry at the hygiene pass.
+- Finding 7 and both notes, rejected. `collect_metrics.nested_results()` has the same gap as finding 7, and the help page promises no column order. Every fold saves the same columns.

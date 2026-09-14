@@ -53,8 +53,10 @@ with \code{\link[=collect_predictions]{collect_predictions()}} instead.
 A run whose control did not set \code{save_pred = TRUE} is refused with class
 \code{nestedtune_column_not_saved}. A run in which no fold completed is
 refused with class \code{nestedtune_no_completed_folds}. On a run with some
-failed folds, the rows those folds held out hold \code{NA} in every
-prediction column, with a warning of class \code{nestedtune_partial_summary}.
+failed folds, the rows those folds held out hold a missing value in
+every prediction column, with a warning of class
+\code{nestedtune_partial_summary}. A missing value is \code{NA}, or \code{NULL} in a
+list column such as the \code{.pred} of a censored-regression run.
 A data column whose name is also a prediction column's name is refused
 with class \code{nestedtune_collect_name_collision}.
 }

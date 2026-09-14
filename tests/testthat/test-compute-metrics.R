@@ -267,6 +267,33 @@ test_that("a class-probability metric set the run did not use is yardstick on ea
   }
 })
 
+test_that("a new class-probability metric set is scored at the event_level given, not the run's", {
+  skip_if_no_engines(stochastic = TRUE)
+  res <- repeated_cls_run()
+  expect_identical(extract_procedure(res)$event_level, "first")
+  ms <- yardstick::metric_set(yardstick::mn_log_loss, yardstick::brier_class)
+
+  # At the second level the probability of that level is `.pred_other`.
+  by_hand <- hand_per_fold(res, function(rows) {
+    dplyr::bind_rows(
+      yardstick::mn_log_loss(rows, y, .pred_other, event_level = "second"),
+      yardstick::brier_class(rows, y, .pred_other, event_level = "second")
+    )
+  })
+  second <- compute_metrics(
+    res,
+    ms,
+    summarize = FALSE,
+    event_level = "second"
+  )
+  expect_identical(second$.metric, by_hand$.metric)
+  expect_identical(second$.estimate, by_hand$.estimate)
+  # The control: scored at the recorded level, the log loss differs.
+  first <- compute_metrics(res, ms, summarize = FALSE)
+  loss <- first$.metric == "mn_log_loss"
+  expect_false(identical(first$.estimate[loss], second$.estimate[loss]))
+})
+
 # ---- AC3: refusals ---------------------------------------------------------
 
 test_that("a run without saved predictions is refused with nestedtune_column_not_saved", {
