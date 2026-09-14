@@ -67,6 +67,8 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - 2026-09-14: claim audit: 22 claims read, 0 corrected — NEWS.md, R/nested-final-fit.R, R/nested-final-fit-print.R, R/nested-final-fit-predict.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, R/nested-results-print.R, R/nested-results-plot.R, three test files. The reader noted that the set subtitle carries no "chosen before seeing" limit. The plan gate accepted that, because a subtitle has no room.
 - 2026-09-14: T6 done. AC1's grep prints nothing, and it matched at the plan commit. AC6's command prints 0, and it printed 1 at the plan commit. Six gating sweeps exit 0 and `air format --check` is clean. `devtools::document()` leaves no diff, and the DESIGN.md diff is empty. `devtools::test()`: 10116 passed, 0 failed. `devtools::check()`: 0 errors, 0 warnings, 0 notes. Status set to review.
 - 2026-09-14: review in progress. AC1-AC6 evidence recorded and ticked. The full suite, `devtools::check()` and three fresh reviewers are still running.
+- 2026-09-14: review gate fixed O1, O3, O4, O7, O8 and O12 and rejected the rest (Review section). The suite and check re-ran clean on `62006a5`.
+- 2026-09-14: step-7 approval: m095-report-number-leftovers approved for merge
 
 ## Decisions
 
