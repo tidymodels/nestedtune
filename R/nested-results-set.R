@@ -10,14 +10,16 @@
 #'
 #' @description
 #' You read a `nested_results_set`, what [nested_workflow_map()] returns,
-#' with the same six functions that read one workflow's run. Each calls
+#' with the same eight functions that read one workflow's run. Each calls
 #' its single-workflow method on every element and binds the tables in the
 #' set's order, under a `wflow_id` column placed first.
 #'
 #' `collect_metrics()` gives one row per workflow and metric, or per
-#' workflow, outer fold and metric with `summarize = FALSE`. The other
-#' five, from `collect_selections()` to `collect_extracts()`, stack their
-#' per-fold tables the same way.
+#' workflow, outer fold and metric with `summarize = FALSE`. The five
+#' from `collect_selections()` to `collect_extracts()` stack their
+#' per-fold tables the same way. `compute_metrics()` scores each
+#' workflow's saved predictions with the metric set you give it.
+#' `augment()` gives each workflow's data rows with its predictions.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param ... Not used. It must be empty, so an argument given here is an error
@@ -34,8 +36,8 @@
 #'
 #' @section Workflows and folds that failed:
 #'
-#' Failed folds are left out, as on one workflow: five of the six take the
-#' folds that completed. A workflow with some folds failed contributes the folds that
+#' Failed folds are left out, as on one workflow: every function but
+#' `collect_notes()` takes the folds that completed. A workflow with some folds failed contributes the folds that
 #' ran. That function's own partial-run warning is raised once for it,
 #' with the workflow's id in front of the message. A workflow in which no
 #' fold completed is left out while another workflow completed one, warned
@@ -52,7 +54,8 @@
 #' A control reaches each workflow of a set through the call's `...` or through
 #' its own `option` entry, so one workflow can keep what another did not.
 #' `collect_predictions()` and `collect_extracts()` therefore refuse a set in
-#' which a workflow with completed folds lacks the column. The refusal
+#' which a workflow with completed folds lacks the column. So do
+#' `compute_metrics()` and `augment()`, which read `.predictions`. The refusal
 #' has class `nestedtune_column_not_saved` and names the workflow.
 #'
 #' An element's table that already has a `wflow_id` column, a parameter given
@@ -68,6 +71,7 @@
 #'
 #' @seealso [nested_workflow_map()], [collect_metrics.nested_results()],
 #'   [collect_selections()], [collect_predictions.nested_results()],
+#'   [compute_metrics.nested_results()], [augment.nested_results()],
 #'   [summary.nested_results_set()] for the set's `summary()`, `autoplot()`
 #'   and `agreement()`
 #' @name collect_metrics.nested_results_set
@@ -122,6 +126,39 @@ collect_predictions.nested_results_set <- function(x, ...) {
 collect_extracts.nested_results_set <- function(x, ...) {
   rlang::check_dots_empty()
   stack_set(x, collect_extracts, call = rlang::current_env())
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @param metrics,event_level As on [compute_metrics.nested_results()]. The
+#'   default `event_level` takes each workflow's recorded level.
+#' @export
+compute_metrics.nested_results_set <- function(
+  x,
+  metrics,
+  ...,
+  summarize = TRUE,
+  event_level = NULL
+) {
+  rlang::check_dots_empty()
+  stack_set(
+    x,
+    function(r) {
+      compute_metrics(
+        r,
+        metrics,
+        summarize = summarize,
+        event_level = event_level
+      )
+    },
+    call = rlang::current_env()
+  )
+}
+
+#' @rdname collect_metrics.nested_results_set
+#' @export
+augment.nested_results_set <- function(x, ...) {
+  rlang::check_dots_empty()
+  stack_set(x, augment, call = rlang::current_env())
 }
 
 # One reader mapped over the elements and bound under `wflow_id`.
