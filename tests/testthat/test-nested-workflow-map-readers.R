@@ -378,6 +378,53 @@ test_that("augment() on a set keeps nestedtune_augment_predictions for a workflo
   expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
 })
 
+# M93: two classification workflows in one set, run at the default level.
+cls_set_results <- function(data, seed = 36) {
+  wset <- workflowsets::as_workflow_set(
+    forest_a = cls_workflow(data),
+    forest_b = cls_workflow(data)
+  )
+  folds <- cls_nested(data)
+  set.seed(seed)
+  memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+}
+
+test_that("compute_metrics() on a set scores each workflow at the event_level passed, or at its own recorded level when NULL", {
+  skip_if_no_wset_fixture(stochastic = TRUE)
+  d <- cls_data()
+  res <- cls_set_results(d)
+  expect_identical(res$wflow_id, c("forest_a", "forest_b"))
+  # The first workflow's recorded level edited to "second".
+  attr(res$result[[1L]], "procedure")$event_level <- "second"
+  expect_identical(
+    vapply(res$result, function(r) extract_procedure(r)$event_level, ""),
+    c("second", "first")
+  )
+  ms <- yardstick::metric_set(yardstick::mn_log_loss)
+
+  for (level in list("second", NULL)) {
+    reader <- function(r) compute_metrics(r, ms, event_level = level)
+    expect_identical(
+      compute_metrics(res, ms, event_level = level),
+      bind_by_id(res, reader),
+      info = if (is.null(level)) "NULL" else level
+    )
+  }
+  # The control: the level changes the scores, so a set method that dropped
+  # the argument would not match the stack at "second".
+  expect_false(identical(
+    compute_metrics(res, ms, event_level = "second"),
+    compute_metrics(res, ms, event_level = "first")
+  ))
+})
+
 # AC4 -------------------------------------------------------------------
 
 test_that("AC4: print names the orchestrator, the workflow count and each workflow's fold counts", {
