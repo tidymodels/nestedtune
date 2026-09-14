@@ -51,6 +51,8 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
 - 2026-09-14: T1 done. The job cap is 30 and the comment gives the measured step range with its procedure and date. `yaml::read_yaml()` parses the file and reads 30. `devtools::test()` was not run, because the change touches no R code.
 - 2026-09-14: T2 done. Lines 7 and 73 of the budget script now point at the workflow files, not a figure. AC2's grep found 2 lines before the edit and none after, and the script exits 0 from the repo root.
 - claim audit: not owed — internal tier
+- 2026-09-14: review fixed findings F1, F2, F3, F7 and F8 at the gate. They are comment and output text in both workflows and the budget script.
+- step-7 approval: m094-coverage-job-cap approved for merge
 
 ## Decisions
 
@@ -76,3 +78,5 @@ The plan measured the job on 2026-09-14 with `gh run list --workflow test-covera
   - F9 (diff): T1's line anchors are stale after the edit. Proposed: reject, plan-owned text that records the lines before the edit.
   - F10 (history): the script lost the M12 attribution. Proposed: reject, removed on purpose by AC2.
   - F11 (history): no D-entry governs CI caps. Proposed: noted, nothing requested.
+- Gate triage (2026-09-14): the user accepted the proposals. F1, F2, F3, F7 and F8 were fixed on the branch, and F4, F5, F6, F9 and F10 were rejected for the reasons above. F11 is noted. The NAMESPACE drift becomes a candidate row at hygiene.
+- After the fixes: AC1's parse reads 30 at job level, and both edited workflows parse. AC2's grep prints nothing and the script exits 0. `test-suite-hygiene.R` passes.

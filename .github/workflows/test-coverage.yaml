@@ -35,11 +35,12 @@ jobs:
     # devel leg needs a long job cap for a from-source dependency build, and
     # this workflow's single ubuntu release leg gets binaries and needs no such
     # thing. This job cap matches that 30-minute step cap of the non-windows
-    # legs. The "Test coverage" step ran 12.0 to 19.5 minutes on the completed
-    # runs of 2026-09-12 to 2026-09-14, and setup before it about 1.2 minutes
-    # (measured 2026-09-14 with `gh run list --workflow test-coverage.yaml`
-    # and `gh run view --json jobs`), so the old 20-minute cap ended runs that
-    # were not hung.
+    # legs. The "Test coverage" step finished in 11.9 to 18.7 minutes on the
+    # runs of 2026-09-12 to 2026-09-14, and setup before it took about 1.2
+    # minutes (measured 2026-09-14 from each attempt's step times with
+    # `gh api repos/{owner}/{repo}/actions/runs/<id>/attempts/<n>/jobs`). The
+    # old 20-minute cap ended attempt 1 of run 34880462437 at 20.0 minutes,
+    # after its "Test coverage" step had finished at 18.7, so it was not hung.
     timeout-minutes: 30
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

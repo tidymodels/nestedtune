@@ -4,8 +4,8 @@
 # That is deliberate and not an accident of layout: `benchmarks/` is
 # `.Rbuildignore`d, so a ledger kept only in this directory would be invisible
 # to the guard in `test-suite-hygiene.R` under `R CMD check` -- which is exactly
-# the run where an unbudgeted wait costs a capped CI job (the workflow files
-# under `.github/workflows/` declare the caps). This file is a
+# the run where an unbudgeted wait costs a CI run cut off at its cap (the
+# workflow files under `.github/workflows/` declare the caps). This file is a
 # reporter over that ledger, and holds no figures of its own.
 #
 # Run:  Rscript benchmarks/test-time-budget.R
@@ -72,5 +72,5 @@ cat(sprintf(
   "\nfor scale: this file typically runs 12.0 s (benchmarks/test-timing-baseline.md),\n"
 ))
 cat(sprintf(
-  "and each CI workflow declares its own cap (.github/workflows/R-CMD-check.yaml,\ntest-coverage.yaml, ...).\n"
+  "and each CI workflow declares its own caps (.github/workflows/R-CMD-check.yaml,\n.github/workflows/test-coverage.yaml, ...).\n"
 ))

@@ -47,7 +47,7 @@ jobs:
     # `test_check("nestedtune")` on a tree that had passed an hour earlier --
     # 52 minutes under `R CMD check` on macOS, which is this workflow's check
     # step, and 40 minutes under `covr` on ubuntu, which is `test-coverage`'s
-    # (that workflow caps its own job at 20). The bound stays on the code both
+    # (that workflow caps its own job). The bound stays on the code both
     # hangs were in. It was 20 until 2026-09-02, when the suite outgrew it:
     # the windows check step had run 13.2, 16.3 and 17.9 minutes on the last
     # three default-branch runs, and the M48 branch, adding tests measured at
