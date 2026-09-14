@@ -50,7 +50,7 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 
 ## Tasks
 
-- [ ] T1: Write the AC1-AC3 tests first in a new `tests/testthat/test-compute-metrics.R`, then add `compute_metrics.nested_results()` in `R/nested-results-collect.R`. Group the stacked predictions by the recorded fold labels, not by `id` alone, because tune's own method merges repeats. Score each fold with the metric set through yardstick, and build the per-fold shape of `per_fold_metrics()` (`R/nested-results.R`) so that `summarize_folds()` gives the summary. Do not call tune's dotted internals such as `.estimate_metrics()`, because an exported dotted symbol carries no stability promise (LESSONS, M28). Read `tune:::compute_metrics.tune_results()` for the metric-type rule and the survival path through `.pred`.
+- [x] T1: Write the AC1-AC3 tests first in a new `tests/testthat/test-compute-metrics.R`, then add `compute_metrics.nested_results()` in `R/nested-results-collect.R`. Group the stacked predictions by the recorded fold labels, not by `id` alone, because tune's own method merges repeats. Score each fold with the metric set through yardstick, and build the per-fold shape of `per_fold_metrics()` (`R/nested-results.R`) so that `summarize_folds()` gives the summary. Do not call tune's dotted internals such as `.estimate_metrics()`, because an exported dotted symbol carries no stability promise (LESSONS, M28). Read `tune:::compute_metrics.tune_results()` for the metric-type rule and the survival path through `.pred`.
 - [ ] T2: Write the AC4-AC5 tests first, then add `augment.nested_results()`. Count how often each data row is held out from the `splits` column, the failed folds included, before any join. Join on `.row` against the data of the first split. Refuse before the join with `nestedtune_augment_rows` when a count is not 1. Read `tune:::augment.tune_results()` and `merge_pred()` for the columns tune drops.
 - [ ] T3: Write the AC6 test first, then add the two set methods in `R/nested-results-set.R` through `stack_set()`.
 - [ ] T4: Write the help pages and the examples, add both methods to `_pkgdown.yml`, and add the `NEWS.md` bullet. Run `devtools::document()`, `devtools::run_examples()`, every gating prose sweep and `devtools::check()`.
@@ -62,7 +62,12 @@ A user scores the saved out-of-fold predictions of a nested run with a new metri
 - 2026-09-13: plan gate chose that `augment()` refuses a design that holds a row out other than once, over averaging the repeated predictions as tune does. The averaging needs an oracle for class probabilities, which the standing `summarize = TRUE` row prices. Falsified by a user who needs `augment()` on a repeated or Monte Carlo design.
 - 2026-09-13: plan gate chose a candidate row for `conf_mat_resampled()` over a nestedtune function of the same name. That function hides tune's version when both packages are attached. Falsified by tune declining to make the function a generic while users ask for the nested version.
 - 2026-09-13: /milestone-implement started. The branch m092-compute-metrics-augment was cut from origin/main at 3761f45.
+- 2026-09-13: T1 done. `compute_metrics.nested_results()` scores each completed row of `.predictions` on its own through the metric set and reuses `per_fold_metrics()` and `summarize_folds()`. `tune::compute_metrics` is re-exported. Two planted defects (event level ignored, repeats pooled by `id`) turned the new tests red. Two guard tests gained lines: the method table in test-nested-tune-bayes-oracles.R and the collect-site regex in test-suite-hygiene.R. Full suite before those fixes: 2 failures, both those guards; the three files pass after.
 
 ## Decisions
+
+- 2026-09-13 (implement gate): `compute_metrics.nested_results()` defaults `event_level` to the level the run recorded, not to tune's `"first"`. A run made with `"second"` is scored with `"second"` again unless the caller says otherwise.
+- 2026-09-13 (implement gate): `augment.nested_results()` joins the prediction columns only and adds no `.resid` column. AC4 stays as written.
+- 2026-09-13 (implement gate): the metric-type refusal reads the prediction columns the run saved, not the recorded metric set. A run that used tune's default metric set records none.
 
 ## Review

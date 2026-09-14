@@ -280,6 +280,226 @@ collect_extracts.nested_results <- function(x, ...) {
   )
 }
 
+# Scoring the saved predictions again (M92). A method on tune's generic, for
+# the reason collect_predictions() is one. Each completed row of `x` is scored
+# on its own, so a repeated design's folds stay apart: tune's own method
+# groups the stacked predictions by `id` alone and merges the repeats. The
+# per-fold tables then go through per_fold_metrics() and summarize_folds(),
+# the code collect_metrics() reads, so the two readers cannot disagree about
+# shape, fold labels or the handling of an NA fold. The metric set is called
+# as tune calls it inside `last_fit()` (`tune:::.estimate_metrics()` and its
+# `estimate_*()` helpers, tune 2.1.0, read 2026-09-13), not through those
+# internals, which carry no stability promise (M28).
+
+#' Score the saved predictions of a nested run with a metric set
+#'
+#' @description
+#' `compute_metrics()` scores the outer-fold predictions a run kept under
+#' `save_pred = TRUE` with a metric set you give it, and summarizes them the
+#' way [collect_metrics()] does. You can report a metric the run did not
+#' compute without running the nested loop again.
+#'
+#' @param x A `nested_results` run whose control set `save_pred = TRUE`.
+#' @param metrics A [yardstick::metric_set()].
+#' @param ... Not used. It must be empty.
+#' @param summarize Whether to average the per-fold metrics (`TRUE`, the
+#'   default) or return them one row per outer fold (`FALSE`).
+#' @param event_level For a two-class outcome, `"first"` or `"second"`: which
+#'   level is the event. The default, `NULL`, takes the level the run
+#'   recorded, so the new metrics treat the same level as the event.
+#'
+#' @return A tibble in the shapes [collect_metrics()] returns.
+#'
+#' @export
+compute_metrics.nested_results <- function(
+  x,
+  metrics,
+  ...,
+  summarize = TRUE,
+  event_level = NULL
+) {
+  rlang::check_dots_empty()
+  call <- rlang::current_env()
+  check_score_metrics(metrics, call = call)
+  if (is.null(event_level)) {
+    # A run built before the procedure was recorded (M46) takes tune's default.
+    event_level <- attr(x, "procedure")$event_level
+    if (is.null(event_level)) event_level <- "first"
+  }
+  check_event_level(event_level, call = call)
+  check_any_completed(x, action = "score")
+  check_column_saved(x, ".predictions", call = call)
+
+  completed <- which(x$.completed)
+  classes <- metric_classes(metrics)
+  check_metric_types_saved(
+    x$.predictions[[completed[[1L]]]],
+    classes,
+    call = call
+  )
+  warn_partial_summary(x)
+
+  frames <- lapply(seq_len(nrow(x)), function(i) {
+    if (!x$.completed[[i]]) {
+      return(new_tbl(list(.metric = character(0))))
+    }
+    score_fold(x$.predictions[[i]], metrics, classes, event_level)
+  })
+  per_fold <- per_fold_metrics(x, frames)
+  if (!summarize) {
+    return(per_fold)
+  }
+  summarize_folds(per_fold)
+}
+
+check_score_metrics <- function(metrics, call = rlang::caller_env()) {
+  if (inherits(metrics, "metric_set")) {
+    return(invisible(metrics))
+  }
+  cli::cli_abort(
+    c(
+      "{.arg metrics} must be a {.fn yardstick::metric_set}.",
+      x = "Got {.obj_type_friendly {metrics}}."
+    ),
+    class = "nestedtune_bad_metrics",
+    call = call
+  )
+}
+
+# Each metric's yardstick class, in the order of the set. The class names the
+# kind of prediction the metric reads, which is what tune's `pred_type()`
+# maps (tune 2.1.0).
+metric_classes <- function(metrics) {
+  vapply(
+    attr(metrics, "metrics"),
+    function(m) setdiff(class(m), "function")[[1L]],
+    character(1)
+  )
+}
+
+# The prediction columns scoring needs, read against the columns the run
+# saved rather than against the metric set it recorded: a run on tune's
+# default metric set records none, and the columns are what scoring reads.
+# `.pred` is numeric for a regression and a list column for a survival
+# prediction, so each kind asks for the one it reads.
+check_metric_types_saved <- function(preds, classes, call = rlang::caller_env()) {
+  outcome <- outcome_column(preds)
+  levels <- levels(preds[[outcome]])
+  numeric_pred <- is.numeric(preds[[".pred"]])
+  list_pred <- is.list(preds[[".pred"]])
+  lacking <- lapply(unique(classes), function(cls) {
+    switch(
+      cls,
+      numeric_metric = if (numeric_pred) character(0) else ".pred",
+      class_metric = setdiff(".pred_class", names(preds)),
+      prob_metric = ,
+      ordered_prob_metric = if (is.null(levels)) {
+        ".pred_<level>"
+      } else {
+        setdiff(paste0(".pred_", levels), names(preds))
+      },
+      dynamic_survival_metric = ,
+      integrated_survival_metric = if (list_pred) character(0) else ".pred",
+      static_survival_metric = setdiff(".pred_time", names(preds)),
+      linear_pred_survival_metric = setdiff(".pred_linear_pred", names(preds)),
+      quantile_metric = setdiff(".pred_quantile", names(preds)),
+      # A metric class tune does not score is a prediction no run saves.
+      paste0("<", cls, ">")
+    )
+  })
+  lacking <- unique(unlist(lacking))
+  if (length(lacking) == 0L) {
+    return(invisible(preds))
+  }
+  saved <- setdiff(names(preds), c(outcome, ".row", ".config"))
+  cli::cli_abort(
+    c(
+      "{.arg metrics} needs predictions this run did not save.",
+      x = "Not saved in the form needed: {.val {lacking}}.",
+      i = "The run saved {.val {saved}}. To score another kind of \\
+           prediction, run it again with a metric of that kind in \\
+           {.arg metrics}."
+    ),
+    class = "nestedtune_metric_type_not_saved",
+    call = call
+  )
+}
+
+# The outcome column of a saved prediction table: the one column that is
+# neither a prediction nor one of the columns tune adds beside them.
+outcome_column <- function(preds) {
+  nms <- names(preds)
+  nms <- nms[!grepl("^\\.pred", nms)]
+  setdiff(nms, c(".row", ".config", ".case_weights", ".iter", ".eval_time"))[[
+    1L
+  ]]
+}
+
+# One fold's metrics, the metric set called with the arguments tune gives it
+# for each kind of metric.
+score_fold <- function(preds, metrics, classes, event_level) {
+  truth <- rlang::sym(outcome_column(preds))
+  weights <- if (".case_weights" %in% names(preds)) {
+    rlang::sym(".case_weights")
+  }
+  survival <- c(
+    "dynamic_survival_metric",
+    "integrated_survival_metric",
+    "static_survival_metric",
+    "linear_pred_survival_metric"
+  )
+  class_prob <- c("class_metric", "prob_metric", "ordered_prob_metric")
+
+  if (all(classes %in% class_prob)) {
+    estimate <- if (any(classes == "class_metric")) rlang::sym(".pred_class")
+    probs <- NULL
+    if (any(classes %in% c("prob_metric", "ordered_prob_metric"))) {
+      probs <- paste0(".pred_", levels(preds[[as.character(truth)]]))
+      if (length(probs) == 2L) {
+        probs <- probs[[if (identical(event_level, "first")) 1L else 2L]]
+      }
+      probs <- rlang::syms(probs)
+    }
+    return(metrics(
+      preds,
+      truth = !!truth,
+      estimate = !!estimate,
+      !!!probs,
+      case_weights = !!weights,
+      event_level = event_level
+    ))
+  }
+  if (all(classes %in% survival)) {
+    static <- any(classes == "static_survival_metric")
+    linear <- any(classes == "linear_pred_survival_metric")
+    estimate <- if (static && linear) {
+      quote(c(static = .pred_time, linear_pred = .pred_linear_pred))
+    } else if (static) {
+      rlang::sym(".pred_time")
+    } else if (linear) {
+      rlang::sym(".pred_linear_pred")
+    }
+    dynamic <- if (
+      any(classes %in% c("dynamic_survival_metric", "integrated_survival_metric"))
+    ) {
+      rlang::sym(".pred")
+    }
+    return(metrics(
+      preds,
+      truth = !!truth,
+      estimate = !!estimate,
+      case_weights = !!weights,
+      !!dynamic
+    ))
+  }
+  estimate <- if (all(classes == "quantile_metric")) {
+    rlang::sym(".pred_quantile")
+  } else {
+    rlang::sym(".pred")
+  }
+  metrics(preds, truth = !!truth, estimate = !!estimate, case_weights = !!weights)
+}
+
 # The refusal for an object whose run did not keep the column asked for. The
 # record the readers trust is the recorded procedure's control: it says
 # whether the run asked, so a column a caller added by hand to a run that

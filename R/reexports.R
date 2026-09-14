@@ -14,6 +14,10 @@ ggplot2::autoplot
 #' @export
 tune::augment
 
+#' @importFrom tune compute_metrics
+#' @export
+tune::compute_metrics
+
 #' @importFrom tune collect_notes
 #' @export
 tune::collect_notes

@@ -935,10 +935,11 @@ warn_partial_summary <- function(
 # or integrated survival metric and which is carried here on the same terms
 # (M41). A failed fold's tibble is empty and predates any evaluation time, so a
 # column some folds carry and others lack is read where it exists and filled
-# with NA over the (zero) rows of the tibbles that lack it.
-per_fold_metrics <- function(x) {
+# with NA over the (zero) rows of the tibbles that lack it. `frames` is one
+# metrics table per row of `x`; compute_metrics() passes the tables it scored
+# from the saved predictions (M92), so both readers build one shape.
+per_fold_metrics <- function(x, frames = x$.metrics) {
   ids <- fold_ids(x)
-  frames <- x$.metrics
   n_rows <- vapply(frames, nrow, integer(1))
 
   column <- function(nm, fill) {

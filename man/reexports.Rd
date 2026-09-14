@@ -7,6 +7,7 @@
 \alias{extract_workflow}
 \alias{autoplot}
 \alias{augment}
+\alias{compute_metrics}
 \alias{collect_notes}
 \alias{collect_predictions}
 \alias{collect_extracts}
@@ -19,6 +20,6 @@ below to see their documentation.
 \describe{
   \item{ggplot2}{\code{\link[ggplot2:autoplot]{autoplot()}}}
 
-  \item{tune}{\code{\link[tune:augment]{augment}}, \code{\link[tune:collect_extracts]{collect_extracts()}}, \code{\link[tune:collect_metrics]{collect_metrics()}}, \code{\link[tune:collect_notes]{collect_notes()}}, \code{\link[tune:collect_predictions]{collect_predictions()}}, \code{\link[tune:extract_workflow]{extract_workflow}}}
+  \item{tune}{\code{\link[tune:augment]{augment}}, \code{\link[tune:collect_extracts]{collect_extracts()}}, \code{\link[tune:collect_metrics]{collect_metrics()}}, \code{\link[tune:collect_notes]{collect_notes()}}, \code{\link[tune:collect_predictions]{collect_predictions()}}, \code{\link[tune:compute_metrics]{compute_metrics()}}, \code{\link[tune:extract_workflow]{extract_workflow}}}
 }}
 
