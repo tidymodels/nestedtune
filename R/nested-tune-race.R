@@ -14,9 +14,10 @@
 #' fold then selects, finalizes, fits and scores on the outer split as the
 #' grid page describes.
 #'
-#' The estimate describes the race-and-fit procedure as a whole and is
-#' reported for it. The model to deploy comes from [nested_final_fit()],
-#' which races the same grid once more on all the data.
+#' The estimate describes the race-and-fit procedure as a whole. The model
+#' to deploy comes from [nested_final_fit()], which races the same grid once
+#' more on all the data, and the estimate is the number to report for that
+#' model.
 #'
 #' @details
 #' Both functions need finetune installed. `nested_tune_race_anova()` also
