@@ -241,7 +241,7 @@ print.summary.nested_results_set <- function(x, ...) {
     cli::cli_h2("Workflow {.val {id}}")
     print_summary_sections(x[[i]], level = 3L)
   }
-  print_procedure_note()
+  print_procedure_note(set = TRUE)
   invisible(x)
 }
 
@@ -289,13 +289,19 @@ summary_selection <- function(selected) {
 # IP3, and the reason these methods exist at all: the number above is a
 # property of the procedure, and the sentence saying so travels with it rather
 # than living in documentation the reader has to go and find.
-print_procedure_note <- function() {
+print_procedure_note <- function(set = FALSE) {
   cli::cli_text("")
-  cli::cli_bullets(c(
-    i = "A nested estimate describes the tune-and-fit procedure, not a model \\
-         you can deploy. Build that with {.fn nested_final_fit}, and report \\
-         this estimate as what its procedure achieves."
-  ))
+  note <- if (set) {
+    "Each nested estimate describes its workflow's tune-and-fit procedure. \\
+     For a workflow chosen before seeing these estimates, its estimate is \\
+     the number to report for the model {.fn nested_final_fit} builds with \\
+     that workflow's {.arg id}."
+  } else {
+    "A nested estimate describes the tune-and-fit procedure. For a \\
+     procedure chosen before seeing this estimate, it is the number to \\
+     report for the model {.fn nested_final_fit} builds."
+  }
+  cli::cli_bullets(c(i = note))
   invisible(NULL)
 }
 

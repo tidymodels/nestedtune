@@ -1,13 +1,13 @@
 # M095: The summary note, plot subtitles and tuner help name the number to report for the deployed model
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** —
 - **Surface tier:** user-facing — a print note, two plot subtitles, help pages, a print message and NEWS
-- **Branch/PR:** —
+- **Branch/PR:** m095-report-number-leftovers
 
 ## Goal
 
@@ -41,7 +41,7 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 
 ## Tasks
 
-- [ ] T1: `print_procedure_note()` at `R/nested-results-print.R:292-300` takes whether it prints under a set (callers at `:185` and `:244`) and states AC2's facts. Update the test at `tests/testthat/test-nested-results-print.R:424-439`, add the set path, and re-accept `_snaps/nested-results-print.md` after reading each changed note. `Rscript benchmarks/sweep-prose.R --plain` clean.
+- [x] T1: `print_procedure_note()` at `R/nested-results-print.R:292-300` takes whether it prints under a set (callers at `:185` and `:244`) and states AC2's facts. Update the test at `tests/testthat/test-nested-results-print.R:424-439`, add the set path, and re-accept `_snaps/nested-results-print.md` after reading each changed note. `Rscript benchmarks/sweep-prose.R --plain` clean.
 - [ ] T2: Subtitles at `R/nested-results-plot.R:286-290` and `:628`. Update `tests/testthat/test-nested-results-plot.R:445` and `:722`. Render and view each changed vdiffr snapshot (`performance-folds-agree`, `set-performance-three-workflows`, `set-performance-both-shortfall-sentences`) before accepting it (LESSONS, M08).
 - [ ] T3: Descriptions at `R/nested-tune-bayes.R:14-17`, `R/nested-tune-race.R:17-19` and `R/nested-tune-sim-anneal.R:14-16`, with `R/nested-tune-grid.R:13-18` as the model. `devtools::document()`, then `--roxygen --plain` clean.
 - [ ] T4: `final_fit_estimate_msg` at `R/nested-final-fit-print.R:13-16`, and the sentences AC5's grep locates (at planning: `R/nested-final-fit.R:24-25` and `:146`, `R/nested-final-fit-print.R:25-26` and `:106-108`, `R/nested-final-fit-predict.R:61`). Update `tests/testthat/test-nested-final-fit-print.R:21` and `:161`, add a print of a fit built from a set, re-accept `_snaps/nested-final-fit-print.md`, `devtools::document()`.
@@ -57,6 +57,8 @@ Every text M091 left saying the nested estimate is "not a model you can deploy" 
 - 2026-09-14: plan gate chose putting the "chosen before seeing the estimate" condition in both summary notes over the set note alone or nowhere, because the help already carries it and a subtitle has no room; falsified by a user reporting a single run's estimate after comparing several runs by hand.
 - 2026-09-14: plan gate chose fixing the two contradicting NEWS bullets now over leaving them for the release consolidation, because they contradict the help today; falsified by the release walk rewriting them anyway.
 - 2026-09-14: plan gate chose mechanical checks over a fresh-reader report, because about eight sentences change and M091 already took a report on the framing; falsified by a reader misreading the new note or subtitles.
+- 2026-09-14: implement started on branch m095-report-number-leftovers. Question gate took the drafted summary notes, the subtitle line "It describes the procedure and is the final fit's number to report." (67 characters), and the set sentence second in the final-fit message.
+- 2026-09-14: T1 done. `print_procedure_note(set)` prints the single-run and set notes, two tests match their facts, 7 snapshot notes re-accepted after reading each; print tests 233 passed, `--plain` sweep clean.
 
 ## Decisions
 

@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-14 (M094's pass: archived, M91's row pruned, a NAME
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | planned | — | normal | milestones/M095-report-number-leftovers.md |
+| M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | in-progress | — | normal | milestones/M095-report-number-leftovers.md |
 | M94 | The coverage job runs under a 30-minute cap | done | — | normal | milestones/archive/M094-coverage-job-cap.md |
 | M93 | augment() refuses saved predictions that do not match what each fold held out | done | — | normal | milestones/archive/M093-augment-checks-predictions.md |
 | M92 | A nested run answers compute_metrics() and augment() | done | — | normal | milestones/archive/M092-compute-metrics-augment.md |

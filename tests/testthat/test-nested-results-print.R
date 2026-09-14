@@ -421,7 +421,7 @@ test_that("unanimous selection is distinguished from disagreement", {
   expect_match(split_txt, "disagree")
 })
 
-test_that("summarizing says the estimate describes the procedure, not a model", {
+test_that("summarizing names the estimate as the number to report for the final fit", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -432,10 +432,49 @@ test_that("summarizing says the estimate describes the procedure, not a model", 
     grid = det_grid(),
     metrics = reg_metrics()
   ))
-  txt <- summary_text(res)
+  # The note wraps at the console width; its facts are read across the wrap.
+  txt <- gsub("\\s+", " ", summary_text(res))
 
-  expect_match(txt, "procedure")
-  expect_match(txt, "not a model you can deploy")
+  expect_match(txt, "describes the tune-and-fit procedure", fixed = TRUE)
+  expect_match(
+    txt,
+    "procedure chosen before seeing this estimate",
+    fixed = TRUE
+  )
+  expect_match(
+    txt,
+    "it is the number to report for the model `nested_final_fit()` builds",
+    fixed = TRUE
+  )
+  expect_no_match(txt, "not a model you can deploy", fixed = TRUE)
+  # The set's workflow sentence belongs to the set's print alone.
+  expect_no_match(txt, "workflow's", fixed = TRUE)
+})
+
+test_that("summarizing a set names each workflow's estimate as the number to report for its fit", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  txt <- gsub("\\s+", " ", print_text(summary(res)))
+
+  expect_match(
+    txt,
+    "Each nested estimate describes its workflow's tune-and-fit procedure",
+    fixed = TRUE
+  )
+  expect_match(
+    txt,
+    "workflow chosen before seeing these estimates",
+    fixed = TRUE
+  )
+  expect_match(
+    txt,
+    paste(
+      "its estimate is the number to report for the model",
+      "`nested_final_fit()` builds with that workflow's `id`"
+    ),
+    fixed = TRUE
+  )
+  expect_no_match(txt, "not a model you can deploy", fixed = TRUE)
 })
 
 test_that("summarizing shows the estimate over the folds that contributed", {
