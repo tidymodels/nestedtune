@@ -6,7 +6,11 @@
 # and the data columns are the data as the design holds it.
 
 # A regression run on `folds`, saving predictions, served from the cache.
-augment_run <- function(data, folds, control = tune::control_grid(save_pred = TRUE)) {
+augment_run <- function(
+  data,
+  folds,
+  control = tune::control_grid(save_pred = TRUE)
+) {
   set.seed(21)
   suppressWarnings(memoised(nested_tune_grid(
     det_workflow(data),

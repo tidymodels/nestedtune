@@ -432,7 +432,11 @@ metric_classes <- function(metrics) {
 # default metric set records none, and the columns are what scoring reads.
 # `.pred` is numeric for a regression and a list column for a survival
 # prediction, so each kind asks for the one it reads.
-check_metric_types_saved <- function(preds, classes, call = rlang::caller_env()) {
+check_metric_types_saved <- function(
+  preds,
+  classes,
+  call = rlang::caller_env()
+) {
   outcome <- outcome_column(preds)
   levels <- levels(preds[[outcome]])
   numeric_pred <- is.numeric(preds[[".pred"]])
@@ -530,7 +534,9 @@ score_fold <- function(preds, metrics, classes, event_level) {
       rlang::sym(".pred_linear_pred")
     }
     dynamic <- if (
-      any(classes %in% c("dynamic_survival_metric", "integrated_survival_metric"))
+      any(
+        classes %in% c("dynamic_survival_metric", "integrated_survival_metric")
+      )
     ) {
       rlang::sym(".pred")
     }
@@ -547,7 +553,12 @@ score_fold <- function(preds, metrics, classes, event_level) {
   } else {
     rlang::sym(".pred")
   }
-  metrics(preds, truth = !!truth, estimate = !!estimate, case_weights = !!weights)
+  metrics(
+    preds,
+    truth = !!truth,
+    estimate = !!estimate,
+    case_weights = !!weights
+  )
 }
 
 # The saved predictions joined onto the data rows (M92). tune's own method
