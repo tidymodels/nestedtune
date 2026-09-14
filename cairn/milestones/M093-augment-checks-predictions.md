@@ -7,7 +7,7 @@
 - **Principles touched:** IP4, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — changes what `augment()` returns or refuses for a user's results object
-- **Branch/PR:** m093-augment-checks-predictions
+- **Branch/PR:** m093-augment-checks-predictions · https://github.com/tidymodels/nestedtune/pull/106
 
 ## Goal
 
