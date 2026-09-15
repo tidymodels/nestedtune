@@ -1,13 +1,13 @@
 # M096: The help pages inherit tune's argument text and share repeated text through templates
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the help pages every user reads
-- **Branch/PR:** —
+- **Branch/PR:** `m096-help-inherits-tune-params`
 
 ## Goal
 
@@ -37,7 +37,7 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 
 ## Tasks
 
-- [ ] T1: Write `cairn/surveys/M096-param-survey.md`: one row per `@param` tag the AC1 grep prints, with the upstream item text quoted beside the local text and the disposition. Start from the plan survey's table (this file's work log names it). Check the upstream Rd items with `tools::Rd_db("tune")`, `Rd_db("finetune")`, `Rd_db("workflowsets")`.
+- [x] T1: Write `cairn/surveys/M096-param-survey.md`: one row per `@param` tag the AC1 grep prints, with the upstream item text quoted beside the local text and the disposition. Start from the plan survey's table (this file's work log names it). Check the upstream Rd items with `tools::Rd_db("tune")`, `Rd_db("finetune")`, `Rd_db("workflowsets")`.
 - [ ] T2: Apply `@inheritParams <upstream>` per `inherit` row and delete the local tag; move each removed sentence into Details or the "Differences" section of the same page, or mark it in the survey as said by the inherited text. Note `R/nested-tune-race.R` inherits from `nested_tune_grid` only today; add `finetune::tune_race_anova`. `devtools::document()`; run the AC1 item comparison and the AC2 idiom.
 - [ ] T3: Templates for the "Differences" scaffold: one `man-roxygen/differences-*.R` per repeated paragraph, parameterized through `@templateVar` (the control constructor, the page name), keeping the bold run-in headings byte-identical so `test-control-slots.R` parses them; the finetune classification note as one template. `devtools::test()` after each page.
 - [ ] T4: The remaining runs: the `@examplesIf` guard into `man-roxygen/example-set.R`; the reader `@param x`/`summarize`/`...` family and the refusal sentences via `@inheritParams collect_metrics.nested_results` or a template; the two `@seealso` families as templates with a `@templateVar` for the varying link.
@@ -51,6 +51,8 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: plan gate chose inheriting tune's text and moving the nested qualification to Details over keeping qualified `@param` entries local because #91 asks for exactly that split and Details already holds the "Differences" section; falsified by a user reading a page's Arguments alone and missing a fold-level restriction the Details state.
 - 2026-09-15: plan gate chose a one-off duplicate command recorded in this file over a `--duplicates` sweep mode because the checker-regress shape recommends not widening `benchmarks/sweep-prose.R`'s promise for a one-time consolidation; falsified by repeated roxygen text re-accumulating across two later milestones.
 - 2026-09-15: plan gate dropped the "you" item from scope (24 occurrences over six pages) and set `Resolves: #91 partial` with no acknowledgement comment, the remainder (the maintainers' human pass) staying on the #91 candidate row.
+- 2026-09-15: /milestone-implement started on `m096-help-inherits-tune-params`. Question gate skipped: the AC1 rule settles every disposition (two facts checked at the branch point, recorded in the survey), and no dependency or naming choice is open.
+- 2026-09-15: T1 done. Survey at `cairn/surveys/M096-param-survey.md`: 24 tags, 5 `inherit` (grid page `param_info` and `grid`, bayes `iter`, race `grid`, fit-resamples `metrics`), 19 `local`.
 
 ## Decisions
 

@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-15 (M095's pass: archived, M92's row and the NAMESP
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M96 | The help pages inherit tune's argument text and share repeated text through templates | planned | — | normal | milestones/M096-help-inherits-tune-params.md |
+| M96 | The help pages inherit tune's argument text and share repeated text through templates | in-progress | — | normal | milestones/M096-help-inherits-tune-params.md |
 | M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | done | — | normal | milestones/archive/M095-report-number-leftovers.md |
 | M94 | The coverage job runs under a 30-minute cap | done | — | normal | milestones/archive/M094-coverage-job-cap.md |
 | M93 | augment() refuses saved predictions that do not match what each fold held out | done | — | normal | milestones/archive/M093-augment-checks-predictions.md |
