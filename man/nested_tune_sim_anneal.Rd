@@ -33,9 +33,9 @@ from finetune says what becomes of each slot.}
 \item{iter}{The number of search iterations, a whole number of at least 1.
 The section on the iterations says why \code{0} is refused.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}

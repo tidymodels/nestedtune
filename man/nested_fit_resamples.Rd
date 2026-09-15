@@ -27,9 +27,8 @@ designs says what the design must hold.}
 name. The section on differences from tune says what becomes of each
 slot.}
 
-\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to use tune's
-defaults for the model's mode. There is no inner run to select on, so
-the set's order carries no weight here.}
+\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
+set of metrics.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event in the one tune call a fold
@@ -66,6 +65,10 @@ Use it for the baseline a tuned procedure is compared against. A plain
 \code{rset} of outer folds is what
 \code{\link[tune:fit_resamples]{tune::fit_resamples()}} already serves. What this function adds is the
 same nested design, so the two runs' folds are the same rows.
+}
+\details{
+\code{metrics} is read as \code{\link[tune:fit_resamples]{tune::fit_resamples()}} reads it. There is no inner
+run to select on, so the set's order carries no weight here.
 }
 \section{One door for a fixed workflow, one for a tuned one}{
 

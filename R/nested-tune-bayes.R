@@ -16,13 +16,16 @@
 #' which runs the recorded search once more on all the data, and the
 #' estimate is the number to report for that model.
 #'
+#' @details
+#' `iter` reaches [tune::tune_bayes()] as given: the number of search
+#' iterations, a non-negative whole number. The section on the iterations
+#' says what `0` does.
+#'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
 #' @param ... A control object from [tune::control_bayes()], as `control`,
 #'   and nothing else. Every argument after `...` is matched by name. The
 #'   section on differences from tune says what becomes of each slot.
-#' @param iter The number of search iterations, a non-negative whole number.
-#'   The section on the iterations says what `0` does.
 #' @param initial The number of candidates each fold scores before the first
 #'   iteration, a whole number of at least 2. A `tune_results` object, which
 #'   tune also accepts here, is refused.

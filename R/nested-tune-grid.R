@@ -27,6 +27,11 @@
 #' outer loop and hands the inner tuning to tune or finetune. Their pages
 #' say what differs, and this page is the reference for what the six share.
 #'
+#' `grid` and `param_info` reach every fold's inner call as
+#' [tune::tune_grid()] takes them. A data frame has one column per tuned
+#' parameter and no other column. The section on finalizing a parameter
+#' range says where a range that depends on the data is finalized.
+#'
 #' @inheritParams tune::tune_grid
 #' @param object A [workflows::workflow()] with at least one parameter marked
 #'   for tuning with [tune::tune()]. A workflow with no marker is refused, and
@@ -38,12 +43,6 @@
 #'   `control`, and nothing else. Every argument after `...` is matched by
 #'   name. The section on differences from tune says what becomes of each
 #'   control slot.
-#' @param param_info A [dials::parameters()] object, or `NULL` to let tune
-#'   derive one from the workflow. The section on finalizing a parameter
-#'   range says where a range that depends on the data is finalized.
-#' @param grid A data frame of candidate parameter values, or a positive whole
-#'   number for the size of a grid tune generates. A data frame has one
-#'   column per tuned parameter and no other column.
 #' @param event_level `"first"` (the default) or `"second"`. It names which
 #'   level of a two-class outcome is the event, and applies to the inner
 #'   tuning run and the outer scoring fit alike.

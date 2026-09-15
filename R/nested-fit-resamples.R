@@ -16,7 +16,12 @@
 #' [tune::fit_resamples()] already serves. What this function adds is the
 #' same nested design, so the two runs' folds are the same rows.
 #'
+#' @details
+#' `metrics` is read as [tune::fit_resamples()] reads it. There is no inner
+#' run to select on, so the set's order carries no weight here.
+#'
 #' @inheritParams nested_tune_grid
+#' @inheritParams tune::fit_resamples
 #' @param object A [workflows::workflow()] with no parameter marked for tuning
 #'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
 #'   it. A workflow carrying a marker is refused at entry.
@@ -24,9 +29,6 @@
 #'   `control`, and nothing else. Every argument after `...` is matched by
 #'   name. The section on differences from tune says what becomes of each
 #'   slot.
-#' @param metrics A [yardstick::metric_set()], or `NULL` to use tune's
-#'   defaults for the model's mode. There is no inner run to select on, so
-#'   the set's order carries no weight here.
 #' @param event_level `"first"` (the default) or `"second"`. It names which
 #'   level of a two-class outcome is the event in the one tune call a fold
 #'   makes, the outer scoring fit.

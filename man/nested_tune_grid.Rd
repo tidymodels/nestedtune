@@ -30,13 +30,14 @@ designs says what the design must hold.}
 name. The section on differences from tune says what becomes of each
 control slot.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
-\item{grid}{A data frame of candidate parameter values, or a positive whole
-number for the size of a grid tune generates. A data frame has one
-column per tuned parameter and no other column.}
+\item{grid}{A data frame of tuning combinations or a positive integer. The
+data frame should have columns for each parameter being tuned and rows for
+tuning parameter candidates. An integer denotes the number of candidate
+parameter sets to be created automatically.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -96,6 +97,11 @@ it with another search:
 With this function they are the package's orchestrators: each runs the
 outer loop and hands the inner tuning to tune or finetune. Their pages
 say what differs, and this page is the reference for what the six share.
+
+\code{grid} and \code{param_info} reach every fold's inner call as
+\code{\link[tune:tune_grid]{tune::tune_grid()}} takes them. A data frame has one column per tuned
+parameter and no other column. The section on finalizing a parameter
+range says where a range that depends on the data is finalized.
 }
 \section{Nested designs}{
 

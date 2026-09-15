@@ -25,15 +25,15 @@
 #' BradleyTerry2, which fits the win/loss model. A missing package is refused
 #' at entry, before any fold runs.
 #'
+#' `grid` is the design the race is offered. A data frame must have one
+#' column per tuned parameter and no other column.
+#'
 #' @inheritParams nested_tune_grid
+#' @inheritParams finetune::tune_race_anova
 #' @param ... A control object from [finetune::control_race()], as
 #'   `control`, and nothing else. Every argument after `...` is matched by
 #'   name. The section on differences from finetune says what becomes of each
 #'   slot.
-#' @param grid A data frame of candidate parameter values, or a positive whole
-#'   number for the size of a grid to generate, the design the race is
-#'   offered. A data frame must have one column per tuned parameter and no other
-#'   column.
 #'
 #' @return A `nested_results` with one row per outer fold and the columns
 #'   [nested_tune_grid()] documents. The `procedure` record names the tuner,

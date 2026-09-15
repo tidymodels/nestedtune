@@ -44,14 +44,14 @@ designs says what the design must hold.}
 name. The section on differences from finetune says what becomes of each
 slot.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
-\item{grid}{A data frame of candidate parameter values, or a positive whole
-number for the size of a grid to generate, the design the race is
-offered. A data frame must have one column per tuned parameter and no other
-column.}
+\item{grid}{A data frame of tuning combinations or a positive integer. The
+data frame should have columns for each parameter being tuned and rows for
+tuning parameter candidates. An integer denotes the number of candidate
+parameter sets to be created automatically.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -99,6 +99,9 @@ Both functions need finetune installed. \code{nested_tune_race_anova()} also
 needs lme4, which fits the ANOVA, and \code{nested_tune_race_win_loss()}
 BradleyTerry2, which fits the win/loss model. A missing package is refused
 at entry, before any fold runs.
+
+\code{grid} is the design the race is offered. A data frame must have one
+column per tuned parameter and no other column.
 }
 \section{What a race records}{
 

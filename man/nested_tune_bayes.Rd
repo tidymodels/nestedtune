@@ -31,12 +31,11 @@ designs says what the design must hold.}
 and nothing else. Every argument after \code{...} is matched by name. The
 section on differences from tune says what becomes of each slot.}
 
-\item{iter}{The number of search iterations, a non-negative whole number.
-The section on the iterations says what \code{0} does.}
+\item{iter}{The maximum number of search iterations.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -86,6 +85,11 @@ The estimate describes the whole search-and-fit procedure rather than
 any one model. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}},
 which runs the recorded search once more on all the data, and the
 estimate is the number to report for that model.
+}
+\details{
+\code{iter} reaches \code{\link[tune:tune_bayes]{tune::tune_bayes()}} as given: the number of search
+iterations, a non-negative whole number. The section on the iterations
+says what \code{0} does.
 }
 \section{The initial candidates and the iterations}{
 
