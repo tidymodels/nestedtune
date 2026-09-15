@@ -173,9 +173,8 @@ than control slots, offered here as arguments and reaching it unchanged.
 So is \code{eval_time}.
 
 
-\strong{Refused: none.} No slot is refused on its own. What is refused at
-entry is a control of another class, such as a \code{control_grid()} that
-tune itself accepts here, and the \code{event_level} conflict above.
+\strong{Refused: none.} No slot is refused on its own. A control of another
+class is refused at entry, as is the \code{event_level} conflict above.
 
 
 \strong{Passed through: \code{no_improve}, \code{uncertain}, \code{time_limit}, \code{verbose},

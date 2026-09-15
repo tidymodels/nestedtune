@@ -99,8 +99,7 @@
 #' than control slots, offered here as arguments and reaching it unchanged.
 #' So is `eval_time`.
 #'
-#' @templateVar OTHER control_grid()
-#' @template differences-refused
+#' @template differences-refused-plain
 #' @section Differences from calling tune directly:
 #' **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
 #' `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,

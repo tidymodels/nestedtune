@@ -58,6 +58,7 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: T3 done. Eight `man-roxygen/differences-*.R` templates serve the five pages (forced, settable, refused, passed-shared bullet, finetune-version note, kept, not-returned, inert), and `param-control-dots`, `param-event-level`, `param-eval-time` and `seealso-orchestrator` serve the params and links. Suite 10116 pass after the edits, both roxygen sweeps clean.
 - 2026-09-15: T4 done. `seealso-reader` at the four `R/nested-results-collect.R` sites, `refusals-saved-run` at the compute_metrics and augment sections, `@inheritParams` for compute_metrics' `summarize`, augment's `x` and the set summary page's `...`. The `collect_metrics.nested_results` seealso has no varying link and stays local (8 words).
 - 2026-09-15: T5 done. The Decisions command exits 0 and prints nothing at this head; the three hits it printed after T3 were the two T4 sites and the sim-anneal "Refused" line, reworded. All six gating sweeps clean.
+- 2026-09-15: claim audit: 25 claims read, 1 corrected — NEWS.md, R/nested-tune-grid.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, R/nested-fit-resamples.R, R/nested-results-collect.R, R/nested-results-set.R, man-roxygen/*.R. The correction: the bayes page said tune accepts a `control_grid()` in `tune_bayes()`, and tune 2.1.0 refuses to coerce it; the bayes and sim-anneal pages now share `differences-refused-plain.R`, which names no example. Re-read by the same reader: holds. Suite 10116 pass after the fix.
 
 ## Decisions
 

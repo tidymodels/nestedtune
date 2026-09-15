@@ -92,9 +92,8 @@
 #' rather than control slots, offered here as arguments and reaching it
 #' unchanged.
 #'
-#' **Refused: none.** No slot is refused on its own. A control of another
-#' class is refused at entry, as is the `event_level` conflict above.
-#'
+#' @template differences-refused-plain
+#' @section Differences from calling finetune directly:
 #' **Passed through: `no_improve`, `restart`, `radius`, `flip`,
 #' `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
 #' `parallel_over`, `workflow_size`.** Each reaches `tune_sim_anneal()` as
