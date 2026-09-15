@@ -528,9 +528,10 @@ summary(mapped)
 #> rmse (standard): 3.15
 #> rsq (standard): 0.757
 #> 
-#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
-#>   you can deploy. Build that with `nested_final_fit()`, and report
-#>   this estimate as what its procedure achieves.
+#> ℹ Each nested estimate describes its workflow's tune-and-fit
+#>   procedure. For a workflow chosen before seeing these estimates, its
+#>   estimate is the number to report for the model `nested_final_fit()`
+#>   builds with that workflow's `id`.
 ```
 
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)

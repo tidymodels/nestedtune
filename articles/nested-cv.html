@@ -234,9 +234,9 @@ means.</p>
 <span><span class="co">#&gt; rmse (standard): 2.49</span></span>
 <span><span class="co">#&gt; rsq (standard): 0.842</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> A nested estimate describes the tune-and-fit procedure, not a model</span></span>
-<span><span class="co">#&gt;   you can deploy. Build that with `nested_final_fit()`, and report</span></span>
-<span><span class="co">#&gt;   this estimate as what its procedure achieves.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> A nested estimate describes the tune-and-fit procedure. For a</span></span>
+<span><span class="co">#&gt;   procedure chosen before seeing this estimate, it is the number to</span></span>
+<span><span class="co">#&gt;   report for the model `nested_final_fit()` builds.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="the-number-to-report">The number to report<a class="anchor" aria-label="anchor" href="#the-number-to-report"></a>
@@ -353,8 +353,11 @@ rule), so the model and the estimate come from one search.</p>
 <span><span class="co">#&gt; Selected: mtry = 2, min_n = 2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Report the nested estimate from `collect_metrics()` on the results</span></span>
-<span><span class="co">#&gt;   object this fit was built from. It describes the procedure that</span></span>
-<span><span class="co">#&gt;   produced this model, and it is the number to report for this model.</span></span>
+<span><span class="co">#&gt;   object this fit was built from. For a fit built from a workflow set,</span></span>
+<span><span class="co">#&gt;   that is this workflow's rows of `collect_metrics()` on the set. That</span></span>
+<span><span class="co">#&gt;   holds for a workflow chosen before seeing the set's estimates. It</span></span>
+<span><span class="co">#&gt;   describes the procedure that produced this model, and it is the</span></span>
+<span><span class="co">#&gt;   number to report for this model.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Compare the parameters above with `.selected` from that run. Outer</span></span>
 <span><span class="co">#&gt;   folds choosing differently is selection instability, and it is</span></span>
 <span><span class="co">#&gt;   information about the procedure rather than noise.</span></span>

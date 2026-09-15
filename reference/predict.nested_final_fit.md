@@ -81,7 +81,10 @@ Augmenting the rows this model was fit on gives in-sample residuals.
 They say how the model fits data it has already seen, not how it does on
 data it has not. The number to report is
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object the fit was built from. See
+on the results object the fit was built from, or, for a fit built from a
+workflow set, that workflow's rows of
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+on the set. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for why that is the number to report for this model.
 

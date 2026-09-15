@@ -108,7 +108,7 @@ summary(res)
 #> rmse (standard): 2.98
 #> rsq (standard): 0.747
 #> 
-#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
-#>   you can deploy. Build that with `nested_final_fit()`, and report
-#>   this estimate as what its procedure achieves.
+#> ℹ A nested estimate describes the tune-and-fit procedure. For a
+#>   procedure chosen before seeing this estimate, it is the number to
+#>   report for the model `nested_final_fit()` builds.
 ```

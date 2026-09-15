@@ -538,9 +538,10 @@ under one heading for the set.</p>
 <span><span class="co">#&gt; rmse (standard): 3.15</span></span>
 <span><span class="co">#&gt; rsq (standard): 0.757</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> A nested estimate describes the tune-and-fit procedure, not a model</span></span>
-<span><span class="co">#&gt;   you can deploy. Build that with `nested_final_fit()`, and report</span></span>
-<span><span class="co">#&gt;   this estimate as what its procedure achieves.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Each nested estimate describes its workflow's tune-and-fit</span></span>
+<span><span class="co">#&gt;   procedure. For a workflow chosen before seeing these estimates, its</span></span>
+<span><span class="co">#&gt;   estimate is the number to report for the model `nested_final_fit()`</span></span>
+<span><span class="co">#&gt;   builds with that workflow's `id`.</span></span></code></pre></div>
 <p><code><a href="../reference/agreement.html">agreement()</a></code> stacks each workflow’s selection table under
 its id, with the parameter columns ahead of the counts. The baseline
 tuned nothing and has no row.</p>

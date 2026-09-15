@@ -16,10 +16,11 @@ model of pairwise wins and losses. The survivors are scored on the
 remaining resamples, and the fold then selects, finalizes, fits and
 scores on the outer split as the grid page describes.
 
-The estimate describes the race-and-fit procedure as a whole and is
-reported for it. The model to deploy comes from
+The estimate describes the race-and-fit procedure as a whole. The model
+to deploy comes from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-which races the same grid once more on all the data.
+which races the same grid once more on all the data, and the estimate is
+the number to report for that model.
 
 ## Usage
 

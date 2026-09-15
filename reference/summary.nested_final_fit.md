@@ -9,9 +9,11 @@ chose.
 The `estimate` component is always `NULL`, because the number to report
 for this model is not stored on it. That number is the nested estimate
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-returns from the results object the fit was built from. The stored
-tuning run's metrics are selection-time quantities, so they do not fill
-the slot. See
+returns from the results object the fit was built from. For a fit built
+from a workflow set, it is that workflow's rows of
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+on the set. The stored tuning run's metrics are selection-time
+quantities, so they do not fill the slot. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for the reason. The name is kept rather than left out, so the object
 states where that number is instead of leaving you to infer it from a
@@ -120,8 +122,11 @@ summary(final)
 #> ── Estimate ──
 #> 
 #> ℹ Report the nested estimate from `collect_metrics()` on the results
-#>   object this fit was built from. It describes the procedure that
-#>   produced this model, and it is the number to report for this model.
+#>   object this fit was built from. For a fit built from a workflow set,
+#>   that is this workflow's rows of `collect_metrics()` on the set. That
+#>   holds for a workflow chosen before seeing the set's estimates. It
+#>   describes the procedure that produced this model, and it is the
+#>   number to report for this model.
 #> ℹ The tuning run above has metrics, but selection consumed them.
 #>   `extract_tune_results()` reaches them, and every one is a
 #>   selection-time quantity, optimistically biased as a claim about this

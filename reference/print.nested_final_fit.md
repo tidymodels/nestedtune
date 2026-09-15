@@ -6,9 +6,12 @@ reach what selection saw.
 
 The number to report is the nested estimate
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-returns from the results object the fit was built from, and the print
-says so. That estimate describes the procedure that produced this model.
-The stored tuning run has metrics, but selection consumed them. See
+returns from the results object the fit was built from. For a fit built
+from a workflow set, it is that workflow's rows of
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+on the set. The print says so. That estimate describes the procedure
+that produced this model. The stored tuning run has metrics, but
+selection consumed them. See
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 for why those metrics are not the number to report and the nested
 estimate is.
@@ -86,8 +89,11 @@ final
 #> Selected: num_comp = 1
 #> 
 #> ℹ Report the nested estimate from `collect_metrics()` on the results
-#>   object this fit was built from. It describes the procedure that
-#>   produced this model, and it is the number to report for this model.
+#>   object this fit was built from. For a fit built from a workflow set,
+#>   that is this workflow's rows of `collect_metrics()` on the set. That
+#>   holds for a workflow chosen before seeing the set's estimates. It
+#>   describes the procedure that produced this model, and it is the
+#>   number to report for this model.
 #> ℹ Compare the parameters above with `.selected` from that run. Outer
 #>   folds choosing differently is selection instability, and it is
 #>   information about the procedure rather than noise.

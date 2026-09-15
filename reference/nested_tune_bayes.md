@@ -14,10 +14,10 @@ seeds, failed folds, parallel execution and what an operation on the
 result does.
 
 The estimate describes the whole search-and-fit procedure rather than
-any one model, and is reported for the procedure. The model to deploy
-comes from
+any one model. The model to deploy comes from
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-which runs the recorded search once more on all the data.
+which runs the recorded search once more on all the data, and the
+estimate is the number to report for that model.
 
 ## Usage
 

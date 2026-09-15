@@ -209,9 +209,10 @@ summary(res)
 #> rmse (standard): 5.93
 #> rsq (standard): 0.495
 #> 
-#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
-#>   you can deploy. Build that with `nested_final_fit()`, and report
-#>   this estimate as what its procedure achieves.
+#> ℹ Each nested estimate describes its workflow's tune-and-fit
+#>   procedure. For a workflow chosen before seeing these estimates, its
+#>   estimate is the number to report for the model `nested_final_fit()`
+#>   builds with that workflow's `id`.
 agreement(res)
 #> # A tibble: 1 × 4
 #>   wflow_id num_comp     n  prop

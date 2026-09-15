@@ -3,19 +3,21 @@
 which number to report for this model. It also names the accessors that
 reach what selection saw.
 The number to report is the nested estimate collect_metrics() returns
-from the results object the fit was built from, and the print says so.
-That estimate describes the procedure that produced this model. The
-stored tuning run has metrics, but selection consumed them. See
-nested_final_fit() for why those metrics are not the number to report
-and the nested estimate is."><meta property="og:description" content="Shows what the full-data search was, which parameters it selected, and
+from the results object the fit was built from. For a fit built from a
+workflow set, it is that workflow's rows of collect_metrics() on the
+set. The print says so. That estimate describes the procedure that
+produced this model. The stored tuning run has metrics, but selection
+consumed them. See nested_final_fit() for why those metrics are not the
+number to report and the nested estimate is."><meta property="og:description" content="Shows what the full-data search was, which parameters it selected, and
 which number to report for this model. It also names the accessors that
 reach what selection saw.
 The number to report is the nested estimate collect_metrics() returns
-from the results object the fit was built from, and the print says so.
-That estimate describes the procedure that produced this model. The
-stored tuning run has metrics, but selection consumed them. See
-nested_final_fit() for why those metrics are not the number to report
-and the nested estimate is."><meta property="og:image" content="https://nestedtune.tidymodels.org/logo.png"><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
+from the results object the fit was built from. For a fit built from a
+workflow set, it is that workflow's rows of collect_metrics() on the
+set. The print says so. That estimate describes the procedure that
+produced this model. The stored tuning run has metrics, but selection
+consumed them. See nested_final_fit() for why those metrics are not the
+number to report and the nested estimate is."><meta property="og:image" content="https://nestedtune.tidymodels.org/logo.png"><script src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/js/badge.min.js" data-max-height="43" data-hide-below="1200" data-light-bg="#666f76" data-light-fg="#f9f9f9"></script><script defer data-domain="nestedtune.tidymodels.org,all.tidymodels.org" src="https://plausible.io/js/plausible.js"></script></head><body>
     <a href="#container" class="visually-hidden-focusable">Skip to content</a>
 
 
@@ -65,11 +67,12 @@ and the nested estimate is."><meta property="og:image" content="https://nestedtu
 which number to report for this model. It also names the accessors that
 reach what selection saw.</p>
 <p>The number to report is the nested estimate <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> returns
-from the results object the fit was built from, and the print says so.
-That estimate describes the procedure that produced this model. The
-stored tuning run has metrics, but selection consumed them. See
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why those metrics are not the number to report
-and the nested estimate is.</p>
+from the results object the fit was built from. For a fit built from a
+workflow set, it is that workflow's rows of <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> on the
+set. The print says so. That estimate describes the procedure that
+produced this model. The stored tuning run has metrics, but selection
+consumed them. See <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for why those metrics are not the
+number to report and the nested estimate is.</p>
     </div>
 
     <div class="section level2">
@@ -142,8 +145,11 @@ and <code><a href="extract_scored_candidates.html">extract_scored_candidates()</
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Selected: num_comp = 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Report the nested estimate from `collect_metrics()` on the results</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   object this fit was built from. It describes the procedure that</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   produced this model, and it is the number to report for this model.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   object this fit was built from. For a fit built from a workflow set,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   that is this workflow's rows of `collect_metrics()` on the set. That</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   holds for a workflow chosen before seeing the set's estimates. It</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   describes the procedure that produced this model, and it is the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   number to report for this model.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Compare the parameters above with `.selected` from that run. Outer</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   folds choosing differently is selection instability, and it is</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   information about the procedure rather than noise.</span>

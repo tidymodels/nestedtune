@@ -181,9 +181,9 @@ summary(res)
 #> rmse (standard): 2.49
 #> rsq (standard): 0.842
 #> 
-#> ℹ A nested estimate describes the tune-and-fit procedure, not a model
-#>   you can deploy. Build that with `nested_final_fit()`, and report
-#>   this estimate as what its procedure achieves.
+#> ℹ A nested estimate describes the tune-and-fit procedure. For a
+#>   procedure chosen before seeing this estimate, it is the number to
+#>   report for the model `nested_final_fit()` builds.
 ```
 
 ## The number to report
@@ -335,8 +335,11 @@ final
 #> Selected: mtry = 2, min_n = 2
 #> 
 #> ℹ Report the nested estimate from `collect_metrics()` on the results
-#>   object this fit was built from. It describes the procedure that
-#>   produced this model, and it is the number to report for this model.
+#>   object this fit was built from. For a fit built from a workflow set,
+#>   that is this workflow's rows of `collect_metrics()` on the set. That
+#>   holds for a workflow chosen before seeing the set's estimates. It
+#>   describes the procedure that produced this model, and it is the
+#>   number to report for this model.
 #> ℹ Compare the parameters above with `.selected` from that run. Outer
 #>   folds choosing differently is selection instability, and it is
 #>   information about the procedure rather than noise.
