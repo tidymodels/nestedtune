@@ -1,16 +1,15 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-14 (M094's pass: archived, M91's row pruned, a NAMESPACE drift row added. validate green.)_
+_Last hygiene check: 2026-09-15 (M095's pass: archived, M92's row and the NAMESPACE drift row pruned, one Known issues entry added. validate green.)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | review | — | normal | milestones/M095-report-number-leftovers.md |
+| M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | done | — | normal | milestones/archive/M095-report-number-leftovers.md |
 | M94 | The coverage job runs under a 30-minute cap | done | — | normal | milestones/archive/M094-coverage-job-cap.md |
 | M93 | augment() refuses saved predictions that do not match what each fold held out | done | — | normal | milestones/archive/M093-augment-checks-predictions.md |
-| M92 | A nested run answers compute_metrics() and augment() | done | — | normal | milestones/archive/M092-compute-metrics-augment.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -52,7 +51,6 @@ _Last hygiene check: 2026-09-14 (M094's pass: archived, M91's row pruned, a NAME
 - `conf_mat_resampled()` for a nested run — added 2026-09-13 at M092's plan gate (M092 Out). tune 2.1.0 defines it as a plain function that checks `inherits(x, "tune_results")`, so no method reaches it, and a same-named export here masks tune's. Promote when tune makes it a generic, or on a user asking for it
 - Honor tune 2.1.0's resample weights (`add_resample_weights()`) in the outer average — added 2026-09-13 at M092's plan gate (M092 Out). `summarize_folds()` takes an unweighted mean, where tune weights by the rset's `.resample_weights` attribute; whether `nested_resamples()` keeps that attribute is unread. Promote on a user weighting the outer folds
 - `compute_metrics()` trusts each fold's `.predictions`: a `.row` repeated inside a fold counts twice — added 2026-09-14 at M093's plan gate (M093 Out). Promote on a user hitting it
-- `devtools::document()` on the default branch rewrites `NAMESPACE`, grouping the `importFrom` lines for tune and vctrs into multi-line calls. No import changes. Added 2026-09-14 at M094's review gate. Promote on the next milestone that runs `document()`, which commits the rewrite
 - [low] `NEWS.md`'s 77 development bullets read to the M84 plain-prose standard — added 2026-09-10 at M84's plan gate — M84 Out. The bullets are consolidated at the first release, so the pass belongs to that release walk's NEWS step. Promote only if a release is declared before then and the walk keeps the bullets as they are. M095 takes the two bullets that contradicted the help after M091
 - [low] Cut the CI matrix on pull requests to ubuntu+windows, and cancel superseded runs on the default branch too — added 2026-07-27 — M11 Out, dropped at its gate. The repo is public, so minutes are free (`billable: 0`); the PR cut saves a median 0.0 min because windows is the critical path in 43 of 55 runs while losing R-devel and oldrel-1 coverage, and cancelling on the default branch can leave a commit with no completed check. Promote on evidence either premise has failed — the repo goes private, or windows stops being the critical path
 - [low] Variance estimation / inference on the nested estimate, `tune::int_pctl()`'s bootstrap intervals included (absorbed at M092's plan gate) — added 2026-07-25, compressed 2026-09-14 — G6; the caveat half went to M25. `references/tidymodels-nested-cv-gaps.md` (G6) and the pages it cites own the sources and numbers. Four blockers: (1) loss stability for a tune-then-fit procedure is unestablished, and the shelf splits the notion five ways (`nachum2026`, `luo2025`, `bayle2026`), so a synthesis note must reconcile them first and nothing may compare two workflows; (2) the valid interval's estimand is the k-fold test error of this run's rules, not the final model's; (3) the estimators need per-observation losses, which M68 keeps under `save_pred`; (4) `luo2026` bounds the power of any assumption-free valid black-box risk test at the fold ratio v-fold nesting uses. Promote only on all four blockers clearing

@@ -428,6 +428,13 @@ execution in RR01, and tune 1.x seeded differently (D-012).
 
 ## Known issues
 
+- The last line of the `autoplot(type = "performance")` subtitle says the
+  nested estimate is the final fit's number to report, with no "chosen before
+  seeing the estimate" condition. The summary note and the help carry that
+  condition. Accepted at M095's gate: the line is capped at 68 characters, and
+  on a set view "the final fit" has no single referent. Revisit on a user
+  reporting one workflow's estimate after choosing it from the plot.
+
 - Two rough edges in the figures, accepted at M077's gates and recorded as
   deliberate in `R/nested-results-plot.R`. `panel_breaks()` sees only a
   panel's limits, and on ggplot2 4.0.3 a two-panel `free_y` figure gets
