@@ -39,10 +39,9 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as
-\code{control}, and nothing else. Every argument after \code{...} is matched by
-name. The section on differences from finetune says what becomes of each
-slot.}
+\item{...}{A control object from \code{\link[finetune:control_race]{control_race()}}, as \code{control}, and
+nothing else. Every argument after \code{...} is matched by name. The
+section on differences from finetune says what becomes of each slot.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
 a parameters set is derived from other arguments. Passing this argument can
@@ -57,8 +56,7 @@ parameter sets to be created automatically.}
 set of metrics.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.}
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
@@ -161,17 +159,21 @@ package forces overwritten. The result records that effective control
 as \code{extract_procedure(res)$control}. Every slot of \code{control_race()}
 falls under one of seven headings.
 
+
 \strong{Forced: \code{allow_par}.} The inner race and the outer scoring fit both
 run at \code{allow_par = FALSE}, whatever the control carries, because
 parallelism belongs over the outer folds.
 
+
 \strong{Settable as its own argument: \code{event_level}.} The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, with a refusal that names both. \code{grid} and \code{eval_time} are the
-racing functions' own
-arguments rather than control slots, offered here as arguments and
-reaching them unchanged.
+entry, with a refusal that names both.
+
+
+\code{grid} and \code{eval_time} are the racing functions' own arguments rather
+than control slots, offered here as arguments and reaching them
+unchanged.
 
 \strong{Refused: none.} No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
@@ -198,26 +200,34 @@ whether the resamples are shuffled first.
 \item \code{verbose_elim} prints finetune's elimination log from a serial run,
 once per fold, and from a mirai daemon where nothing shows it.
 \code{verbose} likewise.
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes, \code{parallel_over} included.
 }
 
+
+\itemize{
+\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
+describes. \code{parallel_over} changes the numbers a stochastic engine
+produces even at \code{allow_par = FALSE}.
+}
+
+
 This classification was read on finetune 1.3.0. The version that added
-\code{workflow_size} to \code{control_race()} is not named in finetune's NEWS, and
-the \verb{>= 1.0.1} floor this package declares does not require it.
+\code{workflow_size} to \code{control_race()} is not named in finetune's NEWS,
+and the \verb{>= 1.0.1} floor this package declares does not require it.
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
-outer fit as well as the race. The outer fit's predictions and extracts
-are kept as \code{.predictions} and \code{.extracts} in the shape the grid page
-describes, and the race's own are still discarded.
 
-\strong{Not returned: \code{save_workflow}.} It lands on the inner race result a
-fold record discards, so setting it costs the work and returns nothing.
-The final fit keeps its race as \verb{$tuning}, where what it saved is
-reachable.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} The outer fit's
+predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
+the grid page describes, and the inner race's own are still discarded.
 
-\strong{Inert: \code{backend_options}.} Backend options with no parallel backend to
-reach, because \code{allow_par} is forced off.
+
+\strong{Not returned: \code{save_workflow}.} It lands on the inner \code{tune_results}
+a fold record discards, so setting it costs the work and returns
+nothing. The final fit keeps its own tuning run as \verb{$tuning}, where what
+it saved is reachable.
+
+
+\strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
+backend to reach at \code{allow_par = FALSE}.
 }
 
 \section{Nested designs}{
@@ -324,7 +334,6 @@ res$.inner_metrics[[1]]
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_resamples]{nested_resamples()}},
-\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}},
-\code{\link[finetune:tune_race_win_loss]{finetune::tune_race_win_loss()}}
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_resamples]{nested_resamples()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}}, \code{\link[finetune:tune_race_win_loss]{finetune::tune_race_win_loss()}}
 }

@@ -22,9 +22,9 @@
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_sim_anneal
-#' @param ... A control object from [finetune::control_sim_anneal()] as
-#'   `control` and nothing else, matched by name. The section on differences
-#'   from finetune says what becomes of each slot.
+#' @templateVar CONSTRUCTOR finetune::control_sim_anneal()
+#' @templateVar PKG finetune
+#' @template param-control-dots
 #' @param iter The number of search iterations, a whole number of at least 1.
 #'   The section on the iterations says why `0` is refused.
 #' @param initial The number of candidates each fold scores before the first
@@ -84,20 +84,16 @@
 #' `extract_procedure(res)$control`. Every slot of `control_sim_anneal()`
 #' falls under one of seven headings.
 #'
-#' **Forced: `allow_par`.** The inner search and the outer scoring fit both
-#' run at `allow_par = FALSE`, whatever the control carries, because
-#' parallelism belongs over the outer folds.
+#' @templateVar INNER inner search
+#' @template differences-forced
+#' @template differences-settable
+#' @section Differences from calling finetune directly:
+#' `iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()`
+#' rather than control slots, offered here as arguments and reaching it
+#' unchanged.
 #'
-#' **Settable as its own argument: `event_level`.** Set through the
-#' argument alone, as on the grid page. A control at finetune's default
-#' takes the argument's level, and one naming a different level is refused
-#' at entry. `iter`, `initial` and `eval_time` are arguments of
-#' `tune_sim_anneal()` rather than control slots, offered here as arguments
-#' and reaching it unchanged.
-#'
-#' **Refused: none.** No slot is refused on its own. What is refused at
-#' entry is a control of another class, such as a `control_bayes()` that
-#' finetune itself runs under, and the `event_level` conflict above.
+#' **Refused: none.** No slot is refused on its own. A control of another
+#' class is refused at entry, as is the `event_level` conflict above.
 #'
 #' **Passed through: `no_improve`, `restart`, `radius`, `flip`,
 #' `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
@@ -117,19 +113,11 @@
 #'   daemon where nothing shows it. Pass
 #'   `control = control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
 #'   `verbose` likewise.
-#' - `pkgs`, `parallel_over` and `workflow_size` behave as on the grid
-#'   page, `parallel_over` included.
-#'
-#' The classification above was read on finetune 1.3.0. The version that
-#' added `workflow_size` to `control_sim_anneal()` is not named in finetune's
-#' NEWS, and the `>= 1.0.1` floor this package declares does not require
-#' it.
-#'
-#' **Kept from the outer fit: `save_pred`, `extract`.** Both reach the
-#' outer fit, whose predictions and extracts come back as `.predictions`
-#' and `.extracts`, in the shape the grid page gives. The inner search's are
-#' still discarded.
-#'
+#' @template differences-passed-shared
+#' @templateVar CONSTRUCTOR control_sim_anneal()
+#' @template differences-finetune-version
+#' @template differences-kept
+#' @section Differences from calling finetune directly:
 #' **Not returned: `save_workflow`, `save_history`.** `save_workflow` lands
 #' on the inner `tune_results` a fold record discards, so setting it costs
 #' the work and returns nothing. The final fit keeps its tuning run as
@@ -139,8 +127,7 @@
 #' path. Every fold overwrites the last one's, and nothing of it reaches
 #' the result.
 #'
-#' **Inert: `backend_options`.** A parallel backend's options, and there is
-#' no backend to reach at `allow_par = FALSE`.
+#' @template differences-inert
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("finetune", "recipes", "yardstick"))
@@ -158,8 +145,8 @@
 #' # then one perturbation per iteration.
 #' res$.inner_metrics[[1]]
 #'
-#' @seealso [nested_tune_grid()], [nested_tune_bayes()], [nested_resamples()],
-#'   [nested_final_fit()], [finetune::tune_sim_anneal()]
+#' @templateVar LINKS [nested_tune_bayes()], [finetune::tune_sim_anneal()]
+#' @template seealso-orchestrator
 #' @export
 nested_tune_sim_anneal <- function(
   object,

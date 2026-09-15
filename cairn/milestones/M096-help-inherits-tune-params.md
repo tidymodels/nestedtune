@@ -54,7 +54,34 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: /milestone-implement started on `m096-help-inherits-tune-params`. Question gate skipped: the AC1 rule settles every disposition (two facts checked at the branch point, recorded in the survey), and no dependency or naming choice is open.
 - 2026-09-15: T1 done. Survey at `cairn/surveys/M096-param-survey.md`: 24 tags, 5 `inherit` (grid page `param_info` and `grid`, bayes `iter`, race `grid`, fit-resamples `metrics`), 19 `local`.
 - 2026-09-15: T2 done. Five local tags deleted, `@inheritParams finetune::tune_race_anova` and `tune::fit_resamples` added; the five rendered items equal the upstream Rd items, and the seven removed sentences render in Details (scratch script over `tools::parse_Rd`). `document()`, `test()` (10116 pass), and both prose sweeps clean.
+- 2026-09-15: checkpoint, T3 and T4 edits on disk and not yet checked off. Roxygen takes a `@template` as a one-line tag and splices the template's own tags in, so a plain-text template cannot sit inside a section. Each Differences template carries its own `@section` tag under the page's title, which roxygen merges, and a page's local paragraph after a template re-opens the section. A guard-only `@examplesIf` template is impossible for the same reason, so the four workflow-set guard lines outside `example-set.R` stay (7 words, under the AC3 floor). The sim-anneal "Refused" example changed: finetune 1.3.0 refuses to coerce a `control_bayes()` for `tune_sim_anneal()` (checked at the branch point), so the page no longer offers it as a class finetune accepts. T3 suite run in progress.
 
 ## Decisions
+
+- 2026-09-15 (T5): the AC3 duplicate-line command. Run from the repo root with `Rscript` on the script below. It reads every `#'` line of `R/*.R` and `man-roxygen/*.R`, numbers blocks per file, tracks the tag per line, keeps the six tag kinds with their untagged continuation lines, collapses whitespace, and prints each line of 12 or more words seen in two or more blocks, with the blocks. It exits 0 and prints nothing when there is none. A `@template` line is not one of the six kinds, so a template's use sites are not read as its text, and the template file's own block is.
+
+```r
+files <- c(Sys.glob("R/*.R"), Sys.glob("man-roxygen/*.R"))
+keep_tags <- c("description", "details", "param", "return", "section", "seealso")
+seen <- list()
+for (f in files) {
+  lines <- readLines(f, warn = FALSE)
+  block <- 0L; in_block <- FALSE; tag <- NA_character_
+  for (l in lines) {
+    if (!startsWith(l, "#'")) { in_block <- FALSE; tag <- NA_character_; next }
+    if (!in_block) { in_block <- TRUE; block <- block + 1L; tag <- "title" }
+    body <- sub("^#' ?", "", l)
+    m <- regmatches(body, regexec("^@([A-Za-z]+)\\s*(.*)$", body))[[1]]
+    if (length(m)) { tag <- m[[2]]; body <- m[[3]] }
+    if (!tag %in% keep_tags) next
+    body <- gsub("\\s+", " ", trimws(body))
+    if (!nzchar(body) || length(strsplit(body, " ", fixed = TRUE)[[1]]) < 12L) next
+    seen[[body]] <- union(seen[[body]], paste0(f, "#", block))
+  }
+}
+hits <- Filter(function(x) length(x) >= 2L, seen)
+for (b in names(hits)) cat(b, "\n   ", paste(hits[[b]], collapse = "  "), "\n")
+quit(status = as.integer(length(hits) > 0L))
+```
 
 ## Review

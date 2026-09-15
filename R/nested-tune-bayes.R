@@ -23,9 +23,9 @@
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
-#' @param ... A control object from [tune::control_bayes()], as `control`,
-#'   and nothing else. Every argument after `...` is matched by name. The
-#'   section on differences from tune says what becomes of each slot.
+#' @templateVar CONSTRUCTOR tune::control_bayes()
+#' @templateVar PKG tune
+#' @template param-control-dots
 #' @param initial The number of candidates each fold scores before the first
 #'   iteration, a whole number of at least 2. A `tune_results` object, which
 #'   tune also accepts here, is refused.
@@ -92,17 +92,16 @@
 #' reaching it. Here the control is given the fold's own tuning seed, the number
 #' `.tuning_seed` reports, whatever the control carried.
 #'
-#' **Settable as its own argument: `event_level`.** The argument is the one
-#' place the level is set, as on the grid page. A control at tune's default
-#' takes it, and a control naming another level is refused at entry, with
-#' a refusal that names both. `iter`, `initial` and `objective` are arguments of
-#' `tune_bayes()` rather than control slots, offered here as arguments and
-#' reaching it unchanged. So is `eval_time`.
+#' @templateVar INNER inner search
+#' @template differences-settable
+#' @section Differences from calling tune directly:
+#' `iter`, `initial` and `objective` are arguments of `tune_bayes()` rather
+#' than control slots, offered here as arguments and reaching it unchanged.
+#' So is `eval_time`.
 #'
-#' **Refused: none.** No slot is refused on its own. What is refused at
-#' entry is a control of another class, such as a `control_grid()` that
-#' tune itself accepts here, and the `event_level` conflict above.
-#'
+#' @templateVar OTHER control_grid()
+#' @template differences-refused
+#' @section Differences from calling tune directly:
 #' **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
 #' `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
 #' `workflow_size`.** Each reaches `tune_bayes()` as given:
@@ -117,21 +116,10 @@
 #'   daemon where nothing shows it.
 #' - `save_gp_scoring` writes its files to the temporary directory of the
 #'   process that tuned, a daemon's own on the parallel path.
-#' - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-#'   describes. `parallel_over` changes the numbers a stochastic engine
-#'   produces even at `allow_par = FALSE`.
-#'
-#' **Kept from the outer fit: `save_pred`, `extract`.** The outer fit's
-#' predictions and extracts are kept as `.predictions` and `.extracts`, as
-#' the grid page describes, and the inner search's are still discarded.
-#'
-#' **Not returned: `save_workflow`.** It lands on the inner `tune_results`
-#' a fold record discards, so setting it costs the work and returns
-#' nothing. The final fit keeps its own tuning run as `$tuning`, where what
-#' it saved is reachable.
-#'
-#' **Inert: `backend_options`.** Options for a backend the forced
-#' `allow_par = FALSE` never reaches.
+#' @template differences-passed-shared
+#' @template differences-kept
+#' @template differences-not-returned
+#' @template differences-inert
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -143,8 +131,8 @@
 #' # then one proposal per iteration.
 #' res$.inner_metrics[[1]]
 #'
-#' @seealso [nested_tune_grid()], [nested_resamples()], [nested_final_fit()],
-#'   [tune::tune_bayes()]
+#' @templateVar LINKS [tune::tune_bayes()]
+#' @template seealso-orchestrator
 #' @export
 nested_tune_bayes <- function(
   object,

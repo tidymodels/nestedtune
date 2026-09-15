@@ -254,8 +254,7 @@ stack_set <- function(
 #'   returns.
 #' @param type Which view to draw: `"parameters"` (the default) or
 #'   `"performance"`, as on [autoplot.nested_results()].
-#' @param ... Not used. It must be empty, so an argument given here is an error
-#'   and not a silent no-op.
+#' @inheritParams collect_metrics.nested_results_set
 #'
 #' @return
 #' `summary()` returns a `summary.nested_results_set` and `autoplot()` a

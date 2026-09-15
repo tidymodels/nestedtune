@@ -77,9 +77,9 @@
 #' collect_inner_metrics(res)
 #' collect_notes(res)
 #'
-#' @seealso [collect_metrics()], [agreement()], [summary.nested_results()],
-#'   [collect_metrics.nested_results_set()] for the same functions on a
-#'   workflow-set run
+#' @templateVar LINKS [collect_metrics()], [agreement()], [summary.nested_results()]
+#' @templateVar WHAT functions
+#' @template seealso-reader
 #' @name collect_selections
 #' @export
 collect_selections <- function(x, ...) {
@@ -237,9 +237,9 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' collect_predictions(res)
 #' collect_extracts(res)
 #'
-#' @seealso [collect_selections()], [collect_metrics()], [nested_tune_grid()],
-#'   [collect_metrics.nested_results_set()] for the same functions on a
-#'   workflow-set run
+#' @templateVar LINKS [collect_selections()], [collect_metrics()], [nested_tune_grid()]
+#' @templateVar WHAT functions
+#' @template seealso-reader
 #' @name collect_predictions.nested_results
 NULL
 
@@ -300,12 +300,11 @@ collect_extracts.nested_results <- function(x, ...) {
 #' has the shape and the averaging of [collect_metrics()]. You get a metric
 #' the run did not compute without running the nested loop again.
 #'
+#' @inheritParams collect_metrics.nested_results
 #' @param x A `nested_results` from [nested_tune_grid()] or one of its
 #'   siblings, run with `save_pred = TRUE` in its control.
 #' @param metrics A [yardstick::metric_set()].
 #' @param ... Not used. It must be empty.
-#' @param summarize Whether to average the per-fold metrics (`TRUE`, the
-#'   default) or return them one row per outer fold (`FALSE`).
 #' @param event_level For a two-class outcome, which level is the event:
 #'   `"first"` or `"second"`. The default, `NULL`, takes the level the run
 #'   recorded. tune's own method defaults to `"first"` instead.
@@ -329,18 +328,17 @@ collect_extracts.nested_results <- function(x, ...) {
 #'
 #' On a repeated design each repeat of a fold is scored as its own fold.
 #'
+#' @templateVar TITLE Refusals
+#' @template refusals-saved-run
 #' @section Refusals:
-#'
-#' A run whose control did not set `save_pred = TRUE` is refused with class
-#' `nestedtune_column_not_saved`. A `metrics` that is not a metric set is
-#' refused with class `nestedtune_bad_metrics`. A metric that reads a kind
-#' of prediction the run did not save is refused with class
+#' A `metrics` that is not a metric set is refused with class
+#' `nestedtune_bad_metrics`. A metric that reads a kind of prediction the
+#' run did not save is refused with class
 #' `nestedtune_metric_type_not_saved`. An example is a class metric such as
 #' `accuracy` on a run whose metrics read only class probabilities.
 #'
 #' A run with some failed folds is scored over the rest, with a warning of
-#' class `nestedtune_partial_summary`. A run in which no fold completed is
-#' refused with class `nestedtune_no_completed_folds`.
+#' class `nestedtune_partial_summary`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -356,10 +354,9 @@ collect_extracts.nested_results <- function(x, ...) {
 #' compute_metrics(res, yardstick::metric_set(yardstick::mae))
 #' compute_metrics(res, yardstick::metric_set(yardstick::mae), summarize = FALSE)
 #'
-#' @seealso [collect_metrics.nested_results()],
-#'   [collect_predictions.nested_results()], [augment.nested_results()],
-#'   [collect_metrics.nested_results_set()] for the same function on a
-#'   workflow-set run
+#' @templateVar LINKS [collect_metrics.nested_results()], [collect_predictions.nested_results()], [augment.nested_results()]
+#' @templateVar WHAT function
+#' @template seealso-reader
 #' @export
 compute_metrics.nested_results <- function(
   x,
@@ -579,8 +576,7 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' out. You can plot or inspect every row's out-of-fold prediction beside
 #' its predictors.
 #'
-#' @param x A `nested_results` from [nested_tune_grid()] or one of its
-#'   siblings, run with `save_pred = TRUE` in its control.
+#' @inheritParams compute_metrics.nested_results
 #' @param ... Not used. It must be empty. tune's `parameters` argument is
 #'   not offered here, because each fold made its predictions with the
 #'   parameters it selected.
@@ -611,9 +607,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' predicts some rows more than once or not at all. Read its predictions
 #' with [collect_predictions()] instead.
 #'
-#' A run whose control did not set `save_pred = TRUE` is refused with class
-#' `nestedtune_column_not_saved`. A run in which no fold completed is
-#' refused with class `nestedtune_no_completed_folds`. A completed fold
+#' @templateVar TITLE Designs and folds refused
+#' @template refusals-saved-run
+#' @section Designs and folds refused:
+#' A completed fold
 #' whose saved predictions do not match the rows it held out is refused
 #' with class `nestedtune_augment_predictions`. Its `.row` column must hold
 #' each of those rows once and no other row. On a run with some
@@ -636,10 +633,9 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #'
 #' augment(res)
 #'
-#' @seealso [collect_predictions.nested_results()],
-#'   [compute_metrics.nested_results()], [nested_final_fit()],
-#'   [collect_metrics.nested_results_set()] for the same function on a
-#'   workflow-set run
+#' @templateVar LINKS [collect_predictions.nested_results()], [compute_metrics.nested_results()], [nested_final_fit()]
+#' @templateVar WHAT function
+#' @template seealso-reader
 #' @export
 augment.nested_results <- function(x, ...) {
   rlang::check_dots_empty()
