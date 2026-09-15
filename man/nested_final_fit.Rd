@@ -49,8 +49,10 @@ row, tunes with the recorded tuner, selects by the recorded
 \code{\link[=selection_rule]{selection_rule()}}, and fits the finalized workflow on all the data.
 
 What comes back is the model to deploy. The number to report for it is
-\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in, for the reason
-the section on what to report gives.
+\code{\link[=collect_metrics]{collect_metrics()}} on the results object you passed in. When you passed a
+workflow set, it is that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set,
+for a workflow chosen before seeing the set's estimates. The section on
+what to report gives the reason.
 }
 \details{
 The procedure a nested estimate describes is "resample this dataset by
@@ -149,14 +151,16 @@ with class \code{nestedtune_bad_final_fit_args}.
 
 
 Report the estimate \code{\link[=collect_metrics]{collect_metrics()}} returns from the results object
-you handed over. It describes the whole tune-and-fit procedure that
-produced this model, measured on rows no part of that procedure ever
-saw. It is the number to report for this model, and no second number is
-computed on the model itself. The metrics inside the tuning run stored
-on it are not a number to report. They were computed on the resamples
-that chose the candidate, so they are selection-time quantities,
-optimistically biased as a claim about this model. \code{collect_metrics()} on
-\code{x$tuning} hands them over without saying so.
+you handed over. For a fit built from a workflow set, report that
+workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set, for a workflow chosen
+before seeing the set's estimates. The estimate describes the whole
+tune-and-fit procedure that produced this model, measured on rows no part
+of that procedure ever saw. It is the number to report for this model,
+and no second number is computed on the model itself. The metrics inside
+the tuning run stored on it are not a number to report. They were computed
+on the resamples that chose the candidate, so they are selection-time
+quantities, optimistically biased as a claim about this model.
+\code{collect_metrics()} on \code{x$tuning} hands them over without saying so.
 
 Expect the nested estimate to run slightly pessimistic instead, because
 each outer fold trained on its analysis rows alone. Varma and Simon

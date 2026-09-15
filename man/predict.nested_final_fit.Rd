@@ -58,8 +58,9 @@ to parsnip, which ignores it.
 Augmenting the rows this model was fit on gives in-sample residuals. They
 say how the model fits data it has already seen, not how it does on data it
 has not. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results object
-the fit was built from. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why that is the
-number to report for this model.
+the fit was built from, or, for a fit built from a workflow set, that
+workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set. See \code{\link[=nested_final_fit]{nested_final_fit()}}
+for why that is the number to report for this model.
 }
 
 \examples{

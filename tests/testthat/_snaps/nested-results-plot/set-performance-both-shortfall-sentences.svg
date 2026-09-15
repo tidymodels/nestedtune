@@ -114,7 +114,7 @@
 <text x='35.24' y='30.35' style='font-size: 11.00px; font-family: sans;' textLength='381.83px' lengthAdjust='spacingAndGlyphs'>3 workflows, 2 outer folds each. Each line marks a workflow's nested estimate.</text>
 <text x='35.24' y='42.23' style='font-size: 11.00px; font-family: sans;' textLength='295.94px' lengthAdjust='spacingAndGlyphs'>3 of 3 workflows did not complete every fold; see summary().</text>
 <text x='35.24' y='54.11' style='font-size: 11.00px; font-family: sans;' textLength='419.46px' lengthAdjust='spacingAndGlyphs'>1 of 3 workflows averages a metric over fewer folds than it completed; see summary().</text>
-<text x='35.24' y='65.99' style='font-size: 11.00px; font-family: sans;' textLength='329.62px' lengthAdjust='spacingAndGlyphs'>It describes the tune-and-fit procedure, not a model you can deploy.</text>
+<text x='35.24' y='65.99' style='font-size: 11.00px; font-family: sans;' textLength='307.84px' lengthAdjust='spacingAndGlyphs'>It describes the procedure and is the final fit's number to report.</text>
 <text x='35.24' y='14.56' style='font-size: 13.20px; font-family: sans;' textLength='301.58px' lengthAdjust='spacingAndGlyphs'>Nested cross-validation estimates across workflows</text>
 </g>
 </svg>

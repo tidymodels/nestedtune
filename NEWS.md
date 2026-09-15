@@ -1,5 +1,15 @@
 # nestedtune 0.0.0.9000
 
+* The note `summary()` prints for a run or a workflow set and the
+  `autoplot(type = "performance")` subtitles now name the nested estimate
+  as the number to report for the model `nested_final_fit()` builds. The
+  help for `nested_tune_bayes()`, the racing tuners and
+  `nested_tune_sim_anneal()` now says the same. The summary note limits
+  this to a procedure chosen before seeing the estimate. For a fit built
+  from a workflow set, the message a final fit prints names that workflow's
+  rows of `collect_metrics()` on the set as the number to report. This
+  holds for a workflow chosen before seeing the set's estimates.
+
 * `compute_metrics()` and `augment()` now answer on a run whose control set
   `save_pred = TRUE`, and on a workflow-set run. `compute_metrics()` scores
   each outer fold's saved predictions with a metric set you give it. It
@@ -261,9 +271,8 @@
 
 * `summary()` on a `nested_final_fit` reports the full-data tuning run's
   resampling scheme, the candidates it scored and the values selection
-  chose, and says, where a number would be, that this model has no
-  performance estimate of its own and the nested estimate is the one to
-  report.
+  chose. Where a number would be, it names the nested estimate as the
+  number to report for this model.
 
 * Printing a `nested_results` shows the object: its outer folds as the
   tibble rows they are, the resampling scheme, a count of the folds that did
@@ -434,9 +443,10 @@
 
 * `nested_final_fit()` builds the model to deploy by running the same tuning
   procedure the nested estimate describes with the whole dataset in hand,
-  and returns it as a separate object carrying no performance number of its
-  own. `collect_metrics()`, `show_best()` and `select_best()` refuse a final
-  fit rather than returning something that reads as its score.
+  and returns it as a separate object. The nested estimate is the number to
+  report for that model. `collect_metrics()`, `show_best()` and
+  `select_best()` refuse a final fit rather than returning something that
+  reads as its score.
 
 * Because the inner resampling specification is stored unevaluated and
   re-evaluated at final-fit time, it is written with literal arguments,

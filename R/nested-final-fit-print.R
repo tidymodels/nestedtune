@@ -12,8 +12,10 @@
 # object, and it describes the procedure that produced the model.
 final_fit_estimate_msg <- "Report the nested estimate from \\
   {.code collect_metrics()} on the results object this fit was built from. \\
-  It describes the procedure that produced this model, and it is the number \\
-  to report for this model."
+  For a fit built from a workflow set, that is this workflow's rows of \\
+  {.code collect_metrics()} on the set. That holds for a workflow chosen \\
+  before seeing the set's estimates. It describes the procedure that \\
+  produced this model, and it is the number to report for this model."
 
 #' Print a final fit
 #'
@@ -23,11 +25,12 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' reach what selection saw.
 #'
 #' The number to report is the nested estimate [collect_metrics()] returns
-#' from the results object the fit was built from, and the print says so.
-#' That estimate describes the procedure that produced this model. The
-#' stored tuning run has metrics, but selection consumed them. See
-#' [nested_final_fit()] for why those metrics are not the number to report
-#' and the nested estimate is.
+#' from the results object the fit was built from. For a fit built from a
+#' workflow set, it is that workflow's rows of [collect_metrics()] on the
+#' set. The print says so. That estimate describes the procedure that
+#' produced this model. The stored tuning run has metrics, but selection
+#' consumed them. See [nested_final_fit()] for why those metrics are not the
+#' number to report and the nested estimate is.
 #'
 #' @param x A `nested_final_fit` object from [nested_final_fit()].
 #' @param ... Not used. It must be empty. Passing an argument here raises an
@@ -106,10 +109,12 @@ print.nested_final_fit <- function(x, ...) {
 #' The `estimate` component is always `NULL`, because the number to report
 #' for this model is not stored on it. That number is the nested estimate
 #' [collect_metrics()] returns from the results object the fit was built
-#' from. The stored tuning run's metrics are selection-time quantities, so
-#' they do not fill the slot. See [nested_final_fit()] for the reason. The
-#' name is kept rather than left out, so the object states where that
-#' number is instead of leaving you to infer it from a missing name.
+#' from. For a fit built from a workflow set, it is that workflow's rows of
+#' [collect_metrics()] on the set. The stored tuning run's metrics are
+#' selection-time quantities, so they do not fill the slot. See
+#' [nested_final_fit()] for the reason. The name is kept rather than left
+#' out, so the object states where that number is instead of leaving you to
+#' infer it from a missing name.
 #'
 #' @param object A `nested_final_fit` object from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit

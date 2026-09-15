@@ -12,9 +12,9 @@
 #' does.
 #'
 #' The estimate describes the whole search-and-fit procedure rather than
-#' any one model, and is reported for the procedure. The model to deploy
-#' comes from [nested_final_fit()], which runs the recorded search once
-#' more on all the data.
+#' any one model. The model to deploy comes from [nested_final_fit()],
+#' which runs the recorded search once more on all the data, and the
+#' estimate is the number to report for that model.
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes

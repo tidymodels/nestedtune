@@ -9,8 +9,10 @@
       Selected: num_comp = 3
       
       i Report the nested estimate from `collect_metrics()` on the results object
-        this fit was built from. It describes the procedure that produced this model,
-        and it is the number to report for this model.
+        this fit was built from. For a fit built from a workflow set, that is this
+        workflow's rows of `collect_metrics()` on the set. That holds for a workflow
+        chosen before seeing the set's estimates. It describes the procedure that
+        produced this model, and it is the number to report for this model.
       i Compare the parameters above with `.selected` from that run. Outer folds
         choosing differently is selection instability, and it is information about
         the procedure rather than noise.
@@ -37,8 +39,10 @@
       -- Estimate --
       
       i Report the nested estimate from `collect_metrics()` on the results object
-        this fit was built from. It describes the procedure that produced this model,
-        and it is the number to report for this model.
+        this fit was built from. For a fit built from a workflow set, that is this
+        workflow's rows of `collect_metrics()` on the set. That holds for a workflow
+        chosen before seeing the set's estimates. It describes the procedure that
+        produced this model, and it is the number to report for this model.
       i The tuning run above has metrics, but selection consumed them.
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.
@@ -55,8 +59,10 @@
       Selected: df1 = 1, df2 = 2
       
       i Report the nested estimate from `collect_metrics()` on the results object
-        this fit was built from. It describes the procedure that produced this model,
-        and it is the number to report for this model.
+        this fit was built from. For a fit built from a workflow set, that is this
+        workflow's rows of `collect_metrics()` on the set. That holds for a workflow
+        chosen before seeing the set's estimates. It describes the procedure that
+        produced this model, and it is the number to report for this model.
       i Compare the parameters above with `.selected` from that run. Outer folds
         choosing differently is selection instability, and it is information about
         the procedure rather than noise.
@@ -85,8 +91,10 @@
       -- Estimate --
       
       i Report the nested estimate from `collect_metrics()` on the results object
-        this fit was built from. It describes the procedure that produced this model,
-        and it is the number to report for this model.
+        this fit was built from. For a fit built from a workflow set, that is this
+        workflow's rows of `collect_metrics()` on the set. That holds for a workflow
+        chosen before seeing the set's estimates. It describes the procedure that
+        produced this model, and it is the number to report for this model.
       i The tuning run above has metrics, but selection consumed them.
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.

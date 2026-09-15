@@ -423,7 +423,7 @@ test_that("the marked estimate is the number collect_metrics reports", {
   expect_identical(rules$yintercept, summary$mean)
 })
 
-test_that("the performance view says the estimate is not a model's score", {
+test_that("the performance view names the estimate as the final fit's number to report", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -437,12 +437,16 @@ test_that("the performance view says the estimate is not a model's score", {
   p <- autoplot(res, type = "performance")
 
   # IP3, in the subtitle rather than only in the help page: ggplot2 renders a
-  # subtitle into the image, so the caveat travels with a figure that has been
-  # exported out of the session that produced it.
+  # subtitle into the image, so the sentence travels with a figure that has
+  # been exported out of the session that produced it.
   subtitle <- plot_label(p, "subtitle")
   expect_match(subtitle, "3 outer folds requested, 3 completed")
   expect_match(subtitle, "nested estimate")
-  expect_match(subtitle, "not a model you can deploy", fixed = TRUE)
+  last <- utils::tail(strsplit(subtitle, "\n", fixed = TRUE)[[1L]], 1L)
+  expect_match(last, "describes the procedure", fixed = TRUE)
+  expect_match(last, "final fit's number to report", fixed = TRUE)
+  expect_lte(nchar(last), 68L)
+  expect_no_match(subtitle, "not a model you can deploy", fixed = TRUE)
   expect_match(plot_label(p, "y"), "held-out outer fold")
 })
 
@@ -717,11 +721,11 @@ test_that("AC2: the set's performance view puts the workflows on x inside one pa
   subtitle <- plot_label(p, "subtitle")
   expect_match(subtitle, "3 workflows, 2 outer folds each.", fixed = TRUE)
   expect_no_match(subtitle, "summary()", fixed = TRUE)
-  expect_match(
-    subtitle,
-    "It describes the tune-and-fit procedure, not a model you can deploy.",
-    fixed = TRUE
-  )
+  last <- utils::tail(strsplit(subtitle, "\n", fixed = TRUE)[[1L]], 1L)
+  expect_match(last, "describes the procedure", fixed = TRUE)
+  expect_match(last, "final fit's number to report", fixed = TRUE)
+  expect_lte(nchar(last), 68L)
+  expect_no_match(subtitle, "not a model you can deploy", fixed = TRUE)
   expect_identical(plot_label(p, "x"), "Workflow")
 })
 
