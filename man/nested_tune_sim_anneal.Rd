@@ -166,9 +166,8 @@ entry, with a refusal that names both.
 rather than control slots, offered here as arguments and reaching it
 unchanged.
 
-\strong{Refused: none.} No slot is refused on its own. What is refused at
-entry is a control of another class, and the \code{event_level} conflict
-above.
+\strong{Refused: none.} No slot is refused on its own. A control of another
+class is refused at entry, as is the \code{event_level} conflict above.
 
 \strong{Passed through: \code{no_improve}, \code{restart}, \code{radius}, \code{flip},
 \code{cooling_coef}, \code{time_limit}, \code{verbose}, \code{verbose_iter}, \code{pkgs},
