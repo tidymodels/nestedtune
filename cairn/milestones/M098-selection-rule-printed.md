@@ -87,3 +87,4 @@ If a run selected each fold's candidate by a rule other than the default best-by
 - finding 11 (`expect_named(under_rule$result, NULL)` in the AC4 test): reject. It justifies the index access that follows.
 - finding 12 (the two-ordering and set cases run only where their fixtures exist): reject, the suite's standing convention.
 - 2026-09-16: `devtools::check()` on the branch before the two help fixes: 0 errors, 0 warnings, 0 notes. The fixes touched roxygen text only, and the touched test files and roxygen sweeps were re-run clean after them.
+- 2026-09-16: step-7 approval: m098-selection-rule-printed approved for merge
