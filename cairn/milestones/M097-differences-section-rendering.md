@@ -7,7 +7,7 @@
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — the rendered help pages that readers open
-- **Branch/PR:** `m097-differences-section-rendering`
+- **Branch/PR:** `m097-differences-section-rendering` · https://github.com/tidymodels/nestedtune/pull/110
 
 ## Goal
 
