@@ -61,6 +61,7 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: claim audit: 25 claims read, 1 corrected — NEWS.md, R/nested-tune-grid.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, R/nested-fit-resamples.R, R/nested-results-collect.R, R/nested-results-set.R, man-roxygen/*.R. The correction: the bayes page said tune accepts a `control_grid()` in `tune_bayes()`, and tune 2.1.0 refuses to coerce it; the bayes and sim-anneal pages now share `differences-refused-plain.R`, which names no example. Re-read by the same reader: holds. Suite 10116 pass after the fix.
 - 2026-09-15: T6 done. `devtools::check()` at `1f3ac3d`: 0 errors, 0 warnings, 0 notes. `document()` no diff. NEWS bullet names the five pages and the four arguments. Status → review.
 - 2026-09-15: /milestone-review: five criteria verified against recorded evidence, gate clean, three reviewers reported (0 + 0 regressions, 11 diff-bug findings to triage at the gate).
+- 2026-09-15: gate: the user chose apply-fixes-then-merge. Fix-now findings 2, 3, 4, 5, 9 applied (`details-param-info` template, `VERSION_CTRL` variable, kept clause, NEWS six pages, bayes Details); AC1, AC2, AC3 and the six sweeps re-verified clean; `test()` and `check()` re-running, results in the next line.
 
 ## Decisions
 
@@ -117,4 +118,12 @@ Independent review (three lenses, fresh context):
   9. Bayes: the inherited item says "maximum number of search iterations", the Details paragraph says "the number of search iterations".
   10. `@inheritParams finetune::tune_race_anova` is a no-op because `nested_tune_grid` is inherited first and supplies `grid`; finetune's item is byte-identical to tune's.
   11. `nested_tune_sim_anneal`'s `param_info` shows tune's "parameters set" wording rather than finetune's "parameter set".
+
+Gate triage (2026-09-15, the user chose "apply fixes, then merge"):
+- Fix now, on the branch before the push: 2 (the version note gets its own `VERSION_CTRL` variable, the `...` items render `finetune::control_race()` and `finetune::control_sim_anneal()` again); 3 and 11 together (`man-roxygen/details-param-info.R`, a Details template on the bayes, race and sim-anneal pages pointing at their "Finalizing a parameter range" section; the wording stays tune's, which is what the inheritance chain the plan chose yields); 4 (the NEWS bullet names all six pages and claims Details only for the four arguments); 5 (the kept template restores "Each reaches the outer fit as well as the <inner run>"); 9 (the bayes Details says tune stops early when the search stalls, both relocated sentences kept verbatim for AC2).
+- Follow-up, one candidate row: 7 and 8 (the template-merge pattern's rendering: a split `\itemize`, orphan paragraphs after a template boundary, doubled blank lines). No false text; a rendering wart.
+- Rejected: 1 (AC1's rule reads the two texts, and both say integer or whole number, so the rendered "positive integer" is true of the wrapper; tune accepting `2.5` is tune's page under-documenting tune); 6 (a race result is a `tune_results` subclass); 10 (harmless, and it records the intended source).
+- Return floor: no finding shows a criterion failing; no return.
+
+After the fixes: `document()` no diff, AC1 five items EQUAL, AC2 sentences render, AC3 command silent, six sweeps clean, `devtools::test()` and `devtools::check()` re-run (results in the work log).
 

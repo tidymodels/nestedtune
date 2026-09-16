@@ -86,9 +86,13 @@ which runs the recorded search once more on all the data, and the
 estimate is the number to report for that model.
 }
 \details{
-\code{iter} reaches \code{\link[tune:tune_bayes]{tune::tune_bayes()}} as given: the number of search
-iterations, a non-negative whole number. The section on the iterations
-says what \code{0} does.
+\code{iter} reaches \code{\link[tune:tune_bayes]{tune::tune_bayes()}} as given, and tune stops early when
+the search stalls. The number of search iterations, a non-negative whole
+number. The section on the iterations says what \code{0} does.
+
+\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.
 }
 \section{The initial candidates and the iterations}{
 
@@ -201,7 +205,8 @@ produces even at \code{allow_par = FALSE}.
 }
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} The outer fit's
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
+outer fit as well as the inner search. The outer fit's
 predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
 the grid page describes, and the inner search's own are still discarded.
 

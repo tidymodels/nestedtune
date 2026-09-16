@@ -28,6 +28,7 @@
 #' `grid` is the design the race is offered. A data frame must have one
 #' column per tuned parameter and no other column.
 #'
+#' @template details-param-info
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_race_anova
 #' @templateVar CONSTRUCTOR finetune::control_race()
@@ -112,7 +113,7 @@
 #'   once per fold, and from a mirai daemon where nothing shows it.
 #'   `verbose` likewise.
 #' @template differences-passed-shared
-#' @templateVar CONSTRUCTOR control_race()
+#' @templateVar VERSION_CTRL control_race()
 #' @template differences-finetune-version
 #' @template differences-kept
 #' @template differences-not-returned

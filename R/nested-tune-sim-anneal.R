@@ -20,6 +20,7 @@
 #' finetune must be installed. A missing package is refused at entry, before
 #' any fold runs.
 #'
+#' @template details-param-info
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_sim_anneal
 #' @templateVar CONSTRUCTOR finetune::control_sim_anneal()
@@ -113,7 +114,7 @@
 #'   `control = control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
 #'   `verbose` likewise.
 #' @template differences-passed-shared
-#' @templateVar CONSTRUCTOR control_sim_anneal()
+#' @templateVar VERSION_CTRL control_sim_anneal()
 #' @template differences-finetune-version
 #' @template differences-kept
 #' @section Differences from calling finetune directly:

@@ -26,7 +26,7 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[finetune:control_sim_anneal]{control_sim_anneal()}}, as \code{control}, and
+\item{...}{A control object from \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}}, as \code{control}, and
 nothing else. Every argument after \code{...} is matched by name. The
 section on differences from finetune says what becomes of each slot.}
 
@@ -84,6 +84,10 @@ report for that model.
 \details{
 finetune must be installed. A missing package is refused at entry, before
 any fold runs.
+
+\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.
 }
 \section{The initial candidates and the iterations}{
 
@@ -204,7 +208,8 @@ This classification was read on finetune 1.3.0. The version that added
 and the \verb{>= 1.0.1} floor this package declares does not require it.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} The outer fit's
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
+outer fit as well as the inner search. The outer fit's
 predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
 the grid page describes, and the inner search's own are still discarded.
 

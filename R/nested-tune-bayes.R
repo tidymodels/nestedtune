@@ -17,10 +17,11 @@
 #' estimate is the number to report for that model.
 #'
 #' @details
-#' `iter` reaches [tune::tune_bayes()] as given: the number of search
-#' iterations, a non-negative whole number. The section on the iterations
-#' says what `0` does.
+#' `iter` reaches [tune::tune_bayes()] as given, and tune stops early when
+#' the search stalls. The number of search iterations, a non-negative whole
+#' number. The section on the iterations says what `0` does.
 #'
+#' @template details-param-info
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
 #' @templateVar CONSTRUCTOR tune::control_bayes()
