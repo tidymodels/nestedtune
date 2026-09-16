@@ -65,6 +65,9 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - 2026-09-15: /milestone-review: seven criteria verified, gate green after one fix-now (the check's `withr` WARNING), three lenses ran, two more fix-now commits at `53a0630` and `ab284f8`, the suite and check rerunning at `ab284f8` before the gate.
 - 2026-09-15: step-7 approval: m097-differences-section-rendering approved for merge.
 - 2026-09-15: PR #110 opened and the merge marker written. The CI watch stopped at its time limit with three checks passed and eight pending, none failed. `/milestone-review M097` re-derives the state and waits again.
+- 2026-09-15: step-7 approval: m097-differences-section-rendering approved for merge, re-posed after the windows CI fix at `8500593`.
+- 2026-09-15: second CI watch on PR #110 stopped at its time limit with ten checks passed and four pending, none failed. `/milestone-review M097` re-derives the state and waits again.
+- 2026-09-15: step-7 approval: m097-differences-section-rendering approved for merge, re-posed on green CI at `8500593`. Conversation read empty.
 
 ## Decisions
 
@@ -77,10 +80,10 @@ Reviewed 2026-09-15 at `262b154`. `main` at `df032a5` had not moved since the br
 - AC3: the parsed Differences section of each of the three pages holds one `\itemize` element, and its text does not contain "behave as the grid page describes". In the rendering, the shared paragraph starts on line 53 (bayes), 52 (race) and 50 (sim-anneal) of the section, after the last U+2022 bullet line at 49, 48 and 44. Pass.
 - AC4: `grep -c -v "^#'"` over the 21 files `ls man-roxygen/*.R` lists reports 0 lines outside `#'` in every file. Pass.
 - AC5: the M096 duplicate-line command, run from the repo root, printed nothing and exited 0. Pass.
-- AC6: at `ab284f8` on a clean tree, `devtools::document()` left the tree clean, and `devtools::test()` passed 10140 assertions with 0 failures, warnings or skips. All six commands `--list-gating` prints exited 0 at that head. Pass.
+- AC6: at `8500593` on a clean tree, `devtools::document()` left the tree clean, and `devtools::test()` passed 10140 assertions with 0 failures, warnings or skips. All six commands `--list-gating` prints exited 0 at `ab284f8`, and the one file changed since is a test file none of them reads. Pass.
 - AC7: `git diff --name-only main -- man/` lists exactly the grid, bayes, race and sim-anneal pages. The grid page's Differences section holds no `\itemize` at the branch head; at `main` its two `\itemize` elements sit at lines 58 and 388, before that section opens at 443. Pass.
 
-**Consistency gate.** `cairn_validate.py` passed with 18 staleness advisories on `references/`, none new. No DESIGN principle changed, so the impact report was skipped. `document()` no diff. README untouched by the branch. `pkgdown::check_pkgdown()` found no problems. NEWS: the plan gate declared a bullet out, and M96's bullet covers the pages. No new top-level file. `devtools::check()` at `ab284f8`: 0 errors, 0 warnings, 0 notes. The first run at `262b154` ended with one WARNING, an unstated `withr` dependency in the tests, which the diff-bug lens also reported as its finding 3 and which the fix-now below removed. All six gating sweeps exit 0.
+**Consistency gate.** `cairn_validate.py` passed with 18 staleness advisories on `references/`, none new. No DESIGN principle changed, so the impact report was skipped. `document()` no diff. README untouched by the branch. `pkgdown::check_pkgdown()` found no problems. NEWS: the plan gate declared a bullet out, and M96's bullet covers the pages. No new top-level file. `devtools::check()` at `8500593`: 0 errors, 0 warnings, 0 notes. The first run at `262b154` ended with one WARNING, an unstated `withr` dependency in the tests, which the diff-bug lens also reported as its finding 3 and which the fix-now below removed. All six gating sweeps exit 0.
 
 **Independent review.** Three lenses on the user-facing tier. The blame-history lens found no conflict with history: the removed `@section` re-open lines were M096's workaround for one `@section` per template, and the moved sentences are verbatim. The prior-review lens found no regression across the archive's Review sections for M081, M085, M087 and M096. The GitHub probe found real threads only on PR 30, on workflow files this branch does not touch. The diff-bug lens verified every criterion, showed the test red ten times against `main`'s pages, and ranked six findings:
 
@@ -92,3 +95,5 @@ Reviewed 2026-09-15 at `262b154`. `main` at `df032a5` had not moved since the br
 6. A page that writes prose right after `@template differences-forced` without a tail gets a paragraph break from the empty expansion. Rejected as a defect, since every use site is followed by a fresh `@section` merge. Recorded as a LESSONS line at hygiene.
 
 Session finding: `air format --check` rejoins one wrapped string in the new test file. Fixed now with the formatter.
+
+**CI on PR #110, first head `b67d620`.** Twelve checks passed and the windows release check failed: three `test-help-structure.R` assertions expected at least one U+2022 bullet line and found none, the other 10009 assertions passing. Cause: `tools::Rd2txt_options()` picks the bullet from the locale when tools loads, and that runner's default is an asterisk. Reproduced locally by setting that default, which gives 0 bullet lines on the race page. Fixed now at `8500593`: the test pins `itemBullet` to U+2022 and `outputEncoding` to UTF-8 in its render call, the glyph AC3 names. The pinned test passes 24 assertions under both defaults. PR-conversation read at the resume: no reviews, no comments, no unresolved threads.
