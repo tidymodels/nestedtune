@@ -21,11 +21,11 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 
 ## Acceptance criteria
 
-- [ ] AC1: For a nested design carrying `.resample_weights`, `collect_metrics()` reports, per metric, `mean` equal to `stats::weighted.mean()` of the folds with a non-`NA` `.estimate` by their weights, and `std_err` equal to the weighted standard deviation of those estimates over the square root of their effective sample size, both as tune 2.1.0's `estimate_tune_results()` computes them on non-`NA` inputs; `n` stays the count of folds that scored; a run with one failed fold reports these over the folds that scored.
-- [ ] AC2: A design without the attribute reports numbers identical to before: every `collect_metrics()`, `print`, `summary()` and `autoplot()` snapshot present at the branch point passes unedited.
-- [ ] AC3: On a weighted run, `compute_metrics()` with the run's own metric set returns `collect_metrics()`'s rows (D-063's promise), and `collect_metrics(summarize = FALSE)` carries a `.weight` column holding each fold's weight.
-- [ ] AC4: Each of the five orchestrator help pages (`?nested_tune_grid`, `?nested_tune_bayes`, `?nested_tune_race`, `?nested_tune_sim_anneal`, `?nested_fit_resamples`) states, through the shared template, that weights set with `tune::add_resample_weights()` on the design reach the outer average, and that a fold that fails or scores `NA` is dropped and the weights renormalized over the folds that scored.
-- [ ] AC5: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `--list-gating` names runs clean.
+- [x] AC1: For a nested design carrying `.resample_weights`, `collect_metrics()` reports, per metric, `mean` equal to `stats::weighted.mean()` of the folds with a non-`NA` `.estimate` by their weights, and `std_err` equal to the weighted standard deviation of those estimates over the square root of their effective sample size, both as tune 2.1.0's `estimate_tune_results()` computes them on non-`NA` inputs; `n` stays the count of folds that scored; a run with one failed fold reports these over the folds that scored.
+- [x] AC2: A design without the attribute reports numbers identical to before: every `collect_metrics()`, `print`, `summary()` and `autoplot()` snapshot present at the branch point passes unedited.
+- [x] AC3: On a weighted run, `compute_metrics()` with the run's own metric set returns `collect_metrics()`'s rows (D-063's promise), and `collect_metrics(summarize = FALSE)` carries a `.weight` column holding each fold's weight.
+- [x] AC4: Each of the five orchestrator help pages (`?nested_tune_grid`, `?nested_tune_bayes`, `?nested_tune_race`, `?nested_tune_sim_anneal`, `?nested_fit_resamples`) states, through the shared template, that weights set with `tune::add_resample_weights()` on the design reach the outer average, and that a fold that fails or scores `NA` is dropped and the weights renormalized over the folds that scored.
+- [x] AC5: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `--list-gating` names runs clean.
 
 ## Coverage
 
@@ -62,3 +62,12 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 ## Decisions
 
 ## Review
+
+- 2026-09-16 evidence at 147ab14, branch in sync with main (0 behind).
+- AC1: `devtools::test()` clean (FAIL 0, WARN 0, PASS 10421); `test-resample-weights.R` holds both oracles: O1 recomputes tune 2.1.0's `weighted.mean`, `cov.wt`-based weighted sd and `sum(w)^2/sum(w^2)` from the unweighted run's per-fold estimates, on `nested_fit_resamples()` and `nested_tune_grid()`, on all folds, with one fold failed (`n` = 2, no NA mean or SE) and with one fold scoring NA; O2 matches `tune::fit_resamples()` under the same weights to 1e-12. Formulas re-read from `deparse(tune:::estimate_tune_results)`, `.weighted_sd`, `.effective_sample_size` at tune 2.1.0 today and agree with `weighted_std_err()`. Verified.
+- AC2: `git diff origin/main..HEAD -- tests/testthat/_snaps/` names 0 files; every snapshot passes in the clean test run; the equal-weights test shows an identical `collect_metrics()` to the unweighted run. Verified.
+- AC3: tests "compute_metrics() with the run's metric set is collect_metrics() on a weighted run" (identical summarized and per-fold, `.weight` present) and "collect_metrics(summarize = FALSE) carries each fold's weight, by fold label" (also under a reordered run and on a stacked set) pass. Verified.
+- AC4: `grep` finds `add_resample_weights` and the "scaled up to sum to one" NA-fold sentence in each of the five Rd files (grid, bayes, race, sim_anneal, fit_resamples); `devtools::document()` produces no diff. Verified.
+- AC5: `devtools::check()` at 147ab14: 0 errors, 0 warnings, 0 notes (7m 44s); `devtools::test()` clean; all six `--list-gating` sweeps clean. Verified.
+- Driving RR: none; projection-vs-outcome no-ops.
+- Consistency gate: `cairn_validate.py` exit 0 (18 references-staleness advisories, pre-existing); no principle changed, `cairn_impact` skipped; `document()` no diff; README.md in sync; `pkgdown::check_pkgdown()` no problems; NEWS bullet present without milestone numbers; `man-roxygen` in `.Rbuildignore`; `air format --check` clean.
