@@ -88,3 +88,4 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - 2026-09-16: step-7 approval: m101-resample-weights approved for merge (after fix-nows F1, F2, F3, F5, F11).
 - 2026-09-16: resume: PR #114 OPEN; re-entering at step 1 (route c). CI red on ubuntu-latest (release): the set test in test-resample-weights.R failed with "there is no package called 'workflowsets'" because it used the bare engine skip; fixed by the shared `skip_if_no_wset_fixture()` skip every other set test uses (a test-guard change, no runtime surface). Trivial fix, no re-approval requested. `devtools::test(filter = "resample-weights")` clean.
 - conversation: PR #114 — empty read (0 reviews, 0 comments, 0 unresolved threads).
+- 2026-09-16: step-7 approval: m101-resample-weights approved for merge (re-posed after the CI skip fix).
