@@ -295,7 +295,7 @@ test_that("AC3: compute_metrics() with the run's metric set is collect_metrics()
 })
 
 test_that("AC3: the set readers stack each workflow's weighted rows", {
-  skip_if_no_engines()
+  skip_if_no_wset_fixture("nested_fit_resamples")
   d <- make_reg_data()
   design <- tune::add_resample_weights(final_nested(d), c(1, 3))
   # The fixed set through the plain orchestrator, so one control reaches
