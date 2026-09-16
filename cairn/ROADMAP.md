@@ -8,7 +8,7 @@ _Last hygiene check: 2026-09-16 (M101's pass: archived, M98's row pruned, a DESI
 | M99 | IP2's text names the randomness it reaches | done | — | normal | milestones/archive/M099-ip2-rng-scope.md |
 | M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | done | — | normal | milestones/archive/M100-compute-metrics-predictions-rows.md |
 | M101 | The outer average honors tune's resample weights | done | — | normal | milestones/archive/M101-resample-weights.md |
-| M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | planned | — | normal | milestones/M102-devel-vctrs-schedule-cache.md |
+| M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | in-progress | — | normal | milestones/M102-devel-vctrs-schedule-cache.md |
 | M103 | The workflow identity reads case weights and a postprocessor | planned | — | normal | milestones/M103-identity-case-weights-postprocessor.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 

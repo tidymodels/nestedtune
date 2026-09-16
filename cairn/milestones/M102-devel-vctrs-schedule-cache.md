@@ -1,13 +1,13 @@
 # M102: The devel-vctrs leg runs weekly and keeps its own dependency cache
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI workflow files
-- **Branch/PR:** —
+- **Branch/PR:** `m102-devel-vctrs-schedule-cache`
 
 ## Goal
 
@@ -35,7 +35,7 @@
 
 ## Tasks
 
-- [ ] T1: Edit the workflow: `schedule:` (a weekly cron off-peak), `workflow_dispatch:`, `cache-version: devel-vctrs` on the setup step (`devel-vctrs.yaml:88-91`); rewrite the header comment (`:9-13`).
+- [x] T1: Edit the workflow: `schedule:` (a weekly cron off-peak), `workflow_dispatch:`, `cache-version: devel-vctrs` on the setup step (`devel-vctrs.yaml:88-91`); rewrite the header comment (`:9-13`).
 - [ ] T2: Push the branch, `gh workflow run devel-vctrs.yaml --ref <branch>` (the workflow is on the default branch, so dispatch on a branch works, M88 lesson), wait per the CI-wait rule, then `gh cache list` and record the key in the work log.
 - [ ] T3: Update `cairn/PROFILE.md`'s line on `devel-vctrs.yaml` and any DESIGN.md sentence naming its triggers (`grep -n devel-vctrs cairn/DESIGN.md cairn/PROFILE.md`).
 
@@ -43,6 +43,7 @@
 
 - 2026-09-16: created by /milestone-plan from two candidate rows added 2026-09-10 (M080 review F1 and F4).
 - 2026-09-16: plan gate chose a distinct `cache-version` over `cache: false` on the leg because it keeps warm installs while cutting the shared restore-key prefix; falsified by the leg's run still restoring another workflow's cache in its log.
+- 2026-09-16: T1 done. Cron `0 6 * * 1` (Monday 06:00 UTC, the plan's off-peak weekly slot, chosen without a gate since the plan fixed the cadence and the key value), `workflow_dispatch:`, `cache-version: devel-vctrs`; header rewritten. `ci-usage.py`'s `read_paths_ignore()` still returns one agreed list over six workflows; `grep -rn cache-version .github/workflows/` finds only devel-vctrs.yaml. No R code changed, so the verify slot's `devtools::test()` was not owed.
 
 ## Decisions
 

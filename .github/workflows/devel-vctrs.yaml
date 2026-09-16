@@ -8,9 +8,16 @@
 # nothing in a released-vctrs matrix would notice until the change reached CRAN.
 # This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
 # against it, so the break surfaces on the next push or pull request here
-# rather than at the upstream release. It carries no `schedule:`, so a quiet
-# week is a week the break waits; what it buys is that no work lands on this
-# repository without the question having been asked.
+# rather than at the upstream release. It also runs once a week (the
+# `schedule:` below, Monday 06:00 UTC), so a quiet week here still asks the
+# question of that week's upstream commits, and on demand
+# (`workflow_dispatch:`), so an upstream change can be checked without a push.
+#
+# The `cache-version: devel-vctrs` on the dependency step keys this leg's
+# library cache apart from every other workflow's. The action saves its cache
+# after the job, by which point vctrs has been overwritten with the
+# development branch below, and the restore key of a sibling job on the same
+# runner image and R version would otherwise match it.
 #
 # It is NOT a gating check. It reports on another project's unreleased branch,
 # so a red run here is news rather than a reason this repository's own work
@@ -35,6 +42,9 @@ on:
       - 'cairn/**'
       - 'CLAUDE.md'
       - '.claude/**'
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
 
 name: devel-vctrs.yaml
 
@@ -89,6 +99,7 @@ jobs:
         with:
           extra-packages: any::testthat, any::pkgload
           needs: check
+          cache-version: devel-vctrs
 
       # After the dependency install, so the released vctrs it pulls in as an
       # Import is overwritten rather than installed on top of the development
