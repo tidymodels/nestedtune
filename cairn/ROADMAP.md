@@ -1,18 +1,17 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-16 (M098's pass: archived, M95's row pruned, no lesson added or retired. validate green.)_
+_Last hygiene check: 2026-09-16 (M099's pass: archived, M96's row and the RR01 B4 candidate row pruned, no lesson added or retired. validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M99 | IP2's text names the randomness it reaches | review | — | normal | milestones/M099-ip2-rng-scope.md |
+| M99 | IP2's text names the randomness it reaches | done | — | normal | milestones/archive/M099-ip2-rng-scope.md |
 | M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | planned | — | normal | milestones/M100-compute-metrics-predictions-rows.md |
 | M101 | The outer average honors tune's resample weights | planned | — | normal | milestones/M101-resample-weights.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | planned | — | normal | milestones/M102-devel-vctrs-schedule-cache.md |
 | M103 | The workflow identity reads case weights and a postprocessor | planned | — | normal | milestones/M103-identity-case-weights-postprocessor.md |
 | M98 | The summary and final-fit prints name a non-default selection rule | done | — | normal | milestones/archive/M098-selection-rule-printed.md |
 | M97 | The Differences sections render each heading's paragraph whole and one list per page | done | — | normal | milestones/archive/M097-differences-section-rendering.md |
-| M96 | The help pages inherit tune's argument text and share repeated text through templates | done | — | normal | milestones/archive/M096-help-inherits-tune-params.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -44,7 +43,6 @@ _Last hygiene check: 2026-09-16 (M098's pass: archived, M95's row pruned, no les
 - `devel-vctrs.yaml` runs only on `push` and `pull_request`, so an upstream vctrs change waits for the next push here — added 2026-09-10 at M080's review gate (finding F1). M080's plan gate chose that over a schedule-only leg; a `schedule:` beside the two triggers was not priced. Promote on an upstream change to `vec_cbind_frame_ptype()` reaching this repository's released-vctrs legs or a user before this leg saw it
 - Stop sending the recipe's own retained copy of the training data to every fold — `recipes::recipe(formula, data)` keeps all training rows in `$template`, serialized once per task in `mirai_map()`'s `.args` — added 2026-07-30, compressed 2026-09-13 — M23 Out, which owns the measurements (workflow bytes about equal to data bytes) and the source-references half it absorbed (`utils::removeSource()` at dispatch, measured then removed, since `utils` is not in Imports and the gain is development-only). Left out as surgery on a recipes-owned object whose other readers of those rows are unestablished (GP1). Promote on evidence that no recipes code path reads `template` for its rows, on a user report of dispatch cost dominated by a recipe, if a dependency gate opens `utils`, or on evidence a user installs with srcrefs kept
 - Probe remote mirai daemon pools, which nothing verifies today — added 2026-07-26 — M10 Out, RR03 Q5, which established the load requirement by execution for local daemons only and inferred the remote case, so a remote host missing the package still surfaces as opaque per-fold worker failures. M58 (done 2026-09-04) asks each local daemon for the workflow's and the tuner's packages, the second question this row asks of a remote pool. M26 records that `mori` is same-machine-only, which bears on whether a remote pool stays a supported shape. Promote once a remote host exists to test against
-- Document IP2's enforceable scope in DESIGN.md — it binds only randomness flowing through R's RNG, so engines that bypass it (kernlab SVM, keras/torch) are unreachable by any R-side scheme — added 2026-07-25 — RR01 B4; amending IP text needs a D-entry
 - What `...` still does not carry after M48: the Gaussian-process fitter's options (`corr`, `nug_thres`, `maxit`, `optim_start`, which `tune_bayes()` forwards from its own `...`) and the outer-loop `control` topepo reserved the name for in [#33](https://github.com/tidymodels/nestedtune/issues/33) — added 2026-09-02 — M48 Out, D-042. Promote on a user needing a GP option, or on a first outer-loop setting that is not its own argument
 - An `autoplot()` view of each fold's inner search trajectory over `.inner_metrics` — the best-so-far by `.iter` for a Bayesian run, which is what [#57](https://github.com/tidymodels/nestedtune/issues/57) wanted the column for — added 2026-09-02 — M49 Out (done 2026-09-02), D-019. Extended 2026-09-02 at M50/M51's plan gate: a racing view (the per-resample elimination order `finetune::plot_race()` draws is not kept by the fold record, M50 Out) and an annealing trajectory (M51 Out) join it; and a view over the out-of-fold predictions M68 keeps (M68 Out, 2026-09-06). Promote on a user asking for a plot rather than the table
 - Dispatch a `nested_workflow_map()` run as workflow-by-fold units in one parallel round instead of one round per workflow — added 2026-09-06 at M71's plan gate — M71 Out; needs the payload to carry the workflow (`R/parallel.R`, `fold_task()`). Promote on evidence that the per-workflow rounds leave daemons idle on a user's run
