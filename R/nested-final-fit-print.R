@@ -65,8 +65,13 @@ print.nested_final_fit <- function(x, ...) {
   cli::cli_h1("Nested cross-validation final fit")
   # The menu selection picked from, before what it picked: the same sentence
   # for both tuners, so one kind of object has one shape of print (RR05 Q2).
-  cli::cli_text("Procedure: {procedure_label(new_summary_nested_final_fit(x))}")
+  s <- new_summary_nested_final_fit(x)
+  cli::cli_text("Procedure: {procedure_label(s)}")
   cli::cli_text("Selected: {selected_label(x$selected)}")
+  # The rule the selection was made by, where it is not the default (M98),
+  # read from the summary's component as the procedure line is, so the two
+  # prints cannot name one fit's rule differently.
+  print_selected_by(s$select)
   cli::cli_text("")
   estimate <- c(i = final_fit_estimate_msg)
   # A fit that ran no tuning (M70) has no selection to compare and no run
@@ -199,6 +204,10 @@ new_summary_nested_final_fit <- function(x) {
       counts,
       list(
         selection = summary_final_selection(x$selected),
+        # The rule selection was made by, as the record holds it (M98): NULL
+        # on a fit that tuned nothing, whose record names no rule, and
+        # carried then as `estimate` is.
+        select = x$procedure$select,
         estimate = NULL
       )
     ),
@@ -360,6 +369,7 @@ print_final_design <- function(s) {
 
 print_final_selection <- function(s) {
   cli::cli_h2("Selected parameters")
+  print_selected_by(s$select)
   if (length(s$selection) == 0L) {
     cli::cli_bullets(c(i = "No tuned parameters."))
     return(invisible(NULL))
