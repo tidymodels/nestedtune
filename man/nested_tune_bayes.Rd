@@ -194,11 +194,9 @@ process that tuned, a daemon's own on the parallel path.
 }
 
 
-\itemize{
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes. \code{parallel_over} changes the numbers a stochastic engine
-produces even at \code{allow_par = FALSE}.
-}
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} also pass through, and behave
+as the grid page describes. \code{parallel_over} changes the numbers a
+stochastic engine produces even at \code{allow_par = FALSE}.
 
 
 \strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the

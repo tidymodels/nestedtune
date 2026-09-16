@@ -204,11 +204,9 @@ once per fold, and from a mirai daemon where nothing shows it.
 }
 
 
-\itemize{
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes. \code{parallel_over} changes the numbers a stochastic engine
-produces even at \code{allow_par = FALSE}.
-}
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} also pass through, and behave
+as the grid page describes. \code{parallel_over} changes the numbers a
+stochastic engine produces even at \code{allow_par = FALSE}.
 
 
 This classification was read on finetune 1.3.0. The version that added
