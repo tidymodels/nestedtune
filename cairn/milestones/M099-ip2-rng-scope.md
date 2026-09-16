@@ -1,6 +1,6 @@
 # M099: IP2's text names the randomness it reaches
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -35,7 +35,7 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
 
 - [x] T1: Draft the D-entry (next id after the last `### D-` heading; append above `<!-- Template:`, the M33 lesson) citing `cairn/DECISIONS.md` D-011 Consequences and `cairn/reviews/archive/RR01-rng-streams-outer-folds.md:361-367`; re-read the heading in place. (RB tripwire: ip-touching)
 - [x] T2: Add the sentence and the annotation to the IP2 entry; compare its bound and engine examples with `man-roxygen/section-reproducibility.R`'s last paragraph and record the read in the work log.
-- [ ] T3: Run `cairn_validate.py`; open the PR per the git model (a `cairn/`-only change on a milestone branch still merges through the PR gate, since it amends a principle).
+- [x] T3: Run `cairn_validate.py`; open the PR per the git model (a `cairn/`-only change on a milestone branch still merges through the PR gate, since it amends a principle).
 
 ## Work log
 
@@ -44,6 +44,9 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
 - 2026-09-16: implement gate adopted the drafted IP2 sentence and D-064 as shown; the ip-touching escalation offer was declined.
 - 2026-09-16: T1 done: D-064 appended above the template block, heading re-read in place; cites D-011 Consequences and RR01 B4, supersedes nothing.
 - 2026-09-16: T2 done: IP2 sentence and annotation added in IP1's annotation form. Read `man-roxygen/section-reproducibility.R` last paragraph: same bound (randomness through R's generator), same engine examples (kernlab's SVMs, the deep-learning engines), same "here or in tune" clause; no divergence, template untouched.
+- 2026-09-16: T3 done: `cairn_validate.py` all checks passed on the branch (18 advisory warnings, all pre-existing references staleness). Minor amendment: T3's "open the PR" clause is executed by `/milestone-review` at its merge step, where the git model places `gh pr create` (D-138); implement opens no PR.
+- 2026-09-16: claim audit: not owed — internal tier.
+- 2026-09-16: all tasks done; status set to review.
 
 ## Decisions
 
