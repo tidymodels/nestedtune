@@ -267,6 +267,12 @@ new_summary_nested_results <- function(x) {
         stage = vapply(x$.notes[failed], fold_failure_stage, character(1))
       ),
       selection = summary_selection(selected),
+      # The rule the folds selected by, as the procedure record holds it
+      # (M98): a `selection_rule()`, or NULL on a record that applied none,
+      # which `nested_fit_resamples()` writes. Carried as NULL rather than
+      # dropped, in the habit the final fit's `estimate` set, so the name is
+      # present whichever way the run went.
+      select = attr(x, "procedure")$select,
       grids = candidate_sets(x),
       estimate = if (length(completed) > 0L) {
         summarize_folds(per_fold_metrics(x))
@@ -346,6 +352,13 @@ fold_failure_stage <- function(notes) {
 
 print_selection <- function(s, heading = cli::cli_h2) {
   heading("Selected parameters")
+  # The rule, where it is not the default (M98): the line's presence is the
+  # signal, as with the failure count and the candidate-set line, and the
+  # default run's print stays as it was. Printed ahead of the early returns
+  # below, because the rule describes the procedure the run asked for, not
+  # what completed (IP4): a run in which no fold completed still selected by
+  # it, on the folds that failed later.
+  print_selected_by(s$select)
 
   if (s$completed == 0L) {
     cli::cli_bullets(c(i = "No outer fold completed, so nothing was selected."))
@@ -358,6 +371,18 @@ print_selection <- function(s, heading = cli::cli_h2) {
   for (param in names(s$selection)) {
     print_one_parameter(param, s$selection[[param]], s$completed)
   }
+  invisible(NULL)
+}
+
+# The `Selected by:` line the results summary, the final fit's print and its
+# summary share (M98), rendered by the one helper the rule's own print uses,
+# so a reader meets the same words in every place. Silent on the default rule
+# and on a record that holds none.
+print_selected_by <- function(select) {
+  if (!names_selection_rule(select)) {
+    return(invisible(NULL))
+  }
+  cli::cli_text("Selected by: {selection_rule_label(select)}")
   invisible(NULL)
 }
 
