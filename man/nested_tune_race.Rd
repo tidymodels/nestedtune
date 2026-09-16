@@ -173,11 +173,8 @@ parallelism belongs over the outer folds.
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
 entry, with a refusal that names both.
+\code{grid} and \code{eval_time} are the racing functions' own arguments rather than control slots, offered here as arguments and reaching them unchanged.
 
-
-\code{grid} and \code{eval_time} are the racing functions' own arguments rather
-than control slots, offered here as arguments and reaching them
-unchanged.
 
 \strong{Refused: none.} No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a

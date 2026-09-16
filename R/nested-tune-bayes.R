@@ -94,12 +94,8 @@
 #' `.tuning_seed` reports, whatever the control carried.
 #'
 #' @templateVar INNER inner search
+#' @templateVar SETTABLE_TAIL `iter`, `initial` and `objective` are arguments of `tune_bayes()` rather than control slots, offered here as arguments and reaching it unchanged. So is `eval_time`.
 #' @template differences-settable
-#' @section Differences from calling tune directly:
-#' `iter`, `initial` and `objective` are arguments of `tune_bayes()` rather
-#' than control slots, offered here as arguments and reaching it unchanged.
-#' So is `eval_time`.
-#'
 #' @template differences-refused-plain
 #' @section Differences from calling tune directly:
 #' **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
