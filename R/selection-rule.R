@@ -36,7 +36,10 @@
 #' @return A list of class `selection_rule` with elements `rule`, `order` and
 #'   `limit`. `order` holds the expressions in `...`, empty for `"best"`.
 #'   `limit` is `NULL` outside `"pct_loss"`. Printing shows the three on one
-#'   line.
+#'   line: the rule, then `by` and the orderings as written, then the limit
+#'   in parentheses. That same label follows `Selected by:` in the printed
+#'   [summary.nested_results()], [print.nested_final_fit()] and
+#'   [summary.nested_final_fit()] when the rule is not `"best"`.
 #'
 #' @section The three rules:
 #'

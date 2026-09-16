@@ -142,10 +142,23 @@ print_failure_count <- function(x) {
 #' - the failed folds, with the stage each failed at
 #' - what the completed folds selected, and the candidates, the parameter
 #'   settings, each searched
+#' - `select`, the [selection_rule()] the folds selected by, as
+#'   [extract_procedure()] records it. It is `NULL` on a
+#'   [nested_fit_resamples()] run, which applies no rule.
 #' - the metric estimates averaged over them
 #'
 #' Printing it is what most callers want. The components are there for one
 #' that needs a number rather than a line of text.
+#'
+#' @section The selection rule:
+#'
+#' When the run selected by a rule other than the default, the print adds
+#' a line directly under the "Selected parameters" heading. It reads
+#' `Selected by:` and then the rule as [selection_rule()] prints it, for
+#' example `Selected by: one_std_err by num_comp`. The line is absent under
+#' the default rule, so its presence is the signal. It prints whether or not
+#' any fold completed, because the rule describes the procedure the run
+#' asked for.
 #'
 #' @section A run that did not finish:
 #'

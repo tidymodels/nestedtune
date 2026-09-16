@@ -50,6 +50,15 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' reads "nothing to select", and the note says that [extract_tune_results()]
 #' and [extract_scored_candidates()] refuse the object.
 #'
+#' @section The selection rule:
+#'
+#' When the selection was made by a rule other than the default, a line
+#' follows the `Selected:` line. It reads `Selected by:` and then the rule
+#' as [selection_rule()] prints it, for example
+#' `Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
+#' under the default rule and on a fit that tuned nothing. The summary's
+#' `select` component holds the rule as a value.
+#'
 #' @template example-setup
 #' @template example-run
 #' @template example-final
@@ -135,10 +144,19 @@ print.nested_final_fit <- function(x, ...) {
 #' - `initial` and `initial_requested`, `iterations_completed` and
 #'   `iterations_requested`, the iterating tuners' counts
 #' - `selection`, the parameter values selection chose
+#' - `select`, the [selection_rule()] the selection was made by, as
+#'   [extract_procedure()] records it
 #' - `estimate`, always `NULL`
 #'
 #' Printing it is what most callers want. The components are there for a
 #' caller that needs a value rather than a line of text.
+#'
+#' @section The selection rule:
+#'
+#' When `select` names a rule other than the default, the print adds a line
+#' directly under the "Selected parameters" heading. It reads `Selected by:`
+#' and then the rule as [selection_rule()] prints it. The line is absent
+#' under the default rule and on a fit that tuned nothing.
 #'
 #' @section Components that are absent:
 #'
@@ -150,7 +168,8 @@ print.nested_final_fit <- function(x, ...) {
 #' rather than failing to print.
 #'
 #' Where nothing was tuned there is no run to describe, so `tuning_label`
-#' is `NULL` and `candidates` is `0`. `selection` is empty.
+#' is `NULL` and `candidates` is `0`. `selection` is empty and `select` is
+#' `NULL`, because no rule was applied.
 #'
 #' @template example-setup
 #' @template example-run
