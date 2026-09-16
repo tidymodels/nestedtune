@@ -170,11 +170,7 @@ reaching it. Here the control is given the fold's own tuning seed, the number
 place the level is set, as on the grid page. A control at tune's
 default takes it, and a control naming another level is refused at
 entry, with a refusal that names both.
-
-
-\code{iter}, \code{initial} and \code{objective} are arguments of \code{tune_bayes()} rather
-than control slots, offered here as arguments and reaching it unchanged.
-So is \code{eval_time}.
+\code{iter}, \code{initial} and \code{objective} are arguments of \code{tune_bayes()} rather than control slots, offered here as arguments and reaching it unchanged. So is \code{eval_time}.
 
 
 \strong{Refused: none.} No slot is refused on its own. A control of another
@@ -198,11 +194,9 @@ process that tuned, a daemon's own on the parallel path.
 }
 
 
-\itemize{
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
 describes. \code{parallel_over} changes the numbers a stochastic engine
 produces even at \code{allow_par = FALSE}.
-}
 
 
 \strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the

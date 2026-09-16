@@ -86,13 +86,9 @@
 #' falls under one of seven headings.
 #'
 #' @templateVar INNER inner search
+#' @templateVar SETTABLE_TAIL `iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()` rather than control slots, offered here as arguments and reaching it unchanged.
 #' @template differences-forced
 #' @template differences-settable
-#' @section Differences from calling finetune directly:
-#' `iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()`
-#' rather than control slots, offered here as arguments and reaching it
-#' unchanged.
-#'
 #' @template differences-refused-plain
 #' @section Differences from calling finetune directly:
 #' **Passed through: `no_improve`, `restart`, `radius`, `flip`,

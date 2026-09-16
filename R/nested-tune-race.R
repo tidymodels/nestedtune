@@ -80,13 +80,10 @@
 #' falls under one of seven headings.
 #'
 #' @templateVar INNER inner race
+#' @templateVar SETTABLE_TAIL `grid` and `eval_time` are the racing functions' own arguments rather than control slots, offered here as arguments and reaching them unchanged.
 #' @template differences-forced
 #' @template differences-settable
 #' @section Differences from calling finetune directly:
-#' `grid` and `eval_time` are the racing functions' own arguments rather
-#' than control slots, offered here as arguments and reaching them
-#' unchanged.
-#'
 #' **Refused: none.** No slot is refused on its own. Three things are
 #' refused at entry. The first is a control of another class, such as a
 #' `control_grid()` that finetune itself accepts here. The second is

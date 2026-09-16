@@ -455,9 +455,8 @@ under one of seven headings.
 \strong{Forced: \code{allow_par}.} The inner tuning run and the outer scoring fit both
 run at \code{allow_par = FALSE}, whatever the control carries, because
 parallelism belongs over the outer folds.
-
-
 Leaving parallelism to a caller puts two pools in contention.
+
 
 \strong{Settable as its own argument: \code{event_level}.} The argument reaches
 the inner \code{control_grid()} and the outer \code{control_last_fit()} alike, and
