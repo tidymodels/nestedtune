@@ -117,21 +117,21 @@ to the run itself.</p>
     <h2 id="refusals">Refusals<a class="anchor" aria-label="anchor" href="#refusals"></a></h2>
 
 
-
 <p>A run whose control did not set <code>save_pred = TRUE</code> is refused with class
-<code>nestedtune_column_not_saved</code>. A <code>metrics</code> that is not a metric set is
-refused with class <code>nestedtune_bad_metrics</code>. A metric that reads a kind
-of prediction the run did not save is refused with class
+<code>nestedtune_column_not_saved</code>. A run in which no fold completed is
+refused with class <code>nestedtune_no_completed_folds</code>.</p>
+
+<p>A <code>metrics</code> that is not a metric set is refused with class
+<code>nestedtune_bad_metrics</code>. A metric that reads a kind of prediction the
+run did not save is refused with class
 <code>nestedtune_metric_type_not_saved</code>. An example is a class metric such as
 <code>accuracy</code> on a run whose metrics read only class probabilities.</p>
 <p>A run with some failed folds is scored over the rest, with a warning of
-class <code>nestedtune_partial_summary</code>. A run in which no fold completed is
-refused with class <code>nestedtune_no_completed_folds</code>.</p>
+class <code>nestedtune_partial_summary</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="collect_metrics.nested_results.html">collect_metrics.nested_results()</a></code>,
-<code><a href="collect_predictions.nested_results.html">collect_predictions.nested_results()</a></code>, <code><a href="augment.nested_results.html">augment.nested_results()</a></code>,
+    <div class="dont-index"><p><code><a href="collect_metrics.nested_results.html">collect_metrics.nested_results()</a></code>, <code><a href="collect_predictions.nested_results.html">collect_predictions.nested_results()</a></code>, <code><a href="augment.nested_results.html">augment.nested_results()</a></code>,
 <code><a href="collect_metrics.nested_results_set.html">collect_metrics.nested_results_set()</a></code> for the same function on a
 workflow-set run</p></div>
     </div>

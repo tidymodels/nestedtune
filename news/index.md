@@ -2,6 +2,18 @@
 
 ## nestedtune 0.0.0.9000
 
+- The help for
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  and
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  now takes the text for `grid`, `param_info`, `iter` and `metrics` from
+  tune’s and finetune’s own pages. What this package adds for one of
+  those arguments reads in the page’s Details.
+
 - The note [`summary()`](https://rdrr.io/r/base/summary.html) prints for
   a run or a workflow set and the `autoplot(type = "performance")`
   subtitles now name the nested estimate as the number to report for the

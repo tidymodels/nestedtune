@@ -117,9 +117,9 @@ designs says what the design must hold.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_sim_anneal.html" class="external-link">finetune::control_sim_anneal()</a></code> as
-<code>control</code> and nothing else, matched by name. The section on differences
-from finetune says what becomes of each slot.</p></dd>
+<dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_sim_anneal.html" class="external-link">finetune::control_sim_anneal()</a></code>, as <code>control</code>, and
+nothing else. Every argument after <code>...</code> is matched by name. The
+section on differences from finetune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-iter">iter<a class="anchor" aria-label="anchor" href="#arg-iter"></a></dt>
@@ -128,9 +128,9 @@ The section on the iterations says why <code>0</code> is refused.</p></dd>
 
 
 <dt id="arg-param-info">param_info<a class="anchor" aria-label="anchor" href="#arg-param-info"></a></dt>
-<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object, or <code>NULL</code> to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.</p></dd>
+<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object or <code>NULL</code>. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
@@ -146,8 +146,7 @@ iteration, a whole number of at least 1 (finetune's default). A
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
 <dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.</p></dd>
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
@@ -177,6 +176,9 @@ records.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>finetune must be installed. A missing package is refused at entry, before
 any fold runs.</p>
+<p><code>param_info</code> reaches the inner call as <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.</p>
     </div>
     <div class="section level2">
     <h2 id="the-initial-candidates-and-the-iterations">The initial candidates and the iterations<a class="anchor" aria-label="anchor" href="#the-initial-candidates-and-the-iterations"></a></h2>
@@ -242,18 +244,23 @@ finetune's default when none is, with the slots this package forces
 overwritten. The result records that effective control as
 <code>extract_procedure(res)$control</code>. Every slot of <code>control_sim_anneal()</code>
 falls under one of seven headings.</p>
+
 <p><strong>Forced: <code>allow_par</code>.</strong> The inner search and the outer scoring fit both
 run at <code>allow_par = FALSE</code>, whatever the control carries, because
 parallelism belongs over the outer folds.</p>
-<p><strong>Settable as its own argument: <code>event_level</code>.</strong> Set through the
-argument alone, as on the grid page. A control at finetune's default
-takes the argument's level, and one naming a different level is refused
-at entry. <code>iter</code>, <code>initial</code> and <code>eval_time</code> are arguments of
-<code>tune_sim_anneal()</code> rather than control slots, offered here as arguments
-and reaching it unchanged.</p>
-<p><strong>Refused: none.</strong> No slot is refused on its own. What is refused at
-entry is a control of another class, such as a <code>control_bayes()</code> that
-finetune itself runs under, and the <code>event_level</code> conflict above.</p>
+
+<p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
+place the level is set, as on the grid page. A control at finetune's
+default takes it, and a control naming another level is refused at
+entry, with a refusal that names both.</p>
+
+<p><code>iter</code>, <code>initial</code> and <code>eval_time</code> are arguments of <code>tune_sim_anneal()</code>
+rather than control slots, offered here as arguments and reaching it
+unchanged.</p>
+
+<p><strong>Refused: none.</strong> No slot is refused on its own. A control of another
+class is refused at entry, as is the <code>event_level</code> conflict above.</p>
+
 <p><strong>Passed through: <code>no_improve</code>, <code>restart</code>, <code>radius</code>, <code>flip</code>,
 <code>cooling_coef</code>, <code>time_limit</code>, <code>verbose</code>, <code>verbose_iter</code>, <code>pkgs</code>,
 <code>parallel_over</code>, <code>workflow_size</code>.</strong> Each reaches <code>tune_sim_anneal()</code> as
@@ -270,16 +277,18 @@ from every fold of a serial run, one log per fold, and from a mirai
 daemon where nothing shows it. Pass
 <code>control = control_sim_anneal(verbose_iter = FALSE)</code> for a quiet run.
 <code>verbose</code> likewise.</p></li>
-<li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as on the grid
-page, <code>parallel_over</code> included.</p></li>
-</ul><p>The classification above was read on finetune 1.3.0. The version that
-added <code>workflow_size</code> to <code>control_sim_anneal()</code> is not named in finetune's
-NEWS, and the <code>&gt;= 1.0.1</code> floor this package declares does not require
-it.</p>
-<p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Both reach the
-outer fit, whose predictions and extracts come back as <code>.predictions</code>
-and <code>.extracts</code>, in the shape the grid page gives. The inner search's are
-still discarded.</p>
+</ul><ul><li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
+describes. <code>parallel_over</code> changes the numbers a stochastic engine
+produces even at <code>allow_par = FALSE</code>.</p></li>
+</ul><p>This classification was read on finetune 1.3.0. The version that added
+<code>workflow_size</code> to <code>control_sim_anneal()</code> is not named in finetune's NEWS,
+and the <code>&gt;= 1.0.1</code> floor this package declares does not require it.</p>
+
+<p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
+outer fit as well as the inner search. The outer fit's
+predictions and extracts are kept as <code>.predictions</code> and <code>.extracts</code>, as
+the grid page describes, and the inner search's own are still discarded.</p>
+
 <p><strong>Not returned: <code>save_workflow</code>, <code>save_history</code>.</strong> <code>save_workflow</code> lands
 on the inner <code>tune_results</code> a fold record discards, so setting it costs
 the work and returns nothing. The final fit keeps its tuning run as
@@ -288,8 +297,9 @@ finetune's search history to <code>sa_history.RData</code> in the temporary
 directory of the process that tuned, a daemon's own on the parallel
 path. Every fold overwrites the last one's, and nothing of it reaches
 the result.</p>
-<p><strong>Inert: <code>backend_options</code>.</strong> A parallel backend's options, and there is
-no backend to reach at <code>allow_par = FALSE</code>.</p>
+
+<p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
+backend to reach at <code>allow_par = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="nested-designs">Nested designs<a class="anchor" aria-label="anchor" href="#nested-designs"></a></h2>
@@ -360,8 +370,8 @@ choice, and repeats tune's message about which time it took.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_resamples.html">nested_resamples()</a></code>,
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, <code><a href="https://finetune.tidymodels.org/reference/tune_sim_anneal.html" class="external-link">finetune::tune_sim_anneal()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="nested_resamples.html">nested_resamples()</a></code>, <code><a href="nested_final_fit.html">nested_final_fit()</a></code>,
+<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="https://finetune.tidymodels.org/reference/tune_sim_anneal.html" class="external-link">finetune::tune_sim_anneal()</a></code></p></div>
     </div>
 
     <div class="section level2">

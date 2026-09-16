@@ -119,22 +119,22 @@ designs says what the design must hold.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_grid()</a></code>, passed as
-<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
-name. The section on differences from tune says what becomes of each
-control slot.</p></dd>
+<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_grid()</a></code>, as <code>control</code>, and
+nothing else. Every argument after <code>...</code> is matched by name. The
+section on differences from tune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-param-info">param_info<a class="anchor" aria-label="anchor" href="#arg-param-info"></a></dt>
-<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object, or <code>NULL</code> to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.</p></dd>
+<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object or <code>NULL</code>. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.</p></dd>
 
 
 <dt id="arg-grid">grid<a class="anchor" aria-label="anchor" href="#arg-grid"></a></dt>
-<dd><p>A data frame of candidate parameter values, or a positive whole
-number for the size of a grid tune generates. A data frame has one
-column per tuned parameter and no other column.</p></dd>
+<dd><p>A data frame of tuning combinations or a positive integer. The
+data frame should have columns for each parameter being tuned and rows for
+tuning parameter candidates. An integer denotes the number of candidate
+parameter sets to be created automatically.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
@@ -144,8 +144,7 @@ set of metrics.</p></dd>
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
 <dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.</p></dd>
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
@@ -184,6 +183,10 @@ it with another search:
 With this function they are the package's orchestrators: each runs the
 outer loop and hands the inner tuning to tune or finetune. Their pages
 say what differs, and this page is the reference for what the six share.</p>
+<p><code>grid</code> and <code>param_info</code> reach every fold's inner call as
+<code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> takes them. A data frame has one column per tuned
+parameter and no other column. The section on finalizing a parameter
+range says where a range that depends on the data is finalized.</p>
     </div>
     <div class="section level2">
     <h2 id="nested-designs">Nested designs<a class="anchor" aria-label="anchor" href="#nested-designs"></a></h2>
@@ -516,10 +519,12 @@ tune's default when none is, with the slots this package forces
 overwritten. The result records that effective control as
 <code>extract_procedure(res)$control</code>. Every slot of <code>control_grid()</code> falls
 under one of seven headings.</p>
-<p><strong>Forced: <code>allow_par</code>.</strong> Both tune calls a fold makes, the inner tuning
-run and the outer scoring fit, run at <code>allow_par = FALSE</code>, whatever the
-control carries. Parallelism belongs over the outer folds, as above,
-because leaving it to a caller puts two pools in contention.</p>
+
+<p><strong>Forced: <code>allow_par</code>.</strong> The inner tuning run and the outer scoring fit both
+run at <code>allow_par = FALSE</code>, whatever the control carries, because
+parallelism belongs over the outer folds.</p>
+
+<p>Leaving parallelism to a caller puts two pools in contention.</p>
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument reaches
 the inner <code>control_grid()</code> and the outer <code>control_last_fit()</code> alike, and
 is the one place the level is set. A control left at tune's default takes
@@ -529,10 +534,12 @@ both. <code>eval_time</code>
 is offered the same way, for the same reason: it changes a number the
 caller is shown. It is an argument of <code>tune_grid()</code> and <code>last_fit()</code>
 rather than a control slot.</p>
+
 <p><strong>Refused: none.</strong> No slot is refused on its own. What is refused at
 entry is a control of another class, such as a <code>control_bayes()</code> that
-tune itself accepts here, and the <code>event_level</code> conflict above.
-tune gives <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code> and <code><a href="https://tune.tidymodels.org/reference/control_last_fit.html" class="external-link">tune::control_last_fit()</a></code>
+tune itself accepts here, and the <code>event_level</code> conflict above.</p>
+
+<p>tune gives <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code> and <code><a href="https://tune.tidymodels.org/reference/control_last_fit.html" class="external-link">tune::control_last_fit()</a></code>
 the <code>control_grid</code> class, so either is accepted as what <code>control_grid()</code>
 returns, its slots read under these headings.</p>
 <p><strong>Passed through: <code>verbose</code>, <code>pkgs</code>, <code>parallel_over</code>, <code>workflow_size</code>.</strong>
@@ -564,6 +571,7 @@ setting it costs the work and returns nothing. Use
 <code><a href="nested_final_fit.html">nested_final_fit()</a></code> keeps its own tuning run as <code>$tuning</code>, where
 <code><a href="extract_tune_results.html">extract_tune_results()</a></code> reaches what
 it saved.</p>
+
 <p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
 backend to reach at <code>allow_par = FALSE</code>.</p>
     </div>

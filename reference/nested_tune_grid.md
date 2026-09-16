@@ -62,23 +62,24 @@ nested_tune_grid(
 
   A control object from
   [`tune::control_grid()`](https://tune.tidymodels.org/reference/control_grid.html),
-  passed as `control`, and nothing else. Every argument after `...` is
-  matched by name. The section on differences from tune says what
-  becomes of each control slot.
+  as `control`, and nothing else. Every argument after `...` is matched
+  by name. The section on differences from tune says what becomes of
+  each slot.
 
 - param_info:
 
   A
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
-  object, or `NULL` to let tune derive one from the workflow. The
-  section on finalizing a parameter range says where a range that
-  depends on the data is finalized.
+  object or `NULL`. If none is given, a parameters set is derived from
+  other arguments. Passing this argument can be useful when parameter
+  ranges need to be customized.
 
 - grid:
 
-  A data frame of candidate parameter values, or a positive whole number
-  for the size of a grid tune generates. A data frame has one column per
-  tuned parameter and no other column.
+  A data frame of tuning combinations or a positive integer. The data
+  frame should have columns for each parameter being tuned and rows for
+  tuning parameter candidates. An integer denotes the number of
+  candidate parameter sets to be created automatically.
 
 - metrics:
 
@@ -89,8 +90,8 @@ nested_tune_grid(
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
-  two-class outcome is the event, and applies to the inner tuning run
-  and the outer scoring fit alike.
+  two-class outcome is the event. It applies to the inner tuning run and
+  the outer scoring fit alike.
 
 - eval_time:
 
@@ -146,6 +147,12 @@ runs it for a workflow with nothing to tune. With this function they are
 the package's orchestrators: each runs the outer loop and hands the
 inner tuning to tune or finetune. Their pages say what differs, and this
 page is the reference for what the six share.
+
+`grid` and `param_info` reach every fold's inner call as
+[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+takes them. A data frame has one column per tuned parameter and no other
+column. The section on finalizing a parameter range says where a range
+that depends on the data is finalized.
 
 ## Nested designs
 
@@ -516,10 +523,11 @@ package forces overwritten. The result records that effective control as
 `extract_procedure(res)$control`. Every slot of `control_grid()` falls
 under one of seven headings.
 
-**Forced: `allow_par`.** Both tune calls a fold makes, the inner tuning
-run and the outer scoring fit, run at `allow_par = FALSE`, whatever the
-control carries. Parallelism belongs over the outer folds, as above,
-because leaving it to a caller puts two pools in contention.
+**Forced: `allow_par`.** The inner tuning run and the outer scoring fit
+both run at `allow_par = FALSE`, whatever the control carries, because
+parallelism belongs over the outer folds.
+
+Leaving parallelism to a caller puts two pools in contention.
 
 **Settable as its own argument: `event_level`.** The argument reaches
 the inner `control_grid()` and the outer `control_last_fit()` alike, and
@@ -532,8 +540,9 @@ and `last_fit()` rather than a control slot.
 
 **Refused: none.** No slot is refused on its own. What is refused at
 entry is a control of another class, such as a `control_bayes()` that
-tune itself accepts here, and the `event_level` conflict above. tune
-gives
+tune itself accepts here, and the `event_level` conflict above.
+
+tune gives
 [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html)
 and
 [`tune::control_last_fit()`](https://tune.tidymodels.org/reference/control_last_fit.html)

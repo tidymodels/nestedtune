@@ -110,9 +110,12 @@ v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
 design is refused with class <code>nestedtune_augment_rows</code>, because it
 predicts some rows more than once or not at all. Read its predictions
 with <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> instead.</p>
+
 <p>A run whose control did not set <code>save_pred = TRUE</code> is refused with class
 <code>nestedtune_column_not_saved</code>. A run in which no fold completed is
-refused with class <code>nestedtune_no_completed_folds</code>. A completed fold
+refused with class <code>nestedtune_no_completed_folds</code>.</p>
+
+<p>A completed fold
 whose saved predictions do not match the rows it held out is refused
 with class <code>nestedtune_augment_predictions</code>. Its <code>.row</code> column must hold
 each of those rows once and no other row. On a run with some
@@ -125,8 +128,7 @@ with class <code>nestedtune_collect_name_collision</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="collect_predictions.nested_results.html">collect_predictions.nested_results()</a></code>,
-<code><a href="compute_metrics.nested_results.html">compute_metrics.nested_results()</a></code>, <code><a href="nested_final_fit.html">nested_final_fit()</a></code>,
+    <div class="dont-index"><p><code><a href="collect_predictions.nested_results.html">collect_predictions.nested_results()</a></code>, <code><a href="compute_metrics.nested_results.html">compute_metrics.nested_results()</a></code>, <code><a href="nested_final_fit.html">nested_final_fit()</a></code>,
 <code><a href="collect_metrics.nested_results_set.html">collect_metrics.nested_results_set()</a></code> for the same function on a
 workflow-set run</p></div>
     </div>

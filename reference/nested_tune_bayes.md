@@ -68,16 +68,15 @@ nested_tune_bayes(
 
 - iter:
 
-  The number of search iterations, a non-negative whole number. The
-  section on the iterations says what `0` does.
+  The maximum number of search iterations.
 
 - param_info:
 
   A
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
-  object, or `NULL` to let tune derive one from the workflow. The
-  section on finalizing a parameter range says where a range that
-  depends on the data is finalized.
+  object or `NULL`. If none is given, a parameters set is derived from
+  other arguments. Passing this argument can be useful when parameter
+  ranges need to be customized.
 
 - metrics:
 
@@ -104,8 +103,8 @@ nested_tune_bayes(
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
-  two-class outcome is the event, and applies to the inner tuning run
-  and the outer scoring fit alike.
+  two-class outcome is the event. It applies to the inner tuning run and
+  the outer scoring fit alike.
 
 - eval_time:
 
@@ -130,6 +129,19 @@ candidate the `i`-th iteration proposed, so a fold's search trajectory
 can be read from it. There is no `grid` attribute. The `procedure`
 record names the tuner `"tune_bayes"`. It holds `iter`, `initial` and
 `objective` beside the arguments every orchestrator records.
+
+## Details
+
+`iter` reaches
+[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
+as given, and tune stops early when the search stalls. The number of
+search iterations, a non-negative whole number. The section on the
+iterations says what `0` does.
+
+`param_info` reaches the inner call as
+[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+takes it. The section on finalizing a parameter range says where a range
+that depends on the data is finalized.
 
 ## The initial candidates and the iterations
 
@@ -212,13 +224,14 @@ it. Here the control is given the fold's own tuning seed, the number
 **Settable as its own argument: `event_level`.** The argument is the one
 place the level is set, as on the grid page. A control at tune's default
 takes it, and a control naming another level is refused at entry, with a
-refusal that names both. `iter`, `initial` and `objective` are arguments
-of `tune_bayes()` rather than control slots, offered here as arguments
-and reaching it unchanged. So is `eval_time`.
+refusal that names both.
 
-**Refused: none.** No slot is refused on its own. What is refused at
-entry is a control of another class, such as a `control_grid()` that
-tune itself accepts here, and the `event_level` conflict above.
+`iter`, `initial` and `objective` are arguments of `tune_bayes()` rather
+than control slots, offered here as arguments and reaching it unchanged.
+So is `eval_time`.
+
+**Refused: none.** No slot is refused on its own. A control of another
+class is refused at entry, as is the `event_level` conflict above.
 
 **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
 `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
@@ -238,21 +251,24 @@ tune itself accepts here, and the `event_level` conflict above.
 - `save_gp_scoring` writes its files to the temporary directory of the
   process that tuned, a daemon's own on the parallel path.
 
+&nbsp;
+
 - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
   describes. `parallel_over` changes the numbers a stochastic engine
   produces even at `allow_par = FALSE`.
 
-**Kept from the outer fit: `save_pred`, `extract`.** The outer fit's
-predictions and extracts are kept as `.predictions` and `.extracts`, as
-the grid page describes, and the inner search's are still discarded.
+**Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
+outer fit as well as the inner search. The outer fit's predictions and
+extracts are kept as `.predictions` and `.extracts`, as the grid page
+describes, and the inner search's own are still discarded.
 
 **Not returned: `save_workflow`.** It lands on the inner `tune_results`
 a fold record discards, so setting it costs the work and returns
 nothing. The final fit keeps its own tuning run as `$tuning`, where what
 it saved is reachable.
 
-**Inert: `backend_options`.** Options for a backend the forced
-`allow_par = FALSE` never reaches.
+**Inert: `backend_options`.** Options for a parallel backend, with no
+backend to reach at `allow_par = FALSE`.
 
 ## Nested designs
 

@@ -83,16 +83,16 @@ nested_tune_race_win_loss(
 
   A
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
-  object, or `NULL` to let tune derive one from the workflow. The
-  section on finalizing a parameter range says where a range that
-  depends on the data is finalized.
+  object or `NULL`. If none is given, a parameters set is derived from
+  other arguments. Passing this argument can be useful when parameter
+  ranges need to be customized.
 
 - grid:
 
-  A data frame of candidate parameter values, or a positive whole number
-  for the size of a grid to generate, the design the race is offered. A
-  data frame must have one column per tuned parameter and no other
-  column.
+  A data frame of tuning combinations or a positive integer. The data
+  frame should have columns for each parameter being tuned and rows for
+  tuning parameter candidates. An integer denotes the number of
+  candidate parameter sets to be created automatically.
 
 - metrics:
 
@@ -103,8 +103,8 @@ nested_tune_race_win_loss(
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
-  two-class outcome is the event, and applies to the inner tuning run
-  and the outer scoring fit alike.
+  two-class outcome is the event. It applies to the inner tuning run and
+  the outer scoring fit alike.
 
 - eval_time:
 
@@ -135,6 +135,14 @@ Both functions need finetune installed. `nested_tune_race_anova()` also
 needs lme4, which fits the ANOVA, and `nested_tune_race_win_loss()`
 BradleyTerry2, which fits the win/loss model. A missing package is
 refused at entry, before any fold runs.
+
+`grid` is the design the race is offered. A data frame must have one
+column per tuned parameter and no other column.
+
+`param_info` reaches the inner call as
+[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+takes it. The section on finalizing a parameter range says where a range
+that depends on the data is finalized.
 
 ## What a race records
 
@@ -203,9 +211,11 @@ parallelism belongs over the outer folds.
 **Settable as its own argument: `event_level`.** The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, with a refusal that names both. `grid` and `eval_time` are the
-racing functions' own arguments rather than control slots, offered here
-as arguments and reaching them unchanged.
+entry, with a refusal that names both.
+
+`grid` and `eval_time` are the racing functions' own arguments rather
+than control slots, offered here as arguments and reaching them
+unchanged.
 
 **Refused: none.** No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
@@ -233,25 +243,28 @@ Each reaches the race as given:
   once per fold, and from a mirai daemon where nothing shows it.
   `verbose` likewise.
 
+&nbsp;
+
 - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-  describes, `parallel_over` included.
+  describes. `parallel_over` changes the numbers a stochastic engine
+  produces even at `allow_par = FALSE`.
 
 This classification was read on finetune 1.3.0. The version that added
 `workflow_size` to `control_race()` is not named in finetune's NEWS, and
 the `>= 1.0.1` floor this package declares does not require it.
 
 **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
-outer fit as well as the race. The outer fit's predictions and extracts
-are kept as `.predictions` and `.extracts` in the shape the grid page
-describes, and the race's own are still discarded.
+outer fit as well as the inner race. The outer fit's predictions and
+extracts are kept as `.predictions` and `.extracts`, as the grid page
+describes, and the inner race's own are still discarded.
 
-**Not returned: `save_workflow`.** It lands on the inner race result a
-fold record discards, so setting it costs the work and returns nothing.
-The final fit keeps its race as `$tuning`, where what it saved is
-reachable.
+**Not returned: `save_workflow`.** It lands on the inner `tune_results`
+a fold record discards, so setting it costs the work and returns
+nothing. The final fit keeps its own tuning run as `$tuning`, where what
+it saved is reachable.
 
-**Inert: `backend_options`.** Backend options with no parallel backend
-to reach, because `allow_par` is forced off.
+**Inert: `backend_options`.** Options for a parallel backend, with no
+backend to reach at `allow_par = FALSE`.
 
 ## Nested designs
 
@@ -326,9 +339,9 @@ choice, and repeats tune's message about which time it took.
 ## See also
 
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md),
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`finetune::tune_race_anova()`](https://finetune.tidymodels.org/reference/tune_race_anova.html),
 [`finetune::tune_race_win_loss()`](https://finetune.tidymodels.org/reference/tune_race_win_loss.html)
 

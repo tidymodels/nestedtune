@@ -113,29 +113,25 @@ designs says what the design must hold.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code>, as
-<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
-name. The section on differences from tune says what becomes of each
-slot.</p></dd>
+<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code>, as <code>control</code>, and
+nothing else. Every argument after <code>...</code> is matched by name. The
+section on differences from tune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
-<dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> to use tune's
-defaults for the model's mode. There is no inner run to select on, so
-the set's order carries no weight here.</p></dd>
+<dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> to compute a standard
+set of metrics.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
 <dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
-level of a two-class outcome is the event in the one tune call a fold
-makes, the outer scoring fit.</p></dd>
+level of a two-class outcome is the event. The one tune call a fold makes, the outer scoring fit, reads it.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
 <dd><p>A numeric vector of evaluation times for a censored
 regression model, or <code>NULL</code> (the default) to leave the choice to tune.
-Anything not numeric, an empty vector, or an element that is missing,
-negative or not finite is refused at entry.</p></dd>
+Anything not numeric, an empty vector, or an element that is missing, negative or not finite is refused at entry.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -149,6 +145,11 @@ zero-row table with tune's summary columns and no parameter column.
 step, consumed by nothing. There is no <code>grid</code> attribute. The
 <code>procedure</code> record names the tuner <code>"fit_resamples"</code>, and holds no
 grid, parameter set or selection rule.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code>metrics</code> is read as <code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">tune::fit_resamples()</a></code> reads it. There is no inner
+run to select on, so the set's order carries no weight here.</p>
     </div>
     <div class="section level2">
     <h2 id="one-door-for-a-fixed-workflow-one-for-a-tuned-one">One door for a fixed workflow, one for a tuned one<a class="anchor" aria-label="anchor" href="#one-door-for-a-fixed-workflow-one-for-a-tuned-one"></a></h2>
@@ -240,9 +241,11 @@ folds.</p>
 place the level is set. A control at tune's default takes it. A control
 naming another level is refused at entry, and the refusal names both
 levels. <code>eval_time</code> is offered the same way, for the same reason.</p>
-<p><strong>Refused: none.</strong> No slot is refused on its own. A control of another
-class, such as a <code>control_bayes()</code>, is refused at entry, as is the
-<code>event_level</code> conflict above.</p>
+
+<p><strong>Refused: none.</strong> No slot is refused on its own. What is refused at
+entry is a control of another class, such as a <code>control_bayes()</code> that
+tune itself accepts here, and the <code>event_level</code> conflict above.</p>
+
 <p><strong>Passed through: none.</strong> There is no inner tuning call for a slot to be
 passed through to.</p>
 <p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> With

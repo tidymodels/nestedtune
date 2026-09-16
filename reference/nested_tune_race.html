@@ -137,23 +137,22 @@ designs says what the design must hold.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code>, as
-<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
-name. The section on differences from finetune says what becomes of each
-slot.</p></dd>
+<dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code>, as <code>control</code>, and
+nothing else. Every argument after <code>...</code> is matched by name. The
+section on differences from finetune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-param-info">param_info<a class="anchor" aria-label="anchor" href="#arg-param-info"></a></dt>
-<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object, or <code>NULL</code> to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.</p></dd>
+<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object or <code>NULL</code>. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.</p></dd>
 
 
 <dt id="arg-grid">grid<a class="anchor" aria-label="anchor" href="#arg-grid"></a></dt>
-<dd><p>A data frame of candidate parameter values, or a positive whole
-number for the size of a grid to generate, the design the race is
-offered. A data frame must have one column per tuned parameter and no other
-column.</p></dd>
+<dd><p>A data frame of tuning combinations or a positive integer. The
+data frame should have columns for each parameter being tuned and rows for
+tuning parameter candidates. An integer denotes the number of candidate
+parameter sets to be created automatically.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
@@ -163,8 +162,7 @@ set of metrics.</p></dd>
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
 <dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.</p></dd>
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
@@ -193,6 +191,11 @@ says what <code>.inner_metrics</code> and the recorded grid mean on a race.</p>
 needs lme4, which fits the ANOVA, and <code>nested_tune_race_win_loss()</code>
 BradleyTerry2, which fits the win/loss model. A missing package is refused
 at entry, before any fold runs.</p>
+<p><code>grid</code> is the design the race is offered. A data frame must have one
+column per tuned parameter and no other column.</p>
+<p><code>param_info</code> reaches the inner call as <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.</p>
     </div>
     <div class="section level2">
     <h2 id="what-a-race-records">What a race records<a class="anchor" aria-label="anchor" href="#what-a-race-records"></a></h2>
@@ -252,16 +255,19 @@ control passed, or finetune's default when none is, with the slots this
 package forces overwritten. The result records that effective control
 as <code>extract_procedure(res)$control</code>. Every slot of <code>control_race()</code>
 falls under one of seven headings.</p>
+
 <p><strong>Forced: <code>allow_par</code>.</strong> The inner race and the outer scoring fit both
 run at <code>allow_par = FALSE</code>, whatever the control carries, because
 parallelism belongs over the outer folds.</p>
+
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, with a refusal that names both. <code>grid</code> and <code>eval_time</code> are the
-racing functions' own
-arguments rather than control slots, offered here as arguments and
-reaching them unchanged.</p>
+entry, with a refusal that names both.</p>
+
+<p><code>grid</code> and <code>eval_time</code> are the racing functions' own arguments rather
+than control slots, offered here as arguments and reaching them
+unchanged.</p>
 <p><strong>Refused: none.</strong> No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
 <code>control_grid()</code> that finetune itself accepts here. The second is
@@ -284,21 +290,25 @@ whether the resamples are shuffled first.</p></li>
 <li><p><code>verbose_elim</code> prints finetune's elimination log from a serial run,
 once per fold, and from a mirai daemon where nothing shows it.
 <code>verbose</code> likewise.</p></li>
-<li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
-describes, <code>parallel_over</code> included.</p></li>
+</ul><ul><li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
+describes. <code>parallel_over</code> changes the numbers a stochastic engine
+produces even at <code>allow_par = FALSE</code>.</p></li>
 </ul><p>This classification was read on finetune 1.3.0. The version that added
-<code>workflow_size</code> to <code>control_race()</code> is not named in finetune's NEWS, and
-the <code>&gt;= 1.0.1</code> floor this package declares does not require it.</p>
+<code>workflow_size</code> to <code>control_race()</code> is not named in finetune's NEWS,
+and the <code>&gt;= 1.0.1</code> floor this package declares does not require it.</p>
+
 <p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
-outer fit as well as the race. The outer fit's predictions and extracts
-are kept as <code>.predictions</code> and <code>.extracts</code> in the shape the grid page
-describes, and the race's own are still discarded.</p>
-<p><strong>Not returned: <code>save_workflow</code>.</strong> It lands on the inner race result a
-fold record discards, so setting it costs the work and returns nothing.
-The final fit keeps its race as <code>$tuning</code>, where what it saved is
-reachable.</p>
-<p><strong>Inert: <code>backend_options</code>.</strong> Backend options with no parallel backend to
-reach, because <code>allow_par</code> is forced off.</p>
+outer fit as well as the inner race. The outer fit's
+predictions and extracts are kept as <code>.predictions</code> and <code>.extracts</code>, as
+the grid page describes, and the inner race's own are still discarded.</p>
+
+<p><strong>Not returned: <code>save_workflow</code>.</strong> It lands on the inner <code>tune_results</code>
+a fold record discards, so setting it costs the work and returns
+nothing. The final fit keeps its own tuning run as <code>$tuning</code>, where what
+it saved is reachable.</p>
+
+<p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
+backend to reach at <code>allow_par = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="nested-designs">Nested designs<a class="anchor" aria-label="anchor" href="#nested-designs"></a></h2>
@@ -369,9 +379,8 @@ choice, and repeats tune's message about which time it took.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_resamples.html">nested_resamples()</a></code>,
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, <code><a href="https://finetune.tidymodels.org/reference/tune_race_anova.html" class="external-link">finetune::tune_race_anova()</a></code>,
-<code><a href="https://finetune.tidymodels.org/reference/tune_race_win_loss.html" class="external-link">finetune::tune_race_win_loss()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="nested_resamples.html">nested_resamples()</a></code>, <code><a href="nested_final_fit.html">nested_final_fit()</a></code>,
+<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="https://finetune.tidymodels.org/reference/tune_race_anova.html" class="external-link">finetune::tune_race_anova()</a></code>, <code><a href="https://finetune.tidymodels.org/reference/tune_race_win_loss.html" class="external-link">finetune::tune_race_win_loss()</a></code></p></div>
     </div>
 
     <div class="section level2">

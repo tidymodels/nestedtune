@@ -62,9 +62,10 @@ nested_tune_sim_anneal(
 - ...:
 
   A control object from
-  [`finetune::control_sim_anneal()`](https://finetune.tidymodels.org/reference/control_sim_anneal.html)
-  as `control` and nothing else, matched by name. The section on
-  differences from finetune says what becomes of each slot.
+  [`finetune::control_sim_anneal()`](https://finetune.tidymodels.org/reference/control_sim_anneal.html),
+  as `control`, and nothing else. Every argument after `...` is matched
+  by name. The section on differences from finetune says what becomes of
+  each slot.
 
 - iter:
 
@@ -75,9 +76,9 @@ nested_tune_sim_anneal(
 
   A
   [`dials::parameters()`](https://dials.tidymodels.org/reference/parameters.html)
-  object, or `NULL` to let tune derive one from the workflow. The
-  section on finalizing a parameter range says where a range that
-  depends on the data is finalized.
+  object or `NULL`. If none is given, a parameters set is derived from
+  other arguments. Passing this argument can be useful when parameter
+  ranges need to be customized.
 
 - metrics:
 
@@ -94,8 +95,8 @@ nested_tune_sim_anneal(
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
-  two-class outcome is the event, and applies to the inner tuning run
-  and the outer scoring fit alike.
+  two-class outcome is the event. It applies to the inner tuning run and
+  the outer scoring fit alike.
 
 - eval_time:
 
@@ -127,6 +128,11 @@ every orchestrator records.
 
 finetune must be installed. A missing package is refused at entry,
 before any fold runs.
+
+`param_info` reaches the inner call as
+[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+takes it. The section on finalizing a parameter range says where a range
+that depends on the data is finalized.
 
 ## The initial candidates and the iterations
 
@@ -203,16 +209,17 @@ control as `extract_procedure(res)$control`. Every slot of
 run at `allow_par = FALSE`, whatever the control carries, because
 parallelism belongs over the outer folds.
 
-**Settable as its own argument: `event_level`.** Set through the
-argument alone, as on the grid page. A control at finetune's default
-takes the argument's level, and one naming a different level is refused
-at entry. `iter`, `initial` and `eval_time` are arguments of
-`tune_sim_anneal()` rather than control slots, offered here as arguments
-and reaching it unchanged.
+**Settable as its own argument: `event_level`.** The argument is the one
+place the level is set, as on the grid page. A control at finetune's
+default takes it, and a control naming another level is refused at
+entry, with a refusal that names both.
 
-**Refused: none.** No slot is refused on its own. What is refused at
-entry is a control of another class, such as a `control_bayes()` that
-finetune itself runs under, and the `event_level` conflict above.
+`iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()`
+rather than control slots, offered here as arguments and reaching it
+unchanged.
+
+**Refused: none.** No slot is refused on its own. A control of another
+class is refused at entry, as is the `event_level` conflict above.
 
 **Passed through: `no_improve`, `restart`, `radius`, `flip`,
 `cooling_coef`, `time_limit`, `verbose`, `verbose_iter`, `pkgs`,
@@ -235,18 +242,21 @@ given:
   `control = control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
   `verbose` likewise.
 
-- `pkgs`, `parallel_over` and `workflow_size` behave as on the grid
-  page, `parallel_over` included.
+&nbsp;
 
-The classification above was read on finetune 1.3.0. The version that
-added `workflow_size` to `control_sim_anneal()` is not named in
-finetune's NEWS, and the `>= 1.0.1` floor this package declares does not
-require it.
+- `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
+  describes. `parallel_over` changes the numbers a stochastic engine
+  produces even at `allow_par = FALSE`.
 
-**Kept from the outer fit: `save_pred`, `extract`.** Both reach the
-outer fit, whose predictions and extracts come back as `.predictions`
-and `.extracts`, in the shape the grid page gives. The inner search's
-are still discarded.
+This classification was read on finetune 1.3.0. The version that added
+`workflow_size` to `control_sim_anneal()` is not named in finetune's
+NEWS, and the `>= 1.0.1` floor this package declares does not require
+it.
+
+**Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
+outer fit as well as the inner search. The outer fit's predictions and
+extracts are kept as `.predictions` and `.extracts`, as the grid page
+describes, and the inner search's own are still discarded.
 
 **Not returned: `save_workflow`, `save_history`.** `save_workflow` lands
 on the inner `tune_results` a fold record discards, so setting it costs
@@ -257,8 +267,8 @@ directory of the process that tuned, a daemon's own on the parallel
 path. Every fold overwrites the last one's, and nothing of it reaches
 the result.
 
-**Inert: `backend_options`.** A parallel backend's options, and there is
-no backend to reach at `allow_par = FALSE`.
+**Inert: `backend_options`.** Options for a parallel backend, with no
+backend to reach at `allow_par = FALSE`.
 
 ## Nested designs
 
@@ -333,9 +343,9 @@ choice, and repeats tune's message about which time it took.
 ## See also
 
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md),
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`finetune::tune_sim_anneal()`](https://finetune.tidymodels.org/reference/tune_sim_anneal.html)
 
 ## Examples

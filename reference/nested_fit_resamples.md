@@ -64,14 +64,13 @@ nested_fit_resamples(
 
   A
   [`yardstick::metric_set()`](https://yardstick.tidymodels.org/reference/metric_set.html),
-  or `NULL` to use tune's defaults for the model's mode. There is no
-  inner run to select on, so the set's order carries no weight here.
+  or `NULL` to compute a standard set of metrics.
 
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
-  two-class outcome is the event in the one tune call a fold makes, the
-  outer scoring fit.
+  two-class outcome is the event. The one tune call a fold makes, the
+  outer scoring fit, reads it.
 
 - eval_time:
 
@@ -91,6 +90,13 @@ columns and no parameter column. `.tuning_seed` holds the seed the loop
 drew for the fold's tuning step, consumed by nothing. There is no `grid`
 attribute. The `procedure` record names the tuner `"fit_resamples"`, and
 holds no grid, parameter set or selection rule.
+
+## Details
+
+`metrics` is read as
+[`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
+reads it. There is no inner run to select on, so the set's order carries
+no weight here.
 
 ## One door for a fixed workflow, one for a tuned one
 
@@ -194,9 +200,9 @@ place the level is set. A control at tune's default takes it. A control
 naming another level is refused at entry, and the refusal names both
 levels. `eval_time` is offered the same way, for the same reason.
 
-**Refused: none.** No slot is refused on its own. A control of another
-class, such as a `control_bayes()`, is refused at entry, as is the
-`event_level` conflict above.
+**Refused: none.** No slot is refused on its own. What is refused at
+entry is a control of another class, such as a `control_bayes()` that
+tune itself accepts here, and the `event_level` conflict above.
 
 **Passed through: none.** There is no inner tuning call for a slot to be
 passed through to.

@@ -68,15 +68,17 @@ On a repeated design each repeat of a fold is scored as its own fold.
 ## Refusals
 
 A run whose control did not set `save_pred = TRUE` is refused with class
-`nestedtune_column_not_saved`. A `metrics` that is not a metric set is
-refused with class `nestedtune_bad_metrics`. A metric that reads a kind
-of prediction the run did not save is refused with class
+`nestedtune_column_not_saved`. A run in which no fold completed is
+refused with class `nestedtune_no_completed_folds`.
+
+A `metrics` that is not a metric set is refused with class
+`nestedtune_bad_metrics`. A metric that reads a kind of prediction the
+run did not save is refused with class
 `nestedtune_metric_type_not_saved`. An example is a class metric such as
 `accuracy` on a run whose metrics read only class probabilities.
 
 A run with some failed folds is scored over the rest, with a warning of
-class `nestedtune_partial_summary`. A run in which no fold completed is
-refused with class `nestedtune_no_completed_folds`.
+class `nestedtune_partial_summary`.
 
 ## See also
 

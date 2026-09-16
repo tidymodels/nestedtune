@@ -118,20 +118,19 @@ designs says what the design must hold.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">tune::control_bayes()</a></code>, as <code>control</code>,
-and nothing else. Every argument after <code>...</code> is matched by name. The
+<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_bayes.html" class="external-link">tune::control_bayes()</a></code>, as <code>control</code>, and
+nothing else. Every argument after <code>...</code> is matched by name. The
 section on differences from tune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-iter">iter<a class="anchor" aria-label="anchor" href="#arg-iter"></a></dt>
-<dd><p>The number of search iterations, a non-negative whole number.
-The section on the iterations says what <code>0</code> does.</p></dd>
+<dd><p>The maximum number of search iterations.</p></dd>
 
 
 <dt id="arg-param-info">param_info<a class="anchor" aria-label="anchor" href="#arg-param-info"></a></dt>
-<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object, or <code>NULL</code> to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.</p></dd>
+<dd><p>A <code><a href="https://dials.tidymodels.org/reference/parameters.html" class="external-link">dials::parameters()</a></code> object or <code>NULL</code>. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
@@ -153,8 +152,7 @@ default), <code><a href="https://tune.tidymodels.org/reference/prob_improve.html
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
 <dd><p><code>"first"</code> (the default) or <code>"second"</code>. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.</p></dd>
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.</p></dd>
 
 
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
@@ -179,6 +177,15 @@ trajectory can be read from it. There is no <code>grid</code> attribute. The
 <code>procedure</code> record names the tuner <code>"tune_bayes"</code>. It holds <code>iter</code>,
 <code>initial</code> and <code>objective</code> beside the arguments every orchestrator
 records.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code>iter</code> reaches <code><a href="https://tune.tidymodels.org/reference/tune_bayes.html" class="external-link">tune::tune_bayes()</a></code> as given, and tune stops early when
+the search stalls. The number of search iterations, a non-negative whole
+number. The section on the iterations says what <code>0</code> does.</p>
+<p><code>param_info</code> reaches the inner call as <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.</p>
     </div>
     <div class="section level2">
     <h2 id="the-initial-candidates-and-the-iterations">The initial candidates and the iterations<a class="anchor" aria-label="anchor" href="#the-initial-candidates-and-the-iterations"></a></h2>
@@ -249,15 +256,19 @@ from the stream when it is not given. Were the slot left alone, a fold's
 proposals depend on how much of the stream tune consumed before
 reaching it. Here the control is given the fold's own tuning seed, the number
 <code>.tuning_seed</code> reports, whatever the control carried.</p>
+
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
-place the level is set, as on the grid page. A control at tune's default
-takes it, and a control naming another level is refused at entry, with
-a refusal that names both. <code>iter</code>, <code>initial</code> and <code>objective</code> are arguments of
-<code>tune_bayes()</code> rather than control slots, offered here as arguments and
-reaching it unchanged. So is <code>eval_time</code>.</p>
-<p><strong>Refused: none.</strong> No slot is refused on its own. What is refused at
-entry is a control of another class, such as a <code>control_grid()</code> that
-tune itself accepts here, and the <code>event_level</code> conflict above.</p>
+place the level is set, as on the grid page. A control at tune's
+default takes it, and a control naming another level is refused at
+entry, with a refusal that names both.</p>
+
+<p><code>iter</code>, <code>initial</code> and <code>objective</code> are arguments of <code>tune_bayes()</code> rather
+than control slots, offered here as arguments and reaching it unchanged.
+So is <code>eval_time</code>.</p>
+
+<p><strong>Refused: none.</strong> No slot is refused on its own. A control of another
+class is refused at entry, as is the <code>event_level</code> conflict above.</p>
+
 <p><strong>Passed through: <code>no_improve</code>, <code>uncertain</code>, <code>time_limit</code>, <code>verbose</code>,
 <code>verbose_iter</code>, <code>save_gp_scoring</code>, <code>pkgs</code>, <code>parallel_over</code>,
 <code>workflow_size</code>.</strong> Each reaches <code>tune_bayes()</code> as given:</p><ul><li><p><code>no_improve</code> and <code>uncertain</code> govern each fold's search as they do in a
@@ -270,18 +281,21 @@ outside what the seeds can promise.</p></li>
 daemon where nothing shows it.</p></li>
 <li><p><code>save_gp_scoring</code> writes its files to the temporary directory of the
 process that tuned, a daemon's own on the parallel path.</p></li>
-<li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
+</ul><ul><li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
 describes. <code>parallel_over</code> changes the numbers a stochastic engine
 produces even at <code>allow_par = FALSE</code>.</p></li>
-</ul><p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> The outer fit's
+</ul><p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
+outer fit as well as the inner search. The outer fit's
 predictions and extracts are kept as <code>.predictions</code> and <code>.extracts</code>, as
-the grid page describes, and the inner search's are still discarded.</p>
+the grid page describes, and the inner search's own are still discarded.</p>
+
 <p><strong>Not returned: <code>save_workflow</code>.</strong> It lands on the inner <code>tune_results</code>
 a fold record discards, so setting it costs the work and returns
 nothing. The final fit keeps its own tuning run as <code>$tuning</code>, where what
 it saved is reachable.</p>
-<p><strong>Inert: <code>backend_options</code>.</strong> Options for a backend the forced
-<code>allow_par = FALSE</code> never reaches.</p>
+
+<p><strong>Inert: <code>backend_options</code>.</strong> Options for a parallel backend, with no
+backend to reach at <code>allow_par = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="nested-designs">Nested designs<a class="anchor" aria-label="anchor" href="#nested-designs"></a></h2>
