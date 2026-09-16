@@ -62,6 +62,8 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: T6 done. `devtools::check()` at `1f3ac3d`: 0 errors, 0 warnings, 0 notes. `document()` no diff. NEWS bullet names the five pages and the four arguments. Status → review.
 - 2026-09-15: /milestone-review: five criteria verified against recorded evidence, gate clean, three reviewers reported (0 + 0 regressions, 11 diff-bug findings to triage at the gate).
 - 2026-09-15: gate: the user chose apply-fixes-then-merge. Fix-now findings 2, 3, 4, 5, 9 applied (`details-param-info` template, `VERSION_CTRL` variable, kept clause, NEWS six pages, bayes Details); AC1, AC2, AC3 and the six sweeps re-verified clean; `test()` and `check()` re-running, results in the next line.
+- 2026-09-15: after the fixes at `154f662`: `devtools::test()` 10116 pass, 0 fail; `devtools::check()` 0 errors, 0 warnings, 0 notes; tree clean after `document()`.
+- 2026-09-15: step-7 approval: m096-help-inherits-tune-params approved for merge
 
 ## Decisions
 
