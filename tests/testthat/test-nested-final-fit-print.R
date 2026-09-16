@@ -172,6 +172,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
       "iterations_completed",
       "iterations_requested",
       "selection",
+      "select",
       "estimate"
     )
   )
@@ -443,4 +444,164 @@ test_that("the Bayesian printed reports are stable", {
 
   expect_snapshot(print(bayes_final_for_print()))
   expect_snapshot(print(summary(bayes_final_for_print())))
+})
+
+
+# The selection-rule line (M98, AC2, AC3) --------------------------------------
+
+# A final fit built from a run under the rule given: the deterministic
+# workflow on `final_nested()`, as `final_for_print()` builds the default
+# one, under the same seeds.
+rule_final <- function(select) {
+  force(select)
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- final_nested(d)
+  grid <- det_grid()
+  ms <- reg_metrics()
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = grid,
+    metrics = ms,
+    select = select
+  ))
+  set.seed(21)
+  memoised(nested_final_fit(wf, res))
+}
+
+# The two-parameter fit, for a rule ordering the candidates by two names:
+# the spline workflow over a literal grid, as
+# test-nested-final-fit-results.R builds it.
+two_param_rule_final <- function(select) {
+  force(select)
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- final_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = g,
+    metrics = ms,
+    param_info = p,
+    select = select
+  ))
+  set.seed(3)
+  memoised(nested_final_fit(wf, res))
+}
+
+# A fit that tuned nothing: the fixed workflow on the suite's
+# `nested_fit_resamples()` run.
+untuned_final <- function() {
+  d <- make_reg_data()
+  set.seed(21)
+  memoised(nested_final_fit(fixed_workflow(d), fit_resamples_results(d)))
+}
+
+print_lines <- function(x) {
+  strsplit(print_text(x), "\n")[[1L]]
+}
+
+selected_by_lines <- function(lines) {
+  lines[startsWith(lines, "Selected by: ")]
+}
+
+# On the fit's print the line follows `Selected:` directly; on the summary's
+# it sits under the heading, after the blank line an h2 leaves.
+expect_selected_by_on_both <- function(final, label) {
+  line <- paste0("Selected by: ", label)
+
+  lines <- print_lines(final)
+  selected <- which(startsWith(lines, "Selected: "))
+  expect_length(selected, 1L)
+  expect_identical(lines[[selected + 1L]], line)
+  expect_identical(selected_by_lines(lines), line)
+
+  lines <- print_lines(summary(final))
+  heading <- which(grepl("Selected parameters", lines, fixed = TRUE))
+  expect_length(heading, 1L)
+  expect_identical(lines[[heading + 2L]], line)
+  expect_identical(selected_by_lines(lines), line)
+}
+
+test_that("AC3: both prints name a non-default rule, after `Selected:` and under the heading", {
+  skip_if_no_engines()
+
+  expect_selected_by_on_both(
+    rule_final(selection_rule("pct_loss", num_comp, limit = 5)),
+    "pct_loss by num_comp (limit = 5)"
+  )
+})
+
+test_that("AC3: a rule ordering by two names is rendered with both on both prints", {
+  skip_if_no_bayes_fixture()
+
+  expect_selected_by_on_both(
+    two_param_rule_final(selection_rule("one_std_err", desc(df1), df2)),
+    "one_std_err by desc(df1), df2"
+  )
+})
+
+test_that("AC3: the default rule and a fit that tuned nothing print no `Selected by:` line", {
+  skip_if_no_engines()
+
+  best <- final_for_print()
+  expect_identical(extract_procedure(best)$select$rule, "best")
+  expect_length(selected_by_lines(print_lines(best)), 0L)
+  expect_length(selected_by_lines(print_lines(summary(best))), 0L)
+
+  untuned <- untuned_final()
+  expect_null(extract_procedure(untuned)$select)
+  expect_length(selected_by_lines(print_lines(untuned)), 0L)
+  expect_length(selected_by_lines(print_lines(summary(untuned))), 0L)
+})
+
+test_that("AC2: the summary's `select` component is the procedure record's rule", {
+  skip_if_no_engines()
+
+  rule <- selection_rule("pct_loss", num_comp, limit = 5)
+  under_rule <- rule_final(rule)
+  s <- summary(under_rule)
+  expect_true("select" %in% names(s))
+  expect_identical(s[["select"]], extract_procedure(under_rule)$select)
+  expect_identical(s[["select"]], rule)
+
+  best <- final_for_print()
+  s <- summary(best)
+  expect_identical(s[["select"]], extract_procedure(best)$select)
+  expect_identical(s[["select"]]$rule, "best")
+
+  # A fit that tuned nothing carries the name with NULL under it, as
+  # `estimate` is carried.
+  s <- summary(untuned_final())
+  expect_true("select" %in% names(s))
+  expect_null(s[["select"]])
+})
+
+test_that("AC3: the selection-rule line holds its shape on both prints", {
+  skip_if_no_engines()
+
+  pct_loss_5 <- rule_final(selection_rule("pct_loss", num_comp, limit = 5))
+  best <- final_for_print()
+  untuned <- untuned_final()
+
+  expect_snapshot(print(pct_loss_5))
+  expect_snapshot(print(summary(pct_loss_5)))
+  expect_snapshot(print(best))
+  expect_snapshot(print(summary(best)))
+  expect_snapshot(print(untuned))
+  expect_snapshot(print(summary(untuned)))
+})
+
+test_that("AC3: the two-ordering line holds its shape on both prints", {
+  skip_if_no_bayes_fixture()
+
+  two <- two_param_rule_final(selection_rule("one_std_err", desc(df1), df2))
+  expect_snapshot(print(two))
+  expect_snapshot(print(summary(two)))
 })

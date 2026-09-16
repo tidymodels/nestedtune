@@ -1143,3 +1143,237 @@ test_that("AC1: the set's printed summary holds its shape", {
     broken = 1L
   )))))
 })
+
+# ---- the selection-rule line (M98, AC1, AC2, AC4) ---------------------------
+
+# A run under the rule given, on the deterministic workflow and
+# `det_nested()`, whose three inner resamples give tune's one-standard-error
+# selector the standard error it filters on. Entry seed 2, as the shape
+# snapshots above. `folds` lets a caller break the design.
+rule_results <- function(
+  select,
+  data = make_reg_data(),
+  folds = det_nested(data)
+) {
+  force(data)
+  force(folds)
+  force(select)
+  set.seed(2)
+  memoised(nested_tune_grid(
+    det_workflow(data),
+    folds,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    select = select
+  ))
+}
+
+# The two-parameter run, for a rule ordering the candidates by two names:
+# the Bayesian fixtures' spline workflow over a literal grid, on
+# `det_nested()`.
+two_param_rule_results <- function(select) {
+  force(select)
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  p <- bayes_param_info(wf)
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  folds <- det_nested(d)
+  ms <- reg_metrics()
+  set.seed(2)
+  memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = g,
+    metrics = ms,
+    param_info = p,
+    select = select
+  ))
+}
+
+# A two-workflow set, one tuned and one fixed, run under the rule given.
+# The rule in `...` reaches the tuned workflow alone: the fixed one routes
+# to `nested_fit_resamples()`, which takes no rule.
+rule_set_results <- function(select, data = make_reg_data(), seed = 31) {
+  force(data)
+  force(select)
+  set.seed(seed)
+  wset <- wset_two(data)
+  folds <- final_nested(data)
+  ms <- reg_metrics()
+  grid <- det_grid()
+  set.seed(seed)
+  memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = folds,
+    metrics = ms,
+    grid = grid,
+    select = select
+  ))
+}
+
+# The lines of a summary's print, and the `Selected by:` line among them.
+summary_lines <- function(x) {
+  strsplit(summary_text(x), "\n")[[1L]]
+}
+
+selected_by_lines <- function(lines) {
+  lines[startsWith(lines, "Selected by: ")]
+}
+
+# The line sits directly under the "Selected parameters" heading: the
+# heading, the blank line an h2 leaves, then the line.
+expect_selected_by_under_heading <- function(x, label) {
+  lines <- summary_lines(x)
+  heading <- which(grepl("Selected parameters", lines, fixed = TRUE))
+  expect_length(heading, 1L)
+  expect_identical(lines[[heading + 2L]], paste0("Selected by: ", label))
+  expect_identical(selected_by_lines(lines), paste0("Selected by: ", label))
+}
+
+test_that("AC1: the summary names a non-default rule directly under the selected-parameters heading", {
+  skip_if_no_engines()
+
+  expect_selected_by_under_heading(
+    rule_results(selection_rule("one_std_err", num_comp)),
+    "one_std_err by num_comp"
+  )
+  expect_selected_by_under_heading(
+    rule_results(selection_rule("pct_loss", num_comp)),
+    "pct_loss by num_comp (limit = 2)"
+  )
+  expect_selected_by_under_heading(
+    rule_results(selection_rule("pct_loss", num_comp, limit = 5)),
+    "pct_loss by num_comp (limit = 5)"
+  )
+  # The rule describes the procedure asked for, not what completed: a run in
+  # which no fold completed still names it.
+  d <- make_reg_data()
+  nothing <- suppressWarnings(rule_results(
+    selection_rule("one_std_err", num_comp),
+    data = d,
+    folds = break_every_fold(det_nested(d))
+  ))
+  expect_identical(suppressWarnings(summary(nothing))$completed, 0L)
+  expect_selected_by_under_heading(nothing, "one_std_err by num_comp")
+  expect_match(summary_text(nothing), "No outer fold completed", fixed = TRUE)
+})
+
+test_that("AC1: a rule ordering by two names is rendered with both, as written", {
+  skip_if_no_bayes_fixture()
+
+  res <- two_param_rule_results(selection_rule("one_std_err", desc(df1), df2))
+  expect_selected_by_under_heading(res, "one_std_err by desc(df1), df2")
+})
+
+test_that("AC1: the default rule and a run that applied none print no `Selected by:` line", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  best <- rule_results(selection_rule("best"), data = d)
+  expect_identical(extract_procedure(best)$select$rule, "best")
+  expect_length(selected_by_lines(summary_lines(best)), 0L)
+
+  fixed <- fit_resamples_results(d)
+  expect_null(extract_procedure(fixed)$select)
+  expect_length(selected_by_lines(summary_lines(fixed)), 0L)
+})
+
+test_that("AC2: the summary's `select` component is the procedure record's rule", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  for (rule in list(
+    selection_rule("one_std_err", num_comp),
+    selection_rule("best")
+  )) {
+    res <- rule_results(rule, data = d)
+    s <- summary(res)
+    expect_true("select" %in% names(s))
+    expect_identical(s[["select"]], extract_procedure(res)$select)
+    expect_identical(s[["select"]], rule)
+  }
+
+  # A record that applied no rule carries the name with NULL under it, so a
+  # caller meets a recorded fact rather than a missing name.
+  fixed <- fit_resamples_results(d)
+  s <- summary(fixed)
+  expect_true("select" %in% names(s))
+  expect_null(s[["select"]])
+})
+
+test_that("AC4: a set names the rule inside each tuned workflow's section and not the fixed one's", {
+  skip_if_no_wset_fixture()
+
+  under_rule <- rule_set_results(selection_rule("one_std_err", num_comp))
+  expect_named(under_rule$result, NULL)
+  expect_identical(under_rule$wflow_id, c("tuned", "fixed"))
+  expect_identical(
+    extract_procedure(under_rule$result[[1L]])$select,
+    selection_rule("one_std_err", num_comp)
+  )
+  expect_null(extract_procedure(under_rule$result[[2L]])$select)
+
+  lines <- strsplit(print_text(summary(under_rule)), "\n")[[1L]]
+  by <- which(startsWith(lines, "Selected by: "))
+  expect_length(by, 1L)
+  expect_identical(lines[[by]], "Selected by: one_std_err by num_comp")
+  # Inside the tuned workflow's section: after its heading, before the
+  # fixed workflow's.
+  tuned <- which(grepl('Workflow "tuned"', lines, fixed = TRUE))
+  fixed <- which(grepl('Workflow "fixed"', lines, fixed = TRUE))
+  expect_true(tuned < by && by < fixed)
+
+  under_default <- rule_set_results(selection_rule("best"))
+  lines <- strsplit(print_text(summary(under_default)), "\n")[[1L]]
+  expect_length(which(startsWith(lines, "Selected by: ")), 0L)
+})
+
+# The fixtures are built ahead of the snapshot calls, as the shape block
+# above builds its own: a fixture served from the cache replays the
+# conditions its build raised, and a broken run's build prints tune's
+# console lines, which are not the print under test.
+test_that("AC1: the selection-rule line holds its shape", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  one_std_err <- rule_results(
+    selection_rule("one_std_err", num_comp),
+    data = d
+  )
+  pct_loss <- rule_results(selection_rule("pct_loss", num_comp), data = d)
+  pct_loss_5 <- rule_results(
+    selection_rule("pct_loss", num_comp, limit = 5),
+    data = d
+  )
+  nothing <- suppressWarnings(rule_results(
+    selection_rule("one_std_err", num_comp),
+    data = d,
+    folds = break_every_fold(det_nested(d))
+  ))
+  best <- rule_results(selection_rule("best"), data = d)
+  fixed <- fit_resamples_results(d)
+
+  expect_snapshot(print(summary(one_std_err)))
+  expect_snapshot(print(summary(pct_loss)))
+  expect_snapshot(print(summary(pct_loss_5)))
+  expect_snapshot(print(suppressWarnings(summary(nothing))))
+  expect_snapshot(print(summary(best)))
+  expect_snapshot(print(summary(fixed)))
+})
+
+test_that("AC1: the two-ordering line holds its shape", {
+  skip_if_no_bayes_fixture()
+
+  two <- two_param_rule_results(selection_rule("one_std_err", desc(df1), df2))
+  expect_snapshot(print(summary(two)))
+})
+
+test_that("AC4: the set's selection-rule line holds its shape", {
+  skip_if_no_wset_fixture()
+
+  under_rule <- rule_set_results(selection_rule("one_std_err", num_comp))
+  under_default <- rule_set_results(selection_rule("best"))
+  expect_snapshot(print(summary(under_rule)))
+  expect_snapshot(print(summary(under_default)))
+})

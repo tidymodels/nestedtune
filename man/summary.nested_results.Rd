@@ -25,8 +25,11 @@ holding:
 \item the outer resampling scheme's label
 \item the requested and completed fold counts
 \item the failed folds, with the stage each failed at
-\item what the completed folds selected, and the candidates, the parameter
-settings, each searched
+\item what the completed folds selected
+\item the rule the folds selected by, as \code{\link[=extract_procedure]{extract_procedure()}} records it,
+under the name \code{select}. It is \code{NULL} on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
+run, which applies no rule.
+\item the candidates, the parameter settings, each fold searched
 \item the metric estimates averaged over them
 }
 
@@ -46,6 +49,19 @@ Outer folds that chose different parameters mean the tuning procedure,
 tune then select, is unstable on this data. Averaging the metrics hides
 that, so the summary marks it.
 }
+\section{The selection rule}{
+
+
+When the run selected by a rule other than the default, the print adds
+a line directly under the "Selected parameters" heading. It reads
+\verb{Selected by:} and then the rule's name, orderings and limit, in the
+words the print of \code{\link[=selection_rule]{selection_rule()}} uses after its class tag, for
+example \verb{Selected by: one_std_err by num_comp}. The line is absent under
+the default rule, so its presence is the signal. It prints whether or not
+any fold completed, because the rule describes the procedure the run
+asked for.
+}
+
 \section{A run that did not finish}{
 
 

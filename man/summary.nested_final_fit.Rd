@@ -29,6 +29,8 @@ with these components:
 \item \code{initial} and \code{initial_requested}, \code{iterations_completed} and
 \code{iterations_requested}, the iterating tuners' counts
 \item \code{selection}, the parameter values selection chose
+\item \code{select}, the \code{\link[=selection_rule]{selection_rule()}} the selection was made by, as
+\code{\link[=extract_procedure]{extract_procedure()}} records it
 \item \code{estimate}, always \code{NULL}
 }
 
@@ -53,6 +55,16 @@ selection-time quantities, so they do not fill the slot. See
 out, so the object states where that number is instead of leaving you to
 infer it from a missing name.
 }
+\section{The selection rule}{
+
+
+When \code{select} names a rule other than the default, the print adds a line
+directly under the "Selected parameters" heading. It reads \verb{Selected by:}
+and then the rule's name, orderings and limit, in the words the print of
+\code{\link[=selection_rule]{selection_rule()}} uses after its class tag. The line is absent
+under the default rule and on a fit that tuned nothing.
+}
+
 \section{Components that are absent}{
 
 
@@ -64,7 +76,8 @@ whose metrics table cannot be read reports its scored figures as zero
 rather than failing to print.
 
 Where nothing was tuned there is no run to describe, so \code{tuning_label}
-is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty.
+is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty and \code{select} is
+\code{NULL}, because no rule was applied.
 }
 
 \examples{

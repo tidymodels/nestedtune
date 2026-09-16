@@ -1,5 +1,13 @@
 # nestedtune 0.0.0.9000
 
+* The printed `summary()` of a run, the final fit's print and its
+  `summary()` now name a selection rule other than the default. The line
+  reads `Selected by:` and then the rule's name, orderings and limit, in
+  the words the print of `selection_rule()` uses after its class tag.
+  A workflow set's printed summary adds the line inside each tuned
+  workflow's section. Both summaries gain a `select` component holding
+  the rule.
+
 * The help for `nested_tune_grid()`, `nested_tune_bayes()`,
   `nested_tune_race_anova()`, `nested_tune_race_win_loss()`,
   `nested_tune_sim_anneal()` and `nested_fit_resamples()` now takes the

@@ -50,6 +50,16 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' reads "nothing to select", and the note says that [extract_tune_results()]
 #' and [extract_scored_candidates()] refuse the object.
 #'
+#' @section The selection rule:
+#'
+#' When the selection was made by a rule other than the default, a line
+#' follows the `Selected:` line. It reads `Selected by:` and then the rule's
+#' name, orderings and limit, in the words the print of [selection_rule()]
+#' uses after its class tag, for example
+#' `Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
+#' under the default rule and on a fit that tuned nothing. The summary's
+#' `select` component holds the rule as a value.
+#'
 #' @template example-setup
 #' @template example-run
 #' @template example-final
@@ -65,8 +75,13 @@ print.nested_final_fit <- function(x, ...) {
   cli::cli_h1("Nested cross-validation final fit")
   # The menu selection picked from, before what it picked: the same sentence
   # for both tuners, so one kind of object has one shape of print (RR05 Q2).
-  cli::cli_text("Procedure: {procedure_label(new_summary_nested_final_fit(x))}")
+  s <- new_summary_nested_final_fit(x)
+  cli::cli_text("Procedure: {procedure_label(s)}")
   cli::cli_text("Selected: {selected_label(x$selected)}")
+  # The rule the selection was made by, where it is not the default (M98),
+  # read from the summary's component as the procedure line is, so the two
+  # prints cannot name one fit's rule differently.
+  print_selected_by(s$select)
   cli::cli_text("")
   estimate <- c(i = final_fit_estimate_msg)
   # A fit that ran no tuning (M70) has no selection to compare and no run
@@ -130,10 +145,20 @@ print.nested_final_fit <- function(x, ...) {
 #' - `initial` and `initial_requested`, `iterations_completed` and
 #'   `iterations_requested`, the iterating tuners' counts
 #' - `selection`, the parameter values selection chose
+#' - `select`, the [selection_rule()] the selection was made by, as
+#'   [extract_procedure()] records it
 #' - `estimate`, always `NULL`
 #'
 #' Printing it is what most callers want. The components are there for a
 #' caller that needs a value rather than a line of text.
+#'
+#' @section The selection rule:
+#'
+#' When `select` names a rule other than the default, the print adds a line
+#' directly under the "Selected parameters" heading. It reads `Selected by:`
+#' and then the rule's name, orderings and limit, in the words the print of
+#' [selection_rule()] uses after its class tag. The line is absent
+#' under the default rule and on a fit that tuned nothing.
 #'
 #' @section Components that are absent:
 #'
@@ -145,7 +170,8 @@ print.nested_final_fit <- function(x, ...) {
 #' rather than failing to print.
 #'
 #' Where nothing was tuned there is no run to describe, so `tuning_label`
-#' is `NULL` and `candidates` is `0`. `selection` is empty.
+#' is `NULL` and `candidates` is `0`. `selection` is empty and `select` is
+#' `NULL`, because no rule was applied.
 #'
 #' @template example-setup
 #' @template example-run
@@ -199,6 +225,10 @@ new_summary_nested_final_fit <- function(x) {
       counts,
       list(
         selection = summary_final_selection(x$selected),
+        # The rule selection was made by, as the record holds it (M98): NULL
+        # on a fit that tuned nothing, whose record names no rule, and
+        # carried then as `estimate` is.
+        select = x$procedure$select,
         estimate = NULL
       )
     ),
@@ -360,6 +390,7 @@ print_final_design <- function(s) {
 
 print_final_selection <- function(s) {
   cli::cli_h2("Selected parameters")
+  print_selected_by(s$select)
   if (length(s$selection) == 0L) {
     cli::cli_bullets(c(i = "No tuned parameters."))
     return(invisible(NULL))

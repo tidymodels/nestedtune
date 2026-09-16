@@ -23,7 +23,11 @@ takes tune's default of 2, and the other rules refuse it.}
 A list of class \code{selection_rule} with elements \code{rule}, \code{order} and
 \code{limit}. \code{order} holds the expressions in \code{...}, empty for \code{"best"}.
 \code{limit} is \code{NULL} outside \code{"pct_loss"}. Printing shows the three on one
-line.
+line: the rule, then \code{by} and the orderings as written, then the limit
+in parentheses. That same label follows \verb{Selected by:} in the printed
+\code{\link[=summary.nested_results]{summary.nested_results()}}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}},
+\code{\link[=print.nested_final_fit]{print.nested_final_fit()}} and \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}} when the
+rule is not \code{"best"}.
 }
 \description{
 Builds the object the \code{select} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} and its
