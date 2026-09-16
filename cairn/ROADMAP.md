@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-16 (M098's pass: archived, M95's row pruned, no les
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M99 | IP2's text names the randomness it reaches | planned | — | normal | milestones/M099-ip2-rng-scope.md |
+| M99 | IP2's text names the randomness it reaches | review | — | normal | milestones/M099-ip2-rng-scope.md |
 | M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | planned | — | normal | milestones/M100-compute-metrics-predictions-rows.md |
 | M101 | The outer average honors tune's resample weights | planned | — | normal | milestones/M101-resample-weights.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | planned | — | normal | milestones/M102-devel-vctrs-schedule-cache.md |
