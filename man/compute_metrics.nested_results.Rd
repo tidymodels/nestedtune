@@ -62,6 +62,15 @@ run did not save is refused with class
 \code{nestedtune_metric_type_not_saved}. An example is a class metric such as
 \code{accuracy} on a run whose metrics read only class probabilities.
 
+A completed fold whose saved predictions do not match the rows it held
+out is refused with class \code{nestedtune_compute_metrics_predictions},
+before any fold is scored. Its \code{.row} column must hold each of those
+rows once and no other row. Five shapes this refuses are a missing row,
+a repeated \code{.row}, an \code{NA} \code{.row}, a row the fold did not hold out, and
+no \code{.row} column. A \code{.row} that is not a whole number is refused too.
+The message names each fold that fails. \code{\link[=augment]{augment()}} refuses the same
+shapes.
+
 A run with some failed folds is scored over the rest, with a warning of
 class \code{nestedtune_partial_summary}.
 }

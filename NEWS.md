@@ -1,5 +1,15 @@
 # nestedtune 0.0.0.9000
 
+* `compute_metrics()` now refuses a completed fold whose saved predictions
+  do not hold exactly the rows that fold held out, each once, before any
+  fold is scored. The refusal has class
+  `nestedtune_compute_metrics_predictions` and names each fold that fails.
+  Five shapes this refuses are a missing row, a repeated `.row`, an `NA`
+  `.row`, a row the fold did not hold out, and no `.row` column. A `.row`
+  that is not a whole number is refused too. `augment()` refuses the same
+  shapes. On a workflow-set run the message
+  names the workflow.
+
 * The printed `summary()` of a run, the final fit's print and its
   `summary()` now name a selection rule other than the default. The line
   reads `Selected by:` and then the rule's name, orderings and limit, in

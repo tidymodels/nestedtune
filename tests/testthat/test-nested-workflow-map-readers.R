@@ -379,6 +379,21 @@ test_that("augment() on a set keeps nestedtune_augment_predictions for a workflo
   expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
 })
 
+# M100: the same mismatch under compute_metrics() on the set.
+test_that("compute_metrics() on a set keeps nestedtune_compute_metrics_predictions for a workflow whose saved predictions miss a held-out row, naming it", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  res <- kept_set_results(d)
+  expect_identical(res$wflow_id, c("tuned", "fixed"))
+  preds <- res$result[[2L]]$.predictions[[2L]]
+  res$result[[2L]]$.predictions[[2L]] <- preds[-1L, ]
+  cnd <- rlang::catch_cnd(compute_metrics(res, reg_metrics()), "error")
+  expect_s3_class(cnd, "nestedtune_compute_metrics_predictions")
+  expect_identical(rlang::call_name(conditionCall(cnd)), "compute_metrics")
+  expect_match(conditionMessage(cnd), 'Workflow "fixed"', fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
+})
+
 # M93: two classification workflows in one set, run at the default level.
 cls_set_results <- function(data, seed = 36) {
   wset <- workflowsets::as_workflow_set(
