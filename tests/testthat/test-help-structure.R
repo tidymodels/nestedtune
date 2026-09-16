@@ -72,12 +72,12 @@ section_lists <- function(body) {
 # column 0; the body is indented.
 rendered_differences <- function(topic) {
   title <- DIFFERENCES_TITLE[[topic]]
-  lines <- withr::with_options(
-    list(useFancyQuotes = FALSE),
+  lines <- rlang::with_options(
     utils::capture.output(tools::Rd2txt(
       structure_rd(topic),
       options = list(underline_titles = FALSE)
-    ))
+    )),
+    useFancyQuotes = FALSE
   )
   start <- which(lines == paste0(title, ":"))
   if (length(start) != 1L) {
@@ -127,8 +127,7 @@ test_that("the grid page's forced paragraph carries the contention sentence", {
 
 SETTABLE_ANCHOR <- c(
   nested_tune_bayes = "are arguments of 'tune_bayes()'",
-  nested_tune_race =
-    "'grid' and 'eval_time' are the racing functions' own arguments",
+  nested_tune_race = "'grid' and 'eval_time' are the racing functions' own arguments",
   nested_tune_sim_anneal = "are arguments of 'tune_sim_anneal()'"
 )
 
