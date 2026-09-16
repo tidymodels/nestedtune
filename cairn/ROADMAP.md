@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-15 (M097's pass: archived, M94's row pruned, the M9
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M98 | The summary and final-fit prints name a non-default selection rule | planned | — | normal | milestones/M098-selection-rule-printed.md |
+| M98 | The summary and final-fit prints name a non-default selection rule | in-progress | — | normal | milestones/M098-selection-rule-printed.md |
 | M97 | The Differences sections render each heading's paragraph whole and one list per page | done | — | normal | milestones/archive/M097-differences-section-rendering.md |
 | M96 | The help pages inherit tune's argument text and share repeated text through templates | done | — | normal | milestones/archive/M096-help-inherits-tune-params.md |
 | M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | done | — | normal | milestones/archive/M095-report-number-leftovers.md |

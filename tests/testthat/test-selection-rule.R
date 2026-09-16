@@ -112,6 +112,46 @@ test_that("AC3: each malformed limit is refused with the percent-loss rule", {
   )
 })
 
+test_that("selection_rule_label() renders the four label shapes the summaries share (M98)", {
+  # No ordering, one, two, and one with a limit: the label is the rule name,
+  # then ` by ` and the orderings as written, then the limit.
+  expect_identical(selection_rule_label(selection_rule()), "best")
+  expect_identical(
+    selection_rule_label(selection_rule("one_std_err", num_comp)),
+    "one_std_err by num_comp"
+  )
+  expect_identical(
+    selection_rule_label(selection_rule("one_std_err", desc(df1), df2)),
+    "one_std_err by desc(df1), df2"
+  )
+  expect_identical(
+    selection_rule_label(selection_rule("pct_loss", desc(df1), df2, limit = 5)),
+    "pct_loss by desc(df1), df2 (limit = 5)"
+  )
+  # The default limit is rendered too, so a reader sees the number tune used.
+  expect_identical(
+    selection_rule_label(selection_rule("pct_loss", num_comp)),
+    "pct_loss by num_comp (limit = 2)"
+  )
+  # The object's own format is the label behind the class tag, so the two
+  # cannot drift apart.
+  rule <- selection_rule("pct_loss", desc(df1), df2, limit = 5)
+  expect_identical(
+    format(rule),
+    paste0("<selection_rule> ", selection_rule_label(rule))
+  )
+})
+
+test_that("names_selection_rule() is true for the two non-default rules alone (M98)", {
+  expect_false(names_selection_rule(selection_rule()))
+  expect_false(names_selection_rule(selection_rule("best")))
+  expect_true(names_selection_rule(selection_rule("one_std_err", num_comp)))
+  expect_true(names_selection_rule(selection_rule("pct_loss", num_comp)))
+  # A record with no rule, as `nested_fit_resamples()` writes it, names none.
+  expect_false(names_selection_rule(NULL))
+  expect_false(names_selection_rule("one_std_err"))
+})
+
 test_that("the object prints on one line naming the rule, orderings and limit", {
   expect_identical(format(selection_rule()), "<selection_rule> best")
   expect_identical(

@@ -1,13 +1,13 @@
 # M098: The summary and final-fit prints name a non-default selection rule
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — printed output and help pages of exported methods
-- **Branch/PR:** —
+- **Branch/PR:** `m098-selection-rule-printed`
 
 ## Goal
 
@@ -39,7 +39,7 @@ If a run selected each fold's candidate by a rule other than the default best-by
 
 ## Tasks
 
-- [ ] T1: Add `selection_rule_label(x)` to `R/selection-rule.R` to render the AC1 label. Make `format.selection_rule()` (line 174) return `paste0("<selection_rule> ", selection_rule_label(x))`. Add unit tests in `test-selection-rule.R` for the four label shapes (no ordering, one, two, with limit). The existing `_snaps/selection-rule.md` blocks must pass unchanged.
+- [x] T1: Add `selection_rule_label(x)` to `R/selection-rule.R` to render the AC1 label. Make `format.selection_rule()` (line 174) return `paste0("<selection_rule> ", selection_rule_label(x))`. Add unit tests in `test-selection-rule.R` for the four label shapes (no ordering, one, two, with limit). The existing `_snaps/selection-rule.md` blocks must pass unchanged.
 - [ ] T2: In `new_summary_nested_results()` (`R/nested-results-print.R`) add `select = attr(x, "procedure")$select` as a named entry that stays present when `NULL`. If the rule is non-default, `print_selection()` prints `Selected by: {label}` after the heading and before its early returns. Add the snapshot and identity tests for AC1, AC2 (results side) and AC4. The set case reuses the mixed fixture the set summary tests at `test-nested-results-print.R:1016` build. Verify with `devtools::test()`.
 - [ ] T3: In `new_summary_nested_final_fit()` (`R/nested-final-fit-print.R`) add the `select` entry from `x$procedure$select`. In `print.nested_final_fit()` add the line after `Selected:`, and in `print_final_selection()` under its heading, both read from the summary's component. Add the snapshot and identity tests for AC2 (fit side) and AC3. Update the component-list assertions in `test-nested-final-fit-print.R` that enumerate the summary's names. Verify with `devtools::test()`.
 - [ ] T4: Write the help text on the four pages and on `selection_rule()`'s page, and the NEWS bullet. Run `devtools::document()` until it leaves no diff. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain` clean, and `air format --check` on touched files. Read the `_snaps/` diff and make sure that it holds only added blocks (AC5). Run the full `devtools::test()`.
@@ -52,6 +52,8 @@ If a run selected each fold's candidate by a rule other than the default best-by
 - 2026-09-15: plan gate chose printing the line on a run in which no fold completed over omitting it. The rule describes the procedure asked for, not what completed (IP4). Falsified by a reader taking the line as a claim that a selection happened.
 - 2026-09-15: plan gate chose leaving `print.nested_results` without the line over adding it because that print describes the object and defers meaning to `summary()`. Falsified by users reading `.selected` off the print without reaching `summary()`.
 - 2026-09-15: plan gate chose the `Selected by: one_std_err by num_comp` form over a prose rendering. One helper then serves the rule's own print and these lines. Falsified by readers not recognizing the rule names as tune's selectors.
+- 2026-09-16: /milestone-implement started. Branch `m098-selection-rule-printed` cut from pushed `main` at `452b015`. No question gate. The plan fixed the label wording, the helper name and the line's placement.
+- 2026-09-16: T1 done. `selection_rule_label()` renders the label and `format.selection_rule()` reads it. `names_selection_rule()` answers whether a record's rule is one the summaries name, which is a non-default rule and not `NULL`. Label tests cover the four shapes and the default limit. `_snaps/selection-rule.md` is unchanged.
 
 ## Decisions
 

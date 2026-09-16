@@ -170,10 +170,12 @@ is_selection_rule <- function(x) {
   inherits(x, "selection_rule")
 }
 
-#' @export
-format.selection_rule <- function(x, ...) {
-  rlang::check_dots_empty()
-  out <- paste0("<selection_rule> ", x$rule)
+# The rule on one line: its name, then ` by ` and the orderings as written,
+# then ` (limit = <limit>)` where the rule carries one. The one rendering the
+# object's own print and the `Selected by:` line of the results and final-fit
+# summaries share (M98), so a reader meets the same words in both places.
+selection_rule_label <- function(x) {
+  out <- x$rule
   if (length(x$order) > 0L) {
     out <- paste0(
       out,
@@ -185,6 +187,20 @@ format.selection_rule <- function(x, ...) {
     out <- paste0(out, " (limit = ", format(x$limit), ")")
   }
   out
+}
+
+# Whether the rule is one the summaries name (M98): the default best-by-metric
+# rule stays unnamed, so the line's presence is itself the signal, as the
+# fold-failure and candidate-set lines are. `NULL` -- the record of a run that
+# applied no rule -- is not named either.
+names_selection_rule <- function(select) {
+  is_selection_rule(select) && select$rule != "best"
+}
+
+#' @export
+format.selection_rule <- function(x, ...) {
+  rlang::check_dots_empty()
+  paste0("<selection_rule> ", selection_rule_label(x))
 }
 
 #' @export
