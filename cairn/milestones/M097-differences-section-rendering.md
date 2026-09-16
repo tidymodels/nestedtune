@@ -23,13 +23,13 @@ On the grid, bayes, race and sim-anneal help pages, the "Differences from callin
 
 The rendering of a page is the text that `tools::Rd2txt(rd, options = list(underline_titles = FALSE))` prints under `options(useFancyQuotes = FALSE)`, where `rd` is the page's object in `tools::Rd_db()`. A paragraph is a run of consecutive non-blank lines. The lines are joined with single spaces before any search. Anchors carry no backticks, because `\code{}` renders as plain single quotes.
 
-- [ ] AC1: In the rendering of `man/nested_tune_grid.Rd`, inside the "Differences from calling tune directly" section, the paragraph that contains "Forced:" also contains "Leaving parallelism to a caller puts two pools in contention."
-- [ ] AC2: In the rendering of `man/nested_tune_bayes.Rd` (section "Differences from calling tune directly"), `man/nested_tune_race.Rd` and `man/nested_tune_sim_anneal.Rd` (section "Differences from calling finetune directly"), the paragraph that contains "Settable as its own argument:" also contains the page's anchor. On bayes the anchor is "are arguments of 'tune_bayes()'". On race it is "'grid' and 'eval_time' are the racing functions' own arguments". On sim-anneal it is "are arguments of 'tune_sim_anneal()'".
-- [ ] AC3: In the parsed Rd of each of those three pages, the Differences section holds exactly one `\itemize` element, and the text of that element does not contain "behave as the grid page describes". In the rendering of each, the paragraph that contains "behave as the grid page describes" lies after the section's last bullet line. A bullet line begins, after leading spaces, with U+2022.
-- [ ] AC4: Every file that `ls man-roxygen/*.R` lists consists solely of lines that begin with `#'`. So `benchmarks/sweep-prose.R`'s roxygen reader and M096's duplicate-line command each read a template as one roxygen block.
-- [ ] AC5: M096's duplicate-line command, run from the repo root at the branch head, prints nothing and exits 0. The command is in the Decisions section of `git show 66f1cfa:cairn/milestones/M096-help-inherits-tune-params.md`. Over the six tag kinds it keeps in `R/*.R` and `man-roxygen/*.R`, no prose line of 12 or more words appears in two or more roxygen blocks.
+- [x] AC1: In the rendering of `man/nested_tune_grid.Rd`, inside the "Differences from calling tune directly" section, the paragraph that contains "Forced:" also contains "Leaving parallelism to a caller puts two pools in contention."
+- [x] AC2: In the rendering of `man/nested_tune_bayes.Rd` (section "Differences from calling tune directly"), `man/nested_tune_race.Rd` and `man/nested_tune_sim_anneal.Rd` (section "Differences from calling finetune directly"), the paragraph that contains "Settable as its own argument:" also contains the page's anchor. On bayes the anchor is "are arguments of 'tune_bayes()'". On race it is "'grid' and 'eval_time' are the racing functions' own arguments". On sim-anneal it is "are arguments of 'tune_sim_anneal()'".
+- [x] AC3: In the parsed Rd of each of those three pages, the Differences section holds exactly one `\itemize` element, and the text of that element does not contain "behave as the grid page describes". In the rendering of each, the paragraph that contains "behave as the grid page describes" lies after the section's last bullet line. A bullet line begins, after leading spaces, with U+2022.
+- [x] AC4: Every file that `ls man-roxygen/*.R` lists consists solely of lines that begin with `#'`. So `benchmarks/sweep-prose.R`'s roxygen reader and M096's duplicate-line command each read a template as one roxygen block.
+- [x] AC5: M096's duplicate-line command, run from the repo root at the branch head, prints nothing and exits 0. The command is in the Decisions section of `git show 66f1cfa:cairn/milestones/M096-help-inherits-tune-params.md`. Over the six tag kinds it keeps in `R/*.R` and `man-roxygen/*.R`, no prose line of 12 or more words appears in two or more roxygen blocks.
 - [ ] AC6: On a tree with no uncommitted changes at the branch head, `Rscript -e 'devtools::document()'` leaves it so, `Rscript -e 'devtools::test()'` passes, and every command that `Rscript benchmarks/sweep-prose.R --list-gating` prints exits 0.
-- [ ] AC7: At the branch head, `git diff --name-only main -- man/` reports exactly `man/nested_tune_grid.Rd`, `man/nested_tune_bayes.Rd`, `man/nested_tune_race.Rd` and `man/nested_tune_sim_anneal.Rd`. The Differences section of `man/nested_tune_grid.Rd` holds no `\itemize` element in the parsed Rd, as at `main`.
+- [x] AC7: At the branch head, `git diff --name-only main -- man/` reports exactly `man/nested_tune_grid.Rd`, `man/nested_tune_bayes.Rd`, `man/nested_tune_race.Rd` and `man/nested_tune_sim_anneal.Rd`. The Differences section of `man/nested_tune_grid.Rd` holds no `\itemize` element in the parsed Rd, as at `main`.
 
 ## Coverage
 
@@ -66,3 +66,12 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 ## Decisions
 
 ## Review
+
+Reviewed 2026-09-15 at `262b154`. `main` at `df032a5` had not moved since the branch was cut, so no merge was needed. The evidence below was gathered by command in this session.
+
+- AC1: rendered the grid page with `tools::Rd2txt()` under the stated options and split the Differences section into paragraphs. One paragraph contains "Forced:", and it contains "Leaving parallelism to a caller puts two pools in contention." Pass.
+- AC2: the same rendering on bayes, race and sim-anneal. On each page one paragraph contains "Settable as its own argument:", and it contains the page's anchor. Pass.
+- AC3: the parsed Differences section of each of the three pages holds one `\itemize` element, and its text does not contain "behave as the grid page describes". In the rendering, the shared paragraph starts on line 53 (bayes), 52 (race) and 50 (sim-anneal) of the section, after the last U+2022 bullet line at 49, 48 and 44. Pass.
+- AC4: `grep -c -v "^#'"` over the 21 files `ls man-roxygen/*.R` lists reports 0 lines outside `#'` in every file. Pass.
+- AC5: the M096 duplicate-line command, run from the repo root, printed nothing and exited 0. Pass.
+- AC7: `git diff --name-only main -- man/` lists exactly the grid, bayes, race and sim-anneal pages. The grid page's Differences section holds no `\itemize` at the branch head; at `main` its two `\itemize` elements sit at lines 58 and 388, before that section opens at 443. Pass.
