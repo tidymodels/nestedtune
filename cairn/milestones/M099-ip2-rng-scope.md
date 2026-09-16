@@ -21,9 +21,9 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
 
 ## Acceptance criteria
 
-- [ ] AC1: The IP2 entry in `cairn/DESIGN.md` (line 211 at `bc905a4`) carries one added sentence stating that IP2 binds randomness flowing through R's generator and that engines randomizing outside it (kernlab's SVMs, the deep-learning engines) are outside its reach under any R-side scheme, followed by an italic amendment annotation naming the D-entry, in the form IP1's annotation takes (`cairn/DESIGN.md:208-210`).
-- [ ] AC2: One D-entry, appended above the `<!-- Template:` block in `cairn/DECISIONS.md`, records the amendment, cites D-011's Consequences paragraph and RR01 finding B4 as its sources, and supersedes no entry; `git diff main` on the branch touches no line of `cairn/DECISIONS.md` above the new entry.
-- [ ] AC3: `python3 cairn_validate.py` is green on the branch.
+- [x] AC1: The IP2 entry in `cairn/DESIGN.md` (line 211 at `bc905a4`) carries one added sentence stating that IP2 binds randomness flowing through R's generator and that engines randomizing outside it (kernlab's SVMs, the deep-learning engines) are outside its reach under any R-side scheme, followed by an italic amendment annotation naming the D-entry, in the form IP1's annotation takes (`cairn/DESIGN.md:208-210`).
+- [x] AC2: One D-entry, appended above the `<!-- Template:` block in `cairn/DECISIONS.md`, records the amendment, cites D-011's Consequences paragraph and RR01 finding B4 as its sources, and supersedes no entry; `git diff main` on the branch touches no line of `cairn/DECISIONS.md` above the new entry.
+- [x] AC3: `python3 cairn_validate.py` is green on the branch.
 
 ## Coverage
 
@@ -51,3 +51,19 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
 ## Decisions
 
 ## Review
+
+- 2026-09-16 AC1: `cairn/DESIGN.md:216-220` on the branch carries the added sentence (binds randomness through R's generator; kernlab's SVMs and the deep-learning engines outside its reach under any R-side scheme, here or in tune) followed by an italic annotation naming D-064, in the shape of IP1's annotation at lines 206-208. Verified by reading the diff hunk and the two entries side by side. Pass.
+- 2026-09-16 AC2: D-064 sits at `cairn/DECISIONS.md:1790-1794`, directly above `<!-- Template:` at 1796; it cites D-011's Consequences paragraph and RR01 B4 by file, and supersedes nothing. `git diff origin/main...HEAD -U0 -- cairn/DECISIONS.md` shows one hunk, `@@ -1789,0 +1790,6 @@`, a pure insertion: no line above the entry changed. Pass.
+- 2026-09-16 AC3: `cairn_validate.py` on the branch: all checks passed, exit 0, 18 advisory warnings (references staleness, pre-existing). Pass.
+- 2026-09-16 sync: branch level with `origin/main` (no commits behind), so no merge-in was needed.
+- 2026-09-16 impact (IP2 changed): `cairn_impact.py IP2` lists 35 references. All live citations read; the amendment is additive, and none contradicts it except `cairn/DESIGN.md:524-525` ("IP2's text is unchanged"), raised by the reviewer as finding 1 below. The promoted candidate row at `cairn/ROADMAP.md:47` is the row this milestone fulfills; pruned at hygiene.
+- 2026-09-16 review lens: internal tier, docs-only diff, one [O] diff-bug reviewer spawned (fresh context, Opus). It confirmed AC1-AC3 and the new text's fidelity to D-011, RR01 B4 and the roxygen template, and ranked nine findings, most severe first:
+  1. `cairn/DESIGN.md:524-525` Known-issues entry says "IP2's text is unchanged", which this branch falsifies. Proposed: fix now.
+  2. `cairn/DECISIONS.md:1790` heading ends ". Supersedes no entry", a form no other heading uses (the template puts supersession in Consequences, only if any). Proposed: fix now, trim the clause from the heading.
+  3. `cairn/DESIGN.md:216` the sentence opens "It binds", where the previous sentence's subject is the disclaimed identity; the template says "This binds". Proposed: fix now, "IP2 binds".
+  4. `cairn/DECISIONS.md:1793` D-064's Decision omits the "here or in tune" clause the DESIGN sentence carries. Proposed: fix now.
+  5. `cairn/DESIGN.md:219` annotation says "M99" not "M099". Proposed: reject; DESIGN.md's only other annotation uses the unpadded "M05", so the branch matches the file's annotation form.
+  6. `cairn/DESIGN.md:219-220` "git holds the original" is boilerplate for an addition. Proposed: reject; AC1 asks for IP1's form and the phrase is true.
+  7. `cairn/DESIGN.md:220` "on RR01's finding B4" names the id where IP1's form states the finding. Proposed: fix now, state the finding.
+  8. `cairn/DECISIONS.md:1792` RR01 cited by path without the `:361-367` range T1 named. Proposed: fix now.
+  9. Milestone file: AC boxes unticked and Decisions section empty. Proposed: reject; AC ticks are review's, and D-entries live in DECISIONS.md, the Decisions section holding milestone-local ones.
