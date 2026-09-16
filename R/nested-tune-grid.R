@@ -375,10 +375,9 @@
 #' under one of seven headings.
 #'
 #' @templateVar INNER inner tuning run
+#' @templateVar FORCED_TAIL Leaving parallelism to a caller puts two pools in contention.
 #' @template differences-forced
 #' @section Differences from calling tune directly:
-#' Leaving parallelism to a caller puts two pools in contention.
-#'
 #' **Settable as its own argument: `event_level`.** The argument reaches
 #' the inner `control_grid()` and the outer `control_last_fit()` alike, and
 #' is the one place the level is set. A control left at tune's default takes

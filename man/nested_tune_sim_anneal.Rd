@@ -164,11 +164,7 @@ parallelism belongs over the outer folds.
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
 entry, with a refusal that names both.
-
-
-\code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()}
-rather than control slots, offered here as arguments and reaching it
-unchanged.
+\code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()} rather than control slots, offered here as arguments and reaching it unchanged.
 
 
 \strong{Refused: none.} No slot is refused on its own. A control of another
@@ -196,11 +192,9 @@ daemon where nothing shows it. Pass
 }
 
 
-\itemize{
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
 describes. \code{parallel_over} changes the numbers a stochastic engine
 produces even at \code{allow_par = FALSE}.
-}
 
 
 This classification was read on finetune 1.3.0. The version that added
