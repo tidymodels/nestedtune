@@ -340,10 +340,11 @@ collect_extracts.nested_results <- function(x, ...) {
 #' A completed fold whose saved predictions do not match the rows it held
 #' out is refused with class `nestedtune_compute_metrics_predictions`,
 #' before any fold is scored. Its `.row` column must hold each of those
-#' rows once and no other row. The five shapes refused are a missing row,
+#' rows once and no other row. Five shapes this refuses are a missing row,
 #' a repeated `.row`, an `NA` `.row`, a row the fold did not hold out, and
-#' no `.row` column. The message names each fold that fails.
-#' [augment()] refuses the same five shapes.
+#' no `.row` column. A `.row` that is not a whole number is refused too.
+#' The message names each fold that fails. [augment()] refuses the same
+#' shapes.
 #'
 #' A run with some failed folds is scored over the rest, with a warning of
 #' class `nestedtune_partial_summary`.

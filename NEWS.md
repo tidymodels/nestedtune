@@ -4,9 +4,10 @@
   do not hold exactly the rows that fold held out, each once, before any
   fold is scored. The refusal has class
   `nestedtune_compute_metrics_predictions` and names each fold that fails.
-  The five shapes refused are a missing row, a repeated `.row`, an `NA`
-  `.row`, a row the fold did not hold out, and no `.row` column. They are
-  the five shapes `augment()` refuses. On a workflow-set run the message
+  Five shapes this refuses are a missing row, a repeated `.row`, an `NA`
+  `.row`, a row the fold did not hold out, and no `.row` column. A `.row`
+  that is not a whole number is refused too. `augment()` refuses the same
+  shapes. On a workflow-set run the message
   names the workflow.
 
 * The printed `summary()` of a run, the final fit's print and its
