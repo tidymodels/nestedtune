@@ -437,6 +437,16 @@ execution in RR01, and tune 1.x seeded differently (D-012).
 
 ## Known issues
 
+- The devel-vctrs leg's scheduled and dispatched runs (M102) fire from no
+  commit, so `.github/ci-usage.py`'s commit-driven accounting and its
+  recorded baseline (`.github/ci-usage-baseline.md`, 2026-08-11 to
+  2026-09-10) cannot attribute them, and a cold devel build after GitHub's
+  7-day cache eviction is unpriced (the M11 and M31 remainder). Accepted at
+  M102's hygiene pass, 2026-09-16: the workflow header documents the
+  eviction and the cold-build fallback, and the usage script is a measuring
+  tool, not a gate. Revisit if the leg's cost is questioned or the baseline
+  is re-pointed.
+
 - The last line of the `autoplot(type = "performance")` subtitle says the
   nested estimate is the final fit's number to report, with no "chosen before
   seeing the estimate" condition. The summary note and the help carry that
