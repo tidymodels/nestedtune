@@ -345,3 +345,30 @@ test_that("AC1: summary(), print and autoplot read the weighted estimate", {
   rules <- ggplot2::layer_data(p, 1L)$yintercept
   expect_equal(sort(rules), sort(weighted$mean))
 })
+
+test_that("AC1: folds that scored carrying zero weight between them read NA, not an error", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  # tune admits a zero weight; the dropped fold held all the weight.
+  design <- break_fold(
+    tune::add_resample_weights(det_nested(d), c(0, 0, 1)),
+    3L,
+    "inner tuning"
+  )
+  res <- suppressWarnings(weighted_grid_run(d, design))
+  expect_identical(res$.completed, c(TRUE, TRUE, FALSE))
+  got <- suppressWarnings(collect_metrics(res))
+  expect_true(all(is.na(got$mean)))
+  expect_true(all(is.na(got$std_err)))
+  expect_identical(got$n, c(2L, 2L))
+})
+
+test_that("AC3: a bare result sheds the weights with the class (IP4)", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- weighted_grid_run(d, weighted_design(d))
+  expect_false(is.null(attr(res, "resample_weights")))
+  bare <- res[1:2, ]
+  expect_false(inherits(bare, "nested_results"))
+  expect_null(attr(bare, "resample_weights"))
+})

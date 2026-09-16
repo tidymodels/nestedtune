@@ -71,3 +71,16 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - AC5: `devtools::check()` at 147ab14: 0 errors, 0 warnings, 0 notes (7m 44s); `devtools::test()` clean; all six `--list-gating` sweeps clean. Verified.
 - Driving RR: none; projection-vs-outcome no-ops.
 - Consistency gate: `cairn_validate.py` exit 0 (18 references-staleness advisories, pre-existing); no principle changed, `cairn_impact` skipped; `document()` no diff; README.md in sync; `pkgdown::check_pkgdown()` no problems; NEWS bullet present without milestone numbers; `man-roxygen` in `.Rbuildignore`; `air format --check` clean.
+- Independent review 2026-09-16: [S] blame-history lens: no findings (run_attributes/stamp_results follow the M38 id_columns pattern; summarize_folds NA rule unchanged since M03). [S] prior-review lens: no prior-review evidence on the touched files (archive read; the gh probe found real threads, none on these files). [O] diff-bug lens: 11 findings, triaged at the gate (user chose "apply fix-nows, re-verify, re-pose merge"):
+  - F1 fold_weights() comment claimed a NA-weight row unreachable while `x$id[2] <- "zzz"` reaches it and cov.wt() then errors — fix now: comment reworded to name the door; the mutation itself is outside the class's doors and unchanged.
+  - F2 weights c(0, 0, 1) with fold 3 failed leave w = c(0, 0) and cov.wt() aborts with a stats error — fix now: a metric whose scoring folds carry zero weight reads NA mean and std_err, `n` unchanged; test added.
+  - F3 ?collect_metrics "Reading std_err" stated the unweighted formula and "What the two shapes hold" omitted `.weight` — fix now: both sections amended.
+  - F4 the help does not name tune's divergence (tune#1197) — rejected: the 2026-09-16 mini gate chose stating this package's rule alone; NEWS and code comments name the divergence.
+  - F5 the all-NA `.weight` guard's comment described a set the API cannot build — fix now: comment reworded; guard kept.
+  - F6 O1 mirrors the implementation's cov.wt() call — rejected: O2 (tune::fit_resamples) is independent on the every-fold case, and the failed-fold rule is this package's own, with no external oracle.
+  - F7 a malformed hand-set `.resample_weights` reads as unweighted — rejected: tune validates at its door.
+  - F8 an rset reordered after add_resample_weights() mispairs weights — rejected: tune's own `.create_weight_mapping()` behaves identically (GP1).
+  - F9 duplicate fold labels take the first weight — rejected: no reachable rsample scheme produces them.
+  - F10 DESIGN.md has no note on the results object's weights — follow-up: written in the step-9 hygiene commit.
+  - F11 no test for the attribute shedding with the class or for a zero weight — fix now: both tests added.
+- Fix-now re-verification: `devtools::test()` FAIL 0, WARN 0, PASS 10428; `document()` regenerated collect_metrics.nested_results.Rd, no further diff; `air format --check` clean; all six sweeps clean; `devtools::check()` result recorded below.

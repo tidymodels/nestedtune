@@ -91,8 +91,9 @@ new_nested_results <- function(
 }
 
 # Each row's weight, read off the recorded table by the fold label columns,
-# or NULL on an unweighted run. A row the table does not name reads NA; it
-# is unreachable while the class holds, since rows are never added, and
+# or NULL on an unweighted run. A row the table does not name reads NA. The
+# class's doors never add a row or relabel one, so the read is reached only
+# by assigning into a label column past them (`x$id[2] <- "zzz"`), and
 # summarize_folds() makes no provision for it.
 fold_weights <- function(x) {
   table <- attr(x, "resample_weights")
@@ -764,7 +765,9 @@ new_tbl <- function(cols) {
 #'
 #' Summarized, there is one row per metric, with the mean across outer folds,
 #' the number of folds `n` behind it, and the standard error of that mean.
-#' Unsummarized, there is one row per outer fold and metric.
+#' Unsummarized, there is one row per outer fold and metric. On a design
+#' weighted with [tune::add_resample_weights()] the unsummarized shape also
+#' carries each fold's weight in a `.weight` column.
 #'
 #' A metric measured at several evaluation times (`eval_time` on
 #' [nested_tune_grid()]) gets a row per time in both shapes. It is never
@@ -788,9 +791,13 @@ new_tbl <- function(cols) {
 #'
 #' `std_err` is the standard error of the mean across outer folds: the standard
 #' deviation of the per-fold scores over the square root of how many there
-#' were. It measures the precision of that mean, not the fold-to-fold spread,
-#' which is larger by the same square-root factor. It is not a confidence
-#' interval, and you must not build one from it.
+#' were. On a weighted design it is the weighted standard deviation over the
+#' square root of the effective sample size, as tune computes it. The
+#' section Weighting the outer folds on [nested_tune_grid()] states the
+#' rule for a fold that fails. It measures the
+#' precision of that mean, not the fold-to-fold spread, which is larger by
+#' the same square-root factor. It is not a confidence interval, and you
+#' must not build one from it.
 #'
 #' You cannot get a valid standard error from the fold scores. That limit
 #' is the statistics', not this implementation's. Outer fold scores are not
@@ -882,9 +889,14 @@ summarize_folds <- function(per_fold) {
   # and a failed fold makes tune ignore the weights with a warning (run
   # 2026-09-16, tune#1197), where this drops the fold and lets `cov.wt()`
   # renormalize the rest, so a missing fold does not blank a weighted run
-  # any more than an unweighted one (the M101 plan gate).
-  # `.weight` all NA -- a workflow with no weights stacked beside one with
-  # them -- reads as unweighted.
+  # any more than an unweighted one (the M101 plan gate). Where the folds
+  # that scored carry zero weight between them (tune admits a zero weight,
+  # and the dropped fold held all of it), there is no weighted evidence
+  # and the row reads NA rather than aborting inside `cov.wt()`; `n` still
+  # counts the folds that scored.
+  # `.weight` all NA reads as unweighted. The set orchestrators run every
+  # workflow on one design, so no set reaches it today; it is kept as the
+  # guard a stacked table would need.
   weighted <- ".weight" %in% names(per_fold) && !all(is.na(per_fold$.weight))
   estimates_for <- function(k) {
     rows <- keys == k
@@ -900,7 +912,7 @@ summarize_folds <- function(per_fold) {
     keys[first],
     function(k) {
       e <- estimates_for(k)
-      if (length(e$vals) == 0L) {
+      if (length(e$vals) == 0L || (weighted && sum(e$w) == 0)) {
         NA_real_
       } else if (weighted) {
         stats::weighted.mean(e$vals, e$w)
@@ -923,7 +935,7 @@ summarize_folds <- function(per_fold) {
     keys[first],
     function(k) {
       e <- estimates_for(k)
-      if (length(e$vals) < 2L) {
+      if (length(e$vals) < 2L || (weighted && sum(e$w) == 0)) {
         NA_real_
       } else if (weighted) {
         weighted_std_err(e$vals, e$w)
