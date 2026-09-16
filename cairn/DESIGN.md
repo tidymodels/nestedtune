@@ -213,7 +213,11 @@ constrains how the package is developed, not what it does.
   parallel or serial. This requires RNG streams managed per outer fold rather
   than inherited from a worker, and it constrains which parallel backends are
   usable. Deliberately **not** claimed, because it cannot be honoured: identity
-  across R versions, across platforms, or across `tune` versions.
+  across R versions, across platforms, or across `tune` versions. It binds
+  randomness that flows through R's generator; engines that randomize outside
+  it (kernlab's SVMs, the deep-learning engines) are outside its reach under
+  any R-side scheme, here or in tune. _(Scope sentence added at M99 by D-064,
+  on RR01's finding B4; git holds the original.)_
 
 - IP3: **The estimate describes the procedure, never the shipped model.** The
   nested estimate characterizes the whole tune-and-fit procedure. The API never
