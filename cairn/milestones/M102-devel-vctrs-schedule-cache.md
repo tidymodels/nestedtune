@@ -21,10 +21,10 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: `.github/workflows/devel-vctrs.yaml` carries a `schedule:` trigger with one weekly cron line and a `workflow_dispatch:` trigger beside its `push` and `pull_request` triggers, and its header comment no longer says the leg carries no schedule.
-- [ ] AC2: The `setup-r-dependencies@v2` step in `devel-vctrs.yaml` passes a `cache-version` value that `grep -rn cache-version .github/workflows/` finds in no other workflow file.
-- [ ] AC3: One `workflow_dispatch` run of the leg on the milestone branch completes and saves a cache whose key (listed by `gh cache list`) contains that `cache-version` value and matches no key another workflow's run saved.
-- [ ] AC4: `cairn/PROFILE.md`'s test-doctrine line describing `devel-vctrs.yaml`'s triggers states the schedule.
+- [x] AC1: `.github/workflows/devel-vctrs.yaml` carries a `schedule:` trigger with one weekly cron line and a `workflow_dispatch:` trigger beside its `push` and `pull_request` triggers, and its header comment no longer says the leg carries no schedule.
+- [x] AC2: The `setup-r-dependencies@v2` step in `devel-vctrs.yaml` passes a `cache-version` value that `grep -rn cache-version .github/workflows/` finds in no other workflow file.
+- [x] AC3: One `workflow_dispatch` run of the leg on the milestone branch completes and saves a cache whose key (listed by `gh cache list`) contains that `cache-version` value and matches no key another workflow's run saved.
+- [x] AC4: `cairn/PROFILE.md`'s test-doctrine line describing `devel-vctrs.yaml`'s triggers states the schedule.
 
 ## Coverage
 
@@ -52,3 +52,10 @@
 ## Decisions
 
 ## Review
+
+Reviewed 2026-09-16 on `m102-devel-vctrs-schedule-cache` at a709297. `origin/main` had not moved since the branch was cut. No PR existed.
+
+- AC1 verified. `grep -nE '^  (push|pull_request|schedule|workflow_dispatch):|cron:' .github/workflows/devel-vctrs.yaml` lists `push:` at line 34, `pull_request:` at 40, `schedule:` at 45, one `cron: '0 6 * * 1'` line at 46, and `workflow_dispatch:` at 47. `grep -niE 'no schedule|carries no|not scheduled'` on the file finds nothing. On `origin/main` the same file's line 11 read "It carries no `schedule:`".
+- AC2 verified. `grep -rn cache-version .github/workflows/` finds two lines, both in `devel-vctrs.yaml`: the header comment at line 16 and the `setup-r-dependencies@v2` step at line 102 (`cache-version: devel-vctrs`). No other workflow file matches.
+- AC3 verified. `gh run view 35149168999` reports event `workflow_dispatch`, head branch `m102-devel-vctrs-schedule-cache`, status completed, conclusion success (20:52:53Z to 21:29:35Z). `gh cache list --limit 100` returns 58 caches. One key contains `devel-vctrs` (`Ubuntu 24.04.5 LTS-R version 4.6.1 (2026-06-24)-x86_64-devel-vctrs-cb589199…`, ref `refs/heads/m102-devel-vctrs-schedule-cache`, saved 21:29:32Z, 126,597,303 bytes). Each of the other 57 keys carries `-1-` in that segment, so none equals it. The run log shows `Cache not found for input keys: …-devel-vctrs-…` at restore and `Cache saved with key: …-devel-vctrs-cb589199…` at the post step.
+- AC4 verified. `grep -n devel-vctrs cairn/PROFILE.md` shows the test-doctrine sentence at lines 62-66. It names the four triggers, "weekly `schedule` (Monday 06:00 UTC)" among them, and the `cache-version: devel-vctrs` key. `grep -n devel-vctrs cairn/DESIGN.md` is empty, so no DESIGN sentence names the triggers.
