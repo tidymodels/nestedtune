@@ -53,8 +53,9 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' @section The selection rule:
 #'
 #' When the selection was made by a rule other than the default, a line
-#' follows the `Selected:` line. It reads `Selected by:` and then the rule
-#' as [selection_rule()] prints it, for example
+#' follows the `Selected:` line. It reads `Selected by:` and then the rule's
+#' name, orderings and limit, in the words the print of [selection_rule()]
+#' uses after its class tag, for example
 #' `Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
 #' under the default rule and on a fit that tuned nothing. The summary's
 #' `select` component holds the rule as a value.
@@ -155,7 +156,8 @@ print.nested_final_fit <- function(x, ...) {
 #'
 #' When `select` names a rule other than the default, the print adds a line
 #' directly under the "Selected parameters" heading. It reads `Selected by:`
-#' and then the rule as [selection_rule()] prints it. The line is absent
+#' and then the rule's name, orderings and limit, in the words the print of
+#' [selection_rule()] uses after its class tag. The line is absent
 #' under the default rule and on a fit that tuned nothing.
 #'
 #' @section Components that are absent:

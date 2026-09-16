@@ -47,8 +47,9 @@ and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}} refuse
 
 
 When the selection was made by a rule other than the default, a line
-follows the \verb{Selected:} line. It reads \verb{Selected by:} and then the rule
-as \code{\link[=selection_rule]{selection_rule()}} prints it, for example
+follows the \verb{Selected:} line. It reads \verb{Selected by:} and then the rule's
+name, orderings and limit, in the words the print of \code{\link[=selection_rule]{selection_rule()}}
+uses after its class tag, for example
 \verb{Selected by: pct_loss by num_comp (limit = 5)}. The line is absent
 under the default rule and on a fit that tuned nothing. The summary's
 \code{select} component holds the rule as a value.

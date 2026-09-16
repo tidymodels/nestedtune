@@ -1,6 +1,6 @@
 # M098: The summary and final-fit prints name a non-default selection rule
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -57,6 +57,8 @@ If a run selected each fold's candidate by a rule other than the default best-by
 - 2026-09-16: T2 done. The results summary carries `select` and `print_selected_by()` prints the line under the heading, ahead of the early returns. Tests add the seven AC1 snapshots, the AC2 identity tests and the AC4 set snapshots on a `wset_two()` run. The set fixture takes `select` through the map's dots, which reach the tuned workflow alone. The snapshot diff holds 247 added lines and no removed line. Full `devtools::test()` clean.
 - 2026-09-16: T3 done. The final-fit summary carries `select` after `selection`, and both prints read the line from that component. Tests add the fit-side AC2 identity tests, the AC3 placement tests on both prints, and eight snapshots over the four cases. The hand-agreed M46 print text is unchanged, as the default rule prints no line. The snapshot diff holds 195 added lines and no removed line. Full `devtools::test()` clean.
 - 2026-09-16: T4 done. The five help pages describe the line and the `select` component, and NEWS carries the bullet. `devtools::document()` leaves no diff, both prose sweeps clean, `air format --check` clean. The `_snaps/` diff against `main` holds added blocks only (AC5). Full `devtools::test()` clean.
+- 2026-09-16: claim audit: 28 claims read, 1 corrected — NEWS.md, R/nested-final-fit-print.R, R/nested-results-print.R and their man pages. The line carries the rule's label without the `<selection_rule>` tag, so "as `selection_rule()` prints it" became "in the words the print of `selection_rule()` uses after its class tag" at four sites. The reader re-read the four once and cleared them.
+- 2026-09-16: all tasks done and verify clean. Status set to `review`.
 
 ## Decisions
 

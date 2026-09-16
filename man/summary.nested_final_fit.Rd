@@ -60,7 +60,8 @@ infer it from a missing name.
 
 When \code{select} names a rule other than the default, the print adds a line
 directly under the "Selected parameters" heading. It reads \verb{Selected by:}
-and then the rule as \code{\link[=selection_rule]{selection_rule()}} prints it. The line is absent
+and then the rule's name, orderings and limit, in the words the print of
+\code{\link[=selection_rule]{selection_rule()}} uses after its class tag. The line is absent
 under the default rule and on a fit that tuned nothing.
 }
 

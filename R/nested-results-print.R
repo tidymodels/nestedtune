@@ -154,7 +154,8 @@ print_failure_count <- function(x) {
 #'
 #' When the run selected by a rule other than the default, the print adds
 #' a line directly under the "Selected parameters" heading. It reads
-#' `Selected by:` and then the rule as [selection_rule()] prints it, for
+#' `Selected by:` and then the rule's name, orderings and limit, in the
+#' words the print of [selection_rule()] uses after its class tag, for
 #' example `Selected by: one_std_err by num_comp`. The line is absent under
 #' the default rule, so its presence is the signal. It prints whether or not
 #' any fold completed, because the rule describes the procedure the run
