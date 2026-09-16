@@ -1,6 +1,6 @@
 # M101: The outer average honors tune's resample weights
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - [x] T2: Record the weights on the results object (`R/nested-results.R:44` constructor, from `attr(design, ".resample_weights")`; `check_results_record()` tolerates its absence for older records) and weight `summarize_folds()`'s mean and SE when present; `n` unchanged; grep every caller of `summarize_folds()` and `per_fold_metrics()` first (M41 lesson).
 - [x] T3: `collect_metrics(summarize = FALSE)` and `compute_metrics()` carry `.weight`; a test that the two agree on a weighted run; the set path through `stack_set()`.
 - [x] T4: The shared reproducibility or estimate template gains the weights paragraph; a NEWS bullet; file the tune issue and record its URL in the work log.
-- [ ] T5: `devtools::test()`, `devtools::check()`, gating sweeps (`--roxygen --plain` too), `air format --check`.
+- [x] T5: `devtools::test()`, `devtools::check()`, gating sweeps (`--roxygen --plain` too), `air format --check`.
 
 ## Work log
 
@@ -56,6 +56,8 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - 2026-09-16: T1 to T3 done in one checkpoint: `tests/testthat/test-resample-weights.R` (two oracle types for AC1: tune's formulas written out, and `tune::fit_resamples()` under the same weights; a planted wrong SE divisor fails 9 assertions), the `resample_weights` attribute keyed by fold label in the constructor and carried by `stamp_results()`, `.weight` on the per-fold table, the weighted branch of `summarize_folds()`; T1's tests were red before T2 and are committed with it. `devtools::test()` clean, `air format --check` clean, `sweep-prose.R --plain` clean.
 - 2026-09-16: T4 done: `man-roxygen/section-resample-weights.R` on the five orchestrator pages, NEWS bullet, `--roxygen --plain` sweep clean.
 - 2026-09-16: tune issue filed as approved at the question gate: https://github.com/tidymodels/tune/issues/1197 (its weighted branch errors on an `NA` estimate and ignores the weights on a failed resample).
+- 2026-09-16: claim audit: 41 claims read, 2 corrected — R/nested-results.R (fold_weights() comment), tests/testthat/test-resample-weights.R (NA-fold test read its estimates off the run under test); the session also corrected three "tune returns NA" sentences the reader had passed (NEWS.md, the summarize_folds() comment, the test header), against the tune#1197 reprex; the reader's one re-read of the corrected sites holds.
+- 2026-09-16: T5 done: `devtools::check()` at 577b73c 0 errors, 0 warnings, 0 notes (9m 18s); all six `--list-gating` sweeps clean; `devtools::test()` clean; the claim-audit corrections after that check touch comments, NEWS and one test, and `test-resample-weights.R` reruns clean. Status → review.
 
 ## Decisions
 

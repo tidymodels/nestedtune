@@ -18,8 +18,9 @@
 #   The per-fold estimates it averages are read off the UNWEIGHTED run of
 #   the same fixture, never off the weighted run under test. On a failed
 #   fold the formulas are applied to the folds that scored, the divergence
-#   from tune the plan chose: tune's weighted branch takes no `na.rm` and
-#   returns NA.
+#   from tune the plan chose: tune's weighted branch takes no `na.rm`, so
+#   a fold scoring NA errors inside `cov.wt()`, and a failed fold makes it
+#   ignore the weights with a warning (run 2026-09-16, tune#1197).
 #
 # O2 -- type "live" (reference implementation). Source: `tune::fit_resamples()`
 #   on the same outer `vfold_cv()` splits under the same weights, whose
@@ -205,11 +206,23 @@ test_that("AC1: with a fold scoring NA, the weights are renormalized over the fo
   d <- make_reg_data()
   design <- weighted_design(d)
   res <- weighted_grid_run(d, design)
-  # An NA estimate planted on one fold's rsq row, through the record rather
-  # than the reader, so the summary's NA rule is what is under test.
-  res$.metrics[[3L]]$.estimate[res$.metrics[[3L]]$.metric == "rsq"] <- NA_real_
-  per_fold <- collect_metrics(res, summarize = FALSE)
+  plain <- unweighted_grid_run(d)
+  # An NA estimate planted on one fold's rsq row of both runs, through the
+  # record rather than the reader, so the summary's NA rule is what is under
+  # test; the per-fold estimates the oracle averages come off the unweighted
+  # run, as in the other tests.
+  plant_na <- function(x) {
+    x$.metrics[[3L]]$.estimate[x$.metrics[[3L]]$.metric == "rsq"] <- NA_real_
+    x
+  }
+  res <- plant_na(res)
+  plain <- plant_na(plain)
+  per_fold <- collect_metrics(plain, summarize = FALSE)
   expect_identical(sum(is.na(per_fold$.estimate)), 1L)
+  expect_identical(
+    collect_metrics(res, summarize = FALSE)$.estimate,
+    per_fold$.estimate
+  )
 
   got <- collect_metrics(res)
   expect_weighted_rows(got, per_fold, stored_weights(design))

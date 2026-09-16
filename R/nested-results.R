@@ -91,9 +91,9 @@ new_nested_results <- function(
 }
 
 # Each row's weight, read off the recorded table by the fold label columns,
-# or NULL on an unweighted run. A row the table does not name -- unreachable
-# while the class holds, since rows are never added -- reads NA, which
-# summarize_folds() treats as no weight for that fold.
+# or NULL on an unweighted run. A row the table does not name reads NA; it
+# is unreachable while the class holds, since rows are never added, and
+# summarize_folds() makes no provision for it.
 fold_weights <- function(x) {
   table <- attr(x, "resample_weights")
   if (!is.data.frame(table)) {
@@ -877,10 +877,12 @@ summarize_folds <- function(per_fold) {
   # (`estimate_tune_results()`'s weighted branch, with `.weighted_sd()` and
   # `.effective_sample_size()`, read 2026-09-16): the weighted mean, and the
   # weighted standard deviation over the square root of the effective
-  # sample size. The one divergence is the NA fold: tune's weighted branch
-  # takes no `na.rm` and returns NA, where this drops the fold and lets
-  # `cov.wt()` renormalize the rest, so a failed fold does not blank a
-  # weighted run any more than an unweighted one (the M101 plan gate).
+  # sample size. The one divergence is the missing fold: tune's weighted
+  # branch takes no `na.rm`, so a fold scoring NA errors inside `cov.wt()`
+  # and a failed fold makes tune ignore the weights with a warning (run
+  # 2026-09-16, tune#1197), where this drops the fold and lets `cov.wt()`
+  # renormalize the rest, so a missing fold does not blank a weighted run
+  # any more than an unweighted one (the M101 plan gate).
   # `.weight` all NA -- a workflow with no weights stacked beside one with
   # them -- reads as unweighted.
   weighted <- ".weight" %in% names(per_fold) && !all(is.na(per_fold$.weight))
