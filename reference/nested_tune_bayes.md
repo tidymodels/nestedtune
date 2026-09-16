@@ -224,11 +224,9 @@ it. Here the control is given the fold's own tuning seed, the number
 **Settable as its own argument: `event_level`.** The argument is the one
 place the level is set, as on the grid page. A control at tune's default
 takes it, and a control naming another level is refused at entry, with a
-refusal that names both.
-
-`iter`, `initial` and `objective` are arguments of `tune_bayes()` rather
-than control slots, offered here as arguments and reaching it unchanged.
-So is `eval_time`.
+refusal that names both. `iter`, `initial` and `objective` are arguments
+of `tune_bayes()` rather than control slots, offered here as arguments
+and reaching it unchanged. So is `eval_time`.
 
 **Refused: none.** No slot is refused on its own. A control of another
 class is refused at entry, as is the `event_level` conflict above.
@@ -251,11 +249,9 @@ class is refused at entry, as is the `event_level` conflict above.
 - `save_gp_scoring` writes its files to the temporary directory of the
   process that tuned, a daemon's own on the parallel path.
 
-&nbsp;
-
-- `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-  describes. `parallel_over` changes the numbers a stochastic engine
-  produces even at `allow_par = FALSE`.
+`pkgs`, `parallel_over` and `workflow_size` behave as the grid page
+describes. `parallel_over` changes the numbers a stochastic engine
+produces even at `allow_par = FALSE`.
 
 **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
 outer fit as well as the inner search. The outer fit's predictions and

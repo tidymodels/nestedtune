@@ -260,11 +260,8 @@ reaching it. Here the control is given the fold's own tuning seed, the number
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
 place the level is set, as on the grid page. A control at tune's
 default takes it, and a control naming another level is refused at
-entry, with a refusal that names both.</p>
-
-<p><code>iter</code>, <code>initial</code> and <code>objective</code> are arguments of <code>tune_bayes()</code> rather
-than control slots, offered here as arguments and reaching it unchanged.
-So is <code>eval_time</code>.</p>
+entry, with a refusal that names both.
+<code>iter</code>, <code>initial</code> and <code>objective</code> are arguments of <code>tune_bayes()</code> rather than control slots, offered here as arguments and reaching it unchanged. So is <code>eval_time</code>.</p>
 
 <p><strong>Refused: none.</strong> No slot is refused on its own. A control of another
 class is refused at entry, as is the <code>event_level</code> conflict above.</p>
@@ -281,10 +278,11 @@ outside what the seeds can promise.</p></li>
 daemon where nothing shows it.</p></li>
 <li><p><code>save_gp_scoring</code> writes its files to the temporary directory of the
 process that tuned, a daemon's own on the parallel path.</p></li>
-</ul><ul><li><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
+</ul><p><code>pkgs</code>, <code>parallel_over</code> and <code>workflow_size</code> behave as the grid page
 describes. <code>parallel_over</code> changes the numbers a stochastic engine
-produces even at <code>allow_par = FALSE</code>.</p></li>
-</ul><p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
+produces even at <code>allow_par = FALSE</code>.</p>
+
+<p><strong>Kept from the outer fit: <code>save_pred</code>, <code>extract</code>.</strong> Each reaches the
 outer fit as well as the inner search. The outer fit's
 predictions and extracts are kept as <code>.predictions</code> and <code>.extracts</code>, as
 the grid page describes, and the inner search's own are still discarded.</p>

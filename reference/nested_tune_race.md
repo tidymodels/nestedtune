@@ -211,11 +211,9 @@ parallelism belongs over the outer folds.
 **Settable as its own argument: `event_level`.** The argument is the one
 place the level is set, as on the grid page. A control at finetune's
 default takes it, and a control naming another level is refused at
-entry, with a refusal that names both.
-
-`grid` and `eval_time` are the racing functions' own arguments rather
-than control slots, offered here as arguments and reaching them
-unchanged.
+entry, with a refusal that names both. `grid` and `eval_time` are the
+racing functions' own arguments rather than control slots, offered here
+as arguments and reaching them unchanged.
 
 **Refused: none.** No slot is refused on its own. Three things are
 refused at entry. The first is a control of another class, such as a
@@ -243,11 +241,9 @@ Each reaches the race as given:
   once per fold, and from a mirai daemon where nothing shows it.
   `verbose` likewise.
 
-&nbsp;
-
-- `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-  describes. `parallel_over` changes the numbers a stochastic engine
-  produces even at `allow_par = FALSE`.
+`pkgs`, `parallel_over` and `workflow_size` behave as the grid page
+describes. `parallel_over` changes the numbers a stochastic engine
+produces even at `allow_par = FALSE`.
 
 This classification was read on finetune 1.3.0. The version that added
 `workflow_size` to `control_race()` is not named in finetune's NEWS, and

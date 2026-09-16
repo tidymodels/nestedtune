@@ -522,9 +522,9 @@ under one of seven headings.</p>
 
 <p><strong>Forced: <code>allow_par</code>.</strong> The inner tuning run and the outer scoring fit both
 run at <code>allow_par = FALSE</code>, whatever the control carries, because
-parallelism belongs over the outer folds.</p>
+parallelism belongs over the outer folds.
+Leaving parallelism to a caller puts two pools in contention.</p>
 
-<p>Leaving parallelism to a caller puts two pools in contention.</p>
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument reaches
 the inner <code>control_grid()</code> and the outer <code>control_last_fit()</code> alike, and
 is the one place the level is set. A control left at tune's default takes

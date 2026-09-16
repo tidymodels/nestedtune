@@ -525,9 +525,8 @@ under one of seven headings.
 
 **Forced: `allow_par`.** The inner tuning run and the outer scoring fit
 both run at `allow_par = FALSE`, whatever the control carries, because
-parallelism belongs over the outer folds.
-
-Leaving parallelism to a caller puts two pools in contention.
+parallelism belongs over the outer folds. Leaving parallelism to a
+caller puts two pools in contention.
 
 **Settable as its own argument: `event_level`.** The argument reaches
 the inner `control_grid()` and the outer `control_last_fit()` alike, and
