@@ -337,6 +337,14 @@ collect_extracts.nested_results <- function(x, ...) {
 #' `nestedtune_metric_type_not_saved`. An example is a class metric such as
 #' `accuracy` on a run whose metrics read only class probabilities.
 #'
+#' A completed fold whose saved predictions do not match the rows it held
+#' out is refused with class `nestedtune_compute_metrics_predictions`,
+#' before any fold is scored. Its `.row` column must hold each of those
+#' rows once and no other row. The five shapes refused are a missing row,
+#' a repeated `.row`, an `NA` `.row`, a row the fold did not hold out, and
+#' no `.row` column. The message names each fold that fails.
+#' [augment()] refuses the same five shapes.
+#'
 #' A run with some failed folds is scored over the rest, with a warning of
 #' class `nestedtune_partial_summary`.
 #'
