@@ -1,6 +1,6 @@
 # M100: compute_metrics() refuses a fold whose saved predictions do not match what it held out
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,7 +38,7 @@
 - [x] T1: Tests first in `test-compute-metrics.R`: one planted mutation per shape (mirror `test-augment.R:211-240`), asserting the class, the fold labels named and not named, and a metric set wrapped to count calls at zero; a repeated v-fold run scored.
 - [x] T2: Generalize `check_predictions_rows()` to take the caller's class and verb (`nestedtune_compute_metrics_predictions`), call it in `compute_metrics.nested_results()` after `check_column_saved()`; confirm the set path names the workflow through `for_workflow()`.
 - [x] T3: Help page (`R/nested-results-collect.R` roxygen) and a NEWS bullet; `devtools::document()` (M92 lesson: confirm roxygen2 meets `Config/roxygen2/version`).
-- [ ] T4: `devtools::test()`, `devtools::check()`, gating sweeps, `air format --check`.
+- [x] T4: `devtools::test()`, `devtools::check()`, gating sweeps, `air format --check`.
 
 ## Work log
 
@@ -48,6 +48,7 @@
 - 2026-09-16: T2: `check_predictions_rows()` takes `verb` (`augment` or `compute_metrics`, matched) and derives the class `nestedtune_<verb>_predictions` from it, one rule for both readers. `compute_metrics.nested_results()` calls it after `check_column_saved()`. The set path names the workflow through `for_workflow()` with no code change (set test green). Full `devtools::test()`, `--plain` sweep and `air format --check` clean.
 - 2026-09-16: T3: the Refusals section of the `compute_metrics()` help names the class, the five shapes and the fold naming, and a NEWS bullet says the same. roxygen2 8.1.0 meets `Config/roxygen2/version`. `document()` also rewrote `NAMESPACE` to one `importFrom()` per line: the default branch carries the wrapped form from a formatter commit, and both forms pass `air format --check`, so roxygen's form is committed here. `--roxygen --plain` and `--plain` sweeps clean.
 - 2026-09-16: claim audit: 19 claims read, 1 corrected — NEWS.md, R/nested-results-collect.R, man/compute_metrics.nested_results.Rd. The five shapes were named as a closed list, and the check also refuses a `.row` that is not numeric or not a whole number; the list is now open and the whole-number case is named. The reader re-read the corrected wording once and it holds.
+- 2026-09-16: T4: `devtools::check()` on the final head 0 errors, 0 warnings, 0 notes (8m19s). The six gating sweeps, `air format --check .` and `devtools::test()` are clean. Status to review.
 
 ## Decisions
 
