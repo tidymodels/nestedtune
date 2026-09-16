@@ -126,6 +126,14 @@ refused with class <code>nestedtune_no_completed_folds</code>.</p>
 run did not save is refused with class
 <code>nestedtune_metric_type_not_saved</code>. An example is a class metric such as
 <code>accuracy</code> on a run whose metrics read only class probabilities.</p>
+<p>A completed fold whose saved predictions do not match the rows it held
+out is refused with class <code>nestedtune_compute_metrics_predictions</code>,
+before any fold is scored. Its <code>.row</code> column must hold each of those
+rows once and no other row. Five shapes this refuses are a missing row,
+a repeated <code>.row</code>, an <code>NA</code> <code>.row</code>, a row the fold did not hold out, and
+no <code>.row</code> column. A <code>.row</code> that is not a whole number is refused too.
+The message names each fold that fails. <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> refuses the same
+shapes.</p>
 <p>A run with some failed folds is scored over the rest, with a warning of
 class <code>nestedtune_partial_summary</code>.</p>
     </div>

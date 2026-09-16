@@ -2,6 +2,18 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+  now refuses a completed fold whose saved predictions do not hold
+  exactly the rows that fold held out, each once, before any fold is
+  scored. The refusal has class `nestedtune_compute_metrics_predictions`
+  and names each fold that fails. Five shapes this refuses are a missing
+  row, a repeated `.row`, an `NA` `.row`, a row the fold did not hold
+  out, and no `.row` column. A `.row` that is not a whole number is
+  refused too.
+  [`augment()`](https://generics.r-lib.org/reference/augment.html)
+  refuses the same shapes. On a workflow-set run the message names the
+  workflow.
+
 - The printed [`summary()`](https://rdrr.io/r/base/summary.html) of a
   run, the final fit’s print and its
   [`summary()`](https://rdrr.io/r/base/summary.html) now name a
