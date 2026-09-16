@@ -7,7 +7,7 @@
 - **Principles touched:** GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — the numbers collect_metrics(), print, summary, autoplot and compute_metrics() report
-- **Branch/PR:** m101-resample-weights
+- **Branch/PR:** m101-resample-weights · https://github.com/tidymodels/nestedtune/pull/114
 
 ## Goal
 
