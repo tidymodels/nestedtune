@@ -725,12 +725,8 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
 # to the object, so any mismatch refuses, under the class of the reader
 # that found it: `nestedtune_<verb>_predictions`. The values are compared
 # as whole numbers: a double `.row` holding the same values is accepted.
-check_predictions_rows <- function(
-  x,
-  verb = c("augment", "compute_metrics"),
-  call = rlang::caller_env()
-) {
-  verb <- rlang::arg_match(verb)
+check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
+  verb <- rlang::arg_match(verb, c("augment", "compute_metrics"))
   bad <- vapply(
     which(x$.completed),
     function(i) !predictions_match_rows(x$.predictions[[i]], x$splits[[i]]),

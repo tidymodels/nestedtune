@@ -49,6 +49,8 @@
 - 2026-09-16: T3: the Refusals section of the `compute_metrics()` help names the class, the five shapes and the fold naming, and a NEWS bullet says the same. roxygen2 8.1.0 meets `Config/roxygen2/version`. `document()` also rewrote `NAMESPACE` to one `importFrom()` per line: the default branch carries the wrapped form from a formatter commit, and both forms pass `air format --check`, so roxygen's form is committed here. `--roxygen --plain` and `--plain` sweeps clean.
 - 2026-09-16: claim audit: 19 claims read, 1 corrected — NEWS.md, R/nested-results-collect.R, man/compute_metrics.nested_results.Rd. The five shapes were named as a closed list, and the check also refuses a `.row` that is not numeric or not a whole number; the list is now open and the whole-number case is named. The reader re-read the corrected wording once and it holds.
 - 2026-09-16: T4: `devtools::check()` on the final head 0 errors, 0 warnings, 0 notes (8m19s). The six gating sweeps, `air format --check .` and `devtools::test()` are clean. Status to review.
+- 2026-09-16: review gate: finding 3 fixed now, the `verb` argument of `check_predictions_rows()` is required. The three touched test files pass again, 715 expectations, and `air format --check` is clean.
+- 2026-09-16: step-7 approval: m100-compute-metrics-predictions-rows approved for merge.
 
 ## Decisions
 
@@ -69,3 +71,4 @@
   6. NEWS and the help say a non-whole `.row` is refused, but the code has no integrality test. A `3.5` is refused as a foreign row.
   7. `check_predictions_rows()` calls `rsample::complement()` on every completed fold on every call.
   8. NAMESPACE flips between roxygen's one-per-line form and the wrapped form on the default branch.
+- Dispositions at the gate: 1 rejected, the censored-regression rescore test passes under the check, quantile predictions hold one row per observation, and the plan gate recorded this falsifier. 2 rejected, reachable only by editing the object and the same for `augment()` since M93. 3 fixed now, `verb` is required. 4 rejected, the comment beside the call states the derivation. 5 rejected, the help does not present its order as precedence. 6 rejected, the sentence was written against an observed refusal and holds in effect. 7 rejected, `complement()` reads a stored index. 8 noted, M094 recorded the drift and the no-diff gate requires roxygen's output.
