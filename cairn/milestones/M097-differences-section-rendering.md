@@ -1,6 +1,6 @@
 # M097: The Differences sections render each heading's paragraph whole and one list per page
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - [x] T1: Write `tests/testthat/test-help-structure.R`. It asserts AC1, AC2 and AC3 as the criteria define them. Pages come from `tools::Rd_db("nestedtune")` when the package is installed (R CMD check), else from `tools::Rd_db(dir = <source root>)` under `devtools::test()`. Section text comes from `tools::Rd2txt()` with the stated options. `\itemize` elements are counted on the parsed section. Run it against today's `man/` and record it red for the stated reason, which is a paragraph or count assertion and never an error in the lookup.
 - [x] T2: Add a last line to `man-roxygen/differences-forced.R`: `#' <%= if (exists("FORCED_TAIL", inherits = FALSE)) FORCED_TAIL else "" %>`. Add the same line with `SETTABLE_TAIL` to `differences-settable.R`. The names differ because a `@templateVar` is block-scoped and last-wins. Move grid's sentence (`R/nested-tune-grid.R:379-380`) into `@templateVar FORCED_TAIL`. Move the three "arguments of" paragraphs (`R/nested-tune-bayes.R:98-101`, `R/nested-tune-race.R:85-88`, `R/nested-tune-sim-anneal.R:91-94`) into `@templateVar SETTABLE_TAIL`, each on one roxygen line. Delete the `@section` re-open lines and blank lines they needed.
 - [x] T3: Rewrite `man-roxygen/differences-passed-shared.R` as a paragraph. It says that `pkgs`, `parallel_over` and `workflow_size` also pass through and behave as the grid page describes, and that `parallel_over` changes the numbers a stochastic engine produces even at `allow_par = FALSE`. Keep the three use sites where they are, after each page's list.
-- [ ] T4: Run `Rscript -e 'devtools::document()'`, `devtools::test()` (T1 green), every `--list-gating` sweep, the M096 duplicate-line command, and `git diff --name-only main -- man/`. Render the four pages with `tools::Rd2txt()`. Summarize the paragraph and list evidence in the work log for review.
+- [x] T4: Run `Rscript -e 'devtools::document()'`, `devtools::test()` (T1 green), every `--list-gating` sweep, the M096 duplicate-line command, and `git diff --name-only main -- man/`. Render the four pages with `tools::Rd2txt()`. Summarize the paragraph and list evidence in the work log for review.
 
 ## Work log
 
@@ -61,6 +61,7 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - 2026-09-15 (T2): tail line added to both templates; grid's sentence moved to `FORCED_TAIL`, the three "arguments of" paragraphs to `SETTABLE_TAIL`, their `@section` re-open lines dropped. `document()` rewrote the four pages only. The test's AC1 and AC2 assertions pass, its six AC3 assertions stay red for T3. Sweeps `--plain` and `--roxygen --plain` clean, M096's duplicate-line command silent at exit 0.
 - 2026-09-15 (T3): `differences-passed-shared.R` rewritten as a closing paragraph. `document()` rewrote the bayes, race and sim-anneal pages. `test-help-structure.R` passes all 24 assertions. The three sections each hold one `\itemize`, grid none. Both sweeps and the duplicate-line command clean.
 - 2026-09-15: claim audit: 14 claims read, 2 corrected — tests/testthat/test-help-structure.R (the header said all four sections hold one list, and the section-lines comment said the lines start at the title line; both comments now match the code, re-read once by the same [O] reader as borne out).
+- 2026-09-15 (T4): at `ab40c13`, `devtools::test()` passes 10140 assertions with 0 failures, warnings or skips. `devtools::document()` on the clean tree leaves it clean. All six `--list-gating` sweeps exit 0. M096's duplicate-line command prints nothing at exit 0. Every `man-roxygen/*.R` file has only `#'` lines. `git diff --name-only main -- man/` lists exactly the grid, bayes, race and sim-anneal pages. Rendered with `Rd2txt()`: the grid forced paragraph ends with the contention sentence; each settable paragraph on bayes, race and sim-anneal ends with its "arguments of" tail; those three sections hold one `\itemize` each with the shared "also pass through" paragraph after the last bullet; grid holds none.
 
 ## Decisions
 

@@ -7,7 +7,7 @@ _Last hygiene check: 2026-09-15 (M096's pass: archived, M93's row pruned, the M6
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M97 | The Differences sections render each heading's paragraph whole and one list per page | in-progress | — | normal | milestones/M097-differences-section-rendering.md |
+| M97 | The Differences sections render each heading's paragraph whole and one list per page | review | — | normal | milestones/M097-differences-section-rendering.md |
 | M96 | The help pages inherit tune's argument text and share repeated text through templates | done | — | normal | milestones/archive/M096-help-inherits-tune-params.md |
 | M95 | The summary note, plot subtitles and tuner help name the number to report for the deployed model | done | — | normal | milestones/archive/M095-report-number-leftovers.md |
 | M94 | The coverage job runs under a 30-minute cap | done | — | normal | milestones/archive/M094-coverage-job-cap.md |
