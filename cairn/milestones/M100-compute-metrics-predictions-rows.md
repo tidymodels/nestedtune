@@ -24,7 +24,7 @@
 - [x] AC1: `compute_metrics()` on a `nested_results` with a completed fold whose `.predictions` fails `predictions_match_rows()` (`R/nested-results-collect.R:740`) against that fold's held-out rows refuses with a classed error whose message names that fold's labels and no other fold's, for each of the five mismatch shapes M093 enumerated (a missing row, a repeated `.row`, an `NA` `.row`, a foreign row, no `.row` column), and the refusal fires with the metric set called zero times.
 - [x] AC2: An unaltered run is scored as before: every `compute_metrics()` expectation in `tests/testthat/test-compute-metrics.R` and `tests/testthat/test-nested-workflow-map-readers.R` present at the branch point passes unedited, and a run on a repeated v-fold outer design (a row held out in more than one fold) is scored, not refused.
 - [x] AC3: The `compute_metrics()` help page names the refusal and the five shapes.
-- [ ] AC4: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `Rscript benchmarks/sweep-prose.R --list-gating` names runs clean.
+- [x] AC4: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `Rscript benchmarks/sweep-prose.R --list-gating` names runs clean.
 
 ## Coverage
 
@@ -58,3 +58,14 @@
 - AC1: `devtools::test()` on the branch head, run alone, gave 10317 pass, 0 fail, 0 skip. `test-compute-metrics.R` plants each of the five shapes on fold 1 and fold 3. Each case asserts the class `nestedtune_compute_metrics_predictions`, the call name, the edited fold's label present, every other label absent, and zero metric calls. The counting metric set is itself tested to count one call per scored fold. The set path is covered in `test-nested-workflow-map-readers.R`. Verified.
 - AC2: `git diff --numstat` shows `test-compute-metrics.R` +126/-0 and `test-nested-workflow-map-readers.R` +15/-0. Every branch-point expectation stands unedited and passed in the run above. The repeated v-fold test holds every row out twice and is scored with one metric call per fold. The censored-regression rescore test at `test-compute-metrics.R:190` passed under the new check with no skip. Verified.
 - AC3: `man/compute_metrics.nested_results.Rd` carries the refusal paragraph naming the class and the five shapes. `devtools::document()` on the head produced no diff. The local roxygen2 is 8.0.0, below the declared 8.1.0, and roxygen only informs on an older version and generates as usual. Verified.
+- AC4: `devtools::check()` on the head, run alone in the foreground, gave 0 errors, 0 warnings, 0 notes in 7m40s. The six sweeps `--list-gating` prints were each clean. `air format --check .` exit 0. Verified.
+- Consistency gate: `cairn_validate.py` all checks passed, 18 staleness advisories on `references/` pages unrelated to this branch. No principle changed, so `cairn_impact.py` was skipped. `document()` no diff. `pkgdown::check_pkgdown()` no problems. `README.Rmd` and `README.md` share one last commit. NEWS carries the bullet with no milestone number. No new top-level file.
+- Reviewers: the blame-history lens and the prior-review lens each reported zero findings. The prior-review lens found one real inline comment on PR #30 against a workflow file, unrelated to the touched files, so no thread walk ran. The diff-bug lens reported eight, ranked:
+  1. `predictions_match_rows()` refuses any duplicate `.row`. A tune mode that saves one row per observation and eval time or quantile is then refused. No censored or quantile run is tested through `compute_metrics()`.
+  2. A completed fold whose `.predictions` is `NULL` or not a data frame is now reported as a row mismatch instead of failing at `check_metric_types_saved()`.
+  3. `verb` defaults to `"augment"`, so a future caller that omits it signals the augment class and wording.
+  4. The class `nestedtune_compute_metrics_predictions` is built by `paste0()` and appears as no literal in `R/`.
+  5. The help lists the metric-type refusal before the predictions refusal, but the code checks predictions first.
+  6. NEWS and the help say a non-whole `.row` is refused, but the code has no integrality test. A `3.5` is refused as a foreign row.
+  7. `check_predictions_rows()` calls `rsample::complement()` on every completed fold on every call.
+  8. NAMESPACE flips between roxygen's one-per-line form and the wrapped form on the default branch.
