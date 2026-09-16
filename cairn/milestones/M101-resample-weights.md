@@ -85,3 +85,4 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
   - F11 no test for the attribute shedding with the class or for a zero weight — fix now: both tests added.
 - Fix-now re-verification: `devtools::test()` FAIL 0, WARN 0, PASS 10428; `document()` regenerated collect_metrics.nested_results.Rd, no further diff; `air format --check` clean; all six sweeps clean; `devtools::check()` result recorded below.
 - `devtools::check()` at 27cd920: 0 errors, 0 warnings, 0 notes. AC5 holds after the fix-nows.
+- 2026-09-16: step-7 approval: m101-resample-weights approved for merge (after fix-nows F1, F2, F3, F5, F11).
