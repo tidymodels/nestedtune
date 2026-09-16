@@ -322,6 +322,29 @@ first argument's type. So `bind_cols(x, extra)` keeps the class while
 return a grouped, a rowwise and a plain tibble, each still carrying the
 attributes.
 
+## Weighting the outer folds
+
+Weights set on the design with
+[`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
+reach the outer average.
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[`summary()`](https://rdrr.io/r/base/summary.html),
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+and
+[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+then report the weighted mean of the folds' estimates. Their `std_err`
+is the weighted standard deviation over the square root of the effective
+sample size, as tune computes both. The per-fold table from
+`collect_metrics(summarize = FALSE)` carries each fold's weight in a
+`.weight` column. tune stores the weights scaled to sum to one, and
+stores none when they are equal, so equal weights give the unweighted
+average.
+
+A fold that fails, or that scores `NA` on a metric, is left out of that
+average and the remaining weights are scaled up to sum to one. `n`
+counts the folds that scored. The weights on a design's inner resamples
+are read by tune itself.
+
 ## Reproducibility
 
 Seed the session before the call, as elsewhere in tidymodels. There is

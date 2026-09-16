@@ -99,7 +99,9 @@ default) or return them one row per outer fold (<code>FALSE</code>).</p></dd>
 
 <p>Summarized, there is one row per metric, with the mean across outer folds,
 the number of folds <code>n</code> behind it, and the standard error of that mean.
-Unsummarized, there is one row per outer fold and metric.</p>
+Unsummarized, there is one row per outer fold and metric. On a design
+weighted with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> the unsummarized shape also
+carries each fold's weight in a <code>.weight</code> column.</p>
 <p>A metric measured at several evaluation times (<code>eval_time</code> on
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>) gets a row per time in both shapes. It is never
 averaged across times. Both shapes carry a <code>.eval_time</code> column exactly
@@ -127,9 +129,13 @@ class named in the refusal that <a href="autoplot.nested_results.html">autoplot(
 
 <p><code>std_err</code> is the standard error of the mean across outer folds: the standard
 deviation of the per-fold scores over the square root of how many there
-were. It measures the precision of that mean, not the fold-to-fold spread,
-which is larger by the same square-root factor. It is not a confidence
-interval, and you must not build one from it.</p>
+were. On a weighted design it is the weighted standard deviation over the
+square root of the effective sample size, as tune computes it. The
+section Weighting the outer folds on <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> states the
+rule for a fold that fails. It measures the
+precision of that mean, not the fold-to-fold spread, which is larger by
+the same square-root factor. It is not a confidence interval, and you
+must not build one from it.</p>
 <p>You cannot get a valid standard error from the fold scores. That limit
 is the statistics', not this implementation's. Outer fold scores are not
 independent, because any two folds share most of their training rows. A

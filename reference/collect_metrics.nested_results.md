@@ -41,7 +41,11 @@ A tibble, described under What the two shapes hold.
 
 Summarized, there is one row per metric, with the mean across outer
 folds, the number of folds `n` behind it, and the standard error of that
-mean. Unsummarized, there is one row per outer fold and metric.
+mean. Unsummarized, there is one row per outer fold and metric. On a
+design weighted with
+[`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
+the unsummarized shape also carries each fold's weight in a `.weight`
+column.
 
 A metric measured at several evaluation times (`eval_time` on
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md))
@@ -70,9 +74,14 @@ give such an object.
 
 `std_err` is the standard error of the mean across outer folds: the
 standard deviation of the per-fold scores over the square root of how
-many there were. It measures the precision of that mean, not the
-fold-to-fold spread, which is larger by the same square-root factor. It
-is not a confidence interval, and you must not build one from it.
+many there were. On a weighted design it is the weighted standard
+deviation over the square root of the effective sample size, as tune
+computes it. The section Weighting the outer folds on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+states the rule for a fold that fails. It measures the precision of that
+mean, not the fold-to-fold spread, which is larger by the same
+square-root factor. It is not a confidence interval, and you must not
+build one from it.
 
 You cannot get a valid standard error from the fold scores. That limit
 is the statistics', not this implementation's. Outer fold scores are not

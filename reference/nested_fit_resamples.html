@@ -182,6 +182,25 @@ draw. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> accept
 every row, with no tuning run.</p>
     </div>
     <div class="section level2">
+    <h2 id="weighting-the-outer-folds">Weighting the outer folds<a class="anchor" aria-label="anchor" href="#weighting-the-outer-folds"></a></h2>
+
+
+
+<p>Weights set on the design with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> reach the
+outer average. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> and
+<code><a href="https://tune.tidymodels.org/reference/compute_metrics.html" class="external-link">compute_metrics()</a></code> then report the weighted mean of the folds'
+estimates. Their <code>std_err</code> is the weighted standard deviation over the
+square root of the effective sample size, as tune computes both. The
+per-fold table from <code>collect_metrics(summarize = FALSE)</code> carries each
+fold's weight in a <code>.weight</code> column. tune stores the weights scaled to
+sum to one, and stores none when they are equal, so equal weights give
+the unweighted average.</p>
+<p>A fold that fails, or that scores <code>NA</code> on a metric, is left out of that
+average and the remaining weights are scaled up to sum to one. <code>n</code> counts
+the folds that scored. The weights on a design's inner resamples are read
+by tune itself.</p>
+    </div>
+    <div class="section level2">
     <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>
 
 

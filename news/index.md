@@ -2,6 +2,21 @@
 
 ## nestedtune 0.0.0.9000
 
+- Weights set on the design with
+  [`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
+  now reach the outer average.
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  and
+  [`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+  report the weighted mean and tune’s weighted standard error over the
+  folds that scored. The per-fold table from
+  `collect_metrics(summarize = FALSE)` carries each fold’s weight in a
+  `.weight` column. A fold that fails or scores `NA` is left out and the
+  remaining weights are scaled to sum to one. A design without weights
+  reports the numbers it did before.
+
 - [`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
   now refuses a completed fold whose saved predictions do not hold
   exactly the rows that fold held out, each once, before any fold is
