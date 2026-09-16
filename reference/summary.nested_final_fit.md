@@ -63,12 +63,28 @@ class `summary.nested_final_fit`, a list with these components:
 
 - `selection`, the parameter values selection chose
 
+- `select`, the
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  the selection was made by, as
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  records it
+
 - `estimate`, always `NULL`
 
 Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
+
+## The selection rule
+
+When `select` names a rule other than the default, the print adds a line
+directly under the "Selected parameters" heading. It reads
+`Selected by:` and then the rule's name, orderings and limit, in the
+words the print of
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+uses after its class tag. The line is absent under the default rule and
+on a fit that tuned nothing.
 
 ## Components that are absent
 
@@ -80,7 +96,8 @@ whose metrics table cannot be read reports its scored figures as zero
 rather than failing to print.
 
 Where nothing was tuned there is no run to describe, so `tuning_label`
-is `NULL` and `candidates` is `0`. `selection` is empty.
+is `NULL` and `candidates` is `0`. `selection` is empty and `select` is
+`NULL`, because no rule was applied.
 
 ## See also
 

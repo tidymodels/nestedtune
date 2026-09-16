@@ -55,6 +55,17 @@ and
 [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
 refuse the object.
 
+## The selection rule
+
+When the selection was made by a rule other than the default, a line
+follows the `Selected:` line. It reads `Selected by:` and then the
+rule's name, orderings and limit, in the words the print of
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+uses after its class tag, for example
+`Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
+under the default rule and on a fit that tuned nothing. The summary's
+`select` component holds the rule as a value.
+
 ## See also
 
 [`summary.nested_final_fit()`](https://nestedtune.tidymodels.org/reference/summary.nested_final_fit.md),

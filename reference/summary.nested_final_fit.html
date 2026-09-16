@@ -121,10 +121,23 @@ with these components:</p><ul><li><p><code>tuning_label</code>, the tuning run's
 <li><p><code>initial</code> and <code>initial_requested</code>, <code>iterations_completed</code> and
 <code>iterations_requested</code>, the iterating tuners' counts</p></li>
 <li><p><code>selection</code>, the parameter values selection chose</p></li>
+<li><p><code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> the selection was made by, as
+<code><a href="extract_procedure.html">extract_procedure()</a></code> records it</p></li>
 <li><p><code>estimate</code>, always <code>NULL</code></p></li>
 </ul><p>Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.</p>
 <p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> returns <code>x</code>, invisibly.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="the-selection-rule">The selection rule<a class="anchor" aria-label="anchor" href="#the-selection-rule"></a></h2>
+
+
+
+<p>When <code>select</code> names a rule other than the default, the print adds a line
+directly under the "Selected parameters" heading. It reads <code>Selected by:</code>
+and then the rule's name, orderings and limit, in the words the print of
+<code><a href="selection_rule.html">selection_rule()</a></code> uses after its class tag. The line is absent
+under the default rule and on a fit that tuned nothing.</p>
     </div>
     <div class="section level2">
     <h2 id="components-that-are-absent">Components that are absent<a class="anchor" aria-label="anchor" href="#components-that-are-absent"></a></h2>
@@ -138,7 +151,8 @@ and the requested ones are the counts the search was called with. A run
 whose metrics table cannot be read reports its scored figures as zero
 rather than failing to print.</p>
 <p>Where nothing was tuned there is no run to describe, so <code>tuning_label</code>
-is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>selection</code> is empty.</p>
+is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>selection</code> is empty and <code>select</code> is
+<code>NULL</code>, because no rule was applied.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

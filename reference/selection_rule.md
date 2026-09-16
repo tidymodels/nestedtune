@@ -41,7 +41,14 @@ selection_rule(rule = c("best", "one_std_err", "pct_loss"), ..., limit = NULL)
 A list of class `selection_rule` with elements `rule`, `order` and
 `limit`. `order` holds the expressions in `...`, empty for `"best"`.
 `limit` is `NULL` outside `"pct_loss"`. Printing shows the three on one
-line.
+line: the rule, then `by` and the orderings as written, then the limit
+in parentheses. That same label follows `Selected by:` in the printed
+[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md),
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md),
+[`print.nested_final_fit()`](https://nestedtune.tidymodels.org/reference/print.nested_final_fit.md)
+and
+[`summary.nested_final_fit()`](https://nestedtune.tidymodels.org/reference/summary.nested_final_fit.md)
+when the rule is not `"best"`.
 
 ## The three rules
 

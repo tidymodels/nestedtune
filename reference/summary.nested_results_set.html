@@ -115,8 +115,11 @@ run called alone. The name of the loop function the set ran through is
 the list's <code>fn</code> attribute.</p>
 <p>Printing it shows that function's name and the workflow count, then one
 section per workflow. Each section holds that run's design, failed
-folds, selected parameters and estimate. The note on what a nested
-estimate describes is printed once, at the end.</p>
+folds, selected parameters and estimate. When the tuned workflows ran
+under a rule other than the default, each of their sections adds the
+<code>Selected by:</code> line of <code><a href="summary.nested_results.html">summary.nested_results()</a></code> under its selected
+parameters. A workflow with nothing to tune has no such line. The note
+on what a nested estimate describes is printed once, at the end.</p>
     </div>
     <div class="section level2">
     <h2 id="what-autoplot-draws">What <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> draws<a class="anchor" aria-label="anchor" href="#what-autoplot-draws"></a></h2>

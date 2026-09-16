@@ -102,12 +102,29 @@ rather than silently ignored.</p></dd>
 holding:</p><ul><li><p>the outer resampling scheme's label</p></li>
 <li><p>the requested and completed fold counts</p></li>
 <li><p>the failed folds, with the stage each failed at</p></li>
-<li><p>what the completed folds selected, and the candidates, the parameter
-settings, each searched</p></li>
+<li><p>what the completed folds selected</p></li>
+<li><p>the rule the folds selected by, as <code><a href="extract_procedure.html">extract_procedure()</a></code> records it,
+under the name <code>select</code>. It is <code>NULL</code> on a <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
+run, which applies no rule.</p></li>
+<li><p>the candidates, the parameter settings, each fold searched</p></li>
 <li><p>the metric estimates averaged over them</p></li>
 </ul><p>Printing it is what most callers want. The components are there for one
 that needs a number rather than a line of text.</p>
 <p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> returns <code>x</code>, invisibly.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="the-selection-rule">The selection rule<a class="anchor" aria-label="anchor" href="#the-selection-rule"></a></h2>
+
+
+
+<p>When the run selected by a rule other than the default, the print adds
+a line directly under the "Selected parameters" heading. It reads
+<code>Selected by:</code> and then the rule's name, orderings and limit, in the
+words the print of <code><a href="selection_rule.html">selection_rule()</a></code> uses after its class tag, for
+example <code>Selected by: one_std_err by num_comp</code>. The line is absent under
+the default rule, so its presence is the signal. It prints whether or not
+any fold completed, because the rule describes the procedure the run
+asked for.</p>
     </div>
     <div class="section level2">
     <h2 id="a-run-that-did-not-finish">A run that did not finish<a class="anchor" aria-label="anchor" href="#a-run-that-did-not-finish"></a></h2>

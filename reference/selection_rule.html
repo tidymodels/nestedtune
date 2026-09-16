@@ -95,7 +95,11 @@ takes tune's default of 2, and the other rules refuse it.</p></dd>
     <p>A list of class <code>selection_rule</code> with elements <code>rule</code>, <code>order</code> and
 <code>limit</code>. <code>order</code> holds the expressions in <code>...</code>, empty for <code>"best"</code>.
 <code>limit</code> is <code>NULL</code> outside <code>"pct_loss"</code>. Printing shows the three on one
-line.</p>
+line: the rule, then <code>by</code> and the orderings as written, then the limit
+in parentheses. That same label follows <code>Selected by:</code> in the printed
+<code><a href="summary.nested_results.html">summary.nested_results()</a></code>, <code><a href="summary.nested_results_set.html">summary.nested_results_set()</a></code>,
+<code><a href="print.nested_final_fit.html">print.nested_final_fit()</a></code> and <code><a href="summary.nested_final_fit.html">summary.nested_final_fit()</a></code> when the
+rule is not <code>"best"</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="the-three-rules">The three rules<a class="anchor" aria-label="anchor" href="#the-three-rules"></a></h2>

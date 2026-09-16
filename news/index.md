@@ -2,6 +2,17 @@
 
 ## nestedtune 0.0.0.9000
 
+- The printed [`summary()`](https://rdrr.io/r/base/summary.html) of a
+  run, the final fit’s print and its
+  [`summary()`](https://rdrr.io/r/base/summary.html) now name a
+  selection rule other than the default. The line reads `Selected by:`
+  and then the rule’s name, orderings and limit, in the words the print
+  of
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  uses after its class tag. A workflow set’s printed summary adds the
+  line inside each tuned workflow’s section. Both summaries gain a
+  `select` component holding the rule.
+
 - The help for
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),

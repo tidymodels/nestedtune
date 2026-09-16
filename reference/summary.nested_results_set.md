@@ -72,8 +72,13 @@ function the set ran through is the list's `fn` attribute.
 
 Printing it shows that function's name and the workflow count, then one
 section per workflow. Each section holds that run's design, failed
-folds, selected parameters and estimate. The note on what a nested
-estimate describes is printed once, at the end.
+folds, selected parameters and estimate. When the tuned workflows ran
+under a rule other than the default, each of their sections adds the
+`Selected by:` line of
+[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
+under its selected parameters. A workflow with nothing to tune has no
+such line. The note on what a nested estimate describes is printed once,
+at the end.
 
 ## What [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) draws
 

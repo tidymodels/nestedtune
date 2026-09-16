@@ -114,6 +114,19 @@ reads "nothing to select", and the note says that <code><a href="extract_tune_re
 and <code><a href="extract_scored_candidates.html">extract_scored_candidates()</a></code> refuse the object.</p>
     </div>
     <div class="section level2">
+    <h2 id="the-selection-rule">The selection rule<a class="anchor" aria-label="anchor" href="#the-selection-rule"></a></h2>
+
+
+
+<p>When the selection was made by a rule other than the default, a line
+follows the <code>Selected:</code> line. It reads <code>Selected by:</code> and then the rule's
+name, orderings and limit, in the words the print of <code><a href="selection_rule.html">selection_rule()</a></code>
+uses after its class tag, for example
+<code>Selected by: pct_loss by num_comp (limit = 5)</code>. The line is absent
+under the default rule and on a fit that tuned nothing. The summary's
+<code>select</code> component holds the rule as a value.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="summary.nested_final_fit.html">summary.nested_final_fit()</a></code>, <code><a href="nested_final_fit.html">nested_final_fit()</a></code>,
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="extract_tune_results.html">extract_tune_results()</a></code>,

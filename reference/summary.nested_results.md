@@ -48,8 +48,15 @@ class `summary.nested_results`, a list holding:
 
 - the failed folds, with the stage each failed at
 
-- what the completed folds selected, and the candidates, the parameter
-  settings, each searched
+- what the completed folds selected
+
+- the rule the folds selected by, as
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  records it, under the name `select`. It is `NULL` on a
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  run, which applies no rule.
+
+- the candidates, the parameter settings, each fold searched
 
 - the metric estimates averaged over them
 
@@ -57,6 +64,19 @@ Printing it is what most callers want. The components are there for one
 that needs a number rather than a line of text.
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
+
+## The selection rule
+
+When the run selected by a rule other than the default, the print adds a
+line directly under the "Selected parameters" heading. It reads
+`Selected by:` and then the rule's name, orderings and limit, in the
+words the print of
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+uses after its class tag, for example
+`Selected by: one_std_err by num_comp`. The line is absent under the
+default rule, so its presence is the signal. It prints whether or not
+any fold completed, because the rule describes the procedure the run
+asked for.
 
 ## A run that did not finish
 
