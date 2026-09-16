@@ -1,13 +1,13 @@
 # M097: The Differences sections render each heading's paragraph whole and one list per page
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — the rendered help pages that readers open
-- **Branch/PR:** —
+- **Branch/PR:** `m097-differences-section-rendering`
 
 ## Goal
 
@@ -43,7 +43,7 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 
 ## Tasks
 
-- [ ] T1: Write `tests/testthat/test-help-structure.R`. It asserts AC1, AC2 and AC3 as the criteria define them. Pages come from `tools::Rd_db("nestedtune")` when the package is installed (R CMD check), else from `tools::Rd_db(dir = <source root>)` under `devtools::test()`. Section text comes from `tools::Rd2txt()` with the stated options. `\itemize` elements are counted on the parsed section. Run it against today's `man/` and record it red for the stated reason, which is a paragraph or count assertion and never an error in the lookup.
+- [x] T1: Write `tests/testthat/test-help-structure.R`. It asserts AC1, AC2 and AC3 as the criteria define them. Pages come from `tools::Rd_db("nestedtune")` when the package is installed (R CMD check), else from `tools::Rd_db(dir = <source root>)` under `devtools::test()`. Section text comes from `tools::Rd2txt()` with the stated options. `\itemize` elements are counted on the parsed section. Run it against today's `man/` and record it red for the stated reason, which is a paragraph or count assertion and never an error in the lookup.
 - [ ] T2: Add a last line to `man-roxygen/differences-forced.R`: `#' <%= if (exists("FORCED_TAIL", inherits = FALSE)) FORCED_TAIL else "" %>`. Add the same line with `SETTABLE_TAIL` to `differences-settable.R`. The names differ because a `@templateVar` is block-scoped and last-wins. Move grid's sentence (`R/nested-tune-grid.R:379-380`) into `@templateVar FORCED_TAIL`. Move the three "arguments of" paragraphs (`R/nested-tune-bayes.R:98-101`, `R/nested-tune-race.R:85-88`, `R/nested-tune-sim-anneal.R:91-94`) into `@templateVar SETTABLE_TAIL`, each on one roxygen line. Delete the `@section` re-open lines and blank lines they needed.
 - [ ] T3: Rewrite `man-roxygen/differences-passed-shared.R` as a paragraph. It says that `pkgs`, `parallel_over` and `workflow_size` also pass through and behave as the grid page describes, and that `parallel_over` changes the numbers a stochastic engine produces even at `allow_par = FALSE`. Keep the three use sites where they are, after each page's list.
 - [ ] T4: Run `Rscript -e 'devtools::document()'`, `devtools::test()` (T1 green), every `--list-gating` sweep, the M096 duplicate-line command, and `git diff --name-only main -- man/`. Render the four pages with `tools::Rd2txt()`. Summarize the paragraph and list evidence in the work log for review.
@@ -56,6 +56,8 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - 2026-09-15: plan gate chose an inline brew expression on a `#'` line for the optional tail over bare `<% if %>` lines, because a line without `#'` ends the roxygen block for `benchmarks/sweep-prose.R` and the M096 command and splits one template into two blocks. Falsified by either reader gaining a brew-aware line skip.
 - 2026-09-15: plan gate chose a new testthat file over a prose-sweep mode, because a rendering check widens a checker M84 and M89 already hardened. Falsified by the sweep growing a renderer of its own for another reason.
 - 2026-09-15: plan gate dropped the doubled blank lines from scope on the measurement that every renderer collapses them. Falsified by a renderer in use here (pkgdown, `Rd2HTML`, `Rd2txt`) starting to show them.
+- 2026-09-15: /milestone-implement started. Branch cut from the pushed `main` at `df032a5`. The plan left nothing open, so no question gate.
+- 2026-09-15 (T1): `tests/testthat/test-help-structure.R` written. Against `man/` at `df032a5` it fails ten times: the grid forced paragraph lacks the contention sentence, the three settable paragraphs lack their tails, the three sections hold two `\itemize` elements, and the shared paragraph starts on the last bullet line. No lookup error.
 
 ## Decisions
 
