@@ -60,6 +60,7 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - 2026-09-15 (T1): `tests/testthat/test-help-structure.R` written. Against `man/` at `df032a5` it fails ten times: the grid forced paragraph lacks the contention sentence, the three settable paragraphs lack their tails, the three sections hold two `\itemize` elements, and the shared paragraph starts on the last bullet line. No lookup error.
 - 2026-09-15 (T2): tail line added to both templates; grid's sentence moved to `FORCED_TAIL`, the three "arguments of" paragraphs to `SETTABLE_TAIL`, their `@section` re-open lines dropped. `document()` rewrote the four pages only. The test's AC1 and AC2 assertions pass, its six AC3 assertions stay red for T3. Sweeps `--plain` and `--roxygen --plain` clean, M096's duplicate-line command silent at exit 0.
 - 2026-09-15 (T3): `differences-passed-shared.R` rewritten as a closing paragraph. `document()` rewrote the bayes, race and sim-anneal pages. `test-help-structure.R` passes all 24 assertions. The three sections each hold one `\itemize`, grid none. Both sweeps and the duplicate-line command clean.
+- 2026-09-15: claim audit: 14 claims read, 2 corrected — tests/testthat/test-help-structure.R (the header said all four sections hold one list, and the section-lines comment said the lines start at the title line; both comments now match the code, re-read once by the same [O] reader as borne out).
 
 ## Decisions
 

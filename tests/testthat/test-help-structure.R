@@ -1,5 +1,6 @@
 # The Differences sections of the four tuner pages render each run-in
-# heading's paragraph whole, and hold one list each (M97, AC1 to AC3).
+# heading's paragraph whole. The bayes, race and sim-anneal sections hold one
+# list each, and the grid section holds none (M97, AC1 to AC3).
 #
 # A rendering is what `tools::Rd2txt()` prints for the page under the
 # options below. A paragraph is a run of consecutive non-blank lines, joined
@@ -66,9 +67,9 @@ section_lists <- function(body) {
   Filter(function(n) identical(structure_tag(n), "\\itemize"), body)
 }
 
-# The rendered lines of the page's Differences section: from its title line
-# to the line before the next section title. A title sits at column 0; the
-# body is indented.
+# The rendered lines of the page's Differences section: from the line after
+# its title line to the line before the next section title. A title sits at
+# column 0; the body is indented.
 rendered_differences <- function(topic) {
   title <- DIFFERENCES_TITLE[[topic]]
   lines <- withr::with_options(
