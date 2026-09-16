@@ -58,14 +58,14 @@ rules in tracking-rules:
   `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
   `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
   the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
-  sets none, running one file per process. **A `workflow_dispatch`-only stress
-  workflow** (`stress-daemon-tests.yaml`) hunts the hang on demand under a job cap far above the rest, invisible to
-  `ci-usage.py` for carrying neither trigger. **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs the suite against
-  vctrs from `r-lib/vctrs@main`, watching the experimental `vec_cbind_frame_ptype()` `R/nested-results.R` has a method
-  on; non-gating and outside the required checks, so an unreleased upstream branch cannot freeze a merge here. **Three
-  organization workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`,
-  `format-suggest.yaml`, M33): no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them;
-  `format-suggest.yaml` runs `air format .` (see DESIGN).
+  sets none, running one file per process. **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`)
+  hunts the hang on demand under a job cap far above the rest, invisible to `ci-usage.py` for carrying neither trigger.
+  **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs the suite against `r-lib/vctrs@main` for the experimental
+  `vec_cbind_frame_ptype()` method in `R/nested-results.R`; non-gating and not a required check, so upstream cannot
+  freeze a merge. Triggers: `push`, `pull_request`, `schedule` (Mondays 06:17 UTC), `workflow_dispatch` (M102);
+  `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
+  workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33):
+  no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air format .`.
 - Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`) writes
   timestamped start/end lines per test file and per `test_that()` block to unbuffered `stderr()`, so a killed job's
   last unmatched `start` names the block it died in (M14, per-test M16; under parallel files it runs in the parent in
