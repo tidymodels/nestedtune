@@ -1,6 +1,6 @@
 # M096: The help pages inherit tune's argument text and share repeated text through templates
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,7 +42,7 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - [x] T3: Templates for the "Differences" scaffold: one `man-roxygen/differences-*.R` per repeated paragraph, parameterized through `@templateVar` (the control constructor, the page name), keeping the bold run-in headings byte-identical so `test-control-slots.R` parses them; the finetune classification note as one template. `devtools::test()` after each page.
 - [x] T4: The remaining runs: the `@examplesIf` guard into `man-roxygen/example-set.R`; the reader `@param x`/`summarize`/`...` family and the refusal sentences via `@inheritParams collect_metrics.nested_results` or a template; the two `@seealso` families as templates with a `@templateVar` for the varying link.
 - [x] T5: Write the AC3 command into this file's Decisions section and run it: an R snippet reading `#'` lines of `R/*.R` and `man-roxygen/*.R`, tracking tag state per block, keeping the six tag kinds, normalizing whitespace, and printing any line of 12+ words seen in two blocks. Fix each hit through T3/T4 or record why it stands.
-- [ ] T6: `devtools::document()` no-diff, `devtools::check()`, the gating sweeps, the NEWS bullet.
+- [x] T6: `devtools::document()` no-diff, `devtools::check()`, the gating sweeps, the NEWS bullet.
 
 ## Work log
 
@@ -59,6 +59,7 @@ Every `@param` on the six loop pages whose accepted values equal the wrapped tun
 - 2026-09-15: T4 done. `seealso-reader` at the four `R/nested-results-collect.R` sites, `refusals-saved-run` at the compute_metrics and augment sections, `@inheritParams` for compute_metrics' `summarize`, augment's `x` and the set summary page's `...`. The `collect_metrics.nested_results` seealso has no varying link and stays local (8 words).
 - 2026-09-15: T5 done. The Decisions command exits 0 and prints nothing at this head; the three hits it printed after T3 were the two T4 sites and the sim-anneal "Refused" line, reworded. All six gating sweeps clean.
 - 2026-09-15: claim audit: 25 claims read, 1 corrected — NEWS.md, R/nested-tune-grid.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, R/nested-fit-resamples.R, R/nested-results-collect.R, R/nested-results-set.R, man-roxygen/*.R. The correction: the bayes page said tune accepts a `control_grid()` in `tune_bayes()`, and tune 2.1.0 refuses to coerce it; the bayes and sim-anneal pages now share `differences-refused-plain.R`, which names no example. Re-read by the same reader: holds. Suite 10116 pass after the fix.
+- 2026-09-15: T6 done. `devtools::check()` at `1f3ac3d`: 0 errors, 0 warnings, 0 notes. `document()` no diff. NEWS bullet names the five pages and the four arguments. Status → review.
 
 ## Decisions
 
