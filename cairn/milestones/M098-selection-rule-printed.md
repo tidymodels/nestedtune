@@ -72,3 +72,18 @@ If a run selected each fold's candidate by a rule other than the default best-by
 - AC5 evidence: `git diff main..HEAD -- tests/testthat/_snaps/` holds 408 added lines and 0 removed lines. The default-rule and `nested_fit_resamples()` blocks pass unchanged in the suite run above.
 - AC6 evidence: `Selected by` appears in `man/summary.nested_results.Rd`, `man/summary.nested_final_fit.Rd`, `man/print.nested_final_fit.Rd`, `man/summary.nested_results_set.Rd` and `man/selection_rule.Rd`. The first three describe the `select` component. The set page describes the line only, and `selection_rule.Rd` names the shared label. `NEWS.md:3-10` carries the bullet.
 - Driving RR: none, projection-vs-outcome no-ops.
+- 2026-09-16: consistency gate. `cairn_validate` passes, 18 references-staleness advisories and no gate failure. `devtools::document()` leaves no diff. README.md is not behind README.Rmd. `pkgdown::check_pkgdown()` finds no problems. All six gating prose sweeps clean. `air format --check` clean on the touched R files. No new top-level file. No DESIGN principle changed, so `cairn_impact` is skipped. `devtools::check()` result is recorded in the line below.
+- 2026-09-16: independent review. [S] prior-review lens: no prior-review evidence on the touched files, the GitHub probe found human comments only on unrelated files, zero findings. [S] history lens: no regression, resurrected bug or contradicted decision. It noted that the plan gate's citation of IP4 for the no-fold-completed line is by analogy to the estimate principle rather than its literal wording, noted with no action. [O] diff-bug lens: twelve findings, no wrong-output bug, triaged below.
+- finding 1 (label wraps at console width through `cli_text`, unlike the rule's own `cat()` print): reject. The sibling `Procedure:` and `Selected:` lines wrap the same way, so the line matches the print it joins.
+- finding 2 (`selection_rule_label()` on an empty `order` under a non-default rule renders no ` by `): reject. `selection_rule()` refuses that state, so no exported path reaches it.
+- finding 3 (`format(x$limit)` follows session options): reject. The limit branch is byte-identical to `main`, a pre-existing property.
+- finding 4 (`names_selection_rule()` reads as an accessor): reject, a naming nitpick.
+- finding 5 (`selection_rule.Rd` omits the set summary among the surfaces the label reaches): fixed now, the return text names `summary.nested_results_set()`.
+- finding 6 (the `select` bullet in `summary.nested_results.Rd` breaks the list's prose register and its order): fixed now, the bullet is prose under the component's name and sits in the component order.
+- finding 7 (AC4's fixture is a new `rule_set_results()` rather than the line-1016 fixture T2 named): reject. The T2 work-log line discloses the fixture, a minor task edit within implement's check-off right.
+- finding 8 (the set test pins the section, not the position under the heading): reject. The AC4 snapshot pins the position.
+- finding 9 (`heading + 2L` encodes cli's h2 spacing): reject. A cli spacing change would fail the snapshots first, and the assertion is what AC1 and AC3 ask for.
+- finding 10 (`selected_by_lines()` defined in two test files): reject, a duplication a linter class would catch.
+- finding 11 (`expect_named(under_rule$result, NULL)` in the AC4 test): reject. It justifies the index access that follows.
+- finding 12 (the two-ordering and set cases run only where their fixtures exist): reject, the suite's standing convention.
+

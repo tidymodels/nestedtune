@@ -25,11 +25,11 @@ holding:
 \item the outer resampling scheme's label
 \item the requested and completed fold counts
 \item the failed folds, with the stage each failed at
-\item what the completed folds selected, and the candidates, the parameter
-settings, each searched
-\item \code{select}, the \code{\link[=selection_rule]{selection_rule()}} the folds selected by, as
-\code{\link[=extract_procedure]{extract_procedure()}} records it. It is \code{NULL} on a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run, which applies no rule.
+\item what the completed folds selected
+\item the rule the folds selected by, as \code{\link[=extract_procedure]{extract_procedure()}} records it,
+under the name \code{select}. It is \code{NULL} on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
+run, which applies no rule.
+\item the candidates, the parameter settings, each fold searched
 \item the metric estimates averaged over them
 }
 

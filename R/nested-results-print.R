@@ -140,11 +140,11 @@ print_failure_count <- function(x) {
 #' - the outer resampling scheme's label
 #' - the requested and completed fold counts
 #' - the failed folds, with the stage each failed at
-#' - what the completed folds selected, and the candidates, the parameter
-#'   settings, each searched
-#' - `select`, the [selection_rule()] the folds selected by, as
-#'   [extract_procedure()] records it. It is `NULL` on a
-#'   [nested_fit_resamples()] run, which applies no rule.
+#' - what the completed folds selected
+#' - the rule the folds selected by, as [extract_procedure()] records it,
+#'   under the name `select`. It is `NULL` on a [nested_fit_resamples()]
+#'   run, which applies no rule.
+#' - the candidates, the parameter settings, each fold searched
 #' - the metric estimates averaged over them
 #'
 #' Printing it is what most callers want. The components are there for one
