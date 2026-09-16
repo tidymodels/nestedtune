@@ -1,17 +1,16 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-16 (M099's pass: archived, M96's row and the RR01 B4 candidate row pruned, no lesson added or retired. validate green.)_
+_Last hygiene check: 2026-09-16 (M100's pass: archived, M97's row pruned, the M92 roxygen lesson corrected in place, one clause trimmed from the cli lesson for the byte cap. validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M99 | IP2's text names the randomness it reaches | done | — | normal | milestones/archive/M099-ip2-rng-scope.md |
-| M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | review | — | normal | milestones/M100-compute-metrics-predictions-rows.md |
+| M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | done | — | normal | milestones/archive/M100-compute-metrics-predictions-rows.md |
 | M101 | The outer average honors tune's resample weights | planned | — | normal | milestones/M101-resample-weights.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | planned | — | normal | milestones/M102-devel-vctrs-schedule-cache.md |
 | M103 | The workflow identity reads case weights and a postprocessor | planned | — | normal | milestones/M103-identity-case-weights-postprocessor.md |
 | M98 | The summary and final-fit prints name a non-default selection rule | done | — | normal | milestones/archive/M098-selection-rule-printed.md |
-| M97 | The Differences sections render each heading's paragraph whole and one list per page | done | — | normal | milestones/archive/M097-differences-section-rendering.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
