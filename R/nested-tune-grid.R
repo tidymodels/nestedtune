@@ -209,6 +209,8 @@
 #' `group_by()`, `rowwise()` and `tibble::as_tibble()` return a grouped, a
 #' rowwise and a plain tibble, each still carrying the attributes.
 #'
+#' @template section-resample-weights
+#'
 #' @template section-reproducibility
 #'
 #' @section Reproducing one fold by hand:

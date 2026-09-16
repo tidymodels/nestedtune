@@ -96,6 +96,25 @@ draw. \code{\link[=nested_final_fit]{nested_final_fit()}} accepts the result and
 every row, with no tuning run.
 }
 
+\section{Weighting the outer folds}{
+
+
+Weights set on the design with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} reach the
+outer average. \code{collect_metrics()}, \code{summary()}, \code{autoplot()} and
+\code{compute_metrics()} then report the weighted mean of the folds'
+estimates. Their \code{std_err} is the weighted standard deviation over the
+square root of the effective sample size, as tune computes both. The
+per-fold table from \code{collect_metrics(summarize = FALSE)} carries each
+fold's weight in a \code{.weight} column. tune stores the weights scaled to
+sum to one, and stores none when they are equal, so equal weights give
+the unweighted average.
+
+A fold that fails, or that scores \code{NA} on a metric, is left out of that
+average and the remaining weights are scaled up to sum to one. \code{n} counts
+the folds that scored. The weights on a design's inner resamples are read
+by tune itself.
+}
+
 \section{Reproducibility}{
 
 
