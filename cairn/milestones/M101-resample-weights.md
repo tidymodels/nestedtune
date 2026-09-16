@@ -84,3 +84,4 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
   - F10 DESIGN.md has no note on the results object's weights — follow-up: written in the step-9 hygiene commit.
   - F11 no test for the attribute shedding with the class or for a zero weight — fix now: both tests added.
 - Fix-now re-verification: `devtools::test()` FAIL 0, WARN 0, PASS 10428; `document()` regenerated collect_metrics.nested_results.Rd, no further diff; `air format --check` clean; all six sweeps clean; `devtools::check()` result recorded below.
+- `devtools::check()` at 27cd920: 0 errors, 0 warnings, 0 notes. AC5 holds after the fix-nows.
