@@ -72,8 +72,41 @@ new_nested_results <- function(
   # IP4: what ran is recorded positively, never inferred from what is absent.
   attr(out, "folds_attempted") <- n
   attr(out, "folds_completed") <- sum(completed)
+  # The outer folds' weights (M101), as `tune::add_resample_weights()` left
+  # them on the design: normalized to sum one, and absent when equal. Kept
+  # as a table keyed by the fold label columns rather than as the design's
+  # positional vector, so a run whose rows a caller reorders still pairs
+  # each fold with its own weight. Absent on a run built before it was
+  # recorded and on one whose design carried none, which read alike as
+  # unweighted.
+  weights <- attr(resamples, ".resample_weights")
+  if (is.numeric(weights) && length(weights) == n) {
+    attr(out, "resample_weights") <- new_tbl(c(
+      cols[id_cols],
+      list(.weight = as.double(weights))
+    ))
+  }
   class(out) <- c("nested_results", class(out))
   out
+}
+
+# Each row's weight, read off the recorded table by the fold label columns,
+# or NULL on an unweighted run. A row the table does not name -- unreachable
+# while the class holds, since rows are never added -- reads NA, which
+# summarize_folds() treats as no weight for that fold.
+fold_weights <- function(x) {
+  table <- attr(x, "resample_weights")
+  if (!is.data.frame(table)) {
+    return(NULL)
+  }
+  id_cols <- id_columns(x)
+  if (length(id_cols) == 0L || !all(id_cols %in% names(x))) {
+    return(NULL)
+  }
+  key <- function(tbl) {
+    do.call(paste, c(lapply(id_cols, function(nm) tbl[[nm]]), list(sep = "\r")))
+  }
+  table$.weight[match(key(x), key(table))]
 }
 
 # How the outer resampling scheme describes itself, for printing.
@@ -274,6 +307,9 @@ stamp_results <- function(out, template) {
   # Which columns the design named its folds with travels the same way, and for
   # the same reason: it describes the call, not the rows in hand (M38).
   attr(out, "id_columns") <- attr(template, "id_columns")
+  # The fold weights describe the design the call ran on (M101), keyed by
+  # the label columns above, so a reordered object reads them as its own.
+  attr(out, "resample_weights") <- attr(template, "resample_weights")
   # Read off the rows rather than copied from the template. Under the invariants
   # the two agree, so this corrects nothing today; it is the object's own record
   # of what ran, and IP4 asks that it be true of the object holding it however
@@ -326,7 +362,15 @@ results_attributes <- function() {
 # These stay true of anything the run produced, a type token included; the two
 # counts do not, which is why they are separated here.
 run_attributes <- function() {
-  c("grid", "metrics", "procedure", "inside", "outer_label", "id_columns")
+  c(
+    "grid",
+    "metrics",
+    "procedure",
+    "inside",
+    "outer_label",
+    "id_columns",
+    "resample_weights"
+  )
 }
 
 #' @importFrom dplyr dplyr_reconstruct
@@ -827,16 +871,40 @@ summarize_folds <- function(per_fold) {
   # `n` counts the folds that actually contributed, so a summary row never
   # reports no estimate while claiming every fold was in it. This is what
   # tune::estimate_tune_results() does, and GP1 says to match it.
+  #
+  # On a weighted run (M101) the `.weight` column carries each fold's weight
+  # and the mean and standard error are tune 2.1.0's weighted ones
+  # (`estimate_tune_results()`'s weighted branch, with `.weighted_sd()` and
+  # `.effective_sample_size()`, read 2026-09-16): the weighted mean, and the
+  # weighted standard deviation over the square root of the effective
+  # sample size. The one divergence is the NA fold: tune's weighted branch
+  # takes no `na.rm` and returns NA, where this drops the fold and lets
+  # `cov.wt()` renormalize the rest, so a failed fold does not blank a
+  # weighted run any more than an unweighted one (the M101 plan gate).
+  # `.weight` all NA -- a workflow with no weights stacked beside one with
+  # them -- reads as unweighted.
+  weighted <- ".weight" %in% names(per_fold) && !all(is.na(per_fold$.weight))
   estimates_for <- function(k) {
-    vals <- per_fold$.estimate[keys == k]
-    vals[!is.na(vals)]
+    rows <- keys == k
+    vals <- per_fold$.estimate[rows]
+    keep <- !is.na(vals)
+    list(
+      vals = vals[keep],
+      w = if (weighted) per_fold$.weight[rows][keep] else NULL
+    )
   }
 
   mean_of <- vapply(
     keys[first],
     function(k) {
-      vals <- estimates_for(k)
-      if (length(vals) == 0L) NA_real_ else mean(vals)
+      e <- estimates_for(k)
+      if (length(e$vals) == 0L) {
+        NA_real_
+      } else if (weighted) {
+        stats::weighted.mean(e$vals, e$w)
+      } else {
+        mean(e$vals)
+      }
     },
     numeric(1),
     USE.NAMES = FALSE
@@ -844,7 +912,7 @@ summarize_folds <- function(per_fold) {
   n_of <- vapply(
     keys[first],
     function(k) {
-      length(estimates_for(k))
+      length(estimates_for(k)$vals)
     },
     integer(1),
     USE.NAMES = FALSE
@@ -852,8 +920,14 @@ summarize_folds <- function(per_fold) {
   se_of <- vapply(
     keys[first],
     function(k) {
-      vals <- estimates_for(k)
-      if (length(vals) < 2L) NA_real_ else stats::sd(vals) / sqrt(length(vals))
+      e <- estimates_for(k)
+      if (length(e$vals) < 2L) {
+        NA_real_
+      } else if (weighted) {
+        weighted_std_err(e$vals, e$w)
+      } else {
+        stats::sd(e$vals) / sqrt(length(e$vals))
+      }
     },
     numeric(1),
     USE.NAMES = FALSE
@@ -870,6 +944,16 @@ summarize_folds <- function(per_fold) {
   cols$n <- n_of
   cols$std_err <- se_of
   new_tbl(cols)
+}
+
+# tune's weighted standard error over the folds that scored: the weighted
+# standard deviation `stats::cov.wt()` gives (its unbiased default, which
+# normalizes the weights itself), over the square root of the effective
+# sample size `sum(w)^2 / sum(w^2)`, floored at one as tune floors it.
+weighted_std_err <- function(vals, w) {
+  weighted_var <- stats::cov.wt(data.frame(vals), wt = w, cor = FALSE)$cov[1, 1]
+  effective_n <- sum(w)^2 / sum(w^2)
+  sqrt(weighted_var) / sqrt(max(effective_n, 1))
 }
 
 # IP4: nothing is reported for a design that did not run at all. With no fold
@@ -965,6 +1049,12 @@ per_fold_metrics <- function(x, frames = x$.metrics) {
     cols$.eval_time <- column(".eval_time", NA_real_)
   }
   cols$.estimate <- column(".estimate", NA_real_)
+  # The fold's weight beside each of its rows on a weighted run (M101), the
+  # column summarize_folds() reads; an unweighted run's table is as it was.
+  weights <- fold_weights(x)
+  if (!is.null(weights)) {
+    cols$.weight <- rep(weights, times = n_rows)
+  }
   new_tbl(cols)
 }
 

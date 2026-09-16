@@ -70,6 +70,8 @@
 #'
 #' @inheritSection nested_tune_grid Nested designs
 #'
+#' @template section-resample-weights
+#'
 #' @template section-reproducibility
 #'
 #' @section The two seeds on a run with no tuning:

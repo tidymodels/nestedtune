@@ -1,13 +1,13 @@
 # M101: The outer average honors tune's resample weights
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — the numbers collect_metrics(), print, summary, autoplot and compute_metrics() report
-- **Branch/PR:** —
+- **Branch/PR:** m101-resample-weights
 
 ## Goal
 
@@ -15,7 +15,7 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 
 ## Scope
 
-**In:** `summarize_folds()` (`R/nested-results.R:809`) reading per-fold weights; the results object recording the weights aligned to its label columns so every reader that shares `summarize_folds()` (`collect_metrics()`, print, `summary()`, `autoplot()`, `compute_metrics()`) reports them; the shared help template stating the door and the `NA`-fold divergence; a tune issue asking whether its weighted branch means to return `NA` on a failed fold.
+**In:** `summarize_folds()` (`R/nested-results.R:809`) reading per-fold weights; the results object recording the weights aligned to its label columns so every reader that shares `summarize_folds()` (`collect_metrics()`, print, `summary()`, `autoplot()`, `compute_metrics()`) reports them; the shared help template stating the door and the `NA`-fold rule; a tune issue reporting that its weighted branch errors on a fold scoring `NA` and ignores the weights, with a warning, on a fold that failed.
 
 **Out:** a `weights` argument on the orchestrators (a candidate row; D-030's per-argument rule and a D-entry would apply); weights on the inner resamples (tune reads them itself, GP1); `nested_final_fit()`'s summary, which reports no estimate by design (IP3).
 
@@ -24,7 +24,7 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - [ ] AC1: For a nested design carrying `.resample_weights`, `collect_metrics()` reports, per metric, `mean` equal to `stats::weighted.mean()` of the folds with a non-`NA` `.estimate` by their weights, and `std_err` equal to the weighted standard deviation of those estimates over the square root of their effective sample size, both as tune 2.1.0's `estimate_tune_results()` computes them on non-`NA` inputs; `n` stays the count of folds that scored; a run with one failed fold reports these over the folds that scored.
 - [ ] AC2: A design without the attribute reports numbers identical to before: every `collect_metrics()`, `print`, `summary()` and `autoplot()` snapshot present at the branch point passes unedited.
 - [ ] AC3: On a weighted run, `compute_metrics()` with the run's own metric set returns `collect_metrics()`'s rows (D-063's promise), and `collect_metrics(summarize = FALSE)` carries a `.weight` column holding each fold's weight.
-- [ ] AC4: `?nested_tune_grid` states, through the shared template, that weights set with `tune::add_resample_weights()` on the design reach the outer average, and that a failed fold is dropped and the weights renormalized, where tune returns `NA`.
+- [ ] AC4: Each of the five orchestrator help pages (`?nested_tune_grid`, `?nested_tune_bayes`, `?nested_tune_race`, `?nested_tune_sim_anneal`, `?nested_fit_resamples`) states, through the shared template, that weights set with `tune::add_resample_weights()` on the design reach the outer average, and that a fold that fails or scores `NA` is dropped and the weights renormalized over the folds that scored.
 - [ ] AC5: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `--list-gating` names runs clean.
 
 ## Coverage
@@ -37,10 +37,10 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 
 ## Tasks
 
-- [ ] T1: Tests first: a weighted design through `nested_fit_resamples()` and `nested_tune_grid()`; expected `mean` and `std_err` computed in the test from tune's formulas (read from `deparse(tune:::estimate_tune_results)` and `tune:::.weighted_sd`, lines cited in a comment, the M28 lesson), on all folds and with one fold failed; the unweighted path unchanged (existing snapshots).
-- [ ] T2: Record the weights on the results object (`R/nested-results.R:44` constructor, from `attr(design, ".resample_weights")`; `check_results_record()` tolerates its absence for older records) and weight `summarize_folds()`'s mean and SE when present; `n` unchanged; grep every caller of `summarize_folds()` and `per_fold_metrics()` first (M41 lesson).
-- [ ] T3: `collect_metrics(summarize = FALSE)` and `compute_metrics()` carry `.weight`; a test that the two agree on a weighted run; the set path through `stack_set()`.
-- [ ] T4: The shared reproducibility or estimate template gains the weights paragraph; a NEWS bullet; file the tune issue and record its URL in the work log.
+- [x] T1: Tests first: a weighted design through `nested_fit_resamples()` and `nested_tune_grid()`; expected `mean` and `std_err` computed in the test from tune's formulas (read from `deparse(tune:::estimate_tune_results)` and `tune:::.weighted_sd`, lines cited in a comment, the M28 lesson), on all folds and with one fold failed; the unweighted path unchanged (existing snapshots).
+- [x] T2: Record the weights on the results object (`R/nested-results.R:44` constructor, from `attr(design, ".resample_weights")`; `check_results_record()` tolerates its absence for older records) and weight `summarize_folds()`'s mean and SE when present; `n` unchanged; grep every caller of `summarize_folds()` and `per_fold_metrics()` first (M41 lesson).
+- [x] T3: `collect_metrics(summarize = FALSE)` and `compute_metrics()` carry `.weight`; a test that the two agree on a weighted run; the set path through `stack_set()`.
+- [x] T4: The shared reproducibility or estimate template gains the weights paragraph; a NEWS bullet; file the tune issue and record its URL in the work log.
 - [ ] T5: `devtools::test()`, `devtools::check()`, gating sweeps (`--roxygen --plain` too), `air format --check`.
 
 ## Work log
@@ -48,6 +48,14 @@ A nested design carrying tune's `.resample_weights` attribute (set by `tune::add
 - 2026-09-16: created by /milestone-plan from the candidate row added 2026-09-13 (M092 Out).
 - 2026-09-16: plan gate chose dropping a failed fold's `NA` and renormalizing over tune's weighted-branch `NA` because the package's unweighted path and tune's unweighted branch both drop `NA`, so one failed fold must not blank a weighted run; falsified by tune confirming the `NA` is intended.
 - 2026-09-16: plan gate chose the `add_resample_weights()` door alone over a `weights` argument on the orchestrators because the door already works on a `nested_resamples` object (probed 2026-09-16) and adds no formal; falsified by a user unable to reach the attribute through it.
+- 2026-09-16: /milestone-implement started; branch m101-resample-weights cut from main at 3166268.
+- 2026-09-16: question gate chose a `resample_weights` attribute keyed by the fold label columns over a `.weight` record column, so a reordered run keeps each fold's weight and the print is unchanged; a new shared template `section-resample-weights.R` on the five orchestrator pages over a paragraph in the reproducibility template; and filing the tune issue with gh at T4.
+- 2026-09-16: amendment (substantive): the plan's premise that tune's weighted branch returns `NA` on a missing fold was read from its code, not run; run on tune 2.1.0, a fold scoring `NA` makes `collect_metrics()` error in `cov.wt()` and a failed fold makes tune ignore the weights with a warning. Mini gate chose AC4 stating this package's rule alone over naming tune's observed behavior; Scope In's issue clause reworded to what the issue reports.
+- 2026-09-16: re-audit: AC4 (full) — one finding: the criterion bound `?nested_tune_grid` alone while the template sits on five pages; fixed by naming the five pages.
+- 2026-09-16: re-audit: AC4 (full) — nothing.
+- 2026-09-16: T1 to T3 done in one checkpoint: `tests/testthat/test-resample-weights.R` (two oracle types for AC1: tune's formulas written out, and `tune::fit_resamples()` under the same weights; a planted wrong SE divisor fails 9 assertions), the `resample_weights` attribute keyed by fold label in the constructor and carried by `stamp_results()`, `.weight` on the per-fold table, the weighted branch of `summarize_folds()`; T1's tests were red before T2 and are committed with it. `devtools::test()` clean, `air format --check` clean, `sweep-prose.R --plain` clean.
+- 2026-09-16: T4 done: `man-roxygen/section-resample-weights.R` on the five orchestrator pages, NEWS bullet, `--roxygen --plain` sweep clean.
+- 2026-09-16: tune issue filed as approved at the question gate: https://github.com/tidymodels/tune/issues/1197 (its weighted branch errors on an `NA` estimate and ignores the weights on a failed resample).
 
 ## Decisions
 

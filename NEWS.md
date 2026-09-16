@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* Weights set on the design with `tune::add_resample_weights()` now reach
+  the outer average. `collect_metrics()`, `summary()`, `autoplot()` and
+  `compute_metrics()` report the weighted mean and tune's weighted
+  standard error over the folds that scored. The per-fold table from
+  `collect_metrics(summarize = FALSE)` carries each fold's weight in a
+  `.weight` column. A fold that fails or scores `NA` is left out and the
+  remaining weights are scaled to sum to one, where tune returns `NA`. A
+  design without weights reports the numbers it did before.
+
 * `compute_metrics()` now refuses a completed fold whose saved predictions
   do not hold exactly the rows that fold held out, each once, before any
   fold is scored. The refusal has class

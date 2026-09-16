@@ -66,6 +66,8 @@
 #' @inheritSection nested_tune_grid Finalizing a parameter range
 #' @inheritSection nested_tune_grid Evaluation times
 #'
+#' @template section-resample-weights
+#'
 #' @template section-reproducibility
 #'
 #' @section Differences from calling finetune directly:
