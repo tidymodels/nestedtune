@@ -9,15 +9,22 @@
 # This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
 # against it, so the break surfaces on the next push or pull request here
 # rather than at the upstream release. It also runs once a week (the
-# `schedule:` below, Monday 06:00 UTC), so a quiet week here still asks the
-# question of that week's upstream commits, and on demand
+# `schedule:` below, Monday 06:17 UTC -- off the hour, the slot GitHub
+# documents as the most delayed under load), so a quiet week here still asks
+# the question of that week's upstream commits, and on demand
 # (`workflow_dispatch:`), so an upstream change can be checked without a push.
+# GitHub disables a `schedule:` after 60 days with no repository activity, so
+# a long dormancy still needs the dispatch.
 #
 # The `cache-version: devel-vctrs` on the dependency step keys this leg's
 # library cache apart from every other workflow's. The action saves its cache
 # after the job, by which point vctrs has been overwritten with the
 # development branch below, and the restore key of a sibling job on the same
-# runner image and R version would otherwise match it.
+# runner image and R version would otherwise match it. The cache is saved only
+# on a key miss, so the development vctrs inside it stays at whatever commit
+# the saving run installed until the dependency hash changes; the install step
+# below re-resolves `r-lib/vctrs@main` on every run regardless, and the
+# "Record which vctrs" step is what shows which commit a run tested.
 #
 # It is NOT a gating check. It reports on another project's unreleased branch,
 # so a red run here is news rather than a reason this repository's own work
@@ -43,14 +50,15 @@ on:
       - 'CLAUDE.md'
       - '.claude/**'
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: '17 6 * * 1'
   workflow_dispatch:
 
 name: devel-vctrs.yaml
 
 # Narrower than the sibling workflows' `read-all`, because this is the one job
 # that builds and runs another project's unreleased HEAD: checkout needs
-# `contents`, and nothing here reads actions, checks or issues. The
+# `contents`, and nothing here reads actions, checks or issues; the dependency
+# cache the job saves needs no scope of its own. The
 # `GITHUB_PAT` in the job `env:` below is kept so `pak` makes authenticated
 # reads against GitHub's API rather than hitting the anonymous rate limit; it
 # is the same read-scoped token these permissions bound.
