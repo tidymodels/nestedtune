@@ -68,3 +68,5 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
   8. `cairn/DECISIONS.md:1792` RR01 cited by path without the `:361-367` range T1 named. Proposed: fix now.
   9. Milestone file: AC boxes unticked and Decisions section empty. Proposed: reject; AC ticks are review's, and D-entries live in DECISIONS.md, the Decisions section holding milestone-local ones.
 - 2026-09-16 consistency gate: `cairn_validate.py` green; `devtools::document()` no diff; README.md in sync with README.Rmd; `pkgdown::check_pkgdown()` no problems; all six gating prose sweeps clean; `devtools::check()` 0 errors, 0 warnings, 0 notes (7m 13s). NEWS.md needs no entry (no user-visible change). No new top-level files.
+- 2026-09-16 triage at the gate (user): findings 1, 2, 3, 4, 7, 8 fixed now on the branch; 5, 6, 9 rejected with the reasons logged above. D-064's "supersedes no entry" moved from its heading to its Consequences line.
+- 2026-09-16: step-7 approval: m099-ip2-rng-scope approved for merge

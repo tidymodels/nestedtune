@@ -213,11 +213,12 @@ constrains how the package is developed, not what it does.
   parallel or serial. This requires RNG streams managed per outer fold rather
   than inherited from a worker, and it constrains which parallel backends are
   usable. Deliberately **not** claimed, because it cannot be honoured: identity
-  across R versions, across platforms, or across `tune` versions. It binds
+  across R versions, across platforms, or across `tune` versions. IP2 binds
   randomness that flows through R's generator; engines that randomize outside
   it (kernlab's SVMs, the deep-learning engines) are outside its reach under
   any R-side scheme, here or in tune. _(Scope sentence added at M99 by D-064,
-  on RR01's finding B4; git holds the original.)_
+  on RR01's finding that IP2's enforceable scope was written nowhere beside
+  its disclaimers; git holds the original.)_
 
 - IP3: **The estimate describes the procedure, never the shipped model.** The
   nested estimate characterizes the whole tune-and-fit procedure. The API never
@@ -522,7 +523,7 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   parallel execution, and this is the one user-reachable setting that can
   break it. Accepted at M48's review rather than refusing the slot: the help
   page states it under "Passed through", D-042 records the caveat, and IP2's
-  text is unchanged.
+  promise clause is unchanged (M99 added only its scope sentence, D-064).
 
 - A record column altered under the class — `x$.inner_metrics[[1]] <- ...`,
   or the same through `[[<-` — keeps the class: tibble's `$<-` reattaches it
