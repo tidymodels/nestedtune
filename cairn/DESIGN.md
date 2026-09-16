@@ -384,7 +384,11 @@ through `inner_metrics_table()`, so eliminated candidates are in it with
 their `n`, M50), notes, the fold's two seeds, and, only when the control
 asked, the outer fit's predictions and extract as `.predictions` and
 `.extracts` (M68, D-054) —
-as a plain tibble carrying class `nested_results`. It deliberately does **not**
+as a plain tibble carrying class `nested_results`. A design weighted with
+`tune::add_resample_weights()` leaves its weights on the object as the
+`resample_weights` attribute, a table keyed by the fold label columns
+(M101), which `summarize_folds()` reads through a `.weight` column on the
+per-fold table; absent, the average is unweighted. It deliberately does **not**
 inherit `tune_results`: that would bring `show_best()` and `select_best()`
 along, and both would rank outer folds, which is the reading IP3 forbids
 (D-010). `collect_metrics()` is registered against tune's generic.
