@@ -21,9 +21,9 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: `compute_metrics()` on a `nested_results` with a completed fold whose `.predictions` fails `predictions_match_rows()` (`R/nested-results-collect.R:740`) against that fold's held-out rows refuses with a classed error whose message names that fold's labels and no other fold's, for each of the five mismatch shapes M093 enumerated (a missing row, a repeated `.row`, an `NA` `.row`, a foreign row, no `.row` column), and the refusal fires with the metric set called zero times.
-- [ ] AC2: An unaltered run is scored as before: every `compute_metrics()` expectation in `tests/testthat/test-compute-metrics.R` and `tests/testthat/test-nested-workflow-map-readers.R` present at the branch point passes unedited, and a run on a repeated v-fold outer design (a row held out in more than one fold) is scored, not refused.
-- [ ] AC3: The `compute_metrics()` help page names the refusal and the five shapes.
+- [x] AC1: `compute_metrics()` on a `nested_results` with a completed fold whose `.predictions` fails `predictions_match_rows()` (`R/nested-results-collect.R:740`) against that fold's held-out rows refuses with a classed error whose message names that fold's labels and no other fold's, for each of the five mismatch shapes M093 enumerated (a missing row, a repeated `.row`, an `NA` `.row`, a foreign row, no `.row` column), and the refusal fires with the metric set called zero times.
+- [x] AC2: An unaltered run is scored as before: every `compute_metrics()` expectation in `tests/testthat/test-compute-metrics.R` and `tests/testthat/test-nested-workflow-map-readers.R` present at the branch point passes unedited, and a run on a repeated v-fold outer design (a row held out in more than one fold) is scored, not refused.
+- [x] AC3: The `compute_metrics()` help page names the refusal and the five shapes.
 - [ ] AC4: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `Rscript benchmarks/sweep-prose.R --list-gating` names runs clean.
 
 ## Coverage
@@ -53,3 +53,8 @@
 ## Decisions
 
 ## Review
+
+- 2026-09-16 sync: `origin/main` at `dff2127` is an ancestor of the branch head. No PR exists for the branch.
+- AC1: `devtools::test()` on the branch head, run alone, gave 10317 pass, 0 fail, 0 skip. `test-compute-metrics.R` plants each of the five shapes on fold 1 and fold 3. Each case asserts the class `nestedtune_compute_metrics_predictions`, the call name, the edited fold's label present, every other label absent, and zero metric calls. The counting metric set is itself tested to count one call per scored fold. The set path is covered in `test-nested-workflow-map-readers.R`. Verified.
+- AC2: `git diff --numstat` shows `test-compute-metrics.R` +126/-0 and `test-nested-workflow-map-readers.R` +15/-0. Every branch-point expectation stands unedited and passed in the run above. The repeated v-fold test holds every row out twice and is scored with one metric call per fold. The censored-regression rescore test at `test-compute-metrics.R:190` passed under the new check with no skip. Verified.
+- AC3: `man/compute_metrics.nested_results.Rd` carries the refusal paragraph naming the class and the five shapes. `devtools::document()` on the head produced no diff. The local roxygen2 is 8.0.0, below the declared 8.1.0, and roxygen only informs on an older version and generates as usual. Verified.
