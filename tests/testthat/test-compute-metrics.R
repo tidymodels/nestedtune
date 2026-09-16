@@ -418,3 +418,129 @@ test_that("a run with no completed fold is refused with nestedtune_no_completed_
   cnd <- rlang::catch_cnd(compute_metrics(res, reg_metrics()), "error")
   expect_s3_class(cnd, "nestedtune_no_completed_folds")
 })
+
+# ---- M100: saved predictions that do not match the held-out rows ---------
+# The mismatches are planted with `plant_row_mismatch()` from
+# `helper-predictions.R`, the same five `augment()` refuses (M93).
+
+# A metric set holding one metric that counts its calls. yardstick calls
+# each metric of a set once per scored fold, so the count reads how many
+# folds were scored. `calls()` reads the count.
+counting_metric_set <- function() {
+  calls <- 0L
+  counted <- function(
+    data,
+    truth,
+    estimate,
+    na_rm = TRUE,
+    case_weights = NULL,
+    ...
+  ) {
+    calls <<- calls + 1L
+    yardstick::rmse(
+      data,
+      !!rlang::enquo(truth),
+      !!rlang::enquo(estimate),
+      na_rm = na_rm,
+      case_weights = !!rlang::enquo(case_weights)
+    )
+  }
+  counted <- yardstick::new_numeric_metric(counted, "minimize")
+  list(metrics = yardstick::metric_set(counted), calls = function() calls)
+}
+
+test_that("the counting metric set counts one call per scored fold", {
+  skip_if_no_engines()
+  res <- saved_reg_run()
+  counter <- counting_metric_set()
+  expect_identical(counter$calls(), 0L)
+  got <- compute_metrics(res, counter$metrics, summarize = FALSE)
+  expect_identical(counter$calls(), sum(res$.completed))
+  expect_identical(unique(got$.metric), "rmse")
+})
+
+expect_scoring_refused <- function(x, labels, calls) {
+  cnd <- rlang::catch_cnd(compute_metrics(x, calls$metrics), "error")
+  expect_s3_class(cnd, "nestedtune_compute_metrics_predictions")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("compute_metrics"))
+  expect_match(conditionMessage(cnd), labels, fixed = TRUE)
+  expect_identical(calls$calls(), 0L)
+  invisible(cnd)
+}
+
+for (case in row_mismatch_cases) {
+  test_that(
+    paste0(
+      "the `",
+      case,
+      "` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored"
+    ),
+    {
+      skip_if_no_engines()
+      res <- saved_reg_run()
+      expect_true(all(res$.completed))
+      for (i in c(1L, 3L)) {
+        cnd <- expect_scoring_refused(
+          plant_row_mismatch(res, i, case),
+          res$id[[i]],
+          counting_metric_set()
+        )
+        # Only the edited fold is named.
+        for (other in setdiff(res$id, res$id[[i]])) {
+          expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
+        }
+      }
+    }
+  )
+}
+
+test_that("on a run with a failed fold, a mismatch is refused before the partial-run warning", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  set.seed(2)
+  res <- suppressWarnings(memoised(nested_tune_grid(
+    det_workflow(d),
+    break_fold(det_nested(d), 2L, "inner tuning"),
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+  expect_identical(res$.completed, c(TRUE, FALSE, TRUE))
+  planted <- plant_row_mismatch(res, 3L, "repeated")
+  expect_no_warning(
+    cnd <- expect_scoring_refused(
+      planted,
+      res$id[[3L]],
+      counting_metric_set()
+    )
+  )
+  expect_no_match(conditionMessage(cnd), res$id[[1L]], fixed = TRUE)
+})
+
+test_that("a double .row with the held-out values is scored as the integer one", {
+  skip_if_no_engines()
+  res <- saved_reg_run()
+  as_double <- res
+  for (i in seq_len(nrow(res))) {
+    as_double <- edit_fold_predictions(as_double, i, function(p) {
+      p$.row <- as.double(p$.row)
+      p
+    })
+  }
+  expect_type(as_double$.predictions[[1L]]$.row, "double")
+  expect_identical(
+    compute_metrics(as_double, reg_metrics()),
+    compute_metrics(res, reg_metrics())
+  )
+})
+
+test_that("a repeated v-fold run, holding rows out more than once, is scored and not refused", {
+  skip_if_no_engines()
+  res <- repeated_reg_run()
+  counts <- table(unlist(lapply(res$splits, rsample::complement)))
+  expect_true(all(counts == 2L))
+  counter <- counting_metric_set()
+  got <- expect_no_error(compute_metrics(res, counter$metrics))
+  expect_identical(counter$calls(), nrow(res))
+  expect_identical(got$n, rep(nrow(res), nrow(got)))
+})

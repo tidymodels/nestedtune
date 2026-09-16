@@ -1,13 +1,13 @@
 # M100: compute_metrics() refuses a fold whose saved predictions do not match what it held out
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — an exported reader's refusal
-- **Branch/PR:** —
+- **Branch/PR:** m100-compute-metrics-predictions-rows
 
 ## Goal
 
@@ -35,7 +35,7 @@
 
 ## Tasks
 
-- [ ] T1: Tests first in `test-compute-metrics.R`: one planted mutation per shape (mirror `test-augment.R:211-240`), asserting the class, the fold labels named and not named, and a metric set wrapped to count calls at zero; a repeated v-fold run scored.
+- [x] T1: Tests first in `test-compute-metrics.R`: one planted mutation per shape (mirror `test-augment.R:211-240`), asserting the class, the fold labels named and not named, and a metric set wrapped to count calls at zero; a repeated v-fold run scored.
 - [ ] T2: Generalize `check_predictions_rows()` to take the caller's class and verb (`nestedtune_compute_metrics_predictions`), call it in `compute_metrics.nested_results()` after `check_column_saved()`; confirm the set path names the workflow through `for_workflow()`.
 - [ ] T3: Help page (`R/nested-results-collect.R` roxygen) and a NEWS bullet; `devtools::document()` (M92 lesson: confirm roxygen2 meets `Config/roxygen2/version`).
 - [ ] T4: `devtools::test()`, `devtools::check()`, gating sweeps, `air format --check`.
@@ -44,6 +44,7 @@
 
 - 2026-09-16: created by /milestone-plan from the candidate row added 2026-09-14 (M093 Out).
 - 2026-09-16: plan gate chose the full held-out match (as `augment()`) over a repeated-`.row`-only check because one rule for both readers is easier to state and M093 already enumerates the shapes; falsified by a tune version or preprocessor that completes a fold with fewer predictions than held-out rows, which would then refuse a valid run.
+- 2026-09-16: question gate skipped, the plan fixed the class, the check's position and the help. T1: `plant_row_mismatch()` and `edit_fold_predictions()` moved from `test-augment.R` to `helper-predictions.R` (parallel test files each source the helpers, not each other). A counting metric set reads the folds scored. Twelve new expectations red before T2, `augment` green.
 
 ## Decisions
 
