@@ -64,6 +64,7 @@ The rendering of a page is the text that `tools::Rd2txt(rd, options = list(under
 - 2026-09-15 (T4): at `ab40c13`, `devtools::test()` passes 10140 assertions with 0 failures, warnings or skips. `devtools::document()` on the clean tree leaves it clean. All six `--list-gating` sweeps exit 0. M096's duplicate-line command prints nothing at exit 0. Every `man-roxygen/*.R` file has only `#'` lines. `git diff --name-only main -- man/` lists exactly the grid, bayes, race and sim-anneal pages. Rendered with `Rd2txt()`: the grid forced paragraph ends with the contention sentence; each settable paragraph on bayes, race and sim-anneal ends with its "arguments of" tail; those three sections hold one `\itemize` each with the shared "also pass through" paragraph after the last bullet; grid holds none.
 - 2026-09-15: /milestone-review: seven criteria verified, gate green after one fix-now (the check's `withr` WARNING), three lenses ran, two more fix-now commits at `53a0630` and `ab284f8`, the suite and check rerunning at `ab284f8` before the gate.
 - 2026-09-15: step-7 approval: m097-differences-section-rendering approved for merge.
+- 2026-09-15: PR #110 opened and the merge marker written. The CI watch stopped at its time limit with three checks passed and eight pending, none failed. `/milestone-review M097` re-derives the state and waits again.
 
 ## Decisions
 
