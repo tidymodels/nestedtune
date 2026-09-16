@@ -67,3 +67,4 @@ IP2's own text in `cairn/DESIGN.md` states that it binds only randomness flowing
   7. `cairn/DESIGN.md:220` "on RR01's finding B4" names the id where IP1's form states the finding. Proposed: fix now, state the finding.
   8. `cairn/DECISIONS.md:1792` RR01 cited by path without the `:361-367` range T1 named. Proposed: fix now.
   9. Milestone file: AC boxes unticked and Decisions section empty. Proposed: reject; AC ticks are review's, and D-entries live in DECISIONS.md, the Decisions section holding milestone-local ones.
+- 2026-09-16 consistency gate: `cairn_validate.py` green; `devtools::document()` no diff; README.md in sync with README.Rmd; `pkgdown::check_pkgdown()` no problems; all six gating prose sweeps clean; `devtools::check()` 0 errors, 0 warnings, 0 notes (7m 13s). NEWS.md needs no entry (no user-visible change). No new top-level files.
