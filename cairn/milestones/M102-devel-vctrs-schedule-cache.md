@@ -47,6 +47,8 @@
 - 2026-09-16: T3 done before T2's run finished. PROFILE.md's devel-vctrs sentence names the four triggers and the cache key; DESIGN.md names no devel-vctrs trigger (`grep -n devel-vctrs cairn/DESIGN.md` empty). The edit put PROFILE.md at 122 lines against the 120 cap; the divergences bullet was compressed in one pass to 119, `cairn_validate` green.
 - 2026-09-16: T2 done. `gh workflow run devel-vctrs.yaml --ref m102-devel-vctrs-schedule-cache` gave run 35149168999 (workflow_dispatch), success, 20:52:53Z to 21:29:35Z. Its log reads `Cache not found for input keys: ...-x86_64-devel-vctrs-cb589199..., ...-x86_64-devel-vctrs-` at the restore, so no other workflow's cache was restored (the plan-gate falsifier did not fire), and `Cache saved with key: Ubuntu 24.04.5 LTS-R version 4.6.1 (2026-06-24)-x86_64-devel-vctrs-cb58919972c102555d146ea4b930eefa4daaf04db9bce6a48a86c7da1f9d69a5` at the post step. `gh cache list --limit 100` shows that key once and every other key (57) carrying `-1-` in its place; the same-hash sibling `...-x86_64-1-cb589199...` from the release leg shows the version segment is the whole difference.
 - 2026-09-16: claim audit: not owed — internal tier.
+- 2026-09-16: review: AC1-AC4 verified, gate green, eight diff-bug findings triaged (F1-F6 fixed on the branch, F7 follow-up, F8 rejected), history and prior-review lenses clean.
+- 2026-09-16: step-7 approval: m102-devel-vctrs-schedule-cache approved for merge.
 - 2026-09-16: all tasks checked, `cairn_validate` green; status to review. The simple-english lint hook flagged pre-existing sentences in ROADMAP.md, PROFILE.md and this file at every edit; the tracking files were not rewritten for it, since cairn records are append-only and the flagged text is prior history.
 
 ## Decisions
