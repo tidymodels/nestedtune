@@ -376,6 +376,7 @@ compute_metrics.nested_results <- function(
   check_event_level(event_level, call = call)
   check_any_completed(x, action = "score")
   check_column_saved(x, ".predictions", call = call)
+  check_predictions_rows(x, verb = "compute_metrics", call = call)
 
   completed <- which(x$.completed)
   classes <- metric_classes(metrics)
@@ -644,7 +645,7 @@ augment.nested_results <- function(x, ...) {
   check_column_saved(x, ".predictions", call = call)
   data <- x$splits[[1L]]$data
   check_held_out_once(x, nrow(data), call = call)
-  check_predictions_rows(x, call = call)
+  check_predictions_rows(x, verb = "augment", call = call)
   preds <- stack_fold_column(
     x,
     ".predictions",
@@ -707,12 +708,20 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
 }
 
 # Each completed fold's saved `.row` against the rows its split held out
-# (M93). The join assigns by `.row`, so a held-out row with no entry would
+# (M93). `augment()` joins by `.row`, so a held-out row with no entry would
 # be left missing without a word, and a repeated one would overwrite another.
-# tune 2.1.0 has no path to either short of an edit to the object, so any
-# mismatch refuses. The values are compared as whole numbers: a double
-# `.row` holding the same values is accepted.
-check_predictions_rows <- function(x, call = rlang::caller_env()) {
+# `compute_metrics()` scores the rows as they are, so a repeated row would
+# count twice and a foreign one would be scored against a row the fold
+# analysed (M100). tune 2.1.0 has no path to any of these short of an edit
+# to the object, so any mismatch refuses, under the class of the reader
+# that found it: `nestedtune_<verb>_predictions`. The values are compared
+# as whole numbers: a double `.row` holding the same values is accepted.
+check_predictions_rows <- function(
+  x,
+  verb = c("augment", "compute_metrics"),
+  call = rlang::caller_env()
+) {
+  verb <- rlang::arg_match(verb)
   bad <- vapply(
     which(x$.completed),
     function(i) !predictions_match_rows(x$.predictions[[i]], x$splits[[i]]),
@@ -725,14 +734,14 @@ check_predictions_rows <- function(x, call = rlang::caller_env()) {
   labels <- fold_ids(x)[bad]
   cli::cli_abort(
     c(
-      "{.fn augment} needs each fold's saved predictions to hold exactly \\
+      "{.fn {verb}} needs each fold's saved predictions to hold exactly \\
        the rows that fold held out, each once.",
       x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
            {?its/their} held-out rows.",
       i = "A saved prediction table must keep its {.field .row} column as \\
            the run returned it."
     ),
-    class = "nestedtune_augment_predictions",
+    class = paste0("nestedtune_", verb, "_predictions"),
     call = call
   )
 }
