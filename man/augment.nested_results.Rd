@@ -50,9 +50,13 @@ design is refused with class \code{nestedtune_augment_rows}, because it
 predicts some rows more than once or not at all. Read its predictions
 with \code{\link[=collect_predictions]{collect_predictions()}} instead.
 
+
 A run whose control did not set \code{save_pred = TRUE} is refused with class
 \code{nestedtune_column_not_saved}. A run in which no fold completed is
-refused with class \code{nestedtune_no_completed_folds}. A completed fold
+refused with class \code{nestedtune_no_completed_folds}.
+
+
+A completed fold
 whose saved predictions do not match the rows it held out is refused
 with class \code{nestedtune_augment_predictions}. Its \code{.row} column must hold
 each of those rows once and no other row. On a run with some
@@ -92,8 +96,7 @@ augment(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}},
-\code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
+\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}, \code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
 \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same function on a
 workflow-set run
 }

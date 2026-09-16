@@ -25,15 +25,15 @@
 #' BradleyTerry2, which fits the win/loss model. A missing package is refused
 #' at entry, before any fold runs.
 #'
+#' `grid` is the design the race is offered. A data frame must have one
+#' column per tuned parameter and no other column.
+#'
+#' @template details-param-info
 #' @inheritParams nested_tune_grid
-#' @param ... A control object from [finetune::control_race()], as
-#'   `control`, and nothing else. Every argument after `...` is matched by
-#'   name. The section on differences from finetune says what becomes of each
-#'   slot.
-#' @param grid A data frame of candidate parameter values, or a positive whole
-#'   number for the size of a grid to generate, the design the race is
-#'   offered. A data frame must have one column per tuned parameter and no other
-#'   column.
+#' @inheritParams finetune::tune_race_anova
+#' @templateVar CONSTRUCTOR finetune::control_race()
+#' @templateVar PKG finetune
+#' @template param-control-dots
 #'
 #' @return A `nested_results` with one row per outer fold and the columns
 #'   [nested_tune_grid()] documents. The `procedure` record names the tuner,
@@ -79,17 +79,13 @@
 #' as `extract_procedure(res)$control`. Every slot of `control_race()`
 #' falls under one of seven headings.
 #'
-#' **Forced: `allow_par`.** The inner race and the outer scoring fit both
-#' run at `allow_par = FALSE`, whatever the control carries, because
-#' parallelism belongs over the outer folds.
-#'
-#' **Settable as its own argument: `event_level`.** The argument is the one
-#' place the level is set, as on the grid page. A control at finetune's
-#' default takes it, and a control naming another level is refused at
-#' entry, with a refusal that names both. `grid` and `eval_time` are the
-#' racing functions' own
-#' arguments rather than control slots, offered here as arguments and
-#' reaching them unchanged.
+#' @templateVar INNER inner race
+#' @template differences-forced
+#' @template differences-settable
+#' @section Differences from calling finetune directly:
+#' `grid` and `eval_time` are the racing functions' own arguments rather
+#' than control slots, offered here as arguments and reaching them
+#' unchanged.
 #'
 #' **Refused: none.** No slot is refused on its own. Three things are
 #' refused at entry. The first is a control of another class, such as a
@@ -116,25 +112,12 @@
 #' - `verbose_elim` prints finetune's elimination log from a serial run,
 #'   once per fold, and from a mirai daemon where nothing shows it.
 #'   `verbose` likewise.
-#' - `pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-#'   describes, `parallel_over` included.
-#'
-#' This classification was read on finetune 1.3.0. The version that added
-#' `workflow_size` to `control_race()` is not named in finetune's NEWS, and
-#' the `>= 1.0.1` floor this package declares does not require it.
-#'
-#' **Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
-#' outer fit as well as the race. The outer fit's predictions and extracts
-#' are kept as `.predictions` and `.extracts` in the shape the grid page
-#' describes, and the race's own are still discarded.
-#'
-#' **Not returned: `save_workflow`.** It lands on the inner race result a
-#' fold record discards, so setting it costs the work and returns nothing.
-#' The final fit keeps its race as `$tuning`, where what it saved is
-#' reachable.
-#'
-#' **Inert: `backend_options`.** Backend options with no parallel backend to
-#' reach, because `allow_par` is forced off.
+#' @template differences-passed-shared
+#' @templateVar VERSION_CTRL control_race()
+#' @template differences-finetune-version
+#' @template differences-kept
+#' @template differences-not-returned
+#' @template differences-inert
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))
@@ -156,9 +139,8 @@
 #' # resamples: `n` below 5 is a candidate the race eliminated.
 #' res$.inner_metrics[[1]]
 #'
-#' @seealso [nested_tune_grid()], [nested_tune_bayes()], [nested_resamples()],
-#'   [nested_final_fit()], [finetune::tune_race_anova()],
-#'   [finetune::tune_race_win_loss()]
+#' @templateVar LINKS [nested_tune_bayes()], [finetune::tune_race_anova()], [finetune::tune_race_win_loss()]
+#' @template seealso-orchestrator
 #' @name nested_tune_race
 NULL
 

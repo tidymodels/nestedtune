@@ -27,6 +27,11 @@
 #' outer loop and hands the inner tuning to tune or finetune. Their pages
 #' say what differs, and this page is the reference for what the six share.
 #'
+#' `grid` and `param_info` reach every fold's inner call as
+#' [tune::tune_grid()] takes them. A data frame has one column per tuned
+#' parameter and no other column. The section on finalizing a parameter
+#' range says where a range that depends on the data is finalized.
+#'
 #' @inheritParams tune::tune_grid
 #' @param object A [workflows::workflow()] with at least one parameter marked
 #'   for tuning with [tune::tune()]. A workflow with no marker is refused, and
@@ -34,22 +39,13 @@
 #' @param resamples A nested resampling design from [nested_resamples()] or
 #'   [rsample::nested_cv()], one row per outer fold. The section on nested
 #'   designs says what the design must hold.
-#' @param ... A control object from [tune::control_grid()], passed as
-#'   `control`, and nothing else. Every argument after `...` is matched by
-#'   name. The section on differences from tune says what becomes of each
-#'   control slot.
-#' @param param_info A [dials::parameters()] object, or `NULL` to let tune
-#'   derive one from the workflow. The section on finalizing a parameter
-#'   range says where a range that depends on the data is finalized.
-#' @param grid A data frame of candidate parameter values, or a positive whole
-#'   number for the size of a grid tune generates. A data frame has one
-#'   column per tuned parameter and no other column.
-#' @param event_level `"first"` (the default) or `"second"`. It names which
-#'   level of a two-class outcome is the event, and applies to the inner
-#'   tuning run and the outer scoring fit alike.
-#' @param eval_time A numeric vector of evaluation times for a censored
-#'   regression model, or `NULL` (the default) to leave the choice to tune.
-#'   The section on evaluation times says what this package refuses.
+#' @templateVar CONSTRUCTOR tune::control_grid()
+#' @templateVar PKG tune
+#' @template param-control-dots
+#' @templateVar SCOPE It applies to the inner tuning run and the outer scoring fit alike.
+#' @template param-event-level
+#' @templateVar REFUSED The section on evaluation times says what this package refuses.
+#' @template param-eval-time
 #' @param select A [selection_rule()] naming which of tune's selectors each
 #'   outer fold picks its candidate with, on its own inner run and the first
 #'   metric. The default is [tune::select_best()].
@@ -378,10 +374,10 @@
 #' `extract_procedure(res)$control`. Every slot of `control_grid()` falls
 #' under one of seven headings.
 #'
-#' **Forced: `allow_par`.** Both tune calls a fold makes, the inner tuning
-#' run and the outer scoring fit, run at `allow_par = FALSE`, whatever the
-#' control carries. Parallelism belongs over the outer folds, as above,
-#' because leaving it to a caller puts two pools in contention.
+#' @templateVar INNER inner tuning run
+#' @template differences-forced
+#' @section Differences from calling tune directly:
+#' Leaving parallelism to a caller puts two pools in contention.
 #'
 #' **Settable as its own argument: `event_level`.** The argument reaches
 #' the inner `control_grid()` and the outer `control_last_fit()` alike, and
@@ -393,9 +389,9 @@
 #' caller is shown. It is an argument of `tune_grid()` and `last_fit()`
 #' rather than a control slot.
 #'
-#' **Refused: none.** No slot is refused on its own. What is refused at
-#' entry is a control of another class, such as a `control_bayes()` that
-#' tune itself accepts here, and the `event_level` conflict above.
+#' @templateVar OTHER control_bayes()
+#' @template differences-refused
+#' @section Differences from calling tune directly:
 #' tune gives [tune::control_resamples()] and [tune::control_last_fit()]
 #' the `control_grid` class, so either is accepted as what `control_grid()`
 #' returns, its slots read under these headings.
@@ -432,8 +428,7 @@
 #' [extract_tune_results()] reaches what
 #' it saved.
 #'
-#' **Inert: `backend_options`.** Options for a parallel backend, with no
-#' backend to reach at `allow_par = FALSE`.
+#' @template differences-inert
 #'
 #' @template example-setup
 #' @template example-run

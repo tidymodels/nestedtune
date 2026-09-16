@@ -16,24 +16,22 @@
 #' [tune::fit_resamples()] already serves. What this function adds is the
 #' same nested design, so the two runs' folds are the same rows.
 #'
+#' @details
+#' `metrics` is read as [tune::fit_resamples()] reads it. There is no inner
+#' run to select on, so the set's order carries no weight here.
+#'
 #' @inheritParams nested_tune_grid
+#' @inheritParams tune::fit_resamples
 #' @param object A [workflows::workflow()] with no parameter marked for tuning
 #'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
 #'   it. A workflow carrying a marker is refused at entry.
-#' @param ... A control object from [tune::control_resamples()], as
-#'   `control`, and nothing else. Every argument after `...` is matched by
-#'   name. The section on differences from tune says what becomes of each
-#'   slot.
-#' @param metrics A [yardstick::metric_set()], or `NULL` to use tune's
-#'   defaults for the model's mode. There is no inner run to select on, so
-#'   the set's order carries no weight here.
-#' @param event_level `"first"` (the default) or `"second"`. It names which
-#'   level of a two-class outcome is the event in the one tune call a fold
-#'   makes, the outer scoring fit.
-#' @param eval_time A numeric vector of evaluation times for a censored
-#'   regression model, or `NULL` (the default) to leave the choice to tune.
-#'   Anything not numeric, an empty vector, or an element that is missing,
-#'   negative or not finite is refused at entry.
+#' @templateVar CONSTRUCTOR tune::control_resamples()
+#' @templateVar PKG tune
+#' @template param-control-dots
+#' @templateVar SCOPE The one tune call a fold makes, the outer scoring fit, reads it.
+#' @template param-event-level
+#' @templateVar REFUSED Anything not numeric, an empty vector, or an element that is missing, negative or not finite is refused at entry.
+#' @template param-eval-time
 #'
 #' @return A `nested_results` with one row per outer fold and the columns
 #'   [nested_tune_grid()] documents, three of them holding what no tuning
@@ -108,10 +106,9 @@
 #' naming another level is refused at entry, and the refusal names both
 #' levels. `eval_time` is offered the same way, for the same reason.
 #'
-#' **Refused: none.** No slot is refused on its own. A control of another
-#' class, such as a `control_bayes()`, is refused at entry, as is the
-#' `event_level` conflict above.
-#'
+#' @templateVar OTHER control_bayes()
+#' @template differences-refused
+#' @section Differences from calling tune directly:
 #' **Passed through: none.** There is no inner tuning call for a slot to be
 #' passed through to.
 #'
@@ -147,8 +144,8 @@
 #' extract_procedure(res)$tuner
 #' res$.selected[[1]]
 #'
-#' @seealso [nested_tune_grid()], [nested_resamples()], [nested_final_fit()],
-#'   [tune::fit_resamples()]
+#' @templateVar LINKS [tune::fit_resamples()]
+#' @template seealso-orchestrator
 #' @export
 nested_fit_resamples <- function(
   object,

@@ -27,16 +27,15 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[tune:control_bayes]{tune::control_bayes()}}, as \code{control},
-and nothing else. Every argument after \code{...} is matched by name. The
+\item{...}{A control object from \code{\link[tune:control_bayes]{tune::control_bayes()}}, as \code{control}, and
+nothing else. Every argument after \code{...} is matched by name. The
 section on differences from tune says what becomes of each slot.}
 
-\item{iter}{The number of search iterations, a non-negative whole number.
-The section on the iterations says what \code{0} does.}
+\item{iter}{The maximum number of search iterations.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -50,8 +49,7 @@ candidate the Gaussian process proposes next: \code{\link[tune:exp_improve]{tune
 default), \code{\link[tune:prob_improve]{tune::prob_improve()}} or \code{\link[tune:conf_bound]{tune::conf_bound()}}.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.}
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
@@ -86,6 +84,15 @@ The estimate describes the whole search-and-fit procedure rather than
 any one model. The model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}},
 which runs the recorded search once more on all the data, and the
 estimate is the number to report for that model.
+}
+\details{
+\code{iter} reaches \code{\link[tune:tune_bayes]{tune::tune_bayes()}} as given, and tune stops early when
+the search stalls. The number of search iterations, a non-negative whole
+number. The section on the iterations says what \code{0} does.
+
+\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.
 }
 \section{The initial candidates and the iterations}{
 
@@ -158,16 +165,21 @@ proposals depend on how much of the stream tune consumed before
 reaching it. Here the control is given the fold's own tuning seed, the number
 \code{.tuning_seed} reports, whatever the control carried.
 
-\strong{Settable as its own argument: \code{event_level}.} The argument is the one
-place the level is set, as on the grid page. A control at tune's default
-takes it, and a control naming another level is refused at entry, with
-a refusal that names both. \code{iter}, \code{initial} and \code{objective} are arguments of
-\code{tune_bayes()} rather than control slots, offered here as arguments and
-reaching it unchanged. So is \code{eval_time}.
 
-\strong{Refused: none.} No slot is refused on its own. What is refused at
-entry is a control of another class, such as a \code{control_grid()} that
-tune itself accepts here, and the \code{event_level} conflict above.
+\strong{Settable as its own argument: \code{event_level}.} The argument is the one
+place the level is set, as on the grid page. A control at tune's
+default takes it, and a control naming another level is refused at
+entry, with a refusal that names both.
+
+
+\code{iter}, \code{initial} and \code{objective} are arguments of \code{tune_bayes()} rather
+than control slots, offered here as arguments and reaching it unchanged.
+So is \code{eval_time}.
+
+
+\strong{Refused: none.} No slot is refused on its own. A control of another
+class is refused at entry, as is the \code{event_level} conflict above.
+
 
 \strong{Passed through: \code{no_improve}, \code{uncertain}, \code{time_limit}, \code{verbose},
 \code{verbose_iter}, \code{save_gp_scoring}, \code{pkgs}, \code{parallel_over},
@@ -183,22 +195,30 @@ outside what the seeds can promise.
 daemon where nothing shows it.
 \item \code{save_gp_scoring} writes its files to the temporary directory of the
 process that tuned, a daemon's own on the parallel path.
+}
+
+
+\itemize{
 \item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
 describes. \code{parallel_over} changes the numbers a stochastic engine
 produces even at \code{allow_par = FALSE}.
 }
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} The outer fit's
+
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
+outer fit as well as the inner search. The outer fit's
 predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
-the grid page describes, and the inner search's are still discarded.
+the grid page describes, and the inner search's own are still discarded.
+
 
 \strong{Not returned: \code{save_workflow}.} It lands on the inner \code{tune_results}
 a fold record discards, so setting it costs the work and returns
 nothing. The final fit keeps its own tuning run as \verb{$tuning}, where what
 it saved is reachable.
 
-\strong{Inert: \code{backend_options}.} Options for a backend the forced
-\code{allow_par = FALSE} never reaches.
+
+\strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
+backend to reach at \code{allow_par = FALSE}.
 }
 
 \section{Nested designs}{

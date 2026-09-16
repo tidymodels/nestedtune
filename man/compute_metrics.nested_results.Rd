@@ -51,17 +51,19 @@ On a repeated design each repeat of a fold is scored as its own fold.
 
 \section{Refusals}{
 
-
 A run whose control did not set \code{save_pred = TRUE} is refused with class
-\code{nestedtune_column_not_saved}. A \code{metrics} that is not a metric set is
-refused with class \code{nestedtune_bad_metrics}. A metric that reads a kind
-of prediction the run did not save is refused with class
+\code{nestedtune_column_not_saved}. A run in which no fold completed is
+refused with class \code{nestedtune_no_completed_folds}.
+
+
+A \code{metrics} that is not a metric set is refused with class
+\code{nestedtune_bad_metrics}. A metric that reads a kind of prediction the
+run did not save is refused with class
 \code{nestedtune_metric_type_not_saved}. An example is a class metric such as
 \code{accuracy} on a run whose metrics read only class probabilities.
 
 A run with some failed folds is scored over the rest, with a warning of
-class \code{nestedtune_partial_summary}. A run in which no fold completed is
-refused with class \code{nestedtune_no_completed_folds}.
+class \code{nestedtune_partial_summary}.
 }
 
 \examples{
@@ -94,8 +96,7 @@ compute_metrics(res, yardstick::metric_set(yardstick::mae), summarize = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}},
-\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}, \code{\link[=augment.nested_results]{augment.nested_results()}},
+\code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}, \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}, \code{\link[=augment.nested_results]{augment.nested_results()}},
 \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same function on a
 workflow-set run
 }

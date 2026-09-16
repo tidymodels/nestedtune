@@ -1,5 +1,12 @@
 # nestedtune 0.0.0.9000
 
+* The help for `nested_tune_grid()`, `nested_tune_bayes()`,
+  `nested_tune_race_anova()`, `nested_tune_race_win_loss()`,
+  `nested_tune_sim_anneal()` and `nested_fit_resamples()` now takes the
+  text for `grid`, `param_info`, `iter` and `metrics` from tune's and
+  finetune's own pages. What this package adds for one of those arguments
+  reads in the page's Details.
+
 * The note `summary()` prints for a run or a workflow set and the
   `autoplot(type = "performance")` subtitles now name the nested estimate
   as the number to report for the model `nested_final_fit()` builds. The

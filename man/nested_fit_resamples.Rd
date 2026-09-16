@@ -22,23 +22,19 @@ it. A workflow carrying a marker is refused at entry.}
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as
-\code{control}, and nothing else. Every argument after \code{...} is matched by
-name. The section on differences from tune says what becomes of each
-slot.}
+\item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as \code{control}, and
+nothing else. Every argument after \code{...} is matched by name. The
+section on differences from tune says what becomes of each slot.}
 
-\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to use tune's
-defaults for the model's mode. There is no inner run to select on, so
-the set's order carries no weight here.}
+\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
+set of metrics.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
-level of a two-class outcome is the event in the one tune call a fold
-makes, the outer scoring fit.}
+level of a two-class outcome is the event. The one tune call a fold makes, the outer scoring fit, reads it.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
-Anything not numeric, an empty vector, or an element that is missing,
-negative or not finite is refused at entry.}
+Anything not numeric, an empty vector, or an element that is missing, negative or not finite is refused at entry.}
 }
 \value{
 A \code{nested_results} with one row per outer fold and the columns
@@ -66,6 +62,10 @@ Use it for the baseline a tuned procedure is compared against. A plain
 \code{rset} of outer folds is what
 \code{\link[tune:fit_resamples]{tune::fit_resamples()}} already serves. What this function adds is the
 same nested design, so the two runs' folds are the same rows.
+}
+\details{
+\code{metrics} is read as \code{\link[tune:fit_resamples]{tune::fit_resamples()}} reads it. There is no inner
+run to select on, so the set's order carries no weight here.
 }
 \section{One door for a fixed workflow, one for a tuned one}{
 
@@ -158,9 +158,11 @@ place the level is set. A control at tune's default takes it. A control
 naming another level is refused at entry, and the refusal names both
 levels. \code{eval_time} is offered the same way, for the same reason.
 
-\strong{Refused: none.} No slot is refused on its own. A control of another
-class, such as a \code{control_bayes()}, is refused at entry, as is the
-\code{event_level} conflict above.
+
+\strong{Refused: none.} No slot is refused on its own. What is refused at
+entry is a control of another class, such as a \code{control_bayes()} that
+tune itself accepts here, and the \code{event_level} conflict above.
+
 
 \strong{Passed through: none.} There is no inner tuning call for a slot to be
 passed through to.

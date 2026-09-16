@@ -25,25 +25,24 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[tune:control_grid]{tune::control_grid()}}, passed as
-\code{control}, and nothing else. Every argument after \code{...} is matched by
-name. The section on differences from tune says what becomes of each
-control slot.}
+\item{...}{A control object from \code{\link[tune:control_grid]{tune::control_grid()}}, as \code{control}, and
+nothing else. Every argument after \code{...} is matched by name. The
+section on differences from tune says what becomes of each slot.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
-\item{grid}{A data frame of candidate parameter values, or a positive whole
-number for the size of a grid tune generates. A data frame has one
-column per tuned parameter and no other column.}
+\item{grid}{A data frame of tuning combinations or a positive integer. The
+data frame should have columns for each parameter being tuned and rows for
+tuning parameter candidates. An integer denotes the number of candidate
+parameter sets to be created automatically.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.}
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
@@ -96,6 +95,11 @@ it with another search:
 With this function they are the package's orchestrators: each runs the
 outer loop and hands the inner tuning to tune or finetune. Their pages
 say what differs, and this page is the reference for what the six share.
+
+\code{grid} and \code{param_info} reach every fold's inner call as
+\code{\link[tune:tune_grid]{tune::tune_grid()}} takes them. A data frame has one column per tuned
+parameter and no other column. The section on finalizing a parameter
+range says where a range that depends on the data is finalized.
 }
 \section{Nested designs}{
 
@@ -447,10 +451,13 @@ overwritten. The result records that effective control as
 \code{extract_procedure(res)$control}. Every slot of \code{control_grid()} falls
 under one of seven headings.
 
-\strong{Forced: \code{allow_par}.} Both tune calls a fold makes, the inner tuning
-run and the outer scoring fit, run at \code{allow_par = FALSE}, whatever the
-control carries. Parallelism belongs over the outer folds, as above,
-because leaving it to a caller puts two pools in contention.
+
+\strong{Forced: \code{allow_par}.} The inner tuning run and the outer scoring fit both
+run at \code{allow_par = FALSE}, whatever the control carries, because
+parallelism belongs over the outer folds.
+
+
+Leaving parallelism to a caller puts two pools in contention.
 
 \strong{Settable as its own argument: \code{event_level}.} The argument reaches
 the inner \code{control_grid()} and the outer \code{control_last_fit()} alike, and
@@ -462,9 +469,12 @@ is offered the same way, for the same reason: it changes a number the
 caller is shown. It is an argument of \code{tune_grid()} and \code{last_fit()}
 rather than a control slot.
 
+
 \strong{Refused: none.} No slot is refused on its own. What is refused at
 entry is a control of another class, such as a \code{control_bayes()} that
 tune itself accepts here, and the \code{event_level} conflict above.
+
+
 tune gives \code{\link[tune:control_resamples]{tune::control_resamples()}} and \code{\link[tune:control_last_fit]{tune::control_last_fit()}}
 the \code{control_grid} class, so either is accepted as what \code{control_grid()}
 returns, its slots read under these headings.
@@ -500,6 +510,7 @@ setting it costs the work and returns nothing. Use
 \code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}, where
 \code{\link[=extract_tune_results]{extract_tune_results()}} reaches what
 it saved.
+
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.

@@ -26,16 +26,16 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
 
-\item{...}{A control object from \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}} as
-\code{control} and nothing else, matched by name. The section on differences
-from finetune says what becomes of each slot.}
+\item{...}{A control object from \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}}, as \code{control}, and
+nothing else. Every argument after \code{...} is matched by name. The
+section on differences from finetune says what becomes of each slot.}
 
 \item{iter}{The number of search iterations, a whole number of at least 1.
 The section on the iterations says why \code{0} is refused.}
 
-\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object, or \code{NULL} to let tune
-derive one from the workflow. The section on finalizing a parameter
-range says where a range that depends on the data is finalized.}
+\item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
+a parameters set is derived from other arguments. Passing this argument can
+be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}
@@ -45,8 +45,7 @@ iteration, a whole number of at least 1 (finetune's default). A
 \code{tune_results} object, which finetune also accepts here, is refused.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
-level of a two-class outcome is the event, and applies to the inner
-tuning run and the outer scoring fit alike.}
+level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
@@ -85,6 +84,10 @@ report for that model.
 \details{
 finetune must be installed. A missing package is refused at entry, before
 any fold runs.
+
+\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
+section on finalizing a parameter range says where a range that depends
+on the data is finalized.
 }
 \section{The initial candidates and the iterations}{
 
@@ -151,20 +154,26 @@ overwritten. The result records that effective control as
 \code{extract_procedure(res)$control}. Every slot of \code{control_sim_anneal()}
 falls under one of seven headings.
 
+
 \strong{Forced: \code{allow_par}.} The inner search and the outer scoring fit both
 run at \code{allow_par = FALSE}, whatever the control carries, because
 parallelism belongs over the outer folds.
 
-\strong{Settable as its own argument: \code{event_level}.} Set through the
-argument alone, as on the grid page. A control at finetune's default
-takes the argument's level, and one naming a different level is refused
-at entry. \code{iter}, \code{initial} and \code{eval_time} are arguments of
-\code{tune_sim_anneal()} rather than control slots, offered here as arguments
-and reaching it unchanged.
 
-\strong{Refused: none.} No slot is refused on its own. What is refused at
-entry is a control of another class, such as a \code{control_bayes()} that
-finetune itself runs under, and the \code{event_level} conflict above.
+\strong{Settable as its own argument: \code{event_level}.} The argument is the one
+place the level is set, as on the grid page. A control at finetune's
+default takes it, and a control naming another level is refused at
+entry, with a refusal that names both.
+
+
+\code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()}
+rather than control slots, offered here as arguments and reaching it
+unchanged.
+
+
+\strong{Refused: none.} No slot is refused on its own. A control of another
+class is refused at entry, as is the \code{event_level} conflict above.
+
 
 \strong{Passed through: \code{no_improve}, \code{restart}, \code{radius}, \code{flip},
 \code{cooling_coef}, \code{time_limit}, \code{verbose}, \code{verbose_iter}, \code{pkgs},
@@ -184,19 +193,26 @@ from every fold of a serial run, one log per fold, and from a mirai
 daemon where nothing shows it. Pass
 \code{control = control_sim_anneal(verbose_iter = FALSE)} for a quiet run.
 \code{verbose} likewise.
-\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on the grid
-page, \code{parallel_over} included.
 }
 
-The classification above was read on finetune 1.3.0. The version that
-added \code{workflow_size} to \code{control_sim_anneal()} is not named in finetune's
-NEWS, and the \verb{>= 1.0.1} floor this package declares does not require
-it.
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Both reach the
-outer fit, whose predictions and extracts come back as \code{.predictions}
-and \code{.extracts}, in the shape the grid page gives. The inner search's are
-still discarded.
+\itemize{
+\item \code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
+describes. \code{parallel_over} changes the numbers a stochastic engine
+produces even at \code{allow_par = FALSE}.
+}
+
+
+This classification was read on finetune 1.3.0. The version that added
+\code{workflow_size} to \code{control_sim_anneal()} is not named in finetune's NEWS,
+and the \verb{>= 1.0.1} floor this package declares does not require it.
+
+
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
+outer fit as well as the inner search. The outer fit's
+predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
+the grid page describes, and the inner search's own are still discarded.
+
 
 \strong{Not returned: \code{save_workflow}, \code{save_history}.} \code{save_workflow} lands
 on the inner \code{tune_results} a fold record discards, so setting it costs
@@ -207,8 +223,9 @@ directory of the process that tuned, a daemon's own on the parallel
 path. Every fold overwrites the last one's, and nothing of it reaches
 the result.
 
-\strong{Inert: \code{backend_options}.} A parallel backend's options, and there is
-no backend to reach at \code{allow_par = FALSE}.
+
+\strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
+backend to reach at \code{allow_par = FALSE}.
 }
 
 \section{Nested designs}{
@@ -311,6 +328,6 @@ res$.inner_metrics[[1]]
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_resamples]{nested_resamples()}},
-\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}}
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_resamples]{nested_resamples()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}}
 }
