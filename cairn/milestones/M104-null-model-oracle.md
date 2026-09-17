@@ -50,7 +50,7 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - 2026-09-16: plan gate chose exact enumeration over the 27 per-fold counts over all 64 label vectors because it costs about 3.3 s instead of 8 s and O1/O2 already pin per-row behavior; falsified by a nested run whose fold accuracy depends on which rows in a fold hold the `"1"` labels.
 - 2026-09-16: plan gate chose exact enumeration over Monte Carlo replicates because the target is an exact number and enumeration reaches it with no tolerance; falsified by a configuration too large to enumerate within GP4's suite time.
 - 2026-09-16: implement gate: user approved the arXiv download (814,345 bytes) and chose `inside = rsample::vfold_cv(v = 2)` for the 4-row analysis sets.
-- 2026-09-16: T1 done. The PDF defines the majority rule as 0 when Y ≤ n/2 and 1 when Y > n/2 (p. 10), Lemma 4.9 and Theorem 4.10 are on p. 11; recorded on `references/nachum2026.md`. `null_model()` predicted `"0"` on a 2-2 tie (parsnip 1.6.0).
+- 2026-09-16: T1 done. The PDF's majority rule predicts 1 only for Y > n/2 and 0 otherwise (p. 10). Lemma 4.9 and Theorem 4.10 are on p. 11. Both are recorded on `references/nachum2026.md`. `null_model()` predicted `"0"` on a 2-2 tie (parsnip 1.6.0).
 
 ## Decisions
 
