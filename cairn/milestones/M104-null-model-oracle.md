@@ -57,6 +57,7 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - 2026-09-16: T4 done. `references/nachum2026.md` replaces the tie "not checked" and replicate "unmeasured" lines with the M104 findings and marks the oracle shipped as O3.
 - 2026-09-16: claim audit: not owed — internal tier
 - 2026-09-16: implement complete. `devtools::test()`: 0 failures, 10576 passes. `cairn_validate` passes, and the nachum2026 staleness advisory reads as it did on main. Status set to review.
+- 2026-09-16: step-7 approval: m104-null-model-oracle approved for merge. Gate triage: F1-F4 fixed, F5-F6 rejected.
 
 ## Decisions
 
@@ -75,3 +76,4 @@ The outer loop's estimate is checked against an exact value from theory: the mea
   - F4 `nachum2026.md:212-213`: the tie answer leaves out the `c("0", "1")` level order it depends on.
   - F5 `nachum2026.md:72` (line not changed): Result 3 omits the theorem's conditions on m.
   - F6 `test-nested-fit-resamples-oracles.R:172`: `set.seed(30)` has no effect on `null_model()`.
+- Triage at the gate 2026-09-16: F1 fix now (the header names the 27 count runs that stand for the 64 labelings). F2 fix now (O3 is called a third source of truth, a closed form, beside O2's by-hand computation). F3 fix now (the rule row names n′, the training sample size, which is n − m under k-fold CV). F4 fix now (the tie answer names the `c("0", "1")` level order). F5 rejected: a pre-existing line that this diff did not change. F6 rejected: the seed follows the file's other tests and does no harm. After the fixes, the oracle file had 0 failures and 131 passes, and the six gating prose sweeps were clean.

@@ -121,7 +121,7 @@ The paper reports no simulations. Its computable quantities:
 |---|---|
 | Fold-count minimizing majority's fold covariance | **k = 3** |
 | Majority fold covariance, m = Ω(n^{1/5}) | Θ(1/√(nm)) = Θ(√k/n) |
-| Majority rule (§4.1.2, p. 10) | predict 0 if Y ≤ n/2, predict 1 if Y > n/2, with Y the count of 1 labels in the sample it is trained on |
+| Majority rule (§4.1.2, p. 10) | predict 0 if Y ≤ n′/2, predict 1 if Y > n′/2, with Y the count of 1 labels and n′ the size of the sample it is trained on (the paper writes n; under k-fold CV, n′ = n − m) |
 | Majority MSE (Lemma 4.9, p. 11) | ((k−1)/k)·Cov(n, m) + 1/(4n) |
 | Majority fold covariance (Theorem 4.10, p. 11) | Cov(n, m) above, for 1 ≤ m ≤ n/2 with m dividing n |
 | Square-wave main constant c₀ | ≈ **0.0424** |
@@ -210,7 +210,8 @@ folds. The single-candidate reduction above is not part of it.
 ## Open questions
 
 - Answered 2026-09-16 (M104): `parsnip::null_model()`'s rule matches A_maj,
-  including at Y = n/2, because it predicts the first factor level on a tie.
+  including at Y = n/2, because it predicts the first factor level on a tie
+  and the levels are ordered `c("0", "1")`.
 - Answered 2026-09-16 (M104): no replicates are needed at fixture-sized n.
   Exact enumeration over per-fold counts gives the MSE, and a planted leak
   moved it from 7/96 to 1/24 at (n, k) = (6, 3).
