@@ -1,13 +1,13 @@
 # M104: An exact analytic oracle for the outer loop through the majority rule
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2, GP4
 - **Resolves:** —
 - **Surface tier:** internal — a test in the package's own suite, which no external consumer relies on
-- **Branch/PR:** —
+- **Branch/PR:** m104-null-model-oracle
 
 ## Goal
 
@@ -37,7 +37,7 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 
 ## Tasks
 
-- [ ] T1: Download arXiv 2511.03554v2 to `cairn/references/sources/nachum2026.pdf` (ask the user before the download, naming the file, source and size), read Lemma 4.9, Theorem 4.10 and the majority rule's definition, and record their printed page numbers and the exact tie rule on `references/nachum2026.md`. If the tie rule is not `Y > n/2`, stop and raise an amendment, since AC1's level order rests on it.
+- [x] T1: Download arXiv 2511.03554v2 to `cairn/references/sources/nachum2026.pdf` (ask the user before the download, naming the file, source and size), read Lemma 4.9, Theorem 4.10 and the majority rule's definition, and record their printed page numbers and the exact tie rule on `references/nachum2026.md`. If the tie rule is not `Y > n/2`, stop and raise an amendment, since AC1's level order rests on it.
 - [ ] T2: Write the AC1 test. Build the outer splits under a fixed seed as O1 does (`set.seed()` then `rsample::vfold_cv(d, v = 3)`), assign labels by fold membership for each `expand.grid()` row, call `nested_resamples()` under the same seed so the splits agree, and assert that the splits' fold membership matches before scoring. Compute Cov(n, m) with `choose()` in the test. Open with `skip_if_no_engines()` if parsnip or yardstick can be absent on a CI leg. Time the loop with `system.time()` and log the reading.
 - [ ] T3: Add O3 to the file's oracle header per AC2, and update the header's closing lines that name O1 and O2 as the oracle types for the estimate.
 - [ ] T4: Update `references/nachum2026.md`'s Oracle status and Open questions per AC4, and mark the oracle candidate there as shipped by M104.
@@ -49,6 +49,8 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - 2026-09-16: criteria audit (reduced mode, internal tier) returned three findings, all applied before the gate. AC1 named the Binomial(2, 1/2) weight, AC3 timed the loop instead of a skip-and-subtract run, and AC4 dropped a "shipped" record (moved to T4) and fixed its "unmeasured" line to the replicate question it answers. The gate then added page numbers to AC2, which is still a property of the test file.
 - 2026-09-16: plan gate chose exact enumeration over the 27 per-fold counts over all 64 label vectors because it costs about 3.3 s instead of 8 s and O1/O2 already pin per-row behavior; falsified by a nested run whose fold accuracy depends on which rows in a fold hold the `"1"` labels.
 - 2026-09-16: plan gate chose exact enumeration over Monte Carlo replicates because the target is an exact number and enumeration reaches it with no tolerance; falsified by a configuration too large to enumerate within GP4's suite time.
+- 2026-09-16: implement gate: user approved the arXiv download (814,345 bytes) and chose `inside = rsample::vfold_cv(v = 2)` for the 4-row analysis sets.
+- 2026-09-16: T1 done. The PDF defines the majority rule as 0 when Y ≤ n/2 and 1 when Y > n/2 (p. 10), Lemma 4.9 and Theorem 4.10 are on p. 11; recorded on `references/nachum2026.md`. `null_model()` predicted `"0"` on a 2-2 tie (parsnip 1.6.0).
 
 ## Decisions
 

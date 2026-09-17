@@ -11,7 +11,9 @@ Extraction: `pdftotext -layout`. **Read in full: Sections 1, 2 and 5**, plus
 Section 4's theorem, lemma and definition statements with their surrounding
 discussion. **Appendices A–F are proofs (roughly 45 of the 60 pages) and were
 not read**; every result below is recorded as stated, not verified — observed
-2026-07-31.
+2026-07-31. Re-checked against arXiv 2511.03554v2 on 2026-09-16 (M104): the
+majority rule's definition (p. 10), Lemma 4.9 and Theorem 4.10 (p. 11) match
+the text above.
 
 **Preprint status.** arXiv preprint as of 2026-07-31; no journal version
 confirmed. The author affiliations are marked with symbols the extraction did
@@ -119,7 +121,9 @@ The paper reports no simulations. Its computable quantities:
 |---|---|
 | Fold-count minimizing majority's fold covariance | **k = 3** |
 | Majority fold covariance, m = Ω(n^{1/5}) | Θ(1/√(nm)) = Θ(√k/n) |
-| Majority MSE (Lemma 4.9) | ((k−1)/k)·Cov(n, m) + 1/(4n) |
+| Majority rule (§4.1.2, p. 10) | predict 0 if Y ≤ n/2, predict 1 if Y > n/2, with Y the count of 1 labels in the sample it is trained on |
+| Majority MSE (Lemma 4.9, p. 11) | ((k−1)/k)·Cov(n, m) + 1/(4n) |
+| Majority fold covariance (Theorem 4.10, p. 11) | Cov(n, m) above, for 1 ≤ m ≤ n/2 with m dividing n |
 | Square-wave main constant c₀ | ≈ **0.0424** |
 | Square-wave error constant c_R | ≤ 4 × 10⁻⁴ |
 | Constant-hypothesis baseline (footnote 3, p. 4) | MSE_CV = p(1−p)/n, so ℜ_CV = **1/(4n)** |
