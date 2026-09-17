@@ -11,7 +11,9 @@ Extraction: `pdftotext -layout`. **Read in full: Sections 1, 2 and 5**, plus
 Section 4's theorem, lemma and definition statements with their surrounding
 discussion. **Appendices A–F are proofs (roughly 45 of the 60 pages) and were
 not read**; every result below is recorded as stated, not verified — observed
-2026-07-31.
+2026-07-31. Spot-checked against arXiv 2511.03554v2 on 2026-09-16 (M104):
+the majority rule's definition (p. 10), Lemma 4.9 and Theorem 4.10 (p. 11)
+match the text below. The rest of the page was not re-read.
 
 **Preprint status.** arXiv preprint as of 2026-07-31; no journal version
 confirmed. The author affiliations are marked with symbols the extraction did
@@ -119,7 +121,9 @@ The paper reports no simulations. Its computable quantities:
 |---|---|
 | Fold-count minimizing majority's fold covariance | **k = 3** |
 | Majority fold covariance, m = Ω(n^{1/5}) | Θ(1/√(nm)) = Θ(√k/n) |
-| Majority MSE (Lemma 4.9) | ((k−1)/k)·Cov(n, m) + 1/(4n) |
+| Majority rule (§4.1.2, p. 10) | predict 0 if Y ≤ n′/2, predict 1 if Y > n′/2, with Y the count of 1 labels and n′ the size of the sample it is trained on (the paper writes n; under k-fold CV, n′ = n − m) |
+| Majority MSE (Lemma 4.9, p. 11) | ((k−1)/k)·Cov(n, m) + 1/(4n) |
+| Majority fold covariance (Theorem 4.10, p. 11) | Cov(n, m) above, for 1 ≤ m ≤ n/2 with m dividing n |
 | Square-wave main constant c₀ | ≈ **0.0424** |
 | Square-wave error constant c_R | ≤ 4 × 10⁻⁴ |
 | Constant-hypothesis baseline (footnote 3, p. 4) | MSE_CV = p(1−p)/n, so ℜ_CV = **1/(4n)** |
@@ -185,27 +189,32 @@ Why it is reachable from this package specifically:
 Why it is not yet a fixture, recorded honestly:
 
 - The theorem's setting is exactly Bernoulli(1/2) labels with an arbitrary
-  feature marginal and 0–1 loss. Any deviation (class imbalance, a tie-breaking
-  rule that differs from `Y > n/2`) voids the closed form, and the tie-breaking
-  behaviour of `null_model()` at Y = n/2 has **not** been checked — observed
-  2026-07-31.
-- MSE is a distributional property. Confirming it needs many replicates, which
-  is the same GP4 collision that keeps `varma2006.md`'s null-data invariant off
-  the fixture list. The advantage here is that the target is an *exact number*
-  rather than a separation between two distributions, which may need far fewer
-  replicates — unmeasured.
+  feature marginal and 0–1 loss. Class imbalance voids the closed form.
+  `parsnip::null_model()` predicts the first factor level on a tie
+  (`which.max(table(y))`, parsnip 1.6.0), which matches the `Y > n/2` rule
+  under levels `c("0", "1")` — observed 2026-09-16 (M104). The tie direction
+  does not change the closed form: under symmetric labels a tie broken toward
+  1 gives the same MSE, 7/96 at (n, k) = (6, 3) — observed 2026-09-16 (M104).
+- MSE is a distributional property, but at fixture-sized n it needs no
+  replicates. Exact enumeration over the per-fold counts of 1 labels, each
+  weighted by its Binomial(m, 1/2) probabilities, reaches the exact number. At
+  (n, k) = (6, 3) that is 27 runs, about 3 s locally — observed 2026-09-16
+  (M104).
 - The paper's own asymptotic claims (Θ(1/√(nm)), k = 3 minimizing) are
   asymptotic; only Theorem 4.10's finite sum is exact at small n.
 
-Recorded as a candidate shape. Not planned, and no acceptance criterion depends
-on it.
+**Shipped by M104** as oracle O3 in
+`tests/testthat/test-nested-fit-resamples-oracles.R`, on 6 rows with 3 outer
+folds. The single-candidate reduction above is not part of it.
 
 ## Open questions
 
-- Whether `parsnip::null_model()`'s prediction rule matches A_maj exactly,
-  including at Y = n/2. Not checked — observed 2026-07-31.
-- How many replicates separate the predicted MSE from a plausible wrong
-  implementation at fixture-sized n. Unmeasured — observed 2026-07-31.
+- Answered 2026-09-16 (M104): `parsnip::null_model()`'s rule matches A_maj,
+  including at Y = n/2, because it predicts the first factor level on a tie
+  and the levels are ordered `c("0", "1")`.
+- Answered 2026-09-16 (M104): no replicates are needed at fixture-sized n.
+  Exact enumeration over per-fold counts gives the MSE, and a planted leak
+  moved it from 7/96 to 1/24 at (n, k) = (6, 3).
 - Whether a nested run with a single-candidate grid provably reduces to flat CV
   in this package. Structurally it should — `select_best()` on one candidate is
   a no-op — but no test asserts it as of 2026-07-31.

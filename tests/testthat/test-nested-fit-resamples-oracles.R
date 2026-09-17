@@ -20,8 +20,26 @@
 #   the same way would still fail here. Pinned by "every fold's metrics are
 #   identical to a by-hand fit, predict and score".
 #
+# O3 -- type "analytic" (closed form from theory). Source: nachum2026,
+#   Lemma 4.9 and Theorem 4.10 (both p. 11), the mean squared error of k-fold
+#   CV for the majority rule under Bernoulli(1/2) labels. The rule (Section
+#   4.1.2, p. 10) predicts "0" unless the count of "1" labels in its training
+#   rows exceeds half of them, so a tie predicts "0". parsnip::null_model()
+#   predicts the first factor level on a tie, which is "0" under the levels
+#   c("0", "1") the test uses. Where O1 and O2 check each fold's number, O3
+#   checks the outer average over all 64 labelings of 6 rows in 3 folds. It
+#   runs one labeling for each of the 27 per-fold counts of "1" labels, weighted
+#   by the probability of that count, because a fold's accuracy depends only on
+#   the counts. Pinned by "the outer estimate's mean squared error for
+#   the majority rule is nachum2026's closed form". Planting a leak, the outer
+#   fit trained on all rows, moved the weighted error to 1/(4n) and failed it.
+#   A tie broken toward "1" gives the same closed form, because the labels are
+#   symmetric, so O3 does not detect the tie direction (M104).
+#
 # O1 and O2 are the >=2 independent oracle types GP2 requires for the
-# estimate this orchestrator reports (AC1).
+# estimate this orchestrator reports (AC1). O3 adds a third, independent
+# source of truth for the averaged estimate: a closed form from theory, where
+# O2 is a by-hand computation.
 #
 # The rest of the file pins the record's shape (AC2): the same columns the
 # five tuning orchestrators write, an empty selection on every completed
@@ -106,6 +124,73 @@ test_that("AC1: every fold's metrics are identical to a by-hand fit, predict and
       )
     }
   }
+})
+
+test_that("O3: the outer estimate's mean squared error for the majority rule is nachum2026's closed form", {
+  skip_if_no_engines()
+
+  n <- 6L
+  k <- 3L
+  m <- n %/% k
+  x <- as.double(seq_len(n))
+  wf <- workflows::workflow(
+    y ~ x,
+    parsnip::null_model(mode = "classification")
+  )
+  ms <- yardstick::metric_set(yardstick::accuracy)
+
+  # The outer folds, drawn under the seed nested_resamples() is given below.
+  # vfold_cv() assigns rows from the row count and the stream alone, so the
+  # labels do not move them; the assertion inside the loop holds that.
+  set.seed(104)
+  outer <- rsample::vfold_cv(data.frame(x = x), v = k)
+  held_out <- lapply(outer$splits, function(s) sort(rsample::complement(s)))
+
+  # Every way to put 0, 1 or 2 "1" labels in each fold. Which rows in a fold
+  # hold them cannot change that fold's accuracy: the rule is fit on the
+  # count of the other folds and predicts one class for both held-out rows.
+  counts <- expand.grid(rep(list(0:m), k))
+  expect_identical(nrow(counts), 27L)
+
+  accuracy <- numeric(nrow(counts))
+  weight <- numeric(nrow(counts))
+  for (r in seq_len(nrow(counts))) {
+    y <- rep("0", n)
+    for (j in seq_len(k)) {
+      y[held_out[[j]][seq_len(counts[r, j])]] <- "1"
+    }
+    d <- data.frame(y = factor(y, levels = c("0", "1")), x = x)
+
+    set.seed(104)
+    folds <- nested_resamples(
+      d,
+      outside = rsample::vfold_cv(v = 3),
+      inside = rsample::vfold_cv(v = 2)
+    )
+    expect_identical(
+      lapply(folds$splits, function(s) sort(rsample::complement(s))),
+      held_out
+    )
+
+    set.seed(30)
+    res <- nested_fit_resamples(wf, folds, metrics = ms)
+    est <- tune::collect_metrics(res)
+    expect_identical(est$.metric, "accuracy")
+    accuracy[[r]] <- est$mean
+    weight[[r]] <- prod(stats::dbinom(unlist(counts[r, ]), m, 0.5))
+  }
+
+  # The weights are a probability distribution over the labelings.
+  expect_equal(sum(weight), 1, tolerance = 1e-12)
+
+  # Lemma 4.9 and Theorem 4.10 (nachum2026, p. 11). The population loss of the
+  # rule is 1/2, so the squared error of the estimated accuracy is the squared
+  # error of the estimated loss.
+  j <- 0:(m - 1)
+  cov_nm <- 2^-n *
+    sum(choose(m - 1, j)^2 * choose(n - 2 * m, floor((n - m) / 2) - j))
+  expected <- (k - 1) / k * cov_nm + 1 / (4 * n)
+  expect_equal(sum(weight * (0.5 - accuracy)^2), expected, tolerance = 1e-12)
 })
 
 test_that("AC2: the record has the five orchestrators' columns, with nothing selected and no inner rows", {
