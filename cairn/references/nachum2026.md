@@ -11,9 +11,9 @@ Extraction: `pdftotext -layout`. **Read in full: Sections 1, 2 and 5**, plus
 Section 4's theorem, lemma and definition statements with their surrounding
 discussion. **Appendices A–F are proofs (roughly 45 of the 60 pages) and were
 not read**; every result below is recorded as stated, not verified — observed
-2026-07-31. Re-checked against arXiv 2511.03554v2 on 2026-09-16 (M104): the
-majority rule's definition (p. 10), Lemma 4.9 and Theorem 4.10 (p. 11) match
-the text above.
+2026-07-31. Spot-checked against arXiv 2511.03554v2 on 2026-09-16 (M104):
+the majority rule's definition (p. 10), Lemma 4.9 and Theorem 4.10 (p. 11)
+match the text below. The rest of the page was not re-read.
 
 **Preprint status.** arXiv preprint as of 2026-07-31; no journal version
 confirmed. The author affiliations are marked with symbols the extraction did
