@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-16 (triage pass: dropped the resample-weights row, 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M104 | An exact analytic oracle for the outer loop through the majority rule | in-progress | — | normal | milestones/M104-null-model-oracle.md |
+| M104 | An exact analytic oracle for the outer loop through the majority rule | review | — | normal | milestones/M104-null-model-oracle.md |
 | M101 | The outer average honors tune's resample weights | done | — | normal | milestones/archive/M101-resample-weights.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | done | — | normal | milestones/archive/M102-devel-vctrs-schedule-cache.md |
 | M103 | The workflow identity reads case weights and a postprocessor | done | — | normal | milestones/archive/M103-identity-case-weights-postprocessor.md |

@@ -1,6 +1,6 @@
 # M104: An exact analytic oracle for the outer loop through the majority rule
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -56,6 +56,7 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - 2026-09-16: T3 done. The oracle header records O3 with its source, pages, tie rule, leak plant and tie symmetry. Its closing lines now name O3 beside O1 and O2. The oracle file passes, 131 expectations.
 - 2026-09-16: T4 done. `references/nachum2026.md` replaces the tie "not checked" and replicate "unmeasured" lines with the M104 findings and marks the oracle shipped as O3.
 - 2026-09-16: claim audit: not owed — internal tier
+- 2026-09-16: implement complete. `devtools::test()`: 0 failures, 10576 passes. `cairn_validate` passes, and the nachum2026 staleness advisory reads as it did on main. Status set to review.
 
 ## Decisions
 
