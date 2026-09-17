@@ -67,3 +67,11 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - AC3: verified 2026-09-16. `system.time()` around the test's 27-row loop, run from a scratch copy of the test body: 3.84 s elapsed, under the 10 s limit.
 - AC4: verified 2026-09-16. `cairn/references/nachum2026.md` records that `null_model()` predicts the first factor level on a tie, matching `Y > n/2` under `c("0", "1")`, and that exact enumeration over per-fold counts needs no replicates. A grep finds no remaining "not checked" or "unmeasured" line.
 - AC5: verified 2026-09-16. `Rscript -e 'devtools::test()'`: 0 failures, 0 warnings, 0 skips, 10576 passes.
+- Consistency gate 2026-09-16: `cairn_validate` exit 0 (18 references-staleness advisories, as on main). No DESIGN principle changed, so `cairn_impact` was skipped. `devtools::document()` produced no diff. `devtools::check()`: 0 errors, 0 warnings, 0 notes. All six gating prose sweeps are clean. The diff does not touch README, `_pkgdown.yml`, NEWS or top-level files, and it has no user-visible change that needs a NEWS entry.
+- Independent review 2026-09-16, three lenses. The blame-history lens found nothing. The prior-review lens found no prior-review evidence. The diff-bug lens confirmed the closed form against a brute force at seven (n, k) pairs and showed that O3 catches four more wrong implementations. It reported six wording findings, ranked:
+  - F1 `test-nested-fit-resamples-oracles.R:29-30`: "every labeling of 6 rows" overstates what the test runs. It runs 27 count patterns that stand for the 64 labelings.
+  - F2 `test-nested-fit-resamples-oracles.R:38-39`: "a third, analytic type" can mislead, because O2 is already typed "analytic by-hand".
+  - F3 `nachum2026.md:124`: the rule row's "Y ≤ n/2" uses n for the training sample, but elsewhere on the page n is the total sample size.
+  - F4 `nachum2026.md:212-213`: the tie answer leaves out the `c("0", "1")` level order it depends on.
+  - F5 `nachum2026.md:72` (line not changed): Result 3 omits the theorem's conditions on m.
+  - F6 `test-nested-fit-resamples-oracles.R:172`: `set.seed(30)` has no effect on `null_model()`.
