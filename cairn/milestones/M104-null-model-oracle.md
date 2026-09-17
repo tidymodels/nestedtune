@@ -21,11 +21,11 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 
 ## Acceptance criteria
 
-- [ ] AC1: `tests/testthat/test-nested-fit-resamples-oracles.R` carries a test that runs `nested_fit_resamples()` with `parsnip::null_model(mode = "classification")` on 6 rows with 3 outer `rsample::vfold_cv()` folds. The outcome is binary with levels `c("0", "1")`. The test runs once for each of the 27 rows of the test's own `expand.grid()` of a count of `"1"` labels (0, 1 or 2) per outer fold. It asserts that the mean of (0.5 − accuracy)², where accuracy is the outer estimate `collect_metrics()` reports and each dataset is weighted by the product over folds of the Binomial(2, 1/2) probability of that fold's count, equals ((k − 1)/k)·Cov(n, m) + 1/(4n) with n = 6, k = 3, m = 2, from `nachum2026` (Lemma 4.9, Theorem 4.10), within a tolerance of `1e-12`.
-- [ ] AC2: The same file's oracle header records this test as O3, of type analytic, naming `nachum2026` with the lemma, the theorem and their page numbers, the majority rule's tie at exactly half the training labels (predict `"0"` unless the count of `"1"` exceeds half), and that `parsnip::null_model()` predicts the first factor level on a tie.
-- [ ] AC3: The AC1 test's enumeration loop runs in under 10 seconds of elapsed time locally, read from `system.time()` around that loop.
-- [ ] AC4: `cairn/references/nachum2026.md` records that `parsnip::null_model()` predicts the first factor level on a tie, which matches the `Y > n/2` rule under levels `c("0", "1")`, and that exact enumeration over per-fold counts answers the replicate-count question with no replicates, replacing the 2026-07-31 "not checked" and "unmeasured" lines those findings answer.
-- [ ] AC5: `Rscript -e 'devtools::test()'` reports no failures.
+- [x] AC1: `tests/testthat/test-nested-fit-resamples-oracles.R` carries a test that runs `nested_fit_resamples()` with `parsnip::null_model(mode = "classification")` on 6 rows with 3 outer `rsample::vfold_cv()` folds. The outcome is binary with levels `c("0", "1")`. The test runs once for each of the 27 rows of the test's own `expand.grid()` of a count of `"1"` labels (0, 1 or 2) per outer fold. It asserts that the mean of (0.5 − accuracy)², where accuracy is the outer estimate `collect_metrics()` reports and each dataset is weighted by the product over folds of the Binomial(2, 1/2) probability of that fold's count, equals ((k − 1)/k)·Cov(n, m) + 1/(4n) with n = 6, k = 3, m = 2, from `nachum2026` (Lemma 4.9, Theorem 4.10), within a tolerance of `1e-12`.
+- [x] AC2: The same file's oracle header records this test as O3, of type analytic, naming `nachum2026` with the lemma, the theorem and their page numbers, the majority rule's tie at exactly half the training labels (predict `"0"` unless the count of `"1"` exceeds half), and that `parsnip::null_model()` predicts the first factor level on a tie.
+- [x] AC3: The AC1 test's enumeration loop runs in under 10 seconds of elapsed time locally, read from `system.time()` around that loop.
+- [x] AC4: `cairn/references/nachum2026.md` records that `parsnip::null_model()` predicts the first factor level on a tie, which matches the `Y > n/2` rule under levels `c("0", "1")`, and that exact enumeration over per-fold counts answers the replicate-count question with no replicates, replacing the 2026-07-31 "not checked" and "unmeasured" lines those findings answer.
+- [x] AC5: `Rscript -e 'devtools::test()'` reports no failures.
 
 ## Coverage
 
@@ -61,3 +61,9 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 ## Decisions
 
 ## Review
+
+- AC1: verified 2026-09-16. The O3 test in `tests/testthat/test-nested-fit-resamples-oracles.R` uses 6 rows, `vfold_cv(v = 3)` outer folds, levels `c("0", "1")`, a 27-row `expand.grid()` of counts 0 to 2, Binomial(2, 1/2) weights, the closed form with n = 6, k = 3, m = 2, and `tolerance = 1e-12`. `devtools::test(filter = "nested-fit-resamples-oracles")`: 0 failures, 131 passes. A scratch run of the test body gave a weighted MSE of 0.07291667 (7/96), 1.4e-17 from the closed form.
+- AC2: verified 2026-09-16. The oracle header records O3 as type "analytic", names `nachum2026` with Lemma 4.9 and Theorem 4.10 (p. 11) and the rule's definition (p. 10), states that a tie predicts "0" unless the count of "1" exceeds half, and states that `parsnip::null_model()` predicts the first factor level on a tie.
+- AC3: verified 2026-09-16. `system.time()` around the test's 27-row loop, run from a scratch copy of the test body: 3.84 s elapsed, under the 10 s limit.
+- AC4: verified 2026-09-16. `cairn/references/nachum2026.md` records that `null_model()` predicts the first factor level on a tie, matching `Y > n/2` under `c("0", "1")`, and that exact enumeration over per-fold counts needs no replicates. A grep finds no remaining "not checked" or "unmeasured" line.
+- AC5: verified 2026-09-16. `Rscript -e 'devtools::test()'`: 0 failures, 0 warnings, 0 skips, 10576 passes.
