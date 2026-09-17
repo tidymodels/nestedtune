@@ -1,12 +1,11 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-16 (triage pass: dropped the resample-weights row, shipped by M101, and the compute_metrics() repeated-.row row, shipped by M100, both already shipped; split the tidymodels-conventions row into Posit attribution, CODEOWNERS and badges rows; no decision entry. validate green.)_
+_Last hygiene check: 2026-09-17 (M104 archived; M101 row retired past the three-row window; no lesson, D-entry or Known issue; validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M104 | An exact analytic oracle for the outer loop through the majority rule | review | — | normal | milestones/M104-null-model-oracle.md |
-| M101 | The outer average honors tune's resample weights | done | — | normal | milestones/archive/M101-resample-weights.md |
+| M104 | An exact analytic oracle for the outer loop through the majority rule | done | — | normal | milestones/archive/M104-null-model-oracle.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | done | — | normal | milestones/archive/M102-devel-vctrs-schedule-cache.md |
 | M103 | The workflow identity reads case weights and a postprocessor | done | — | normal | milestones/archive/M103-identity-case-weights-postprocessor.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->

@@ -1,0 +1,11 @@
+# M104: An exact analytic oracle for the outer loop through the majority rule
+
+**Status:** done (2026-09-17, PR #117 https://github.com/tidymodels/nestedtune/pull/117)
+
+**Goal:** The outer loop's estimate is checked against an exact value from theory: the mean squared error of k-fold CV for the majority rule under Bernoulli(1/2) labels.
+
+**Outcome:** Oracle O3 in `tests/testthat/test-nested-fit-resamples-oracles.R` runs `nested_fit_resamples()` with `parsnip::null_model(mode = "classification")` on 6 rows in 3 outer folds (inner `vfold_cv(v = 2)`), once for each of the 27 per-fold counts of `"1"` labels. It weights each run by its Binomial(2, 1/2) probabilities and matches ((k − 1)/k)·Cov(n, m) + 1/(4n) from `nachum2026` (Lemma 4.9, Theorem 4.10, p. 11) within 1e-12, 7/96 at (6, 3). The loop takes about 3-4 s. A planted leak (the outer fit trained on all rows) gives 1/24 and fails the test. The tie direction is not detected, because symmetric labels give the same MSE either way. The oracle header records O3, its pages and the tie rule. `cairn/references/nachum2026.md` records the PDF spot check, that `null_model()` predicts the first factor level on a tie, and that exact enumeration needs no replicates.
+
+**Decisions:** Exact enumeration over per-fold counts, chosen at the plan gate over all 64 label vectors and over Monte Carlo replicates. The arXiv PDF was downloaded with the user's approval.
+
+**Review:** All five criteria verified: `devtools::test()` 10576 passes, `devtools::check()` 0 errors, 0 warnings, 0 notes, six gating sweeps, `document()` no diff and `cairn_validate` clean. Three lenses ran. Blame-history and prior-review reported nothing. The diff-bug lens confirmed the closed form by brute force at seven (n, k) pairs and ranked six wording findings. Fixed at the gate: the header's "every labeling" claim, the "third analytic type" wording, the reference rule row's use of n, and the tie answer's missing level order. Rejected: a pre-existing Result 3 line without the theorem's conditions, and an unused seed that follows the file's pattern. The CI wait stopped at the harness ceiling, and the merge landed on resume with 14 checks green and an empty PR conversation. Nothing was graduated or retired.
