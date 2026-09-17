@@ -1702,6 +1702,13 @@ identity_difference <- function(recorded, given) {
     ))
   }
   d <- first_difference(recorded, given)
+  if (!is.null(d) && length(d$path) == 0L && identical(d$kind, "names")) {
+    # A part present on one side only: the case weights or the
+    # postprocessor (M103), which the identity leaves out when the workflow
+    # carries none, so a record built without one and a workflow with one
+    # differ in their parts' names.
+    return(optional_part_difference(recorded, given))
+  }
   if (is.null(d)) {
     # `identical()` told the two apart on something the walk does not read
     # (an attribute, or NULL against empty names); named rather than left
@@ -1739,6 +1746,42 @@ identity_difference <- function(recorded, given) {
     },
     "."
   ))
+}
+
+# The sentence for a part one side carries and the other does not; the
+# case weights are named ahead of the postprocessor, the order the identity
+# holds them in. A parts difference with neither on one side only is
+# something the walk was not written for, and is named as such.
+optional_part_difference <- function(recorded, given) {
+  side <- function(part) {
+    c(recorded = part %in% names(recorded), given = part %in% names(given))
+  }
+  weights <- side("case_weights")
+  if (xor(weights[["recorded"]], weights[["given"]])) {
+    col <- function(id) {
+      if (is.null(id$case_weights)) {
+        "none"
+      } else {
+        cli::format_inline("the column {.code {id$case_weights}}")
+      }
+    }
+    return(cli::format_inline(paste(
+      "The case weights differ: {col(recorded)} recorded, and {col(given)}",
+      "given."
+    )))
+  }
+  post <- side("postprocessor")
+  if (xor(post[["recorded"]], post[["given"]])) {
+    one <- function(id) if (is.null(id$postprocessor)) "none" else "one"
+    return(cli::format_inline(paste(
+      "The postprocessor differs: {one(recorded)} recorded, and {one(given)}",
+      "given."
+    )))
+  }
+  paste(
+    "The workflow differs from the recorded one in a part the comparison",
+    "cannot name."
+  )
 }
 
 preprocessor_kind_label <- function(kind) {
@@ -1804,6 +1847,27 @@ identity_part <- function(path, recorded) {
         sprintf("The model's engine argument `%s`", at(3L))
       },
       "The model"
+    ))
+  }
+  if (identical(at(1L), "case_weights")) {
+    return("The case-weights column")
+  }
+  if (identical(at(1L), "postprocessor")) {
+    if (is.na(at(3L))) {
+      return("The postprocessor's adjustment count")
+    }
+    i <- as.integer(at(3L))
+    type <- recorded$postprocessor$adjustments[[i]]$type
+    adjustment <- sprintf("The postprocessor's adjustment %d (%s)", i, type)
+    return(switch(
+      at(4L),
+      type = sprintf("The postprocessor's adjustment %d's type", i),
+      arguments = if (is.na(at(5L))) {
+        paste(adjustment, "arguments")
+      } else {
+        sprintf("%s argument `%s`", adjustment, at(5L))
+      },
+      adjustment
     ))
   }
   switch(

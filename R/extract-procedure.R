@@ -53,7 +53,9 @@
 #' arguments, and the preprocessor, each in deparsed form. A formula or a
 #' variables selection is held as written. A recipe is held as its steps
 #' in order, with each step's selectors and settings, and its random step
-#' ids left out. Case weights and a postprocessor are not held. The
+#' ids left out. A case-weights column is held as written. A tailor
+#' postprocessor is held as its adjustments in order, each by type and
+#' arguments. A workflow with neither holds no entry for them. The
 #' workflow object itself is not stored, and no data rows are. A model
 #' argument is held as written, so a name bound outside the workflow is
 #' held as that name and not as its value. [nested_final_fit()] compares

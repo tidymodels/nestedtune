@@ -121,10 +121,11 @@ each step's selectors and settings. It does not distinguish a model
 argument given as a name from the same name bound to another value,
 because the argument is recorded as written. A recipe setting that is a
 function is compared as its body, so two functions with one body that
-close over different values are not distinguished either. It does not
-read case weights or a postprocessor, so a workflow that differs there
-alone is accepted. A workflow rebuilt from the same code passes, even
-though its recipe step ids differ.
+close over different values are not distinguished either. A case-weights
+column is compared as written, and a tailor postprocessor as its
+adjustments in order, each by type and arguments, when the workflow
+carries them. A workflow rebuilt from the same code passes, even though
+its recipe step ids differ.
 
 Four shapes of \code{results} are refused before any fitting, with condition
 class \code{nestedtune_bad_results}. One carries no record: it was built by an

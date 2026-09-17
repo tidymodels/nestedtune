@@ -16,13 +16,49 @@
 # user handed over and not a re-run of it. A recipe step's settings are the
 # exception (see `preprocessor_identity()` below): recipes evaluates them
 # when the step is added, so they are recorded by value.
+#
+# Two parts are present only when the workflow carries them (M103): the
+# case-weights column `workflows::add_case_weights()` files under `pre`, and
+# the tailor `workflows::add_tailor()` files under `post`. Absent, they are
+# left out rather than recorded as NULL, so a workflow with neither has the
+# identity a record saved before the two parts existed holds, and such a
+# record still matches the workflow it ran under.
 
 workflow_identity <- function(object) {
-  list(
+  id <- list(
     model = model_identity(workflows::extract_spec_parsnip(object)),
     preprocessor = preprocessor_identity(
       workflows::extract_preprocessor(object)
     )
+  )
+  weights <- object$pre$actions$case_weights
+  if (!is.null(weights)) {
+    # The column as written: `add_case_weights()` holds it as a quosure.
+    id$case_weights <- deparse_one(weights$col)
+  }
+  post <- object$post$actions$tailor
+  if (!is.null(post)) {
+    id$postprocessor <- postprocessor_identity(post$tailor)
+  }
+  id
+}
+
+# The tailor as its adjustments in order, each as its class (the first,
+# `probability_threshold` ahead of `adjustment`) and its arguments deparsed.
+# An adjustment's `inputs`, `outputs` and `requires_fit` are fixed by its
+# class, its `results` and `trained` flag are written by fitting, and the
+# tailor's own `type` is set by its adjustments at construction and by the
+# outcome column at fitting, so none of them is recorded. A custom
+# adjustment's `commands` are quosures, deparsed by element as a step's
+# `inputs` are.
+postprocessor_identity <- function(post) {
+  list(adjustments = lapply(post$adjustments, adjustment_identity))
+}
+
+adjustment_identity <- function(adjustment) {
+  list(
+    type = class(adjustment)[[1L]],
+    arguments = deparse_settings(adjustment$arguments)
   )
 }
 

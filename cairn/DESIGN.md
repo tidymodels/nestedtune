@@ -110,7 +110,9 @@ naming convention.
   identity of the workflow the run was given — `workflow_identity()`
   (`R/workflow-identity.R`), the model specification and the preprocessor
   deparsed, with recipe step ids, quosure environments and the recipe
-  template left out — and the final fit refuses a workflow whose identity
+  template left out, and, when the workflow carries them, the case-weights
+  column as written and the tailor's adjustments in order (M103) — and the
+  final fit refuses a workflow whose identity
   differs, with class `nestedtune_workflow_mismatch`, after the grid and
   marker checks and before any seed is drawn (`check_workflow_identity()`,
   M83); a record without the entry is refused as one from an earlier version.

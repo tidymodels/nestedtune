@@ -110,6 +110,25 @@ test_that("a difference the walk cannot place is named as such", {
   )
 })
 
+test_that("a parts difference in neither optional part is named as such", {
+  # The top-level names differ, but not by a case-weights or postprocessor
+  # part on one side only: the walk stops at the names, and the sentence
+  # says it cannot name the part (M103 review, finding 1).
+  recorded <- list(
+    model = list(class = "linear_reg", eng_args = list()),
+    preprocessor = list(kind = "formula", formula = "y ~ x")
+  )
+  given <- recorded[c("preprocessor", "model")]
+  d <- first_difference(recorded, given)
+  expect_length(d$path, 0L)
+  expect_identical(d$kind, "names")
+  expect_match(
+    identity_difference(recorded, given),
+    "The workflow differs from the recorded one in a part the comparison cannot name",
+    fixed = TRUE
+  )
+})
+
 test_that("AC5: the identity carries no data rows", {
   skip_if_no_engines()
 
@@ -200,4 +219,114 @@ test_that("a model argument is recorded as written, and a recipe setting as the 
     workflow_identity(fixed_workflow(d)),
     workflow_identity(det_workflow(d))
   ))
+})
+
+# M103: the two parts the identity gained after M83, a case-weights column
+# and a tailor postprocessor, each present only when the workflow carries
+# it, so a workflow with neither keeps the identity a record saved before
+# them holds (AC2).
+
+test_that("AC2: a workflow with neither part has the identity it had at the branch point", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  # The record saved before this milestone, under the workflow it ran under
+  # (fixtures/make-branch-point-results.R names the commit and the seeds).
+  saved <- readRDS(test_path("fixtures", "branch-point-results.rds"))
+  recorded <- extract_procedure(saved)$workflow
+  expect_named(recorded, c("model", "preprocessor"))
+  expect_identical(workflow_identity(fixed_workflow(d)), recorded)
+  expect_named(workflow_identity(det_workflow(d)), c("model", "preprocessor"))
+})
+
+test_that("AC1: the case-weights column is a part of the identity, recorded as written", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  d$w1 <- parsnip::importance_weights(rep(1, nrow(d)))
+  d$w2 <- d$w1
+
+  plain <- fixed_workflow(d)
+  one <- workflows::add_case_weights(plain, w1)
+  two <- workflows::add_case_weights(plain, w2)
+  expect_false(identical(workflow_identity(plain), workflow_identity(one)))
+  expect_false(identical(workflow_identity(one), workflow_identity(two)))
+  expect_identical(
+    workflow_identity(one),
+    workflow_identity(workflows::add_case_weights(fixed_workflow(d), w1))
+  )
+  id <- workflow_identity(one)
+  expect_named(id, c("model", "preprocessor", "case_weights"))
+  expect_identical(id$case_weights, "w1")
+  # The other two parts are untouched by the addition.
+  expect_identical(id[c("model", "preprocessor")], workflow_identity(plain))
+})
+
+test_that("AC1: a tailor is a part of the identity, as its adjustments in order", {
+  skip_if_no_engines()
+  skip_if_not_installed("tailor")
+  d <- make_reg_data()
+
+  plain <- fixed_workflow(d)
+  with_tailor <- workflows::add_tailor(plain, custom_tailor())
+  expect_false(identical(
+    workflow_identity(plain),
+    workflow_identity(with_tailor)
+  ))
+  expect_identical(
+    workflow_identity(with_tailor),
+    workflow_identity(workflows::add_tailor(fixed_workflow(d), custom_tailor()))
+  )
+
+  id <- workflow_identity(with_tailor)
+  expect_named(id, c("model", "preprocessor", "postprocessor"))
+  expect_identical(id[c("model", "preprocessor")], workflow_identity(plain))
+  expect_named(id$postprocessor, "adjustments")
+  adj <- id$postprocessor$adjustments
+  expect_length(adj, 1L)
+  expect_identical(adj[[1L]]$type, "predictions_custom")
+  expect_identical(
+    adj[[1L]]$arguments,
+    list(commands = list(.pred = ".pred + 1"), pkgs = "character(0)")
+  )
+  # The tailor's own type is set by its adjustments and, at fitting, by the
+  # outcome column, and is not recorded; every leaf is a string, as for the
+  # other parts.
+  expect_false("type" %in% names(id$postprocessor))
+  expect_type(rapply(id, function(x) x, how = "unlist"), "character")
+
+  # One adjustment's argument value.
+  expect_false(identical(
+    workflow_identity(workflows::add_tailor(plain, custom_tailor(1))),
+    workflow_identity(workflows::add_tailor(plain, custom_tailor(2)))
+  ))
+  # The order of two adjustments.
+  ab <- tailor::adjust_predictions_custom(custom_tailor(1), .pred = .pred * 2)
+  ba <- tailor::adjust_predictions_custom(
+    tailor::adjust_predictions_custom(tailor::tailor(), .pred = .pred * 2),
+    .pred = .pred + 1
+  )
+  expect_false(identical(
+    workflow_identity(workflows::add_tailor(plain, ab)),
+    workflow_identity(workflows::add_tailor(plain, ba))
+  ))
+  # The adjustment type, on a classification workflow, since a probability
+  # threshold binds the tailor to a binary outcome.
+  d$c <- factor(ifelse(d$y > 0, "a", "b"))
+  cls <- workflows::workflow(c ~ x1 + x2, parsnip::logistic_reg())
+  threshold <- tailor::adjust_probability_threshold(tailor::tailor(), 0.3)
+  custom <- tailor::adjust_predictions_custom(
+    tailor::tailor(),
+    .pred_class = .pred_class
+  )
+  t_id <- workflow_identity(workflows::add_tailor(cls, threshold))
+  c_id <- workflow_identity(workflows::add_tailor(cls, custom))
+  expect_false(identical(t_id, c_id))
+  expect_identical(
+    t_id$postprocessor$adjustments[[1L]]$type,
+    "probability_threshold"
+  )
+  expect_identical(
+    t_id$postprocessor$adjustments[[1L]]$arguments,
+    list(threshold = "0.3")
+  )
 })
