@@ -1793,6 +1793,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** IP2's entry gains one sentence: it binds randomness that flows through R's generator, and engines that randomize outside it (kernlab's SVMs, the deep-learning engines) are outside its reach under any R-side scheme, here or in tune. The seeding scheme and the template's wording are unchanged.
 **Consequences:** a reader of DESIGN.md learns IP2's scope without opening D-011. A test on an engine that bypasses R's RNG stays out, since there is nothing to assert. Falsified by an R-side mechanism that pins such an engine, which would narrow the exclusion. Supersedes no entry.
 
+### D-065 (2026-09-16): `tailor` joins Suggests as the package the identity tests build a postprocessor with — extends the dependency set D-053 last touched
+
+**Context:** M103 adds a workflow's tailor postprocessor to `workflow_identity()`, read from the action `workflows::add_tailor()` files under `post`. The tests that show two tailors refused, and one refused against none, need a real tailor; a hand-built stand-in would test a shape of this package's own making.
+**Decision:** `tailor` is declared in Suggests, and the tests that build one skip when it is absent. The identity itself never loads tailor: it reads the stored action's adjustments by class and arguments, so the package has no runtime dependency on it, and `probably` stays out, since the two adjustments the tests use (`adjust_predictions_custom()`, `adjust_probability_threshold()`) are the ones tailor computes itself.
+**Consequences:** CRAN's no-Suggests flavor skips the tailor tests and runs the case-weights ones. Falsified by the identity needing a tailor function to read an adjustment, which would move tailor to Imports at a gate.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

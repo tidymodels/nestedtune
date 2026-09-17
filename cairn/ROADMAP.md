@@ -8,7 +8,7 @@ _Last hygiene check: 2026-09-16 (M102's pass: archived, M99's row pruned, the tw
 | M100 | compute_metrics() refuses a fold whose saved predictions do not match what it held out | done | — | normal | milestones/archive/M100-compute-metrics-predictions-rows.md |
 | M101 | The outer average honors tune's resample weights | done | — | normal | milestones/archive/M101-resample-weights.md |
 | M102 | The devel-vctrs leg runs weekly and keeps its own dependency cache | done | — | normal | milestones/archive/M102-devel-vctrs-schedule-cache.md |
-| M103 | The workflow identity reads case weights and a postprocessor | planned | — | normal | milestones/M103-identity-case-weights-postprocessor.md |
+| M103 | The workflow identity reads case weights and a postprocessor | in-progress | — | normal | milestones/M103-identity-case-weights-postprocessor.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates

@@ -2766,3 +2766,11 @@ absent_step_workflow <- function(data) {
   )
   workflows::workflow(rec, parsnip::linear_reg())
 }
+
+# A tailor shifting the numeric prediction by `offset` (M103), for the
+# identity tests: `adjust_predictions_custom()` and
+# `adjust_probability_threshold()` are the two adjustments tailor computes
+# itself; the rest need the probably package, which is not asked for.
+custom_tailor <- function(offset = 1) {
+  tailor::adjust_predictions_custom(tailor::tailor(), .pred = .pred + !!offset)
+}

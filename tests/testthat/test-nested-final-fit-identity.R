@@ -565,3 +565,184 @@ test_that("AC4: the final fit on a set with an id still fits", {
     workflow_identity(extract_workflow(set, "baseline"))
   )
 })
+
+# M103: the case-weights column and the tailor postprocessor join the
+# identity, so a record built from a workflow carrying one refuses a
+# workflow differing there, and a record saved before the two parts existed
+# is still accepted under the workflow it ran under.
+
+test_that("AC2: a record saved before the two parts existed is accepted under its workflow", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  saved <- readRDS(test_path("fixtures", "branch-point-results.rds"))
+  expect_named(extract_procedure(saved)$workflow, c("model", "preprocessor"))
+  set.seed(5)
+  fit <- nested_final_fit(fixed_workflow(d), saved)
+  expect_s3_class(fit, "nested_final_fit")
+  # And a workflow that now carries weights is refused against it, with the
+  # part named: the record says none, the workflow says a column.
+  d$wts <- parsnip::importance_weights(rep(1, nrow(d)))
+  expect_mismatch(
+    workflows::add_case_weights(fixed_workflow(d), wts),
+    saved,
+    "The case weights differ: none recorded, and the column `wts` given"
+  )
+})
+
+test_that("AC1: a record built with case weights refuses another column, or none", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  set.seed(4242)
+  d$wts <- parsnip::importance_weights(runif(nrow(d), 0.5, 2))
+  d$other <- d$wts
+  # The recipe names the weights column, so it keeps its `case_weights` role
+  # through the recipe; a recipe naming the predictors alone drops it, and
+  # every fold fails. The recipe is the same on both sides of each probe, so
+  # the identities differ in the case-weights part alone.
+  all_workflow <- function(d) {
+    rec <- recipes::step_pca(
+      recipes::recipe(y ~ x1 + x2 + x3 + x4 + wts, data = d),
+      recipes::all_numeric_predictors(),
+      num_comp = 2L,
+      id = "pca_fixed"
+    )
+    workflows::workflow(rec, parsnip::linear_reg())
+  }
+  weighted <- workflows::add_case_weights(all_workflow(d), wts)
+  set.seed(37)
+  res <- nested_fit_resamples(
+    weighted,
+    final_nested(d),
+    metrics = reg_metrics()
+  )
+  expect_identical(extract_procedure(res)$workflow$case_weights, "wts")
+  expect_equal(nrow(collect_notes(res)), 0L)
+
+  expect_mismatch(
+    workflows::add_case_weights(all_workflow(d), other),
+    res,
+    "The case-weights column differs: recorded \"wts\", given \"other\""
+  )
+  expect_mismatch(
+    all_workflow(d),
+    res,
+    "The case weights differ: the column `wts` recorded, and none given"
+  )
+  expect_mismatch(
+    workflows::add_case_weights(fixed_workflow(d), wts),
+    fit_resamples_results(d),
+    "The case weights differ: none recorded, and the column `wts` given"
+  )
+
+  # The passing control: the matching weighted workflow reaches the stand-in.
+  testthat::local_mocked_bindings(
+    final_fit_worker = function(...) {
+      rlang::abort("the worker was reached", class = "nestedtune_test_fitted")
+    }
+  )
+  expect_error(
+    nested_final_fit(workflows::add_case_weights(all_workflow(d), wts), res),
+    class = "nestedtune_test_fitted"
+  )
+})
+
+test_that("AC1: a record built with a tailor refuses one differing in presence, type, argument or order", {
+  skip_if_no_engines()
+  skip_if_not_installed("tailor")
+  d <- make_reg_data()
+  ms <- reg_metrics()
+  folds <- final_nested(d)
+
+  # A tailor present on one side only.
+  shifted <- workflows::add_tailor(fixed_workflow(d), custom_tailor(1))
+  set.seed(38)
+  res <- nested_fit_resamples(shifted, folds, metrics = ms)
+  expect_named(extract_procedure(res)$workflow$postprocessor, "adjustments")
+  expect_mismatch(
+    fixed_workflow(d),
+    res,
+    "The postprocessor differs: one recorded, and none given"
+  )
+  expect_mismatch(
+    shifted,
+    fit_resamples_results(d),
+    "The postprocessor differs: none recorded, and one given"
+  )
+
+  # One adjustment's argument value.
+  expect_mismatch(
+    workflows::add_tailor(fixed_workflow(d), custom_tailor(2)),
+    res,
+    "The postprocessor's adjustment 1 (predictions_custom) argument `commands` differs"
+  )
+
+  # The order of two adjustments: the record holds the shift then the
+  # scale, and the probe the reverse.
+  ab <- tailor::adjust_predictions_custom(custom_tailor(1), .pred = .pred * 2)
+  ba <- tailor::adjust_predictions_custom(
+    tailor::adjust_predictions_custom(tailor::tailor(), .pred = .pred * 2),
+    .pred = .pred + 1
+  )
+  set.seed(39)
+  res_ab <- nested_fit_resamples(
+    workflows::add_tailor(fixed_workflow(d), ab),
+    folds,
+    metrics = ms
+  )
+  cnd <- expect_mismatch(
+    workflows::add_tailor(fixed_workflow(d), ba),
+    res_ab,
+    "The postprocessor's adjustment 1 (predictions_custom) argument `commands` differs"
+  )
+  expect_match(conditionMessage(cnd), ".pred + 1", fixed = TRUE)
+  expect_match(conditionMessage(cnd), ".pred * 2", fixed = TRUE)
+  expect_mismatch(
+    shifted,
+    res_ab,
+    "The postprocessor's adjustment count differs: 2 recorded, 1 given"
+  )
+
+  # The adjustment type, on a binary outcome, where a probability threshold
+  # and a custom adjustment are two types tailor computes itself.
+  d$c <- factor(ifelse(d$y > 0, "a", "b"))
+  cls <- workflows::workflow(c ~ x1 + x2 + x3 + x4, parsnip::logistic_reg())
+  threshold <- tailor::adjust_probability_threshold(tailor::tailor(), 0.3)
+  custom <- tailor::adjust_predictions_custom(
+    tailor::tailor(),
+    .pred_class = .pred_class
+  )
+  set.seed(40)
+  res_cls <- nested_fit_resamples(
+    workflows::add_tailor(cls, threshold),
+    final_nested(d),
+    metrics = yardstick::metric_set(yardstick::accuracy)
+  )
+  expect_mismatch(
+    workflows::add_tailor(cls, custom),
+    res_cls,
+    "The postprocessor's adjustment 1's type differs: recorded \"probability_threshold\", given \"predictions_custom\""
+  )
+  expect_mismatch(
+    workflows::add_tailor(
+      cls,
+      tailor::adjust_probability_threshold(tailor::tailor(), 0.4)
+    ),
+    res_cls,
+    "The postprocessor's adjustment 1 (probability_threshold) argument `threshold` differs: recorded \"0.3\", given \"0.4\""
+  )
+
+  # The passing control: the matching tailored workflow reaches the stand-in.
+  testthat::local_mocked_bindings(
+    final_fit_worker = function(...) {
+      rlang::abort("the worker was reached", class = "nestedtune_test_fitted")
+    }
+  )
+  expect_error(
+    nested_final_fit(
+      workflows::add_tailor(fixed_workflow(d), custom_tailor(1)),
+      res
+    ),
+    class = "nestedtune_test_fitted"
+  )
+})
