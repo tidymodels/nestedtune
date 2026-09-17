@@ -20,8 +20,23 @@
 #   the same way would still fail here. Pinned by "every fold's metrics are
 #   identical to a by-hand fit, predict and score".
 #
+# O3 -- type "analytic" (closed form from theory). Source: nachum2026,
+#   Lemma 4.9 and Theorem 4.10 (both p. 11), the mean squared error of k-fold
+#   CV for the majority rule under Bernoulli(1/2) labels. The rule (Section
+#   4.1.2, p. 10) predicts "0" unless the count of "1" labels in its training
+#   rows exceeds half of them, so a tie predicts "0". parsnip::null_model()
+#   predicts the first factor level on a tie, which is "0" under the levels
+#   c("0", "1") the test uses. Where O1 and O2 check each fold's number, O3
+#   checks the outer average over every labeling of 6 rows in 3 folds, weighted
+#   by its probability. Pinned by "the outer estimate's mean squared error for
+#   the majority rule is nachum2026's closed form". Planting a leak, the outer
+#   fit trained on all rows, moved the weighted error to 1/(4n) and failed it.
+#   A tie broken toward "1" gives the same closed form, because the labels are
+#   symmetric, so O3 does not detect the tie direction (M104).
+#
 # O1 and O2 are the >=2 independent oracle types GP2 requires for the
-# estimate this orchestrator reports (AC1).
+# estimate this orchestrator reports (AC1). O3 adds a third, analytic type for
+# the averaged estimate.
 #
 # The rest of the file pins the record's shape (AC2): the same columns the
 # five tuning orchestrators write, an empty selection on every completed
