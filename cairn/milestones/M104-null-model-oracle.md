@@ -40,7 +40,7 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - [x] T1: Download arXiv 2511.03554v2 to `cairn/references/sources/nachum2026.pdf` (ask the user before the download, naming the file, source and size), read Lemma 4.9, Theorem 4.10 and the majority rule's definition, and record their printed page numbers and the exact tie rule on `references/nachum2026.md`. If the tie rule is not `Y > n/2`, stop and raise an amendment, since AC1's level order rests on it.
 - [x] T2: Write the AC1 test. Build the outer splits under a fixed seed as O1 does (`set.seed()` then `rsample::vfold_cv(d, v = 3)`), assign labels by fold membership for each `expand.grid()` row, call `nested_resamples()` under the same seed so the splits agree, and assert that the splits' fold membership matches before scoring. Compute Cov(n, m) with `choose()` in the test. Open with `skip_if_no_engines()` if parsnip or yardstick can be absent on a CI leg. Time the loop with `system.time()` and log the reading.
 - [x] T3: Add O3 to the file's oracle header per AC2, and update the header's closing lines that name O1 and O2 as the oracle types for the estimate.
-- [ ] T4: Update `references/nachum2026.md`'s Oracle status and Open questions per AC4, and mark the oracle candidate there as shipped by M104.
+- [x] T4: Update `references/nachum2026.md`'s Oracle status and Open questions per AC4, and mark the oracle candidate there as shipped by M104.
 
 ## Work log
 
@@ -53,7 +53,9 @@ The outer loop's estimate is checked against an exact value from theory: the mea
 - 2026-09-16: T1 done. The PDF's majority rule predicts 1 only for Y > n/2 and 0 otherwise (p. 10). Lemma 4.9 and Theorem 4.10 are on p. 11. Both are recorded on `references/nachum2026.md`. `null_model()` predicted `"0"` on a 2-2 tie (parsnip 1.6.0).
 - 2026-09-16: T2 done. The O3 test passes. Its 27-row loop took 2.93 s under `system.time()` locally, and the wrapper was removed after the reading. `devtools::test()`: 0 failures, 10576 passes.
 - 2026-09-16: T2 discrimination. A planted leak trained the outer `last_fit()` on all rows. O3 then failed with 0.042 against 0.073. The 0.042 is 1/(4n), which a scratch enumeration predicted. The same enumeration gave 7/96 for a tie broken toward `"1"`: Bernoulli(1/2) labels are symmetric, so O3 does not detect the tie direction.
-- 2026-09-16: T3 done. The oracle header records O3 with its source, pages, tie rule, the leak plant and the tie symmetry, and its closing lines now name O3 beside O1 and O2. The oracle file passes, 131 expectations.
+- 2026-09-16: T3 done. The oracle header records O3 with its source, pages, tie rule, leak plant and tie symmetry. Its closing lines now name O3 beside O1 and O2. The oracle file passes, 131 expectations.
+- 2026-09-16: T4 done. `references/nachum2026.md` replaces the tie "not checked" and replicate "unmeasured" lines with the M104 findings and marks the oracle shipped as O3.
+- 2026-09-16: claim audit: not owed — internal tier
 
 ## Decisions
 
