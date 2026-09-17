@@ -110,6 +110,25 @@ test_that("a difference the walk cannot place is named as such", {
   )
 })
 
+test_that("a parts difference in neither optional part is named as such", {
+  # The top-level names differ, but not by a case-weights or postprocessor
+  # part on one side only: the walk stops at the names, and the sentence
+  # says it cannot name the part (M103 review, finding 1).
+  recorded <- list(
+    model = list(class = "linear_reg", eng_args = list()),
+    preprocessor = list(kind = "formula", formula = "y ~ x")
+  )
+  given <- recorded[c("preprocessor", "model")]
+  d <- first_difference(recorded, given)
+  expect_length(d$path, 0L)
+  expect_identical(d$kind, "names")
+  expect_match(
+    identity_difference(recorded, given),
+    "The workflow differs from the recorded one in a part the comparison cannot name",
+    fixed = TRUE
+  )
+})
+
 test_that("AC5: the identity carries no data rows", {
   skip_if_no_engines()
 

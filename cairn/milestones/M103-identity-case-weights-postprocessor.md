@@ -71,3 +71,6 @@
   4. `as.integer(at(3L))` assumes an unnamed `adjustments` list; a named one would error inside the mismatch message. Same shape as `step_identity()`'s.
   5. Both passing controls mock `final_fit_worker`, so no test refits a weighted or tailored workflow through `nested_final_fit()` unmocked.
   6. A data-frame adjustment argument would deparse whole, rows included, as recipe step settings already can; no current tailor adjustment takes one.
+- Triage at the gate (2026-09-16): finding 1 fixed now, a test in `test-workflow-identity.R` firing the fallback sentence on a names-only difference in neither optional part (60 passes in the file, `air` clean). Findings 2-6 rejected: 2 is the milestone's Out scope (naming the part, never diffing beyond it); 3, 4 and 6 are latent under every tailor a constructor builds and match how recipe steps are already recorded, so they are not this diff's defect; 5 is outside AC1, which names the refusal, and the suite fits weighted and tailored workflows through `nested_fit_resamples()`.
+- step-7 approval: m103-identity-case-weights-postprocessor approved for merge (2026-09-16).
+
