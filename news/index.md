@@ -2,6 +2,18 @@
 
 ## nestedtune 0.0.0.9000
 
+- The workflow identity every result records now holds a case-weights
+  column, as written, and a tailor postprocessor, as its adjustments in
+  order with each one’s type and arguments, when the workflow carries
+  them.
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  refuses a workflow that differs in either, with class
+  `nestedtune_workflow_mismatch`, and the message names the part: the
+  column, the adjustment and its argument, or one side carrying the part
+  and the other not. A workflow with neither keeps the identity it had,
+  so a results object saved before this change is accepted under the
+  workflow it ran under. `tailor` joins Suggests for the tests.
+
 - Weights set on the design with
   [`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
   now reach the outer average.
