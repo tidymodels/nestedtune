@@ -21,10 +21,10 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: Two workflows differing only in their case-weights column (`workflows::add_case_weights()`) have different `workflow_identity()` values, and `nested_final_fit()` on a record built from one refuses the other with class `nestedtune_workflow_mismatch` naming the case-weights part; the same holds for a workflow with and without a tailor postprocessor, and for two tailors differing in adjustment type, in one adjustment's argument value, or in adjustment order.
-- [ ] AC2: `workflow_identity()` of a workflow with neither case weights nor a postprocessor is `identical()` to its value at the branch point, so a record saved before this milestone is accepted by `nested_final_fit()` under the workflow it ran under.
-- [ ] AC3: `tailor` is in `Suggests`, and the help text in `?nested_final_fit` and `?extract_procedure` listing what the identity does not compare no longer names case weights or a postprocessor.
-- [ ] AC4: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `--list-gating` names runs clean.
+- [x] AC1: Two workflows differing only in their case-weights column (`workflows::add_case_weights()`) have different `workflow_identity()` values, and `nested_final_fit()` on a record built from one refuses the other with class `nestedtune_workflow_mismatch` naming the case-weights part; the same holds for a workflow with and without a tailor postprocessor, and for two tailors differing in adjustment type, in one adjustment's argument value, or in adjustment order.
+- [x] AC2: `workflow_identity()` of a workflow with neither case weights nor a postprocessor is `identical()` to its value at the branch point, so a record saved before this milestone is accepted by `nested_final_fit()` under the workflow it ran under.
+- [x] AC3: `tailor` is in `Suggests`, and the help text in `?nested_final_fit` and `?extract_procedure` listing what the identity does not compare no longer names case weights or a postprocessor.
+- [x] AC4: `devtools::test()` clean, `devtools::check()` at 0 errors, 0 warnings, 0 notes, and every sweep `--list-gating` names runs clean.
 
 ## Coverage
 
@@ -57,3 +57,17 @@
 - 2026-09-16: M083's return-gate choice to hold its AC1 and AC2 narrow (the identity reads the model and the preprocessor alone; case weights and the postprocessor filed as a candidate row) is superseded here: the identity reads both parts when the workflow carries them, and leaves them out when it does not, so the M083 promise stands for a workflow with neither and widens for one with either. The candidate row that carried the gap closes at this milestone's hygiene pass, its third item (what a function-valued step setting closes over) staying a candidate.
 
 ## Review
+
+- 2026-09-16, pass 1. Branch at `674e451`, two commits past `a0837b5`; `origin/main` unchanged since the branch point, no PR yet.
+- AC1: `devtools::test()` clean (10516 passes, 0 skips, so the tailor tests ran). The suite's M103 blocks assert `nestedtune_workflow_mismatch` and the named part for the case-weights pair (another column, none against one, one against none), the tailor present/absent pair, and the type, argument and order pairs (`test-nested-final-fit-identity.R`, `test-workflow-identity.R`). Verified.
+- AC2: a review-side probe rebuilt the fixture's workflow and found `workflow_identity()` `identical()` to the record in `fixtures/branch-point-results.rds`, whose names are `model`, `preprocessor`; `a0837b5` is the merge base. The suite's AC2 blocks fit against that fixture. Verified.
+- AC3: `tailor` at DESCRIPTION Suggests; `man/nested_final_fit.Rd` and `man/extract_procedure.Rd` name the case-weights column and the tailor's adjustments as compared, and no "not held"/"does not read" sentence remains. Verified.
+- AC4: `devtools::check()` 0 errors, 0 warnings, 0 notes (16m 55s); the six `--list-gating` sweeps clean. Verified.
+- Consistency gate: `cairn_validate.py` exit 0 (18 references-staleness advisories, pre-existing); no principle text changed, `cairn_impact` skipped; `document()` no diff; `air format --check` clean; `pkgdown::check_pkgdown()` no problems; README untouched; NEWS bullet present; no new top-level file. Pass.
+- Independent review: [S] blame-history, no findings (M083's exclusion is superseded by a recorded milestone decision, D-041's shape was rejected at the plan gate, the string-leaf invariant and the earlier-version refusal hold). [S] prior-review, no regression (the M083 findings on cli interpolation, quosure deparse and engine-argument order all still guarded; PR #97 carried no inline comments). [O] diff-bug, six findings, none failing a criterion, ranked:
+  1. `R/checks.R` `optional_part_difference()`'s fallback sentence ("a part the comparison cannot name") is fired by no test, unlike `identity_difference()`'s own fallback.
+  2. When both optional parts differ in presence, only the case weights are named; the postprocessor difference goes unmentioned.
+  3. Two branches of `identity_part()`'s postprocessor arm look unreachable from any tailor a constructor builds (the plural "arguments" sentence and the switch default).
+  4. `as.integer(at(3L))` assumes an unnamed `adjustments` list; a named one would error inside the mismatch message. Same shape as `step_identity()`'s.
+  5. Both passing controls mock `final_fit_worker`, so no test refits a weighted or tailored workflow through `nested_final_fit()` unmocked.
+  6. A data-frame adjustment argument would deparse whole, rows included, as recipe step settings already can; no current tailor adjustment takes one.
