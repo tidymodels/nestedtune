@@ -45,11 +45,12 @@ workflow_identity <- function(object) {
 
 # The tailor as its adjustments in order, each as its class (the first,
 # `probability_threshold` ahead of `adjustment`) and its arguments deparsed.
-# An adjustment's `inputs` and `outputs` are fixed by its class, its
-# `results` and `trained` flag are written by fitting, and the tailor's own
-# `type` is derived from its adjustments and the model's mode, so none of
-# them is recorded. A custom adjustment's `commands` are quosures, deparsed
-# by element as a step's `inputs` are.
+# An adjustment's `inputs`, `outputs` and `requires_fit` are fixed by its
+# class, its `results` and `trained` flag are written by fitting, and the
+# tailor's own `type` is set by its adjustments at construction and by the
+# outcome column at fitting, so none of them is recorded. A custom
+# adjustment's `commands` are quosures, deparsed by element as a step's
+# `inputs` are.
 postprocessor_identity <- function(post) {
   list(adjustments = lapply(post$adjustments, adjustment_identity))
 }

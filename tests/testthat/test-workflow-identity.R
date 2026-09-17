@@ -269,8 +269,9 @@ test_that("AC1: a tailor is a part of the identity, as its adjustments in order"
     adj[[1L]]$arguments,
     list(commands = list(.pred = ".pred + 1"), pkgs = "character(0)")
   )
-  # The tailor's own type is derived from the model's mode and is not
-  # recorded; every leaf is a string, as for the other parts.
+  # The tailor's own type is set by its adjustments and, at fitting, by the
+  # outcome column, and is not recorded; every leaf is a string, as for the
+  # other parts.
   expect_false("type" %in% names(id$postprocessor))
   expect_type(rapply(id, function(x) x, how = "unlist"), "character")
 

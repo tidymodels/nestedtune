@@ -1,6 +1,6 @@
 # M103: The workflow identity reads case weights and a postprocessor
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,7 +38,7 @@
 - [x] T1: Tests first in `test-workflow-identity.R` and `test-nested-final-fit-identity.R`: the case-weights pair, the tailor present/absent pair, and three tailor pairs (type, argument, order), each asserting the class and the named part; a fixture results object saved at the branch point (`saveRDS` under `tests/testthat/fixtures/`) fitted against under the same workflow.
 - [x] T2: Add `case_weights` and `postprocessor` parts to `workflow_identity()`, omitted when `NULL`; deparse the tailor as its adjustment list (class and arguments per adjustment, in order); `check_workflow_identity()` names the part.
 - [x] T3: `tailor` to Suggests with a D-entry (extends the dependency set D-053 last touched); update `R/nested-final-fit.R` and `R/extract-procedure.R` roxygen; a NEWS bullet; a milestone-local decision naming and superseding M083's amendment-gate choice to hold AC1/AC2 narrow (records-hygiene §2).
-- [ ] T4: `devtools::document()`, `devtools::test()`, `devtools::check()`, gating sweeps, `air format --check`.
+- [x] T4: `devtools::document()`, `devtools::test()`, `devtools::check()`, gating sweeps, `air format --check`.
 
 ## Work log
 
@@ -48,6 +48,9 @@
 - 2026-09-16: T1 done. `fixtures/branch-point-results.rds` generated at a0837b5 by `fixtures/make-branch-point-results.R` (the `fit_resamples_results()` recipe written out; 6.9 KB). Tests: the case-weights pair, the tailor present/absent pair, and the type, argument and order pairs, each asserting the mismatch class and the named part, in `test-workflow-identity.R` and `test-nested-final-fit-identity.R`; `custom_tailor()` joins the helpers. A recipe naming the predictors alone drops the weights column's role and fails every fold, so the weighted record's recipe names the column.
 - 2026-09-16: T2 done. `workflow_identity()` appends `case_weights` (the column deparsed) and `postprocessor` (each adjustment's class and deparsed arguments, in order) when present; `identity_difference()` names a part present on one side only through `optional_part_difference()`, and `identity_part()` names the column, the adjustment count, an adjustment's type or an argument.
 - 2026-09-16: T3 done. tailor in Suggests; the two help pages and the NEWS bullet say what the identity now compares; DESIGN Architecture's identity sentence names the two parts; D-065 and the milestone-local decision superseding M083's gate choice written. The roxygen sweep caught one semicolon and one 31-word sentence, both split.
+- 2026-09-16: T4 done. `document()` no diff, `devtools::test()` clean, `devtools::check()` 0 errors, 0 warnings, 0 notes (12m 53s), the six gating sweeps clean, `air format --check` clean.
+- 2026-09-16: claim audit: 31 claims read, 2 corrected — R/workflow-identity.R, tests/testthat/test-workflow-identity.R (the tailor's `type` is set by its adjustments at construction and by the outcome column at fitting, not by the model's mode; `requires_fit` added to the unrecorded fields; both re-read correct).
+- 2026-09-16: all tasks checked; status review.
 
 ## Decisions
 
