@@ -45,7 +45,8 @@ M083's gates and narrowed at M103's hygiene to this item.
 - [ ] AC1: For a setting that is a function, `workflow_identity()` records a
       two-part entry. The first part is the function in the `deparse_one()`
       form it has today. The second part is each binding that
-      `codetools::findGlobals(fn, merge = FALSE)$variables` names and that
+      `codetools::findGlobals(fn)` names, which is every name the function
+      reads, whether it calls it or uses it as a value, and that
       resolves through the function's enclosing environments to an environment
       that is not a namespace, not an attached package environment and not the
       base environment, in name order, each recorded by value through
@@ -58,23 +59,29 @@ M083's gates and narrowed at M103's hygiene to this item.
       `nested_final_fit()` refuses the second against a record built from the
       first with condition class `nestedtune_workflow_mismatch`. Two workflows
       built by the same code over equal values have identities that are
-      `identical()`. Both hold over a family of settings that varies the form
-      as well as the value: a number, a character vector, a list, another
-      function, a base function named from a namespace (`median`), and a
-      function that reads nothing.
+      `identical()`. Both hold over a family that varies the value's form: a
+      number, a character vector, a list, another function, a base function
+      named from a namespace (`median`), and a function that reads nothing.
+      Both also hold over a family that varies the site: a recipe step's own
+      setting, a step's nested `options`, and a tailor adjustment's argument.
 - [ ] AC3: Where the difference is one read binding, the refusal message names
-      that binding. It shows the recorded and the given forms where both were
-      recorded as text. It says the value differs without showing it where
-      either was recorded as a fingerprint under AC4. The test asserts on the
-      rendered message.
-- [ ] AC4: A read binding whose `deparse_one()` form is longer than 2,048
-      characters is recorded as `rlang::hash()` of that text instead. The
-      entry that binding contributes is then one fixed-length string whatever
-      the value's size, and two workflows differing only in such a value still
+      that binding, at each of the three sites AC2's second family varies. It
+      shows the recorded and the given forms where both were recorded as text.
+      It says the value differs without showing it where either carries the
+      fingerprint marker AC4 writes. The test asserts on the rendered message.
+- [ ] AC4: A read binding is measured by the total `nchar()` of the character
+      leaves of its `deparse_one()` form, which is one string for a plain
+      value and several for a list. Above 2,048 characters the binding is
+      recorded as the two-element entry `list("<hash>", rlang::hash(x))`
+      instead, so the difference walk can tell a fingerprint from a deparsed
+      string. The entry that binding contributes is then bounded whatever the
+      value's size, and two workflows differing only in such a value still
       have identities that are not `identical()`.
 - [ ] AC5: After the change, a repository sweep for the stale claim reports
       nothing. The sweep is
-      `grep -rniE "compared (as|by) its body" R man NEWS.md cairn/DESIGN.md`.
+      `grep -rniE "(as|by) its body" R man NEWS.md cairn/DESIGN.md`, which
+      reaches the four sites that hold the claim today, the two in
+      `R/workflow-identity.R` and `R/checks.R` included.
       The `nested_final_fit()` help page, the DESIGN.md Architecture paragraph
       on the identity and one NEWS.md bullet each state what is now read. Each
       also names the two limits that remain: a value reached indirectly, and a
@@ -112,13 +119,18 @@ M083's gates and narrowed at M103's hygiene to this item.
 - [ ] T4: Make the no-binding case return today's single string. The
       branch-point fixture and the data-size independence assertions
       (`test-workflow-identity.R:132-143`) stay green.
-- [ ] T5: Add the 2,048-character bound and the `rlang::hash()` fallback.
+- [ ] T5: Add the 2,048-character bound over the form's character leaves, and
+      the marked `list("<hash>", rlang::hash(x))` entry above it.
 - [ ] T6: Make `identity_difference()` and `identity_part()`
-      (`R/checks.R:1885`) name the read binding that differs, and show or
-      withhold the two forms. Add a test on the rendered message.
-- [ ] T7: Add the AC2 family in `test-workflow-identity.R`, and the refusal
-      path in `test-nested-final-fit-identity.R`.
-- [ ] T8: Correct the prose at every site the AC5 sweep reports, at the
+      (`R/checks.R:1831`) name the read binding that differs, and show or
+      withhold the two forms. Both branches stop at `at(5L)` today, which is
+      too shallow for a function inside a step's nested `options`, so the
+      depth they walk grows with the path the new entry adds. Add a test on
+      the rendered message at each of AC2's three sites.
+- [ ] T7: Add AC2's two families in `test-workflow-identity.R`, one over the
+      value's form and one over the three sites, and the refusal path in
+      `test-nested-final-fit-identity.R`.
+- [ ] T8: Correct the prose at all four sites the AC5 sweep reports, at the
       DESIGN.md Architecture identity paragraph, and in one NEWS.md bullet.
       Then run `document()` and the two prose sweeps.
 - [ ] T9: Run the full local gate: test, check, `document()` with no diff,
@@ -128,6 +140,7 @@ M083's gates and narrowed at M103's hygiene to this item.
 
 - 2026-09-20: created by /milestone-plan.
 - 2026-09-20: criteria audit ran in full mode (fresh Opus reader, user-facing tier). It returned eleven findings. Nine were fixed before the gate: the deparsed form is the whole function and not its body, AC2's and AC4's promises were unbounded, the message clause and the size clause contradicted each other, two of three named prose sites do not hold the sentence they were told to delete while two unnamed sites do, no digest procedure was named, one clause duplicated an existing assertion, and the evidence was a single exemplar. Two were posed at the gate.
+- 2026-09-20: the style rewrite changed the criteria bytes the first audit read, so a second fresh Opus reader audited the final text in full mode. It returned five new defects, all fixed here before implementation: the sweep pattern missed the changed file's own wording of the stale claim, `findGlobals()` was read for variables alone so the family's called-function cases were unreachable, the size bound had no meaning for a list-valued binding, the fingerprint carried no marker the difference walk could see, and both families varied the value's form while holding the site fixed.
 - 2026-09-20: plan gate chose reading the names a static scan reports over expanding the whole closure environment, because a function built inside another captures that frame and the training data with it, which breaks the data-independence the identity holds today. Falsified by a user report of a false pass whose value is reached only indirectly.
 - 2026-09-20: plan gate chose `codetools` over a hand-rolled `all.vars()` walk, because the walk over-collects names also bound locally and can refuse the workflow that is in fact right. Falsified by codetools being unavailable on a platform this package supports.
 - 2026-09-20: plan gate chose a fingerprint above the size bound over skipping a large value, because skipping reopens the gap this milestone closes. Falsified by the fingerprint differing between two constructions of one value.
