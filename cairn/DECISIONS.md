@@ -1799,6 +1799,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `tailor` is declared in Suggests, and the tests that build one skip when it is absent. The identity itself never loads tailor: it reads the stored action's adjustments by class and arguments, so the package has no runtime dependency on it, and `probably` stays out, since the two adjustments the tests use (`adjust_predictions_custom()`, `adjust_probability_threshold()`) are the ones tailor computes itself.
 **Consequences:** CRAN's no-Suggests flavor skips the tailor tests and runs the case-weights ones. Falsified by the identity needing a tailor function to read an adjustment, which would move tailor to Imports at a gate.
 
+### D-066 (2026-09-20): `codetools` joins Imports as the reader of the names a function-valued setting uses — extends the dependency set D-065 last touched
+
+**Context:** M105 makes `workflow_identity()` record what a function-valued recipe setting reads from outside itself, so the final fit refuses a workflow whose function computes other values. Finding those names takes either `codetools::findGlobals()` or a hand-rolled walk of the body with `all.vars()`. The hand-rolled walk over-collects: a name assigned inside the function that also exists outside is recorded, and the check then refuses a workflow that is in fact the right one.
+**Decision:** `codetools` is declared in Imports and called as `codetools::findGlobals()`. It ships with every standard R installation at recommended priority, so it adds no installation cost. Considered and rejected: the `all.vars()` walk (no dependency, but a false refusal is the worst failure this check has); and reading the whole closure environment, which needs no name scan at all (a function built inside another captures that frame, and the training data with it, which breaks the data-independence the identity holds today and the no-data posture GP4 asks of the record).
+**Consequences:** the identity reads a function's names both when the record is written and when a workflow is checked against it. A value a function reaches indirectly, through `get()` or `eval()`, is still not read, and the help page says so. Falsified by a platform this package supports where codetools is absent, which returns the question to the hand-rolled walk.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
