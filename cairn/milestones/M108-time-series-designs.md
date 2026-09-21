@@ -24,8 +24,8 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - [ ] AC1: `nested_tune_grid()` runs over an `rsample::nested_cv()` design whose outer and inner resamples are both `rolling_origin()`. Each fold's selection and outer metrics equal those of `reference_nested_loop()` (`tests/testthat/helper-orchestration.R`) on the same design, tested.
 - [ ] AC2: The AC1 test also passes for a design whose outer resamples are `sliding_window()` and whose inner resamples are `rolling_origin()`.
 - [ ] AC3: `nested_resamples()` accepts `rolling_origin()` and `sliding_window()` as `outside`, with `rolling_origin()` as `inside`. For both designs, a test asserts that every outer and inner analysis and assessment set matches `rsample::nested_cv()` row for row, as `expect_outer_identical()` and `expect_inner_identical()` check.
-- [ ] AC4: `nested_final_fit()` on the AC1 result completes, and its `predict()` output equals a reference built in the test. The reference is `tune::tune_grid()` over the recorded inner design on the full data, then the recorded selection rule, then `fit()`.
-- [ ] AC5: With `save_pred = TRUE` on the AC1 design, `collect_predictions()` returns one row per outer-assessment row per fold, tested. `augment()` on that result raises an error the test names by class. Its message names rows that no fold held out, not a repeated or Monte Carlo design.
+- [ ] AC4: `nested_final_fit()` on the AC1 result completes, and its `predict()` output equals a reference built in the test. The reference is `tune::tune_grid()`, then the selection rule, then `fit()`. It runs under `fit$tuning_seed` and `fit$fit_seed`. Its inner design is built on the full data from the literal `rolling_origin()` call of the fixture.
+- [ ] AC5: With `save_pred = TRUE` on the AC1 design, `collect_predictions()` returns one row per outer-assessment row per fold, tested. The AC1 and AC2 designs use `assess = 1`. `augment()` on that result raises `nestedtune_augment_rows`. Where no row is held out twice, the message names the rows no fold held out. It does not name a repeated or Monte Carlo design.
 - [ ] AC6: A D-entry records support for `rolling_origin()` and `sliding_window()` outer designs under `nested_tune_grid()` and `nested_final_fit()`. The help of `nested_tune_grid()` and `nested_resamples()` names both, and `NEWS.md` describes the support. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
@@ -39,7 +39,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 
 ## Tasks
 
-- [ ] T1: Build the two designs as test fixtures with `rsample::nested_cv()`, and write the AC1 and AC2 oracle tests against `reference_nested_loop()`. A mismatch here is a defect to fix, not a test to loosen.
+- [ ] T1: Build the two designs as test fixtures with `rsample::nested_cv()`. Set `lookback` on `sliding_window()`, whose default gives a one-row analysis set. Then and write the AC1 and AC2 oracle tests against `reference_nested_loop()`. A mismatch here is a defect to fix, not a test to loosen.
 - [ ] T2: Run `nested_resamples()` on both designs and write the AC3 split-identity tests. If the constructor refuses either design, lift the refusal only where the D-entry's reasoning covers it.
 - [ ] T3: Write the AC4 final-fit test and its reference.
 - [ ] T4: Fit `augment()`'s refusal message (`R/nested-results-collect.R:710`) to the design it refuses, and write the AC5 tests.
@@ -50,6 +50,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: created by /milestone-plan. A probe on `main` at `74c0a95` ran `nested_tune_grid()` over a six-fold `rolling_origin()` design to completion.
 - 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed above. They were an unnamed oracle, an unset inner design, a split identity the constructor cannot meet, `save_pred` unstated, and a support claim wider than the tests.
 - 2026-09-21: plan gate chose a support claim bounded to what is tested over probing every orchestrator and sliding design, because it halves the milestone; falsified by a user report of a failure on a design or orchestrator the claim leaves out.
+- 2026-09-21: re-audit in full mode found AC4 silent on seeds and AC5's message wrong for overlapping windows. Both were fixed after the plan commit, with `assess = 1` and a `lookback` note in T1.
 
 ## Decisions
 

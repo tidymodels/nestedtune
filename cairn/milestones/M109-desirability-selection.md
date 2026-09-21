@@ -21,12 +21,12 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. An orchestrator refuses at entry a term that names neither a metric in the run's metric set nor a tuned parameter. The test names that error by class.
-- [ ] AC2: On a fixture with two metrics, each fold's `.selected` has the parameter values and `.config` that `desirability2::select_best_desirability()` gives with the same terms. The reference applies it to that fold's inner tuning run from `reference_nested_loop()`. The test covers `nested_tune_grid()` and `nested_tune_bayes()`.
+- [ ] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. `nested_tune_grid()` and `nested_tune_bayes()` each refuse at entry a term that names neither a metric in the run's metric set nor a tuned parameter. With no `metrics`, the check uses the default set tune uses for the model's mode. The test names that error by class.
+- [ ] AC2: On a fixture with two metrics, each fold's `.selected` has the parameter values and `.config` that `desirability2::select_best_desirability()` gives with the same terms. The reference applies it to that fold's inner tuning run. That run comes from `reference_nested_loop()` for the grid and `reference_nested_bayes_loop()` for the Bayesian path, each run with the default rule. The test covers `nested_tune_grid()` and `nested_tune_bayes()`.
 - [ ] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [ ] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
-- [ ] AC5: If desirability2 is not installed, two calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_final_fit()` on a result that recorded the rule.
-- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [ ] AC5: If desirability2 is not installed, three calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_tune_grid()` given a rule built while the package was installed. The third is `nested_final_fit()` on a result that recorded the rule.
+- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
 
@@ -50,6 +50,7 @@
 - 2026-09-21: created by /milestone-plan.
 - 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed above. They were D-056's standing refusal, terms that can name parameters, no stored inner run for the oracle, return columns unverified, and no refusal for a final fit without the package.
 - 2026-09-21: plan gate chose grid and Bayesian support with the other three tuners refusing, over all five tuners, because racing drops candidates before the end and needs its own oracle; falsified by desirability2 documenting its selector for racing results.
+- 2026-09-21: re-audit in full mode returned four findings, all fixed after the plan commit. AC1 did not say which orchestrators check or which metric set applies by default. AC2 had no Bayesian reference, AC5 had no refusal on entry, and AC6 left D-056's parameters-only clause standing.
 
 ## Decisions
 

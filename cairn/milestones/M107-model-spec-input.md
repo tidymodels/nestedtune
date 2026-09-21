@@ -23,8 +23,8 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 
 - [ ] AC1: Each of the six orchestrators accepts a parsnip `model_spec` with a formula `preprocessor`. The five tuners share a fixture with tuned parameters, and `nested_fit_resamples()` uses one with none. The test builds the preprocessor once, before the seed, and passes the same object to both calls. The reference is the same call on `workflows::workflow(preprocessor, spec)` under the same seed. For each orchestrator, a test asserts that `collect_metrics(summarize = FALSE)` and `collect_selections()` are identical to the reference. For `nested_fit_resamples()`, only `collect_metrics()` is compared.
 - [ ] AC2: The same identity holds with a recipe `preprocessor` for `nested_tune_grid()` and `nested_fit_resamples()`, tested.
-- [ ] AC3: `nested_final_fit(workflows::workflow(preprocessor, spec), res)` on a result built from a `model_spec` passes the workflow-identity check. Under one seed, its `predict()` output is identical to the final fit of the result built from the workflow, tested on the `nested_tune_grid()` case.
-- [ ] AC4: Each of three inputs raises an error the test names by class, for each of the six orchestrators. The first is a `model_spec` with no `preprocessor`. The second is a `preprocessor` that is neither a formula nor a recipe. The third is a `preprocessor` passed by name beside a `workflow`. `nested_final_fit()` given a bare `model_spec` raises an error whose message names `workflows::workflow()`, tested.
+- [ ] AC3: `nested_final_fit(workflows::workflow(preprocessor, spec), res)` on a result built from a `model_spec` passes the workflow-identity check. Under one seed, its `predict()` output is identical to the final fit of the result built from the workflow. The test uses the `nested_tune_grid()` case with the AC2 recipe, built once.
+- [ ] AC4: Each of three inputs raises an error the test names by class, for each of the six orchestrators. The first is a `model_spec` with no `preprocessor`. The second is a `preprocessor` that is neither a formula nor a recipe. The third is a `preprocessor` passed by name beside a `workflow`, whose message says that a workflow carries its own preprocessor. `nested_final_fit()` given a bare `model_spec` raises an error whose message names `workflows::workflow()`, tested.
 - [ ] AC5: A D-entry records the signature choice. `NEWS.md` describes the new input, and each orchestrator's help documents `preprocessor`. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
@@ -49,6 +49,7 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: criteria audit ran in full mode and returned four findings, all fixed above. They were recipe step ids drawn from the RNG stream, two fixtures for the tuned and untuned cases, `nested_final_fit()` refusing a bare spec, and a positional `preprocessor` beside a workflow landing in `resamples`.
 - 2026-09-21: plan gate chose S3 generics in tune's argument order over a named `preprocessor` argument after the dots, because ported tune code then needs only a rename; falsified by the generic breaking a documented workflow call.
 - 2026-09-21: plan gate chose wrapping in `workflow()` by the user for `nested_final_fit()` over a `model_spec` method there, because the final fit matches a recorded workflow (D-041); falsified by a user report that the spec route cannot pass that match.
+- 2026-09-21: re-audit in full mode found AC3 silent on its preprocessor and AC4's third input already refused with an uninformative message. Both were fixed after the plan commit.
 
 ## Decisions
 
