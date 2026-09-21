@@ -59,6 +59,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: T4 done. `devtools::test()` exited 0 with no failure. `document()` and both prose sweeps are clean.
 - 2026-09-21: T5 checkpoint, not checked off. The help of `nested_tune_grid()` (a section the other orchestrators inherit) and of `nested_resamples()` names both designs, and `NEWS.md` has two entries. All six gating sweeps are clean. `devtools::check()` on the branch and on `main` at `6f4795a` is still running.
 - 2026-09-21: claim audit found that the help, the NEWS entry and D-071 claim a `nested_final_fit()` test on the sliding-window design that did not exist. Minor amendment inside T3: a sliding-window final-fit test is added, sharing its body with the rolling-origin one. The test file passes (133 expectations).
+- 2026-09-21: claim audit: 24 claims read, 3 corrected — NEWS.md, R/nested-resamples.R, R/nested-tune-grid.R
 
 ## Decisions
 
