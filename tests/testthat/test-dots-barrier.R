@@ -115,6 +115,11 @@ DOTS_EXEMPT_METHODS <- c(
   # ignore, not this package's to fence). `augment.nested_final_fit` stays probed -- workflows' own
   # method swallows its dots, so the fence there is this package's.
   "predict.nested_final_fit",
+  # The two refusals M106 registers. Their whole body is an error naming
+  # nested_final_fit(), and a caller's `new_data` arrives through `...`, so a
+  # fence would answer that call with a dots error instead of the guidance.
+  "predict.nested_results",
+  "predict.nested_results_set",
   # The compatibility methods M37 registers. Their `...` is not this package's
   # to fence: vctrs passes `x_arg`, `y_arg` and `call` through the `...` of a
   # `vec_ptype2()` or `vec_cast()` method, base `rbind()`'s `...` IS the data

@@ -1206,3 +1206,48 @@ fold_ids <- function(x) {
   }
   do.call(paste, c(lapply(id_cols, function(nm) x[[nm]]), list(sep = ", ")))
 }
+
+#' Predicting from a nested run
+#'
+#' A nested run holds one model per outer fold, each fitted to estimate how
+#' the procedure performs, and none of them is the model to deploy.
+#' `predict()` on its results therefore refuses, with class
+#' `nestedtune_predict_results`, and points you to [nested_final_fit()],
+#' which fits that model on all the data. For a workflow set, the message
+#' names `nested_final_fit()`'s `id` argument, which picks the workflow.
+#'
+#' @param object A `nested_results` or a `nested_results_set`.
+#' @param ... Not used.
+#' @return None. The call is an error.
+#' @seealso [nested_final_fit()], [predict.nested_final_fit()]
+#' @template example-setup
+#' @template example-run
+#' @template example-final
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' # Predict from the final fit, not from `res`.
+#' predict(final, new_data = mtcars[1:3, ])
+#' @name predict.nested_results
+#' @export
+predict.nested_results <- function(object, ...) {
+  cli::cli_abort(
+    c(
+      "A {.cls nested_results} has no model to predict with.",
+      i = "Its fold models serve the estimate. Fit the model to deploy \\
+           with {.fn nested_final_fit}, then call {.fn predict} on that."
+    ),
+    class = "nestedtune_predict_results"
+  )
+}
+
+#' @rdname predict.nested_results
+#' @export
+predict.nested_results_set <- function(object, ...) {
+  cli::cli_abort(
+    c(
+      "A {.cls nested_results_set} has no model to predict with.",
+      i = "Fit one workflow's model with {.fn nested_final_fit}, naming it \\
+           with {.arg id}, then call {.fn predict} on that."
+    ),
+    class = "nestedtune_predict_results"
+  )
+}
