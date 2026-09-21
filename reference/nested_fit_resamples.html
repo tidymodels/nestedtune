@@ -86,7 +86,24 @@ same nested design, so the two runs' folds are the same rows.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nested_fit_resamples</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nested_fit_resamples</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">nested_fit_resamples</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'model_spec'</span></span>
+<span><span class="fu">nested_fit_resamples</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">preprocessor</span>,</span>
+<span>  <span class="va">resamples</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  event_level <span class="op">=</span> <span class="st">"first"</span>,</span>
+<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'workflow'</span></span>
+<span><span class="fu">nested_fit_resamples</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">resamples</span>,</span>
 <span>  <span class="va">...</span>,</span>
@@ -103,19 +120,32 @@ same nested design, so the two runs' folds are the same rows.</p>
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with no parameter marked for tuning
 with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>, every value fixed as <code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">tune::fit_resamples()</a></code> takes
-it. A workflow carrying a marker is refused at entry.</p></dd>
+it, or a parsnip model specification with no marker, given with
+<code>preprocessor</code>. A workflow carrying a marker is refused at entry.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>On the generic, the arguments of the method that <code>object</code>
+selects. On a method, a control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code>, as
+<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
+name. The section on differences from tune says what becomes of
+each slot.</p></dd>
+
+
+<dt id="arg-preprocessor">preprocessor<a class="anchor" aria-label="anchor" href="#arg-preprocessor"></a></dt>
+<dd><p>A formula or a recipe, when <code>object</code> is a model
+specification. The two are combined as
+<code>workflows::workflow(preprocessor, object)</code>, and the call runs as it
+does on that workflow. Other preprocessors, such as
+<code><a href="https://workflows.tidymodels.org/reference/add_variables.html" class="external-link">workflows::workflow_variables()</a></code>, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>
 <dd><p>A nested resampling design from <code><a href="nested_resamples.html">nested_resamples()</a></code> or
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>, one row per outer fold. The section on nested
 designs says what the design must hold.</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">tune::control_resamples()</a></code>, as <code>control</code>, and
-nothing else. Every argument after <code>...</code> is matched by name. The
-section on differences from tune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>

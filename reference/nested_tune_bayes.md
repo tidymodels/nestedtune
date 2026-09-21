@@ -22,6 +22,28 @@ estimate is the number to report for that model.
 ## Usage
 
 ``` r
+nested_tune_bayes(object, ...)
+
+# Default S3 method
+nested_tune_bayes(object, ...)
+
+# S3 method for class 'model_spec'
+nested_tune_bayes(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  iter = 10,
+  param_info = NULL,
+  metrics = NULL,
+  initial = 5,
+  objective = tune::exp_improve(),
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+)
+
+# S3 method for class 'workflow'
 nested_tune_bayes(
   object,
   resamples,
@@ -44,10 +66,29 @@ nested_tune_bayes(
   A
   [`workflows::workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
   with at least one parameter marked for tuning with
-  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html).
-  A workflow with no marker is refused, and
+  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html),
+  or a parsnip model specification with such a parameter, given with
+  `preprocessor`. A workflow with no marker is refused, and
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   scores one on the same design.
+
+- ...:
+
+  On the generic, the arguments of the method that `object` selects. On
+  a method, a control object from
+  [`tune::control_bayes()`](https://tune.tidymodels.org/reference/control_bayes.html),
+  as `control`, and nothing else. Every argument after `...` is matched
+  by name. The section on differences from tune says what becomes of
+  each slot.
+
+- preprocessor:
+
+  A formula or a recipe, when `object` is a model specification. The two
+  are combined as `workflows::workflow(preprocessor, object)`, and the
+  call runs as it does on that workflow. Other preprocessors, such as
+  [`workflows::workflow_variables()`](https://workflows.tidymodels.org/reference/add_variables.html),
+  go through a workflow. A workflow already carries its preprocessor, so
+  one given beside a workflow is refused.
 
 - resamples:
 
@@ -57,14 +98,6 @@ nested_tune_bayes(
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
   one row per outer fold. The section on nested designs says what the
   design must hold.
-
-- ...:
-
-  A control object from
-  [`tune::control_bayes()`](https://tune.tidymodels.org/reference/control_bayes.html),
-  as `control`, and nothing else. Every argument after `...` is matched
-  by name. The section on differences from tune says what becomes of
-  each slot.
 
 - iter:
 

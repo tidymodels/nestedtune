@@ -95,7 +95,27 @@ model.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nested_tune_race_anova</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nested_tune_race_anova</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">nested_tune_race_anova</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'model_spec'</span></span>
+<span><span class="fu">nested_tune_race_anova</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">preprocessor</span>,</span>
+<span>  <span class="va">resamples</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  param_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  grid <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  event_level <span class="op">=</span> <span class="st">"first"</span>,</span>
+<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  select <span class="op">=</span> <span class="fu"><a href="selection_rule.html">selection_rule</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'workflow'</span></span>
+<span><span class="fu">nested_tune_race_anova</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">resamples</span>,</span>
 <span>  <span class="va">...</span>,</span>
@@ -107,6 +127,26 @@ model.</p>
 <span>  select <span class="op">=</span> <span class="fu"><a href="selection_rule.html">selection_rule</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">nested_tune_race_win_loss</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">nested_tune_race_win_loss</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'model_spec'</span></span>
+<span><span class="fu">nested_tune_race_win_loss</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">preprocessor</span>,</span>
+<span>  <span class="va">resamples</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  param_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  grid <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  event_level <span class="op">=</span> <span class="st">"first"</span>,</span>
+<span>  eval_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  select <span class="op">=</span> <span class="fu"><a href="selection_rule.html">selection_rule</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'workflow'</span></span>
 <span><span class="fu">nested_tune_race_win_loss</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">resamples</span>,</span>
@@ -126,20 +166,33 @@ model.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with at least one parameter marked
-for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>. A workflow with no marker is refused, and
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores one on the same design.</p></dd>
+for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>, or a parsnip model specification with
+such a parameter, given with <code>preprocessor</code>. A workflow with no marker is
+refused, and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores one on the same design.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>On the generic, the arguments of the method that <code>object</code>
+selects. On a method, a control object from <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code>, as
+<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
+name. The section on differences from finetune says what becomes of
+each slot.</p></dd>
+
+
+<dt id="arg-preprocessor">preprocessor<a class="anchor" aria-label="anchor" href="#arg-preprocessor"></a></dt>
+<dd><p>A formula or a recipe, when <code>object</code> is a model
+specification. The two are combined as
+<code>workflows::workflow(preprocessor, object)</code>, and the call runs as it
+does on that workflow. Other preprocessors, such as
+<code><a href="https://workflows.tidymodels.org/reference/add_variables.html" class="external-link">workflows::workflow_variables()</a></code>, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>
 <dd><p>A nested resampling design from <code><a href="nested_resamples.html">nested_resamples()</a></code> or
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>, one row per outer fold. The section on nested
 designs says what the design must hold.</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>A control object from <code><a href="https://finetune.tidymodels.org/reference/control_race.html" class="external-link">finetune::control_race()</a></code>, as <code>control</code>, and
-nothing else. Every argument after <code>...</code> is matched by name. The
-section on differences from finetune says what becomes of each slot.</p></dd>
 
 
 <dt id="arg-param-info">param_info<a class="anchor" aria-label="anchor" href="#arg-param-info"></a></dt>

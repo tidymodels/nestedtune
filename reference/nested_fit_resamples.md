@@ -21,6 +21,23 @@ the two runs' folds are the same rows.
 ## Usage
 
 ``` r
+nested_fit_resamples(object, ...)
+
+# Default S3 method
+nested_fit_resamples(object, ...)
+
+# S3 method for class 'model_spec'
+nested_fit_resamples(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL
+)
+
+# S3 method for class 'workflow'
 nested_fit_resamples(
   object,
   resamples,
@@ -41,7 +58,26 @@ nested_fit_resamples(
   [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html),
   every value fixed as
   [`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
-  takes it. A workflow carrying a marker is refused at entry.
+  takes it, or a parsnip model specification with no marker, given with
+  `preprocessor`. A workflow carrying a marker is refused at entry.
+
+- ...:
+
+  On the generic, the arguments of the method that `object` selects. On
+  a method, a control object from
+  [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html),
+  as `control`, and nothing else. Every argument after `...` is matched
+  by name. The section on differences from tune says what becomes of
+  each slot.
+
+- preprocessor:
+
+  A formula or a recipe, when `object` is a model specification. The two
+  are combined as `workflows::workflow(preprocessor, object)`, and the
+  call runs as it does on that workflow. Other preprocessors, such as
+  [`workflows::workflow_variables()`](https://workflows.tidymodels.org/reference/add_variables.html),
+  go through a workflow. A workflow already carries its preprocessor, so
+  one given beside a workflow is refused.
 
 - resamples:
 
@@ -51,14 +87,6 @@ nested_fit_resamples(
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
   one row per outer fold. The section on nested designs says what the
   design must hold.
-
-- ...:
-
-  A control object from
-  [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html),
-  as `control`, and nothing else. Every argument after `...` is matched
-  by name. The section on differences from tune says what becomes of
-  each slot.
 
 - metrics:
 
