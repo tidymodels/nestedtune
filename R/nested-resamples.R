@@ -37,6 +37,13 @@
 #' warned about. The same row can otherwise land in both the inner analysis and
 #' the inner assessment set, which makes the estimate invalid.
 #'
+#' @section Time-series designs:
+#'
+#' An outer [rsample::rolling_origin()] or [rsample::sliding_window()] with
+#' an inner [rsample::rolling_origin()] is tested to give the same splits as
+#' [rsample::nested_cv()]. [nested_tune_grid()] and [nested_final_fit()]
+#' support these designs. Other time-series designs are not tested.
+#'
 #' @section Memory:
 #'
 #' What you save is one copy of the analysis set per outer fold.

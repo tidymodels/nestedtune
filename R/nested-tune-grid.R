@@ -103,6 +103,15 @@
 #' design whatever its `inside` argument returned, and because a design
 #' assembled by hand can index rows its outer fold never sees.
 #'
+#' Time-series designs are supported for an outer
+#' [rsample::rolling_origin()] or [rsample::sliding_window()] with an inner
+#' [rsample::rolling_origin()], under [nested_tune_grid()] and
+#' [nested_final_fit()], which are tested on both. The other orchestrators
+#' are not tested on them, and neither are other time-series designs such as
+#' [rsample::sliding_index()] and [rsample::sliding_period()].
+#' [augment()][augment.nested_results] refuses these designs, because their
+#' assessment sets leave rows out.
+#'
 #' @section Finalizing a parameter range:
 #'
 #' `param_info` is passed unchanged to the inner tuning call on every outer
