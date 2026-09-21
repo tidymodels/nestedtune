@@ -30,10 +30,10 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 ## Coverage
 
 - AC1 → T1
-- AC2 → T2
-- AC3 → T3
-- AC4 → T4
-- AC5 → T5
+- AC2 → T2, T8
+- AC3 → T3, T7
+- AC4 → T4, T9
+- AC5 → T5, T6
 
 ## Tasks
 
@@ -42,6 +42,10 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T3: Add `metric` and `eval_time` to both `autoplot()` methods (`R/nested-results-plot.R:77`). Filter the rows before `plot_performance()` builds its panels, because the panel labels carry qualifiers (`metric_panel()`, `qualify_panels()`). Render the filtered plot before approving its snapshot (LESSONS, plots).
 - [x] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
 - [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [ ] T6: Add `extract-nested_final_fit` and `predict.nested_results` to the `_pkgdown.yml` reference index, and write a D-entry for the seven re-exported generics and the predict refusal (review F16).
+- [ ] T7: Read the scored times before the `metric` filter in `filter_plot_rows()` (F1). Test a set in which one workflow lacks a metric through the filter directly (F7).
+- [ ] T8: Refuse a wide pivot in which two rows share a key and a metric, or a metric is named like a key column, with one class (F2, F4). Document the refusal and fix the `type` help's pointer (F14). Add an oracle provenance header and a weighted-run wide test (F6).
+- [ ] T9: Move the misplaced comment in `R/checks.R` (F9), tighten the predict set test's `id` match (F10), re-wrap lines over 80 columns (F15), and mention the extractors in the final-fit object comment (history note).
 
 ## Work log
 
@@ -55,6 +59,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: claim audit: 47 claims read, 4 corrected — NEWS.md, R/nested-final-fit.R, R/nested-results.R, tests/testthat/test-collect-metrics-wide.R, tests/testthat/test-nested-final-fit-extract.R
 - 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch point `d477922` and on the branch at `25170cf`, both run the same day. Status set to review.
 - 2026-09-21: review pass 1 returned the milestone: the consistency gate's `pkgdown::check_pkgdown()` failed, with `extract-nested_final_fit` and `predict.nested_results` missing from the `_pkgdown.yml` reference index. Defect return 1.
+- 2026-09-21: pass-1 triage accepted at the gate. Tasks T6-T9 added for the pkgdown index and the fix-now findings, and Coverage extended to them. F3 becomes a candidate row, and F5, F8, F11, F12 and F13 are rejected.
 
 ## Decisions
 
@@ -74,3 +79,8 @@ Independent review, three lenses:
 - Blame-history: no finding contradicts a decision. One note: the object comment in `R/nested-final-fit.R` does not mention that extractors now exist beside the absent ranking and collecting generics.
 - Prior-review record: no finding. No past review point is reintroduced.
 - Diff-bug: 16 ranked findings. F1: the `eval_time` refusal reads times after the `metric` filter, so it falsely says a time was not scored (`R/nested-results-plot.R:390`). F2: the wide pivot silently overwrites when two rows share a key and a metric, for example one metric under two estimators (`R/nested-results.R:894`). F3: a repeated design's wide table keys on the pasted `id` from the long shape, not `id` and `id2`. F4: a metric named like a key column overwrites that key. F5: an `NA` in `.metric` gives a base R error. F6: the wide reference copies the drop list, the file has no oracle provenance header, and the `.weight` drop is not exercised. F7: the set filter's case where one workflow lacks a metric is untested. F8: a set warns about failed folds before refusing a bad `metric`. F9: a comment now sits above `check_metrics_type()` instead of `check_plot_type()`. F10: the predict set test matches `"id"` as a bare substring. F11: `eval_time` matches exactly, as tune does. F12: `extract_recipe()` on a formula fit gives workflows' own message. F13: the generics are imported through tune, as `extract_workflow` is. F14: the `type` help's pointer to the shapes section, and no mention of estimator collisions. F15: `NEWS.md:14` and one roxygen line run past 80 columns. F16: no D-entry records the seven re-exports and the predict refusal, where D-052 and D-063 recorded such re-exports.
+
+Pass-1 triage, accepted at the gate on 2026-09-21:
+- Fix now (T6-T9): the pkgdown index failure, F1, F2, F4, F6, F7, F9, F10, F14, F15, F16, and the blame-history note on the object comment.
+- Follow-up: F3, as a candidate row added with this triage.
+- Rejected: F5, because `per_fold_metrics()` never writes an `NA` metric. F8, because the failed-fold warnings are true before the refusal. F11, because exact matching is what tune's `autoplot()` does. F12, because workflows' message names the missing recipe accurately. F13, because it matches the `extract_workflow` re-export, and the objects are identical.
