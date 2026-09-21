@@ -40,8 +40,8 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 ## Tasks
 
 - [x] T1: Build the two designs as test fixtures with `rsample::nested_cv()`. Set `lookback` on `sliding_window()`, whose default gives a one-row analysis set. Then and write the AC1 and AC2 oracle tests against `reference_nested_loop()`. A mismatch here is a defect to fix, not a test to loosen.
-- [ ] T2: Run `nested_resamples()` on both designs and write the AC3 split-identity tests. If the constructor refuses either design, lift the refusal only where the D-entry's reasoning covers it.
-- [ ] T3: Write the AC4 final-fit test and its reference.
+- [x] T2: Run `nested_resamples()` on both designs and write the AC3 split-identity tests. If the constructor refuses either design, lift the refusal only where the D-entry's reasoning covers it.
+- [x] T3: Write the AC4 final-fit test and its reference.
 - [ ] T4: Fit `augment()`'s refusal message (`R/nested-results-collect.R:710`) to the design it refuses, and write the AC5 tests.
 - [ ] T5: Write the D-entry, the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
@@ -54,6 +54,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: implement started on `m108-time-series-designs`. Question gate chose an `augment()` message giving the count and the row numbers, shortened by cli. Test metrics are `rmse` and `mae`, since `rsq` is `NA` on a one-row assessment set.
 - 2026-09-21: T1 checkpoint, not checked off. The AC1/AC2 oracle tests pass alone (20 expectations). A planted swap of the two designs fails folds 2 and 3. The full suite is still running.
 - 2026-09-21: T1 done. `devtools::test()` finished clean with no failure.
+- 2026-09-21: T2 and T3 done in one commit, because the suite run for T2 also read the T3 test. `nested_resamples()` accepted both designs, so no refusal was lifted. Planted defects (inner `skip`, outer `lookback`, a wrong inner design and candidate in the final-fit reference) each failed. Suite clean.
 
 ## Decisions
 
