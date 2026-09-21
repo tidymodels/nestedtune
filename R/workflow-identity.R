@@ -172,5 +172,11 @@ deparse_one <- function(x) {
   if (is.list(x) && !is.object(x)) {
     return(deparse_settings(x))
   }
+  # `deparse()` reads `getOption("scipen")`, so the same value printed
+  # `1e+05` in one session and `100000` in another, and the final fit
+  # refused a workflow the user had built from the same code. The option is
+  # pinned for the call, since every leaf of the identity goes through here.
+  old <- options(scipen = 0)
+  on.exit(options(old), add = TRUE)
   paste(deparse(x, width.cutoff = 500L, backtick = TRUE), collapse = " ")
 }
