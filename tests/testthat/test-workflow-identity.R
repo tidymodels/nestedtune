@@ -330,3 +330,31 @@ test_that("AC1: a tailor is a part of the identity, as its adjustments in order"
     list(threshold = "0.3")
   )
 })
+
+test_that("the identity does not depend on the session's number printing", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  # `deparse()` reads `getOption("scipen")`, so a user who sets it in
+  # `.Rprofile` on one machine recorded one identity and was refused the
+  # same workflow on another. Every leaf of the identity goes through the
+  # same deparse, so a model argument carries it as readily as a step
+  # setting.
+  wf <- workflows::workflow(
+    recipes::step_pca(
+      recipes::recipe(y ~ x1 + x2 + x3 + x4, data = d),
+      recipes::all_predictors(),
+      num_comp = 2L
+    ),
+    parsnip::linear_reg(penalty = 1e5)
+  )
+  plain <- workflow_identity(wf)
+
+  old <- options(scipen = 100)
+  on.exit(options(old), add = TRUE)
+  expect_identical(workflow_identity(wf), plain)
+
+  # The control: the pinned option is what decides, not the value being
+  # small enough to print one way in both.
+  expect_match(plain$model$args$penalty, "1e+05", fixed = TRUE)
+})
