@@ -1,6 +1,6 @@
 # M106: tune's reader arguments and extract methods on the nested classes
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,10 +21,10 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 
 ## Acceptance criteria
 
-- [ ] AC1: Each of the seven generics named in Scope has a `nested_final_fit` method. For each one, a test asserts that the result is `identical()` to the same call on `extract_workflow(fit)`, on a recipe-based fixture.
-- [ ] AC2: `collect_metrics()` on a `nested_results` and on a `nested_results_set` takes `type = c("long", "wide")`. A test asserts that `type = "long"` is `identical()` to the call without `type`. A second test asserts that `type = "wide"` equals a reference pivot the test writes with `stats::reshape()`. The pivot puts metric names in columns and `mean` or `.estimate` in the values. Its keys are the fold label columns for unsummarized output, `.eval_time` where the run has it, and `wflow_id` on a set. It drops `.estimator`, `n` and `std_err`. The test covers `summarize = TRUE` and `FALSE`, on a classification fixture and on the survival fixture. An unknown `type` raises an error the test names by class.
-- [ ] AC3: `autoplot()` on a `nested_results` and on a `nested_results_set` takes `metric` and `eval_time`, each `NULL` by default, meaning all. With `type = "performance"`, a test reads `ggplot2::ggplot_build()`. It asserts that the panels drawn are exactly those whose metric is in the named set, and whose time is too on the survival fixture. One filtered plot gets a `vdiffr` snapshot. Three inputs each raise an error the test names by class: a metric absent from every workflow of the run, a time absent from the run, and either argument given with `type = "parameters"`.
-- [ ] AC4: `predict()` on a `nested_results` or a `nested_results_set` raises an error that the test names by class, and whose message names `nested_final_fit()`.
+- [x] AC1: Each of the seven generics named in Scope has a `nested_final_fit` method. For each one, a test asserts that the result is `identical()` to the same call on `extract_workflow(fit)`, on a recipe-based fixture.
+- [x] AC2: `collect_metrics()` on a `nested_results` and on a `nested_results_set` takes `type = c("long", "wide")`. A test asserts that `type = "long"` is `identical()` to the call without `type`. A second test asserts that `type = "wide"` equals a reference pivot the test writes with `stats::reshape()`. The pivot puts metric names in columns and `mean` or `.estimate` in the values. Its keys are the fold label columns for unsummarized output, `.eval_time` where the run has it, and `wflow_id` on a set. It drops `.estimator`, `n` and `std_err`. The test covers `summarize = TRUE` and `FALSE`, on a classification fixture and on the survival fixture. An unknown `type` raises an error the test names by class.
+- [x] AC3: `autoplot()` on a `nested_results` and on a `nested_results_set` takes `metric` and `eval_time`, each `NULL` by default, meaning all. With `type = "performance"`, a test reads `ggplot2::ggplot_build()`. It asserts that the panels drawn are exactly those whose metric is in the named set, and whose time is too on the survival fixture. One filtered plot gets a `vdiffr` snapshot. Three inputs each raise an error the test names by class: a metric absent from every workflow of the run, a time absent from the run, and either argument given with `type = "parameters"`.
+- [x] AC4: `predict()` on a `nested_results` or a `nested_results_set` raises an error that the test names by class, and whose message names `nested_final_fit()`.
 - [ ] AC5: `NEWS.md` describes the new methods and arguments, and each help page documents them. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
@@ -54,7 +54,23 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T4 done. Both refusals raise `nestedtune_predict_results` and are exempt from the dots probe, because a caller's `new_data` arrives through `...`. The full suite failed only on the Bayesian oracle file's table of every method on the class. That table now runs the refusal, and the file passes.
 - 2026-09-21: claim audit: 47 claims read, 4 corrected — NEWS.md, R/nested-final-fit.R, R/nested-results.R, tests/testthat/test-collect-metrics-wide.R, tests/testthat/test-nested-final-fit-extract.R
 - 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch point `d477922` and on the branch at `25170cf`, both run the same day. Status set to review.
+- 2026-09-21: review pass 1 returned the milestone: the consistency gate's `pkgdown::check_pkgdown()` failed, with `extract-nested_final_fit` and `predict.nested_results` missing from the `_pkgdown.yml` reference index. Defect return 1.
 
 ## Decisions
 
 ## Review
+
+Pass 1, 2026-09-21, at `c8822f6`. The full suite ran with `NOT_CRAN=true`, so snapshots were active. It gave 0 failures and 0 skips in the six files below.
+
+- AC1: `test-nested-final-fit-extract.R` passed. It asserts `identical()` for each of the seven generics against `extract_workflow(final)` on the recipe fixture, plus `estimated = FALSE`.
+- AC2: `test-collect-metrics-wide.R` passed. The long type is identical to the call without a type, and the wide type equals the `stats::reshape()` reference for both `summarize` values. The fixtures are the classification run, the survival run with `.eval_time`, and the survival set with `wflow_id`. The refusal is `nestedtune_bad_type`.
+- AC3: `test-autoplot-filter.R` passed. The panels drawn equal the unfiltered plot's panels for the named metrics and times on both classes, and the `vdiffr` snapshot matched. Each refusal is `nestedtune_bad_plot_filter`.
+- AC4: `test-predict-results.R` passed. Both classes raise `nestedtune_predict_results` with `nested_final_fit()` in the message.
+- AC5: not ticked in this pass. The check evidence dates from implement, and the return below changes the tree.
+
+Consistency gate: `cairn_validate` passed, `devtools::document()` gave no diff, and all six gating prose sweeps were clean. `pkgdown::check_pkgdown()` FAILED, with 2 topics missing from the `_pkgdown.yml` index: `extract-nested_final_fit` and `predict.nested_results`.
+
+Independent review, three lenses:
+- Blame-history: no finding contradicts a decision. One note: the object comment in `R/nested-final-fit.R` does not mention that extractors now exist beside the absent ranking and collecting generics.
+- Prior-review record: no finding. No past review point is reintroduced.
+- Diff-bug: 16 ranked findings. F1: the `eval_time` refusal reads times after the `metric` filter, so it falsely says a time was not scored (`R/nested-results-plot.R:390`). F2: the wide pivot silently overwrites when two rows share a key and a metric, for example one metric under two estimators (`R/nested-results.R:894`). F3: a repeated design's wide table keys on the pasted `id` from the long shape, not `id` and `id2`. F4: a metric named like a key column overwrites that key. F5: an `NA` in `.metric` gives a base R error. F6: the wide reference copies the drop list, the file has no oracle provenance header, and the `.weight` drop is not exercised. F7: the set filter's case where one workflow lacks a metric is untested. F8: a set warns about failed folds before refusing a bad `metric`. F9: a comment now sits above `check_metrics_type()` instead of `check_plot_type()`. F10: the predict set test matches `"id"` as a bare substring. F11: `eval_time` matches exactly, as tune does. F12: `extract_recipe()` on a formula fit gives workflows' own message. F13: the generics are imported through tune, as `extract_workflow` is. F14: the `type` help's pointer to the shapes section, and no mention of estimator collisions. F15: `NEWS.md:14` and one roxygen line run past 80 columns. F16: no D-entry records the seven re-exports and the predict refusal, where D-052 and D-063 recorded such re-exports.
