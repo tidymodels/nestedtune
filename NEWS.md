@@ -1,5 +1,12 @@
 # nestedtune 0.0.0.9000
 
+* Five messages no longer break across two lines partway through a
+  sentence. They used a line continuation that `cli::format_inline()`
+  does not join, so the reader saw a newline and an indent. The refusal
+  `nested_final_fit()` gives for reordered model arguments showed a stray
+  backslash as well. The other four are three refusals of a malformed
+  nested design and the completion line of a workflow set's print.
+
 * The workflow identity a result records no longer depends on the number
   formatting the session happens to use. `deparse()` reads the `scipen`
   option, so a workflow holding a value such as `1e5` recorded one
