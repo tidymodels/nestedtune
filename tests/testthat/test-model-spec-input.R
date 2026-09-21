@@ -338,6 +338,48 @@ test_that("AC2: nested_tune_grid() on a spec and a recipe is the workflow run", 
   expect_same_run(run$routes)
 })
 
+# The final fit takes a workflow (D-041), so a result built from a spec is
+# finalized on `workflow(preprocessor, spec)`, the workflow the spec route
+# recorded. The identity check refuses a workflow that differs from the
+# recorded one with `nestedtune_workflow_mismatch`, so a fit that returns at
+# all has passed it; the class is asserted absent too, and the control shows
+# the same check refusing a workflow with another recipe.
+test_that("AC3: a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
+  skip_if_no_engines()
+  run <- recipe_grid_routes()
+  wf <- workflows::workflow(run$recipe, bare_spec())
+
+  set.seed(3)
+  from_spec <- rlang::catch_cnd(
+    nested_final_fit(wf, run$routes$spec),
+    classes = "nestedtune_workflow_mismatch"
+  )
+  expect_null(from_spec)
+  set.seed(3)
+  from_spec <- nested_final_fit(wf, run$routes$spec)
+  set.seed(3)
+  from_workflow <- nested_final_fit(wf, run$routes$workflow)
+
+  expect_identical(
+    predict(from_spec, new_data = run$data),
+    predict(from_workflow, new_data = run$data)
+  )
+
+  # The control: the check is live on this result, so a recipe over other
+  # predictors, tuning the same parameter, is refused rather than fitted.
+  other_recipe <- recipes::step_pca(
+    recipes::recipe(y ~ x1 + x2 + x3, data = run$data),
+    recipes::all_predictors(),
+    num_comp = tune::tune(),
+    id = "pca_spec_input"
+  )
+  other <- workflows::workflow(other_recipe, bare_spec())
+  expect_error(
+    nested_final_fit(other, run$routes$spec),
+    class = "nestedtune_workflow_mismatch"
+  )
+})
+
 test_that("AC2: nested_fit_resamples() on a spec and a recipe is the workflow run", {
   skip_if_no_engines()
   d <- make_reg_data()
