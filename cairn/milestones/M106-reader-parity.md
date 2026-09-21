@@ -25,7 +25,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] AC2: `collect_metrics()` on a `nested_results` and on a `nested_results_set` takes `type = c("long", "wide")`. A test asserts that `type = "long"` is `identical()` to the call without `type`. A second test asserts that `type = "wide"` equals a reference pivot the test writes with `stats::reshape()`. The pivot puts metric names in columns and `mean` or `.estimate` in the values. Its keys are the fold label columns for unsummarized output, `.eval_time` where the run has it, and `wflow_id` on a set. It drops `.estimator`, `n` and `std_err`. The test covers `summarize = TRUE` and `FALSE`, on a classification fixture and on the survival fixture. An unknown `type` raises an error the test names by class.
 - [x] AC3: `autoplot()` on a `nested_results` and on a `nested_results_set` takes `metric` and `eval_time`, each `NULL` by default, meaning all. With `type = "performance"`, a test reads `ggplot2::ggplot_build()`. It asserts that the panels drawn are exactly those whose metric is in the named set, and whose time is too on the survival fixture. One filtered plot gets a `vdiffr` snapshot. Three inputs each raise an error the test names by class: a metric absent from every workflow of the run, a time absent from the run, and either argument given with `type = "parameters"`.
 - [x] AC4: `predict()` on a `nested_results` or a `nested_results_set` raises an error that the test names by class, and whose message names `nested_final_fit()`.
-- [ ] AC5: `NEWS.md` describes the new methods and arguments, and each help page documents them. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [x] AC5: `NEWS.md` describes the new methods and arguments, and each help page documents them. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
 
@@ -88,3 +88,12 @@ Pass-1 triage, accepted at the gate on 2026-09-21:
 - Fix now (T6-T9): the pkgdown index failure, F1, F2, F4, F6, F7, F9, F10, F14, F15, F16, and the blame-history note on the object comment.
 - Follow-up: F3, as a candidate row added with this triage.
 - Rejected: F5, because `per_fold_metrics()` never writes an `NA` metric. F8, because the failed-fold warnings are true before the refusal. F11, because exact matching is what tune's `autoplot()` does. F12, because workflows' message names the missing recipe accurately. F13, because it matches the `extract_workflow` re-export, and the objects are identical.
+
+Pass 2, 2026-09-21, at `d861b82`, after T6-T9.
+- AC1-AC4: the full suite ran with `NOT_CRAN=true` and gave 0 failures. It added the F1 test, which errors on the pass-1 code, the F7 filter test, the weighted-run wide test and the two collision refusals. The pass-1 evidence for these criteria stands on this head.
+- AC5: `NEWS.md` has four bullets for the new methods and arguments. `man/` documents each one, and `devtools::document()` gave no diff. `devtools::check()` gave 0 errors, 0 warnings and 0 notes, where the branch point `d477922` also gave 0 notes. So no note is new.
+
+Consistency gate: `cairn_validate` passed, `devtools::document()` gave no diff, `pkgdown::check_pkgdown()` found no problems, and all six gating prose sweeps were clean. `NEWS.md` has the changelog entries. No `DESIGN.md` principle changed, so `cairn_impact` was skipped.
+
+Independent review of the fix delta `c8822f6..d861b82`, by one fresh diff reviewer: it confirmed each pass-1 fix, found no false collision on the survival, set or summarized runs, and reported seven low findings. G1: the collision snapshot calls the helper directly, so the `collect_metrics()` call name it carries is untested. G2: the F7 test drives the filter, not `autoplot()` on a set. G3: the reference still lists `.weight` among dropped columns, so only the name check guards it. G4: the test file header repeats itself. G5: a metric named `id` is refused only unsummarized, where `id` is a key. G6: `R/nested-results-collect.R:312` still says "two shapes" for summarized and unsummarized. G7: the predict set test's phrase match relies on testthat's fixed width.
+
