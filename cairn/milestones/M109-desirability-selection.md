@@ -1,0 +1,56 @@
+# M109: Selecting each fold's candidate by desirability over several metrics
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** IP3, GP1, GP3
+- **Resolves:** —
+- **Surface tier:** user-facing — a new rule on an exported constructor
+- **Branch/PR:** —
+
+## Goal
+
+`selection_rule("desirability", ...)` selects each fold's candidate, and the final fit's, with desirability2's joint desirability over several metrics.
+
+## Scope
+
+**In:** A fourth rule on `selection_rule()` taking desirability2 terms as `...`. It is recorded in the procedure, printed, and applied by `nested_tune_grid()`, `nested_tune_bayes()` and `nested_final_fit()`. desirability2 joins Suggests. A D-entry supersedes D-056's clause that refuses a rule outside tune's three.
+
+**Out:** The rule under `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`, which refuse it at entry here. Their support goes to a candidate row added with this plan.
+
+## Acceptance criteria
+
+- [ ] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. An orchestrator refuses at entry a term that names neither a metric in the run's metric set nor a tuned parameter. The test names that error by class.
+- [ ] AC2: On a fixture with two metrics, each fold's `.selected` has the parameter values and `.config` that `desirability2::select_best_desirability()` gives with the same terms. The reference applies it to that fold's inner tuning run from `reference_nested_loop()`. The test covers `nested_tune_grid()` and `nested_tune_bayes()`.
+- [ ] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
+- [ ] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
+- [ ] AC5: If desirability2 is not installed, two calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_final_fit()` on a result that recorded the rule.
+- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+
+## Coverage
+
+- AC1 → T1, T2
+- AC2 → T3
+- AC3 → T3
+- AC4 → T2
+- AC5 → T4
+- AC6 → T1, T5
+
+## Tasks
+
+- [ ] T1: Install desirability2. Read its `NAMESPACE`, `select_best_desirability()`'s arguments and return columns, and whether a term can name a tuned parameter (LESSONS, claims about another package). Write the two D-entries, then add desirability2 to Suggests.
+- [ ] T2: Extend `selection_rule()` (`R/selection-rule.R:76`) with the rule. Capture the terms as expressions, as the orderings are captured. Add the entry check against the run's metric set and tuned parameters, and add the three tuners' refusal.
+- [ ] T3: Apply the rule where the recorded rule selects today, for the folds and the final fit. Write the AC2 and AC3 oracle tests, comparing parameter columns and `.config` only.
+- [ ] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
+- [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+
+## Work log
+
+- 2026-09-21: created by /milestone-plan.
+- 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed above. They were D-056's standing refusal, terms that can name parameters, no stored inner run for the oracle, return columns unverified, and no refusal for a final fit without the package.
+- 2026-09-21: plan gate chose grid and Bayesian support with the other three tuners refusing, over all five tuners, because racing drops candidates before the end and needs its own oracle; falsified by desirability2 documenting its selector for racing results.
+
+## Decisions
+
+## Review
