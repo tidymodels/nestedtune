@@ -2,6 +2,15 @@
 
 ## nestedtune 0.0.0.9000
 
+- Five messages no longer break across two lines partway through a
+  sentence. They used a line continuation that
+  [`cli::format_inline()`](https://cli.r-lib.org/reference/format_inline.html)
+  does not join, so the reader saw a newline and an indent. The refusal
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  gives for reordered model arguments showed a stray backslash as well.
+  The other four are three refusals of a malformed nested design and the
+  completion line of a workflow set’s print.
+
 - The workflow identity a result records no longer depends on the number
   formatting the session happens to use.
   [`deparse()`](https://rdrr.io/r/base/deparse.html) reads the `scipen`
