@@ -7,7 +7,7 @@
 - **Principles touched:** IP2, GP1, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the signature of six exported functions
-- **Branch/PR:** `m107-model-spec-input`
+- **Branch/PR:** `m107-model-spec-input` · https://github.com/tidymodels/nestedtune/pull/122
 
 ## Goal
 
