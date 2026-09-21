@@ -37,7 +37,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 
 ## Tasks
 
-- [ ] T1: Add the seven `nested_final_fit` methods beside `extract_workflow.nested_final_fit()` (`R/nested-final-fit.R:481`), each delegating to the stored workflow. Register `outcome_names` from tune. Test each against `extract_workflow(fit)`.
+- [x] T1: Add the seven `nested_final_fit` methods beside `extract_workflow.nested_final_fit()` (`R/nested-final-fit.R:481`), each delegating to the stored workflow. Register `outcome_names` from tune. Test each against `extract_workflow(fit)`.
 - [ ] T2: Add `type` to `collect_metrics.nested_results()` (`R/nested-results.R:840`) and `collect_metrics.nested_results_set()` (`R/nested-results-set.R:82`). Pivot with dplyr and vctrs, since tidyr is not a dependency. Test against the `stats::reshape()` reference.
 - [ ] T3: Add `metric` and `eval_time` to both `autoplot()` methods (`R/nested-results-plot.R:77`). Filter the rows before `plot_performance()` builds its panels, because the panel labels carry qualifiers (`metric_panel()`, `qualify_panels()`). Render the filtered plot before approving its snapshot (LESSONS, plots).
 - [ ] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
@@ -48,6 +48,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: created by /milestone-plan.
 - 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed in the wording above. They were a snapshot baseline, loose pivot keys, qualified panel names, no check-notes baseline, and tidyr absent from Suggests.
 - 2026-09-21: plan gate chose a dplyr pivot over adding tidyr, because a dependency needs its own decision; falsified by the pivot diverging from tune's `pivot_metrics()` on a shape tune supports.
+- 2026-09-21: T1 done. The seven methods refuse stray arguments, because workflows' extractors other than `extract_recipe()` drop unknown ones silently (the `augment.nested_final_fit()` precedent). `extract_recipe()` takes `estimated` by name, and the generics are re-exported beside `extract_workflow()`. The full suite ran once, failing only on the dots probe's seven new methods before the fence, and both touched files pass after it.
 
 ## Decisions
 

@@ -482,3 +482,82 @@ extract_workflow.nested_final_fit <- function(x, ...) {
   rlang::check_dots_empty()
   x$workflow
 }
+
+#' Extract the parts of a final fit's workflow
+#'
+#' These methods reach the fitted model, the preprocessor and the outcome
+#' names of the workflow that [nested_final_fit()] trained. Each one gives
+#' the same answer as the same call on [extract_workflow()]'s output.
+#'
+#' @param x A `nested_final_fit` from [nested_final_fit()].
+#' @param ... Must be empty. The methods for a workflow ignore an argument
+#'   they do not know, so these refuse it rather than pass it on.
+#' @param estimated For `extract_recipe()`, whether to return the trained
+#'   recipe (`TRUE`, the default) or the recipe as it was given.
+#' @return What the same call returns for the trained workflow.
+#' @seealso [extract_workflow()], [extract_tune_results()]
+#' @name extract-nested_final_fit
+#' @template example-setup
+#' @template example-run
+#' @template example-final
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' extract_fit_parsnip(final)
+#' extract_recipe(final)
+#' outcome_names(final)
+NULL
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_fit_parsnip
+#' @export
+extract_fit_parsnip.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  extract_fit_parsnip(x$workflow)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_fit_engine
+#' @export
+extract_fit_engine.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  extract_fit_engine(x$workflow)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_recipe
+#' @export
+extract_recipe.nested_final_fit <- function(x, ..., estimated = TRUE) {
+  rlang::check_dots_empty()
+  extract_recipe(x$workflow, estimated = estimated)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_mold
+#' @export
+extract_mold.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  extract_mold(x$workflow)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_preprocessor
+#' @export
+extract_preprocessor.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  extract_preprocessor(x$workflow)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_spec_parsnip
+#' @export
+extract_spec_parsnip.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  extract_spec_parsnip(x$workflow)
+}
+
+#' @rdname extract-nested_final_fit
+#' @importFrom tune outcome_names
+#' @export
+outcome_names.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  outcome_names(x$workflow)
+}

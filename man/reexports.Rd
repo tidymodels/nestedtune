@@ -5,6 +5,13 @@
 \alias{reexports}
 \alias{collect_metrics}
 \alias{extract_workflow}
+\alias{extract_fit_parsnip}
+\alias{extract_fit_engine}
+\alias{extract_recipe}
+\alias{extract_mold}
+\alias{extract_preprocessor}
+\alias{extract_spec_parsnip}
+\alias{outcome_names}
 \alias{autoplot}
 \alias{augment}
 \alias{compute_metrics}
@@ -20,6 +27,6 @@ below to see their documentation.
 \describe{
   \item{ggplot2}{\code{\link[ggplot2:autoplot]{autoplot()}}}
 
-  \item{tune}{\code{\link[tune:augment]{augment}}, \code{\link[tune:collect_extracts]{collect_extracts()}}, \code{\link[tune:collect_metrics]{collect_metrics()}}, \code{\link[tune:collect_notes]{collect_notes()}}, \code{\link[tune:collect_predictions]{collect_predictions()}}, \code{\link[tune:compute_metrics]{compute_metrics()}}, \code{\link[tune:extract_workflow]{extract_workflow}}}
+  \item{tune}{\code{\link[tune:augment]{augment}}, \code{\link[tune:collect_extracts]{collect_extracts()}}, \code{\link[tune:collect_metrics]{collect_metrics()}}, \code{\link[tune:collect_notes]{collect_notes()}}, \code{\link[tune:collect_predictions]{collect_predictions()}}, \code{\link[tune:compute_metrics]{compute_metrics()}}, \code{\link[tune:extract_fit_engine]{extract_fit_engine}}, \code{\link[tune:extract_fit_parsnip]{extract_fit_parsnip}}, \code{\link[tune:extract_mold]{extract_mold}}, \code{\link[tune:extract_preprocessor]{extract_preprocessor}}, \code{\link[tune:extract_recipe]{extract_recipe}}, \code{\link[tune:extract_spec_parsnip]{extract_spec_parsnip}}, \code{\link[tune:extract_workflow]{extract_workflow}}, \code{\link[tune:outcome_names]{outcome_names()}}}
 }}
 

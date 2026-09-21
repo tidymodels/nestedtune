@@ -30,16 +30,23 @@ S3method(compute_metrics,nested_results)
 S3method(compute_metrics,nested_results_set)
 S3method(dplyr_reconstruct,nested_results)
 S3method(dplyr_reconstruct,nested_results_set)
+S3method(extract_fit_engine,nested_final_fit)
+S3method(extract_fit_parsnip,nested_final_fit)
+S3method(extract_mold,nested_final_fit)
+S3method(extract_preprocessor,nested_final_fit)
 S3method(extract_procedure,default)
 S3method(extract_procedure,nested_final_fit)
 S3method(extract_procedure,nested_results)
+S3method(extract_recipe,nested_final_fit)
 S3method(extract_scored_candidates,default)
 S3method(extract_scored_candidates,nested_final_fit)
+S3method(extract_spec_parsnip,nested_final_fit)
 S3method(extract_tune_results,default)
 S3method(extract_tune_results,nested_final_fit)
 S3method(extract_workflow,nested_final_fit)
 S3method(extract_workflow,nested_results_set)
 S3method(format,selection_rule)
+S3method(outcome_names,nested_final_fit)
 S3method(predict,nested_final_fit)
 S3method(print,nested_final_fit)
 S3method(print,nested_results)
@@ -76,8 +83,14 @@ export(collect_notes)
 export(collect_predictions)
 export(collect_selections)
 export(compute_metrics)
+export(extract_fit_engine)
+export(extract_fit_parsnip)
+export(extract_mold)
+export(extract_preprocessor)
 export(extract_procedure)
+export(extract_recipe)
 export(extract_scored_candidates)
+export(extract_spec_parsnip)
 export(extract_tune_results)
 export(extract_workflow)
 export(nested_final_fit)
@@ -89,18 +102,30 @@ export(nested_tune_race_anova)
 export(nested_tune_race_win_loss)
 export(nested_tune_sim_anneal)
 export(nested_workflow_map)
+export(outcome_names)
 export(selection_rule)
 importFrom(dplyr,dplyr_reconstruct)
 importFrom(ggplot2,autoplot)
 importFrom(rlang,.data)
-importFrom(tune,augment)
-importFrom(tune,collect_extracts)
-importFrom(tune,collect_metrics)
-importFrom(tune,collect_notes)
-importFrom(tune,collect_predictions)
-importFrom(tune,compute_metrics)
-importFrom(tune,extract_workflow)
-importFrom(vctrs,vec_cast)
-importFrom(vctrs,vec_cbind_frame_ptype)
-importFrom(vctrs,vec_ptype2)
-importFrom(vctrs,vec_restore)
+importFrom(tune,
+  augment,
+  collect_extracts,
+  collect_metrics,
+  collect_notes,
+  collect_predictions,
+  compute_metrics,
+  extract_fit_engine,
+  extract_fit_parsnip,
+  extract_mold,
+  extract_preprocessor,
+  extract_recipe,
+  extract_spec_parsnip,
+  extract_workflow,
+  outcome_names
+)
+importFrom(vctrs,
+  vec_cast,
+  vec_cbind_frame_ptype,
+  vec_ptype2,
+  vec_restore
+)

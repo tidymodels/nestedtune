@@ -6,6 +6,34 @@ tune::collect_metrics
 #' @export
 tune::extract_workflow
 
+#' @importFrom tune extract_fit_parsnip
+#' @export
+tune::extract_fit_parsnip
+
+#' @importFrom tune extract_fit_engine
+#' @export
+tune::extract_fit_engine
+
+#' @importFrom tune extract_recipe
+#' @export
+tune::extract_recipe
+
+#' @importFrom tune extract_mold
+#' @export
+tune::extract_mold
+
+#' @importFrom tune extract_preprocessor
+#' @export
+tune::extract_preprocessor
+
+#' @importFrom tune extract_spec_parsnip
+#' @export
+tune::extract_spec_parsnip
+
+#' @importFrom tune outcome_names
+#' @export
+tune::outcome_names
+
 #' @importFrom ggplot2 autoplot
 #' @export
 ggplot2::autoplot
