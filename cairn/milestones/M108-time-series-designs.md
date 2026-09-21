@@ -55,6 +55,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: T1 checkpoint, not checked off. The AC1/AC2 oracle tests pass alone (20 expectations). A planted swap of the two designs fails folds 2 and 3. The full suite is still running.
 - 2026-09-21: T1 done. `devtools::test()` finished clean with no failure.
 - 2026-09-21: T2 and T3 done in one commit, because the suite run for T2 also read the T3 test. `nested_resamples()` accepted both designs, so no refusal was lifted. Planted defects (inner `skip`, outer `lookback`, a wrong inner design and candidate in the final-fit reference) each failed. Suite clean.
+- 2026-09-21: T4 checkpoint, not checked off. `augment()` names the rows no fold held out when none is held out twice. The AC5 tests failed three times before the fix and pass after it. The `augment()` help is updated, and the D-071 draft for T5 is written. The full suite is still running.
 
 ## Decisions
 

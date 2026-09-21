@@ -160,3 +160,51 @@ test_that("the final fit on a rolling-origin design matches a hand-rolled refere
     predict(ref, new_data = d)
   )
 })
+
+# ---- AC5: predictions and augment() -----------------------------------------
+
+ts_pred_run <- function(data) {
+  set.seed(20)
+  memoised(nested_tune_grid(
+    det_workflow(data),
+    ts_rolling_nested(data),
+    grid = det_grid(),
+    metrics = ts_metrics(),
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+}
+
+test_that("collect_predictions() returns each outer-assessment row once per fold", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d)
+
+  preds <- collect_predictions(res)
+  held <- lapply(res$splits, rsample::complement)
+  expect_identical(nrow(preds), length(unlist(held)))
+  for (i in seq_len(nrow(res))) {
+    expect_identical(
+      as.integer(preds$.row[preds$id == res$id[[i]]]),
+      held[[i]]
+    )
+  }
+})
+
+test_that("augment() refuses a rolling-origin result and names the rows never held out", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d)
+
+  never <- setdiff(seq_len(nrow(d)), unlist(lapply(res$splits, rsample::complement)))
+  expect_length(never, 87L)
+
+  cnd <- rlang::catch_cnd(augment(res), "error")
+  expect_s3_class(cnd, "nestedtune_augment_rows")
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  # cli shortens the row list to its first three and last two.
+  expect_identical(c(head(never, 3L), tail(never, 2L)), c(1:3, 89:90))
+  expect_match(msg, "87 rows: 1, 2, 3, ", fixed = TRUE)
+  expect_match(msg, "89, and 90.", fixed = TRUE)
+  expect_no_match(msg, "repeated", ignore.case = TRUE)
+  expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+})
