@@ -66,6 +66,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T9 done. The `autoplot()` comment is back above `check_plot_type()`, the predict set test matches the phrase naming `id`, the added lines over 80 columns are re-wrapped, and the object comment names the extractors. A roxygen sentence that T8 committed with a prose-sweep hit is reworded, and all six gating sweeps are clean.
 - 2026-09-21: step-7 approval: m106-reader-parity approved for merge
 - 2026-09-21: CI wait on PR #121 reached its ten-minute bound with build, format-suggest and both prose sweeps passed and nine legs pending. The wait stopped here, and `/milestone-review M106` resumes it.
+- 2026-09-21: resume: PR #121 open, route (c). `main` has not moved since `d477922`. CI finished red on one leg: R-CMD-check-hard (ubuntu, release) failed 6 tests, because six new tests reach the ranger fixture behind `skip_if_no_engines()` without `stochastic = TRUE`. The six guards are fixed on the branch.
 
 ## Decisions
 
@@ -100,4 +101,8 @@ Consistency gate: `cairn_validate` passed, `devtools::document()` gave no diff, 
 Independent review of the fix delta `c8822f6..d861b82`, by one fresh diff reviewer: it confirmed each pass-1 fix, found no false collision on the survival, set or summarized runs, and reported seven low findings. G1: the collision snapshot calls the helper directly, so the `collect_metrics()` call name it carries is untested. G2: the F7 test drives the filter, not `autoplot()` on a set. G3: the reference still lists `.weight` among dropped columns, so only the name check guards it. G4: the test file header repeats itself. G5: a metric named `id` is refused only unsummarized, where `id` is a key. G6: `R/nested-results-collect.R:312` still says "two shapes" for summarized and unsummarized. G7: the predict set test's phrase match relies on testthat's fixed width.
 
 Pass-2 triage, accepted at the approval gate on 2026-09-21. Fixed now: G4, the header now one paragraph, and G6, the `compute_metrics()` return text now says long shape. Rejected: G1, because no fixture reaches a collision through `collect_metrics()`, and the reviewer ran the call and saw it name `collect_metrics()`. G2, because no set fixture has uneven metrics, and the plot filters the stacked table in one call. G3, because the name assertion guards `.weight`. G5, because `id` is a key only unsummarized, as the help says. G7, because testthat pins the width.
+
+Resume pass, 2026-09-21. CI on PR #121 at `5805f7b`: 13 checks passed and R-CMD-check-hard (ubuntu-latest, release) failed. That job installs only hard dependencies, so ranger is absent. Six tests in `test-autoplot-filter.R` and `test-collect-metrics-wide.R` build the ranger-based classification fixture after `skip_if_no_engines()`, which skips only on recipes and yardstick, and tune installs both. The fix gives those six calls `stochastic = TRUE`, the guard the other ranger tests use. Both files gave 0 failures and 0 skips on a normal run. With `skip_if_not_installed("ranger")` mocked to skip, they gave 0 failures, 0 errors and 6 skips. The AC1-AC5 evidence above stands, because the fix changes only when six tests skip.
+
+conversation: PR #121 had no reviews, no conversation comments and no unresolved threads.
 

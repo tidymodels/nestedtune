@@ -40,7 +40,7 @@ cls_single <- function() {
 }
 
 test_that("`metric` draws the named metrics' panels and no others", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   res <- cls_single()
   all <- autoplot(res, type = "performance")
@@ -135,7 +135,7 @@ test_that("a metric or time the run did not score is refused", {
 })
 
 test_that("a time on a run scored at none is refused", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   expect_error(
     autoplot(cls_single(), type = "performance", eval_time = 1),
@@ -159,7 +159,7 @@ test_that("a set refuses a metric no workflow scored", {
 })
 
 test_that("either argument with the parameters view is refused", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   res <- cls_single()
   expect_error(

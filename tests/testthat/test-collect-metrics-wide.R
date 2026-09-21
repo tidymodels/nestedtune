@@ -74,7 +74,7 @@ srv_run <- function() {
 }
 
 test_that("the long type is the call without a type", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   res <- cls_run()
   for (summarize in c(TRUE, FALSE)) {
@@ -86,7 +86,7 @@ test_that("the long type is the call without a type", {
 })
 
 test_that("the wide type pivots a classification run's metrics", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   res <- cls_run()
   expect_wide_matches(res)
@@ -131,7 +131,7 @@ test_that("the wide type pivots a set, keyed on the workflow", {
 })
 
 test_that("an unknown type is refused", {
-  skip_if_no_engines()
+  skip_if_no_engines(stochastic = TRUE)
 
   res <- cls_run()
   expect_error(
