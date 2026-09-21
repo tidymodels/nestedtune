@@ -1,13 +1,13 @@
 # M106: tune's reader arguments and extract methods on the nested classes
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — new methods and arguments on exported generics
-- **Branch/PR:** —
+- **Branch/PR:** m106-reader-parity
 
 ## Goal
 
