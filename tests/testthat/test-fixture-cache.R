@@ -307,7 +307,9 @@ test_that("the key separates every formal argument of both orchestrators", {
   }
 
   orchestrators <- list(
-    nested_tune_grid = nested_tune_grid,
+    # The export is a generic `(object, ...)` since M107; the arguments a
+    # request varies are the `workflow` method's.
+    nested_tune_grid = nested_tune_grid.workflow,
     nested_final_fit = nested_final_fit
   )
 

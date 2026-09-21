@@ -8,6 +8,16 @@
 # two orchestrators, whose `...` admits `control` and nothing else (M48) --
 # and never merely that something went wrong.
 
+# The six orchestrators, generics on `object` since M107.
+ORCHESTRATORS <- c(
+  "nested_tune_grid",
+  "nested_tune_bayes",
+  "nested_tune_race_anova",
+  "nested_tune_race_win_loss",
+  "nested_tune_sim_anneal",
+  "nested_fit_resamples"
+)
+
 # AC1 -------------------------------------------------------------------
 
 test_that("AC1: the four entry points carry `...` after their required arguments", {
@@ -15,8 +25,13 @@ test_that("AC1: the four entry points carry `...` after their required arguments
   # re-agreed here. For nested_tune_grid(), `param_info`, `grid`, `metrics` and
   # `event_level` all sit behind the barrier and therefore match by name only,
   # as do `eval_time` (M41) and `select` (M69).
+  # Since M107 the export is a generic on `object` alone, and the signature
+  # below is its `workflow` method's. The model-spec method puts
+  # `preprocessor` second, in tune's order, and carries the rest unchanged,
+  # defaults included.
+  expect_identical(names(formals(nested_tune_grid)), c("object", "..."))
   expect_identical(
-    names(formals(nested_tune_grid)),
+    names(formals(nested_tune_grid.workflow)),
     c(
       "object",
       "resamples",
@@ -29,9 +44,26 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       "select"
     )
   )
+  # For all six: the generic takes `object` and the dots, and the model-spec
+  # method is the workflow method with `preprocessor` second.
+  for (fn in ORCHESTRATORS) {
+    expect_identical(names(formals(get(fn))), c("object", "..."), label = fn)
+    spec_formals <- formals(get(paste0(fn, ".model_spec")))
+    expect_identical(
+      names(spec_formals)[1:2],
+      c("object", "preprocessor"),
+      label = fn
+    )
+    expect_identical(
+      as.list(spec_formals[-2L]),
+      as.list(formals(get(paste0(fn, ".workflow")))),
+      label = fn
+    )
+  }
   # Its sibling (M45) puts its own three arguments behind the same barrier.
+  expect_identical(names(formals(nested_tune_bayes)), c("object", "..."))
   expect_identical(
-    names(formals(nested_tune_bayes)),
+    names(formals(nested_tune_bayes.workflow)),
     c(
       "object",
       "resamples",
@@ -75,15 +107,22 @@ test_that("AC1: the four entry points carry `...` after their required arguments
 # and is judged by `check_control()` instead -- test-nested-tune-grid-checks.R
 # and its Bayesian sibling hold that contract.
 
+# An empty workflow reaches the `workflow` method (M107), whose dots are
+# fenced before the workflow itself is judged; a bare number would stop at
+# the default method's refusal first.
 test_that("AC2: nested_tune_grid() refuses an argument it does not know", {
-  cnd <- rlang::catch_cnd(nested_tune_grid(1, 2, nonesuch = 1))
+  cnd <- rlang::catch_cnd(
+    nested_tune_grid(workflows::workflow(), 2, nonesuch = 1)
+  )
   expect_s3_class(cnd, "nestedtune_bad_dots")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
   expect_match(conditionMessage(cnd), "nonesuch")
 })
 
 test_that("AC2: nested_tune_bayes() refuses an argument it does not know", {
-  cnd <- rlang::catch_cnd(nested_tune_bayes(1, 2, nonesuch = 1))
+  cnd <- rlang::catch_cnd(
+    nested_tune_bayes(workflows::workflow(), 2, nonesuch = 1)
+  )
   expect_s3_class(cnd, "nestedtune_bad_dots")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_bayes")
   expect_match(conditionMessage(cnd), "nonesuch")
@@ -102,6 +141,13 @@ test_that("AC2: nested_resamples() refuses an argument it does not know", {
 })
 
 # AC5 -------------------------------------------------------------------
+
+ORCHESTRATOR_METHODS <- as.vector(outer(
+  ORCHESTRATORS,
+  c("default", "model_spec", "workflow"),
+  paste,
+  sep = "."
+))
 
 # The domain is read from what the package actually registers, not from a list
 # kept here: a tenth method added next year is in the probe the day it is
@@ -147,7 +193,13 @@ DOTS_EXEMPT_METHODS <- c(
   "[.nested_results_set",
   "vec_restore.nested_results_set",
   "rbind.nested_results_set",
-  "names<-.nested_results_set"
+  "names<-.nested_results_set",
+  # The orchestrators' methods (M107). The `workflow` method's `...` carries
+  # `control` and is fenced by this package's `nestedtune_bad_dots`, probed
+  # by the AC2 blocks above; the `model_spec` method passes its dots on to
+  # the `workflow` method; the default refuses the object whatever rides in
+  # its dots.
+  ORCHESTRATOR_METHODS
 )
 
 # Default methods that refuse the object ahead of the dots (M56).

@@ -135,8 +135,8 @@ check_calls <- function(fn) {
 }
 
 test_that("every check the grid path makes, the Bayesian path makes too", {
-  grid_checks <- check_calls(nested_tune_grid)
-  bayes_checks <- check_calls(nested_tune_bayes)
+  grid_checks <- check_calls(nested_tune_grid.workflow)
+  bayes_checks <- check_calls(nested_tune_bayes.workflow)
 
   # One fact held independently of the derivation: the enumeration cannot
   # silently empty.
@@ -160,7 +160,11 @@ test_that("each shared check fires through nested_tune_bayes()", {
   fired <- list(
     check_dots_control = function() nested_tune_bayes(wf, folds, 3),
     check_control = function() nested_tune_bayes(wf, folds, control = "no"),
-    check_workflow = function() nested_tune_bayes(parsnip::linear_reg(), folds),
+    check_no_preprocessor = function() {
+      nested_tune_bayes(wf, preprocessor = y ~ x1, resamples = folds)
+    },
+    # An empty workflow, since a bare spec takes the model-spec route (M107).
+    check_workflow = function() nested_tune_bayes(workflows::workflow(), folds),
     check_untuned_workflow = function() {
       nested_tune_bayes(fixed_workflow(d), folds)
     },
@@ -182,7 +186,8 @@ test_that("each shared check fires through nested_tune_bayes()", {
   patterns <- c(
     check_dots_control = "accepts `control`",
     check_control = "control_bayes",
-    check_workflow = "must be a",
+    check_no_preprocessor = "carries its own preprocessor",
+    check_workflow = "no model specification",
     check_untuned_workflow = "no parameter marked for tuning",
     check_nested = "nested resampling design",
     check_metrics = "metric_set",
@@ -193,7 +198,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
   )
 
   shared <- setdiff(
-    check_calls(nested_tune_grid),
+    check_calls(nested_tune_grid.workflow),
     c("check_grid", "check_grid_params")
   )
   expect_identical(setdiff(shared, names(fired)), character(0))

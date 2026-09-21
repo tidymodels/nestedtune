@@ -34,8 +34,16 @@
 #'
 #' @inheritParams tune::tune_grid
 #' @param object A [workflows::workflow()] with at least one parameter marked
-#'   for tuning with [tune::tune()]. A workflow with no marker is refused, and
-#'   [nested_fit_resamples()] scores one on the same design.
+#'   for tuning with [tune::tune()], or a parsnip model specification with
+#'   such a parameter, given with `preprocessor`. A workflow with no marker is
+#'   refused, and [nested_fit_resamples()] scores one on the same design.
+#' @param preprocessor A formula or a recipe, when `object` is a model
+#'   specification. The two are combined as
+#'   `workflows::workflow(preprocessor, object)`, and the call runs as it
+#'   does on that workflow. Other preprocessors, such as
+#'   [workflows::workflow_variables()], go through a workflow. A workflow
+#'   already carries its preprocessor, so one given beside a workflow is
+#'   refused.
 #' @param resamples A nested resampling design from [nested_resamples()] or
 #'   [rsample::nested_cv()], one row per outer fold. The section on nested
 #'   designs says what the design must hold.
@@ -443,7 +451,52 @@
 #' @seealso [nested_tune_bayes()], [nested_resamples()], [nested_final_fit()],
 #'   [tune::tune_grid()]
 #' @export
-nested_tune_grid <- function(
+nested_tune_grid <- function(object, ...) {
+  UseMethod("nested_tune_grid")
+}
+
+#' @rdname nested_tune_grid
+#' @export
+nested_tune_grid.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+# The model-spec door (D-069): the spec and its preprocessor become the
+# workflow tune's own method would build, and the call goes through the
+# generic again, so every later refusal names the function the user called.
+# The named arguments are the workflow method's, with its defaults, and are
+# passed on as given.
+#' @rdname nested_tune_grid
+#' @export
+nested_tune_grid.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+) {
+  check_preprocessor(preprocessor)
+  nested_tune_grid(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    param_info = param_info,
+    grid = grid,
+    metrics = metrics,
+    event_level = event_level,
+    eval_time = eval_time,
+    select = select
+  )
+}
+
+#' @rdname nested_tune_grid
+#' @export
+nested_tune_grid.workflow <- function(
   object,
   resamples,
   ...,
@@ -454,7 +507,9 @@ nested_tune_grid <- function(
   eval_time = NULL,
   select = selection_rule()
 ) {
-  control <- check_dots_control(capture_dots(...))
+  dots <- capture_dots(...)
+  check_no_preprocessor(dots, resamples)
+  control <- check_dots_control(dots)
   check_workflow(object)
   check_untuned_workflow(object)
   check_nested(resamples)

@@ -781,7 +781,7 @@ test_that("the option, not an argument, is what carries the bound", {
   # and the assertion this test exists to make is that nothing here names a
   # daemon count or a timeout.
   expect_identical(
-    names(formals(nested_tune_grid)),
+    names(formals(nested_tune_grid.workflow)),
     c(
       "object",
       "resamples",

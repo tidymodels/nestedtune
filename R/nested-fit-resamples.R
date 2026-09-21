@@ -149,7 +149,42 @@
 #' @templateVar LINKS [tune::fit_resamples()]
 #' @template seealso-orchestrator
 #' @export
-nested_fit_resamples <- function(
+nested_fit_resamples <- function(object, ...) {
+  UseMethod("nested_fit_resamples")
+}
+
+#' @rdname nested_fit_resamples
+#' @export
+nested_fit_resamples.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+# The model-spec door, as `nested_tune_grid.model_spec()` describes it.
+#' @rdname nested_fit_resamples
+#' @export
+nested_fit_resamples.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL
+) {
+  check_preprocessor(preprocessor)
+  nested_fit_resamples(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    metrics = metrics,
+    event_level = event_level,
+    eval_time = eval_time
+  )
+}
+
+#' @rdname nested_fit_resamples
+#' @export
+nested_fit_resamples.workflow <- function(
   object,
   resamples,
   ...,
@@ -157,7 +192,9 @@ nested_fit_resamples <- function(
   event_level = "first",
   eval_time = NULL
 ) {
-  control <- check_dots_control(capture_dots(...))
+  dots <- capture_dots(...)
+  check_no_preprocessor(dots, resamples)
+  control <- check_dots_control(dots)
   check_workflow(object)
   # The door this function is (D-057): a marked workflow goes to the five,
   # refused here before the design is judged.

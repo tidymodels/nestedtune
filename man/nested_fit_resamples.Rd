@@ -2,9 +2,26 @@
 % Please edit documentation in R/nested-fit-resamples.R
 \name{nested_fit_resamples}
 \alias{nested_fit_resamples}
+\alias{nested_fit_resamples.default}
+\alias{nested_fit_resamples.model_spec}
+\alias{nested_fit_resamples.workflow}
 \title{Score a workflow with nothing to tune on a nested design}
 \usage{
-nested_fit_resamples(
+nested_fit_resamples(object, ...)
+
+\method{nested_fit_resamples}{default}(object, ...)
+
+\method{nested_fit_resamples}{model_spec}(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL
+)
+
+\method{nested_fit_resamples}{workflow}(
   object,
   resamples,
   ...,
@@ -18,13 +35,21 @@ nested_fit_resamples(
 with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tune:fit_resamples]{tune::fit_resamples()}} takes
 it. A workflow carrying a marker is refused at entry.}
 
-\item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
-designs says what the design must hold.}
-
 \item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as \code{control}, and
 nothing else. Every argument after \code{...} is matched by name. The
 section on differences from tune says what becomes of each slot.}
+
+\item{preprocessor}{A formula or a recipe, when \code{object} is a model
+specification. The two are combined as
+\code{workflows::workflow(preprocessor, object)}, and the call runs as it
+does on that workflow. Other preprocessors, such as
+\code{\link[workflows:workflow_variables]{workflows::workflow_variables()}}, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.}
+
+\item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
+designs says what the design must hold.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
 set of metrics.}

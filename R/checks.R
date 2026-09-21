@@ -9,8 +9,19 @@ check_workflow <- function(object, call = rlang::caller_env()) {
     cli::cli_abort(
       c(
         "{.arg object} must be a {.cls workflow}.",
-        x = "Got {.obj_type_friendly {object}}.",
-        i = "Wrap a model and a preprocessor with {.fn workflows::workflow}."
+        x = if (inherits(object, "model_spec")) {
+          "Got a bare model specification."
+        } else {
+          "Got {.obj_type_friendly {object}}."
+        },
+        # A bare spec is the one input the orchestrators accept and this does
+        # not (D-069), so its hint spells the wrapping out.
+        i = if (inherits(object, "model_spec")) {
+          "Wrap it with its preprocessor: \\
+           {.code workflows::workflow(preprocessor, spec)}."
+        } else {
+          "Wrap a model and a preprocessor with {.fn workflows::workflow}."
+        }
       ),
       call = call
     )
@@ -108,6 +119,88 @@ check_workflow_pkgs <- function(object, call = rlang::caller_env()) {
   }
 
   invisible(needed)
+}
+
+# The model-spec door of the six orchestrators (M107, D-069). tune's own
+# `model_spec` methods accept a formula, a recipe, or a `workflow_variables()`
+# object, but they add only the first two to the workflow they build, so the
+# third reaches the fit with no preprocessor. Here it is refused with the
+# other wrong types, and its hint names the workflow route that does take it.
+is_formula_or_recipe <- function(x) {
+  rlang::is_formula(x) || inherits(x, "recipe")
+}
+
+check_preprocessor <- function(preprocessor, call = rlang::caller_env()) {
+  if (rlang::is_missing(preprocessor)) {
+    cli::cli_abort(
+      c(
+        "{.arg preprocessor} is missing.",
+        i = "A model specification needs a formula or a recipe as its \\
+             second argument, before {.arg resamples}."
+      ),
+      class = "nestedtune_bad_preprocessor",
+      call = call
+    )
+  }
+  if (!is_formula_or_recipe(preprocessor)) {
+    cli::cli_abort(
+      c(
+        "{.arg preprocessor} must be a formula or a recipe.",
+        x = "Got {.obj_type_friendly {preprocessor}}.",
+        i = if (inherits(preprocessor, "workflow_variables")) {
+          "Add variables to a workflow with {.fn workflows::add_variables} \\
+           and pass the workflow instead."
+        } else if (inherits(preprocessor, "rset")) {
+          "The resampling design is the third argument, after the \\
+           preprocessor."
+        }
+      ),
+      class = "nestedtune_bad_preprocessor",
+      call = call
+    )
+  }
+  invisible(preprocessor)
+}
+
+# The other side of the same door: a workflow carries its own preprocessor, so
+# one given beside it is refused, whether it came by name (it lands in `...`)
+# or by position (it lands in `resamples`, and the design in `...`). `dots` is
+# the list `capture_dots()` returns. Asked before `check_dots_control()` and
+# `check_nested()`, whose messages would name the symptom and not the cause.
+check_no_preprocessor <- function(dots, resamples, call = rlang::caller_env()) {
+  by_name <- "preprocessor" %in% rlang::names2(dots)
+  by_position <- !rlang::is_missing(resamples) &&
+    (is_formula_or_recipe(resamples) ||
+      inherits(resamples, "workflow_variables"))
+  if (!by_name && !by_position) {
+    return(invisible())
+  }
+  cli::cli_abort(
+    c(
+      "A workflow carries its own preprocessor.",
+      x = if (by_name) {
+        "Got {.arg preprocessor} beside a workflow."
+      } else {
+        "Got {.obj_type_friendly {resamples}} where {.arg resamples} goes."
+      },
+      i = "Pass the bare model specification with the preprocessor, or \\
+           leave the preprocessor out and pass the workflow alone."
+    ),
+    class = "nestedtune_preprocessor_with_workflow",
+    call = call
+  )
+}
+
+# What the six orchestrators' default methods raise (D-069).
+abort_bad_object <- function(object, call = rlang::caller_env()) {
+  cli::cli_abort(
+    c(
+      "{.arg object} must be a {.cls workflow} or a parsnip model \\
+       specification.",
+      x = "Got {.obj_type_friendly {object}}."
+    ),
+    call = call
+  )
 }
 
 # The workflow's tuned parameter ids, or NULL where they cannot be read: a
@@ -1578,7 +1671,10 @@ check_map_fn <- function(fn, call = rlang::caller_env()) {
 # itself, so a formal added to an orchestrator is accepted here the day it
 # lands.
 orchestrator_args <- function(fn) {
-  formals <- names(formals(get(fn, envir = asNamespace("nestedtune"))))
+  # The export is a generic `(object, ...)` since M107, so the arguments are
+  # the `workflow` method's, the one a set's workflows dispatch to.
+  method <- paste0(fn, ".workflow")
+  formals <- names(formals(get(method, envir = asNamespace("nestedtune"))))
   c(setdiff(formals, c("object", "...")), "control")
 }
 

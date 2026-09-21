@@ -38,8 +38,8 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 ## Tasks
 
 - [x] T1: Write the D-entry for the generic-with-methods signature. (RB tripwire: irreversible-api) Read tune's `tune_grid.model_spec()` and the finetune methods for argument order and refusals first (LESSONS, claims about another package).
-- [ ] T2: Convert `nested_tune_grid()` (`R/nested-tune-grid.R:446`) to a generic with both methods, and add the classed refusals for the three bad inputs. The dots carry `control` (D-042), so check how `test-dots-barrier.R` and `test-fixture-cache.R` enumerate formals, and update them.
-- [ ] T3: Repeat T2 for the other five orchestrators. Write the AC1 and AC2 identity tests.
+- [x] T2: Convert `nested_tune_grid()` (`R/nested-tune-grid.R:446`) to a generic with both methods, and add the classed refusals for the three bad inputs. The dots carry `control` (D-042), so check how `test-dots-barrier.R` and `test-fixture-cache.R` enumerate formals, and update them.
+- [x] T3: Repeat T2 for the other five orchestrators. Write the AC1 and AC2 identity tests.
 - [ ] T4: Change `check_workflow()`'s message (`R/checks.R:8`) for a `model_spec`. Write the AC3 final-fit identity test and the AC4 refusal tests.
 - [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
@@ -52,6 +52,8 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: re-audit in full mode found AC3 silent on its preprocessor and AC4's third input already refused with an uninformative message. Both were fixed after the plan commit.
 - 2026-09-21: implement started on branch `m107-model-spec-input`. Question gate took every recommendation: the spec method calls the generic again on the built workflow, two error classes (`nestedtune_bad_preprocessor`, `nestedtune_preprocessor_with_workflow`), a positional formula or recipe beside a workflow refused under the second class, and a default method refusing any other object.
 - 2026-09-21: T1 done. D-069 records the signature, read against tune 2.1.0's `tune_grid`, `tune_bayes` and `fit_resamples` spec methods and finetune 1.3.0's race and annealing ones.
+- 2026-09-21: T2 and T3 share one checkpoint (minor amendment). `orchestrator_args()` in `R/checks.R` reads the formals of all six for `nested_workflow_map()`, so it now reads each `.workflow` method, and converting one orchestrator alone left the map's tests red.
+- 2026-09-21: T2 and T3 done. All six are generics with `default`, `model_spec` and `workflow` methods. `test-model-spec-input.R` holds the AC1 and AC2 identities and the AC4 refusals for all six. Tests that read the formals or bodies of the exports now read the `workflow` methods. Four check tests passed a bare spec as their `check_workflow` case, which now reaches the spec method, so they use an empty workflow. A planted defect (the grid spec method dropping `grid`) turned the AC1 and AC2 grid identities red. Suite 929 tests, 0 failed; both prose sweeps clean; `air format --check` clean.
 
 ## Decisions
 

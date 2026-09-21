@@ -145,7 +145,49 @@ NULL
 
 #' @rdname nested_tune_race
 #' @export
-nested_tune_race_anova <- function(
+nested_tune_race_anova <- function(object, ...) {
+  UseMethod("nested_tune_race_anova")
+}
+
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_anova.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+# The model-spec door, as `nested_tune_grid.model_spec()` describes it, for
+# both racers.
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_anova.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+) {
+  check_preprocessor(preprocessor)
+  nested_tune_race_anova(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    param_info = param_info,
+    grid = grid,
+    metrics = metrics,
+    event_level = event_level,
+    eval_time = eval_time,
+    select = select
+  )
+}
+
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_anova.workflow <- function(
   object,
   resamples,
   ...,
@@ -173,7 +215,47 @@ nested_tune_race_anova <- function(
 
 #' @rdname nested_tune_race
 #' @export
-nested_tune_race_win_loss <- function(
+nested_tune_race_win_loss <- function(object, ...) {
+  UseMethod("nested_tune_race_win_loss")
+}
+
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_win_loss.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_win_loss.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+) {
+  check_preprocessor(preprocessor)
+  nested_tune_race_win_loss(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    param_info = param_info,
+    grid = grid,
+    metrics = metrics,
+    event_level = event_level,
+    eval_time = eval_time,
+    select = select
+  )
+}
+
+#' @rdname nested_tune_race
+#' @export
+nested_tune_race_win_loss.workflow <- function(
   object,
   resamples,
   ...,
@@ -222,6 +304,7 @@ nested_tune_race <- function(
   call
 ) {
   check_tuner_installed(fn, call = call)
+  check_no_preprocessor(dots, resamples, call = call)
   control <- check_dots_control(dots, call = call)
   check_workflow(object, call = call)
   check_untuned_workflow(object, call = call)
