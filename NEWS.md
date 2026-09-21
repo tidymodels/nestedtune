@@ -4,8 +4,9 @@
   `extract_fit_engine()`, `extract_recipe()`, `extract_mold()`,
   `extract_preprocessor()`, `extract_spec_parsnip()` and
   `outcome_names()` with what the same call gives on its trained workflow.
-  `extract_recipe()` takes `estimated`. The workflow methods drop an
-  argument they do not know, so these refuse one instead.
+  `extract_recipe()` takes `estimated`. Apart from `extract_recipe()`, the
+  workflow methods drop an argument they do not know, so these refuse one
+  instead.
 
 * `collect_metrics()` on a `nested_results` or a `nested_results_set`
   takes `type = "wide"`, which returns one column per metric, as tune's

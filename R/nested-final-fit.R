@@ -490,8 +490,9 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' the same answer as the same call on [extract_workflow()]'s output.
 #'
 #' @param x A `nested_final_fit` from [nested_final_fit()].
-#' @param ... Must be empty. The methods for a workflow ignore an argument
-#'   they do not know, so these refuse it rather than pass it on.
+#' @param ... Must be empty. A workflow's methods other than
+#'   `extract_recipe()` ignore an argument they do not know, so these refuse
+#'   it rather than pass it on.
 #' @param estimated For `extract_recipe()`, whether to return the trained
 #'   recipe (`TRUE`, the default) or the recipe as it was given.
 #' @return What the same call returns for the trained workflow.

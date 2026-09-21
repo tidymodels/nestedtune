@@ -42,9 +42,9 @@ carries each fold's weight in a \code{.weight} column.
 
 \code{type = "wide"} turns either shape into one column per metric, as tune's
 \code{collect_metrics()} does. The column holds the mean when summarized and
-each fold's estimate when not. Its other columns are the keys of those values:
-the outer fold's labels when unsummarized, and \code{.eval_time} where the long
-shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are dropped.
+each fold's estimate when not. Its other columns are the keys of those
+values: the outer fold's labels when unsummarized, and \code{.eval_time} where
+the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are dropped.
 
 A metric measured at several evaluation times (\code{eval_time} on
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in both shapes. It is never

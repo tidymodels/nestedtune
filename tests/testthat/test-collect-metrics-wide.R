@@ -3,7 +3,8 @@
 # The reference pivot is written here with `stats::reshape()`, which shares
 # no code with the package's pivot. It puts each metric in a column of its
 # own, keyed on every column that is neither a metric field nor a summary
-# field, the rule tune's `pivot_metrics()` follows.
+# field. On tune's own tables this gives the keys `pivot_metrics()` names in
+# its fixed list.
 
 wide_reference <- function(long) {
   value <- if ("mean" %in% names(long)) "mean" else ".estimate"
@@ -11,9 +12,10 @@ wide_reference <- function(long) {
   dropped <- c(dropped, ".weight")
   keys <- setdiff(names(long), dropped)
   frame <- as.data.frame(long)[c(keys, ".metric", value)]
-  # reshape() merges rows whose id holds an NA, which a static metric's
-  # `.eval_time` does, so the id is one string built from the keys, NA
-  # spelled out. The keys ride along as columns constant within an id.
+  # With an id of two or more columns, reshape() merges every row holding an
+  # NA in any of them, and a static metric's `.eval_time` is NA. So the id is
+  # one string built from the keys, NA spelled out. The keys ride along as
+  # columns constant within an id.
   frame$.row <- if (length(keys) == 0L) {
     "1"
   } else {

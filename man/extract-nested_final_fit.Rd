@@ -28,8 +28,9 @@
 \arguments{
 \item{x}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Must be empty. The methods for a workflow ignore an argument
-they do not know, so these refuse it rather than pass it on.}
+\item{...}{Must be empty. A workflow's methods other than
+\code{extract_recipe()} ignore an argument they do not know, so these refuse
+it rather than pass it on.}
 
 \item{estimated}{For \code{extract_recipe()}, whether to return the trained
 recipe (\code{TRUE}, the default) or the recipe as it was given.}

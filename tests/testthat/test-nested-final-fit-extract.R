@@ -250,9 +250,9 @@ test_that("the final fit answers the workflow extractors as its workflow does", 
   expect_false(recipes::fully_trained(extract_recipe(final, estimated = FALSE)))
 })
 
-# workflows' own extractors, `extract_recipe()` aside, drop an argument they
-# do not know, so passing one on would be a silent no-op. These methods
-# refuse it, as augment.nested_final_fit() does.
+# The extractors' workflow methods, `extract_recipe()` aside, drop an
+# argument they do not know, so passing one on would be a silent no-op.
+# These methods refuse it, as augment.nested_final_fit() does.
 test_that("the workflow extractors refuse a stray argument", {
   skip_if_no_engines()
 

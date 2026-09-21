@@ -52,6 +52,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T2 done. The wide pivot keys on every column that is not a metric or summary field, and a bad `type` raises `nestedtune_bad_type`. The `reshape()` reference first merged rows keyed on a static metric's NA time, so it now keys on a string. That mismatch showed the reference can fail. The full suite failed only on the formals test and one help sentence the prose sweep flagged. Both files pass after the fix.
 - 2026-09-21: T3 done, and the full suite is clean. `eval_time` keeps a static metric's untimed panel, as tune's `autoplot()` does. The survival fixture scores `brier_survival` at two times beside `concordance_survival`, so the tests cover that case. A metric or time absent from the run, a malformed value, or either argument with the parameters view raises `nestedtune_bad_plot_filter`. The new snapshot was rendered and read before approval.
 - 2026-09-21: T4 done. Both refusals raise `nestedtune_predict_results` and are exempt from the dots probe, because a caller's `new_data` arrives through `...`. The full suite failed only on the Bayesian oracle file's table of every method on the class. That table now runs the refusal, and the file passes.
+- 2026-09-21: claim audit: 47 claims read, 4 corrected — NEWS.md, R/nested-final-fit.R, R/nested-results.R, tests/testthat/test-collect-metrics-wide.R, tests/testthat/test-nested-final-fit-extract.R
 
 ## Decisions
 
