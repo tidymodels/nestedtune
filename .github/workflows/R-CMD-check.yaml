@@ -150,10 +150,27 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
-          # P3M's macOS binaries are built with OpenMP enabled, but the runners
-          # have no libomp, so e.g. gower fails to load. CRAN's own macOS
-          # binaries are built without it, so use those instead.
-          use-public-rspm: ${{ matrix.config.os != 'macos-latest' }}
+          # Every leg takes P3M binaries, macOS included. Two failure modes
+          # pull in opposite directions here, and this is the current
+          # balance between them.
+          #
+          # P3M's macOS binaries are built with OpenMP enabled and the
+          # runners ship no libomp, so `gower` failed to load with `symbol
+          # not found in flat namespace` (job 99324307884 of run
+          # 33336519275). That is why macOS took CRAN's binaries instead.
+          # The `gower?source` entry below still builds that one package on
+          # the runner, so its own failure stays fixed.
+          #
+          # CRAN then began compressing its macOS binaries with zstd under
+          # the `.tgz` name, and the pak that `setup-r-dependencies` installs
+          # cannot extract them: `Cannot extract ... censored_0.3.5.tgz,
+          # unknown archive type`, twice in 55 seconds on PR #118, whose diff
+          # was three lines inside one `deparse()` call. That is
+          # r-lib/pkgdepends#485, and taking P3M's binaries is the workaround
+          # its maintainer gives. Revert this line once pkgdepends reads zstd,
+          # and expect the OpenMP failure to return in some package other
+          # than `gower` if it does not.
+          use-public-rspm: true
 
       # The macOS leg alone builds `gower` on the runner. The RSPM arm64
       # binary (`bin/macosx/sonoma-arm64/contrib/4.6/gower_1.0.2.tgz`) links
