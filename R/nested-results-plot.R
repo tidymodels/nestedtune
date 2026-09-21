@@ -370,21 +370,22 @@ filter_plot_rows <- function(
   eval_time,
   call = rlang::caller_env()
 ) {
+  # Both are checked against the whole run before either filters, so a time
+  # is judged by what the run scored, not by what the named metrics scored.
   if (!is.null(metric)) {
     absent <- setdiff(metric, per_fold$.metric)
     if (length(absent) > 0L) {
       scored <- unique(per_fold$.metric)
       cli::cli_abort(
         c(
-          "{.arg metric} names {cli::qty(length(absent))}{?a metric/metrics} the run \\
-           did not score: {.val {absent}}.",
+          "{.arg metric} names {cli::qty(length(absent))}{?a metric/metrics} \\
+           the run did not score: {.val {absent}}.",
           i = "It scored {.val {scored}}."
         ),
         class = "nestedtune_bad_plot_filter",
         call = call
       )
     }
-    per_fold <- take_rows(per_fold, per_fold$.metric %in% metric)
   }
   if (!is.null(eval_time)) {
     times <- if (".eval_time" %in% names(per_fold)) {
@@ -396,8 +397,8 @@ filter_plot_rows <- function(
     if (length(absent) > 0L) {
       cli::cli_abort(
         c(
-          "{.arg eval_time} names {cli::qty(length(absent))}{?a time/times} the run \\
-           did not score at: {.val {absent}}.",
+          "{.arg eval_time} names {cli::qty(length(absent))}{?a time/times} \\
+           the run did not score at: {.val {absent}}.",
           i = if (length(times) > 0L) {
             "It scored at {.val {times}}."
           } else {
@@ -408,6 +409,11 @@ filter_plot_rows <- function(
         call = call
       )
     }
+  }
+  if (!is.null(metric)) {
+    per_fold <- take_rows(per_fold, per_fold$.metric %in% metric)
+  }
+  if (!is.null(eval_time)) {
     at <- per_fold$.eval_time
     per_fold <- take_rows(per_fold, is.na(at) | at %in% eval_time)
   }

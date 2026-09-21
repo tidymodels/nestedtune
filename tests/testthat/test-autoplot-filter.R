@@ -209,3 +209,46 @@ test_that("a filtered performance view looks the way it reads", {
     )
   )
 })
+
+# M106 review F1: the time is judged by what the run scored, not by what the
+# named metrics scored. The static metric has no time, so filtering to it
+# alone would once leave no timed row and refuse a time the run did score.
+test_that("a time the run scored is accepted beside a static metric", {
+  skip_if_no_censored()
+
+  res <- srv_single()
+  t <- srv_eval_times()[[1L]]
+  p <- autoplot(
+    res,
+    type = "performance",
+    metric = "concordance_survival",
+    eval_time = t
+  )
+  labels <- panels_of(autoplot(res, type = "performance"))
+  expect_setequal(
+    panels_of(p),
+    labels[panel_metric(labels, "concordance_survival")]
+  )
+})
+
+# M106 review F7: on a set, the filter reads the stacked rows, so a metric
+# one workflow scored is kept for that workflow and refused only when no
+# workflow scored it. The set fixtures share one metric set, so the stacked
+# table is written here with a metric only workflow `b` scored.
+test_that("a set keeps a metric only one workflow scored", {
+  stacked <- tibble::tibble(
+    wflow_id = c("a", "a", "b", "b", "b"),
+    id = c("Fold1", "Fold2", "Fold1", "Fold2", "Fold2"),
+    .metric = c("rmse", "rmse", "rmse", "rmse", "mae"),
+    .estimator = "standard",
+    .estimate = c(1, 2, 3, 4, 5)
+  )
+  kept <- filter_plot_rows(stacked, "mae", NULL)
+  expect_identical(kept$wflow_id, "b")
+  expect_identical(kept$.estimate, 5)
+
+  expect_error(
+    filter_plot_rows(stacked, "rsq", NULL),
+    class = "nestedtune_bad_plot_filter"
+  )
+})
