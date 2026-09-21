@@ -40,7 +40,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T1: Add the seven `nested_final_fit` methods beside `extract_workflow.nested_final_fit()` (`R/nested-final-fit.R:481`), each delegating to the stored workflow. Register `outcome_names` from tune. Test each against `extract_workflow(fit)`.
 - [x] T2: Add `type` to `collect_metrics.nested_results()` (`R/nested-results.R:840`) and `collect_metrics.nested_results_set()` (`R/nested-results-set.R:82`). Pivot with dplyr and vctrs, since tidyr is not a dependency. Test against the `stats::reshape()` reference.
 - [x] T3: Add `metric` and `eval_time` to both `autoplot()` methods (`R/nested-results-plot.R:77`). Filter the rows before `plot_performance()` builds its panels, because the panel labels carry qualifiers (`metric_panel()`, `qualify_panels()`). Render the filtered plot before approving its snapshot (LESSONS, plots).
-- [ ] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
+- [x] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
 - [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
@@ -51,6 +51,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T1 done. The seven methods refuse stray arguments, because workflows' extractors other than `extract_recipe()` drop unknown ones silently (the `augment.nested_final_fit()` precedent). `extract_recipe()` takes `estimated` by name, and the generics are re-exported beside `extract_workflow()`. The full suite ran once, failing only on the dots probe's seven new methods before the fence, and both touched files pass after it.
 - 2026-09-21: T2 done. The wide pivot keys on every column that is not a metric or summary field, and a bad `type` raises `nestedtune_bad_type`. The `reshape()` reference first merged rows keyed on a static metric's NA time, so it now keys on a string. That mismatch showed the reference can fail. The full suite failed only on the formals test and one help sentence the prose sweep flagged. Both files pass after the fix.
 - 2026-09-21: T3 done, and the full suite is clean. `eval_time` keeps a static metric's untimed panel, as tune's `autoplot()` does. The survival fixture scores `brier_survival` at two times beside `concordance_survival`, so the tests cover that case. A metric or time absent from the run, a malformed value, or either argument with the parameters view raises `nestedtune_bad_plot_filter`. The new snapshot was rendered and read before approval.
+- 2026-09-21: T4 done. Both refusals raise `nestedtune_predict_results` and are exempt from the dots probe, because a caller's `new_data` arrives through `...`. The full suite failed only on the Bayesian oracle file's table of every method on the class. That table now runs the refusal, and the file passes.
 
 ## Decisions
 
