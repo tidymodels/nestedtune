@@ -10,7 +10,13 @@
 \usage{
 \method{agreement}{nested_results_set}(x, ...)
 
-\method{autoplot}{nested_results_set}(object, type = c("parameters", "performance"), ...)
+\method{autoplot}{nested_results_set}(
+  object,
+  type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
+  ...
+)
 
 \method{summary}{nested_results_set}(object, ...)
 
@@ -26,6 +32,10 @@ and not a silent no-op.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.}
+
+\item{metric, eval_time}{For \code{type = "performance"}, the metrics and the
+evaluation times to draw panels for, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.
+A metric is refused only when no workflow of the set scored it.}
 }
 \value{
 \code{summary()} returns a \code{summary.nested_results_set} and \code{autoplot()} a

@@ -982,6 +982,61 @@ check_metrics_type <- function(type, call = rlang::caller_env()) {
   )
 }
 
+# `metric` and `eval_time` choose panels of the performance view. The
+# parameters view has no metric panels, so either argument there is refused
+# rather than ignored (GP3). The values are checked against the run later,
+# once its rows are read.
+check_plot_filter <- function(
+  type,
+  metric,
+  eval_time,
+  call = rlang::caller_env()
+) {
+  if (identical(type, "parameters")) {
+    given <- c("metric", "eval_time")[
+      c(!is.null(metric), !is.null(eval_time))
+    ]
+    if (length(given) > 0L) {
+      cli::cli_abort(
+        c(
+          "{.arg {given}} {?is/are} only used with \\
+           {.code type = \"performance\"}.",
+          i = "The parameters view draws what each fold selected, not \\
+               its metrics."
+        ),
+        class = "nestedtune_bad_plot_filter",
+        call = call
+      )
+    }
+  }
+  if (
+    !is.null(metric) &&
+      (!is.character(metric) || length(metric) == 0L || anyNA(metric))
+  ) {
+    cli::cli_abort(
+      c(
+        "{.arg metric} must be a character vector of metric names.",
+        x = "Got {.obj_type_friendly {metric}}."
+      ),
+      class = "nestedtune_bad_plot_filter",
+      call = call
+    )
+  }
+  if (
+    !is.null(eval_time) &&
+      (!is.numeric(eval_time) || length(eval_time) == 0L || anyNA(eval_time))
+  ) {
+    cli::cli_abort(
+      c(
+        "{.arg eval_time} must be a numeric vector of evaluation times.",
+        x = "Got {.obj_type_friendly {eval_time}}."
+      ),
+      class = "nestedtune_bad_plot_filter",
+      call = call
+    )
+  }
+}
+
 check_plot_type <- function(type, call = rlang::caller_env()) {
   allowed <- c("parameters", "performance")
   if (identical(type, allowed)) {

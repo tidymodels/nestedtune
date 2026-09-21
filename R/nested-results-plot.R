@@ -32,6 +32,12 @@
 #'   siblings, [nested_fit_resamples()] included.
 #' @param type Which view to draw: `"parameters"` (the default) or
 #'   `"performance"`.
+#' @param metric,eval_time For `type = "performance"`, the metrics and the
+#'   evaluation times to draw panels for. `NULL`, the default, draws them
+#'   all. A static metric's panel has no time and is drawn whatever
+#'   `eval_time` names, as in tune's `autoplot()`. A metric or a time the run
+#'   did not score is refused with class `nestedtune_bad_plot_filter`, as is
+#'   either argument given with `type = "parameters"`.
 #' @inheritParams collect_metrics.nested_results
 #' @return A `ggplot` object.
 #'
@@ -68,6 +74,7 @@
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
 #' autoplot(res)
 #' autoplot(res, type = "performance")
+#' autoplot(res, type = "performance", metric = "rmse")
 #'
 #' @seealso [nested_tune_grid()], [print.nested_results()],
 #'   [collect_metrics()], [summary.nested_results_set()] for the same two
@@ -77,16 +84,20 @@
 autoplot.nested_results <- function(
   object,
   type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
   ...
 ) {
   rlang::check_dots_empty()
   type <- check_plot_type(type)
+  check_plot_filter(type, metric, eval_time)
   check_any_completed(object, action = "plot")
+  call <- rlang::current_env()
 
   switch(
     type,
     parameters = plot_selection(object),
-    performance = plot_performance(object)
+    performance = plot_performance(object, metric, eval_time, call = call)
   )
 }
 
@@ -215,8 +226,18 @@ whole_number_breaks <- function(limits) {
   ]
 }
 
-plot_performance <- function(x) {
-  per_fold <- per_fold_metrics(x)
+plot_performance <- function(
+  x,
+  metric = NULL,
+  eval_time = NULL,
+  call = rlang::caller_env()
+) {
+  per_fold <- filter_plot_rows(
+    per_fold_metrics(x),
+    metric,
+    eval_time,
+    call = call
+  )
   summarized <- summarize_folds(per_fold)
   # A metric measured at several evaluation times is one estimate per time
   # (M41), so the time joins the panel name before the estimator question is
@@ -335,6 +356,62 @@ from_folds <- function(k, completed) {
 
 chose_value <- function(k, completed) {
   paste0(k, " of ", completed, " chose")
+}
+
+# The rows the performance view draws, when `metric` or `eval_time` names
+# some. Filtered before anything is summarized or labelled, so the panels,
+# their fold-count qualifiers and the rules are all built from what is kept.
+# A static metric's row has no time and is kept whatever `eval_time` names,
+# as tune's own `autoplot()` keeps it; a name or time the run never scored
+# is refused rather than drawn as nothing.
+filter_plot_rows <- function(
+  per_fold,
+  metric,
+  eval_time,
+  call = rlang::caller_env()
+) {
+  if (!is.null(metric)) {
+    absent <- setdiff(metric, per_fold$.metric)
+    if (length(absent) > 0L) {
+      scored <- unique(per_fold$.metric)
+      cli::cli_abort(
+        c(
+          "{.arg metric} names {cli::qty(length(absent))}{?a metric/metrics} the run \\
+           did not score: {.val {absent}}.",
+          i = "It scored {.val {scored}}."
+        ),
+        class = "nestedtune_bad_plot_filter",
+        call = call
+      )
+    }
+    per_fold <- take_rows(per_fold, per_fold$.metric %in% metric)
+  }
+  if (!is.null(eval_time)) {
+    times <- if (".eval_time" %in% names(per_fold)) {
+      unique(per_fold$.eval_time[!is.na(per_fold$.eval_time)])
+    } else {
+      numeric()
+    }
+    absent <- eval_time[!eval_time %in% times]
+    if (length(absent) > 0L) {
+      cli::cli_abort(
+        c(
+          "{.arg eval_time} names {cli::qty(length(absent))}{?a time/times} the run \\
+           did not score at: {.val {absent}}.",
+          i = if (length(times) > 0L) {
+            "It scored at {.val {times}}."
+          } else {
+            "It scored no metric at an evaluation time."
+          }
+        ),
+        class = "nestedtune_bad_plot_filter",
+        call = call
+      )
+    }
+    at <- per_fold$.eval_time
+    per_fold <- take_rows(per_fold, is.na(at) | at %in% eval_time)
+  }
+  per_fold
 }
 
 # The metric name a row is drawn under: the metric alone, or "<metric> at time
@@ -511,15 +588,18 @@ selection_axis <- function(values) {
 autoplot.nested_results_set <- function(
   object,
   type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
   ...
 ) {
   rlang::check_dots_empty()
   type <- check_plot_type(type)
+  check_plot_filter(type, metric, eval_time)
   call <- rlang::current_env()
   switch(
     type,
     parameters = plot_set_selection(object, call = call),
-    performance = plot_set_performance(object, call = call)
+    performance = plot_set_performance(object, call, metric, eval_time)
   )
 }
 
@@ -529,7 +609,7 @@ autoplot.nested_results_set <- function(
 # `collect_metrics()` reads, never recomputed. Every workflow keeps its slot
 # on the axis, an all-failed one included (IP4, as a failed fold keeps its
 # slot in the single view), and a fold that scored nothing draws no point.
-plot_set_performance <- function(x, call) {
+plot_set_performance <- function(x, call, metric = NULL, eval_time = NULL) {
   ids <- x$wflow_id
   # The per-fold rows, stacked under the readers' fold-state rules: a
   # workflow with a failed fold warns naming it, an all-failed one
@@ -544,6 +624,9 @@ plot_set_performance <- function(x, call) {
     action = "plot",
     noun = "figure"
   )
+  # Filtered over the whole stack, so a metric one workflow scored is drawn
+  # for it and refused only when no workflow scored it.
+  per_fold <- filter_plot_rows(per_fold, metric, eval_time, call = call)
 
   # The panel names, decided over the distinct (metric, estimator, time)
   # keys of the whole set rather than per workflow, so a metric two

@@ -270,6 +270,9 @@ stack_set <- function(
 #'   returns.
 #' @param type Which view to draw: `"parameters"` (the default) or
 #'   `"performance"`, as on [autoplot.nested_results()].
+#' @param metric,eval_time For `type = "performance"`, the metrics and the
+#'   evaluation times to draw panels for, as on [autoplot.nested_results()].
+#'   A metric is refused only when no workflow of the set scored it.
 #' @inheritParams collect_metrics.nested_results_set
 #'
 #' @return
