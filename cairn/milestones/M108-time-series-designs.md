@@ -42,7 +42,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - [x] T1: Build the two designs as test fixtures with `rsample::nested_cv()`. Set `lookback` on `sliding_window()`, whose default gives a one-row analysis set. Then and write the AC1 and AC2 oracle tests against `reference_nested_loop()`. A mismatch here is a defect to fix, not a test to loosen.
 - [x] T2: Run `nested_resamples()` on both designs and write the AC3 split-identity tests. If the constructor refuses either design, lift the refusal only where the D-entry's reasoning covers it.
 - [x] T3: Write the AC4 final-fit test and its reference.
-- [ ] T4: Fit `augment()`'s refusal message (`R/nested-results-collect.R:710`) to the design it refuses, and write the AC5 tests.
+- [x] T4: Fit `augment()`'s refusal message (`R/nested-results-collect.R:710`) to the design it refuses, and write the AC5 tests.
 - [ ] T5: Write the D-entry, the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
@@ -56,6 +56,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: T1 done. `devtools::test()` finished clean with no failure.
 - 2026-09-21: T2 and T3 done in one commit, because the suite run for T2 also read the T3 test. `nested_resamples()` accepted both designs, so no refusal was lifted. Planted defects (inner `skip`, outer `lookback`, a wrong inner design and candidate in the final-fit reference) each failed. Suite clean.
 - 2026-09-21: T4 checkpoint, not checked off. `augment()` names the rows no fold held out when none is held out twice. The AC5 tests failed three times before the fix and pass after it. The `augment()` help is updated, and the D-071 draft for T5 is written. The full suite is still running.
+- 2026-09-21: T4 done. `devtools::test()` exited 0 with no failure. `document()` and both prose sweeps are clean.
 
 ## Decisions
 
