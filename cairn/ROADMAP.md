@@ -1,16 +1,15 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-21 (M106 done and archived; M103 row pruned for terminal-row retention. Validate green.)_
+_Last hygiene check: 2026-09-21 (M107 done and archived. M104 row pruned for terminal-row retention. Validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M107 | A model specification with a formula or recipe as the orchestrators' input | review | — | normal | milestones/M107-model-spec-input.md |
 | M108 | Rolling-origin and sliding-window outer designs | planned | — | normal | milestones/M108-time-series-designs.md |
 | M109 | Selecting each fold's candidate by desirability over several metrics | planned | — | normal | milestones/M109-desirability-selection.md |
+| M107 | A model specification with a formula or recipe as the orchestrators' input | done | — | normal | milestones/archive/M107-model-spec-input.md |
 | M106 | tune's reader arguments and extract methods on the nested classes | done | — | normal | milestones/archive/M106-reader-parity.md |
 | M105 | The workflow identity reads what a function-valued setting closes over | dropped | — | normal | milestones/archive/M105-identity-closure-values.md |
-| M104 | An exact analytic oracle for the outer loop through the majority rule | done | — | normal | milestones/archive/M104-null-model-oracle.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
