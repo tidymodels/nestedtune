@@ -21,6 +21,7 @@
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/collect_selections.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.html</loc></url>
+<url><loc>https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_procedure.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_scored_candidates.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/extract_tune_results.html</loc></url>
@@ -36,6 +37,7 @@
 <url><loc>https://nestedtune.tidymodels.org/reference/nested_workflow_map.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/nestedtune-package.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/predict.nested_final_fit.html</loc></url>
+<url><loc>https://nestedtune.tidymodels.org/reference/predict.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/print.nested_final_fit.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/print.nested_results.html</loc></url>
 <url><loc>https://nestedtune.tidymodels.org/reference/print.nested_results_set.html</loc></url>

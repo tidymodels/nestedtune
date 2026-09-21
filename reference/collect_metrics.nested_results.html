@@ -66,7 +66,7 @@ on all the data.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'nested_results'</span></span>
-<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, summarize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, summarize <span class="op">=</span> <span class="cn">TRUE</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"wide"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,13 +87,19 @@ rather than silently ignored.</p></dd>
 <dd><p>Whether to average the per-fold metrics (<code>TRUE</code>, the
 default) or return them one row per outer fold (<code>FALSE</code>).</p></dd>
 
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>The table's shape: <code>"long"</code> (the default), one row per metric,
+or <code>"wide"</code>, one column per metric. Both are described under What the
+tables hold.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble, described under What the two shapes hold.</p>
+    <p>A tibble, described under What the tables hold.</p>
     </div>
     <div class="section level2">
-    <h2 id="what-the-two-shapes-hold">What the two shapes hold<a class="anchor" aria-label="anchor" href="#what-the-two-shapes-hold"></a></h2>
+    <h2 id="what-the-tables-hold">What the tables hold<a class="anchor" aria-label="anchor" href="#what-the-tables-hold"></a></h2>
 
 
 
@@ -102,9 +108,18 @@ the number of folds <code>n</code> behind it, and the standard error of that mea
 Unsummarized, there is one row per outer fold and metric. On a design
 weighted with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> the unsummarized shape also
 carries each fold's weight in a <code>.weight</code> column.</p>
+<p><code>type = "wide"</code> turns either shape into one column per metric, as tune's
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> does. The column holds the mean when summarized and
+each fold's estimate when not. Its other columns are the keys of those
+values: the outer fold's labels when unsummarized, and <code>.eval_time</code> where
+the long shape has it. The estimator, <code>n</code>, <code>std_err</code> and <code>.weight</code> are
+dropped. Two cases are refused with class <code>nestedtune_wide_collision</code>,
+because each puts two values in one place: a metric scored with two
+estimators, and a metric named like a key column. The long shape keeps
+both.</p>
 <p>A metric measured at several evaluation times (<code>eval_time</code> on
-<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>) gets a row per time in both shapes. It is never
-averaged across times. Both shapes carry a <code>.eval_time</code> column exactly
+<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>) gets a row per time in every table. It is never
+averaged across times. Every table carries a <code>.eval_time</code> column exactly
 when the run was scored by a dynamic or integrated survival metric, as
 tune's own <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> does. A static metric's row beside one
 holds <code>NA</code> there.</p>

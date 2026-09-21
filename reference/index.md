@@ -48,6 +48,9 @@ design.
 - [`summary(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
   [`print(`*`<summary.nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
   : Summarize a nested cross-validation result
+- [`predict(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/predict.nested_results.md)
+  [`predict(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/predict.nested_results.md)
+  : Predicting from a nested run
 - [`autoplot(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
   : Plot a nested cross-validation result
 - [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
@@ -92,6 +95,14 @@ field on the results.
 - [`predict(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/predict.nested_final_fit.md)
   [`augment(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/predict.nested_final_fit.md)
   : Predict with the final model
+- [`extract_fit_parsnip(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_fit_engine(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_recipe(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_mold(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_preprocessor(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_spec_parsnip(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`outcome_names(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  : Extract the parts of a final fit's workflow
 - [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
   : Extract the tuning run a final fit was selected from
 - [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
@@ -102,6 +113,13 @@ field on the results.
 - [`reexports`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`collect_metrics`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`extract_workflow`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_fit_parsnip`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_fit_engine`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_recipe`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_mold`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_preprocessor`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_spec_parsnip`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`outcome_names`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`autoplot`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`augment`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`compute_metrics`](https://nestedtune.tidymodels.org/reference/reexports.md)

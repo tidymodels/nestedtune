@@ -12,7 +12,7 @@ builds that model by running the procedure once more on all the data.
 
 ``` r
 # S3 method for class 'nested_results'
-collect_metrics(x, ..., summarize = TRUE)
+collect_metrics(x, ..., summarize = TRUE, type = c("long", "wide"))
 ```
 
 ## Arguments
@@ -33,11 +33,17 @@ collect_metrics(x, ..., summarize = TRUE)
   Whether to average the per-fold metrics (`TRUE`, the default) or
   return them one row per outer fold (`FALSE`).
 
+- type:
+
+  The table's shape: `"long"` (the default), one row per metric, or
+  `"wide"`, one column per metric. Both are described under What the
+  tables hold.
+
 ## Value
 
-A tibble, described under What the two shapes hold.
+A tibble, described under What the tables hold.
 
-## What the two shapes hold
+## What the tables hold
 
 Summarized, there is one row per metric, with the mean across outer
 folds, the number of folds `n` behind it, and the standard error of that
@@ -47,11 +53,21 @@ design weighted with
 the unsummarized shape also carries each fold's weight in a `.weight`
 column.
 
+`type = "wide"` turns either shape into one column per metric, as tune's
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+does. The column holds the mean when summarized and each fold's estimate
+when not. Its other columns are the keys of those values: the outer
+fold's labels when unsummarized, and `.eval_time` where the long shape
+has it. The estimator, `n`, `std_err` and `.weight` are dropped. Two
+cases are refused with class `nestedtune_wide_collision`, because each
+puts two values in one place: a metric scored with two estimators, and a
+metric named like a key column. The long shape keeps both.
+
 A metric measured at several evaluation times (`eval_time` on
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md))
-gets a row per time in both shapes. It is never averaged across times.
-Both shapes carry a `.eval_time` column exactly when the run was scored
-by a dynamic or integrated survival metric, as tune's own
+gets a row per time in every table. It is never averaged across times.
+Every table carries a `.eval_time` column exactly when the run was
+scored by a dynamic or integrated survival metric, as tune's own
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 does. A static metric's row beside one holds `NA` there.
 

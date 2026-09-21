@@ -22,7 +22,7 @@ gives each workflow's data rows with its predictions.
 
 ``` r
 # S3 method for class 'nested_results_set'
-collect_metrics(x, ..., summarize = TRUE)
+collect_metrics(x, ..., summarize = TRUE, type = c("long", "wide"))
 
 # S3 method for class 'nested_results_set'
 collect_selections(x, ...)
@@ -63,6 +63,15 @@ augment(x, ...)
   Whether to average each workflow's per-fold metrics (`TRUE`, the
   default) or return them one row per outer fold (`FALSE`), as on
   [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
+
+- type:
+
+  For
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  the table's shape: `"long"` (the default) or `"wide"`, as on
+  [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
+  The wide shape is keyed on `wflow_id` too, and a metric one workflow
+  did not score is `NA` in its rows.
 
 - metrics, event_level:
 

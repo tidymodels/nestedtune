@@ -21,7 +21,13 @@ reports.
 
 ``` r
 # S3 method for class 'nested_results'
-autoplot(object, type = c("parameters", "performance"), ...)
+autoplot(
+  object,
+  type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -37,6 +43,17 @@ autoplot(object, type = c("parameters", "performance"), ...)
 - type:
 
   Which view to draw: `"parameters"` (the default) or `"performance"`.
+
+- metric, eval_time:
+
+  For `type = "performance"`, the metrics and the evaluation times to
+  draw panels for. `NULL`, the default, draws them all. A static
+  metric's panel has no time and is drawn whatever `eval_time` names, as
+  in tune's
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html).
+  A metric or a time the run did not score is refused with class
+  `nestedtune_bad_plot_filter`, as is either argument given with
+  `type = "parameters"`.
 
 - ...:
 
@@ -108,4 +125,6 @@ res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 autoplot(res)
 
 autoplot(res, type = "performance")
+
+autoplot(res, type = "performance", metric = "rmse")
 ```

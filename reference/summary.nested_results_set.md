@@ -24,7 +24,13 @@ stacks each workflow's selection table under its id.
 agreement(x, ...)
 
 # S3 method for class 'nested_results_set'
-autoplot(object, type = c("parameters", "performance"), ...)
+autoplot(
+  object,
+  type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
+  ...
+)
 
 # S3 method for class 'nested_results_set'
 summary(object, ...)
@@ -52,6 +58,13 @@ print(x, ...)
   Which view to draw: `"parameters"` (the default) or `"performance"`,
   as on
   [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md).
+
+- metric, eval_time:
+
+  For `type = "performance"`, the metrics and the evaluation times to
+  draw panels for, as on
+  [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md).
+  A metric is refused only when no workflow of the set scored it.
 
 ## Value
 

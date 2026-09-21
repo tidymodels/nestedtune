@@ -44,10 +44,11 @@ compute_metrics(x, metrics, ..., summarize = TRUE, event_level = NULL)
 
 ## Value
 
-A tibble in the two shapes
+A tibble, summarized or per fold as
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-returns. Given the metric set and the event level the run used, it is
-identical to `collect_metrics(x, summarize = summarize)`.
+returns it in the long shape. Given the metric set and the event level
+the run used, it is identical to
+`collect_metrics(x, summarize = summarize)`.
 
 ## What is scored again, and what is not
 
