@@ -42,7 +42,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T3: Add `metric` and `eval_time` to both `autoplot()` methods (`R/nested-results-plot.R:77`). Filter the rows before `plot_performance()` builds its panels, because the panel labels carry qualifiers (`metric_panel()`, `qualify_panels()`). Render the filtered plot before approving its snapshot (LESSONS, plots).
 - [x] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
 - [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
-- [ ] T6: Add `extract-nested_final_fit` and `predict.nested_results` to the `_pkgdown.yml` reference index, and write a D-entry for the seven re-exported generics and the predict refusal (review F16).
+- [x] T6: Add `extract-nested_final_fit` and `predict.nested_results` to the `_pkgdown.yml` reference index, and write a D-entry for the seven re-exported generics and the predict refusal (review F16).
 - [ ] T7: Read the scored times before the `metric` filter in `filter_plot_rows()` (F1). Test a set in which one workflow lacks a metric through the filter directly (F7).
 - [ ] T8: Refuse a wide pivot in which two rows share a key and a metric, or a metric is named like a key column, with one class (F2, F4). Document the refusal and fix the `type` help's pointer (F14). Add an oracle provenance header and a weighted-run wide test (F6).
 - [ ] T9: Move the misplaced comment in `R/checks.R` (F9), tighten the predict set test's `id` match (F10), re-wrap lines over 80 columns (F15), and mention the extractors in the final-fit object comment (history note).
@@ -60,6 +60,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch point `d477922` and on the branch at `25170cf`, both run the same day. Status set to review.
 - 2026-09-21: review pass 1 returned the milestone: the consistency gate's `pkgdown::check_pkgdown()` failed, with `extract-nested_final_fit` and `predict.nested_results` missing from the `_pkgdown.yml` reference index. Defect return 1.
 - 2026-09-21: pass-1 triage accepted at the gate. Tasks T6-T9 added for the pkgdown index and the fix-now findings, and Coverage extended to them. F3 becomes a candidate row, and F5, F8, F11, F12 and F13 are rejected.
+- 2026-09-21: T6 done. Both topics were added to `_pkgdown.yml`, and `pkgdown::check_pkgdown()` now reports no problems. D-068 records the seven re-exports and the predict refusal.
 
 ## Decisions
 

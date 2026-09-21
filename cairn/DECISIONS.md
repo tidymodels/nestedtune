@@ -1811,6 +1811,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** a setting that is a function stays compared by its deparsed text, as it is on the default branch. The closure walk never merges, and `codetools` never joins Imports. The help page's existing sentence already says two functions with one text over different closed-over values are not told apart. M105 is dropped as descoped: the question it asked has an answer.
 **Consequences:** the gap stays open and sits on a candidate row that carries RR08's declared-values design as the starting point for any future attempt. D-066's reasoning for `codetools` over a hand-rolled scan stands for its own question; what changes is that no name scan is needed. (Supersedes D-066.)
 
+### D-068 (2026-09-21): a `nested_final_fit` answers seven workflow extractors, which are re-exported, and `predict()` on a results object refuses by class. Extends the re-exports D-052 and D-063 made, and fills the `extract_` seam D-023 opened
+
+**Context:** M106 compared the package with tune 2.1.0. A final fit answered only `extract_workflow()`, so reaching its parsnip fit or recipe took two calls. `predict()` on a `nested_results` gave R's bare "no applicable method", which names no door.
+**Decision:** `nested_final_fit` gets methods for `extract_fit_parsnip()`, `extract_fit_engine()`, `extract_recipe()`, `extract_mold()`, `extract_preprocessor()`, `extract_spec_parsnip()` and `outcome_names()`. Each hands the call to the trained workflow. The generics are imported from tune and re-exported, as `extract_workflow` is. The methods refuse a stray argument, because workflows' own methods other than `extract_recipe()` drop one silently, the reason `augment.nested_final_fit()` fences its dots. `extract_recipe()` takes `estimated` by name. `predict()` on a `nested_results` or a `nested_results_set` refuses with class `nestedtune_predict_results` and names `nested_final_fit()`. Considered and rejected: importing the six hardhat generics from hardhat, which adds an Import for objects tune already re-exports; and passing the dots on to the workflow methods, which would make a misspelled argument a silent no-op.
+**Consequences:** the ranking and collecting refusals of D-010 and D-014 stand, since none of the seven produces a performance number. The re-exports depend on tune continuing to re-export the hardhat generics. Falsified by tune dropping one of them, or by a workflows method starting to use an argument these methods refuse.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

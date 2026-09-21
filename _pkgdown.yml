@@ -52,6 +52,7 @@ reference:
   - augment.nested_results
   - print.nested_results
   - summary.nested_results
+  - predict.nested_results
   - autoplot.nested_results
   - agreement
   - extract_procedure
@@ -71,6 +72,7 @@ reference:
   - print.nested_final_fit
   - summary.nested_final_fit
   - predict.nested_final_fit
+  - extract-nested_final_fit
   - extract_tune_results
   - extract_scored_candidates
 
