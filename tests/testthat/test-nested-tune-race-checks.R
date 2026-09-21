@@ -286,7 +286,7 @@ check_calls <- function(fn) {
 }
 
 test_that("every check the grid path makes, the racing path makes too", {
-  grid_checks <- check_calls(nested_tune_grid)
+  grid_checks <- check_calls(nested_tune_grid.workflow)
   race_checks <- check_calls(nested_tune_race)
 
   # One fact held independently of the derivation: the enumeration cannot
@@ -314,8 +314,20 @@ test_that("each shared check fires through both racing exports", {
         race_call(fn, wf, folds, 3, control = ctrl)
       },
       check_control = function() race_call(fn, wf, folds, control = "no"),
+      check_required = function() race_call(fn, wf),
+      check_no_preprocessor = function() {
+        race_call(
+          fn,
+          wf,
+          preprocessor = y ~ x1,
+          resamples = folds,
+          control = ctrl
+        )
+      },
+      # An empty workflow, since a bare spec takes the model-spec route
+      # (M107).
       check_workflow = function() {
-        race_call(fn, parsnip::linear_reg(), folds, control = ctrl)
+        race_call(fn, workflows::workflow(), folds, control = ctrl)
       },
       check_untuned_workflow = function() {
         race_call(fn, fixed_workflow(d), folds, control = ctrl)
@@ -360,7 +372,9 @@ test_that("each shared check fires through both racing exports", {
     patterns <- c(
       check_dots_control = "accepts `control`",
       check_control = "control_race",
-      check_workflow = "must be a",
+      check_no_preprocessor = "carries its own preprocessor",
+      check_required = "`resamples` is absent",
+      check_workflow = "no model specification",
       check_untuned_workflow = "no parameter marked for tuning",
       check_nested = "nested resampling design",
       check_grid = "grid",
@@ -373,7 +387,7 @@ test_that("each shared check fires through both racing exports", {
     )
 
     expect_identical(
-      setdiff(check_calls(nested_tune_grid), names(fired)),
+      setdiff(check_calls(nested_tune_grid.workflow), names(fired)),
       character(0)
     )
 

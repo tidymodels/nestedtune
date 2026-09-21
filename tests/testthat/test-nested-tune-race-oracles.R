@@ -42,16 +42,20 @@
 # it exists here.
 
 test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order (AC1)", {
+  # Method by method since M107, each export being a generic on `object`.
+  for (cls in c("workflow", "model_spec")) {
+    grid_formals <- formals(get(paste0("nested_tune_grid.", cls)))
+    expect_identical(
+      formals(get(paste0("nested_tune_race_anova.", cls))),
+      grid_formals
+    )
+    expect_identical(
+      formals(get(paste0("nested_tune_race_win_loss.", cls))),
+      grid_formals
+    )
+  }
   expect_identical(
-    formals(nested_tune_race_anova),
-    formals(nested_tune_grid)
-  )
-  expect_identical(
-    formals(nested_tune_race_win_loss),
-    formals(nested_tune_grid)
-  )
-  expect_identical(
-    names(formals(nested_tune_grid)),
+    names(formals(nested_tune_grid.workflow)),
     c(
       "object",
       "resamples",

@@ -16,9 +16,11 @@ test_that("`object` must be an unfitted workflow", {
   d <- make_reg_data()
   folds <- valid_folds(d)
 
+  # A bare spec is an accepted `object` since M107, and a design in the
+  # preprocessor's place is what the spec route refuses.
   expect_error(
     nested_tune_grid(parsnip::linear_reg(), folds),
-    "must be a"
+    class = "nestedtune_bad_preprocessor"
   )
   expect_error(nested_tune_grid("not a workflow", folds), "must be a")
   expect_error(nested_tune_grid(NULL, folds), "must be a")

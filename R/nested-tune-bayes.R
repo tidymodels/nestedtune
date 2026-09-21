@@ -132,7 +132,53 @@
 #' @templateVar LINKS [tune::tune_bayes()]
 #' @template seealso-orchestrator
 #' @export
-nested_tune_bayes <- function(
+nested_tune_bayes <- function(object, ...) {
+  UseMethod("nested_tune_bayes")
+}
+
+#' @rdname nested_tune_bayes
+#' @export
+nested_tune_bayes.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+# The model-spec door, as `nested_tune_grid.model_spec()` describes it.
+#' @rdname nested_tune_bayes
+#' @export
+nested_tune_bayes.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  iter = 10,
+  param_info = NULL,
+  metrics = NULL,
+  initial = 5,
+  objective = tune::exp_improve(),
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+) {
+  check_preprocessor(preprocessor)
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_bayes(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    iter = iter,
+    param_info = param_info,
+    metrics = metrics,
+    initial = initial,
+    objective = objective,
+    event_level = event_level,
+    eval_time = eval_time,
+    select = select
+  ))
+}
+
+#' @rdname nested_tune_bayes
+#' @export
+nested_tune_bayes.workflow <- function(
   object,
   resamples,
   ...,
@@ -145,7 +191,10 @@ nested_tune_bayes <- function(
   eval_time = NULL,
   select = selection_rule()
 ) {
-  control <- check_dots_control(capture_dots(...))
+  dots <- capture_dots(...)
+  check_no_preprocessor(dots, resamples)
+  rlang::check_required(resamples)
+  control <- check_dots_control(dots)
   check_workflow(object)
   check_untuned_workflow(object)
   check_nested(resamples)

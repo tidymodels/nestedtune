@@ -2,9 +2,29 @@
 % Please edit documentation in R/nested-tune-grid.R
 \name{nested_tune_grid}
 \alias{nested_tune_grid}
+\alias{nested_tune_grid.default}
+\alias{nested_tune_grid.model_spec}
+\alias{nested_tune_grid.workflow}
 \title{Nested cross-validation with a grid search inside}
 \usage{
-nested_tune_grid(
+nested_tune_grid(object, ...)
+
+\method{nested_tune_grid}{default}(object, ...)
+
+\method{nested_tune_grid}{model_spec}(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+)
+
+\method{nested_tune_grid}{workflow}(
   object,
   resamples,
   ...,
@@ -18,16 +38,27 @@ nested_tune_grid(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specification with
+such a parameter, given with \code{preprocessor}. A workflow with no marker is
+refused, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+
+\item{...}{On the generic, the arguments of the method that \code{object}
+selects. On a method, a control object from \code{\link[tune:control_grid]{tune::control_grid()}}, as
+\code{control}, and nothing else. Every argument after \code{...} is matched by
+name. The section on differences from tune says what becomes of
+each slot.}
+
+\item{preprocessor}{A formula or a recipe, when \code{object} is a model
+specification. The two are combined as
+\code{workflows::workflow(preprocessor, object)}, and the call runs as it
+does on that workflow. Other preprocessors, such as
+\code{\link[workflows:workflow_variables]{workflows::workflow_variables()}}, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
-
-\item{...}{A control object from \code{\link[tune:control_grid]{tune::control_grid()}}, as \code{control}, and
-nothing else. Every argument after \code{...} is matched by name. The
-section on differences from tune says what becomes of each slot.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
 a parameters set is derived from other arguments. Passing this argument can
@@ -95,6 +126,12 @@ it with another search:
 With this function they are the package's orchestrators: each runs the
 outer loop and hands the inner tuning to tune or finetune. Their pages
 say what differs, and this page is the reference for what the six share.
+
+Each of the six also takes a parsnip model specification and a
+preprocessor in tune's order, as in
+\code{nested_tune_grid(spec, preprocessor, resamples)}. The call runs as it
+does on \code{workflows::workflow(preprocessor, spec)}. \code{\link[=nested_final_fit]{nested_final_fit()}}
+takes that workflow, not the specification.
 
 \code{grid} and \code{param_info} reach every fold's inner call as
 \code{\link[tune:tune_grid]{tune::tune_grid()}} takes them. A data frame has one column per tuned

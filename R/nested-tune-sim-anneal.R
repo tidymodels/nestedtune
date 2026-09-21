@@ -146,7 +146,53 @@
 #' @templateVar LINKS [nested_tune_bayes()], [finetune::tune_sim_anneal()]
 #' @template seealso-orchestrator
 #' @export
-nested_tune_sim_anneal <- function(
+nested_tune_sim_anneal <- function(object, ...) {
+  UseMethod("nested_tune_sim_anneal")
+}
+
+#' @rdname nested_tune_sim_anneal
+#' @export
+nested_tune_sim_anneal.default <- function(object, ...) {
+  abort_bad_object(object)
+}
+
+# The model-spec door, as `nested_tune_grid.model_spec()` describes it.
+#' @rdname nested_tune_sim_anneal
+#' @export
+nested_tune_sim_anneal.model_spec <- function(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  iter = 10,
+  param_info = NULL,
+  metrics = NULL,
+  initial = 1,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+) {
+  # finetune first, as the workflow method does.
+  check_tuner_installed("tune_sim_anneal")
+  check_preprocessor(preprocessor)
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_sim_anneal(
+    workflows::workflow(preprocessor, object),
+    resamples,
+    ...,
+    iter = iter,
+    param_info = param_info,
+    metrics = metrics,
+    initial = initial,
+    event_level = event_level,
+    eval_time = eval_time,
+    select = select
+  ))
+}
+
+#' @rdname nested_tune_sim_anneal
+#' @export
+nested_tune_sim_anneal.workflow <- function(
   object,
   resamples,
   ...,
@@ -165,7 +211,10 @@ nested_tune_sim_anneal <- function(
   # Bayesian sibling's checks in its order, with the two floors that are
   # this sibling's own (D-046).
   check_tuner_installed("tune_sim_anneal")
-  control <- check_dots_control(capture_dots(...))
+  dots <- capture_dots(...)
+  check_no_preprocessor(dots, resamples)
+  rlang::check_required(resamples)
+  control <- check_dots_control(dots)
   check_workflow(object)
   check_untuned_workflow(object)
   check_nested(resamples)

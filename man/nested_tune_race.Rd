@@ -3,10 +3,33 @@
 \name{nested_tune_race}
 \alias{nested_tune_race}
 \alias{nested_tune_race_anova}
+\alias{nested_tune_race_anova.default}
+\alias{nested_tune_race_anova.model_spec}
+\alias{nested_tune_race_anova.workflow}
 \alias{nested_tune_race_win_loss}
+\alias{nested_tune_race_win_loss.default}
+\alias{nested_tune_race_win_loss.model_spec}
+\alias{nested_tune_race_win_loss.workflow}
 \title{Nested cross-validation with racing inside}
 \usage{
-nested_tune_race_anova(
+nested_tune_race_anova(object, ...)
+
+\method{nested_tune_race_anova}{default}(object, ...)
+
+\method{nested_tune_race_anova}{model_spec}(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+)
+
+\method{nested_tune_race_anova}{workflow}(
   object,
   resamples,
   ...,
@@ -18,7 +41,24 @@ nested_tune_race_anova(
   select = selection_rule()
 )
 
-nested_tune_race_win_loss(
+nested_tune_race_win_loss(object, ...)
+
+\method{nested_tune_race_win_loss}{default}(object, ...)
+
+\method{nested_tune_race_win_loss}{model_spec}(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  param_info = NULL,
+  grid = 10,
+  metrics = NULL,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+)
+
+\method{nested_tune_race_win_loss}{workflow}(
   object,
   resamples,
   ...,
@@ -32,16 +72,27 @@ nested_tune_race_win_loss(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specification with
+such a parameter, given with \code{preprocessor}. A workflow with no marker is
+refused, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+
+\item{...}{On the generic, the arguments of the method that \code{object}
+selects. On a method, a control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as
+\code{control}, and nothing else. Every argument after \code{...} is matched by
+name. The section on differences from finetune says what becomes of
+each slot.}
+
+\item{preprocessor}{A formula or a recipe, when \code{object} is a model
+specification. The two are combined as
+\code{workflows::workflow(preprocessor, object)}, and the call runs as it
+does on that workflow. Other preprocessors, such as
+\code{\link[workflows:workflow_variables]{workflows::workflow_variables()}}, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
-
-\item{...}{A control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as \code{control}, and
-nothing else. Every argument after \code{...} is matched by name. The
-section on differences from finetune says what becomes of each slot.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
 a parameters set is derived from other arguments. Passing this argument can

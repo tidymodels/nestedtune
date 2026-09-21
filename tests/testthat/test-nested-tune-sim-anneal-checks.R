@@ -248,8 +248,8 @@ check_calls <- function(fn) {
 }
 
 test_that("every check the Bayesian path makes, the annealing path makes too", {
-  bayes_checks <- check_calls(nested_tune_bayes)
-  anneal_checks <- check_calls(nested_tune_sim_anneal)
+  bayes_checks <- check_calls(nested_tune_bayes.workflow)
+  anneal_checks <- check_calls(nested_tune_sim_anneal.workflow)
 
   # One fact held independently of the derivation: the enumeration cannot
   # silently empty.
@@ -279,8 +279,18 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     check_control = function() {
       nested_tune_sim_anneal(wf, folds, control = "no")
     },
+    check_required = function() nested_tune_sim_anneal(wf),
+    check_no_preprocessor = function() {
+      nested_tune_sim_anneal(
+        wf,
+        preprocessor = y ~ x1,
+        resamples = folds,
+        control = ctrl
+      )
+    },
+    # An empty workflow, since a bare spec takes the model-spec route (M107).
     check_workflow = function() {
-      nested_tune_sim_anneal(parsnip::linear_reg(), folds, control = ctrl)
+      nested_tune_sim_anneal(workflows::workflow(), folds, control = ctrl)
     },
     check_untuned_workflow = function() {
       nested_tune_sim_anneal(fixed_workflow(d), folds, control = ctrl)
@@ -318,7 +328,9 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
   patterns <- c(
     check_dots_control = "accepts `control`",
     check_control = "control_sim_anneal",
-    check_workflow = "must be a",
+    check_no_preprocessor = "carries its own preprocessor",
+    check_required = "`resamples` is absent",
+    check_workflow = "no model specification",
     check_untuned_workflow = "no parameter marked for tuning",
     check_nested = "nested resampling design",
     check_iter = "at least 1",
@@ -330,7 +342,7 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
     check_selection_rule = "selection_rule"
   )
 
-  shared <- setdiff(check_calls(nested_tune_bayes), "check_objective")
+  shared <- setdiff(check_calls(nested_tune_bayes.workflow), "check_objective")
   expect_identical(setdiff(shared, names(fired)), character(0))
 
   for (nm in names(fired)) {

@@ -35,7 +35,7 @@
 
 test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1 (AC1)", {
   expect_identical(
-    names(formals(nested_tune_sim_anneal)),
+    names(formals(nested_tune_sim_anneal.workflow)),
     c(
       "object",
       "resamples",
@@ -49,10 +49,10 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "select"
     )
   )
-  expect_identical(formals(nested_tune_sim_anneal)$iter, 10)
-  expect_identical(formals(nested_tune_sim_anneal)$initial, 1)
+  expect_identical(formals(nested_tune_sim_anneal.workflow)$iter, 10)
+  expect_identical(formals(nested_tune_sim_anneal.workflow)$initial, 1)
   expect_identical(
-    formals(nested_tune_sim_anneal)[c(
+    formals(nested_tune_sim_anneal.workflow)[c(
       "object",
       "resamples",
       "iter",
@@ -62,7 +62,7 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "eval_time",
       "select"
     )],
-    formals(nested_tune_bayes)[c(
+    formals(nested_tune_bayes.workflow)[c(
       "object",
       "resamples",
       "iter",

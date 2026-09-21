@@ -2,9 +2,30 @@
 % Please edit documentation in R/nested-tune-sim-anneal.R
 \name{nested_tune_sim_anneal}
 \alias{nested_tune_sim_anneal}
+\alias{nested_tune_sim_anneal.default}
+\alias{nested_tune_sim_anneal.model_spec}
+\alias{nested_tune_sim_anneal.workflow}
 \title{Nested cross-validation with simulated annealing inside}
 \usage{
-nested_tune_sim_anneal(
+nested_tune_sim_anneal(object, ...)
+
+\method{nested_tune_sim_anneal}{default}(object, ...)
+
+\method{nested_tune_sim_anneal}{model_spec}(
+  object,
+  preprocessor,
+  resamples,
+  ...,
+  iter = 10,
+  param_info = NULL,
+  metrics = NULL,
+  initial = 1,
+  event_level = "first",
+  eval_time = NULL,
+  select = selection_rule()
+)
+
+\method{nested_tune_sim_anneal}{workflow}(
   object,
   resamples,
   ...,
@@ -19,16 +40,27 @@ nested_tune_sim_anneal(
 }
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
-for tuning with \code{\link[tune:tune]{tune::tune()}}. A workflow with no marker is refused, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+for tuning with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specification with
+such a parameter, given with \code{preprocessor}. A workflow with no marker is
+refused, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
+
+\item{...}{On the generic, the arguments of the method that \code{object}
+selects. On a method, a control object from \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}}, as
+\code{control}, and nothing else. Every argument after \code{...} is matched by
+name. The section on differences from finetune says what becomes of
+each slot.}
+
+\item{preprocessor}{A formula or a recipe, when \code{object} is a model
+specification. The two are combined as
+\code{workflows::workflow(preprocessor, object)}, and the call runs as it
+does on that workflow. Other preprocessors, such as
+\code{\link[workflows:workflow_variables]{workflows::workflow_variables()}}, go through a workflow. A workflow
+already carries its preprocessor, so one given beside a workflow is
+refused.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
 designs says what the design must hold.}
-
-\item{...}{A control object from \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}}, as \code{control}, and
-nothing else. Every argument after \code{...} is matched by name. The
-section on differences from finetune says what becomes of each slot.}
 
 \item{iter}{The number of search iterations, a whole number of at least 1.
 The section on the iterations says why \code{0} is refused.}
