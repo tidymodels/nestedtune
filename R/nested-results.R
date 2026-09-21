@@ -756,6 +756,9 @@ new_tbl <- function(cols) {
 #'   siblings.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
+#' @param type The table's shape: `"long"` (the default), one row per metric,
+#'   or `"wide"`, one column per metric. The wide shape is described under
+#'   What the two shapes hold.
 #' @param ... Not used. It must be empty. An argument passed here is an error
 #'   rather than silently ignored.
 #'
@@ -768,6 +771,12 @@ new_tbl <- function(cols) {
 #' Unsummarized, there is one row per outer fold and metric. On a design
 #' weighted with [tune::add_resample_weights()] the unsummarized shape also
 #' carries each fold's weight in a `.weight` column.
+#'
+#' `type = "wide"` turns either shape into one column per metric, as tune's
+#' `collect_metrics()` does. The column holds the mean when summarized and
+#' each fold's estimate when not. Its other columns are the keys of those values:
+#' the outer fold's labels when unsummarized, and `.eval_time` where the long
+#' shape has it. The estimator, `n`, `std_err` and `.weight` are dropped.
 #'
 #' A metric measured at several evaluation times (`eval_time` on
 #' [nested_tune_grid()]) gets a row per time in both shapes. It is never
@@ -837,16 +846,58 @@ new_tbl <- function(cols) {
 #' @seealso [collect_metrics.nested_results_set()] for the same function on a
 #'   workflow-set run
 #' @export
-collect_metrics.nested_results <- function(x, ..., summarize = TRUE) {
+collect_metrics.nested_results <- function(
+  x,
+  ...,
+  summarize = TRUE,
+  type = c("long", "wide")
+) {
   rlang::check_dots_empty()
+  type <- check_metrics_type(type)
   check_any_completed(x)
   warn_partial_summary(x)
 
-  per_fold <- per_fold_metrics(x)
-  if (!summarize) {
-    return(per_fold)
+  out <- per_fold_metrics(x)
+  if (summarize) {
+    out <- summarize_folds(out)
   }
-  summarize_folds(per_fold)
+  if (identical(type, "wide")) {
+    out <- pivot_metrics_wide(out)
+  }
+  out
+}
+
+# The wide shape: one column per metric, holding the mean (summarized) or the
+# fold's estimate, keyed on every other column that is not a field of the
+# metric or of its summary -- the fold labels, `.eval_time`, `wflow_id` on a
+# set. tune's pivot_metrics() keys the same way and drops `.estimator`, `n`
+# and `std_err` with it (GP1). Metric columns come in the order the long
+# table first lists them, and the rows in the order it first lists each key.
+pivot_metrics_wide <- function(long) {
+  value <- if ("mean" %in% names(long)) "mean" else ".estimate"
+  dropped <- c(".metric", ".estimator", ".estimate", "mean", "n", "std_err")
+  dropped <- c(dropped, ".weight")
+  keys <- long[setdiff(names(long), dropped)]
+  group <- if (length(keys) == 0L) {
+    rep(1L, nrow(long))
+  } else {
+    vctrs::vec_group_id(keys)
+  }
+  first <- !duplicated(group)
+  cols <- as.list(keys)
+  cols <- lapply(cols, function(col) col[first])
+  n <- sum(first)
+  row <- match(group, group[first])
+  for (metric in unique(long$.metric)) {
+    at <- long$.metric == metric
+    column <- rep(NA_real_, n)
+    column[row[at]] <- long[[value]][at]
+    cols[[metric]] <- column
+  }
+  if (length(cols) == 0L) {
+    return(new_tbl(list()))
+  }
+  new_tbl(cols)
 }
 
 # The averaging, with no conditions of its own.

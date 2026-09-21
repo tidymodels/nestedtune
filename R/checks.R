@@ -955,6 +955,33 @@ eval_inside_spec <- function(inside, data, env, call = rlang::caller_env()) {
 # The default is the whole vector, as the signature spells it out, and the first
 # element wins -- so this accepts it, accepts either name on its own, and
 # refuses anything else by naming both.
+check_metrics_type <- function(type, call = rlang::caller_env()) {
+  allowed <- c("long", "wide")
+  if (identical(type, allowed)) {
+    return(allowed[[1L]])
+  }
+  if (
+    is.character(type) &&
+      length(type) == 1L &&
+      !is.na(type) &&
+      type %in% allowed
+  ) {
+    return(type)
+  }
+  cli::cli_abort(
+    c(
+      "{.arg type} must be {.or {.val {allowed}}}.",
+      x = if (is.character(type) && length(type) == 1L) {
+        "Got {.val {type}}."
+      } else {
+        "Got {.obj_type_friendly {type}}."
+      }
+    ),
+    class = "nestedtune_bad_type",
+    call = call
+  )
+}
+
 check_plot_type <- function(type, call = rlang::caller_env()) {
   allowed <- c("parameters", "performance")
   if (identical(type, allowed)) {

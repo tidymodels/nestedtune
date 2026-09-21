@@ -259,7 +259,7 @@ test_that("AC5: every registered method whose `...` is unused fences it", {
 test_that("AC6: collect_metrics() puts `summarize` behind the barrier", {
   expect_identical(
     names(formals(getS3method("collect_metrics", "nested_results"))),
-    c("x", "...", "summarize")
+    c("x", "...", "summarize", "type")
   )
 })
 

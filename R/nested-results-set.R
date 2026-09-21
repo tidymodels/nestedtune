@@ -27,6 +27,10 @@
 #' @param summarize Whether to average each workflow's per-fold metrics
 #'   (`TRUE`, the default) or return them one row per outer fold (`FALSE`),
 #'   as on [collect_metrics.nested_results()].
+#' @param type For `collect_metrics()`, the table's shape: `"long"` (the
+#'   default) or `"wide"`, as on [collect_metrics.nested_results()]. The wide
+#'   shape is keyed on `wflow_id` too, and a metric one workflow did not
+#'   score is `NA` in its rows.
 #'
 #' @return A tibble: `wflow_id` first, then the columns the single-workflow
 #'   method returns for each element. The rows are bound in the set's order
@@ -79,13 +83,25 @@ NULL
 
 #' @rdname collect_metrics.nested_results_set
 #' @export
-collect_metrics.nested_results_set <- function(x, ..., summarize = TRUE) {
+collect_metrics.nested_results_set <- function(
+  x,
+  ...,
+  summarize = TRUE,
+  type = c("long", "wide")
+) {
   rlang::check_dots_empty()
-  stack_set(
+  type <- check_metrics_type(type)
+  # Stacked long, then pivoted once, so a metric one workflow lacks is a
+  # missing value in its rows rather than a column the stack cannot align.
+  out <- stack_set(
     x,
     function(r) collect_metrics(r, summarize = summarize),
     call = rlang::current_env()
   )
+  if (identical(type, "wide")) {
+    out <- pivot_metrics_wide(out)
+  }
+  out
 }
 
 #' @rdname collect_metrics.nested_results_set
