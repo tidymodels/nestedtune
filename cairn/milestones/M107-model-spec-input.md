@@ -62,6 +62,7 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: review gate: the user took every fix-now group (findings 1, 2, 4 to 7, 10 to 13) and approved the merge, subject to a re-ask if a fix is nontrivial. D-070 is widened for finding 10, instead of a new entry, to keep one correcting entry for this milestone. It had not reached `main`.
 - 2026-09-21: step-7 approval: m107-model-spec-input approved for merge (re-asked after the nontrivial fixes in 60dec8e).
 - 2026-09-21: PR #122 opened. The CI watch reached the time limit and was stopped. build, format-suggest and both prose-sweep runs passed, and 8 R CMD check and coverage jobs were still pending. Not merged.
+- 2026-09-21: resume: PR #122 open. CI red on `ubuntu-latest (release)` in both check workflows. Cause: with `R_KEEP_PKG_SOURCE: yes`, the frame's call carries a `srcref` attribute, so `with_user_call()`'s `identical()` never matched. Also, on the leg without suggested packages, the AC4 and forwarding tests reached the finetune refusal first. Fix: compare the calls without attributes, and pass over the racers and the annealer in those tests where finetune is absent. A kept-source install reproduced the failure and passes after the fix (306 expectations). The full suite passes locally: 11040 expectations, 0 failed. The fix is small and keeps the approved behavior, so approval stands.
 
 ## Decisions
 

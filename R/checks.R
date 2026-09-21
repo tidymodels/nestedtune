@@ -217,15 +217,21 @@ abort_bad_object <- function(object, call = rlang::caller_env()) {
 # back the call the user wrote, the one the spec method was dispatched from.
 # That frame's call carries the method's name, so the generic's name, the
 # head of the internal call, replaces it. Only a condition whose call is that
-# internal call exactly is rewritten.
+# internal call exactly is rewritten. The two are compared without their
+# attributes: a package installed with its source kept records a `srcref` on
+# the frame's call, which the substituted expression does not carry.
 with_user_call <- function(expr, call = rlang::caller_env()) {
   inner <- substitute(expr)
   call <- rlang::frame_call(call)
   call[[1]] <- inner[[1]]
+  bare <- function(x) {
+    attributes(x) <- NULL
+    x
+  }
   withCallingHandlers(
     expr,
     error = function(cnd) {
-      if (identical(conditionCall(cnd), inner)) {
+      if (identical(bare(conditionCall(cnd)), bare(inner))) {
         cnd$call <- call
         stop(cnd)
       }

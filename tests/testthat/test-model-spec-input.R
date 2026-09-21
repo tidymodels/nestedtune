@@ -36,10 +36,15 @@ call_by_name <- function(fn, ...) {
 # None of these reaches a design or a fit, so they need no engine: a stand-in
 # `resamples` is never judged, since each refusal fires before
 # `check_nested()`. Each asserts the class, and that the condition names the
-# export the user called rather than a method.
+# export the user called rather than a method. The racers and the annealer
+# refuse a missing finetune first on both routes, so where it is absent their
+# preprocessor refusals are unreachable and those three are passed over.
 
 test_that("AC4: a model specification with no preprocessor is refused by class", {
   for (fn in ORCHESTRATORS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
     f <- function(...) call_by_name(fn, ...)
     cnd <- rlang::catch_cnd(f(bare_spec(), resamples = 1))
     expect_s3_class(cnd, "nestedtune_bad_preprocessor")
@@ -66,6 +71,9 @@ test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused
     variables = "add_variables"
   )
   for (fn in ORCHESTRATORS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
     f <- function(...) call_by_name(fn, ...)
     for (nm in names(wrong)) {
       cnd <- rlang::catch_cnd(f(bare_spec(), wrong[[nm]], 1))
@@ -188,6 +196,9 @@ test_that("the racers and the annealer refuse a missing finetune before judging 
 # name. `control` stands for what the dots carry.
 test_that("each spec method passes every argument on to the workflow method", {
   for (fn in ORCHESTRATORS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
     wf_method <- get(paste0(fn, ".workflow"))
     named <- setdiff(names(formals(wf_method)), c("object", "resamples", "..."))
     sentinels <- stats::setNames(
