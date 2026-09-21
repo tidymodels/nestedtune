@@ -24,7 +24,8 @@
 #' @inheritParams tune::fit_resamples
 #' @param object A [workflows::workflow()] with no parameter marked for tuning
 #'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
-#'   it. A workflow carrying a marker is refused at entry.
+#'   it, or a parsnip model specification with no marker, given with
+#'   `preprocessor`. A workflow carrying a marker is refused at entry.
 #' @templateVar CONSTRUCTOR tune::control_resamples()
 #' @templateVar PKG tune
 #' @template param-control-dots

@@ -196,9 +196,10 @@ DOTS_EXEMPT_METHODS <- c(
   "names<-.nested_results_set",
   # The orchestrators' methods (M107). The `workflow` method's `...` carries
   # `control` and is fenced by this package's `nestedtune_bad_dots`, probed
-  # by the AC2 blocks above; the `model_spec` method passes its dots on to
-  # the `workflow` method; the default refuses the object whatever rides in
-  # its dots.
+  # by the AC2 blocks above for grid and Bayes and by each sibling's
+  # checks test for the rest. The `model_spec` method passes its dots on to
+  # the `workflow` method, and the default refuses the object whatever rides
+  # in its dots.
   ORCHESTRATOR_METHODS
 )
 

@@ -1,5 +1,18 @@
 # nestedtune 0.0.0.9000
 
+* `nested_tune_grid()`, `nested_tune_bayes()`, `nested_tune_race_anova()`,
+  `nested_tune_race_win_loss()`, `nested_tune_sim_anneal()` and
+  `nested_fit_resamples()` now take a parsnip model specification with a
+  formula or a recipe, in tune's order:
+  `nested_tune_grid(spec, preprocessor, resamples)`. The call gives the
+  same result as the one on `workflows::workflow(preprocessor, spec)`
+  under the same seed. A specification with no preprocessor, or with one
+  that is not a formula or a recipe, is refused with class
+  `nestedtune_bad_preprocessor`. A preprocessor given beside a workflow is
+  refused with class `nestedtune_preprocessor_with_workflow`.
+  `nested_final_fit()` still takes a workflow, and its message for a bare
+  specification names `workflows::workflow(preprocessor, spec)`.
+
 * A `nested_final_fit` now answers `extract_fit_parsnip()`,
   `extract_fit_engine()`, `extract_recipe()`, `extract_mold()`,
   `extract_preprocessor()`, `extract_spec_parsnip()` and

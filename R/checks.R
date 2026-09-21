@@ -122,10 +122,9 @@ check_workflow_pkgs <- function(object, call = rlang::caller_env()) {
 }
 
 # The model-spec door of the six orchestrators (M107, D-069). tune's own
-# `model_spec` methods accept a formula, a recipe, or a `workflow_variables()`
-# object, but they add only the first two to the workflow they build, so the
-# third reaches the fit with no preprocessor. Here it is refused with the
-# other wrong types, and its hint names the workflow route that does take it.
+# `model_spec` methods take only a formula or a recipe and refuse a
+# `workflow_variables()` object. Here it is refused with the other wrong
+# types, and its hint names the workflow route that does take it.
 is_formula_or_recipe <- function(x) {
   rlang::is_formula(x) || inherits(x, "recipe")
 }

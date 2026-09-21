@@ -14,9 +14,9 @@ ORCHESTRATORS <- c(
 )
 
 # Whether the packages an orchestrator's tuner needs are installed, read off
-# the package's registry. The racers and the annealer refuse a missing
-# finetune before anything else, so a check that runs after that one is only
-# reachable where these are present.
+# the package's registry. On a workflow, the racers and the annealer refuse a
+# missing finetune before anything else, so a check that runs after that one
+# is only reachable where these are present.
 tuner_ready <- function(fn) {
   key <- sub("^nested_", "", fn)
   requires <- tuner_registry[[key]]$requires
@@ -49,8 +49,8 @@ test_that("AC4: a model specification with no preprocessor is refused by class",
 })
 
 test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused by class", {
-  # A number, a design handed where the preprocessor goes, and the one
-  # preprocessor tune's own method accepts and then drops.
+  # A number, a design handed where the preprocessor goes, and variables,
+  # which tune's own method refuses and which only a workflow takes.
   wrong <- list(
     number = 1,
     design = rsample::nested_cv(

@@ -33,7 +33,8 @@ nested_fit_resamples(object, ...)
 \arguments{
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with no parameter marked for tuning
 with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tune:fit_resamples]{tune::fit_resamples()}} takes
-it. A workflow carrying a marker is refused at entry.}
+it, or a parsnip model specification with no marker, given with
+\code{preprocessor}. A workflow carrying a marker is refused at entry.}
 
 \item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as \code{control}, and
 nothing else. Every argument after \code{...} is matched by name. The

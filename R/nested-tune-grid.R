@@ -27,6 +27,12 @@
 #' outer loop and hands the inner tuning to tune or finetune. Their pages
 #' say what differs, and this page is the reference for what the six share.
 #'
+#' Each of the six also takes a parsnip model specification and a
+#' preprocessor in tune's order, as in
+#' `nested_tune_grid(spec, preprocessor, resamples)`. The call runs as it
+#' does on `workflows::workflow(preprocessor, spec)`. [nested_final_fit()]
+#' takes that workflow, not the specification.
+#'
 #' `grid` and `param_info` reach every fold's inner call as
 #' [tune::tune_grid()] takes them. A data frame has one column per tuned
 #' parameter and no other column. The section on finalizing a parameter
