@@ -17,11 +17,11 @@ rather than silently ignored.}
 default) or return them one row per outer fold (\code{FALSE}).}
 
 \item{type}{The table's shape: \code{"long"} (the default), one row per metric,
-or \code{"wide"}, one column per metric. The wide shape is described under
-What the two shapes hold.}
+or \code{"wide"}, one column per metric. Both are described under What the
+tables hold.}
 }
 \value{
-A tibble, described under What the two shapes hold.
+A tibble, described under What the tables hold.
 }
 \description{
 Reports the nested cross-validation estimate from a \code{\link[=nested_tune_grid]{nested_tune_grid()}}
@@ -31,7 +31,7 @@ is the number to report for the model you deploy.
 \code{\link[=nested_final_fit]{nested_final_fit()}} builds that model by running the procedure once more
 on all the data.
 }
-\section{What the two shapes hold}{
+\section{What the tables hold}{
 
 
 Summarized, there is one row per metric, with the mean across outer folds,
@@ -44,11 +44,15 @@ carries each fold's weight in a \code{.weight} column.
 \code{collect_metrics()} does. The column holds the mean when summarized and
 each fold's estimate when not. Its other columns are the keys of those
 values: the outer fold's labels when unsummarized, and \code{.eval_time} where
-the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are dropped.
+the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are
+dropped. A metric scored with two estimators has two values for one cell,
+and a metric named like a key column would overwrite that key, so either
+is refused with class \code{nestedtune_wide_collision}. The long shape keeps
+both.
 
 A metric measured at several evaluation times (\code{eval_time} on
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in both shapes. It is never
-averaged across times. Both shapes carry a \code{.eval_time} column exactly
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in every table. It is never
+averaged across times. Every table carries a \code{.eval_time} column exactly
 when the run was scored by a dynamic or integrated survival metric, as
 tune's own \code{collect_metrics()} does. A static metric's row beside one
 holds \code{NA} there.

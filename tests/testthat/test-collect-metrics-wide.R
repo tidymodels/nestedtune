@@ -1,5 +1,10 @@
 # M106 AC2: collect_metrics(type = "wide").
 #
+# Oracle provenance: the reference is a second pivot written with base R's
+# `stats::reshape()`, which shares no code with the package's. It checks
+# the reshaping. The key rule is checked apart from it, by the column names
+# each test states for its fixture.
+#
 # The reference pivot is written here with `stats::reshape()`, which shares
 # no code with the package's pivot. It puts each metric in a column of its
 # own, keyed on every column that is neither a metric field nor a summary
@@ -152,4 +157,49 @@ test_that("an unknown type is refused on a set", {
     collect_metrics(srv_set_results(), type = "tall"),
     class = "nestedtune_bad_type"
   )
+})
+
+# M106 review F6: a weighted run's `.weight` column is a field of the fold,
+# not a key, so the wide table drops it rather than keying rows on it.
+test_that("the wide type drops a weighted run's fold weights", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  design <- tune::add_resample_weights(det_nested(d), c(1, 2, 3))
+  set.seed(2)
+  res <- memoised(nested_tune_grid(
+    det_workflow(d),
+    design,
+    grid = det_grid(),
+    metrics = reg_metrics()
+  ))
+  expect_true(".weight" %in% names(collect_metrics(res, summarize = FALSE)))
+  expect_wide_matches(res)
+  per_fold <- collect_metrics(res, summarize = FALSE, type = "wide")
+  expect_false(".weight" %in% names(per_fold))
+  expect_identical(nrow(per_fold), nrow(res))
+})
+
+# M106 review F2 and F4: the pivot refuses to lose a value. The long tables
+# are written here, because no fixture scores one metric under two
+# estimators or names a metric like a key column.
+test_that("the wide type refuses a cell with two values", {
+  long <- tibble::tibble(
+    id = c("Fold1", "Fold1"),
+    .metric = c("f_meas", "f_meas"),
+    .estimator = c("macro", "micro"),
+    .estimate = c(0.1, 0.2)
+  )
+  expect_error(pivot_metrics_wide(long), class = "nestedtune_wide_collision")
+})
+
+test_that("the wide type refuses a metric named like a key column", {
+  long <- tibble::tibble(
+    id = c("Fold1", "Fold2"),
+    .metric = c("id", "id"),
+    .estimator = "standard",
+    .estimate = c(0.1, 0.2)
+  )
+  expect_error(pivot_metrics_wide(long), class = "nestedtune_wide_collision")
+  expect_snapshot(error = TRUE, pivot_metrics_wide(long))
 })

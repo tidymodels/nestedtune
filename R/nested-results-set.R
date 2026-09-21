@@ -99,7 +99,7 @@ collect_metrics.nested_results_set <- function(
     call = rlang::current_env()
   )
   if (identical(type, "wide")) {
-    out <- pivot_metrics_wide(out)
+    out <- pivot_metrics_wide(out, call = rlang::current_env())
   }
   out
 }

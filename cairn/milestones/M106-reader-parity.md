@@ -44,7 +44,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 - [x] T6: Add `extract-nested_final_fit` and `predict.nested_results` to the `_pkgdown.yml` reference index, and write a D-entry for the seven re-exported generics and the predict refusal (review F16).
 - [x] T7: Read the scored times before the `metric` filter in `filter_plot_rows()` (F1). Test a set in which one workflow lacks a metric through the filter directly (F7).
-- [ ] T8: Refuse a wide pivot in which two rows share a key and a metric, or a metric is named like a key column, with one class (F2, F4). Document the refusal and fix the `type` help's pointer (F14). Add an oracle provenance header and a weighted-run wide test (F6).
+- [x] T8: Refuse a wide pivot in which two rows share a key and a metric, or a metric is named like a key column, with one class (F2, F4). Document the refusal and fix the `type` help's pointer (F14). Add an oracle provenance header and a weighted-run wide test (F6).
 - [ ] T9: Move the misplaced comment in `R/checks.R` (F9), tighten the predict set test's `id` match (F10), re-wrap lines over 80 columns (F15), and mention the extractors in the final-fit object comment (history note).
 
 ## Work log
@@ -62,6 +62,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: pass-1 triage accepted at the gate. Tasks T6-T9 added for the pkgdown index and the fix-now findings, and Coverage extended to them. F3 becomes a candidate row, and F5, F8, F11, F12 and F13 are rejected.
 - 2026-09-21: T6 done. Both topics were added to `_pkgdown.yml`, and `pkgdown::check_pkgdown()` now reports no problems. D-068 records the seven re-exports and the predict refusal.
 - 2026-09-21: T7 done. `filter_plot_rows()` checks both arguments against the whole run before filtering. The F1 regression test errors on the old code and passes on the new, and the F7 test drives the filter directly on a stacked table.
+- 2026-09-21: T8 done. Two refusals raise `nestedtune_wide_collision`: one metric under two estimators, and a metric named like a key column. The help section is renamed What the tables hold, and a weighted-run test shows `.weight` dropped. The test file carries an oracle provenance header.
 
 ## Decisions
 

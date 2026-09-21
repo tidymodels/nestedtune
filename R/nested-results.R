@@ -757,14 +757,14 @@ new_tbl <- function(cols) {
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
 #' @param type The table's shape: `"long"` (the default), one row per metric,
-#'   or `"wide"`, one column per metric. The wide shape is described under
-#'   What the two shapes hold.
+#'   or `"wide"`, one column per metric. Both are described under What the
+#'   tables hold.
 #' @param ... Not used. It must be empty. An argument passed here is an error
 #'   rather than silently ignored.
 #'
-#' @return A tibble, described under What the two shapes hold.
+#' @return A tibble, described under What the tables hold.
 #'
-#' @section What the two shapes hold:
+#' @section What the tables hold:
 #'
 #' Summarized, there is one row per metric, with the mean across outer folds,
 #' the number of folds `n` behind it, and the standard error of that mean.
@@ -776,11 +776,15 @@ new_tbl <- function(cols) {
 #' `collect_metrics()` does. The column holds the mean when summarized and
 #' each fold's estimate when not. Its other columns are the keys of those
 #' values: the outer fold's labels when unsummarized, and `.eval_time` where
-#' the long shape has it. The estimator, `n`, `std_err` and `.weight` are dropped.
+#' the long shape has it. The estimator, `n`, `std_err` and `.weight` are
+#' dropped. A metric scored with two estimators has two values for one cell,
+#' and a metric named like a key column would overwrite that key, so either
+#' is refused with class `nestedtune_wide_collision`. The long shape keeps
+#' both.
 #'
 #' A metric measured at several evaluation times (`eval_time` on
-#' [nested_tune_grid()]) gets a row per time in both shapes. It is never
-#' averaged across times. Both shapes carry a `.eval_time` column exactly
+#' [nested_tune_grid()]) gets a row per time in every table. It is never
+#' averaged across times. Every table carries a `.eval_time` column exactly
 #' when the run was scored by a dynamic or integrated survival metric, as
 #' tune's own `collect_metrics()` does. A static metric's row beside one
 #' holds `NA` there.
@@ -862,7 +866,7 @@ collect_metrics.nested_results <- function(
     out <- summarize_folds(out)
   }
   if (identical(type, "wide")) {
-    out <- pivot_metrics_wide(out)
+    out <- pivot_metrics_wide(out, call = rlang::current_env())
   }
   out
 }
@@ -876,7 +880,7 @@ collect_metrics.nested_results <- function(
 # the two rules give the same keys (GP1), and this one also keeps
 # `wflow_id`. Metric columns come in the order the long table first lists
 # them, and the rows in the order it first lists each key.
-pivot_metrics_wide <- function(long) {
+pivot_metrics_wide <- function(long, call = rlang::caller_env()) {
   value <- if ("mean" %in% names(long)) "mean" else ".estimate"
   dropped <- c(".metric", ".estimator", ".estimate", "mean", "n", "std_err")
   dropped <- c(dropped, ".weight")
@@ -885,6 +889,36 @@ pivot_metrics_wide <- function(long) {
     rep(1L, nrow(long))
   } else {
     vctrs::vec_group_id(keys)
+  }
+  # Dropping the estimator can leave two values for one cell, and a metric
+  # named like a key column would overwrite that key. Either would lose a
+  # value without a word, so both are refused (GP3). tune's pivot_wider()
+  # warns and builds a list column for the first.
+  clash <- intersect(unique(long$.metric), names(keys))
+  if (length(clash) > 0L) {
+    cli::cli_abort(
+      c(
+        "Cannot widen the metrics: {cli::qty(length(clash))}{?a metric \\
+         is/metrics are} named like a key column: {.val {clash}}.",
+        i = "Use {.code type = \"long\"} for this run."
+      ),
+      class = "nestedtune_wide_collision",
+      call = call
+    )
+  }
+  twice <- duplicated(vctrs::data_frame(group = group, metric = long$.metric))
+  if (any(twice)) {
+    doubled <- unique(long$.metric[twice])
+    cli::cli_abort(
+      c(
+        "Cannot widen the metrics: {.val {doubled}} {cli::qty(length(doubled))}\\
+         {?has/have} more than one value for the same row.",
+        i = "This happens when one metric is scored with two estimators. \\
+             Use {.code type = \"long\"}, which keeps {.field .estimator}."
+      ),
+      class = "nestedtune_wide_collision",
+      call = call
+    )
   }
   first <- !duplicated(group)
   cols <- as.list(keys)
