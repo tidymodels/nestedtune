@@ -7,7 +7,7 @@
 - **Principles touched:** IP3, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — new methods and arguments on exported generics
-- **Branch/PR:** m106-reader-parity
+- **Branch/PR:** m106-reader-parity, https://github.com/tidymodels/nestedtune/pull/121
 
 ## Goal
 
