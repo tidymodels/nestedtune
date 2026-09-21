@@ -1,0 +1,11 @@
+# M106: tune's reader arguments and extract methods on the nested classes
+
+**Status:** done (2026-09-21, PR #121 https://github.com/tidymodels/nestedtune/pull/121)
+
+**Goal:** A tidymodels user reaches the fitted parts of a final fit, the wide metrics table and a filtered performance plot with the calls tune taught them.
+
+**Outcome:** A `nested_final_fit` answers `extract_fit_parsnip()`, `extract_fit_engine()`, `extract_recipe()`, `extract_mold()`, `extract_preprocessor()`, `extract_spec_parsnip()` and `outcome_names()` by delegating to its stored workflow, refusing stray arguments, with the generics re-exported. `collect_metrics()` on both result classes takes `type = c("long", "wide")`: the wide shape pivots metrics into columns with dplyr and vctrs, keyed on every non-metric column, and refuses a cell with two values or a metric named like a key (`nestedtune_wide_collision`). `autoplot()` on both classes takes `metric` and `eval_time`, filtering rows in `filter_plot_rows()` before the panels are built, keeping a static metric's untimed panel, and refusing an unscored metric or time or either argument with the parameters view (`nestedtune_bad_plot_filter`). `predict()` on both classes refuses with `nestedtune_predict_results` and names `nested_final_fit()`. Both new topics are in the pkgdown index.
+
+**Decisions:** D-068 (the seven re-exports and the predict refusal). A dplyr pivot over adding tidyr, chosen at the plan gate.
+
+**Review:** Pass 1 returned the milestone on a `pkgdown::check_pkgdown()` failure (defect return 1). Its diff-bug lens ranked 16 findings. Fixed: F1 (the time check read after the metric filter), F2 and F4 (silent wide overwrites), F6, F7, F9, F10, F14, F15, F16 and the blame-history comment note. F3 (a repeated design's pasted `id`) went to a candidate row, and F5, F8, F11, F12 and F13 were rejected. Pass 2 verified all five criteria with `devtools::check()` at 0 notes, and a fix-delta reviewer's seven low findings gave two wording fixes and five rejections. On resume, CI's hard-dependency leg failed six new tests that used the ranger fixture without the ranger skip. The skip was fixed, CI went green on 15 checks, and the PR conversation was empty. The M101 lesson on hard-dependency skips was extended.
