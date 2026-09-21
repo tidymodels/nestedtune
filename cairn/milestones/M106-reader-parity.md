@@ -64,6 +64,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T7 done. `filter_plot_rows()` checks both arguments against the whole run before filtering. The F1 regression test errors on the old code and passes on the new, and the F7 test drives the filter directly on a stacked table.
 - 2026-09-21: T8 done. Two refusals raise `nestedtune_wide_collision`: one metric under two estimators, and a metric named like a key column. The help section is renamed What the tables hold, and a weighted-run test shows `.weight` dropped. The test file carries an oracle provenance header.
 - 2026-09-21: T9 done. The `autoplot()` comment is back above `check_plot_type()`, the predict set test matches the phrase naming `id`, the added lines over 80 columns are re-wrapped, and the object comment names the extractors. A roxygen sentence that T8 committed with a prose-sweep hit is reworded, and all six gating sweeps are clean.
+- 2026-09-21: step-7 approval: m106-reader-parity approved for merge
 
 ## Decisions
 
@@ -96,4 +97,6 @@ Pass 2, 2026-09-21, at `d861b82`, after T6-T9.
 Consistency gate: `cairn_validate` passed, `devtools::document()` gave no diff, `pkgdown::check_pkgdown()` found no problems, and all six gating prose sweeps were clean. `NEWS.md` has the changelog entries. No `DESIGN.md` principle changed, so `cairn_impact` was skipped.
 
 Independent review of the fix delta `c8822f6..d861b82`, by one fresh diff reviewer: it confirmed each pass-1 fix, found no false collision on the survival, set or summarized runs, and reported seven low findings. G1: the collision snapshot calls the helper directly, so the `collect_metrics()` call name it carries is untested. G2: the F7 test drives the filter, not `autoplot()` on a set. G3: the reference still lists `.weight` among dropped columns, so only the name check guards it. G4: the test file header repeats itself. G5: a metric named `id` is refused only unsummarized, where `id` is a key. G6: `R/nested-results-collect.R:312` still says "two shapes" for summarized and unsummarized. G7: the predict set test's phrase match relies on testthat's fixed width.
+
+Pass-2 triage, accepted at the approval gate on 2026-09-21. Fixed now: G4, the header now one paragraph, and G6, the `compute_metrics()` return text now says long shape. Rejected: G1, because no fixture reaches a collision through `collect_metrics()`, and the reviewer ran the call and saw it name `collect_metrics()`. G2, because no set fixture has uneven metrics, and the plot filters the stacked table in one call. G3, because the name assertion guards `.weight`. G5, because `id` is a key only unsummarized, as the help says. G7, because testthat pins the width.
 

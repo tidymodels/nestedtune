@@ -309,7 +309,8 @@ collect_extracts.nested_results <- function(x, ...) {
 #'   `"first"` or `"second"`. The default, `NULL`, takes the level the run
 #'   recorded. tune's own method defaults to `"first"` instead.
 #'
-#' @return A tibble in the two shapes [collect_metrics()] returns. Given
+#' @return A tibble, summarized or per fold as [collect_metrics()] returns
+#'   it in the long shape. Given
 #'   the metric set and the event level the run used, it is identical to
 #'   `collect_metrics(x, summarize = summarize)`.
 #'

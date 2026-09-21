@@ -1,15 +1,11 @@
 # M106 AC2: collect_metrics(type = "wide").
 #
 # Oracle provenance: the reference is a second pivot written with base R's
-# `stats::reshape()`, which shares no code with the package's. It checks
-# the reshaping. The key rule is checked apart from it, by the column names
-# each test states for its fixture.
-#
-# The reference pivot is written here with `stats::reshape()`, which shares
-# no code with the package's pivot. It puts each metric in a column of its
-# own, keyed on every column that is neither a metric field nor a summary
-# field. On tune's own tables this gives the keys `pivot_metrics()` names in
-# its fixed list.
+# `stats::reshape()`, which shares no code with the package's. It puts each
+# metric in a column of its own, keyed on every column that is neither a
+# metric field nor a summary field. On tune's own tables this gives the keys
+# `pivot_metrics()` names in its fixed list. The key rule is also checked
+# apart from it, by the column names each test states for its fixture.
 
 wide_reference <- function(long) {
   value <- if ("mean" %in% names(long)) "mean" else ".estimate"
