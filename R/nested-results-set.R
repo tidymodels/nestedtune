@@ -387,10 +387,10 @@ print.nested_results_set <- function(x, ...) {
       completed <- sum(r$.completed)
       total <- nrow(r)
       label <- orchestrator_label(attr(r, "procedure")$tuner)
-      cli::format_inline(
-        "{.val {x$wflow_id[[i]]}}: {completed} of {total} outer \\
-         fold{?s} completed ({label})"
-      )
+      cli::format_inline(paste(
+        "{.val {x$wflow_id[[i]]}}: {completed} of {total} outer",
+        "fold{?s} completed ({label})"
+      ))
     },
     character(1)
   )

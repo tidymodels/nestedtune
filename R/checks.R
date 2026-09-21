@@ -477,10 +477,10 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
       bad,
       function(f) {
         pos <- not_rsplit[[f]]
-        cli::format_inline(
-          "Outer fold {f}: inner {cli::qty(length(pos))}split{?s} {pos} \\
-           {?is/are} not {.cls rsplit}."
-        )
+        cli::format_inline(paste(
+          "Outer fold {f}: inner {cli::qty(length(pos))}split{?s} {pos}",
+          "{?is/are} not {.cls rsplit}."
+        ))
       },
       character(1)
     )
@@ -554,10 +554,10 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
       function(f) {
         k <- kind[[f]]
         if (all(k == "other")) {
-          return(cli::format_inline(
-            "Outer fold {f}: every inner split carries a frame that is \\
-             neither the outer split's own nor its analysis set."
-          ))
+          return(cli::format_inline(paste(
+            "Outer fold {f}: every inner split carries a frame that is",
+            "neither the outer split's own nor its analysis set."
+          )))
         }
         parts <- vapply(
           names(carries)[names(carries) %in% k],
@@ -619,10 +619,10 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
       n_bad <- length(unique(c(in_bad, out_bad)))
       bullets <- c(
         bullets,
-        cli::format_inline(
-          "Outer fold {f}, inner split {s}: {paste(parts, collapse = ' and ')}, \\
-           {cli::qty(n_bad)}{?a row/rows} the outer split does not hold."
-        )
+        cli::format_inline(paste(
+          "Outer fold {f}, inner split {s}: {paste(parts, collapse = ' and ')},",
+          "{cli::qty(n_bad)}{?a row/rows} the outer split does not hold."
+        ))
       )
     }
   }
@@ -1741,8 +1741,10 @@ identity_difference <- function(recorded, given) {
       "{.val {only_given}} {?is/are} given and not recorded"
     },
     if (length(only_recorded) == 0L && length(only_given) == 0L) {
-      "recorded in the order {.val {d$recorded}}, given in the order \\
-       {.val {d$given}}"
+      paste(
+        "recorded in the order {.val {d$recorded}},",
+        "given in the order {.val {d$given}}"
+      )
     },
     "."
   ))
