@@ -22,7 +22,8 @@ default) or return them one row per outer fold (\code{FALSE}).}
 recorded. tune's own method defaults to \code{"first"} instead.}
 }
 \value{
-A tibble in the two shapes \code{\link[=collect_metrics]{collect_metrics()}} returns. Given
+A tibble, summarized or per fold as \code{\link[=collect_metrics]{collect_metrics()}} returns
+it in the long shape. Given
 the metric set and the event level the run used, it is identical to
 \code{collect_metrics(x, summarize = summarize)}.
 }

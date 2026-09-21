@@ -11,7 +11,7 @@
 \alias{augment.nested_results_set}
 \title{Stack each workflow's table of a workflow-set run under its id}
 \usage{
-\method{collect_metrics}{nested_results_set}(x, ..., summarize = TRUE)
+\method{collect_metrics}{nested_results_set}(x, ..., summarize = TRUE, type = c("long", "wide"))
 
 \method{collect_selections}{nested_results_set}(x, ...)
 
@@ -36,6 +36,11 @@ and not a silent no-op.}
 \item{summarize}{Whether to average each workflow's per-fold metrics
 (\code{TRUE}, the default) or return them one row per outer fold (\code{FALSE}),
 as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}.}
+
+\item{type}{For \code{collect_metrics()}, the table's shape: \code{"long"} (the
+default) or \code{"wide"}, as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}. The wide
+shape is keyed on \code{wflow_id} too, and a metric one workflow did not
+score is \code{NA} in its rows.}
 
 \item{metrics, event_level}{As on \code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}. The
 default \code{event_level} takes each workflow's recorded level.}

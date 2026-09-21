@@ -756,12 +756,15 @@ new_tbl <- function(cols) {
 #'   siblings.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
 #'   default) or return them one row per outer fold (`FALSE`).
+#' @param type The table's shape: `"long"` (the default), one row per metric,
+#'   or `"wide"`, one column per metric. Both are described under What the
+#'   tables hold.
 #' @param ... Not used. It must be empty. An argument passed here is an error
 #'   rather than silently ignored.
 #'
-#' @return A tibble, described under What the two shapes hold.
+#' @return A tibble, described under What the tables hold.
 #'
-#' @section What the two shapes hold:
+#' @section What the tables hold:
 #'
 #' Summarized, there is one row per metric, with the mean across outer folds,
 #' the number of folds `n` behind it, and the standard error of that mean.
@@ -769,9 +772,19 @@ new_tbl <- function(cols) {
 #' weighted with [tune::add_resample_weights()] the unsummarized shape also
 #' carries each fold's weight in a `.weight` column.
 #'
+#' `type = "wide"` turns either shape into one column per metric, as tune's
+#' `collect_metrics()` does. The column holds the mean when summarized and
+#' each fold's estimate when not. Its other columns are the keys of those
+#' values: the outer fold's labels when unsummarized, and `.eval_time` where
+#' the long shape has it. The estimator, `n`, `std_err` and `.weight` are
+#' dropped. Two cases are refused with class `nestedtune_wide_collision`,
+#' because each puts two values in one place: a metric scored with two
+#' estimators, and a metric named like a key column. The long shape keeps
+#' both.
+#'
 #' A metric measured at several evaluation times (`eval_time` on
-#' [nested_tune_grid()]) gets a row per time in both shapes. It is never
-#' averaged across times. Both shapes carry a `.eval_time` column exactly
+#' [nested_tune_grid()]) gets a row per time in every table. It is never
+#' averaged across times. Every table carries a `.eval_time` column exactly
 #' when the run was scored by a dynamic or integrated survival metric, as
 #' tune's own `collect_metrics()` does. A static metric's row beside one
 #' holds `NA` there.
@@ -837,16 +850,92 @@ new_tbl <- function(cols) {
 #' @seealso [collect_metrics.nested_results_set()] for the same function on a
 #'   workflow-set run
 #' @export
-collect_metrics.nested_results <- function(x, ..., summarize = TRUE) {
+collect_metrics.nested_results <- function(
+  x,
+  ...,
+  summarize = TRUE,
+  type = c("long", "wide")
+) {
   rlang::check_dots_empty()
+  type <- check_metrics_type(type)
   check_any_completed(x)
   warn_partial_summary(x)
 
-  per_fold <- per_fold_metrics(x)
-  if (!summarize) {
-    return(per_fold)
+  out <- per_fold_metrics(x)
+  if (summarize) {
+    out <- summarize_folds(out)
   }
-  summarize_folds(per_fold)
+  if (identical(type, "wide")) {
+    out <- pivot_metrics_wide(out, call = rlang::current_env())
+  }
+  out
+}
+
+# The wide shape: one column per metric, holding the mean (summarized) or the
+# fold's estimate, keyed on every other column that is not a field of the
+# metric or of its summary -- the fold labels, `.eval_time`, `wflow_id` on a
+# set. tune's pivot_metrics() instead keys on a fixed list (the tuning
+# parameters, `.config`, `.iter`, `.eval_time`, the `id` columns) and drops
+# the rest, `.estimator`, `n` and `std_err` among them. On tune's own tables
+# the two rules give the same keys (GP1), and this one also keeps
+# `wflow_id`. Metric columns come in the order the long table first lists
+# them, and the rows in the order it first lists each key.
+pivot_metrics_wide <- function(long, call = rlang::caller_env()) {
+  value <- if ("mean" %in% names(long)) "mean" else ".estimate"
+  dropped <- c(".metric", ".estimator", ".estimate", "mean", "n", "std_err")
+  dropped <- c(dropped, ".weight")
+  keys <- long[setdiff(names(long), dropped)]
+  group <- if (length(keys) == 0L) {
+    rep(1L, nrow(long))
+  } else {
+    vctrs::vec_group_id(keys)
+  }
+  # Dropping the estimator can leave two values for one cell, and a metric
+  # named like a key column would overwrite that key. Either would lose a
+  # value without a word, so both are refused (GP3). tune's pivot_wider()
+  # warns and builds a list column for the first.
+  clash <- intersect(unique(long$.metric), names(keys))
+  if (length(clash) > 0L) {
+    cli::cli_abort(
+      c(
+        "Cannot widen the metrics: {cli::qty(length(clash))}{?a metric \\
+         is/metrics are} named like a key column: {.val {clash}}.",
+        i = "Use {.code type = \"long\"} for this run."
+      ),
+      class = "nestedtune_wide_collision",
+      call = call
+    )
+  }
+  twice <- duplicated(vctrs::data_frame(group = group, metric = long$.metric))
+  if (any(twice)) {
+    doubled <- unique(long$.metric[twice])
+    cli::cli_abort(
+      c(
+        "Cannot widen the metrics: {.val {doubled}} \\
+         {cli::qty(length(doubled))}{?has/have} more than one value for the \\
+         same row.",
+        i = "This happens when one metric is scored with two estimators. \\
+             Use {.code type = \"long\"}, which keeps {.field .estimator}."
+      ),
+      class = "nestedtune_wide_collision",
+      call = call
+    )
+  }
+  first <- !duplicated(group)
+  cols <- as.list(keys)
+  cols <- lapply(cols, function(col) col[first])
+  n <- sum(first)
+  row <- match(group, group[first])
+  for (metric in unique(long$.metric)) {
+    at <- long$.metric == metric
+    column <- rep(NA_real_, n)
+    column[row[at]] <- long[[value]][at]
+    cols[[metric]] <- column
+  }
+  if (length(cols) == 0L) {
+    return(new_tbl(list()))
+  }
+  new_tbl(cols)
 }
 
 # The averaging, with no conditions of its own.
@@ -1154,4 +1243,49 @@ fold_ids <- function(x) {
     return(x[[id_cols]])
   }
   do.call(paste, c(lapply(id_cols, function(nm) x[[nm]]), list(sep = ", ")))
+}
+
+#' Predicting from a nested run
+#'
+#' A nested run holds one model per outer fold, each fitted to estimate how
+#' the procedure performs, and none of them is the model to deploy.
+#' `predict()` on its results therefore refuses, with class
+#' `nestedtune_predict_results`, and points you to [nested_final_fit()],
+#' which fits that model on all the data. For a workflow set, the message
+#' names `nested_final_fit()`'s `id` argument, which picks the workflow.
+#'
+#' @param object A `nested_results` or a `nested_results_set`.
+#' @param ... Not used.
+#' @return None. The call is an error.
+#' @seealso [nested_final_fit()], [predict.nested_final_fit()]
+#' @template example-setup
+#' @template example-run
+#' @template example-final
+#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' # Predict from the final fit, not from `res`.
+#' predict(final, new_data = mtcars[1:3, ])
+#' @name predict.nested_results
+#' @export
+predict.nested_results <- function(object, ...) {
+  cli::cli_abort(
+    c(
+      "A {.cls nested_results} has no model to predict with.",
+      i = "Its fold models serve the estimate. Fit the model to deploy \\
+           with {.fn nested_final_fit}, then call {.fn predict} on that."
+    ),
+    class = "nestedtune_predict_results"
+  )
+}
+
+#' @rdname predict.nested_results
+#' @export
+predict.nested_results_set <- function(object, ...) {
+  cli::cli_abort(
+    c(
+      "A {.cls nested_results_set} has no model to predict with.",
+      i = "Fit one workflow's model with {.fn nested_final_fit}, naming it \\
+           with {.arg id}, then call {.fn predict} on that."
+    ),
+    class = "nestedtune_predict_results"
+  )
 }

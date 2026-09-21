@@ -4,7 +4,13 @@
 \alias{autoplot.nested_results}
 \title{Plot a nested cross-validation result}
 \usage{
-\method{autoplot}{nested_results}(object, type = c("parameters", "performance"), ...)
+\method{autoplot}{nested_results}(
+  object,
+  type = c("parameters", "performance"),
+  metric = NULL,
+  eval_time = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
@@ -12,6 +18,13 @@ siblings, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} included.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}.}
+
+\item{metric, eval_time}{For \code{type = "performance"}, the metrics and the
+evaluation times to draw panels for. \code{NULL}, the default, draws them
+all. A static metric's panel has no time and is drawn whatever
+\code{eval_time} names, as in tune's \code{autoplot()}. A metric or a time the run
+did not score is refused with class \code{nestedtune_bad_plot_filter}, as is
+either argument given with \code{type = "parameters"}.}
 
 \item{...}{Not used. It must be empty. An argument passed here is an error
 rather than silently ignored.}
@@ -87,6 +100,7 @@ res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 autoplot(res)
 autoplot(res, type = "performance")
+autoplot(res, type = "performance", metric = "rmse")
 \dontshow{\}) # examplesIf}
 }
 \seealso{

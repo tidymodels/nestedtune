@@ -1,5 +1,34 @@
 # nestedtune 0.0.0.9000
 
+* A `nested_final_fit` now answers `extract_fit_parsnip()`,
+  `extract_fit_engine()`, `extract_recipe()`, `extract_mold()`,
+  `extract_preprocessor()`, `extract_spec_parsnip()` and
+  `outcome_names()` with what the same call gives on its trained workflow.
+  `extract_recipe()` takes `estimated`. Apart from `extract_recipe()`, the
+  workflow methods drop an argument they do not know, so these refuse one
+  instead.
+
+* `collect_metrics()` on a `nested_results` or a `nested_results_set`
+  takes `type = "wide"`, which returns one column per metric, as tune's
+  `collect_metrics()` does. A summarized table holds each metric's mean,
+  and an unsummarized one holds each outer fold's estimate. The fold
+  labels, `.eval_time` and `wflow_id` stay as key columns. An unknown
+  `type` is refused with class `nestedtune_bad_type`. A metric scored with
+  two estimators, or named like a key column, is refused with class
+  `nestedtune_wide_collision`.
+
+* `autoplot()` on a `nested_results` or a `nested_results_set` takes
+  `metric` and `eval_time`, which choose the panels of
+  `type = "performance"`. A static metric's panel is drawn whatever
+  `eval_time` names, as in tune. A metric or a time the run did not score,
+  or either argument with `type = "parameters"`, is refused with class
+  `nestedtune_bad_plot_filter`.
+
+* `predict()` on a `nested_results` or a `nested_results_set` now refuses
+  with class `nestedtune_predict_results` and names `nested_final_fit()`,
+  which fits the model to predict with. Before, R gave its generic "no
+  applicable method" error.
+
 * Five messages no longer break across two lines partway through a
   sentence. They used a line continuation that `cli::format_inline()`
   does not join, so the reader saw a newline and an indent. The refusal

@@ -4,7 +4,7 @@
 \alias{collect_metrics.nested_results}
 \title{Collect the metrics from a nested resampling run}
 \usage{
-\method{collect_metrics}{nested_results}(x, ..., summarize = TRUE)
+\method{collect_metrics}{nested_results}(x, ..., summarize = TRUE, type = c("long", "wide"))
 }
 \arguments{
 \item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
@@ -15,9 +15,13 @@ rather than silently ignored.}
 
 \item{summarize}{Whether to average the per-fold metrics (\code{TRUE}, the
 default) or return them one row per outer fold (\code{FALSE}).}
+
+\item{type}{The table's shape: \code{"long"} (the default), one row per metric,
+or \code{"wide"}, one column per metric. Both are described under What the
+tables hold.}
 }
 \value{
-A tibble, described under What the two shapes hold.
+A tibble, described under What the tables hold.
 }
 \description{
 Reports the nested cross-validation estimate from a \code{\link[=nested_tune_grid]{nested_tune_grid()}}
@@ -27,7 +31,7 @@ is the number to report for the model you deploy.
 \code{\link[=nested_final_fit]{nested_final_fit()}} builds that model by running the procedure once more
 on all the data.
 }
-\section{What the two shapes hold}{
+\section{What the tables hold}{
 
 
 Summarized, there is one row per metric, with the mean across outer folds,
@@ -36,9 +40,19 @@ Unsummarized, there is one row per outer fold and metric. On a design
 weighted with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} the unsummarized shape also
 carries each fold's weight in a \code{.weight} column.
 
+\code{type = "wide"} turns either shape into one column per metric, as tune's
+\code{collect_metrics()} does. The column holds the mean when summarized and
+each fold's estimate when not. Its other columns are the keys of those
+values: the outer fold's labels when unsummarized, and \code{.eval_time} where
+the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are
+dropped. Two cases are refused with class \code{nestedtune_wide_collision},
+because each puts two values in one place: a metric scored with two
+estimators, and a metric named like a key column. The long shape keeps
+both.
+
 A metric measured at several evaluation times (\code{eval_time} on
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in both shapes. It is never
-averaged across times. Both shapes carry a \code{.eval_time} column exactly
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in every table. It is never
+averaged across times. Every table carries a \code{.eval_time} column exactly
 when the run was scored by a dynamic or integrated survival metric, as
 tune's own \code{collect_metrics()} does. A static metric's row beside one
 holds \code{NA} there.

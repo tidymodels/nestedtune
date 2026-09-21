@@ -216,3 +216,56 @@ test_that("the refusals read the same for both accessors", {
     extract_scored_candidates(1:3)
   })
 })
+
+# M106 AC1: the final fit answers tune's and hardhat's extractors as the
+# workflow it holds does. Each method hands its call to that workflow, so the
+# reference is the same call made on `extract_workflow()` by hand.
+test_that("the final fit answers the extractors as its workflow does", {
+  skip_if_no_engines()
+
+  final <- final_for_extract()
+  wf <- extract_workflow(final)
+
+  extractors <- list(
+    extract_fit_parsnip = extract_fit_parsnip,
+    extract_fit_engine = extract_fit_engine,
+    extract_recipe = extract_recipe,
+    extract_mold = extract_mold,
+    extract_preprocessor = extract_preprocessor,
+    extract_spec_parsnip = extract_spec_parsnip,
+    outcome_names = outcome_names
+  )
+  for (nm in names(extractors)) {
+    fn <- extractors[[nm]]
+    expect_identical(fn(final), fn(wf), label = nm)
+  }
+
+  # The fixture is recipe-based, so the recipe reached is a trained one; the
+  # untrained one differs from it and arrives only through `estimated`.
+  expect_true(recipes::fully_trained(extract_recipe(final)))
+  expect_identical(
+    extract_recipe(final, estimated = FALSE),
+    extract_recipe(wf, estimated = FALSE)
+  )
+  expect_false(recipes::fully_trained(extract_recipe(final, estimated = FALSE)))
+})
+
+# The extractors' workflow methods, `extract_recipe()` aside, drop an
+# argument they do not know, so passing one on would be a silent no-op.
+# These methods refuse it, as augment.nested_final_fit() does.
+test_that("the workflow extractors refuse a stray argument", {
+  skip_if_no_engines()
+
+  final <- final_for_extract()
+  for (fn in list(
+    extract_fit_parsnip,
+    extract_fit_engine,
+    extract_recipe,
+    extract_mold,
+    extract_preprocessor,
+    extract_spec_parsnip,
+    outcome_names
+  )) {
+    expect_error(fn(final, nonesuch = 1), class = "rlib_error_dots_nonempty")
+  }
+})

@@ -347,6 +347,11 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
     "S3method(dplyr_reconstruct,nested_results)" = function() {
       dplyr::dplyr_reconstruct(df, res)
     },
+    # predict() refuses by contract (M106), so running it is running its
+    # refusal, as with the casts into the class below.
+    "S3method(predict,nested_results)" = function() {
+      expect_error(predict(res), class = "nestedtune_predict_results")
+    },
     "S3method(print,nested_results)" = function() print_text(res),
     "S3method(print,summary.nested_results)" = function() {
       cli::cli_fmt(print(summary(res)))
