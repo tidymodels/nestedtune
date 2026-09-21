@@ -2,6 +2,17 @@
 
 ## nestedtune 0.0.0.9000
 
+- The workflow identity a result records no longer depends on the number
+  formatting the session happens to use.
+  [`deparse()`](https://rdrr.io/r/base/deparse.html) reads the `scipen`
+  option, so a workflow holding a value such as `1e5` recorded one
+  identity in a session that set the option and another in a session
+  that did not, and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  refused a workflow the user had built from the same code. The option
+  is now fixed while the identity is written, so a record made on one
+  machine matches the workflow rebuilt on another.
+
 - The workflow identity every result records now holds a case-weights
   column, as written, and a tailor postprocessor, as its adjustments in
   order with each one’s type and arguments, when the workflow carries
