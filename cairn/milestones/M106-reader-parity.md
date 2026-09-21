@@ -1,6 +1,6 @@
 # M106: tune's reader arguments and extract methods on the nested classes
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T2: Add `type` to `collect_metrics.nested_results()` (`R/nested-results.R:840`) and `collect_metrics.nested_results_set()` (`R/nested-results-set.R:82`). Pivot with dplyr and vctrs, since tidyr is not a dependency. Test against the `stats::reshape()` reference.
 - [x] T3: Add `metric` and `eval_time` to both `autoplot()` methods (`R/nested-results-plot.R:77`). Filter the rows before `plot_performance()` builds its panels, because the panel labels carry qualifiers (`metric_panel()`, `qualify_panels()`). Render the filtered plot before approving its snapshot (LESSONS, plots).
 - [x] T4: Add `predict.nested_results()` and `predict.nested_results_set()`, each refusing with a class and naming `nested_final_fit()`. For a set, the message names its `id` argument.
-- [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -53,6 +53,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T3 done, and the full suite is clean. `eval_time` keeps a static metric's untimed panel, as tune's `autoplot()` does. The survival fixture scores `brier_survival` at two times beside `concordance_survival`, so the tests cover that case. A metric or time absent from the run, a malformed value, or either argument with the parameters view raises `nestedtune_bad_plot_filter`. The new snapshot was rendered and read before approval.
 - 2026-09-21: T4 done. Both refusals raise `nestedtune_predict_results` and are exempt from the dots probe, because a caller's `new_data` arrives through `...`. The full suite failed only on the Bayesian oracle file's table of every method on the class. That table now runs the refusal, and the file passes.
 - 2026-09-21: claim audit: 47 claims read, 4 corrected — NEWS.md, R/nested-final-fit.R, R/nested-results.R, tests/testthat/test-collect-metrics-wide.R, tests/testthat/test-nested-final-fit-extract.R
+- 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch point `d477922` and on the branch at `25170cf`, both run the same day. Status set to review.
 
 ## Decisions
 
