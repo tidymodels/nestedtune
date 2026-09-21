@@ -1,13 +1,13 @@
 # M108: Rolling-origin and sliding-window outer designs
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, IP4, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs the package supports
-- **Branch/PR:** —
+- **Branch/PR:** `m108-time-series-designs`
 
 ## Goal
 
@@ -51,6 +51,8 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed above. They were an unnamed oracle, an unset inner design, a split identity the constructor cannot meet, `save_pred` unstated, and a support claim wider than the tests.
 - 2026-09-21: plan gate chose a support claim bounded to what is tested over probing every orchestrator and sliding design, because it halves the milestone; falsified by a user report of a failure on a design or orchestrator the claim leaves out.
 - 2026-09-21: re-audit in full mode found AC4 silent on seeds and AC5's message wrong for overlapping windows. Both were fixed after the plan commit, with `assess = 1` and a `lookback` note in T1.
+- 2026-09-21: implement started on `m108-time-series-designs`. Question gate chose an `augment()` message giving the count and the row numbers, shortened by cli. Test metrics are `rmse` and `mae`, since `rsq` is `NA` on a one-row assessment set.
+- 2026-09-21: T1 checkpoint, not checked off. The AC1/AC2 oracle tests pass alone (20 expectations). A planted swap of the two designs fails folds 2 and 3. The full suite is still running.
 
 ## Decisions
 

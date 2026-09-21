@@ -535,6 +535,34 @@ final_nested <- function(data, seed = 11) {
   )
 }
 
+# The two time-series designs (M108), built with rsample::nested_cv() itself.
+# Both take three outer slices of `make_reg_data()`'s 90 rows, each holding out
+# one row (`assess = 1`), so no row is held out twice. The inner design is a
+# literal `rolling_origin()` call, so the final fit can re-run it on the full
+# data. `sliding_window()` sets `lookback`: its default of 0 gives a one-row
+# analysis set. Neither design draws from the RNG, so neither takes a seed.
+ts_rolling_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+}
+
+ts_sliding_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::sliding_window(lookback = 59, assess_stop = 1, step = 10),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+}
+
+# `rsq` is left out: on a one-row assessment set it has no variance to
+# divide by, and yardstick returns `NA` with a warning.
+ts_metrics <- function() {
+  yardstick::metric_set(yardstick::rmse, yardstick::mae)
+}
+
 # The results objects a final fit is built from (M46, D-041): one nested run
 # on `final_nested()`, served from the cache, carrying the procedure the final
 # fit re-runs. The deterministic one is the default; the stochastic sibling
