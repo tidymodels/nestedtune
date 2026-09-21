@@ -67,6 +67,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: step-7 approval: m106-reader-parity approved for merge
 - 2026-09-21: CI wait on PR #121 reached its ten-minute bound with build, format-suggest and both prose sweeps passed and nine legs pending. The wait stopped here, and `/milestone-review M106` resumes it.
 - 2026-09-21: resume: PR #121 open, route (c). `main` has not moved since `d477922`. CI finished red on one leg: R-CMD-check-hard (ubuntu, release) failed 6 tests, because six new tests reach the ranger fixture behind `skip_if_no_engines()` without `stochastic = TRUE`. The six guards are fixed on the branch.
+- 2026-09-21: step-7 approval: m106-reader-parity approved for merge (re-posed after the skip fix `8c20a34`)
 
 ## Decisions
 
