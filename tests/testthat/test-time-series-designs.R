@@ -16,9 +16,10 @@
 # O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
 #   tune::select_best() and fit() run by hand under the final fit's
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
-#   from the fixture's literal `rolling_origin()` call. Pinned by "the final
-#   fit on a rolling-origin design matches a hand-rolled reference".
-#   Satisfies AC4.
+#   from the fixture's literal `rolling_origin()` call. Pinned by the two
+#   "the final fit on a ... design matches a hand-rolled reference" tests,
+#   one per outer design. Satisfies AC4, and the sliding-window test backs
+#   the help's claim for `nested_final_fit()` on that design.
 
 expect_matches_reference <- function(res, ref) {
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
@@ -111,16 +112,13 @@ test_that("sliding-window splits match rsample::nested_cv()", {
   expect_inner_identical(lean, ref)
 })
 
-test_that("the final fit on a rolling-origin design matches a hand-rolled reference", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
+expect_final_matches_reference <- function(d, folds) {
   wf <- det_workflow(d)
   ms <- ts_metrics()
   grid <- det_grid()
 
   set.seed(20)
-  res <- nested_tune_grid(wf, ts_rolling_nested(d), grid = grid, metrics = ms)
+  res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
   set.seed(31)
   final <- nested_final_fit(wf, res)
 
@@ -159,6 +157,18 @@ test_that("the final fit on a rolling-origin design matches a hand-rolled refere
     predict(final, new_data = d),
     predict(ref, new_data = d)
   )
+}
+
+test_that("the final fit on a rolling-origin design matches a hand-rolled reference", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_final_matches_reference(d, ts_rolling_nested(d))
+})
+
+test_that("the final fit on a sliding-window design matches a hand-rolled reference", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_final_matches_reference(d, ts_sliding_nested(d))
 })
 
 # ---- AC5: predictions and augment() -----------------------------------------
