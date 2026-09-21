@@ -61,6 +61,7 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: review in progress (checkpoint). AC1 to AC4 evidence recorded and ticked. `devtools::check()` and the three reviewers are still running.
 - 2026-09-21: review gate: the user took every fix-now group (findings 1, 2, 4 to 7, 10 to 13) and approved the merge, subject to a re-ask if a fix is nontrivial. D-070 is widened for finding 10, instead of a new entry, to keep one correcting entry for this milestone. It had not reached `main`.
 - 2026-09-21: step-7 approval: m107-model-spec-input approved for merge (re-asked after the nontrivial fixes in 60dec8e).
+- 2026-09-21: PR #122 opened. The CI watch reached the time limit and was stopped. build, format-suggest and both prose-sweep runs passed, and 8 R CMD check and coverage jobs were still pending. Not merged.
 
 ## Decisions
 
