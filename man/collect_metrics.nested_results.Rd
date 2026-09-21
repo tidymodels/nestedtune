@@ -45,9 +45,9 @@ carries each fold's weight in a \code{.weight} column.
 each fold's estimate when not. Its other columns are the keys of those
 values: the outer fold's labels when unsummarized, and \code{.eval_time} where
 the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are
-dropped. A metric scored with two estimators has two values for one cell,
-and a metric named like a key column would overwrite that key, so either
-is refused with class \code{nestedtune_wide_collision}. The long shape keeps
+dropped. Two cases are refused with class \code{nestedtune_wide_collision},
+because each puts two values in one place: a metric scored with two
+estimators, and a metric named like a key column. The long shape keeps
 both.
 
 A metric measured at several evaluation times (\code{eval_time} on

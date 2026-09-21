@@ -461,7 +461,9 @@ final_fit_worker <- function(
 # because the package's own oracle reads it. What it deliberately does not
 # carry is any method that would turn that run into a performance claim: tune's
 # ranking and collecting generics are left unregistered, so they error rather
-# than answer, exactly as they do for `nested_results` (D-010, RR02 Q7).
+# than answer, exactly as they do for `nested_results` (D-010, RR02 Q7). The
+# extractors below reach parts of the trained workflow and make no such
+# claim (D-068).
 new_nested_final_fit <- function(workflow, selected, tuning, seeds, procedure) {
   structure(
     list(

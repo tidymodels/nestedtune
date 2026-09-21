@@ -11,9 +11,11 @@
 * `collect_metrics()` on a `nested_results` or a `nested_results_set`
   takes `type = "wide"`, which returns one column per metric, as tune's
   `collect_metrics()` does. A summarized table holds each metric's mean,
-  and an unsummarized one holds each outer fold's estimate. The fold labels, `.eval_time` and
-  `wflow_id` stay as key columns. An unknown `type` is refused with class
-  `nestedtune_bad_type`.
+  and an unsummarized one holds each outer fold's estimate. The fold
+  labels, `.eval_time` and `wflow_id` stay as key columns. An unknown
+  `type` is refused with class `nestedtune_bad_type`. A metric scored with
+  two estimators, or named like a key column, is refused with class
+  `nestedtune_wide_collision`.
 
 * `autoplot()` on a `nested_results` or a `nested_results_set` takes
   `metric` and `eval_time`, which choose the panels of

@@ -950,11 +950,8 @@ eval_inside_spec <- function(inside, data, env, call = rlang::caller_env()) {
   out
 }
 
-# Which of the two views `autoplot()` was asked for.
-#
-# The default is the whole vector, as the signature spells it out, and the first
-# element wins -- so this accepts it, accepts either name on its own, and
-# refuses anything else by naming both.
+# Which table shape `collect_metrics()` was asked for, read the way
+# check_plot_type() reads its view below.
 check_metrics_type <- function(type, call = rlang::caller_env()) {
   allowed <- c("long", "wide")
   if (identical(type, allowed)) {
@@ -1037,6 +1034,11 @@ check_plot_filter <- function(
   }
 }
 
+# Which of the two views `autoplot()` was asked for.
+#
+# The default is the whole vector, as the signature spells it out, and the first
+# element wins -- so this accepts it, accepts either name on its own, and
+# refuses anything else by naming both.
 check_plot_type <- function(type, call = rlang::caller_env()) {
   allowed <- c("parameters", "performance")
   if (identical(type, allowed)) {

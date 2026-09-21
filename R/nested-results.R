@@ -777,9 +777,9 @@ new_tbl <- function(cols) {
 #' each fold's estimate when not. Its other columns are the keys of those
 #' values: the outer fold's labels when unsummarized, and `.eval_time` where
 #' the long shape has it. The estimator, `n`, `std_err` and `.weight` are
-#' dropped. A metric scored with two estimators has two values for one cell,
-#' and a metric named like a key column would overwrite that key, so either
-#' is refused with class `nestedtune_wide_collision`. The long shape keeps
+#' dropped. Two cases are refused with class `nestedtune_wide_collision`,
+#' because each puts two values in one place: a metric scored with two
+#' estimators, and a metric named like a key column. The long shape keeps
 #' both.
 #'
 #' A metric measured at several evaluation times (`eval_time` on
@@ -911,8 +911,9 @@ pivot_metrics_wide <- function(long, call = rlang::caller_env()) {
     doubled <- unique(long$.metric[twice])
     cli::cli_abort(
       c(
-        "Cannot widen the metrics: {.val {doubled}} {cli::qty(length(doubled))}\\
-         {?has/have} more than one value for the same row.",
+        "Cannot widen the metrics: {.val {doubled}} \\
+         {cli::qty(length(doubled))}{?has/have} more than one value for the \\
+         same row.",
         i = "This happens when one metric is scored with two estimators. \\
              Use {.code type = \"long\"}, which keeps {.field .estimator}."
       ),

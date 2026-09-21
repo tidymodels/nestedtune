@@ -1,6 +1,6 @@
 # M106: tune's reader arguments and extract methods on the nested classes
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - [x] T6: Add `extract-nested_final_fit` and `predict.nested_results` to the `_pkgdown.yml` reference index, and write a D-entry for the seven re-exported generics and the predict refusal (review F16).
 - [x] T7: Read the scored times before the `metric` filter in `filter_plot_rows()` (F1). Test a set in which one workflow lacks a metric through the filter directly (F7).
 - [x] T8: Refuse a wide pivot in which two rows share a key and a metric, or a metric is named like a key column, with one class (F2, F4). Document the refusal and fix the `type` help's pointer (F14). Add an oracle provenance header and a weighted-run wide test (F6).
-- [ ] T9: Move the misplaced comment in `R/checks.R` (F9), tighten the predict set test's `id` match (F10), re-wrap lines over 80 columns (F15), and mention the extractors in the final-fit object comment (history note).
+- [x] T9: Move the misplaced comment in `R/checks.R` (F9), tighten the predict set test's `id` match (F10), re-wrap lines over 80 columns (F15), and mention the extractors in the final-fit object comment (history note).
 
 ## Work log
 
@@ -63,6 +63,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T6 done. Both topics were added to `_pkgdown.yml`, and `pkgdown::check_pkgdown()` now reports no problems. D-068 records the seven re-exports and the predict refusal.
 - 2026-09-21: T7 done. `filter_plot_rows()` checks both arguments against the whole run before filtering. The F1 regression test errors on the old code and passes on the new, and the F7 test drives the filter directly on a stacked table.
 - 2026-09-21: T8 done. Two refusals raise `nestedtune_wide_collision`: one metric under two estimators, and a metric named like a key column. The help section is renamed What the tables hold, and a weighted-run test shows `.weight` dropped. The test file carries an oracle provenance header.
+- 2026-09-21: T9 done. The `autoplot()` comment is back above `check_plot_type()`, the predict set test matches the phrase naming `id`, the added lines over 80 columns are re-wrapped, and the object comment names the extractors. A roxygen sentence that T8 committed with a prose-sweep hit is reworded, and all six gating sweeps are clean.
 
 ## Decisions
 

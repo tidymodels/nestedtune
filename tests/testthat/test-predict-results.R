@@ -22,6 +22,6 @@ test_that("predict() on a nested_results_set names nested_final_fit()", {
   cnd <- rlang::catch_cnd(predict(res, new_data = make_reg_data()))
   expect_s3_class(cnd, "nestedtune_predict_results")
   expect_match(conditionMessage(cnd), "nested_final_fit()", fixed = TRUE)
-  expect_match(conditionMessage(cnd), "id", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "naming it with `id`", fixed = TRUE)
   expect_snapshot(error = TRUE, predict(res, new_data = make_reg_data()))
 })

@@ -220,7 +220,7 @@ test_that("the refusals read the same for both accessors", {
 # M106 AC1: the final fit answers tune's and hardhat's extractors as the
 # workflow it holds does. Each method hands its call to that workflow, so the
 # reference is the same call made on `extract_workflow()` by hand.
-test_that("the final fit answers the workflow extractors as its workflow does", {
+test_that("the final fit answers the extractors as its workflow does", {
   skip_if_no_engines()
 
   final <- final_for_extract()
