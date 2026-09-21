@@ -109,6 +109,117 @@ test_that("AC4: a preprocessor beside a workflow is refused by class, by name or
   }
 })
 
+test_that("a formula passed unnamed beside a workflow, with `resamples` named, is refused by class", {
+  wf <- workflows::workflow(y ~ x, bare_spec())
+  for (fn in ORCHESTRATORS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
+    f <- function(...) call_by_name(fn, ...)
+    cnd <- rlang::catch_cnd(f(wf, y ~ x, resamples = 1))
+    expect_s3_class(cnd, "nestedtune_preprocessor_with_workflow")
+    expect_match(conditionMessage(cnd), "as an unnamed argument")
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  }
+})
+
+test_that("a missing `resamples` or `object` is refused, naming the export", {
+  wf <- workflows::workflow(y ~ x, bare_spec())
+  for (fn in ORCHESTRATORS) {
+    f <- function(...) call_by_name(fn, ...)
+    if (tuner_ready(fn)) {
+      for (cnd in list(
+        rlang::catch_cnd(f(wf)),
+        rlang::catch_cnd(f(bare_spec(), y ~ x))
+      )) {
+        expect_s3_class(cnd, "rlang_error")
+        expect_match(conditionMessage(cnd), "`resamples` is absent")
+        expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+      }
+    }
+    cnd <- rlang::catch_cnd(f())
+    expect_s3_class(cnd, "rlang_error")
+    expect_match(conditionMessage(cnd), "`object` is absent")
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  }
+})
+
+# A refusal raised after the spec method has built the workflow comes from
+# the workflow method, whose own call is the spec method's internal one. The
+# condition records the call the user wrote instead. An unknown name in the
+# dots is refused there, before any design is judged.
+test_that("a refusal on the spec route records the call the user wrote", {
+  for (fn in ORCHESTRATORS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
+    user_call <- rlang::call2(fn, bare_spec(), y ~ x, 1, bogus = 1)
+    cnd <- rlang::catch_cnd(eval(user_call))
+    expect_s3_class(cnd, "nestedtune_bad_dots")
+    expect_identical(conditionCall(cnd), user_call)
+  }
+})
+
+test_that("the racers and the annealer refuse a missing finetune before judging the preprocessor", {
+  real <- rlang::is_installed
+  testthat::local_mocked_bindings(
+    is_installed = function(pkg_, ...) {
+      if (pkg_ %in% "finetune") FALSE else real(pkg_, ...)
+    },
+    .package = "rlang"
+  )
+  for (fn in c(
+    "nested_tune_race_anova",
+    "nested_tune_race_win_loss",
+    "nested_tune_sim_anneal"
+  )) {
+    f <- function(...) call_by_name(fn, ...)
+    cnd <- rlang::catch_cnd(f(bare_spec(), 1, 1))
+    expect_s3_class(cnd, "nestedtune_pkg_not_installed")
+    expect_match(conditionMessage(cnd), "finetune")
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  }
+})
+
+# The forwarding itself: each spec method hands every argument to the
+# workflow method as given. The workflow method is replaced by one that
+# returns what it received, and every argument carries a sentinel no default
+# equals, so a dropped or renamed argument shows as a default or a missing
+# name. `control` stands for what the dots carry.
+test_that("each spec method passes every argument on to the workflow method", {
+  for (fn in ORCHESTRATORS) {
+    wf_method <- get(paste0(fn, ".workflow"))
+    named <- setdiff(names(formals(wf_method)), c("object", "resamples", "..."))
+    sentinels <- stats::setNames(
+      lapply(named, function(nm) paste0("sentinel-", nm)),
+      named
+    )
+    # The generic finds its method as a binding in the namespace before it
+    # reads the S3 table, so the binding is what is replaced.
+    testthat::local_mocked_bindings(
+      !!paste0(fn, ".workflow") := function(object, resamples, ...) {
+        list(object = object, resamples = resamples, args = rlang::list2(...))
+      }
+    )
+    got <- rlang::exec(
+      fn,
+      bare_spec(),
+      y ~ x,
+      "sentinel-resamples",
+      control = "sentinel-control",
+      !!!sentinels
+    )
+    expect_s3_class(got$object, "workflow")
+    expect_identical(got$resamples, "sentinel-resamples")
+    expect_identical(
+      got$args[order(names(got$args))],
+      c(sentinels, control = "sentinel-control")[
+        order(c(named, "control"))
+      ]
+    )
+  }
+})
+
 test_that("an object that is neither a workflow nor a model specification is refused", {
   for (fn in ORCHESTRATORS) {
     f <- function(...) call_by_name(fn, ...)
@@ -236,26 +347,30 @@ test_that("AC1: nested_tune_bayes() on a spec and a formula is the workflow run"
   expect_same_run(routes)
 })
 
-test_that("AC1: the two racers on a spec and a formula are the workflow run", {
-  for (fn in c("nested_tune_race_anova", "nested_tune_race_win_loss")) {
-    skip_if_no_race_fixture(sub("^nested_", "", fn), stochastic = TRUE)
-    d <- make_reg_data()
-    folds <- det_nested(d)
-    f <- reg_formula()
-    ms <- reg_metrics()
-    ctrl <- race_control()
-    routes <- spec_routes(
-      fn,
-      stoch_spec(),
-      f,
-      folds,
-      grid = stoch_grid(),
-      metrics = ms,
-      control = ctrl
-    )
-    expect_same_run(routes)
-  }
-})
+# One block per racer, so a skip for one leaves the other's test standing.
+for (fn in c("nested_tune_race_anova", "nested_tune_race_win_loss")) {
+  test_that(
+    paste0("AC1: ", fn, "() on a spec and a formula is the workflow run"),
+    {
+      skip_if_no_race_fixture(sub("^nested_", "", fn), stochastic = TRUE)
+      d <- make_reg_data()
+      folds <- det_nested(d)
+      f <- reg_formula()
+      ms <- reg_metrics()
+      ctrl <- race_control()
+      routes <- spec_routes(
+        fn,
+        stoch_spec(),
+        f,
+        folds,
+        grid = stoch_grid(),
+        metrics = ms,
+        control = ctrl
+      )
+      expect_same_run(routes)
+    }
+  )
+}
 
 test_that("AC1: nested_tune_sim_anneal() on a spec and a formula is the workflow run", {
   skip_if_no_anneal_fixture(stochastic = TRUE)

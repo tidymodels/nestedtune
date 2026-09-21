@@ -171,8 +171,11 @@ nested_tune_race_anova.model_spec <- function(
   eval_time = NULL,
   select = selection_rule()
 ) {
+  # finetune first, as the workflow method does.
+  check_tuner_installed("tune_race_anova")
   check_preprocessor(preprocessor)
-  nested_tune_race_anova(
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_race_anova(
     workflows::workflow(preprocessor, object),
     resamples,
     ...,
@@ -182,7 +185,7 @@ nested_tune_race_anova.model_spec <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select
-  )
+  ))
 }
 
 #' @rdname nested_tune_race
@@ -239,8 +242,10 @@ nested_tune_race_win_loss.model_spec <- function(
   eval_time = NULL,
   select = selection_rule()
 ) {
+  check_tuner_installed("tune_race_win_loss")
   check_preprocessor(preprocessor)
-  nested_tune_race_win_loss(
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_race_win_loss(
     workflows::workflow(preprocessor, object),
     resamples,
     ...,
@@ -250,7 +255,7 @@ nested_tune_race_win_loss.model_spec <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select
-  )
+  ))
 }
 
 #' @rdname nested_tune_race
@@ -305,6 +310,7 @@ nested_tune_race <- function(
 ) {
   check_tuner_installed(fn, call = call)
   check_no_preprocessor(dots, resamples, call = call)
+  rlang::check_required(resamples, call = call)
   control <- check_dots_control(dots, call = call)
   check_workflow(object, call = call)
   check_untuned_workflow(object, call = call)

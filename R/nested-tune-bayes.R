@@ -160,7 +160,8 @@ nested_tune_bayes.model_spec <- function(
   select = selection_rule()
 ) {
   check_preprocessor(preprocessor)
-  nested_tune_bayes(
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_bayes(
     workflows::workflow(preprocessor, object),
     resamples,
     ...,
@@ -172,7 +173,7 @@ nested_tune_bayes.model_spec <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select
-  )
+  ))
 }
 
 #' @rdname nested_tune_bayes
@@ -192,6 +193,7 @@ nested_tune_bayes.workflow <- function(
 ) {
   dots <- capture_dots(...)
   check_no_preprocessor(dots, resamples)
+  rlang::check_required(resamples)
   control <- check_dots_control(dots)
   check_workflow(object)
   check_untuned_workflow(object)

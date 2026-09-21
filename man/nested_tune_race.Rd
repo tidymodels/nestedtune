@@ -76,9 +76,11 @@ for tuning with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specif
 such a parameter, given with \code{preprocessor}. A workflow with no marker is
 refused, and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores one on the same design.}
 
-\item{...}{A control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as \code{control}, and
-nothing else. Every argument after \code{...} is matched by name. The
-section on differences from finetune says what becomes of each slot.}
+\item{...}{On the generic, the arguments of the method that \code{object}
+selects. On a method, a control object from \code{\link[finetune:control_race]{finetune::control_race()}}, as
+\code{control}, and nothing else. Every argument after \code{...} is matched by
+name. The section on differences from finetune says what becomes of
+each slot.}
 
 \item{preprocessor}{A formula or a recipe, when \code{object} is a model
 specification. The two are combined as

@@ -36,9 +36,11 @@ with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tun
 it, or a parsnip model specification with no marker, given with
 \code{preprocessor}. A workflow carrying a marker is refused at entry.}
 
-\item{...}{A control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as \code{control}, and
-nothing else. Every argument after \code{...} is matched by name. The
-section on differences from tune says what becomes of each slot.}
+\item{...}{On the generic, the arguments of the method that \code{object}
+selects. On a method, a control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as
+\code{control}, and nothing else. Every argument after \code{...} is matched by
+name. The section on differences from tune says what becomes of
+each slot.}
 
 \item{preprocessor}{A formula or a recipe, when \code{object} is a model
 specification. The two are combined as

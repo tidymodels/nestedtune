@@ -14,8 +14,9 @@ check_workflow <- function(object, call = rlang::caller_env()) {
         } else {
           "Got {.obj_type_friendly {object}}."
         },
-        # A bare spec is the one input the orchestrators accept and this does
-        # not (D-069), so its hint spells the wrapping out.
+        # The six orchestrators take a bare spec by their own method (D-069)
+        # and never reach this with one. `nested_final_fit()` does, so the
+        # hint spells out the wrapping that function needs.
         i = if (inherits(object, "model_spec")) {
           "Wrap it with its preprocessor: \\
            {.code workflows::workflow(preprocessor, spec)}."
@@ -162,16 +163,20 @@ check_preprocessor <- function(preprocessor, call = rlang::caller_env()) {
 }
 
 # The other side of the same door: a workflow carries its own preprocessor, so
-# one given beside it is refused, whether it came by name (it lands in `...`)
-# or by position (it lands in `resamples`, and the design in `...`). `dots` is
-# the list `capture_dots()` returns. Asked before `check_dots_control()` and
+# one given beside it is refused, whether it came by name (it lands in `...`),
+# by position (it lands in `resamples`, and the design in `...`), or by
+# position with `resamples` named (it lands in `...` unnamed). `dots` is the
+# list `capture_dots()` returns. Asked before `check_dots_control()` and
 # `check_nested()`, whose messages would name the symptom and not the cause.
 check_no_preprocessor <- function(dots, resamples, call = rlang::caller_env()) {
+  preprocessor_like <- function(x) {
+    is_formula_or_recipe(x) || inherits(x, "workflow_variables")
+  }
   by_name <- "preprocessor" %in% rlang::names2(dots)
-  by_position <- !rlang::is_missing(resamples) &&
-    (is_formula_or_recipe(resamples) ||
-      inherits(resamples, "workflow_variables"))
-  if (!by_name && !by_position) {
+  by_position <- !rlang::is_missing(resamples) && preprocessor_like(resamples)
+  unnamed <- dots[!nzchar(rlang::names2(dots))]
+  in_dots <- Filter(preprocessor_like, unnamed)
+  if (!by_name && !by_position && length(in_dots) == 0L) {
     return(invisible())
   }
   cli::cli_abort(
@@ -179,8 +184,11 @@ check_no_preprocessor <- function(dots, resamples, call = rlang::caller_env()) {
       "A workflow carries its own preprocessor.",
       x = if (by_name) {
         "Got {.arg preprocessor} beside a workflow."
-      } else {
+      } else if (by_position) {
         "Got {.obj_type_friendly {resamples}} where {.arg resamples} goes."
+      } else {
+        "Got {.obj_type_friendly {in_dots[[1]]}} as an unnamed argument \\
+         beside a workflow."
       },
       i = "Pass the bare model specification with the preprocessor, or \\
            leave the preprocessor out and pass the workflow alone."
@@ -190,8 +198,10 @@ check_no_preprocessor <- function(dots, resamples, call = rlang::caller_env()) {
   )
 }
 
-# What the six orchestrators' default methods raise (D-069).
+# What the six orchestrators' default methods raise (D-069). A call with no
+# `object` at all dispatches here too, and is refused as missing.
 abort_bad_object <- function(object, call = rlang::caller_env()) {
+  rlang::check_required(object, call = call)
   cli::cli_abort(
     c(
       "{.arg object} must be a {.cls workflow} or a parsnip model \\
@@ -199,6 +209,27 @@ abort_bad_object <- function(object, call = rlang::caller_env()) {
       x = "Got {.obj_type_friendly {object}}."
     ),
     call = call
+  )
+}
+
+# Runs a `model_spec` method's call of the generic on the built workflow. An
+# error raised in that call's own frame records it as its call, so this puts
+# back the call the user wrote, the one the spec method was dispatched from.
+# That frame's call carries the method's name, so the generic's name, the
+# head of the internal call, replaces it. Only a condition whose call is that
+# internal call exactly is rewritten.
+with_user_call <- function(expr, call = rlang::caller_env()) {
+  inner <- substitute(expr)
+  call <- rlang::frame_call(call)
+  call[[1]] <- inner[[1]]
+  withCallingHandlers(
+    expr,
+    error = function(cnd) {
+      if (identical(conditionCall(cnd), inner)) {
+        cnd$call <- call
+        stop(cnd)
+      }
+    }
   )
 }
 

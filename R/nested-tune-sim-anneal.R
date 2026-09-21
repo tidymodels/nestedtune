@@ -172,8 +172,11 @@ nested_tune_sim_anneal.model_spec <- function(
   eval_time = NULL,
   select = selection_rule()
 ) {
+  # finetune first, as the workflow method does.
+  check_tuner_installed("tune_sim_anneal")
   check_preprocessor(preprocessor)
-  nested_tune_sim_anneal(
+  rlang::check_required(resamples)
+  with_user_call(nested_tune_sim_anneal(
     workflows::workflow(preprocessor, object),
     resamples,
     ...,
@@ -184,7 +187,7 @@ nested_tune_sim_anneal.model_spec <- function(
     event_level = event_level,
     eval_time = eval_time,
     select = select
-  )
+  ))
 }
 
 #' @rdname nested_tune_sim_anneal
@@ -210,6 +213,7 @@ nested_tune_sim_anneal.workflow <- function(
   check_tuner_installed("tune_sim_anneal")
   dots <- capture_dots(...)
   check_no_preprocessor(dots, resamples)
+  rlang::check_required(resamples)
   control <- check_dots_control(dots)
   check_workflow(object)
   check_untuned_workflow(object)

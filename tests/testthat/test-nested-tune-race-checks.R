@@ -314,6 +314,7 @@ test_that("each shared check fires through both racing exports", {
         race_call(fn, wf, folds, 3, control = ctrl)
       },
       check_control = function() race_call(fn, wf, folds, control = "no"),
+      check_required = function() race_call(fn, wf),
       check_no_preprocessor = function() {
         race_call(
           fn,
@@ -372,6 +373,7 @@ test_that("each shared check fires through both racing exports", {
       check_dots_control = "accepts `control`",
       check_control = "control_race",
       check_no_preprocessor = "carries its own preprocessor",
+      check_required = "`resamples` is absent",
       check_workflow = "no model specification",
       check_untuned_workflow = "no parameter marked for tuning",
       check_nested = "nested resampling design",

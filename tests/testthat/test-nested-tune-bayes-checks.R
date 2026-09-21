@@ -163,6 +163,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
     check_no_preprocessor = function() {
       nested_tune_bayes(wf, preprocessor = y ~ x1, resamples = folds)
     },
+    check_required = function() nested_tune_bayes(wf),
     # An empty workflow, since a bare spec takes the model-spec route (M107).
     check_workflow = function() nested_tune_bayes(workflows::workflow(), folds),
     check_untuned_workflow = function() {
@@ -187,6 +188,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
     check_dots_control = "accepts `control`",
     check_control = "control_bayes",
     check_no_preprocessor = "carries its own preprocessor",
+    check_required = "`resamples` is absent",
     check_workflow = "no model specification",
     check_untuned_workflow = "no parameter marked for tuning",
     check_nested = "nested resampling design",

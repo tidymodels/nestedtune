@@ -173,14 +173,15 @@ nested_fit_resamples.model_spec <- function(
   eval_time = NULL
 ) {
   check_preprocessor(preprocessor)
-  nested_fit_resamples(
+  rlang::check_required(resamples)
+  with_user_call(nested_fit_resamples(
     workflows::workflow(preprocessor, object),
     resamples,
     ...,
     metrics = metrics,
     event_level = event_level,
     eval_time = eval_time
-  )
+  ))
 }
 
 #' @rdname nested_fit_resamples
@@ -195,6 +196,7 @@ nested_fit_resamples.workflow <- function(
 ) {
   dots <- capture_dots(...)
   check_no_preprocessor(dots, resamples)
+  rlang::check_required(resamples)
   control <- check_dots_control(dots)
   check_workflow(object)
   # The door this function is (D-057): a marked workflow goes to the five,

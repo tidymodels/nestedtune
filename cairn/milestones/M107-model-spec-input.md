@@ -59,6 +59,7 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: claim audit: 27 claims read, 4 corrected — R/checks.R, tests/testthat/test-model-spec-input.R, tests/testthat/test-dots-barrier.R. The same reader re-read the four and found each true.
 - 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes, so no note is new against `main`. It ran before the comment-only corrections. The edited test files were re-run clean after them. `cairn_validate` passes. Status set to review.
 - 2026-09-21: review in progress (checkpoint). AC1 to AC4 evidence recorded and ticked. `devtools::check()` and the three reviewers are still running.
+- 2026-09-21: review gate: the user took every fix-now group (findings 1, 2, 4 to 7, 10 to 13) and approved the merge, subject to a re-ask if a fix is nontrivial. D-070 is widened for finding 10, instead of a new entry, to keep one correcting entry for this milestone. It had not reached `main`.
 
 ## Decisions
 
@@ -90,3 +91,11 @@ Independent review: three fresh-context reviewers ran. The blame-history reviewe
 12. In the race identity test, a skip for the anova fixture also skips win_loss, because the skip sits inside the loop.
 13. The `check_workflow()` comment frames the function around the orchestrators. `nested_workflow_map()` also calls it.
 14. `cairn/DESIGN.md` is unchanged. It does not describe the orchestrators' inputs.
+
+Triage at the merge gate (2026-09-21). No finding shows a criterion failing, so none returns the milestone.
+
+- Fix now, done: 1, 4, 5, 6, 7 (error messages and the recorded call), 2 and 12 (test strength), 10, 11 and 13 (doc text).
+- Rejected: 3, because AC3 asks for the `predict()` identity and the test gives it with a live mismatch control. 8 and 9, because tune's own methods behave the same way. 14, because DESIGN.md does not describe the orchestrators' inputs.
+- Prior-review side note (finetune check order in the workflow methods): rejected, because both call `check_tuner_installed()` first.
+
+Fix-now evidence. A missing `resamples` on either route and a call with no `object` raise `rlang::check_required()` errors that name the export. A formula passed unnamed beside a workflow, with `resamples` named, raises `nestedtune_preprocessor_with_workflow`. The racer and annealer spec methods check finetune before the preprocessor, which a mocked absent finetune confirms. `with_user_call()` rewrites the internal call on errors from the workflow method to the user's call, and a test asserts `conditionCall()` identical to the user's call for all six. A forwarding test replaces each workflow method and asserts that every named argument and `control` arrive as given. Planted defects turned it red: `select` dropped from the grid spec method, and `...` dropped from the bayes spec method. Disabling the rewrite turned the recorded-call test red (6 of 12). The two racers' identity tests are now separate blocks. The `...` help now describes the generic and the methods apart. D-070 is widened to state every input refused beside a workflow. The three shared-check tests list `check_required` as a new shared check. `test-model-spec-input.R` and the three checks files pass. Prose sweeps and `air format --check` are clean, and `document()` is in sync.
