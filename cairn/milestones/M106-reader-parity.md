@@ -65,6 +65,7 @@ A tidymodels user reaches the fitted parts of a final fit, the wide metrics tabl
 - 2026-09-21: T8 done. Two refusals raise `nestedtune_wide_collision`: one metric under two estimators, and a metric named like a key column. The help section is renamed What the tables hold, and a weighted-run test shows `.weight` dropped. The test file carries an oracle provenance header.
 - 2026-09-21: T9 done. The `autoplot()` comment is back above `check_plot_type()`, the predict set test matches the phrase naming `id`, the added lines over 80 columns are re-wrapped, and the object comment names the extractors. A roxygen sentence that T8 committed with a prose-sweep hit is reworded, and all six gating sweeps are clean.
 - 2026-09-21: step-7 approval: m106-reader-parity approved for merge
+- 2026-09-21: CI wait on PR #121 reached its ten-minute bound with build, format-suggest and both prose sweeps passed and nine legs pending. The wait stopped here, and `/milestone-review M106` resumes it.
 
 ## Decisions
 
