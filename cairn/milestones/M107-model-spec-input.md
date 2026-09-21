@@ -1,6 +1,6 @@
 # M107: A model specification with a formula or recipe as the orchestrators' input
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - [x] T2: Convert `nested_tune_grid()` (`R/nested-tune-grid.R:446`) to a generic with both methods, and add the classed refusals for the three bad inputs. The dots carry `control` (D-042), so check how `test-dots-barrier.R` and `test-fixture-cache.R` enumerate formals, and update them.
 - [x] T3: Repeat T2 for the other five orchestrators. Write the AC1 and AC2 identity tests.
 - [x] T4: Change `check_workflow()`'s message (`R/checks.R:8`) for a `model_spec`. Write the AC3 final-fit identity test and the AC4 refusal tests.
-- [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -56,6 +56,8 @@ A user who calls `tune_grid(spec, preprocessor, resamples)` can call `nested_tun
 - 2026-09-21: T2 and T3 done. All six are generics with `default`, `model_spec` and `workflow` methods. `test-model-spec-input.R` holds the AC1 and AC2 identities and the AC4 refusals for all six. Tests that read the formals or bodies of the exports now read the `workflow` methods. Four check tests passed a bare spec as their `check_workflow` case, which now reaches the spec method, so they use an empty workflow. A planted defect (the grid spec method dropping `grid`) turned the AC1 and AC2 grid identities red. Suite 929 tests, 0 failed; both prose sweeps clean; `air format --check` clean.
 - 2026-09-21: T4 done. The `check_workflow()` message change for a bare spec landed with T2, and its test with T3. The AC3 test finalizes both grid-recipe results on `workflow(recipe, spec)` under one seed and compares `predict()`. Its control, a recipe over other predictors, is refused with `nestedtune_workflow_mismatch`. The test file passes 195 expectations.
 - 2026-09-21: T5 in progress (checkpoint). Help and `NEWS.md` text written, `document()` run, and all six gating prose sweeps clean. `devtools::check()` is running. The claim audit's first pass read 27 claims and flagged 4. Four comments are corrected, and D-070 corrects D-069's reason for refusing `workflow_variables()`. The audit's re-read is pending.
+- 2026-09-21: claim audit: 27 claims read, 4 corrected — R/checks.R, tests/testthat/test-model-spec-input.R, tests/testthat/test-dots-barrier.R. The same reader re-read the four and found each true.
+- 2026-09-21: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes, so no note is new against `main`. It ran before the comment-only corrections. The edited test files were re-run clean after them. `cairn_validate` passes. Status set to review.
 
 ## Decisions
 
