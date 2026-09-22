@@ -83,7 +83,7 @@ Consistency gate:
 
 Independent review: three fresh reviewers. The blame-history reviewer found nothing. The prior-review reviewer found no prior finding the diff contradicts. The diff reviewer found no criterion failing and ranked 11 findings, listed here with dispositions set at the merge gate:
 - R1: an overlapping `sliding_window()` design (for example `assess_stop = 3, step = 1`) holds rows out twice, so `augment()` still names a repeated or Monte Carlo design as the cause. The help, NEWS and D-071 limit the new message to designs with no row held out twice.
-- R2: no test runs `augment()` on a `sliding_window()` result, though its help says that design is refused.
+- R2: the `augment()` help says a `sliding_window()` design is refused. No test runs `augment()` on such a result.
 - R3: the new refusal test does not assert the condition call, as `test-augment.R` does for the old branch.
 - R4: the two final-fit tests give identical fits, because the final fit re-runs only the inner design. The sliding-window test shows that the result is accepted, not a separate number.
 - R5: the final-fit test uses a deterministic workflow, so it cannot detect a final fit that ignores its seeds.
@@ -92,4 +92,4 @@ Independent review: three fresh reviewers. The blame-history reviewer found noth
 - R8: `[augment()][augment.nested_results]` in `R/nested-tune-grid.R:112` renders without code font in five help pages.
 - R9: the final-fit tests call `nested_tune_grid()` without `memoised()`, which adds two full nested runs per suite run.
 - R10: the new message says "exactly once" and then "No outer fold holds out 87 rows". The reviewer judged it accurate.
-- R11: the old branch still prints "holds out 0 rows never" when no row is left out. This predates the branch.
+- R11: when no row is left out, the old branch still prints "holds out 0 rows never". This predates the branch.
