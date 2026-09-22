@@ -111,4 +111,17 @@ Sync: `origin/main` is still at ea063a1, the branch point, so nothing needed a m
 - AC2: `test-nested-tune-grid-oracles.R` and `test-nested-tune-bayes-oracles.R` pass. Each compares every fold's `.selected` parameter columns and `.config` with `select_best_desirability()` on that fold's reference run. The run comes from `reference_nested_loop()` or `reference_nested_bayes_loop()` under the default rule. Each test also asserts that at least one pick differs from the default rule's. Pass.
 - AC3: `test-nested-final-fit-results.R` passes. It asserts that `nested_final_fit()`'s `$selected` equals `select_best_desirability()` on the run `extract_tune_results()` returns, and that the pick differs from `select_best()` by rmse. Pass.
 - AC4: `test-nested-tune-race-checks.R` (both racers) and `test-nested-tune-sim-anneal-checks.R` pass, each asserting class `nestedtune_selection_rule_unsupported` at entry. Pass.
-- AC5: `test-selection-rule-installed.R` passes. With desirability2 masked it asserts class `nestedtune_pkg_not_installed` for `selection_rule()`, for `nested_tune_grid()` given a rule built before the mask, and for `nested_final_fit()` on a result that recorded the rule, each beside an unmasked control. A fourth block covers `nested_tune_bayes()`. Pass.
+- AC5: `test-selection-rule-installed.R` passes. With desirability2 masked, it asserts class `nestedtune_pkg_not_installed` for three calls, each beside an unmasked control. They are `selection_rule()`, `nested_tune_grid()` given a rule built before the mask, and `nested_final_fit()` on a result that recorded the rule. A fourth block covers `nested_tune_bayes()`. Pass.
+
+Independent review, pass 2, three fresh-context lenses. The blame-history lens found no undone past work and no conflict with D-044, D-056, D-072 or D-073. The prior-review lens found no regression against the archived reviews of M46-M59, M69, M83 and M98. The diff lens confirmed the T6-T9 fixes by running them. Negative numbers, injected values and named arguments pass, and names in later arguments are refused. Its findings, most severe first:
+
+1. [O] A goal with an invalid value passes every check and fails every fold after tuning. Examples are `maximize(rsq, bogus = 1)`, `maximize(rsq, low = 1, high = 0)` and `maximize(rsq, low = "a")`. Reproduced on a 3-fold grid, where 3 of 3 folds failed. The help discloses that values are read only at scoring.
+2. [O] The later-argument check refuses the constants `pi` and `T`, because `all.vars()` counts them as variables. Reproduced.
+3. [O] The `!!` hint always names the first variable, so it suggests `!!.data` for `.data$lo` and `!!x` for a formula. Reproduced.
+4. [O] The racer and annealing refusal names tune's function, as in `tune_race_anova()`, where the user called `nested_tune_race_anova()`. Reproduced.
+5. [O] `selection_rule()`'s help says every orchestrator refuses the rule on a censored model. Only grid and Bayesian have that check, because the others refuse the rule for every model. Read from source.
+6. [O] The entry check refuses a goal on a summary column that is neither a metric nor a parameter. Examples are `.config`, and `.iter` on a Bayesian run. The grid case was reproduced. This matches D-073's scope.
+7. [O] The `select` help that the racers and `nested_tune_sim_anneal()` inherit does not say they refuse the rule. Read from source.
+8. [O] One roxygen line in `R/selection-rule.R` is 125 characters wide. Read from source.
+
+No finding shows an acceptance criterion failing, so none is a return under the floor.
