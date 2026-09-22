@@ -1,6 +1,6 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -43,7 +43,7 @@
 - [x] T2: Extend `selection_rule()` (`R/selection-rule.R:76`) with the rule. Capture the terms as expressions, as the orderings are captured. Add the entry check against the run's metric set and tuned parameters, and add the three tuners' refusal.
 - [x] T3: Apply the rule where the recorded rule selects today, for the folds and the final fit. Write the AC2 and AC3 oracle tests, comparing parameter columns and `.config` only.
 - [x] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
-- [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -57,6 +57,9 @@
 - 2026-09-21: T2 done. The constructor takes the fourth rule and runs its terms through `desirability()`. The registry gains a `desirability` field that the entry check reads to refuse the racers and annealing. The unknown-term check reads `check_metrics_arg()`. The constructor's absent-package refusal landed here, and its test waits for T4. Planted defects turned the new tests red. Suite and plain sweep clean.
 - 2026-09-21: T3 done. `apply_selection_rule()` gained the branch in T2, so the folds and the final fit share it. The grid, Bayesian and final-fit oracle tests each use terms that move at least one pick off the default rule's, measured and recorded in the test files. A planted fallback to the default rule turned all three red. desirability2 refuses goals written as `desirability2::maximize()`. A cache miss on repeated reference-loop requests predates this branch and went to the fixture-key candidate row. Suite and plain sweep clean.
 - 2026-09-21: T4 done. `nested_final_fit()` asks for desirability2 when the record holds the rule. Discovered sub-task: `needed_pkgs()` adds desirability2 for the rule, so a daemon without it is refused before any fold is sent. The three AC5 refusals are tested with the package masked, each beside a passing control, and a no-op planted check turned all three red. Suite and plain sweep clean.
+- 2026-09-21: T5 done. `selection_rule()`'s help gains the fourth rule and a section on writing a goal, `nested_tune_grid()`'s select text names the rule, and NEWS.md has the entry. `document()` run, all six gating sweeps clean. `devtools::check()` on the branch gives 0 errors, 0 warnings, 0 notes. On main at the branch point, run from a worktree, it gives one note, for the worktree's `.git` file.
+- 2026-09-21: claim audit: 50 claims read, 1 corrected — R/selection-rule.R, man/selection_rule.Rd (desirability2 estimates only the limits a goal leaves out). The reader re-read the correction and confirmed it.
+- 2026-09-21: status set to review.
 
 ## Decisions
 
