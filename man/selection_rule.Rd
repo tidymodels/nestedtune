@@ -73,9 +73,10 @@ names a metric or a tuned parameter. desirability2 checks each goal when
 the rule is built. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at
 entry that every name a goal uses is a metric in \code{metrics} or a parameter
 \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
-uses by default for the model's mode. desirability2 sets each goal's
-limits from the tuning run it scores, so each fold and the final fit scale
-the goals on their own inner run. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+uses by default for the model's mode. desirability2 sets each limit a goal
+leaves out from the tuning run it scores, so each fold and the final fit
+scale those goals on their own inner run. A limit written into the goal
+holds everywhere. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
 rule.
 }

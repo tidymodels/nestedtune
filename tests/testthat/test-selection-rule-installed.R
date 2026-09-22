@@ -101,8 +101,8 @@ test_that("AC5: nested_final_fit() refuses a result that recorded the desirabili
     select = rule
   ))
 
-  # The refusal comes before the inner run is built: the tuner is mocked to
-  # a sentinel, which a refusal after that point would raise instead.
+  # The refusal comes before the tuner runs: the tuner is mocked to a
+  # sentinel, which a refusal after that point would raise instead.
   testthat::local_mocked_bindings(
     run_tuner = function(...) {
       rlang::abort("tuning began", class = "nestedtune_sentinel")
