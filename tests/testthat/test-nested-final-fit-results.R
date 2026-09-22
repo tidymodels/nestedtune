@@ -121,3 +121,58 @@ test_that("AC2: the final fit selects by the recorded rule, and records it (M69)
       identical(picked$best, picked$pct_loss)
   )
 })
+
+# The desirability rule reaches the final fit (M109, AC3): the oracle is
+# desirability2::select_best_desirability(), called by name with the terms
+# written out, on the run `extract_tune_results()` returns. Measured
+# 2026-09-21 on this full-data run (tune 2.1.0, desirability2 0.2.0): best by
+# rmse picks (2,2), which is also the smallest candidate, so a term favoring
+# simple models cannot move the pick. `target(df1, target = 5)` picks (5,2),
+# which is what lets the last expectation tell a final fit that applied the
+# rule from one that ignored it.
+
+test_that("AC3: the final fit selects by a recorded desirability rule (M109)", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- final_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  cols <- c("df1", "df2", ".config")
+  rule <- selection_rule(
+    "desirability",
+    minimize(rmse),
+    maximize(rsq),
+    target(df1, target = 5)
+  )
+
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = g,
+    metrics = ms,
+    param_info = p,
+    select = rule
+  ))
+  set.seed(3)
+  final <- memoised(nested_final_fit(wf, res))
+  expect_identical(extract_procedure(final)$select, rule)
+  tuning <- extract_tune_results(final)
+  ref <- desirability2::select_best_desirability(
+    tuning,
+    minimize(rmse),
+    maximize(rsq),
+    target(df1, target = 5)
+  )
+  expect_identical(final$selected[cols], ref[cols])
+  # A final fit that ignored the record would select best by rmse, which
+  # differs on this run (see the measurement above).
+  expect_false(identical(
+    final$selected[cols],
+    tune::select_best(tuning, metric = "rmse")[cols]
+  ))
+})

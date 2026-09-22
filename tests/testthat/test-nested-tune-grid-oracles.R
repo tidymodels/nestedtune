@@ -361,3 +361,68 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
   expect_false(identical(picked$one_std_err, picked$best))
   expect_false(identical(picked$pct_loss, picked$best))
 })
+
+# O6 -- type "live" (reference implementation), for the desirability rule
+#   (M109, AC2). Source: desirability2::select_best_desirability(), called by
+#   name with the terms written out here, on each fold's hand-run tuning
+#   result from reference_nested_loop() under the default rule, the same
+#   cached run O5 reads. Only the parameter columns and `.config` are
+#   compared. Measured 2026-09-21 on this fixture under seed 20 (tune 2.1.0,
+#   desirability2 0.2.0): best picks (2,2), (2,2), (2,5), and the terms below
+#   pick (2,2), (2,2), (2,2). The third fold differs, which is what lets the
+#   test tell a driver that applied the rule from one that ignored it.
+
+test_that("AC2: the desirability rule picks what desirability2 picks on the fold's inner run (M109)", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  cols <- c("df1", "df2", ".config")
+
+  set.seed(20)
+  ref_best <- memoised(reference_nested_loop(
+    wf,
+    folds,
+    g,
+    ms,
+    seed = 20,
+    metric_name = "rmse"
+  ))
+  rule <- selection_rule(
+    "desirability",
+    minimize(rmse),
+    maximize(rsq),
+    minimize(df1),
+    minimize(df2)
+  )
+  set.seed(20)
+  res <- nested_tune_grid(
+    wf,
+    folds,
+    grid = g,
+    metrics = ms,
+    param_info = p,
+    select = rule
+  )
+  expect_true(all(res$.completed))
+  expect_identical(extract_procedure(res)$select, rule)
+  for (i in seq_len(nrow(res))) {
+    ref <- desirability2::select_best_desirability(
+      ref_best[[i]]$tuned,
+      minimize(rmse),
+      maximize(rsq),
+      minimize(df1),
+      minimize(df2)
+    )
+    expect_identical(res$.selected[[i]][cols], ref[cols], info = paste("fold", i))
+  }
+
+  # The rule reached the selection (see O6 above).
+  best <- lapply(ref_best, function(fold) fold$selected[cols])
+  expect_false(identical(lapply(res$.selected, `[`, cols), best))
+})
