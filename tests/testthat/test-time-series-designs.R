@@ -102,7 +102,11 @@ test_that("sliding-window splits match rsample::nested_cv()", {
   ref <- ts_sliding_nested(d)
   lean <- nested_resamples(
     d,
-    outside = rsample::sliding_window(lookback = 59, assess_stop = 1, step = 10),
+    outside = rsample::sliding_window(
+      lookback = 59,
+      assess_stop = 1,
+      step = 10
+    ),
     inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
   )
 
@@ -201,7 +205,10 @@ test_that("collect_predictions() returns each outer-assessment row once per fold
 })
 
 expect_augment_names_never_held <- function(res, d) {
-  never <- setdiff(seq_len(nrow(d)), unlist(lapply(res$splits, rsample::complement)))
+  never <- setdiff(
+    seq_len(nrow(d)),
+    unlist(lapply(res$splits, rsample::complement))
+  )
   expect_length(never, 87L)
 
   cnd <- rlang::catch_cnd(augment(res), "error")

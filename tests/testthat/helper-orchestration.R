@@ -552,7 +552,11 @@ ts_rolling_nested <- function(data) {
 ts_sliding_nested <- function(data) {
   rsample::nested_cv(
     data,
-    outside = rsample::sliding_window(lookback = 59, assess_stop = 1, step = 10),
+    outside = rsample::sliding_window(
+      lookback = 59,
+      assess_stop = 1,
+      step = 10
+    ),
     inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
   )
 }

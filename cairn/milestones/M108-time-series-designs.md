@@ -63,6 +63,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: T5 done. `devtools::check()` on the final branch tree gives 0 errors, 0 warnings and 0 notes, the same as `main` at `6f4795a`. Status set to review.
 - 2026-09-21: review found every criterion met, the gate clean and 11 diff findings. The gate fixed R2, R3, R8 and R9 on the branch and filed R1 as a candidate.
 - 2026-09-21: step-7 approval: m108-time-series-designs approved for merge
+- 2026-09-21: CI on PR #123 failed `format-suggest` on three long lines in two test files. `air format` fixed them, and the test file passes 143 expectations.
 
 ## Decisions
 
