@@ -2620,6 +2620,66 @@ MAP_FNS <- c(
   "nested_fit_resamples"
 )
 
+# The hand call for one workflow of a set: the routed orchestrator, its
+# arguments spelled by name, under the entry seed. Moved here from
+# test-nested-workflow-map-oracles.R at M110, so the time-series tests can use
+# it too.
+#
+# The hand call's arguments are written out here from the documented
+# contract, never read off `orchestrator_args()`: for a tuned workflow the
+# orchestrator `fn` names takes everything the map was given, and a fixed
+# workflow runs through `nested_fit_resamples()` with the design and the
+# metrics alone -- no `grid`, no counts, and no `control` (the class is
+# `fn`'s, and the plain resampling orchestrator refuses it).
+hand_call <- function(fn, workflow, folds, ms, seed) {
+  tuned <- length(tune::extract_parameter_set_dials(workflow)$id) > 0L
+  set.seed(seed)
+  if (!tuned) {
+    # The fixed workflow's hand call is the same run whichever `fn` the block
+    # is for, so it is served from the fixture cache after the first block
+    # builds it (M74).
+    return(memoised(nested_fit_resamples(workflow, folds, metrics = ms)))
+  }
+  switch(
+    fn,
+    nested_tune_grid = nested_tune_grid(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms
+    ),
+    nested_tune_bayes = nested_tune_bayes(
+      workflow,
+      folds,
+      iter = 1,
+      initial = 2,
+      metrics = ms
+    ),
+    nested_tune_race_anova = nested_tune_race_anova(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms,
+      control = race_control()
+    ),
+    nested_tune_race_win_loss = nested_tune_race_win_loss(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms,
+      control = race_control()
+    ),
+    nested_tune_sim_anneal = nested_tune_sim_anneal(
+      workflow,
+      folds,
+      iter = 2,
+      initial = 3,
+      metrics = ms,
+      control = anneal_control()
+    )
+  )
+}
+
 # The arguments each orchestrator's map run takes beyond the design and the
 # metrics: the same counts and controls the single-workflow fixtures above
 # use, so a hand call under the same seed reproduces the element.

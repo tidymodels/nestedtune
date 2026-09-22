@@ -605,3 +605,39 @@ test_that("the final fit on a rolling-origin fit_resamples() result fits every r
   plain <- parsnip::fit(wf, data = d)
   expect_identical(predict(final, new_data = d), predict(plain, new_data = d))
 })
+
+# O7 -- type "live" (reference implementation). Source: hand_call() in
+#   helper-orchestration.R, the orchestrator each workflow of a set routes
+#   to, called by hand under the same seed, as
+#   test-nested-workflow-map-oracles.R uses it. Pinned by "a workflow set on a
+#   rolling-origin design matches the hand calls". Satisfies M110 AC5.
+test_that("a workflow set on a rolling-origin design matches the hand calls", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  wset <- wset_two(d)
+  folds <- ts_rolling_nested(d)
+  ms <- ts_metrics()
+
+  set.seed(26)
+  res <- nested_workflow_map(
+    wset,
+    resamples = folds,
+    grid = det_grid(),
+    metrics = ms
+  )
+
+  expect_identical(res$wflow_id, c("tuned", "fixed"))
+  tuners <- vapply(
+    res$result,
+    function(r) extract_procedure(r)$tuner,
+    character(1)
+  )
+  expect_identical(tuners, c("tune_grid", "fit_resamples"))
+  for (i in seq_len(nrow(wset))) {
+    wf <- wset$info[[i]]$workflow[[1L]]
+    hand <- hand_call("nested_tune_grid", wf, folds, ms, seed = 26)
+    expect_true(all(hand$.completed))
+    expect_identical(res$result[[i]]$.metrics, hand$.metrics)
+    expect_identical(res$result[[i]]$.selected, hand$.selected)
+  }
+})

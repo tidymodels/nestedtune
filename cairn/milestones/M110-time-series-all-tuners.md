@@ -45,7 +45,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - [x] T2: Write the AC1 tests in `tests/testthat/test-time-series-designs.R`. The racers use `control_race(burn_in = 2)`, as `helper-orchestration.R:1774` does, and take the skips the M101 lesson names. A mismatch is a defect to fix, not a test to loosen.
 - [x] T3: Write the AC2 tests.
 - [x] T4: Write the AC3 and AC4 final-fit tests.
-- [ ] T5: Write the AC5 test.
+- [x] T5: Write the AC5 test.
 - [ ] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps that `cairn/PROFILE.md` names. Record the figures in the work log.
 - [ ] T7: Write the D-entry extending D-071. It records that a final fit reads only the inner design, so one sliding-window final-fit test stands for the other tuners. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
@@ -60,6 +60,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: T2 done. The Bayesian, both racing and the annealing tuners match their reference loops on both designs, with no package change. `test-time-series-designs.R` runs 215 expectations, 0 failures, in 84 s alone.
 - 2026-09-22: T3 done. `nested_fit_resamples()` matches `tune::fit_resamples()` on the outer splits rebuilt from each fixture's literal outer call, 14 expectations per design, 0 failures.
 - 2026-09-22: T4 done. The final fit matches each tuner's reference on the rolling-origin result, and the Bayesian one on the sliding-window result too. The fit_resamples final fit has no tuning run and equals the plain fit. A reference left on its default `vfold_cv()` inner design gives different `in_id`s, so the comparison can fail.
+- 2026-09-22: T5 done. `hand_call()` moved unchanged from `test-nested-workflow-map-oracles.R` to `helper-orchestration.R`, so the time-series file can use it. A two-workflow set on the rolling-origin design matches the hand calls. Both files pass, 387 expectations.
 
 ## Decisions
 
