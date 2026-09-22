@@ -31,7 +31,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 
 ## Coverage
 
-- AC1 → T1, T2
+- AC1 → T2
 - AC2 → T3
 - AC3 → T1, T4
 - AC4 → T4
