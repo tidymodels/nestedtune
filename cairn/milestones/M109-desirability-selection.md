@@ -7,7 +7,7 @@
 - **Principles touched:** IP3, GP1, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — a new rule on an exported constructor
-- **Branch/PR:** m109-desirability-selection — https://github.com/tidymodels/nestedtune/pull/124
+- **Branch/PR:** m109-desirability-selection, https://github.com/tidymodels/nestedtune/pull/124
 
 ## Goal
 
