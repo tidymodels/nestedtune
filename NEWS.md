@@ -20,12 +20,13 @@
   `nested_tune_grid()`, `nested_tune_bayes()` and `nested_final_fit()`
   refuse the rule with class `nestedtune_pkg_not_installed`.
 
-* `nested_tune_grid()` and `nested_final_fit()` support an outer
-  `rsample::rolling_origin()` or `rsample::sliding_window()` design with
-  an inner `rsample::rolling_origin()` design. `nested_resamples()` builds
-  these designs with the same splits as `rsample::nested_cv()`. Other
-  time-series designs, and the other orchestrators on these designs, are
-  not tested.
+* Every orchestrator, `nested_workflow_map()` and `nested_final_fit()`
+  support an outer `rsample::rolling_origin()` or
+  `rsample::sliding_window()` design with an inner
+  `rsample::rolling_origin()` design. `nested_resamples()` builds these
+  designs with the same splits as `rsample::nested_cv()`. Other
+  time-series designs, such as `rsample::sliding_index()` and
+  `rsample::sliding_period()`, are not tested.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no

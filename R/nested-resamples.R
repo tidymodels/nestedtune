@@ -41,8 +41,10 @@
 #'
 #' An outer [rsample::rolling_origin()] or [rsample::sliding_window()] with
 #' an inner [rsample::rolling_origin()] is tested to give the same splits as
-#' [rsample::nested_cv()]. [nested_tune_grid()] and [nested_final_fit()]
-#' support these designs. Other time-series designs are not tested.
+#' [rsample::nested_cv()]. Every orchestrator, [nested_workflow_map()] and
+#' [nested_final_fit()] support these designs. Other time-series designs,
+#' such as [rsample::sliding_index()] and [rsample::sliding_period()], are
+#' not tested.
 #'
 #' @section Memory:
 #'

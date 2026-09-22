@@ -107,10 +107,13 @@
 #'
 #' Time-series designs are supported for an outer
 #' [rsample::rolling_origin()] or [rsample::sliding_window()] with an inner
-#' [rsample::rolling_origin()], under [nested_tune_grid()] and
-#' [nested_final_fit()], which are tested on both. The other orchestrators
-#' are not tested on them, and neither are other time-series designs such as
-#' [rsample::sliding_index()] and [rsample::sliding_period()].
+#' [rsample::rolling_origin()]. Every orchestrator is tested on both:
+#' [nested_tune_grid()], [nested_tune_bayes()], [nested_tune_race_anova()],
+#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] and
+#' [nested_fit_resamples()]. So are [nested_workflow_map()] and
+#' [nested_final_fit()]. Other time-series designs, such as
+#' [rsample::sliding_index()] and [rsample::sliding_period()], are not
+#' tested.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
 #' assessment sets leave rows out.
 #'
