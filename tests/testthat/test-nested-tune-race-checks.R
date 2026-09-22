@@ -476,6 +476,36 @@ test_that("a refusal leaves the RNG where it found it", {
   expect_identical(.Random.seed, before)
 })
 
+test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
+  skip_if_no_race_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- race_folds(d)
+  ctrl <- race_control()
+
+  for (fn in RACERS) {
+    cnd <- refusal(race_call(
+      fn,
+      wf,
+      folds,
+      select = selection_rule("desirability", maximize(rsq)),
+      control = ctrl
+    ))
+    expect_refused(
+      cnd,
+      "nestedtune_selection_rule_unsupported",
+      fn,
+      export_name(fn)
+    )
+    # The message names the orchestrators the user calls (review finding 4).
+    msg <- cli::ansi_strip(conditionMessage(cnd))
+    expect_match(msg, paste0("under `nested_", fn, "()`"), fixed = TRUE)
+    expect_match(msg, "`nested_tune_grid()`", fixed = TRUE)
+  }
+})
+
 test_that("`select` is held at entry by both racers, before any fold runs (M69, AC4)", {
   skip_if_no_race_fixture()
 

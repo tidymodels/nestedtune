@@ -79,9 +79,11 @@ level of a two-class outcome is the event. It applies to the inner tuning run an
 regression model, or \code{NULL} (the default) to leave the choice to tune.
 The section on evaluation times says what this package refuses.}
 
-\item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming which of tune's selectors each
-outer fold picks its candidate with, on its own inner run and the first
-metric. The default is \code{\link[tune:select_best]{tune::select_best()}}.}
+\item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming the selector each outer fold
+picks its candidate with, on its own inner run. The default is
+\code{\link[tune:select_best]{tune::select_best()}} on the first metric. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
+\code{"desirability"} rule.}
 }
 \value{
 A tibble of class \code{nested_results} with one row per outer fold.
@@ -226,7 +228,12 @@ argument. \code{select} takes what \code{\link[=selection_rule]{selection_rule()
 carries. Each fold applies the rule to its own inner run, with \code{metric}
 the first metric in \code{metrics}. Every name an ordering uses must be a
 parameter \code{object} tunes, and anything but a \code{selection_rule()} is
-refused at entry. The result records the rule as
+refused at entry. The \code{"desirability"} rule selects with
+\code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}} over the goals it carries.
+Each name in a goal's first argument must be a metric in \code{metrics} or a
+parameter \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are
+tune's default set. The section "Writing a desirability goal" in
+\code{\link[=selection_rule]{selection_rule()}} says more. The result records the rule as
 \code{extract_procedure(res)$select}, and \code{\link[=nested_final_fit]{nested_final_fit()}} selects by it
 too.
 }

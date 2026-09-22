@@ -205,7 +205,7 @@ nested_tune_bayes.workflow <- function(
   check_param_info(param_info)
   check_event_level(event_level)
   check_eval_time(eval_time)
-  check_selection_rule(select, object)
+  check_selection_rule(select, object, "tune_bayes", metrics)
   control <- check_control(control, "tune_bayes", event_level)
 
   nested_loop(

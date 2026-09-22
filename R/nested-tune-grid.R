@@ -60,9 +60,11 @@
 #' @template param-event-level
 #' @templateVar REFUSED The section on evaluation times says what this package refuses.
 #' @template param-eval-time
-#' @param select A [selection_rule()] naming which of tune's selectors each
-#'   outer fold picks its candidate with, on its own inner run and the first
-#'   metric. The default is [tune::select_best()].
+#' @param select A [selection_rule()] naming the selector each outer fold
+#'   picks its candidate with, on its own inner run. The default is
+#'   [tune::select_best()] on the first metric. [nested_tune_race_anova()],
+#'   [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
+#'   `"desirability"` rule.
 #'
 #' @return A tibble of class `nested_results` with one row per outer fold.
 #'   Beside the fold's split and labels, each row holds:
@@ -160,7 +162,12 @@
 #' carries. Each fold applies the rule to its own inner run, with `metric`
 #' the first metric in `metrics`. Every name an ordering uses must be a
 #' parameter `object` tunes, and anything but a `selection_rule()` is
-#' refused at entry. The result records the rule as
+#' refused at entry. The `"desirability"` rule selects with
+#' [desirability2::select_best_desirability()] over the goals it carries.
+#' Each name in a goal's first argument must be a metric in `metrics` or a
+#' parameter `object` tunes. With `metrics` left `NULL`, the metrics are
+#' tune's default set. The section "Writing a desirability goal" in
+#' [selection_rule()] says more. The result records the rule as
 #' `extract_procedure(res)$select`, and [nested_final_fit()] selects by it
 #' too.
 #'
@@ -536,7 +543,7 @@ nested_tune_grid.workflow <- function(
   check_param_info(param_info)
   check_event_level(event_level)
   check_eval_time(eval_time)
-  check_selection_rule(select, object)
+  check_selection_rule(select, object, "tune_grid", metrics)
   control <- check_control(control, "tune_grid", event_level)
 
   nested_loop(

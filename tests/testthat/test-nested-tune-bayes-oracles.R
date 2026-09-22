@@ -486,3 +486,73 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
   expect_false(identical(picked$one_std_err, picked$best))
   expect_false(identical(picked$pct_loss, picked$best))
 })
+
+# The desirability rule on the Bayesian path (M109, AC2): the reference is
+# desirability2::select_best_desirability(), called by name with the terms
+# written out, on each fold's hand run from reference_nested_bayes_loop()
+# under the default rule, the cached run the test above reads. Parameter
+# columns and `.config` only. Measured 2026-09-21 on this fixture under seed
+# 20 (tune 2.1.0, desirability2 0.2.0): best picks (5,1), (5,1), (1,5), and
+# the terms below pick (1,5), (5,1), (1,5). The first fold differs, so a
+# driver that ignored the rule fails the last expectation. The grid oracle's
+# terms, which add `minimize(df2)`, pick what best picks on all three folds
+# of this run.
+
+test_that("AC2: the desirability rule picks what desirability2 picks on the fold's Bayesian run (M109)", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  cols <- c("df1", "df2", ".config")
+
+  set.seed(20)
+  ref_best <- memoised(reference_nested_bayes_loop(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    objective = tune::exp_improve(),
+    param_info = p,
+    metrics = ms,
+    seed = 20,
+    metric_name = "rmse"
+  ))
+  rule <- selection_rule(
+    "desirability",
+    minimize(rmse),
+    maximize(rsq),
+    minimize(df1)
+  )
+  set.seed(20)
+  res <- nested_tune_bayes(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    param_info = p,
+    metrics = ms,
+    select = rule
+  )
+  expect_true(all(res$.completed))
+  expect_identical(extract_procedure(res)$select, rule)
+  for (i in seq_len(nrow(res))) {
+    ref <- desirability2::select_best_desirability(
+      ref_best[[i]]$tuned,
+      minimize(rmse),
+      maximize(rsq),
+      minimize(df1)
+    )
+    expect_identical(
+      res$.selected[[i]][cols],
+      ref[cols],
+      info = paste("fold", i)
+    )
+  }
+
+  best <- lapply(ref_best, function(fold) fold$selected[cols])
+  expect_false(identical(lapply(res$.selected, `[`, cols), best))
+})

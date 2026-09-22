@@ -74,7 +74,10 @@ new_tuner <- function(tuner, args) {
 # (`procedure_counts()`). `selects` says the tuner picks a candidate from an
 # inner run, so its orchestrator takes a `select` rule, its record carries
 # one, and its final fit re-runs a search; the plain resampling fit is the
-# one tuner that does not (M70). `label` is the search's name in that print.
+# one tuner that does not (M70). `desirability` says the orchestrator applies
+# the desirability rule (M109, D-073): racing drops candidates before the end
+# and annealing walks from one, so both refuse it. `label` is the search's
+# name in that print.
 tuner_registry <- list(
   tune_grid = list(
     package = "tune",
@@ -84,6 +87,7 @@ tuner_registry <- list(
     takes_grid = TRUE,
     iterates = FALSE,
     selects = TRUE,
+    desirability = TRUE,
     label = "grid search"
   ),
   tune_bayes = list(
@@ -99,6 +103,7 @@ tuner_registry <- list(
     takes_grid = FALSE,
     iterates = TRUE,
     selects = TRUE,
+    desirability = TRUE,
     label = "Bayesian optimization"
   ),
   tune_race_anova = list(
@@ -109,6 +114,7 @@ tuner_registry <- list(
     takes_grid = TRUE,
     iterates = FALSE,
     selects = TRUE,
+    desirability = FALSE,
     label = "ANOVA racing"
   ),
   tune_race_win_loss = list(
@@ -119,6 +125,7 @@ tuner_registry <- list(
     takes_grid = TRUE,
     iterates = FALSE,
     selects = TRUE,
+    desirability = FALSE,
     label = "win/loss racing"
   ),
   # `control_sim_anneal()` has no seed slot: the perturbations draw from the
@@ -131,6 +138,7 @@ tuner_registry <- list(
     takes_grid = FALSE,
     iterates = TRUE,
     selects = TRUE,
+    desirability = FALSE,
     label = "simulated annealing"
   ),
   # tune's plain resampling fit (M70): no inner run and nothing selected. Its
@@ -147,6 +155,7 @@ tuner_registry <- list(
     takes_grid = FALSE,
     iterates = FALSE,
     selects = FALSE,
+    desirability = FALSE,
     label = "no tuning"
   )
 )
@@ -188,6 +197,11 @@ tuner_selects <- function(tuner) {
   !(rlang::is_string(tuner) &&
     tuner %in% names(tuner_registry) &&
     isFALSE(tuner_registry[[tuner]]$selects))
+}
+
+# Whether the orchestrator applies the desirability rule (M109).
+tuner_takes_desirability <- function(tuner) {
+  isTRUE(tuner_entry(tuner)$desirability)
 }
 
 # The inner tuning call, assembled and evaluated.

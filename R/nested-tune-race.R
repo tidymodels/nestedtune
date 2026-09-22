@@ -321,7 +321,7 @@ nested_tune_race <- function(
   check_param_info(param_info, call = call)
   check_event_level(event_level, call = call)
   check_eval_time(eval_time, call = call)
-  check_selection_rule(select, object, call = call)
+  check_selection_rule(select, object, fn, metrics, call = call)
   control <- check_control(control, fn, event_level, call = call)
   check_race_burn_in(resamples, control, call = call)
 

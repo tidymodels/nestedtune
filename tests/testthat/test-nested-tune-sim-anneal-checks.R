@@ -446,6 +446,29 @@ test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests
   expect_gt(sum(iterated), 0L)
 })
 
+test_that("AC4: the desirability rule is refused at entry (M109)", {
+  skip_if_no_anneal_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  cnd <- refusal(nested_tune_sim_anneal(
+    wf,
+    anneal_folds(d),
+    select = selection_rule("desirability", maximize(rsq)),
+    control = anneal_control()
+  ))
+  expect_refused(
+    cnd,
+    "nestedtune_selection_rule_unsupported",
+    "tune_sim_anneal"
+  )
+  # The message names the orchestrators the user calls (review finding 4).
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "under `nested_tune_sim_anneal()`", fixed = TRUE)
+  expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
+})
+
 test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
   skip_if_no_anneal_fixture()
 

@@ -16,19 +16,22 @@
 #'
 #' @description
 #' Builds the object the `select` argument of [nested_tune_grid()] and its
-#' siblings takes. It names one of tune's three selectors and carries what that
-#' selector needs.
+#' siblings takes. It names one of tune's three selectors, or desirability2's
+#' desirability selector, and carries what that selector needs.
 #'
-#' Every outer fold applies the rule to its own inner tuning run, on the first
-#' metric of that run. The result records the rule, so [nested_final_fit()]
-#' selects the same way on the full data.
+#' Every outer fold applies the rule to its own inner tuning run. tune's three
+#' selectors rank on the first metric of that run. The result records the
+#' rule, so [nested_final_fit()] selects the same way on the full data.
 #'
-#' @param rule The selector: `"best"` (the default), `"one_std_err"` or
-#'   `"pct_loss"`. The section below says what each one picks.
+#' @param rule The selector: `"best"` (the default), `"one_std_err"`,
+#'   `"pct_loss"` or `"desirability"`. The section below says what each one
+#'   picks.
 #' @param ... For `"one_std_err"` and `"pct_loss"`, one or more bare
 #'   expressions ordering the candidates from simplest to most complex, as
-#'   tune's selectors take them. At least one is required for those rules, and
-#'   `"best"` accepts none.
+#'   tune's selectors take them. For `"desirability"`, one or more goals such
+#'   as `maximize(rsq)` or `minimize(num_comp)`, as
+#'   [desirability2::select_best_desirability()] takes them. At least one is
+#'   required for those three rules, and `"best"` accepts none.
 #' @param limit For `"pct_loss"` only, the acceptable loss against the best
 #'   candidate, in percent, as a single non-negative number. Left `NULL` it
 #'   takes tune's default of 2, and the other rules refuse it.
@@ -42,13 +45,44 @@
 #'   [print.nested_final_fit()] and [summary.nested_final_fit()] when the
 #'   rule is not `"best"`.
 #'
-#' @section The three rules:
+#' @section The four rules:
 #'
 #' `"best"` takes the candidate with the best mean on the first metric, as
 #' [tune::select_best()] does. `"one_std_err"` takes the simplest candidate
 #' within one standard error of the best, as [tune::select_by_one_std_err()]
 #' does. `"pct_loss"` takes the simplest candidate whose loss against the best
 #' stays under `limit` percent, as [tune::select_by_pct_loss()] does.
+#' `"desirability"` takes the candidate with the highest overall desirability
+#' over the goals in `...`, as [desirability2::select_best_desirability()]
+#' does.
+#'
+#' @section Writing a desirability goal:
+#'
+#' The `"desirability"` rule needs the desirability2 package, version 0.2.0
+#' or later. Where it is not installed, the rule is refused when it is built,
+#' when an orchestrator starts, and when [nested_final_fit()] is given a
+#' result that recorded it.
+#'
+#' Each goal is a call to one of desirability2's goal functions, such as
+#' `maximize()`, `minimize()` or `target()`, written without the
+#' `desirability2::` prefix, which desirability2 refuses. Its first argument
+#' names a metric or a tuned parameter. Its other arguments must be values,
+#' and a goal that names anything there is refused when the rule is built.
+#' Write a variable's value into a goal with `!!`, as in
+#' `maximize(rsq, low = !!lo)`. When the rule is built, desirability2 checks
+#' that each goal calls one of its goal functions with an unnamed first
+#' argument and the other arguments named. It reads the values of those
+#' arguments only when it scores a tuning run. [nested_tune_grid()] and
+#' [nested_tune_bayes()] check at entry that every name in a goal's first
+#' argument is a metric in `metrics` or a parameter `object` tunes. With
+#' `metrics` left `NULL`, the metrics are the ones tune uses by default for
+#' the model's mode. desirability2 sets each limit a goal
+#' leaves out from the tuning run it scores, so each fold and the final fit
+#' scale those goals on their own inner run. A limit written into the goal
+#' holds everywhere. [nested_tune_race_anova()],
+#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
+#' rule. [nested_tune_grid()] and [nested_tune_bayes()] refuse it on a
+#' censored regression model.
 #'
 #' @section Writing an ordering:
 #'
@@ -70,17 +104,29 @@
 #' # A larger penalty is the simpler model, so its order is descending.
 #' selection_rule("pct_loss", desc(penalty), limit = 5)
 #'
+#' # A high R-squared and few components, weighed together.
+#' if (rlang::is_installed("desirability2", version = "0.2.0")) {
+#'   selection_rule("desirability", maximize(rsq), minimize(num_comp))
+#' }
+#'
 #' @seealso [nested_tune_grid()], [nested_final_fit()], [extract_procedure()],
 #'   which reaches the recorded rule as `$select`.
 #' @export
 selection_rule <- function(
-  rule = c("best", "one_std_err", "pct_loss"),
+  rule = c("best", "one_std_err", "pct_loss", "desirability"),
   ...,
   limit = NULL
 ) {
   rule <- rlang::arg_match(rule)
+  if (rule == "desirability") {
+    check_desirability_installed()
+  }
   rlang::check_dots_unnamed()
   order <- unname(rlang::enexprs(...))
+  if (rule == "desirability") {
+    check_desirability_terms(order, limit)
+    return(new_selection_rule(rule, order, NULL))
+  }
   literal <- !vapply(
     order,
     function(x) rlang::is_symbol(x) || rlang::is_call(x),
@@ -162,6 +208,96 @@ selection_rule <- function(
   new_selection_rule(rule, order, limit)
 }
 
+# The desirability rule's terms (M109, D-073): at least one, no `limit`, and
+# each judged by desirability2's own `desirability()`, which knows its goal
+# functions and their arguments. Its errors carry no class, so each is raised
+# again under this package's, with desirability2's message kept as the parent.
+check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
+  if (length(terms) == 0L) {
+    cli::cli_abort(
+      c(
+        "{.val desirability} needs at least one term in {.arg ...}.",
+        i = "Write a goal such as {.code maximize(rsq)} or \\
+             {.code minimize(num_comp)}, as \\
+             {.fn desirability2::select_best_desirability} takes them."
+      ),
+      class = "nestedtune_selection_rule_no_order",
+      call = call
+    )
+  }
+  if (!is.null(limit)) {
+    cli::cli_abort(
+      c(
+        "{.arg limit} belongs to {.val pct_loss} alone.",
+        x = "Got {.arg limit} with {.val desirability}, which has no limit."
+      ),
+      class = "nestedtune_selection_rule_limit",
+      call = call
+    )
+  }
+  tryCatch(
+    desirability2::desirability(!!!terms),
+    error = function(cnd) {
+      cli::cli_abort(
+        "desirability2 refused the terms in {.arg ...}.",
+        parent = cnd,
+        class = "nestedtune_selection_rule_terms",
+        call = call
+      )
+    }
+  )
+  # desirability2 reads a goal's later arguments only when it scores a run,
+  # with the goal as a bare expression, so a name there is never checked
+  # before the tuning. A metric, or a variable local to the caller, fails
+  # every fold after its inner run, and a global variable is read only where
+  # each fold runs (M109 review findings 1 and 4). Only the first argument
+  # may name something, and the rest must be values.
+  for (term in terms) {
+    later <- as.list(term)[-(1:2)]
+    named <- unique(unlist(lapply(later, all.vars)))
+    if (length(named) > 0L) {
+      goal <- deparse_in_full(term)
+      # The hint injects the first argument that names something, whole, so
+      # `.data$lo` and `lo * 2` are not cut down to their first name (M109
+      # review finding 3).
+      names_something <- vapply(
+        later,
+        function(arg) length(all.vars(arg)) > 0L,
+        logical(1)
+      )
+      at <- which(names_something)[[1L]]
+      arg <- later[[at]]
+      inject <- deparse_in_full(arg)
+      if (!is.symbol(arg)) {
+        inject <- paste0("(", inject, ")")
+      }
+      # desirability2 has already refused an unnamed later argument.
+      hint <- paste0(names(later)[[at]], " = !!", inject)
+      cli::cli_abort(
+        c(
+          "Only a goal's first argument may name a metric or a parameter, \\
+           and the other arguments must be values.",
+          x = "{.code {goal}} names {.val {named}} outside its first \\
+               argument.",
+          i = "Write the value itself, or inject a variable's value with \\
+               {.code !!}, as in {.code {hint}}."
+        ),
+        class = "nestedtune_selection_rule_term_arg",
+        call = call
+      )
+    }
+  }
+  invisible(terms)
+}
+
+# The names a desirability term reads: the variables of its first argument,
+# where desirability2 itself reads them (`all.vars()` of the goal's `x`).
+desirability_term_names <- function(terms) {
+  unique(unlist(lapply(terms, function(term) {
+    if (rlang::is_call(term) && length(term) >= 2L) all.vars(term[[2L]])
+  })))
+}
+
 # The constructor behind the checks: what the object is, with nothing judged.
 new_selection_rule <- function(rule, order, limit) {
   structure(
@@ -184,13 +320,19 @@ selection_rule_label <- function(x) {
     out <- paste0(
       out,
       " by ",
-      paste(vapply(x$order, rlang::as_label, character(1L)), collapse = ", ")
+      paste(vapply(x$order, deparse_in_full, character(1L)), collapse = ", ")
     )
   }
   if (!is.null(x$limit)) {
     out <- paste0(out, " (limit = ", format(x$limit), ")")
   }
   out
+}
+
+# One ordering or goal as written, on one line. `rlang::as_label()` shortens
+# a long call to `target(...)`, which hid a desirability goal's limits (M109).
+deparse_in_full <- function(expr) {
+  paste(rlang::expr_deparse(expr, width = Inf), collapse = " ")
 }
 
 # Whether the rule is one the summaries name (M98): the default best-by-metric
@@ -235,20 +377,32 @@ apply_selection_rule <- function(tuned, select, metric_name) {
       !!!select$order,
       metric = metric_name,
       limit = select$limit
+    ),
+    # Scored over the terms alone, so `metric_name` plays no part (M109).
+    desirability = desirability2::select_best_desirability(
+      tuned,
+      !!!select$order
     )
   )
   # tune's one-standard-error rule filters on `std_err`, which a single inner
   # resample leaves NA, so the selector returns no row; left alone, the empty
   # selection fails the outer fit one step later with a note about the
   # preprocessor. Name the failure where it happens, so the fold's note does.
+  # The standard-error cause is named only under the rule it belongs to
+  # (M109 review finding 5).
   if (nrow(selected) == 0L) {
+    hint <- if (select$rule == "one_std_err") {
+      c(
+        i = "{.fn tune::select_by_one_std_err} needs a standard error, \
+             which one inner resample cannot give; use more inner resamples \
+             or another rule."
+      )
+    }
     cli::cli_abort(
       c(
         "The {.val {select$rule}} selection rule chose no candidate on this \
          fold's inner run.",
-        i = "{.fn tune::select_by_one_std_err} needs a standard error, \
-             which one inner resample cannot give; use more inner resamples \
-             or another rule."
+        hint
       ),
       class = "nestedtune_selection_rule_empty"
     )

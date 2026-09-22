@@ -1231,6 +1231,17 @@ test_that("the list the probe is sent is the workflow's packages and the tuner's
     c("finetune", "lme4") %in%
       needed_pkgs(wf, tuner_race("tune_race_anova", det_grid()))
   ))
+  # The desirability rule adds desirability2, and no other rule adds it
+  # (M109). The rule is built by hand, since the constructor would ask for
+  # the package this list is about.
+  des <- new_selection_rule("desirability", list(quote(maximize(rsq))), NULL)
+  expect_true(
+    "desirability2" %in% needed_pkgs(wf, tuner_grid(det_grid()), des)
+  )
+  expect_false(
+    "desirability2" %in%
+      needed_pkgs(wf, tuner_grid(det_grid()), selection_rule())
+  )
 })
 
 test_that("the dispatch hands the probe the list the helper builds", {

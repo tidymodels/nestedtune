@@ -997,6 +997,104 @@ test_that("an ordering naming a parameter the workflow does not tune is refused,
   expect_no_match(msg, "\"desc\"")
 })
 
+test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+  skip_if_no_engines()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- valid_folds(d)
+
+  # With an explicit set: `mae` is a regression metric, but not in this set.
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    select = selection_rule("desirability", maximize(rsq), minimize(mae))
+  ))
+  expect_grid_refused(cnd, "nestedtune_selection_rule_unknown_term", "mae")
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "num_comp", fixed = TRUE)
+  expect_match(msg, "rmse", fixed = TRUE)
+  # The goal function is never reported as an unknown name.
+  expect_no_match(msg, "\"minimize\"")
+
+  # With no `metrics`: tune's regression default is rmse and rsq, so
+  # `accuracy` is refused and `rsq` is not.
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    select = selection_rule("desirability", maximize(accuracy))
+  ))
+  expect_grid_refused(
+    cnd,
+    "nestedtune_selection_rule_unknown_term",
+    "accuracy"
+  )
+
+  # The passing controls reach the loop: a metric of the set, a tuned
+  # parameter, and a metric of tune's default set.
+  expect_s3_class(
+    grid_refusal(nested_tune_grid(
+      wf,
+      folds,
+      grid = det_grid(),
+      metrics = reg_metrics(),
+      select = selection_rule("desirability", maximize(rsq), minimize(num_comp))
+    )),
+    "nestedtune_sentinel"
+  )
+  expect_s3_class(
+    grid_refusal(nested_tune_grid(
+      wf,
+      folds,
+      grid = det_grid(),
+      select = selection_rule("desirability", minimize(rmse))
+    )),
+    "nestedtune_sentinel"
+  )
+})
+
+test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+  skip_if_no_censored()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- srv_data()
+  wf <- srv_workflow(d)
+  folds <- srv_nested(d)
+
+  # desirability2 ranks one row per candidate per evaluation time there, where
+  # tune's selectors use the first time (review finding 2).
+  cnd <- grid_refusal(nested_tune_grid(
+    wf,
+    folds,
+    grid = srv_grid(),
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    select = selection_rule("desirability", minimize(brier_survival))
+  ))
+  expect_grid_refused(
+    cnd,
+    "nestedtune_selection_rule_unsupported",
+    "censored regression"
+  )
+
+  # The passing control: the same call under the default rule reaches the
+  # loop, so the refusal is the rule's.
+  expect_s3_class(
+    grid_refusal(nested_tune_grid(
+      wf,
+      folds,
+      grid = srv_grid(),
+      metrics = srv_metrics(),
+      eval_time = srv_eval_times()
+    )),
+    "nestedtune_sentinel"
+  )
+})
+
 test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
   skip_if_no_engines()
   d <- make_reg_data()

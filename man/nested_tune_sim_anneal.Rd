@@ -83,9 +83,11 @@ level of a two-class outcome is the event. It applies to the inner tuning run an
 regression model, or \code{NULL} (the default) to leave the choice to tune.
 The section on evaluation times says what this package refuses.}
 
-\item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming which of tune's selectors each
-outer fold picks its candidate with, on its own inner run and the first
-metric. The default is \code{\link[tune:select_best]{tune::select_best()}}.}
+\item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming the selector each outer fold
+picks its candidate with, on its own inner run. The default is
+\code{\link[tune:select_best]{tune::select_best()}} on the first metric. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
+\code{"desirability"} rule.}
 }
 \value{
 A \code{nested_results} shaped as \code{\link[=nested_tune_grid]{nested_tune_grid()}} documents, one

@@ -334,6 +334,46 @@ test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
     select = selection_rule("pct_loss", df1, nonesuch)
   ))
   expect_refused(cnd, "nestedtune_selection_rule_unknown_param", "nonesuch")
+})
+
+test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- bayes_folds(d)
+
+  cnd <- refusal(nested_tune_bayes(
+    wf,
+    folds,
+    metrics = reg_metrics(),
+    select = selection_rule("desirability", maximize(rsq), minimize(nonesuch))
+  ))
+  expect_refused(cnd, "nestedtune_selection_rule_unknown_term", "nonesuch")
+  # With no `metrics`, tune's regression default holds no `accuracy`.
+  cnd <- refusal(nested_tune_bayes(
+    wf,
+    folds,
+    select = selection_rule("desirability", maximize(accuracy))
+  ))
+  expect_refused(cnd, "nestedtune_selection_rule_unknown_term", "accuracy")
+  # A metric and both tuned parameters pass to the loop.
+  expect_s3_class(
+    refusal(nested_tune_bayes(
+      wf,
+      folds,
+      param_info = bayes_param_info(wf),
+      metrics = reg_metrics(),
+      select = selection_rule(
+        "desirability",
+        maximize(rsq),
+        minimize(df1),
+        minimize(df2)
+      )
+    )),
+    "nestedtune_sentinel"
+  )
   expect_match(cli::ansi_strip(conditionMessage(cnd)), "df1", fixed = TRUE)
   expect_match(cli::ansi_strip(conditionMessage(cnd)), "df2", fixed = TRUE)
 
@@ -342,6 +382,38 @@ test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
       wf,
       folds,
       select = selection_rule("one_std_err", desc(df1), df2)
+    )),
+    "nestedtune_sentinel"
+  )
+})
+
+test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+  skip_if_no_censored()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- srv_data()
+  wf <- srv_workflow(d)
+  folds <- srv_nested(d)
+
+  cnd <- refusal(nested_tune_bayes(
+    wf,
+    folds,
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    select = selection_rule("desirability", minimize(brier_survival))
+  ))
+  expect_refused(
+    cnd,
+    "nestedtune_selection_rule_unsupported",
+    "censored regression"
+  )
+  # The same call under the default rule reaches the loop.
+  expect_s3_class(
+    refusal(nested_tune_bayes(
+      wf,
+      folds,
+      metrics = srv_metrics(),
+      eval_time = srv_eval_times()
     )),
     "nestedtune_sentinel"
   )

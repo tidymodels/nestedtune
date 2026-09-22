@@ -195,10 +195,190 @@ test_that("a rule that selects no candidate fails the fold with a note naming th
   notes <- collect_notes(res)
   expect_true(all(grepl("chose no candidate", notes$note, fixed = TRUE)))
   expect_true(all(grepl("one_std_err", notes$note, fixed = TRUE)))
+  expect_true(all(grepl("standard error", notes$note, fixed = TRUE)))
   # The same design completes under the default rule.
   set.seed(1)
   ok <- suppressMessages(nested_tune_grid(wf, folds, grid = det_grid()))
   expect_false(any(vapply(ok$.selected, is.null, logical(1))))
+})
+
+test_that("an empty selection under another rule names that rule and not the standard-error cause", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  # No real run under these rules is known to select nothing, so the
+  # selector is mocked to return no row (review finding 5).
+  empty <- function(...) {
+    data.frame(num_comp = integer(0), .config = character(0))
+  }
+  testthat::local_mocked_bindings(
+    select_best_desirability = empty,
+    .package = "desirability2"
+  )
+  cnd <- rlang::catch_cnd(apply_selection_rule(
+    NULL,
+    selection_rule("desirability", maximize(rsq)),
+    "rmse"
+  ))
+  expect_s3_class(cnd, "nestedtune_selection_rule_empty")
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "\"desirability\" selection rule", fixed = TRUE)
+  expect_no_match(msg, "one_std_err", fixed = TRUE)
+  expect_no_match(msg, "standard error", fixed = TRUE)
+})
+
+# The desirability rule (M109): desirability2's goal terms, captured as the
+# orderings are and judged by desirability2 itself when the rule is built.
+
+test_that("AC1: the desirability rule captures its terms as bare expressions and prints them", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  rule <- selection_rule(
+    "desirability",
+    maximize(rsq),
+    minimize(num_comp, scale = 2)
+  )
+  expect_s3_class(rule, "selection_rule")
+  expect_identical(rule$rule, "desirability")
+  expect_identical(
+    rule$order,
+    list(quote(maximize(rsq)), quote(minimize(num_comp, scale = 2)))
+  )
+  expect_false(any(vapply(rule$order, rlang::is_quosure, logical(1L))))
+  expect_null(rule$limit)
+  expect_identical(
+    format(rule),
+    "<selection_rule> desirability by maximize(rsq), minimize(num_comp, scale = 2)"
+  )
+  expect_true(names_selection_rule(rule))
+})
+
+test_that("AC1: a goal too long for `rlang::as_label()` prints in full", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  goal <- quote(target(
+    rsq,
+    low = 0.1,
+    target = 0.5,
+    high = 0.9,
+    scale_low = 2,
+    scale_high = 3
+  ))
+  written <- "target(rsq, low = 0.1, target = 0.5, high = 0.9, scale_low = 2, scale_high = 3)"
+  # The shortening this test guards against: `as_label()` gives `target(...)`.
+  expect_identical(rlang::as_label(goal), "target(...)")
+
+  rule <- selection_rule("desirability", !!goal, minimize(num_comp))
+  expect_identical(
+    format(rule),
+    paste0("<selection_rule> desirability by ", written, ", minimize(num_comp)")
+  )
+  expect_identical(
+    cli::ansi_strip(capture.output(print(rule))),
+    paste0("<selection_rule> desirability by ", written, ", minimize(num_comp)")
+  )
+})
+
+test_that("the desirability rule refuses no terms, a limit, and a term desirability2 refuses", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  cnd <- rlang::catch_cnd(selection_rule("desirability"))
+  expect_s3_class(cnd, "nestedtune_selection_rule_no_order")
+  expect_match(cli::ansi_strip(conditionMessage(cnd)), "at least one term")
+
+  expect_error(
+    selection_rule("desirability", maximize(rsq), limit = 5),
+    class = "nestedtune_selection_rule_limit"
+  )
+
+  # desirability2's own refusal, of a goal function it does not know, raised
+  # again under this package's class with desirability2's error as parent.
+  cnd <- rlang::catch_cnd(selection_rule("desirability", maxmize(rsq)))
+  expect_s3_class(cnd, "nestedtune_selection_rule_terms")
+  expect_match(conditionMessage(cnd$parent), "maxmize", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
+
+  # A bare name is not a goal either.
+  expect_error(
+    selection_rule("desirability", rsq),
+    class = "nestedtune_selection_rule_terms"
+  )
+  # A named term is refused as a named ordering is.
+  expect_error(
+    selection_rule("desirability", a = maximize(rsq)),
+    class = "rlib_error_dots_named"
+  )
+})
+
+test_that("the desirability rule refuses a name in a goal's later arguments", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  # A variable of the caller's: desirability2 would read it only when it
+  # scores each fold's run, after all the tuning (review finding 1).
+  lo <- 0.2
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = lo)
+  ))
+  expect_s3_class(cnd, "nestedtune_selection_rule_term_arg")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "maximize(rsq, low = lo)", fixed = TRUE)
+  expect_match(msg, "low = !!lo", fixed = TRUE)
+
+  # The hint injects the whole argument, not its first name (review pass 2,
+  # finding 3).
+  hint_of <- function(cnd) cli::ansi_strip(conditionMessage(cnd))
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = .data$lo)
+  ))
+  expect_match(hint_of(cnd), "low = !!(.data$lo)", fixed = TRUE)
+  expect_no_match(hint_of(cnd), "!!.data`", fixed = TRUE)
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = 0.1, high = lo * 2)
+  ))
+  expect_match(hint_of(cnd), "high = !!(lo * 2)", fixed = TRUE)
+
+  # A metric named in a later argument, which the entry check does not read
+  # (review finding 4), and a name inside a call there.
+  expect_error(
+    selection_rule("desirability", maximize(rsq, low = rmse)),
+    class = "nestedtune_selection_rule_term_arg"
+  )
+  expect_error(
+    selection_rule(
+      "desirability",
+      minimize(rmse),
+      maximize(rsq, high = lo * 2)
+    ),
+    class = "nestedtune_selection_rule_term_arg"
+  )
+
+  # Passing controls: the value written in, the value injected, and calls
+  # holding no name.
+  expect_s3_class(
+    selection_rule("desirability", maximize(rsq, low = 0.2)),
+    "selection_rule"
+  )
+  injected <- selection_rule("desirability", maximize(rsq, low = !!lo))
+  expect_identical(injected$order, list(quote(maximize(rsq, low = 0.2))))
+  expect_s3_class(
+    selection_rule(
+      "desirability",
+      target(rmse, low = -1, target = 0, high = 1)
+    ),
+    "selection_rule"
+  )
+})
+
+test_that("desirability_term_names() reads the first argument of each goal alone", {
+  terms <- list(
+    quote(maximize(rsq, low = 0.2)),
+    quote(minimize(num_comp, scale = cut)),
+    quote(target(rmse, target = 1))
+  )
+  expect_identical(desirability_term_names(terms), c("rsq", "num_comp", "rmse"))
 })
 
 test_that("is_selection_rule() answers for the class alone", {

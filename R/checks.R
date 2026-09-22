@@ -1474,7 +1474,21 @@ check_dots_control <- function(dots, call = rlang::caller_env()) {
 # `all.names()`, so `desc(df1)` contributes `df1` and not the function it is
 # wrapped in. As there, an extraction that fails skips the check rather than
 # turning into a false refusal.
-check_selection_rule <- function(select, object, call = rlang::caller_env()) {
+#
+# The desirability rule (M109, D-073) is held to more: the tuner must be one
+# the registry says applies it, desirability2 must be installed, and every
+# name in a term's first argument must be a metric of the run's set or a
+# tuned parameter. `selection_rule()` already refuses a name in the later
+# arguments.
+# With no `metrics` the set is the one tune picks for the model's mode,
+# read through `tune::check_metrics_arg()` so the two cannot disagree.
+check_selection_rule <- function(
+  select,
+  object,
+  tuner,
+  metrics = NULL,
+  call = rlang::caller_env()
+) {
   if (!is_selection_rule(select)) {
     cli::cli_abort(
       c(
@@ -1486,6 +1500,9 @@ check_selection_rule <- function(select, object, call = rlang::caller_env()) {
       class = "nestedtune_bad_selection_rule",
       call = call
     )
+  }
+  if (select$rule == "desirability") {
+    return(check_desirability_rule(select, object, tuner, metrics, call))
   }
   if (length(select$order) == 0L) {
     return(invisible(select))
@@ -1511,6 +1528,102 @@ check_selection_rule <- function(select, object, call = rlang::caller_env()) {
     )
   }
   invisible(select)
+}
+
+check_desirability_rule <- function(
+  select,
+  object,
+  tuner,
+  metrics,
+  call = rlang::caller_env()
+) {
+  if (!tuner_takes_desirability(tuner)) {
+    # The user called the orchestrator, so the message names it, not the
+    # tuner it wraps (M109 review finding 4).
+    orchestrator <- paste0("nested_", tuner)
+    supported <- paste0(
+      "nested_",
+      names(Filter(
+        function(entry) isTRUE(entry$desirability),
+        tuner_registry
+      ))
+    )
+    cli::cli_abort(
+      c(
+        "The {.val desirability} selection rule is not supported under \\
+         {.fn {orchestrator}}.",
+        i = "It is applied under {.fn {supported}}."
+      ),
+      class = "nestedtune_selection_rule_unsupported",
+      call = call
+    )
+  }
+  check_desirability_installed(call = call)
+  # On a censored regression model, desirability2 ranks one row per
+  # candidate per evaluation time, where tune's selectors use the first time
+  # alone, so the rule is refused there (M109 review finding 2).
+  mode <- tryCatch(
+    workflows::extract_spec_parsnip(object)$mode,
+    error = function(cnd) NULL
+  )
+  if (identical(mode, "censored regression")) {
+    cli::cli_abort(
+      c(
+        "The {.val desirability} selection rule is not supported on a \\
+         censored regression model.",
+        i = "Choose one of tune's selectors with {.fn selection_rule}, \\
+             which rank on the first evaluation time."
+      ),
+      class = "nestedtune_selection_rule_unsupported",
+      call = call
+    )
+  }
+  # As for the orderings, an extraction that fails skips the check rather
+  # than turning into a false refusal; tune then fails the folds itself.
+  known <- tryCatch(
+    c(
+      tune::extract_parameter_set_dials(object)$id,
+      names(attr(tune::check_metrics_arg(metrics, object), "metrics"))
+    ),
+    error = function(cnd) NULL
+  )
+  if (is.null(known)) {
+    return(invisible(select))
+  }
+  unknown <- setdiff(desirability_term_names(select$order), known)
+  if (length(unknown) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg select} scores the candidates on {length(unknown)} name{?s} \\
+         that {?is/are} neither a metric of the run nor a parameter \\
+         {.arg object} tunes: {.val {unknown}}.",
+        i = "The run's metrics and tuned parameters are {.val {known}}."
+      ),
+      class = "nestedtune_selection_rule_unknown_term",
+      call = call
+    )
+  }
+  invisible(select)
+}
+
+# desirability2 at the version the rule was written against (D-072), asked
+# where the rule is built, where an orchestrator starts, and where
+# `nested_final_fit()` starts on a result that recorded the rule.
+# Through `rlang::is_installed()`, as `check_tuner_installed()`
+# asks, so a test can mock the absence.
+check_desirability_installed <- function(call = rlang::caller_env()) {
+  if (!rlang::is_installed("desirability2", version = "0.2.0")) {
+    cli::cli_abort(
+      c(
+        "The {.val desirability} selection rule needs {.pkg desirability2} \\
+         (>= 0.2.0), which is not installed.",
+        i = "Install it with {.code install.packages(\"desirability2\")}."
+      ),
+      class = "nestedtune_pkg_not_installed",
+      call = call
+    )
+  }
+  invisible(TRUE)
 }
 
 # The control, held to the tuner and to the `event_level` argument, and
