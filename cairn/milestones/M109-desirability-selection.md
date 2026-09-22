@@ -1,13 +1,13 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — a new rule on an exported constructor
-- **Branch/PR:** —
+- **Branch/PR:** m109-desirability-selection
 
 ## Goal
 
@@ -51,6 +51,7 @@
 - 2026-09-21: criteria audit ran in full mode and returned five findings, all fixed above. They were D-056's standing refusal, terms that can name parameters, no stored inner run for the oracle, return columns unverified, and no refusal for a final fit without the package.
 - 2026-09-21: plan gate chose grid and Bayesian support with the other three tuners refusing, over all five tuners, because racing drops candidates before the end and needs its own oracle; falsified by desirability2 documenting its selector for racing results.
 - 2026-09-21: re-audit in full mode returned four findings, all fixed after the plan commit. AC1 did not say which orchestrators check or which metric set applies by default. AC2 had no Bayesian reference, AC5 had no refusal on entry, and AC6 left D-056's parameters-only clause standing.
+- 2026-09-21: implement started on branch m109-desirability-selection. desirability2 0.2.0 installed from CRAN.
 
 ## Decisions
 
