@@ -246,9 +246,10 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
   )
   # desirability2 reads a goal's later arguments only when it scores a run,
   # with the goal as a bare expression, so a name there is never checked
-  # before the tuning: a variable of the caller's or a metric fails every
-  # fold after its inner run (M109 review findings 1 and 4). Only the first
-  # argument may name something, and the rest must be values.
+  # before the tuning. A metric, or a variable local to the caller, fails
+  # every fold after its inner run, and a global variable is read only where
+  # each fold runs (M109 review findings 1 and 4). Only the first argument
+  # may name something, and the rest must be values.
   for (term in terms) {
     named <- unique(unlist(lapply(as.list(term)[-(1:2)], all.vars)))
     if (length(named) > 0L) {

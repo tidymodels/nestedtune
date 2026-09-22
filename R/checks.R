@@ -1477,7 +1477,9 @@ check_dots_control <- function(dots, call = rlang::caller_env()) {
 #
 # The desirability rule (M109, D-073) is held to more: the tuner must be one
 # the registry says applies it, desirability2 must be installed, and every
-# name a term reads must be a metric of the run's set or a tuned parameter.
+# name in a term's first argument must be a metric of the run's set or a
+# tuned parameter. `selection_rule()` already refuses a name in the later
+# arguments.
 # With no `metrics` the set is the one tune picks for the model's mode,
 # read through `tune::check_metrics_arg()` so the two cannot disagree.
 check_selection_rule <- function(
@@ -1600,8 +1602,9 @@ check_desirability_rule <- function(
 }
 
 # desirability2 at the version the rule was written against (D-072), asked
-# where the rule is built, where an orchestrator starts, and where the final
-# fit selects. Through `rlang::is_installed()`, as `check_tuner_installed()`
+# where the rule is built, where an orchestrator starts, and where
+# `nested_final_fit()` starts on a result that recorded the rule.
+# Through `rlang::is_installed()`, as `check_tuner_installed()`
 # asks, so a test can mock the absence.
 check_desirability_installed <- function(call = rlang::caller_env()) {
   if (!rlang::is_installed("desirability2", version = "0.2.0")) {

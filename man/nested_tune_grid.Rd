@@ -227,9 +227,10 @@ carries. Each fold applies the rule to its own inner run, with \code{metric}
 the first metric in \code{metrics}. Every name an ordering uses must be a
 parameter \code{object} tunes, and anything but a \code{selection_rule()} is
 refused at entry. The \code{"desirability"} rule selects with
-\code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}} over the goals it carries, and
-each name a goal uses must be a metric in \code{metrics} or a parameter
-\code{object} tunes. The section on writing a goal in \code{\link[=selection_rule]{selection_rule()}} says
+\code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}} over the goals it carries.
+Each name in a goal's first argument must be a metric in \code{metrics} or a
+parameter \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are
+tune's default set. The section on writing a goal in \code{\link[=selection_rule]{selection_rule()}} says
 more. The result records the rule as
 \code{extract_procedure(res)$select}, and \code{\link[=nested_final_fit]{nested_final_fit()}} selects by it
 too.

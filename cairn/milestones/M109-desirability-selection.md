@@ -1,6 +1,6 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -70,6 +70,9 @@
 - 2026-09-21: T7 done. `selection_rule()` refuses, with class `nestedtune_selection_rule_term_arg`, a goal that names a variable or a metric outside its first argument. The message points to `!!`. The test failed before the check and has passing controls for a written value, an injected value and a negative number. The help says the same. Suite, plain and roxygen sweeps clean.
 - 2026-09-21: T8 done. The entry check refuses the rule on a censored regression model with class `nestedtune_selection_rule_unsupported`. Grid and Bayesian tests reached the loop before the check. Each has a default-rule control that still reaches it. Suite and both sweeps clean.
 - 2026-09-21: T9 done. The empty-selection hint names the standard-error cause only under `"one_std_err"`, tested with a mocked empty desirability selection that failed first. Finding 5's path did not reproduce: dplyr 1.2.1 `slice_max()` keeps all-NA rows. NEWS names the four refusal classes and the censored refusal. The help now says what desirability2 checks at build. Suite and both sweeps clean.
+- 2026-09-21: claim audit: 64 claims read, 5 corrected — R/checks.R, R/nested-tune-grid.R, R/selection-rule.R, NEWS.md. None was false. The entry check reads only a goal's first argument, and a global variable is found at scoring. The final fit asks for the package at entry. NEWS now names the four functions that refuse without it. The reader re-read all five and confirmed them.
+- 2026-09-21: discovered sub-task: a test that `nested_tune_bayes()` refuses without desirability2, which the corrected NEWS line names. The `--roxygen` sweep then split the corrected grid help sentence. Suite and all six gating sweeps clean.
+- 2026-09-21: status set to review.
 
 ## Decisions
 

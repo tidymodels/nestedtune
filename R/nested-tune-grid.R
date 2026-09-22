@@ -161,9 +161,10 @@
 #' the first metric in `metrics`. Every name an ordering uses must be a
 #' parameter `object` tunes, and anything but a `selection_rule()` is
 #' refused at entry. The `"desirability"` rule selects with
-#' [desirability2::select_best_desirability()] over the goals it carries, and
-#' each name a goal uses must be a metric in `metrics` or a parameter
-#' `object` tunes. The section on writing a goal in [selection_rule()] says
+#' [desirability2::select_best_desirability()] over the goals it carries.
+#' Each name in a goal's first argument must be a metric in `metrics` or a
+#' parameter `object` tunes. With `metrics` left `NULL`, the metrics are
+#' tune's default set. The section on writing a goal in [selection_rule()] says
 #' more. The result records the rule as
 #' `extract_procedure(res)$select`, and [nested_final_fit()] selects by it
 #' too.

@@ -73,6 +73,33 @@ test_that("AC5: nested_tune_grid() refuses a desirability rule at entry without 
   expect_desirability2_refusal(cnd, "nested_tune_grid")
 })
 
+test_that("nested_tune_bayes() refuses a desirability rule at entry without desirability2", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d, v = 2)
+  rule <- selection_rule("desirability", maximize(rsq))
+
+  testthat::local_mocked_bindings(
+    dispatch_folds = function(...) {
+      rlang::abort("fitting began", class = "nestedtune_sentinel")
+    }
+  )
+  expect_error(
+    nested_tune_bayes(wf, folds, select = rule),
+    class = "nestedtune_sentinel"
+  )
+  mask_desirability2()
+  cnd <- rlang::catch_cnd(
+    nested_tune_bayes(wf, folds, select = rule),
+    classes = "error"
+  )
+  expect_false(inherits(cnd, "nestedtune_sentinel"))
+  expect_desirability2_refusal(cnd, "nested_tune_bayes")
+})
+
 test_that("AC5: nested_final_fit() refuses a result that recorded the desirability rule without desirability2", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
