@@ -79,6 +79,7 @@
 - 2026-09-22: amendment return: AC6 — "`devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch." The user chose this wording at the mini gate. It executes the return logged above and is not a second return.
 - 2026-09-22: the amendment was the only work, so no code changed and the claim audit is not rerun. Status set to review.
 - 2026-09-22: review pass 3. AC1-AC6 pass, and `devtools::check()` gave 0 errors, 0 warnings, 0 notes. At the gate the user chose fixing seven wording findings before the merge. They are fixed and tested, and the suite is clean.
+- 2026-09-22: step-7 approval: m109-desirability-selection approved for merge
 
 ## Decisions
 
