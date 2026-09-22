@@ -66,6 +66,8 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: `devtools::document()` regenerated six Rd files. All six gating prose sweeps print clean.
 - 2026-09-22: claim audit: 24 claims read, 4 corrected — R/nested-tune-grid.R, R/nested-resamples.R, NEWS.md, tests/testthat/test-time-series-designs.R. The help and `NEWS.md` said `nested_workflow_map()` was tested on both designs, but it is tested on the rolling-origin design alone. The test comment's premise now says the final fit never reads the outer splits. It still reads the data through the first split. D-074's phrase "never reads the outer design" means the same.
 - 2026-09-22: T7 done. `devtools::check()` at `98eac1e` gave 0 errors, 0 warnings, 0 notes. After the claim-audit edits, `tools::checkRd()` passes on the six changed Rd files and `test-help-structure.R` passes, 24 expectations. Status set to review.
+- 2026-09-22: review gate fixes committed on the branch: D-075, class assertions, a sliding-window fit_resamples final fit, oracle records moved to the header, and seed columns in the set test. F4 (`start-first`) was reverted while applying it, against the M76 measurement.
+- 2026-09-22: step-7 approval: m110-time-series-all-tuners approved for merge
 
 ## Decisions
 
@@ -85,3 +87,20 @@ Consistency gate at `dc35bf8`. `cairn_validate` passes, with 18 advisory referen
 - AC7: `devtools::check()` at `dc35bf8`, the branch head with the claim-audit edits, gave 0 errors, 0 warnings, 0 notes. With no note, none is absent from the check of `main`.
 
 Independent review at `dc35bf8`. The [S] blame-history lens found nothing. The [S] prior-review lens found nothing reintroduced or contradicted. The [O] diff-bug lens ranked 15 findings, none showing a criterion failing. Triage follows at the gate.
+
+Triage, accepted at the gate as proposed on 2026-09-22:
+- F1 (D-074 claims the map on both fixtures), F8 (D-074's "never reads the outer design"), F10 (D-071's Consequences not marked superseded): fix now. D-075 corrects all three.
+- F2 (no suite-time baseline): follow-up at step 8. Each CI leg's time is compared with `main`'s last run before the merge.
+- F3 (AC3 tuner runs rebuilt, the recipe step ids drawn from the stream): follow-up. It joins the fixture-key candidate row at hygiene.
+- F4 (file not in `start-first`): accepted as fix now, then rejected while applying it. The PROFILE test-doctrine slot (M76) and the `R-CMD-check.yaml` comment record that re-ordering measured 2.4% slower and bought nothing.
+- F5 (AC7 without evidence at HEAD): resolved by the check at `dc35bf8`.
+- F6 (no design-class assertion in the M110 loops): fix now. `TS_SPLIT_CLASS` is asserted in every looped test.
+- F7 (the sliding-window Bayesian final fit tests the D-074 premise only): noted, matches D-074.
+- F9 ("tested on both" not covering the fit_resamples final fit): fix now. A sliding-window case was added.
+- F11 (oracle records mid-file): fix now. O4-O7 moved to the header.
+- F12 (one oracle type): rejected. These are checks that the orchestrators match hand-run tune calls, as M108's were, and the header now says so.
+- F13 (an M108 test reads its seeds from the output): rejected, the test predates this diff.
+- F14 (AC5 without seed columns): fix now. Both seed columns are asserted.
+- F15 (stale text): the Review section is committed. AC5's `hand_call()` path is plan text, which review does not edit, noted.
+
+After the fixes, `test-time-series-designs.R` runs 27 tests, 300 expectations, 0 failures.

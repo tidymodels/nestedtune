@@ -20,6 +20,39 @@
 #   "the final fit on a ... design matches a hand-rolled reference" tests,
 #   one per outer design. Satisfies AC4, and the sliding-window test backs
 #   the help's claim for `nested_final_fit()` on that design.
+#
+# O4 -- type "live" (reference implementation), M110. Source: each tuner's own
+#   reference loop in helper-orchestration.R -- reference_nested_bayes_loop(),
+#   reference_nested_race_loop() and reference_nested_anneal_loop() -- written
+#   from the seed contract rather than from the driver, and run here on the
+#   two time-series designs. Pinned by the "matches its reference loop on a
+#   ... design" tests. Satisfies M110 AC1.
+#
+# O5 -- type "live" (reference implementation), M110. Source:
+#   tune::fit_resamples() run by hand on the outer splits, rebuilt here from
+#   the fixture's literal outer call rather than read off the nested object,
+#   as test-nested-fit-resamples-oracles.R does for `vfold_cv()`. Pinned by
+#   the "nested_fit_resamples() matches fit_resamples() on a ... design"
+#   tests. Satisfies M110 AC2.
+#
+# O6 -- type "live" (reference implementation), M110. Source: each tuner's
+#   reference final fit in helper-orchestration.R --
+#   reference_bayes_final_fit(), reference_race_final_fit() and
+#   reference_anneal_final_fit() -- handed the fixtures' literal inner
+#   `rolling_origin()` call as `inner_design`, so the reference builds the
+#   inner design on the full data from its own spelling of the call and
+#   selects with `select_best()` itself. Pinned by the "the final fit ...
+#   matches its reference" tests. Satisfies M110 AC3.
+#
+# O7 -- type "live" (reference implementation), M110. Source: hand_call() in
+#   helper-orchestration.R, the orchestrator each workflow of a set routes
+#   to, called by hand under the same seed, as
+#   test-nested-workflow-map-oracles.R uses it. Pinned by "a workflow set on a
+#   rolling-origin design matches the hand calls". Satisfies M110 AC5.
+#
+# O4-O7 each check that an orchestrator gives what tune or finetune gives when
+# run by hand. The estimate itself adds nothing new for these designs, so no
+# second oracle type is asked of them here.
 
 expect_matches_reference <- function(res, ref) {
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
@@ -237,18 +270,18 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_augment_names_never_held(res, d)
 })
 
-# ---- The other orchestrators (M110) ------------------------------------------
-#
-# O4 -- type "live" (reference implementation). Source: each tuner's own
-#   reference loop in helper-orchestration.R -- reference_nested_bayes_loop(),
-#   reference_nested_race_loop() and reference_nested_anneal_loop() -- written
-#   from the seed contract rather than from the driver, and run here on the
-#   two time-series designs. Pinned by the "matches its reference loop on a
-#   ... design" tests. Satisfies M110 AC1.
+# ---- The other orchestrators (M110; oracles O4-O7 in the header) -------------
 
 TS_DESIGNS <- list(
   "rolling-origin" = ts_rolling_nested,
   "sliding-window" = ts_sliding_nested
+)
+
+# The outer split class each design builds, so a test shows it ran on the
+# design its name claims.
+TS_SPLIT_CLASS <- list(
+  "rolling-origin" = "rof_split",
+  "sliding-window" = "sliding_window_split"
 )
 
 for (design in names(TS_DESIGNS)) {
@@ -264,6 +297,7 @@ for (design in names(TS_DESIGNS)) {
       d <- make_reg_data()
       wf <- bayes_workflow(d)
       folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       p <- bayes_param_info(wf)
       ms <- ts_metrics()
 
@@ -301,6 +335,7 @@ for (design in names(TS_DESIGNS)) {
         d <- make_reg_data()
         wf <- det_workflow(d)
         folds <- build(d)
+        expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
         ms <- ts_metrics()
         g <- det_grid()
         ctrl <- race_control()
@@ -341,6 +376,7 @@ for (design in names(TS_DESIGNS)) {
       d <- make_reg_data()
       wf <- det_workflow(d)
       folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       ms <- ts_metrics()
       ctrl <- anneal_control()
 
@@ -370,13 +406,6 @@ for (design in names(TS_DESIGNS)) {
   )
 }
 
-# O5 -- type "live" (reference implementation). Source: tune::fit_resamples()
-#   run by hand on the outer splits, rebuilt here from the fixture's literal
-#   outer call rather than read off the nested object, as
-#   test-nested-fit-resamples-oracles.R does for `vfold_cv()`. Pinned by the
-#   "nested_fit_resamples() matches fit_resamples() on a ... design" tests.
-#   Satisfies M110 AC2.
-
 TS_OUTER <- list(
   "rolling-origin" = function(d) {
     rsample::rolling_origin(d, initial = 60, assess = 1, skip = 9)
@@ -402,8 +431,10 @@ for (design in names(TS_DESIGNS)) {
       ms <- ts_metrics()
       outer <- outer_of(d)
 
+      folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       set.seed(25)
-      res <- nested_fit_resamples(wf, build(d), metrics = ms)
+      res <- nested_fit_resamples(wf, folds, metrics = ms)
       plain <- tune::fit_resamples(
         wf,
         resamples = outer,
@@ -431,14 +462,6 @@ for (design in names(TS_DESIGNS)) {
   )
 }
 
-# O6 -- type "live" (reference implementation). Source: each tuner's reference
-#   final fit in helper-orchestration.R -- reference_bayes_final_fit(),
-#   reference_race_final_fit() and reference_anneal_final_fit() -- handed the
-#   fixtures' literal inner `rolling_origin()` call as `inner_design`, so the
-#   reference builds the inner design on the full data from its own spelling
-#   of the call and selects with `select_best()` itself. Pinned by the "the
-#   final fit ... matches its reference" tests. Satisfies M110 AC3.
-#
 # Both fixtures share the data, the inner call and the tuner's arguments, and
 # the final fit never reads the outer splits, so a sliding-window result gives
 # the same final fit as a rolling-origin one. The Bayesian sliding-window test
@@ -476,6 +499,7 @@ for (design in names(TS_DESIGNS)) {
       d <- make_reg_data()
       wf <- bayes_workflow(d)
       folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       p <- bayes_param_info(wf)
       ms <- ts_metrics()
 
@@ -584,34 +608,45 @@ test_that("the annealing final fit on a rolling-origin result matches its refere
 
 # The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
 # tuning run, an empty selection, and the plain fit on every row under the
-# recorded fit seed.
-test_that("the final fit on a rolling-origin fit_resamples() result fits every row", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-  wf <- fixed_workflow(d)
+# recorded fit seed. Run on both designs, so the help's "tested on both"
+# holds for this result too.
+for (design in names(TS_DESIGNS)) {
+  build <- TS_DESIGNS[[design]]
 
-  set.seed(25)
-  res <- nested_fit_resamples(wf, ts_rolling_nested(d), metrics = ts_metrics())
-  set.seed(44)
-  final <- nested_final_fit(wf, res)
+  test_that(
+    sprintf(
+      "the final fit on a %s fit_resamples() result fits every row",
+      design
+    ),
+    {
+      skip_if_no_engines()
+      d <- make_reg_data()
+      wf <- fixed_workflow(d)
+      folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
 
-  expect_null(final$tuning)
-  expect_identical(dim(final$selected), c(0L, 0L))
-  set.seed(
-    final$fit_seed,
-    kind = "Mersenne-Twister",
-    normal.kind = "Inversion",
-    sample.kind = "Rejection"
+      set.seed(25)
+      res <- nested_fit_resamples(wf, folds, metrics = ts_metrics())
+      set.seed(44)
+      final <- nested_final_fit(wf, res)
+
+      expect_null(final$tuning)
+      expect_identical(dim(final$selected), c(0L, 0L))
+      set.seed(
+        final$fit_seed,
+        kind = "Mersenne-Twister",
+        normal.kind = "Inversion",
+        sample.kind = "Rejection"
+      )
+      plain <- parsnip::fit(wf, data = d)
+      expect_identical(
+        predict(final, new_data = d),
+        predict(plain, new_data = d)
+      )
+    }
   )
-  plain <- parsnip::fit(wf, data = d)
-  expect_identical(predict(final, new_data = d), predict(plain, new_data = d))
-})
+}
 
-# O7 -- type "live" (reference implementation). Source: hand_call() in
-#   helper-orchestration.R, the orchestrator each workflow of a set routes
-#   to, called by hand under the same seed, as
-#   test-nested-workflow-map-oracles.R uses it. Pinned by "a workflow set on a
-#   rolling-origin design matches the hand calls". Satisfies M110 AC5.
 test_that("a workflow set on a rolling-origin design matches the hand calls", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
@@ -638,6 +673,8 @@ test_that("a workflow set on a rolling-origin design matches the hand calls", {
     wf <- wset$info[[i]]$workflow[[1L]]
     hand <- hand_call("nested_tune_grid", wf, folds, ms, seed = 26)
     expect_true(all(hand$.completed))
+    expect_identical(res$result[[i]]$.tuning_seed, hand$.tuning_seed)
+    expect_identical(res$result[[i]]$.outer_fit_seed, hand$.outer_fit_seed)
     expect_identical(res$result[[i]]$.metrics, hand$.metrics)
     expect_identical(res$result[[i]]$.selected, hand$.selected)
   }
