@@ -21,7 +21,7 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. `nested_tune_grid()` and `nested_tune_bayes()` each refuse at entry a term that names neither a metric in the run's metric set nor a tuned parameter. With no `metrics`, the check uses the default set tune uses for the model's mode. The test names that error by class.
+- [x] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. `nested_tune_grid()` and `nested_tune_bayes()` each refuse at entry a term that names neither a metric in the run's metric set nor a tuned parameter. With no `metrics`, the check uses the default set tune uses for the model's mode. The test names that error by class.
 - [x] AC2: On a fixture with two metrics, each fold's `.selected` has the parameter values and `.config` that `desirability2::select_best_desirability()` gives with the same terms. The reference applies it to that fold's inner tuning run. That run comes from `reference_nested_loop()` for the grid and `reference_nested_bayes_loop()` for the Bayesian path, each run with the default rule. The test covers `nested_tune_grid()` and `nested_tune_bayes()`.
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
@@ -100,3 +100,15 @@ Independent review, three fresh-context lenses. The prior-review lens found no r
 7. [S] `attach_daemon_pkgs()`'s default `pkgs` does not pass the rule to `needed_pkgs()`. Its one caller passes `pkgs`, so no path reaches the default today.
 8. [S] For this rule, the absent-package refusal runs before the named-dots check, the reverse of the other rules' order.
 9. [O] NEWS omits class `nestedtune_selection_rule_terms` and the refusal of `limit`. The help sentence that desirability2 checks each goal at build overstates the shape check.
+
+Pass 1 dispositions, from the work log: findings 1-5 and 9 went back as T6-T9, and findings 6-8 went to the desirability candidate row.
+
+### Pass 2 (2026-09-22)
+
+Sync: `origin/main` is still at ea063a1, the branch point, so nothing needed a merge. Unless stated, the evidence comes from `devtools::test()` over the eleven touched test files on 2026-09-22: 227 tests, 0 failures, 0 errors, 0 skips.
+
+- AC1: `test-selection-rule.R` asserts that `$order` holds the terms as bare calls and asserts the full `format()` label, including a long `target()` goal. From the branch source, `print()` on three goals showed each in full, including a `target()` goal with five later arguments. `test-nested-tune-grid-checks.R` and `test-nested-tune-bayes-checks.R` assert class `nestedtune_selection_rule_unknown_term` for a term outside an explicit metric set. With no `metrics`, they assert the same class for `accuracy` against tune's regression default. Passing controls for a metric, a tuned parameter and a default-set metric reach the loop. Pass.
+- AC2: `test-nested-tune-grid-oracles.R` and `test-nested-tune-bayes-oracles.R` pass. Each compares every fold's `.selected` parameter columns and `.config` with `select_best_desirability()` on that fold's reference run. The run comes from `reference_nested_loop()` or `reference_nested_bayes_loop()` under the default rule. Each test also asserts that at least one pick differs from the default rule's. Pass.
+- AC3: `test-nested-final-fit-results.R` passes. It asserts that `nested_final_fit()`'s `$selected` equals `select_best_desirability()` on the run `extract_tune_results()` returns, and that the pick differs from `select_best()` by rmse. Pass.
+- AC4: `test-nested-tune-race-checks.R` (both racers) and `test-nested-tune-sim-anneal-checks.R` pass, each asserting class `nestedtune_selection_rule_unsupported` at entry. Pass.
+- AC5: `test-selection-rule-installed.R` passes. With desirability2 masked it asserts class `nestedtune_pkg_not_installed` for `selection_rule()`, for `nested_tune_grid()` given a rule built before the mask, and for `nested_final_fit()` on a result that recorded the rule, each beside an unmasked control. A fourth block covers `nested_tune_bayes()`. Pass.
