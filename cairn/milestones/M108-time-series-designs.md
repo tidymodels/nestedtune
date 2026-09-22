@@ -7,7 +7,7 @@
 - **Principles touched:** IP1, IP4, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs the package supports
-- **Branch/PR:** `m108-time-series-designs`
+- **Branch/PR:** `m108-time-series-designs` · https://github.com/tidymodels/nestedtune/pull/123
 
 ## Goal
 
