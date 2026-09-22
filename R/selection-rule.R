@@ -272,13 +272,19 @@ selection_rule_label <- function(x) {
     out <- paste0(
       out,
       " by ",
-      paste(vapply(x$order, rlang::as_label, character(1L)), collapse = ", ")
+      paste(vapply(x$order, deparse_in_full, character(1L)), collapse = ", ")
     )
   }
   if (!is.null(x$limit)) {
     out <- paste0(out, " (limit = ", format(x$limit), ")")
   }
   out
+}
+
+# One ordering or goal as written, on one line. `rlang::as_label()` shortens
+# a long call to `target(...)`, which hid a desirability goal's limits (M109).
+deparse_in_full <- function(expr) {
+  paste(rlang::expr_deparse(expr, width = Inf), collapse = " ")
 }
 
 # Whether the rule is one the summaries name (M98): the default best-by-metric

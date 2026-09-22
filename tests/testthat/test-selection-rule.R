@@ -227,6 +227,32 @@ test_that("AC1: the desirability rule captures its terms as bare expressions and
   expect_true(names_selection_rule(rule))
 })
 
+test_that("AC1: a goal too long for `rlang::as_label()` prints in full", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  goal <- quote(target(
+    rsq,
+    low = 0.1,
+    target = 0.5,
+    high = 0.9,
+    scale_low = 2,
+    scale_high = 3
+  ))
+  written <- "target(rsq, low = 0.1, target = 0.5, high = 0.9, scale_low = 2, scale_high = 3)"
+  # The shortening this test guards against: `as_label()` gives `target(...)`.
+  expect_identical(rlang::as_label(goal), "target(...)")
+
+  rule <- selection_rule("desirability", !!goal, minimize(num_comp))
+  expect_identical(
+    format(rule),
+    paste0("<selection_rule> desirability by ", written, ", minimize(num_comp)")
+  )
+  expect_identical(
+    cli::ansi_strip(capture.output(print(rule))),
+    paste0("<selection_rule> desirability by ", written, ", minimize(num_comp)")
+  )
+})
+
 test_that("the desirability rule refuses no terms, a limit, and a term desirability2 refuses", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

@@ -1266,6 +1266,27 @@ test_that("AC1: a rule ordering by two names is rendered with both, as written",
   expect_selected_by_under_heading(res, "one_std_err by desc(df1), df2")
 })
 
+test_that("AC1: a desirability goal too long for `rlang::as_label()` is named in full", {
+  skip_if_no_engines()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  res <- rule_results(selection_rule(
+    "desirability",
+    target(
+      rsq,
+      low = 0.1,
+      target = 0.5,
+      high = 0.9,
+      scale_low = 2,
+      scale_high = 3
+    )
+  ))
+  expect_selected_by_under_heading(
+    res,
+    "desirability by target(rsq, low = 0.1, target = 0.5, high = 0.9, scale_low = 2, scale_high = 3)"
+  )
+})
+
 test_that("AC1: the default rule and a run that applied none print no `Selected by:` line", {
   skip_if_no_engines()
   d <- make_reg_data()
