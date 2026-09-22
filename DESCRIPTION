@@ -28,6 +28,7 @@ Imports:
 Suggests:
     BradleyTerry2,
     censored,
+    desirability2 (>= 0.2.0),
     dials,
     finetune (>= 1.0.1),
     knitr,

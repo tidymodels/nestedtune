@@ -39,7 +39,7 @@
 
 ## Tasks
 
-- [ ] T1: Install desirability2. Read its `NAMESPACE`, `select_best_desirability()`'s arguments and return columns, and whether a term can name a tuned parameter (LESSONS, claims about another package). Write the two D-entries, then add desirability2 to Suggests.
+- [x] T1: Install desirability2. Read its `NAMESPACE`, `select_best_desirability()`'s arguments and return columns, and whether a term can name a tuned parameter (LESSONS, claims about another package). Write the two D-entries, then add desirability2 to Suggests.
 - [ ] T2: Extend `selection_rule()` (`R/selection-rule.R:76`) with the rule. Capture the terms as expressions, as the orderings are captured. Add the entry check against the run's metric set and tuned parameters, and add the three tuners' refusal.
 - [ ] T3: Apply the rule where the recorded rule selects today, for the folds and the final fit. Write the AC2 and AC3 oracle tests, comparing parameter columns and `.config` only.
 - [ ] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
@@ -52,6 +52,8 @@
 - 2026-09-21: plan gate chose grid and Bayesian support with the other three tuners refusing, over all five tuners, because racing drops candidates before the end and needs its own oracle; falsified by desirability2 documenting its selector for racing results.
 - 2026-09-21: re-audit in full mode returned four findings, all fixed after the plan commit. AC1 did not say which orchestrators check or which metric set applies by default. AC2 had no Bayesian reference, AC5 had no refusal on entry, and AC6 left D-056's parameters-only clause standing.
 - 2026-09-21: implement started on branch m109-desirability-selection. desirability2 0.2.0 installed from CRAN.
+- 2026-09-21: question gate took the four recommendations: Suggests floor 0.2.0, terms run through `desirability()` at build with errors rewrapped, classes `nestedtune_pkg_not_installed` reused plus `_unknown_term` and `_unsupported`, label kept as `desirability by <terms>`.
+- 2026-09-21: T1 done. `show_best_desirability()` reads the wide `collect_metrics()` columns less `.config`, so a term can name a metric or a tuned parameter. D-072 and D-073 written, desirability2 (>= 0.2.0) in Suggests.
 
 ## Decisions
 
