@@ -17,7 +17,7 @@
 
 **In:** A fourth rule on `selection_rule()` taking desirability2 terms as `...`. It is recorded in the procedure, printed, and applied by `nested_tune_grid()`, `nested_tune_bayes()` and `nested_final_fit()`. desirability2 joins Suggests. A D-entry supersedes D-056's clause that refuses a rule outside tune's three.
 
-**Out:** The rule under `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`, which refuse it at entry here. Their support goes to a candidate row added with this plan.
+**Out:** The rule under `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`, which refuse it at entry here. The rule on a censored regression model, which `nested_tune_grid()` and `nested_tune_bayes()` refuse at entry here. Their support goes to a candidate row added with this plan.
 
 ## Acceptance criteria
 
@@ -65,6 +65,7 @@
 - 2026-09-21: claim audit: 50 claims read, 1 corrected — R/selection-rule.R, man/selection_rule.Rd (desirability2 estimates only the limits a goal leaves out). The reader re-read the correction and confirmed it.
 - 2026-09-21: status set to review.
 - 2026-09-21: review return 1 (defect). AC1 fails: `print()` shortened a long goal to `target(...)` (finding 3). A goal holding a variable passed entry and failed every fold (finding 1). At the gate the user sent findings 1-5 and 9 back as T6-T9 and findings 6-8 to the desirability candidate row. AC2-AC6 evidence stands. Status set to in-progress.
+- 2026-09-21: resume question gate took both recommendations. T7 refuses at build any name in a goal's later arguments, pointing to `!!`. T8 refuses the rule on a censored regression model at entry. Scope Out gains that refusal, amended at this gate. Censored support joins the desirability candidate row.
 
 ## Decisions
 
