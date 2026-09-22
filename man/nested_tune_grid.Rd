@@ -81,7 +81,9 @@ The section on evaluation times says what this package refuses.}
 
 \item{select}{A \code{\link[=selection_rule]{selection_rule()}} naming the selector each outer fold
 picks its candidate with, on its own inner run. The default is
-\code{\link[tune:select_best]{tune::select_best()}} on the first metric.}
+\code{\link[tune:select_best]{tune::select_best()}} on the first metric. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
+\code{"desirability"} rule.}
 }
 \value{
 A tibble of class \code{nested_results} with one row per outer fold.
@@ -230,8 +232,8 @@ refused at entry. The \code{"desirability"} rule selects with
 \code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}} over the goals it carries.
 Each name in a goal's first argument must be a metric in \code{metrics} or a
 parameter \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are
-tune's default set. The section on writing a goal in \code{\link[=selection_rule]{selection_rule()}} says
-more. The result records the rule as
+tune's default set. The section "Writing a desirability goal" in
+\code{\link[=selection_rule]{selection_rule()}} says more. The result records the rule as
 \code{extract_procedure(res)$select}, and \code{\link[=nested_final_fit]{nested_final_fit()}} selects by it
 too.
 }

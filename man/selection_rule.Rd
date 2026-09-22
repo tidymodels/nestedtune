@@ -77,13 +77,15 @@ that each goal calls one of its goal functions with an unnamed first
 argument and the other arguments named. It reads the values of those
 arguments only when it scores a tuning run. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at entry that every name in a goal's first
-argument is a metric in \code{metrics} or a parameter \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
-uses by default for the model's mode. desirability2 sets each limit a goal
+argument is a metric in \code{metrics} or a parameter \code{object} tunes. With
+\code{metrics} left \code{NULL}, the metrics are the ones tune uses by default for
+the model's mode. desirability2 sets each limit a goal
 leaves out from the tuning run it scores, so each fold and the final fit
 scale those goals on their own inner run. A limit written into the goal
 holds everywhere. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
-rule, and every orchestrator refuses it on a censored regression model.
+rule. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} refuse it on a
+censored regression model.
 }
 
 \section{Writing an ordering}{

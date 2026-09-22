@@ -459,7 +459,10 @@ test_that("AC4: the desirability rule is refused at entry (M109)", {
     control = anneal_control()
   ))
   expect_refused(cnd, "nestedtune_selection_rule_unsupported", "tune_sim_anneal")
-  expect_match(conditionMessage(cnd), "tune_bayes", fixed = TRUE)
+  # The message names the orchestrators the user calls (review finding 4).
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "under `nested_tune_sim_anneal()`", fixed = TRUE)
+  expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
 })
 
 test_that("`select` is held at entry, before any fold runs (M69, AC4)", {

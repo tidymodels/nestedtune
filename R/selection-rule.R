@@ -74,13 +74,15 @@
 #' argument and the other arguments named. It reads the values of those
 #' arguments only when it scores a tuning run. [nested_tune_grid()] and
 #' [nested_tune_bayes()] check at entry that every name in a goal's first
-#' argument is a metric in `metrics` or a parameter `object` tunes. With `metrics` left `NULL`, the metrics are the ones tune
-#' uses by default for the model's mode. desirability2 sets each limit a goal
+#' argument is a metric in `metrics` or a parameter `object` tunes. With
+#' `metrics` left `NULL`, the metrics are the ones tune uses by default for
+#' the model's mode. desirability2 sets each limit a goal
 #' leaves out from the tuning run it scores, so each fold and the final fit
 #' scale those goals on their own inner run. A limit written into the goal
 #' holds everywhere. [nested_tune_race_anova()],
 #' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
-#' rule, and every orchestrator refuses it on a censored regression model.
+#' rule. [nested_tune_grid()] and [nested_tune_bayes()] refuse it on a
+#' censored regression model.
 #'
 #' @section Writing an ordering:
 #'
@@ -251,9 +253,26 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
   # each fold runs (M109 review findings 1 and 4). Only the first argument
   # may name something, and the rest must be values.
   for (term in terms) {
-    named <- unique(unlist(lapply(as.list(term)[-(1:2)], all.vars)))
+    later <- as.list(term)[-(1:2)]
+    named <- unique(unlist(lapply(later, all.vars)))
     if (length(named) > 0L) {
       goal <- deparse_in_full(term)
+      # The hint injects the first argument that names something, whole, so
+      # `.data$lo` and `lo * 2` are not cut down to their first name (M109
+      # review finding 3).
+      names_something <- vapply(
+        later,
+        function(arg) length(all.vars(arg)) > 0L,
+        logical(1)
+      )
+      at <- which(names_something)[[1L]]
+      arg <- later[[at]]
+      inject <- deparse_in_full(arg)
+      if (!is.symbol(arg)) {
+        inject <- paste0("(", inject, ")")
+      }
+      # desirability2 has already refused an unnamed later argument.
+      hint <- paste0(names(later)[[at]], " = !!", inject)
       cli::cli_abort(
         c(
           "Only a goal's first argument may name a metric or a parameter, \\
@@ -261,7 +280,7 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
           x = "{.code {goal}} names {.val {named}} outside its first \\
                argument.",
           i = "Write the value itself, or inject a variable's value with \\
-               {.code !!{named[[1L]]}}."
+               {.code !!}, as in {.code {hint}}."
         ),
         class = "nestedtune_selection_rule_term_arg",
         call = call

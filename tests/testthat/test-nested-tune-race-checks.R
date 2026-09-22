@@ -499,7 +499,10 @@ test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
       fn,
       export_name(fn)
     )
-    expect_match(conditionMessage(cnd), "tune_grid", fixed = TRUE)
+    # The message names the orchestrators the user calls (review finding 4).
+    msg <- cli::ansi_strip(conditionMessage(cnd))
+    expect_match(msg, paste0("under `nested_", fn, "()`"), fixed = TRUE)
+    expect_match(msg, "`nested_tune_grid()`", fixed = TRUE)
   }
 })
 

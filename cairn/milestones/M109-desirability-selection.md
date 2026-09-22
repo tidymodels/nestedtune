@@ -78,6 +78,7 @@
 - 2026-09-22: re-audit: AC6 (full) — the proposed clause could hide a new failing test, because the check reports all test failures as one error. It also depended on one unrepeated run of `main`. The reader proposed a named-test exception.
 - 2026-09-22: amendment return: AC6 — "`devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch." The user chose this wording at the mini gate. It executes the return logged above and is not a second return.
 - 2026-09-22: the amendment was the only work, so no code changed and the claim audit is not rerun. Status set to review.
+- 2026-09-22: review pass 3. AC1-AC6 pass, and `devtools::check()` gave 0 errors, 0 warnings, 0 notes. At the gate the user chose fixing seven wording findings before the merge. They are fixed and tested, and the suite is clean.
 
 ## Decisions
 
@@ -154,3 +155,7 @@ Independent review, pass 3. The code is the tree the pass-2 fan-out read. One fr
 12. [O] `NEWS.md` line 18, added here, is 82 characters wide. Read from source.
 
 No finding shows an acceptance criterion failing, so none is a return under the floor.
+
+Gate dispositions, pass 3. The user chose to fix the wording, then merge. Pass-2 findings 3, 4, 5, 7 and 8 and pass-3 findings 11 and 12 are fixed now. Pass-2 findings 1, 2 and 6 and pass-3 finding 10 go to the desirability candidate row.
+
+Fix-now evidence, 2026-09-22. The term-argument hint now injects the whole argument that names something, as in `low = !!(.data$lo)` and `high = !!(lo * 2)`. The racer and annealing refusal names `nested_tune_race_anova()` and similar, and its hint names `nested_tune_grid()` and `nested_tune_bayes()`. The censored-model help sentence names grid and Bayesian alone. The `select` help that the racers and annealing inherit says they refuse the rule. The grid help names the section "Writing a desirability goal". The wide roxygen line and the wide NEWS line are wrapped. The new assertions in `test-selection-rule.R`, `test-nested-tune-race-checks.R` and `test-nested-tune-sim-anneal-checks.R` failed on the old code, with 4, 4 and 2 failures. `devtools::test()` then gave 965 tests with 0 failures, 0 errors and 0 skips. `document()` was run, and all six gating sweeps exit 0.

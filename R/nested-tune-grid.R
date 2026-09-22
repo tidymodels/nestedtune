@@ -62,7 +62,9 @@
 #' @template param-eval-time
 #' @param select A [selection_rule()] naming the selector each outer fold
 #'   picks its candidate with, on its own inner run. The default is
-#'   [tune::select_best()] on the first metric.
+#'   [tune::select_best()] on the first metric. [nested_tune_race_anova()],
+#'   [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
+#'   `"desirability"` rule.
 #'
 #' @return A tibble of class `nested_results` with one row per outer fold.
 #'   Beside the fold's split and labels, each row holds:
@@ -164,8 +166,8 @@
 #' [desirability2::select_best_desirability()] over the goals it carries.
 #' Each name in a goal's first argument must be a metric in `metrics` or a
 #' parameter `object` tunes. With `metrics` left `NULL`, the metrics are
-#' tune's default set. The section on writing a goal in [selection_rule()] says
-#' more. The result records the rule as
+#' tune's default set. The section "Writing a desirability goal" in
+#' [selection_rule()] says more. The result records the rule as
 #' `extract_procedure(res)$select`, and [nested_final_fit()] selects by it
 #' too.
 #'

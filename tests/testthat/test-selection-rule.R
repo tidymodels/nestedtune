@@ -318,7 +318,16 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
   msg <- cli::ansi_strip(conditionMessage(cnd))
   expect_match(msg, "maximize(rsq, low = lo)", fixed = TRUE)
-  expect_match(msg, "!!lo", fixed = TRUE)
+  expect_match(msg, "low = !!lo", fixed = TRUE)
+
+  # The hint injects the whole argument, not its first name (review pass 2,
+  # finding 3).
+  hint_of <- function(cnd) cli::ansi_strip(conditionMessage(cnd))
+  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = .data$lo)))
+  expect_match(hint_of(cnd), "low = !!(.data$lo)", fixed = TRUE)
+  expect_no_match(hint_of(cnd), "!!.data`", fixed = TRUE)
+  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = 0.1, high = lo * 2)))
+  expect_match(hint_of(cnd), "high = !!(lo * 2)", fixed = TRUE)
 
   # A metric named in a later argument, which the entry check does not read
   # (review finding 4), and a name inside a call there.
