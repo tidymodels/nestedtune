@@ -41,7 +41,7 @@ test_that("a rolling-origin design matches a hand-rolled reference loop", {
   expect_s3_class(folds$splits[[1]], "rof_split")
 
   set.seed(20)
-  res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
   ref <- memoised(reference_nested_loop(
     wf,
     folds,
@@ -66,7 +66,7 @@ test_that("a sliding-window design matches a hand-rolled reference loop", {
   expect_s3_class(folds$splits[[1]], "sliding_window_split")
 
   set.seed(21)
-  res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
   ref <- memoised(reference_nested_loop(
     wf,
     folds,
@@ -118,7 +118,7 @@ expect_final_matches_reference <- function(d, folds) {
   grid <- det_grid()
 
   set.seed(20)
-  res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
   set.seed(31)
   final <- nested_final_fit(wf, res)
 
@@ -173,11 +173,11 @@ test_that("the final fit on a sliding-window design matches a hand-rolled refere
 
 # ---- AC5: predictions and augment() -----------------------------------------
 
-ts_pred_run <- function(data) {
+ts_pred_run <- function(data, design = ts_rolling_nested) {
   set.seed(20)
   memoised(nested_tune_grid(
     det_workflow(data),
-    ts_rolling_nested(data),
+    design(data),
     grid = det_grid(),
     metrics = ts_metrics(),
     control = tune::control_grid(save_pred = TRUE)
@@ -200,16 +200,13 @@ test_that("collect_predictions() returns each outer-assessment row once per fold
   }
 })
 
-test_that("augment() refuses a rolling-origin result and names the rows never held out", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-  res <- ts_pred_run(d)
-
+expect_augment_names_never_held <- function(res, d) {
   never <- setdiff(seq_len(nrow(d)), unlist(lapply(res$splits, rsample::complement)))
   expect_length(never, 87L)
 
   cnd <- rlang::catch_cnd(augment(res), "error")
   expect_s3_class(cnd, "nestedtune_augment_rows")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
   msg <- cli::ansi_strip(conditionMessage(cnd))
   # cli shortens the row list to its first three and last two.
   expect_identical(c(head(never, 3L), tail(never, 2L)), c(1:3, 89:90))
@@ -217,4 +214,18 @@ test_that("augment() refuses a rolling-origin result and names the rows never he
   expect_match(msg, "89, and 90.", fixed = TRUE)
   expect_no_match(msg, "repeated", ignore.case = TRUE)
   expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+}
+
+test_that("augment() refuses a rolling-origin result and names the rows never held out", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_augment_names_never_held(ts_pred_run(d), d)
+})
+
+test_that("augment() refuses a sliding-window result and names the rows never held out", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d, ts_sliding_nested)
+  expect_s3_class(res$splits[[1]], "sliding_window_split")
+  expect_augment_names_never_held(res, d)
 })

@@ -109,7 +109,7 @@
 #' [nested_final_fit()], which are tested on both. The other orchestrators
 #' are not tested on them, and neither are other time-series designs such as
 #' [rsample::sliding_index()] and [rsample::sliding_period()].
-#' [augment()][augment.nested_results] refuses these designs, because their
+#' [`augment()`][augment.nested_results] refuses these designs, because their
 #' assessment sets leave rows out.
 #'
 #' @section Finalizing a parameter range:

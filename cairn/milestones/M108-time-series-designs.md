@@ -61,6 +61,8 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: claim audit found that the help, the NEWS entry and D-071 claim a `nested_final_fit()` test on the sliding-window design that did not exist. Minor amendment inside T3: a sliding-window final-fit test is added, sharing its body with the rolling-origin one. The test file passes (133 expectations).
 - 2026-09-21: claim audit: 24 claims read, 3 corrected — NEWS.md, R/nested-resamples.R, R/nested-tune-grid.R
 - 2026-09-21: T5 done. `devtools::check()` on the final branch tree gives 0 errors, 0 warnings and 0 notes, the same as `main` at `6f4795a`. Status set to review.
+- 2026-09-21: review found every criterion met, the gate clean and 11 diff findings. The gate fixed R2, R3, R8 and R9 on the branch and filed R1 as a candidate.
+- 2026-09-21: step-7 approval: m108-time-series-designs approved for merge
 
 ## Decisions
 
@@ -93,3 +95,13 @@ Independent review: three fresh reviewers. The blame-history reviewer found noth
 - R9: the final-fit tests call `nested_tune_grid()` without `memoised()`, which adds two full nested runs per suite run.
 - R10: the new message says "exactly once" and then "No outer fold holds out 87 rows". The reviewer judged it accurate.
 - R11: when no row is left out, the old branch still prints "holds out 0 rows never". This predates the branch.
+
+Dispositions, chosen at the merge gate:
+- R1: follow-up. It is absorbed into the existing ROADMAP candidate row for time-series designs past M108.
+- R2: fixed. A new test runs `augment()` on the sliding-window result and asserts the same class, call and message.
+- R3: fixed. The shared `augment()` assertion now checks that the condition call is `augment`.
+- R8: fixed. The link is written as code, and `devtools::document()` regenerated the five help pages.
+- R9: fixed. The four `nested_tune_grid()` calls in the file use `memoised()`, and the rolling-origin final fit now reuses the AC1 run.
+- R4, R5, R6, R7, R10, R11: noted, no change.
+
+After the fixes, the test file passes 143 expectations and `devtools::test()` passes 11185 with 0 failed. The six gating prose sweeps each exit 0.

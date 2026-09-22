@@ -169,7 +169,7 @@ Time-series designs are supported for an outer
 \code{\link[=nested_final_fit]{nested_final_fit()}}, which are tested on both. The other orchestrators
 are not tested on them, and neither are other time-series designs such as
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}.
-\link[=augment.nested_results]{augment()} refuses these designs, because their
+\code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out.
 }
 
