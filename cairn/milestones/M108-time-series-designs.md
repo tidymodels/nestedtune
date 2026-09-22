@@ -1,6 +1,6 @@
 # M108: Rolling-origin and sliding-window outer designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -43,7 +43,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - [x] T2: Run `nested_resamples()` on both designs and write the AC3 split-identity tests. If the constructor refuses either design, lift the refusal only where the D-entry's reasoning covers it.
 - [x] T3: Write the AC4 final-fit test and its reference.
 - [x] T4: Fit `augment()`'s refusal message (`R/nested-results-collect.R:710`) to the design it refuses, and write the AC5 tests.
-- [ ] T5: Write the D-entry, the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T5: Write the D-entry, the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -60,6 +60,7 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 - 2026-09-21: T5 checkpoint, not checked off. The help of `nested_tune_grid()` (a section the other orchestrators inherit) and of `nested_resamples()` names both designs, and `NEWS.md` has two entries. All six gating sweeps are clean. `devtools::check()` on the branch and on `main` at `6f4795a` is still running.
 - 2026-09-21: claim audit found that the help, the NEWS entry and D-071 claim a `nested_final_fit()` test on the sliding-window design that did not exist. Minor amendment inside T3: a sliding-window final-fit test is added, sharing its body with the rolling-origin one. The test file passes (133 expectations).
 - 2026-09-21: claim audit: 24 claims read, 3 corrected — NEWS.md, R/nested-resamples.R, R/nested-tune-grid.R
+- 2026-09-21: T5 done. `devtools::check()` on the final branch tree gives 0 errors, 0 warnings and 0 notes, the same as `main` at `6f4795a`. Status set to review.
 
 ## Decisions
 
