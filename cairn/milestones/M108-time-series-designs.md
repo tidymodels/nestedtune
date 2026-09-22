@@ -21,12 +21,12 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 
 ## Acceptance criteria
 
-- [ ] AC1: `nested_tune_grid()` runs over an `rsample::nested_cv()` design whose outer and inner resamples are both `rolling_origin()`. Each fold's selection and outer metrics equal those of `reference_nested_loop()` (`tests/testthat/helper-orchestration.R`) on the same design, tested.
-- [ ] AC2: The AC1 test also passes for a design whose outer resamples are `sliding_window()` and whose inner resamples are `rolling_origin()`.
-- [ ] AC3: `nested_resamples()` accepts `rolling_origin()` and `sliding_window()` as `outside`, with `rolling_origin()` as `inside`. For both designs, a test asserts that every outer and inner analysis and assessment set matches `rsample::nested_cv()` row for row, as `expect_outer_identical()` and `expect_inner_identical()` check.
-- [ ] AC4: `nested_final_fit()` on the AC1 result completes, and its `predict()` output equals a reference built in the test. The reference is `tune::tune_grid()`, then the selection rule, then `fit()`. It runs under `fit$tuning_seed` and `fit$fit_seed`. Its inner design is built on the full data from the literal `rolling_origin()` call of the fixture.
-- [ ] AC5: With `save_pred = TRUE` on the AC1 design, `collect_predictions()` returns one row per outer-assessment row per fold, tested. The AC1 and AC2 designs use `assess = 1`. `augment()` on that result raises `nestedtune_augment_rows`. Where no row is held out twice, the message names the rows no fold held out. It does not name a repeated or Monte Carlo design.
-- [ ] AC6: A D-entry records support for `rolling_origin()` and `sliding_window()` outer designs under `nested_tune_grid()` and `nested_final_fit()`. The help of `nested_tune_grid()` and `nested_resamples()` names both, and `NEWS.md` describes the support. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [x] AC1: `nested_tune_grid()` runs over an `rsample::nested_cv()` design whose outer and inner resamples are both `rolling_origin()`. Each fold's selection and outer metrics equal those of `reference_nested_loop()` (`tests/testthat/helper-orchestration.R`) on the same design, tested.
+- [x] AC2: The AC1 test also passes for a design whose outer resamples are `sliding_window()` and whose inner resamples are `rolling_origin()`.
+- [x] AC3: `nested_resamples()` accepts `rolling_origin()` and `sliding_window()` as `outside`, with `rolling_origin()` as `inside`. For both designs, a test asserts that every outer and inner analysis and assessment set matches `rsample::nested_cv()` row for row, as `expect_outer_identical()` and `expect_inner_identical()` check.
+- [x] AC4: `nested_final_fit()` on the AC1 result completes, and its `predict()` output equals a reference built in the test. The reference is `tune::tune_grid()`, then the selection rule, then `fit()`. It runs under `fit$tuning_seed` and `fit$fit_seed`. Its inner design is built on the full data from the literal `rolling_origin()` call of the fixture.
+- [x] AC5: With `save_pred = TRUE` on the AC1 design, `collect_predictions()` returns one row per outer-assessment row per fold, tested. The AC1 and AC2 designs use `assess = 1`. `augment()` on that result raises `nestedtune_augment_rows`. Where no row is held out twice, the message names the rows no fold held out. It does not name a repeated or Monte Carlo design.
+- [x] AC6: A D-entry records support for `rolling_origin()` and `sliding_window()` outer designs under `nested_tune_grid()` and `nested_final_fit()`. The help of `nested_tune_grid()` and `nested_resamples()` names both, and `NEWS.md` describes the support. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
 
@@ -65,3 +65,31 @@ The package tests and documents `rolling_origin()` and `sliding_window()` outer 
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-09-21 on `m108-time-series-designs` at `93f3e4c`, with `origin/main` at `6f4795a`, the branch point (no sync merge needed).
+
+- AC1: `test-time-series-designs.R` run alone gives 133 expectations, 0 failed, 0 skipped. The test "a rolling-origin design matches a hand-rolled reference loop" has 10 expectations. It runs `nested_tune_grid()` on `ts_rolling_nested()`, a `rsample::nested_cv()` design with `rolling_origin()` outer and inner. It compares each fold's `.metrics`, `.selected` and seeds with `reference_nested_loop()` by `expect_identical()`.
+- AC2: in the same run, "a sliding-window design matches a hand-rolled reference loop" passes its 10 expectations. It uses `ts_sliding_nested()`, a `sliding_window()` outer design with a `rolling_origin()` inner design, and makes the same comparison as AC1.
+- AC3: in the same run, "rolling-origin splits match rsample::nested_cv()" (54 expectations) and "sliding-window splits match rsample::nested_cv()" (42 expectations) pass. Each builds the design with `nested_resamples()` and compares it to the fixture by `expect_outer_identical()` and `expect_inner_identical()`.
+- AC4: in the same run, "the final fit on a rolling-origin design matches a hand-rolled reference" passes 3 expectations. It calls `nested_final_fit()` on the AC1 run (seed 20). The reference runs `tune::tune_grid()`, `tune::select_best()` on `rmse`, and `fit()` under `final$tuning_seed` and `final$fit_seed`. Its inner design is the fixture's literal `rolling_origin()` call on the full data. The test asserts identical inner splits, an identical selection and identical `predict()` output. The sliding-window version also passes 3 expectations.
+- AC5: both fixtures use `assess = 1` (`helper-orchestration.R`). In the same run, "collect_predictions() returns each outer-assessment row once per fold" passes 4 expectations. It runs the AC1 design with `save_pred = TRUE` and matches each fold's `.row` values to that fold's `rsample::complement()`. "augment() refuses a rolling-origin result and names the rows never held out" passes 7 expectations. It asserts class `nestedtune_augment_rows`, a message naming the 87 rows by count, first three and last two, and no "repeated" or "Monte Carlo" text.
+- AC6: D-071 in `cairn/DECISIONS.md` records the support. `man/nested_tune_grid.Rd` and `man/nested_resamples.Rd` each name `rolling_origin()` and `sliding_window()`. `NEWS.md` has two entries for the change. `devtools::check()` on the branch gives Status OK with 0 errors, 0 warnings and 0 notes, and its tests pass. With no note on the branch, no note is absent from the `main` check at `6f4795a`.
+
+Consistency gate:
+- `cairn_validate.py` exits 0. All checks pass, with 18 references-staleness advisories that predate this branch.
+- No `DESIGN.md` principle changed, so `cairn_impact.py` is skipped.
+- `devtools::document()` gives no diff. `pkgdown::check_pkgdown()` finds no problems. README files are untouched. No new top-level file.
+- The six gating prose sweeps from `--list-gating` each exit 0.
+
+Independent review: three fresh reviewers. The blame-history reviewer found nothing. The prior-review reviewer found no prior finding the diff contradicts. The diff reviewer found no criterion failing and ranked 11 findings, listed here with dispositions set at the merge gate:
+- R1: an overlapping `sliding_window()` design (for example `assess_stop = 3, step = 1`) holds rows out twice, so `augment()` still names a repeated or Monte Carlo design as the cause. The help, NEWS and D-071 limit the new message to designs with no row held out twice.
+- R2: no test runs `augment()` on a `sliding_window()` result, though its help says that design is refused.
+- R3: the new refusal test does not assert the condition call, as `test-augment.R` does for the old branch.
+- R4: the two final-fit tests give identical fits, because the final fit re-runs only the inner design. The sliding-window test shows that the result is accepted, not a separate number.
+- R5: the final-fit test uses a deterministic workflow, so it cannot detect a final fit that ignores its seeds.
+- R6: each new result has one oracle type (live reference), against the DESIGN convention of two. No new computation was added.
+- R7: with `assess = 1`, the prediction test checks one row per fold, so it cannot catch a reordering inside a fold.
+- R8: `[augment()][augment.nested_results]` in `R/nested-tune-grid.R:112` renders without code font in five help pages.
+- R9: the final-fit tests call `nested_tune_grid()` without `memoised()`, which adds two full nested runs per suite run.
+- R10: the new message says "exactly once" and then "No outer fold holds out 87 rows". The reviewer judged it accurate.
+- R11: the old branch still prints "holds out 0 rows never" when no row is left out. This predates the branch.
