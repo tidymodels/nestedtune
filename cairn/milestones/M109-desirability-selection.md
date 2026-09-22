@@ -26,7 +26,7 @@
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
 - [x] AC5: If desirability2 is not installed, three calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_tune_grid()` given a rule built while the package was installed. The third is `nested_final_fit()` on a result that recorded the rule.
-- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [x] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
 
@@ -72,3 +72,18 @@ Sync: `origin/main` is at ea063a1, the branch point, so nothing needed a merge. 
 - AC3: `test-nested-final-fit-results.R` fits `nested_final_fit()` on a grid result that recorded the rule. It asserts that `$selected` equals `select_best_desirability()` on the run `extract_tune_results()` returns, over the parameter columns and `.config`. It also asserts that the pick differs from `select_best()` by rmse on that run. Pass.
 - AC4: `test-nested-tune-race-checks.R` loops over both racers and asserts class `nestedtune_selection_rule_unsupported` at entry, with a message naming `tune_grid`. `test-nested-tune-sim-anneal-checks.R` asserts the same class for `nested_tune_sim_anneal()`, with a message naming `tune_bayes`. Pass.
 - AC5: `test-selection-rule-installed.R` masks desirability2 through `rlang::is_installed()`. It asserts class `nestedtune_pkg_not_installed` and the call name for three calls. They are `selection_rule()`, `nested_tune_grid()` given a rule built before the mask, and `nested_final_fit()` on a result that recorded the rule. Each has an unmasked passing control, and the orchestrator cases show the refusal fires before the loop or tuner sentinel. Pass.
+- AC6: D-072 records desirability2 (>= 0.2.0) in Suggests. D-073 supersedes D-056's rule clause and, for this rule, its parameters-only ordering clause. `NEWS.md` has the entry, and `man/selection_rule.Rd` documents the rule and a section on writing a goal. `devtools::check()` on the branch gave 0 errors, 0 warnings, 0 notes (8 minutes, 2026-09-21). The implement log records one note on `main` at the branch point, for a worktree `.git` file, so the branch adds no note. Pass.
+
+Consistency gate, 2026-09-21: `cairn_validate` exit 0 with 18 references-staleness advisories. `devtools::document()` left no diff. README is not touched. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. No DESIGN principle changed, so `cairn_impact` is skipped.
+
+Independent review, three fresh-context lenses. The prior-review lens found no regressions against M69, M98 or D-056. Findings, most severe first:
+
+1. [O] A goal argument written as a variable, as in `maximize(rsq, low = lo)`, passes the build and entry checks. After all inner tuning runs, desirability2 then fails to evaluate it in every fold. Reproduced by the reviewer.
+2. [O] Censored models: `select_best_desirability()` ranks one row per candidate per evaluation time and returns `.eval_time` with the pick. tune's selectors use the first evaluation time. Read from source, not run.
+3. [O] Through `rlang::as_label()`, `print()` and the "Selected by" line shorten a long goal. `target(rsq, low = 0.1, target = 0.5, high = 0.9, scale_low = 2, scale_high = 3)` printed as `target(...)`, reproduced here. AC1 says `print()` shows the terms.
+4. [O] The entry check reads only a goal's first argument, so a metric named in a later argument fails in each fold, as in finding 1.
+5. [O][S] The empty-selection error hint names `tune::select_by_one_std_err()` for every rule. `slice_max()` drops an all-NA desirability, which reaches this message under the new rule.
+6. [O] Daemons are checked for desirability2 but not for the 0.2.0 floor, and no end-to-end parallel test runs the rule.
+7. [S] `attach_daemon_pkgs()`'s default `pkgs` does not pass the rule to `needed_pkgs()`. Its one caller passes `pkgs`, so no path reaches the default today.
+8. [S] For this rule, the absent-package refusal runs before the named-dots check, the reverse of the other rules' order.
+9. [O] NEWS omits class `nestedtune_selection_rule_terms` and the refusal of `limit`. The help sentence that desirability2 checks each goal at build overstates the shape check.
