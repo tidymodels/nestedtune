@@ -1,6 +1,6 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -26,7 +26,7 @@
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
 - [x] AC5: If desirability2 is not installed, three calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_tune_grid()` given a rule built while the package was installed. The third is `nested_final_fit()` on a result that recorded the rule.
-- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch.
 
 ## Coverage
 
@@ -75,6 +75,9 @@
 - 2026-09-21: status set to review.
 - 2026-09-22: review pass 2. AC1-AC5 pass. AC6 fails as written. On this machine, `devtools::check()` gives 1 error at `test-parallel-interrupt.R:108` on the branch and on `main` at ea063a1.
 - 2026-09-22: amendment return: AC6 — "`devtools::check()` gives 0 warnings, and no error or note absent from the check of `main` at the branch point." This is the proposed clause, for the amendment gate to accept or change. Defect returns stay at 1. The eight pass-2 findings in the Review section wait for triage at the next merge gate. Status set to in-progress.
+- 2026-09-22: re-audit: AC6 (full) — the proposed clause could hide a new failing test, because the check reports all test failures as one error. It also depended on one unrepeated run of `main`. The reader proposed a named-test exception.
+- 2026-09-22: amendment return: AC6 — "`devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch." The user chose this wording at the mini gate. It executes the return logged above and is not a second return.
+- 2026-09-22: the amendment was the only work, so no code changed and the claim audit is not rerun. Status set to review.
 
 ## Decisions
 
