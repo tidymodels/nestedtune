@@ -146,3 +146,11 @@ Sync: `origin/main` is still at ea063a1, the branch point, so nothing needed a m
 - AC6: D-072 and D-073 stand. `NEWS.md` has the entry, and `man/selection_rule.Rd` documents the rule. `devtools::check()` on the branch gave 0 errors, 0 warnings and 0 notes in 11 minutes. The tests step passed, `test-parallel-interrupt.R` included, so the amended clause's exception was not needed. Pass.
 
 Consistency gate, 2026-09-22: `cairn_validate` exit 0 with 18 references-staleness advisories. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. No DESIGN principle changed, so `cairn_impact` is skipped.
+
+Independent review, pass 3. The code is the tree the pass-2 fan-out read, so one fresh [O] reviewer read the AC6 amendment, re-checked the eight pass-2 findings and read the full diff again. All eight pass-2 findings still hold. Finding 4 is wider than stated: the refusal's hint also names `tune_grid()` and `tune_bayes()` where the user calls the `nested_` functions. The reviewer also corrects pass 2's AC6 line. The named interrupt test calls `dispatch_folds()`, which reaches the changed `needed_pkgs()` line at `R/parallel.R:225`, so the branch does reach that test. Under the default rule the new branch does nothing there. On the amendment, the reviewer notes that the exception names no expiry and gives `tests/testthat.Rout.fail` without its `nestedtune.Rcheck/` directory. This pass did not use the exception. New findings, most severe first:
+
+10. [O] Daemons are checked for desirability2 at `R/parallel.R:517`, not for its 0.2.0 floor, and D-072 set the floor because 0.1.0 can select differently. This repeats pass-1 finding 6, which the desirability candidate row holds. Read from source.
+11. [O] The grid help at `R/nested-tune-grid.R:166-167` names "the section on writing a goal", but the section is titled "Writing a desirability goal". Read from source.
+12. [O] `NEWS.md` line 18, added here, is 82 characters wide. Read from source.
+
+No finding shows an acceptance criterion failing, so none is a return under the floor.
