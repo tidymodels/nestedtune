@@ -284,6 +284,44 @@ test_that("the desirability rule refuses no terms, a limit, and a term desirabil
   )
 })
 
+test_that("the desirability rule refuses a name in a goal's later arguments", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  # A variable of the caller's: desirability2 would read it only when it
+  # scores each fold's run, after all the tuning (review finding 1).
+  lo <- 0.2
+  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = lo)))
+  expect_s3_class(cnd, "nestedtune_selection_rule_term_arg")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "maximize(rsq, low = lo)", fixed = TRUE)
+  expect_match(msg, "!!lo", fixed = TRUE)
+
+  # A metric named in a later argument, which the entry check does not read
+  # (review finding 4), and a name inside a call there.
+  expect_error(
+    selection_rule("desirability", maximize(rsq, low = rmse)),
+    class = "nestedtune_selection_rule_term_arg"
+  )
+  expect_error(
+    selection_rule("desirability", minimize(rmse), maximize(rsq, high = lo * 2)),
+    class = "nestedtune_selection_rule_term_arg"
+  )
+
+  # Passing controls: the value written in, the value injected, and calls
+  # holding no name.
+  expect_s3_class(
+    selection_rule("desirability", maximize(rsq, low = 0.2)),
+    "selection_rule"
+  )
+  injected <- selection_rule("desirability", maximize(rsq, low = !!lo))
+  expect_identical(injected$order, list(quote(maximize(rsq, low = 0.2))))
+  expect_s3_class(
+    selection_rule("desirability", target(rmse, low = -1, target = 0, high = 1)),
+    "selection_rule"
+  )
+})
+
 test_that("desirability_term_names() reads the first argument of each goal alone", {
   terms <- list(
     quote(maximize(rsq, low = 0.2)),

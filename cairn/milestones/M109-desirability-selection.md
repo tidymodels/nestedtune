@@ -45,7 +45,7 @@
 - [x] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
 - [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 - [x] T6: Print each goal in full in `print()` and the "Selected by" line, and test a goal long enough that `rlang::as_label()` shortens it (review finding 3).
-- [ ] T7: Refuse at build or entry a goal whose later arguments hold a variable or name a metric. No such goal must reach a fold (review findings 1 and 4).
+- [x] T7: Refuse at build or entry a goal whose later arguments hold a variable or name a metric. No such goal must reach a fold (review findings 1 and 4).
 - [ ] T8: For censored models, select at the first evaluation time as tune's selectors do, or refuse the rule, and test the choice (review finding 2).
 - [ ] T9: Make the empty-selection hint name the rule that ran, and add the `nestedtune_selection_rule_terms` class and the `limit` refusal to NEWS. Narrow the help sentence on what desirability2 checks at build (review findings 5 and 9).
 
@@ -67,6 +67,7 @@
 - 2026-09-21: review return 1 (defect). AC1 fails: `print()` shortened a long goal to `target(...)` (finding 3). A goal holding a variable passed entry and failed every fold (finding 1). At the gate the user sent findings 1-5 and 9 back as T6-T9 and findings 6-8 to the desirability candidate row. AC2-AC6 evidence stands. Status set to in-progress.
 - 2026-09-21: resume question gate took both recommendations. T7 refuses at build any name in a goal's later arguments, pointing to `!!`. T8 refuses the rule on a censored regression model at entry. Scope Out gains that refusal, amended at this gate. Censored support joins the desirability candidate row.
 - 2026-09-21: T6 done. The label deparses each goal in full through `rlang::expr_deparse(width = Inf)`, so `print()` and the "Selected by" line show the long `target()` goal that `as_label()` gave as `target(...)`. Both new tests failed on that text before the fix. Suite and plain sweep clean.
+- 2026-09-21: T7 done. `selection_rule()` refuses, with class `nestedtune_selection_rule_term_arg`, a goal that names a variable or a metric outside its first argument. The message points to `!!`. The test failed before the check and has passing controls for a written value, an injected value and a negative number. The help says the same. Suite, plain and roxygen sweeps clean.
 
 ## Decisions
 

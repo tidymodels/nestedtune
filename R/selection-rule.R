@@ -66,7 +66,10 @@
 #' Each goal is a call to one of desirability2's goal functions, such as
 #' `maximize()`, `minimize()` or `target()`, written without the
 #' `desirability2::` prefix, which desirability2 refuses. Its first argument
-#' names a metric or a tuned parameter. desirability2 checks each goal when
+#' names a metric or a tuned parameter. Its other arguments must be values,
+#' and a goal that names anything there is refused when the rule is built.
+#' Write a variable's value into a goal with `!!`, as in
+#' `maximize(rsq, low = !!lo)`. desirability2 checks each goal when
 #' the rule is built. [nested_tune_grid()] and [nested_tune_bayes()] check at
 #' entry that every name a goal uses is a metric in `metrics` or a parameter
 #' `object` tunes. With `metrics` left `NULL`, the metrics are the ones tune
@@ -239,6 +242,29 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
       )
     }
   )
+  # desirability2 reads a goal's later arguments only when it scores a run,
+  # with the goal as a bare expression, so a name there is never checked
+  # before the tuning: a variable of the caller's or a metric fails every
+  # fold after its inner run (M109 review findings 1 and 4). Only the first
+  # argument may name something, and the rest must be values.
+  for (term in terms) {
+    named <- unique(unlist(lapply(as.list(term)[-(1:2)], all.vars)))
+    if (length(named) > 0L) {
+      goal <- deparse_in_full(term)
+      cli::cli_abort(
+        c(
+          "Only a goal's first argument may name a metric or a parameter, \\
+           and the other arguments must be values.",
+          x = "{.code {goal}} names {.val {named}} outside its first \\
+               argument.",
+          i = "Write the value itself, or inject a variable's value with \\
+               {.code !!{named[[1L]]}}."
+        ),
+        class = "nestedtune_selection_rule_term_arg",
+        call = call
+      )
+    }
+  }
   invisible(terms)
 }
 

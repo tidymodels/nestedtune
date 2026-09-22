@@ -69,7 +69,10 @@ result that recorded it.
 Each goal is a call to one of desirability2's goal functions, such as
 \code{maximize()}, \code{minimize()} or \code{target()}, written without the
 \verb{desirability2::} prefix, which desirability2 refuses. Its first argument
-names a metric or a tuned parameter. desirability2 checks each goal when
+names a metric or a tuned parameter. Its other arguments must be values,
+and a goal that names anything there is refused when the rule is built.
+Write a variable's value into a goal with \verb{!!}, as in
+\code{maximize(rsq, low = !!lo)}. desirability2 checks each goal when
 the rule is built. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at
 entry that every name a goal uses is a metric in \code{metrics} or a parameter
 \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
