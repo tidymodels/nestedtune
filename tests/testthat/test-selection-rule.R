@@ -207,7 +207,9 @@ test_that("an empty selection under another rule names that rule and not the sta
 
   # No real run under these rules is known to select nothing, so the
   # selector is mocked to return no row (review finding 5).
-  empty <- function(...) data.frame(num_comp = integer(0), .config = character(0))
+  empty <- function(...) {
+    data.frame(num_comp = integer(0), .config = character(0))
+  }
   testthat::local_mocked_bindings(
     select_best_desirability = empty,
     .package = "desirability2"
@@ -313,7 +315,10 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   # A variable of the caller's: desirability2 would read it only when it
   # scores each fold's run, after all the tuning (review finding 1).
   lo <- 0.2
-  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = lo)))
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = lo)
+  ))
   expect_s3_class(cnd, "nestedtune_selection_rule_term_arg")
   expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
   msg <- cli::ansi_strip(conditionMessage(cnd))
@@ -323,10 +328,16 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   # The hint injects the whole argument, not its first name (review pass 2,
   # finding 3).
   hint_of <- function(cnd) cli::ansi_strip(conditionMessage(cnd))
-  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = .data$lo)))
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = .data$lo)
+  ))
   expect_match(hint_of(cnd), "low = !!(.data$lo)", fixed = TRUE)
   expect_no_match(hint_of(cnd), "!!.data`", fixed = TRUE)
-  cnd <- rlang::catch_cnd(selection_rule("desirability", maximize(rsq, low = 0.1, high = lo * 2)))
+  cnd <- rlang::catch_cnd(selection_rule(
+    "desirability",
+    maximize(rsq, low = 0.1, high = lo * 2)
+  ))
   expect_match(hint_of(cnd), "high = !!(lo * 2)", fixed = TRUE)
 
   # A metric named in a later argument, which the entry check does not read
@@ -336,7 +347,11 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
     class = "nestedtune_selection_rule_term_arg"
   )
   expect_error(
-    selection_rule("desirability", minimize(rmse), maximize(rsq, high = lo * 2)),
+    selection_rule(
+      "desirability",
+      minimize(rmse),
+      maximize(rsq, high = lo * 2)
+    ),
     class = "nestedtune_selection_rule_term_arg"
   )
 
@@ -349,7 +364,10 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   injected <- selection_rule("desirability", maximize(rsq, low = !!lo))
   expect_identical(injected$order, list(quote(maximize(rsq, low = 0.2))))
   expect_s3_class(
-    selection_rule("desirability", target(rmse, low = -1, target = 0, high = 1)),
+    selection_rule(
+      "desirability",
+      target(rmse, low = -1, target = 0, high = 1)
+    ),
     "selection_rule"
   )
 })

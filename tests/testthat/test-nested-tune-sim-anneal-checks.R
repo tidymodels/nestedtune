@@ -458,7 +458,11 @@ test_that("AC4: the desirability rule is refused at entry (M109)", {
     select = selection_rule("desirability", maximize(rsq)),
     control = anneal_control()
   ))
-  expect_refused(cnd, "nestedtune_selection_rule_unsupported", "tune_sim_anneal")
+  expect_refused(
+    cnd,
+    "nestedtune_selection_rule_unsupported",
+    "tune_sim_anneal"
+  )
   # The message names the orchestrators the user calls (review finding 4).
   msg <- cli::ansi_strip(conditionMessage(cnd))
   expect_match(msg, "under `nested_tune_sim_anneal()`", fixed = TRUE)

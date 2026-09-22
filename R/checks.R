@@ -1541,10 +1541,13 @@ check_desirability_rule <- function(
     # The user called the orchestrator, so the message names it, not the
     # tuner it wraps (M109 review finding 4).
     orchestrator <- paste0("nested_", tuner)
-    supported <- paste0("nested_", names(Filter(
-      function(entry) isTRUE(entry$desirability),
-      tuner_registry
-    )))
+    supported <- paste0(
+      "nested_",
+      names(Filter(
+        function(entry) isTRUE(entry$desirability),
+        tuner_registry
+      ))
+    )
     cli::cli_abort(
       c(
         "The {.val desirability} selection rule is not supported under \\

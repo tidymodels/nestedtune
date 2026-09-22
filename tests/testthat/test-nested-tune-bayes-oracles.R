@@ -546,7 +546,11 @@ test_that("AC2: the desirability rule picks what desirability2 picks on the fold
       maximize(rsq),
       minimize(df1)
     )
-    expect_identical(res$.selected[[i]][cols], ref[cols], info = paste("fold", i))
+    expect_identical(
+      res$.selected[[i]][cols],
+      ref[cols],
+      info = paste("fold", i)
+    )
   }
 
   best <- lapply(ref_best, function(fold) fold$selected[cols])

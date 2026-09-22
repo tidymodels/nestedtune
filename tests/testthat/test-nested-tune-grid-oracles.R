@@ -419,7 +419,11 @@ test_that("AC2: the desirability rule picks what desirability2 picks on the fold
       minimize(df1),
       minimize(df2)
     )
-    expect_identical(res$.selected[[i]][cols], ref[cols], info = paste("fold", i))
+    expect_identical(
+      res$.selected[[i]][cols],
+      ref[cols],
+      info = paste("fold", i)
+    )
   }
 
   # The rule reached the selection (see O6 above).
