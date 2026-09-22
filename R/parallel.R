@@ -222,7 +222,7 @@ dispatch_folds <- function(
 
   # One list, read by the probe, the attach step and the host's entry check
   # (M58), so no two of them can name different packages.
-  pkgs <- needed_pkgs(object, tuner)
+  pkgs <- needed_pkgs(object, tuner, select)
   check_daemons_can_load(
     status = daemons_load_status(pkgs = pkgs, call = call),
     call = call
@@ -642,10 +642,15 @@ workflow_pkgs <- function(object) {
 # tune is left off, as it always was: this package imports it, so the
 # pre-flight's namespace load has already brought it into every daemon; base
 # R's own packages likewise.
-needed_pkgs <- function(object, tuner = NULL) {
+needed_pkgs <- function(object, tuner = NULL, select = NULL) {
   pkgs <- workflow_pkgs(object)
   if (!is.null(tuner)) {
     pkgs <- c(pkgs, tuner_entry(tuner$tuner)$requires)
+  }
+  # The desirability rule selects inside the fold, so every daemon needs
+  # desirability2 too (M109).
+  if (is_selection_rule(select) && identical(select$rule, "desirability")) {
+    pkgs <- c(pkgs, "desirability2")
   }
   setdiff(unique(pkgs), c("base", "stats", "utils", "methods", "tune"))
 }

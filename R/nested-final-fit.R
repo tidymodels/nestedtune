@@ -295,6 +295,14 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
   # its model-fitting package is absent is refused before the inner rset is
   # built rather than inside the race.
   check_tuner_installed(procedure$tuner)
+  # And desirability2 for a recorded desirability rule (M109, D-072), which a
+  # result built where it was installed can carry to where it is not.
+  if (
+    is_selection_rule(procedure$select) &&
+      identical(procedure$select$rule, "desirability")
+  ) {
+    check_desirability_installed()
+  }
   # The grid is judged against the workflow as the orchestrator judged it,
   # so a workflow other than the one the estimate was built around is refused
   # here rather than by tune, one full tuning run later (GP3).
