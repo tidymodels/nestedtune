@@ -26,7 +26,7 @@
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
 - [x] AC5: If desirability2 is not installed, three calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_tune_grid()` given a rule built while the package was installed. The third is `nested_final_fit()` on a result that recorded the rule.
-- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch.
+- [x] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 warnings and no note absent from the check of `main` at the branch point, and gives 0 errors, except that its tests step may fail on `test-parallel-interrupt.R`'s "an interrupted run leaves no fold executing" (the flake the ROADMAP's M079 candidate row records) when `tests/testthat.Rout.fail` lists no other failing test and that file passes when run alone on the branch.
 
 ## Coverage
 
@@ -133,3 +133,16 @@ Independent review, pass 2, three fresh-context lenses. The blame-history lens f
 8. [O] One roxygen line in `R/selection-rule.R` is 125 characters wide. Read from source.
 
 No finding shows an acceptance criterion failing, so none is a return under the floor.
+
+### Pass 3 (2026-09-22)
+
+Sync: `origin/main` is still at ea063a1, the branch point, so nothing needed a merge. The code is unchanged since pass 2: `git diff 4d0ae31 HEAD` touches only this file. The evidence comes from one `devtools::check()` on the branch on 2026-09-22, whose tests step ran every test file and passed.
+
+- AC1: `test-selection-rule.R`, `test-nested-tune-grid-checks.R` and `test-nested-tune-bayes-checks.R` pass in the check's tests step. They hold the assertions pass 2 records for the recorded terms, the full `print()` label and the unknown-term class. Pass.
+- AC2: `test-nested-tune-grid-oracles.R` and `test-nested-tune-bayes-oracles.R` pass in the check's tests step, with the oracle comparisons pass 2 records. Pass.
+- AC3: `test-nested-final-fit-results.R` passes in the check's tests step, with the final-fit oracle pass 2 records. Pass.
+- AC4: `test-nested-tune-race-checks.R` and `test-nested-tune-sim-anneal-checks.R` pass in the check's tests step. Pass.
+- AC5: `test-selection-rule-installed.R` passes in the check's tests step, with the three masked refusals and their controls. Pass.
+- AC6: D-072 and D-073 stand. `NEWS.md` has the entry, and `man/selection_rule.Rd` documents the rule. `devtools::check()` on the branch gave 0 errors, 0 warnings and 0 notes in 11 minutes. The tests step passed, `test-parallel-interrupt.R` included, so the amended clause's exception was not needed. Pass.
+
+Consistency gate, 2026-09-22: `cairn_validate` exit 0 with 18 references-staleness advisories. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. No DESIGN principle changed, so `cairn_impact` is skipped.
