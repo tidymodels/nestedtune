@@ -1,5 +1,18 @@
 # nestedtune 0.0.0.9000
 
+* `selection_rule()` gains a fourth rule, `"desirability"`, which selects
+  with `desirability2::select_best_desirability()` over goals such as
+  `maximize(rsq)` and `minimize(num_comp)`. A goal can name a metric or a
+  tuned parameter. `nested_tune_grid()`, `nested_tune_bayes()` and
+  `nested_final_fit()` apply it. `nested_tune_grid()` and
+  `nested_tune_bayes()` refuse at entry a goal that names neither a metric
+  of the run nor a tuned parameter, with class
+  `nestedtune_selection_rule_unknown_term`. The racing tuners and
+  `nested_tune_sim_anneal()` refuse the rule with class
+  `nestedtune_selection_rule_unsupported`. The rule needs desirability2
+  0.2.0 or later, now in Suggests. Where it is absent, the rule is refused
+  with class `nestedtune_pkg_not_installed`.
+
 * `nested_tune_grid()` and `nested_final_fit()` support an outer
   `rsample::rolling_origin()` or `rsample::sliding_window()` design with
   an inner `rsample::rolling_origin()` design. `nested_resamples()` builds

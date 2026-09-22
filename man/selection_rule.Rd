@@ -4,16 +4,23 @@
 \alias{selection_rule}
 \title{Choose the rule each fold selects its parameters by}
 \usage{
-selection_rule(rule = c("best", "one_std_err", "pct_loss"), ..., limit = NULL)
+selection_rule(
+  rule = c("best", "one_std_err", "pct_loss", "desirability"),
+  ...,
+  limit = NULL
+)
 }
 \arguments{
-\item{rule}{The selector: \code{"best"} (the default), \code{"one_std_err"} or
-\code{"pct_loss"}. The section below says what each one picks.}
+\item{rule}{The selector: \code{"best"} (the default), \code{"one_std_err"},
+\code{"pct_loss"} or \code{"desirability"}. The section below says what each one
+picks.}
 
 \item{...}{For \code{"one_std_err"} and \code{"pct_loss"}, one or more bare
 expressions ordering the candidates from simplest to most complex, as
-tune's selectors take them. At least one is required for those rules, and
-\code{"best"} accepts none.}
+tune's selectors take them. For \code{"desirability"}, one or more goals such
+as \code{maximize(rsq)} or \code{minimize(num_comp)}, as
+\code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}} takes them. At least one is
+required for those three rules, and \code{"best"} accepts none.}
 
 \item{limit}{For \code{"pct_loss"} only, the acceptable loss against the best
 candidate, in percent, as a single non-negative number. Left \code{NULL} it
@@ -31,14 +38,14 @@ rule is not \code{"best"}.
 }
 \description{
 Builds the object the \code{select} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} and its
-siblings takes. It names one of tune's three selectors and carries what that
-selector needs.
+siblings takes. It names one of tune's three selectors, or desirability2's
+desirability selector, and carries what that selector needs.
 
-Every outer fold applies the rule to its own inner tuning run, on the first
-metric of that run. The result records the rule, so \code{\link[=nested_final_fit]{nested_final_fit()}}
-selects the same way on the full data.
+Every outer fold applies the rule to its own inner tuning run. tune's three
+selectors rank on the first metric of that run. The result records the
+rule, so \code{\link[=nested_final_fit]{nested_final_fit()}} selects the same way on the full data.
 }
-\section{The three rules}{
+\section{The four rules}{
 
 
 \code{"best"} takes the candidate with the best mean on the first metric, as
@@ -46,6 +53,31 @@ selects the same way on the full data.
 within one standard error of the best, as \code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}}
 does. \code{"pct_loss"} takes the simplest candidate whose loss against the best
 stays under \code{limit} percent, as \code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}} does.
+\code{"desirability"} takes the candidate with the highest overall desirability
+over the goals in \code{...}, as \code{\link[desirability2:select_best_desirability]{desirability2::select_best_desirability()}}
+does.
+}
+
+\section{Writing a desirability goal}{
+
+
+The \code{"desirability"} rule needs the desirability2 package, version 0.2.0
+or later. Where it is not installed, the rule is refused when it is built,
+when an orchestrator starts, and when \code{\link[=nested_final_fit]{nested_final_fit()}} is given a
+result that recorded it.
+
+Each goal is a call to one of desirability2's goal functions, such as
+\code{maximize()}, \code{minimize()} or \code{target()}, written without the
+\verb{desirability2::} prefix, which desirability2 refuses. Its first argument
+names a metric or a tuned parameter. desirability2 checks each goal when
+the rule is built. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at
+entry that every name a goal uses is a metric in \code{metrics} or a parameter
+\code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
+uses by default for the model's mode. desirability2 sets each goal's
+limits from the tuning run it scores, so each fold and the final fit scale
+the goals on their own inner run. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
+rule.
 }
 
 \section{Writing an ordering}{
@@ -69,6 +101,11 @@ selection_rule("one_std_err", num_comp)
 
 # A larger penalty is the simpler model, so its order is descending.
 selection_rule("pct_loss", desc(penalty), limit = 5)
+
+# A high R-squared and few components, weighed together.
+if (rlang::is_installed("desirability2", version = "0.2.0")) {
+  selection_rule("desirability", maximize(rsq), minimize(num_comp))
+}
 
 }
 \seealso{

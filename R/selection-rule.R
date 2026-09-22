@@ -16,19 +16,22 @@
 #'
 #' @description
 #' Builds the object the `select` argument of [nested_tune_grid()] and its
-#' siblings takes. It names one of tune's three selectors and carries what that
-#' selector needs.
+#' siblings takes. It names one of tune's three selectors, or desirability2's
+#' desirability selector, and carries what that selector needs.
 #'
-#' Every outer fold applies the rule to its own inner tuning run, on the first
-#' metric of that run. The result records the rule, so [nested_final_fit()]
-#' selects the same way on the full data.
+#' Every outer fold applies the rule to its own inner tuning run. tune's three
+#' selectors rank on the first metric of that run. The result records the
+#' rule, so [nested_final_fit()] selects the same way on the full data.
 #'
-#' @param rule The selector: `"best"` (the default), `"one_std_err"` or
-#'   `"pct_loss"`. The section below says what each one picks.
+#' @param rule The selector: `"best"` (the default), `"one_std_err"`,
+#'   `"pct_loss"` or `"desirability"`. The section below says what each one
+#'   picks.
 #' @param ... For `"one_std_err"` and `"pct_loss"`, one or more bare
 #'   expressions ordering the candidates from simplest to most complex, as
-#'   tune's selectors take them. At least one is required for those rules, and
-#'   `"best"` accepts none.
+#'   tune's selectors take them. For `"desirability"`, one or more goals such
+#'   as `maximize(rsq)` or `minimize(num_comp)`, as
+#'   [desirability2::select_best_desirability()] takes them. At least one is
+#'   required for those three rules, and `"best"` accepts none.
 #' @param limit For `"pct_loss"` only, the acceptable loss against the best
 #'   candidate, in percent, as a single non-negative number. Left `NULL` it
 #'   takes tune's default of 2, and the other rules refuse it.
@@ -42,13 +45,36 @@
 #'   [print.nested_final_fit()] and [summary.nested_final_fit()] when the
 #'   rule is not `"best"`.
 #'
-#' @section The three rules:
+#' @section The four rules:
 #'
 #' `"best"` takes the candidate with the best mean on the first metric, as
 #' [tune::select_best()] does. `"one_std_err"` takes the simplest candidate
 #' within one standard error of the best, as [tune::select_by_one_std_err()]
 #' does. `"pct_loss"` takes the simplest candidate whose loss against the best
 #' stays under `limit` percent, as [tune::select_by_pct_loss()] does.
+#' `"desirability"` takes the candidate with the highest overall desirability
+#' over the goals in `...`, as [desirability2::select_best_desirability()]
+#' does.
+#'
+#' @section Writing a desirability goal:
+#'
+#' The `"desirability"` rule needs the desirability2 package, version 0.2.0
+#' or later. Where it is not installed, the rule is refused when it is built,
+#' when an orchestrator starts, and when [nested_final_fit()] is given a
+#' result that recorded it.
+#'
+#' Each goal is a call to one of desirability2's goal functions, such as
+#' `maximize()`, `minimize()` or `target()`, written without the
+#' `desirability2::` prefix, which desirability2 refuses. Its first argument
+#' names a metric or a tuned parameter. desirability2 checks each goal when
+#' the rule is built. [nested_tune_grid()] and [nested_tune_bayes()] check at
+#' entry that every name a goal uses is a metric in `metrics` or a parameter
+#' `object` tunes. With `metrics` left `NULL`, the metrics are the ones tune
+#' uses by default for the model's mode. desirability2 sets each goal's
+#' limits from the tuning run it scores, so each fold and the final fit scale
+#' the goals on their own inner run. [nested_tune_race_anova()],
+#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
+#' rule.
 #'
 #' @section Writing an ordering:
 #'
@@ -69,6 +95,11 @@
 #'
 #' # A larger penalty is the simpler model, so its order is descending.
 #' selection_rule("pct_loss", desc(penalty), limit = 5)
+#'
+#' # A high R-squared and few components, weighed together.
+#' if (rlang::is_installed("desirability2", version = "0.2.0")) {
+#'   selection_rule("desirability", maximize(rsq), minimize(num_comp))
+#' }
 #'
 #' @seealso [nested_tune_grid()], [nested_final_fit()], [extract_procedure()],
 #'   which reaches the recorded rule as `$select`.
