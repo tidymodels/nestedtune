@@ -236,3 +236,136 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_s3_class(res$splits[[1]], "sliding_window_split")
   expect_augment_names_never_held(res, d)
 })
+
+# ---- The other orchestrators (M110) ------------------------------------------
+#
+# O4 -- type "live" (reference implementation). Source: each tuner's own
+#   reference loop in helper-orchestration.R -- reference_nested_bayes_loop(),
+#   reference_nested_race_loop() and reference_nested_anneal_loop() -- written
+#   from the seed contract rather than from the driver, and run here on the
+#   two time-series designs. Pinned by the "matches its reference loop on a
+#   ... design" tests. Satisfies M110 AC1.
+
+TS_DESIGNS <- list(
+  "rolling-origin" = ts_rolling_nested,
+  "sliding-window" = ts_sliding_nested
+)
+
+for (design in names(TS_DESIGNS)) {
+  build <- TS_DESIGNS[[design]]
+
+  test_that(
+    sprintf(
+      "nested_tune_bayes() matches its reference loop on a %s design",
+      design
+    ),
+    {
+      skip_if_no_bayes_fixture()
+      d <- make_reg_data()
+      wf <- bayes_workflow(d)
+      folds <- build(d)
+      p <- bayes_param_info(wf)
+      ms <- ts_metrics()
+
+      set.seed(22)
+      res <- memoised(nested_tune_bayes(
+        wf,
+        folds,
+        iter = 2,
+        initial = 3,
+        param_info = p,
+        metrics = ms
+      ))
+      ref <- memoised(reference_nested_bayes_loop(
+        wf,
+        folds,
+        iter = 2,
+        initial = 3,
+        objective = tune::exp_improve(),
+        param_info = p,
+        metrics = ms,
+        seed = 22,
+        metric_name = "rmse"
+      ))
+
+      expect_true(all(res$.completed))
+      expect_matches_reference(res, ref)
+    }
+  )
+
+  for (fn in RACERS) {
+    test_that(
+      sprintf("%s matches its reference loop on a %s design", fn, design),
+      {
+        skip_if_no_race_fixture(fn)
+        d <- make_reg_data()
+        wf <- det_workflow(d)
+        folds <- build(d)
+        ms <- ts_metrics()
+        g <- det_grid()
+        ctrl <- race_control()
+
+        set.seed(23)
+        res <- memoised(race_call_by_name(
+          fn,
+          wf,
+          folds,
+          grid = g,
+          metrics = ms,
+          control = ctrl
+        ))
+        ref <- memoised(reference_nested_race_loop(
+          fn,
+          wf,
+          folds,
+          grid = g,
+          metrics = ms,
+          seed = 23,
+          metric_name = "rmse",
+          control = ctrl
+        ))
+
+        expect_true(all(res$.completed))
+        expect_matches_reference(res, ref)
+      }
+    )
+  }
+
+  test_that(
+    sprintf(
+      "nested_tune_sim_anneal() matches its reference loop on a %s design",
+      design
+    ),
+    {
+      skip_if_no_anneal_fixture()
+      d <- make_reg_data()
+      wf <- det_workflow(d)
+      folds <- build(d)
+      ms <- ts_metrics()
+      ctrl <- anneal_control()
+
+      set.seed(24)
+      res <- memoised(nested_tune_sim_anneal(
+        wf,
+        folds,
+        iter = 2,
+        initial = 3,
+        metrics = ms,
+        control = ctrl
+      ))
+      ref <- memoised(reference_nested_anneal_loop(
+        wf,
+        folds,
+        iter = 2,
+        initial = 3,
+        metrics = ms,
+        seed = 24,
+        metric_name = "rmse",
+        control = ctrl
+      ))
+
+      expect_true(all(res$.completed))
+      expect_matches_reference(res, ref)
+    }
+  )
+}
