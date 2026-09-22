@@ -1,0 +1,238 @@
+# Oracle records for rolling-origin and sliding-window outer designs (M108).
+# DESIGN Conventions: oracles are recorded in the test file that asserts them.
+#
+# O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
+#   itself, recomputed at test time by reference_nested_loop() in
+#   helper-orchestration.R, written from the documented seed contract rather
+#   than from the driver. Run here on designs built by rsample::nested_cv()
+#   with `rolling_origin()` and `sliding_window()` outer resamples. Pinned by
+#   the two "match a hand-rolled reference loop" tests. Satisfies AC1/AC2.
+#
+# O2 -- type "live" (reference implementation). Source: rsample::nested_cv(),
+#   recomputed at test time. Every outer and inner analysis and assessment set
+#   `nested_resamples()` builds must match it row for row. Pinned by the two
+#   "splits match rsample::nested_cv()" tests. Satisfies AC3.
+#
+# O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
+#   tune::select_best() and fit() run by hand under the final fit's
+#   `tuning_seed` and `fit_seed`, on an inner design built on the full data
+#   from the fixture's literal `rolling_origin()` call. Pinned by the two
+#   "the final fit on a ... design matches a hand-rolled reference" tests,
+#   one per outer design. Satisfies AC4, and the sliding-window test backs
+#   the help's claim for `nested_final_fit()` on that design.
+
+expect_matches_reference <- function(res, ref) {
+  expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
+  expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
+  for (i in seq_len(nrow(res))) {
+    expect_identical(res$.metrics[[i]], ref[[i]]$metrics)
+    expect_identical(res$.selected[[i]], ref[[i]]$selected)
+  }
+}
+
+test_that("a rolling-origin design matches a hand-rolled reference loop", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  ms <- ts_metrics()
+  grid <- det_grid()
+  folds <- ts_rolling_nested(d)
+  expect_s3_class(folds$splits[[1]], "rof_split")
+
+  set.seed(20)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
+  ref <- memoised(reference_nested_loop(
+    wf,
+    folds,
+    grid,
+    ms,
+    seed = 20,
+    metric_name = "rmse"
+  ))
+
+  expect_true(all(res$.completed))
+  expect_matches_reference(res, ref)
+})
+
+test_that("a sliding-window design matches a hand-rolled reference loop", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  ms <- ts_metrics()
+  grid <- det_grid()
+  folds <- ts_sliding_nested(d)
+  expect_s3_class(folds$splits[[1]], "sliding_window_split")
+
+  set.seed(21)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
+  ref <- memoised(reference_nested_loop(
+    wf,
+    folds,
+    grid,
+    ms,
+    seed = 21,
+    metric_name = "rmse"
+  ))
+
+  expect_true(all(res$.completed))
+  expect_matches_reference(res, ref)
+})
+
+test_that("rolling-origin splits match rsample::nested_cv()", {
+  d <- make_reg_data()
+
+  ref <- ts_rolling_nested(d)
+  lean <- nested_resamples(
+    d,
+    outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+
+  expect_s3_class(lean, "nested_resamples")
+  expect_s3_class(lean$splits[[1]], "rof_split")
+  expect_outer_identical(lean, ref)
+  expect_inner_identical(lean, ref)
+})
+
+test_that("sliding-window splits match rsample::nested_cv()", {
+  d <- make_reg_data()
+
+  ref <- ts_sliding_nested(d)
+  lean <- nested_resamples(
+    d,
+    outside = rsample::sliding_window(
+      lookback = 59,
+      assess_stop = 1,
+      step = 10
+    ),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+
+  expect_s3_class(lean, "nested_resamples")
+  expect_s3_class(lean$splits[[1]], "sliding_window_split")
+  expect_outer_identical(lean, ref)
+  expect_inner_identical(lean, ref)
+})
+
+expect_final_matches_reference <- function(d, folds) {
+  wf <- det_workflow(d)
+  ms <- ts_metrics()
+  grid <- det_grid()
+
+  set.seed(20)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
+  set.seed(31)
+  final <- nested_final_fit(wf, res)
+
+  # The reference runs under the final fit's own two seeds, with the kind
+  # pinned, and builds its inner design from the fixture's literal call on
+  # the full data.
+  set.seed(
+    final$tuning_seed,
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  inner <- rsample::rolling_origin(d, initial = 40, assess = 1, skip = 4)
+  tuned <- tune::tune_grid(
+    wf,
+    resamples = inner,
+    grid = grid,
+    metrics = ms,
+    control = tune::control_grid(allow_par = FALSE)
+  )
+  best <- tune::select_best(tuned, metric = "rmse")
+  set.seed(
+    final$fit_seed,
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  ref <- parsnip::fit(tune::finalize_workflow(wf, best), data = d)
+
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$in_id),
+    lapply(inner$splits, function(s) s$in_id)
+  )
+  expect_identical(final$selected, best)
+  expect_identical(
+    predict(final, new_data = d),
+    predict(ref, new_data = d)
+  )
+}
+
+test_that("the final fit on a rolling-origin design matches a hand-rolled reference", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_final_matches_reference(d, ts_rolling_nested(d))
+})
+
+test_that("the final fit on a sliding-window design matches a hand-rolled reference", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_final_matches_reference(d, ts_sliding_nested(d))
+})
+
+# ---- AC5: predictions and augment() -----------------------------------------
+
+ts_pred_run <- function(data, design = ts_rolling_nested) {
+  set.seed(20)
+  memoised(nested_tune_grid(
+    det_workflow(data),
+    design(data),
+    grid = det_grid(),
+    metrics = ts_metrics(),
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+}
+
+test_that("collect_predictions() returns each outer-assessment row once per fold", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d)
+
+  preds <- collect_predictions(res)
+  held <- lapply(res$splits, rsample::complement)
+  expect_identical(nrow(preds), length(unlist(held)))
+  for (i in seq_len(nrow(res))) {
+    expect_identical(
+      as.integer(preds$.row[preds$id == res$id[[i]]]),
+      held[[i]]
+    )
+  }
+})
+
+expect_augment_names_never_held <- function(res, d) {
+  never <- setdiff(
+    seq_len(nrow(d)),
+    unlist(lapply(res$splits, rsample::complement))
+  )
+  expect_length(never, 87L)
+
+  cnd <- rlang::catch_cnd(augment(res), "error")
+  expect_s3_class(cnd, "nestedtune_augment_rows")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  # cli shortens the row list to its first three and last two.
+  expect_identical(c(head(never, 3L), tail(never, 2L)), c(1:3, 89:90))
+  expect_match(msg, "87 rows: 1, 2, 3, ", fixed = TRUE)
+  expect_match(msg, "89, and 90.", fixed = TRUE)
+  expect_no_match(msg, "repeated", ignore.case = TRUE)
+  expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+}
+
+test_that("augment() refuses a rolling-origin result and names the rows never held out", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  expect_augment_names_never_held(ts_pred_run(d), d)
+})
+
+test_that("augment() refuses a sliding-window result and names the rows never held out", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d, ts_sliding_nested)
+  expect_s3_class(res$splits[[1]], "sliding_window_split")
+  expect_augment_names_never_held(res, d)
+})

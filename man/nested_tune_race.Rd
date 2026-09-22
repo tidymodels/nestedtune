@@ -324,6 +324,15 @@ refused before anything is fitted. The error has condition class
 split or index. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
 design whatever its \code{inside} argument returned, and because a design
 assembled by hand can index rows its outer fold never sees.
+
+Time-series designs are supported for an outer
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or \code{\link[rsample:sliding_window]{rsample::sliding_window()}} with an inner
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, under \code{\link[=nested_tune_grid]{nested_tune_grid()}} and
+\code{\link[=nested_final_fit]{nested_final_fit()}}, which are tested on both. The other orchestrators
+are not tested on them, and neither are other time-series designs such as
+\code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}.
+\code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
+assessment sets leave rows out.
 }
 
 \section{Finalizing a parameter range}{

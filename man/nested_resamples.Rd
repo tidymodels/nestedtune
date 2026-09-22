@@ -50,6 +50,15 @@ warned about. The same row can otherwise land in both the inner analysis and
 the inner assessment set, which makes the estimate invalid.
 }
 
+\section{Time-series designs}{
+
+
+An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or \code{\link[rsample:sliding_window]{rsample::sliding_window()}} with
+an inner \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is tested to give the same splits as
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_final_fit]{nested_final_fit()}}
+support these designs. Other time-series designs are not tested.
+}
+
 \section{Memory}{
 
 

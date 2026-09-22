@@ -1829,6 +1829,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the `workflow_variables()` refusal stands, for the reason that matches tune: the spec route takes what tune's spec route takes, a formula or a recipe, and variables go through a workflow. Beside a workflow, `nestedtune_preprocessor_with_workflow` is raised for any value passed by name as `preprocessor`, and for a formula, a recipe or a `workflow_variables()` object in the `resamples` position or unnamed in the dots.
 **Consequences:** none for the code beyond the unnamed-dots case M107's review added. (Supersedes the `workflow_variables()` reason in D-069's Decision, and its statement of which inputs beside a workflow are refused.)
 
+### D-071 (2026-09-21): an outer `rolling_origin()` or `sliding_window()` design with a `rolling_origin()` inner design is supported under `nested_tune_grid()` and `nested_final_fit()`, and the support claim goes no wider than its tests
+
+**Context:** both designs ran through the orchestrators with no test and no stated support. M108's plan gate bounded the claim to what the milestone tests, rather than probing every rsample time-series design under all six orchestrators.
+**Decision:** the supported outer designs are `rolling_origin()` and `sliding_window()`, each with a `rolling_origin()` inner design. Either `nested_resamples()` or `rsample::nested_cv()` can build them. The support covers `nested_tune_grid()` and `nested_final_fit()`, and the help of `nested_tune_grid()` and `nested_resamples()` states it. The orchestrators and the entry check need no change for these designs. `augment()` still refuses them, because their assessment sets leave rows out. When no row is held out twice, its message names those rows and no longer names a repeated or Monte Carlo design.
+**Consequences:** `sliding_index()`, `sliding_period()` and the other five orchestrators over time-series designs stay unclaimed. A ROADMAP candidate row holds them. Falsified by a user report of a failure on a supported design, or by rsample changing how either constructor lays out its splits.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

@@ -1,5 +1,17 @@
 # nestedtune 0.0.0.9000
 
+* `nested_tune_grid()` and `nested_final_fit()` support an outer
+  `rsample::rolling_origin()` or `rsample::sliding_window()` design with
+  an inner `rsample::rolling_origin()` design. `nested_resamples()` builds
+  these designs with the same splits as `rsample::nested_cv()`. Other
+  time-series designs, and the other orchestrators on these designs, are
+  not tested.
+
+* When an outer design leaves rows out of every assessment set and holds
+  no row out twice, `augment()` now names those rows in its error. It no
+  longer names a repeated or Monte Carlo design as the cause.
+  The condition class is still `nestedtune_augment_rows`.
+
 * `nested_tune_grid()`, `nested_tune_bayes()`, `nested_tune_race_anova()`,
   `nested_tune_race_win_loss()`, `nested_tune_sim_anneal()` and
   `nested_fit_resamples()` now take a parsnip model specification with a

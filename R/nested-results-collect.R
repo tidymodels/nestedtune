@@ -616,7 +616,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
 #' design is refused with class `nestedtune_augment_rows`, because it
 #' predicts some rows more than once or not at all. Read its predictions
-#' with [collect_predictions()] instead.
+#' with [collect_predictions()] instead. A [rsample::rolling_origin()] or
+#' [rsample::sliding_window()] design leaves rows out of every assessment
+#' set and is refused with the same class. When no row is held out twice,
+#' the message names the rows left out.
 #'
 #' @templateVar TITLE Designs and folds refused
 #' @template refusals-saved-run
@@ -702,6 +705,23 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
   }
   never <- sum(counts == 0L)
   more <- sum(counts > 1L)
+  # A design that holds no row out twice, such as a rolling-origin or
+  # sliding-window one, only leaves rows out: it is told which (M108).
+  if (more == 0L) {
+    rows <- cli::cli_vec(which(counts == 0L), list("vec-trunc" = 5L))
+    cli::cli_abort(
+      c(
+        "{.fn augment} needs an outer design that holds out every data row \\
+         exactly once.",
+        x = "No outer fold holds out {never} row{?s}: {rows}.",
+        i = "A design whose assessment sets do not cover the data has no \\
+             prediction for those rows. Read the predictions it has with \\
+             {.fn collect_predictions}."
+      ),
+      class = "nestedtune_augment_rows",
+      call = call
+    )
+  }
   cli::cli_abort(
     c(
       "{.fn augment} needs an outer design that holds out every data row \\
