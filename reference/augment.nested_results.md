@@ -57,7 +57,13 @@ or grouped v-fold design does. A repeated v-fold or a Monte Carlo design
 is refused with class `nestedtune_augment_rows`, because it predicts
 some rows more than once or not at all. Read its predictions with
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-instead.
+instead. A
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+or
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+design leaves rows out of every assessment set and is refused with the
+same class. When no row is held out twice, the message names the rows
+left out.
 
 A run whose control did not set `save_pred = TRUE` is refused with class
 `nestedtune_column_not_saved`. A run in which no fold completed is

@@ -109,7 +109,10 @@ predicts new data with it.</p>
 v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
 design is refused with class <code>nestedtune_augment_rows</code>, because it
 predicts some rows more than once or not at all. Read its predictions
-with <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> instead.</p>
+with <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> instead. A <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> design leaves rows out of every assessment
+set and is refused with the same class. When no row is held out twice,
+the message names the rows left out.</p>
 
 <p>A run whose control did not set <code>save_pred = TRUE</code> is refused with class
 <code>nestedtune_column_not_saved</code>. A run in which no fold completed is

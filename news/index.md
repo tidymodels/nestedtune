@@ -2,6 +2,29 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  support an outer
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  or
+  [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  design with an inner
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  design.
+  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+  builds these designs with the same splits as
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
+  Other time-series designs, and the other orchestrators on these
+  designs, are not tested.
+
+- When an outer design leaves rows out of every assessment set and holds
+  no row out twice,
+  [`augment()`](https://generics.r-lib.org/reference/augment.html) now
+  names those rows in its error. It no longer names a repeated or Monte
+  Carlo design as the cause. The condition class is still
+  `nestedtune_augment_rows`.
+
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
   [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),

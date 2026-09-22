@@ -338,6 +338,14 @@ refused before anything is fitted. The error has condition class
 split or index. The checks exist because <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a
 design whatever its <code>inside</code> argument returned, and because a design
 assembled by hand can index rows its outer fold never sees.</p>
+<p>Time-series designs are supported for an outer
+<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> with an inner
+<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, under <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, which are tested on both. The other orchestrators
+are not tested on them, and neither are other time-series designs such as
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code>.
+<code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
+assessment sets leave rows out.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

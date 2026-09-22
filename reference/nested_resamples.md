@@ -65,6 +65,21 @@ One behavior differs on purpose: an outer bootstrap is refused rather
 than warned about. The same row can otherwise land in both the inner
 analysis and the inner assessment set, which makes the estimate invalid.
 
+## Time-series designs
+
+An outer
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+or
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+with an inner
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+is tested to give the same splits as
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+support these designs. Other time-series designs are not tested.
+
 ## Memory
 
 What you save is one copy of the analysis set per outer fold.

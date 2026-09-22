@@ -122,6 +122,16 @@ warned about. The same row can otherwise land in both the inner analysis and
 the inner assessment set, which makes the estimate invalid.</p>
     </div>
     <div class="section level2">
+    <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>
+
+
+
+<p>An outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> with
+an inner <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is tested to give the same splits as
+<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_final_fit.html">nested_final_fit()</a></code>
+support these designs. Other time-series designs are not tested.</p>
+    </div>
+    <div class="section level2">
     <h2 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h2>
 
 

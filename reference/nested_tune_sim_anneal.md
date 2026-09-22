@@ -349,6 +349,24 @@ split or index. The checks exist because
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.
 
+Time-series designs are supported for an outer
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+or
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+with an inner
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+under
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+which are tested on both. The other orchestrators are not tested on
+them, and neither are other time-series designs such as
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+and
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html).
+[`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
+refuses these designs, because their assessment sets leave rows out.
+
 ## Finalizing a parameter range
 
 `param_info` is passed unchanged to the inner tuning call on every outer
