@@ -195,10 +195,33 @@ test_that("a rule that selects no candidate fails the fold with a note naming th
   notes <- collect_notes(res)
   expect_true(all(grepl("chose no candidate", notes$note, fixed = TRUE)))
   expect_true(all(grepl("one_std_err", notes$note, fixed = TRUE)))
+  expect_true(all(grepl("standard error", notes$note, fixed = TRUE)))
   # The same design completes under the default rule.
   set.seed(1)
   ok <- suppressMessages(nested_tune_grid(wf, folds, grid = det_grid()))
   expect_false(any(vapply(ok$.selected, is.null, logical(1))))
+})
+
+test_that("an empty selection under another rule names that rule and not the standard-error cause", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  # No real run under these rules is known to select nothing, so the
+  # selector is mocked to return no row (review finding 5).
+  empty <- function(...) data.frame(num_comp = integer(0), .config = character(0))
+  testthat::local_mocked_bindings(
+    select_best_desirability = empty,
+    .package = "desirability2"
+  )
+  cnd <- rlang::catch_cnd(apply_selection_rule(
+    NULL,
+    selection_rule("desirability", maximize(rsq)),
+    "rmse"
+  ))
+  expect_s3_class(cnd, "nestedtune_selection_rule_empty")
+  msg <- cli::ansi_strip(conditionMessage(cnd))
+  expect_match(msg, "\"desirability\" selection rule", fixed = TRUE)
+  expect_no_match(msg, "one_std_err", fixed = TRUE)
+  expect_no_match(msg, "standard error", fixed = TRUE)
 })
 
 # The desirability rule (M109): desirability2's goal terms, captured as the

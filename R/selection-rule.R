@@ -69,10 +69,12 @@
 #' names a metric or a tuned parameter. Its other arguments must be values,
 #' and a goal that names anything there is refused when the rule is built.
 #' Write a variable's value into a goal with `!!`, as in
-#' `maximize(rsq, low = !!lo)`. desirability2 checks each goal when
-#' the rule is built. [nested_tune_grid()] and [nested_tune_bayes()] check at
-#' entry that every name a goal uses is a metric in `metrics` or a parameter
-#' `object` tunes. With `metrics` left `NULL`, the metrics are the ones tune
+#' `maximize(rsq, low = !!lo)`. When the rule is built, desirability2 checks
+#' that each goal calls one of its goal functions with an unnamed first
+#' argument and the other arguments named. It reads the values of those
+#' arguments only when it scores a tuning run. [nested_tune_grid()] and
+#' [nested_tune_bayes()] check at entry that every name in a goal's first
+#' argument is a metric in `metrics` or a parameter `object` tunes. With `metrics` left `NULL`, the metrics are the ones tune
 #' uses by default for the model's mode. desirability2 sets each limit a goal
 #' leaves out from the tuning run it scores, so each fold and the final fit
 #' scale those goals on their own inner run. A limit written into the goal
@@ -366,14 +368,21 @@ apply_selection_rule <- function(tuned, select, metric_name) {
   # resample leaves NA, so the selector returns no row; left alone, the empty
   # selection fails the outer fit one step later with a note about the
   # preprocessor. Name the failure where it happens, so the fold's note does.
+  # The standard-error cause is named only under the rule it belongs to
+  # (M109 review finding 5).
   if (nrow(selected) == 0L) {
+    hint <- if (select$rule == "one_std_err") {
+      c(
+        i = "{.fn tune::select_by_one_std_err} needs a standard error, \
+             which one inner resample cannot give; use more inner resamples \
+             or another rule."
+      )
+    }
     cli::cli_abort(
       c(
         "The {.val {select$rule}} selection rule chose no candidate on this \
          fold's inner run.",
-        i = "{.fn tune::select_by_one_std_err} needs a standard error, \
-             which one inner resample cannot give; use more inner resamples \
-             or another rule."
+        hint
       ),
       class = "nestedtune_selection_rule_empty"
     )

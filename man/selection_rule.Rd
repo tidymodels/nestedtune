@@ -72,10 +72,12 @@ Each goal is a call to one of desirability2's goal functions, such as
 names a metric or a tuned parameter. Its other arguments must be values,
 and a goal that names anything there is refused when the rule is built.
 Write a variable's value into a goal with \verb{!!}, as in
-\code{maximize(rsq, low = !!lo)}. desirability2 checks each goal when
-the rule is built. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at
-entry that every name a goal uses is a metric in \code{metrics} or a parameter
-\code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
+\code{maximize(rsq, low = !!lo)}. When the rule is built, desirability2 checks
+that each goal calls one of its goal functions with an unnamed first
+argument and the other arguments named. It reads the values of those
+arguments only when it scores a tuning run. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} check at entry that every name in a goal's first
+argument is a metric in \code{metrics} or a parameter \code{object} tunes. With \code{metrics} left \code{NULL}, the metrics are the ones tune
 uses by default for the model's mode. desirability2 sets each limit a goal
 leaves out from the tuning run it scores, so each fold and the final fit
 scale those goals on their own inner run. A limit written into the goal

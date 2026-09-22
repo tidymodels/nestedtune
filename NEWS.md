@@ -9,7 +9,13 @@
   of the run nor a tuned parameter, with class
   `nestedtune_selection_rule_unknown_term`. The racing tuners and
   `nested_tune_sim_anneal()` refuse the rule with class
-  `nestedtune_selection_rule_unsupported`. The rule needs desirability2
+  `nestedtune_selection_rule_unsupported`. `nested_tune_grid()` and
+  `nested_tune_bayes()` refuse it with the same class on a censored
+  regression model. `selection_rule()` refuses a goal desirability2
+  refuses, with class `nestedtune_selection_rule_terms`. It refuses a goal
+  that names a variable or a metric outside its first argument, with class
+  `nestedtune_selection_rule_term_arg`. It refuses a `limit` under the
+  rule, with class `nestedtune_selection_rule_limit`. The rule needs desirability2
   0.2.0 or later, now in Suggests. Where it is absent, the rule is refused
   with class `nestedtune_pkg_not_installed`.
 
