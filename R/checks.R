@@ -1552,6 +1552,25 @@ check_desirability_rule <- function(
     )
   }
   check_desirability_installed(call = call)
+  # On a censored regression model, desirability2 ranks one row per
+  # candidate per evaluation time, where tune's selectors use the first time
+  # alone, so the rule is refused there (M109 review finding 2).
+  mode <- tryCatch(
+    workflows::extract_spec_parsnip(object)$mode,
+    error = function(cnd) NULL
+  )
+  if (identical(mode, "censored regression")) {
+    cli::cli_abort(
+      c(
+        "The {.val desirability} selection rule is not supported on a \\
+         censored regression model.",
+        i = "Choose one of tune's selectors with {.fn selection_rule}, \\
+             which rank on the first evaluation time."
+      ),
+      class = "nestedtune_selection_rule_unsupported",
+      call = call
+    )
+  }
   # As for the orderings, an extraction that fails skips the check rather
   # than turning into a false refusal; tune then fails the folds itself.
   known <- tryCatch(

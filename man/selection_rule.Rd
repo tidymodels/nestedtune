@@ -81,7 +81,7 @@ leaves out from the tuning run it scores, so each fold and the final fit
 scale those goals on their own inner run. A limit written into the goal
 holds everywhere. \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} refuse the
-rule.
+rule, and every orchestrator refuses it on a censored regression model.
 }
 
 \section{Writing an ordering}{

@@ -387,6 +387,38 @@ test_that("AC1: a desirability term naming neither a metric nor a tuned paramete
   )
 })
 
+test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+  skip_if_no_censored()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- srv_data()
+  wf <- srv_workflow(d)
+  folds <- srv_nested(d)
+
+  cnd <- refusal(nested_tune_bayes(
+    wf,
+    folds,
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    select = selection_rule("desirability", minimize(brier_survival))
+  ))
+  expect_refused(
+    cnd,
+    "nestedtune_selection_rule_unsupported",
+    "censored regression"
+  )
+  # The same call under the default rule reaches the loop.
+  expect_s3_class(
+    refusal(nested_tune_bayes(
+      wf,
+      folds,
+      metrics = srv_metrics(),
+      eval_time = srv_eval_times()
+    )),
+    "nestedtune_sentinel"
+  )
+})
+
 test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
