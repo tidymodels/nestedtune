@@ -1,6 +1,6 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,7 +21,7 @@
 
 ## Acceptance criteria
 
-- [x] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. `nested_tune_grid()` and `nested_tune_bayes()` each refuse at entry a term that names neither a metric in the run's metric set nor a tuned parameter. With no `metrics`, the check uses the default set tune uses for the model's mode. The test names that error by class.
+- [ ] AC1: `selection_rule("desirability", ...)` takes desirability2 terms such as `maximize()` and `minimize()` as `...`. The procedure records the terms, and `print()` shows them. `nested_tune_grid()` and `nested_tune_bayes()` each refuse at entry a term that names neither a metric in the run's metric set nor a tuned parameter. With no `metrics`, the check uses the default set tune uses for the model's mode. The test names that error by class.
 - [x] AC2: On a fixture with two metrics, each fold's `.selected` has the parameter values and `.config` that `desirability2::select_best_desirability()` gives with the same terms. The reference applies it to that fold's inner tuning run. That run comes from `reference_nested_loop()` for the grid and `reference_nested_bayes_loop()` for the Bayesian path, each run with the default rule. The test covers `nested_tune_grid()` and `nested_tune_bayes()`.
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
@@ -30,12 +30,12 @@
 
 ## Coverage
 
-- AC1 → T1, T2
-- AC2 → T3
+- AC1 → T1, T2, T6, T7
+- AC2 → T3, T8
 - AC3 → T3
 - AC4 → T2
 - AC5 → T4
-- AC6 → T1, T5
+- AC6 → T1, T5, T9
 
 ## Tasks
 
@@ -44,6 +44,10 @@
 - [x] T3: Apply the rule where the recorded rule selects today, for the folds and the final fit. Write the AC2 and AC3 oracle tests, comparing parameter columns and `.config` only.
 - [x] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
 - [x] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [ ] T6: Print each goal in full in `print()` and the "Selected by" line, and test a goal long enough that `rlang::as_label()` shortens it (review finding 3).
+- [ ] T7: Refuse at build or entry a goal whose later arguments hold a variable or name a metric. No such goal must reach a fold (review findings 1 and 4).
+- [ ] T8: For censored models, select at the first evaluation time as tune's selectors do, or refuse the rule, and test the choice (review finding 2).
+- [ ] T9: Make the empty-selection hint name the rule that ran, and add the `nestedtune_selection_rule_terms` class and the `limit` refusal to NEWS. Narrow the help sentence on what desirability2 checks at build (review findings 5 and 9).
 
 ## Work log
 
@@ -60,6 +64,7 @@
 - 2026-09-21: T5 done. `selection_rule()`'s help gains the fourth rule and a section on writing a goal, `nested_tune_grid()`'s select text names the rule, and NEWS.md has the entry. `document()` run, all six gating sweeps clean. `devtools::check()` on the branch gives 0 errors, 0 warnings, 0 notes. On main at the branch point, run from a worktree, it gives one note, for the worktree's `.git` file.
 - 2026-09-21: claim audit: 50 claims read, 1 corrected — R/selection-rule.R, man/selection_rule.Rd (desirability2 estimates only the limits a goal leaves out). The reader re-read the correction and confirmed it.
 - 2026-09-21: status set to review.
+- 2026-09-21: review return 1 (defect). AC1 fails: `print()` shortened a long goal to `target(...)` (finding 3). A goal holding a variable passed entry and failed every fold (finding 1). At the gate the user sent findings 1-5 and 9 back as T6-T9 and findings 6-8 to the desirability candidate row. AC2-AC6 evidence stands. Status set to in-progress.
 
 ## Decisions
 
