@@ -27,7 +27,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - [x] AC4: `nested_final_fit()` on a `nested_fit_resamples()` result over `ts_rolling_nested()` has a `NULL` tuning run and an empty selection, tested. Its `predict()` on the full data equals that of `fit()` on the full data under the recorded `fit_seed`.
 - [x] AC5: `nested_workflow_map()` runs a set of one tuned and one fixed workflow on `ts_rolling_nested()`, routing the tuned one to `nested_tune_grid()`, tested. Each workflow's `.metrics` and `.selected` equal those that `hand_call()` (`tests/testthat/test-nested-workflow-map-oracles.R`) returns for it under the same seed.
 - [x] AC6: The time-series paragraph of the `nested_tune_grid()` help (`R/nested-tune-grid.R:109-115`), which its five siblings inherit, states support for both designs with an inner `rolling_origin()`. It covers all six orchestrators and `nested_final_fit()`. The `nested_resamples()` help states the same. Both name `sliding_index()` and `sliding_period()` as not tested. `NEWS.md` has an entry.
-- [ ] AC7: `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
+- [x] AC7: `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
 
 ## Coverage
 
@@ -81,3 +81,7 @@ Fresh evidence, 2026-09-22, at `dc35bf8`, `main` unmoved at `fdad226`. `testthat
 - AC6: `tools::Rd2txt()` on `nested_tune_grid`, `nested_tune_bayes`, `nested_tune_race`, `nested_tune_sim_anneal` and `nested_fit_resamples` renders one identical paragraph. It states support for both designs with an inner `rolling_origin()`, names all six orchestrators as tested on both, and states `nested_final_fit()` tested on both. `nested_resamples.Rd` states the same. Both name `sliding_index()` and `sliding_period()` as not tested. `NEWS.md:22-28` carries the entry.
 
 Consistency gate at `dc35bf8`. `cairn_validate` passes, with 18 advisory references-staleness warnings. `devtools::document()` leaves no diff, `README.Rmd` is untouched, and `pkgdown::check_pkgdown()` finds no problems. No top-level file is added, `air format --check` is clean on the touched R files, and all six gating prose sweeps print clean. `NEWS.md` has the entry. No principle changed, so `cairn_impact` is skipped.
+
+- AC7: `devtools::check()` at `dc35bf8`, the branch head with the claim-audit edits, gave 0 errors, 0 warnings, 0 notes. With no note, none is absent from the check of `main`.
+
+Independent review at `dc35bf8`. The [S] blame-history lens found nothing. The [S] prior-review lens found nothing reintroduced or contradicted. The [O] diff-bug lens ranked 15 findings, none showing a criterion failing. Triage follows at the gate.
