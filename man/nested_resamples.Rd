@@ -55,8 +55,10 @@ the inner assessment set, which makes the estimate invalid.
 
 An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or \code{\link[rsample:sliding_window]{rsample::sliding_window()}} with
 an inner \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is tested to give the same splits as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_final_fit]{nested_final_fit()}}
-support these designs. Other time-series designs are not tested.
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. Every orchestrator, \code{\link[=nested_workflow_map]{nested_workflow_map()}} and
+\code{\link[=nested_final_fit]{nested_final_fit()}} support these designs. Other time-series designs,
+such as \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, are
+not tested.
 }
 
 \section{Memory}{

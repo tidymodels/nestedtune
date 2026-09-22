@@ -46,7 +46,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - [x] T3: Write the AC2 tests.
 - [x] T4: Write the AC3 and AC4 final-fit tests.
 - [x] T5: Write the AC5 test.
-- [ ] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps that `cairn/PROFILE.md` names. Record the figures in the work log.
+- [x] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps that `cairn/PROFILE.md` names. Record the figures in the work log.
 - [ ] T7: Write the D-entry extending D-071. It records that a final fit reads only the inner design, so one sliding-window final-fit test stands for the other tuners. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
@@ -62,6 +62,8 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: T4 done. The final fit matches each tuner's reference on the rolling-origin result, and the Bayesian one on the sliding-window result too. The fit_resamples final fit has no tuning run and equals the plain fit. A reference left on its default `vfold_cv()` inner design gives different `in_id`s, so the comparison can fail.
 - 2026-09-22: T5 done. `hand_call()` moved unchanged from `test-nested-workflow-map-oracles.R` to `helper-orchestration.R`, so the time-series file can use it. A two-workflow set on the rolling-origin design matches the hand calls. Both files pass, 387 expectations.
 - 2026-09-22: checkpoint, T7 half-done. D-074, the help source and the `NEWS.md` bullet are written. `man/` is not yet regenerated, and the full-suite run for T6 is in progress.
+- 2026-09-22: T6 done. At `a14fdfe` the full suite ran in 721 s wall on 2 local workers, 11451 expectations, 0 failures. `test-time-series-designs.R` alone ran in 169 s, 26 tests, 279 expectations. The CI caps are 30 min for the check step (40 on windows) and 30 min for `test-coverage`.
+- 2026-09-22: `devtools::document()` regenerated six Rd files. All six gating prose sweeps print clean.
 
 ## Decisions
 
