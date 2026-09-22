@@ -1,6 +1,6 @@
 # M109: Selecting each fold's candidate by desirability over several metrics
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -26,7 +26,7 @@
 - [x] AC3: `nested_final_fit()` on such a result selects what `select_best_desirability()` selects on the run `extract_tune_results()` returns, tested.
 - [x] AC4: Each of the two racing tuners and `nested_tune_sim_anneal()` refuses the rule at entry with an error the test names by class.
 - [x] AC5: If desirability2 is not installed, three calls refuse with an error the test names by class. The first is `selection_rule("desirability", ...)`. The second is `nested_tune_grid()` given a rule built while the package was installed. The third is `nested_final_fit()` on a result that recorded the rule.
-- [x] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
+- [ ] AC6: A D-entry records desirability2 joining Suggests, and a D-entry supersedes D-056's rule clause and, for this rule, its clause that orderings name only tuned parameters. `NEWS.md` describes the rule, and `selection_rule()`'s help documents it. `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of `main` at the branch point.
 
 ## Coverage
 
@@ -73,6 +73,8 @@
 - 2026-09-21: claim audit: 64 claims read, 5 corrected — R/checks.R, R/nested-tune-grid.R, R/selection-rule.R, NEWS.md. None was false. The entry check reads only a goal's first argument, and a global variable is found at scoring. The final fit asks for the package at entry. NEWS now names the four functions that refuse without it. The reader re-read all five and confirmed them.
 - 2026-09-21: discovered sub-task: a test that `nested_tune_bayes()` refuses without desirability2, which the corrected NEWS line names. The `--roxygen` sweep then split the corrected grid help sentence. Suite and all six gating sweeps clean.
 - 2026-09-21: status set to review.
+- 2026-09-22: review pass 2. AC1-AC5 pass. AC6 fails as written. On this machine, `devtools::check()` gives 1 error at `test-parallel-interrupt.R:108` on the branch and on `main` at ea063a1.
+- 2026-09-22: amendment return: AC6 — "`devtools::check()` gives 0 warnings, and no error or note absent from the check of `main` at the branch point." This is the proposed clause, for the amendment gate to accept or change. Defect returns stay at 1. The eight pass-2 findings in the Review section wait for triage at the next merge gate. Status set to in-progress.
 
 ## Decisions
 
@@ -112,6 +114,9 @@ Sync: `origin/main` is still at ea063a1, the branch point, so nothing needed a m
 - AC3: `test-nested-final-fit-results.R` passes. It asserts that `nested_final_fit()`'s `$selected` equals `select_best_desirability()` on the run `extract_tune_results()` returns, and that the pick differs from `select_best()` by rmse. Pass.
 - AC4: `test-nested-tune-race-checks.R` (both racers) and `test-nested-tune-sim-anneal-checks.R` pass, each asserting class `nestedtune_selection_rule_unsupported` at entry. Pass.
 - AC5: `test-selection-rule-installed.R` passes. With desirability2 masked, it asserts class `nestedtune_pkg_not_installed` for three calls, each beside an unmasked control. They are `selection_rule()`, `nested_tune_grid()` given a rule built before the mask, and `nested_final_fit()` on a result that recorded the rule. A fourth block covers `nested_tune_bayes()`. Pass.
+- AC6: Fail as written. `devtools::check()` on the branch gave 1 error, 0 warnings and 0 notes in two runs on 2026-09-22. The error is `test-parallel-interrupt.R:108`, the interrupt test the M079 candidate row names. The same check on `main` at ea063a1 gave the same error and the worktree `.git` note. That file passes alone on the branch, 7 of 7. GitHub CI on `main` passed at e21dc9f, and the branch check on 2026-09-21 gave 0 errors. The branch changes nothing that test reaches. D-072, D-073, `NEWS.md` and the help were read and stand. AC6 asks for 0 errors, which `main` does not give on this machine today, so the criterion goes back for a gated amendment.
+
+Consistency gate, 2026-09-22: `cairn_validate` exit 0 with 18 references-staleness advisories. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. No new top-level file. No DESIGN principle changed, so `cairn_impact` is skipped.
 
 Independent review, pass 2, three fresh-context lenses. The blame-history lens found no undone past work and no conflict with D-044, D-056, D-072 or D-073. The prior-review lens found no regression against the archived reviews of M46-M59, M69, M83 and M98. The diff lens confirmed the T6-T9 fixes by running them. Negative numbers, injected values and named arguments pass, and names in later arguments are refused. Its findings, most severe first:
 

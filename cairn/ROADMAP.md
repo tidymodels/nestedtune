@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-21 (M108 done and archived. M105 row pruned for ter
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M109 | Selecting each fold's candidate by desirability over several metrics | review | — | normal | milestones/M109-desirability-selection.md |
+| M109 | Selecting each fold's candidate by desirability over several metrics | in-progress | — | normal | milestones/M109-desirability-selection.md |
 | M108 | Rolling-origin and sliding-window outer designs | done | — | normal | milestones/archive/M108-time-series-designs.md |
 | M107 | A model specification with a formula or recipe as the orchestrators' input | done | — | normal | milestones/archive/M107-model-spec-input.md |
 | M106 | tune's reader arguments and extract methods on the nested classes | done | — | normal | milestones/archive/M106-reader-parity.md |
