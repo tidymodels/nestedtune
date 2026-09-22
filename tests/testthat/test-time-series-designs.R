@@ -430,3 +430,178 @@ for (design in names(TS_DESIGNS)) {
     }
   )
 }
+
+# O6 -- type "live" (reference implementation). Source: each tuner's reference
+#   final fit in helper-orchestration.R -- reference_bayes_final_fit(),
+#   reference_race_final_fit() and reference_anneal_final_fit() -- handed the
+#   fixtures' literal inner `rolling_origin()` call as `inner_design`, so the
+#   reference builds the inner design on the full data from its own spelling
+#   of the call and selects with `select_best()` itself. Pinned by the "the
+#   final fit ... matches its reference" tests. Satisfies M110 AC3.
+#
+# Both fixtures share the inner call, and the final fit reads only the inner
+# design, so a sliding-window result gives the same final fit as a
+# rolling-origin one. The Bayesian sliding-window test shows it once.
+
+ts_inner <- function(data) {
+  rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)
+}
+
+expect_final_matches <- function(final, ref, d) {
+  expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$in_id),
+    lapply(ref$tuned$splits, function(s) s$in_id)
+  )
+  # The reference's inner design is the literal call's, not a default.
+  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
+  expect_identical(final$selected, ref$selected)
+  expect_identical(
+    predict(extract_workflow(final), new_data = d),
+    predict(ref$workflow, new_data = d)
+  )
+}
+
+for (design in names(TS_DESIGNS)) {
+  build <- TS_DESIGNS[[design]]
+
+  test_that(
+    sprintf(
+      "the Bayesian final fit on a %s result matches its reference",
+      design
+    ),
+    {
+      skip_if_no_bayes_fixture()
+      d <- make_reg_data()
+      wf <- bayes_workflow(d)
+      folds <- build(d)
+      p <- bayes_param_info(wf)
+      ms <- ts_metrics()
+
+      set.seed(22)
+      res <- memoised(nested_tune_bayes(
+        wf,
+        folds,
+        iter = 2,
+        initial = 3,
+        param_info = p,
+        metrics = ms
+      ))
+      set.seed(41)
+      final <- nested_final_fit(wf, res)
+      ref <- reference_bayes_final_fit(
+        wf,
+        d,
+        iter = 2,
+        initial = 3,
+        objective = tune::exp_improve(),
+        param_info = p,
+        metrics = ms,
+        seed = 41,
+        metric_name = "rmse",
+        inner_design = ts_inner
+      )
+      expect_final_matches(final, ref, d)
+    }
+  )
+}
+
+for (fn in RACERS) {
+  test_that(
+    sprintf(
+      "the %s final fit on a rolling-origin result matches its reference",
+      fn
+    ),
+    {
+      skip_if_no_race_fixture(fn)
+      d <- make_reg_data()
+      wf <- det_workflow(d)
+      folds <- ts_rolling_nested(d)
+      ms <- ts_metrics()
+      g <- det_grid()
+      ctrl <- race_control()
+
+      set.seed(23)
+      res <- memoised(race_call_by_name(
+        fn,
+        wf,
+        folds,
+        grid = g,
+        metrics = ms,
+        control = ctrl
+      ))
+      set.seed(42)
+      final <- nested_final_fit(wf, res)
+      ref <- reference_race_final_fit(
+        fn,
+        wf,
+        d,
+        grid = g,
+        metrics = ms,
+        seed = 42,
+        metric_name = "rmse",
+        control = ctrl,
+        inner_design = ts_inner
+      )
+      expect_final_matches(final, ref, d)
+    }
+  )
+}
+
+test_that("the annealing final fit on a rolling-origin result matches its reference", {
+  skip_if_no_anneal_fixture()
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- ts_rolling_nested(d)
+  ms <- ts_metrics()
+  ctrl <- anneal_control()
+
+  set.seed(24)
+  res <- memoised(nested_tune_sim_anneal(
+    wf,
+    folds,
+    iter = 2,
+    initial = 3,
+    metrics = ms,
+    control = ctrl
+  ))
+  set.seed(43)
+  final <- nested_final_fit(wf, res)
+  ref <- reference_anneal_final_fit(
+    wf,
+    d,
+    iter = 2,
+    initial = 3,
+    metrics = ms,
+    seed = 43,
+    metric_name = "rmse",
+    control = ctrl,
+    inner_design = ts_inner
+  )
+  expect_final_matches(final, ref, d)
+})
+
+# The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
+# tuning run, an empty selection, and the plain fit on every row under the
+# recorded fit seed.
+test_that("the final fit on a rolling-origin fit_resamples() result fits every row", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  wf <- fixed_workflow(d)
+
+  set.seed(25)
+  res <- nested_fit_resamples(wf, ts_rolling_nested(d), metrics = ts_metrics())
+  set.seed(44)
+  final <- nested_final_fit(wf, res)
+
+  expect_null(final$tuning)
+  expect_identical(dim(final$selected), c(0L, 0L))
+  set.seed(
+    final$fit_seed,
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  plain <- parsnip::fit(wf, data = d)
+  expect_identical(predict(final, new_data = d), predict(plain, new_data = d))
+})
