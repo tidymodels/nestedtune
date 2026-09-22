@@ -201,6 +201,72 @@ test_that("a rule that selects no candidate fails the fold with a note naming th
   expect_false(any(vapply(ok$.selected, is.null, logical(1))))
 })
 
+# The desirability rule (M109): desirability2's goal terms, captured as the
+# orderings are and judged by desirability2 itself when the rule is built.
+
+test_that("AC1: the desirability rule captures its terms as bare expressions and prints them", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  rule <- selection_rule(
+    "desirability",
+    maximize(rsq),
+    minimize(num_comp, scale = 2)
+  )
+  expect_s3_class(rule, "selection_rule")
+  expect_identical(rule$rule, "desirability")
+  expect_identical(
+    rule$order,
+    list(quote(maximize(rsq)), quote(minimize(num_comp, scale = 2)))
+  )
+  expect_false(any(vapply(rule$order, rlang::is_quosure, logical(1L))))
+  expect_null(rule$limit)
+  expect_identical(
+    format(rule),
+    "<selection_rule> desirability by maximize(rsq), minimize(num_comp, scale = 2)"
+  )
+  expect_true(names_selection_rule(rule))
+})
+
+test_that("the desirability rule refuses no terms, a limit, and a term desirability2 refuses", {
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  cnd <- rlang::catch_cnd(selection_rule("desirability"))
+  expect_s3_class(cnd, "nestedtune_selection_rule_no_order")
+  expect_match(cli::ansi_strip(conditionMessage(cnd)), "at least one term")
+
+  expect_error(
+    selection_rule("desirability", maximize(rsq), limit = 5),
+    class = "nestedtune_selection_rule_limit"
+  )
+
+  # desirability2's own refusal, of a goal function it does not know, raised
+  # again under this package's class with desirability2's error as parent.
+  cnd <- rlang::catch_cnd(selection_rule("desirability", maxmize(rsq)))
+  expect_s3_class(cnd, "nestedtune_selection_rule_terms")
+  expect_match(conditionMessage(cnd$parent), "maxmize", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1L]], as.name("selection_rule"))
+
+  # A bare name is not a goal either.
+  expect_error(
+    selection_rule("desirability", rsq),
+    class = "nestedtune_selection_rule_terms"
+  )
+  # A named term is refused as a named ordering is.
+  expect_error(
+    selection_rule("desirability", a = maximize(rsq)),
+    class = "rlib_error_dots_named"
+  )
+})
+
+test_that("desirability_term_names() reads the first argument of each goal alone", {
+  terms <- list(
+    quote(maximize(rsq, low = 0.2)),
+    quote(minimize(num_comp, scale = cut)),
+    quote(target(rmse, target = 1))
+  )
+  expect_identical(desirability_term_names(terms), c("rsq", "num_comp", "rmse"))
+})
+
 test_that("is_selection_rule() answers for the class alone", {
   expect_true(is_selection_rule(selection_rule()))
   expect_false(is_selection_rule("best"))

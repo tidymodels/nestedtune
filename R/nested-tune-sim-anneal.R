@@ -224,7 +224,7 @@ nested_tune_sim_anneal.workflow <- function(
   check_param_info(param_info)
   check_event_level(event_level)
   check_eval_time(eval_time)
-  check_selection_rule(select, object)
+  check_selection_rule(select, object, "tune_sim_anneal", metrics)
   control <- check_control(control, "tune_sim_anneal", event_level)
 
   nested_loop(

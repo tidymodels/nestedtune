@@ -40,7 +40,7 @@
 ## Tasks
 
 - [x] T1: Install desirability2. Read its `NAMESPACE`, `select_best_desirability()`'s arguments and return columns, and whether a term can name a tuned parameter (LESSONS, claims about another package). Write the two D-entries, then add desirability2 to Suggests.
-- [ ] T2: Extend `selection_rule()` (`R/selection-rule.R:76`) with the rule. Capture the terms as expressions, as the orderings are captured. Add the entry check against the run's metric set and tuned parameters, and add the three tuners' refusal.
+- [x] T2: Extend `selection_rule()` (`R/selection-rule.R:76`) with the rule. Capture the terms as expressions, as the orderings are captured. Add the entry check against the run's metric set and tuned parameters, and add the three tuners' refusal.
 - [ ] T3: Apply the rule where the recorded rule selects today, for the folds and the final fit. Write the AC2 and AC3 oracle tests, comparing parameter columns and `.config` only.
 - [ ] T4: Add the absent-package refusals in the pattern `check_tuner_installed()` uses (D-044), and test them with desirability2 masked.
 - [ ] T5: Write the help and `NEWS.md` text, then run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
@@ -54,6 +54,7 @@
 - 2026-09-21: implement started on branch m109-desirability-selection. desirability2 0.2.0 installed from CRAN.
 - 2026-09-21: question gate took the four recommendations: Suggests floor 0.2.0, terms run through `desirability()` at build with errors rewrapped, classes `nestedtune_pkg_not_installed` reused plus `_unknown_term` and `_unsupported`, label kept as `desirability by <terms>`.
 - 2026-09-21: T1 done. `show_best_desirability()` reads the wide `collect_metrics()` columns less `.config`, so a term can name a metric or a tuned parameter. D-072 and D-073 written, desirability2 (>= 0.2.0) in Suggests.
+- 2026-09-21: T2 done. The constructor takes the fourth rule and runs its terms through `desirability()`. The registry gains a `desirability` field that the entry check reads to refuse the racers and annealing. The unknown-term check reads `check_metrics_arg()`. The constructor's absent-package refusal landed here, and its test waits for T4. Planted defects turned the new tests red. Suite and plain sweep clean.
 
 ## Decisions
 

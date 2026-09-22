@@ -74,13 +74,20 @@
 #'   which reaches the recorded rule as `$select`.
 #' @export
 selection_rule <- function(
-  rule = c("best", "one_std_err", "pct_loss"),
+  rule = c("best", "one_std_err", "pct_loss", "desirability"),
   ...,
   limit = NULL
 ) {
   rule <- rlang::arg_match(rule)
+  if (rule == "desirability") {
+    check_desirability_installed()
+  }
   rlang::check_dots_unnamed()
   order <- unname(rlang::enexprs(...))
+  if (rule == "desirability") {
+    check_desirability_terms(order, limit)
+    return(new_selection_rule(rule, order, NULL))
+  }
   literal <- !vapply(
     order,
     function(x) rlang::is_symbol(x) || rlang::is_call(x),
@@ -162,6 +169,55 @@ selection_rule <- function(
   new_selection_rule(rule, order, limit)
 }
 
+# The desirability rule's terms (M109, D-073): at least one, no `limit`, and
+# each judged by desirability2's own `desirability()`, which knows its goal
+# functions and their arguments. Its errors carry no class, so each is raised
+# again under this package's, with desirability2's message kept as the parent.
+check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
+  if (length(terms) == 0L) {
+    cli::cli_abort(
+      c(
+        "{.val desirability} needs at least one term in {.arg ...}.",
+        i = "Write a goal such as {.code maximize(rsq)} or \\
+             {.code minimize(num_comp)}, as \\
+             {.fn desirability2::select_best_desirability} takes them."
+      ),
+      class = "nestedtune_selection_rule_no_order",
+      call = call
+    )
+  }
+  if (!is.null(limit)) {
+    cli::cli_abort(
+      c(
+        "{.arg limit} belongs to {.val pct_loss} alone.",
+        x = "Got {.arg limit} with {.val desirability}, which has no limit."
+      ),
+      class = "nestedtune_selection_rule_limit",
+      call = call
+    )
+  }
+  tryCatch(
+    desirability2::desirability(!!!terms),
+    error = function(cnd) {
+      cli::cli_abort(
+        "desirability2 refused the terms in {.arg ...}.",
+        parent = cnd,
+        class = "nestedtune_selection_rule_terms",
+        call = call
+      )
+    }
+  )
+  invisible(terms)
+}
+
+# The names a desirability term reads: the variables of its first argument,
+# where desirability2 itself reads them (`all.vars()` of the goal's `x`).
+desirability_term_names <- function(terms) {
+  unique(unlist(lapply(terms, function(term) {
+    if (rlang::is_call(term) && length(term) >= 2L) all.vars(term[[2L]])
+  })))
+}
+
 # The constructor behind the checks: what the object is, with nothing judged.
 new_selection_rule <- function(rule, order, limit) {
   structure(
@@ -235,6 +291,11 @@ apply_selection_rule <- function(tuned, select, metric_name) {
       !!!select$order,
       metric = metric_name,
       limit = select$limit
+    ),
+    # Scored over the terms alone, so `metric_name` plays no part (M109).
+    desirability = desirability2::select_best_desirability(
+      tuned,
+      !!!select$order
     )
   )
   # tune's one-standard-error rule filters on `std_err`, which a single inner
