@@ -417,7 +417,8 @@ reference_bayes_final_fit <- function(
   seed,
   metric_name,
   v = 3,
-  control = NULL
+  control = NULL,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -428,7 +429,7 @@ reference_bayes_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- tune::tune_bayes(
     wf,
     resamples = inner,
@@ -451,6 +452,17 @@ reference_bayes_final_fit <- function(
   fitted <- parsnip::fit(final_wf, data = data)
 
   list(seeds = seeds, selected = best, workflow = fitted, tuned = tuned)
+}
+
+# The inner design a reference final fit builds on the full data, under the
+# tuning seed already set. `inner_design` is a function of the data, spelled
+# out by the test as the design's own `inside` call (M110), and the default is
+# the `vfold_cv(v = v)` the suite's other designs use.
+reference_inner <- function(data, v, inner_design = NULL) {
+  if (is.null(inner_design)) {
+    return(rsample::vfold_cv(data, v = v))
+  }
+  inner_design(data)
 }
 
 ref_field <- function(ref, field) {
@@ -1990,7 +2002,8 @@ reference_race_final_fit <- function(
   seed,
   metric_name,
   v = 3,
-  control = NULL
+  control = NULL,
+  inner_design = NULL
 ) {
   racer <- getExportedValue("finetune", fn)
   set.seed(seed)
@@ -2002,7 +2015,7 @@ reference_race_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   raced <- racer(
     wf,
     resamples = inner,
@@ -2222,7 +2235,8 @@ reference_anneal_final_fit <- function(
   metric_name,
   v = 3,
   control = NULL,
-  param_info = NULL
+  param_info = NULL,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -2233,7 +2247,7 @@ reference_anneal_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- finetune::tune_sim_anneal(
     wf,
     resamples = inner,

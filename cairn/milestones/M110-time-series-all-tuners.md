@@ -1,13 +1,13 @@
 # M110: Rolling-origin and sliding-window designs under every orchestrator
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, IP4, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs each orchestrator supports
-- **Branch/PR:** —
+- **Branch/PR:** m110-time-series-all-tuners
 
 ## Goal
 
@@ -41,7 +41,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 
 ## Tasks
 
-- [ ] T1: Give `reference_bayes_final_fit()`, `reference_race_final_fit()` and `reference_anneal_final_fit()` (`tests/testthat/helper-orchestration.R:409`, `:1984`, `:2215`) an argument for the inner design. Today each builds `vfold_cv(v = 3)` on the full data. Their current callers keep that default.
+- [x] T1: Give `reference_bayes_final_fit()`, `reference_race_final_fit()` and `reference_anneal_final_fit()` (`tests/testthat/helper-orchestration.R:409`, `:1984`, `:2215`) an argument for the inner design. Today each builds `vfold_cv(v = 3)` on the full data. Their current callers keep that default.
 - [ ] T2: Write the AC1 tests in `tests/testthat/test-time-series-designs.R`. The racers use `control_race(burn_in = 2)`, as `helper-orchestration.R:1774` does, and take the skips the M101 lesson names. A mismatch is a defect to fix, not a test to loosen.
 - [ ] T3: Write the AC2 tests.
 - [ ] T4: Write the AC3 and AC4 final-fit tests.
@@ -55,6 +55,8 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: criteria audit ran in full mode and returned 11 findings on the two plans, all fixed before the gate. The M110 findings were test counts stated as promises and an oracle comparing `.estimate`, not `.metrics`. Also a fit_resamples final fit with no inner design, a reference copying the selection under test, an unnamed routed orchestrator, and a claim missing its inner design.
 - 2026-09-22: plan gate chose both designs under every orchestrator over rolling-origin alone, because the help then states one rule. Falsified by the added runs pushing a CI leg past its step cap.
 - 2026-09-22: plan gate chose two milestones over one, because one carries 11 criteria. Falsified by M111 needing no work beyond what M110 builds.
+- 2026-09-22: implement started on branch `m110-time-series-all-tuners`. No question gate, because the plan left no choice open.
+- 2026-09-22: T1 done. `reference_inner()` in `helper-orchestration.R` builds the final-fit references' inner design, `vfold_cv(v = 3)` unless a test passes `inner_design`. The three final-fit oracle files pass unchanged.
 
 ## Decisions
 
