@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-22 (M109 done and archived. M106 row pruned. Valida
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M110 | Rolling-origin and sliding-window designs under every orchestrator | in-progress | — | normal | milestones/M110-time-series-all-tuners.md |
+| M110 | Rolling-origin and sliding-window designs under every orchestrator | review | — | normal | milestones/M110-time-series-all-tuners.md |
 | M111 | Index-based and period-based sliding outer designs | planned | M110 | normal | milestones/M111-index-period-designs.md |
 | M109 | Selecting each fold's candidate by desirability over several metrics | done | — | normal | milestones/archive/M109-desirability-selection.md |
 | M108 | Rolling-origin and sliding-window outer designs | done | — | normal | milestones/archive/M108-time-series-designs.md |

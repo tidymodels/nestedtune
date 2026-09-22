@@ -1,6 +1,6 @@
 # M110: Rolling-origin and sliding-window designs under every orchestrator
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -47,7 +47,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - [x] T4: Write the AC3 and AC4 final-fit tests.
 - [x] T5: Write the AC5 test.
 - [x] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps that `cairn/PROFILE.md` names. Record the figures in the work log.
-- [ ] T7: Write the D-entry extending D-071. It records that a final fit reads only the inner design, so one sliding-window final-fit test stands for the other tuners. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T7: Write the D-entry extending D-071. It records that a final fit reads only the inner design, so one sliding-window final-fit test stands for the other tuners. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -65,6 +65,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: T6 done. At `a14fdfe` the full suite ran in 721 s wall on 2 local workers, 11451 expectations, 0 failures. `test-time-series-designs.R` alone ran in 169 s, 26 tests, 279 expectations. The CI caps are 30 min for the check step (40 on windows) and 30 min for `test-coverage`.
 - 2026-09-22: `devtools::document()` regenerated six Rd files. All six gating prose sweeps print clean.
 - 2026-09-22: claim audit: 24 claims read, 4 corrected — R/nested-tune-grid.R, R/nested-resamples.R, NEWS.md, tests/testthat/test-time-series-designs.R. The help and `NEWS.md` said `nested_workflow_map()` was tested on both designs, but it is tested on the rolling-origin design alone. The test comment's premise now says the final fit never reads the outer splits. It still reads the data through the first split. D-074's phrase "never reads the outer design" means the same.
+- 2026-09-22: T7 done. `devtools::check()` at `98eac1e` gave 0 errors, 0 warnings, 0 notes. After the claim-audit edits, `tools::checkRd()` passes on the six changed Rd files and `test-help-structure.R` passes, 24 expectations. Status set to review.
 
 ## Decisions
 
