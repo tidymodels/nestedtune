@@ -68,6 +68,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: T7 done. `devtools::check()` at `98eac1e` gave 0 errors, 0 warnings, 0 notes. After the claim-audit edits, `tools::checkRd()` passes on the six changed Rd files and `test-help-structure.R` passes, 24 expectations. Status set to review.
 - 2026-09-22: review gate fixes committed on the branch: D-075, class assertions, a sliding-window fit_resamples final fit, oracle records moved to the header, and seed columns in the set test. F4 (`start-first`) was reverted while applying it, against the M76 measurement.
 - 2026-09-22: step-7 approval: m110-time-series-all-tuners approved for merge
+- 2026-09-22: PR #125 opened at `2dcfd85`. The CI watch reached the session's time limit and was stopped. `build`, `prose-sweep` and `format-suggest` passed, and the 8 check and coverage legs were pending.
 
 ## Decisions
 
