@@ -439,9 +439,10 @@ for (design in names(TS_DESIGNS)) {
 #   of the call and selects with `select_best()` itself. Pinned by the "the
 #   final fit ... matches its reference" tests. Satisfies M110 AC3.
 #
-# Both fixtures share the inner call, and the final fit reads only the inner
-# design, so a sliding-window result gives the same final fit as a
-# rolling-origin one. The Bayesian sliding-window test shows it once.
+# Both fixtures share the data, the inner call and the tuner's arguments, and
+# the final fit never reads the outer splits, so a sliding-window result gives
+# the same final fit as a rolling-origin one. The Bayesian sliding-window test
+# checks it once, against the same reference.
 
 ts_inner <- function(data) {
   rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)

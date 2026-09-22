@@ -332,8 +332,9 @@ Time-series designs are supported for an outer
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. Every orchestrator is tested on both:
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}. So are \code{\link[=nested_workflow_map]{nested_workflow_map()}} and
-\code{\link[=nested_final_fit]{nested_final_fit()}}. Other time-series designs, such as
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}. \code{\link[=nested_final_fit]{nested_final_fit()}} is tested on both, and
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} on the rolling-origin design. Other time-series
+designs, such as
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, are not
 tested.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their

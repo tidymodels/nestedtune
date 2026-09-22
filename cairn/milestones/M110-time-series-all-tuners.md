@@ -64,6 +64,7 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: checkpoint, T7 half-done. D-074, the help source and the `NEWS.md` bullet are written. `man/` is not yet regenerated, and the full-suite run for T6 is in progress.
 - 2026-09-22: T6 done. At `a14fdfe` the full suite ran in 721 s wall on 2 local workers, 11451 expectations, 0 failures. `test-time-series-designs.R` alone ran in 169 s, 26 tests, 279 expectations. The CI caps are 30 min for the check step (40 on windows) and 30 min for `test-coverage`.
 - 2026-09-22: `devtools::document()` regenerated six Rd files. All six gating prose sweeps print clean.
+- 2026-09-22: claim audit: 24 claims read, 4 corrected — R/nested-tune-grid.R, R/nested-resamples.R, NEWS.md, tests/testthat/test-time-series-designs.R. The help and `NEWS.md` said `nested_workflow_map()` was tested on both designs, but it is tested on the rolling-origin design alone. The test comment's premise now says the final fit never reads the outer splits. It still reads the data through the first split. D-074's phrase "never reads the outer design" means the same.
 
 ## Decisions
 
