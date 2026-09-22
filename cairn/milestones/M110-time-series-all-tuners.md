@@ -7,7 +7,7 @@
 - **Principles touched:** IP1, IP4, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs each orchestrator supports
-- **Branch/PR:** m110-time-series-all-tuners
+- **Branch/PR:** m110-time-series-all-tuners, PR #125 https://github.com/tidymodels/nestedtune/pull/125
 
 ## Goal
 
