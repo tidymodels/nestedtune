@@ -197,9 +197,11 @@ The section on evaluation times says what this package refuses.</p></dd>
 
 
 <dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
-<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> naming which of tune's selectors each
-outer fold picks its candidate with, on its own inner run and the first
-metric. The default is <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code>.</p></dd>
+<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> naming the selector each outer fold
+picks its candidate with, on its own inner run. The default is
+<code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> on the first metric. <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> refuse the
+<code>"desirability"</code> rule.</p></dd>
 
 </dl></div>
     <div class="section level2">

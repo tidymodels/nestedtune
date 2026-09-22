@@ -134,9 +134,15 @@ nested_tune_grid(
 
   A
   [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  naming which of tune's selectors each outer fold picks its candidate
-  with, on its own inner run and the first metric. The default is
-  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html).
+  naming the selector each outer fold picks its candidate with, on its
+  own inner run. The default is
+  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html)
+  on the first metric.
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+  and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  refuse the `"desirability"` rule.
 
 ## Value
 
@@ -295,7 +301,14 @@ rule to its own inner run, with `metric` the first metric in `metrics`.
 Every name an ordering uses must be a parameter `object` tunes, and
 anything but a
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-is refused at entry. The result records the rule as
+is refused at entry. The `"desirability"` rule selects with
+[`desirability2::select_best_desirability()`](https://desirability2.tidymodels.org/reference/show_best_desirability.html)
+over the goals it carries. Each name in a goal's first argument must be
+a metric in `metrics` or a parameter `object` tunes. With `metrics` left
+`NULL`, the metrics are tune's default set. The section "Writing a
+desirability goal" in
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+says more. The result records the rule as
 `extract_procedure(res)$select`, and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
 selects by it too.

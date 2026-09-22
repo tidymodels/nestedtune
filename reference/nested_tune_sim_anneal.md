@@ -140,9 +140,13 @@ nested_tune_sim_anneal(
 
   A
   [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  naming which of tune's selectors each outer fold picks its candidate
-  with, on its own inner run and the first metric. The default is
-  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html).
+  naming the selector each outer fold picks its candidate with, on its
+  own inner run. The default is
+  [`tune::select_best()`](https://tune.tidymodels.org/reference/show_best.html)
+  on the first metric.
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+  and `nested_tune_sim_anneal()` refuse the `"desirability"` rule.
 
 ## Value
 

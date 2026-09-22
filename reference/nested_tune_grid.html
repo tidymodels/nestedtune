@@ -187,9 +187,11 @@ The section on evaluation times says what this package refuses.</p></dd>
 
 
 <dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
-<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> naming which of tune's selectors each
-outer fold picks its candidate with, on its own inner run and the first
-metric. The default is <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code>.</p></dd>
+<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> naming the selector each outer fold
+picks its candidate with, on its own inner run. The default is
+<code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> on the first metric. <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> refuse the
+<code>"desirability"</code> rule.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -314,7 +316,12 @@ argument. <code>select</code> takes what <code><a href="selection_rule.html">sel
 carries. Each fold applies the rule to its own inner run, with <code>metric</code>
 the first metric in <code>metrics</code>. Every name an ordering uses must be a
 parameter <code>object</code> tunes, and anything but a <code><a href="selection_rule.html">selection_rule()</a></code> is
-refused at entry. The result records the rule as
+refused at entry. The <code>"desirability"</code> rule selects with
+<code><a href="https://desirability2.tidymodels.org/reference/show_best_desirability.html" class="external-link">desirability2::select_best_desirability()</a></code> over the goals it carries.
+Each name in a goal's first argument must be a metric in <code>metrics</code> or a
+parameter <code>object</code> tunes. With <code>metrics</code> left <code>NULL</code>, the metrics are
+tune's default set. The section "Writing a desirability goal" in
+<code><a href="selection_rule.html">selection_rule()</a></code> says more. The result records the rule as
 <code>extract_procedure(res)$select</code>, and <code><a href="nested_final_fit.html">nested_final_fit()</a></code> selects by it
 too.</p>
     </div>

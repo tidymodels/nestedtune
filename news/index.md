@@ -2,6 +2,42 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  gains a fourth rule, `"desirability"`, which selects with
+  [`desirability2::select_best_desirability()`](https://desirability2.tidymodels.org/reference/show_best_desirability.html)
+  over goals such as `maximize(rsq)` and `minimize(num_comp)`. A goal
+  can name a metric or a tuned parameter.
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  apply it.
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  and
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  refuse at entry a goal that names neither a metric of the run nor a
+  tuned parameter, with class `nestedtune_selection_rule_unknown_term`.
+  The racing tuners and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  refuse the rule with class `nestedtune_selection_rule_unsupported`.
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  and
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  refuse it with the same class on a censored regression model.
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  refuses a goal desirability2 refuses, with class
+  `nestedtune_selection_rule_terms`. It refuses a goal that names a
+  variable or a metric outside its first argument, with class
+  `nestedtune_selection_rule_term_arg`. It refuses a `limit` under the
+  rule, with class `nestedtune_selection_rule_limit`. The rule needs
+  desirability2 0.2.0 or later, now in Suggests. Where it is absent,
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  and
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  refuse the rule with class `nestedtune_pkg_not_installed`.
+
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   and
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
