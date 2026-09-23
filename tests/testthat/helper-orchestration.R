@@ -579,6 +579,54 @@ ts_metrics <- function() {
   yardstick::metric_set(yardstick::rmse, yardstick::mae)
 }
 
+# The two time-series designs by name, and the outer split class each builds,
+# so a test looping over them shows it ran on the design its name claims
+# (M110). The M110 tests sit in four files, test-time-series-*.R, so no one
+# file runs alone for long under parallel test files.
+TS_DESIGNS <- list(
+  "rolling-origin" = ts_rolling_nested,
+  "sliding-window" = ts_sliding_nested
+)
+
+TS_SPLIT_CLASS <- list(
+  "rolling-origin" = "rof_split",
+  "sliding-window" = "sliding_window_split"
+)
+
+# The fixtures' inner call, spelled out for a reference final fit to build on
+# the full data (M110).
+ts_inner <- function(data) {
+  rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)
+}
+
+# A nested run against its reference loop: the two seed columns first, then
+# each fold's metrics and selection (M108, M110).
+expect_ts_matches_reference <- function(res, ref) {
+  expect_true(all(res$.completed))
+  expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
+  expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
+  for (i in seq_len(nrow(res))) {
+    expect_identical(res$.metrics[[i]], ref[[i]]$metrics)
+    expect_identical(res$.selected[[i]], ref[[i]]$selected)
+  }
+}
+
+# A final fit against a reference final fit built over `ts_inner()` (M110).
+expect_ts_final_matches <- function(final, ref, d) {
+  expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$in_id),
+    lapply(ref$tuned$splits, function(s) s$in_id)
+  )
+  # The reference's inner design is the literal call's, not a default.
+  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
+  expect_identical(final$selected, ref$selected)
+  expect_identical(
+    predict(extract_workflow(final), new_data = d),
+    predict(ref$workflow, new_data = d)
+  )
+}
+
 # The results objects a final fit is built from (M46, D-041): one nested run
 # on `final_nested()`, served from the cache, carrying the procedure the final
 # fit re-runs. The deterministic one is the default; the stochastic sibling

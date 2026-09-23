@@ -21,12 +21,9 @@
 #   one per outer design. Satisfies AC4, and the sliding-window test backs
 #   the help's claim for `nested_final_fit()` on that design.
 #
-# O4 -- type "live" (reference implementation), M110. Source: each tuner's own
-#   reference loop in helper-orchestration.R -- reference_nested_bayes_loop(),
-#   reference_nested_race_loop() and reference_nested_anneal_loop() -- written
-#   from the seed contract rather than from the driver, and run here on the
-#   two time-series designs. Pinned by the "matches its reference loop on a
-#   ... design" tests. Satisfies M110 AC1.
+# The M110 oracles for the Bayesian, racing and annealing tuners are recorded
+# in test-time-series-bayes.R, test-time-series-race.R and
+# test-time-series-anneal.R, beside the tests that assert them.
 #
 # O5 -- type "live" (reference implementation), M110. Source:
 #   tune::fit_resamples() run by hand on the outer splits, rebuilt here from
@@ -35,23 +32,14 @@
 #   the "nested_fit_resamples() matches fit_resamples() on a ... design"
 #   tests. Satisfies M110 AC2.
 #
-# O6 -- type "live" (reference implementation), M110. Source: each tuner's
-#   reference final fit in helper-orchestration.R --
-#   reference_bayes_final_fit(), reference_race_final_fit() and
-#   reference_anneal_final_fit() -- handed the fixtures' literal inner
-#   `rolling_origin()` call as `inner_design`, so the reference builds the
-#   inner design on the full data from its own spelling of the call and
-#   selects with `select_best()` itself. Pinned by the "the final fit ...
-#   matches its reference" tests. Satisfies M110 AC3.
-#
 # O7 -- type "live" (reference implementation), M110. Source: hand_call() in
 #   helper-orchestration.R, the orchestrator each workflow of a set routes
 #   to, called by hand under the same seed, as
 #   test-nested-workflow-map-oracles.R uses it. Pinned by "a workflow set on a
 #   rolling-origin design matches the hand calls". Satisfies M110 AC5.
 #
-# O4-O7 each check that an orchestrator gives what tune or finetune gives when
-# run by hand. The estimate itself adds nothing new for these designs, so no
+# O5 and O7 each check that an orchestrator gives what tune gives when run by
+# hand. The estimate itself adds nothing new for these designs, so no
 # second oracle type is asked of them here.
 
 expect_matches_reference <- function(res, ref) {
@@ -270,141 +258,12 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_augment_names_never_held(res, d)
 })
 
-# ---- The other orchestrators (M110; oracles O4-O7 in the header) -------------
-
-TS_DESIGNS <- list(
-  "rolling-origin" = ts_rolling_nested,
-  "sliding-window" = ts_sliding_nested
-)
-
-# The outer split class each design builds, so a test shows it ran on the
-# design its name claims.
-TS_SPLIT_CLASS <- list(
-  "rolling-origin" = "rof_split",
-  "sliding-window" = "sliding_window_split"
-)
-
-for (design in names(TS_DESIGNS)) {
-  build <- TS_DESIGNS[[design]]
-
-  test_that(
-    sprintf(
-      "nested_tune_bayes() matches its reference loop on a %s design",
-      design
-    ),
-    {
-      skip_if_no_bayes_fixture()
-      d <- make_reg_data()
-      wf <- bayes_workflow(d)
-      folds <- build(d)
-      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-      p <- bayes_param_info(wf)
-      ms <- ts_metrics()
-
-      set.seed(22)
-      res <- memoised(nested_tune_bayes(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        param_info = p,
-        metrics = ms
-      ))
-      ref <- memoised(reference_nested_bayes_loop(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        objective = tune::exp_improve(),
-        param_info = p,
-        metrics = ms,
-        seed = 22,
-        metric_name = "rmse"
-      ))
-
-      expect_true(all(res$.completed))
-      expect_matches_reference(res, ref)
-    }
-  )
-
-  for (fn in RACERS) {
-    test_that(
-      sprintf("%s matches its reference loop on a %s design", fn, design),
-      {
-        skip_if_no_race_fixture(fn)
-        d <- make_reg_data()
-        wf <- det_workflow(d)
-        folds <- build(d)
-        expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-        ms <- ts_metrics()
-        g <- det_grid()
-        ctrl <- race_control()
-
-        set.seed(23)
-        res <- memoised(race_call_by_name(
-          fn,
-          wf,
-          folds,
-          grid = g,
-          metrics = ms,
-          control = ctrl
-        ))
-        ref <- memoised(reference_nested_race_loop(
-          fn,
-          wf,
-          folds,
-          grid = g,
-          metrics = ms,
-          seed = 23,
-          metric_name = "rmse",
-          control = ctrl
-        ))
-
-        expect_true(all(res$.completed))
-        expect_matches_reference(res, ref)
-      }
-    )
-  }
-
-  test_that(
-    sprintf(
-      "nested_tune_sim_anneal() matches its reference loop on a %s design",
-      design
-    ),
-    {
-      skip_if_no_anneal_fixture()
-      d <- make_reg_data()
-      wf <- det_workflow(d)
-      folds <- build(d)
-      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-      ms <- ts_metrics()
-      ctrl <- anneal_control()
-
-      set.seed(24)
-      res <- memoised(nested_tune_sim_anneal(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        metrics = ms,
-        control = ctrl
-      ))
-      ref <- memoised(reference_nested_anneal_loop(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        metrics = ms,
-        seed = 24,
-        metric_name = "rmse",
-        control = ctrl
-      ))
-
-      expect_true(all(res$.completed))
-      expect_matches_reference(res, ref)
-    }
-  )
-}
+# ---- The other orchestrators (M110) ------------------------------------------
+#
+# The Bayesian, racing and annealing tuners have their own files,
+# test-time-series-bayes.R, test-time-series-race.R and
+# test-time-series-anneal.R, so no one file runs alone for long under parallel
+# test files. TS_DESIGNS and TS_SPLIT_CLASS are in helper-orchestration.R.
 
 TS_OUTER <- list(
   "rolling-origin" = function(d) {
@@ -461,150 +320,6 @@ for (design in names(TS_DESIGNS)) {
     }
   )
 }
-
-# Both fixtures share the data, the inner call and the tuner's arguments, and
-# the final fit never reads the outer splits, so a sliding-window result gives
-# the same final fit as a rolling-origin one. The Bayesian sliding-window test
-# checks it once, against the same reference.
-
-ts_inner <- function(data) {
-  rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)
-}
-
-expect_final_matches <- function(final, ref, d) {
-  expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
-  expect_identical(
-    lapply(final$tuning$splits, function(s) s$in_id),
-    lapply(ref$tuned$splits, function(s) s$in_id)
-  )
-  # The reference's inner design is the literal call's, not a default.
-  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
-  expect_identical(final$selected, ref$selected)
-  expect_identical(
-    predict(extract_workflow(final), new_data = d),
-    predict(ref$workflow, new_data = d)
-  )
-}
-
-for (design in names(TS_DESIGNS)) {
-  build <- TS_DESIGNS[[design]]
-
-  test_that(
-    sprintf(
-      "the Bayesian final fit on a %s result matches its reference",
-      design
-    ),
-    {
-      skip_if_no_bayes_fixture()
-      d <- make_reg_data()
-      wf <- bayes_workflow(d)
-      folds <- build(d)
-      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-      p <- bayes_param_info(wf)
-      ms <- ts_metrics()
-
-      set.seed(22)
-      res <- memoised(nested_tune_bayes(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        param_info = p,
-        metrics = ms
-      ))
-      set.seed(41)
-      final <- nested_final_fit(wf, res)
-      ref <- reference_bayes_final_fit(
-        wf,
-        d,
-        iter = 2,
-        initial = 3,
-        objective = tune::exp_improve(),
-        param_info = p,
-        metrics = ms,
-        seed = 41,
-        metric_name = "rmse",
-        inner_design = ts_inner
-      )
-      expect_final_matches(final, ref, d)
-    }
-  )
-}
-
-for (fn in RACERS) {
-  test_that(
-    sprintf(
-      "the %s final fit on a rolling-origin result matches its reference",
-      fn
-    ),
-    {
-      skip_if_no_race_fixture(fn)
-      d <- make_reg_data()
-      wf <- det_workflow(d)
-      folds <- ts_rolling_nested(d)
-      ms <- ts_metrics()
-      g <- det_grid()
-      ctrl <- race_control()
-
-      set.seed(23)
-      res <- memoised(race_call_by_name(
-        fn,
-        wf,
-        folds,
-        grid = g,
-        metrics = ms,
-        control = ctrl
-      ))
-      set.seed(42)
-      final <- nested_final_fit(wf, res)
-      ref <- reference_race_final_fit(
-        fn,
-        wf,
-        d,
-        grid = g,
-        metrics = ms,
-        seed = 42,
-        metric_name = "rmse",
-        control = ctrl,
-        inner_design = ts_inner
-      )
-      expect_final_matches(final, ref, d)
-    }
-  )
-}
-
-test_that("the annealing final fit on a rolling-origin result matches its reference", {
-  skip_if_no_anneal_fixture()
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- ts_rolling_nested(d)
-  ms <- ts_metrics()
-  ctrl <- anneal_control()
-
-  set.seed(24)
-  res <- memoised(nested_tune_sim_anneal(
-    wf,
-    folds,
-    iter = 2,
-    initial = 3,
-    metrics = ms,
-    control = ctrl
-  ))
-  set.seed(43)
-  final <- nested_final_fit(wf, res)
-  ref <- reference_anneal_final_fit(
-    wf,
-    d,
-    iter = 2,
-    initial = 3,
-    metrics = ms,
-    seed = 43,
-    metric_name = "rmse",
-    control = ctrl,
-    inner_design = ts_inner
-  )
-  expect_final_matches(final, ref, d)
-})
 
 # The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
 # tuning run, an empty selection, and the plain fit on every row under the

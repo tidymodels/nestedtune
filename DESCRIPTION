@@ -57,5 +57,6 @@ Config/testthat/start-first: nested-tune-bayes-oracles, parallel-identity,
     nested-tune-race-rng, nested-tune-bayes-rng, nested-tune-race-oracles,
     nested-tune-bayes-results, nested-tune-sim-anneal-rng,
     nested-tune-grid-failures, nested-tune-sim-anneal-oracles,
-    nested-tune-grid-oracles, nested-final-fit-oracles
+    nested-tune-grid-oracles, nested-final-fit-oracles, time-series-bayes,
+    time-series-race
 Config/roxygen2/version: 8.1.0

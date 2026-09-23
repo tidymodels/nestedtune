@@ -69,6 +69,8 @@ The rolling-origin and sliding-window outer designs that M108 supports under `ne
 - 2026-09-22: review gate fixes committed on the branch: D-075, class assertions, a sliding-window fit_resamples final fit, oracle records moved to the header, and seed columns in the set test. F4 (`start-first`) was reverted while applying it, against the M76 measurement.
 - 2026-09-22: step-7 approval: m110-time-series-all-tuners approved for merge
 - 2026-09-22: PR #125 opened at `2dcfd85`. The CI watch reached the session's time limit and was stopped. `build`, `prose-sweep` and `format-suggest` passed, and the 8 check and coverage legs were pending.
+- 2026-09-22: resume. PR #125 red. `ubuntu-latest (release)` and `(oldrel-1)` in `R-CMD-check.yaml` hit the 30 min `check-r-package` step cap ("The action has timed out"). The tests had passed, `testthat.R [73m/24m] OK`, against `[69m/19m]` on `main`'s last run 35789092742. The step then timed out in the vignette rebuild, 144 s on `main`. Four CPU-minutes added five wall minutes, because the 169 s file ran late and alone.
+- 2026-09-22: CI fix. The M110 tests are split into `test-time-series-bayes.R` (60 s alone), `test-time-series-race.R` (34 s), `test-time-series-anneal.R` (19 s) and the rest of `test-time-series-designs.R` (20 s). The Bayes and race files join `Config/testthat/start-first`. `TS_DESIGNS`, `TS_SPLIT_CLASS`, `ts_inner()` and two expectation helpers move to `helper-orchestration.R`. The four files run 27 tests, 300 expectations, 0 failures, and the start-first resolution test passes. This reverses the F4 rejection: M76's measurement predates a single file this long.
 
 ## Decisions
 
@@ -93,7 +95,8 @@ Triage, accepted at the gate as proposed on 2026-09-22:
 - F1 (D-074 claims the map on both fixtures), F8 (D-074's "never reads the outer design"), F10 (D-071's Consequences not marked superseded): fix now. D-075 corrects all three.
 - F2 (no suite-time baseline): follow-up at step 8. Each CI leg's time is compared with `main`'s last run before the merge.
 - F3 (AC3 tuner runs rebuilt, the recipe step ids drawn from the stream): follow-up. It joins the fixture-key candidate row at hygiene.
-- F4 (file not in `start-first`): accepted as fix now, then rejected while applying it. The PROFILE test-doctrine slot (M76) and the `R-CMD-check.yaml` comment record that re-ordering measured 2.4% slower and bought nothing.
+- F4 (file not in `start-first`): accepted as fix now, then rejected while applying it on the M76 measurement that re-ordering bought nothing. CI then timed out two ubuntu legs, so the fix was made after all. The file is split in four, and the two longest parts are queued first (work log, 2026-09-22 CI fix).
+- F2 (no suite-time baseline): the step-8 comparison found the ubuntu release and oldrel-1 check steps over their 30 min cap. The tests took 24 min wall against 19 on `main`, and the F4 fix answers it.
 - F5 (AC7 without evidence at HEAD): resolved by the check at `dc35bf8`.
 - F6 (no design-class assertion in the M110 loops): fix now. `TS_SPLIT_CLASS` is asserted in every looped test.
 - F7 (the sliding-window Bayesian final fit tests the D-074 premise only): noted, matches D-074.
