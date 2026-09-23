@@ -173,7 +173,8 @@ Time-series designs are supported for an outer
 \code{\link[=nested_final_fit]{nested_final_fit()}} for their results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}},
 \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}}, \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and
 \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested on the rolling-origin design, and
-so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is
+so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their results, plus the sliding-window
+design for \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is
 tested on the rolling-origin design. The outer design never reaches the
 tuner: each tuner is handed one outer fold's inner resamples at a time.
 An inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.

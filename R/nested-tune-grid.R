@@ -113,7 +113,8 @@
 #' [nested_final_fit()] for their results. [nested_tune_bayes()],
 #' [nested_tune_race_anova()], [nested_tune_race_win_loss()] and
 #' [nested_tune_sim_anneal()] are tested on the rolling-origin design, and
-#' so is [nested_final_fit()] for their results. [nested_workflow_map()] is
+#' so is [nested_final_fit()] for their results, plus the sliding-window
+#' design for [nested_tune_bayes()] results. [nested_workflow_map()] is
 #' tested on the rolling-origin design. The outer design never reaches the
 #' tuner: each tuner is handed one outer fold's inner resamples at a time.
 #' An inner design other than [rsample::rolling_origin()] is not tested.
