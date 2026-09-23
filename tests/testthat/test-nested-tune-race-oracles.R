@@ -370,14 +370,21 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     picked <- list()
     for (nm in names(rules)) {
       set.seed(20)
-      res <- race_fn(fn)(
-        wf,
-        folds,
-        grid = det_grid(),
-        metrics = ms,
-        control = ctrl,
-        select = rules[[nm]]
-      )
+      if (nm == "best") {
+        # The default rule is `best`, so race_results(fn) is this run, served
+        # from the cache; the `select` assertion below checks the record
+        # equals the rule written out (M113).
+        res <- race_results(fn)
+      } else {
+        res <- race_fn(fn)(
+          wf,
+          folds,
+          grid = det_grid(),
+          metrics = ms,
+          control = ctrl,
+          select = rules[[nm]]
+        )
+      }
       ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
       expect_matches_reference(res, ref, "rmse")
       expect_identical(extract_procedure(res)$select, rules[[nm]])
