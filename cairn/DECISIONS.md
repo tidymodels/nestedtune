@@ -1859,6 +1859,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the support for both outer designs covers the six orchestrators and `nested_final_fit()`, tuned and untuned results alike. `nested_workflow_map()` is claimed on the rolling-origin design, as the help and `NEWS.md` state. The final fit reads the data the design carries and the recorded procedure, and never reads the outer splits, so a sliding-window result gives the same final fit as a rolling-origin one with the same inner call. D-071's clause leaving "the other five orchestrators" unclaimed is superseded.
 **Consequences:** a sliding-window test of `nested_workflow_map()` lifts its bound. Falsified by a final fit that reads the outer splits. (Corrects D-074's Context and Decision on these two points, and supersedes D-071's Consequences clause on the five orchestrators.)
 
+### D-076 (2026-09-22): in `R-CMD-check.yaml`, only the macos-latest leg builds and checks the vignettes, so the other four legs' check steps keep room under their caps. First D-entry on the CI step caps
+
+**Context:** M111's tests push the `R-CMD-check.yaml` check step past its cap on the slower legs. Every leg built the vignettes and then re-built them at check time. No D-entry covered the CI caps (M094 review). The other option was a fixture cache shared across the parallel test workers. That is a harness change, and it saves less per leg.
+**Decision:** the four legs other than macos-latest pass `--no-build-vignettes` to `R CMD build` and `--ignore-vignettes` to `R CMD check`. They keep `--as-cran`. macOS keeps the vignettes because its step had the most headroom under its cap. `R-CMD-check-hard.yaml` still builds and checks the vignettes, and `pkgdown.yaml` still knits them. The step caps stay 30 minutes, and 40 on windows. The figures are in the yaml comment and in M112's work log.
+**Consequences:** this workflow no longer catches a vignette failure that shows only on windows, oldrel-1 or R-devel. Falsified by such a failure, or by the macOS step near its cap. Either moves the vignettes to another leg or brings the cache back.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

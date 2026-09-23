@@ -100,8 +100,19 @@ jobs:
     # workers, so there is no idle worker time for a re-ordering to recover
     # (benchmarks/test-timing-parallel.md, which also states what those figures
     # do not settle).
-    # Bringing windows under 24 too is a ROADMAP candidate, now waiting on
-    # the check-time vignette rebuild rather than on a test-suite lever.
+    #
+    # Of these five legs, only macos-latest builds and checks the vignettes.
+    # The other four pass `--no-build-vignettes` to `R CMD build` and
+    # `--ignore-vignettes` to `R CMD check`, through the step's `build_args`
+    # and `args` below. Each leg paid for the vignettes twice: in job
+    # 106991147696 of run 35801023421 (ubuntu release, 2026-09-23), building
+    # them took 145 s and re-building them at check time took 140 s, of a
+    # 28.8-minute step whose tests took 21.8. macOS keeps them because its
+    # step was the shortest of the five in that run, at 21.4 minutes, against
+    # windows 32.2, ubuntu release 28.8, devel 26.8 and oldrel-1 22.4. The
+    # vignettes are still checked on the same pushes and pull requests
+    # elsewhere: `R-CMD-check-hard.yaml` builds and checks them, and
+    # `pkgdown.yaml` knits them into the site.
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building
@@ -192,4 +203,5 @@ jobs:
         timeout-minutes: ${{ matrix.config.os == 'windows-latest' && 40 || 30 }}
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          build_args: ${{ matrix.config.os == 'macos-latest' && 'c("--no-manual","--compact-vignettes=gs+qpdf")' || 'c("--no-manual","--no-build-vignettes")' }}
+          args: ${{ matrix.config.os == 'macos-latest' && 'c("--no-manual","--as-cran")' || 'c("--no-manual","--as-cran","--ignore-vignettes")' }}

@@ -1,13 +1,13 @@
 # M112: Vignettes built and checked on the macOS check leg alone
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a CI setting change that no user of the package relies on
-- **Branch/PR:** —
+- **Branch/PR:** m112-vignettes-one-leg
 
 ## Goal
 
@@ -45,6 +45,8 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: plan gate chose the vignettes on one leg over a fixture cache shared across the test workers, because the vignettes cost about 4.8 min per leg in a settings change, against about 2 min for the cache in a harness change. Falsified by a vignette failure that only a skipped leg's platform shows.
 - 2026-09-22: plan gate chose macOS release as the leg that keeps the vignettes over ubuntu release and windows, because its step ran 16 to 22 min against a 30 min cap. Falsified by macOS nearing its cap.
 - 2026-09-22: plan gate chose to read the CI saving from the PR run at review and from the first run on `main`, over adding a local timing criterion, because the PR opens only after approval and local minutes run about 4 times faster than CI. Falsified by a non-macOS leg's step on `main` after merge running no faster than before.
+- 2026-09-22: implement started on `m112-vignettes-one-leg`, cut from `main` at `aaf2279`. Question gate skipped, since the plan left nothing open.
+- 2026-09-22: checkpoint, T1 to T3 written and not yet checked off. The new test block failed on the old yaml and passes on the new one, and each of the four planted defects failed it at its own line. The full `devtools::test()` run is still going.
 
 ## Decisions
 
