@@ -23,7 +23,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 
 - [x] AC1: In `.github/workflows/R-CMD-check.yaml`, the matrix has exactly one `macos-latest` entry, and the `check-r-package` step's `build_args` and `args` are each one expression keyed on `matrix.config.os == 'macos-latest'`. For that entry they give `c("--no-manual","--compact-vignettes=gs+qpdf")` and `c("--no-manual","--as-cran")`. For the other four entries they give `c("--no-manual","--no-build-vignettes")` and `c("--no-manual","--as-cran","--ignore-vignettes")`, tested.
 - [x] AC2: The step-cap comment in `R-CMD-check.yaml` states that, of its five legs, only `macos-latest` builds and checks the vignettes. It also states that `R-CMD-check-hard.yaml` checks them and `pkgdown.yaml` knits them. The test-doctrine slot of `cairn/PROFILE.md` states the same scope in one clause.
-- [ ] AC3: `devtools::test()` passes, and `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
+- [x] AC3: `devtools::test()` passes, and `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
 
 ## Coverage
 
@@ -65,3 +65,13 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - AC1 still holds at `cf01af1`: `git diff 75fc491 cf01af1` touches only `cairn/`.
 - AC2 (2026-09-22, head `cf01af1`): `R-CMD-check.yaml:104` says "Of these five legs, only macos-latest builds and checks the vignettes." Lines 113-115 say `R-CMD-check-hard.yaml` builds and checks them and `pkgdown.yaml` knits them. `cairn/PROFILE.md:50` states the same scope in one sentence, the other two workflows in a relative clause.
 - Gate (head `cf01af1`): `cairn_validate` exit 0. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. README.Rmd and NEWS.md are untouched, since the change has no user-visible surface. No new top-level files. No DESIGN.md principle changed, so `cairn_impact` is skipped.
+- AC3 (2026-09-22, head `cf01af1`): `devtools::test()` exit 0 with no failed tests. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9m 47s. The baseline check of the branch point `aaf2279`, from a `git archive` export at T4, also gave 0 notes, so no note is new.
+- Reviewers: [S] blame-history, 0 findings, and it traced the removed "windows under 24" sentence to the candidate row that M112 absorbed. [S] prior-review, 0 findings, no past review on per-leg vignette flags. [O] diff-bug, 8 findings, ranked:
+  - F1: `R-CMD-check-hard.yaml` installs hard dependencies only. So `nested-cv.Rmd`, `results.Rmd` and `tuners.Rmd` stop at their missing-package notice there. The comment (lines 113-115), `PROFILE.md:50` and D-076's Decision overstate that job as a second check. Verified against `R-CMD-check-hard.yaml:74-81` and `vignettes/*.Rmd` `knit_exit()`.
+  - F2: CI never runs the new test, because `.github/` is build-ignored and the test skips there. This is the file's existing convention.
+  - F3: the single-macOS count at `test-ci-workflows.R:140` matches one spelling only. It misses `os: 'macos-latest'` and `- os: macos-latest`.
+  - F4: macOS was chosen from one run with a 1-minute margin over oldrel-1. The M76 medians rank macOS above oldrel-1 and ubuntu release.
+  - F5: D-076's Context says "the slower legs", but M111's block note records ubuntu release alone.
+  - F6: the `step_value()` header says "the line after". The code searches the whole step for one `key:` line.
+  - F7: `PROFILE.md:50` is not wrapped at about 120 characters.
+  - F8: the `--as-cran` behavior on the four legs is known only from a local run. CI sets `_R_CHECK_CRAN_INCOMING_=false`.
