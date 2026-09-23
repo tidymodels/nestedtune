@@ -25,7 +25,8 @@
 #
 # O3 -- type "invariant" (mode independence), pinned in
 #   test-parallel-identity.R as BC13: the same seed gives an identical result
-#   serially and at two daemon counts. Recorded here for the audit.
+#   serially and at two daemons (the three-daemon repeat went at M113,
+#   D-079). Recorded here for the audit.
 #
 # O1 and O2 are the >=2 independent oracle types GP2 asks of the package's own
 # contribution -- the call, the seed, the record, the loop -- at the initial

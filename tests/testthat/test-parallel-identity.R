@@ -15,7 +15,7 @@
 # Pools (M74). mirai holds one pool at a time, so the file is ordered by pool:
 # one shared 2-daemon pool serves every block that only needs a primed pool,
 # started once below and probed before each reuse by `shared_daemons(2)`
-# (helper-parallel.R); the blocks that also compare at three daemons follow
+# (helper-parallel.R); BC1, which also compares at three daemons, follows
 # on one shared 3-daemon pool; BC9, which pollutes its daemons, is the last
 # block on the 2-daemon pool; BC3, which kills a daemon, starts a private
 # pool at the end. A block's serial reference is built while the pool is up
@@ -434,8 +434,8 @@ test_that("BC8: the identity holds with a censored fixture at a named eval_time 
 # Gaussian-process proposals and the ranger fits both draw -- a deterministic
 # engine would leave only tune's own `set.seed(control$seed + i)` calls to
 # differ, and those are the seed rule under test on both sides of the
-# identity. Shared by the two-daemon block here and the three-daemon one
-# below (M74).
+# identity. Its one caller is the two-daemon block; the three-daemon one it
+# was shared with (M74) went at M113.
 bayes_serial_reference <- function(wf, nested, p) {
   set.seed(2026L)
   serial <- serial_run(nested_tune_bayes(
@@ -539,8 +539,8 @@ test_that("BC11: the control reaches every fold on the parallel path as on the s
 # BC12 (M50, AC4), for both racers: the stochastic fixture, so the race's
 # resample shuffle and the ranger fits both draw; and the daemons' library
 # holds finetune, which the loop attaches in every daemon before the first
-# fold is sent. The serial race is shared by the two-daemon block here and
-# the three-daemon one below (M74).
+# fold is sent. The serial race's one caller is the two-daemon block; the
+# three-daemon one it was shared with (M74) went at M113.
 race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
   set.seed(2026L)
   serial <- serial_run(race_call_by_name(
@@ -597,8 +597,9 @@ test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
 # perturbations and the ranger fits all draw; and the daemons' library holds
 # finetune, which the loop attaches in every daemon before the first fold is
 # sent. `time_limit` is left unset (`NA`), as AC4 requires: a wall-clock stop
-# is the one slot that could make the two sides differ. The serial search is
-# shared by the two-daemon block here and the three-daemon one below (M74).
+# is the one slot that could make the two sides differ. The serial search's
+# one caller is the two-daemon block; the three-daemon one it was shared
+# with (M74) went at M113.
 anneal_serial_reference <- function(wf, nested, p, ms, ctrl) {
   expect_true(is.na(ctrl$time_limit))
   set.seed(2026L)

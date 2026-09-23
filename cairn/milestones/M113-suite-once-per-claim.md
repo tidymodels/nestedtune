@@ -24,7 +24,7 @@ Cut the test suite's serial time to three quarters of today's by removing repeat
 - [x] AC1: `Rscript benchmarks/profile-tests.R 3` is run in a clean checkout of the branch-point commit `5088fb7` and in a clean checkout of the branch-head commit under review. The script is the same file in both. The two trees are run one after the other, never at the same time, on the same machine, with the same R version and the same package library. Before the runs, `requireNamespace()` returns TRUE for every package in DESCRIPTION Suggests. The head's `SUITE TOTAL (sum of test times)` line, the median of its three serial runs, is at most 80% of the branch point's `SUITE TOTAL` line. Each of the six runs reports `fail 0`, and each head run's skip count is no higher than the highest skip count among the three branch-point runs.
 - [x] AC2: No line under `R/` that `covr::package_coverage()` reports with at least one hit on the branch point is reported with zero hits on the branch head. Both runs are serial, with every Suggests package installed, `NOT_CRAN=true`, and the daemon-trace sidecar merged as `test-coverage.yaml` does. Lines are matched by file and by position among lines not opening with `#'`, because the branch changes no other line of `R/`. A line whose reading flips is re-run once on each tree and counts only if both readings repeat.
 - [x] AC3: Every claim, one `expect_*()` call, that a `test_that()` block asserted at `5088fb7` and whose block's description is gone or body differs at the head, is asserted by a surviving block. The blocks are enumerated from `git diff 5088fb7..HEAD -- tests/testthat`. The exceptions are the claims D-079 names dropped: (a) reference-loop identity for `nested_tune_bayes()`, the two racers and `nested_tune_sim_anneal()` on the sliding-window, sliding-index and sliding-period outer designs. (b) Agreement with tune's selector for the Bayes and sim-anneal selection-rule blocks. (c) Serial-parallel identity at three daemons for BC10, BC12 and BC13. (d) Caller-RNG-survival and no-RNG-state on the success path in the Bayes, race and anneal rng files.
-- [ ] AC4: `devtools::test()` on the branch head on macOS, with every Suggests package installed and `NOT_CRAN=true`, reports 0 failures and 0 skips.
+- [x] AC4: `devtools::test()` on the branch head on macOS, with every Suggests package installed and `NOT_CRAN=true`, reports 0 failures and 0 skips.
 - [x] AC5: For each of the six orchestrators, `nested_final_fit()` and `nested_workflow_map()`, the time-series paragraphs in the help of `nested_tune_grid()`, `nested_resamples()` and `augment()`, and the `NEWS.md` entry on time-series designs, name exactly the outer designs on which a `test-time-series-*.R` file compares that function against its reference.
 - [ ] AC6: On the measured head, the ubuntu release leg's `Running ‘testthat.R’` elapsed time, the median of three `R-CMD-check.yaml` attempts, is at most 80% of the median of three attempts of run 35883406135 on `5088fb7`. The measured head is a pushed commit from which the merge-time branch head differs only under `cairn/`. The CI bar is looser than AC1's because the leg varies about 20% on identical code (M51 lesson).
 
@@ -54,8 +54,8 @@ Blocks whose description is gone at the head, by file and line at `5088fb7`, and
 
 | Block at `5088fb7` | Where the claim lives now |
 |---|---|
-| `test-time-series-bayes.R:53` on sliding-window, sliding-index, sliding-period (3 runtime blocks) | D-079 (a) |
-| `test-time-series-race.R:43` on the same three designs, both racers (6 runtime blocks) | D-079 (a) |
+| `test-time-series-bayes.R:46` on sliding-window, sliding-index, sliding-period (3 runtime blocks) | D-079 (a) |
+| `test-time-series-race.R:42` on the same three designs, both racers (6 runtime blocks) | D-079 (a) |
 | `test-time-series-anneal.R:41` on the same three designs (3 runtime blocks) | D-079 (a) |
 | `test-nested-tune-bayes-oracles.R:434` M69 selection rules | D-079 (b) |
 | `test-nested-tune-sim-anneal-oracles.R:308` M69 selection rules | D-079 (b) |
@@ -101,5 +101,26 @@ Review run 2026-09-23 on `m113-suite-once-per-claim`, main at `f8358c4` an ances
 - AC2: `benchmarks/coverage-lines.R` on `5088fb7` and on the head tree at `b494c40`, both serial, `NOT_CRAN=true`, 34 sidecar files merged each: 5238 lines, 116 zero-hit lines on both, matched by file and non-roxygen position with 0 unmatched rows, 0 lines covered at the branch point and zero on the head, 0 gained (`benchmarks/coverage-lines-5088fb7.csv`, `benchmarks/coverage-lines-M113-head.csv`). `git diff b494c40 HEAD -- R/` changes roxygen lines only, so the head's code lines are the measured ones. No line flipped, so the re-run clause was not needed.
 - AC3: `git diff 5088fb7..HEAD -- tests/testthat` removes 16 `test_that(` lines and the three time-series loops shrink by 12 runtime blocks; the Removals ledger above maps each to a D-079 clause or a surviving block. Every `expect_*()` call in a block whose body changed stands (the diff's removed `expect_` lines all sit inside deleted blocks: bayes-oracles 6, anneal-oracles 4, identity 8, bayes-rng 6, race-rng 12, anneal-rng 12, plus 2 re-indented in the bayes time-series file). One judgment for the gate: the race and anneal fold-order and ambient-kind blocks map to grid-rng's blocks of the same description, which D-079 names dropped and AC3's list does not.
 - AC5: read at review against the loops. Grid and fit_resamples reference loops run over `TS_NEW_OUTER_CALLS` and `TS_DESIGNS` (all four); Bayes, both racers and anneal over rolling-origin alone; final fits on rolling-origin for the four tuners plus sliding-window for Bayes; the workflow-set block on rolling-origin. The help named rolling-origin alone for the Bayes final fit, so it did not name exactly the tested set: fixed at review in `R/nested-tune-grid.R`, `R/nested-resamples.R` and `NEWS.md`, `document()` re-run, sweeps clean. The `augment()` help names no per-orchestrator test and needed no change.
+
+- AC4: fresh `devtools::test()` under `NOT_CRAN=true` on macOS at review: 977 blocks, `fail 0 | skip 0 | warn 0` (`ac4-review.log`). `devtools::check()` at review: 0 errors, 0 warnings, 0 notes, its `testthat.R` at 836 s CPU and 447 s wall.
+- AC6: pending the PR. Read after approval at step 8 from the PR's run and two `gh run rerun` attempts, bar 12 min.
+
+Findings and triage (ranked by their reviewers; [O] diff-bug 17, [S] history 2, [S] prior-review 1):
+- O1: the race and anneal fold-order and ambient-kind blocks fall outside AC3's exceptions and are mapped to grid blocks that assert on `nested_tune_grid()`. To the gate.
+- O2, O3, O8, O9: stale oracle headers and comments naming the three-daemon repeats or the deleted blocks. Fixed at review.
+- O4: the race `best` step no longer passes `select` to a racer. Rejected: T3 planned it, the comment states it, grid passes the rule explicitly.
+- O5: the `test-nested-workflow-map-oracles.R:94` cache entry has no partner. Fixed at review: the call is direct again, and the T5 log's "reads the cached hand call" was wrong.
+- O6: dead `wf` in the fit_resamples AC2 block. Fixed at review.
+- O7 and H2: BC4 keeps `skip_if_no_daemons()` and fabricates its worker count. Rejected: the skip is harmless, and the fabrication is planned in T6 and disclosed in the comment.
+- O10: two ledger line citations. Fixed at review.
+- O11: the measured trees (`766f44b`, `b494c40`) are not the head under review. Presented at the gate as a recorded deviation; tests and `R/` code lines are identical to the head.
+- O12: D-079 says `nested_final_fit()` stays tested on all four. D-080 corrects it at review.
+- O13: IP2 evidence at one worker count for three tuners. Noted; D-079 records it.
+- O14: `covr:::merge_coverage()` is an internal. Rejected: `test-coverage.yaml` calls the same one.
+- O15 and P1: the `start-first` re-cut against the Out line citing M76. Rejected: the Out excludes reordering as a speed lever; T2 planned the re-read, the list must name existing files (`test-parallel-detection.R` checks it) and keep the longest files first (M110 lesson), and it drops files that are no longer heavy.
+- O16: redundant `set.seed(20)` before `race_results(fn)`. Fixed at review.
+- O17: the second readers block's fixture passes a grid the original call did not. Rejected: both workflows are fixed, so the grid is never read.
+- H1: one-sided `memoised()` in `test-nested-tune-grid-rng.R` against the letter of the M42 lesson. Rejected as a defect: the cached side builds directly on its first request and the other side is always direct, which is the mechanism the lesson guards. The lesson line is extended at hygiene to say so.
+- The fix-now edits moved `test-parallel-identity.R` by one line; the ledger re-keyed, `test-suite-hygiene.R` green, `air format --check` clean, the touched files re-run green.
 
 Consistency gate: `cairn_validate` all checks passed (18 advisory warnings, all on references pages). `devtools::document()` no diff. `README.md` in sync with `README.Rmd`. `pkgdown::check_pkgdown()` no problems. Both prose sweeps clean. `air format --check` clean on every touched `.R` file. `NEWS.md` carries the time-series entry this milestone reworded. New files live under `benchmarks/`, already `.Rbuildignore`d.

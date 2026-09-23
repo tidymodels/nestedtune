@@ -247,9 +247,9 @@ test_that("AC2: the two seeds are the documented draw, shared with a tuned run u
   # The contract, written out rather than read off any run: `set.seed(s)`,
   # one `sample.int(.Machine$integer.max, 2 * n)`, fold i taking elements
   # 2i - 1 and 2i.
-  # Both workflows are built before the seed is set: a recipe step draws its
-  # id from the stream, and the contract's draw is the loop's first.
-  wf <- fixed_workflow(d)
+  # The tuned workflow is built before the seed is set: a recipe step draws
+  # its id from the stream, and the contract's draw is the loop's first. The
+  # fixed workflow is the cached fixture's own (M113).
   tuned_wf <- det_workflow(d)
   set.seed(30)
   seeds <- sample.int(.Machine$integer.max, 2L * nrow(folds))

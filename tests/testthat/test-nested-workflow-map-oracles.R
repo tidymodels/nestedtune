@@ -91,12 +91,12 @@ test_that("AC1: a per-workflow grid option overrides the grid in `...` for that 
   expect_null(attr(res$result[[2L]], "grid"))
 
   set.seed(31)
-  first <- memoised(nested_tune_grid(
+  first <- nested_tune_grid(
     wset$info[[1L]]$workflow[[1L]],
     folds,
     grid = det_grid(),
     metrics = ms
-  ))
+  )
   set.seed(31)
   second <- nested_fit_resamples(
     wset$info[[2L]]$workflow[[1L]],

@@ -1,8 +1,8 @@
 # The "the caller's RNG state and kind survive the call untouched" and "a
 # session with no RNG state is left with a valid one" blocks were pinned here
-# until M113. The success-path RNG restore and the fold seeding are one
-# shared site in `nested_loop()` / `set_fold_seed()`, so
-# test-nested-tune-grid-rng.R covers them (D-079).
+# until M113. The success-path RNG restore is one shared site in
+# `nested_loop()`, so test-nested-tune-grid-rng.R covers it (D-079).
+#
 # IP2 for the Bayesian path (M45 AC4). Five of the eight properties
 # test-nested-tune-grid-rng.R holds the grid path to are asserted here on
 # nested_tune_bayes(); the caller's-RNG-survives, folds-fail restore and

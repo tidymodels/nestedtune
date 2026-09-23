@@ -765,42 +765,42 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      632L,
+      633L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      695L,
+      696L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      745L,
+      746L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC15: the selection rule reaches the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
-      783L,
+      784L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC16: the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      826L,
+      827L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC17: the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      857L,
+      858L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC9: a fold is immune to whatever a daemon ran before it",
@@ -808,28 +808,28 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      893L,
+      894L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      894L,
+      895L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      907L,
+      908L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC1: parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      971L,
+      972L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "BC3: a daemon killed mid-run yields a recorded failure, not an abort",

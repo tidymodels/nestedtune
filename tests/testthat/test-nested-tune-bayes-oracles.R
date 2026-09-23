@@ -26,8 +26,9 @@
 #
 # O3 -- type "invariant" (mode independence), pinned in
 #   test-parallel-identity.R as BC10: the same seed gives an identical result
-#   serially and at two daemon counts. Recorded here for the audit; the
-#   assertion lives with the other dispatch identities.
+#   serially and at two daemons (the three-daemon repeat went at M113,
+#   D-079). Recorded here for the audit; the assertion lives with the other
+#   dispatch identities.
 #
 # O4 -- type "live" (reference implementation), M48. Source: the same
 #   reference loop, handed the caller's `control_bayes()` and applying the
