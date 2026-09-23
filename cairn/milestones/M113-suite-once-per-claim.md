@@ -91,6 +91,7 @@ Blocks whose body differs and whose every `expect_*()` call stands: the time-ser
 - 2026-09-23: re-audit: AC1 (full) — second reader on the fixed wording; found the concurrent-run and dirty-tree readings, gave the reworded text written above less its "the review record shows this" clause, which binds a record. AC1 has spent both re-entries.
 - 2026-09-23: amendment return: AC3 — "(e) Every claim in the fold-order block and in the ambient-RNG-state-or-kind block of the race and anneal rng files." Chosen at the merge gate over merging on the grid-block reading or restoring the four blocks. Status in-progress for the amendment alone and back to review in the same turn once AC3 was re-ticked.
 - 2026-09-23: re-audit: AC3 (full) — reachable; D-079 names the (e) drops word for word; one ambiguity, that a claim-shaped (e) exempted only the kind assertion of a three-assertion block, taken as the reader's rewording written above.
+- 2026-09-23: step-7 approval: m113-suite-once-per-claim approved for merge, conditional on AC6's median of three attempts at or under 12 min.
 - 2026-09-23: T8 in part. The branch is pushed, but `R-CMD-check.yaml` runs on a push to `main` or on a pull request alone, with no `workflow_dispatch`, and the PR opens at review after approval (D-138). So AC6's three attempts are read at `/milestone-review`, by `gh run rerun` on the PR's run twice and `gh api .../attempts/<n>/jobs` for each, against the 12 min bar. Status set to review with that one measurement outstanding.
 
 ## Decisions
