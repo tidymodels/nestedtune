@@ -68,3 +68,25 @@ reproducibility guarantee those tests exist to prove. The oracle files
 (`test-nested-tune-grid-oracles.R`, `test-nested-final-fit-oracles.R`,
 8.6 s together) duplicate their reference runs on purpose — that duplication is
 the oracle, and removing it would remove the check.
+
+## M113 (2026-09-23): branch point against head
+
+Same script, three passes per tree, run one tree after the other on one
+machine (macOS, R 4.6.1, testthat 3.3.2, every Suggests package installed,
+`NOT_CRAN=true`, serial). The branch point ran in a clean worktree at
+`5088fb7`; the head ran in the branch checkout at `766f44b`.
+
+| Tree | Pass 1 | Pass 2 | Pass 3 | Median | Counts |
+|---|---:|---:|---:|---:|---|
+| `5088fb7` | 898.2 | 1029.3 | 1329.3 | 1029.3 | pass 11776, fail 0, skip 0 |
+| `766f44b` | 808.6 | 759.2 | 823.9 | 808.6 | pass 11387, fail 0, skip 0 |
+
+The head's median is 78.6% of the branch point's. The branch point's spread
+is wide: the laptop moved between battery and mains power during these runs,
+and an earlier set of three passes beside a covr run read 1329.2, 1338.7 and
+972.2 s. Per-file medians on the head, heaviest first: `test-parallel-identity.R`
+63.5, `test-time-series-bayes.R` 59.2, `test-nested-tune-bayes-oracles.R`
+55.0, `test-nested-tune-grid-oracles.R` 51.3, `test-time-series-designs.R`
+32.3. The largest drops from the branch point: `test-time-series-bayes.R`
+112.4 to 59.2, `test-time-series-race.R` 47.3 to 17.8,
+`test-time-series-anneal.R` 45.0 to 10.8.
