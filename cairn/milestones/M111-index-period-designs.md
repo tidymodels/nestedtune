@@ -1,6 +1,6 @@
 # M111: Index-based and period-based sliding outer designs
 
-- **Status:** blocked
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M110
 - **Driving RR:** —
@@ -61,6 +61,8 @@
 - 2026-09-22: T6 figures. Whole suite locally, two workers: 476 s on `main` at `d6fca8c`, 535 s on the branch at `5c5a9b5` (+12.4%). The four time-series files alone: designs 29 s, bayes 113 s, race 50 s, anneal 30 s. M110's merge run 35801023421, ubuntu release: the check step took 28.8 min, of which `testthat.R` took 21.8 min. Scaled by +12.4%, the tests add about 2.7 min, and the step reaches about 31.5 min against its 30 min cap. The plan gate's falsifier is estimated to fire.
 - 2026-09-22: cut the Bayesian final-fit tests on the two new designs (18 s alone). No criterion asks for them, and the grid and fit_resamples final fits back the help claim. The Bayes file is now 94 s alone. T7 help, `NEWS.md` and D-076 drafted and swept clean, carried in this checkpoint unticked. The step-cap choice goes to a mini gate.
 - 2026-09-22: blocked. Mini gate chose making the suite faster first, over narrowing AC2 and AC7 to three functions or raising the ubuntu step cap. Blocker: a suite-speed milestone, to be planned from the "CI check steps near their caps" candidate row. It must make room for about 2.3 min more tests under the ubuntu release step's 30 min cap. When it is done, merge `main`, rerun T6, then finish T7.
+- 2026-09-22: blocked, recorded on `main`. The branch `m111-index-period-designs` holds T1 to T5 and the full work log. The added tests put the ubuntu release check step at about 31 min against its 30 min cap, and a mini gate chose a suite-speed milestone first.
+- 2026-09-23: resumed, blocker cleared. M112 merged as `d6cbee6`, and the four legs other than macOS skip the vignettes. Merged `main` into the branch. The branch's drafted D-entry became D-078, because M112 took D-076 and D-077 on `main`. Status set to in-progress.
 
 ## Decisions
 
