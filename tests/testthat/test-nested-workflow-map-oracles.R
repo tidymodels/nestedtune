@@ -10,63 +10,8 @@
 #   -- is exactly what a wrong element would show. One block per `fn`, so a
 #   route that drifts names its orchestrator.
 #
-# The hand call's arguments are written out here from the documented
-# contract, never read off `orchestrator_args()`: for a tuned workflow the
-# orchestrator `fn` names takes everything the map was given, and a fixed
-# workflow runs through `nested_fit_resamples()` with the design and the
-# metrics alone -- no `grid`, no counts, and no `control` (the class is
-# `fn`'s, and the plain resampling orchestrator refuses it).
-
-# The hand call for one workflow: the routed orchestrator, its arguments
-# spelled by name, under the entry seed.
-hand_call <- function(fn, workflow, folds, ms, seed) {
-  tuned <- length(tune::extract_parameter_set_dials(workflow)$id) > 0L
-  set.seed(seed)
-  if (!tuned) {
-    # The fixed workflow's hand call is the same run whichever `fn` the block
-    # is for, so it is served from the fixture cache after the first block
-    # builds it (M74).
-    return(memoised(nested_fit_resamples(workflow, folds, metrics = ms)))
-  }
-  switch(
-    fn,
-    nested_tune_grid = nested_tune_grid(
-      workflow,
-      folds,
-      grid = det_grid(),
-      metrics = ms
-    ),
-    nested_tune_bayes = nested_tune_bayes(
-      workflow,
-      folds,
-      iter = 1,
-      initial = 2,
-      metrics = ms
-    ),
-    nested_tune_race_anova = nested_tune_race_anova(
-      workflow,
-      folds,
-      grid = det_grid(),
-      metrics = ms,
-      control = race_control()
-    ),
-    nested_tune_race_win_loss = nested_tune_race_win_loss(
-      workflow,
-      folds,
-      grid = det_grid(),
-      metrics = ms,
-      control = race_control()
-    ),
-    nested_tune_sim_anneal = nested_tune_sim_anneal(
-      workflow,
-      folds,
-      iter = 2,
-      initial = 3,
-      metrics = ms,
-      control = anneal_control()
-    )
-  )
-}
+# The hand call is `hand_call()` in helper-orchestration.R, which
+# test-time-series-designs.R also uses (M110).
 
 for (fn in MAP_FNS) {
   test_that(

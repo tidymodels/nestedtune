@@ -417,7 +417,8 @@ reference_bayes_final_fit <- function(
   seed,
   metric_name,
   v = 3,
-  control = NULL
+  control = NULL,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -428,7 +429,7 @@ reference_bayes_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- tune::tune_bayes(
     wf,
     resamples = inner,
@@ -451,6 +452,17 @@ reference_bayes_final_fit <- function(
   fitted <- parsnip::fit(final_wf, data = data)
 
   list(seeds = seeds, selected = best, workflow = fitted, tuned = tuned)
+}
+
+# The inner design a reference final fit builds on the full data, under the
+# tuning seed already set. `inner_design` is a function of the data, spelled
+# out by the test as the design's own `inside` call (M110), and the default is
+# the `vfold_cv(v = v)` the suite's other designs use.
+reference_inner <- function(data, v, inner_design = NULL) {
+  if (is.null(inner_design)) {
+    return(rsample::vfold_cv(data, v = v))
+  }
+  inner_design(data)
 }
 
 ref_field <- function(ref, field) {
@@ -565,6 +577,54 @@ ts_sliding_nested <- function(data) {
 # divide by, and yardstick returns `NA` with a warning.
 ts_metrics <- function() {
   yardstick::metric_set(yardstick::rmse, yardstick::mae)
+}
+
+# The two time-series designs by name, and the outer split class each builds,
+# so a test looping over them shows it ran on the design its name claims
+# (M110). The M110 tests sit in four files, test-time-series-*.R, so no one
+# file runs alone for long under parallel test files.
+TS_DESIGNS <- list(
+  "rolling-origin" = ts_rolling_nested,
+  "sliding-window" = ts_sliding_nested
+)
+
+TS_SPLIT_CLASS <- list(
+  "rolling-origin" = "rof_split",
+  "sliding-window" = "sliding_window_split"
+)
+
+# The fixtures' inner call, spelled out for a reference final fit to build on
+# the full data (M110).
+ts_inner <- function(data) {
+  rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)
+}
+
+# A nested run against its reference loop: the two seed columns first, then
+# each fold's metrics and selection (M108, M110).
+expect_ts_matches_reference <- function(res, ref) {
+  expect_true(all(res$.completed))
+  expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
+  expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
+  for (i in seq_len(nrow(res))) {
+    expect_identical(res$.metrics[[i]], ref[[i]]$metrics)
+    expect_identical(res$.selected[[i]], ref[[i]]$selected)
+  }
+}
+
+# A final fit against a reference final fit built over `ts_inner()` (M110).
+expect_ts_final_matches <- function(final, ref, d) {
+  expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$in_id),
+    lapply(ref$tuned$splits, function(s) s$in_id)
+  )
+  # The reference's inner design is the literal call's, not a default.
+  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
+  expect_identical(final$selected, ref$selected)
+  expect_identical(
+    predict(extract_workflow(final), new_data = d),
+    predict(ref$workflow, new_data = d)
+  )
 }
 
 # The results objects a final fit is built from (M46, D-041): one nested run
@@ -1990,7 +2050,8 @@ reference_race_final_fit <- function(
   seed,
   metric_name,
   v = 3,
-  control = NULL
+  control = NULL,
+  inner_design = NULL
 ) {
   racer <- getExportedValue("finetune", fn)
   set.seed(seed)
@@ -2002,7 +2063,7 @@ reference_race_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   raced <- racer(
     wf,
     resamples = inner,
@@ -2222,7 +2283,8 @@ reference_anneal_final_fit <- function(
   metric_name,
   v = 3,
   control = NULL,
-  param_info = NULL
+  param_info = NULL,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -2233,7 +2295,7 @@ reference_anneal_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- finetune::tune_sim_anneal(
     wf,
     resamples = inner,
@@ -2605,6 +2667,66 @@ MAP_FNS <- c(
   "nested_tune_sim_anneal",
   "nested_fit_resamples"
 )
+
+# The hand call for one workflow of a set: the routed orchestrator, its
+# arguments spelled by name, under the entry seed. Moved here from
+# test-nested-workflow-map-oracles.R at M110, so the time-series tests can use
+# it too.
+#
+# The hand call's arguments are written out here from the documented
+# contract, never read off `orchestrator_args()`: for a tuned workflow the
+# orchestrator `fn` names takes everything the map was given, and a fixed
+# workflow runs through `nested_fit_resamples()` with the design and the
+# metrics alone -- no `grid`, no counts, and no `control` (the class is
+# `fn`'s, and the plain resampling orchestrator refuses it).
+hand_call <- function(fn, workflow, folds, ms, seed) {
+  tuned <- length(tune::extract_parameter_set_dials(workflow)$id) > 0L
+  set.seed(seed)
+  if (!tuned) {
+    # The fixed workflow's hand call is the same run whichever `fn` the block
+    # is for, so it is served from the fixture cache after the first block
+    # builds it (M74).
+    return(memoised(nested_fit_resamples(workflow, folds, metrics = ms)))
+  }
+  switch(
+    fn,
+    nested_tune_grid = nested_tune_grid(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms
+    ),
+    nested_tune_bayes = nested_tune_bayes(
+      workflow,
+      folds,
+      iter = 1,
+      initial = 2,
+      metrics = ms
+    ),
+    nested_tune_race_anova = nested_tune_race_anova(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms,
+      control = race_control()
+    ),
+    nested_tune_race_win_loss = nested_tune_race_win_loss(
+      workflow,
+      folds,
+      grid = det_grid(),
+      metrics = ms,
+      control = race_control()
+    ),
+    nested_tune_sim_anneal = nested_tune_sim_anneal(
+      workflow,
+      folds,
+      iter = 2,
+      initial = 3,
+      metrics = ms,
+      control = anneal_control()
+    )
+  )
+}
 
 # The arguments each orchestrator's map run takes beyond the design and the
 # metrics: the same counts and controls the single-workflow fixtures above
