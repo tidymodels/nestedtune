@@ -1,6 +1,6 @@
 # M111: Index-based and period-based sliding outer designs
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** M110
 - **Driving RR:** —
@@ -60,6 +60,7 @@
 - 2026-09-22: T5 done. `check_held_out_once()` gives a time-series split class (`TIME_SERIES_SPLITS`) its own overlap text. The AC5 test fails on 3 assertions with the old message restored. The `augment()` help paragraph rides in this commit, as it sits in the same file. Full suite clean, 535 s wall locally.
 - 2026-09-22: T6 figures. Whole suite locally, two workers: 476 s on `main` at `d6fca8c`, 535 s on the branch at `5c5a9b5` (+12.4%). The four time-series files alone: designs 29 s, bayes 113 s, race 50 s, anneal 30 s. M110's merge run 35801023421, ubuntu release: the check step took 28.8 min, of which `testthat.R` took 21.8 min. Scaled by +12.4%, the tests add about 2.7 min, and the step reaches about 31.5 min against its 30 min cap. The plan gate's falsifier is estimated to fire.
 - 2026-09-22: cut the Bayesian final-fit tests on the two new designs (18 s alone). No criterion asks for them, and the grid and fit_resamples final fits back the help claim. The Bayes file is now 94 s alone. T7 help, `NEWS.md` and D-076 drafted and swept clean, carried in this checkpoint unticked. The step-cap choice goes to a mini gate.
+- 2026-09-22: blocked. Mini gate chose making the suite faster first, over narrowing AC2 and AC7 to three functions or raising the ubuntu step cap. Blocker: a suite-speed milestone, to be planned from the "CI check steps near their caps" candidate row. It must make room for about 2.3 min more tests under the ubuntu release step's 30 min cap. When it is done, merge `main`, rerun T6, then finish T7.
 
 ## Decisions
 
