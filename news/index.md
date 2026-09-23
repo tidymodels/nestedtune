@@ -52,18 +52,34 @@
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   builds these designs with the same splits as
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-  Other time-series designs, such as
+  Every orchestrator is also tested on an outer
   [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  or
+  [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  design with an inner
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  design. So is
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+  for
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   and
-  [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-  are not tested.
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  results.
+  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+  builds these with the same splits as
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+  too. An inner design other than
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  is not tested.
 
 - When an outer design leaves rows out of every assessment set and holds
   no row out twice,
   [`augment()`](https://generics.r-lib.org/reference/augment.html) now
   names those rows in its error. It no longer names a repeated or Monte
-  Carlo design as the cause. The condition class is still
-  `nestedtune_augment_rows`.
+  Carlo design as the cause. When a time-series design’s assessment sets
+  overlap, the error counts the rows left out and the rows held out more
+  than once, and does not name a repeated or Monte Carlo design. The
+  condition class is still `nestedtune_augment_rows`.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),

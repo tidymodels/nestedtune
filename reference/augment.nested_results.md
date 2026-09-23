@@ -58,12 +58,16 @@ is refused with class `nestedtune_augment_rows`, because it predicts
 some rows more than once or not at all. Read its predictions with
 [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 instead. A
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 or
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 design leaves rows out of every assessment set and is refused with the
 same class. When no row is held out twice, the message names the rows
-left out.
+left out. When its assessment sets overlap, the message counts the rows
+left out and the rows held out more than once, and does not name a
+repeated or Monte Carlo design.
 
 A run whose control did not set `save_pred = TRUE` is refused with class
 `nestedtune_column_not_saved`. A run in which no fold completed is

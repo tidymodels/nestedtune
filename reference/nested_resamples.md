@@ -68,22 +68,26 @@ analysis and the inner assessment set, which makes the estimate invalid.
 ## Time-series designs
 
 An outer
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 or
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 with an inner
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
 is tested to give the same splits as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-Every orchestrator and
+Every orchestrator is tested on all four designs, and so is
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-are tested on both designs, and
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-on the rolling-origin design. Other time-series designs, such as
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+for
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
 and
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-are not tested.
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+results.
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+is tested on the rolling-origin design. An inner design other than
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+is not tested.
 
 ## Memory
 

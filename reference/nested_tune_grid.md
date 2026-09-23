@@ -227,12 +227,14 @@ builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.
 
 Time-series designs are supported for an outer
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 or
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 with an inner
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html).
-Every orchestrator is tested on both: `nested_tune_grid()`,
+Every orchestrator is tested on all four: `nested_tune_grid()`,
 [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
 [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
@@ -240,15 +242,17 @@ Every orchestrator is tested on both: `nested_tune_grid()`,
 and
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md).
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-is tested on both, and
+is tested on all four for `nested_tune_grid()` and
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+results, and
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-on the rolling-origin design. Other time-series designs, such as
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-and
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-are not tested.
+on the rolling-origin design. An inner design other than
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+is not tested.
 [`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
 refuses these designs, because their assessment sets leave rows out.
+When the assessment sets overlap, its error also counts the rows held
+out more than once.
 
 ## Finalizing a parameter range
 
