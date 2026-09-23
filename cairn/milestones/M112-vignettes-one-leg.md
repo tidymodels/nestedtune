@@ -1,6 +1,6 @@
 # M112: Vignettes built and checked on the macOS check leg alone
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,7 +21,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 
 ## Acceptance criteria
 
-- [ ] AC1: In `.github/workflows/R-CMD-check.yaml`, the matrix has exactly one `macos-latest` entry, and the `check-r-package` step's `build_args` and `args` are each one expression keyed on `matrix.config.os == 'macos-latest'`. For that entry they give `c("--no-manual","--compact-vignettes=gs+qpdf")` and `c("--no-manual","--as-cran")`. For the other four entries they give `c("--no-manual","--no-build-vignettes")` and `c("--no-manual","--as-cran","--ignore-vignettes")`, tested.
+- [x] AC1: In `.github/workflows/R-CMD-check.yaml`, the matrix has exactly one `macos-latest` entry, and the `check-r-package` step's `build_args` and `args` are each one expression keyed on `matrix.config.os == 'macos-latest'`. For that entry they give `c("--no-manual","--compact-vignettes=gs+qpdf")` and `c("--no-manual","--as-cran")`. For the other four entries they give `c("--no-manual","--no-build-vignettes")` and `c("--no-manual","--as-cran","--ignore-vignettes")`, tested.
 - [ ] AC2: The step-cap comment in `R-CMD-check.yaml` states that, of its five legs, only `macos-latest` builds and checks the vignettes. It also states that `R-CMD-check-hard.yaml` checks them and `pkgdown.yaml` knits them. The test-doctrine slot of `cairn/PROFILE.md` states the same scope in one clause.
 - [ ] AC3: `devtools::test()` passes, and `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
 
@@ -54,7 +54,10 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: all tasks checked, status set to review.
 - 2026-09-22: review defect return 1, from the step-4 consistency gate. `cairn_validate` failed `weight caps`: `cairn/PROFILE.md` is 120 lines against a cap under 120, after T3's clause grew it by one line. Status back to in-progress. The fresh suite, the check and the three reviewers were stopped before they reported.
 - 2026-09-22: return fixed. The T3 clause now shares lines with the existing text, so `cairn/PROFILE.md` is 119 lines and `cairn_validate` passes. Only that file changed, so the suite and check results from `ca51211` and `61b5622` still cover the code. Status set to review.
+- 2026-09-22: review defect return 2, at step 3 on AC2. AC2 asks the PROFILE test-doctrine slot to state the scope "in one clause". `cairn/PROFILE.md:50` states it in two sentences, split in T3 for the prose lint. Status back to in-progress. AC1 was verified first. The fresh suite, the check and the three reviewers were stopped before they reported. The light gate checks passed at `75fc491`: `cairn_validate`, `document()` with no diff, `check_pkgdown()`, and all six prose sweeps.
 
 ## Decisions
 
 ## Review
+
+- AC1 (2026-09-22, head `75fc491`): the matrix has one `{os: macos-latest` entry. A YAML parse of the `check-r-package` step gives `build_args` and `args` as one `matrix.config.os == 'macos-latest'` expression each, with the four flag vectors AC1 names. The test block "R-CMD-check.yaml builds and checks the vignettes on macOS alone" passes, and the file passes 10 of 10. The block failed on the pre-change yaml and on each of the four planted defects (work log, T2).
