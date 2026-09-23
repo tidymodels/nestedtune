@@ -1,25 +1,27 @@
-# Oracle records for rolling-origin and sliding-window outer designs (M108).
+# Oracle records for rolling-origin and sliding-window outer designs (M108),
+# extended to sliding-index and sliding-period outer designs (M111).
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 #
 # O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
 #   itself, recomputed at test time by reference_nested_loop() in
 #   helper-orchestration.R, written from the documented seed contract rather
 #   than from the driver. Run here on designs built by rsample::nested_cv()
-#   with `rolling_origin()` and `sliding_window()` outer resamples. Pinned by
-#   the two "match a hand-rolled reference loop" tests. Satisfies AC1/AC2.
+#   with `rolling_origin()`, `sliding_window()`, `sliding_index()` and
+#   `sliding_period()` outer resamples. Pinned by the four "match(es) a
+#   hand-rolled reference loop" tests. Satisfies M108 AC1/AC2 and M111 AC1.
 #
 # O2 -- type "live" (reference implementation). Source: rsample::nested_cv(),
 #   recomputed at test time. Every outer and inner analysis and assessment set
-#   `nested_resamples()` builds must match it row for row. Pinned by the two
-#   "splits match rsample::nested_cv()" tests. Satisfies AC3.
+#   `nested_resamples()` builds must match it row for row. Pinned by the four
+#   "splits match rsample::nested_cv()" tests. Satisfies M108 AC3 and M111 AC3.
 #
 # O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
 #   tune::select_best() and fit() run by hand under the final fit's
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
-#   from the fixture's literal `rolling_origin()` call. Pinned by the two
+#   from the fixture's literal `rolling_origin()` call. Pinned by the four
 #   "the final fit on a ... design matches a hand-rolled reference" tests,
-#   one per outer design. Satisfies AC4, and the sliding-window test backs
-#   the help's claim for `nested_final_fit()` on that design.
+#   one per outer design. Satisfies M108 AC4 and M111 AC4, and backs the
+#   help's claim for `nested_final_fit()` on each design.
 #
 # The M110 oracles for the Bayesian, racing and annealing tuners are recorded
 # in test-time-series-bayes.R, test-time-series-race.R and
@@ -385,6 +387,13 @@ test_that("augment() on an overlapping sliding-window result counts both kinds o
   expect_match(msg, "time-series design", fixed = TRUE)
   expect_no_match(msg, "repeated", ignore.case = TRUE)
   expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+})
+
+# The overlap test above reaches one of the four classes. TS_SPLIT_CLASS is
+# checked against a real fixture of each design, so a class dropped from or
+# misspelled in the package's list fails here (M111).
+test_that("augment()'s time-series classes are the four designs' split classes", {
+  expect_setequal(TIME_SERIES_SPLITS, unlist(TS_SPLIT_CLASS, use.names = FALSE))
 })
 
 # ---- The other orchestrators (M110) ------------------------------------------

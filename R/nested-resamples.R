@@ -42,8 +42,9 @@
 #' An outer [rsample::rolling_origin()], [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] with an inner
 #' [rsample::rolling_origin()] is tested to give the same splits as
-#' [rsample::nested_cv()]. Every orchestrator and [nested_final_fit()] are
-#' tested on all four designs, and [nested_workflow_map()] on the
+#' [rsample::nested_cv()]. Every orchestrator is tested on all four designs,
+#' and so is [nested_final_fit()] for [nested_tune_grid()] and
+#' [nested_fit_resamples()] results. [nested_workflow_map()] is tested on the
 #' rolling-origin design. An inner design other than
 #' [rsample::rolling_origin()] is not tested.
 #'

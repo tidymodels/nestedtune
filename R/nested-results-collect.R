@@ -736,9 +736,9 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
   # A time-series design whose assessment sets overlap is told so, not
   # called a repeated or Monte Carlo design (M111).
   info <- if (inherits(x$splits[[1L]], TIME_SERIES_SPLITS)) {
-    "A time-series design whose assessment sets overlap predicts a row \\
-     several times, and one that does not reach every row predicts it not \\
-     at all. Read those predictions with {.fn collect_predictions}."
+    "An overlapping time-series design predicts some rows several times \\
+     and others not at all. Read those predictions with \\
+     {.fn collect_predictions}."
   } else {
     "A repeated or Monte Carlo design predicts a row several times or not \\
      at all. Read those predictions with {.fn collect_predictions}."

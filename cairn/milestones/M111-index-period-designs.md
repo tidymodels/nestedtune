@@ -91,3 +91,11 @@
   - F7: line 3 of `test-time-series-anneal.R` and of `test-time-series-race.R` is 108 characters, left unwrapped by the claim-audit edit.
   - F8: the non-overlap `augment()` path is untested on the two new designs. AC6 does not ask for it.
   - F9: the new message's "one that does not reach every row predicts it not at all" reads as though another design caused the missing rows.
+- Triage at the gate (user chose "Fix 5, then merge"):
+  - F1 fixed now. A new test checks that `TIME_SERIES_SPLITS` equals the four `TS_SPLIT_CLASS` values, which each design's fixture test checks against a real split. A planted `rof_splitX` fails that test alone.
+  - F4 fixed now. The help and NEWS now say `nested_final_fit()` is tested on all four designs for `nested_tune_grid()` and `nested_fit_resamples()` results.
+  - F6 fixed now. The header oracle records name the four tests per oracle and both milestones' criteria.
+  - F7 fixed now. The two header lines are rewrapped.
+  - F9 fixed now. The message now reads "An overlapping time-series design predicts some rows several times and others not at all."
+  - Rejected: F2, because D-078 records the first-split rule and rsample never mixes classes. F3, because the Scope fixes the data. F5, because the grid and fit_resamples final-fit tests cover `date`. F8, because AC6 does not ask for it.
+  - After the fixes, `test-time-series-designs.R` passes 26 of 26, `document()` rewrote the six help pages, and all six prose sweeps pass.

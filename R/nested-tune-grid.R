@@ -111,7 +111,8 @@
 #' [rsample::rolling_origin()]. Every orchestrator is tested on all four:
 #' [nested_tune_grid()], [nested_tune_bayes()], [nested_tune_race_anova()],
 #' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] and
-#' [nested_fit_resamples()]. [nested_final_fit()] is tested on all four, and
+#' [nested_fit_resamples()]. [nested_final_fit()] is tested on all four for
+#' [nested_tune_grid()] and [nested_fit_resamples()] results, and
 #' [nested_workflow_map()] on the rolling-origin design. An inner design
 #' other than [rsample::rolling_origin()] is not tested.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
