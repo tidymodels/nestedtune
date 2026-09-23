@@ -46,7 +46,7 @@
 - [x] T3: Write the AC3 split-identity tests.
 - [x] T4: Write the AC4 final-fit tests, using M108's `expect_final_matches_reference()`.
 - [x] T5: Fit the message in `check_held_out_once()` (`R/nested-results-collect.R:700-733`) to a sliding design that holds rows out more than once. Decide the design from the outer split class, and keep today's text for other designs. Write the AC5 and AC6 tests. The AC6 repeated and Monte Carlo case extends `tests/testthat/test-augment.R:150-163`.
-- [ ] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps in `cairn/PROFILE.md`. Record the figures in the work log.
+- [x] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps in `cairn/PROFILE.md`. Record the figures in the work log.
 - [ ] T7: Write the D-entry extending M110's entry to the two designs and the new message. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
@@ -63,6 +63,7 @@
 - 2026-09-22: blocked. Mini gate chose making the suite faster first, over narrowing AC2 and AC7 to three functions or raising the ubuntu step cap. Blocker: a suite-speed milestone, to be planned from the "CI check steps near their caps" candidate row. It must make room for about 2.3 min more tests under the ubuntu release step's 30 min cap. When it is done, merge `main`, rerun T6, then finish T7.
 - 2026-09-22: blocked, recorded on `main`. The branch `m111-index-period-designs` holds T1 to T5 and the full work log. The added tests put the ubuntu release check step at about 31 min against its 30 min cap, and a mini gate chose a suite-speed milestone first.
 - 2026-09-23: resumed, blocker cleared. M112 merged as `d6cbee6`, and the four legs other than macOS skip the vignettes. Merged `main` into the branch. The branch's drafted D-entry became D-078, because M112 took D-076 and D-077 on `main`. Status set to in-progress.
+- 2026-09-23: T6 rerun after the merge at `1f84c8e`. Locally, two workers: the whole suite passed in 500 s, and `test-time-series-designs.R` alone took 32 s. On PR #126 (run 35817157833, the `main` tests without M111's), the ubuntu release check step took 24.5 min, of which `testthat.R` took 22.3. Scaled by the +12.4% measured at T6 before the block, the tests add about 2.8 min, so the step is estimated at about 27.3 min against its 30 min cap. The PR run at review gives the measured figure.
 
 ## Decisions
 
