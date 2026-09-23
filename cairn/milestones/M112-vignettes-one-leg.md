@@ -22,7 +22,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 ## Acceptance criteria
 
 - [x] AC1: In `.github/workflows/R-CMD-check.yaml`, the matrix has exactly one `macos-latest` entry, and the `check-r-package` step's `build_args` and `args` are each one expression keyed on `matrix.config.os == 'macos-latest'`. For that entry they give `c("--no-manual","--compact-vignettes=gs+qpdf")` and `c("--no-manual","--as-cran")`. For the other four entries they give `c("--no-manual","--no-build-vignettes")` and `c("--no-manual","--as-cran","--ignore-vignettes")`, tested.
-- [ ] AC2: The step-cap comment in `R-CMD-check.yaml` states that, of its five legs, only `macos-latest` builds and checks the vignettes. It also states that `R-CMD-check-hard.yaml` checks them and `pkgdown.yaml` knits them. The test-doctrine slot of `cairn/PROFILE.md` states the same scope in one clause.
+- [x] AC2: The step-cap comment in `R-CMD-check.yaml` states that, of its five legs, only `macos-latest` builds and checks the vignettes. It also states that `R-CMD-check-hard.yaml` checks them and `pkgdown.yaml` knits them. The test-doctrine slot of `cairn/PROFILE.md` states the same scope in one clause.
 - [ ] AC3: `devtools::test()` passes, and `devtools::check()` gives 0 errors, 0 warnings, and no note absent from the check of the default branch at the branch point.
 
 ## Coverage
@@ -62,3 +62,6 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 ## Review
 
 - AC1 (2026-09-22, head `75fc491`): the matrix has one `{os: macos-latest` entry. A YAML parse of the `check-r-package` step gives `build_args` and `args` as one `matrix.config.os == 'macos-latest'` expression each, with the four flag vectors AC1 names. The test block "R-CMD-check.yaml builds and checks the vignettes on macOS alone" passes, and the file passes 10 of 10. The block failed on the pre-change yaml and on each of the four planted defects (work log, T2).
+- AC1 still holds at `cf01af1`: `git diff 75fc491 cf01af1` touches only `cairn/`.
+- AC2 (2026-09-22, head `cf01af1`): `R-CMD-check.yaml:104` says "Of these five legs, only macos-latest builds and checks the vignettes." Lines 113-115 say `R-CMD-check-hard.yaml` builds and checks them and `pkgdown.yaml` knits them. `cairn/PROFILE.md:50` states the same scope in one sentence, the other two workflows in a relative clause.
+- Gate (head `cf01af1`): `cairn_validate` exit 0. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0. README.Rmd and NEWS.md are untouched, since the change has no user-visible surface. No new top-level files. No DESIGN.md principle changed, so `cairn_impact` is skipped.
