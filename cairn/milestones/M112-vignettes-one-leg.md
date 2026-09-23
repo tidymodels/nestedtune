@@ -56,6 +56,8 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: return fixed. The T3 clause now shares lines with the existing text, so `cairn/PROFILE.md` is 119 lines and `cairn_validate` passes. Only that file changed, so the suite and check results from `ca51211` and `61b5622` still cover the code. Status set to review.
 - 2026-09-22: review defect return 2, at step 3 on AC2. AC2 asks the PROFILE test-doctrine slot to state the scope "in one clause". `cairn/PROFILE.md:50` states it in two sentences, split in T3 for the prose lint. Status back to in-progress. AC1 was verified first. The fresh suite, the check and the three reviewers were stopped before they reported. The light gate checks passed at `75fc491`: `cairn_validate`, `document()` with no diff, `check_pkgdown()`, and all six prose sweeps.
 - 2026-09-22: return 2 fixed. `cairn/PROFILE.md:50` now states the vignette scope in one sentence, with `R-CMD-check-hard.yaml` and `pkgdown.yaml` in a relative clause. The file is 119 lines and `cairn_validate` passes. No code changed. Status set to review.
+- 2026-09-22: gate fixes F1, F3, F5 and F6 landed at `3d228b3`. `devtools::test()` then passed with no failed tests.
+- step-7 approval: m112-vignettes-one-leg approved for merge
 
 ## Decisions
 
