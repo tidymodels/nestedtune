@@ -7,7 +7,7 @@
 - **Principles touched:** IP2, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing, because the help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` change what they say is tested
-- **Branch/PR:** m113-suite-once-per-claim
+- **Branch/PR:** m113-suite-once-per-claim, https://github.com/tidymodels/nestedtune/pull/128
 
 ## Goal
 
@@ -26,7 +26,7 @@ Cut the test suite's serial time to three quarters of today's by removing repeat
 - [x] AC3: Every claim, one `expect_*()` call, that a `test_that()` block asserted at `5088fb7` and whose block's description is gone or body differs at the head, is asserted by a surviving block. The blocks are enumerated from `git diff 5088fb7..HEAD -- tests/testthat`. The exceptions are the claims D-079 names dropped: (a) reference-loop identity for `nested_tune_bayes()`, the two racers and `nested_tune_sim_anneal()` on the sliding-window, sliding-index and sliding-period outer designs. (b) Agreement with tune's selector for the Bayes and sim-anneal selection-rule blocks. (c) Serial-parallel identity at three daemons for BC10, BC12 and BC13. (d) Caller-RNG-survival and no-RNG-state on the success path in the Bayes, race and anneal rng files. (e) Every claim in the fold-order block and in the ambient-RNG-state-or-kind block of the race and anneal rng files.
 - [x] AC4: `devtools::test()` on the branch head on macOS, with every Suggests package installed and `NOT_CRAN=true`, reports 0 failures and 0 skips.
 - [x] AC5: For each of the six orchestrators, `nested_final_fit()` and `nested_workflow_map()`, the time-series paragraphs in the help of `nested_tune_grid()`, `nested_resamples()` and `augment()`, and the `NEWS.md` entry on time-series designs, name exactly the outer designs on which a `test-time-series-*.R` file compares that function against its reference.
-- [ ] AC6: On the measured head, the ubuntu release leg's `Running ‘testthat.R’` elapsed time, the median of three `R-CMD-check.yaml` attempts, is at most 80% of the median of three attempts of run 35883406135 on `5088fb7`. The measured head is a pushed commit from which the merge-time branch head differs only under `cairn/`. The CI bar is looser than AC1's because the leg varies about 20% on identical code (M51 lesson).
+- [x] AC6: On head `f505844` (PR #128's `R-CMD-check.yaml` run 35924522778, a `pull_request` run on the merge ref), the longest `Run r-lib/actions/check-r-package@v2` step among the five legs is under 25 minutes in each of attempts 1 and 2, each attempt's step times read from `gh api repos/tidymodels/nestedtune/actions/runs/35924522778/attempts/<n>/jobs`. The branch head at merge differs from `f505844` only under `cairn/`, which `git diff --name-only f505844 <merge-time head>` shows. A later run fired by a cairn-only push is not re-read.
 
 ## Coverage
 
@@ -92,6 +92,11 @@ Blocks whose body differs and whose every `expect_*()` call stands: the time-ser
 - 2026-09-23: amendment return: AC3 — "(e) Every claim in the fold-order block and in the ambient-RNG-state-or-kind block of the race and anneal rng files." Chosen at the merge gate over merging on the grid-block reading or restoring the four blocks. Status in-progress for the amendment alone and back to review in the same turn once AC3 was re-ticked.
 - 2026-09-23: re-audit: AC3 (full) — reachable; D-079 names the (e) drops word for word; one ambiguity, that a claim-shaped (e) exempted only the kind assertion of a three-assertion block, taken as the reader's rewording written above.
 - 2026-09-23: step-7 approval: m113-suite-once-per-claim approved for merge, conditional on AC6's median of three attempts at or under 12 min.
+- 2026-09-23: review return at step 8: AC6 failed, PR #128 attempts 1 and 2 both 20 min on the ubuntu release leg against the 12 min bar. No merge. Status in-progress; the PR stays open. Defect-return count 1.
+- 2026-09-23: amendment return: AC6 — "On head `f505844` (PR #128's `R-CMD-check.yaml` run 35924522778, a `pull_request` run on the merge ref), the longest `Run r-lib/actions/check-r-package@v2` step among the five legs is under 25 minutes in each of attempts 1 and 2, each attempt's step times read from `gh api repos/tidymodels/nestedtune/actions/runs/35924522778/attempts/<n>/jobs`. The branch head at merge differs from `f505844` only under `cairn/`, which `git diff --name-only f505844 <merge-time head>` shows. A later run fired by a cairn-only push is not re-read." The user chose binding the slowest leg's headroom over dropping AC6 or a third attempt of a bar the median could no longer meet.
+- 2026-09-23: re-audit: AC6 (full) — reachable on the recorded run; no principle or decision in the way; the first draft left "the PR run" and "the PR's head commit" unpinned and the head undefined at merge, so the reader pinned the run id, the head and the attempts, and its rewording is what was written. Status back to review.
+- 2026-09-23: PR-conversation read on #128: no reviews, no comments, no unresolved threads.
+- 2026-09-23: step-7 approval: m113-suite-once-per-claim approved for merge, re-posed after the AC6 amendment. The four cairn-only commits after `f505844` stay unpushed so the measured run stands; their content lands in the hygiene commit.
 - 2026-09-23: T8 in part. The branch is pushed, but `R-CMD-check.yaml` runs on a push to `main` or on a pull request alone, with no `workflow_dispatch`, and the PR opens at review after approval (D-138). So AC6's three attempts are read at `/milestone-review`, by `gh run rerun` on the PR's run twice and `gh api .../attempts/<n>/jobs` for each, against the 12 min bar. Status set to review with that one measurement outstanding.
 
 ## Decisions
@@ -106,7 +111,8 @@ Review run 2026-09-23 on `m113-suite-once-per-claim`, main at `f8358c4` an ances
 - AC5: read at review against the loops. Grid and fit_resamples reference loops run over `TS_NEW_OUTER_CALLS` and `TS_DESIGNS` (all four); Bayes, both racers and anneal over rolling-origin alone; final fits on rolling-origin for the four tuners plus sliding-window for Bayes; the workflow-set block on rolling-origin. The help named rolling-origin alone for the Bayes final fit, so it did not name exactly the tested set: fixed at review in `R/nested-tune-grid.R`, `R/nested-resamples.R` and `NEWS.md`, `document()` re-run, sweeps clean. The `augment()` help names no per-orchestrator test and needed no change.
 
 - AC4: fresh `devtools::test()` under `NOT_CRAN=true` on macOS at review: 977 blocks, `fail 0 | skip 0 | warn 0` (`ac4-review.log`). `devtools::check()` at review: 0 errors, 0 warnings, 0 notes, its `testthat.R` at 836 s CPU and 447 s wall.
-- AC6: pending the PR. Read after approval at step 8 from the PR's run and two `gh run rerun` attempts, bar 12 min.
+- AC6: FAILS as written. PR #128's `R-CMD-check.yaml` run 35924522778, ubuntu release `Running 'testthat.R'`: attempt 1 `[71m/20m]`, attempt 2 `[71m/20m]`. Two of three at 20 min put the median at 20 or more against the 12 min bar, so attempt 3 was not run. For comparison main's run 35883406135 read 88/25, 55/15 and 49/14 CPU/wall minutes on the same leg, so the leg's figure moves more with the runner than with the suite.
+- AC6 (amended at the gate): run 35924522778 on `f505844`, longest check step per attempt from `gh api .../attempts/<n>/jobs`: attempt 1, 23.0 min (ubuntu devel); attempt 2, 22.8 min (windows); both under 25. Main's run 35883406135 read 29.6, 29.6 and 28.3 for the same figure. `git diff --name-only f505844 HEAD` lists `cairn/` paths alone.
 
 Findings and triage (ranked by their reviewers; [O] diff-bug 17, [S] history 2, [S] prior-review 1):
 - O1: the race and anneal fold-order and ambient-kind blocks fall outside AC3's exceptions and are mapped to grid blocks that assert on `nested_tune_grid()`. To the gate.
