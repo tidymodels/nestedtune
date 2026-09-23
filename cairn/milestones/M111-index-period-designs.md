@@ -1,13 +1,13 @@
 # M111: Index-based and period-based sliding outer designs
 
-- **Status:** planned
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** M110
 - **Driving RR:** —
 - **Principles touched:** IP1, IP4, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs the package supports, and changes an error message
-- **Branch/PR:** —
+- **Branch/PR:** m111-index-period-designs
 
 ## Goal
 
@@ -54,6 +54,7 @@
 - 2026-09-22: created by /milestone-plan with M110. A probe on `main` at `dad72ce` ran `nested_tune_grid()` to completion on both fixtures. `sliding_period(period = "week")` errors inside `nested_cv()` at the default `lookback`. At `lookback` 7 or less, a racer refuses a fold with 2 or fewer inner resamples. At `lookback = 8` the design has 5 folds with 4 or 5 inner resamples each.
 - 2026-09-22: criteria audit findings on M111 were the unstated `sliding_period()` arguments and a message change that needed code. Also a test property stated as a promise, and a final-fit claim tested on one design of two. All were fixed before the gate.
 - 2026-09-22: plan gate chose all six orchestrators on the new designs over `nested_tune_grid()` alone, because the help then states one rule for four designs. Falsified by the added runs pushing a CI leg past its step cap.
+- 2026-09-22: blocked, recorded on `main`. The branch `m111-index-period-designs` holds T1 to T5 and the full work log. The added tests put the ubuntu release check step at about 31 min against its 30 min cap, and a mini gate chose a suite-speed milestone first.
 
 ## Decisions
 
