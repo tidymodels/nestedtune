@@ -48,6 +48,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: implement started on `m112-vignettes-one-leg`, cut from `main` at `aaf2279`. Question gate skipped, since the plan left nothing open.
 - 2026-09-22: checkpoint, T1 to T3 written and not yet checked off. The new test block failed on the old yaml and passes on the new one, and each of the four planted defects failed it at its own line. The full `devtools::test()` run is still going.
 - 2026-09-22: T1 to T3 done. `devtools::test()` passed with 0 failures in 8.2 min, and the workflow test file passed 10 of 10 on the final tree. The comment's figures come from the step times of run 35801023421: macOS 21.4 min was the shortest of the five legs.
+- 2026-09-22: T4 timing, local, in sequence at `ca51211`. With the macOS flags, `R CMD build` took 52 s and `R CMD check` 521 s. With the other legs' flags, they took 1 s and 457 s, so 115 s less in total. Both checks gave 1 NOTE, CRAN incoming feasibility. The other-leg flags add one line to that NOTE: "Package has a VignetteBuilder field but no prebuilt vignette index." The branch and baseline `devtools::check()` runs are being redone. The first branch run wrote an empty log, and the baseline showed a `.git` NOTE that came from the worktree.
 
 ## Decisions
 
