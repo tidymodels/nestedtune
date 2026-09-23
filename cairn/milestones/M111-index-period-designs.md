@@ -67,6 +67,8 @@
 - 2026-09-23: T7 drafts checked against AC7. `devtools::document()` left no diff. All six prose sweeps and `check_pkgdown()` are clean.
 - claim audit: 33 claims read, 9 corrected — NEWS.md, test-time-series-bayes.R, test-time-series-anneal.R, test-time-series-race.R, test-time-series-designs.R, helper-orchestration.R
 - 2026-09-23: T7 done. `devtools::check()` at `f0484d4` gave 0 errors, 0 warnings and 0 notes. The branch point `main` also gave 0 notes, at M112's review. The later audit corrections change only comments and NEWS.md. Status set to review.
+- 2026-09-23: gate fixes F1, F4, F6, F7 and F9 landed at `e301e9d`. `devtools::test()` then ran 1004 tests with 0 failed, 0 errors and 0 skipped.
+- step-7 approval: m111-index-period-designs approved for merge
 
 ## Decisions
 
