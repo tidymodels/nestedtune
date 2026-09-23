@@ -109,7 +109,7 @@ test_that("the reference loop also matches with a stochastic engine", {
   )
 
   set.seed(21)
-  res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
 
   ref <- memoised(reference_nested_loop(
     wf,
@@ -170,9 +170,10 @@ test_that("a control passed through `...` reaches the inner tune_grid() (M48)", 
   }
 
   # The discrimination: the same run without the control is not this one, so
-  # the match above is not the default run agreeing with itself.
+  # the match above is not the default run agreeing with itself. The plain
+  # run is the stochastic oracle's, served from the cache (M113).
   set.seed(21)
-  plain <- nested_tune_grid(wf, folds, grid = grid, metrics = ms)
+  plain <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
   expect_false(identical(plain$.metrics, res$.metrics))
 })
 

@@ -1,11 +1,19 @@
-# IP2 for the Bayesian path (M45 AC4). The eight properties
-# test-nested-tune-grid-rng.R holds the grid path to, asserted on
-# nested_tune_bayes(), plus the one rule that is this path's own: the
-# Gaussian-process seed is the fold's tuning seed, and the control carrying it
-# is built inside that seed's scope. Every test that could pass vacuously under
-# a deterministic engine uses ranger, whose fits draw from R's RNG; the
-# proposals themselves draw too, through tune's own `set.seed(control$seed +
-# i)` calls, which is what the seed rule fixes.
+# The "the caller's RNG state and kind survive the call untouched" and "a
+# session with no RNG state is left with a valid one" blocks were pinned here
+# until M113. The success-path RNG restore is one shared site in
+# `nested_loop()`, so test-nested-tune-grid-rng.R covers it (D-079).
+#
+# IP2 for the Bayesian path (M45 AC4). Five of the eight properties
+# test-nested-tune-grid-rng.R holds the grid path to are asserted here on
+# nested_tune_bayes(); the caller's-RNG-survives, folds-fail restore and
+# no-RNG-state properties are covered once, in test-nested-tune-grid-rng.R
+# (D-079). Plus the one rule
+# that is this path's own: the Gaussian-process seed is the fold's tuning
+# seed, and the control carrying it is built inside that seed's scope. Every
+# test that could pass vacuously under a deterministic engine uses ranger,
+# whose fits draw from R's RNG; the proposals themselves draw too, through
+# tune's own `set.seed(control$seed + i)` calls, which is what the seed rule
+# fixes.
 
 bayes_tuner <- function() tuner_bayes(2, 3, tune::exp_improve())
 
@@ -244,56 +252,6 @@ test_that("the Gaussian-process seed is the fold's tuning seed, set inside its s
   expect_identical(seen$state, get(".Random.seed", envir = globalenv()))
 })
 
-test_that("the caller's RNG state and kind survive the call untouched", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  p <- bayes_param_info(wf)
-  ms <- reg_metrics()
-
-  set.seed(6)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-
-  set.seed(404)
-  before_seed <- .Random.seed
-  before_kind <- RNGkind()
-  invisible(nested_tune_bayes(
-    wf,
-    folds,
-    iter = 1,
-    initial = 3,
-    param_info = p,
-    metrics = ms
-  ))
-
-  expect_identical(.Random.seed, before_seed)
-  expect_identical(RNGkind(), before_kind)
-
-  # Net-zero stated the way a user would notice it: what they draw next is
-  # what they would have drawn had the call not been there.
-  set.seed(404)
-  with_call <- {
-    invisible(nested_tune_bayes(
-      wf,
-      folds,
-      iter = 1,
-      initial = 3,
-      param_info = p,
-      metrics = ms
-    ))
-    runif(3)
-  }
-  set.seed(404)
-  without_call <- runif(3)
-
-  expect_identical(with_call, without_call)
-})
-
 test_that("the RNG state is restored when the call itself errors", {
   skip_if_no_bayes_fixture()
 
@@ -331,31 +289,4 @@ test_that("the RNG state is restored when the call itself errors", {
 
   expect_identical(.Random.seed, before_seed)
   expect_identical(RNGkind(), before_kind)
-})
-
-test_that("a session with no RNG state is left with a valid one", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  p <- bayes_param_info(wf)
-
-  set.seed(8)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-
-  saved <- .Random.seed
-  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
-  rm(".Random.seed", envir = globalenv())
-
-  expect_no_error(
-    nested_tune_bayes(wf, folds, iter = 1, initial = 3, param_info = p)
-  )
-  # Nothing to restore, so the state the call created stays -- removing it
-  # would leave the session worse off than it was found.
-  expect_true(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
-  expect_no_error(runif(1))
 })

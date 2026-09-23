@@ -443,7 +443,7 @@ for (design in names(TS_DESIGNS)) {
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       set.seed(25)
-      res <- nested_fit_resamples(wf, folds, metrics = ms)
+      res <- memoised(nested_fit_resamples(wf, folds, metrics = ms))
       plain <- tune::fit_resamples(
         wf,
         resamples = outer,
@@ -473,8 +473,8 @@ for (design in names(TS_DESIGNS)) {
 
 # The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
 # tuning run, an empty selection, and the plain fit on every row under the
-# recorded fit seed. Run on every design in TS_DESIGNS, so the help's
-# "tested on all four" holds for this result too.
+# recorded fit seed. Run on every design in TS_DESIGNS, so the help's claim
+# that `nested_fit_resamples()` results are tested on all four holds.
 for (design in names(TS_DESIGNS)) {
   build <- TS_DESIGNS[[design]]
 
@@ -490,8 +490,9 @@ for (design in names(TS_DESIGNS)) {
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
 
+      # The seed-25 run the block above built, served from the cache (M113).
       set.seed(25)
-      res <- nested_fit_resamples(wf, folds, metrics = ts_metrics())
+      res <- memoised(nested_fit_resamples(wf, folds, metrics = ts_metrics()))
       set.seed(44)
       final <- nested_final_fit(wf, res)
 

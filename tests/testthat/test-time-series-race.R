@@ -1,15 +1,18 @@
-# The two racing tuners on the time-series designs (M110, M111), and their
-# final fits on the rolling-origin design. DESIGN Conventions: oracles are
-# recorded in the test file that asserts them. The M110 tests sit in four
-# files, test-time-series-*.R, so no one file runs alone for long under
-# parallel test files.
+# The two racing tuners on the rolling-origin time-series design (M110, cut
+# to one design at M113 under D-079), and their final fits on the same
+# design. DESIGN Conventions: oracles are recorded in the test file that
+# asserts them. The M110 tests sit in four files, test-time-series-*.R, so
+# no one file runs alone for long under parallel test files.
 #
 # O1 -- type "live" (reference implementation). Source:
 #   reference_nested_race_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver, run here for each racer on
-#   every design in TS_DESIGNS (M110, M111). Pinned by the "<racer>
-#   matches its reference loop on a ... design" tests. Satisfies M110 AC1 for
-#   these tuners.
+#   the rolling-origin design alone (M113): the outer design never reaches
+#   tuner code, every fixture's inner call is the same `rolling_origin()`,
+#   and test-time-series-designs.R runs the grid and fit_resamples paths on
+#   every design in TS_DESIGNS. Pinned by the "<racer> matches its reference
+#   loop on a rolling-origin design" tests. Satisfies M110 AC1 for these
+#   tuners.
 #
 # O2 -- type "live" (reference implementation). Source:
 #   reference_race_final_fit() in helper-orchestration.R, handed the
@@ -35,7 +38,7 @@ ts_race_run <- function(fn, wf, folds, g, ms, ctrl) {
   ))
 }
 
-for (design in names(TS_DESIGNS)) {
+for (design in "rolling-origin") {
   build <- TS_DESIGNS[[design]]
 
   for (fn in RACERS) {

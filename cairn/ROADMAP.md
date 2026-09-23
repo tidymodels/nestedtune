@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-23 (M111 done and archived. M109 row pruned. Valida
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M113 | The suite runs in three quarters of its serial time with no line of coverage lost | planned | — | high | milestones/M113-suite-once-per-claim.md |
+| M113 | The suite runs in three quarters of its serial time with no line of coverage lost | review | — | high | milestones/M113-suite-once-per-claim.md |
 | M111 | Index-based and period-based sliding outer designs | done | M110 | normal | milestones/archive/M111-index-period-designs.md |
 | M112 | Vignettes built and checked on the macOS check leg alone | done | — | high | milestones/archive/M112-vignettes-one-leg.md |
 | M110 | Rolling-origin and sliding-window designs under every orchestrator | done | — | normal | milestones/archive/M110-time-series-all-tuners.md |

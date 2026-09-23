@@ -1883,6 +1883,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `nested_tune_bayes()`, the two racers and `nested_tune_sim_anneal()` are tested against their reference loop on the rolling-origin design alone. `nested_tune_grid()`, `nested_fit_resamples()` and `nested_final_fit()` stay tested on all four, and `nested_workflow_map()` on rolling-origin (D-075). The help and `NEWS.md` state which function is tested on which design. Four further families go: agreement with tune's selector for the Bayes and annealing selection-rule blocks; serial-parallel identity at three daemons for BC10, BC12 and BC13; caller-RNG-survival and no-RNG-state on the success path in the Bayes, race and anneal rng files; the fold-order and ambient-kind blocks in the race and anneal rng files. IP2 stays evidenced for every tuner at two daemons and for grid at two counts. GP2's oracle count for the selection rules stays two, grid and racing.
 **Consequences:** the support for the three tuners on the sliding designs rests on the shared loop, not on a per-tuner test. Falsified by a tuner failing on a sliding design that passes on rolling-origin, by a tuner-specific draw or selection reaching a shared site, or by a tuner's result changing with the daemon count. (Supersedes D-074's rejection clause and narrows D-078's tested set.)
 
+### D-080 (2026-09-23): `nested_final_fit()` stays tested on all four time-series designs for grid and fit_resamples results, on rolling-origin for the other tuners' results, and on sliding-window for Bayes results as well. Corrects D-079's Decision
+
+**Context:** M113's review found D-079's Decision saying `nested_final_fit()` "stay[s] tested on all four". The tests compare the final fit on all four designs for `nested_tune_grid()` and `nested_fit_resamples()` results alone. For Bayes, racing and annealing results they compare it on rolling-origin, and for Bayes results on sliding-window too, the test D-075 rests on.
+**Decision:** D-079 stands with that clause read as this entry states it. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` say the same.
+**Consequences:** none beyond the wording. Falsified by a final-fit test on a further design landing without this entry being superseded. (Corrects D-079's Decision.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

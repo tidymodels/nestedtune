@@ -34,7 +34,8 @@
 #
 # O4 -- type "invariant" (mode independence), pinned in
 #   test-parallel-identity.R as BC12: the same seed gives an identical result
-#   serially and at two daemon counts. Recorded here for the audit.
+#   serially and at two daemons (the three-daemon repeat went at M113,
+#   D-079). Recorded here for the audit.
 #
 # O1 and O2 are the >=2 independent oracle types GP2 asks of the package's own
 # contribution -- the call, the seed, the record, the loop. The elimination
@@ -369,15 +370,22 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     ))
     picked <- list()
     for (nm in names(rules)) {
-      set.seed(20)
-      res <- race_fn(fn)(
-        wf,
-        folds,
-        grid = det_grid(),
-        metrics = ms,
-        control = ctrl,
-        select = rules[[nm]]
-      )
+      if (nm == "best") {
+        # The default rule is `best`, so race_results(fn), which seeds
+        # itself, is this run, served from the cache; the `select` assertion
+        # below checks the record equals the rule written out (M113).
+        res <- race_results(fn)
+      } else {
+        set.seed(20)
+        res <- race_fn(fn)(
+          wf,
+          folds,
+          grid = det_grid(),
+          metrics = ms,
+          control = ctrl,
+          select = rules[[nm]]
+        )
+      }
       ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
       expect_matches_reference(res, ref, "rmse")
       expect_identical(extract_procedure(res)$select, rules[[nm]])

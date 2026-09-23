@@ -26,8 +26,9 @@
 #
 # O3 -- type "invariant" (mode independence), pinned in
 #   test-parallel-identity.R as BC10: the same seed gives an identical result
-#   serially and at two daemon counts. Recorded here for the audit; the
-#   assertion lives with the other dispatch identities.
+#   serially and at two daemons (the three-daemon repeat went at M113,
+#   D-079). Recorded here for the audit; the assertion lives with the other
+#   dispatch identities.
 #
 # O4 -- type "live" (reference implementation), M48. Source: the same
 #   reference loop, handed the caller's `control_bayes()` and applying the
@@ -424,73 +425,15 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
   }
 })
 
-# The selection rule on the Bayesian path (M69, AC1): the reference loop's
-# selection is tune's selector called by name on the hand run
-# (reference_select(), helper-orchestration.R), so O1 pins the rule as it
-# pins the default. Measured 2026-09-06 on bayes_results()'s fixture under
-# seed 20: best picks (5,1), (5,1), (1,5); one_std_err by df1 (5,1), (5,1),
-# (1,10); pct_loss by df1 at limit 5 (1,5), (5,1), (1,10).
-
-test_that("AC1: each selection rule picks what tune's selector picks on the fold's Bayesian run (M69)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- det_nested(d)
-  p <- bayes_param_info(wf)
-  ms <- reg_metrics()
-
-  rules <- list(
-    best = selection_rule("best"),
-    one_std_err = selection_rule("one_std_err", df1),
-    pct_loss = selection_rule("pct_loss", df1, limit = 5)
-  )
-  # One reference tuning stage for the configuration -- the one the default
-  # oracle above built, served from the cache -- and each rule applied to it
-  # through reference_with_rule() (M74).
-  set.seed(20)
-  ref_best <- memoised(reference_nested_bayes_loop(
-    wf,
-    folds,
-    iter = 2,
-    initial = 3,
-    objective = tune::exp_improve(),
-    param_info = p,
-    metrics = ms,
-    seed = 20,
-    metric_name = "rmse"
-  ))
-  picked <- list()
-  for (nm in names(rules)) {
-    set.seed(20)
-    res <- nested_tune_bayes(
-      wf,
-      folds,
-      iter = 2,
-      initial = 3,
-      param_info = p,
-      metrics = ms,
-      select = rules[[nm]]
-    )
-    expect_true(all(res$.completed), info = nm)
-    ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
-    for (i in seq_len(nrow(res))) {
-      expect_identical(res$.selected[[i]], ref[[i]]$selected, info = nm)
-      expect_identical(res$.metrics[[i]], ref[[i]]$metrics, info = nm)
-    }
-    expect_identical(extract_procedure(res)$select, rules[[nm]])
-    picked[[nm]] <- res$.selected
-  }
-
-  # The rule reached the selection (see the note above).
-  expect_false(identical(picked$one_std_err, picked$best))
-  expect_false(identical(picked$pct_loss, picked$best))
-})
+# The M69 selection-rule block for the Bayesian path was pinned here until
+# M113. `apply_selection_rule()` is one shared site inside
+# `nested_fold_fit()`, so the grid and racing oracle files' selection-rule
+# blocks cover it (D-079).
 
 # The desirability rule on the Bayesian path (M109, AC2): the reference is
 # desirability2::select_best_desirability(), called by name with the terms
 # written out, on each fold's hand run from reference_nested_bayes_loop()
-# under the default rule, the cached run the test above reads. Parameter
+# under the default rule, served from the cache. Parameter
 # columns and `.config` only. Measured 2026-09-21 on this fixture under seed
 # 20 (tune 2.1.0, desirability2 0.2.0): best picks (5,1), (5,1), (1,5), and
 # the terms below pick (1,5), (5,1), (1,5). The first fold differs, so a

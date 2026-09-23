@@ -53,10 +53,9 @@ VignetteBuilder: knitr
 Config/Needs/website: tidymodels, tidyverse/tidytemplate, pkgdown
 Config/testthat/edition: 3
 Config/testthat/parallel: true
-Config/testthat/start-first: nested-tune-bayes-oracles, parallel-identity,
-    nested-tune-race-rng, nested-tune-bayes-rng, nested-tune-race-oracles,
-    nested-tune-bayes-results, nested-tune-sim-anneal-rng,
-    nested-tune-grid-failures, nested-tune-sim-anneal-oracles,
-    nested-tune-grid-oracles, nested-final-fit-oracles, time-series-bayes,
-    time-series-race
+Config/testthat/start-first: parallel-identity, time-series-bayes,
+    nested-tune-bayes-oracles, nested-tune-grid-oracles, time-series-designs,
+    nested-tune-race-oracles, nested-final-fit-oracles,
+    nested-tune-bayes-results, nested-tune-bayes-rng, time-series-race,
+    nested-tune-grid-failures
 Config/roxygen2/version: 8.1.0

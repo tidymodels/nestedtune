@@ -108,13 +108,16 @@
 #' Time-series designs are supported for an outer
 #' [rsample::rolling_origin()], [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] with an inner
-#' [rsample::rolling_origin()]. Every orchestrator is tested on all four:
-#' [nested_tune_grid()], [nested_tune_bayes()], [nested_tune_race_anova()],
-#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] and
-#' [nested_fit_resamples()]. [nested_final_fit()] is tested on all four for
-#' [nested_tune_grid()] and [nested_fit_resamples()] results, and
-#' [nested_workflow_map()] on the rolling-origin design. An inner design
-#' other than [rsample::rolling_origin()] is not tested.
+#' [rsample::rolling_origin()]. [nested_tune_grid()] and
+#' [nested_fit_resamples()] are tested on all four, and so is
+#' [nested_final_fit()] for their results. [nested_tune_bayes()],
+#' [nested_tune_race_anova()], [nested_tune_race_win_loss()] and
+#' [nested_tune_sim_anneal()] are tested on the rolling-origin design, and
+#' so is [nested_final_fit()] for their results, plus the sliding-window
+#' design for [nested_tune_bayes()] results. [nested_workflow_map()] is
+#' tested on the rolling-origin design. The outer design never reaches the
+#' tuner: each tuner is handed one outer fold's inner resamples at a time.
+#' An inner design other than [rsample::rolling_origin()] is not tested.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
 #' assessment sets leave rows out. When the assessment sets overlap, its
 #' error also counts the rows held out more than once.

@@ -21,8 +21,17 @@ test_that("the same seed produces the same result", {
     inside = rsample::vfold_cv(v = 3)
   )
 
+  # `first` is served from the cache on a repeat, built directly on the first
+  # request, and `second` is always direct, so the identity below compares a
+  # direct build with a direct call, never a cached object with itself (M42
+  # lesson, M113).
   set.seed(77)
-  first <- nested_tune_grid(wf, folds, grid = stoch_grid(), metrics = ms)
+  first <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = stoch_grid(),
+    metrics = ms
+  ))
   set.seed(77)
   second <- nested_tune_grid(wf, folds, grid = stoch_grid(), metrics = ms)
 
@@ -45,8 +54,14 @@ test_that("a different seed produces different numbers", {
     inside = rsample::vfold_cv(v = 3)
   )
 
+  # The seed-77 run the block above built, served from the cache (M113).
   set.seed(77)
-  first <- nested_tune_grid(wf, folds, grid = stoch_grid(), metrics = ms)
+  first <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = stoch_grid(),
+    metrics = ms
+  ))
   set.seed(78)
   other <- nested_tune_grid(wf, folds, grid = stoch_grid(), metrics = ms)
 

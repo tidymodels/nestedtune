@@ -21,16 +21,19 @@
   refuse the rule with class `nestedtune_pkg_not_installed`.
 
 * Every orchestrator and `nested_final_fit()` support an outer
-  `rsample::rolling_origin()` or `rsample::sliding_window()` design with
-  an inner `rsample::rolling_origin()` design. `nested_workflow_map()` is
-  tested on the rolling-origin design. `nested_resamples()` builds these
-  designs with the same splits as `rsample::nested_cv()`. Every
-  orchestrator is also tested on an outer `rsample::sliding_index()` or
-  `rsample::sliding_period()` design with an inner
-  `rsample::rolling_origin()` design. So is `nested_final_fit()`, for
-  `nested_tune_grid()` and `nested_fit_resamples()` results. `nested_resamples()` builds
-  these with the same splits as `rsample::nested_cv()` too. An inner design
-  other than `rsample::rolling_origin()` is not tested.
+  `rsample::rolling_origin()`, `rsample::sliding_window()`,
+  `rsample::sliding_index()` or `rsample::sliding_period()` design with
+  an inner `rsample::rolling_origin()` design. `nested_tune_grid()` and
+  `nested_fit_resamples()` are tested on all four, and so is
+  `nested_final_fit()` for their results. `nested_tune_bayes()`,
+  `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and
+  `nested_tune_sim_anneal()` are tested on the rolling-origin design, and
+  so is `nested_final_fit()` for their results, plus the sliding-window
+  design for `nested_tune_bayes()` results. `nested_workflow_map()` is
+  tested on the rolling-origin design.
+  `nested_resamples()` builds all four designs with the same splits as
+  `rsample::nested_cv()`. An inner design other than
+  `rsample::rolling_origin()` is not tested.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no
