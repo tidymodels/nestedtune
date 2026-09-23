@@ -88,3 +88,77 @@ test_that("job_uses() reads a job's steps in order and stops at the next job", {
 
   expect_null(job_uses(path, "no-such-job"))
 })
+
+# The value of the one `key:` line in the step whose line matches `anchor`, or
+# NULL when the step has none or more than one. A step starts at a `- ` line,
+# so the step runs from the anchor to the next such line at the same or smaller
+# indent.
+step_value <- function(lines, anchor, key) {
+  start <- grep(anchor, lines, fixed = TRUE)
+  if (length(start) != 1L) {
+    return(NULL)
+  }
+  indent <- nchar(sub("-.*$", "", lines[[start]]))
+  later <- which(
+    seq_along(lines) > start &
+      grepl("^\\s*- ", lines) &
+      nchar(sub("-.*$", "", lines)) <= indent
+  )
+  end <- if (length(later)) later[[1]] - 1L else length(lines)
+  hit <- grep(paste0("^\\s*", key, ":\\s"), lines[start:end], value = TRUE)
+  if (length(hit) != 1L) {
+    return(NULL)
+  }
+  trimws(sub(paste0("^\\s*", key, ":\\s*"), "", hit))
+}
+
+# The two string arms of `${{ matrix.config.os == '<os>' && '<a>' || '<b>' }}`,
+# or NULL when the value is not that one expression.
+os_arms <- function(value, os) {
+  pattern <- paste0(
+    "^\\$\\{\\{ matrix\\.config\\.os == '",
+    os,
+    "' && '([^']+)' \\|\\| '([^']+)' \\}\\}$"
+  )
+  if (is.null(value) || !grepl(pattern, value)) {
+    return(NULL)
+  }
+  c(on = sub(pattern, "\\1", value), off = sub(pattern, "\\2", value))
+}
+
+# Only the macOS leg builds and checks the vignettes, which buys the other four
+# legs' check step the time the vignettes cost them. `args` is written out on
+# both arms because setting it replaces the action's default of
+# `c("--no-manual","--as-cran")`, which would otherwise drop `--as-cran`.
+test_that("R-CMD-check.yaml builds and checks the vignettes on macOS alone", {
+  path <- workflow_path("R-CMD-check.yaml")
+  skip_if_not(
+    file.exists(path),
+    "workflow sources are not in the built package"
+  )
+  lines <- readLines(path, warn = FALSE)
+
+  # A matrix entry in flow form (`- {os: macos-latest, ...}`) or block form
+  # (`- os: macos-latest`), with the value quoted or not.
+  macos_entry <- "^\\s*-?\\s*\\{?\\s*os:\\s*['\"]?macos-latest['\"]?\\s*([,}]|$)"
+  expect_length(grep(macos_entry, lines), 1L)
+
+  anchor <- "uses: r-lib/actions/check-r-package@"
+  build_args <- os_arms(step_value(lines, anchor, "build_args"), "macos-latest")
+  args <- os_arms(step_value(lines, anchor, "args"), "macos-latest")
+
+  expect_identical(
+    build_args,
+    c(
+      on = 'c("--no-manual","--compact-vignettes=gs+qpdf")',
+      off = 'c("--no-manual","--no-build-vignettes")'
+    )
+  )
+  expect_identical(
+    args,
+    c(
+      on = 'c("--no-manual","--as-cran")',
+      off = 'c("--no-manual","--as-cran","--ignore-vignettes")'
+    )
+  )
+})
