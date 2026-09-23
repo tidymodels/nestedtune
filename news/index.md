@@ -41,34 +41,36 @@
 - Every orchestrator and
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   support an outer
-  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-  or
-  [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-  design with an inner
-  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-  design.
-  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-  is tested on the rolling-origin design.
-  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  builds these designs with the same splits as
-  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-  Every orchestrator is also tested on an outer
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+  [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
   [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
   or
   [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
   design with an inner
   [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-  design. So is
-  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-  for
+  design.
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   and
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  are tested on all four, and so is
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  for their results.
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+  and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  are tested on the rolling-origin design, and so is
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  for their results, plus the sliding-window design for
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
   results.
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  is tested on the rolling-origin design.
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  builds these with the same splits as
-  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-  too. An inner design other than
+  builds all four designs with the same splits as
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
+  An inner design other than
   [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
   is not tested.
 

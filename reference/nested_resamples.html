@@ -129,11 +129,14 @@ the inner assessment set, which makes the estimate invalid.</p>
 <p>An outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is tested to give the same splits as
-<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. Every orchestrator is tested on all four designs,
-and so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> results. <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on the
-rolling-origin design. An inner design other than
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is not tested.</p>
+<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
+are tested on all four designs, and so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their
+results. <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> are tested
+on the rolling-origin design, and so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their
+results, plus the sliding-window design for <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>
+results. <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on the rolling-origin design.
+An inner design other than <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is not tested.</p>
     </div>
     <div class="section level2">
     <h2 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h2>

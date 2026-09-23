@@ -381,13 +381,16 @@ assembled by hand can index rows its outer fold never sees.</p>
 <p>Time-series designs are supported for an outer
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>. Every orchestrator is tested on all four:
-<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code>nested_tune_sim_anneal()</code> and
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested on all four for
-<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> results, and
-<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> on the rolling-origin design. An inner design
-other than <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is not tested.
+<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> are tested on all four, and so is
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their results. <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and
+<code>nested_tune_sim_anneal()</code> are tested on the rolling-origin design, and
+so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their results, plus the sliding-window
+design for <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> results. <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is
+tested on the rolling-origin design. The outer design never reaches the
+tuner: each tuner is handed one outer fold's inner resamples at a time.
+An inner design other than <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> is not tested.
 <code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
 assessment sets leave rows out. When the assessment sets overlap, its
 error also counts the rows held out more than once.</p>

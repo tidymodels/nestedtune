@@ -234,19 +234,25 @@ or
 [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 with an inner
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html).
-Every orchestrator is tested on all four: `nested_tune_grid()`,
+`nested_tune_grid()` and
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+are tested on all four, and so is
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+for their results.
 [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
 [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
 and
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md).
+[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+are tested on the rolling-origin design, and so is
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-is tested on all four for `nested_tune_grid()` and
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-results, and
+for their results, plus the sliding-window design for
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+results.
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-on the rolling-origin design. An inner design other than
+is tested on the rolling-origin design. The outer design never reaches
+the tuner: each tuner is handed one outer fold's inner resamples at a
+time. An inner design other than
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
 is not tested.
 [`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
