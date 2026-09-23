@@ -48,6 +48,26 @@ Cut the test suite's serial time to three quarters of today's by removing repeat
 - [ ] T7: Write the removals ledger in this file (block, file:line at `5088fb7`, surviving block or D-079 clause). Then measure AC1, AC2 and AC4 on the head and put the figures in `benchmarks/test-timing-baseline.md`.
 - [ ] T8: Push the measured head, read three `R-CMD-check.yaml` attempts per the M51 lesson, and log AC6's figure with the run id and attempt numbers.
 
+## Removals ledger
+
+Blocks whose description is gone at the head, by file and line at `5088fb7`, and where each claim now lives. Runtime blocks are the ones a loop built.
+
+| Block at `5088fb7` | Where the claim lives now |
+|---|---|
+| `test-time-series-bayes.R:53` on sliding-window, sliding-index, sliding-period (3 runtime blocks) | D-079 (a) |
+| `test-time-series-race.R:43` on the same three designs, both racers (6 runtime blocks) | D-079 (a) |
+| `test-time-series-anneal.R:41` on the same three designs (3 runtime blocks) | D-079 (a) |
+| `test-nested-tune-bayes-oracles.R:434` M69 selection rules | D-079 (b) |
+| `test-nested-tune-sim-anneal-oracles.R:308` M69 selection rules | D-079 (b) |
+| `test-parallel-identity.R:915` BC10, `:944` BC12, `:981` BC13 at three daemons | D-079 (c) |
+| `test-nested-tune-bayes-rng.R:247` caller's state survives, `:336` no RNG state | D-079 (d) |
+| `test-nested-tune-race-rng.R:204` caller's state survives, `:279` no RNG state | D-079 (d) |
+| `test-nested-tune-sim-anneal-rng.R:199` caller's state survives, `:270` no RNG state | D-079 (d) |
+| `test-nested-tune-race-rng.R:103` fold order, `:149` ambient RNG kind | `test-nested-tune-grid-rng.R:59` and `:97`, the same descriptions on the shared `set_fold_seed()` site; D-079 names the drop, AC3's list does not, so review decides whether the grid block asserts the claim |
+| `test-nested-tune-sim-anneal-rng.R:98` fold order, `:144` ambient RNG kind | the same two grid blocks, on the same reading |
+
+Blocks whose body differs and whose every `expect_*()` call stands: the time-series loops' surviving blocks, `test-nested-tune-race-oracles.R:341`, `test-nested-fit-resamples-oracles.R:99` and `:240`, `test-nested-tune-grid-oracles.R:96` and `:132`, `test-nested-tune-grid-rng.R:10` and `:34`, `test-nested-workflow-map-readers.R:151` and `:201`, `test-nested-workflow-map-oracles.R:70`, `test-time-series-designs.R:431` and `:481` (8 runtime blocks), `test-nested-resamples-memory.R`'s three blocks, and `test-parallel-identity.R:120` BC4.
+
 ## Work log
 
 - 2026-09-23: created by /milestone-plan. Serial suite at `5088fb7` measured by `devtools::test()` under `TESTTHAT_PARALLEL=FALSE`: 1276.4 s over 1004 blocks, 0 failed, 0 skipped. The four `test-time-series-*.R` files took 299 s, `test-nested-tune-bayes-oracles.R` 95 s, `test-parallel-identity.R` 85 s. In CI run 35883406135, the ubuntu release `testthat.R` took 25 min of a 26 min check step, and the macOS step took 29 of its 30 min cap.
