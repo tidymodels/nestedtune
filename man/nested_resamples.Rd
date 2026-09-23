@@ -56,11 +56,13 @@ the inner assessment set, which makes the estimate invalid.
 An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is tested to give the same splits as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. Every orchestrator is tested on all four designs,
-and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for \code{\link[=nested_tune_grid]{nested_tune_grid()}} and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on the
-rolling-origin design. An inner design other than
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
+are tested on all four designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their
+results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested
+on the rolling-origin design, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their
+results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on the rolling-origin design.
+An inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
 }
 
 \section{Memory}{

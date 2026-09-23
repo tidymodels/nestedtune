@@ -1,14 +1,17 @@
-# nested_tune_bayes() on the time-series designs (M110, M111), and its final
-# fit on the rolling-origin and sliding-window designs.
+# nested_tune_bayes() on the rolling-origin time-series design (M110, cut to
+# one design at M113 under D-079), and its final fit on the rolling-origin
+# and sliding-window designs.
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 # The M110 tests sit in four files, test-time-series-*.R, so no one file runs
 # alone for long under parallel test files.
 #
 # O1 -- type "live" (reference implementation). Source:
 #   reference_nested_bayes_loop() in helper-orchestration.R, written from the
-#   seed contract rather than from the driver, run here on every design in
-#   TS_DESIGNS (M110, M111). Pinned by the
-#   "nested_tune_bayes() matches its reference loop on a ... design" tests.
+#   seed contract rather than from the driver, run here on the rolling-origin
+#   design alone (M113): the outer design never reaches tuner code, and
+#   test-time-series-designs.R runs the grid and fit_resamples paths on every
+#   design in TS_DESIGNS. Pinned by the
+#   "nested_tune_bayes() matches its reference loop on a ... design" test.
 #   Satisfies M110 AC1 for this tuner.
 #
 # O2 -- type "live" (reference implementation). Source:
@@ -40,47 +43,48 @@ ts_bayes_run <- function(wf, folds, p, ms) {
   ))
 }
 
-for (design in names(TS_DESIGNS)) {
+for (design in c("rolling-origin", "sliding-window")) {
   build <- TS_DESIGNS[[design]]
 
-  test_that(
-    sprintf(
-      "nested_tune_bayes() matches its reference loop on a %s design",
-      design
-    ),
-    {
-      skip_if_no_bayes_fixture()
-      d <- TS_DATA[[design]]()
-      wf <- bayes_workflow(d)
-      folds <- build(d)
-      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-      p <- bayes_param_info(wf)
-      ms <- ts_metrics()
+  # The reference loop runs on the rolling-origin design alone (M113); the
+  # sliding-window run below serves only its final-fit test.
+  if (design == "rolling-origin") {
+    test_that(
+      sprintf(
+        "nested_tune_bayes() matches its reference loop on a %s design",
+        design
+      ),
+      {
+        skip_if_no_bayes_fixture()
+        d <- TS_DATA[[design]]()
+        wf <- bayes_workflow(d)
+        folds <- build(d)
+        expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
+        p <- bayes_param_info(wf)
+        ms <- ts_metrics()
 
-      res <- ts_bayes_run(wf, folds, p, ms)
-      ref <- memoised(reference_nested_bayes_loop(
-        wf,
-        folds,
-        iter = 2,
-        initial = 3,
-        objective = tune::exp_improve(),
-        param_info = p,
-        metrics = ms,
-        seed = 22,
-        metric_name = "rmse"
-      ))
+        res <- ts_bayes_run(wf, folds, p, ms)
+        ref <- memoised(reference_nested_bayes_loop(
+          wf,
+          folds,
+          iter = 2,
+          initial = 3,
+          objective = tune::exp_improve(),
+          param_info = p,
+          metrics = ms,
+          seed = 22,
+          metric_name = "rmse"
+        ))
 
-      expect_ts_matches_reference(res, ref)
-    }
-  )
+        expect_ts_matches_reference(res, ref)
+      }
+    )
+  }
 
   # The final fit reads the data and the recorded procedure, never the
   # outer split indices, so the two M110 designs stand for the M111 ones and
-  # the suite does not pay for two more final fits (M111).
-  if (!design %in% c("rolling-origin", "sliding-window")) {
-    next
-  }
-
+  # the suite does not pay for two more final fits (M111). The sliding-window
+  # test is what evidences that claim (D-075), so it stays under M113.
   test_that(
     sprintf(
       "the Bayesian final fit on a %s result matches its reference",

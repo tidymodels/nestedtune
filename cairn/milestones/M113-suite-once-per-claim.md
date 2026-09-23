@@ -1,13 +1,13 @@
 # M113: The suite runs in three quarters of its serial time with no line of coverage lost
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing, because the help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` change what they say is tested
-- **Branch/PR:** —
+- **Branch/PR:** m113-suite-once-per-claim
 
 ## Goal
 
@@ -40,7 +40,7 @@ Cut the test suite's serial time to three quarters of today's by removing repeat
 ## Tasks
 
 - [ ] T1: Baselines on `5088fb7`. Run `Rscript benchmarks/profile-tests.R 3` and record it in `benchmarks/test-timing-baseline.md` with its conditions. Run covr serially with the sidecar merged and save the per-line hits under `benchmarks/`, keyed by file and non-roxygen position. Run `gh run rerun 35883406135` twice, read the three attempts' `testthat.R` elapsed figures from `gh api .../attempts/<n>/jobs`, and log their median.
-- [ ] T2: `test-time-series-{bayes,race,anneal}.R` loop over the rolling-origin design alone. `TS_DESIGNS` keeps all four for `test-time-series-designs.R`. Reword the help at `R/nested-tune-grid.R:108-117` and `R/nested-resamples.R:40-49`, the `augment()` help, and `NEWS.md:24-33` from the tests' own loops. D-079 is on `main` from the plan commit. Re-read `Config/testthat/start-first` against the new file times.
+- [x] T2: `test-time-series-{bayes,race,anneal}.R` loop over the rolling-origin design alone. `TS_DESIGNS` keeps all four for `test-time-series-designs.R`. Reword the help at `R/nested-tune-grid.R:108-117` and `R/nested-resamples.R:40-49`, the `augment()` help, and `NEWS.md:24-33` from the tests' own loops. D-079 is on `main` from the plan commit. Re-read `Config/testthat/start-first` against the new file times.
 - [ ] T3: Selection-rule loops. Drop the Bayes (`test-nested-tune-bayes-oracles.R:434`) and anneal (`test-nested-tune-sim-anneal-oracles.R:308`) M69 blocks. Grid's (`test-nested-tune-grid-oracles.R:313`) and race's (`test-nested-tune-race-oracles.R:341`) explicit `best` step reads the cached fixture, and the `procedure$select` assertion stays.
 - [ ] T4: RNG duplicates. Drop the success-path "caller's state survives" and "no RNG state" blocks in `test-nested-tune-{bayes,race,sim-anneal}-rng.R`. Grid's copies and every error-path copy stay. Drop the fold-order and ambient-kind blocks in the race and anneal rng files. Bayes keeps them for its control seed slot.
 - [ ] T5: Cache the fresh repeats. `test-nested-fit-resamples-oracles.R:108,258` read `fit_resamples_results()`. `test-nested-tune-grid-oracles.R:112,175` and `test-nested-tune-grid-rng.R:25,49` go through `memoised()` where the M42 lesson allows. `test-nested-workflow-map-readers.R:161,210,298` read `broken_set_results()`. `test-nested-workflow-map-oracles.R:94` reads the cached hand call. `test-time-series-designs.R:494` reuses the runs at `:446`. `test-nested-resamples-memory.R` computes `measure(V_VALUES)` once. `test-nested-final-fit-rng.R:342,369,418` fold onto the shared envelope.
@@ -57,6 +57,8 @@ Cut the test suite's serial time to three quarters of today's by removing repeat
 - 2026-09-23: plan gate chose grid alone at three daemons over all four tuners, because every tuner keeps its two-daemon identity and no tuner code reads the worker count. Falsified by a tuner's result changing with the daemon count.
 - 2026-09-23: plan gate chose re-running main's run twice for a median over the single attempt, because the leg varies about 20% on identical code. Falsified by the three attempts agreeing within a minute.
 - 2026-09-23: plan chose leaving the harness tests in the default suite over moving them to a CI job, because they cost 9 s locally and skip under `R CMD check`. Falsified by a harness file passing 30 s serially.
+- 2026-09-23: implement started on `m113-suite-once-per-claim`. No gate question was open. T1's baselines run in a worktree at `5088fb7`: `profile-tests.R 3`, `benchmarks/coverage-lines.R` (new, the covr per-line reader), and attempt 2 of run 35883406135 started.
+- 2026-09-23: T2 done. The three tuner time-series files loop over rolling-origin alone (the Bayes sliding-window final-fit test stays as D-075's evidence). Help, NEWS and the file headers reworded from the loops. Serial seconds for the four files: bayes 146.1 to 71.7, race 62.8 to 23.9, anneal 44.6 to 15.2, designs 45.4 to 43.6. Sweeps and `air` clean.
 
 ## Decisions
 

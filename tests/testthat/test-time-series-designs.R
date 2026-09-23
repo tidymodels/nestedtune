@@ -473,8 +473,8 @@ for (design in names(TS_DESIGNS)) {
 
 # The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
 # tuning run, an empty selection, and the plain fit on every row under the
-# recorded fit seed. Run on every design in TS_DESIGNS, so the help's
-# "tested on all four" holds for this result too.
+# recorded fit seed. Run on every design in TS_DESIGNS, so the help's claim
+# that `nested_fit_resamples()` results are tested on all four holds.
 for (design in names(TS_DESIGNS)) {
   build <- TS_DESIGNS[[design]]
 
