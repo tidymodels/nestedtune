@@ -1,6 +1,6 @@
 # M112: Vignettes built and checked on the macOS check leg alone
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,6 +52,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: T4 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch at `61b5622`, and the same on a `git archive` export of `aaf2279`, the branch point.
 - claim audit: not owed — internal tier
 - 2026-09-22: all tasks checked, status set to review.
+- 2026-09-22: review defect return 1, from the step-4 consistency gate. `cairn_validate` failed `weight caps`: `cairn/PROFILE.md` is 120 lines against a cap under 120, after T3's clause grew it by one line. Status back to in-progress. The fresh suite, the check and the three reviewers were stopped before they reported.
 
 ## Decisions
 
