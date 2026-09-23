@@ -1,6 +1,6 @@
-# The two racing tuners and their final fits on the time-series designs
-# (M110). DESIGN Conventions: oracles are recorded in the test file that
-# asserts them. The M110 tests sit in four files, test-time-series-*.R, so no
+# The two racing tuners on the time-series designs (M110, M111), and their
+# final fits on the rolling-origin design. DESIGN Conventions: oracles are
+# recorded in the test file that asserts them. The M110 tests sit in four files, test-time-series-*.R, so no
 # one file runs alone for long under parallel test files.
 #
 # O1 -- type "live" (reference implementation). Source:

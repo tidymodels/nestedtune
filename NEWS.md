@@ -24,9 +24,11 @@
   `rsample::rolling_origin()` or `rsample::sliding_window()` design with
   an inner `rsample::rolling_origin()` design. `nested_workflow_map()` is
   tested on the rolling-origin design. `nested_resamples()` builds these
-  designs with the same splits as `rsample::nested_cv()`. The same holds
-  for an outer `rsample::sliding_index()` or `rsample::sliding_period()`
-  design with an inner `rsample::rolling_origin()` design. An inner design
+  designs with the same splits as `rsample::nested_cv()`. Every
+  orchestrator and `nested_final_fit()` are also tested on an outer
+  `rsample::sliding_index()` or `rsample::sliding_period()` design with an
+  inner `rsample::rolling_origin()` design. `nested_resamples()` builds
+  these with the same splits as `rsample::nested_cv()` too. An inner design
   other than `rsample::rolling_origin()` is not tested.
 
 * When an outer design leaves rows out of every assessment set and holds

@@ -577,11 +577,11 @@ ts_sliding_nested <- function(data) {
 # run on `make_ts_data()`: `make_reg_data()` plus 90 consecutive days. The
 # workflows' recipes name `x1` to `x4`, so `date` is never a predictor.
 # `sliding_index()` mirrors the sliding-window design: three outer slices,
-# each holding out one day. `sliding_period()` holds out a week at a time,
-# with an eight-week `lookback`. At the default `lookback` of 0,
-# `nested_cv()` errors, and at 7 or less a racer refuses a fold with two or
-# fewer inner resamples; at 8 the design has five folds with four or five
-# inner resamples each.
+# each holding out one day. `sliding_period()` holds out a week at a time
+# (the last fold a five-day partial week), with an eight-week `lookback`. At
+# a `lookback` of 5 or less, `nested_cv()` errors. At 6 or 7, a fold has two
+# or fewer inner resamples, which a racer at `burn_in = 2` refuses. At 8 the
+# design has five folds with four or five inner resamples each.
 make_ts_data <- function() {
   d <- make_reg_data()
   d$date <- as.Date("2020-01-01") + seq_len(nrow(d)) - 1L

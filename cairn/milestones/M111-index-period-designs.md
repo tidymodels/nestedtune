@@ -64,6 +64,8 @@
 - 2026-09-22: blocked, recorded on `main`. The branch `m111-index-period-designs` holds T1 to T5 and the full work log. The added tests put the ubuntu release check step at about 31 min against its 30 min cap, and a mini gate chose a suite-speed milestone first.
 - 2026-09-23: resumed, blocker cleared. M112 merged as `d6cbee6`, and the four legs other than macOS skip the vignettes. Merged `main` into the branch. The branch's drafted D-entry became D-078, because M112 took D-076 and D-077 on `main`. Status set to in-progress.
 - 2026-09-23: T6 rerun after the merge at `1f84c8e`. Locally, two workers: the whole suite passed in 500 s, and `test-time-series-designs.R` alone took 32 s. On PR #126 (run 35817157833, the `main` tests without M111's), the ubuntu release check step took 24.5 min, of which `testthat.R` took 22.3. Scaled by the +12.4% measured at T6 before the block, the tests add about 2.8 min, so the step is estimated at about 27.3 min against its 30 min cap. The PR run at review gives the measured figure.
+- 2026-09-23: T7 drafts checked against AC7. `devtools::document()` left no diff. All six prose sweeps and `check_pkgdown()` are clean.
+- claim audit: 33 claims read, 9 corrected — NEWS.md, test-time-series-bayes.R, test-time-series-anneal.R, test-time-series-race.R, test-time-series-designs.R, helper-orchestration.R
 
 ## Decisions
 

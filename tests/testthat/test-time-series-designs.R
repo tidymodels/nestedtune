@@ -200,8 +200,8 @@ test_that("the final fit on a sliding-window design matches a hand-rolled refere
 #
 # The O1, O2 and O3 oracles above, run on `sliding_index()` and
 # `sliding_period()` outer designs over `make_ts_data()`. The Bayesian,
-# racing, annealing and fit_resamples tests reach these designs through
-# TS_DESIGNS.
+# racing, annealing and fit_resamples reference-loop tests, and the
+# fit_resamples final-fit test, reach these designs through TS_DESIGNS.
 
 TS_NEW_OUTER_CALLS <- list(
   "sliding-index" = function(d) {
@@ -348,7 +348,7 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_augment_names_never_held(res, d)
 })
 
-# Two outer slices whose eleven-row assessment sets share row 70 (M111).
+# Two outer slices whose eleven-row assessment sets share row 71 (M111).
 ts_overlap_nested <- function(data) {
   rsample::nested_cv(
     data,
@@ -464,8 +464,8 @@ for (design in names(TS_DESIGNS)) {
 
 # The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
 # tuning run, an empty selection, and the plain fit on every row under the
-# recorded fit seed. Run on both designs, so the help's "tested on both"
-# holds for this result too.
+# recorded fit seed. Run on every design in TS_DESIGNS, so the help's
+# "tested on all four" holds for this result too.
 for (design in names(TS_DESIGNS)) {
   build <- TS_DESIGNS[[design]]
 

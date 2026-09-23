@@ -1,5 +1,5 @@
-# nested_tune_bayes() and its final fit on the time-series designs (M110,
-# M111).
+# nested_tune_bayes() on the time-series designs (M110, M111), and its final
+# fit on the rolling-origin and sliding-window designs.
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 # The M110 tests sit in four files, test-time-series-*.R, so no one file runs
 # alone for long under parallel test files.
@@ -20,9 +20,9 @@
 #   AC3 for this tuner.
 #
 # Both fixtures share the data, the inner call and the tuner's arguments, and
-# the final fit never reads the outer splits, so a sliding-window result gives
-# the same final fit as a rolling-origin one. The sliding-window final-fit
-# test checks it once, against the same reference.
+# the final fit never reads the outer split indices, so a sliding-window
+# result gives the same final fit as a rolling-origin one. The sliding-window
+# final-fit test checks it once, against the same reference.
 #
 # O1 and O2 check that the orchestrator gives what tune gives when run by
 # hand. The estimate itself adds nothing new for these designs, so no second
@@ -75,7 +75,7 @@ for (design in names(TS_DESIGNS)) {
   )
 
   # The final fit reads the data and the recorded procedure, never the
-  # outer splits, so the two M110 designs stand for the M111 ones here and
+  # outer split indices, so the two M110 designs stand for the M111 ones and
   # the suite does not pay for two more final fits (M111).
   if (!design %in% c("rolling-origin", "sliding-window")) {
     next
