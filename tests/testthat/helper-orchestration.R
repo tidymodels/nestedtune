@@ -573,24 +573,76 @@ ts_sliding_nested <- function(data) {
   )
 }
 
+# The index-based and period-based designs (M111) need a date column, so they
+# run on `make_ts_data()`: `make_reg_data()` plus 90 consecutive days. The
+# workflows' recipes name `x1` to `x4`, so `date` is never a predictor.
+# `sliding_index()` mirrors the sliding-window design: three outer slices,
+# each holding out one day. `sliding_period()` holds out a week at a time
+# (the last fold a five-day partial week), with an eight-week `lookback`. At
+# a `lookback` of 5 or less, `nested_cv()` errors. At 6 or 7, a fold has two
+# or fewer inner resamples, which a racer at `burn_in = 2` refuses. At 8 the
+# design has five folds with four or five inner resamples each.
+make_ts_data <- function() {
+  d <- make_reg_data()
+  d$date <- as.Date("2020-01-01") + seq_len(nrow(d)) - 1L
+  d
+}
+
+ts_index_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::sliding_index(
+      index = date,
+      lookback = 59,
+      assess_stop = 1,
+      step = 10
+    ),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+}
+
+ts_period_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::sliding_period(
+      index = date,
+      period = "week",
+      lookback = 8
+    ),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+}
+
 # `rsq` is left out: on a one-row assessment set it has no variance to
 # divide by, and yardstick returns `NA` with a warning.
 ts_metrics <- function() {
   yardstick::metric_set(yardstick::rmse, yardstick::mae)
 }
 
-# The two time-series designs by name, and the outer split class each builds,
-# so a test looping over them shows it ran on the design its name claims
-# (M110). The M110 tests sit in four files, test-time-series-*.R, so no one
-# file runs alone for long under parallel test files.
+# The four time-series designs by name, the outer split class each builds,
+# so a test looping over them shows it ran on the design its name claims, and
+# the data each is built on (M110, M111). The tests sit in four files,
+# test-time-series-*.R, so no one file runs alone for long under parallel
+# test files.
 TS_DESIGNS <- list(
   "rolling-origin" = ts_rolling_nested,
-  "sliding-window" = ts_sliding_nested
+  "sliding-window" = ts_sliding_nested,
+  "sliding-index" = ts_index_nested,
+  "sliding-period" = ts_period_nested
 )
 
 TS_SPLIT_CLASS <- list(
   "rolling-origin" = "rof_split",
-  "sliding-window" = "sliding_window_split"
+  "sliding-window" = "sliding_window_split",
+  "sliding-index" = "sliding_index_split",
+  "sliding-period" = "sliding_period_split"
+)
+
+TS_DATA <- list(
+  "rolling-origin" = make_reg_data,
+  "sliding-window" = make_reg_data,
+  "sliding-index" = make_ts_data,
+  "sliding-period" = make_ts_data
 )
 
 # The fixtures' inner call, spelled out for a reference final fit to build on

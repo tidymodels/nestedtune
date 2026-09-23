@@ -1871,6 +1871,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-076 stands. Off macOS, `pkgdown.yaml` is the one workflow that runs the vignettes' code in full, because it installs the Suggests. `R-CMD-check-hard.yaml` checks only that the vignettes build without their Suggests. M111's block rests on the ubuntu release leg.
 **Consequences:** a vignette failure under `R CMD check` that `pkgdown.yaml`'s knit does not show is caught on macOS alone. (Corrects D-076's Context on the legs over the cap, and its Decision on what `R-CMD-check-hard.yaml` checks.)
 
+### D-078 (2026-09-22): the time-series support covers outer `sliding_index()` and `sliding_period()` designs, and `augment()` names an overlapping time-series design as such. Extends D-075
+
+**Context:** D-071, D-074 and D-075 claim an outer `rolling_origin()` or `sliding_window()` design with an inner `rolling_origin()`. M111 tests outer `sliding_index()` and `sliding_period()` designs, each with an inner `rolling_origin()`, under the six orchestrators and `nested_final_fit()`, against the same references. `augment()` called a time-series design whose assessment sets overlap a repeated or Monte Carlo design.
+**Decision:** the support covers the four outer designs under the six orchestrators and `nested_final_fit()`. `nested_workflow_map()` stays claimed on the rolling-origin design alone (D-075). When a row is held out more than once, `augment()` reads the class of the first outer split. A `rolling_origin()`, `sliding_window()`, `sliding_index()` or `sliding_period()` split gets a message about overlapping time-series assessment sets. Any other design keeps the repeated or Monte Carlo text. The condition class stays `nestedtune_augment_rows`. Considered and rejected: the new text for the three sliding designs alone, which leaves an overlapping `rolling_origin()` design called a repeated one.
+**Consequences:** an inner design other than `rolling_origin()` stays unclaimed, in its candidate row. Falsified by a user report of a failure on a claimed design, or by rsample adding a time-series split class the check does not list.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

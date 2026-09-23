@@ -295,17 +295,18 @@ design whatever its \code{inside} argument returned, and because a design
 assembled by hand can index rows its outer fold never sees.
 
 Time-series designs are supported for an outer
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or \code{\link[rsample:sliding_window]{rsample::sliding_window()}} with an inner
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. Every orchestrator is tested on both:
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
+\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. Every orchestrator is tested on all four:
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}. \code{\link[=nested_final_fit]{nested_final_fit()}} is tested on both, and
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} on the rolling-origin design. Other time-series
-designs, such as
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, are not
-tested.
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}}. \code{\link[=nested_final_fit]{nested_final_fit()}} is tested on all four for
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} results, and
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} on the rolling-origin design. An inner design
+other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
-assessment sets leave rows out.
+assessment sets leave rows out. When the assessment sets overlap, its
+error also counts the rows held out more than once.
 }
 
 \section{Finalizing a parameter range}{

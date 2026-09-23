@@ -1,12 +1,13 @@
-# nested_tune_sim_anneal() and its final fit on the two time-series designs
-# (M110). DESIGN Conventions: oracles are recorded in the test file that
-# asserts them. The M110 tests sit in four files, test-time-series-*.R, so no
-# one file runs alone for long under parallel test files.
+# nested_tune_sim_anneal() on the time-series designs (M110, M111), and its
+# final fit on the rolling-origin design. DESIGN Conventions: oracles are
+# recorded in the test file that asserts them. The M110 tests sit in four
+# files, test-time-series-*.R, so no one file runs alone for long under
+# parallel test files.
 #
 # O1 -- type "live" (reference implementation). Source:
 #   reference_nested_anneal_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver, run here on
-#   ts_rolling_nested() and ts_sliding_nested(). Pinned by the
+#   every design in TS_DESIGNS (M110, M111). Pinned by the
 #   "nested_tune_sim_anneal() matches its reference loop on a ... design"
 #   tests. Satisfies M110 AC1 for this tuner.
 #
@@ -44,7 +45,7 @@ for (design in names(TS_DESIGNS)) {
     ),
     {
       skip_if_no_anneal_fixture()
-      d <- make_reg_data()
+      d <- TS_DATA[[design]]()
       wf <- det_workflow(d)
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
