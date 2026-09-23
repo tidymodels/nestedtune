@@ -110,9 +110,11 @@ jobs:
     # 28.8-minute step whose tests took 21.8. macOS keeps them because its
     # step was the shortest of the five in that run, at 21.4 minutes, against
     # windows 32.2, ubuntu release 28.8, devel 26.8 and oldrel-1 22.4. The
-    # vignettes are still checked on the same pushes and pull requests
-    # elsewhere: `R-CMD-check-hard.yaml` builds and checks them, and
-    # `pkgdown.yaml` knits them into the site.
+    # vignettes still run on the same pushes and pull requests elsewhere, in
+    # two ways. `R-CMD-check-hard.yaml` builds and checks them, but it
+    # installs neither tidymodels nor ranger, so `nested-cv.Rmd`,
+    # `results.Rmd` and `tuners.Rmd` stop at their missing-package notice
+    # there. `pkgdown.yaml` installs the Suggests and knits all four in full.
     #
     # 60 minutes, on the job: the devel leg gets no Linux binaries and builds
     # every dependency from source. A 20-minute job cap killed it mid-`Building

@@ -1865,6 +1865,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the four legs other than macos-latest pass `--no-build-vignettes` to `R CMD build` and `--ignore-vignettes` to `R CMD check`. They keep `--as-cran`. macOS keeps the vignettes because its step had the most headroom under its cap. `R-CMD-check-hard.yaml` still builds and checks the vignettes, and `pkgdown.yaml` still knits them. The step caps stay 30 minutes, and 40 on windows. The figures are in the yaml comment and in M112's work log.
 **Consequences:** this workflow no longer catches a vignette failure that shows only on windows, oldrel-1 or R-devel. Falsified by such a failure, or by the macOS step near its cap. Either moves the vignettes to another leg or brings the cache back.
 
+### D-077 (2026-09-22): `R-CMD-check-hard.yaml` runs the vignettes without tidymodels or ranger, so only `pkgdown.yaml` runs them in full off macOS. Corrects D-076's Context and Decision
+
+**Context:** M112's review found two faults in D-076. Its Decision says `R-CMD-check-hard.yaml` still builds and checks the vignettes. That job installs the hard dependencies and names only rcmdcheck, testthat, knitr and rmarkdown. When tidymodels or ranger is missing, `nested-cv.Rmd`, `results.Rmd` and `tuners.Rmd` call `knitr::knit_exit()`, so their code does not run there. D-076's Context says M111's tests pass the cap "on the slower legs", but M111's block note records ubuntu release alone.
+**Decision:** D-076 stands. Off macOS, `pkgdown.yaml` is the one workflow that runs the vignettes' code in full, because it installs the Suggests. `R-CMD-check-hard.yaml` checks only that the vignettes build without their Suggests. M111's block rests on the ubuntu release leg.
+**Consequences:** a vignette failure under `R CMD check` that `pkgdown.yaml`'s knit does not show is caught on macOS alone. (Corrects D-076's Context on the legs over the cap, and its Decision on what `R-CMD-check-hard.yaml` checks.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

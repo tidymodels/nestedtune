@@ -89,9 +89,10 @@ test_that("job_uses() reads a job's steps in order and stops at the next job", {
   expect_null(job_uses(path, "no-such-job"))
 })
 
-# The value of `key:` on the line after the one matching `anchor`'s step, read
-# up to that step's end. A step starts at a `- ` line, so the block runs from
-# the anchor to the next line at the same or smaller indent that starts one.
+# The value of the one `key:` line in the step whose line matches `anchor`, or
+# NULL when the step has none or more than one. A step starts at a `- ` line,
+# so the step runs from the anchor to the next such line at the same or smaller
+# indent.
 step_value <- function(lines, anchor, key) {
   start <- grep(anchor, lines, fixed = TRUE)
   if (length(start) != 1L) {
@@ -137,7 +138,10 @@ test_that("R-CMD-check.yaml builds and checks the vignettes on macOS alone", {
   )
   lines <- readLines(path, warn = FALSE)
 
-  expect_length(grep("^\\s*- \\{os: macos-latest,", lines), 1L)
+  # A matrix entry in flow form (`- {os: macos-latest, ...}`) or block form
+  # (`- os: macos-latest`), with the value quoted or not.
+  macos_entry <- "^\\s*-?\\s*\\{?\\s*os:\\s*['\"]?macos-latest['\"]?\\s*([,}]|$)"
+  expect_length(grep(macos_entry, lines), 1L)
 
   anchor <- "uses: r-lib/actions/check-r-package@"
   build_args <- os_arms(step_value(lines, anchor, "build_args"), "macos-latest")
