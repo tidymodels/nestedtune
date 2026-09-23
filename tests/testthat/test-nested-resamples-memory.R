@@ -79,11 +79,24 @@ slope <- function(size, v) {
 
 V_VALUES <- c(2, 5, 10, 50)
 
+# The three blocks read one measurement, taken on the first request (M113).
+# It is taken inside a block, after the skips, so a missing package skips
+# rather than errors at file load.
+measured <- local({
+  m <- NULL
+  function() {
+    if (is.null(m)) {
+      m <<- measure(V_VALUES)
+    }
+    m
+  }
+})
+
 test_that("the size slope is far shallower than rsample::nested_cv()'s", {
   skip_if_not_installed("lobstr")
   skip_if_not_installed("mlbench")
 
-  m <- measure(V_VALUES)
+  m <- measured()
 
   # Recorded measurement, LetterRecognition (20000 x 17, 2.645 MB), inner v = 5,
   # rsample 1.3.2 / R 4.6.1, as multiples of the source data size:
@@ -116,7 +129,7 @@ test_that("measured size matches the analytic prediction within 2%", {
   skip_if_not_installed("lobstr")
   skip_if_not_installed("mlbench")
 
-  m <- measure(V_VALUES)
+  m <- measured()
 
   # A shared copy plus the index vectors is the whole story; anything the model
   # omits -- a retained analysis frame above all -- would show up here as the
@@ -128,7 +141,7 @@ test_that("rsample's own size does NOT match the lean analytic model", {
   skip_if_not_installed("lobstr")
   skip_if_not_installed("mlbench")
 
-  m <- measure(V_VALUES)
+  m <- measured()
 
   # The model would be vacuous if it fitted anything, so it is checked against
   # the implementation it is meant to distinguish.

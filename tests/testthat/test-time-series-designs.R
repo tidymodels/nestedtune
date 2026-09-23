@@ -443,7 +443,7 @@ for (design in names(TS_DESIGNS)) {
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
       set.seed(25)
-      res <- nested_fit_resamples(wf, folds, metrics = ms)
+      res <- memoised(nested_fit_resamples(wf, folds, metrics = ms))
       plain <- tune::fit_resamples(
         wf,
         resamples = outer,
@@ -490,8 +490,9 @@ for (design in names(TS_DESIGNS)) {
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
 
+      # The seed-25 run the block above built, served from the cache (M113).
       set.seed(25)
-      res <- nested_fit_resamples(wf, folds, metrics = ts_metrics())
+      res <- memoised(nested_fit_resamples(wf, folds, metrics = ts_metrics()))
       set.seed(44)
       final <- nested_final_fit(wf, res)
 

@@ -151,20 +151,8 @@ test_that("AC3: a workflow that only partly completed raises the reader's partia
 test_that("AC3: a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
-  set.seed(32)
-  wset <- workflowsets::as_workflow_set(
-    tuned = det_workflow(d),
-    broken = broken_workflow(d)
-  )
-  folds <- final_nested(d)
-  set.seed(32)
-  res <- suppressWarnings(nested_workflow_map(
-    wset,
-    resamples = folds,
-    grid = det_grid(),
-    metrics = reg_metrics(),
-    control = tune::control_grid(save_pred = TRUE, extract = coef_extract)
-  ))
+  # The tuned-plus-broken set under seed 32, served from the cache (M113).
+  res <- broken_set_results(d)
   expect_true(all(res$result[[1L]]$.completed))
   expect_false(any(res$result[[2L]]$.completed))
 
@@ -201,18 +189,8 @@ test_that("AC3: a workflow in which no fold completed is left out with a warning
 test_that("AC3: a set in which no workflow completed a fold is refused, and collect_notes() still answers", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
-  wset <- workflowsets::as_workflow_set(
-    broken = broken_workflow(d),
-    also_broken = broken_workflow(d)
-  )
-  folds <- final_nested(d)
-  set.seed(32)
-  res <- suppressWarnings(nested_workflow_map(
-    wset,
-    resamples = folds,
-    metrics = reg_metrics(),
-    control = tune::control_grid(save_pred = TRUE, extract = coef_extract)
-  ))
+  # The all-broken set under seed 32, served from the cache (M113).
+  res <- broken_set_results(d, alone = TRUE)
   for (r in res$result) {
     expect_false(any(r$.completed))
   }
