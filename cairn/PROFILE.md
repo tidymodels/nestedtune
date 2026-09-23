@@ -54,7 +54,7 @@ rules in tracking-rules:
   from-source dependency build, which a smaller one once killed before cache-save. A step bound is not free headroom:
   a leg nearing its own is a suite to make faster (M52). **Parallel test files** (`Config/testthat/parallel: true`,
   M52): `Config/testthat/start-first` in DESCRIPTION queues named files first, so a long file cannot land last
-  (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover;
+  (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover; corrected M110: save one file far longer than the rest, which ran late and alone until split and queued;
   `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
   `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
   the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
