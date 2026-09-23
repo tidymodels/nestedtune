@@ -1,6 +1,6 @@
 # M111: Index-based and period-based sliding outer designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M110
 - **Driving RR:** —
@@ -47,7 +47,7 @@
 - [x] T4: Write the AC4 final-fit tests, using M108's `expect_final_matches_reference()`.
 - [x] T5: Fit the message in `check_held_out_once()` (`R/nested-results-collect.R:700-733`) to a sliding design that holds rows out more than once. Decide the design from the outer split class, and keep today's text for other designs. Write the AC5 and AC6 tests. The AC6 repeated and Monte Carlo case extends `tests/testthat/test-augment.R:150-163`.
 - [x] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps in `cairn/PROFILE.md`. Record the figures in the work log.
-- [ ] T7: Write the D-entry extending M110's entry to the two designs and the new message. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
+- [x] T7: Write the D-entry extending M110's entry to the two designs and the new message. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
 ## Work log
 
@@ -66,6 +66,7 @@
 - 2026-09-23: T6 rerun after the merge at `1f84c8e`. Locally, two workers: the whole suite passed in 500 s, and `test-time-series-designs.R` alone took 32 s. On PR #126 (run 35817157833, the `main` tests without M111's), the ubuntu release check step took 24.5 min, of which `testthat.R` took 22.3. Scaled by the +12.4% measured at T6 before the block, the tests add about 2.8 min, so the step is estimated at about 27.3 min against its 30 min cap. The PR run at review gives the measured figure.
 - 2026-09-23: T7 drafts checked against AC7. `devtools::document()` left no diff. All six prose sweeps and `check_pkgdown()` are clean.
 - claim audit: 33 claims read, 9 corrected — NEWS.md, test-time-series-bayes.R, test-time-series-anneal.R, test-time-series-race.R, test-time-series-designs.R, helper-orchestration.R
+- 2026-09-23: T7 done. `devtools::check()` at `f0484d4` gave 0 errors, 0 warnings and 0 notes. The branch point `main` also gave 0 notes, at M112's review. The later audit corrections change only comments and NEWS.md. Status set to review.
 
 ## Decisions
 
