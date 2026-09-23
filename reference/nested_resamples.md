@@ -75,10 +75,15 @@ with an inner
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
 is tested to give the same splits as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and
+Every orchestrator and
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-support these designs. Other time-series designs are not tested.
+are tested on both designs, and
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+on the rolling-origin design. Other time-series designs, such as
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+and
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+are not tested.
 
 ## Memory
 

@@ -312,16 +312,22 @@ Time-series designs are supported for an outer
 or
 [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 with an inner
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
-under
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-which are tested on both. The other orchestrators are not tested on
-them, and neither are other time-series designs such as
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html).
+Every orchestrator is tested on both:
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+and `nested_fit_resamples()`.
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+is tested on both, and
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+on the rolling-origin design. Other time-series designs, such as
 [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 and
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html).
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+are not tested.
 [`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
 refuses these designs, because their assessment sets leave rows out.
 

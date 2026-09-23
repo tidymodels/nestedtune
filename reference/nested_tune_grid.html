@@ -254,10 +254,14 @@ design whatever its <code>inside</code> argument returned, and because a design
 assembled by hand can index rows its outer fold never sees.</p>
 <p>Time-series designs are supported for an outer
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> with an inner
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, under <code>nested_tune_grid()</code> and
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, which are tested on both. The other orchestrators
-are not tested on them, and neither are other time-series designs such as
-<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code>.
+<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>. Every orchestrator is tested on both:
+<code>nested_tune_grid()</code>, <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> and
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested on both, and
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> on the rolling-origin design. Other time-series
+designs, such as
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code>, are not
+tested.
 <code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
 assessment sets leave rows out.</p>
     </div>

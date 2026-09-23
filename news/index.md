@@ -38,8 +38,7 @@
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   refuse the rule with class `nestedtune_pkg_not_installed`.
 
-- [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  and
+- Every orchestrator and
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
   support an outer
   [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
@@ -48,11 +47,16 @@
   design with an inner
   [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
   design.
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  is tested on the rolling-origin design.
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   builds these designs with the same splits as
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-  Other time-series designs, and the other orchestrators on these
-  designs, are not tested.
+  Other time-series designs, such as
+  [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  and
+  [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+  are not tested.
 
 - When an outer design leaves rows out of every assessment set and holds
   no row out twice,
