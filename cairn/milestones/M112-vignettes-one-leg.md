@@ -1,6 +1,6 @@
 # M112: Vignettes built and checked on the macOS check leg alone
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -36,7 +36,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - [x] T1: Set `build_args` and `args` on the `check-r-package` step (`.github/workflows/R-CMD-check.yaml:191-196`) as AC1 states. Use non-empty strings on both sides of each `&& ||`, since GitHub reads `''` as false.
 - [x] T2: Add a block to `tests/testthat/test-ci-workflows.R` that checks the AC1 values. It reads the matrix entries and the two step lines by indentation, as `job_uses()` does. Plant each defect and see the block fail: flags given to macOS, flags missing on a non-macOS leg, `--as-cran` dropped, and a second `macos-latest` entry.
 - [x] T3: Rewrite the step-cap comment's vignette sentences for AC2, from the phase times of job 106991147696 in run 35801023421. Add the PROFILE clause. Write the D-entry on which leg checks the vignettes and why.
-- [ ] T4: Run `devtools::test()`, `devtools::check()`, and `devtools::check()` on the default branch at the branch point for the note baseline. Time a local `R CMD build` plus `R CMD check` with and without the non-macOS flags, and record the figures in the work log.
+- [x] T4: Run `devtools::test()`, `devtools::check()`, and `devtools::check()` on the default branch at the branch point for the note baseline. Time a local `R CMD build` plus `R CMD check` with and without the non-macOS flags, and record the figures in the work log.
 
 ## Work log
 
@@ -49,6 +49,9 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: checkpoint, T1 to T3 written and not yet checked off. The new test block failed on the old yaml and passes on the new one, and each of the four planted defects failed it at its own line. The full `devtools::test()` run is still going.
 - 2026-09-22: T1 to T3 done. `devtools::test()` passed with 0 failures in 8.2 min, and the workflow test file passed 10 of 10 on the final tree. The comment's figures come from the step times of run 35801023421: macOS 21.4 min was the shortest of the five legs.
 - 2026-09-22: T4 timing, local, in sequence at `ca51211`. With the macOS flags, `R CMD build` took 52 s and `R CMD check` 521 s. With the other legs' flags, they took 1 s and 457 s, so 115 s less in total. Both checks gave 1 NOTE, CRAN incoming feasibility. The other-leg flags add one line to that NOTE: "Package has a VignetteBuilder field but no prebuilt vignette index." The branch and baseline `devtools::check()` runs are being redone. The first branch run wrote an empty log, and the baseline showed a `.git` NOTE that came from the worktree.
+- 2026-09-22: T4 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes on the branch at `61b5622`, and the same on a `git archive` export of `aaf2279`, the branch point.
+- claim audit: not owed — internal tier
+- 2026-09-22: all tasks checked, status set to review.
 
 ## Decisions
 
