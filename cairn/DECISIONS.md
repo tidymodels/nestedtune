@@ -1859,6 +1859,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the support for both outer designs covers the six orchestrators and `nested_final_fit()`, tuned and untuned results alike. `nested_workflow_map()` is claimed on the rolling-origin design, as the help and `NEWS.md` state. The final fit reads the data the design carries and the recorded procedure, and never reads the outer splits, so a sliding-window result gives the same final fit as a rolling-origin one with the same inner call. D-071's clause leaving "the other five orchestrators" unclaimed is superseded.
 **Consequences:** a sliding-window test of `nested_workflow_map()` lifts its bound. Falsified by a final fit that reads the outer splits. (Corrects D-074's Context and Decision on these two points, and supersedes D-071's Consequences clause on the five orchestrators.)
 
+### D-076 (2026-09-22): the time-series support covers outer `sliding_index()` and `sliding_period()` designs, and `augment()` names an overlapping time-series design as such. Extends D-075
+
+**Context:** D-071, D-074 and D-075 claim an outer `rolling_origin()` or `sliding_window()` design with an inner `rolling_origin()`. M111 tests outer `sliding_index()` and `sliding_period()` designs, each with an inner `rolling_origin()`, under the six orchestrators and `nested_final_fit()`, against the same references. `augment()` called a time-series design whose assessment sets overlap a repeated or Monte Carlo design.
+**Decision:** the support covers the four outer designs under the six orchestrators and `nested_final_fit()`. `nested_workflow_map()` stays claimed on the rolling-origin design alone (D-075). When a row is held out more than once, `augment()` reads the class of the first outer split. A `rolling_origin()`, `sliding_window()`, `sliding_index()` or `sliding_period()` split gets a message about overlapping time-series assessment sets. Any other design keeps the repeated or Monte Carlo text. The condition class stays `nestedtune_augment_rows`. Considered and rejected: the new text for the three sliding designs alone, which leaves an overlapping `rolling_origin()` design called a repeated one.
+**Consequences:** an inner design other than `rolling_origin()` stays unclaimed, in its candidate row. Falsified by a user report of a failure on a claimed design, or by rsample adding a time-series split class the check does not list.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

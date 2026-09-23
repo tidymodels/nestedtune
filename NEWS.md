@@ -24,13 +24,17 @@
   `rsample::rolling_origin()` or `rsample::sliding_window()` design with
   an inner `rsample::rolling_origin()` design. `nested_workflow_map()` is
   tested on the rolling-origin design. `nested_resamples()` builds these
-  designs with the same splits as `rsample::nested_cv()`. Other
-  time-series designs, such as `rsample::sliding_index()` and
-  `rsample::sliding_period()`, are not tested.
+  designs with the same splits as `rsample::nested_cv()`. The same holds
+  for an outer `rsample::sliding_index()` or `rsample::sliding_period()`
+  design with an inner `rsample::rolling_origin()` design. An inner design
+  other than `rsample::rolling_origin()` is not tested.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no
   longer names a repeated or Monte Carlo design as the cause.
+  When a time-series design's assessment sets overlap, the error counts
+  the rows left out and the rows held out more than once, and does not
+  name a repeated or Monte Carlo design.
   The condition class is still `nestedtune_augment_rows`.
 
 * `nested_tune_grid()`, `nested_tune_bayes()`, `nested_tune_race_anova()`,

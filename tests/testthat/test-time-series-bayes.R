@@ -1,12 +1,13 @@
-# nested_tune_bayes() and its final fit on the two time-series designs (M110).
+# nested_tune_bayes() and its final fit on the time-series designs (M110,
+# M111).
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 # The M110 tests sit in four files, test-time-series-*.R, so no one file runs
 # alone for long under parallel test files.
 #
 # O1 -- type "live" (reference implementation). Source:
 #   reference_nested_bayes_loop() in helper-orchestration.R, written from the
-#   seed contract rather than from the driver, run here on
-#   ts_rolling_nested() and ts_sliding_nested(). Pinned by the
+#   seed contract rather than from the driver, run here on every design in
+#   TS_DESIGNS (M110, M111). Pinned by the
 #   "nested_tune_bayes() matches its reference loop on a ... design" tests.
 #   Satisfies M110 AC1 for this tuner.
 #
@@ -72,6 +73,13 @@ for (design in names(TS_DESIGNS)) {
       expect_ts_matches_reference(res, ref)
     }
   )
+
+  # The final fit reads the data and the recorded procedure, never the
+  # outer splits, so the two M110 designs stand for the M111 ones here and
+  # the suite does not pay for two more final fits (M111).
+  if (!design %in% c("rolling-origin", "sliding-window")) {
+    next
+  }
 
   test_that(
     sprintf(

@@ -39,13 +39,13 @@
 #'
 #' @section Time-series designs:
 #'
-#' An outer [rsample::rolling_origin()] or [rsample::sliding_window()] with
-#' an inner [rsample::rolling_origin()] is tested to give the same splits as
+#' An outer [rsample::rolling_origin()], [rsample::sliding_window()],
+#' [rsample::sliding_index()] or [rsample::sliding_period()] with an inner
+#' [rsample::rolling_origin()] is tested to give the same splits as
 #' [rsample::nested_cv()]. Every orchestrator and [nested_final_fit()] are
-#' tested on both designs, and [nested_workflow_map()] on the rolling-origin
-#' design. Other time-series designs,
-#' such as [rsample::sliding_index()] and [rsample::sliding_period()], are
-#' not tested.
+#' tested on all four designs, and [nested_workflow_map()] on the
+#' rolling-origin design. An inner design other than
+#' [rsample::rolling_origin()] is not tested.
 #'
 #' @section Memory:
 #'
