@@ -1,18 +1,18 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-23 (M111 done and archived. M109 row pruned. Validate green.)_
+_Last hygiene check: 2026-09-23 (M113 done and archived. M110 row pruned. Validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M113 | The suite runs in three quarters of its serial time with no line of coverage lost | review | — | high | milestones/M113-suite-once-per-claim.md |
+| M113 | The suite runs in three quarters of its serial time with no line of coverage lost | done | — | high | milestones/archive/M113-suite-once-per-claim.md |
 | M111 | Index-based and period-based sliding outer designs | done | M110 | normal | milestones/archive/M111-index-period-designs.md |
 | M112 | Vignettes built and checked on the macOS check leg alone | done | — | high | milestones/archive/M112-vignettes-one-leg.md |
-| M110 | Rolling-origin and sliding-window designs under every orchestrator | done | — | normal | milestones/archive/M110-time-series-all-tuners.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
+- A lighter engine for the Bayesian fixtures: after M113, `test-time-series-bayes.R` (59 s) and `test-nested-tune-bayes-oracles.R` (55 s) are the second and third heaviest files, most of it tune's Gaussian-process fitting per iteration on every fold. Added 2026-09-23 at M113's hygiene (M113 Out). Promote on the suite being priced again
 - Put the Tibshirani and Tibshirani (2009) corrected flat estimate beside the nested one, read from the final fit's stored tuning run through tune's `debias_estimate()`. Added 2026-09-11 at issue [#95](https://github.com/tidymodels/nestedtune/issues/95)'s plan gate (D-062, tune#917 holds the code). The nested record cannot carry it, because `.inner_metrics` is summarized (D-043). Shipping it trades GP5 and amends D-014's no-claim posture on the stored run, so it takes a D-entry at its gate. Promote when tune exports the function and a source validates the correction for a tuned workflow, or when a user asks for the comparison
 - What #91 still asks for after M84-M87 and M96: the maintainers' human pass over the guides and help pages (topepo's PR offer in the thread). The `@param` inheritance and the roxygen templates went to M96 on 2026-09-15; the guides' use of "you" was dropped at M96's plan gate (24 occurrences across the six pages at `ca6c628`, the M082-era overuse gone). The passive-voice and -ing-verb reader entries went to DESIGN Known issues at M87. [#91](https://github.com/tidymodels/nestedtune/issues/91) stays open. Promote on the issue author's PR offer landing
 - Comparing a workflow setting that is a function by more than its text, rewritten 2026-09-21 when M105 was dropped (D-067; `cairn/reviews/archive/RR08-closure-identity-stability.md` owns the analysis). Reading the values a closure reads was tried and withdrawn: of seven failure mechanisms, enclosure mutation and data-masked names under non-standard evaluation are not properties of the function, so no recorder of live values decides them, and both refuse a user their own workflow. RR08's Q2 gives the design a future attempt should start from, which is values the user declares rather than values a scan discovers, with a hash for comparison and a deparse for display alone. RR08 Q4 adds that any version recording something that changes with fitting must record it once, before its check. The older items stand: a value reached through `get()`, `eval()`, `mget()` or `...` is not seen; an environment reads as one token; and the size bound covers a read binding alone, where M103 logged a data-frame step argument deparsing whole. Promote on a user report of a false pass, or on a declared-values API being wanted
