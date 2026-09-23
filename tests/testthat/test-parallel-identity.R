@@ -123,14 +123,14 @@ test_that("BC4: an aborted parallel run still restores the caller's RNG state", 
   # An interrupt unwinds through the same on.exit() the pre-flight abort does,
   # so this pins the exit contract BC4 depends on. The interrupt value itself is
   # classified in test-parallel-classify.R, where it can be constructed exactly.
-  #
   # The abort is induced by mocking the probe, not by breaking the library path:
   # real daemons with no library cannot load mirai either, so they die at
-  # startup and the probe hangs (M07-D6).
+  # startup and the probe hangs (M07-D6). The pool itself is never reached, so
+  # the worker count is fabricated rather than probed off the shared pool (M113).
   local_mocked_bindings(daemons_load_status = function(...) {
     preflight_outcome(reports(FALSE))
   })
-  shared_daemons(2)
+  local_mocked_bindings(mirai_workers = function() 2L)
 
   data <- make_reg_data()
   nested <- det_nested(data)
@@ -882,9 +882,11 @@ test_that("BC9: a fold is immune to whatever a daemon ran before it", {
   expect_identical(polluted, fresh)
 })
 
-# The shared 3-daemon pool (M74): the second count BC1, BC10, BC12 and BC13
-# compare at, each block rebuilding its serial reference so that it depends
-# on nothing an earlier block computed.
+# The shared 3-daemon pool (M74): the second count BC1 compares at, its
+# serial reference rebuilt so that it depends on nothing an earlier block
+# computed. BC10, BC12 and BC13 compared here too until M113: no tuner code
+# reads the worker count, every tuner keeps its two-daemon block above, and
+# grid keeps both counts (D-079).
 
 test_that("the shared 3-daemon pool starts primed (M74)", {
   skip_if_no_daemons()
@@ -909,109 +911,6 @@ test_that("BC1: parallel matches serial at three daemons", {
   )
 
   expect_identical(last_dispatch(), "parallel")
-  expect_identical(parallel, serial)
-})
-
-test_that("BC10: the Bayesian path matches serial at three daemons (M45, AC4)", {
-  skip_if_no_daemons()
-  skip_if_not_installed("ranger")
-  skip_if_not_installed("dials")
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  p <- bayes_stoch_param_info(wf)
-
-  serial <- bayes_serial_reference(wf, nested, p)
-
-  shared_daemons(3)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(
-    nested_tune_bayes(
-      wf,
-      nested,
-      iter = 2,
-      initial = 3,
-      param_info = p,
-      metrics = reg_metrics()
-    )
-  )
-
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(parallel, serial)
-})
-
-test_that("BC12: both racing paths match serial at three daemons (M50, AC4)", {
-  skip_if_no_daemons()
-  skip_if_no_race_fixture(stochastic = TRUE)
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  ms <- reg_metrics()
-  ctrl <- race_control()
-
-  for (fn in RACERS) {
-    serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
-
-    shared_daemons(3)
-    set.seed(2026L)
-    parallel <- without_pkgload_warning(race_call_by_name(
-      fn,
-      wf,
-      nested,
-      grid = stoch_grid(),
-      metrics = ms,
-      control = ctrl
-    ))
-    expect_identical(last_dispatch(), "parallel")
-    for (col in c(
-      ".metrics",
-      ".selected",
-      ".inner_metrics",
-      ".tuning_seed",
-      ".outer_fit_seed"
-    )) {
-      expect_identical(parallel[[col]], serial[[col]], info = paste(fn, col))
-    }
-    expect_identical(parallel, serial)
-  }
-})
-
-test_that("BC13: the annealing path matches serial at three daemons (M51, AC4)", {
-  skip_if_no_daemons()
-  skip_if_no_anneal_fixture(stochastic = TRUE)
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-  p <- bayes_stoch_param_info(wf)
-  ms <- reg_metrics()
-  ctrl <- anneal_control()
-
-  serial <- anneal_serial_reference(wf, nested, p, ms, ctrl)
-
-  shared_daemons(3)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(nested_tune_sim_anneal(
-    wf,
-    nested,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms,
-    control = ctrl
-  ))
-  expect_identical(last_dispatch(), "parallel")
-  for (col in c(
-    ".metrics",
-    ".selected",
-    ".inner_metrics",
-    ".tuning_seed",
-    ".outer_fit_seed"
-  )) {
-    expect_identical(parallel[[col]], serial[[col]], info = col)
-  }
   expect_identical(parallel, serial)
 })
 
