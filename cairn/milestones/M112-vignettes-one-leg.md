@@ -33,9 +33,9 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 
 ## Tasks
 
-- [ ] T1: Set `build_args` and `args` on the `check-r-package` step (`.github/workflows/R-CMD-check.yaml:191-196`) as AC1 states. Use non-empty strings on both sides of each `&& ||`, since GitHub reads `''` as false.
-- [ ] T2: Add a block to `tests/testthat/test-ci-workflows.R` that checks the AC1 values. It reads the matrix entries and the two step lines by indentation, as `job_uses()` does. Plant each defect and see the block fail: flags given to macOS, flags missing on a non-macOS leg, `--as-cran` dropped, and a second `macos-latest` entry.
-- [ ] T3: Rewrite the step-cap comment's vignette sentences for AC2, from the phase times of job 106991147696 in run 35801023421. Add the PROFILE clause. Write the D-entry on which leg checks the vignettes and why.
+- [x] T1: Set `build_args` and `args` on the `check-r-package` step (`.github/workflows/R-CMD-check.yaml:191-196`) as AC1 states. Use non-empty strings on both sides of each `&& ||`, since GitHub reads `''` as false.
+- [x] T2: Add a block to `tests/testthat/test-ci-workflows.R` that checks the AC1 values. It reads the matrix entries and the two step lines by indentation, as `job_uses()` does. Plant each defect and see the block fail: flags given to macOS, flags missing on a non-macOS leg, `--as-cran` dropped, and a second `macos-latest` entry.
+- [x] T3: Rewrite the step-cap comment's vignette sentences for AC2, from the phase times of job 106991147696 in run 35801023421. Add the PROFILE clause. Write the D-entry on which leg checks the vignettes and why.
 - [ ] T4: Run `devtools::test()`, `devtools::check()`, and `devtools::check()` on the default branch at the branch point for the note baseline. Time a local `R CMD build` plus `R CMD check` with and without the non-macOS flags, and record the figures in the work log.
 
 ## Work log
@@ -47,6 +47,7 @@ The four `R-CMD-check.yaml` legs other than macOS skip building and checking the
 - 2026-09-22: plan gate chose to read the CI saving from the PR run at review and from the first run on `main`, over adding a local timing criterion, because the PR opens only after approval and local minutes run about 4 times faster than CI. Falsified by a non-macOS leg's step on `main` after merge running no faster than before.
 - 2026-09-22: implement started on `m112-vignettes-one-leg`, cut from `main` at `aaf2279`. Question gate skipped, since the plan left nothing open.
 - 2026-09-22: checkpoint, T1 to T3 written and not yet checked off. The new test block failed on the old yaml and passes on the new one, and each of the four planted defects failed it at its own line. The full `devtools::test()` run is still going.
+- 2026-09-22: T1 to T3 done. `devtools::test()` passed with 0 failures in 8.2 min, and the workflow test file passed 10 of 10 on the final tree. The comment's figures come from the step times of run 35801023421: macOS 21.4 min was the shortest of the five legs.
 
 ## Decisions
 
