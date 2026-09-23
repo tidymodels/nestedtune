@@ -48,10 +48,13 @@ The outer design must hold out every data row exactly once, as a
 v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
 design is refused with class \code{nestedtune_augment_rows}, because it
 predicts some rows more than once or not at all. Read its predictions
-with \code{\link[=collect_predictions]{collect_predictions()}} instead. A \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or
-\code{\link[rsample:sliding_window]{rsample::sliding_window()}} design leaves rows out of every assessment
+with \code{\link[=collect_predictions]{collect_predictions()}} instead. A \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}},
+\code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
+\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design leaves rows out of every assessment
 set and is refused with the same class. When no row is held out twice,
-the message names the rows left out.
+the message names the rows left out. When its assessment sets overlap,
+the message counts the rows left out and the rows held out more than
+once, and does not name a repeated or Monte Carlo design.
 
 
 A run whose control did not set \code{save_pred = TRUE} is refused with class

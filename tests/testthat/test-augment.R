@@ -158,8 +158,10 @@ test_that("an outer design holding a row out other than once is refused with nes
     cnd <- rlang::catch_cnd(augment(res), "error")
     expect_s3_class(cnd, "nestedtune_augment_rows")
     expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
-    # A design that holds a row out twice keeps the message naming it (M108).
+    # A design that holds a row out twice keeps the message naming it (M108),
+    # and is not called a time-series design (M111).
     expect_match(conditionMessage(cnd), "Monte Carlo", fixed = TRUE)
+    expect_no_match(conditionMessage(cnd), "time-series", fixed = TRUE)
   }
 })
 

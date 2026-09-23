@@ -6,7 +6,7 @@ _Last hygiene check: 2026-09-23 (M110 done and archived. M107 row pruned. Valida
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M110 | Rolling-origin and sliding-window designs under every orchestrator | done | — | normal | milestones/archive/M110-time-series-all-tuners.md |
-| M111 | Index-based and period-based sliding outer designs | planned | M110 | normal | milestones/M111-index-period-designs.md |
+| M111 | Index-based and period-based sliding outer designs | in-progress | M110 | normal | milestones/M111-index-period-designs.md |
 | M109 | Selecting each fold's candidate by desirability over several metrics | done | — | normal | milestones/archive/M109-desirability-selection.md |
 | M108 | Rolling-origin and sliding-window outer designs | done | — | normal | milestones/archive/M108-time-series-designs.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->

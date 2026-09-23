@@ -616,10 +616,13 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
 #' design is refused with class `nestedtune_augment_rows`, because it
 #' predicts some rows more than once or not at all. Read its predictions
-#' with [collect_predictions()] instead. A [rsample::rolling_origin()] or
-#' [rsample::sliding_window()] design leaves rows out of every assessment
+#' with [collect_predictions()] instead. A [rsample::rolling_origin()],
+#' [rsample::sliding_window()], [rsample::sliding_index()] or
+#' [rsample::sliding_period()] design leaves rows out of every assessment
 #' set and is refused with the same class. When no row is held out twice,
-#' the message names the rows left out.
+#' the message names the rows left out. When its assessment sets overlap,
+#' the message counts the rows left out and the rows held out more than
+#' once, and does not name a repeated or Monte Carlo design.
 #'
 #' @templateVar TITLE Designs and folds refused
 #' @template refusals-saved-run
@@ -696,6 +699,14 @@ augment.nested_results <- function(x, ...) {
   new_tbl(c(data[outcome], joined, data[setdiff(names(data), outcome)]))
 }
 
+# The outer split classes of rsample's time-series constructors.
+TIME_SERIES_SPLITS <- c(
+  "rof_split",
+  "sliding_window_split",
+  "sliding_index_split",
+  "sliding_period_split"
+)
+
 # Each data row's count of outer assessment sets holding it, over every fold.
 check_held_out_once <- function(x, n, call = rlang::caller_env()) {
   held <- unlist(lapply(x$splits, rsample::complement), use.names = FALSE)
@@ -722,15 +733,23 @@ check_held_out_once <- function(x, n, call = rlang::caller_env()) {
       call = call
     )
   }
+  # A time-series design whose assessment sets overlap is told so, not
+  # called a repeated or Monte Carlo design (M111).
+  info <- if (inherits(x$splits[[1L]], TIME_SERIES_SPLITS)) {
+    "A time-series design whose assessment sets overlap predicts a row \\
+     several times, and one that does not reach every row predicts it not \\
+     at all. Read those predictions with {.fn collect_predictions}."
+  } else {
+    "A repeated or Monte Carlo design predicts a row several times or not \\
+     at all. Read those predictions with {.fn collect_predictions}."
+  }
   cli::cli_abort(
     c(
       "{.fn augment} needs an outer design that holds out every data row \\
        exactly once.",
       x = "This design holds out {never} row{?s} never and {more} row{?s} \\
            more than once.",
-      i = "A repeated or Monte Carlo design predicts a row several times \\
-           or not at all. Read those predictions with \\
-           {.fn collect_predictions}."
+      i = info
     ),
     class = "nestedtune_augment_rows",
     call = call

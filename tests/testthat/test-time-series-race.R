@@ -42,7 +42,7 @@ for (design in names(TS_DESIGNS)) {
       sprintf("%s matches its reference loop on a %s design", fn, design),
       {
         skip_if_no_race_fixture(fn)
-        d <- make_reg_data()
+        d <- TS_DATA[[design]]()
         wf <- det_workflow(d)
         folds <- build(d)
         expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])

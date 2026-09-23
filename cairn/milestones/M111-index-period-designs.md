@@ -1,13 +1,13 @@
 # M111: Index-based and period-based sliding outer designs
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M110
 - **Driving RR:** —
 - **Principles touched:** IP1, IP4, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — states which outer designs the package supports, and changes an error message
-- **Branch/PR:** —
+- **Branch/PR:** m111-index-period-designs
 
 ## Goal
 
@@ -41,11 +41,11 @@
 
 ## Tasks
 
-- [ ] T1: Add `make_ts_data()`, `ts_index_nested()` and `ts_period_nested()` to `tests/testthat/helper-orchestration.R`. Build them with `rsample::nested_cv()`, with the literal inner call the final fit re-runs.
-- [ ] T2: Write the AC1 and AC2 tests in `tests/testthat/test-time-series-designs.R`, using the reference loops as M110 does.
-- [ ] T3: Write the AC3 split-identity tests.
-- [ ] T4: Write the AC4 final-fit tests, using M108's `expect_final_matches_reference()`.
-- [ ] T5: Fit the message in `check_held_out_once()` (`R/nested-results-collect.R:700-733`) to a sliding design that holds rows out more than once. Decide the design from the outer split class, and keep today's text for other designs. Write the AC5 and AC6 tests. The AC6 repeated and Monte Carlo case extends `tests/testthat/test-augment.R:150-163`.
+- [x] T1: Add `make_ts_data()`, `ts_index_nested()` and `ts_period_nested()` to `tests/testthat/helper-orchestration.R`. Build them with `rsample::nested_cv()`, with the literal inner call the final fit re-runs.
+- [x] T2: Write the AC1 tests in `tests/testthat/test-time-series-designs.R`, using the reference loops as M110 does. The AC2 tests come from adding both designs to `TS_DESIGNS`, which the four `test-time-series-*.R` files loop over.
+- [x] T3: Write the AC3 split-identity tests.
+- [x] T4: Write the AC4 final-fit tests, using M108's `expect_final_matches_reference()`.
+- [x] T5: Fit the message in `check_held_out_once()` (`R/nested-results-collect.R:700-733`) to a sliding design that holds rows out more than once. Decide the design from the outer split class, and keep today's text for other designs. Write the AC5 and AC6 tests. The AC6 repeated and Monte Carlo case extends `tests/testthat/test-augment.R:150-163`.
 - [ ] T6: Time `test-time-series-designs.R` alone and the whole suite in parallel. Compare both with the CI step caps in `cairn/PROFILE.md`. Record the figures in the work log.
 - [ ] T7: Write the D-entry extending M110's entry to the two designs and the new message. Write the help and `NEWS.md` text. Run `devtools::document()`, the prose sweeps from the verify slot, and `devtools::check()`.
 
@@ -54,6 +54,10 @@
 - 2026-09-22: created by /milestone-plan with M110. A probe on `main` at `dad72ce` ran `nested_tune_grid()` to completion on both fixtures. `sliding_period(period = "week")` errors inside `nested_cv()` at the default `lookback`. At `lookback` 7 or less, a racer refuses a fold with 2 or fewer inner resamples. At `lookback = 8` the design has 5 folds with 4 or 5 inner resamples each.
 - 2026-09-22: criteria audit findings on M111 were the unstated `sliding_period()` arguments and a message change that needed code. Also a test property stated as a promise, and a final-fit claim tested on one design of two. All were fixed before the gate.
 - 2026-09-22: plan gate chose all six orchestrators on the new designs over `nested_tune_grid()` alone, because the help then states one rule for four designs. Falsified by the added runs pushing a CI leg past its step cap.
+- 2026-09-22: implement started on branch `m111-index-period-designs`. Question gate: the time-series `augment()` wording covers all four time-series split classes, `rolling_origin()` included, over the three sliding ones alone. The new designs join `TS_DESIGNS`, so the four time-series files run them, over one new file.
+- 2026-09-22: minor amendment: T2's wording now says the AC2 tests reach the new designs through `TS_DESIGNS` in the four files. T3 and T4 landed in the same edit to `test-time-series-designs.R`, so T1 to T4 share one checkpoint.
+- 2026-09-22: T1-T4 done. `make_ts_data()`, `ts_index_nested()`, `ts_period_nested()` and a `TS_DATA` lookup in the helper. Grid, split and final-fit tests loop over the two designs. The four files pass alone: designs 29 s, bayes 113 s, race 50 s, anneal 30 s wall.
+- 2026-09-22: T5 done. `check_held_out_once()` gives a time-series split class (`TIME_SERIES_SPLITS`) its own overlap text. The AC5 test fails on 3 assertions with the old message restored. The `augment()` help paragraph rides in this commit, as it sits in the same file. Full suite clean, 535 s wall locally.
 
 ## Decisions
 

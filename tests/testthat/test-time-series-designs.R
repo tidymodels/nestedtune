@@ -196,6 +196,96 @@ test_that("the final fit on a sliding-window design matches a hand-rolled refere
   expect_final_matches_reference(d, ts_sliding_nested(d))
 })
 
+# ---- Index-based and period-based designs (M111) -----------------------------
+#
+# The O1, O2 and O3 oracles above, run on `sliding_index()` and
+# `sliding_period()` outer designs over `make_ts_data()`. The Bayesian,
+# racing, annealing and fit_resamples tests reach these designs through
+# TS_DESIGNS.
+
+TS_NEW_OUTER_CALLS <- list(
+  "sliding-index" = function(d) {
+    nested_resamples(
+      d,
+      outside = rsample::sliding_index(
+        index = date,
+        lookback = 59,
+        assess_stop = 1,
+        step = 10
+      ),
+      inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+    )
+  },
+  "sliding-period" = function(d) {
+    nested_resamples(
+      d,
+      outside = rsample::sliding_period(
+        index = date,
+        period = "week",
+        lookback = 8
+      ),
+      inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+    )
+  }
+)
+
+for (design in names(TS_NEW_OUTER_CALLS)) {
+  build <- TS_DESIGNS[[design]]
+  lean_of <- TS_NEW_OUTER_CALLS[[design]]
+
+  test_that(
+    sprintf("a %s design matches a hand-rolled reference loop", design),
+    {
+      skip_if_no_engines()
+      d <- make_ts_data()
+      wf <- det_workflow(d)
+      ms <- ts_metrics()
+      grid <- det_grid()
+      folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
+
+      set.seed(20)
+      res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
+      ref <- memoised(reference_nested_loop(
+        wf,
+        folds,
+        grid,
+        ms,
+        seed = 20,
+        metric_name = "rmse"
+      ))
+
+      expect_ts_matches_reference(res, ref)
+    }
+  )
+
+  test_that(sprintf("%s splits match rsample::nested_cv()", design), {
+    d <- make_ts_data()
+
+    ref <- build(d)
+    lean <- lean_of(d)
+
+    expect_s3_class(lean, "nested_resamples")
+    expect_s3_class(lean$splits[[1]], TS_SPLIT_CLASS[[design]])
+    expect_outer_identical(lean, ref)
+    expect_inner_identical(lean, ref)
+  })
+
+  test_that(
+    sprintf(
+      "the final fit on a %s design matches a hand-rolled reference",
+      design
+    ),
+    {
+      skip_if_no_engines()
+      d <- make_ts_data()
+      folds <- build(d)
+      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
+      expect_final_matches_reference(d, folds)
+    }
+  )
+}
+
 # ---- AC5: predictions and augment() -----------------------------------------
 
 ts_pred_run <- function(data, design = ts_rolling_nested) {
@@ -258,6 +348,45 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_augment_names_never_held(res, d)
 })
 
+# Two outer slices whose eleven-row assessment sets share row 70 (M111).
+ts_overlap_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::sliding_window(
+      lookback = 59,
+      assess_stop = 11,
+      step = 10
+    ),
+    inside = rsample::rolling_origin(initial = 40, assess = 1, skip = 4)
+  )
+}
+
+test_that("augment() on an overlapping sliding-window result counts both kinds of row", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- ts_pred_run(d, ts_overlap_nested)
+  expect_s3_class(res$splits[[1]], "sliding_window_split")
+  counts <- tabulate(
+    unlist(lapply(res$splits, rsample::complement)),
+    nbins = nrow(d)
+  )
+  expect_identical(c(sum(counts == 0L), sum(counts > 1L)), c(69L, 1L))
+
+  cnd <- rlang::catch_cnd(augment(res), "error")
+  expect_s3_class(cnd, "nestedtune_augment_rows")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
+  # cli wraps the message at the console width.
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(
+    msg,
+    "holds out 69 rows never and 1 row more than once.",
+    fixed = TRUE
+  )
+  expect_match(msg, "time-series design", fixed = TRUE)
+  expect_no_match(msg, "repeated", ignore.case = TRUE)
+  expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+})
+
 # ---- The other orchestrators (M110) ------------------------------------------
 #
 # The Bayesian, racing and annealing tuners have their own files,
@@ -271,6 +400,18 @@ TS_OUTER <- list(
   },
   "sliding-window" = function(d) {
     rsample::sliding_window(d, lookback = 59, assess_stop = 1, step = 10)
+  },
+  "sliding-index" = function(d) {
+    rsample::sliding_index(
+      d,
+      index = date,
+      lookback = 59,
+      assess_stop = 1,
+      step = 10
+    )
+  },
+  "sliding-period" = function(d) {
+    rsample::sliding_period(d, index = date, period = "week", lookback = 8)
   }
 )
 
@@ -285,7 +426,7 @@ for (design in names(TS_DESIGNS)) {
     ),
     {
       skip_if_no_engines()
-      d <- make_reg_data()
+      d <- TS_DATA[[design]]()
       wf <- fixed_workflow(d)
       ms <- ts_metrics()
       outer <- outer_of(d)
@@ -335,7 +476,7 @@ for (design in names(TS_DESIGNS)) {
     ),
     {
       skip_if_no_engines()
-      d <- make_reg_data()
+      d <- TS_DATA[[design]]()
       wf <- fixed_workflow(d)
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])

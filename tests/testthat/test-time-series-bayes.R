@@ -49,7 +49,7 @@ for (design in names(TS_DESIGNS)) {
     ),
     {
       skip_if_no_bayes_fixture()
-      d <- make_reg_data()
+      d <- TS_DATA[[design]]()
       wf <- bayes_workflow(d)
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
@@ -80,7 +80,7 @@ for (design in names(TS_DESIGNS)) {
     ),
     {
       skip_if_no_bayes_fixture()
-      d <- make_reg_data()
+      d <- TS_DATA[[design]]()
       wf <- bayes_workflow(d)
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
