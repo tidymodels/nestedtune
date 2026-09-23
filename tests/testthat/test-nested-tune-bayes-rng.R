@@ -3,10 +3,11 @@
 # until M113. The success-path RNG restore and the fold seeding are one
 # shared site in `nested_loop()` / `set_fold_seed()`, so
 # test-nested-tune-grid-rng.R covers them (D-079).
-# IP2 for the Bayesian path (M45 AC4). Six of the eight properties
+# IP2 for the Bayesian path (M45 AC4). Five of the eight properties
 # test-nested-tune-grid-rng.R holds the grid path to are asserted here on
-# nested_tune_bayes(); the caller's-RNG-survives and no-RNG-state properties
-# are covered once, in test-nested-tune-grid-rng.R (D-079). Plus the one rule
+# nested_tune_bayes(); the caller's-RNG-survives, folds-fail restore and
+# no-RNG-state properties are covered once, in test-nested-tune-grid-rng.R
+# (D-079). Plus the one rule
 # that is this path's own: the Gaussian-process seed is the fold's tuning
 # seed, and the control carrying it is built inside that seed's scope. Every
 # test that could pass vacuously under a deterministic engine uses ranger,

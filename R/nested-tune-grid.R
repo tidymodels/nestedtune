@@ -115,8 +115,8 @@
 #' [nested_tune_sim_anneal()] are tested on the rolling-origin design, and
 #' so is [nested_final_fit()] for their results. [nested_workflow_map()] is
 #' tested on the rolling-origin design. The outer design never reaches the
-#' tuner: each tuner sees one outer fold's analysis rows at a time. An
-#' inner design other than [rsample::rolling_origin()] is not tested.
+#' tuner: each tuner is handed one outer fold's inner resamples at a time.
+#' An inner design other than [rsample::rolling_origin()] is not tested.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
 #' assessment sets leave rows out. When the assessment sets overlap, its
 #' error also counts the rows held out more than once.

@@ -8,9 +8,10 @@
 # `.github/workflows/test-coverage.yaml` does: the daemons' trace files go to
 # the `daemon-traces` sidecar `tests/testthat/helper-covr.R` points at, and are
 # merged back with covr's own `merge_coverage()`, skipping any file that
-# cannot be read. Two differences from the workflow, both deliberate: the
-# tests run serially (`TESTTHAT_PARALLEL=FALSE`), and `NOT_CRAN=true` is set
-# so no test skips.
+# cannot be read. Two settings the script makes itself: the tests run
+# serially (`TESTTHAT_PARALLEL=FALSE`), and `NOT_CRAN=true` is set so the
+# `skip_on_cran()` tests run. A test that skips on a missing package or on no
+# daemons still skips.
 #
 # The output has one row per line covr tallies: `file` (relative to `R/`),
 # `line` (the line number in that tree), `pos` (the line's position among the

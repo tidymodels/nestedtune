@@ -310,8 +310,8 @@ Time-series designs are supported for an outer
 \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested on the rolling-origin design, and
 so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is
 tested on the rolling-origin design. The outer design never reaches the
-tuner: each tuner sees one outer fold's analysis rows at a time. An
-inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
+tuner: each tuner is handed one outer fold's inner resamples at a time.
+An inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out. When the assessment sets overlap, its
 error also counts the rows held out more than once.
