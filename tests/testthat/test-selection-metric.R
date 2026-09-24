@@ -155,12 +155,15 @@ test_that("a workflow set with an unsuitable metric set is refused before any wo
   d <- make_reg_data()
   # The workflow with nothing to tune comes first, so a refusal made only at
   # the tuned workflow's turn would follow its run and its failed-fold warning.
+  # It takes a suitable set from its own `option` entry, so the refusal is
+  # the tuned workflow's (M117 made the pre-check judge both routes).
   wset <- workflowsets::as_workflow_set(
     fixed = fixed_workflow(d),
     tuned = det_workflow(d)
   )
+  wset <- workflowsets::option_add(wset, id = "fixed", metrics = reg_metrics())
   warned <- 0L
-  withCallingHandlers(
+  cnd <- withCallingHandlers(
     expect_error(
       nested_workflow_map(
         object = wset,
@@ -177,4 +180,42 @@ test_that("a workflow set with an unsuitable metric set is refused before any wo
     }
   )
   expect_identical(warned, 0L)
+  expect_match(conditionMessage(cnd), "Workflow \"tuned\"", fixed = TRUE)
+})
+
+# A workflow the map routes to `nested_fit_resamples()` is judged in the
+# pre-check too (M117, D-082), by either route there. The refused workflow
+# comes second and takes its set from its own `option` entry, since a shared
+# set in `...` would refuse the first. No orchestrator call may start.
+test_that("a workflow the map routes to nested_fit_resamples() is refused before any workflow runs (M117 AC2)", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  wset <- workflowsets::as_workflow_set(
+    ok = fixed_workflow(d),
+    bad = fixed_workflow(d)
+  )
+  wset <- workflowsets::option_add(
+    wset,
+    id = "bad",
+    metrics = yardstick::metric_set(yardstick::accuracy)
+  )
+
+  for (fn in c("nested_fit_resamples", "nested_tune_grid")) {
+    runs <- 0L
+    local_mocked_bindings(run_orchestrator = function(...) {
+      runs <<- runs + 1L
+      NULL
+    })
+    cnd <- expect_error(
+      nested_workflow_map(
+        object = wset,
+        fn = fn,
+        resamples = det_nested(d),
+        metrics = reg_metrics()
+      ),
+      class = "nestedtune_metrics_mode"
+    )
+    expect_match(conditionMessage(cnd), "Workflow \"bad\"", fixed = TRUE)
+    expect_identical(runs, 0L)
+  }
 })

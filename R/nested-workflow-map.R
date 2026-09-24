@@ -187,21 +187,20 @@ nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
   routes <- vapply(workflows, route_workflow, character(1), fn = fn)
   check_map_options(object, routes)
   # Every workflow judged before any runs (GP3), each refusal naming the
-  # workflow: the shared checks, and under the plain resampling orchestrator
-  # the door it keeps (D-057).
+  # workflow: the shared checks, under the plain resampling orchestrator the
+  # door it keeps (D-057), and under every route the metric set (D-082).
   for (i in seq_along(ids)) {
     for_workflow(ids[[i]], call, {
       check_workflow(workflows[[i]], call = call)
       if (identical(routes[[i]], "nested_fit_resamples")) {
         check_tuned_workflow(workflows[[i]], call = call)
-      } else {
-        # The metric set this workflow's run would get, resolved as the run
-        # resolves it (M116). A `metrics` that is not a metric set is left to
-        # the orchestrator's own check.
-        metrics <- map_args(dots, object$option[[i]], routes[[i]], fn)$metrics
-        if (is.null(metrics) || inherits(metrics, "metric_set")) {
-          check_metrics_mode(metrics, workflows[[i]], call = call)
-        }
+      }
+      # The metric set this workflow's run would get, resolved as the run
+      # resolves it (M116). A `metrics` that is not a metric set is left to
+      # the orchestrator's own check.
+      metrics <- map_args(dots, object$option[[i]], routes[[i]], fn)$metrics
+      if (is.null(metrics) || inherits(metrics, "metric_set")) {
+        check_metrics_mode(metrics, workflows[[i]], call = call)
       }
     })
   }

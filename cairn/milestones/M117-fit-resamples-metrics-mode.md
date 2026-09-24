@@ -48,7 +48,7 @@
 
 - [x] T1: Write AC1's tests in `tests/testthat/test-selection-metric.R` beside the M116 refusal test (line 95), under `skip_if_no_engines()` (LESSONS, M101). See both fail on `main`'s code with the failure they are expected to have: no error, and a failed-fold warning.
 - [x] T2: In `nested_loop()` run `check_metrics_mode()` for every tuner and keep its value as `first_metric` only where `tuner_selects()` holds. Update the comments there and above `check_metrics_mode()` (`R/checks.R:1209`). AC1's tests pass, and the line-89 test passes unchanged.
-- [ ] T3: Write AC2's test under `skip_if_no_wset_fixture()` and see it fail. The refused workflow takes its set from `workflowsets::option_add(metrics = ...)`, since a shared set in `...` refuses the first workflow. Count orchestrator calls with `local_mocked_bindings(run_orchestrator = ...)` (`R/nested-workflow-map.R:258-267`) or an equal probe. Update the pre-check comment at `R/nested-workflow-map.R:190-192`. Then call `check_metrics_mode()` in the `nested_fit_resamples` branch of `nested_workflow_map()`'s pre-check. Use the `map_args()` resolution and the metric-set guard of the tuned branch (`R/nested-workflow-map.R:198-204`).
+- [x] T3: Write AC2's test under `skip_if_no_wset_fixture()` and see it fail. The refused workflow takes its set from `workflowsets::option_add(metrics = ...)`, since a shared set in `...` refuses the first workflow. Count orchestrator calls with `local_mocked_bindings(run_orchestrator = ...)` (`R/nested-workflow-map.R:258-267`) or an equal probe. Update the pre-check comment at `R/nested-workflow-map.R:190-192`. Then call `check_metrics_mode()` in the `nested_fit_resamples` branch of `nested_workflow_map()`'s pre-check. Use the `map_args()` resolution and the metric-set guard of the tuned branch (`R/nested-workflow-map.R:198-204`).
 - [ ] T4: Say the refusal in `nested_fit_resamples()`'s help (the `metrics` entry at `R/nested-fit-resamples.R:25`). Make the details line at `:20` agree with it. Drop "tuned" from the two sentences in `nested_workflow_map()`'s help (`R/nested-workflow-map.R:43-45`, `125-127`). Rewrite the M116 bullet in `NEWS.md` (lines 11-14) to name `nested_fit_resamples()` and every workflow the map runs. Run `devtools::document()`.
 - [ ] T5: Run the `verify` slot in full and `air format --check` on the touched files.
 
@@ -62,6 +62,7 @@
 - 2026-09-24: plan gate chose rewriting M116's unreleased NEWS bullet over a second bullet because one bullet then states the whole rule; falsified by a release that ships M116's bullet before this milestone merges.
 - 2026-09-24: implement started on branch `m117-fit-resamples-metrics-mode`; no open choice, so no question gate.
 - 2026-09-24: T1/T2 done. On `main` the AC1 test got no error and one `nestedtune_failed_folds` warning (3 of 3 folds failed); after `nested_loop()` checks every tuner, `test-selection-metric.R` passes whole.
+- 2026-09-24: T3 done. On the old pre-check the AC2 test got no error under either route. The M116 map test now gives its fixed workflow a suitable `option` set and asserts the tuned workflow's id, so it still tests the tuned branch (minor edit to an existing test).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
