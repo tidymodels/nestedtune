@@ -66,6 +66,8 @@
 - 2026-09-24: T4 done. The help and NEWS name the new reach, and the AC4 grep prints nothing. The details line at `R/nested-fit-resamples.R:20` already agreed, so it is unchanged. Both prose sweeps are clean.
 - 2026-09-24: T5 done. Full `devtools::test()` at `4332313` passed 11503 expectations with 0 failures. The claim-audit fixes after it touched one roxygen sentence and one test file, and both reran clean.
 - claim audit: 14 claims read, 4 corrected — R/nested-workflow-map.R, tests/testthat/test-selection-metric.R. The M116 map test's warning count was blind after T3, so it now counts `run_orchestrator()` calls. With the pre-check disabled it read 2 runs and failed.
+- 2026-09-24: review found every criterion met and the gate clean. The user accepted all six findings as rejected.
+- step-7 approval: m117-fit-resamples-metrics-mode approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
@@ -83,11 +85,11 @@ Review of `7b5e4ef` on 2026-09-24. The branch already contained `origin/main`, s
 
 Consistency gate: `cairn_validate.py` exited 0 (18 `references staleness` advisories, none failing). No DESIGN principle changed, so `cairn_impact` was skipped. `document()` made no diff. `pkgdown::check_pkgdown()` found no problems. The `NEWS.md` bullet covers the change. No new top-level files. `devtools::check()` gave 0 errors, 0 warnings, 0 notes. All six gating prose sweeps are clean. `air format --check` on the touched R files exited 0.
 
-Independent review: three fresh reviewers ([O] diff, [S] blame history, [S] prior reviews) found no correctness defect. The [S] prior-review lens found no regression of an earlier finding. Findings, most severe first, with the dispositions proposed at the gate:
+Independent review: three fresh reviewers ([O] diff, [S] blame history, [S] prior reviews) found no correctness defect. The [S] prior-review lens found no regression of an earlier finding. Findings, most severe first, with the dispositions the user accepted at the gate:
 
-- O1: the help line at `R/nested-fit-resamples.R:20` says `metrics` "is read as `tune::fit_resamples()` reads it", but each fold scores with `tune::last_fit()`. Proposed: reject. The line is older than this branch, and both functions resolve metrics through `check_metrics_arg()`.
-- O2: the AC2 test does not assert that `fn = "nested_tune_grid"` routes the fixed workflow to `nested_fit_resamples()`. Proposed: reject. `test-nested-workflow-map-oracles.R:58` already asserts that route.
-- O3: AC1's "no fold ran" evidence rests on the failed-fold warning. Proposed: reject. AC1 asks for no warning. If folds run, the `expect_error()` still fails.
-- O4: the map resolves the metric set twice, in the pre-check and again in `nested_loop()`. Proposed: reject. The plan put the check at both sites on purpose, and the cost is one `check_metrics_arg()` call per workflow.
-- O5 and S1: an irregular line break before "it is refused" at `R/nested-workflow-map.R:128-129`. Proposed: reject. It is a style point and the rendered help is unchanged.
-- O6: the change is an error with no deprecation period. Proposed: reject. The plan gate waived the deprecation because the package has no release, and the NEWS bullet ends "Before, every fold ran and failed."
+- O1: the help line at `R/nested-fit-resamples.R:20` says `metrics` "is read as `tune::fit_resamples()` reads it", but each fold scores with `tune::last_fit()`. Rejected at the gate. The line is older than this branch, and both functions resolve metrics through `check_metrics_arg()`.
+- O2: the AC2 test does not assert that `fn = "nested_tune_grid"` routes the fixed workflow to `nested_fit_resamples()`. Rejected at the gate. `test-nested-workflow-map-oracles.R:58` already asserts that route.
+- O3: AC1's "no fold ran" evidence rests on the failed-fold warning. Rejected at the gate. AC1 asks for no warning. If folds run, the `expect_error()` still fails.
+- O4: the map resolves the metric set twice, in the pre-check and again in `nested_loop()`. Rejected at the gate. The plan put the check at both sites on purpose, and the cost is one `check_metrics_arg()` call per workflow.
+- O5 and S1: an irregular line break before "it is refused" at `R/nested-workflow-map.R:128-129`. Rejected at the gate. It is a style point and the rendered help is unchanged.
+- O6: the change is an error with no deprecation period. Rejected at the gate. The plan gate waived the deprecation because the package has no release, and the NEWS bullet ends "Before, every fold ran and failed."
