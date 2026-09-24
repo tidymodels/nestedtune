@@ -404,10 +404,11 @@ print_selection <- function(s, heading = cli::cli_h2) {
 
 # The `Selected by:` line the results summary, the final fit's print and its
 # summary share (M98), rendered by the one helper the rule's own print uses,
-# so a reader meets the same words in every place. Silent on the default rule
-# and on a record that holds none. The `Selecting metric:` line follows it
-# (M116), under every rule that selects on the first metric, the default
-# included, so a reader can tell which metric in the set chose.
+# so a reader meets the same words in every place. That line is silent on the
+# default rule and on a record that holds none. The `Selecting metric:` line
+# (M116) prints under every rule that selects on the first metric, the
+# default included, so a reader can tell which metric in the set chose. It
+# comes after the `Selected by:` line when both print.
 print_selected_by <- function(select, first_metric = NULL) {
   if (names_selection_rule(select)) {
     cli::cli_text("Selected by: {selection_rule_label(select)}")

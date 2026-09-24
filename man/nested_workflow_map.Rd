@@ -24,8 +24,8 @@ no \code{resamples}.
 A \code{metrics} passed here reaches every workflow's run. Under the
 \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules of \code{\link[=selection_rule]{selection_rule()}},
 its first metric chooses each fold's candidate, and every metric in it
-is scored. The \code{metrics} entry of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says what the
-default set is and how the \code{"desirability"} rule chooses instead.}
+is scored. The \code{metrics} entry of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says what \code{NULL}
+means and how the \code{"desirability"} rule chooses instead.}
 }
 \value{
 A \code{nested_results_set}: a tibble of class

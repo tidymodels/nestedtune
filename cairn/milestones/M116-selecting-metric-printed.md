@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M116: The summaries and the final fit's print name the metric that selects
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -99,3 +99,6 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: T2 done. `print_selected_by()` prints `Selecting metric:` through the new `names_selecting_metric()`, and both summaries carry `first_metric`. New tests in the two print test files cover placement, absence and the all-failed run. Two tests pinning the final fit's print text and summary names were updated. Snapshots re-recorded under NOT_CRAN=true: 27 added lines, all `Selecting metric: rmse`, none removed. The full suite under NOT_CRAN=true passes with no failures.
 - 2026-09-24: T3 in progress. Help on the five pages written and regenerated, NEWS entry and D-081 added; all six gating sweeps clean after five sentences were split. Full suite and check() running (checkpoint, T3 not ticked).
 - 2026-09-24: T3 done. Full suite under NOT_CRAN=true: no failures, so the AC5 exception was not used. `devtools::check()` 0 errors, 0 warnings, 0 notes. `devtools::document()` leaves no diff. All six gating sweeps clean.
+- 2026-09-24: delegated the claim audit to a fresh [O] general-purpose reader; I applied its two corrections myself.
+- 2026-09-24: claim audit: 58 claims read, 2 corrected — R/nested-workflow-map.R, R/nested-results-print.R
+- 2026-09-24: status set to review. Only help and comment text changed after the last suite run; document() and all six sweeps are clean after the corrections.
