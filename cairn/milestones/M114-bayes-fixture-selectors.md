@@ -45,7 +45,7 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 
 ## Tasks
 
-- [ ] T1: Measure the branch point before any fixture edit. Run three serial passes of `benchmarks/profile-tests.R` on mains power. Add `benchmarks/test-blocks.R`. From one serial pass, it writes one CSV row per test block: file, test, expectations, failed, skipped, error. Write the branch point's table beside it.
+- [x] T1: Measure the branch point before any fixture edit. Run three serial passes of `benchmarks/profile-tests.R` on mains power. Add `benchmarks/test-blocks.R`. From one serial pass, it writes one CSV row per test block: file, test, expectations, failed, skipped, error. Write the branch point's table beside it.
 - [ ] T2: Add `benchmarks/recipes-tune-args-cost.R`. Change the selectors in both fixtures to strings. The comment above each fixture names the cost, the script and the date measured (the derived-figures rule). Run the two Bayesian files.
 - [ ] T3: Measure the head the same way, on the same machine right after the branch point. Compare the two per-block tables by file and test name. Write the M114 section of `benchmarks/test-timing-baseline.md`. If the eleven heaviest files changed, re-cut `Config/testthat/start-first` in `DESCRIPTION`.
 - [ ] T4: Search the tidymodels/recipes issues for an existing report on `find_tune_id()` or `tune_args()` cost. If none exists, draft the issue body in `cairn/milestones/M114-recipes-issue.md`, with the reproducer and the two figures. Nothing is posted before the user approves the text at the review gate.
@@ -58,6 +58,7 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: plan gate chose the two helper fixtures over also changing the inline identity recipes, because those tests check the bare-name spelling. Falsified by `test-nested-final-fit-identity.R` entering the five heaviest files.
 - 2026-09-23: plan gate chose per-block expectation counts over a per-line covr comparison as the no-loss evidence. Falsified by an `R/` code path that branches on how a recipe step names its columns.
 - 2026-09-23: implement started on `m114-bayes-fixture-selectors`; no question gate, the plan left nothing open. Checkpoint: `benchmarks/test-blocks.R` written, branch-point runs started in a detached worktree at `1aef465`; T2's fixture edit and cost script drafted, not yet run.
+- 2026-09-23: T1 done. Branch point `1aef465` on mains power, three serial passes: 762.5, 762.2 and 827.8 s, pass 11387, fail 0, skip 0. Medians: `test-nested-tune-bayes-oracles.R` 59.9 s, `test-time-series-bayes.R` 57.6 s. Block table `benchmarks/test-blocks-1aef465.csv`: 977 blocks in 88 files, file and test keys unique.
 
 ## Decisions
 
