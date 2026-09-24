@@ -112,7 +112,7 @@ test_that("a metric set that does not suit the model's mode is refused at entry 
 })
 
 test_that("a workflow set with an unsuitable metric set is refused before any workflow runs (M116)", {
-  skip_if_no_engines()
+  skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The workflow with nothing to tune comes first, so a refusal made only at
   # the tuned workflow's turn would follow its run and its failed-fold warning.

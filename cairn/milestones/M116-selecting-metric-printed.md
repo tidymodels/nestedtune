@@ -155,3 +155,4 @@ The summaries and the final fit's print name the metric that chose each fold's c
   - [O]5 and [O]7: fixed in T4.
   - [O]2: closed by T4's tests.
 - After the fixes: `test-selection-metric.R` passes (27 expectations, 0 failed; no test reads the message text), `document()` regenerated one page, and the six sweeps are clean. The full suite runs on the PR's CI.
+- Step 8 CI on PR #131: `format-suggest` flagged one `for` header in `test-nested-results-print.R`, fixed with `air format`. `R-CMD-check-hard.yaml` failed 1 of 7000 tests: the new map test in `test-selection-metric.R` used `workflowsets` without a skip, and that job installs no Suggests. It now calls `skip_if_no_wset_fixture()`, as the other set tests do, and the file passes locally (27 expectations). Both are trivial test-only fixes, so approval was not re-requested.
