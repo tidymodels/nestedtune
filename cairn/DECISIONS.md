@@ -1895,6 +1895,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** A `Selecting metric:` line prints under the `"best"`, `"one_std_err"` and `"pct_loss"` rules on the results, set and final-fit summaries and on the final fit's print. `Selected by:` is unchanged. The name is resolved once at entry through `tune::check_metrics_arg()` and recorded as `first_metric` under every rule of a selecting tuner. The final fit records the name it resolves from its own run, and a results object built before the entry is not migrated. A metric set tune cannot resolve for the workflow's mode is refused with class `nestedtune_metrics_mode` before any fold runs, and before any workflow of a `nested_workflow_map()` call runs, where each fold used to run and fail on it. `nested_fit_resamples()`, which records no name, keeps its old behavior. Rejected: extending `Selected by:` to `best on rmse`, which would stop the rule line matching the rule object's print, and reading the name at print time, which a `nested_results` cannot do without its workflow.
 **Consequences:** the default run's print gains a line on four surfaces. Falsified by a user reading the two lines as naming different things, or by tune ordering a default set differently at entry and inside a fold.
 
+### D-082 (2026-09-24): `nested_fit_resamples()`, and `nested_workflow_map()` for the workflows it routes there, refuse a metric set that does not suit the model's mode before any fold runs. Supersedes D-081's clause that `nested_fit_resamples()` keeps its old behavior
+
+**Context:** D-081 tied the entry refusal to recording the selecting metric's name. `nested_fit_resamples()` records no name, so D-081 left it out, and there every fold still runs and fails on such a set (M116 review, finding P2).
+**Decision:** `nested_loop()` runs the entry check for every tuner, and it records `first_metric` only for a tuner that selects. The refusal keeps the class `nestedtune_metrics_mode`. `nested_workflow_map()`'s pre-check covers the workflows it routes to `nested_fit_resamples()`. The change ships as an error with no deprecation period, because the package has no release (user waiver at M117's plan gate). The rest of D-081 stands.
+**Consequences:** a call that returned all-failed folds with a warning now stops with an error. Falsified by a metric set that `tune::check_metrics_arg()` refuses and `tune::fit_resamples()` accepts inside a fold.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
