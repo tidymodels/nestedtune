@@ -95,7 +95,9 @@ nested_fit_resamples(
   or `NULL` for tune's default set. The outer loop scores every metric
   in the set, and
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-  reports each one.
+  reports each one. A metric set that does not suit the model's mode,
+  such as a classification metric on a regression model, is refused
+  before any fold runs.
 
 - event_level:
 

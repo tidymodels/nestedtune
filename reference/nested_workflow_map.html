@@ -116,8 +116,9 @@ no <code>resamples</code>.</p>
 its first metric chooses each fold's candidate, and every metric in it
 is scored. The <code>metrics</code> entry of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> says what <code>NULL</code>
 means and how the <code>"desirability"</code> rule chooses instead. A set that
-does not suit a tuned workflow's model is refused before any workflow
-runs.</p></dd>
+does not suit the model of any workflow the map runs is refused before
+any workflow runs, a workflow routed to <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
+included.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -209,9 +210,10 @@ reading function still learns which workflow lost folds.</p>
 orchestrator raises for one workflow is raised the same way, when that
 workflow's turn comes. A <code>grid</code> that names a parameter that workflow
 does not tune is one such error, and a control of the wrong class is
-another. The workflows before it have run by then. A <code>metrics</code> that
-does not suit a tuned workflow's model is the exception: it is refused
-before any workflow runs. What is raised is
+another. The workflows before it have run by then. A metric set in
+<code>metrics</code> that does not suit the model of any workflow the map runs is
+the exception:
+it is refused before any workflow runs. What is raised is
 the original condition
 object, with <code>Workflow "&lt;id&gt;": </code> written in front of the first line of
 its message and this function, or the reading function, as its call.

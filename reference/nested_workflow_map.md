@@ -54,8 +54,10 @@ nested_workflow_map(object, fn = "nested_tune_grid", ...)
   is scored. The `metrics` entry of
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   says what `NULL` means and how the `"desirability"` rule chooses
-  instead. A set that does not suit a tuned workflow's model is refused
-  before any workflow runs.
+  instead. A set that does not suit the model of any workflow the map
+  runs is refused before any workflow runs, a workflow routed to
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  included.
 
 ## Value
 
@@ -152,13 +154,13 @@ function still learns which workflow lost folds.
 An error an orchestrator raises for one workflow is raised the same way,
 when that workflow's turn comes. A `grid` that names a parameter that
 workflow does not tune is one such error, and a control of the wrong
-class is another. The workflows before it have run by then. A `metrics`
-that does not suit a tuned workflow's model is the exception: it is
-refused before any workflow runs. What is raised is the original
-condition object, with `Workflow "<id>": ` written in front of the first
-line of its message and this function, or the reading function, as its
-call. Its class vector, its `parent` and the cause chain, its bullets
-and every field a handler reads are unchanged.
+class is another. The workflows before it have run by then. A metric set
+in `metrics` that does not suit the model of any workflow the map runs
+is the exception: it is refused before any workflow runs. What is raised
+is the original condition object, with `Workflow "<id>": ` written in
+front of the first line of its message and this function, or the reading
+function, as its call. Its class vector, its `parent` and the cause
+chain, its bullets and every field a handler reads are unchanged.
 
 ## Subsetting
 

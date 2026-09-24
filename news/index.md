@@ -13,11 +13,14 @@
   as a component of the same name. The help for
   [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
   says which metric of a `metrics` passed to it selects. The five tuning
-  functions, and
+  functions and
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  now refuse a metric set that does not suit the model’s mode before any
+  fold runs. An example is a classification metric on a regression
+  model.
   [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-  for the workflows it tunes, now refuse a metric set that does not suit
-  the model’s mode, such as a classification metric on a regression
-  model, before any fold runs. Before, every fold ran and failed.
+  makes the same refusal for every workflow the map runs, before any
+  workflow runs. Before, every fold ran and failed.
 
 - The help for `metrics` on
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
