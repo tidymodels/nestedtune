@@ -69,8 +69,8 @@ under the default rule and on a fit that tuned nothing.
 Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
 line reads \verb{Selecting metric:} and then a name. The name is the
 \code{first_metric} component. Under the default rule it is the first line
-under the heading. It is absent
-under the \code{"desirability"} rule and on a fit that tuned nothing.
+under the heading. It is absent under the \code{"desirability"} rule, on a
+fit that tuned nothing, and on a fit whose record holds no \code{first_metric}.
 }
 
 \section{Components that are absent}{

@@ -59,7 +59,8 @@ line names the metric that chose the candidate. An example is
 \verb{Selecting metric: rmse}.
 Under the default rule it follows the \verb{Selected:} line, and otherwise the
 \verb{Selected by:} line. It is absent under the \code{"desirability"} rule, which
-chooses by its goals, and on a fit that tuned nothing.
+chooses by its goals, on a fit that tuned nothing, and on a fit whose
+record holds no \code{first_metric}.
 }
 
 \examples{

@@ -40,7 +40,9 @@
 #'   `"best"`, `"one_std_err"` and `"pct_loss"` rules of [selection_rule()],
 #'   its first metric chooses each fold's candidate, and every metric in it
 #'   is scored. The `metrics` entry of [nested_tune_grid()] says what `NULL`
-#'   means and how the `"desirability"` rule chooses instead.
+#'   means and how the `"desirability"` rule chooses instead. A set that
+#'   does not suit a tuned workflow's model is refused before any workflow
+#'   runs.
 #'
 #' @return A `nested_results_set`: a tibble of class
 #'   `c("nested_results_set", "tbl_df", "tbl", "data.frame")` with one row
@@ -190,6 +192,14 @@ nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
       check_workflow(workflows[[i]], call = call)
       if (identical(routes[[i]], "nested_fit_resamples")) {
         check_tuned_workflow(workflows[[i]], call = call)
+      } else {
+        # The metric set this workflow's run would get, resolved as the run
+        # resolves it (M116). A `metrics` that is not a metric set is left to
+        # the orchestrator's own check.
+        metrics <- map_args(dots, object$option[[i]], routes[[i]], fn)$metrics
+        if (is.null(metrics) || inherits(metrics, "metric_set")) {
+          check_metrics_mode(metrics, workflows[[i]], call = call)
+        }
       }
     })
   }

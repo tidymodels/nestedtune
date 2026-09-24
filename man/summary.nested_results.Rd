@@ -70,7 +70,9 @@ line names the metric that chose each fold's candidate. It reads
 \verb{Selecting metric:} and then the \code{first_metric} component, for example
 \verb{Selecting metric: rmse}. Under the default rule it is the first line
 under the heading. It is absent under the \code{"desirability"} rule, which
-chooses by its goals, and it also prints when no fold completed.
+chooses by its goals, on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run, and on a run
+whose record holds no \code{first_metric}. It also prints when no fold
+completed.
 }
 
 \section{A run that did not finish}{

@@ -68,6 +68,9 @@
 #'   read, the run chooses under one loss and assesses under another. For
 #'   example, `metric_set(mae, rmse)` chooses by `mae` and also reports
 #'   `rmse`. Stone (1974, p. 116) says that the two losses need not match.
+#'   A set that tune cannot use for the model's mode, such as a
+#'   classification metric on a regression model, is refused before any
+#'   fold runs.
 #' @templateVar CONSTRUCTOR tune::control_grid()
 #' @templateVar PKG tune
 #' @template param-control-dots
@@ -618,6 +621,12 @@ nested_loop <- function(
   call
 ) {
   n <- nrow(resamples)
+  # Resolved before any fold runs and before the seed draw (M116), so a metric
+  # set tune cannot resolve for the workflow is refused at entry rather than
+  # after every fold has failed on it.
+  first_metric <- if (tuner_selects(tuner$tuner)) {
+    check_metrics_mode(metrics, object, call = call)
+  }
 
   # Snapshot before drawing, so what is restored is the caller's state on
   # entry rather than its state after our own draw. `.Random.seed` does not
@@ -661,9 +670,7 @@ nested_loop <- function(
     select = select,
     control = control,
     workflow = workflow_identity(object),
-    first_metric = if (tuner_selects(tuner$tuner)) {
-      first_metric_name(metrics, object)
-    }
+    first_metric = first_metric
   )
   out <- new_nested_results(resamples, folds, seeds, grid, metrics, procedure)
   warn_failed_folds(out, call = call)

@@ -65,7 +65,8 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' `Selecting metric: rmse`.
 #' Under the default rule it follows the `Selected:` line, and otherwise the
 #' `Selected by:` line. It is absent under the `"desirability"` rule, which
-#' chooses by its goals, and on a fit that tuned nothing.
+#' chooses by its goals, on a fit that tuned nothing, and on a fit whose
+#' record holds no `first_metric`.
 #'
 #' @template example-setup
 #' @template example-run
@@ -172,8 +173,8 @@ print.nested_final_fit <- function(x, ...) {
 #' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
 #' line reads `Selecting metric:` and then a name. The name is the
 #' `first_metric` component. Under the default rule it is the first line
-#' under the heading. It is absent
-#' under the `"desirability"` rule and on a fit that tuned nothing.
+#' under the heading. It is absent under the `"desirability"` rule, on a
+#' fit that tuned nothing, and on a fit whose record holds no `first_metric`.
 #'
 #' @section Components that are absent:
 #'

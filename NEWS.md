@@ -1,14 +1,16 @@
 # nestedtune 0.0.0.9000
 
 * `summary()` of a nested result, of a workflow-set result and of a final
-  fit, and the final fit's print, name the metric that chose each fold's
-  candidate. A line such as `Selecting metric: rmse` prints under the
+  fit, and the final fit's print, name the metric that chose the selected
+  candidates. A line such as `Selecting metric: rmse` prints under the
   `"best"`, `"one_std_err"` and `"pct_loss"` rules, the default included.
   It is absent under the `"desirability"` rule. The record that
   `extract_procedure()` returns holds the name as `first_metric`, and the
   summaries carry it as a component of the same name. The help for
   `nested_workflow_map()` says which metric of a `metrics` passed to it
-  selects.
+  selects. A metric set that does not suit the model's mode, such as a
+  classification metric on a regression model, is now refused before any
+  fold runs. Before, every fold ran and failed.
 
 * The help for `metrics` on `nested_tune_grid()` and its tuning siblings
   says which metric selects and which metrics the outer loop scores. The

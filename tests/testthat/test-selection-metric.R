@@ -87,3 +87,48 @@ test_that("the entry reaches no tuner, and a run that selects nothing records no
   fr <- fit_resamples_results(d)
   expect_false("first_metric" %in% names(extract_procedure(fr)))
 })
+
+# A metric set tune cannot resolve for the workflow's mode is refused before
+# any fold runs, since the entry cannot be recorded for it (M116 review). Each
+# fold's run would fail on the same set.
+test_that("a metric set that does not suit the model's mode is refused at entry (M116)", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  wrong <- yardstick::metric_set(yardstick::accuracy)
+
+  cnd <- expect_error(
+    nested_tune_grid(det_workflow(d), det_nested(d), grid = det_grid(), metrics = wrong),
+    class = "nestedtune_metrics_mode"
+  )
+  expect_identical(rlang::call_name(cnd$call), "nested_tune_grid")
+  expect_s3_class(cnd$parent, "error")
+})
+
+test_that("a workflow set with an unsuitable metric set is refused before any workflow runs (M116)", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  # The workflow with nothing to tune comes first, so a refusal made only at
+  # the tuned workflow's turn would follow its run and its failed-fold warning.
+  wset <- workflowsets::as_workflow_set(
+    fixed = fixed_workflow(d),
+    tuned = det_workflow(d)
+  )
+  warned <- 0L
+  withCallingHandlers(
+    expect_error(
+      nested_workflow_map(
+        object = wset,
+        fn = "nested_tune_grid",
+        resamples = det_nested(d),
+        metrics = yardstick::metric_set(yardstick::accuracy),
+        grid = det_grid()
+      ),
+      class = "nestedtune_metrics_mode"
+    ),
+    warning = function(w) {
+      warned <<- warned + 1L
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_identical(warned, 0L)
+})

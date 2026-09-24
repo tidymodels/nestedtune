@@ -53,6 +53,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - AC3 → T2, T3
 - AC4 → T3
 - AC5 → T3
+- AC1, AC2 → T4
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits); substantive
@@ -64,6 +65,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - [x] T1: Record the entry. Write the test first in `tests/testthat/test-selection-metric.R`. Resolve the name in `nested_loop()` (`R/nested-tune-grid.R:656`) with `names(attr(tune::check_metrics_arg(metrics, object), "metrics"))[[1]]`, the reading `R/checks.R:1586` uses. Add `first_metric` to `new_procedure()` (`R/tuner.R:319`) for a selecting tuner alone, and to the shared names in `procedure_tuner()`. In `R/nested-final-fit.R`, pass the `metric_name` the final fit resolves (line 438) to both `new_procedure()` calls. Reuse the suite's existing fixtures for the four other tuners (D-079).
 - [x] T2: Print the line. Extend `print_selected_by()` (`R/nested-results-print.R:391`) to print `Selecting metric:` after the rule line under the three metric rules. Add the `first_metric` component to `new_summary_nested_results()` and `new_summary_nested_final_fit()`. Re-record the two snapshot files and review every changed line. Assert absence through `cli::cli_fmt()`, never `capture.output()` (LESSONS, cli output).
 - [x] T3: Write the help and the record. Describe the line and the entry on the four help pages AC3 names and in `nested_workflow_map()`'s `...` entry. Add the NEWS entry and the D-entry that supersedes M098's plan-gate choice for this line. Run the `verify` slot and `devtools::check()`.
+- [ ] T4: Refuse at entry a metric set tune cannot resolve for the workflow's mode (review pass 2, finding [O]1). Resolve `first_metric` in `nested_loop()` before the seed draw through `check_metrics_mode()` (class `nestedtune_metrics_mode`, the orchestrator's `call`), and in `nested_workflow_map()`'s per-workflow pre-check. Tests in `test-selection-metric.R`. Help, NEWS and D-081 say so. Also fix review findings [O]5 (help absences) and [O]7 (NEWS wording).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates.
@@ -94,6 +96,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: implement resumed after defect return 1; no question gate. Added the set-summary expectation for a record without `first_metric` to the M116 AC2 set test in `test-nested-results-print.R`; the file passes (the test runs 9 expectations, 0 failed). Full suite running (checkpoint).
 - 2026-09-24: full suite under NOT_CRAN=true: 89 files, 990 tests, 0 failed, 0 errors, 0 skipped. The earlier claim audit stands; the only prose added since is one test comment, which describes the four lines under it. Status set to review.
 - 2026-09-24: review pass 2 returned to in-progress under the return floor (defect return 2). Finding [O]1, verified by running it: `first_metric_name()` calls `tune::check_metrics_arg()` after every fold has run, so a metric set that does not suit the model's mode (for example `metric_set(accuracy)` on a regression workflow) aborts the whole run from an internal frame. On `main` the same call returns a `nested_results` whose folds all failed. That breaks AC2 ("it prints when no outer fold completed") and is a regression. The fix approach, a `tryCatch` to `NULL` (the `check_desirability_rule()` pattern) or an entry refusal with the orchestrator's `call`, is the implement question gate's to settle, with a test for this path. `devtools::check()` was stopped unfinished.
+- 2026-09-24: implement resumed after defect return 2. Question gate: the user chose an entry refusal over a `tryCatch` to `NULL`, because the refusal keeps AC1 and AC2 as written and follows GP3. Minor amendment: T4 added for the refusal and the two fix-now findings, with a Coverage line. T4 code, tests, help, NEWS and the D-081 sentence written; the new tests pass (the refusal on a direct call, and the refusal in a set before any workflow runs, asserted by zero warnings); document() regenerated 9 pages; all six sweeps clean. Full suite running (checkpoint, T4 not ticked).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote

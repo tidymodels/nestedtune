@@ -170,7 +170,9 @@ print_failure_count <- function(x) {
 #' `Selecting metric:` and then the `first_metric` component, for example
 #' `Selecting metric: rmse`. Under the default rule it is the first line
 #' under the heading. It is absent under the `"desirability"` rule, which
-#' chooses by its goals, and it also prints when no fold completed.
+#' chooses by its goals, on a [nested_fit_resamples()] run, and on a run
+#' whose record holds no `first_metric`. It also prints when no fold
+#' completed.
 #'
 #' @section A run that did not finish:
 #'
