@@ -41,8 +41,9 @@
 #'   its first metric chooses each fold's candidate, and every metric in it
 #'   is scored. The `metrics` entry of [nested_tune_grid()] says what `NULL`
 #'   means and how the `"desirability"` rule chooses instead. A set that
-#'   does not suit a tuned workflow's model is refused before any workflow
-#'   runs.
+#'   does not suit the model of any workflow the map runs is refused before
+#'   any workflow runs, a workflow routed to [nested_fit_resamples()]
+#'   included.
 #'
 #' @return A `nested_results_set`: a tibble of class
 #'   `c("nested_results_set", "tbl_df", "tbl", "data.frame")` with one row
@@ -123,8 +124,8 @@
 #' workflow's turn comes. A `grid` that names a parameter that workflow
 #' does not tune is one such error, and a control of the wrong class is
 #' another. The workflows before it have run by then. A `metrics` that
-#' does not suit a tuned workflow's model is the exception: it is refused
-#' before any workflow runs. What is raised is
+#' does not suit the model of any workflow the map runs is the exception:
+#' it is refused before any workflow runs. What is raised is
 #' the original condition
 #' object, with `Workflow "<id>": ` written in front of the first line of
 #' its message and this function, or the reading function, as its call.

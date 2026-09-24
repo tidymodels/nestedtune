@@ -56,7 +56,9 @@ designs says what the design must hold.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
 set. The outer loop scores every metric in the set, and
-\code{\link[=collect_metrics]{collect_metrics()}} reports each one.}
+\code{\link[=collect_metrics]{collect_metrics()}} reports each one. A metric set that does not suit
+the model's mode, such as a classification metric on a regression
+model, is refused before any fold runs.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. The one tune call a fold makes, the outer scoring fit, reads it.}

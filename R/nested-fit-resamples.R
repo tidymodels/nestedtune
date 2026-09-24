@@ -24,7 +24,9 @@
 #' @inheritParams tune::fit_resamples
 #' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
 #'   set. The outer loop scores every metric in the set, and
-#'   [collect_metrics()] reports each one.
+#'   [collect_metrics()] reports each one. A metric set that does not suit
+#'   the model's mode, such as a classification metric on a regression
+#'   model, is refused before any fold runs.
 #' @param object A [workflows::workflow()] with no parameter marked for tuning
 #'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
 #'   it, or a parsnip model specification with no marker, given with
