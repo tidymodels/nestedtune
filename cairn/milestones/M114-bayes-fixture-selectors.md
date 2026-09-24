@@ -7,7 +7,7 @@
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — a change to test fixtures and benchmark records, which nothing outside the repo reads
-- **Branch/PR:** m114-bayes-fixture-selectors
+- **Branch/PR:** m114-bayes-fixture-selectors · https://github.com/tidymodels/nestedtune/pull/129
 
 ## Goal
 
