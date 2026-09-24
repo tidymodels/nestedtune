@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* The help for `metrics` on `nested_tune_grid()` and its tuning siblings
+  says which metric selects and which metrics the outer loop scores. The
+  "Running the loop" section of the nested cross-validation guide says so
+  too. Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, the
+  first metric in the set chooses each fold's candidate. Every metric in
+  the set is scored, so `metric_set(mae, rmse)` chooses by `mae` and also
+  reports `rmse`. The help for `metrics` on `nested_fit_resamples()` says
+  that every metric in the set is scored.
+
 * `selection_rule()` gains a fourth rule, `"desirability"`, which selects
   with `desirability2::select_best_desirability()` over goals such as
   `maximize(rsq)` and `minimize(num_comp)`. A goal can name a metric or a
