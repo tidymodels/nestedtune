@@ -1,14 +1,13 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-24 (M114 done and archived. M112 row pruned. One Known issues entry. Validate green.)_
+_Last hygiene check: 2026-09-24 (M115 done and archived. M111 row pruned. One candidate row added. Validate green.)_
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M115 | The help and the guide say which metric selects and which metrics the outer loop scores | review | — | normal | milestones/M115-select-and-assess-metrics.md |
+| M115 | The help and the guide say which metric selects and which metrics the outer loop scores | done | — | normal | milestones/archive/M115-select-and-assess-metrics.md |
 | M114 | The two Bayesian test files run in half their serial time | done | — | normal | milestones/archive/M114-bayes-fixture-selectors.md |
 | M113 | The suite runs in three quarters of its serial time with no line of coverage lost | done | — | high | milestones/archive/M113-suite-once-per-claim.md |
-| M111 | Index-based and period-based sliding outer designs | done | M110 | normal | milestones/archive/M111-index-period-designs.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
