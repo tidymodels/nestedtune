@@ -493,6 +493,15 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   conduct beside it on the site is 2.1. Both are upstream problems; fixing
   either means fixing it upstream first.
 
+- The workflow identity check compares a recipe step's selectors as deparsed
+  text, so `step_ns(x1)` and `step_ns("x1")` count as different workflows. A
+  user who switches a selector's spelling after a nested run gets a mismatch
+  from `nested_final_fit()`, although the two steps select the same column.
+  M114's tests met this when its fixtures moved to strings for speed. Accepted
+  at M114's review gate, 2026-09-24. The behavior predates M114, and no user
+  reported it. Revisit on a user report, or if a later change advises
+  users to write selectors as strings.
+
 - The three vendored organization CI workflows carry properties this repository
   would not choose, accepted at M33's review for the same reason: each is held
   at the organization's shared blob, and editing one puts it off that blob.
