@@ -1476,7 +1476,10 @@ test_that("M116 AC3: the summary's `first_metric` component is the record's entr
 test_that("M116 AC2: a set names the selecting metric in the tuned workflow's section alone", {
   skip_if_no_wset_fixture()
 
-  for (rule in list(selection_rule("best"), selection_rule("one_std_err", num_comp))) {
+  for (rule in list(
+    selection_rule("best"),
+    selection_rule("one_std_err", num_comp)
+  )) {
     lines <- strsplit(print_text(summary(rule_set_results(rule))), "\n")[[1L]]
     at <- which(startsWith(lines, "Selecting metric: "))
     expect_length(at, 1L)
