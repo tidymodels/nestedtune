@@ -31,10 +31,10 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 
 ## Acceptance criteria
 
-- [ ] AC1: In `tests/testthat/helper-orchestration.R`, `bayes_workflow()` and `srv_spline_workflow()` pass every step's column selector as a string. A read of both function bodies at the head shows it.
+- [x] AC1: In `tests/testthat/helper-orchestration.R`, `bayes_workflow()` and `srv_spline_workflow()` pass every step's column selector as a string. A read of both function bodies at the head shows it.
 - [ ] AC2: `test-time-series-bayes.R` and `test-nested-tune-bayes-oracles.R` each run serially in at most half their branch-point time. The figure is the median of three `benchmarks/profile-tests.R` passes per tree.
 - [ ] AC3: One serial pass of the whole suite runs per tree. In testthat's results table, every test block, keyed by file and test name, has the same expectation count on both trees. No block fails, errors or skips on either tree.
-- [ ] AC4: `benchmarks/recipes-tune-args-cost.R` prints the per-call time of `generics::tune_args()` on `step_ns(x1)` and on `step_ns("x1")`. On the head, the first figure is at least five times the second.
+- [x] AC4: `benchmarks/recipes-tune-args-cost.R` prints the per-call time of `generics::tune_args()` on `step_ns(x1)` and on `step_ns("x1")`. On the head, the first figure is at least five times the second.
 
 ## Coverage
 
@@ -71,3 +71,8 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 ## Decisions
 
 ## Review
+
+Review run 2026-09-23 on `m114-bayes-fixture-selectors` at `791bbfc`. The default branch had not moved from the branch point `1aef465`, so no merge was needed.
+
+- AC1: read at `791bbfc`, `tests/testthat/helper-orchestration.R`. `srv_spline_workflow()` passes `"x1"` to its one `step_ns()`. `bayes_workflow()` passes `"x1"` and `"x2"` to its two `step_ns()` calls. Neither function has another step. Pass.
+- AC4: `Rscript benchmarks/recipes-tune-args-cost.R` ran at `791bbfc` with recipes 1.4.0, R 4.6.1 and 200 calls per spelling. It printed 6.25 ms per call for `step_ns(x1)` and 0.60 ms for `step_ns("x1")`, ratio 10.4. The criterion needs at least 5. Pass.
