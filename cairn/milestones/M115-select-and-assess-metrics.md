@@ -1,0 +1,54 @@
+# M115: The help and the guide say which metric selects and which metrics the outer loop scores
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** GP1, GP3, GP5
+- **Resolves:** —
+- **Surface tier:** user-facing — help pages and a guide that users read
+- **Branch/PR:** —
+
+## Goal
+
+The help and the guide tell a user how to choose each fold's candidate under one metric and report another (Stone 1974a, p. 116).
+
+## Scope
+
+**In:** Each orchestrator passes one `metrics` set to the inner tune call and to the outer `tune::last_fit()`. tune's three selectors choose on the first metric in the set (`R/nested-tune-grid.R:717`, `R/selection-rule.R:366`). The outer loop scores every metric in the set. So `metric_set(mae, rmse)` already chooses under `mae` and assesses under `rmse`. No help page or guide says so. The tuning pages inherit tune's one-line `metrics` text. This milestone writes the help text and the guide's prose, and adds tests on the `sep_*` fixture. The API does not change.
+
+**Out:** A `metric` argument on `selection_rule()` and a separate assessment metric set. The plan gate rejected both (work log). Under the `"best"` rule, `summary()` and the final fit's print do not name the selecting metric, and that goes to a candidate row. The gate declined a worked guide chunk, so it leaves no remainder.
+
+## Acceptance criteria
+
+- [ ] AC1: The fixture is `sep_*`, and the two rules are `selection_rule()` and `selection_rule("one_std_err", desc(num_comp))`. Under each rule, `nested_tune_grid()` given `metrics = metric_set(mae, rmse)` selects in each outer fold the candidate that tune's selector picks on the `mae` column of that fold's inner run. Under each rule, each fold's outer `rmse` equals the `rmse` that `tune::last_fit()` gives the workflow finalized with that candidate on that fold's split. Under each rule, the same call with `metrics = metric_set(rmse, mae)` selects a different candidate in at least one outer fold.
+- [ ] AC2: The `metrics` entry of each help page that `grep -l '\\item{metrics}' man/nested_tune_*.Rd` lists states four things. (1) Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, each fold's candidate comes from the first metric in the set. Where the tuner accepts `"desirability"`, that rule chooses by its goals. (2) `nested_tune_bayes()`, the two racing tuners and `nested_tune_sim_anneal()` also steer their inner search on that first metric. (3) The outer loop scores every metric in the set. (4) If the first metric is not the one the user reads, the run chooses under one loss and assesses under another. Stone (1974a, p. 116) says the two losses need not match. The `metrics` entry of `man/nested_fit_resamples.Rd` states (3) and none of (1), (2) or (4).
+- [ ] AC3: The "Running the loop" section of `vignettes/nested-cv.Rmd` states three things in prose. tune's three selectors choose on the first metric in the set. The outer loop scores every metric in the set. If the first metric is not the one the user reads, the run chooses under one loss and assesses under another, citing Stone (1974a, p. 116). The milestone adds no code chunk to the guide.
+- [ ] AC4: The `r-package` profile's `verify` slot is clean (`cairn/PROFILE.md`).
+
+## Coverage
+
+- AC1 → T1
+- AC2 → T2, T4
+- AC3 → T3, T4
+- AC4 → T4
+
+## Tasks
+
+- [ ] T1: Add a test block to `tests/testthat/test-metrics-argument.R` on `sep_data()`, `sep_workflow()`, `sep_nested()` and `sep_grid()`. For each rule, compare every fold's `.selected` and outer `rmse` with `reference_nested_loop(metric_name = "mae", select = ...)` (`helper-orchestration.R:130`). Under each rule, assert that `metric_set(rmse, mae)` changes `.selected` in at least one fold. A comment says why the ordering is `desc(num_comp)`: with `num_comp` both orders choose one component in every fold. Use `memoised()` and pin the seeds as the file's other blocks do.
+- [ ] T2: Give `nested_tune_grid()` its own `@param metrics` with AC2's four statements. Name the tuners that refuse `"desirability"` (`R/tuner.R:117-158`). A source comment cites the `first_metric()` calls in tune's `tune_bayes()` and in finetune's racers and annealer. `nested_fit_resamples()` inherits from `nested_tune_grid` first (`R/nested-fit-resamples.R:23`). So give it its own `@param metrics` that states only (3). Make sure that the bayes, race and sim_anneal pages inherit the grid text (`R/nested-tune-bayes.R:25`, `R/nested-tune-race.R:32`, `R/nested-tune-sim-anneal.R:24`). Run `devtools::document()`.
+- [ ] T3: Extend the "Running the loop" paragraph (`vignettes/nested-cv.Rmd:131-140`) with AC3's prose. Keep it to plain sentences with no em dashes.
+- [ ] T4: Run `benchmarks/sweep-prose.R` over the changed help and guide, read the rendered `metrics` entries of all five pages, and run the profile's `verify` slot.
+
+## Work log
+
+- 2026-09-24: created by /milestone-plan. Absorbs the candidate row "Let the metric that selects differ from the metric that scores" (added 2026-07-31), promoted on the user's request.
+- 2026-09-24: criteria audit (full mode, fresh reader) returned six findings. Fixed: AC2's text would reach `nested_fit_resamples()` by inheritance, so AC2 now bounds that page. The desirability clause now covers only the tuners that accept it. AC1's test-file sentence moved to T1. AC3 leaves desirability out. Posed at the gate: AC1 probed one tuner and one rule. Nothing to change: separation depends on the fixture's pinned seeds, which AC1 already names.
+- 2026-09-24: plan gate chose documenting the set's order over a `metric` argument on `selection_rule()`, because the searches optimize the first metric whatever the selector reads and GP3 prefers one path; falsified by a user needing to select on a metric other than the one their search optimizes.
+- 2026-09-24: plan gate chose documenting the set's order over a second assessment metric set, because it adds one argument to six signatures (D-030); falsified by a metric too costly for the inner loop and wanted only in the outer one.
+- 2026-09-24: re-audit of the changed AC1 (full mode, same fresh reader) found that `"one_std_err"` by `num_comp` might not separate the two orders. Measured on `sep_*` with seed 20, `mae` first against `rmse` first: `"best"` 1 2 2 against 3 1 3, `"one_std_err"` by `num_comp` 1 1 1 against 1 1 1, by `desc(num_comp)` 5 5 4 against 5 5 5. AC1 now uses `desc(num_comp)` and claims separation under both rules.
+- 2026-09-24: plan gate chose probes under `"best"` and `"one_std_err"` on `nested_tune_grid()` over a `nested_tune_bayes()` probe, because the first-metric lookup is fold code every tuner shares and Bayesian tests are the suite's slowest (M114); falsified by a tuner resolving its selecting metric by its own path.
+
+## Decisions
+
+## Review
