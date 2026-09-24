@@ -81,6 +81,15 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: plan gate chose a separate `Selecting metric:` line over extending `Selected by:` to `best on rmse`, because the rule line then stays the same words as the rule object's print (M098) and avoids "by num_comp on rmse"; falsified by a user reading the two lines as naming different things.
 - 2026-09-24: plan gate chose recording `first_metric` at entry over deriving it at print time, because a `nested_results` stores no workflow and would read the name off `.inner_metrics` row order, with no answer when no fold completed; falsified by tune changing how `check_metrics_arg()` orders a default set.
 - 2026-09-24: plan gate chose M109's named-test exception for `test-parallel-interrupt.R` over a strict pass, because the flake fails on `main` too (M079 candidate row); falsified by the flake being fixed.
+- 2026-09-24: implement started on branch m116-selecting-metric; no question gate, since the plan left nothing open. T1 code and test written; full-suite run pending (checkpoint, T1 not ticked).
+- 2026-09-24: T1 done. `first_metric` resolved in `nested_loop()` through the new `first_metric_name()`, recorded by `new_procedure()` for selecting tuners, shared in `procedure_tuner()`, and written by the final fit from its own `metric_name`. New `test-selection-metric.R` (22 expectations) passes. The full suite showed 3 failures, all tests pinning the record's entry names; each now lists `first_metric`, and both files pass.
+- 2026-09-24: T2 done. `print_selected_by()` prints `Selecting metric:` through the new `names_selecting_metric()`, and both summaries carry `first_metric`. New tests in the two print test files cover placement, absence and the all-failed run. Two tests pinning the final fit's print text and summary names were updated. Snapshots re-recorded under NOT_CRAN=true: 27 added lines, all `Selecting metric: rmse`, none removed. The full suite under NOT_CRAN=true passes with no failures.
+- 2026-09-24: T3 in progress. Help on the five pages written and regenerated, NEWS entry and D-081 added; all six gating sweeps clean after five sentences were split. Full suite and check() running (checkpoint, T3 not ticked).
+- 2026-09-24: T3 done. Full suite under NOT_CRAN=true: no failures, so the AC5 exception was not used. `devtools::check()` 0 errors, 0 warnings, 0 notes. `devtools::document()` leaves no diff. All six gating sweeps clean.
+- 2026-09-24: delegated the claim audit to a fresh [O] general-purpose reader; I applied its two corrections myself.
+- 2026-09-24: claim audit: 58 claims read, 2 corrected — R/nested-workflow-map.R, R/nested-results-print.R
+- 2026-09-24: status set to review. Only help and comment text changed after the last suite run; document() and all six sweeps are clean after the corrections.
+- 2026-09-24: review started; moved the eight implement lines that had landed under Review into this log, unchanged. Checkpoint: full suite still running, AC2 gap found (see Review once recorded).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
@@ -94,11 +103,3 @@ The summaries and the final fit's print name the metric that chose each fold's c
      results, review findings + triage. EXEMPT from the 150-line cap (M55),
      as are the work log (D-046) and the decisions section (D-074); evidence
      never scrambles plan-owned content. -->
-- 2026-09-24: implement started on branch m116-selecting-metric; no question gate, since the plan left nothing open. T1 code and test written; full-suite run pending (checkpoint, T1 not ticked).
-- 2026-09-24: T1 done. `first_metric` resolved in `nested_loop()` through the new `first_metric_name()`, recorded by `new_procedure()` for selecting tuners, shared in `procedure_tuner()`, and written by the final fit from its own `metric_name`. New `test-selection-metric.R` (22 expectations) passes. The full suite showed 3 failures, all tests pinning the record's entry names; each now lists `first_metric`, and both files pass.
-- 2026-09-24: T2 done. `print_selected_by()` prints `Selecting metric:` through the new `names_selecting_metric()`, and both summaries carry `first_metric`. New tests in the two print test files cover placement, absence and the all-failed run. Two tests pinning the final fit's print text and summary names were updated. Snapshots re-recorded under NOT_CRAN=true: 27 added lines, all `Selecting metric: rmse`, none removed. The full suite under NOT_CRAN=true passes with no failures.
-- 2026-09-24: T3 in progress. Help on the five pages written and regenerated, NEWS entry and D-081 added; all six gating sweeps clean after five sentences were split. Full suite and check() running (checkpoint, T3 not ticked).
-- 2026-09-24: T3 done. Full suite under NOT_CRAN=true: no failures, so the AC5 exception was not used. `devtools::check()` 0 errors, 0 warnings, 0 notes. `devtools::document()` leaves no diff. All six gating sweeps clean.
-- 2026-09-24: delegated the claim audit to a fresh [O] general-purpose reader; I applied its two corrections myself.
-- 2026-09-24: claim audit: 58 claims read, 2 corrected — R/nested-workflow-map.R, R/nested-results-print.R
-- 2026-09-24: status set to review. Only help and comment text changed after the last suite run; document() and all six sweeps are clean after the corrections.
