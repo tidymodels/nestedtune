@@ -52,6 +52,7 @@ The help and the guide tell a user how to choose each fold's candidate under one
 - 2026-09-24: T1 done. The new block replaces the file's "selects under the metrics it was given" block, whose one assertion it repeats. With both blocks, the reference loop built twice, which is the cache-key gap the M42 candidate row records. A planted `[[2L]]` for the first-metric lookup turned 9 checks red. Full suite 0 failures, 11406 passes.
 - 2026-09-24: T2 done. `nested_tune_grid()` has its own `@param metrics`, which the Bayes, race and annealing pages inherit. `nested_fit_resamples()` has a one-statement entry. The grid page has a references entry that the other three inherit. A source comment at the first-metric lookup cites the four `first_metric()` calls.
 - 2026-09-24: T3 done. A second paragraph in "Running the loop" and a References section in `vignettes/nested-cv.Rmd`. No code chunk added.
+- 2026-09-24: claim audit: 17 claims read, 0 corrected — R/nested-tune-grid.R, R/nested-fit-resamples.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, tests/testthat/test-metrics-argument.R, vignettes/nested-cv.Rmd
 
 ## Decisions
 
