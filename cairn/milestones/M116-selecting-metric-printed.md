@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M116: The summaries and the final fit's print name the metric that selects
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -92,6 +92,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: review started; moved the eight implement lines that had landed under Review into this log, unchanged. Checkpoint: full suite still running, AC2 gap found (see Review once recorded).
 - 2026-09-24: review returned to in-progress (defect return 1). AC2 fails as written: no expectation asserts that the set summary prints no `Selecting metric:` line on a record without `first_metric`, one of the absences AC2 names on each of the four surfaces. Fix: add that expectation to `tests/testthat/test-nested-results-print.R`, then re-run `/milestone-review M116`. AC5 left unverified because review stopped before `devtools::check()`.
 - 2026-09-24: implement resumed after defect return 1; no question gate. Added the set-summary expectation for a record without `first_metric` to the M116 AC2 set test in `test-nested-results-print.R`; the file passes (the test runs 9 expectations, 0 failed). Full suite running (checkpoint).
+- 2026-09-24: full suite under NOT_CRAN=true: 89 files, 990 tests, 0 failed, 0 errors, 0 skipped. The earlier claim audit stands; the only prose added since is one test comment, which describes the four lines under it. Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
