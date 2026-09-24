@@ -188,6 +188,7 @@ test_that("a grid run records its procedure, and its grid and metrics as before"
       "event_level",
       "eval_time",
       "select",
+      "first_metric",
       "control",
       "workflow"
     )
@@ -221,6 +222,7 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
       "event_level",
       "eval_time",
       "select",
+      "first_metric",
       "control",
       "workflow"
     )
