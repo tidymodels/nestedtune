@@ -111,6 +111,45 @@ test_that("a metric set that does not suit the model's mode is refused at entry 
   expect_s3_class(cnd$parent, "error")
 })
 
+# `nested_fit_resamples()` selects nothing and records no name, but every
+# fold's run would still fail on such a set, so it is refused at entry too
+# (M117, D-082). Before, each fold ran, failed, and the call warned. The
+# warning count shows that no fold ran before the refusal.
+expect_metrics_mode_refusal <- function(expr, fn) {
+  warned <- 0L
+  cnd <- withCallingHandlers(
+    expect_error(expr, class = "nestedtune_metrics_mode"),
+    warning = function(w) {
+      warned <<- warned + 1L
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_identical(warned, 0L)
+  expect_identical(rlang::call_name(cnd$call), fn)
+  expect_s3_class(cnd$parent, "error")
+  invisible(cnd)
+}
+
+test_that("nested_fit_resamples() refuses a metric set that does not suit the model's mode (M117 AC1)", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  wrong <- yardstick::metric_set(yardstick::accuracy)
+
+  expect_metrics_mode_refusal(
+    nested_fit_resamples(fixed_workflow(d), det_nested(d), metrics = wrong),
+    "nested_fit_resamples"
+  )
+  expect_metrics_mode_refusal(
+    nested_fit_resamples(
+      parsnip::linear_reg(),
+      y ~ x1 + x2 + x3 + x4,
+      det_nested(d),
+      metrics = wrong
+    ),
+    "nested_fit_resamples"
+  )
+})
+
 test_that("a workflow set with an unsuitable metric set is refused before any workflow runs (M116)", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()

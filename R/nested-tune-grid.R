@@ -623,9 +623,11 @@ nested_loop <- function(
   n <- nrow(resamples)
   # Resolved before any fold runs and before the seed draw (M116), so a metric
   # set tune cannot resolve for the workflow is refused at entry rather than
-  # after every fold has failed on it.
-  first_metric <- if (tuner_selects(tuner$tuner)) {
-    check_metrics_mode(metrics, object, call = call)
+  # after every fold has failed on it. Every tuner is checked, the plain
+  # resampling one included (D-082); only a tuner that selects keeps the name.
+  first_metric <- check_metrics_mode(metrics, object, call = call)
+  if (!tuner_selects(tuner$tuner)) {
+    first_metric <- NULL
   }
 
   # Snapshot before drawing, so what is restored is the caller's state on

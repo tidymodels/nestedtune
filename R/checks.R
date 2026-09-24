@@ -1209,6 +1209,8 @@ check_metrics <- function(metrics, call = rlang::caller_env()) {
 
 # The first metric's name, as tune resolves the set for the workflow (M116),
 # or a refusal where it cannot, as for a set made for another model mode.
+# `nested_loop()` calls it for every tuner, a tuner that selects nothing
+# included (D-082), and keeps the name only where the tuner selects.
 # Every fold's run would fail on the same set, so refusing
 # here saves the whole loop and names the function the user called. tune's
 # own message is kept as the parent.
