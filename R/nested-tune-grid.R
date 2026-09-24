@@ -660,7 +660,10 @@ nested_loop <- function(
     eval_time = eval_time,
     select = select,
     control = control,
-    workflow = workflow_identity(object)
+    workflow = workflow_identity(object),
+    first_metric = if (tuner_selects(tuner$tuner)) {
+      first_metric_name(metrics, object)
+    }
   )
   out <- new_nested_results(resamples, folds, seeds, grid, metrics, procedure)
   warn_failed_folds(out, call = call)
@@ -1004,6 +1007,15 @@ param_object <- function(id, params) {
   }
   object <- params$object[[match(id, params$id)]]
   if (is.list(object)) object else NULL
+}
+
+# The name of the first metric in the set, resolved as tune resolves it for
+# the workflow, so a run given `metrics = NULL` records the first metric of
+# tune's default set for the workflow's mode (M116). Each fold's run resolves
+# the same name through `tune::.get_tune_metric_names()`; this reads it once,
+# before any fold runs, so the record names it when no fold completes.
+first_metric_name <- function(metrics, object) {
+  names(attr(tune::check_metrics_arg(metrics, object), "metrics"))[[1L]]
 }
 
 # Whether the inner run's metrics table carries `.eval_time`: the metric set

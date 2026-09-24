@@ -312,7 +312,11 @@ control_class <- function(tuner) {
 # selects by the rule the folds selected by. A tuner that selects nothing
 # (M70) records neither `select` nor `param_info`: no rule was applied and no
 # parameter set was read, and a record naming them would claim otherwise
-# (IP4). `workflow` is the canonical identity of the workflow the run was
+# (IP4). `first_metric` is the name of the first metric in the set, as
+# tune resolves it for the workflow (M116): the metric that selects under
+# the three rules tune's selectors take, and the one the Bayesian, racing and
+# annealing searches steer on. A tuner that selects nothing records none.
+# `workflow` is the canonical identity of the workflow the run was
 # given (`workflow_identity()`, M83), recorded on every tuner's result so a
 # later final fit can refuse a workflow other than that one; the workflow
 # object itself is not stored (R/workflow-identity.R says why).
@@ -323,7 +327,8 @@ new_procedure <- function(
   eval_time,
   select,
   control,
-  workflow
+  workflow,
+  first_metric = NULL
 ) {
   shared <- if (tuner_selects(tuner$tuner)) {
     list(
@@ -331,6 +336,7 @@ new_procedure <- function(
       event_level = event_level,
       eval_time = eval_time,
       select = select,
+      first_metric = first_metric,
       control = control,
       workflow = workflow
     )
@@ -346,13 +352,14 @@ new_procedure <- function(
 }
 
 # The tuner description rebuilt from a results object's record, for the final
-# fit (D-041): the record is the description plus the six shared entries,
+# fit (D-041): the record is the description plus the seven shared entries,
 # so everything that is neither the tuner's name nor one of those is the
 # tuner's own argument. Read by name rather than by position so a record
 # whose shared arguments were reordered still rebuilds the same description.
 # `control` and `select` are shared, so the final fit passes each once, as
 # its own argument, and never a second time inside the description; the
-# `workflow` identity is compared at entry and passed to no tuner.
+# `workflow` identity is compared at entry and passed to no tuner, and
+# `first_metric` is resolved again by the final fit from its own run (M116).
 procedure_tuner <- function(procedure) {
   shared <- c(
     "tuner",
@@ -360,6 +367,7 @@ procedure_tuner <- function(procedure) {
     "event_level",
     "eval_time",
     "select",
+    "first_metric",
     "control",
     "workflow"
   )

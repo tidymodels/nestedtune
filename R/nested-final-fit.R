@@ -456,7 +456,11 @@ final_fit_worker <- function(
     eval_time = eval_time,
     select = select,
     control = control,
-    workflow = workflow_identity(object)
+    workflow = workflow_identity(object),
+    # The name this fit selected on, resolved above from its own run, so a
+    # results object built before the entry was recorded still yields a fit
+    # that names it (M116).
+    first_metric = metric_name
   )
   new_nested_final_fit(fitted, selected, tuned, seeds, procedure)
 }
