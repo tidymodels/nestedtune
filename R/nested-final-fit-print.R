@@ -79,9 +79,9 @@ print.nested_final_fit <- function(x, ...) {
   cli::cli_text("Procedure: {procedure_label(s)}")
   cli::cli_text("Selected: {selected_label(x$selected)}")
   # The rule the selection was made by, where it is not the default (M98),
-  # read from the summary's component as the procedure line is, so the two
-  # prints cannot name one fit's rule differently.
-  print_selected_by(s$select)
+  # and the metric it selected on (M116), read from the summary's components
+  # as the procedure line is, so the two prints cannot name them differently.
+  print_selected_by(s$select, s$first_metric)
   cli::cli_text("")
   estimate <- c(i = final_fit_estimate_msg)
   # A fit that ran no tuning (M70) has no selection to compare and no run
@@ -229,6 +229,9 @@ new_summary_nested_final_fit <- function(x) {
         # on a fit that tuned nothing, whose record names no rule, and
         # carried then as `estimate` is.
         select = x$procedure$select,
+        # The name of the first metric the fit selected on (M116), NULL on a
+        # fit that tuned nothing.
+        first_metric = x$procedure$first_metric,
         estimate = NULL
       )
     ),
@@ -390,7 +393,7 @@ print_final_design <- function(s) {
 
 print_final_selection <- function(s) {
   cli::cli_h2("Selected parameters")
-  print_selected_by(s$select)
+  print_selected_by(s$select, s$first_metric)
   if (length(s$selection) == 0L) {
     cli::cli_bullets(c(i = "No tuned parameters."))
     return(invisible(NULL))

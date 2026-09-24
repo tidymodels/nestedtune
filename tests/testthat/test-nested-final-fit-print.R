@@ -127,6 +127,7 @@ PRINT_AS_AGREED_M46 <- paste(
     "-- Nested cross-validation final fit -------------------------------------------",
     "Procedure: grid search, 3 candidates scored",
     "Selected: num_comp = 3",
+    "Selecting metric: rmse",
     "",
     "i Report the nested estimate from `collect_metrics()` on the results object",
     "  this fit was built from. For a fit built from a workflow set, that is this",
@@ -173,6 +174,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
       "iterations_requested",
       "selection",
       "select",
+      "first_metric",
       "estimate"
     )
   )
@@ -604,4 +606,74 @@ test_that("AC3: the two-ordering line holds its shape on both prints", {
   two <- two_param_rule_final(selection_rule("one_std_err", desc(df1), df2))
   expect_snapshot(print(two))
   expect_snapshot(print(summary(two)))
+})
+
+# The selecting-metric line (M116) ---------------------------------------------
+
+selecting_metric_lines <- function(lines) {
+  lines[startsWith(lines, "Selecting metric: ")]
+}
+
+test_that("M116 AC2: both prints name the selecting metric under the default rule", {
+  skip_if_no_engines()
+
+  best <- final_for_print()
+  lines <- print_lines(best)
+  selected <- which(startsWith(lines, "Selected: "))
+  expect_identical(lines[[selected + 1L]], "Selecting metric: rmse")
+  expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
+
+  lines <- print_lines(summary(best))
+  heading <- which(grepl("Selected parameters", lines, fixed = TRUE))
+  expect_identical(lines[[heading + 2L]], "Selecting metric: rmse")
+  expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
+})
+
+test_that("M116 AC2: both prints name the selecting metric after the rule line", {
+  skip_if_no_engines()
+
+  for (rule in list(
+    selection_rule("one_std_err", num_comp),
+    selection_rule("pct_loss", num_comp, limit = 5)
+  )) {
+    final <- rule_final(rule)
+    for (lines in list(print_lines(final), print_lines(summary(final)))) {
+      by <- which(startsWith(lines, "Selected by: "))
+      expect_length(by, 1L)
+      expect_identical(lines[[by + 1L]], "Selecting metric: rmse")
+      expect_length(selecting_metric_lines(lines), 1L)
+    }
+  }
+})
+
+test_that("M116 AC2: no selecting-metric line on a fit that tuned nothing, on a record without the entry, or under desirability", {
+  skip_if_no_engines()
+
+  untuned <- untuned_final()
+  expect_length(selecting_metric_lines(print_lines(untuned)), 0L)
+  expect_length(selecting_metric_lines(print_lines(summary(untuned))), 0L)
+
+  old <- final_for_print()
+  old$procedure$first_metric <- NULL
+  expect_length(selecting_metric_lines(print_lines(old)), 0L)
+  expect_length(selecting_metric_lines(print_lines(summary(old))), 0L)
+
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+  des <- rule_final(selection_rule("desirability", maximize(rsq)))
+  expect_identical(extract_procedure(des)$first_metric, "rmse")
+  expect_length(selecting_metric_lines(print_lines(des)), 0L)
+  expect_length(selecting_metric_lines(print_lines(summary(des))), 0L)
+})
+
+test_that("M116 AC3: the final fit summary's `first_metric` component is the record's entry, or NULL", {
+  skip_if_no_engines()
+
+  best <- final_for_print()
+  s <- summary(best)
+  expect_identical(s[["first_metric"]], "rmse")
+  expect_identical(s[["first_metric"]], extract_procedure(best)$first_metric)
+
+  s <- summary(untuned_final())
+  expect_true("first_metric" %in% names(s))
+  expect_null(s[["first_metric"]])
 })

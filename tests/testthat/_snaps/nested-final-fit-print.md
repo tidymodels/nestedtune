@@ -7,6 +7,7 @@
       -- Nested cross-validation final fit -------------------------------------------
       Procedure: grid search, 3 candidates scored
       Selected: num_comp = 3
+      Selecting metric: rmse
       
       i Report the nested estimate from `collect_metrics()` on the results object
         this fit was built from. For a fit built from a workflow set, that is this
@@ -34,6 +35,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       num_comp: 3
       
       -- Estimate --
@@ -57,6 +59,7 @@
       Procedure: Bayesian optimization, 3 initial candidates (3 requested), 2
       iterations completed (2 requested)
       Selected: df1 = 1, df2 = 2
+      Selecting metric: rmse
       
       i Report the nested estimate from `collect_metrics()` on the results object
         this fit was built from. For a fit built from a workflow set, that is this
@@ -85,6 +88,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       df1: 1
       df2: 2
       
@@ -109,6 +113,7 @@
       Procedure: grid search, 3 candidates scored
       Selected: num_comp = 3
       Selected by: pct_loss by num_comp (limit = 5)
+      Selecting metric: rmse
       
       i Report the nested estimate from `collect_metrics()` on the results object
         this fit was built from. For a fit built from a workflow set, that is this
@@ -137,6 +142,7 @@
       -- Selected parameters --
       
       Selected by: pct_loss by num_comp (limit = 5)
+      Selecting metric: rmse
       num_comp: 3
       
       -- Estimate --
@@ -159,6 +165,7 @@
       -- Nested cross-validation final fit -------------------------------------------
       Procedure: grid search, 3 candidates scored
       Selected: num_comp = 3
+      Selecting metric: rmse
       
       i Report the nested estimate from `collect_metrics()` on the results object
         this fit was built from. For a fit built from a workflow set, that is this
@@ -186,6 +193,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       num_comp: 3
       
       -- Estimate --
@@ -252,6 +260,7 @@
       Procedure: grid search, 9 candidates scored
       Selected: df1 = 5, df2 = 2
       Selected by: one_std_err by desc(df1), df2
+      Selecting metric: rmse
       
       i Report the nested estimate from `collect_metrics()` on the results object
         this fit was built from. For a fit built from a workflow set, that is this
@@ -280,6 +289,7 @@
       -- Selected parameters --
       
       Selected by: one_std_err by desc(df1), df2
+      Selecting metric: rmse
       df1: 5
       df2: 2
       

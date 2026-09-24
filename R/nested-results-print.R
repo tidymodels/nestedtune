@@ -287,6 +287,9 @@ new_summary_nested_results <- function(x) {
       # dropped, in the habit the final fit's `estimate` set, so the name is
       # present whichever way the run went.
       select = attr(x, "procedure")$select,
+      # The name of the first metric, as the record holds it (M116), or NULL
+      # on a record that holds none.
+      first_metric = attr(x, "procedure")$first_metric,
       grids = candidate_sets(x),
       estimate = if (length(completed) > 0L) {
         summarize_folds(per_fold_metrics(x))
@@ -367,12 +370,12 @@ fold_failure_stage <- function(notes) {
 print_selection <- function(s, heading = cli::cli_h2) {
   heading("Selected parameters")
   # The rule, where it is not the default (M98): the line's presence is the
-  # signal, as with the failure count and the candidate-set line, and the
-  # default run's print stays as it was. Printed ahead of the early returns
-  # below, because the rule describes the procedure the run asked for, not
-  # what completed (IP4): a run in which no fold completed still selected by
-  # it, on the folds that failed later.
-  print_selected_by(s$select)
+  # signal, as with the failure count and the candidate-set line. Then the
+  # selecting metric, under every rule that selects on it (M116). Printed
+  # ahead of the early returns below, because the rule describes the
+  # procedure the run asked for, not what completed (IP4): a run in which no
+  # fold completed still selected by it, on the folds that failed later.
+  print_selected_by(s$select, s$first_metric)
 
   if (s$completed == 0L) {
     cli::cli_bullets(c(i = "No outer fold completed, so nothing was selected."))
@@ -391,13 +394,27 @@ print_selection <- function(s, heading = cli::cli_h2) {
 # The `Selected by:` line the results summary, the final fit's print and its
 # summary share (M98), rendered by the one helper the rule's own print uses,
 # so a reader meets the same words in every place. Silent on the default rule
-# and on a record that holds none.
-print_selected_by <- function(select) {
-  if (!names_selection_rule(select)) {
-    return(invisible(NULL))
+# and on a record that holds none. The `Selecting metric:` line follows it
+# (M116), under every rule that selects on the first metric, the default
+# included, so a reader can tell which metric in the set chose.
+print_selected_by <- function(select, first_metric = NULL) {
+  if (names_selection_rule(select)) {
+    cli::cli_text("Selected by: {selection_rule_label(select)}")
   }
-  cli::cli_text("Selected by: {selection_rule_label(select)}")
+  if (names_selecting_metric(select, first_metric)) {
+    cli::cli_text("Selecting metric: {first_metric}")
+  }
   invisible(NULL)
+}
+
+# Whether the prints name the selecting metric (M116): under the three rules
+# tune's selectors take, which choose on the first metric, and never under
+# `"desirability"`, which chooses by its goals. A record built before the
+# entry was recorded holds no name, and nothing is printed for it.
+names_selecting_metric <- function(select, first_metric) {
+  is_selection_rule(select) &&
+    select$rule != "desirability" &&
+    rlang::is_string(first_metric)
 }
 
 # The candidate set each completed fold searched, derived from its inner
