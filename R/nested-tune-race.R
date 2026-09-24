@@ -138,6 +138,7 @@
 #' # resamples: `n` below 5 is a candidate the race eliminated.
 #' res$.inner_metrics[[1]]
 #'
+#' @inherit nested_tune_grid references
 #' @templateVar LINKS [nested_tune_bayes()], [finetune::tune_race_anova()], [finetune::tune_race_win_loss()]
 #' @template seealso-orchestrator
 #' @name nested_tune_race

@@ -69,8 +69,21 @@ The section on the iterations says why \code{0} is refused.}
 a parameters set is derived from other arguments. Passing this argument can
 be useful when parameter ranges need to be customized.}
 
-\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} to compute a standard
-set of metrics.}
+\item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
+set. Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules of
+\code{\link[=selection_rule]{selection_rule()}}, the first metric in the set chooses each fold's
+candidate. The \code{"desirability"} rule chooses by its goals instead.
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} accept that rule, and the
+racing and annealing tuners refuse it. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}},
+\code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}}, \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and
+\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} also steer their inner search on the first
+metric. The outer loop scores every metric in the set, and
+\code{\link[=collect_metrics]{collect_metrics()}} reports each one.
+
+So the order of the set matters. If the first metric is not the one you
+read, the run chooses under one loss and assesses under another. For
+example, \code{metric_set(mae, rmse)} chooses by \code{mae} and also reports
+\code{rmse}. Stone (1974, p. 116) says that the two losses need not match.}
 
 \item{initial}{The number of candidates each fold scores before the first
 iteration, a whole number of at least 1 (finetune's default). A
@@ -390,6 +403,11 @@ collect_metrics(res)
 # then one perturbation per iteration.
 res$.inner_metrics[[1]]
 \dontshow{\}) # examplesIf}
+}
+\references{
+Stone, M. (1974). Cross-validatory choice and assessment of statistical
+predictions. \emph{Journal of the Royal Statistical Society, Series B}, 36(2),
+111-147.
 }
 \seealso{
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_resamples]{nested_resamples()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},

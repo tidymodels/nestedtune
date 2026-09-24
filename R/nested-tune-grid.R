@@ -53,6 +53,21 @@
 #' @param resamples A nested resampling design from [nested_resamples()] or
 #'   [rsample::nested_cv()], one row per outer fold. The section on nested
 #'   designs says what the design must hold.
+#' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
+#'   set. Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules of
+#'   [selection_rule()], the first metric in the set chooses each fold's
+#'   candidate. The `"desirability"` rule chooses by its goals instead.
+#'   [nested_tune_grid()] and [nested_tune_bayes()] accept that rule, and the
+#'   racing and annealing tuners refuse it. [nested_tune_bayes()],
+#'   [nested_tune_race_anova()], [nested_tune_race_win_loss()] and
+#'   [nested_tune_sim_anneal()] also steer their inner search on the first
+#'   metric. The outer loop scores every metric in the set, and
+#'   [collect_metrics()] reports each one.
+#'
+#'   So the order of the set matters. If the first metric is not the one you
+#'   read, the run chooses under one loss and assesses under another. For
+#'   example, `metric_set(mae, rmse)` chooses by `mae` and also reports
+#'   `rmse`. Stone (1974, p. 116) says that the two losses need not match.
 #' @templateVar CONSTRUCTOR tune::control_grid()
 #' @templateVar PKG tune
 #' @template param-control-dots
@@ -478,6 +493,11 @@
 #' # it is information, not noise.
 #' res$.selected
 #'
+#' @references
+#' Stone, M. (1974). Cross-validatory choice and assessment of statistical
+#' predictions. *Journal of the Royal Statistical Society, Series B*, 36(2),
+#' 111-147.
+#'
 #' @seealso [nested_tune_bayes()], [nested_resamples()], [nested_final_fit()],
 #'   [tune::tune_grid()]
 #' @export
@@ -714,6 +734,11 @@ nested_fold_fit <- function(
         )
         # Resolved from the tuned object rather than from `metrics`, so the same
         # code answers whether the caller supplied a metric set or let tune pick.
+        # The searches steer on the same metric: tune's `tune_bayes_workflow()`
+        # and finetune's `tune_race_anova_workflow()`,
+        # `tune_race_win_loss_workflow()` and `tune_sim_anneal_workflow()` each
+        # set `opt_metric <- first_metric(metrics)` (tune 2.1.0, finetune 1.3.0,
+        # read 2026-09-24). The `metrics` help says so (M115).
         metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
         # The recorded rule (M69), one of tune's three selectors behind
         # `apply_selection_rule()` (R/selection-rule.R). `eval_time` is

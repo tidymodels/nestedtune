@@ -129,6 +129,7 @@
 #' # then one proposal per iteration.
 #' res$.inner_metrics[[1]]
 #'
+#' @inherit nested_tune_grid references
 #' @templateVar LINKS [tune::tune_bayes()]
 #' @template seealso-orchestrator
 #' @export

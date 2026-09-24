@@ -138,6 +138,14 @@ it as the `select` argument. Every
 statistical step is tune's. This package adds the loop, the seeding, and a
 result that keeps what each fold chose.
 
+The order of the `metrics` set matters. tune's three selectors choose on
+the first metric in the set, and the outer loop scores every metric in it.
+If the first metric is not the one you read, the run chooses under one loss
+and assesses under another. For example, `metric_set(mae, rmse)` chooses by
+`mae` and also reports `rmse`. Stone (1974, p. 116) says that the two losses
+need not match. The run below passes no set, so it uses tune's default for
+a regression, `metric_set(rmse, rsq)`, and chooses by `rmse`.
+
 ```{r run}
 set.seed(2)
 
@@ -355,3 +363,9 @@ built the deployed model, and it is the number reported for that model.
 The instability is reported rather than hidden. The deployed model is
 described as what it is: the same procedure applied to all the data, so
 there is no second number to compute for it.
+
+## References
+
+Stone, M. (1974). Cross-validatory choice and assessment of statistical
+predictions. *Journal of the Royal Statistical Society, Series B*, 36(2),
+111–147.

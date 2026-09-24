@@ -143,6 +143,7 @@
 #' # then one perturbation per iteration.
 #' res$.inner_metrics[[1]]
 #'
+#' @inherit nested_tune_grid references
 #' @templateVar LINKS [nested_tune_bayes()], [finetune::tune_sim_anneal()]
 #' @template seealso-orchestrator
 #' @export
