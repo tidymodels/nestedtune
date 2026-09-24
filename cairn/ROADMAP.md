@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-24 (M116 planned from the two M115 candidate rows. 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M116 | The summaries and the final fit's print name the metric that selects | review | — | normal | milestones/M116-selecting-metric-printed.md |
+| M116 | The summaries and the final fit's print name the metric that selects | in-progress | — | normal | milestones/M116-selecting-metric-printed.md |
 | M115 | The help and the guide say which metric selects and which metrics the outer loop scores | done | — | normal | milestones/archive/M115-select-and-assess-metrics.md |
 | M114 | The two Bayesian test files run in half their serial time | done | — | normal | milestones/archive/M114-bayes-fixture-selectors.md |
 | M113 | The suite runs in three quarters of its serial time with no line of coverage lost | done | — | high | milestones/archive/M113-suite-once-per-claim.md |
