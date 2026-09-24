@@ -1889,6 +1889,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-079 stands with that clause read as this entry states it. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` say the same.
 **Consequences:** none beyond the wording. Falsified by a final-fit test on a further design landing without this entry being superseded. (Corrects D-079's Decision.)
 
+### D-081 (2026-09-24): the prints name the selecting metric under every rule that selects on it, the default included, and the procedure record holds its name as `first_metric`. Supersedes M098's plan-gate choice to print nothing under the default rule
+
+**Context:** M098 printed `Selected by:` under a non-default rule alone, so that the line's presence was the signal. No print named the metric that chose, so under `metric_set(mae, rmse)` a reader could not tell that `mae` chose (M115 Out).
+**Decision:** A `Selecting metric:` line prints under the `"best"`, `"one_std_err"` and `"pct_loss"` rules on the results, set and final-fit summaries and on the final fit's print. `Selected by:` is unchanged. The name is resolved once at entry through `tune::check_metrics_arg()` and recorded as `first_metric` under every rule of a selecting tuner. The final fit records the name it resolves from its own run, and a results object built before the entry is not migrated. A metric set tune cannot resolve for the workflow's mode is refused with class `nestedtune_metrics_mode` before any fold runs, and before any workflow of a `nested_workflow_map()` call runs, where each fold used to run and fail on it. `nested_fit_resamples()`, which records no name, keeps its old behavior. Rejected: extending `Selected by:` to `best on rmse`, which would stop the rule line matching the rule object's print, and reading the name at print time, which a `nested_results` cannot do without its workflow.
+**Consequences:** the default run's print gains a line on four surfaces. Falsified by a user reading the two lines as naming different things, or by tune ordering a default set differently at entry and inside a fold.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

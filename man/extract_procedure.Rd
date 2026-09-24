@@ -43,12 +43,18 @@ own arguments beside it:
 \item \code{"fit_resamples"}, for a run with nothing to tune, with none
 }
 
-\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{param_info},
+\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{first_metric}
+is the name of the first metric in the set, as tune resolves it for the
+workflow. A run given no metric set names the first metric of tune's
+default set. Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules,
+that metric chooses each fold's candidate. The Bayesian search, the two
+races and the annealing search steer on it under every rule. \code{param_info},
 \code{event_level} and \code{eval_time} are as they were given. \code{control} is the
 control object the run was given, or tune's default when none was, with
 the slots this package forces already applied. On a Bayesian result
-\code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info}
-and no \code{select}, because no parameter set was read and no rule applied.
+\code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info},
+no \code{select} and no \code{first_metric}, because no parameter set was read and
+no rule applied.
 See "Differences from calling tune directly" on each loop function's
 help page for what those slots are.
 

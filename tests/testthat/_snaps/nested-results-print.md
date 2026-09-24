@@ -65,6 +65,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       v num_comp: 3 (all 3 completed folds agree)
       
       -- Estimate (3 of 3 outer folds) --
@@ -88,6 +89,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       v num_comp: 3 (all 5 completed folds agree)
       
       -- Estimate (5 of 5 outer folds) --
@@ -111,6 +113,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       ! num_comp: 4, 4, 4, 3 (folds disagree)
       
       -- Estimate (4 of 4 outer folds) --
@@ -136,6 +139,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       v num_comp: 3 (all 2 completed folds agree)
       
       -- Estimate (2 of 3 outer folds) --
@@ -163,6 +167,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       i No outer fold completed, so nothing was selected.
       
       -- Estimate --
@@ -189,6 +194,7 @@
       Outer folds: 2 requested, 2 completed
       
       -- Selected parameters 
+      Selecting metric: rmse
       ! num_comp: 3 2 (folds disagree)
       
       -- Estimate (2 of 2 outer folds) 
@@ -213,6 +219,7 @@
       Outer folds: 2 requested, 2 completed
       
       -- Selected parameters 
+      Selecting metric: rmse
       v threshold: 0.9 (all 2 completed folds agree)
       
       -- Estimate (2 of 2 outer folds) 
@@ -241,6 +248,7 @@
       i See the `.notes` column of the results object for what went wrong.
       
       -- Selected parameters 
+      Selecting metric: rmse
       v num_comp: 2 (the only completed fold)
       
       -- Estimate (1 of 2 outer folds) 
@@ -269,6 +277,7 @@
       i See the `.notes` column of the results object for what went wrong.
       
       -- Selected parameters 
+      Selecting metric: rmse
       v threshold: 0.9 (the only completed fold)
       
       -- Estimate (1 of 2 outer folds) 
@@ -292,6 +301,7 @@
       -- Selected parameters --
       
       Selected by: one_std_err by num_comp
+      Selecting metric: rmse
       ! num_comp: 2, 3, 2 (folds disagree)
       
       -- Estimate (3 of 3 outer folds) --
@@ -316,6 +326,7 @@
       -- Selected parameters --
       
       Selected by: pct_loss by num_comp (limit = 2)
+      Selecting metric: rmse
       v num_comp: 3 (all 3 completed folds agree)
       
       -- Estimate (3 of 3 outer folds) --
@@ -340,6 +351,7 @@
       -- Selected parameters --
       
       Selected by: pct_loss by num_comp (limit = 5)
+      Selecting metric: rmse
       ! num_comp: 2, 3, 2 (folds disagree)
       
       -- Estimate (3 of 3 outer folds) --
@@ -368,6 +380,7 @@
       -- Selected parameters --
       
       Selected by: one_std_err by num_comp
+      Selecting metric: rmse
       i No outer fold completed, so nothing was selected.
       
       -- Estimate --
@@ -390,6 +403,7 @@
       
       -- Selected parameters --
       
+      Selecting metric: rmse
       v num_comp: 3 (all 3 completed folds agree)
       
       -- Estimate (3 of 3 outer folds) --
@@ -437,6 +451,7 @@
       -- Selected parameters --
       
       Selected by: one_std_err by desc(df1), df2
+      Selecting metric: rmse
       ! df1: 2, 8, 2 (folds disagree)
       ! df2: 2, 2, 5 (folds disagree)
       
@@ -466,6 +481,7 @@
       
       -- Selected parameters 
       Selected by: one_std_err by num_comp
+      Selecting metric: rmse
       ! num_comp: 3 2 (folds disagree)
       
       -- Estimate (2 of 2 outer folds) 
@@ -504,6 +520,7 @@
       Outer folds: 2 requested, 2 completed
       
       -- Selected parameters 
+      Selecting metric: rmse
       ! num_comp: 3 2 (folds disagree)
       
       -- Estimate (2 of 2 outer folds) 

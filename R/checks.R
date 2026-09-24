@@ -1207,6 +1207,28 @@ check_metrics <- function(metrics, call = rlang::caller_env()) {
   invisible(metrics)
 }
 
+# The first metric's name, as tune resolves the set for the workflow (M116),
+# or a refusal where it cannot, as for a set made for another model mode.
+# Every fold's run would fail on the same set, so refusing
+# here saves the whole loop and names the function the user called. tune's
+# own message is kept as the parent.
+check_metrics_mode <- function(metrics, object, call = rlang::caller_env()) {
+  rlang::try_fetch(
+    first_metric_name(metrics, object, call = call),
+    error = function(cnd) {
+      cli::cli_abort(
+        c(
+          "tune refused {.arg metrics} for this workflow.",
+          i = "Each fold's run would fail on it, so no fold was run."
+        ),
+        parent = cnd,
+        class = "nestedtune_metrics_mode",
+        call = call
+      )
+    }
+  )
+}
+
 # `param_info` is tune's, and it is passed through untouched -- so the only
 # thing worth checking here is the one mistake that would otherwise be paid for
 # by a whole outer loop before tune saw it.

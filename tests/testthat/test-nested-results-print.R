@@ -1398,3 +1398,130 @@ test_that("AC4: the set's selection-rule line holds its shape", {
   expect_snapshot(print(summary(under_rule)))
   expect_snapshot(print(summary(under_default)))
 })
+
+# The selecting-metric line (M116) ---------------------------------------------
+
+selecting_metric_lines <- function(lines) {
+  lines[startsWith(lines, "Selecting metric: ")]
+}
+
+test_that("M116 AC2: the summary names the selecting metric, first under the default rule and after the rule line otherwise", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  best <- rule_results(selection_rule("best"), data = d)
+  lines <- summary_lines(best)
+  heading <- which(grepl("Selected parameters", lines, fixed = TRUE))
+  expect_identical(lines[[heading + 2L]], "Selecting metric: rmse")
+  expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
+
+  for (rule in list(
+    selection_rule("one_std_err", num_comp),
+    selection_rule("pct_loss", num_comp)
+  )) {
+    lines <- summary_lines(rule_results(rule, data = d))
+    by <- which(startsWith(lines, "Selected by: "))
+    expect_length(by, 1L)
+    expect_identical(lines[[by + 1L]], "Selecting metric: rmse")
+    expect_length(selecting_metric_lines(lines), 1L)
+  }
+
+  # The line describes the procedure asked for, as the rule line does, so a
+  # run in which no fold completed still prints it.
+  nothing <- suppressWarnings(rule_results(
+    selection_rule("best"),
+    data = d,
+    folds = break_every_fold(det_nested(d))
+  ))
+  expect_identical(suppressWarnings(summary(nothing))$completed, 0L)
+  expect_identical(
+    selecting_metric_lines(summary_lines(nothing)),
+    "Selecting metric: rmse"
+  )
+})
+
+test_that("M116 AC2: no selecting-metric line under desirability, on a run that selects nothing, or on a record without the entry", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  fixed <- fit_resamples_results(d)
+  expect_length(selecting_metric_lines(summary_lines(fixed)), 0L)
+
+  old <- rule_results(selection_rule("best"), data = d)
+  procedure <- attr(old, "procedure")
+  procedure$first_metric <- NULL
+  attr(old, "procedure") <- procedure
+  expect_length(selecting_metric_lines(summary_lines(old)), 0L)
+
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+  des <- rule_results(selection_rule("desirability", maximize(rsq)), data = d)
+  expect_identical(extract_procedure(des)$first_metric, "rmse")
+  expect_length(selecting_metric_lines(summary_lines(des)), 0L)
+})
+
+test_that("M116 AC3: the summary's `first_metric` component is the record's entry, or NULL", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+
+  res <- rule_results(selection_rule("best"), data = d)
+  s <- summary(res)
+  expect_identical(s[["first_metric"]], "rmse")
+  expect_identical(s[["first_metric"]], extract_procedure(res)$first_metric)
+
+  s <- summary(fit_resamples_results(d))
+  expect_true("first_metric" %in% names(s))
+  expect_null(s[["first_metric"]])
+})
+
+test_that("M116 AC2: a set names the selecting metric in the tuned workflow's section alone", {
+  skip_if_no_wset_fixture()
+
+  for (rule in list(
+    selection_rule("best"),
+    selection_rule("one_std_err", num_comp)
+  )) {
+    lines <- strsplit(print_text(summary(rule_set_results(rule))), "\n")[[1L]]
+    at <- which(startsWith(lines, "Selecting metric: "))
+    expect_length(at, 1L)
+    expect_identical(lines[[at]], "Selecting metric: rmse")
+    tuned <- which(grepl('Workflow "tuned"', lines, fixed = TRUE))
+    fixed <- which(grepl('Workflow "fixed"', lines, fixed = TRUE))
+    expect_true(tuned < at && at < fixed)
+  }
+
+  # A tuned workflow whose record holds no entry prints no line.
+  old <- rule_set_results(selection_rule("best"))
+  i <- which(old$wflow_id == "tuned")
+  res <- old$result[[i]]
+  procedure <- attr(res, "procedure")
+  procedure$first_metric <- NULL
+  attr(res, "procedure") <- procedure
+  old$result[[i]] <- res
+  expect_s3_class(old, "nested_results_set")
+  lines <- strsplit(print_text(summary(old)), "\n")[[1L]]
+  expect_length(selecting_metric_lines(lines), 0L)
+
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+  des <- rule_set_results(selection_rule("desirability", maximize(rsq)))
+  lines <- strsplit(print_text(summary(des)), "\n")[[1L]]
+  expect_length(selecting_metric_lines(lines), 0L)
+})
+
+test_that("M116 AC2: a set in which every fold failed still names the selecting metric", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  set.seed(31)
+  wset <- wset_two(d)
+  broken <- suppressWarnings(memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_tune_grid",
+    resamples = break_every_fold(det_nested(d)),
+    metrics = reg_metrics(),
+    grid = det_grid()
+  )))
+  lines <- strsplit(
+    print_text(suppressWarnings(summary(broken))),
+    "\n"
+  )[[1L]]
+  expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
+})

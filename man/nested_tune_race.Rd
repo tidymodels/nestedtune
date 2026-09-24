@@ -117,7 +117,10 @@ metric. The outer loop scores every metric in the set, and
 So the order of the set matters. If the first metric is not the one you
 read, the run chooses under one loss and assesses under another. For
 example, \code{metric_set(mae, rmse)} chooses by \code{mae} and also reports
-\code{rmse}. Stone (1974, p. 116) says that the two losses need not match.}
+\code{rmse}. Stone (1974, p. 116) says that the two losses need not match.
+A set that tune cannot use for the model's mode, such as a
+classification metric on a regression model, is refused before any
+fold runs.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}

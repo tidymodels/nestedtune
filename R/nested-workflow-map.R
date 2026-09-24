@@ -36,6 +36,14 @@
 #'   names does not take is refused, as is an unnamed argument or a call with
 #'   no `resamples`.
 #'
+#'   A `metrics` passed here reaches every workflow's run. Under the
+#'   `"best"`, `"one_std_err"` and `"pct_loss"` rules of [selection_rule()],
+#'   its first metric chooses each fold's candidate, and every metric in it
+#'   is scored. The `metrics` entry of [nested_tune_grid()] says what `NULL`
+#'   means and how the `"desirability"` rule chooses instead. A set that
+#'   does not suit a tuned workflow's model is refused before any workflow
+#'   runs.
+#'
 #' @return A `nested_results_set`: a tibble of class
 #'   `c("nested_results_set", "tbl_df", "tbl", "data.frame")` with one row
 #'   per workflow in the set's order and three columns. `wflow_id` is the
@@ -114,7 +122,9 @@
 #' orchestrator raises for one workflow is raised the same way, when that
 #' workflow's turn comes. A `grid` that names a parameter that workflow
 #' does not tune is one such error, and a control of the wrong class is
-#' another. The workflows before it have run by then. What is raised is
+#' another. The workflows before it have run by then. A `metrics` that
+#' does not suit a tuned workflow's model is the exception: it is refused
+#' before any workflow runs. What is raised is
 #' the original condition
 #' object, with `Workflow "<id>": ` written in front of the first line of
 #' its message and this function, or the reading function, as its call.
@@ -184,6 +194,14 @@ nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
       check_workflow(workflows[[i]], call = call)
       if (identical(routes[[i]], "nested_fit_resamples")) {
         check_tuned_workflow(workflows[[i]], call = call)
+      } else {
+        # The metric set this workflow's run would get, resolved as the run
+        # resolves it (M116). A `metrics` that is not a metric set is left to
+        # the orchestrator's own check.
+        metrics <- map_args(dots, object$option[[i]], routes[[i]], fn)$metrics
+        if (is.null(metrics) || inherits(metrics, "metric_set")) {
+          check_metrics_mode(metrics, workflows[[i]], call = call)
+        }
       }
     })
   }

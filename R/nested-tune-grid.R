@@ -68,6 +68,9 @@
 #'   read, the run chooses under one loss and assesses under another. For
 #'   example, `metric_set(mae, rmse)` chooses by `mae` and also reports
 #'   `rmse`. Stone (1974, p. 116) says that the two losses need not match.
+#'   A set that tune cannot use for the model's mode, such as a
+#'   classification metric on a regression model, is refused before any
+#'   fold runs.
 #' @templateVar CONSTRUCTOR tune::control_grid()
 #' @templateVar PKG tune
 #' @template param-control-dots
@@ -618,6 +621,12 @@ nested_loop <- function(
   call
 ) {
   n <- nrow(resamples)
+  # Resolved before any fold runs and before the seed draw (M116), so a metric
+  # set tune cannot resolve for the workflow is refused at entry rather than
+  # after every fold has failed on it.
+  first_metric <- if (tuner_selects(tuner$tuner)) {
+    check_metrics_mode(metrics, object, call = call)
+  }
 
   # Snapshot before drawing, so what is restored is the caller's state on
   # entry rather than its state after our own draw. `.Random.seed` does not
@@ -660,7 +669,8 @@ nested_loop <- function(
     eval_time = eval_time,
     select = select,
     control = control,
-    workflow = workflow_identity(object)
+    workflow = workflow_identity(object),
+    first_metric = first_metric
   )
   out <- new_nested_results(resamples, folds, seeds, grid, metrics, procedure)
   warn_failed_folds(out, call = call)
@@ -1004,6 +1014,16 @@ param_object <- function(id, params) {
   }
   object <- params$object[[match(id, params$id)]]
   if (is.list(object)) object else NULL
+}
+
+# The name of the first metric in the set, resolved as tune resolves it for
+# the workflow, so a run given `metrics = NULL` records the first metric of
+# tune's default set for the workflow's mode (M116). Each fold's run resolves
+# the same name through `tune::.get_tune_metric_names()`; this reads it once,
+# before any fold runs, so the record names it when no fold completes.
+first_metric_name <- function(metrics, object, call = rlang::caller_env()) {
+  set <- tune::check_metrics_arg(metrics, object, call = call)
+  names(attr(set, "metrics"))[[1L]]
 }
 
 # Whether the inner run's metrics table carries `.eval_time`: the metric set

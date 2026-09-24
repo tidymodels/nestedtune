@@ -363,6 +363,7 @@ test_that("the procedure records the effective control on both tuners (M48, AC4)
       "event_level",
       "eval_time",
       "select",
+      "first_metric",
       "control",
       "workflow"
     )
