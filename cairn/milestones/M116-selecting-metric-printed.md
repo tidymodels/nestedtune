@@ -1,0 +1,96 @@
+<!-- Section ownership + write-modes: see tracking-rules.md "Milestone-file
+     section ownership". A phase skill never rewrites another phase's section.
+     Per-section owners are tagged below. The one size check that can fail is
+     cairn_validate's <150 over the plan-owned body. -->
+# M116: The summaries and the final fit's print name the metric that selects
+
+- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
+- **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
+- **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
+- **Principles touched:** IP4, GP3   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
+- **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
+- **Surface tier:** user-facing — it changes the printed summaries, the procedure record and a help page   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
+- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+
+## Goal
+<!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
+
+The summaries and the final fit's print name the metric that chose each fold's candidate, and the help of `nested_workflow_map()` says which metric selects.
+
+## Scope
+<!-- owner: plan · create/amend-via-gate -->
+
+**In:** A `first_metric` entry in the procedure record, resolved once at entry. A `Selecting metric:` line on the four summary and print surfaces that already carry `Selected by:`. A `first_metric` component on the two summary objects. The help text of `nested_workflow_map()`'s `...` entry. The two M115 candidate rows are absorbed here.
+
+**Out:** The line on `print.nested_results`, which M098 kept free of the rule and which stays so (no row, a standing choice). The rule object's own print, which cannot know the metric. A `metric` argument on `selection_rule()`, which M115's plan rejected. A migration of results built before the entry, which D-041 declines: the summary prints no line for them.
+
+## Acceptance criteria
+<!-- owner: plan · create/amend-via-gate; review reads, never reinterprets.
+     Every item opens with its positional label — `ACn:` — the item's
+     position counted top-to-bottom, the number Coverage cites; an
+     insertion, removal, or reorder renumbers the labels and the Coverage
+     lines together.
+     Driving RR set → its Binding criteria appear VERBATIM here (binding-
+     criteria check), each ingested as a numbered criterion carrying its tag
+     — `- [ ] ACn (BCm): <verbatim>` — with its own Coverage line, since
+     coverage-complete counts AC checkboxes positionally (M107); departures:
+     a "Deviations from RR<NN>" table ends this section. -->
+
+- [ ] AC1: The procedure record of a `nested_results` from any of the five selecting orchestrators, under any rule, holds `first_metric`. The entry is the name of the first metric in the set as `tune::check_metrics_arg()` resolves it for the workflow. The record of a `nested_final_fit` built from it holds the same name. The final fit resolves that name from its own tuning run. `procedure_tuner()` treats the entry as shared, so no tuner receives it. A test asserts that `extract_procedure()` of the results and of its final fit give a `first_metric` equal to `tune::.get_tune_metric_names(extract_tune_results(fit))[[1]]`. It runs `nested_tune_grid()` under `metric_set(mae, rmse)`, `metric_set(rmse, mae)` and `metrics = NULL`, on one regression and one classification workflow. It runs each of the four other selecting orchestrators once. The same test asserts that a `nested_fit_resamples()` record has no `first_metric` entry.
+- [ ] AC2: Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, four surfaces print the line `Selecting metric: <first_metric>`. They are `summary()` of a `nested_results`, `print()` and `summary()` of a `nested_final_fit`, and each tuned workflow's section of `summary()` of a `nested_results_set`. Under `"best"`, the line is the first line of the "Selected parameters" section. Under `"best"` in the final fit's print, it is the line after `Selected:`. Under the other two rules, it is the line after `Selected by:`. In the results summary and the set section, it prints when no outer fold completed. On each of the four surfaces, the line is absent under the `"desirability"` rule and on a record without `first_metric`. It is also absent on each surface that shows a `nested_fit_resamples()` result. Snapshot tests pin the line on each of the four surfaces under `"best"` and under `"one_std_err"`. Expectations assert each absence named above, and the line's presence in the results summary of a run in which every fold failed.
+- [ ] AC3: `summary.nested_results` and `summary.nested_final_fit` carry a `first_metric` component. It holds the record's entry, or `NULL` where the record holds none. A test asserts both values. The help pages of `summary.nested_results`, `print.nested_final_fit`, `summary.nested_results_set` and `extract_procedure` describe the line or the entry.
+- [ ] AC4: The `...` entry of `nested_workflow_map()`'s help says two things about a `metrics` passed there. Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, its first metric chooses each fold's candidate, and every metric in it is scored. The entry links to `nested_tune_grid()` for the default metric set and for the `"desirability"` rule. `man/nested_workflow_map.Rd` holds the text after `devtools::document()`.
+- [ ] AC5: The `verify` slot is clean. `devtools::test()` passes. One exception applies: if `test-parallel-interrupt.R` fails inside the parallel suite and passes when run alone, the review records both runs and AC5 still holds. `devtools::document()` leaves no diff. Every gating sweep that `Rscript benchmarks/sweep-prose.R --list-gating` prints is clean. `devtools::check()` gives 0 errors, 0 warnings and 0 notes. `NEWS.md` has one entry for the line and the record entry.
+
+## Coverage
+<!-- owner: plan · create/amend-via-gate; each acceptance criterion → the
+     task(s) satisfying it, by positional number (AC/Task counted
+     top-to-bottom). Review reads to fence evidence — tracking-rules "AC fencing". -->
+
+- AC1 → T1
+- AC2 → T2
+- AC3 → T2, T3
+- AC4 → T3
+- AC5 → T3
+
+## Tasks
+<!-- owner: plan (create) / implement (check-off, minor edits); substantive
+     change is amend-via-gate. Every item opens with its positional label —
+     `Tn:` — the item's position counted top-to-bottom, the number Coverage
+     cites; an insertion, removal, or reorder renumbers the labels and the
+     Coverage lines together. -->
+
+- [ ] T1: Record the entry. Write the test first in `tests/testthat/test-selection-metric.R`. Resolve the name in `nested_loop()` (`R/nested-tune-grid.R:656`) with `names(attr(tune::check_metrics_arg(metrics, object), "metrics"))[[1]]`, the reading `R/checks.R:1586` uses. Add `first_metric` to `new_procedure()` (`R/tuner.R:319`) for a selecting tuner alone, and to the shared names in `procedure_tuner()`. In `R/nested-final-fit.R`, pass the `metric_name` the final fit resolves (line 438) to both `new_procedure()` calls. Reuse the suite's existing fixtures for the four other tuners (D-079).
+- [ ] T2: Print the line. Extend `print_selected_by()` (`R/nested-results-print.R:391`) to print `Selecting metric:` after the rule line under the three metric rules. Add the `first_metric` component to `new_summary_nested_results()` and `new_summary_nested_final_fit()`. Re-record the two snapshot files and review every changed line. Assert absence through `cli::cli_fmt()`, never `capture.output()` (LESSONS, cli output).
+- [ ] T3: Write the help and the record. Describe the line and the entry on the four help pages AC3 names and in `nested_workflow_map()`'s `...` entry. Add the NEWS entry and the D-entry that supersedes M098's plan-gate choice for this line. Run the `verify` slot and `devtools::check()`.
+
+## Work log
+<!-- owner: any skill · append-only; one line per entry; absolute dates.
+     EXEMPT from the 150-line cap (D-046): history under D-045, never edited,
+     so the cap must never demand a trim here. Wrapped entries get a WARN.
+     The rejected-alternative record (/milestone-plan step 4) takes this form:
+     `- YYYY-MM-DD: plan gate chose <approach> over <alternative> because
+     <reason>; falsified by <evidence class>.` — one per approach choice the
+     gate actually weighed, none where it weighed none, and it is the record
+     `/milestone-review`'s thrash trigger (b) reads. It lives here rather than
+     below so an instantiated file inherits no placeholder to delete. -->
+
+- 2026-09-24: created by /milestone-plan. Absorbs the two candidate rows M115 added (the `Selected by:` line under `"best"`, and the `nested_workflow_map()` help). The help row's premise was wrong: that page has no `metrics` entry to inherit, so the text goes in `...`.
+- 2026-09-24: criteria audit (full mode, fresh [O] reader) returned 11 findings. Eight were fixed at the gate. AC1 names `procedure_tuner()`. AC2 drops "takes its place", limits the no-fold-completed clause to the two surfaces that can reach it, and names the absence surfaces. AC4 names its link scope. A D-entry records the M098 reversal. Old records are not migrated, and the final fit resolves its own name. The entry is recorded under every rule. Test breadth and instrument findings needed no change. Posed: the flake exception.
+- 2026-09-24: plan gate chose a separate `Selecting metric:` line over extending `Selected by:` to `best on rmse`, because the rule line then stays the same words as the rule object's print (M098) and avoids "by num_comp on rmse"; falsified by a user reading the two lines as naming different things.
+- 2026-09-24: plan gate chose recording `first_metric` at entry over deriving it at print time, because a `nested_results` stores no workflow and would read the name off `.inner_metrics` row order, with no answer when no fold completed; falsified by tune changing how `check_metrics_arg()` orders a default set.
+- 2026-09-24: plan gate chose M109's named-test exception for `test-parallel-interrupt.R` over a strict pass, because the flake fails on `main` too (M079 candidate row); falsified by the flake being fixed.
+
+## Decisions
+<!-- owner: implement / review · append-only; milestone-local; promote
+     cross-cutting ones to cairn/DECISIONS.md.
+     EXEMPT from the 150-line cap (D-074) because D-045 makes it history like the work log — dated dispositions, never edited — so the cap must never demand a trim here either.
+     Entries carry their rationale; the counterweight `decisions format`
+     advisory watches for pasted output, not for entry length (D-075). -->
+
+## Review
+<!-- owner: review · exclusive; evidence per criterion, consistency-gate
+     results, review findings + triage. EXEMPT from the 150-line cap (M55),
+     as are the work log (D-046) and the decisions section (D-074); evidence
+     never scrambles plan-owned content. -->
