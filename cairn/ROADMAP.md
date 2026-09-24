@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-24 (M116 done, PR #131; validate green; ROADMAP and
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | planned | — | normal | milestones/M117-fit-resamples-metrics-mode.md |
+| M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | review | — | normal | milestones/M117-fit-resamples-metrics-mode.md |
 | M116 | The summaries and the final fit's print name the metric that selects | done | — | normal | milestones/archive/M116-selecting-metric-printed.md |
 | M115 | The help and the guide say which metric selects and which metrics the outer loop scores | done | — | normal | milestones/archive/M115-select-and-assess-metrics.md |
 | M114 | The two Bayesian test files run in half their serial time | done | — | normal | milestones/archive/M114-bayes-fixture-selectors.md |

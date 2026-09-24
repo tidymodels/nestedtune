@@ -26,8 +26,9 @@ A \code{metrics} passed here reaches every workflow's run. Under the
 its first metric chooses each fold's candidate, and every metric in it
 is scored. The \code{metrics} entry of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says what \code{NULL}
 means and how the \code{"desirability"} rule chooses instead. A set that
-does not suit a tuned workflow's model is refused before any workflow
-runs.}
+does not suit the model of any workflow the map runs is refused before
+any workflow runs, a workflow routed to \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
+included.}
 }
 \value{
 A \code{nested_results_set}: a tibble of class
@@ -131,9 +132,10 @@ An error an
 orchestrator raises for one workflow is raised the same way, when that
 workflow's turn comes. A \code{grid} that names a parameter that workflow
 does not tune is one such error, and a control of the wrong class is
-another. The workflows before it have run by then. A \code{metrics} that
-does not suit a tuned workflow's model is the exception: it is refused
-before any workflow runs. What is raised is
+another. The workflows before it have run by then. A metric set in
+\code{metrics} that does not suit the model of any workflow the map runs is
+the exception:
+it is refused before any workflow runs. What is raised is
 the original condition
 object, with \verb{Workflow "<id>": } written in front of the first line of
 its message and this function, or the reading function, as its call.
