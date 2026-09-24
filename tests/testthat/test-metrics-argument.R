@@ -104,11 +104,11 @@ test_that("nested_final_fit() tunes under the metrics it was given", {
   )
 })
 
-# O1's pin (M115). The ordering is `desc(num_comp)` and not `num_comp`. Measured 2026-09-24 on
-# this fixture under seed 20, `mae` first against `rmse` first: "best" picks
-# 1 2 2 against 3 1 3; "one_std_err" by `num_comp` picks 1 1 1 against 1 1 1,
-# so the two orders cannot be told apart; by `desc(num_comp)` it picks 5 5 4
-# against 5 5 5.
+# O1's pin (M115). The ordering is `desc(num_comp)` and not `num_comp`.
+# Measured 2026-09-24 on this fixture under seed 20, `mae` first against `rmse`
+# first: "best" picks 1 2 2 against 3 1 3; "one_std_err" by `num_comp` picks
+# 1 1 1 against 1 1 1, so the two orders cannot be told apart; by
+# `desc(num_comp)` it picks 5 5 4 against 5 5 5.
 
 test_that("the first metric in the set selects, and the outer loop scores every metric", {
   skip_if_no_engines()

@@ -496,7 +496,7 @@
 #' @references
 #' Stone, M. (1974). Cross-validatory choice and assessment of statistical
 #' predictions. *Journal of the Royal Statistical Society, Series B*, 36(2),
-#' 111-147.
+#' 111–147.
 #'
 #' @seealso [nested_tune_bayes()], [nested_resamples()], [nested_final_fit()],
 #'   [tune::tune_grid()]

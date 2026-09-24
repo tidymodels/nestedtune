@@ -407,7 +407,7 @@ res$.inner_metrics[[1]]
 \references{
 Stone, M. (1974). Cross-validatory choice and assessment of statistical
 predictions. \emph{Journal of the Royal Statistical Society, Series B}, 36(2),
-111-147.
+111–147.
 }
 \seealso{
 \code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_resamples]{nested_resamples()}}, \code{\link[=nested_final_fit]{nested_final_fit()}},
