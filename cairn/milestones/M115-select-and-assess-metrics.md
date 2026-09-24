@@ -52,6 +52,6 @@ The help and the guide tell a user how to choose each fold's candidate under one
 
 ## Decisions
 
-- 2026-09-24 (implement question gate): user-facing text cites the source AC2 and AC3 name as "Stone (1974, p. 116)", with the full reference in a references entry on `nested_tune_grid()` that the Bayes, race and annealing pages inherit, and in a new References section of `vignettes/nested-cv.Rmd`. The "a" in `stone1974a` tells two papers apart on the internal shelf only, and a reader sees one Stone paper. AC2's and AC3's "Stone (1974a, p. 116)" is read as naming that source.
+- 2026-09-24 (implement question gate): user-facing text cites the source AC2 and AC3 name as "Stone (1974, p. 116)". The full reference goes in a references entry on `nested_tune_grid()`, which the Bayes, race and annealing pages inherit. It also goes in a new References section of `vignettes/nested-cv.Rmd`. The "a" in `stone1974a` tells two papers apart on the internal shelf only, and a reader sees one Stone paper. AC2's and AC3's "Stone (1974a, p. 116)" is read as naming that source.
 
 ## Review
