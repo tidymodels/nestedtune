@@ -1,0 +1,978 @@
+"file","test","expectations","failed","skipped","error"
+"test-augment.R","a data column named like a prediction column is refused, not renamed",2,0,FALSE,FALSE
+"test-augment.R","a double .row with the held-out values is accepted",2,0,FALSE,FALSE
+"test-augment.R","a mismatch is refused before a data column named like a prediction column",3,0,FALSE,FALSE
+"test-augment.R","a run with no completed fold is refused with nestedtune_no_completed_folds",2,0,FALSE,FALSE
+"test-augment.R","a run without saved predictions is refused with nestedtune_column_not_saved",2,0,FALSE,FALSE
+"test-augment.R","an outer design holding a row out other than once is refused with nestedtune_augment_rows",8,0,FALSE,FALSE
+"test-augment.R","non-empty `...` is refused",1,0,FALSE,FALSE
+"test-augment.R","on a censored-regression run, a fold missing a held-out row is refused",4,0,FALSE,FALSE
+"test-augment.R","on a censored-regression run, whose outcome names no data column, the predictions come first",4,0,FALSE,FALSE
+"test-augment.R","on a classification run, the class and probability columns are joined",7,0,FALSE,FALSE
+"test-augment.R","on a grouped v-fold design, augment() joins each row's held-out prediction",7,0,FALSE,FALSE
+"test-augment.R","on a run with a failed fold, a mismatch is refused before the partial-run warning",6,0,FALSE,FALSE
+"test-augment.R","on a run with a failed fold, the rows it held out hold NA and a nestedtune_partial_summary warning is raised",5,0,FALSE,FALSE
+"test-augment.R","on a v-fold design from nested_resamples(), augment() joins each row's held-out prediction",7,0,FALSE,FALSE
+"test-augment.R","on a v-fold design from rsample::nested_cv(), augment() joins each row's held-out prediction",6,0,FALSE,FALSE
+"test-augment.R","the `foreign` mismatch on the first and a later fold is refused with nestedtune_augment_predictions",11,0,FALSE,FALSE
+"test-augment.R","the `missing` mismatch on the first and a later fold is refused with nestedtune_augment_predictions",11,0,FALSE,FALSE
+"test-augment.R","the `na` mismatch on the first and a later fold is refused with nestedtune_augment_predictions",11,0,FALSE,FALSE
+"test-augment.R","the `no_row` mismatch on the first and a later fold is refused with nestedtune_augment_predictions",11,0,FALSE,FALSE
+"test-augment.R","the `repeated` mismatch on the first and a later fold is refused with nestedtune_augment_predictions",11,0,FALSE,FALSE
+"test-autoplot-filter.R","`eval_time` draws the named times and keeps a static metric",3,0,FALSE,FALSE
+"test-autoplot-filter.R","`metric` draws the named metrics' panels and no others",4,0,FALSE,FALSE
+"test-autoplot-filter.R","a filtered performance view looks the way it reads",1,0,FALSE,FALSE
+"test-autoplot-filter.R","a metric or time the run did not score is refused",3,0,FALSE,FALSE
+"test-autoplot-filter.R","a set keeps a metric only one workflow scored",3,0,FALSE,FALSE
+"test-autoplot-filter.R","a set refuses a metric no workflow scored",2,0,FALSE,FALSE
+"test-autoplot-filter.R","a set refuses either argument with the parameters view",1,0,FALSE,FALSE
+"test-autoplot-filter.R","a set's view filters over every workflow",3,0,FALSE,FALSE
+"test-autoplot-filter.R","a time on a run scored at none is refused",1,0,FALSE,FALSE
+"test-autoplot-filter.R","a time the run scored is accepted beside a static metric",1,0,FALSE,FALSE
+"test-autoplot-filter.R","either argument with the parameters view is refused",5,0,FALSE,FALSE
+"test-ci-workflows.R","job_uses() reads a job's steps in order and stops at the next job",3,0,FALSE,FALSE
+"test-ci-workflows.R","R-CMD-check.yaml builds and checks the vignettes on macOS alone",3,0,FALSE,FALSE
+"test-ci-workflows.R","the pkgdown deploy job checks out before it deploys",4,0,FALSE,FALSE
+"test-collect-metrics-wide.R","an unknown type is refused",3,0,FALSE,FALSE
+"test-collect-metrics-wide.R","an unknown type is refused on a set",1,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the long type is the call without a type",2,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type drops a weighted run's fold weights",7,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type keeps the evaluation time as a key",7,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type pivots a classification run's metrics",9,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type pivots a set, keyed on the workflow",6,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type refuses a cell with two values",1,0,FALSE,FALSE
+"test-collect-metrics-wide.R","the wide type refuses a metric named like a key column",2,0,FALSE,FALSE
+"test-collect-readers.R","a column added by hand to a run that never saved one is refused, the recorded control deciding",8,0,FALSE,FALSE
+"test-collect-readers.R","a prediction table carrying a fold label column is refused, not renamed",2,0,FALSE,FALSE
+"test-collect-readers.R","a run in which no fold completed is refused ahead of the column refusals",5,0,FALSE,FALSE
+"test-collect-readers.R","a stacked column named like a fold label is refused, not renamed",6,0,FALSE,FALSE
+"test-collect-readers.R","an object lacking the column is refused by name, the message naming the slot to set",10,0,FALSE,FALSE
+"test-collect-readers.R","both readers refuse a non-empty `...`",2,0,FALSE,FALSE
+"test-collect-readers.R","both readers warn once on a partial run and read the completed folds only",4,0,FALSE,FALSE
+"test-collect-readers.R","collect_extracts() is one row per completed fold, the value in a list column, NULL kept",7,0,FALSE,FALSE
+"test-collect-readers.R","collect_inner_metrics() keeps a fold's own .config beside its rows",4,0,FALSE,FALSE
+"test-collect-readers.R","collect_inner_metrics() stacks each completed fold's inner table under its label",6,0,FALSE,FALSE
+"test-collect-readers.R","collect_inner_metrics() stacks over the union of columns, NA where a fold lacks one",5,0,FALSE,FALSE
+"test-collect-readers.R","collect_inner_metrics() warns once on a partial run and refuses an all-failed one",7,0,FALSE,FALSE
+"test-collect-readers.R","collect_notes() is tune's generic, re-exported",1,0,FALSE,FALSE
+"test-collect-readers.R","collect_notes() on a run with no note is zero rows with the same columns",6,0,FALSE,FALSE
+"test-collect-readers.R","collect_notes() reads every fold, warning about none",2,0,FALSE,FALSE
+"test-collect-readers.R","collect_notes() stacks every fold's notes under its label",7,0,FALSE,FALSE
+"test-collect-readers.R","collect_predictions() stacks each completed fold's predictions under id and id2",6,0,FALSE,FALSE
+"test-collect-readers.R","collect_selections() and collect_inner_metrics() refuse other objects, naming both",31,0,FALSE,FALSE
+"test-collect-readers.R","collect_selections() is one labelled row per completed fold",6,0,FALSE,FALSE
+"test-collect-readers.R","collect_selections() refuses a run in which no fold completed, as collect_metrics() does",5,0,FALSE,FALSE
+"test-collect-readers.R","collect_selections() stacks over the union of columns, NA where a fold lacks one",5,0,FALSE,FALSE
+"test-collect-readers.R","collect_selections() warns once on a partial run and stacks the completed folds",7,0,FALSE,FALSE
+"test-collect-readers.R","every reader carries the recorded label columns, id and id2 on a repeated design",24,0,FALSE,FALSE
+"test-collect-readers.R","on a fitted run, collect_predictions() is the hand stack of what the folds kept",5,0,FALSE,FALSE
+"test-compute-metrics.R","a `metrics` that is not a metric set is refused with nestedtune_bad_metrics",6,0,FALSE,FALSE
+"test-compute-metrics.R","a class-probability metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary",12,0,FALSE,FALSE
+"test-compute-metrics.R","a double .row with the held-out values is scored as the integer one",2,0,FALSE,FALSE
+"test-compute-metrics.R","a metric set needing a prediction the run did not save is refused with nestedtune_metric_type_not_saved",6,0,FALSE,FALSE
+"test-compute-metrics.R","a new class-probability metric set is scored at the event_level given, not the run's",4,0,FALSE,FALSE
+"test-compute-metrics.R","a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary",14,0,FALSE,FALSE
+"test-compute-metrics.R","a repeated v-fold run, holding rows out more than once, is scored and not refused",4,0,FALSE,FALSE
+"test-compute-metrics.R","a run with a failed fold warns with nestedtune_partial_summary and scores the rest",3,0,FALSE,FALSE
+"test-compute-metrics.R","a run with no completed fold is refused with nestedtune_no_completed_folds",2,0,FALSE,FALSE
+"test-compute-metrics.R","a run without saved predictions is refused with nestedtune_column_not_saved",4,0,FALSE,FALSE
+"test-compute-metrics.R","a survival metric on a regression run is refused, the `.pred` column being numeric",1,0,FALSE,FALSE
+"test-compute-metrics.R","an `event_level` naming no level is refused",2,0,FALSE,FALSE
+"test-compute-metrics.R","event_level defaults to the level the run recorded, not to ""first""",3,0,FALSE,FALSE
+"test-compute-metrics.R","non-empty `...` is refused",1,0,FALSE,FALSE
+"test-compute-metrics.R","on a run with a failed fold, a mismatch is refused before the partial-run warning",7,0,FALSE,FALSE
+"test-compute-metrics.R","the `foreign` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored",13,0,FALSE,FALSE
+"test-compute-metrics.R","the `missing` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored",13,0,FALSE,FALSE
+"test-compute-metrics.R","the `na` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored",13,0,FALSE,FALSE
+"test-compute-metrics.R","the `no_row` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored",13,0,FALSE,FALSE
+"test-compute-metrics.R","the `repeated` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored",13,0,FALSE,FALSE
+"test-compute-metrics.R","the counting metric set counts one call per scored fold",3,0,FALSE,FALSE
+"test-compute-metrics.R","with the run's metric set and level, compute_metrics() is collect_metrics() on a classification run at event_level = ""second""",3,0,FALSE,FALSE
+"test-compute-metrics.R","with the run's metric set, compute_metrics() is collect_metrics() on a censored-regression run",3,0,FALSE,FALSE
+"test-compute-metrics.R","with the run's metric set, compute_metrics() is collect_metrics() on a regression run",2,0,FALSE,FALSE
+"test-control-slots.R","every control_bayes() slot sits under one heading on nested_tune_bayes()'s page",29,0,FALSE,FALSE
+"test-control-slots.R","every control_grid() slot sits under one heading on nested_tune_grid()'s page",22,0,FALSE,FALSE
+"test-control-slots.R","every control_race() slot sits under one heading on the racing page (M50, AC7)",30,0,FALSE,FALSE
+"test-control-slots.R","every control_resamples() slot sits under one heading on nested_fit_resamples()'s page (M70, AC7)",24,0,FALSE,FALSE
+"test-control-slots.R","every control_sim_anneal() slot sits under one heading on nested_tune_sim_anneal()'s page (M51, AC6)",35,0,FALSE,FALSE
+"test-control-slots.R","the heading parse can see a slot classified twice, and one left out",6,0,FALSE,FALSE
+"test-control-slots.R","the racing page says what the recorded grid is, and what `n` is (AC7)",2,0,FALSE,FALSE
+"test-covr-traces.R","an explicit COVERAGE_DIR is respected under covr",3,0,FALSE,FALSE
+"test-covr-traces.R","outside covr nothing is diverted",3,0,FALSE,FALSE
+"test-covr-traces.R","under covr, traces are diverted to a sidecar the merge never reads",4,0,FALSE,FALSE
+"test-dots-barrier.R","AC1: the four entry points carry `...` after their required arguments",24,0,FALSE,FALSE
+"test-dots-barrier.R","AC2: nested_final_fit() refuses an argument it does not know",2,0,FALSE,FALSE
+"test-dots-barrier.R","AC2: nested_resamples() refuses an argument it does not know",2,0,FALSE,FALSE
+"test-dots-barrier.R","AC2: nested_tune_bayes() refuses an argument it does not know",3,0,FALSE,FALSE
+"test-dots-barrier.R","AC2: nested_tune_grid() refuses an argument it does not know",3,0,FALSE,FALSE
+"test-dots-barrier.R","AC5: every registered method whose `...` is unused fences it",57,0,FALSE,FALSE
+"test-dots-barrier.R","AC6: a positional `summarize` is refused at the call, a named one is not",3,0,FALSE,FALSE
+"test-dots-barrier.R","AC6: collect_metrics() puts `summarize` behind the barrier",1,0,FALSE,FALSE
+"test-dplyr-compat.R",".inner_metrics is in the record dplyr_reconstruct() checks",16,0,FALSE,FALSE
+"test-dplyr-compat.R","[ with a logical row mask returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","[ with a negative row index returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","[ with a row index returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","a column named `id2` on a plain design can be removed again",19,0,FALSE,FALSE
+"test-dplyr-compat.R","a column named `id2` on a plain design is not pasted into the fold labels",2,0,FALSE,FALSE
+"test-dplyr-compat.R","a column the caller added can be removed again, whatever it is named",30,0,FALSE,FALSE
+"test-dplyr-compat.R","a column the caller added is not pasted into the fold labels",3,0,FALSE,FALSE
+"test-dplyr-compat.R","a fold-label column with a dim is refused rather than compared",4,0,FALSE,FALSE
+"test-dplyr-compat.R","a list column named `id0` survives a verb on a repeated design",19,0,FALSE,FALSE
+"test-dplyr-compat.R","a template with no id column of its own cannot be reconstructed onto",3,0,FALSE,FALSE
+"test-dplyr-compat.R","a verb that keeps the class returns a tibble, not a bare data frame",11,0,FALSE,FALSE
+"test-dplyr-compat.R","an added id-prefixed list column survives two verbs on a repeated design",19,0,FALSE,FALSE
+"test-dplyr-compat.R","an id-prefixed column added by the caller keeps the class",30,0,FALSE,FALSE
+"test-dplyr-compat.R","bind_rows() doubling the rows returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","every dplyr verb lands in the branch the invariants assign it",105,0,FALSE,FALSE
+"test-dplyr-compat.R","filter() dropping a failed fold returns a bare tibble",3,0,FALSE,FALSE
+"test-dplyr-compat.R","has_results_columns() requires .inner_metrics",2,0,FALSE,FALSE
+"test-dplyr-compat.R","head() taking one row returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","no row-changing result prints the outer resampling scheme",18,0,FALSE,FALSE
+"test-dplyr-compat.R","replacing a fold-label column with an unorderable value returns a bare tibble",3,0,FALSE,FALSE
+"test-dplyr-compat.R","slice() dropping one row returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","slice() taking one row returns a bare tibble",2,0,FALSE,FALSE
+"test-dplyr-compat.R","the help page makes no promise about what subsetting rows keeps",10,0,FALSE,FALSE
+"test-eval-time.R","AC1: an accepted `eval_time` reaches the outer loop untouched",8,0,FALSE,FALSE
+"test-eval-time.R","AC1: an unusable `eval_time` is refused, naming the function the user called",19,0,FALSE,FALSE
+"test-eval-time.R","AC1: the recorded `eval_time` reaches the final fit untouched",8,0,FALSE,FALSE
+"test-eval-time.R","AC1: the refusal fires before any fitting begins",16,0,FALSE,FALSE
+"test-eval-time.R","AC2: the metric each outer fold reports at the named evaluation time is the IPCW Brier score",13,0,FALSE,FALSE
+"test-eval-time.R","AC3: a multi-element `eval_time` reports what its first element names",9,0,FALSE,FALSE
+"test-eval-time.R","AC3: two runs differing only in `eval_time` report different metrics, each the one tune produces",19,0,FALSE,FALSE
+"test-eval-time.R","AC4: nested_final_fit() tunes and selects under the caller's evaluation time",6,0,FALSE,FALSE
+"test-eval-time.R","AC6: both help pages document `eval_time` and what this package refuses",12,0,FALSE,FALSE
+"test-eval-time.R","AC8: a failed fold contributes no rows and keeps the time column",6,0,FALSE,FALSE
+"test-eval-time.R","AC8: a multi-element `eval_time` is summarized per evaluation time",17,0,FALSE,FALSE
+"test-eval-time.R","AC8: a run with no evaluation time keeps the shape it had",5,0,FALSE,FALSE
+"test-eval-time.R","AC8: a scalar `eval_time` still reports one row per metric",5,0,FALSE,FALSE
+"test-eval-time.R","AC8: a static metric beside a dynamic one keeps one row, with no time",5,0,FALSE,FALSE
+"test-eval-time.R","both evaluation times have observations at risk and events on either side",24,0,FALSE,FALSE
+"test-eval-time.R","the fixture's grid is ranked differently at the two evaluation times",5,0,FALSE,FALSE
+"test-event-level.R","AC1: a value that names no level is refused, by both orchestrators",10,0,FALSE,FALSE
+"test-event-level.R","AC1: the refusal fires before anything is fitted",2,0,FALSE,FALSE
+"test-event-level.R","AC2: the sensitivity each outer fold reports is the one yardstick computes at that event level",17,0,FALSE,FALSE
+"test-event-level.R","AC3: the two levels exchange sensitivity and specificity",9,0,FALSE,FALSE
+"test-event-level.R","AC4: nested_final_fit() tunes under the caller's event level",7,0,FALSE,FALSE
+"test-event-level.R","the fixture keeps both classes in every split, and separates the two metrics",7,0,FALSE,FALSE
+"test-extract-procedure.R","AC1: the accessor returns the record the final fit carries",2,0,FALSE,FALSE
+"test-extract-procedure.R","AC1: the accessor returns the record the results object carries",3,0,FALSE,FALSE
+"test-extract-procedure.R","AC2: an object with no method is refused, naming both that answer",7,0,FALSE,FALSE
+"test-extract-procedure.R","AC2: both methods refuse a stray argument in the dots",2,0,FALSE,FALSE
+"test-extract-procedure.R","AC2: the no-method refusal wins over a dots complaint",2,0,FALSE,FALSE
+"test-extract-procedure.R","the record's `select` is the selection_rule() the call was given, on both objects (M69, AC2)",3,0,FALSE,FALSE
+"test-fixture-cache.R","a cache hit is identical to the build it replaces",2,0,FALSE,FALSE
+"test-fixture-cache.R","a cache hit leaves the RNG where a build would",1,0,FALSE,FALSE
+"test-fixture-cache.R","a cache hit re-signals the conditions the build emitted",3,0,FALSE,FALSE
+"test-fixture-cache.R","a call with no named arguments keys rather than erroring",2,0,FALSE,FALSE
+"test-fixture-cache.R","a different seed rebuilds rather than serving the first result",2,0,FALSE,FALSE
+"test-fixture-cache.R","a hit re-signals conditions that are neither warning nor message",2,0,FALSE,FALSE
+"test-fixture-cache.R","a request nested past the depth cut is refused, naming the argument",6,0,FALSE,FALSE
+"test-fixture-cache.R","the key separates every formal argument of both orchestrators",17,0,FALSE,FALSE
+"test-fixture-cache.R","the key separates the function, not just the name it was called by",3,0,FALSE,FALSE
+"test-fixture-cache.R","the key separates the seed, and argument order does not",2,0,FALSE,FALSE
+"test-fixture-cache.R","the key separates what the design's inner spec resolves in the caller",1,0,FALSE,FALSE
+"test-fixture-cache.R","the same signature keys the same way twice, so it is built once",2,0,FALSE,FALSE
+"test-fixture-cache.R","the scaffolding above leaves the shared cache as it found it",2,0,FALSE,FALSE
+"test-fixture-cache.R","the wrapped call sees the test as its caller, not this helper",1,0,FALSE,FALSE
+"test-format-inline.R","a rendered identity difference carries no continuation artefact",3,0,FALSE,FALSE
+"test-format-inline.R","no string with a backslash continuation reaches format_inline()",1,0,FALSE,FALSE
+"test-hang-trace.R","a block that never ends leaves an unmatched start",2,0,FALSE,FALSE
+"test-hang-trace.R","a file's end forgets its unended blocks as well as its ended ones",4,0,FALSE,FALSE
+"test-hang-trace.R","every test_that() block gets a paired, named start and end line",6,0,FALSE,FALSE
+"test-hang-trace.R","no two test_that() blocks in one file share a description",3,0,FALSE,FALSE
+"test-hang-trace.R","the duplicate-description scan reports a planted duplicate",1,0,FALSE,FALSE
+"test-hang-trace.R","the per-file lines M14 ships still bracket the per-test ones",3,0,FALSE,FALSE
+"test-hang-trace.R","the reporter and the runner's composite both declare live updates",6,0,FALSE,FALSE
+"test-hang-trace.R","under parallel files every file and block gets exactly one live pair",17,0,FALSE,FALSE
+"test-help-structure.R","the Differences section holds one list on nested_tune_bayes",5,0,FALSE,FALSE
+"test-help-structure.R","the Differences section holds one list on nested_tune_race",5,0,FALSE,FALSE
+"test-help-structure.R","the Differences section holds one list on nested_tune_sim_anneal",5,0,FALSE,FALSE
+"test-help-structure.R","the grid page's Differences section holds no list",1,0,FALSE,FALSE
+"test-help-structure.R","the grid page's forced paragraph carries the contention sentence",2,0,FALSE,FALSE
+"test-help-structure.R","the settable paragraph carries its tail on nested_tune_bayes",2,0,FALSE,FALSE
+"test-help-structure.R","the settable paragraph carries its tail on nested_tune_race",2,0,FALSE,FALSE
+"test-help-structure.R","the settable paragraph carries its tail on nested_tune_sim_anneal",2,0,FALSE,FALSE
+"test-id-columns.R","a design's label column is recorded under whatever name it has",5,0,FALSE,FALSE
+"test-id-columns.R","an unusable label record falls back to row positions",4,0,FALSE,FALSE
+"test-id-columns.R","no method's answer depends on what the caller named the column",132,0,FALSE,FALSE
+"test-id-columns.R","the changelog and the help page promise what the code now does",7,0,FALSE,FALSE
+"test-id-columns.R","the constructor records the columns it took from the design",4,0,FALSE,FALSE
+"test-id-columns.R","the record travels with the class and is shed with it",4,0,FALSE,FALSE
+"test-metrics-argument.R","nested_final_fit() tunes under the metrics it was given",1,0,FALSE,FALSE
+"test-metrics-argument.R","nested_tune_grid() scores the metrics it was given",4,0,FALSE,FALSE
+"test-metrics-argument.R","nested_tune_grid() selects under the metrics it was given",4,0,FALSE,FALSE
+"test-metrics-argument.R","the fixture separates the caller's metric set from tune's default",2,0,FALSE,FALSE
+"test-model-spec-input.R","a formula passed unnamed beside a workflow, with `resamples` named, is refused by class",18,0,FALSE,FALSE
+"test-model-spec-input.R","a missing `resamples` or `object` is refused, naming the export",54,0,FALSE,FALSE
+"test-model-spec-input.R","a refusal on the spec route records the call the user wrote",12,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_fit_resamples() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_tune_bayes() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_tune_grid() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_tune_race_anova() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_tune_race_win_loss() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC1: nested_tune_sim_anneal() on a spec and a formula is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC2: nested_fit_resamples() on a spec and a recipe is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC2: nested_tune_grid() on a spec and a recipe is the workflow run",4,0,FALSE,FALSE
+"test-model-spec-input.R","AC3: a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does",3,0,FALSE,FALSE
+"test-model-spec-input.R","AC4: a model specification with no preprocessor is refused by class",18,0,FALSE,FALSE
+"test-model-spec-input.R","AC4: a preprocessor beside a workflow is refused by class, by name or by position",54,0,FALSE,FALSE
+"test-model-spec-input.R","AC4: a preprocessor that is neither a formula nor a recipe is refused by class",66,0,FALSE,FALSE
+"test-model-spec-input.R","AC4: nested_final_fit() given a bare model specification names workflows::workflow()",4,0,FALSE,FALSE
+"test-model-spec-input.R","an object that is neither a workflow nor a model specification is refused",18,0,FALSE,FALSE
+"test-model-spec-input.R","each spec method passes every argument on to the workflow method",18,0,FALSE,FALSE
+"test-model-spec-input.R","the racers and the annealer refuse a missing finetune before judging the preprocessor",9,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a missing engine package is refused by the final fit",1,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a results object carrying no inner specification is refused",10,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a results object carrying no procedure is refused",8,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a results object in which no outer fold completed is refused",12,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a results object whose record holds no selection rule is refused (M69, AC2)",12,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a results object with the record and no rows is refused",5,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a run that recorded no metric set re-runs under tune's defaults",2,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","a run with one failed fold and one completed is fitted",2,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","an inner specification that cannot be re-evaluated names itself and the call",4,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","an inner specification that is not an rset is refused, naming the call",2,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","an object that is not a nested_results is refused",13,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","the all-failed refusal fires before anything is drawn",2,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","the former procedure arguments are refused as unknown",10,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","the record refusals fire before anything is drawn",2,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","the record refusals fire before the all-failed one",4,0,FALSE,FALSE
+"test-nested-final-fit-checks.R","the workflow checks are wired into the final fit",9,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","a survival fit's candidates carry no evaluation-time column",5,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","an object with no method is refused as such whatever rides in the dots",6,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","both accessors refuse an object they cannot answer for",7,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the candidate accessor holds up past nine candidates",3,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the candidate accessor reports the candidates that scored",5,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the final fit answers the extractors as its workflow does",10,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the refusals read the same for both accessors",1,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the tuning-run accessor returns the stored run, unreduced",4,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","the workflow extractors refuse a stray argument",7,0,FALSE,FALSE
+"test-nested-final-fit-extract.R","what the accessors return agrees with what the loop records",3,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC1: a record built with a tailor refuses one differing in presence, type, argument or order",39,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC1: a record built with case weights refuses another column, or none",18,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC1: each row of a nested_results_set records its own workflow",4,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC1: every orchestrator's result records the workflow it ran under",19,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC1: the final fit's record carries the same entry, and the fit runs",4,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC2: a record saved before the two parts existed is accepted under its workflow",7,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC2: a setting written with braces is refused with the mismatch class",7,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC2: the identity check runs after the record, grid and marker checks",4,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC2: the model axes are refused on the three records",45,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC2: the preprocessor axes are refused on the three records",46,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC3: a rebuilt workflow is accepted and gives the same fit",16,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC4: a record with no workflow entry is refused before the identity check",10,0,FALSE,FALSE
+"test-nested-final-fit-identity.R","AC4: the final fit on a set with an id still fits",2,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","a single-candidate grid degenerates to a direct fit",2,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","at iter = 0 the Bayesian final fit is the grid final fit on the space-filling grid",11,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the Bayesian final fit matches a hand-rolled reference pipeline",6,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the Bayesian final fit matches tune::fit_best() on the reference run",3,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the final fit matches a hand-rolled reference pipeline",4,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the final fit matches tune::fit_best() on the same tuning run",1,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the final fit re-runs under the recorded control (M48, AC4)",8,0,FALSE,FALSE
+"test-nested-final-fit-oracles.R","the procedure records the effective control on both tuners (M48, AC4)",9,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC1: predict() on the censored fit is the workflow's prediction",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC1: predict() on the classification fit is the workflow's prediction",4,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC1: predict() on the regression fit is the workflow's prediction",3,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC2: augment() on the censored fit is the workflow's augmentation",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC2: augment() on the classification fit is the workflow's augmentation",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC2: augment() on the regression fit is the workflow's augmentation",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC3: augment() refuses an argument it does not know",3,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC3: predict() forwards an unknown argument to parsnip's refusal",3,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC3: predict() without `new_data` raises the workflow's own error",4,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC4: augment is re-exported, so the call works with tune unattached",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC6: tune's ranking and collecting generics still refuse the object",8,0,FALSE,FALSE
+"test-nested-final-fit-print.R","a grid final fit carries the Bayesian counts as NULL and names its search",11,0,FALSE,FALSE
+"test-nested-final-fit-print.R","a summary with nothing to report drops the lines it cannot fill",4,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC2: summary() returns a classed object naming what was selected",12,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC2: the summary's `select` component is the procedure record's rule",7,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: a rule ordering by two names is rendered with both on both prints",6,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: both prints name a non-default rule, after `Selected:` and under the heading",6,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: the default rule and a fit that tuned nothing print no `Selected by:` line",6,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: the selection-rule line holds its shape on both prints",6,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: the summary shows no number from the stored tuning run",49,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC3: the two-ordering line holds its shape on both prints",2,0,FALSE,FALSE
+"test-nested-final-fit-print.R","AC5: a Bayesian final fit names its procedure with the counts that ran",13,0,FALSE,FALSE
+"test-nested-final-fit-print.R","printing a fit built from a set and one built from a workflow names the set's rows on both",12,0,FALSE,FALSE
+"test-nested-final-fit-print.R","printing a grid final fit is the hand-agreed text, not the snapshot",1,0,FALSE,FALSE
+"test-nested-final-fit-print.R","printing names the selection and where the estimate lives",7,0,FALSE,FALSE
+"test-nested-final-fit-print.R","printing shows no number from the stored tuning run",49,0,FALSE,FALSE
+"test-nested-final-fit-print.R","the Bayesian printed reports are stable",2,0,FALSE,FALSE
+"test-nested-final-fit-print.R","the counts read what ran, not what was asked for",10,0,FALSE,FALSE
+"test-nested-final-fit-print.R","the printed report is stable",1,0,FALSE,FALSE
+"test-nested-final-fit-print.R","the stored selection keeps the value's own precision",4,0,FALSE,FALSE
+"test-nested-final-fit-print.R","the summary report is stable",1,0,FALSE,FALSE
+"test-nested-final-fit-print.R","tune's ranking generics have no method for a final fit",5,0,FALSE,FALSE
+"test-nested-final-fit-race.R","a workflow other than the one the race was built around is refused on the recorded grid",2,0,FALSE,FALSE
+"test-nested-final-fit-race.R","print() and summary() name the racing method with the count scored (AC6)",14,0,FALSE,FALSE
+"test-nested-final-fit-race.R","the final fit's candidates are every candidate its race scored (AC6, D-043)",12,0,FALSE,FALSE
+"test-nested-final-fit-race.R","the racing final fit matches a hand-rolled reference pipeline (AC6)",16,0,FALSE,FALSE
+"test-nested-final-fit-race.R","the racing final fit's tuning run answers tune's collect_metrics() with both scopes",3,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","a marked workflow is refused by the final fit on such a record, before fitting",3,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","AC4: the final fit fits the workflow on every row with no tuning run",9,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","AC4: the print names the procedure as no tuning and the selection as nothing",14,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","AC4: the procedure record names the tuner and carries no grid, param_info or select",8,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","AC4: the two extractors refuse a fit that ran no tuning",5,0,FALSE,FALSE
+"test-nested-final-fit-resamples.R","the caller's RNG state is restored, and the same seed gives the same fit",4,0,FALSE,FALSE
+"test-nested-final-fit-results.R","AC2: the final fit selects by the recorded rule, and records it (M69)",13,0,FALSE,FALSE
+"test-nested-final-fit-results.R","AC3: the final fit selects by a recorded desirability rule (M109)",3,0,FALSE,FALSE
+"test-nested-final-fit-results.R","the final fit returns a trained workflow inside its own object",14,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","a different seed produces a different final fit",2,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","a session with no RNG state is left with a valid one",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","a session with no RNG state is left with a valid one by a Bayesian final fit",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","AC4: the final fit reads nothing from the fold rows but splits and .completed",7,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the Bayesian fit does not depend on the ambient RNG state or kind",5,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the caller's RNG state and kind survive a Bayesian final fit",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the caller's RNG state and kind survive the call untouched",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the fit does not depend on the ambient RNG state or kind",4,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the kind is restored on the error path from a non-default kind",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the RNG state and kind are restored when a Bayesian final fit errors",6,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the RNG state is restored when the call errors after the snapshot",3,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the same seed produces the same Bayesian final fit, a different seed a different one",6,0,FALSE,FALSE
+"test-nested-final-fit-rng.R","the same seed produces the same final fit",4,0,FALSE,FALSE
+"test-nested-final-fit-set.R","AC4: a fit by id is the fit of the extracted workflow with its own results",14,0,FALSE,FALSE
+"test-nested-final-fit-set.R","AC4: a set with results, a set with no id, and a workflow with an id are refused",7,0,FALSE,FALSE
+"test-nested-final-fit-set.R","AC4: an id naming no row is refused",4,0,FALSE,FALSE
+"test-nested-final-fit-sim-anneal.R","finetune must be installed to re-run an annealing result",1,0,FALSE,FALSE
+"test-nested-final-fit-sim-anneal.R","print() and summary() name simulated annealing with the counts that ran (AC5)",12,0,FALSE,FALSE
+"test-nested-final-fit-sim-anneal.R","the annealing final fit matches a hand-rolled reference pipeline (AC5)",10,0,FALSE,FALSE
+"test-nested-final-fit-sim-anneal.R","the final fit's candidates carry the iteration each came from (AC5, D-043)",4,0,FALSE,FALSE
+"test-nested-fit-resamples-checks.R","AC5: a workflow tuning two parameters is refused naming both",4,0,FALSE,FALSE
+"test-nested-fit-resamples-checks.R","AC5: a workflow with a tune() marker is refused, naming the tuning orchestrators, before any fold runs",9,0,FALSE,FALSE
+"test-nested-fit-resamples-checks.R","the refusals fire before the RNG is drawn from",4,0,FALSE,FALSE
+"test-nested-fit-resamples-checks.R","the shared entry checks fire, in the shared shapes",13,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC1: every fold's metrics are identical to a by-hand fit, predict and score",6,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC1: every fold's metrics are identical to fit_resamples() on the same outer splits",14,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC2: `.predictions` and `.extracts` are present exactly when the control asked",16,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC2: a fold whose fit raises is recorded as failed with a note at the outer fit",13,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC2: the record has the five orchestrators' columns, with nothing selected and no inner rows",21,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","AC2: the two seeds are the documented draw, shared with a tuned run under the same session seed",4,0,FALSE,FALSE
+"test-nested-fit-resamples-oracles.R","O3: the outer estimate's mean squared error for the majority rule is nachum2026's closed form",57,0,FALSE,FALSE
+"test-nested-fit-resamples-readers.R","AC3: the outer fit's predictions and extracts stack when they were kept",8,0,FALSE,FALSE
+"test-nested-fit-resamples-readers.R","AC3: the performance view draws and the parameters view refuses by name",6,0,FALSE,FALSE
+"test-nested-fit-resamples-readers.R","AC3: the readers over the inner stage return zero rows",9,0,FALSE,FALSE
+"test-nested-fit-resamples-readers.R","AC3: the readers over the outer fits answer without a condition",17,0,FALSE,FALSE
+"test-nested-fit-resamples-rng.R","a fold's result does not depend on the ambient RNG state or kind",5,0,FALSE,FALSE
+"test-nested-fit-resamples-rng.R","AC6: the same seed gives identical results across two direct calls",4,0,FALSE,FALSE
+"test-nested-fit-resamples-rng.R","the caller's RNG state and kind survive the call untouched",2,0,FALSE,FALSE
+"test-nested-resamples-identity.R","a repeated inner spec keeps its id2 column",23,0,FALSE,FALSE
+"test-nested-resamples-identity.R","an already-evaluated outer rset is accepted and matches",40,0,FALSE,FALSE
+"test-nested-resamples-identity.R","inner rsets keep the class, id columns and attributes of their spec",18,0,FALSE,FALSE
+"test-nested-resamples-identity.R","inner splits match rsample::nested_cv() for a repeated outer scheme",44,0,FALSE,FALSE
+"test-nested-resamples-identity.R","inner splits match rsample::nested_cv() for a v-fold/bootstrap scheme",46,0,FALSE,FALSE
+"test-nested-resamples-identity.R","inner splits match rsample::nested_cv() for a v-fold/v-fold scheme",40,0,FALSE,FALSE
+"test-nested-resamples-identity.R","retrieved frames are identical to rsample's down to their attributes",3,0,FALSE,FALSE
+"test-nested-resamples-identity.R","the inner fingerprint is recomputed, not carried over from rsample",2,0,FALSE,FALSE
+"test-nested-resamples-identity.R","the object is a drop-in: class and spec attributes match rsample's",5,0,FALSE,FALSE
+"test-nested-resamples-memory.R","measured size matches the analytic prediction within 2%",1,0,FALSE,FALSE
+"test-nested-resamples-memory.R","rsample's own size does NOT match the lean analytic model",1,0,FALSE,FALSE
+"test-nested-resamples-memory.R","the size slope is far shallower than rsample::nested_cv()'s",5,0,FALSE,FALSE
+"test-nested-resamples-regressions.R","a prebuilt `outside` rset built on other data is refused (IP1)",3,0,FALSE,FALSE
+"test-nested-resamples-regressions.R","inner rsplit objects match rsample's in class and structure",44,0,FALSE,FALSE
+"test-nested-resamples-regressions.R","inner splits carry resample ids that tidymodels can attach",2,0,FALSE,FALSE
+"test-nested-resamples-regressions.R","no inner analysis row ever comes from the outer assessment set (IP1)",24,0,FALSE,FALSE
+"test-nested-resamples-rng.R","a different seed produces different splits",1,0,FALSE,FALSE
+"test-nested-resamples-rng.R","indices land on the original data, not on a per-fold renumbering",36,0,FALSE,FALSE
+"test-nested-resamples-rng.R","no analysis frame is retained -- every split shares the caller's data",12,0,FALSE,FALSE
+"test-nested-resamples-rng.R","the same amount of randomness is consumed as rsample::nested_cv()",1,0,FALSE,FALSE
+"test-nested-resamples-rng.R","the same seed produces the same object",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","`data` must be a data frame",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","`inside` must be an expression, not an existing object",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","`outside` must be a spec or an rset",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a failing spec reports a message that does not carry the data",4,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a grouped inner spec keeps groups whole within each inner split",12,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a grouped inner spec matches rsample::nested_cv()",32,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a single-row data frame is refused by the underlying spec",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a stratified inner spec matches rsample::nested_cv()",32,0,FALSE,FALSE
+"test-nested-resamples-specs.R","a zero-row data frame is refused by the underlying spec",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","an `inside` spec that does not produce an rset is refused",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","an outer bootstrap is refused, as a call and as an object",2,0,FALSE,FALSE
+"test-nested-resamples-specs.R","character and factor stratification behave the same",1,0,FALSE,FALSE
+"test-nested-resamples-specs.R","rows carrying NA are resampled, not dropped",33,0,FALSE,FALSE
+"test-nested-resamples-specs.R","stratified and grouped outer specs match rsample::nested_cv()",80,0,FALSE,FALSE
+"test-nested-resamples-specs.R","the `inside` guard covers every outer fold, not just the first",2,0,FALSE,FALSE
+"test-nested-resamples-specs.R","the refusal names the user's call, not an internal one",1,0,FALSE,FALSE
+"test-nested-results-agreement.R","a fold that recorded no value is its own row, under NA",4,0,FALSE,FALSE
+"test-nested-results-agreement.R","a fold that selected NA is counted as a value",3,0,FALSE,FALSE
+"test-nested-results-agreement.R","a partial run is tabulated over the folds that completed, with a warning",6,0,FALSE,FALSE
+"test-nested-results-agreement.R","a partial run with nothing tuned still warns, then gives no rows",5,0,FALSE,FALSE
+"test-nested-results-agreement.R","a run where every fold failed is refused the way collect_metrics() refuses",6,0,FALSE,FALSE
+"test-nested-results-agreement.R","a run with nothing tuned is a table with no rows and no warning",4,0,FALSE,FALSE
+"test-nested-results-agreement.R","a unanimous run is one row counting every completed fold",8,0,FALSE,FALSE
+"test-nested-results-agreement.R","AC5: a parameter whose id is wflow_id, n or prop is refused naming the workflow",12,0,FALSE,FALSE
+"test-nested-results-agreement.R","AC5: a set's partial and all-failed workflows are warned and refused as the readers warn and refuse",16,0,FALSE,FALSE
+"test-nested-results-agreement.R","AC5: agreement() on a set stacks each element's table under wflow_id, parameters before the counts",10,0,FALSE,FALSE
+"test-nested-results-agreement.R","agreement() refuses objects that are not nested results, naming both",22,0,FALSE,FALSE
+"test-nested-results-agreement.R","folds that disagree are counted per combination, most frequent first",6,0,FALSE,FALSE
+"test-nested-results-agreement.R","tune's .config label neither splits a row nor becomes a column",3,0,FALSE,FALSE
+"test-nested-results-agreement.R","two folds agree only when every selected parameter agrees",10,0,FALSE,FALSE
+"test-nested-results-plot.R","a censored run at several evaluation times plots",2,0,FALSE,FALSE
+"test-nested-results-plot.R","a completed fold with no value for a parameter is not imputed",2,0,FALSE,FALSE
+"test-nested-results-plot.R","a design with no tuned parameters points at the other view",3,0,FALSE,FALSE
+"test-nested-results-plot.R","a failed fold keeps its place on the axis and draws no point",2,0,FALSE,FALSE
+"test-nested-results-plot.R","a failed fold keeps its slot and contributes no score",4,0,FALSE,FALSE
+"test-nested-results-plot.R","a fold scoring NA on one metric still scores the others",3,0,FALSE,FALSE
+"test-nested-results-plot.R","a metric measured at several evaluation times gets a panel per time",6,0,FALSE,FALSE
+"test-nested-results-plot.R","a metric no completed fold scored is counted, draws no rule, and reports no average",7,0,FALSE,FALSE
+"test-nested-results-plot.R","a metric no fold could score keeps its panel",4,0,FALSE,FALSE
+"test-nested-results-plot.R","a non-numeric selection is drawn on a discrete axis",3,0,FALSE,FALSE
+"test-nested-results-plot.R","a panel says so when fewer folds contributed to it than completed",4,0,FALSE,FALSE
+"test-nested-results-plot.R","a run where no fold completed is refused, in plotting's own words",7,0,FALSE,FALSE
+"test-nested-results-plot.R","a set every completed fold of which scored carries neither shortfall sentence",5,0,FALSE,FALSE
+"test-nested-results-plot.R","a set with both a failed fold and a short average carries both sentences with their own counts",5,0,FALSE,FALSE
+"test-nested-results-plot.R","a whole-number parameter is not given fractional breaks",2,0,FALSE,FALSE
+"test-nested-results-plot.R","AC2: an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it",10,0,FALSE,FALSE
+"test-nested-results-plot.R","AC2: the set's performance view puts the workflows on x inside one panel per metric",36,0,FALSE,FALSE
+"test-nested-results-plot.R","AC3: a set in which no workflow tuned a parameter is refused, pointing at the other view",6,0,FALSE,FALSE
+"test-nested-results-plot.R","AC3: the set's parameters view is one panel per workflow and tuned parameter, each the single view's points",18,0,FALSE,FALSE
+"test-nested-results-plot.R","AC4: an all-failed workflow contributes no point to either view, and a set with none completed is refused",17,0,FALSE,FALSE
+"test-nested-results-plot.R","AC4: both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot",33,0,FALSE,FALSE
+"test-nested-results-plot.R","AC4: the set's autoplot() refuses a type outside the two, and fences its dots first",6,0,FALSE,FALSE
+"test-nested-results-plot.R","an unrecognized type is refused by name",5,0,FALSE,FALSE
+"test-nested-results-plot.R","both set views look the way they read",4,0,FALSE,FALSE
+"test-nested-results-plot.R","both views look the way they read",4,0,FALSE,FALSE
+"test-nested-results-plot.R","each panel decides its own breaks",6,0,FALSE,FALSE
+"test-nested-results-plot.R","folds that disagree are drawn at their own values, keyed by fold",2,0,FALSE,FALSE
+"test-nested-results-plot.R","one short metric in two workflows reports a larger count than in one",3,0,FALSE,FALSE
+"test-nested-results-plot.R","the censored set's panels and rules agree with the single view and with collect_metrics()",23,0,FALSE,FALSE
+"test-nested-results-plot.R","the censored set's performance view draws one panel per metric-and-time key",6,0,FALSE,FALSE
+"test-nested-results-plot.R","the marked estimate is the number collect_metrics reports",2,0,FALSE,FALSE
+"test-nested-results-plot.R","the mixed censored set draws a character and a numeric parameter on discrete axes",8,0,FALSE,FALSE
+"test-nested-results-plot.R","the parameters view draws one point per completed fold",4,0,FALSE,FALSE
+"test-nested-results-plot.R","the parameters view is the default and both views are ggplots",3,0,FALSE,FALSE
+"test-nested-results-plot.R","the parameters view states how much of the design ran",2,0,FALSE,FALSE
+"test-nested-results-plot.R","the performance view draws one point per fold and metric",3,0,FALSE,FALSE
+"test-nested-results-plot.R","the performance view names the estimate as the final fit's number to report",7,0,FALSE,FALSE
+"test-nested-results-plot.R","the set's subtitle counts one workflow whose metric averaged fewer folds than it completed",4,0,FALSE,FALSE
+"test-nested-results-plot.R","two estimators for one metric get a panel each",3,0,FALSE,FALSE
+"test-nested-results-plot.R","two short metrics in one workflow report the count one short metric does",3,0,FALSE,FALSE
+"test-nested-results-print.R","a failed fold is named along with the stage it failed at",5,0,FALSE,FALSE
+"test-nested-results-print.R","a fold that selected NA is a value, not an absent one",1,0,FALSE,FALSE
+"test-nested-results-print.R","a list-valued selection prints instead of aborting",2,0,FALSE,FALSE
+"test-nested-results-print.R","a parameter only some folds chose is not reported as disagreement",3,0,FALSE,FALSE
+"test-nested-results-print.R","a single completed fold reads in the singular",1,0,FALSE,FALSE
+"test-nested-results-print.R","a subset missing the per-fold record prints as a plain tibble",3,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: a desirability goal too long for `rlang::as_label()` is named in full",3,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: a rule ordering by two names is rendered with both, as written",3,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: summary() on a set is one element summary per workflow, named and in set order",17,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: summary() on a set warns once per workflow with a failed fold, the id in front, and never aborts",28,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the default rule and a run that applied none print no `Selected by:` line",4,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the selection-rule line holds its shape",6,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the set's print is one h1, one h2 per workflow in set order, and the note once",20,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the set's printed summary holds its shape",2,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the set's summary and its print fence their dots",2,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the summary names a non-default rule directly under the selected-parameters heading",14,0,FALSE,FALSE
+"test-nested-results-print.R","AC1: the two-ordering line holds its shape",1,0,FALSE,FALSE
+"test-nested-results-print.R","AC2: the summary's `select` component is the procedure record's rule",8,0,FALSE,FALSE
+"test-nested-results-print.R","AC4: a set names the rule inside each tuned workflow's section and not the fixed one's",8,0,FALSE,FALSE
+"test-nested-results-print.R","AC4: the set's selection-rule line holds its shape",2,0,FALSE,FALSE
+"test-nested-results-print.R","an outer scheme the object does not name is left unprinted",3,0,FALSE,FALSE
+"test-nested-results-print.R","an unusable label record names failed folds by row position",14,0,FALSE,FALSE
+"test-nested-results-print.R","folds that searched different candidate sets are said to have",7,0,FALSE,FALSE
+"test-nested-results-print.R","print returns its input invisibly and is registered for S3 dispatch",4,0,FALSE,FALSE
+"test-nested-results-print.R","print() still fences `...`, so a partial spelling is refused",7,0,FALSE,FALSE
+"test-nested-results-print.R","print() takes `n` and hands it to the row rendering",8,0,FALSE,FALSE
+"test-nested-results-print.R","print() takes `width` and hands it to the row rendering",2,0,FALSE,FALSE
+"test-nested-results-print.R","printed output holds its shape",10,0,FALSE,FALSE
+"test-nested-results-print.R","printing a partial run neither warns nor errors",3,0,FALSE,FALSE
+"test-nested-results-print.R","printing a run where nothing completed neither warns nor errors",5,0,FALSE,FALSE
+"test-nested-results-print.R","printing counts the folds that did not complete, and only then",4,0,FALSE,FALSE
+"test-nested-results-print.R","printing names the outer scheme and shows the object's own rows",8,0,FALSE,FALSE
+"test-nested-results-print.R","printing survives a list-valued parameter column (M21 review F1)",5,0,FALSE,FALSE
+"test-nested-results-print.R","printing the summary carries every section print() used to emit",10,0,FALSE,FALSE
+"test-nested-results-print.R","summarizing a set names each workflow's estimate as the number to report for its fit",4,0,FALSE,FALSE
+"test-nested-results-print.R","summarizing names the estimate as the number to report for the final fit",5,0,FALSE,FALSE
+"test-nested-results-print.R","summarizing reports the outer design and how much of it ran",3,0,FALSE,FALSE
+"test-nested-results-print.R","summarizing shows the estimate over the folds that contributed",4,0,FALSE,FALSE
+"test-nested-results-print.R","summary() and its print method reject arguments they do not take",2,0,FALSE,FALSE
+"test-nested-results-print.R","summary() of a run where every fold completed signals nothing",2,0,FALSE,FALSE
+"test-nested-results-print.R","summary() of a run where every fold failed reports it rather than aborting",7,0,FALSE,FALSE
+"test-nested-results-print.R","summary() returns a classed object carrying the run's numbers",7,0,FALSE,FALSE
+"test-nested-results-print.R","summary() warns on a partial run and still returns its object",3,0,FALSE,FALSE
+"test-nested-results-print.R","the candidate-set comparison ignores order and tune's config labels",3,0,FALSE,FALSE
+"test-nested-results-print.R","the failure advice names the results object's `.notes` column, never `x$`",10,0,FALSE,FALSE
+"test-nested-results-print.R","the tibble-body scrub keeps the header and every cli line",3,0,FALSE,FALSE
+"test-nested-results-print.R","unanimous selection is distinguished from disagreement",6,0,FALSE,FALSE
+"test-nested-results-set-compat.R","AC1: a bare result sheds the record with the class",4,0,FALSE,FALSE
+"test-nested-results-set-compat.R","AC1: a kept subset carries the operation's own rows, columns and order",6,0,FALSE,FALSE
+"test-nested-results-set-compat.R","AC1: every door keeps the class exactly when every row is one of the run's own",188,0,FALSE,FALSE
+"test-nested-results-set-compat.R","group_by(), rowwise() and as_tibble() return a non-set that still carries fn",9,0,FALSE,FALSE
+"test-nested-results-set-compat.R","the rule refuses a template that is not a set",5,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`...` accepts `control` and nothing else (M48, AC5)",16,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`control` must be what tune::control_bayes() returns (M48, AC5)",16,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`initial` must be a single whole number of at least 2",36,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`initial` refuses a tune_results, which tune would accept",7,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`iter` must be a single non-negative whole number",33,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`objective` must be an acquisition function",21,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","`select` is held at entry, before any fold runs (M69, AC4)",12,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","a control naming another event level is refused at entry (M48, AC3)",7,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","a refusal leaves the RNG where it found it",4,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)",12,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",4,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","each shared check fires through nested_tune_bayes()",49,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","every check the grid path makes, the Bayesian path makes too",3,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","every malformed design is refused at entry (M55)",250,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","the desirability rule is refused at entry on a censored regression model (M109)",5,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","the three acquisition functions tune offers are accepted",3,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","a control passed through `...` reaches every fold (M48, AC1)",18,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","AC2: the desirability rule picks what desirability2 picks on the fold's Bayesian run (M109)",6,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","at iter = 0 the Bayesian path is the grid path on the space-filling grid",29,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","every nested_results method in NAMESPACE runs on a Bayesian result",42,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","per-fold metrics and selections match a hand-rolled Bayesian reference loop",16,0,FALSE,FALSE
+"test-nested-tune-bayes-oracles.R","the Bayesian reference loop also matches with a stochastic engine",9,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a Bayesian fold that scored nothing carries a zero-row table with .iter",6,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a Bayesian run records its procedure and carries no grid attribute",15,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a Bayesian table's candidate set carries the iteration each candidate came from",4,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a grid run records its procedure, and its grid and metrics as before",9,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a grid table's candidate set carries no iteration",2,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a table describing no candidate yields an empty set",2,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","a table with no label keys its candidates on their values",2,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","forced slots win, and a control built inline draws nothing the caller can see (M48, AC3)",4,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","iterations past nine order by number, not by label",2,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","print() and summary() count the candidates a Bayesian fold scored",10,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","the procedure is part of the run's record",2,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","the procedure survives a row reorder and goes with the class",4,0,FALSE,FALSE
+"test-nested-tune-bayes-results.R","two folds that scored the same candidates in different iterations searched the same set",2,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","a different seed produces different numbers",2,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","fold results do not depend on the ambient RNG state or kind",2,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","fold results do not depend on the order folds are run in",9,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","the Gaussian-process seed is the fold's tuning seed, set inside its scope",3,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","the RNG state is restored when the call itself errors",3,0,FALSE,FALSE
+"test-nested-tune-bayes-rng.R","the same seed produces the same result",4,0,FALSE,FALSE
+"test-nested-tune-finalize.R","AC1: every tuner finalizes on the outer fold's analysis rows",22,0,FALSE,FALSE
+"test-nested-tune-finalize.R","AC2: every candidate a fold searched lies inside the range its analysis rows finalize",16,0,FALSE,FALSE
+"test-nested-tune-finalize.R","AC3: a nested_resamples() design and the nested_cv() design it matches tune identically",58,0,FALSE,FALSE
+"test-nested-tune-finalize.R","AC4: an inner rset the rebuild does not apply to reaches run_tuner() untouched",9,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`...` accepts `control` and nothing else (M48, AC5)",16,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`control` must be what tune::control_grid() returns (M48, AC5)",18,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`grid` must be candidates or a positive whole number",7,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`metrics` must be a metric set or NULL",2,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`object` must be an unfitted workflow",4,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`resamples` must be a nested resampling design",4,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`resamples` must name its outer folds",1,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","`select` must be a selection_rule(), refused before any fold runs (M69, AC4)",10,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a control naming another event level is refused at entry (M48, AC3)",7,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a grid column not marked for tuning is refused",2,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a grid given as a size is not held to the column check",1,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a non-rset element of inner_resamples is refused",7,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a non-rsplit element of splits is refused",6,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a tuned parameter with no grid column is refused",2,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a well-formed design passes the entry check unchanged (M55, AC5)",20,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a workflow carrying no model spec is refused by nestedtune",6,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","a workflow with a model but no preprocessor is refused",3,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)",13,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",4,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","an ordering naming a parameter the workflow does not tune is refused, naming both (M69, AC4)",6,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","an outer bootstrap is refused, not warned about",1,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","an outer in_id past the frame is left to last_fit(), not judged against an analysis set that cannot be built (M59)",3,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","an rsample design whose inside produced no rset is refused",1,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","case weights are not mistaken for a preprocessor",6,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","each refusal says which defect it found (M55, AC1-AC3)",42,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","every planted design is refused, naming every offender (M55, AC1-AC4)",493,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","nested_tune_grid() completes every fold of an rsample::nested_cv() design (M59, AC4)",4,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the checks fire before any fitting happens",2,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the control refusals fire before the RNG is drawn from (M48)",1,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the desirability rule is refused at entry on a censored regression model (M109)",5,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the grid check fires before any fitting happens",2,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the loop still accepts a design with no inner specification",3,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the new refusals fire before the RNG is drawn from",6,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the whole-object refusals carry the class too (M55, AC4)",8,0,FALSE,FALSE
+"test-nested-tune-grid-checks.R","the workflow's engine packages must be installed",1,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a candidate that fails on every inner resample is absent from the record",11,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a censored fold that scored nothing carries .eval_time under a dynamic metric only",21,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a completed fold carries an empty note table",2,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fake tuning run's method leaves with the block that made it",4,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold that completed on a truncated inner design keeps tune's notes",7,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold that failed at the outer fit keeps the grid its tuning scored",4,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold that fails at inner tuning does not abort the run",3,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold that fails at the outer fit does not abort the run",2,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold that scored nothing records an empty table, never NULL",8,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a fold's seeds do not move when an earlier fold fails (IP2)",4,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a regression fold that scored nothing carries no .eval_time for an eval_time it was given",7,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a results object holding no completed fold refuses to summarize",1,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","a row subset carries no record of the run at all",12,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","an engine parameter with no dials object is typed from the grid",16,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","an error raised by last_fit() is recorded against the outer fit",4,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","an error raised by tune_grid() itself is recorded, not propagated",12,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","an error while finalizing is this fold's failure, not the run's",3,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","bookkeeping the candidate record cannot abort a run",8,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","collect_metrics() aborts when no fold completed",5,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","collect_metrics() averages the completed folds and warns about the rest",4,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","dropping any of the per-fold columns sheds the results class",5,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","failure capture leaves a clean run exactly as M02 left it",5,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","the failing stage and its cause are recorded, tune's own notes included",7,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","the object records folds attempted and completed",2,0,FALSE,FALSE
+"test-nested-tune-grid-failures.R","the run itself warns when a fold fails, naming it",2,0,FALSE,FALSE
+"test-nested-tune-grid-leakage.R","each fold is handed its own inner resamples, in order",8,0,FALSE,FALSE
+"test-nested-tune-grid-leakage.R","no fold's assessment rows reach its inner tuning or its outer fit",45,0,FALSE,FALSE
+"test-nested-tune-grid-leakage.R","the results object keeps each fold's own split",4,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","a control passed through `...` reaches the inner tune_grid() (M48)",7,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","a grid size larger than the reachable candidates records what ran",7,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","a single-candidate grid degenerates to fit_resamples()",7,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","AC1: each selection rule picks what tune's selector picks on the fold's inner run (M69)",26,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","AC2: the desirability rule picks what desirability2 picks on the fold's inner run (M109)",6,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","an integer grid records the candidates that fold actually expanded",7,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","per-fold metrics and selections match a hand-rolled reference loop",8,0,FALSE,FALSE
+"test-nested-tune-grid-oracles.R","the reference loop also matches with a stochastic engine",8,0,FALSE,FALSE
+"test-nested-tune-grid-results.R",".predictions and .extracts are record columns through the five doors (AC5)",20,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a failed fold's .extracts element is NULL, with no extract note (AC2)",5,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a failed fold's .predictions element is NULL (AC1)",4,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a fold scoring NA is dropped from the summary rather than poisoning it",5,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a metric that is NA in every fold summarizes to NA with n = 0",3,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a run carrying neither column keeps its class through the same verbs (AC5)",6,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a run given no metric set carries no metrics attribute",2,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","a single outer fold gives an NA standard error rather than an error",2,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","an extract that errors leaves the fold completed, its element NULL, and one note (AC2)",24,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","collect_metrics() summarizes across outer folds",7,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","collect_metrics(summarize = FALSE) returns one row per fold and metric",3,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","each fold records the candidates its inner tuning actually scored",24,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s (AC2)",14,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","extract = NULL leaves no .extracts column (AC2)",4,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","metrics = NULL falls back to tune's defaults",1,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)",12,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the default control and save_pred = FALSE leave no .predictions column (AC1)",3,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the evaluated-candidate record travels with the rows it describes",2,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the object carries the grid and metrics it was asked to run",9,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the object records the design's inner specification (M46)",7,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the results object is not a tune_results, so tune's selectors refuse it",3,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the results object retains one row per outer fold with its selection",14,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","a different seed produces different numbers",2,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","a session with no RNG state is left with a valid one",3,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","fold results do not depend on the ambient RNG state or kind",2,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","fold results do not depend on the order folds are run in",6,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","the caller's RNG state and kind survive the call untouched",3,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","the RNG state is restored when folds fail but the run completes",3,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","the RNG state is restored when the call itself errors",3,0,FALSE,FALSE
+"test-nested-tune-grid-rng.R","the same seed produces the same result",3,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","`control` must be what finetune::control_race() returns",40,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","`select` is held at entry by both racers, before any fold runs (M69, AC4)",28,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","a control naming another event level is refused at entry",10,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","a refusal leaves the RNG where it found it",7,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","AC4: both racers refuse the desirability rule at entry (M109)",12,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","AC5: a workflow with no tune() marker is refused by both racers, naming nested_fit_resamples(), before any fold runs (M70)",8,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","an inner design not larger than the burn-in is refused at entry",34,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","each race's own model-fitting package must be installed",10,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","each shared check fires through both racing exports",114,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","every check the grid path makes, the racing path makes too",3,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","every malformed design is refused at entry, by both racers (M55)",499,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","finetune must be installed, for both racers",12,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","the final fit on a racing result asks for the race's packages first",12,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","the install hint is one pasteable call, for one package or several",6,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","a candidate raced to the end carries the grid path's mean (AC2)",81,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","a race fold that scored nothing carries a zero-row table with no .iter",12,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","AC1: each selection rule picks what tune's selector picks on the fold's race, for both racers (M69)",82,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (AC1, deterministic)",26,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","the fold record is every candidate the race scored, and the selection a survivor (AC3)",62,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)",4,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","the racing exports carry nested_tune_grid()'s formals, defaults and order (AC1)",5,0,FALSE,FALSE
+"test-nested-tune-race-oracles.R","the racing reference loop also matches on the metric-separating fixture (AC1)",26,0,FALSE,FALSE
+"test-nested-tune-race-rng.R","a different seed produces different inner tables",6,0,FALSE,FALSE
+"test-nested-tune-race-rng.R","the RNG state is restored when the call itself errors",6,0,FALSE,FALSE
+"test-nested-tune-race-rng.R","the same seed produces the same result",10,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`...` accepts `control` and nothing else",12,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`control` must be what finetune::control_sim_anneal() returns",30,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`initial` must be a single whole number of at least 1",51,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`initial` refuses a tune_results, which finetune would accept",8,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`iter` must be a single whole number of at least 1",52,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","`select` is held at entry, before any fold runs (M69, AC4)",14,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","a control naming another event level is refused at entry",7,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","a refusal leaves the RNG where it found it",4,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","AC4: the desirability rule is refused at entry (M109)",6,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",4,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","each shared check fires through nested_tune_sim_anneal()",57,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","every check the Bayesian path makes, the annealing path makes too",4,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","every malformed design is refused at entry (M55)",250,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","finetune must be installed",7,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","finetune still iterates at iter = 0, the fact iter's floor of 1 rests on",1,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","a fold that scored nothing carries .iter on its zero-row table (AC1)",6,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1 (AC1)",4,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","per-fold metrics, selections and inner tables match a hand-rolled annealing reference loop (AC1, deterministic)",38,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","the annealing reference loop also matches on the metric-separating fixture (AC1)",35,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)",2,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-oracles.R","the initial candidates are the grid path's under the same seed (AC2)",44,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-rng.R","a different seed produces different inner tables",3,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-rng.R","the RNG state is restored when the call itself errors",3,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-rng.R","the same seed produces the same result",5,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","a re-signalled condition with no message text gets the prefix as its message",5,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC4: a re-signalled condition keeps the original's class, parent, body, footer, format flag and data fields",73,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC4: a re-signalled warning is muffled at the source and a warning of another class passes untouched",4,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: a marked workflow under the plain resampling orchestrator is refused naming its wflow_id",6,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: a name in `...` the named orchestrator does not take is refused",26,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: a workflow check_workflow() refuses is refused naming its wflow_id",6,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: an object that is not a workflow_set is refused",10,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: an option entry the routed orchestrator does not take is refused, naming the workflow",22,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: every workflow's packages are checked at entry",6,0,FALSE,FALSE
+"test-nested-workflow-map-checks.R","AC5: fn must name one of the six orchestrators",19,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: a control in `...` reaches the tuned workflows and an option control reaches the fixed one",4,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: a per-workflow grid option overrides the grid in `...` for that workflow alone",7,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: a warning raised inside one workflow names it and keeps its class",10,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: an error one workflow's orchestrator raises names the workflow",3,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_fit_resamples)",14,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_tune_bayes)",14,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_tune_grid)",14,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_tune_race_anova)",14,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_tune_race_win_loss)",14,0,FALSE,FALSE
+"test-nested-workflow-map-oracles.R","AC1: each element is identical to the hand call (fn = nested_tune_sim_anneal)",14,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: a subset dropping the failed workflow reads the completed one as the whole set does, warning of nothing",20,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: a subset holding only workflows in which no fold completed is refused as the whole set is",24,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: every reader on a row subset gives the whole set's rows for the workflows kept, in the subset's order",103,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: extract_workflow() and nested_final_fit() answer for a kept id and refuse a dropped one",10,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: summary() of a row subset is the whole set's summary restricted to its ids, fn kept",16,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC2: the two column readers answer on a subset of the set that kept their columns",62,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: a set in which no workflow completed a fold is refused, and collect_notes() still answers",20,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it",31,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: a workflow that only partly completed raises the reader's partial warning once, naming it",54,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: a workflow that would contribute rows but did not keep the column is refused naming it, after the all-failed refusal",19,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: an element's table carrying a wflow_id column is refused",3,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: every reader's table is bind_rows() of the elements' tables under wflow_id, in set order",27,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged",13,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC4: extract_workflow() returns the element's workflow and refuses an unknown id",10,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC4: print names the orchestrator, the workflow count and each workflow's fold counts",9,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC4: rank_results() and fit_best() raise on the set rather than answering",2,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","augment() on a set keeps nestedtune_augment_predictions for a workflow whose saved predictions miss a held-out row, naming it",5,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","compute_metrics() and augment() on a set are bind_rows() of each workflow's call under wflow_id",11,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","compute_metrics() and augment() on a set refuse a non-empty `...`",2,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","compute_metrics() on a set keeps nestedtune_compute_metrics_predictions for a workflow whose saved predictions miss a held-out row, naming it",5,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","compute_metrics() on a set scores each workflow at the event_level passed, or at its own recorded level when NULL",5,0,FALSE,FALSE
+"test-nested-workflow-map-rng.R","AC2: a session that never drew is left with no RNG state",6,0,FALSE,FALSE
+"test-nested-workflow-map-rng.R","AC2: an error partway through the set still restores the caller's state",2,0,FALSE,FALSE
+"test-nested-workflow-map-rng.R","AC2: the caller's RNG state and kind survive the call untouched",2,0,FALSE,FALSE
+"test-nested-workflow-map-rng.R","AC2: the same seed gives identical sets across two direct calls, and a different seed does not",5,0,FALSE,FALSE
+"test-parallel-classify.R","a bad bound is refused before any daemon is asked",1,0,FALSE,FALSE
+"test-parallel-classify.R","a bound that is not a single positive finite number is refused",6,0,FALSE,FALSE
+"test-parallel-classify.R","a cancelled run is caught by a handler for any stopped run",1,0,FALSE,FALSE
+"test-parallel-classify.R","a cancelled task aborts instead of being recorded as a failed fold",2,0,FALSE,FALSE
+"test-parallel-classify.R","a connected daemon that cannot answer in time is bounded",4,0,FALSE,FALSE
+"test-parallel-classify.R","a daemon answering something other than a report counts as silent",2,0,FALSE,FALSE
+"test-parallel-classify.R","a daemon that cannot load the package still reports the packages it lacks",3,0,FALSE,FALSE
+"test-parallel-classify.R","a daemon that loads but lacks a symbol is incompatible, not ok",5,0,FALSE,FALSE
+"test-parallel-classify.R","a daemon that loads the package but lacks a needed one is missing_pkgs",7,0,FALSE,FALSE
+"test-parallel-classify.R","a fold record missing the evaluated-candidate set is not a fold record",13,0,FALSE,FALSE
+"test-parallel-classify.R","a load failure keeps the install and prime remedies",3,0,FALSE,FALSE
+"test-parallel-classify.R","a miraiError becomes a recorded worker failure, not an abort",5,0,FALSE,FALSE
+"test-parallel-classify.R","a miraiError is never read as a capability report",4,0,FALSE,FALSE
+"test-parallel-classify.R","a missing package beside a daemon that cannot load is named by the load abort",6,0,FALSE,FALSE
+"test-parallel-classify.R","a missing package beside a silent daemon is named by the package abort",4,0,FALSE,FALSE
+"test-parallel-classify.R","a missing package beside an incompatible build is named by the package abort",4,0,FALSE,FALSE
+"test-parallel-classify.R","a package this session has no copy of yields no symbol expectation",4,0,FALSE,FALSE
+"test-parallel-classify.R","a pool failing both ways names both facts",6,0,FALSE,FALSE
+"test-parallel-classify.R","a pool that cannot load AND holds an old build names both fixes",11,0,FALSE,FALSE
+"test-parallel-classify.R","a pool where every daemon loaded passes",3,0,FALSE,FALSE
+"test-parallel-classify.R","a pool with no daemon at all is a non-response, not a load failure",4,0,FALSE,FALSE
+"test-parallel-classify.R","a probe that reached no daemon at all is not a pass",3,0,FALSE,FALSE
+"test-parallel-classify.R","a raised bound is reported as a number, not in scientific notation",3,0,FALSE,FALSE
+"test-parallel-classify.R","a real interrupt is an interrupt, not a cancellation",2,0,FALSE,FALSE
+"test-parallel-classify.R","a report is rejected unless every field has the right shape",11,0,FALSE,FALSE
+"test-parallel-classify.R","a timeout is not reported as a package that cannot be loaded",7,0,FALSE,FALSE
+"test-parallel-classify.R","a well-formed fold record passes through untouched",2,0,FALSE,FALSE
+"test-parallel-classify.R","a worker whose message is the cancel code is not a cancellation",2,0,FALSE,FALSE
+"test-parallel-classify.R","an errorValue from a dead daemon is recorded without calling conditionMessage()",5,0,FALSE,FALSE
+"test-parallel-classify.R","an incompatible daemon outranks one that never answered",3,0,FALSE,FALSE
+"test-parallel-classify.R","an incompatible pool answers to the shared unusable class",1,0,FALSE,FALSE
+"test-parallel-classify.R","an incompatible pool still reports daemons that said nothing",2,0,FALSE,FALSE
+"test-parallel-classify.R","an infinite bound is refused, because it is not a bound",1,0,FALSE,FALSE
+"test-parallel-classify.R","an unset option yields the documented 30 seconds",1,0,FALSE,FALSE
+"test-parallel-classify.R","anything else that is not a fold record is recorded as a worker failure",10,0,FALSE,FALSE
+"test-parallel-classify.R","both causes answer to one shared class",2,0,FALSE,FALSE
+"test-parallel-classify.R","dispatch accepts daemons primed with the package",1,0,FALSE,FALSE
+"test-parallel-classify.R","every outcome the ladder can produce is reachable and distinct",1,0,FALSE,FALSE
+"test-parallel-classify.R","every parallel driver refuses a pool that lacks a needed package before any fold is dispatched",110,0,FALSE,FALSE
+"test-parallel-classify.R","one loadable daemon no longer passes the check for the whole pool",5,0,FALSE,FALSE
+"test-parallel-classify.R","the abort names the package actually probed",2,0,FALSE,FALSE
+"test-parallel-classify.R","the ambiguous teardown value stays a recorded fold failure",2,0,FALSE,FALSE
+"test-parallel-classify.R","the both-fault bullet counts and pluralises on the affected daemons",3,0,FALSE,FALSE
+"test-parallel-classify.R","the dispatch hands the probe the list the helper builds",8,0,FALSE,FALSE
+"test-parallel-classify.R","the incompatible abort names the symbols, the count, and the restart",5,0,FALSE,FALSE
+"test-parallel-classify.R","the incompatible abort renders at one symbol, two, five, and a mixed pool",1,0,FALSE,FALSE
+"test-parallel-classify.R","the ladder orders every outcome, and the package rung sits between load and build",5,0,FALSE,FALSE
+"test-parallel-classify.R","the list the probe is sent is the workflow's packages and the tuner's",6,0,FALSE,FALSE
+"test-parallel-classify.R","the missing packages are the union across the pool, and the count is of daemons",2,0,FALSE,FALSE
+"test-parallel-classify.R","the missing symbols are the union across the pool",2,0,FALSE,FALSE
+"test-parallel-classify.R","the missing-package abort names the count, the packages, and the install-then-restart remedy",10,0,FALSE,FALSE
+"test-parallel-classify.R","the option raises and lowers the bound",2,0,FALSE,FALSE
+"test-parallel-classify.R","the option, not an argument, is what carries the bound",1,0,FALSE,FALSE
+"test-parallel-classify.R","the package abort pluralises on the daemon count and the package count separately",6,0,FALSE,FALSE
+"test-parallel-classify.R","the probe expression asks the daemon for nothing but base R",1,0,FALSE,FALSE
+"test-parallel-classify.R","the probe reads its bound from the option, not from the constant",2,0,FALSE,FALSE
+"test-parallel-classify.R","the timeout message points at the option that raises the bound",2,0,FALSE,FALSE
+"test-parallel-detection.R","a dispatcher-backed run warns not at all",2,0,FALSE,FALSE
+"test-parallel-detection.R","a heterogeneous pool names the daemon that lacks a needed package",10,0,FALSE,FALSE
+"test-parallel-detection.R","a NULL or missing worker count is not parallel",3,0,FALSE,FALSE
+"test-parallel-detection.R","a primed pool matches the host's namespace exactly",3,0,FALSE,FALSE
+"test-parallel-detection.R","a run on an uncancellable pool warns exactly once",3,0,FALSE,FALSE
+"test-parallel-detection.R","a symbol no build defines is reported by every daemon that loaded",8,0,FALSE,FALSE
+"test-parallel-detection.R","dispatch_folds warns once per call, whatever it is dispatching",3,0,FALSE,FALSE
+"test-parallel-detection.R","every Config/testthat/start-first name resolves to a test file",3,0,FALSE,FALSE
+"test-parallel-detection.R","mirai_workers() counts connected daemons",3,0,FALSE,FALSE
+"test-parallel-detection.R","mirai_workers() reports 0 when mirai is not installed",1,0,FALSE,FALSE
+"test-parallel-detection.R","only the uncancellable pool warns, and it names the remedy",5,0,FALSE,FALSE
+"test-parallel-detection.R","the branch a run took is recorded out-of-band, not on the result",3,0,FALSE,FALSE
+"test-parallel-detection.R","the dispatch threshold is two daemons, matching tune's",4,0,FALSE,FALSE
+"test-parallel-detection.R","the probe reaches every daemon, not just a loadable one",7,0,FALSE,FALSE
+"test-parallel-detection.R","the probe sends the package list, and a daemon that has them all reports none",6,0,FALSE,FALSE
+"test-parallel-detection.R","the start-first check reports a planted unknown name",2,0,FALSE,FALSE
+"test-parallel-detection.R","the two pool kinds are distinguishable, and the count cannot do it",4,0,FALSE,FALSE
+"test-parallel-identity.R","a cancelled parallel run returns nothing and restores the RNG state",18,0,FALSE,FALSE
+"test-parallel-identity.R","BC1: parallel matches serial at three daemons",21,0,FALSE,FALSE
+"test-parallel-identity.R","BC1: parallel matches serial at two daemons",16,0,FALSE,FALSE
+"test-parallel-identity.R","BC1: the caller's RNG state and kind survive a parallel run",15,0,FALSE,FALSE
+"test-parallel-identity.R","BC10: the Bayesian path matches serial at two daemons (M45, AC4)",17,0,FALSE,FALSE
+"test-parallel-identity.R","BC11: the control reaches every fold on the parallel path as on the serial one (M48, AC2)",23,0,FALSE,FALSE
+"test-parallel-identity.R","BC12: both racing paths match serial at two daemons (M50, AC4)",44,0,FALSE,FALSE
+"test-parallel-identity.R","BC13: the annealing path matches serial at two daemons (M51, AC4)",23,0,FALSE,FALSE
+"test-parallel-identity.R","BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)",22,0,FALSE,FALSE
+"test-parallel-identity.R","BC15: the selection rule reaches the folds on two daemons as serially (M69, AC5)",20,0,FALSE,FALSE
+"test-parallel-identity.R","BC16: the plain resampling path matches serial on two daemons (M70, AC6)",21,0,FALSE,FALSE
+"test-parallel-identity.R","BC17: the workflow-set map matches serial on two daemons (M71, AC2)",22,0,FALSE,FALSE
+"test-parallel-identity.R","BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer",17,0,FALSE,FALSE
+"test-parallel-identity.R","BC3: a daemon killed mid-run yields a recorded failure, not an abort",12,0,FALSE,FALSE
+"test-parallel-identity.R","BC4: an aborted parallel run still restores the caller's RNG state",3,0,FALSE,FALSE
+"test-parallel-identity.R","BC6: a failed fold matches serially in every field but its traces",31,0,FALSE,FALSE
+"test-parallel-identity.R","BC6: the identity holds with param_info supplied (M34, AC4)",17,0,FALSE,FALSE
+"test-parallel-identity.R","BC7: the identity holds with a two-class fixture at event_level = ""second"" (M35, AC5)",18,0,FALSE,FALSE
+"test-parallel-identity.R","BC8: the identity holds with a censored fixture at a named eval_time (M41, AC5)",21,0,FALSE,FALSE
+"test-parallel-identity.R","BC9: a fold is immune to whatever a daemon ran before it",15,0,FALSE,FALSE
+"test-parallel-identity.R","no shared pool outlives its section (M74)",1,0,FALSE,FALSE
+"test-parallel-identity.R","the shared 2-daemon pool starts primed (M74)",3,0,FALSE,FALSE
+"test-parallel-identity.R","the shared 3-daemon pool starts primed (M74)",4,0,FALSE,FALSE
+"test-parallel-interrupt.R","a run that finished normally is unharmed by the cancel on the way out",4,0,FALSE,FALSE
+"test-parallel-interrupt.R","an interrupted run leaves no fold executing",3,0,FALSE,FALSE
+"test-parallel-metrics.R","the metric set the caller gave reaches folds running on a worker",8,0,FALSE,FALSE
+"test-parallel-payload.R","a daemon receives the payload the serial branch would have passed",4,0,FALSE,FALSE
+"test-parallel-payload.R","a design whose folds share no frame is leaned too",20,0,FALSE,FALSE
+"test-parallel-payload.R","a fold whose outer frame is not the shared one carries its own",5,0,FALSE,FALSE
+"test-parallel-payload.R","a fold's dispatch carries the data exactly once",15,0,FALSE,FALSE
+"test-parallel-payload.R","a leaned payload weighs what the index vectors alone predict",10,0,FALSE,FALSE
+"test-parallel-payload.R","a leaned run puts under a quarter of the pre-milestone bytes on the wire",1,0,FALSE,FALSE
+"test-parallel-payload.R","an inner rset whose splits hold different frames is refused leaning",1,0,FALSE,FALSE
+"test-parallel-payload.R","rehydrating a leaned payload returns the serial path's own objects",5,0,FALSE,FALSE
+"test-parallel-payload.R","the dispatch gate recognises the payloads it must lean",13,0,FALSE,FALSE
+"test-parallel-required-pkgs.R","a racing run attaches finetune and the race's model package in every daemon",4,0,FALSE,FALSE
+"test-parallel-required-pkgs.R","a recipe selector the caller left unqualified resolves on a daemon",4,0,FALSE,FALSE
+"test-param-info.R","a param_info that is not a parameters object is refused up front",1,0,FALSE,FALSE
+"test-param-info.R","AC3: param_info restricts what every outer fold selects",6,0,FALSE,FALSE
+"test-param-info.R","AC3: param_info restricts what the final fit selects",3,0,FALSE,FALSE
+"test-predict-results.R","predict() on a nested_results names nested_final_fit()",3,0,FALSE,FALSE
+"test-predict-results.R","predict() on a nested_results_set names nested_final_fit()",4,0,FALSE,FALSE
+"test-resample-weights.R","AC1: folds that scored carrying zero weight between them read NA, not an error",4,0,FALSE,FALSE
+"test-resample-weights.R","AC1: nested_fit_resamples() on a weighted design matches tune::fit_resamples() under the same weights (O2)",4,0,FALSE,FALSE
+"test-resample-weights.R","AC1: nested_fit_resamples() on a weighted design reports tune's weighted mean and standard error (O1)",10,0,FALSE,FALSE
+"test-resample-weights.R","AC1: nested_tune_grid() on a weighted design reports tune's weighted mean and standard error",10,0,FALSE,FALSE
+"test-resample-weights.R","AC1: summary(), print and autoplot read the weighted estimate",4,0,FALSE,FALSE
+"test-resample-weights.R","AC1: with a fold scoring NA, the weights are renormalized over the folds that scored",11,0,FALSE,FALSE
+"test-resample-weights.R","AC1: with one fold failed, the weighted average covers the folds that scored",14,0,FALSE,FALSE
+"test-resample-weights.R","AC2: equal weights are no weights, and the numbers are the unweighted run's",4,0,FALSE,FALSE
+"test-resample-weights.R","AC3: a bare result sheds the weights with the class (IP4)",3,0,FALSE,FALSE
+"test-resample-weights.R","AC3: collect_metrics(summarize = FALSE) carries each fold's weight, by fold label",7,0,FALSE,FALSE
+"test-resample-weights.R","AC3: compute_metrics() with the run's metric set is collect_metrics() on a weighted run",3,0,FALSE,FALSE
+"test-resample-weights.R","AC3: the set readers stack each workflow's weighted rows",7,0,FALSE,FALSE
+"test-selection-rule-installed.R","AC5: nested_final_fit() refuses a result that recorded the desirability rule without desirability2",6,0,FALSE,FALSE
+"test-selection-rule-installed.R","AC5: nested_tune_grid() refuses a desirability rule at entry without desirability2",6,0,FALSE,FALSE
+"test-selection-rule-installed.R","AC5: selection_rule() refuses the desirability rule without desirability2",6,0,FALSE,FALSE
+"test-selection-rule-installed.R","nested_tune_bayes() refuses a desirability rule at entry without desirability2",6,0,FALSE,FALSE
+"test-selection-rule.R","a named argument in the dots is refused, so a misspelled limit is not an ordering",2,0,FALSE,FALSE
+"test-selection-rule.R","a rule that selects no candidate fails the fold with a note naming the rule",6,0,FALSE,FALSE
+"test-selection-rule.R","AC1: a goal too long for `rlang::as_label()` prints in full",3,0,FALSE,FALSE
+"test-selection-rule.R","AC1: the desirability rule captures its terms as bare expressions and prints them",7,0,FALSE,FALSE
+"test-selection-rule.R","AC3: `limit` defaults to tune's 2 for the percent-loss rule only",6,0,FALSE,FALSE
+"test-selection-rule.R","AC3: a limit is refused with best and with one_std_err",3,0,FALSE,FALSE
+"test-selection-rule.R","AC3: a rule outside tune's three is refused by arg_match()",3,0,FALSE,FALSE
+"test-selection-rule.R","AC3: each malformed limit is refused with the percent-loss rule",9,0,FALSE,FALSE
+"test-selection-rule.R","AC3: one_std_err and pct_loss need at least one ordering",7,0,FALSE,FALSE
+"test-selection-rule.R","AC3: the default rule is best-by-metric with no ordering and no limit",5,0,FALSE,FALSE
+"test-selection-rule.R","AC3: the orderings are captured as bare expressions, never quosures",6,0,FALSE,FALSE
+"test-selection-rule.R","an empty selection under another rule names that rule and not the standard-error cause",4,0,FALSE,FALSE
+"test-selection-rule.R","an ordering given with best is refused, as tune::select_best() refuses one",2,0,FALSE,FALSE
+"test-selection-rule.R","an ordering that is a string or a number is refused: it would order nothing",5,0,FALSE,FALSE
+"test-selection-rule.R","desirability_term_names() reads the first argument of each goal alone",1,0,FALSE,FALSE
+"test-selection-rule.R","is_selection_rule() answers for the class alone",4,0,FALSE,FALSE
+"test-selection-rule.R","names_selection_rule() is true for the two non-default rules alone (M98)",6,0,FALSE,FALSE
+"test-selection-rule.R","selection_rule_label() renders the four label shapes the summaries share (M98)",6,0,FALSE,FALSE
+"test-selection-rule.R","the desirability rule refuses a name in a goal's later arguments",12,0,FALSE,FALSE
+"test-selection-rule.R","the desirability rule refuses no terms, a limit, and a term desirability2 refuses",8,0,FALSE,FALSE
+"test-selection-rule.R","the object prints on one line naming the rule, orderings and limit",4,0,FALSE,FALSE
+"test-suite-hygiene.R","a copied bound still matches the argument it was copied from",14,0,FALSE,FALSE
+"test-suite-hygiene.R","daemon answers are named by the pid each one holds",8,0,FALSE,FALSE
+"test-suite-hygiene.R","every wait-shaped call in the daemon files carries a budget row",2,0,FALSE,FALSE
+"test-suite-hygiene.R","no test waits on a mirai result outside collect_bounded()",2,0,FALSE,FALSE
+"test-suite-hygiene.R","the budget ledger has no rows for calls that are gone",1,0,FALSE,FALSE
+"test-suite-hygiene.R","the localized file's declared worst case fits the CI budget",3,0,FALSE,FALSE
+"test-suite-hygiene.R","the metrics-delivery file stays inside its own ceiling",2,0,FALSE,FALSE
+"test-sweep-prose.R","--plain names each clause once and stays silent on spans and near-misses",13,0,FALSE,FALSE
+"test-sweep-prose.R","an unclosed comment and a dropped item-shaped line take no prose",5,0,FALSE,FALSE
+"test-sweep-prose.R","the parse drops every planted leak and keeps the prose beside it",23,0,FALSE,FALSE
+"test-sweep-prose.R","the six gating sweeps are clean over the real sources",31,0,FALSE,FALSE
+"test-time-series-anneal.R","nested_tune_sim_anneal() matches its reference loop on a rolling-origin design",10,0,FALSE,FALSE
+"test-time-series-anneal.R","the annealing final fit on a rolling-origin result matches its reference",5,0,FALSE,FALSE
+"test-time-series-bayes.R","nested_tune_bayes() matches its reference loop on a rolling-origin design",10,0,FALSE,FALSE
+"test-time-series-bayes.R","the Bayesian final fit on a rolling-origin result matches its reference",6,0,FALSE,FALSE
+"test-time-series-bayes.R","the Bayesian final fit on a sliding-window result matches its reference",6,0,FALSE,FALSE
+"test-time-series-designs.R","a rolling-origin design matches a hand-rolled reference loop",10,0,FALSE,FALSE
+"test-time-series-designs.R","a sliding-index design matches a hand-rolled reference loop",10,0,FALSE,FALSE
+"test-time-series-designs.R","a sliding-period design matches a hand-rolled reference loop",14,0,FALSE,FALSE
+"test-time-series-designs.R","a sliding-window design matches a hand-rolled reference loop",10,0,FALSE,FALSE
+"test-time-series-designs.R","a workflow set on a rolling-origin design matches the hand calls",12,0,FALSE,FALSE
+"test-time-series-designs.R","augment() on an overlapping sliding-window result counts both kinds of row",8,0,FALSE,FALSE
+"test-time-series-designs.R","augment() refuses a rolling-origin result and names the rows never held out",8,0,FALSE,FALSE
+"test-time-series-designs.R","augment() refuses a sliding-window result and names the rows never held out",9,0,FALSE,FALSE
+"test-time-series-designs.R","augment()'s time-series classes are the four designs' split classes",1,0,FALSE,FALSE
+"test-time-series-designs.R","collect_predictions() returns each outer-assessment row once per fold",4,0,FALSE,FALSE
+"test-time-series-designs.R","nested_fit_resamples() matches fit_resamples() on a rolling-origin design",15,0,FALSE,FALSE
+"test-time-series-designs.R","nested_fit_resamples() matches fit_resamples() on a sliding-index design",15,0,FALSE,FALSE
+"test-time-series-designs.R","nested_fit_resamples() matches fit_resamples() on a sliding-period design",23,0,FALSE,FALSE
+"test-time-series-designs.R","nested_fit_resamples() matches fit_resamples() on a sliding-window design",15,0,FALSE,FALSE
+"test-time-series-designs.R","rolling-origin splits match rsample::nested_cv()",54,0,FALSE,FALSE
+"test-time-series-designs.R","sliding-index splits match rsample::nested_cv()",42,0,FALSE,FALSE
+"test-time-series-designs.R","sliding-period splits match rsample::nested_cv()",74,0,FALSE,FALSE
+"test-time-series-designs.R","sliding-window splits match rsample::nested_cv()",42,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a rolling-origin design matches a hand-rolled reference",3,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a rolling-origin fit_resamples() result fits every row",4,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-index design matches a hand-rolled reference",4,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-index fit_resamples() result fits every row",4,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-period design matches a hand-rolled reference",4,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-period fit_resamples() result fits every row",4,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-window design matches a hand-rolled reference",3,0,FALSE,FALSE
+"test-time-series-designs.R","the final fit on a sliding-window fit_resamples() result fits every row",4,0,FALSE,FALSE
+"test-time-series-race.R","the tune_race_anova final fit on a rolling-origin result matches its reference",5,0,FALSE,FALSE
+"test-time-series-race.R","the tune_race_win_loss final fit on a rolling-origin result matches its reference",5,0,FALSE,FALSE
+"test-time-series-race.R","tune_race_anova matches its reference loop on a rolling-origin design",10,0,FALSE,FALSE
+"test-time-series-race.R","tune_race_win_loss matches its reference loop on a rolling-origin design",10,0,FALSE,FALSE
+"test-tuner-registry.R","a name the registry does not hold is an internal error",5,0,FALSE,FALSE
+"test-tuner-registry.R","every registry entry names a function in its package and a control of its class",31,0,FALSE,FALSE
+"test-tuner-registry.R","the final-fit reproducibility recipe calls every registry tuner",16,0,FALSE,FALSE
+"test-tuner-registry.R","the racers take a grid and do not iterate; the Bayesian and annealing tuners are the reverse",28,0,FALSE,FALSE
+"test-vctrs-compat.R",".inner_metrics is in the record vec_restore() and rbind() check",67,0,FALSE,FALSE
+"test-vctrs-compat.R","a column add answers the same through either door with the results object second",15,0,FALSE,FALSE
+"test-vctrs-compat.R","a name shared by two columns outside the record keeps the object through every door",41,0,FALSE,FALSE
+"test-vctrs-compat.R","a nested_results casts to its own tibble prototype",13,0,FALSE,FALSE
+"test-vctrs-compat.R","a tibble does not cast to a nested_results",2,0,FALSE,FALSE
+"test-vctrs-compat.R","combining with a table whose columns differ answers rather than raising",31,0,FALSE,FALSE
+"test-vctrs-compat.R","every block that calls tibble:: opens with the tibble skip",2,0,FALSE,FALSE
+"test-vctrs-compat.R","group_by(), rowwise() and as_tibble() leave the recorded attributes readable",7,0,FALSE,FALSE
+"test-vctrs-compat.R","names<- sheds the record for every record column and keeps it for a column outside it",151,0,FALSE,FALSE
+"test-vctrs-compat.R","printing the frame prototype emits neither the outer label nor a fold count",6,0,FALSE,FALSE
+"test-vctrs-compat.R","rbind() doubling the rows keeps neither the class nor the record",13,0,FALSE,FALSE
+"test-vctrs-compat.R","rename() moving a record column keeps neither the class nor the record",14,0,FALSE,FALSE
+"test-vctrs-compat.R","the frame prototype carries the run's description and no fold counts",6,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_c() doubling the rows keeps neither the class nor the record",13,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_cbind() and bind_cols() adding a column answer the same way",21,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_cbind() sheds the class when minimal name repair duplicates a record column",27,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_cbind() sheds the class when name repair moves a record column",16,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_ptype2() returns a prototype for every pair of the three types",10,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_rbind() and vec_c() shed on one argument where bind_rows() keeps",51,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_rbind() doubling the rows keeps neither the class nor the record",13,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_slice() reordering the rows keeps the class and the record",11,0,FALSE,FALSE
+"test-vctrs-compat.R","vec_slice() taking one row keeps neither the class nor the record",12,0,FALSE,FALSE
+"test-workflow-identity.R","a difference the walk cannot place is named as such",3,0,FALSE,FALSE
+"test-workflow-identity.R","a model argument is recorded as written, and a recipe setting as the value the step holds",5,0,FALSE,FALSE
+"test-workflow-identity.R","a parts difference in neither optional part is named as such",3,0,FALSE,FALSE
+"test-workflow-identity.R","AC1: a tailor is a part of the identity, as its adjustments in order",15,0,FALSE,FALSE
+"test-workflow-identity.R","AC1: the case-weights column is a part of the identity, recorded as written",6,0,FALSE,FALSE
+"test-workflow-identity.R","AC2: a workflow with neither part has the identity it had at the branch point",3,0,FALSE,FALSE
+"test-workflow-identity.R","AC3: a workflow rebuilt from the same code has the same identity",3,0,FALSE,FALSE
+"test-workflow-identity.R","AC3: arguments given through set_args() and set_engine() read as those given in the constructor",2,0,FALSE,FALSE
+"test-workflow-identity.R","AC5: the identity carries no data rows",3,0,FALSE,FALSE
+"test-workflow-identity.R","engine arguments given in another order read as the same",3,0,FALSE,FALSE
+"test-workflow-identity.R","the identity does not depend on the session's number printing",2,0,FALSE,FALSE
+"test-workflow-identity.R","the identity names the model and the preprocessor as the criteria describe",14,0,FALSE,FALSE
+"test-workflow-pkgs.R","a workflow needing a package the host lacks is refused at every entry point",30,0,FALSE,FALSE
+"test-workflow-pkgs.R","a workflow whose packages are all installed passes the check silently",1,0,FALSE,FALSE
+"test-workflow-pkgs.R","the engine's package is still refused, under the same class",2,0,FALSE,FALSE
+"test-workflow-pkgs.R","the fixture's package reaches the workflow's list and is not installed",3,0,FALSE,FALSE

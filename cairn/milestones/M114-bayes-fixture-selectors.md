@@ -47,8 +47,8 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 
 - [x] T1: Measure the branch point before any fixture edit. Run three serial passes of `benchmarks/profile-tests.R` on mains power. Add `benchmarks/test-blocks.R`. From one serial pass, it writes one CSV row per test block: file, test, expectations, failed, skipped, error. Write the branch point's table beside it.
 - [x] T2: Add `benchmarks/recipes-tune-args-cost.R`. Change the selectors in both fixtures to strings. The comment above each fixture names the cost, the script and the date measured (the derived-figures rule). Run the two Bayesian files.
-- [ ] T3: Measure the head the same way, on the same machine right after the branch point. Compare the two per-block tables by file and test name. Write the M114 section of `benchmarks/test-timing-baseline.md`. If the eleven heaviest files changed, re-cut `Config/testthat/start-first` in `DESCRIPTION`.
-- [ ] T4: Search the tidymodels/recipes issues for an existing report on `find_tune_id()` or `tune_args()` cost. If none exists, draft the issue body in `cairn/milestones/M114-recipes-issue.md`, with the reproducer and the two figures. Nothing is posted before the user approves the text at the review gate.
+- [x] T3: Measure the head the same way, on the same machine right after the branch point. Compare the two per-block tables by file and test name. Write the M114 section of `benchmarks/test-timing-baseline.md`. If the eleven heaviest files changed, re-cut `Config/testthat/start-first` in `DESCRIPTION`.
+- [x] T4: Search the tidymodels/recipes issues for an existing report on `find_tune_id()` or `tune_args()` cost. If none exists, draft the issue body in `benchmarks/recipes-tune-args-issue.md`, with the reproducer and the two figures. Nothing is posted before the user approves the text at the review gate.
 
 ## Work log
 
@@ -62,6 +62,9 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: scope amended at a mini gate (user chose amend). The string fixtures failed two expectations in `test-nested-final-fit-identity.R`. The identity check compares selectors as deparsed text, and `ns_workflow()` and the reordered recipe still wrote bare names. Those two now use strings. The first Out bullet now names them. No criterion changed. The planned falsifier on `R/` spelling branches did not fire: `R/workflow-identity.R` deparses both spellings on one path.
 - 2026-09-23: T2 done. `benchmarks/recipes-tune-args-cost.R` prints 7.40 ms for `step_ns(x1)` and 0.60 ms for `step_ns("x1")`, ratio 12.3. An Rprof of the bare call puts 76% of its time in `conditionMessage()` cli formatting inside `try()`. Both fixtures use strings. `test-time-series-bayes.R` ran in 19.6 s and `test-nested-tune-bayes-oracles.R` in 20.7 s, no failures. `devtools::test()` clean: 11387 expectations, 0 failed.
 - 2026-09-23: checkpoint. T3 head passes running. T4 in part: issue search found only #1506 and #1296, both about wrong results. Draft in `M114-recipes-issue.md` still holds a placeholder for the head figures, and its example is not yet run.
+- 2026-09-23: T3 done. Head (code of `507906d`, printed as `39f4232`) three serial passes on mains power: 549.1, 550.0 and 544.4 s, pass 11387. Median 72.0% of the branch point. `test-time-series-bayes.R` 17.9 s (31.1%), `test-nested-tune-bayes-oracles.R` 20.3 s (33.9%). Block tables joined on file and test: 977 of 977 match on expectation count, no failed, errored or skipped block. A planted one-count change was detected. `start-first` re-cut to the head's eleven heaviest. `devtools::test()` clean after the re-cut.
+- 2026-09-23: minor amendment: T4's draft path moved from `cairn/milestones/M114-recipes-issue.md` to `benchmarks/recipes-tune-args-issue.md`. `cairn_validate` failed the first path as a milestone file with no ROADMAP row, and earlier upstream drafts live in `benchmarks/`.
+- 2026-09-23: T4 done. No existing recipes report on the cost. The draft's example ran and printed 6.4 and 0.6 ms. It carries the head file times.
 
 ## Decisions
 
