@@ -123,8 +123,9 @@
 #' orchestrator raises for one workflow is raised the same way, when that
 #' workflow's turn comes. A `grid` that names a parameter that workflow
 #' does not tune is one such error, and a control of the wrong class is
-#' another. The workflows before it have run by then. A `metrics` that
-#' does not suit the model of any workflow the map runs is the exception:
+#' another. The workflows before it have run by then. A metric set in
+#' `metrics` that does not suit the model of any workflow the map runs is
+#' the exception:
 #' it is refused before any workflow runs. What is raised is
 #' the original condition
 #' object, with `Workflow "<id>": ` written in front of the first line of

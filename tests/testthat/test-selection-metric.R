@@ -114,7 +114,8 @@ test_that("a metric set that does not suit the model's mode is refused at entry 
 # `nested_fit_resamples()` selects nothing and records no name, but every
 # fold's run would still fail on such a set, so it is refused at entry too
 # (M117, D-082). Before, each fold ran, failed, and the call warned. The
-# warning count shows that no fold ran before the refusal.
+# warning count shows that the call did not reach the failed-fold warning,
+# which follows every fold's run.
 expect_metrics_mode_refusal <- function(expr, fn) {
   warned <- 0L
   cnd <- withCallingHandlers(
@@ -153,38 +154,37 @@ test_that("nested_fit_resamples() refuses a metric set that does not suit the mo
 test_that("a workflow set with an unsuitable metric set is refused before any workflow runs (M116)", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
-  # The workflow with nothing to tune comes first, so a refusal made only at
-  # the tuned workflow's turn would follow its run and its failed-fold warning.
-  # It takes a suitable set from its own `option` entry, so the refusal is
-  # the tuned workflow's (M117 made the pre-check judge both routes).
+  # The workflow with nothing to tune comes first and takes a suitable set
+  # from its own `option` entry, so the refusal is the tuned workflow's (M117
+  # made the pre-check judge both routes). A refusal made only at the tuned
+  # workflow's turn would follow the first workflow's run, which the counter
+  # on `run_orchestrator()` would see.
   wset <- workflowsets::as_workflow_set(
     fixed = fixed_workflow(d),
     tuned = det_workflow(d)
   )
   wset <- workflowsets::option_add(wset, id = "fixed", metrics = reg_metrics())
-  warned <- 0L
-  cnd <- withCallingHandlers(
-    expect_error(
-      nested_workflow_map(
-        object = wset,
-        fn = "nested_tune_grid",
-        resamples = det_nested(d),
-        metrics = yardstick::metric_set(yardstick::accuracy),
-        grid = det_grid()
-      ),
-      class = "nestedtune_metrics_mode"
+  runs <- 0L
+  local_mocked_bindings(run_orchestrator = function(...) {
+    runs <<- runs + 1L
+    NULL
+  })
+  cnd <- expect_error(
+    nested_workflow_map(
+      object = wset,
+      fn = "nested_tune_grid",
+      resamples = det_nested(d),
+      metrics = yardstick::metric_set(yardstick::accuracy),
+      grid = det_grid()
     ),
-    warning = function(w) {
-      warned <<- warned + 1L
-      invokeRestart("muffleWarning")
-    }
+    class = "nestedtune_metrics_mode"
   )
-  expect_identical(warned, 0L)
+  expect_identical(runs, 0L)
   expect_match(conditionMessage(cnd), "Workflow \"tuned\"", fixed = TRUE)
 })
 
 # A workflow the map routes to `nested_fit_resamples()` is judged in the
-# pre-check too (M117, D-082), by either route there. The refused workflow
+# pre-check too (M117, D-082), whether `fn` names that function or a tuner. The refused workflow
 # comes second and takes its set from its own `option` entry, since a shared
 # set in `...` would refuse the first. No orchestrator call may start.
 test_that("a workflow the map routes to nested_fit_resamples() is refused before any workflow runs (M117 AC2)", {

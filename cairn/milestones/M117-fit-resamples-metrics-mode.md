@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M117: `nested_fit_resamples()` refuses a metric set that does not suit the model's mode
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -50,7 +50,7 @@
 - [x] T2: In `nested_loop()` run `check_metrics_mode()` for every tuner and keep its value as `first_metric` only where `tuner_selects()` holds. Update the comments there and above `check_metrics_mode()` (`R/checks.R:1209`). AC1's tests pass, and the line-89 test passes unchanged.
 - [x] T3: Write AC2's test under `skip_if_no_wset_fixture()` and see it fail. The refused workflow takes its set from `workflowsets::option_add(metrics = ...)`, since a shared set in `...` refuses the first workflow. Count orchestrator calls with `local_mocked_bindings(run_orchestrator = ...)` (`R/nested-workflow-map.R:258-267`) or an equal probe. Update the pre-check comment at `R/nested-workflow-map.R:190-192`. Then call `check_metrics_mode()` in the `nested_fit_resamples` branch of `nested_workflow_map()`'s pre-check. Use the `map_args()` resolution and the metric-set guard of the tuned branch (`R/nested-workflow-map.R:198-204`).
 - [x] T4: Say the refusal in `nested_fit_resamples()`'s help (the `metrics` entry at `R/nested-fit-resamples.R:25`). Make the details line at `:20` agree with it. Drop "tuned" from the two sentences in `nested_workflow_map()`'s help (`R/nested-workflow-map.R:43-45`, `125-127`). Rewrite the M116 bullet in `NEWS.md` (lines 11-14) to name `nested_fit_resamples()` and every workflow the map runs. Run `devtools::document()`.
-- [ ] T5: Run the `verify` slot in full and `air format --check` on the touched files.
+- [x] T5: Run the `verify` slot in full and `air format --check` on the touched files.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -64,6 +64,8 @@
 - 2026-09-24: T1/T2 done. On `main` the AC1 test got no error and one `nestedtune_failed_folds` warning (3 of 3 folds failed); after `nested_loop()` checks every tuner, `test-selection-metric.R` passes whole.
 - 2026-09-24: T3 done. On the old pre-check the AC2 test got no error under either route. The M116 map test now gives its fixed workflow a suitable `option` set and asserts the tuned workflow's id, so it still tests the tuned branch (minor edit to an existing test).
 - 2026-09-24: T4 done. The help and NEWS name the new reach, and the AC4 grep prints nothing. The details line at `R/nested-fit-resamples.R:20` already agreed, so it is unchanged. Both prose sweeps are clean.
+- 2026-09-24: T5 done. Full `devtools::test()` at `4332313` passed 11503 expectations with 0 failures. The claim-audit fixes after it touched one roxygen sentence and one test file, and both reran clean.
+- claim audit: 14 claims read, 4 corrected — R/nested-workflow-map.R, tests/testthat/test-selection-metric.R. The M116 map test's warning count was blind after T3, so it now counts `run_orchestrator()` calls. With the pre-check disabled it read 2 runs and failed.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
