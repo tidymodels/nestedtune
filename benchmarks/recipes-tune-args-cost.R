@@ -7,8 +7,9 @@
 # A bare column name such as `x1` has no binding outside a selection context,
 # so that evaluation fails, and purrr and cli build a full error message that
 # `try()` then discards. A string such as `"x1"` evaluates to itself and
-# nothing fails. tune reads these arguments many times per resample, so the
-# difference adds up in a Bayesian search. Usage, from the package root:
+# nothing fails. What the difference did to two Bayesian test files is in the
+# M114 section of `benchmarks/test-timing-baseline.md`. Usage, from the
+# package root:
 #
 #   Rscript benchmarks/recipes-tune-args-cost.R [calls]
 #

@@ -1168,7 +1168,8 @@ srv_recipe_data <- function(data = srv_data()) {
 
 # The numeric-parameter workflow: a natural-spline expansion of `x1` whose
 # degrees of freedom are tuned over two values. The step's id is drawn from
-# the RNG stream, so every caller builds it inside the seeded region.
+# the RNG stream, so every caller builds it inside the seeded region. The
+# column is named by string for the cost `bayes_workflow()` below records.
 srv_spline_workflow <- function(data) {
   rec <- recipes::step_ns(
     recipes::recipe(surv ~ x1 + x2, data = data),
@@ -1255,6 +1256,13 @@ skip_if_no_engines <- function(stochastic = FALSE) {
 # The stochastic sibling is `stoch_workflow()` as it stands: `min_n` is
 # integer-valued over 39 levels, and the reference loop fixes what AC2 asserts
 # about it, seed by seed, so it needs no seed-independent design.
+#
+# The spline columns are named by string, not bare name. tune reads a step's
+# tuning arguments through recipes' `find_tune_id()`, which evaluates a bare
+# name, fails, and formats an error message it then discards. One
+# `tune_args()` call cost 7.40 ms on `step_ns(x1)` and 0.60 ms on
+# `step_ns("x1")` (`benchmarks/recipes-tune-args-cost.R`, recipes 1.4.0,
+# measured 2026-09-23).
 bayes_workflow <- function(data) {
   rec <- recipes::step_ns(
     recipes::step_ns(
