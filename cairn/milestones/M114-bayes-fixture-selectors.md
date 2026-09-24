@@ -1,6 +1,6 @@
 # M114: The two Bayesian test files run in half their serial time
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -65,6 +65,8 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: T3 done. Head (code of `507906d`, printed as `39f4232`) three serial passes on mains power: 549.1, 550.0 and 544.4 s, pass 11387. Median 72.0% of the branch point. `test-time-series-bayes.R` 17.9 s (31.1%), `test-nested-tune-bayes-oracles.R` 20.3 s (33.9%). Block tables joined on file and test: 977 of 977 match on expectation count, no failed, errored or skipped block. A planted one-count change was detected. `start-first` re-cut to the head's eleven heaviest. `devtools::test()` clean after the re-cut.
 - 2026-09-23: minor amendment: T4's draft path moved from `cairn/milestones/M114-recipes-issue.md` to `benchmarks/recipes-tune-args-issue.md`. `cairn_validate` failed the first path as a milestone file with no ROADMAP row, and earlier upstream drafts live in `benchmarks/`.
 - 2026-09-23: T4 done. No existing recipes report on the cost. The draft's example ran and printed 6.4 and 0.6 ms. It carries the head file times.
+- 2026-09-23: claim audit: not owed — internal tier
+- 2026-09-23: implement complete. Status set to review.
 
 ## Decisions
 
