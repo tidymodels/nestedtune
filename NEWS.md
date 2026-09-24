@@ -9,9 +9,9 @@
   summaries carry it as a component of the same name. The help for
   `nested_workflow_map()` says which metric of a `metrics` passed to it
   selects. The five tuning functions, and `nested_workflow_map()` for the
-  workflows it tunes, now refuse a metric set that does not suit the model's mode, such as a
-  classification metric on a regression model, before any fold runs.
-  Before, every fold ran and failed.
+  workflows it tunes, now refuse a metric set that does not suit the
+  model's mode, such as a classification metric on a regression model,
+  before any fold runs. Before, every fold ran and failed.
 
 * The help for `metrics` on `nested_tune_grid()` and its tuning siblings
   says which metric selects and which metrics the outer loop scores. The
