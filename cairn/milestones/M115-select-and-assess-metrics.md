@@ -1,13 +1,13 @@
 # M115: The help and the guide say which metric selects and which metrics the outer loop scores
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP3, GP5
 - **Resolves:** —
 - **Surface tier:** user-facing — help pages and a guide that users read
-- **Branch/PR:** —
+- **Branch/PR:** m115-select-and-assess-metrics
 
 ## Goal
 
@@ -48,7 +48,10 @@ The help and the guide tell a user how to choose each fold's candidate under one
 - 2026-09-24: plan gate chose documenting the set's order over a second assessment metric set, because it adds one argument to six signatures (D-030); falsified by a metric too costly for the inner loop and wanted only in the outer one.
 - 2026-09-24: re-audit of the changed AC1 (full mode, same fresh reader) found that `"one_std_err"` by `num_comp` might not separate the two orders. Measured on `sep_*` with seed 20, `mae` first against `rmse` first: `"best"` 1 2 2 against 3 1 3, `"one_std_err"` by `num_comp` 1 1 1 against 1 1 1, by `desc(num_comp)` 5 5 4 against 5 5 5. AC1 now uses `desc(num_comp)` and claims separation under both rules.
 - 2026-09-24: plan gate chose probes under `"best"` and `"one_std_err"` on `nested_tune_grid()` over a `nested_tune_bayes()` probe, because the first-metric lookup is fold code every tuner shares and Bayesian tests are the suite's slowest (M114); falsified by a tuner resolving its selecting metric by its own path.
+- 2026-09-24: implement started on branch `m115-select-and-assess-metrics`. Read the sources: tune 2.1.0 `tune_bayes_workflow()` and finetune 1.3.0's two racers and annealer each set `opt_metric` from `first_metric(metrics)`. Question gate chose the citation form recorded under Decisions.
 
 ## Decisions
+
+- 2026-09-24 (implement question gate): user-facing text cites the source AC2 and AC3 name as "Stone (1974, p. 116)", with the full reference in a references entry on `nested_tune_grid()` that the Bayes, race and annealing pages inherit, and in a new References section of `vignettes/nested-cv.Rmd`. The "a" in `stone1974a` tells two papers apart on the internal shelf only, and a reader sees one Stone paper. AC2's and AC3's "Stone (1974a, p. 116)" is read as naming that source.
 
 ## Review
