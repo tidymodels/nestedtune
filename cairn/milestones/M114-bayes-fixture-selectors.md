@@ -32,8 +32,8 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 ## Acceptance criteria
 
 - [x] AC1: In `tests/testthat/helper-orchestration.R`, `bayes_workflow()` and `srv_spline_workflow()` pass every step's column selector as a string. A read of both function bodies at the head shows it.
-- [ ] AC2: `test-time-series-bayes.R` and `test-nested-tune-bayes-oracles.R` each run serially in at most half their branch-point time. The figure is the median of three `benchmarks/profile-tests.R` passes per tree.
-- [ ] AC3: One serial pass of the whole suite runs per tree. In testthat's results table, every test block, keyed by file and test name, has the same expectation count on both trees. No block fails, errors or skips on either tree.
+- [x] AC2: `test-time-series-bayes.R` and `test-nested-tune-bayes-oracles.R` each run serially in at most half their branch-point time. The figure is the median of three `benchmarks/profile-tests.R` passes per tree.
+- [x] AC3: One serial pass of the whole suite runs per tree. In testthat's results table, every test block, keyed by file and test name, has the same expectation count on both trees. No block fails, errors or skips on either tree.
 - [x] AC4: `benchmarks/recipes-tune-args-cost.R` prints the per-call time of `generics::tune_args()` on `step_ns(x1)` and on `step_ns("x1")`. On the head, the first figure is at least five times the second.
 
 ## Coverage
@@ -76,3 +76,5 @@ Review run 2026-09-23 on `m114-bayes-fixture-selectors` at `791bbfc`. The defaul
 
 - AC1: read at `791bbfc`, `tests/testthat/helper-orchestration.R`. `srv_spline_workflow()` passes `"x1"` to its one `step_ns()`. `bayes_workflow()` passes `"x1"` and `"x2"` to its two `step_ns()` calls. Neither function has another step. Pass.
 - AC4: `Rscript benchmarks/recipes-tune-args-cost.R` ran at `791bbfc` with recipes 1.4.0, R 4.6.1 and 200 calls per spelling. It printed 6.25 ms per call for `step_ns(x1)` and 0.60 ms for `step_ns("x1")`, ratio 10.4. The criterion needs at least 5. Pass.
+- AC2: `benchmarks/profile-tests.R` ran three serial passes per tree on mains power. The branch point ran first, in a clean worktree at `1aef465`. The head ran next at `f88dd63`, whose code is that of `791bbfc`. Suite totals: branch point 694.8, 776.5 and 904.4 s, head 604.4, 593.8 and 605.3 s, pass 11387 and fail 0 in all six. Median file times: `test-time-series-bayes.R` 19.9 s against 52.0 s (38.3%), `test-nested-tune-bayes-oracles.R` 22.1 s against 59.7 s (37.0%). Both are at most half. Pass.
+- AC3: `benchmarks/test-blocks.R` ran one serial pass per tree. Each table has 977 blocks in 88 files, 11387 expectations and no duplicate file and test key. Joined on file and test, 0 blocks are missing from either side and 0 differ in expectation count. No block failed, skipped or errored on either tree. A planted one-count change to the head table showed as 1 mismatch. Pass.
