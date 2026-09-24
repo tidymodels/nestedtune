@@ -1,13 +1,13 @@
 # M114: The two Bayesian test files run in half their serial time
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — a change to test fixtures and benchmark records, which nothing outside the repo reads
-- **Branch/PR:** —
+- **Branch/PR:** m114-bayes-fixture-selectors
 
 ## Goal
 
@@ -57,6 +57,7 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: plan chose string selectors over a lighter Gaussian-process engine or fewer iterations, because the fitting measured under 3% of a run. Falsified by a head profile where Gaussian-process fitting exceeds a quarter of a Bayesian run.
 - 2026-09-23: plan gate chose the two helper fixtures over also changing the inline identity recipes, because those tests check the bare-name spelling. Falsified by `test-nested-final-fit-identity.R` entering the five heaviest files.
 - 2026-09-23: plan gate chose per-block expectation counts over a per-line covr comparison as the no-loss evidence. Falsified by an `R/` code path that branches on how a recipe step names its columns.
+- 2026-09-23: implement started on `m114-bayes-fixture-selectors`; no question gate, the plan left nothing open. Checkpoint: `benchmarks/test-blocks.R` written, branch-point runs started in a detached worktree at `1aef465`; T2's fixture edit and cost script drafted, not yet run.
 
 ## Decisions
 

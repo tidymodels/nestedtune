@@ -1172,7 +1172,7 @@ srv_recipe_data <- function(data = srv_data()) {
 srv_spline_workflow <- function(data) {
   rec <- recipes::step_ns(
     recipes::recipe(surv ~ x1 + x2, data = data),
-    x1,
+    "x1",
     deg_free = tune::tune()
   )
   spec <- parsnip::set_mode(
@@ -1259,10 +1259,10 @@ bayes_workflow <- function(data) {
   rec <- recipes::step_ns(
     recipes::step_ns(
       recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
-      x1,
+      "x1",
       deg_free = tune::tune("df1")
     ),
-    x2,
+    "x2",
     deg_free = tune::tune("df2")
   )
   workflows::workflow(rec, parsnip::linear_reg())

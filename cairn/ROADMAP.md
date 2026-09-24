@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-23 (M113 done and archived. M110 row pruned. Valida
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M114 | The two Bayesian test files run in half their serial time | planned | — | normal | milestones/M114-bayes-fixture-selectors.md |
+| M114 | The two Bayesian test files run in half their serial time | in-progress | — | normal | milestones/M114-bayes-fixture-selectors.md |
 | M113 | The suite runs in three quarters of its serial time with no line of coverage lost | done | — | high | milestones/archive/M113-suite-once-per-claim.md |
 | M111 | Index-based and period-based sliding outer designs | done | M110 | normal | milestones/archive/M111-index-period-designs.md |
 | M112 | Vignettes built and checked on the macOS check leg alone | done | — | high | milestones/archive/M112-vignettes-one-leg.md |
