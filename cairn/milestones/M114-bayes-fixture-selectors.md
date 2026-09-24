@@ -78,3 +78,17 @@ Review run 2026-09-23 on `m114-bayes-fixture-selectors` at `791bbfc`. The defaul
 - AC4: `Rscript benchmarks/recipes-tune-args-cost.R` ran at `791bbfc` with recipes 1.4.0, R 4.6.1 and 200 calls per spelling. It printed 6.25 ms per call for `step_ns(x1)` and 0.60 ms for `step_ns("x1")`, ratio 10.4. The criterion needs at least 5. Pass.
 - AC2: `benchmarks/profile-tests.R` ran three serial passes per tree on mains power. The branch point ran first, in a clean worktree at `1aef465`. The head ran next at `f88dd63`, whose code is that of `791bbfc`. Suite totals: branch point 694.8, 776.5 and 904.4 s, head 604.4, 593.8 and 605.3 s, pass 11387 and fail 0 in all six. Median file times: `test-time-series-bayes.R` 19.9 s against 52.0 s (38.3%), `test-nested-tune-bayes-oracles.R` 22.1 s against 59.7 s (37.0%). Both are at most half. Pass.
 - AC3: `benchmarks/test-blocks.R` ran one serial pass per tree. Each table has 977 blocks in 88 files, 11387 expectations and no duplicate file and test key. Joined on file and test, 0 blocks are missing from either side and 0 differ in expectation count. No block failed, skipped or errored on either tree. A planted one-count change to the head table showed as 1 mismatch. Pass.
+
+Consistency gate: `cairn_validate` passed, with 18 references-staleness advisories that predate M114. No principle text changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exited 0. README and NEWS are untouched, and the change has no user-visible surface, so no NEWS entry is owed. `benchmarks/` is already in `.Rbuildignore`.
+
+Independent review: three fresh reviewers. The history reader found nothing that undoes past work or contradicts a D-entry. The prior-review reader found no repeat of an archived finding, and it raised the same gap as O1. The diff reader re-joined the block tables and found that the recipes source matches what the draft quotes. Its findings, most severe first, each checked against the files:
+
+- O1: the `start-first` re-cut in `DESCRIPTION` has no committed per-file figures behind it. The M114 baseline section lists head times for 4 of the 11 named files.
+- O2: `recipes-tune-args-issue.md:30` calls the script's run "longer", but the inline example also times 200 calls.
+- O3: `recipes-tune-args-issue.md:37` gives Rprof shares (94%, 76%) that no committed procedure reproduces.
+- O4: `recipes-tune-args-issue.md:39` gives the suite totals without saying they are medians of three passes.
+- O5: `recipes-tune-args-cost.R` times `ceiling(calls / 10) * 10` calls but prints `calls`.
+- O6: the `srv_spline_workflow()` comment points to `bayes_workflow()`'s figures instead of carrying its own.
+- O7: the `removed` probe in `test-nested-final-fit-identity.R:315` still writes bare `x1` against the string-spelled Bayesian record. It passes because the step-count check fires first.
+- O8: the identity check treats `step_ns(x1)` and `step_ns("x1")` as different workflows, so a user who switches spelling after a run gets a mismatch. This predates M114 and has no Known issues entry.
+- O9: `test-blocks.R`'s summary line counts failed blocks but sums skips and errors.
