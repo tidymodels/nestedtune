@@ -82,7 +82,9 @@ test_that("the entry reaches no tuner, and a run that selects nothing records no
 
   d <- make_reg_data()
   res <- final_results(d)
-  expect_false("first_metric" %in% names(procedure_tuner(extract_procedure(res))$args))
+  expect_false(
+    "first_metric" %in% names(procedure_tuner(extract_procedure(res))$args)
+  )
 
   fr <- fit_resamples_results(d)
   expect_false("first_metric" %in% names(extract_procedure(fr)))
@@ -97,7 +99,12 @@ test_that("a metric set that does not suit the model's mode is refused at entry 
   wrong <- yardstick::metric_set(yardstick::accuracy)
 
   cnd <- expect_error(
-    nested_tune_grid(det_workflow(d), det_nested(d), grid = det_grid(), metrics = wrong),
+    nested_tune_grid(
+      det_workflow(d),
+      det_nested(d),
+      grid = det_grid(),
+      metrics = wrong
+    ),
     class = "nestedtune_metrics_mode"
   )
   expect_identical(rlang::call_name(cnd$call), "nested_tune_grid")

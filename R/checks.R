@@ -1208,13 +1208,13 @@ check_metrics <- function(metrics, call = rlang::caller_env()) {
 }
 
 # The first metric's name, as tune resolves the set for the workflow (M116),
-# or a refusal where it cannot: a set for another model mode, or a model whose
-# mode is unknown. Every fold's run would fail on the same set, so refusing
+# or a refusal where it cannot, as for a set made for another model mode.
+# Every fold's run would fail on the same set, so refusing
 # here saves the whole loop and names the function the user called. tune's
 # own message is kept as the parent.
 check_metrics_mode <- function(metrics, object, call = rlang::caller_env()) {
   rlang::try_fetch(
-    first_metric_name(metrics, object),
+    first_metric_name(metrics, object, call = call),
     error = function(cnd) {
       cli::cli_abort(
         c(

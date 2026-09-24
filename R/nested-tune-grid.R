@@ -1021,8 +1021,9 @@ param_object <- function(id, params) {
 # tune's default set for the workflow's mode (M116). Each fold's run resolves
 # the same name through `tune::.get_tune_metric_names()`; this reads it once,
 # before any fold runs, so the record names it when no fold completes.
-first_metric_name <- function(metrics, object) {
-  names(attr(tune::check_metrics_arg(metrics, object), "metrics"))[[1L]]
+first_metric_name <- function(metrics, object, call = rlang::caller_env()) {
+  set <- tune::check_metrics_arg(metrics, object, call = call)
+  names(attr(set, "metrics"))[[1L]]
 }
 
 # Whether the inner run's metrics table carries `.eval_time`: the metric set

@@ -8,9 +8,10 @@
   `extract_procedure()` returns holds the name as `first_metric`, and the
   summaries carry it as a component of the same name. The help for
   `nested_workflow_map()` says which metric of a `metrics` passed to it
-  selects. A metric set that does not suit the model's mode, such as a
-  classification metric on a regression model, is now refused before any
-  fold runs. Before, every fold ran and failed.
+  selects. The five tuning functions and `nested_workflow_map()` now refuse
+  a metric set that does not suit the model's mode, such as a
+  classification metric on a regression model, before any fold runs.
+  Before, every fold ran and failed.
 
 * The help for `metrics` on `nested_tune_grid()` and its tuning siblings
   says which metric selects and which metrics the outer loop scores. The
