@@ -29,6 +29,10 @@ holding:
 \item the rule the folds selected by, as \code{\link[=extract_procedure]{extract_procedure()}} records it,
 under the name \code{select}. It is \code{NULL} on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
 run, which applies no rule.
+\item the name of the first metric in the set, as \code{\link[=extract_procedure]{extract_procedure()}}
+records it, under the name \code{first_metric}. It is \code{NULL} on a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run, and on a run built before the name was
+recorded.
 \item the candidates, the parameter settings, each fold searched
 \item the metric estimates averaged over them
 }
@@ -60,6 +64,13 @@ example \verb{Selected by: one_std_err by num_comp}. The line is absent under
 the default rule, so its presence is the signal. It prints whether or not
 any fold completed, because the rule describes the procedure the run
 asked for.
+
+Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
+line names the metric that chose each fold's candidate. It reads
+\verb{Selecting metric:} and then the \code{first_metric} component, for example
+\verb{Selecting metric: rmse}. Under the default rule it is the first line
+under the heading. It is absent under the \code{"desirability"} rule, which
+chooses by its goals, and it also prints when no fold completed.
 }
 
 \section{A run that did not finish}{

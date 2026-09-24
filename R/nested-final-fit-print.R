@@ -60,6 +60,13 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' under the default rule and on a fit that tuned nothing. The summary's
 #' `select` component holds the rule as a value.
 #'
+#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
+#' line names the metric that chose the candidate. An example is
+#' `Selecting metric: rmse`.
+#' Under the default rule it follows the `Selected:` line, and otherwise the
+#' `Selected by:` line. It is absent under the `"desirability"` rule, which
+#' chooses by its goals, and on a fit that tuned nothing.
+#'
 #' @template example-setup
 #' @template example-run
 #' @template example-final
@@ -147,6 +154,8 @@ print.nested_final_fit <- function(x, ...) {
 #' - `selection`, the parameter values selection chose
 #' - `select`, the [selection_rule()] the selection was made by, as
 #'   [extract_procedure()] records it
+#' - `first_metric`, the name of the first metric in the set, as
+#'   [extract_procedure()] records it
 #' - `estimate`, always `NULL`
 #'
 #' Printing it is what most callers want. The components are there for a
@@ -160,6 +169,12 @@ print.nested_final_fit <- function(x, ...) {
 #' [selection_rule()] uses after its class tag. The line is absent
 #' under the default rule and on a fit that tuned nothing.
 #'
+#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
+#' line reads `Selecting metric:` and then a name. The name is the
+#' `first_metric` component. Under the default rule it is the first line
+#' under the heading. It is absent
+#' under the `"desirability"` rule and on a fit that tuned nothing.
+#'
 #' @section Components that are absent:
 #'
 #' The four counts are `NULL` on a grid or a racing fit, which iterate over
@@ -170,8 +185,8 @@ print.nested_final_fit <- function(x, ...) {
 #' rather than failing to print.
 #'
 #' Where nothing was tuned there is no run to describe, so `tuning_label`
-#' is `NULL` and `candidates` is `0`. `selection` is empty and `select` is
-#' `NULL`, because no rule was applied.
+#' is `NULL` and `candidates` is `0`. `selection` is empty, and `select`
+#' and `first_metric` are `NULL`, because no rule was applied.
 #'
 #' @template example-setup
 #' @template example-run

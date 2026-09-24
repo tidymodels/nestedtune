@@ -63,7 +63,9 @@ section per workflow. Each section holds that run's design, failed
 folds, selected parameters and estimate. When the tuned workflows ran
 under a rule other than the default, each of their sections adds the
 \verb{Selected by:} line of \code{\link[=summary.nested_results]{summary.nested_results()}} under its selected
-parameters. A workflow with nothing to tune has no such line. The note
+parameters. Each tuned workflow's section also carries that summary's
+\verb{Selecting metric:} line under the rules that print it. A workflow with
+nothing to tune has neither line. The note
 on what a nested estimate describes is printed once, at the end.
 }
 

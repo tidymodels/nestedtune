@@ -36,6 +36,12 @@
 #'   names does not take is refused, as is an unnamed argument or a call with
 #'   no `resamples`.
 #'
+#'   A `metrics` passed here reaches every workflow's run. Under the
+#'   `"best"`, `"one_std_err"` and `"pct_loss"` rules of [selection_rule()],
+#'   its first metric chooses each fold's candidate, and every metric in it
+#'   is scored. The `metrics` entry of [nested_tune_grid()] says what the
+#'   default set is and how the `"desirability"` rule chooses instead.
+#'
 #' @return A `nested_results_set`: a tibble of class
 #'   `c("nested_results_set", "tbl_df", "tbl", "data.frame")` with one row
 #'   per workflow in the set's order and three columns. `wflow_id` is the

@@ -31,6 +31,8 @@ with these components:
 \item \code{selection}, the parameter values selection chose
 \item \code{select}, the \code{\link[=selection_rule]{selection_rule()}} the selection was made by, as
 \code{\link[=extract_procedure]{extract_procedure()}} records it
+\item \code{first_metric}, the name of the first metric in the set, as
+\code{\link[=extract_procedure]{extract_procedure()}} records it
 \item \code{estimate}, always \code{NULL}
 }
 
@@ -63,6 +65,12 @@ directly under the "Selected parameters" heading. It reads \verb{Selected by:}
 and then the rule's name, orderings and limit, in the words the print of
 \code{\link[=selection_rule]{selection_rule()}} uses after its class tag. The line is absent
 under the default rule and on a fit that tuned nothing.
+
+Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
+line reads \verb{Selecting metric:} and then a name. The name is the
+\code{first_metric} component. Under the default rule it is the first line
+under the heading. It is absent
+under the \code{"desirability"} rule and on a fit that tuned nothing.
 }
 
 \section{Components that are absent}{
@@ -76,8 +84,8 @@ whose metrics table cannot be read reports its scored figures as zero
 rather than failing to print.
 
 Where nothing was tuned there is no run to describe, so \code{tuning_label}
-is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty and \code{select} is
-\code{NULL}, because no rule was applied.
+is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty, and \code{select}
+and \code{first_metric} are \code{NULL}, because no rule was applied.
 }
 
 \examples{

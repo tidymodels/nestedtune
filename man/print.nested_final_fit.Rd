@@ -53,6 +53,13 @@ uses after its class tag, for example
 \verb{Selected by: pct_loss by num_comp (limit = 5)}. The line is absent
 under the default rule and on a fit that tuned nothing. The summary's
 \code{select} component holds the rule as a value.
+
+Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
+line names the metric that chose the candidate. An example is
+\verb{Selecting metric: rmse}.
+Under the default rule it follows the \verb{Selected:} line, and otherwise the
+\verb{Selected by:} line. It is absent under the \code{"desirability"} rule, which
+chooses by its goals, and on a fit that tuned nothing.
 }
 
 \examples{

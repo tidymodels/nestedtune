@@ -144,6 +144,10 @@ print_failure_count <- function(x) {
 #' - the rule the folds selected by, as [extract_procedure()] records it,
 #'   under the name `select`. It is `NULL` on a [nested_fit_resamples()]
 #'   run, which applies no rule.
+#' - the name of the first metric in the set, as [extract_procedure()]
+#'   records it, under the name `first_metric`. It is `NULL` on a
+#'   [nested_fit_resamples()] run, and on a run built before the name was
+#'   recorded.
 #' - the candidates, the parameter settings, each fold searched
 #' - the metric estimates averaged over them
 #'
@@ -160,6 +164,13 @@ print_failure_count <- function(x) {
 #' the default rule, so its presence is the signal. It prints whether or not
 #' any fold completed, because the rule describes the procedure the run
 #' asked for.
+#'
+#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
+#' line names the metric that chose each fold's candidate. It reads
+#' `Selecting metric:` and then the `first_metric` component, for example
+#' `Selecting metric: rmse`. Under the default rule it is the first line
+#' under the heading. It is absent under the `"desirability"` rule, which
+#' chooses by its goals, and it also prints when no fold completed.
 #'
 #' @section A run that did not finish:
 #'
