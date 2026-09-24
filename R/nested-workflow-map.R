@@ -122,7 +122,9 @@
 #' orchestrator raises for one workflow is raised the same way, when that
 #' workflow's turn comes. A `grid` that names a parameter that workflow
 #' does not tune is one such error, and a control of the wrong class is
-#' another. The workflows before it have run by then. What is raised is
+#' another. The workflows before it have run by then. A `metrics` that
+#' does not suit a tuned workflow's model is the exception: it is refused
+#' before any workflow runs. What is raised is
 #' the original condition
 #' object, with `Workflow "<id>": ` written in front of the first line of
 #' its message and this function, or the reading function, as its call.

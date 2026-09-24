@@ -99,6 +99,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: implement resumed after defect return 2. Question gate: the user chose an entry refusal over a `tryCatch` to `NULL`, because the refusal keeps AC1 and AC2 as written and follows GP3. Minor amendment: T4 added for the refusal and the two fix-now findings, with a Coverage line. T4 code, tests, help, NEWS and the D-081 sentence written; the new tests pass (the refusal on a direct call, and the refusal in a set before any workflow runs, asserted by zero warnings); document() regenerated 9 pages; all six sweeps clean. Full suite running (checkpoint, T4 not ticked).
 - 2026-09-24: claim audit: 23 claims read, 2 corrected — NEWS.md, R/checks.R. NEWS now limits the refusal to the five tuning functions and the map, since `nested_fit_resamples()` does not refuse; the `check_metrics_mode()` comment drops an unknown-mode case `workflow()` already refuses. `first_metric_name()` now passes `call` to tune, so the parent condition names the user's function too. The suite run started before these edits was stopped and restarted.
 - 2026-09-24: T4 done. The auditor's re-read held both corrections and asked that NEWS limit the map's refusal to the workflows it tunes, which it now does. Full suite under NOT_CRAN=true after the last code change: 89 files, 992 tests, 0 failed, 0 errors, 0 skipped. document() leaves no diff, and all six sweeps are clean. Status set to review.
+- step-7 approval: m116-selecting-metric approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
@@ -142,3 +143,15 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - AC5 (pass 3): `devtools::test()` under NOT_CRAN=true, 89 files, 992 tests, 0 failed (flake exception not used); `devtools::document()` no diff; the six gating sweeps `--list-gating` prints are clean; `devtools::check()` 0 errors, 0 warnings, 0 notes; `NEWS.md` has one entry for the line, the record entry and the refusal.
 - Consistency gate (pass 3): `cairn_validate` all checks passed (18 references-staleness advisories); `pkgdown::check_pkgdown()` no problems; README not touched; the one new file is a test, so no `.Rbuildignore` entry is needed; no DESIGN principle changed, so `cairn_impact` is skipped.
 - Pass 3, independent review: [S] blame-history found nothing. [S] prior-review found no regression of an archived review and noted that the pass-2 dispositions were still pending. Its claim that [O]2 is still open is rejected, because tune's `check_metrics_arg()` rejects on mode alone, which the T4 tests cover. [O] diff-bug found no correctness defect: tune and finetune call the same `check_metrics_arg()` on the same workflow, so the refusal rejects nothing tune accepts. Its eight ranked items (P1-P8) go to the step-7 gate with the pending pass-2 items.
+- Step-7 triage (the user accepted every proposed disposition):
+  - P1: fix now. The refusal header now reads "tune refused `metrics` for this workflow", with the bullet "Each fold's run would fail on it, so no fold was run", and tune's message kept as the parent.
+  - P3: fix now. The map help's error-timing section now names the `metrics` refusal as the exception that comes before any workflow runs.
+  - P2: follow-up, as a new candidate ROADMAP row (the search found no existing row).
+  - P4: rejected, because a `NULL` default kept in the record follows existing practice (`param_info`, `eval_time`).
+  - P5 / [O]3: rejected, because D-081 intends the entry under every rule.
+  - P6 / [O]6: rejected as informational, since the name matches tune's.
+  - P7: rejected, because every tuner reaches the refusal through the one `nested_loop()`.
+  - P8 / [O]4: noted.
+  - [O]5 and [O]7: fixed in T4.
+  - [O]2: closed by T4's tests.
+- After the fixes: `test-selection-metric.R` passes (27 expectations, 0 failed; no test reads the message text), `document()` regenerated one page, and the six sweeps are clean. The full suite runs on the PR's CI.

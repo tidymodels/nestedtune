@@ -1218,8 +1218,8 @@ check_metrics_mode <- function(metrics, object, call = rlang::caller_env()) {
     error = function(cnd) {
       cli::cli_abort(
         c(
-          "{.arg metrics} does not suit the workflow's model.",
-          i = "tune could not resolve the metric set for this model's mode."
+          "tune refused {.arg metrics} for this workflow.",
+          i = "Each fold's run would fail on it, so no fold was run."
         ),
         parent = cnd,
         class = "nestedtune_metrics_mode",
