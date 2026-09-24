@@ -142,6 +142,9 @@ pca_workflow <- function(
   workflows::workflow(rec, model)
 }
 
+# The Bayesian record's workflow, spelled as `bayes_workflow()` spells it:
+# the identity check compares selectors as deparsed text, so a bare `x1`
+# would differ from the record's `"x1"` before any other field is read.
 ns_workflow <- function(
   d,
   first = "x1",
@@ -151,10 +154,10 @@ ns_workflow <- function(
   rec <- recipes::step_ns(
     recipes::step_ns(
       base_recipe(d),
-      !!rlang::sym(first),
+      !!first,
       deg_free = tune::tune("df1")
     ),
-    !!rlang::sym(second),
+    !!second,
     deg_free = df2
   )
   workflows::workflow(rec, parsnip::linear_reg())
@@ -309,7 +312,7 @@ test_that("AC2: the preprocessor axes are refused on the three records", {
     "The recipe's step count differs: 1 recorded, 2 given"
   )
   removed <- workflows::workflow(
-    recipes::step_ns(base_recipe(d), x1, deg_free = tune::tune("df1")),
+    recipes::step_ns(base_recipe(d), "x1", deg_free = tune::tune("df1")),
     parsnip::linear_reg()
   )
   expect_mismatch(
@@ -317,10 +320,12 @@ test_that("AC2: the preprocessor axes are refused on the three records", {
     bayes,
     "The recipe's step count differs: 2 recorded, 1 given"
   )
+  # String selectors, as the record spells them (see `ns_workflow()`), so
+  # the step order is the only difference.
   reordered <- workflows::workflow(
     recipes::step_ns(
-      recipes::step_ns(base_recipe(d), x2, deg_free = tune::tune("df2")),
-      x1,
+      recipes::step_ns(base_recipe(d), "x2", deg_free = tune::tune("df2")),
+      "x1",
       deg_free = tune::tune("df1")
     ),
     parsnip::linear_reg()
@@ -328,7 +333,7 @@ test_that("AC2: the preprocessor axes are refused on the three records", {
   expect_mismatch(
     reordered,
     bayes,
-    "The recipe's step 1 (step_ns) selector differs: recorded \"x1\", given \"x2\""
+    "The recipe's step 1 (step_ns) selector differs: recorded \"\\\"x1\\\"\", given \"\\\"x2\\\"\""
   )
 
   # A step with a different selector, and one with a different setting;

@@ -90,3 +90,58 @@ and an earlier set of three passes beside a covr run read 1329.2, 1338.7 and
 32.3. The largest drops from the branch point: `test-time-series-bayes.R`
 112.4 to 59.2, `test-time-series-race.R` 47.3 to 17.8,
 `test-time-series-anneal.R` 45.0 to 10.8.
+
+## M114 (2026-09-23): string selectors in the Bayesian fixtures
+
+Same script and conditions as M113, on mains power throughout, three passes
+per tree, one tree right after the other. The branch point ran in a clean
+worktree at `1aef465`. The head ran in the branch checkout. Its code is that
+of `507906d`, and the script printed `39f4232`, a later commit that changed
+only tracking files.
+
+| Tree | Pass 1 | Pass 2 | Pass 3 | Median | Counts |
+|---|---:|---:|---:|---:|---|
+| `1aef465` | 762.5 | 762.2 | 827.8 | 762.5 | pass 11387, fail 0, skip 0 |
+| `39f4232` | 549.1 | 550.0 | 544.4 | 549.1 | pass 11387, fail 0, skip 0 |
+
+The head's median is 72.0% of the branch point's. The change is two fixtures
+in `helper-orchestration.R`, `bayes_workflow()` and `srv_spline_workflow()`,
+naming their spline columns by string. `benchmarks/recipes-tune-args-cost.R`
+shows why: one `tune_args()` call on `step_ns(x1)` took 7.40 ms and on
+`step_ns("x1")` 0.60 ms.
+
+| File | `1aef465` | `39f4232` | Head / branch point |
+|---|---:|---:|---:|
+| `test-time-series-bayes.R` | 57.6 | 17.9 | 31.1% |
+| `test-nested-tune-bayes-oracles.R` | 59.9 | 20.3 | 33.9% |
+| `test-parallel-identity.R` | 61.8 | 40.0 | 64.7% |
+| `test-nested-tune-grid-oracles.R` | 52.4 | 23.1 | 44.1% |
+
+Per-block comparison: `benchmarks/test-blocks.R` ran one serial pass per tree,
+and the tables sit beside it as `test-blocks-1aef465.csv` and
+`test-blocks-39f4232.csv`. Joined on file and test name, all 977 blocks in 88
+files appear on both trees with the same expectation count. No block failed,
+errored or skipped on either tree. `Config/testthat/start-first` is re-cut to
+the head's eleven heaviest files.
+
+The review re-ran both trees the same way on 2026-09-23. The branch point ran
+at `1aef465`, and the head at `f88dd63`, whose code is that of `791bbfc`. Suite
+totals were 694.8, 776.5 and 904.4 s against 604.4, 593.8 and 605.3 s. The
+median seconds of the eleven files `start-first` names, in its order:
+
+| File | `1aef465` | `f88dd63` |
+|---|---:|---:|
+| `test-parallel-identity.R` | 52.4 | 41.7 |
+| `test-time-series-designs.R` | 30.4 | 30.3 |
+| `test-nested-tune-race-oracles.R` | 27.8 | 27.3 |
+| `test-nested-tune-grid-oracles.R` | 46.7 | 24.5 |
+| `test-nested-tune-bayes-oracles.R` | 59.7 | 22.1 |
+| `test-nested-results-print.R` | 25.1 | 30.0 |
+| `test-nested-tune-finalize.R` | 19.2 | 21.1 |
+| `test-time-series-bayes.R` | 52.0 | 19.9 |
+| `test-model-spec-input.R` | 17.7 | 18.6 |
+| `test-nested-tune-grid-failures.R` | 18.5 | 17.4 |
+| `test-time-series-race.R` | 20.0 | 19.1 |
+
+In this run, `test-nested-workflow-map-oracles.R` took 17.6 s, 0.2 s more than
+`test-nested-tune-grid-failures.R`, so the two traded places at the cut.
