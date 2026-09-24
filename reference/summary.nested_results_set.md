@@ -89,9 +89,10 @@ folds, selected parameters and estimate. When the tuned workflows ran
 under a rule other than the default, each of their sections adds the
 `Selected by:` line of
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
-under its selected parameters. A workflow with nothing to tune has no
-such line. The note on what a nested estimate describes is printed once,
-at the end.
+under its selected parameters. Each tuned workflow's section also
+carries that summary's `Selecting metric:` line under the rules that
+print it. A workflow with nothing to tune has neither line. The note on
+what a nested estimate describes is printed once, at the end.
 
 ## What [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) draws
 
@@ -209,6 +210,7 @@ summary(res)
 #> Outer folds: 2 requested, 2 completed
 #> 
 #> ── Selected parameters 
+#> Selecting metric: rmse
 #> ✔ num_comp: 1 (all 2 completed folds agree)
 #> 
 #> ── Estimate (2 of 2 outer folds) 

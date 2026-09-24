@@ -338,6 +338,7 @@ final
 #> ── Nested cross-validation final fit ──────────────────────────────────
 #> Procedure: grid search, 2 candidates scored
 #> Selected: num_comp = 1
+#> Selecting metric: rmse
 #> 
 #> ℹ Report the nested estimate from `collect_metrics()` on the results
 #>   object this fit was built from. For a fit built from a workflow set,

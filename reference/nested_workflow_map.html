@@ -110,7 +110,14 @@ two.</p></dd>
 as <code>resamples</code> (required), any of its other arguments, and a <code>control</code>
 as it takes one through its own <code>...</code>. A name the orchestrator <code>fn</code>
 names does not take is refused, as is an unnamed argument or a call with
-no <code>resamples</code>.</p></dd>
+no <code>resamples</code>.</p>
+<p>A <code>metrics</code> passed here reaches every workflow's run. Under the
+<code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules of <code><a href="selection_rule.html">selection_rule()</a></code>,
+its first metric chooses each fold's candidate, and every metric in it
+is scored. The <code>metrics</code> entry of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> says what <code>NULL</code>
+means and how the <code>"desirability"</code> rule chooses instead. A set that
+does not suit a tuned workflow's model is refused before any workflow
+runs.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -202,7 +209,9 @@ reading function still learns which workflow lost folds.</p>
 orchestrator raises for one workflow is raised the same way, when that
 workflow's turn comes. A <code>grid</code> that names a parameter that workflow
 does not tune is one such error, and a control of the wrong class is
-another. The workflows before it have run by then. What is raised is
+another. The workflows before it have run by then. A <code>metrics</code> that
+does not suit a tuned workflow's model is the exception: it is refused
+before any workflow runs. What is raised is
 the original condition
 object, with <code>Workflow "&lt;id&gt;": </code> written in front of the first line of
 its message and this function, or the reading function, as its call.

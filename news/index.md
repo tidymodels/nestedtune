@@ -2,6 +2,23 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`summary()`](https://rdrr.io/r/base/summary.html) of a nested result,
+  of a workflow-set result and of a final fit, and the final fit’s
+  print, name the metric that chose the selected candidates. A line such
+  as `Selecting metric: rmse` prints under the `"best"`, `"one_std_err"`
+  and `"pct_loss"` rules, the default included. It is absent under the
+  `"desirability"` rule. The record that
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  returns holds the name as `first_metric`, and the summaries carry it
+  as a component of the same name. The help for
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  says which metric of a `metrics` passed to it selects. The five tuning
+  functions, and
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  for the workflows it tunes, now refuse a metric set that does not suit
+  the model’s mode, such as a classification metric on a regression
+  model, before any fold runs. Before, every fold ran and failed.
+
 - The help for `metrics` on
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   and its tuning siblings says which metric selects and which metrics

@@ -497,6 +497,7 @@ summary(mapped)
 #> Outer folds: 5 requested, 5 completed
 #> 
 #> ── Selected parameters
+#> Selecting metric: rmse
 #> ! mtry: 8, 5, 8, 5, 5 (folds disagree)
 #> ✔ min_n: 2 (all 5 completed folds agree)
 #> 
@@ -522,6 +523,7 @@ summary(mapped)
 #> Outer folds: 5 requested, 5 completed
 #> 
 #> ── Selected parameters
+#> Selecting metric: rmse
 #> ✔ num_comp: 1 (all 5 completed folds agree)
 #> 
 #> ── Estimate (5 of 5 outer folds)

@@ -56,6 +56,12 @@ class `summary.nested_results`, a list holding:
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   run, which applies no rule.
 
+- the name of the first metric in the set, as
+  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
+  records it, under the name `first_metric`. It is `NULL` on a
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  run, and on a run built before the name was recorded.
+
 - the candidates, the parameter settings, each fold searched
 
 - the metric estimates averaged over them
@@ -77,6 +83,16 @@ uses after its class tag, for example
 default rule, so its presence is the signal. It prints whether or not
 any fold completed, because the rule describes the procedure the run
 asked for.
+
+Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
+line names the metric that chose each fold's candidate. It reads
+`Selecting metric:` and then the `first_metric` component, for example
+`Selecting metric: rmse`. Under the default rule it is the first line
+under the heading. It is absent under the `"desirability"` rule, which
+chooses by its goals, on a
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+run, and on a run whose record holds no `first_metric`. It also prints
+when no fold completed.
 
 ## A run that did not finish
 
@@ -121,6 +137,7 @@ summary(res)
 #> 
 #> ── Selected parameters ──
 #> 
+#> Selecting metric: rmse
 #> ✔ num_comp: 1 (all 2 completed folds agree)
 #> 
 #> ── Estimate (2 of 2 outer folds) ──

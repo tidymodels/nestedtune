@@ -130,7 +130,9 @@ section per workflow. Each section holds that run's design, failed
 folds, selected parameters and estimate. When the tuned workflows ran
 under a rule other than the default, each of their sections adds the
 <code>Selected by:</code> line of <code><a href="summary.nested_results.html">summary.nested_results()</a></code> under its selected
-parameters. A workflow with nothing to tune has no such line. The note
+parameters. Each tuned workflow's section also carries that summary's
+<code>Selecting metric:</code> line under the rules that print it. A workflow with
+nothing to tune has neither line. The note
 on what a nested estimate describes is printed once, at the end.</p>
     </div>
     <div class="section level2">
@@ -242,6 +244,7 @@ there while drawing no rule.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Outer folds: 2 requested, 2 completed</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Selected parameters </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Selecting metric: rmse</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> num_comp: 1 (all 2 completed folds agree)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Estimate (2 of 2 outer folds) </span>

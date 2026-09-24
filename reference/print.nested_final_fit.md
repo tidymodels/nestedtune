@@ -66,6 +66,13 @@ uses after its class tag, for example
 under the default rule and on a fit that tuned nothing. The summary's
 `select` component holds the rule as a value.
 
+Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
+line names the metric that chose the candidate. An example is
+`Selecting metric: rmse`. Under the default rule it follows the
+`Selected:` line, and otherwise the `Selected by:` line. It is absent
+under the `"desirability"` rule, which chooses by its goals, on a fit
+that tuned nothing, and on a fit whose record holds no `first_metric`.
+
 ## See also
 
 [`summary.nested_final_fit()`](https://nestedtune.tidymodels.org/reference/summary.nested_final_fit.md),
@@ -98,6 +105,7 @@ final
 #> ── Nested cross-validation final fit ──────────────────────────────────
 #> Procedure: grid search, 2 candidates scored
 #> Selected: num_comp = 1
+#> Selecting metric: rmse
 #> 
 #> ℹ Report the nested estimate from `collect_metrics()` on the results
 #>   object this fit was built from. For a fit built from a workflow set,

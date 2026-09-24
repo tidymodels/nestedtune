@@ -138,6 +138,9 @@ nested_tune_grid(
   you read, the run chooses under one loss and assesses under another.
   For example, `metric_set(mae, rmse)` chooses by `mae` and also reports
   `rmse`. Stone (1974, p. 116) says that the two losses need not match.
+  A set that tune cannot use for the model's mode, such as a
+  classification metric on a regression model, is refused before any
+  fold runs.
 
 - event_level:
 

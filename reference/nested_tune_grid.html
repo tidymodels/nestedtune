@@ -184,7 +184,10 @@ metric. The outer loop scores every metric in the set, and
 <p>So the order of the set matters. If the first metric is not the one you
 read, the run chooses under one loss and assesses under another. For
 example, <code>metric_set(mae, rmse)</code> chooses by <code>mae</code> and also reports
-<code>rmse</code>. Stone (1974, p. 116) says that the two losses need not match.</p></dd>
+<code>rmse</code>. Stone (1974, p. 116) says that the two losses need not match.
+A set that tune cannot use for the model's mode, such as a
+classification metric on a regression model, is refused before any
+fold runs.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>

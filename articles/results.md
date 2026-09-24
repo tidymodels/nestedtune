@@ -264,6 +264,7 @@ summary(res)
 #> 
 #> ── Selected parameters ──
 #> 
+#> Selecting metric: rmse
 #> ! mtry: 8, 8, 5, 8, 5 (folds disagree)
 #> ✔ min_n: 2 (all 5 completed folds agree)
 #> 

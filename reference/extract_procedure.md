@@ -57,14 +57,19 @@ own arguments beside it:
 
 `select` is the
 [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-each fold selected by. `param_info`, `event_level` and `eval_time` are
-as they were given. `control` is the control object the run was given,
-or tune's default when none was, with the slots this package forces
-already applied. On a Bayesian result `seed` is left out. A
-`"fit_resamples"` record carries no `param_info` and no `select`,
-because no parameter set was read and no rule applied. See "Differences
-from calling tune directly" on each loop function's help page for what
-those slots are.
+each fold selected by. `first_metric` is the name of the first metric in
+the set, as tune resolves it for the workflow. A run given no metric set
+names the first metric of tune's default set. Under the `"best"`,
+`"one_std_err"` and `"pct_loss"` rules, that metric chooses each fold's
+candidate. The Bayesian search, the two races and the annealing search
+steer on it under every rule. `param_info`, `event_level` and
+`eval_time` are as they were given. `control` is the control object the
+run was given, or tune's default when none was, with the slots this
+package forces already applied. On a Bayesian result `seed` is left out.
+A `"fit_resamples"` record carries no `param_info`, no `select` and no
+`first_metric`, because no parameter set was read and no rule applied.
+See "Differences from calling tune directly" on each loop function's
+help page for what those slots are.
 
 `workflow` is the identity of the model specification and the
 preprocessor the run was given: the model's type, engine, mode and

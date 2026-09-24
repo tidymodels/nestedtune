@@ -123,6 +123,8 @@ with these components:</p><ul><li><p><code>tuning_label</code>, the tuning run's
 <li><p><code>selection</code>, the parameter values selection chose</p></li>
 <li><p><code>select</code>, the <code><a href="selection_rule.html">selection_rule()</a></code> the selection was made by, as
 <code><a href="extract_procedure.html">extract_procedure()</a></code> records it</p></li>
+<li><p><code>first_metric</code>, the name of the first metric in the set, as
+<code><a href="extract_procedure.html">extract_procedure()</a></code> records it</p></li>
 <li><p><code>estimate</code>, always <code>NULL</code></p></li>
 </ul><p>Printing it is what most callers want. The components are there for a
 caller that needs a value rather than a line of text.</p>
@@ -138,6 +140,11 @@ directly under the "Selected parameters" heading. It reads <code>Selected by:</c
 and then the rule's name, orderings and limit, in the words the print of
 <code><a href="selection_rule.html">selection_rule()</a></code> uses after its class tag. The line is absent
 under the default rule and on a fit that tuned nothing.</p>
+<p>Under the <code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules, one more
+line reads <code>Selecting metric:</code> and then a name. The name is the
+<code>first_metric</code> component. Under the default rule it is the first line
+under the heading. It is absent under the <code>"desirability"</code> rule, on a
+fit that tuned nothing, and on a fit whose record holds no <code>first_metric</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="components-that-are-absent">Components that are absent<a class="anchor" aria-label="anchor" href="#components-that-are-absent"></a></h2>
@@ -151,8 +158,8 @@ and the requested ones are the counts the search was called with. A run
 whose metrics table cannot be read reports its scored figures as zero
 rather than failing to print.</p>
 <p>Where nothing was tuned there is no run to describe, so <code>tuning_label</code>
-is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>selection</code> is empty and <code>select</code> is
-<code>NULL</code>, because no rule was applied.</p>
+is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>selection</code> is empty, and <code>select</code>
+and <code>first_metric</code> are <code>NULL</code>, because no rule was applied.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -187,6 +194,7 @@ is <code>NULL</code> and <code>candidates</code> is <code>0</code>. <code>select
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Selected parameters</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Selecting metric: rmse</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> num_comp: 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Estimate</span> ──</span>

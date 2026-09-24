@@ -125,6 +125,13 @@ uses after its class tag, for example
 <code>Selected by: pct_loss by num_comp (limit = 5)</code>. The line is absent
 under the default rule and on a fit that tuned nothing. The summary's
 <code>select</code> component holds the rule as a value.</p>
+<p>Under the <code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules, one more
+line names the metric that chose the candidate. An example is
+<code>Selecting metric: rmse</code>.
+Under the default rule it follows the <code>Selected:</code> line, and otherwise the
+<code>Selected by:</code> line. It is absent under the <code>"desirability"</code> rule, which
+chooses by its goals, on a fit that tuned nothing, and on a fit whose
+record holds no <code>first_metric</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -156,6 +163,7 @@ under the default rule and on a fit that tuned nothing. The summary's
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Nested cross-validation final fit</span> <span style="color: #00BBBB;">──────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Procedure: grid search, 2 candidates scored</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Selected: num_comp = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Selecting metric: rmse</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Report the nested estimate from `collect_metrics()` on the results</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   object this fit was built from. For a fit built from a workflow set,</span>
