@@ -92,7 +92,10 @@ nested_fit_resamples(
 
   A
   [`yardstick::metric_set()`](https://yardstick.tidymodels.org/reference/metric_set.html),
-  or `NULL` to compute a standard set of metrics.
+  or `NULL` for tune's default set. The outer loop scores every metric
+  in the set, and
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  reports each one.
 
 - event_level:
 

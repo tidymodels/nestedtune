@@ -2,6 +2,18 @@
 
 ## nestedtune 0.0.0.9000
 
+- The help for `metrics` on
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  and its tuning siblings says which metric selects and which metrics
+  the outer loop scores. The “Running the loop” section of the nested
+  cross-validation guide says so too. Under the `"best"`,
+  `"one_std_err"` and `"pct_loss"` rules, the first metric in the set
+  chooses each fold’s candidate. Every metric in the set is scored, so
+  `metric_set(mae, rmse)` chooses by `mae` and also reports `rmse`. The
+  help for `metrics` on
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  says that every metric in the set is scored.
+
 - [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
   gains a fourth rule, `"desirability"`, which selects with
   [`desirability2::select_best_desirability()`](https://desirability2.tidymodels.org/reference/show_best_desirability.html)

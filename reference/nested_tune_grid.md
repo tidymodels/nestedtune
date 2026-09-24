@@ -116,7 +116,28 @@ nested_tune_grid(
 
   A
   [`yardstick::metric_set()`](https://yardstick.tidymodels.org/reference/metric_set.html),
-  or `NULL` to compute a standard set of metrics.
+  or `NULL` for tune's default set. Under the `"best"`, `"one_std_err"`
+  and `"pct_loss"` rules of
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
+  the first metric in the set chooses each fold's candidate. The
+  `"desirability"` rule chooses by its goals instead.
+  `nested_tune_grid()` and
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  accept that rule, and the racing and annealing tuners refuse it.
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+  [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+  [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+  and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  also steer their inner search on the first metric. The outer loop
+  scores every metric in the set, and
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  reports each one.
+
+  So the order of the set matters. If the first metric is not the one
+  you read, the run chooses under one loss and assesses under another.
+  For example, `metric_set(mae, rmse)` chooses by `mae` and also reports
+  `rmse`. Stone (1974, p. 116) says that the two losses need not match.
 
 - event_level:
 
@@ -694,6 +715,12 @@ reaches what it saved.
 
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.
+
+## References
+
+Stone, M. (1974). Cross-validatory choice and assessment of statistical
+predictions. *Journal of the Royal Statistical Society, Series B*,
+36(2), 111–147.
 
 ## See also
 

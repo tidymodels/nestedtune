@@ -168,8 +168,20 @@ be useful when parameter ranges need to be customized.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
-<dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> to compute a standard
-set of metrics.</p></dd>
+<dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> for tune's default
+set. Under the <code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules of
+<code><a href="selection_rule.html">selection_rule()</a></code>, the first metric in the set chooses each fold's
+candidate. The <code>"desirability"</code> rule chooses by its goals instead.
+<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> accept that rule, and the
+racing and annealing tuners refuse it. <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and
+<code>nested_tune_sim_anneal()</code> also steer their inner search on the first
+metric. The outer loop scores every metric in the set, and
+<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports each one.</p>
+<p>So the order of the set matters. If the first metric is not the one you
+read, the run chooses under one loss and assesses under another. For
+example, <code>metric_set(mae, rmse)</code> chooses by <code>mae</code> and also reports
+<code>rmse</code>. Stone (1974, p. 116) says that the two losses need not match.</p></dd>
 
 
 <dt id="arg-initial">initial<a class="anchor" aria-label="anchor" href="#arg-initial"></a></dt>
@@ -436,6 +448,12 @@ once per tune call.</p>
 selects at the first of the evaluation times the tuning run was built
 with, which are the ones named here. Passing them again changes no
 choice, and repeats tune's message about which time it took.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Stone, M. (1974). Cross-validatory choice and assessment of statistical
+predictions. <em>Journal of the Royal Statistical Society, Series B</em>, 36(2),
+111–147.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

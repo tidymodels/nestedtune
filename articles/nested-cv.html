@@ -193,6 +193,15 @@ of tune’s selectors, pass a <code><a href="../reference/selection_rule.html">s
 the <code>select</code> argument. Every statistical step is tune’s. This
 package adds the loop, the seeding, and a result that keeps what each
 fold chose.</p>
+<p>The order of the <code>metrics</code> set matters. tune’s three
+selectors choose on the first metric in the set, and the outer loop
+scores every metric in it. If the first metric is not the one you read,
+the run chooses under one loss and assesses under another. For example,
+<code>metric_set(mae, rmse)</code> chooses by <code>mae</code> and also
+reports <code>rmse</code>. Stone (1974, p. 116) says that the two losses
+need not match. The run below passes no set, so it uses tune’s default
+for a regression, <code>metric_set(rmse, rsq)</code>, and chooses by
+<code>rmse</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -471,6 +480,13 @@ that built the deployed model, and it is the number reported for that
 model. The instability is reported rather than hidden. The deployed
 model is described as what it is: the same procedure applied to all the
 data, so there is no second number to compute for it.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Stone, M. (1974). Cross-validatory choice and assessment of
+statistical predictions. <em>Journal of the Royal Statistical Society,
+Series B</em>, 36(2), 111–147.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
