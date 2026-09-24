@@ -42,7 +42,9 @@ batch_ms <- function(step) {
     seq_len(ceiling(calls / 10)),
     function(i) {
       t0 <- proc.time()[["elapsed"]]
-      for (j in 1:10) generics::tune_args(step)
+      for (j in 1:10) {
+        generics::tune_args(step)
+      }
       proc.time()[["elapsed"]] - t0
     },
     numeric(1)
