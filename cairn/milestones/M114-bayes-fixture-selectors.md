@@ -61,6 +61,7 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: T1 done. Branch point `1aef465` on mains power, three serial passes: 762.5, 762.2 and 827.8 s, pass 11387, fail 0, skip 0. Medians: `test-nested-tune-bayes-oracles.R` 59.9 s, `test-time-series-bayes.R` 57.6 s. Block table `benchmarks/test-blocks-1aef465.csv`: 977 blocks in 88 files, file and test keys unique.
 - 2026-09-23: scope amended at a mini gate (user chose amend). The string fixtures failed two expectations in `test-nested-final-fit-identity.R`. The identity check compares selectors as deparsed text, and `ns_workflow()` and the reordered recipe still wrote bare names. Those two now use strings. The first Out bullet now names them. No criterion changed. The planned falsifier on `R/` spelling branches did not fire: `R/workflow-identity.R` deparses both spellings on one path.
 - 2026-09-23: T2 done. `benchmarks/recipes-tune-args-cost.R` prints 7.40 ms for `step_ns(x1)` and 0.60 ms for `step_ns("x1")`, ratio 12.3. An Rprof of the bare call puts 76% of its time in `conditionMessage()` cli formatting inside `try()`. Both fixtures use strings. `test-time-series-bayes.R` ran in 19.6 s and `test-nested-tune-bayes-oracles.R` in 20.7 s, no failures. `devtools::test()` clean: 11387 expectations, 0 failed.
+- 2026-09-23: checkpoint. T3 head passes running. T4 in part: issue search found only #1506 and #1296, both about wrong results. Draft in `M114-recipes-issue.md` still holds a placeholder for the head figures, and its example is not yet run.
 
 ## Decisions
 
