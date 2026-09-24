@@ -1486,6 +1486,18 @@ test_that("M116 AC2: a set names the selecting metric in the tuned workflow's se
     expect_true(tuned < at && at < fixed)
   }
 
+  # A tuned workflow whose record holds no entry prints no line.
+  old <- rule_set_results(selection_rule("best"))
+  i <- which(old$wflow_id == "tuned")
+  res <- old$result[[i]]
+  procedure <- attr(res, "procedure")
+  procedure$first_metric <- NULL
+  attr(res, "procedure") <- procedure
+  old$result[[i]] <- res
+  expect_s3_class(old, "nested_results_set")
+  lines <- strsplit(print_text(summary(old)), "\n")[[1L]]
+  expect_length(selecting_metric_lines(lines), 0L)
+
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
   des <- rule_set_results(selection_rule("desirability", maximize(rsq)))
   lines <- strsplit(print_text(summary(des)), "\n")[[1L]]

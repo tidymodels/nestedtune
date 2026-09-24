@@ -91,6 +91,7 @@ The summaries and the final fit's print name the metric that chose each fold's c
 - 2026-09-24: status set to review. Only help and comment text changed after the last suite run; document() and all six sweeps are clean after the corrections.
 - 2026-09-24: review started; moved the eight implement lines that had landed under Review into this log, unchanged. Checkpoint: full suite still running, AC2 gap found (see Review once recorded).
 - 2026-09-24: review returned to in-progress (defect return 1). AC2 fails as written: no expectation asserts that the set summary prints no `Selecting metric:` line on a record without `first_metric`, one of the absences AC2 names on each of the four surfaces. Fix: add that expectation to `tests/testthat/test-nested-results-print.R`, then re-run `/milestone-review M116`. AC5 left unverified because review stopped before `devtools::check()`.
+- 2026-09-24: implement resumed after defect return 1; no question gate. Added the set-summary expectation for a record without `first_metric` to the M116 AC2 set test in `test-nested-results-print.R`; the file passes (the test runs 9 expectations, 0 failed). Full suite running (checkpoint).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
