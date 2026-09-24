@@ -56,7 +56,10 @@ cat(sprintf("recipes:  %s\n", utils::packageVersion("recipes")))
 cat(sprintf("purrr:    %s\n", utils::packageVersion("purrr")))
 cat(sprintf("cli:      %s\n", utils::packageVersion("cli")))
 cat(sprintf("R:        %s\n", R.version.string))
-cat(sprintf("calls:    %d per spelling, timed in batches of 10\n\n", calls))
+cat(sprintf(
+  "calls:    %d per spelling, timed in batches of 10\n\n",
+  10L * as.integer(ceiling(calls / 10))
+))
 cat(sprintf("step_ns(x1)    %6.2f ms per call\n", ms[["bare"]]))
 cat(sprintf("step_ns(\"x1\")  %6.2f ms per call\n", ms[["string"]]))
 cat(sprintf("ratio          %6.1f\n", ms[["bare"]] / ms[["string"]]))

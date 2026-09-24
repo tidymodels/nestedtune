@@ -123,3 +123,25 @@ and the tables sit beside it as `test-blocks-1aef465.csv` and
 files appear on both trees with the same expectation count. No block failed,
 errored or skipped on either tree. `Config/testthat/start-first` is re-cut to
 the head's eleven heaviest files.
+
+The review re-ran both trees the same way on 2026-09-23. The branch point ran
+at `1aef465`, and the head at `f88dd63`, whose code is that of `791bbfc`. Suite
+totals were 694.8, 776.5 and 904.4 s against 604.4, 593.8 and 605.3 s. The
+median seconds of the eleven files `start-first` names, in its order:
+
+| File | `1aef465` | `f88dd63` |
+|---|---:|---:|
+| `test-parallel-identity.R` | 52.4 | 41.7 |
+| `test-time-series-designs.R` | 30.4 | 30.3 |
+| `test-nested-tune-race-oracles.R` | 27.8 | 27.3 |
+| `test-nested-tune-grid-oracles.R` | 46.7 | 24.5 |
+| `test-nested-tune-bayes-oracles.R` | 59.7 | 22.1 |
+| `test-nested-results-print.R` | 25.1 | 30.0 |
+| `test-nested-tune-finalize.R` | 19.2 | 21.1 |
+| `test-time-series-bayes.R` | 52.0 | 19.9 |
+| `test-model-spec-input.R` | 17.7 | 18.6 |
+| `test-nested-tune-grid-failures.R` | 18.5 | 17.4 |
+| `test-time-series-race.R` | 20.0 | 19.1 |
+
+In this run, `test-nested-workflow-map-oracles.R` took 17.6 s, 0.2 s more than
+`test-nested-tune-grid-failures.R`, so the two traded places at the cut.

@@ -27,15 +27,13 @@ sapply(steps, ms_per_call)
 #>    6.4    0.6
 ```
 
-A longer run of the same measurement used 200 calls per spelling. It gave these figures, with recipes 1.4.0, purrr 1.2.2, cli 3.6.6 and R 4.6.1 on macOS:
+`benchmarks/recipes-tune-args-cost.R` in our repository takes the same 200 calls per spelling after one warm-up call. It gave these figures, with recipes 1.4.0, purrr 1.2.2, cli 3.6.6 and R 4.6.1 on macOS:
 
 | selector | ms per call |
 |---|---:|
 | `step_ns(x1)` | 7.40 |
 | `step_ns("x1")` | 0.60 |
 
-An `Rprof()` of 300 calls on the bare-name step put 94% of the time inside `try()`. It put 76% inside `conditionMessage()` and cli's formatting.
-
-tune calls `tune_args()` often during a search. In our package's tests, two Bayesian-search fixtures changed from bare names to strings. Two test files that use them went from 57.6 s and 59.9 s to 17.9 s and 20.3 s (medians of three serial runs). The whole test suite went from 762.5 s to 549.1 s.
+tune calls `tune_args()` often during a search. In our package's tests, two Bayesian-search fixtures changed from bare names to strings. Two test files that use them went from 57.6 s and 59.9 s to 17.9 s and 20.3 s (medians of three serial runs). The whole test suite went from 762.5 s to 549.1 s, also medians of three serial runs.
 
 One possible fix skips the evaluation when the quosure's expression is a bare symbol. Another uses `tryCatch()` with a handler that does not read the message. We did not test either change.

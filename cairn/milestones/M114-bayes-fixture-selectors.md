@@ -67,6 +67,8 @@ The plan measured the cause on 2026-09-23. The candidate row blamed Gaussian-pro
 - 2026-09-23: T4 done. No existing recipes report on the cost. The draft's example ran and printed 6.4 and 0.6 ms. It carries the head file times.
 - 2026-09-23: claim audit: not owed — internal tier
 - 2026-09-23: implement complete. Status set to review.
+- 2026-09-23: review: AC1-AC4 pass on fresh runs, gate clean, 9 findings triaged (7 fixed, 1 rejected, 1 follow-up). Recipes issue kept as a draft.
+- 2026-09-23: step-7 approval: m114-bayes-fixture-selectors approved for merge
 
 ## Decisions
 
@@ -92,3 +94,14 @@ Independent review: three fresh reviewers. The history reader found nothing that
 - O7: the `removed` probe in `test-nested-final-fit-identity.R:315` still writes bare `x1` against the string-spelled Bayesian record. It passes because the step-count check fires first.
 - O8: the identity check treats `step_ns(x1)` and `step_ns("x1")` as different workflows, so a user who switches spelling after a run gets a mismatch. This predates M114 and has no Known issues entry.
 - O9: `test-blocks.R`'s summary line counts failed blocks but sums skips and errors.
+
+Triage at the gate (user chose the recommended dispositions):
+
+- O1 fixed: the M114 baseline section now lists the review run's medians for the eleven `start-first` files on both trees. It also records that `test-nested-workflow-map-oracles.R` ran 0.2 s longer than `test-nested-tune-grid-failures.R` at the cut.
+- O2, O3, O4 fixed in the draft. Line 30 names the script and its warm-up call, the unpinned Rprof sentence is gone, and the suite totals say they are medians.
+- O5 fixed: the script prints the call count it timed. With argument 25 it printed 30.
+- O6 rejected: a pointer to the figures is what the derived-claims rule prefers over a second copy.
+- O7 fixed: the `removed` probe uses `"x1"`. The identity file run alone gave 13 blocks, 221 expectations and 0 failures before and after the edit.
+- O8 follow-up: a DESIGN Known issues entry at hygiene.
+- O9 fixed: the summary line counts blocks for all three states.
+- The recipes issue is not posted. The user chose to keep it as a draft.

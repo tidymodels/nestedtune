@@ -312,7 +312,7 @@ test_that("AC2: the preprocessor axes are refused on the three records", {
     "The recipe's step count differs: 1 recorded, 2 given"
   )
   removed <- workflows::workflow(
-    recipes::step_ns(base_recipe(d), x1, deg_free = tune::tune("df1")),
+    recipes::step_ns(base_recipe(d), "x1", deg_free = tune::tune("df1")),
     parsnip::linear_reg()
   )
   expect_mismatch(

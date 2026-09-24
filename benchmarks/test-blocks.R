@@ -41,12 +41,12 @@ blocks <- blocks[order(blocks$file, blocks$test), ]
 utils::write.csv(blocks, out, row.names = FALSE)
 
 cat(sprintf(
-  "%s: %d blocks in %d files | %d expectations | failed %d | skipped %d | error %d\n",
+  "%s: %d blocks in %d files | %d expectations | blocks failed %d, skipped %d, errored %d\n",
   system("git rev-parse --short HEAD", intern = TRUE),
   nrow(blocks),
   length(unique(blocks$file)),
   sum(blocks$expectations),
   sum(blocks$failed > 0),
-  sum(blocks$skipped),
-  sum(blocks$error)
+  sum(blocks$skipped > 0),
+  sum(blocks$error > 0)
 ))
