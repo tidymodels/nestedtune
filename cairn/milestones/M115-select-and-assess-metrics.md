@@ -1,6 +1,6 @@
 # M115: The help and the guide say which metric selects and which metrics the outer loop scores
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,7 +38,7 @@ The help and the guide tell a user how to choose each fold's candidate under one
 - [x] T1: Add a test block to `tests/testthat/test-metrics-argument.R` on `sep_data()`, `sep_workflow()`, `sep_nested()` and `sep_grid()`. For each rule, compare every fold's `.selected` and outer `rmse` with `reference_nested_loop(metric_name = "mae", select = ...)` (`helper-orchestration.R:130`). Under each rule, assert that `metric_set(rmse, mae)` changes `.selected` in at least one fold. A comment says why the ordering is `desc(num_comp)`: with `num_comp` both orders choose one component in every fold. Use `memoised()` and pin the seeds as the file's other blocks do.
 - [x] T2: Give `nested_tune_grid()` its own `@param metrics` with AC2's four statements. Name the tuners that refuse `"desirability"` (`R/tuner.R:117-158`). A source comment cites the `first_metric()` calls in tune's `tune_bayes()` and in finetune's racers and annealer. `nested_fit_resamples()` inherits from `nested_tune_grid` first (`R/nested-fit-resamples.R:23`). So give it its own `@param metrics` that states only (3). Make sure that the bayes, race and sim_anneal pages inherit the grid text (`R/nested-tune-bayes.R:25`, `R/nested-tune-race.R:32`, `R/nested-tune-sim-anneal.R:24`). Run `devtools::document()`.
 - [x] T3: Extend the "Running the loop" paragraph (`vignettes/nested-cv.Rmd:131-140`) with AC3's prose. Keep it to plain sentences with no em dashes.
-- [ ] T4: Run `benchmarks/sweep-prose.R` over the changed help and guide, read the rendered `metrics` entries of all five pages, and run the profile's `verify` slot.
+- [x] T4: Run `benchmarks/sweep-prose.R` over the changed help and guide, read the rendered `metrics` entries of all five pages, and run the profile's `verify` slot.
 
 ## Work log
 
@@ -53,6 +53,7 @@ The help and the guide tell a user how to choose each fold's candidate under one
 - 2026-09-24: T2 done. `nested_tune_grid()` has its own `@param metrics`, which the Bayes, race and annealing pages inherit. `nested_fit_resamples()` has a one-statement entry. The grid page has a references entry that the other three inherit. A source comment at the first-metric lookup cites the four `first_metric()` calls.
 - 2026-09-24: T3 done. A second paragraph in "Running the loop" and a References section in `vignettes/nested-cv.Rmd`. No code chunk added.
 - 2026-09-24: claim audit: 17 claims read, 0 corrected — R/nested-tune-grid.R, R/nested-fit-resamples.R, R/nested-tune-bayes.R, R/nested-tune-race.R, R/nested-tune-sim-anneal.R, tests/testthat/test-metrics-argument.R, vignettes/nested-cv.Rmd
+- 2026-09-24: T4 done. The six gating sweeps are clean. The five rendered `metrics` entries were read. Full suite 0 failures, 11406 passes, and `document()` leaves no diff. Added a `NEWS.md` entry, a sub-task the review gate's changelog check needs. Status set to review.
 
 ## Decisions
 
