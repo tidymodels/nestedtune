@@ -646,10 +646,12 @@ TS_DATA <- list(
 )
 
 # The three inner sliding designs (M119), each under the rolling-origin outer
-# design, built on `make_ts_data()` because two of them need `date`. Each
-# inner design has four, six and then eight or seven resamples across the
-# three outer folds. `sliding_period()` takes five-week analysis sets and
-# holds out the next week.
+# design, built on `make_ts_data()` because two of them need `date`. The
+# sliding-window and sliding-index designs have four, six and eight inner
+# resamples across the three outer folds, and sliding-period has four, five
+# and seven. `sliding_period()` takes analysis sets of the current week and
+# the five weeks before it, and holds out the next week, which in a fold's
+# last resample can be a partial week.
 ts_inner_window_nested <- function(data) {
   rsample::nested_cv(
     data,
