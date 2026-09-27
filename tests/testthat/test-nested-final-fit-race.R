@@ -12,6 +12,8 @@
 #   hand-rolled reference pipeline", for each racer, on the stochastic
 #   fixture so a mis-seeded fit cannot agree by accident.
 
+skip_heavy_on_cran()
+
 race_final_and_reference <- function(fn) {
   d <- make_reg_data()
   wf <- stoch_workflow(d)

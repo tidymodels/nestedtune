@@ -14,6 +14,8 @@
 # shuffling the inner resamples before the burn-in, which is why even the
 # deterministic fixture's record depends on the seed.
 
+skip_heavy_on_cran()
+
 race_run <- function(fn, wf, folds, ms, ctrl = race_control()) {
   race_call_by_name(
     fn,

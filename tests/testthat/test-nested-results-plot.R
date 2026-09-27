@@ -8,6 +8,8 @@
 # mistaken for an oracle, the marked estimate against collect_metrics(), is
 # asserted for exactly that reason: the two must never be able to disagree.
 
+skip_heavy_on_cran()
+
 test_that("the parameters view draws one point per completed fold", {
   skip_if_no_engines()
   d <- make_reg_data()

@@ -7,6 +7,8 @@
 # range restricts the grid every fold searches -- with the unrestricted run
 # beside it as the control that shows the restriction is doing the work.
 
+skip_heavy_on_cran()
+
 NARROW_THRESHOLD <- c(0.05, 0.15)
 
 narrow_param_info <- function(wf) {

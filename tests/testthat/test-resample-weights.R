@@ -27,6 +27,8 @@
 #   `collect_metrics()` is tune's weighted branch itself. Every-fold case
 #   only, where tune and this package agree.
 
+skip_heavy_on_cran()
+
 weighted_design <- function(data, weights = c(1, 2, 3)) {
   tune::add_resample_weights(det_nested(data), weights)
 }

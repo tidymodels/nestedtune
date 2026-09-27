@@ -30,6 +30,8 @@
 # still has those properties -- without it the difference clauses below would
 # pass vacuously on a fixture that had drifted.
 
+skip_heavy_on_cran()
+
 cls_estimate <- function(res, i, metric) {
   m <- res$.metrics[[i]]
   m$.estimate[m$.metric == metric]

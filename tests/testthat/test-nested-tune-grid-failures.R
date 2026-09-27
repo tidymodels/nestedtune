@@ -4,6 +4,8 @@
 # tuning raises, while the outer fit returns quietly with no metrics. A driver
 # that only catches thrown errors passes half of this file.
 
+skip_heavy_on_cran()
+
 test_that("a fold that fails at inner tuning does not abort the run", {
   skip_if_no_engines()
   d <- make_reg_data()

@@ -11,6 +11,8 @@
 # AC1: every tuner the registry enumerates records the identity, and so
 # does each row of a set and the final fit's own record.
 
+skip_heavy_on_cran()
+
 test_that("AC1: every orchestrator's result records the workflow it ran under", {
   skip_if_no_race_fixture()
   skip_if_no_anneal_fixture()

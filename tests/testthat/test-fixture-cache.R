@@ -12,6 +12,8 @@
 # over the formals `nested_tune_grid()` and `nested_final_fit()` declare at
 # test time, rather than over a list of signatures someone remembered to write.
 
+skip_heavy_on_cran()
+
 # A stand-in for the orchestrator: cheap, and net-zero on the RNG exactly as
 # `nested_tune_grid()` and `nested_final_fit()` are (D-011). Nothing here fits a
 # model -- what is under test is the cache, not the loop.

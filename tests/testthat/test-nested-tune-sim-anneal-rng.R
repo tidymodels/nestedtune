@@ -15,6 +15,8 @@
 # from the stream the fold's tuning seed started -- which is why even the
 # deterministic fixture's record depends on the seed.
 
+skip_heavy_on_cran()
+
 anneal_run <- function(wf, folds, p, ms, ctrl = anneal_control()) {
   nested_tune_sim_anneal(
     wf,

@@ -5,6 +5,8 @@
 # row's prediction columns are that row's entry in the stacked predictions,
 # and the data columns are the data as the design holds it.
 
+skip_heavy_on_cran()
+
 # A regression run on `folds`, saving predictions, served from the cache.
 augment_run <- function(
   data,

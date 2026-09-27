@@ -15,6 +15,8 @@
 # tune's own `set.seed(control$seed + i)` calls, which is what the seed rule
 # fixes.
 
+skip_heavy_on_cran()
+
 bayes_tuner <- function() tuner_bayes(2, 3, tune::exp_improve())
 
 # The seed-77 run is built once and read back by the different-seed test

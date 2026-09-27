@@ -44,6 +44,8 @@
 # hand. The estimate itself adds nothing new for these designs, so no
 # second oracle type is asked of them here.
 
+skip_heavy_on_cran()
+
 expect_matches_reference <- function(res, ref) {
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
   expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))

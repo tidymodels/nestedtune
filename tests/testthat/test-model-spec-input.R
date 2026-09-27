@@ -4,6 +4,8 @@
 # tune's order, wraps the two in `workflows::workflow(preprocessor, object)`,
 # and calls the generic again, so the run is the workflow path's own.
 
+skip_heavy_on_cran()
+
 ORCHESTRATORS <- c(
   "nested_tune_grid",
   "nested_tune_bayes",

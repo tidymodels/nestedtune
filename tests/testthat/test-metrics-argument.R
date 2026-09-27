@@ -27,6 +27,8 @@
 # two would pass vacuously against a future tune whose defaults had changed,
 # which is the failure mode this file exists to prevent.
 
+skip_heavy_on_cran()
+
 test_that("the fixture separates the caller's metric set from tune's default", {
   skip_if_no_engines()
 

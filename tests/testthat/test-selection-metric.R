@@ -4,6 +4,8 @@
 # call every fold and the final fit select on. It is compared with the entry
 # on both the results object and the final fit built from it.
 
+skip_heavy_on_cran()
+
 expect_first_metric <- function(res, final) {
   want <- tune::.get_tune_metric_names(extract_tune_results(final))[[1L]]
   expect_identical(extract_procedure(res)$first_metric, want)

@@ -62,6 +62,8 @@
 #   `.iter`-bearing run picks the row the package picked, and routes the tail
 #   through upstream code. Satisfies AC3's second clause.
 
+skip_heavy_on_cran()
+
 # One final fit and one reference per file rather than per test (M74): both
 # are built once and served from the cache to the two strands below, as
 # bayes_final_and_reference() does for the Bayesian path.

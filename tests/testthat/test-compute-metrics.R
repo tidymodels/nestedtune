@@ -7,6 +7,8 @@
 # metric on each fold's rows of `collect_predictions()`, and the summary
 # computed by hand from those per-fold numbers, never from the method.
 
+skip_heavy_on_cran()
+
 # The runs, each served from the fixture cache. The two repeated fixtures
 # build their design inline. The others take it from the `*_nested()` helpers.
 saved_reg_run <- function() {

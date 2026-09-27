@@ -4,6 +4,8 @@
 # contract says. Every identity below is between two direct calls, never
 # through `memoised()` (the M42 lesson).
 
+skip_heavy_on_cran()
+
 test_that("AC6: the same seed gives identical results across two direct calls", {
   skip_if_no_engines(stochastic = TRUE)
 

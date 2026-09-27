@@ -5,6 +5,8 @@
 # M42 lesson), and every fixture is built before the state is read: a recipe
 # draws its step id from the stream.
 
+skip_heavy_on_cran()
+
 test_that("AC2: the caller's RNG state and kind survive the call untouched", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()

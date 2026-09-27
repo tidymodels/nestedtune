@@ -12,6 +12,8 @@
 # approved snapshot records whatever the code printed, not what it owed, so a
 # criterion that must hold is asserted in words as well as recorded in shape.
 
+skip_heavy_on_cran()
+
 # The summary's rendered text, for the assertions below. Wrapped because a
 # partial run warns by design (AC3) and the warning is asserted where it is the
 # subject, not in every block that reads the text.

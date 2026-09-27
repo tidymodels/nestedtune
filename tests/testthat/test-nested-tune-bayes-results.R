@@ -4,6 +4,8 @@
 # rather than as a parameter, and every result of either orchestrator records
 # the procedure that produced it.
 
+skip_heavy_on_cran()
+
 # ---- the candidate set derived from a metrics table --------------------------
 
 # A metrics table as `candidate_set()` reads it: tune's summary rows, one per

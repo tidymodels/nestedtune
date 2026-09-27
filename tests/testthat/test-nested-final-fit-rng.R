@@ -6,6 +6,8 @@
 # was when the call returns -- including when the call errors. Tests that could
 # pass vacuously under a deterministic engine use ranger.
 
+skip_heavy_on_cran()
+
 test_that("the same seed produces the same final fit", {
   skip_if_no_engines(stochastic = TRUE)
 

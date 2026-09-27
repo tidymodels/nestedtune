@@ -10,6 +10,8 @@
 
 # ---- the generic and its refusals (AC1) --------------------------------------
 
+skip_heavy_on_cran()
+
 test_that("agreement() refuses objects that are not nested results, naming both", {
   skip_if_no_engines()
   d <- make_reg_data()
