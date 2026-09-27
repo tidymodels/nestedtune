@@ -74,6 +74,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - 2026-09-27: second re-audit is the stop, so the user chose the narrowing to helper names absent under `tests/` at the branch point. AC4 now reads as in the criteria list. The findings still wait for triage at the re-review gate.
 - 2026-09-27: status set to review.
 - 2026-09-27: re-review gate triage applied: F1 prose fix, O3, O8, O9, O10, O12 and O13 fixed, O7 to a candidate row. Checkpoint before the full suite and a CRAN-conditions check re-verify the fixes.
+- step-7 approval: m118-cran-test-time approved for merge
 
 ## Decisions
 
