@@ -53,6 +53,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: T1-T3 done. `TS_INNER_DESIGNS` holds the three fixtures, and `expect_final_matches_reference()` moved to the helper with an `inner` argument. `devtools::test()`: 1010 blocks, 0 failures, 0 errors, 8 min 11 s.
 - 2026-09-27: T4 done. Help, `NEWS.md` and D-083 written, `devtools::document()` rewrote six Rd files, both prose sweeps clean. No "inner" hit in R/, man/, NEWS.md, vignettes/ or the README limits the tested inner designs to `rolling_origin()`.
 - 2026-09-27: claim audit: 16 claims read, 2 corrected — tests/testthat/helper-orchestration.R (the inner resample counts, and the six-week sliding-period analysis sets). Re-read by the same reader is pending.
+- 2026-09-27: the same reader re-read the two corrected claims and the added partial-week clause once, and found that all three hold.
 
 ## Decisions
 
