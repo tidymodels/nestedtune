@@ -162,3 +162,38 @@ test_that("R-CMD-check.yaml builds and checks the vignettes on macOS alone", {
     )
   )
 })
+
+# The uncommented `NESTEDTUNE_FULL_SUITE:` lines of a workflow file.
+full_suite_lines <- function(lines) {
+  grep("^\\s*NESTEDTUNE_FULL_SUITE:", lines, value = TRUE)
+}
+
+# The check matrix runs the tests `skip_heavy_on_cran()` keeps off CRAN, and the
+# hard-dependency job runs the CRAN subset. The matrix sets the switch once, in
+# the job's own `env:` at six spaces, so every leg inherits it; a step-level or
+# per-leg setting would sit deeper.
+test_that("the check matrix runs the full suite and the hard job does not", {
+  matrix_path <- workflow_path("R-CMD-check.yaml")
+  hard_path <- workflow_path("R-CMD-check-hard.yaml")
+  skip_if_not(
+    file.exists(matrix_path) && file.exists(hard_path),
+    "workflow sources are not in the built package"
+  )
+
+  expect_identical(
+    full_suite_lines(readLines(matrix_path, warn = FALSE)),
+    "      NESTEDTUNE_FULL_SUITE: true"
+  )
+  expect_length(full_suite_lines(readLines(hard_path, warn = FALSE)), 0L)
+})
+
+test_that("full_suite_lines() reads setting lines and not comments", {
+  lines <- c(
+    "    env:",
+    "      # NESTEDTUNE_FULL_SUITE: true",
+    "      NESTEDTUNE_FULL_SUITE: true",
+    "      TESTTHAT_CPUS: 4"
+  )
+  expect_identical(full_suite_lines(lines), "      NESTEDTUNE_FULL_SUITE: true")
+  expect_length(full_suite_lines(lines[-3]), 0L)
+})

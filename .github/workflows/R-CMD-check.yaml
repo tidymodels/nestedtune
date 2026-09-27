@@ -153,6 +153,11 @@ jobs:
       # image (read 2026-09-03 from the hosted-runner sizes page). testthat
       # defaults to 2 when this is unset, which leaves half the cores idle.
       TESTTHAT_CPUS: ${{ matrix.config.os == 'macos-latest' && 3 || 4 }}
+      # Runs the tests that `skip_heavy_on_cran()` keeps off CRAN
+      # (tests/testthat/helper-cran.R). `NOT_CRAN` stays unset here, so the
+      # mirai daemon tests still skip on these legs, as before.
+      # R-CMD-check-hard.yaml leaves this unset and runs the CRAN subset.
+      NESTEDTUNE_FULL_SUITE: true
 
     steps:
       - uses: actions/checkout@v7

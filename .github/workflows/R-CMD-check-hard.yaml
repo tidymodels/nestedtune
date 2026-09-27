@@ -60,6 +60,9 @@ jobs:
       # core, and this leg runs on ubuntu alone (4 vCPUs). Unset, testthat
       # would use 2.
       TESTTHAT_CPUS: 4
+      # `NESTEDTUNE_FULL_SUITE` is deliberately unset, so this job runs the
+      # tests CRAN runs: the ones `skip_heavy_on_cran()` does not skip
+      # (tests/testthat/helper-cran.R). R-CMD-check.yaml sets it.
 
     steps:
       - uses: actions/checkout@v7
