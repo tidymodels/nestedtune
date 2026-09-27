@@ -49,7 +49,15 @@
 #' on the rolling-origin design, and so is [nested_final_fit()] for their
 #' results, plus the sliding-window design for [nested_tune_bayes()]
 #' results. [nested_workflow_map()] is tested on the rolling-origin design.
-#' An inner design other than [rsample::rolling_origin()] is not tested.
+#'
+#' An outer [rsample::rolling_origin()] with an inner
+#' [rsample::sliding_window()], [rsample::sliding_index()] or
+#' [rsample::sliding_period()] is tested to give the same splits as
+#' [rsample::nested_cv()]. [nested_tune_grid()] is tested on these three
+#' designs, and so is [nested_final_fit()] for its results. The other
+#' orchestrators, [nested_workflow_map()] and the other three outer designs
+#' are not tested with these inner designs. Any other inner design is not
+#' tested.
 #'
 #' @section Memory:
 #'

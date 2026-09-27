@@ -1,13 +1,13 @@
 # M119: Inner sliding-window, sliding-index and sliding-period designs
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — the help and `NEWS.md` state which designs a user can rely on
-- **Branch/PR:** —
+- **Branch/PR:** m119-inner-sliding-designs
 
 ## Goal
 
@@ -49,6 +49,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: criteria audit (full mode, fresh reader) returned 9 findings, all fixed at the gate. AC1 now uses `expect_ts_matches_reference()` and literal inner calls, and names the split class. AC2 adds the outer check. AC3 adds the split check. AC4 reads every "inner" hit and states what is untested. T4's D-entry supersedes D-078's clause. AC5 keeps "0 notes".
 - 2026-09-27: plan gate chose `nested_tune_grid()` and `nested_final_fit()` over all seven functions, because tune accepts any rset and the CI legs were near their caps in M111. Falsified by a tuner failing on an inner sliding design that passes under grid.
 - 2026-09-27: plan gate chose an outer `rolling_origin()` alone over all four outer designs, because the outer design never reaches the tuner (D-079). Falsified by a sliding outer design failing with an inner sliding design that passes under rolling-origin.
+- 2026-09-27: checkpoint, in-progress. T1-T4 edits written, no task checked off yet. The new file passes serially in 24 s, and a planted copy that passes the default inner call fails the three final-fit tests. The full suite and `devtools::document()` are still owed.
 
 ## Decisions
 

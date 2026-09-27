@@ -645,6 +645,73 @@ TS_DATA <- list(
   "sliding-period" = make_ts_data
 )
 
+# The three inner sliding designs (M119), each under the rolling-origin outer
+# design, built on `make_ts_data()` because two of them need `date`. Each
+# inner design has four, six and then eight or seven resamples across the
+# three outer folds. `sliding_period()` takes five-week analysis sets and
+# holds out the next week.
+ts_inner_window_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
+    inside = rsample::sliding_window(lookback = 39, assess_stop = 1, step = 5)
+  )
+}
+
+ts_inner_index_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
+    inside = rsample::sliding_index(
+      index = date,
+      lookback = 39,
+      assess_stop = 1,
+      step = 5
+    )
+  )
+}
+
+ts_inner_period_nested <- function(data) {
+  rsample::nested_cv(
+    data,
+    outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
+    inside = rsample::sliding_period(index = date, period = "week", lookback = 5)
+  )
+}
+
+# The inner sliding designs by name: the nested builder, the inner split
+# class it builds, and its literal inner call for a reference final fit to
+# build on the full data (M119).
+TS_INNER_DESIGNS <- list(
+  "sliding-window" = list(
+    build = ts_inner_window_nested,
+    split_class = "sliding_window_split",
+    inner = function(data) {
+      rsample::sliding_window(data, lookback = 39, assess_stop = 1, step = 5)
+    }
+  ),
+  "sliding-index" = list(
+    build = ts_inner_index_nested,
+    split_class = "sliding_index_split",
+    inner = function(data) {
+      rsample::sliding_index(
+        data,
+        index = date,
+        lookback = 39,
+        assess_stop = 1,
+        step = 5
+      )
+    }
+  ),
+  "sliding-period" = list(
+    build = ts_inner_period_nested,
+    split_class = "sliding_period_split",
+    inner = function(data) {
+      rsample::sliding_period(data, index = date, period = "week", lookback = 5)
+    }
+  )
+)
+
 # The fixtures' inner call, spelled out for a reference final fit to build on
 # the full data (M110).
 ts_inner <- function(data) {
@@ -677,6 +744,59 @@ expect_ts_final_matches <- function(final, ref, d) {
     predict(extract_workflow(final), new_data = d),
     predict(ref$workflow, new_data = d)
   )
+}
+
+# A grid final fit on a time-series design against one run by hand (M108,
+# M111). `inner` is the fixture's literal inner call as a function of the
+# data, and its default is `ts_inner()`, the `rolling_origin()` call of the
+# outer-design fixtures (M119). Returns the final fit, so a caller can assert
+# more of it.
+expect_final_matches_reference <- function(d, folds, inner = ts_inner) {
+  wf <- det_workflow(d)
+  ms <- ts_metrics()
+  grid <- det_grid()
+
+  set.seed(20)
+  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
+  set.seed(31)
+  final <- nested_final_fit(wf, res)
+
+  # The reference runs under the final fit's own two seeds, with the kind
+  # pinned, and builds its inner design from the fixture's literal call on
+  # the full data.
+  set.seed(
+    final$tuning_seed,
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  inner_rs <- inner(d)
+  tuned <- tune::tune_grid(
+    wf,
+    resamples = inner_rs,
+    grid = grid,
+    metrics = ms,
+    control = tune::control_grid(allow_par = FALSE)
+  )
+  best <- tune::select_best(tuned, metric = "rmse")
+  set.seed(
+    final$fit_seed,
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  ref <- parsnip::fit(tune::finalize_workflow(wf, best), data = d)
+
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$in_id),
+    lapply(inner_rs$splits, function(s) s$in_id)
+  )
+  expect_identical(final$selected, best)
+  expect_identical(
+    predict(final, new_data = d),
+    predict(ref, new_data = d)
+  )
+  invisible(final)
 }
 
 # The results objects a final fit is built from (M46, D-041): one nested run

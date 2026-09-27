@@ -1901,6 +1901,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `nested_loop()` runs the entry check for every tuner, and it records `first_metric` only for a tuner that selects. The refusal keeps the class `nestedtune_metrics_mode`. `nested_workflow_map()`'s pre-check covers the workflows it routes to `nested_fit_resamples()`. The change ships as an error with no deprecation period, because the package has no release (user waiver at M117's plan gate). The rest of D-081 stands.
 **Consequences:** a call that returned all-failed folds with a warning now stops with an error. Falsified by a metric set that `tune::check_metrics_arg()` refuses and `tune::fit_resamples()` accepts inside a fold.
 
+### D-083 (2026-09-27): inner `sliding_window()`, `sliding_index()` and `sliding_period()` designs are claimed under an outer `rolling_origin()` for `nested_tune_grid()` and `nested_final_fit()`. Extends D-078, and supersedes its clause leaving every inner design other than `rolling_origin()` unclaimed
+
+**Context:** D-078 claims four outer time-series designs, each with an inner `rolling_origin()`, and leaves every other inner design unclaimed. M119 tests the three sliding designs as the inner design under an outer `rolling_origin()`, against the grid reference loop, `rsample::nested_cv()`'s splits, and a hand-run final fit. No package code changed.
+**Decision:** the claim covers those three designs under `nested_tune_grid()`, under `nested_final_fit()` for its results, and in `nested_resamples()`. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state it and state what is not tested. The other five orchestrators, `nested_workflow_map()`, and the three sliding outer designs are not claimed with these inner designs. Considered and rejected at M119's plan gate: all seven functions, and all four outer designs, each because it adds CI time without reaching a code path the grid run does not.
+**Consequences:** one candidate row holds the unclaimed pairs. Falsified by a tuner failing on an inner sliding design that passes under grid, or by a sliding outer design failing with an inner sliding design that passes under rolling-origin. (Supersedes D-078's Consequences clause on inner designs other than `rolling_origin()`.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
