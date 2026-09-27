@@ -1,6 +1,8 @@
 # Printing a final fit, and the generics it deliberately does not answer
 # (AC4, AC10).
 
+skip_heavy_on_cran()
+
 # The message's sentence for a fit built from a set, matched across the
 # console's line wraps.
 set_rows_wording <- gsub(

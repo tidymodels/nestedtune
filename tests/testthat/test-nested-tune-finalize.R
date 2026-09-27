@@ -21,6 +21,8 @@
 # row-identity assertion behind both: the frame every finalizer call is handed
 # is one outer fold's analysis frame and no other rows.
 
+skip_heavy_on_cran()
+
 # The fixture: a 200-row frame, five outer folds of four inner folds, so each
 # fold's analysis set holds 160 rows. Inner v = 4 clears the racers' burn-in
 # floor (R/checks.R, `check_race_burn_in()`); the `inside` arguments are

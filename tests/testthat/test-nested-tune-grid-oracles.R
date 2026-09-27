@@ -53,6 +53,8 @@
 # change. The O3 test below asserts the part that IS this package's contract:
 # each fold's record matches what that fold ran.
 
+skip_heavy_on_cran()
+
 test_that("per-fold metrics and selections match a hand-rolled reference loop", {
   skip_if_no_engines()
 

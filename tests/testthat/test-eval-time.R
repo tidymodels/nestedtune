@@ -38,6 +38,8 @@
 # them a run at either time would agree with a run at the other for reasons
 # having nothing to do with whether the argument was forwarded.
 
+skip_heavy_on_cran()
+
 test_that("both evaluation times have observations at risk and events on either side", {
   skip_if_no_censored()
 

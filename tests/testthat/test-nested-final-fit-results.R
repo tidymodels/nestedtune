@@ -1,6 +1,8 @@
 # What the final fit hands back (AC1): its object, the workflow's predictions,
 # and the rows it was trained on, all read off one cached fit.
 
+skip_heavy_on_cran()
+
 test_that("the final fit returns a trained workflow inside its own object", {
   skip_if_no_engines()
 

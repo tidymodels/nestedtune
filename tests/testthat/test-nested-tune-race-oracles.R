@@ -42,6 +42,8 @@
 # itself is finetune's, inside D-002's boundary, and no independent oracle for
 # it exists here.
 
+skip_heavy_on_cran()
+
 test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order (AC1)", {
   # Method by method since M107, each export being a generic on `object`.
   for (cls in c("workflow", "model_spec")) {

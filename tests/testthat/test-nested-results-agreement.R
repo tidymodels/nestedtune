@@ -8,6 +8,8 @@
 # fold is counted exactly once) is asserted on every fixture beside them. No
 # statistic is computed here that an oracle would need to confirm.
 
+skip_heavy_on_cran()
+
 # ---- the generic and its refusals (AC1) --------------------------------------
 
 test_that("agreement() refuses objects that are not nested results, naming both", {

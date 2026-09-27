@@ -5,6 +5,8 @@
 # metric when its label is that metric's name, alone or followed by the
 # qualifiers the view adds (" at time ...", " (from ...").
 
+skip_heavy_on_cran()
+
 panels_of <- function(p) {
   unique(panel_labels(ggplot2::ggplot_build(p)))
 }

@@ -7,6 +7,8 @@
 # Q8). Every test that could pass vacuously under a deterministic engine uses
 # ranger instead, whose fits draw from R's RNG.
 
+skip_heavy_on_cran()
+
 test_that("the same seed produces the same result", {
   skip_if_no_engines(stochastic = TRUE)
 

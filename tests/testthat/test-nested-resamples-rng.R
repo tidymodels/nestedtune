@@ -4,6 +4,8 @@
 # ignored the seed would pass a same-seed test trivially), and that fidelity to
 # rsample extends to how much randomness is consumed.
 
+skip_heavy_on_cran()
+
 test_that("the same seed produces the same object", {
   d <- make_test_data()
 

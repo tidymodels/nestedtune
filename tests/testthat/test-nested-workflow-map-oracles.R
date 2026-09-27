@@ -13,6 +13,8 @@
 # The hand call is `hand_call()` in helper-orchestration.R, which
 # test-time-series-designs.R also uses (M110).
 
+skip_heavy_on_cran()
+
 for (fn in MAP_FNS) {
   test_that(
     paste0("AC1: each element is identical to the hand call (fn = ", fn, ")"),

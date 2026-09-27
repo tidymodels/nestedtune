@@ -26,6 +26,8 @@
 # hand. The estimate itself adds nothing new for these designs, so no second
 # oracle type is asked of them here.
 
+skip_heavy_on_cran()
+
 ts_race_run <- function(fn, wf, folds, g, ms, ctrl) {
   set.seed(23)
   memoised(race_call_by_name(

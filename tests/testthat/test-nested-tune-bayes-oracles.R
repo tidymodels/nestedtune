@@ -46,6 +46,8 @@
 # Gaussian-process search inside D-002's boundary, and no independent oracle
 # for them exists here or in a review brief (plan gate, 2026-09-01).
 
+skip_heavy_on_cran()
+
 test_that("per-fold metrics and selections match a hand-rolled Bayesian reference loop", {
   skip_if_no_bayes_fixture()
 

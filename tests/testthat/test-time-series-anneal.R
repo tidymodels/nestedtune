@@ -25,6 +25,8 @@
 # hand. The estimate itself adds nothing new for these designs, so no second
 # oracle type is asked of them here.
 
+skip_heavy_on_cran()
+
 ts_anneal_run <- function(wf, folds, ms, ctrl) {
   set.seed(24)
   memoised(nested_tune_sim_anneal(

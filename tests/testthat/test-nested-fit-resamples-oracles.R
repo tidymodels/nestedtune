@@ -48,6 +48,8 @@
 # session seed, the two optional columns present exactly when asked for, and
 # a failing fold recorded as such.
 
+skip_heavy_on_cran()
+
 test_that("AC1: every fold's metrics are identical to fit_resamples() on the same outer splits", {
   skip_if_no_engines()
 

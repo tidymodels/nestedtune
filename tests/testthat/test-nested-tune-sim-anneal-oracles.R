@@ -34,6 +34,8 @@
 # finetune's own search inside D-002's boundary, and no independent oracle
 # for them exists here.
 
+skip_heavy_on_cran()
+
 test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1 (AC1)", {
   expect_identical(
     names(formals(nested_tune_sim_anneal.workflow)),

@@ -1,3 +1,5 @@
+skip_heavy_on_cran()
+
 example_results <- function(v = 3, metrics = reg_metrics(), seed = 55) {
   d <- make_reg_data()
   wf <- det_workflow(d)

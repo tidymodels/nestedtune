@@ -8,6 +8,8 @@
 # check, and before any seed is drawn (AC2). test-workflow-identity.R pins
 # the identity function itself.
 
+skip_heavy_on_cran()
+
 # AC1: every tuner the registry enumerates records the identity, and so
 # does each row of a set and the final fit's own record.
 
