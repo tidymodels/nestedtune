@@ -1,6 +1,6 @@
 # M118: The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,13 +21,13 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 
 ## Acceptance criteria
 
-- [ ] AC1: Under CRAN conditions, the median of three runs of the `Running 'testthat.R'` line reports at most 120 s of CPU time. CRAN conditions are `NOT_CRAN` unset, `TESTTHAT_CPUS=2`, and `R CMD check --as-cran --no-manual` on the built tarball, on the maintainer's Mac. The branch point read 560 s CPU and 278 s elapsed on 2026-09-27 at `fde0ba1`.
-- [ ] AC2: In the same three runs, the median elapsed time of the whole check is at most 200 s (branch point 370 s). In each run, the CPU time of the test step is below 2.5 times its elapsed time.
-- [ ] AC3: With `NOT_CRAN=true`, as `devtools::test()` sets it, the pass count of the suite is at least the branch point's under the same settings. Every added pass comes from a test added on the branch. The skip count is no higher.
+- [x] AC1: Under CRAN conditions, the median of three runs of the `Running 'testthat.R'` line reports at most 120 s of CPU time. CRAN conditions are `NOT_CRAN` unset, `TESTTHAT_CPUS=2`, and `R CMD check --as-cran --no-manual` on the built tarball, on the maintainer's Mac. The branch point read 560 s CPU and 278 s elapsed on 2026-09-27 at `fde0ba1`.
+- [x] AC2: In the same three runs, the median elapsed time of the whole check is at most 200 s (branch point 370 s). In each run, the CPU time of the test step is below 2.5 times its elapsed time.
+- [x] AC3: With `NOT_CRAN=true`, as `devtools::test()` sets it, the pass count of the suite is at least the branch point's under the same settings. Every added pass comes from a test added on the branch. The skip count is no higher.
 - [ ] AC4: This branch excludes no test block under CRAN conditions except through `skip_heavy_on_cran()`, which a `tests/testthat/helper-*.R` file defines. The evidence is `git diff <branch point> -- tests/`, read per file. In it, the net count of `skip_on_cran()`, `skip_if_no_daemons()`, `skip_if()`, `skip()` and early `return()` calls must not rise. The count of `test_that(` calls must not fall. A test shows two cases. With both variables unset, the helper skips. With either one set to `"true"`, the helper runs the block.
-- [ ] AC5: For every `nested_*` function that `NAMESPACE` exports, at least one `test_that()` block calls it and carries no skip that fires under CRAN conditions. The AC1 runs report 0 failures.
-- [ ] AC6: Every leg of `R-CMD-check.yaml` sets `NESTEDTUNE_FULL_SUITE: true`, and `R-CMD-check-hard.yaml` does not set it.
-- [ ] AC7: `devtools::test()` passes with 0 failures. `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep that `Rscript benchmarks/sweep-prose.R --list-gating` prints is clean.
+- [x] AC5: For every `nested_*` function that `NAMESPACE` exports, at least one `test_that()` block calls it and carries no skip that fires under CRAN conditions. The AC1 runs report 0 failures.
+- [x] AC6: Every leg of `R-CMD-check.yaml` sets `NESTEDTUNE_FULL_SUITE: true`, and `R-CMD-check-hard.yaml` does not set it.
+- [x] AC7: `devtools::test()` passes with 0 failures. `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep that `Rscript benchmarks/sweep-prose.R --list-gating` prints is clean.
 
 ## Coverage
 
@@ -65,9 +65,44 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - 2026-09-27: T6 done. `devtools::document()` leaves no diff, the six gating prose sweeps are clean, and `devtools::check()` gives 0 errors, 0 warnings and 0 notes at `9def2f5`.
 - 2026-09-27: claim audit: not owed — internal tier.
 - 2026-09-27: status set to review.
+- 2026-09-27: review: AC1-AC3 and AC5-AC7 verified with fresh evidence. AC4 fails as written, because the helper's own `skip(` and `return(` raise its count and a new source-reading block skips through `skip_if_not()`. 16 findings logged in the Review section. F1 says CI already sets `NOT_CRAN` true, so the switch has no effect there.
+- 2026-09-27: amendment return: AC4 — "This branch excludes no test block that ran under CRAN conditions at the branch point, except through `skip_heavy_on_cran()`, which a `tests/testthat/helper-*.R` file defines. The evidence is `git diff <branch point> -- tests/`, read per file. Outside the body of `skip_heavy_on_cran()`, the net count of `skip_on_cran()`, `skip_if_no_daemons()`, `skip_if()`, `skip()` and early `return()` calls must not rise."
+- 2026-09-27: status set to in-progress for the AC4 amendment alone. The findings wait for triage at the re-review gate. F1 comes first, because it decides whether any CI job runs the CRAN subset.
 
 ## Decisions
 
 - 2026-09-27 (T2): the CRAN smoke layer is decided per file, by class first and time second. Every oracle, RNG, time-series and print-or-plot-shape file skips on CRAN at any cost. Of the rest, the `*-checks.R` files, the `*-readers.R` files and the six reader files (`collect-readers`, `collect-metrics-wide`, `extract-procedure`, `nested-final-fit-extract`, `nested-final-fit-predict`, `predict-results`) stay. Any other file under 2 s in the branch point's CRAN-conditions run also stays. `test-nested-final-fit-sim-anneal.R` (4.4 s) stays too, because no other kept block completes an annealing run. So 41 files skip through a file-level `skip_heavy_on_cran()` call, and 49 run on CRAN. The end-to-end run per export: `nested_resamples()` in `test-nested-resamples-specs.R`; `nested_tune_grid()` in `test-collect-metrics-wide.R`; `nested_tune_bayes()` in `test-nested-tune-bayes-checks.R` ("the three acquisition functions tune offers are accepted"); both racers in `test-nested-tune-race-checks.R` ("the final fit on a racing result asks for the race's packages first", through `race_final_results()`); `nested_tune_sim_anneal()` in `test-nested-final-fit-sim-anneal.R`; `nested_fit_resamples()` in `test-nested-final-fit-resamples.R`; `nested_workflow_map()` in `test-nested-workflow-map-readers.R`; `nested_final_fit()` in `test-nested-final-fit-set.R`.
 
 ## Review
+
+Fresh evidence, 2026-09-27, at `150d92f`. The default branch had not moved since the branch point (`2e50d31`), so no merge was needed. The three CRAN-conditions runs used the command in `benchmarks/cran-check-timing.md` on the maintainer's Mac, from one tarball built at the head.
+
+- AC1: the three `Running 'testthat.R'` lines read 100 s, 91 s and 92 s of CPU. The median is 92 s, against a bar of 120 s (branch point 560 s). During run 1 the three review subagents were also reading files, which probably explains its higher figure.
+- AC2: the whole check took 140.2 s, 131.8 s and 133.1 s. The median is 133.1 s, against a bar of 200 s (branch point 370 s). The test-step CPU to elapsed ratios are 100/48 = 2.08, 91/44 = 2.07 and 92/45 = 2.04, each below 2.5.
+- AC3: `devtools::test()` at the head gives 1000 blocks, 11512 pass, 0 fail and 0 skip. The branch point's record at `2e50d31` is 994 blocks, 11503 pass and 0 skip. The 9 added passes are the 5 in the new `test-skip-heavy.R` and the 4 in the two new `test-ci-workflows.R` blocks. The source count of `test_that(` under `tests/` goes from 979 to 985.
+- AC4, not met as written. `git diff 2e50d31 -- tests/` has 200 insertions and 0 deletions over 44 files, so no `test_that(` call and no skip is removed. Counts of `skip_on_cran()`, `skip_if_no_daemons()` and `skip_if()` are unchanged in every file. Two counts named in the criterion rise, and both come from the body of `skip_heavy_on_cran()` in `helper-cran.R`: one `testthat::skip(` and one early `return(invisible(TRUE))`. The new block in `test-ci-workflows.R` on the check matrix also skips under CRAN conditions, through `skip_if_not(file.exists(...))`. It skips because the built package has no `.github/`. Three blocks already in that file skip the same way. `skip_if_not(` is not in the criterion's list, but the first sentence says no block is excluded except through the helper. The two-case helper test passes (`test-skip-heavy.R`, 4 blocks). The work meets the plan's intent, so the fault is in the criterion's wording, and it goes back for a gated amendment.
+- AC5: NAMESPACE exports 9 `nested_*` functions. A parse of the test files with no file-level `skip_heavy_on_cran()` lists the blocks that call each function. A counted block calls the function directly or through a helper, and it has no skip that fires on CRAN. The counts are `nested_final_fit` 56, `nested_fit_resamples` 18, `nested_resamples` 105, `nested_tune_bayes` 20, `nested_tune_grid` 131, `nested_tune_race_anova` 6, `nested_tune_race_win_loss` 4, `nested_tune_sim_anneal` 17 and `nested_workflow_map` 34. All three AC1 runs report `[ FAIL 0 | WARN 0 | SKIP 107 | PASS 6540 ]`.
+- AC6: `R-CMD-check.yaml` sets `NESTEDTUNE_FULL_SUITE: true` once, in the job-level `env:` of the one matrix job, so all five legs get it. `R-CMD-check-hard.yaml` names the variable only in a comment.
+- AC7: `devtools::test()` gives 0 failures (see AC3). `devtools::check()` gives 0 errors, 0 warnings and 0 notes. The six commands that `sweep-prose.R --list-gating` prints each exit 0 and print "clean".
+
+Consistency gate: `cairn_validate.py` exits 0, with 18 reference-staleness advisories that predate this branch. `devtools::document()` leaves no diff. `pkgdown::check_pkgdown()` finds no problems. `devtools::check()` is clean, as AC7 records. No file a user reads changed, so NEWS needs no entry. No DESIGN principle changed, so `cairn_impact` is not owed.
+
+Findings, most severe first. Each one waits for triage at the re-review gate, except where a line says otherwise.
+
+- F1 (orchestrator, verified): CI already runs with `NOT_CRAN` set to true. `r-lib/actions/setup-r` puts `NOT_CRAN: true` in the environment of every later step. The `check-r-package` step logs show it on all five `R-CMD-check.yaml` legs (run 36062063637). They also show it on the hard job (run 36062063647), whose tests took 1302 s of CPU. So `NESTEDTUNE_FULL_SUITE` changes nothing in CI, and the hard job runs the full suite, not the CRAN subset. The mirai daemon tests already run on all five legs. The plan gate's reason for a second variable, the `helper-cran.R` header, both yaml comments and the new PROFILE sentence all state the opposite. No CI job runs the CRAN subset.
+- O2: AC4's wording fails, as recorded above. This is the amendment return in the work log.
+- O1: the coverage job can skip the 41 files, the reviewer said. Rejected: its log (run 36062063607) shows `NOT_CRAN: true`, so every test runs there.
+- S1 (blame lens): the hard-dependency job loses the 41 files. F1 refutes it today. If a fix for F1 sets `NOT_CRAN: false` there, it becomes true. About 26 of the 41 files have no `skip_if_not_installed()` guard.
+- O3: the T2 Decision says every oracle file skips on CRAN, but `test-nested-resamples-identity.R`, `test-nested-resamples-memory.R` and `test-parallel-payload.R` call themselves oracle files and stay.
+- O4: PROFILE says `TESTTHAT_CPUS` is set in "the four workflows that run the whole suite". This is true under F1. If the hard job gets the CRAN subset, it becomes false.
+- O5: the hard job's 30-minute cap comment measures a full-suite run. The same dependence on F1 applies.
+- O14: nothing shows the switch reaching `R CMD check` in CI. F1 shows that it cannot matter there.
+- O6: `Config/testthat/start-first` queues about ten files that now skip at once under CRAN conditions. The effect has not been measured.
+- O7: DESCRIPTION allows `testthat (>= 3.0.0)`. testthat 3.2.3 fixed an error from `skip()` called outside a test, and the 41 file-level calls use that path.
+- O8: `skip_heavy_on_cran()` accepts only `NOT_CRAN == "true"`, while testthat also accepts "TRUE" and "T".
+- O9: `test-skip-heavy.R:17` is 87 characters, over air's 80.
+- O10: in `test-nested-final-fit-identity.R:14` and `test-nested-results-agreement.R:13`, the skip call sits between a comment and the block that the comment describes.
+- O11: the T2 Decision names an indirect witness for the two racers, although direct calls exist in other kept files.
+- O12: the `helper-cran.R` header describes a narrower kept set than the T2 Decision.
+- O13: `benchmarks/cran-check-timing.md` calls both `fde0ba1` and `2e50d31` "branch point" and does not say that only a plan commit separates them.
+- Prior-review lens: no prior-review evidence touches this diff.

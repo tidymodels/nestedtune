@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-27 (CRAN-readiness status pass; validate green, 18 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | review | — | normal | milestones/M118-cran-test-time.md |
+| M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | in-progress | — | normal | milestones/M118-cran-test-time.md |
 | M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | done | — | normal | milestones/archive/M117-fit-resamples-metrics-mode.md |
 | M116 | The summaries and the final fit's print name the metric that selects | done | — | normal | milestones/archive/M116-selecting-metric-printed.md |
 | M115 | The help and the guide say which metric selects and which metrics the outer loop scores | done | — | normal | milestones/archive/M115-select-and-assess-metrics.md |
