@@ -45,7 +45,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - [x] T2: List the CRAN smoke layer file by file. For each exported `nested_*` function, name the block that stays unskipped and calls it. Record the list in the Decisions section of this file.
 - [x] T3: Apply `skip_heavy_on_cran()` to every block outside the smoke layer, at the top of each file or of each block. Start with the heaviest files in the per-file table in `benchmarks/cran-check-timing.md`. Stop when a CRAN-conditions run meets AC1.
 - [x] T4: Set `NESTEDTUNE_FULL_SUITE: true` in the `env:` of the check job in `R-CMD-check.yaml`, and leave `R-CMD-check-hard.yaml` unset. Add a block to `test-ci-workflows.R` that reads both files. Update the yaml comments and the PROFILE test-doctrine slot where they say which job runs which tests.
-- [ ] T5: Write `benchmarks/cran-check-timing.md`. Record the command, the machine, the branch point's figures and per-file table, and three head runs. For each run, record the CPU and elapsed time of `Running 'testthat.R'`, the elapsed time of the whole check, and the pass and skip counts.
+- [x] T5: Write `benchmarks/cran-check-timing.md`. Record the command, the machine, the branch point's figures and per-file table, and three head runs. For each run, record the CPU and elapsed time of `Running 'testthat.R'`, the elapsed time of the whole check, and the pass and skip counts.
 - [ ] T6: Run the verify slot, `devtools::check()` and the gating prose sweeps. The slowest `R-CMD-check.yaml` step of the PR's CI run is read against its cap at review, when the branch is first pushed.
 
 ## Work log
@@ -61,6 +61,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - 2026-09-27: T1 done: `helper-cran.R` and `test-skip-heavy.R` (4 blocks, 5 expectations pass). Minor edit: the test saves and restores the variables by hand, because `withr` is not a dependency and adding it needs a gate.
 - 2026-09-27: T2 and T3 done. A [S] subagent added the file-level call to 42 files with the Edit tool. In 8 files it split a function from its comment, and I moved those calls above the comment. `test-nested-final-fit-sim-anneal.R` then went back into the smoke layer. `devtools::test()` gives 998 blocks, 11508 pass, 0 fail, 0 skip. One CRAN-conditions run of the 42-file set read tests 92 s CPU and 45 s elapsed, and the whole check 136 s.
 - 2026-09-27: T4 done. `R-CMD-check.yaml` sets `NESTEDTUNE_FULL_SUITE: true` in the job `env:`, and the hard job has a comment and no setting. The new `test-ci-workflows.R` block passes, and it fails with `false` planted in place of `true`. PROFILE's test-doctrine line names the switch.
+- 2026-09-27: T5 done. `benchmarks/cran-check-timing.md` holds three CRAN-conditions runs at `2af34dc`: tests 94, 96 and 92 s CPU, whole check 134.3, 133.9 and 133.0 s, ratio at most 2.09, 6540 pass and 0 fail each. Full suite: 994 blocks and 11503 pass at `2e50d31`, 1000 and 11512 at the head, 0 skip on both.
 
 ## Decisions
 
