@@ -1,6 +1,6 @@
 # M118: The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -24,7 +24,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - [x] AC1: Under CRAN conditions, the median of three runs of the `Running 'testthat.R'` line reports at most 120 s of CPU time. CRAN conditions are `NOT_CRAN` unset, `TESTTHAT_CPUS=2`, and `R CMD check --as-cran --no-manual` on the built tarball, on the maintainer's Mac. The branch point read 560 s CPU and 278 s elapsed on 2026-09-27 at `fde0ba1`.
 - [x] AC2: In the same three runs, the median elapsed time of the whole check is at most 200 s (branch point 370 s). In each run, the CPU time of the test step is below 2.5 times its elapsed time.
 - [x] AC3: With `NOT_CRAN=true`, as `devtools::test()` sets it, the pass count of the suite is at least the branch point's under the same settings. Every added pass comes from a test added on the branch. The skip count is no higher.
-- [ ] AC4: This branch excludes no test block under CRAN conditions except through `skip_heavy_on_cran()`, which a `tests/testthat/helper-*.R` file defines. The evidence is `git diff <branch point> -- tests/`, read per file. In it, the net count of `skip_on_cran()`, `skip_if_no_daemons()`, `skip_if()`, `skip()` and early `return()` calls must not rise. The count of `test_that(` calls must not fall. A test shows two cases. With both variables unset, the helper skips. With either one set to `"true"`, the helper runs the block.
+- [ ] AC4: `git diff <branch point> -- tests/` deletes and changes no line. In each file that exists at the branch point, every added line outside the `test_that()` blocks the diff adds, and outside the helper functions it adds whose names do not occur under `tests/` at the branch point, is a `skip_heavy_on_cran()` call, a comment or a blank line. A `tests/testthat/helper-*.R` file defines `skip_heavy_on_cran()`. With both `NOT_CRAN` and `NESTEDTUNE_FULL_SUITE` unset, it skips. With either one set to `"true"`, it runs the block.
 - [x] AC5: For every `nested_*` function that `NAMESPACE` exports, at least one `test_that()` block calls it and carries no skip that fires under CRAN conditions. The AC1 runs report 0 failures.
 - [x] AC6: Every leg of `R-CMD-check.yaml` sets `NESTEDTUNE_FULL_SUITE: true`, and `R-CMD-check-hard.yaml` does not set it.
 - [x] AC7: `devtools::test()` passes with 0 failures. `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep that `Rscript benchmarks/sweep-prose.R --list-gating` prints is clean.
@@ -68,6 +68,11 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - 2026-09-27: review: AC1-AC3 and AC5-AC7 verified with fresh evidence. AC4 fails as written, because the helper's own `skip(` and `return(` raise its count and a new source-reading block skips through `skip_if_not()`. 16 findings logged in the Review section. F1 says CI already sets `NOT_CRAN` true, so the switch has no effect there.
 - 2026-09-27: amendment return: AC4 — "This branch excludes no test block that ran under CRAN conditions at the branch point, except through `skip_heavy_on_cran()`, which a `tests/testthat/helper-*.R` file defines. The evidence is `git diff <branch point> -- tests/`, read per file. Outside the body of `skip_heavy_on_cran()`, the net count of `skip_on_cran()`, `skip_if_no_daemons()`, `skip_if()`, `skip()` and early `return()` calls must not rise."
 - 2026-09-27: status set to in-progress for the AC4 amendment alone. The findings wait for triage at the re-review gate. F1 comes first, because it decides whether any CI job runs the CRAN subset.
+- re-audit: AC4 (reduced) — bounded-promise: the five counted skip forms stand in for "excludes no test block", and the added `skip_if_not()` escapes them; proportionality: "ran under CRAN conditions at the branch point" needs a CRAN-conditions run to enumerate; instrument: "A test shows" binds a test, not the helper.
+- 2026-09-27: mini gate chose a diff-line wording for AC4, which is narrower than the returned wording. The reader's draft exempted only new blocks, so I added new helper functions, because `test-ci-workflows.R` adds `full_suite_lines()` outside any block.
+- re-audit: AC4 (reduced) — bounded-promise: a new helper could reuse an old helper's name and change unchanged blocks; proportionality: nothing; instrument: nothing.
+- 2026-09-27: second re-audit is the stop, so the user chose the narrowing to helper names absent under `tests/` at the branch point. AC4 now reads as in the criteria list. The findings still wait for triage at the re-review gate.
+- 2026-09-27: status set to review.
 
 ## Decisions
 
