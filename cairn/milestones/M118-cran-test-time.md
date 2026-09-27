@@ -73,10 +73,12 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - re-audit: AC4 (reduced) — bounded-promise: a new helper could reuse an old helper's name and change unchanged blocks; proportionality: nothing; instrument: nothing.
 - 2026-09-27: second re-audit is the stop, so the user chose the narrowing to helper names absent under `tests/` at the branch point. AC4 now reads as in the criteria list. The findings still wait for triage at the re-review gate.
 - 2026-09-27: status set to review.
+- 2026-09-27: re-review gate triage applied: F1 prose fix, O3, O8, O9, O10, O12 and O13 fixed, O7 to a candidate row. Checkpoint before the full suite and a CRAN-conditions check re-verify the fixes.
 
 ## Decisions
 
 - 2026-09-27 (T2): the CRAN smoke layer is decided per file, by class first and time second. Every oracle, RNG, time-series and print-or-plot-shape file skips on CRAN at any cost. Of the rest, the `*-checks.R` files, the `*-readers.R` files and the six reader files (`collect-readers`, `collect-metrics-wide`, `extract-procedure`, `nested-final-fit-extract`, `nested-final-fit-predict`, `predict-results`) stay. Any other file under 2 s in the branch point's CRAN-conditions run also stays. `test-nested-final-fit-sim-anneal.R` (4.4 s) stays too, because no other kept block completes an annealing run. So 41 files skip through a file-level `skip_heavy_on_cran()` call, and 49 run on CRAN. The end-to-end run per export: `nested_resamples()` in `test-nested-resamples-specs.R`; `nested_tune_grid()` in `test-collect-metrics-wide.R`; `nested_tune_bayes()` in `test-nested-tune-bayes-checks.R` ("the three acquisition functions tune offers are accepted"); both racers in `test-nested-tune-race-checks.R` ("the final fit on a racing result asks for the race's packages first", through `race_final_results()`); `nested_tune_sim_anneal()` in `test-nested-final-fit-sim-anneal.R`; `nested_fit_resamples()` in `test-nested-final-fit-resamples.R`; `nested_workflow_map()` in `test-nested-workflow-map-readers.R`; `nested_final_fit()` in `test-nested-final-fit-set.R`.
+- 2026-09-27 (review, O3): three files that call themselves oracle files stay on CRAN, against the class rule above: `test-nested-resamples-identity.R` (0.3 s), `test-nested-resamples-memory.R` (1.2 s) and `test-parallel-payload.R` (0.3 s). The T2 pass kept them by the 2 s rule, and the AC1 runs include them. They stay, and this line corrects the record.
 
 ## Review
 
@@ -113,5 +115,21 @@ Findings, most severe first. Each one waits for triage at the re-review gate, ex
 - Prior-review lens: no prior-review evidence touches this diff.
 
 Re-review after the AC4 amendment, 2026-09-27, at `e69aee7`. The default branch is still at the branch point `2e50d31`. `git diff 150d92f e69aee7` outside `cairn/` is empty, so the evidence for AC1-AC3 and AC5-AC7 above still describes the head. The review fan-out above read the same code, so no new lenses ran.
+
+Triage at the re-review gate:
+
+- F1: fix now, prose only. The `helper-cran.R` header, both yaml comments, the PROFILE sentence, the `test-ci-workflows.R` comment and block title, and the full-suite paragraph of `benchmarks/cran-check-timing.md` now say that `setup-r` sets `NOT_CRAN: true` in every CI job, so every job runs the full suite. No behavior changed. The older hard-yaml line 41 ("the suite skips every daemon test") predates this branch and stays.
+- O1: rejected at the first review. O2: resolved by the AC4 amendment.
+- S1, O4, O5: no change. Each one depended on the hard job getting the CRAN subset, and the F1 disposition keeps the full suite there.
+- O3: fix now, a dated line in Decisions.
+- O6: rejected. A file that skips at its top finishes at once, so its place in the queue costs almost nothing.
+- O7: follow-up, a candidate row in ROADMAP.
+- O8: fix now. The helper reads each variable with `as.logical()`, and a new block tests "TRUE" and "T".
+- O9: fix now, the long line wrapped.
+- O10: fix now. In both files, the skip call moved above the section comment.
+- O11: rejected. The Decision names a valid witness, and the direct witnesses do not change the smoke layer.
+- O12: fix now, in the new `helper-cran.R` header.
+- O13: fix now. The timing record says that `2e50d31` follows `fde0ba1` with a plan commit only.
+- O14: rejected, covered by F1.
 
 - AC4: `git diff 2e50d31 -- tests/` has 200 insertions and 0 deletions over 44 files. Two files are new: `helper-cran.R` and `test-skip-heavy.R`. In 41 of the 42 changed files, each added line is `skip_heavy_on_cran()` or a blank line. In `test-ci-workflows.R`, the added lines are two new `test_that()` blocks, the new helper `full_suite_lines()`, comments and blank lines. `git grep full_suite_lines 2e50d31 -- tests/` finds nothing. `helper-cran.R` defines `skip_heavy_on_cran()`. `test-skip-heavy.R` passes 5 expectations over the unset case and each variable set to `"true"`.

@@ -47,7 +47,7 @@ rules in tracking-rules:
   check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
   `pull_request` against the whole PR diff. **Hang caps** turn a hang into a failed job with a timestamp; every figure
   stays in the workflow declaring it. `R-CMD-check.yaml` bounds its job and its `check-r-package` step separately, the
-  step higher on windows. Only its macos-latest leg builds and checks the vignettes, which `R-CMD-check-hard.yaml` also checks without their Suggests and `pkgdown.yaml` knits in full (M112, D-077). Its legs set `NESTEDTUNE_FULL_SUITE: true`, so they run the tests `skip_heavy_on_cran()` keeps off CRAN; `R-CMD-check-hard.yaml` leaves it unset and runs the CRAN subset (M118).
+  step higher on windows. Only its macos-latest leg builds and checks the vignettes, which `R-CMD-check-hard.yaml` also checks without their Suggests and `pkgdown.yaml` knits in full (M112, D-077). Its legs set `NESTEDTUNE_FULL_SUITE: true`, but `setup-r` already sets `NOT_CRAN: true` in every job, so every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN and none runs the CRAN subset (M118).
   `test-coverage.yaml`, `R-CMD-check-hard.yaml` (M57), `devel-vctrs.yaml` and `prose-sweep.yaml` (M88, its `push` with no `branches` filter, the yaml saying why) each bound one job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own measurements and rationale.
   The step bound is the guarantee, both pre-M14 hangs having sat in `test_check("nestedtune")` (52 minutes under `R
   CMD check`, 40 under `covr`), which is why each workflow carries its own; the job bound covers the devel leg's

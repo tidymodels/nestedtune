@@ -31,6 +31,10 @@ The test figures are the `Running 'testthat.R' [cpu/elapsed]` line that
 
 ## Branch point and head
 
+The CRAN-conditions baseline ran at `fde0ba1`. The branch point `2e50d31` is
+the next commit. That commit added the plan and changed no file outside
+`cairn/`, so both trees give the same figures.
+
 | Tree | Run | Tests CPU | Tests elapsed | CPU / elapsed | Whole check | Pass | Skip | Fail |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `fde0ba1` | 1 | 560 s | 278 s | 2.01 | 370.1 s | 10840 | 81 | 0 |
@@ -52,7 +56,8 @@ package holds no `.github/` folder.
 ## The full suite, where it still runs
 
 `devtools::test()` sets `NOT_CRAN=true`, so it runs every test. The same holds
-for the `R-CMD-check.yaml` legs, which set `NESTEDTUNE_FULL_SUITE: true`.
+for every CI job, because `r-lib/actions/setup-r` sets `NOT_CRAN: true` for the
+steps after it. The `R-CMD-check.yaml` legs also set `NESTEDTUNE_FULL_SUITE: true`.
 
 | Tree | Blocks | Pass | Fail | Skip |
 |---|---:|---:|---:|---:|
