@@ -132,4 +132,11 @@ Triage at the re-review gate:
 - O13: fix now. The timing record says that `2e50d31` follows `fde0ba1` with a plan commit only.
 - O14: rejected, covered by F1.
 
+Re-verification after the fixes, at `27cef6b`:
+
+- `devtools::test()` gives 1001 blocks, 11514 pass, 0 fail, 0 skip and 0 error. The 2 added passes come from the new O8 block in `test-skip-heavy.R`.
+- AC4 holds again. `git diff 2e50d31 -- tests/` has 215 insertions and 0 deletions. In 41 files, each added line is `skip_heavy_on_cran()` or a blank line.
+- The six gating prose sweeps are clean, `air format --check tests/testthat/` is clean, and `cairn_validate` passes.
+- Three CRAN-conditions runs from one tarball each report `[ FAIL 0 | WARN 0 | SKIP 107 | PASS 6542 ]`, the same set as at `150d92f` plus the 2 new passes. They read 142 s, 134 s and 134 s of test CPU, and 202.1 s, 192.8 s and 195.4 s for the whole check. All three are over the AC1 and AC2 bars. The first overlapped a `devtools::check()` of the hitop package on the same machine. The third overlapped `devtools::check()` and `R CMD check --as-cran` of the rlmstudio package, which a process monitor logged. The second started when the load average was 4. These runs do not meet AC1's conditions, so AC1 and AC2 have no clean evidence at this head yet.
+
 - AC4: `git diff 2e50d31 -- tests/` has 200 insertions and 0 deletions over 44 files. Two files are new: `helper-cran.R` and `test-skip-heavy.R`. In 41 of the 42 changed files, each added line is `skip_heavy_on_cran()` or a blank line. In `test-ci-workflows.R`, the added lines are two new `test_that()` blocks, the new helper `full_suite_lines()`, comments and blank lines. `git grep full_suite_lines 2e50d31 -- tests/` finds nothing. `helper-cran.R` defines `skip_heavy_on_cran()`. `test-skip-heavy.R` passes 5 expectations over the unset case and each variable set to `"true"`.
