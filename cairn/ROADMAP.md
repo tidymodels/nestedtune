@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-24 (M117 done, PR #132; validate green; ROADMAP and LESSONS under budget)._
+_Last hygiene check: 2026-09-27 (CRAN-readiness status pass; validate green, 18 reference-staleness advisories; LESSONS 2 bytes under budget)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
