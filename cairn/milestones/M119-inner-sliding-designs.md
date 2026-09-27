@@ -37,10 +37,10 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 
 ## Tasks
 
-- [ ] T1: Add `ts_inner_window_nested()`, `ts_inner_index_nested()` and `ts_inner_period_nested()` to `helper-orchestration.R`, with the calls AC1 names. Add a named list of them beside `TS_DESIGNS`, with the inner split class each builds.
-- [ ] T2: Add `tests/testthat/test-time-series-inner.R`. Call `skip_heavy_on_cran()` at the top and `skip_if_no_engines()` in each engine block. Write the AC1 and AC2 blocks, looping over the new list. If AC2 fails, stop and replan, because the fix is a code change.
-- [ ] T3: Give `expect_final_matches_reference()` in `test-time-series-designs.R` an inner-design argument. Its default keeps today's `rolling_origin()` call. If the new file needs it, move it to `helper-orchestration.R`. Write the AC3 blocks.
-- [ ] T4: Edit the time-series paragraph in `R/nested-tune-grid.R` and `R/nested-resamples.R`, and the `NEWS.md` entry, to AC4's wording. Run `devtools::document()`. Add a D-entry that extends D-078 with the claim and its bound, and supersedes its clause that leaves any inner design other than `rolling_origin()` unclaimed.
+- [x] T1: Add `ts_inner_window_nested()`, `ts_inner_index_nested()` and `ts_inner_period_nested()` to `helper-orchestration.R`, with the calls AC1 names. Add a named list of them beside `TS_DESIGNS`, with the inner split class each builds.
+- [x] T2: Add `tests/testthat/test-time-series-inner.R`. Call `skip_heavy_on_cran()` at the top and `skip_if_no_engines()` in each engine block. Write the AC1 and AC2 blocks, looping over the new list. If AC2 fails, stop and replan, because the fix is a code change.
+- [x] T3: Give `expect_final_matches_reference()` in `test-time-series-designs.R` an inner-design argument. Its default keeps today's `rolling_origin()` call. If the new file needs it, move it to `helper-orchestration.R`. Write the AC3 blocks.
+- [x] T4: Edit the time-series paragraph in `R/nested-tune-grid.R` and `R/nested-resamples.R`, and the `NEWS.md` entry, to AC4's wording. Run `devtools::document()`. Add a D-entry that extends D-078 with the claim and its bound, and supersedes its clause that leaves any inner design other than `rolling_origin()` unclaimed.
 - [ ] T5: Time the new file serially. If it runs over 30 s, add it to `Config/testthat/start-first`. Run `devtools::test()` and `devtools::check()`.
 
 ## Work log
@@ -50,6 +50,8 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: plan gate chose `nested_tune_grid()` and `nested_final_fit()` over all seven functions, because tune accepts any rset and the CI legs were near their caps in M111. Falsified by a tuner failing on an inner sliding design that passes under grid.
 - 2026-09-27: plan gate chose an outer `rolling_origin()` alone over all four outer designs, because the outer design never reaches the tuner (D-079). Falsified by a sliding outer design failing with an inner sliding design that passes under rolling-origin.
 - 2026-09-27: checkpoint, in-progress. T1-T4 edits written, no task checked off yet. The new file passes serially in 24 s, and a planted copy that passes the default inner call fails the three final-fit tests. The full suite and `devtools::document()` are still owed.
+- 2026-09-27: T1-T3 done. `TS_INNER_DESIGNS` holds the three fixtures, and `expect_final_matches_reference()` moved to the helper with an `inner` argument. `devtools::test()`: 1010 blocks, 0 failures, 0 errors, 8 min 11 s.
+- 2026-09-27: T4 done. Help, `NEWS.md` and D-083 written, `devtools::document()` rewrote six Rd files, both prose sweeps clean. No "inner" hit in R/, man/, NEWS.md, vignettes/ or the README limits the tested inner designs to `rolling_origin()`.
 
 ## Decisions
 

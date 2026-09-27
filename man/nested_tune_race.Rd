@@ -355,7 +355,12 @@ so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their results, plu
 design for \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is
 tested on the rolling-origin design. The outer design never reaches the
 tuner: each tuner is handed one outer fold's inner resamples at a time.
-An inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
+An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
+\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design is tested with an outer
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} under \code{\link[=nested_tune_grid]{nested_tune_grid()}}, and so is
+\code{\link[=nested_final_fit]{nested_final_fit()}} for its results. The other orchestrators,
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} and the other three outer designs are not tested
+with these inner designs. Any other inner design is not tested.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out. When the assessment sets overlap, its
 error also counts the rows held out more than once.
