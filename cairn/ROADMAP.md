@@ -1,14 +1,13 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-27 (CRAN-readiness status pass; validate green, 18 reference-staleness advisories; LESSONS 2 bytes under budget)._
+_Last hygiene check: 2026-09-27 (M118 done; validate green, 18 reference-staleness advisories; LESSONS 2 bytes under budget)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | review | — | normal | milestones/M118-cran-test-time.md |
+| M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | done | — | normal | milestones/archive/M118-cran-test-time.md |
 | M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | done | — | normal | milestones/archive/M117-fit-resamples-metrics-mode.md |
 | M116 | The summaries and the final fit's print name the metric that selects | done | — | normal | milestones/archive/M116-selecting-metric-printed.md |
-| M115 | The help and the guide say which metric selects and which metrics the outer loop scores | done | — | normal | milestones/archive/M115-select-and-assess-metrics.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
