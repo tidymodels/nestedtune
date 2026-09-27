@@ -1,13 +1,13 @@
 # M118: The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — it changes test skips, CI configuration and a benchmark record, which no user of the package relies on
-- **Branch/PR:** —
+- **Branch/PR:** m118-cran-test-time
 
 ## Goal
 
@@ -46,7 +46,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - [ ] T3: Apply `skip_heavy_on_cran()` to every block outside the smoke layer, at the top of each file or of each block. Start with the heaviest files in the per-file table in `benchmarks/cran-check-timing.md`. Stop when a CRAN-conditions run meets AC1.
 - [ ] T4: Set `NESTEDTUNE_FULL_SUITE: true` in the `env:` of the check job in `R-CMD-check.yaml`, and leave `R-CMD-check-hard.yaml` unset. Add a block to `test-ci-workflows.R` that reads both files. Update the yaml comments and the PROFILE test-doctrine slot where they say which job runs which tests.
 - [ ] T5: Write `benchmarks/cran-check-timing.md`. Record the command, the machine, the branch point's figures and per-file table, and three head runs. For each run, record the CPU and elapsed time of `Running 'testthat.R'`, the elapsed time of the whole check, and the pass and skip counts.
-- [ ] T6: Run the verify slot, `devtools::check()` and the gating prose sweeps. Push the branch, and read the slowest `R-CMD-check.yaml` step of one CI run against its cap.
+- [ ] T6: Run the verify slot, `devtools::check()` and the gating prose sweeps. The slowest `R-CMD-check.yaml` step of the PR's CI run is read against its cap at review, when the branch is first pushed.
 
 ## Work log
 
@@ -55,6 +55,9 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 - 2026-09-27: criteria audit (reduced mode, fresh [O] reader) returned 8 findings, all fixed before the gate. AC3 allows the new passes of the helper test. AC4 counts net skips and blocks, not added lines. AC5 covers the `nested_*` exports in NAMESPACE and reads test source, not `testthat.Rout`. AC6 drops its "full suite" clause. AC7 names commands, not the profile slot.
 - 2026-09-27: plan gate chose a package switch (`NESTEDTUNE_FULL_SUITE`) over plain `skip_on_cran()` with `NOT_CRAN=true` on the CI matrix. The plain form also starts the mirai daemon tests on all five legs, near their step caps. Falsified by the daemon tests proving cheap and stable across the matrix.
 - 2026-09-27: plan gate chose a stated smoke layer over skipping the slowest files until the bar is met, because a stated layer gives the CRAN set a one-sentence rule. Falsified by the smoke layer alone using more than 120 s of CPU.
+
+- 2026-09-27: implement started on `m118-cran-test-time`; no question gate, since the plan gate settled the switch, the bar and the smoke-layer rule.
+- 2026-09-27: minor amendment: T6's CI read moves to review, because the branch is first pushed at review's merge step.
 
 ## Decisions
 
