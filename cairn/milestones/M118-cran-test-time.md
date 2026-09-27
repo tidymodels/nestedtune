@@ -41,7 +41,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 
 ## Tasks
 
-- [ ] T1: Write `skip_heavy_on_cran()` in a new `tests/testthat/helper-cran.R`. Add a test file that fires both arms under `withr::local_envvar()` and asserts the class and message of the skip condition.
+- [x] T1: Write `skip_heavy_on_cran()` in a new `tests/testthat/helper-cran.R`. Add a test file that fires both arms under `withr::local_envvar()` and asserts the class and message of the skip condition.
 - [ ] T2: List the CRAN smoke layer file by file. For each exported `nested_*` function, name the block that stays unskipped and calls it. Record the list in the Decisions section of this file.
 - [ ] T3: Apply `skip_heavy_on_cran()` to every block outside the smoke layer, at the top of each file or of each block. Start with the heaviest files in the per-file table in `benchmarks/cran-check-timing.md`. Stop when a CRAN-conditions run meets AC1.
 - [ ] T4: Set `NESTEDTUNE_FULL_SUITE: true` in the `env:` of the check job in `R-CMD-check.yaml`, and leave `R-CMD-check-hard.yaml` unset. Add a block to `test-ci-workflows.R` that reads both files. Update the yaml comments and the PROFILE test-doctrine slot where they say which job runs which tests.
@@ -58,6 +58,7 @@ Under CRAN's conditions, the test step of `R CMD check --as-cran` uses at most 1
 
 - 2026-09-27: implement started on `m118-cran-test-time`; no question gate, since the plan gate settled the switch, the bar and the smoke-layer rule.
 - 2026-09-27: minor amendment: T6's CI read moves to review, because the branch is first pushed at review's merge step.
+- 2026-09-27: T1 done: `helper-cran.R` and `test-skip-heavy.R` (4 blocks, 5 expectations pass). Minor edit: the test saves and restores the variables by hand, because `withr` is not a dependency and adding it needs a gate.
 
 ## Decisions
 
