@@ -360,12 +360,9 @@ average_fold_predictions <- function(
   preds <- preds[setdiff(names(preds), drop)]
   check_average_columns(preds, verb = verb, call = call)
   rows <- sort(unique(preds$.row))
-  group <- factor(match(preds$.row, rows), levels = seq_along(rows))
+  group <- match(preds$.row, rows)
   first <- match(rows, preds$.row)
-  per_row <- function(v, fn) {
-    vapply(split(v, group), fn, numeric(1), USE.NAMES = FALSE)
-  }
-  mean_na_rm <- function(v) mean(v, na.rm = TRUE)
+  n <- length(rows)
 
   nms <- names(preds)
   # A factor outcome names the probability columns, one per level, so a
@@ -377,9 +374,13 @@ average_fold_predictions <- function(
     character(0)
   }
   if (length(prob_cols) > 0L) {
-    probs <- matrix(
-      unlist(lapply(prob_cols, function(nm) per_row(preds[[nm]], mean_na_rm))),
-      ncol = length(prob_cols)
+    probs <- mean_by(
+      matrix(
+        unlist(lapply(prob_cols, function(nm) as.double(preds[[nm]]))),
+        ncol = length(prob_cols)
+      ),
+      group,
+      n
     )
     probs <- probs / rowSums(probs)
   }
@@ -393,21 +394,56 @@ average_fold_predictions <- function(
       return(class_from_probs(probs, prob_cols, v, preds[[outcome]]))
     }
     if (nm == ".pred_class") {
-      return(class_by_vote(v, group))
+      return(class_by_vote(v, group, n))
     }
     if (nm == ".pred_time") {
-      return(per_row(v, stats::median))
+      return(median_by(v, group, n))
     }
     if (nm == ".pred" && is.list(v)) {
-      return(average_survival(v, group))
+      return(average_survival(v, group, n))
     }
     if (startsWith(nm, ".pred") && is.numeric(v)) {
-      return(per_row(v, mean_na_rm))
+      return(mean_by(v, group, n))
     }
     vctrs::vec_slice(v, first)
   })
   names(cols) <- nms
   new_tbl(cols)
+}
+
+# Grouped statistics over `v`, one per group `1:n` of the integer `group`,
+# each group non-empty. They are written with grouped sums and one sort
+# rather than a call per group (M126: 100,002 rows took 0.8 s that way).
+# The mean ignores missing values, and a group with none left gives `NaN`,
+# as `mean(na.rm = TRUE)` does. Its rounding can differ from `mean()`'s in
+# the last bits, because `mean()` refines its sum in a second pass.
+#
+# `v` can be a matrix, averaged column by column in one pass, which gives a
+# matrix; a vector gives a vector.
+mean_by <- function(v, group, n) {
+  if (!is.matrix(v)) {
+    return(as.vector(mean_by(matrix(as.double(v)), group, n)))
+  }
+  seen <- !is.na(v)
+  v[!seen] <- 0
+  sums <- rowsum(v, group, reorder = TRUE)
+  counts <- rowsum(seen + 0, group, reorder = TRUE)
+  unname(sums / counts)
+}
+
+# The median, missing when any value in the group is, as `stats::median()`
+# is by default.
+median_by <- function(v, group, n) {
+  v <- as.double(v)
+  size <- tabulate(group, n)
+  o <- order(group, v)
+  sorted <- v[o]
+  start <- cumsum(size) - size
+  lo <- sorted[start + (size + 1L) %/% 2L]
+  hi <- sorted[start + size %/% 2L + 1L]
+  out <- (lo + hi) / 2
+  out[tabulate(group[is.na(v)], n) > 0L] <- NA_real_
+  out
 }
 
 # The factor columns among a prediction table's outcome columns: those that
@@ -513,13 +549,14 @@ check_no_quantile <- function(x, verb, call = rlang::caller_env()) {
   cli::cli_abort(msg, class = "nestedtune_summarize_quantile", call = call)
 }
 
-# The class at the largest averaged probability. `which.max()` returns the
-# first of tied maxima, and `prob_cols` is in factor order. Orderedness
-# follows the outcome, as in tune's `prob_summarize()`, not the saved class.
+# The class at the largest averaged probability. `max.col(ties.method =
+# "first")` returns the first of tied maxima, comparing exactly, and
+# `prob_cols` is in factor order. A row holding a missing probability is
+# missing throughout, because renormalizing divides it by a missing sum, and
+# `max.col()` gives it a missing class. Orderedness follows the outcome, as
+# in tune's `prob_summarize()`, not the saved class.
 class_from_probs <- function(probs, prob_cols, saved, outcome) {
-  idx <- apply(probs, 1L, function(r) {
-    if (all(is.na(r))) NA_integer_ else which.max(r)
-  })
+  idx <- max.col(probs, ties.method = "first")
   labels <- substring(prob_cols, nchar(".pred_") + 1L)
   factor(
     labels[idx],
@@ -531,8 +568,10 @@ class_from_probs <- function(probs, prob_cols, saved, outcome) {
 # The most frequent class per row. A missing vote is counted as a class of
 # its own, placed after the levels, as tune's `dplyr::count()` counts it, so
 # it wins only when it outnumbers every level. `max.col(ties.method =
-# "first")` takes the first level among tied counts.
-class_by_vote <- function(v, group) {
+# "first")` takes the first level among tied counts. `group` numbers the
+# rows `1:n`.
+class_by_vote <- function(v, group, n = max(as.integer(group))) {
+  group <- factor(as.integer(group), levels = seq_len(n))
   counts <- unclass(table(group, addNA(v, ifany = FALSE)))
   idx <- max.col(counts, ties.method = "first")
   idx[idx > nlevels(v)] <- NA_integer_
@@ -543,38 +582,34 @@ class_by_vote <- function(v, group) {
 # every other column with missing values ignored, in the order the times
 # first appear. A NULL entry is left out, and a row whose every entry is
 # NULL holds NULL (M126), the value `augment()` gives a list column's row
-# that no completed fold held out.
-average_survival <- function(v, group) {
-  sizes <- vapply(v, function(t) if (is.null(t)) 0L else nrow(t), integer(1))
-  out <- vector("list", nlevels(group))
+# that no completed fold held out. `group` numbers the rows `1:n`.
+average_survival <- function(v, group, n) {
+  sizes <- vctrs::list_sizes(v)
+  out <- vector("list", n)
   if (sum(sizes) == 0L) {
     return(out)
   }
-  long <- vctrs::vec_rbind(!!!v)
-  long_group <- rep(as.integer(group), sizes)
+  long <- vctrs::list_unchop(v)
+  long_group <- rep(group, sizes)
   key <- vctrs::vec_group_id(
     vctrs::new_data_frame(list(g = long_group, t = long$.eval_time))
   )
-  first <- match(seq_len(attr(key, "n")), key)
+  n_key <- attr(key, "n")
+  first <- match(seq_len(n_key), key)
   averaged <- lapply(names(long), function(nm) {
     if (nm == ".eval_time") {
       return(long$.eval_time[first])
     }
-    vapply(
-      split(long[[nm]], factor(key, levels = seq_along(first))),
-      function(x) mean(x, na.rm = TRUE),
-      numeric(1),
-      USE.NAMES = FALSE
-    )
+    mean_by(long[[nm]], key, n_key)
   })
   names(averaged) <- names(long)
   averaged <- new_tbl(averaged)
-  owner <- factor(long_group[first], levels = seq_len(nlevels(group)))
-  entries <- split(seq_along(first), owner)
+  entries <- split(
+    seq_len(n_key),
+    factor(long_group[first], levels = seq_len(n))
+  )
   filled <- lengths(entries) > 0L
-  out[filled] <- lapply(entries[filled], function(i) {
-    vctrs::vec_slice(averaged, i)
-  })
+  out[filled] <- vctrs::vec_chop(averaged, indices = unname(entries[filled]))
   out
 }
 
