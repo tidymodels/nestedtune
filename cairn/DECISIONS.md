@@ -1955,6 +1955,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** The refusal of `.pred_quantile` stands. Its reason is that a check of a port against tune's average needs a quantile engine such as quantreg in Suggests, a dependency change for its own gate. A row whose averaged probabilities are missing gets a missing class, because tune's first level there rests on no prediction. A missing vote counts as a class of its own, as tune counts it. The user chose this at M124's amendment gate.
 **Consequences:** D-090's clause that no run can check a quantile average is superseded, and so is its statement that the rules are tune's without exception. The rest of D-090 stands. Falsified by a user needing averaged quantile predictions, or by tune returning a missing class for missing probabilities.
 
+### D-092 (2026-09-28): `augment()` accepts an outer design that holds every data row out at least once, and joins each row's averaged prediction when some row is held out more than once. Supersedes D-063's clause refusing a design that holds a row out other than exactly once
+
+**Context:** D-063 refused a repeated or Monte Carlo design in `augment()` until the averaging of repeated predictions had an oracle for class probabilities. M124 checked `collect_predictions(summarize = TRUE)` against two oracles. One is tune's own average on the same outer splits. The other is a base R average written from the help page. That meets the precondition D-063 named.
+**Decision:** `augment()` refuses only a design that leaves some data row out of every assessment set, with class `nestedtune_augment_rows`. The message names the first five such rows and no design type. On a design that holds some row out more than once, every row joins its entry in the `summarize = TRUE` average. So one design never mixes averaged and saved values. On a design that holds each row out once, the saved predictions are joined as they are. Saved quantile predictions on the averaged path are refused with class `nestedtune_summarize_quantile`, as D-091 keeps them refused there. Considered and rejected: joining tune's `NA` rows for rows never held out, which the M125 plan gate declined.
+**Consequences:** D-063's refusal clause and its Consequences clause on the `summarize = TRUE` candidate row are superseded. The rest of D-063 stands. Falsified by users needing rows never held out augmented, or by a postprocessed class that users need kept on a repeated design.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

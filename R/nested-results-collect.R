@@ -395,8 +395,15 @@ average_fold_predictions <- function(preds, drop) {
 # `quantile_summarize()`. That rule is not ported, because checking a port
 # against it needs a quantile engine in Suggests. Read per fold before
 # stacking, so the refusal is this one and not whatever binding a quantile
-# column with the other folds raises.
-check_no_quantile <- function(x, call = rlang::caller_env()) {
+# column with the other folds raises. `augment()` averages on a design that
+# holds a row out more than once, and refuses under the same class there
+# (M125).
+check_no_quantile <- function(
+  x,
+  verb = c("collect_predictions", "augment"),
+  call = rlang::caller_env()
+) {
+  verb <- rlang::arg_match(verb)
   has <- vapply(
     x$.predictions[x$.completed],
     function(p) ".pred_quantile" %in% names(p),
@@ -405,16 +412,22 @@ check_no_quantile <- function(x, call = rlang::caller_env()) {
   if (!any(has)) {
     return(invisible(x))
   }
-  cli::cli_abort(
-    c(
+  msg <- switch(
+    verb,
+    collect_predictions = c(
       "{.code summarize = TRUE} cannot average quantile predictions.",
       x = "The saved predictions carry a {.field .pred_quantile} column.",
       i = "Call {.fn collect_predictions} with {.code summarize = FALSE} \\
            for the per-fold predictions."
     ),
-    class = "nestedtune_summarize_quantile",
-    call = call
+    augment = c(
+      "{.fn augment} cannot average quantile predictions.",
+      x = "The outer design holds some data rows out more than once, and \\
+           the saved predictions carry a {.field .pred_quantile} column.",
+      i = "Read the per-fold predictions with {.fn collect_predictions}."
+    )
   )
+  cli::cli_abort(msg, class = "nestedtune_summarize_quantile", call = call)
 }
 
 # The class at the largest averaged probability. `which.max()` returns the
@@ -786,12 +799,14 @@ score_fold <- function(preds, metrics, classes, event_level) {
   )
 }
 
-# The saved predictions joined onto the data rows (M92). tune's own method
-# averages a row held out more than once; this one refuses such a design
-# (plan gate, 2026-09-13), so every row it returns carries the one prediction
-# made for it. The hold-out counts are read from the splits of every fold,
-# the failed ones included, so a failed fold never makes a repeated design
-# look like a single hold-out. The columns joined are tune's `merge_pred()`
+# The saved predictions joined onto the data rows (M92). On a design that
+# holds some row out more than once, every row joins its entry in
+# `collect_predictions(summarize = TRUE)`'s average (M125), the rows held out
+# once included, so one design never mixes averaged and saved values. A
+# design that holds each row out once joins the saved predictions as they
+# are. The hold-out counts are read from the splits of every fold, the
+# failed ones included, so a failed fold never makes a repeated design look
+# like a single hold-out. The columns joined are tune's `merge_pred()`
 # columns, those starting `.pred` (tune 2.1.0, read 2026-09-13), placed after
 # the outcome the way tune's `reorder_pred_cols()` places them; no `.resid`
 # is added (implement gate, 2026-09-13).
@@ -800,9 +815,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #'
 #' @description
 #' `augment()` returns the data a nested run was given, one row per data
-#' row, with the predictions made for that row when its outer fold held it
-#' out. You can plot or inspect every row's out-of-fold prediction beside
-#' its predictors.
+#' row, with the predictions made for that row when an outer fold held it
+#' out. On a design that holds a row out more than once, those predictions
+#' are averaged. You can plot or inspect every row's out-of-fold prediction
+#' beside its predictors.
 #'
 #' @inheritParams compute_metrics.nested_results
 #' @param ... Not used. It must be empty. tune's `parameters` argument is
@@ -827,19 +843,36 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' on all the rows by [nested_final_fit()], and its own `augment()` method
 #' predicts new data with it.
 #'
+#' @section Designs accepted, and averaged predictions:
+#'
+#' The outer design must hold out every data row at least once.
+#'
+#' A v-fold or grouped v-fold design holds out each row once. There, each
+#' row joins the predictions that its one outer fold saved, as they are.
+#'
+#' A repeated v-fold design holds out each row once per repeat, and a
+#' Monte Carlo design can hold out a row several times. On a design that
+#' holds out some row more than once, every row joins its averaged
+#' prediction, the rows held out once included. The average is the one
+#' `collect_predictions(summarize = TRUE)` gives, and
+#' [collect_predictions.nested_results()] states its rules. For example, a
+#' `.pred_class` saved beside class probabilities is recomputed from the
+#' averaged probabilities, whatever class a postprocessor set.
+#'
 #' @section Designs and folds refused:
 #'
-#' The outer design must hold out every data row exactly once, as a
-#' v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
-#' design is refused with class `nestedtune_augment_rows`, because it
-#' predicts some rows more than once or not at all. Read its predictions
-#' with [collect_predictions()] instead. A [rsample::rolling_origin()],
+#' A design that leaves some data row out of every assessment set is
+#' refused with class `nestedtune_augment_rows`. The message names the
+#' first five of those rows, or all of them when there are five or fewer.
+#' A Monte Carlo design can leave rows out. A [rsample::rolling_origin()],
 #' [rsample::sliding_window()], [rsample::sliding_index()] or
-#' [rsample::sliding_period()] design leaves rows out of every assessment
-#' set and is refused with the same class. When no row is held out twice,
-#' the message names the rows left out. When its assessment sets overlap,
-#' the message counts the rows left out and the rows held out more than
-#' once, and does not name a repeated or Monte Carlo design.
+#' [rsample::sliding_period()] design leaves out at least the rows before
+#' its first assessment set. Read the predictions such a design has with
+#' [collect_predictions()].
+#'
+#' On a design that holds out some row more than once, saved quantile
+#' predictions are refused with class `nestedtune_summarize_quantile`,
+#' because `collect_predictions(summarize = TRUE)` does not average them.
 #'
 #' @templateVar TITLE Designs and folds refused
 #' @template refusals-saved-run
@@ -847,11 +880,12 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' A completed fold
 #' whose saved predictions do not match the rows it held out is refused
 #' with class `nestedtune_augment_predictions`. Its `.row` column must hold
-#' each of those rows once and no other row. On a run with some
-#' failed folds, the rows those folds held out hold a missing value in
+#' each of those rows once and no other row. On a run with some failed
+#' folds, a row that only failed folds held out holds a missing value in
 #' every prediction column, with a warning of class
-#' `nestedtune_partial_summary`. A missing value is `NA`, or `NULL` in a
-#' list column such as the `.pred` of a censored-regression run.
+#' `nestedtune_partial_summary`. A row that a completed fold also held out
+#' takes the average over the completed folds. A missing value is `NA`, or
+#' `NULL` in a list column such as the `.pred` of a censored-regression run.
 #' A data column whose name is also a prediction column's name is refused
 #' with class `nestedtune_collect_name_collision`.
 #'
@@ -877,14 +911,20 @@ augment.nested_results <- function(x, ...) {
   check_any_completed(x, action = "augment")
   check_column_saved(x, ".predictions", call = call)
   data <- x$splits[[1L]]$data
-  check_held_out_once(x, nrow(data), call = call)
+  repeated <- check_held_out(x, nrow(data), call = call)
   check_predictions_rows(x, verb = "augment", call = call)
+  if (repeated) {
+    check_no_quantile(x, verb = "augment", call = call)
+  }
   preds <- stack_fold_column(
     x,
     ".predictions",
     completed_only = TRUE,
     call = call
   )
+  if (repeated) {
+    preds <- average_fold_predictions(preds, drop = c(id_columns(x), ".config"))
+  }
   pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
   clash <- intersect(pred_cols, names(data))
   if (length(clash) > 0L) {
@@ -916,57 +956,34 @@ augment.nested_results <- function(x, ...) {
   new_tbl(c(data[outcome], joined, data[setdiff(names(data), outcome)]))
 }
 
-# The outer split classes of rsample's time-series constructors.
-TIME_SERIES_SPLITS <- c(
-  "rof_split",
-  "sliding_window_split",
-  "sliding_index_split",
-  "sliding_period_split"
-)
-
 # Each data row's count of outer assessment sets holding it, over every fold.
-check_held_out_once <- function(x, n, call = rlang::caller_env()) {
+# A row no set holds is refused, naming the first five such rows (M108,
+# M125). The message names no design type: a Monte Carlo, rolling-origin or
+# overlapping sliding-window design can each leave rows out (M111). Returns
+# whether some row is held out more than once, which is when `augment()`
+# averages.
+check_held_out <- function(x, n, call = rlang::caller_env()) {
   held <- unlist(lapply(x$splits, rsample::complement), use.names = FALSE)
   counts <- tabulate(held, nbins = n)
-  if (all(counts == 1L)) {
-    return(invisible(x))
+  rows <- which(counts == 0L)
+  if (length(rows) == 0L) {
+    return(any(counts > 1L))
   }
-  never <- sum(counts == 0L)
-  more <- sum(counts > 1L)
-  # A design that holds no row out twice, such as a rolling-origin or
-  # sliding-window one, only leaves rows out: it is told which (M108).
-  if (more == 0L) {
-    rows <- cli::cli_vec(which(counts == 0L), list("vec-trunc" = 5L))
-    cli::cli_abort(
-      c(
-        "{.fn augment} needs an outer design that holds out every data row \\
-         exactly once.",
-        x = "No outer fold holds out {never} row{?s}: {rows}.",
-        i = "A design whose assessment sets do not cover the data has no \\
-             prediction for those rows. Read the predictions it has with \\
-             {.fn collect_predictions}."
-      ),
-      class = "nestedtune_augment_rows",
-      call = call
-    )
-  }
-  # A time-series design whose assessment sets overlap is told so, not
-  # called a repeated or Monte Carlo design (M111).
-  info <- if (inherits(x$splits[[1L]], TIME_SERIES_SPLITS)) {
-    "An overlapping time-series design predicts some rows several times \\
-     and others not at all. Read those predictions with \\
-     {.fn collect_predictions}."
+  never <- length(rows)
+  shown <- utils::head(rows, 5L)
+  listed <- if (never > 5L) {
+    "No outer fold holds out {never} rows. The first five are {shown}."
   } else {
-    "A repeated or Monte Carlo design predicts a row several times or not \\
-     at all. Read those predictions with {.fn collect_predictions}."
+    "No outer fold holds out {cli::qty(never)}row{?s} {shown}."
   }
   cli::cli_abort(
     c(
       "{.fn augment} needs an outer design that holds out every data row \\
-       exactly once.",
-      x = "This design holds out {never} row{?s} never and {more} row{?s} \\
-           more than once.",
-      i = info
+       at least once.",
+      x = listed,
+      i = "A design whose assessment sets do not cover the data has no \\
+           prediction for those rows. Read the predictions it has with \\
+           {.fn collect_predictions}."
     ),
     class = "nestedtune_augment_rows",
     call = call

@@ -24,9 +24,10 @@ the prediction columns come first. The fold labels, \code{.row} and
 }
 \description{
 \code{augment()} returns the data a nested run was given, one row per data
-row, with the predictions made for that row when its outer fold held it
-out. You can plot or inspect every row's out-of-fold prediction beside
-its predictors.
+row, with the predictions made for that row when an outer fold held it
+out. On a design that holds a row out more than once, those predictions
+are averaged. You can plot or inspect every row's out-of-fold prediction
+beside its predictors.
 }
 \section{Which predictions these are}{
 
@@ -41,20 +42,39 @@ on all the rows by \code{\link[=nested_final_fit]{nested_final_fit()}}, and its 
 predicts new data with it.
 }
 
+\section{Designs accepted, and averaged predictions}{
+
+
+The outer design must hold out every data row at least once.
+
+A v-fold or grouped v-fold design holds out each row once. There, each
+row joins the predictions that its one outer fold saved, as they are.
+
+A repeated v-fold design holds out each row once per repeat, and a
+Monte Carlo design can hold out a row several times. On a design that
+holds out some row more than once, every row joins its averaged
+prediction, the rows held out once included. The average is the one
+\code{collect_predictions(summarize = TRUE)} gives, and
+\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}} states its rules. For example, a
+\code{.pred_class} saved beside class probabilities is recomputed from the
+averaged probabilities, whatever class a postprocessor set.
+}
+
 \section{Designs and folds refused}{
 
 
-The outer design must hold out every data row exactly once, as a
-v-fold or grouped v-fold design does. A repeated v-fold or a Monte Carlo
-design is refused with class \code{nestedtune_augment_rows}, because it
-predicts some rows more than once or not at all. Read its predictions
-with \code{\link[=collect_predictions]{collect_predictions()}} instead. A \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}},
+A design that leaves some data row out of every assessment set is
+refused with class \code{nestedtune_augment_rows}. The message names the
+first five of those rows, or all of them when there are five or fewer.
+A Monte Carlo design can leave rows out. A \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}},
 \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design leaves rows out of every assessment
-set and is refused with the same class. When no row is held out twice,
-the message names the rows left out. When its assessment sets overlap,
-the message counts the rows left out and the rows held out more than
-once, and does not name a repeated or Monte Carlo design.
+\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design leaves out at least the rows before
+its first assessment set. Read the predictions such a design has with
+\code{\link[=collect_predictions]{collect_predictions()}}.
+
+On a design that holds out some row more than once, saved quantile
+predictions are refused with class \code{nestedtune_summarize_quantile},
+because \code{collect_predictions(summarize = TRUE)} does not average them.
 
 
 A run whose control did not set \code{save_pred = TRUE} is refused with class
@@ -65,11 +85,12 @@ refused with class \code{nestedtune_no_completed_folds}.
 A completed fold
 whose saved predictions do not match the rows it held out is refused
 with class \code{nestedtune_augment_predictions}. Its \code{.row} column must hold
-each of those rows once and no other row. On a run with some
-failed folds, the rows those folds held out hold a missing value in
+each of those rows once and no other row. On a run with some failed
+folds, a row that only failed folds held out holds a missing value in
 every prediction column, with a warning of class
-\code{nestedtune_partial_summary}. A missing value is \code{NA}, or \code{NULL} in a
-list column such as the \code{.pred} of a censored-regression run.
+\code{nestedtune_partial_summary}. A row that a completed fold also held out
+takes the average over the completed folds. A missing value is \code{NA}, or
+\code{NULL} in a list column such as the \code{.pred} of a censored-regression run.
 A data column whose name is also a prediction column's name is refused
 with class \code{nestedtune_collect_name_collision}.
 }

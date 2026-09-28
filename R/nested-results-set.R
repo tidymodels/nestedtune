@@ -21,7 +21,8 @@
 #' from `collect_selections()` to `collect_extracts()` stack their
 #' per-fold tables the same way. `compute_metrics()` scores each
 #' workflow's saved predictions with the metric set you give it.
-#' `augment()` gives each workflow's data rows with its predictions.
+#' `augment()` gives each workflow's data rows with its predictions,
+#' averaged per row on a design that holds out a row more than once.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param ... Not used. It must be empty, so an argument given here is an error

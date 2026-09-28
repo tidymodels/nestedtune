@@ -269,7 +269,8 @@ test_that("AC1: on a repeated v-fold censored regression, each row joins its ave
     srv_workflow(d),
     repeated_folds(d, 37),
     grid = srv_grid(),
-    metrics = srv_metrics(),
+    # Concordance reads `.pred_time`, so both averaged columns are saved.
+    metrics = srv_set_metrics(),
     eval_time = srv_eval_times(),
     control = tune::control_grid(save_pred = TRUE)
   )))
