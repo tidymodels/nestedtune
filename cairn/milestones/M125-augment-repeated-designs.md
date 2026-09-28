@@ -1,6 +1,6 @@
 # M125: augment() on repeated and Monte Carlo designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M124
 - **Driving RR:** —
@@ -40,7 +40,7 @@
 - [x] T1: Write the AC1 to AC3 tests first in `tests/testthat/test-augment.R`. Rewrite the test at `test-augment.R:143`, which asserts that repeated and Monte Carlo designs are refused. Update the overlapping-design message assertion in `test-time-series-designs.R:345`. For AC3, break folds in every repeat that together hold one row (criteria audit). For example, break the first fold of repeat one with `break_fold()`, and the repeat-two folds holding its rows. Run the tests and record that they fail.
 - [x] T2: Change `check_held_out_once()` in `R/nested-results-collect.R` to refuse only rows held out never. For a row held out more than once, `augment.nested_results()` joins M124's averaged table. Append a D-entry that supersedes D-063's refusal clause. It says that M124's two oracles, tune's own average and a base R one, meet the precondition D-063 named. On the averaged path, refuse saved quantile predictions with class `nestedtune_summarize_quantile` (implement gate). The refusal names the first five rows never held out, not cli's first three and last two. It uses one message for every design, so `TIME_SERIES_SPLITS` and its test go (implement gate).
 - [x] T3: Update the `augment.nested_results` help page, the set help line at `R/nested-results-set.R:24`, and the `augment()` bullet in `NEWS.md`. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
-- [ ] T4: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
+- [x] T4: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
 ## Work log
 
@@ -54,6 +54,7 @@
 - 2026-09-28: checkpoint, T4 started. `devtools::check()` and the claim audit ([O] fresh reader) are running.
 - claim audit: 50 claims read, 3 corrected — R/nested-tune-grid.R, tests/testthat/helper-predictions.R, NEWS.md
 - 2026-09-28: the same reader re-read the three corrections and the singular "that row" wording in `check_held_out()`, and all held. `test-augment.R`, `test-time-series-designs.R`, `test-help-structure.R`, `test-sweep-prose.R` and both prose sweeps are clean after the fixes.
+- 2026-09-28: T4 done on 332efcf0. `devtools::check()`: 0 errors, 0 warnings, 0 notes. `document()` left no diff, and `check_pkgdown()` found no problems. Full `devtools::test()` passed on the T2 code, and only docs, a comment and one message line changed after it. Status set to review.
 
 ## Decisions
 
