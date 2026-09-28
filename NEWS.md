@@ -8,7 +8,14 @@
   per-fold table is unchanged. The average follows
   tune's rules for `summarize = TRUE`. Because each fold selected its own
   candidate, the average spans those candidates, and the fold labels and
-  `.config` are dropped. Quantile predictions are refused.
+  `.config` are dropped. Quantile predictions are refused. The average
+  refuses saved predictions whose `.row` column no longer holds each row
+  its fold held out exactly once. It also refuses three edited shapes that
+  its rules cannot read: two factor outcome columns, a `.pred_class` column with no
+  factor outcome, and a censored `.pred` entry with no `.eval_time`. A
+  `NULL` censored entry is left out of its row's average. A metric computed
+  on the averages describes several fitted models, not the tuning
+  procedure, so `collect_metrics()` stays the nested estimate.
 
 * The per-fold tables of `collect_metrics(summarize = FALSE)` and
   `compute_metrics(summarize = FALSE)` carry the design's fold labels

@@ -614,3 +614,15 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   `rmd_paragraphs()` or the roxygen reader. Routed from candidates
   2026-09-28; added 2026-09-12 at M089's review gate (findings 3-6, 9, 10),
   extended at M097's review.
+
+- Two edited shapes of saved predictions still average without
+  renormalizing the probabilities, and without a message. One is a run with
+  probabilities but no saved class, whose outcome column was removed: no
+  saved column then names the probability columns. The other is an outcome
+  whose levels do not match the saved `.pred_*` names. There the unmatched
+  columns are averaged as plain numbers, and the class is taken from the
+  matched columns alone, or voted when none match.
+  `check_average_columns()` (`R/nested-results-collect.R`) refuses the three
+  shapes that do say what the average would misread. Accepted at M126's plan
+  gate, 2026-09-28: tune 2.1.0 writes neither shape, so each needs an edit
+  to the object. Revisit on a user report of either shape.

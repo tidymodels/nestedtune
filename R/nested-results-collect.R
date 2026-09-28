@@ -250,7 +250,8 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' * A censored run takes the median `.pred_time`, which is missing if any
 #'   fold's value is. The survival probabilities in `.pred` take, per
 #'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
-#'   missing values ignored.
+#'   missing values ignored. A `NULL` entry in `.pred` is left out of its
+#'   row's average, and a row whose every entry is `NULL` holds `NULL`.
 #'
 #' A tie, between votes or between averaged probabilities, goes to the first
 #' of the tied levels in the factor's level order.
@@ -261,6 +262,26 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' predictions are not averaged: a run whose saved predictions carry a
 #' `.pred_quantile` column is refused with class
 #' `nestedtune_summarize_quantile`.
+#'
+#' A metric computed on these averages describes an average of several
+#' fitted models, not the tuning procedure, so it is not the nested
+#' estimate. [collect_metrics()] gives that estimate.
+#'
+#' The average reads the saved predictions as the run returned them, and
+#' refuses two kinds of edited table. A completed fold whose `.row` column
+#' does not hold each row the fold held out exactly once, and no other row,
+#' is refused with class `nestedtune_collect_predictions_predictions`. The
+#' per-fold table, with `summarize = FALSE`, is not checked. Three shapes
+#' are refused with class `nestedtune_summarize_columns`:
+#'
+#' * two or more factor outcome columns, where the average reads one;
+#' * a `.pred_class` column with no factor outcome column;
+#' * a censored `.pred` entry that is not `NULL` and has no `.eval_time`
+#'   column.
+#'
+#' An outcome column here is any column other than the prediction columns,
+#' `.row`, `.config`, `.case_weights`, `.iter`, `.eval_time` and the fold
+#' labels.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -988,6 +1009,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' `.pred_class` saved beside class probabilities is recomputed from the
 #' averaged probabilities, whatever class a postprocessor set.
 #'
+#' A metric computed on averaged predictions describes an average of several
+#' fitted models, not the tuning procedure, so it is not the nested
+#' estimate. [collect_metrics()] gives that estimate.
+#'
 #' @section Designs and folds refused:
 #'
 #' A design that leaves some data row out of every assessment set is
@@ -1002,6 +1027,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' On a design that holds out some row more than once, saved quantile
 #' predictions are refused with class `nestedtune_summarize_quantile`,
 #' because `collect_predictions(summarize = TRUE)` does not average them.
+#' On such a design, the three edited shapes of saved predictions that the
+#' average refuses are refused here too, with class
+#' `nestedtune_summarize_columns`. [collect_predictions.nested_results()]
+#' lists them.
 #'
 #' @templateVar TITLE Designs and folds refused
 #' @template refusals-saved-run
@@ -1016,7 +1045,8 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' takes the average over the completed folds. A missing value is `NA`, or
 #' `NULL` in a list column such as the `.pred` of a censored-regression run.
 #' A data column whose name is also a prediction column's name is refused
-#' with class `nestedtune_collect_name_collision`.
+#' with class `nestedtune_collect_name_collision`, before either refusal of
+#' the average.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
