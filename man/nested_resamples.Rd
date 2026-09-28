@@ -68,10 +68,14 @@ An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an
 \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
 \code{\link[rsample:sliding_period]{rsample::sliding_period()}} is tested to give the same splits as
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on these three
-designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for its results. The other
-orchestrators, \code{\link[=nested_workflow_map]{nested_workflow_map()}} and the other three outer designs
-are not tested with these inner designs. Any other inner design is not
-tested.
+designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for its results. These designs are
+also tested under \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
+\code{\link[=nested_workflow_map]{nested_workflow_map()}}. \code{\link[=nested_final_fit]{nested_final_fit()}} is tested for the results of
+those four tuners on the sliding-period design alone.
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs, and it reads
+no inner design. The other three outer designs are not tested with these
+inner designs. Any other inner design is not tested.
 }
 
 \section{Memory}{
