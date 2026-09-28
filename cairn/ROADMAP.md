@@ -1,15 +1,14 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-28 (M123 archived, M120 row pruned, validate green)._
+_Last hygiene check: 2026-09-28 (M124 archived, M121 row pruned, validate green)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M124 | Averaged out-of-fold predictions | review | — | normal | milestones/M124-averaged-predictions.md |
 | M125 | augment() on repeated and Monte Carlo designs | planned | M124 | normal | milestones/M125-augment-repeated-designs.md |
+| M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |
 | M123 | The parameter set a final fit searched | done | — | normal | milestones/archive/M123-final-fit-parameter-set.md |
 | M122 | Repeated-design fold labels in per-fold metrics | done | — | normal | milestones/archive/M122-repeated-fold-labels.md |
-| M121 | Sliding outer designs with inner sliding designs | done | — | normal | milestones/archive/M121-sliding-outer-inner-pairs.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
