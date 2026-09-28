@@ -36,7 +36,10 @@ on all the data.
 
 Summarized, there is one row per metric, with the mean across outer folds,
 the number of folds \code{n} behind it, and the standard error of that mean.
-Unsummarized, there is one row per outer fold and metric. On a design
+Unsummarized, there is one row per outer fold and metric. The first
+columns are the design's fold labels, each in its own column: \code{id}, and
+\code{id2} on a repeated design, as in tune's own table. A join on a repeated
+design's folds uses both columns. On a design
 weighted with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} the unsummarized shape also
 carries each fold's weight in a \code{.weight} column.
 

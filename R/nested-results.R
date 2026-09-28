@@ -768,7 +768,10 @@ new_tbl <- function(cols) {
 #'
 #' Summarized, there is one row per metric, with the mean across outer folds,
 #' the number of folds `n` behind it, and the standard error of that mean.
-#' Unsummarized, there is one row per outer fold and metric. On a design
+#' Unsummarized, there is one row per outer fold and metric. The first
+#' columns are the design's fold labels, each in its own column: `id`, and
+#' `id2` on a repeated design, as in tune's own table. A join on a repeated
+#' design's folds uses both columns. On a design
 #' weighted with [tune::add_resample_weights()] the unsummarized shape also
 #' carries each fold's weight in a `.weight` column.
 #'
@@ -1125,9 +1128,20 @@ warn_partial_summary <- function(
 # with NA over the (zero) rows of the tibbles that lack it. `frames` is one
 # metrics table per row of `x`; compute_metrics() passes the tables it scored
 # from the saved predictions (M92), so both readers build one shape.
+#
+# The rows are labelled by the design's own label columns, each its own
+# column, as tune labels its per-resample rows and as the stacking readers do
+# (D-036, D-052); a repeated design gives `id` and `id2`. An object whose
+# record cannot label its rows gets one `id` holding fold_ids()'s positions.
 per_fold_metrics <- function(x, frames = x$.metrics) {
-  ids <- fold_ids(x)
   n_rows <- vapply(frames, nrow, integer(1))
+  label_cols <- per_fold_label_columns(x)
+  labels <- if (identical(label_cols, usable_label_columns(x))) {
+    lapply(label_cols, function(nm) rep(x[[nm]], times = n_rows))
+  } else {
+    list(rep(fold_ids(x), times = n_rows))
+  }
+  names(labels) <- label_cols
 
   column <- function(nm, fill) {
     unlist(
@@ -1143,10 +1157,12 @@ per_fold_metrics <- function(x, frames = x$.metrics) {
     logical(1)
   ))
 
-  cols <- list(
-    id = rep(ids, times = n_rows),
-    .metric = column(".metric", NA_character_),
-    .estimator = column(".estimator", NA_character_)
+  cols <- c(
+    labels,
+    list(
+      .metric = column(".metric", NA_character_),
+      .estimator = column(".estimator", NA_character_)
+    )
   )
   if (timed) {
     cols$.eval_time <- column(".eval_time", NA_real_)
@@ -1235,14 +1251,36 @@ stack_fold_column <- function(
 # and is wrong silently. Positions are true of any object, and the caller that
 # needs a name for a fold gets one it can act on.
 fold_ids <- function(x) {
-  id_cols <- id_columns(x)
-  if (length(id_cols) == 0L || !all(id_cols %in% names(x))) {
+  id_cols <- usable_label_columns(x)
+  if (is.null(id_cols)) {
     return(paste("row", seq_len(nrow(x))))
   }
-  if (length(id_cols) == 1L) {
-    return(x[[id_cols]])
+  paste_labels(x, id_cols)
+}
+
+# The recorded label columns when they can label the rows, else NULL.
+usable_label_columns <- function(x) {
+  id_cols <- id_columns(x)
+  if (length(id_cols) == 0L || !all(id_cols %in% names(x))) {
+    return(NULL)
   }
-  do.call(paste, c(lapply(id_cols, function(nm) x[[nm]]), list(sep = ", ")))
+  id_cols
+}
+
+# The label columns per_fold_metrics() writes: the recorded ones, or the one
+# `id` of positions when the record cannot label the rows.
+per_fold_label_columns <- function(x) {
+  cols <- usable_label_columns(x)
+  if (is.null(cols)) "id" else cols
+}
+
+# One string per row of `tbl` from its label columns `cols`, joined with ", "
+# (M122). A single column is returned as it is.
+paste_labels <- function(tbl, cols) {
+  if (length(cols) == 1L) {
+    return(tbl[[cols]])
+  }
+  do.call(paste, c(lapply(cols, function(nm) tbl[[nm]]), list(sep = ", ")))
 }
 
 #' Predicting from a nested run

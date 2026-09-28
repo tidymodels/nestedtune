@@ -59,7 +59,9 @@ its single-workflow method on every element and binds the tables in the
 set's order, under a \code{wflow_id} column placed first.
 
 \code{collect_metrics()} gives one row per workflow and metric, or per
-workflow, outer fold and metric with \code{summarize = FALSE}. The five
+workflow, outer fold and metric with \code{summarize = FALSE}. There, the
+design's fold labels follow \code{wflow_id}, each in its own column: \code{id}, and
+\code{id2} on a repeated design. The five
 from \code{collect_selections()} to \code{collect_extracts()} stack their
 per-fold tables the same way. \code{compute_metrics()} scores each
 workflow's saved predictions with the metric set you give it.

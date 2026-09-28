@@ -268,8 +268,11 @@ plot_performance <- function(
     ),
     bases
   )]
+  # The fold axis pastes the label columns, as fold_ids() does, so a
+  # repeated design's folds read "Repeat1, Fold1" (M122).
+  folds <- paste_labels(per_fold, per_fold_label_columns(x))
   points <- new_tbl(list(
-    fold = factor(per_fold$id[scored], levels = fold_ids(x)),
+    fold = factor(folds[scored], levels = fold_ids(x)),
     score = per_fold$.estimate[scored],
     metric = factor(scored_panels, levels = panels)
   ))

@@ -15,7 +15,9 @@
 #' set's order, under a `wflow_id` column placed first.
 #'
 #' `collect_metrics()` gives one row per workflow and metric, or per
-#' workflow, outer fold and metric with `summarize = FALSE`. The five
+#' workflow, outer fold and metric with `summarize = FALSE`. There, the
+#' design's fold labels follow `wflow_id`, each in its own column: `id`, and
+#' `id2` on a repeated design. The five
 #' from `collect_selections()` to `collect_extracts()` stack their
 #' per-fold tables the same way. `compute_metrics()` scores each
 #' workflow's saved predictions with the metric set you give it.

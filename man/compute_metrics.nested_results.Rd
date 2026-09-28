@@ -25,7 +25,9 @@ recorded. tune's own method defaults to \code{"first"} instead.}
 A tibble, summarized or per fold as \code{\link[=collect_metrics]{collect_metrics()}} returns
 it in the long shape. Given
 the metric set and the event level the run used, it is identical to
-\code{collect_metrics(x, summarize = summarize)}.
+\code{collect_metrics(x, summarize = summarize)}. Per fold, the first
+columns are the design's fold labels, each in its own column: \code{id},
+and \code{id2} on a repeated design.
 }
 \description{
 \code{compute_metrics()} scores the predictions a run kept under
