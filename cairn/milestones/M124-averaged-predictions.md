@@ -7,7 +7,7 @@
 - **Principles touched:** GP1, GP2, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it adds an argument to an exported method
-- **Branch/PR:** m124-averaged-predictions
+- **Branch/PR:** m124-averaged-predictions · https://github.com/tidymodels/nestedtune/pull/139
 
 ## Goal
 
