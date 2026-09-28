@@ -741,6 +741,224 @@ TS_INNER_DESIGNS <- list(
   )
 )
 
+# The nine pairs of a sliding outer design and an inner sliding design
+# (M121), named "<outer> / <inner>", each with its outer and inner split class
+# and its literal `nested_resamples()` call. All nine run on
+# `make_ts_weekday_data()`, so the index designs differ from the window ones.
+# The outer sliding-window design takes 60-row windows. The outer
+# sliding-index design takes 69-day windows, which hold 50 rows on the
+# weekday dates, so it builds four outer folds to sliding-window's three.
+# The outer sliding-period design takes twelve-week windows, every second
+# week. The inner calls are those of TS_INNER_DESIGNS. Counted with
+# `sapply(x$inner_resamples, nrow)` on each pair's call, run 2026-09-27:
+#
+#   outer \ inner    window    index      period
+#   window           4 4 4     7 7 7      7 7 7
+#   index            2 2 2 2   5 5 5 5    5 5 5 5
+#   period           4 4 4 4   6 7 7 7    6 6 6 6
+#
+# Only the first outer analysis window starts at row 1, so every later fold
+# re-points its inner splits at a window that does not.
+TS_SLIDING_PAIRS <- list(
+  "sliding-window / sliding-window" = list(
+    outer_class = "sliding_window_split",
+    inner_class = "sliding_window_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_window(
+          lookback = 59,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_window(
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-window / sliding-index" = list(
+    outer_class = "sliding_window_split",
+    inner_class = "sliding_index_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_window(
+          lookback = 59,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_index(
+          index = date,
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-window / sliding-period" = list(
+    outer_class = "sliding_window_split",
+    inner_class = "sliding_period_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_window(
+          lookback = 59,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 5
+        )
+      )
+    }
+  ),
+  "sliding-index / sliding-window" = list(
+    outer_class = "sliding_index_split",
+    inner_class = "sliding_window_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_index(
+          index = date,
+          lookback = 69,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_window(
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-index / sliding-index" = list(
+    outer_class = "sliding_index_split",
+    inner_class = "sliding_index_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_index(
+          index = date,
+          lookback = 69,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_index(
+          index = date,
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-index / sliding-period" = list(
+    outer_class = "sliding_index_split",
+    inner_class = "sliding_period_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_index(
+          index = date,
+          lookback = 69,
+          assess_stop = 1,
+          step = 10
+        ),
+        inside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 5
+        )
+      )
+    }
+  ),
+  "sliding-period / sliding-window" = list(
+    outer_class = "sliding_period_split",
+    inner_class = "sliding_window_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 11,
+          step = 2
+        ),
+        inside = rsample::sliding_window(
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-period / sliding-index" = list(
+    outer_class = "sliding_period_split",
+    inner_class = "sliding_index_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 11,
+          step = 2
+        ),
+        inside = rsample::sliding_index(
+          index = date,
+          lookback = 39,
+          assess_stop = 1,
+          step = 5
+        )
+      )
+    }
+  ),
+  "sliding-period / sliding-period" = list(
+    outer_class = "sliding_period_split",
+    inner_class = "sliding_period_split",
+    build = function(d) {
+      nested_resamples(
+        d,
+        outside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 11,
+          step = 2
+        ),
+        inside = rsample::sliding_period(
+          index = date,
+          period = "week",
+          lookback = 5
+        )
+      )
+    }
+  )
+)
+
+# A pair's call with `rsample::nested_cv()` in place of `nested_resamples()`,
+# so the reference design takes the pair's arguments as written (M121).
+ts_pair_reference <- function(pair, d) {
+  cl <- body(pair$build)
+  if (identical(cl[[1]], as.name("{"))) {
+    cl <- cl[[2]]
+  }
+  cl[[1]] <- quote(rsample::nested_cv)
+  eval(cl, list(d = d), environment(pair$build))
+}
+
+# The pairs sit in three files, one per outer design, so no one file runs
+# alone for long under parallel test files (M121).
+ts_pairs_with_outer <- function(outer) {
+  TS_SLIDING_PAIRS[startsWith(names(TS_SLIDING_PAIRS), paste0(outer, " / "))]
+}
+
 # The fixtures' inner call, spelled out for a reference final fit to build on
 # the full data (M110).
 ts_inner <- function(data) {

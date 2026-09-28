@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-27 (M120 done; validate green, 18 staleness advisor
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M121 | Sliding outer designs with inner sliding designs | planned | M120 | normal | milestones/M121-sliding-outer-inner-pairs.md |
+| M121 | Sliding outer designs with inner sliding designs | in-progress | M120 | normal | milestones/M121-sliding-outer-inner-pairs.md |
 | M120 | Inner sliding designs under the other orchestrators | done | — | normal | milestones/archive/M120-inner-sliding-orchestrators.md |
 | M119 | Inner sliding-window, sliding-index and sliding-period designs | done | — | normal | milestones/archive/M119-inner-sliding-designs.md |
 | M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | done | — | normal | milestones/archive/M118-cran-test-time.md |
