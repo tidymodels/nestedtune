@@ -102,6 +102,7 @@ field on the results.
   [`extract_preprocessor(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
   [`extract_spec_parsnip(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
   [`outcome_names(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
+  [`extract_parameter_set_dials(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
   : Extract the parts of a final fit's workflow
 - [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
   : Extract the tuning run a final fit was selected from
@@ -120,6 +121,7 @@ field on the results.
   [`extract_preprocessor`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`extract_spec_parsnip`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`outcome_names`](https://nestedtune.tidymodels.org/reference/reexports.md)
+  [`extract_parameter_set_dials`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`autoplot`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`augment`](https://nestedtune.tidymodels.org/reference/reexports.md)
   [`compute_metrics`](https://nestedtune.tidymodels.org/reference/reexports.md)

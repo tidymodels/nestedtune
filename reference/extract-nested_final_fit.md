@@ -3,7 +3,9 @@
 These methods reach the fitted model, the preprocessor and the outcome
 names of the workflow that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-trained. Each one gives the same answer as the same call on
+trained. Each one except
+[`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+gives the same answer as the same call on
 [`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)'s
 output.
 
@@ -30,6 +32,9 @@ extract_spec_parsnip(x, ...)
 
 # S3 method for class 'nested_final_fit'
 outcome_names(x, ...)
+
+# S3 method for class 'nested_final_fit'
+extract_parameter_set_dials(x, ...)
 ```
 
 ## Arguments
@@ -55,7 +60,27 @@ outcome_names(x, ...)
 
 ## Value
 
-What the same call returns for the trained workflow.
+What the same call returns for the trained workflow. For
+[`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
+a dials `parameters` object, the set the tuning run stored.
+
+## Details
+
+The trained workflow holds no `tune()` placeholder, so
+[`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+reads the parameter set from the tuning run that
+[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
+returns. It is the set tune stored for that run. That set starts from
+`param_info` if the call gave one, and from the untrained workflow's set
+otherwise. If tune built the candidates itself, as for a numeric `grid`
+or for
+[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
+it first finalized any unknown range, such as the upper bound of `mtry`,
+on the predictors. With a data-frame `grid`, the returned set can keep
+an unknown range. A fit from
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+ran no tuning and is refused with condition class
+`nestedtune_no_tuning_run`.
 
 ## See also
 
@@ -108,4 +133,10 @@ extract_recipe(final)
 #> • PCA extraction with: cyl, disp, hp, drat, wt, qsec, ... | Trained
 outcome_names(final)
 #> [1] "mpg"
+extract_parameter_set_dials(final)
+#> Collection of 1 parameters for tuning
+#> 
+#>  identifier     type    object
+#>    num_comp num_comp nparam[+]
+#> 
 ```

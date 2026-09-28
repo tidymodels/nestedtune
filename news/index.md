@@ -204,6 +204,15 @@
   the workflow methods drop an argument they do not know, so these
   refuse one instead.
 
+- A `nested_final_fit` now answers
+  [`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+  with the parameter set tune stored on its tuning run. The trained
+  workflow holds no `tune()` placeholder, so the set is read from that
+  run and not from the workflow. With a data-frame `grid`, the set can
+  keep an unknown range such as that of `mtry`. A fit from
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  is refused with class `nestedtune_no_tuning_run`.
+
 - [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   on a `nested_results` or a `nested_results_set` takes `type = "wide"`,
   which returns one column per metric, as tune’s

@@ -127,7 +127,7 @@ parameter set below fixes that range by hand. It also bounds
 the size of an inner analysis set here.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
-<span>  <span class="fu">extract_parameter_set_dials</span><span class="op">(</span><span class="va">wf</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_parameter_set_dials</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span>,</span>
 <span>  mtry <span class="op">=</span> <span class="fu">mtry</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">8L</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  min_n <span class="op">=</span> <span class="fu">min_n</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">10L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>

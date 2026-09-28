@@ -18,6 +18,7 @@ to see their documentation.
   [`extract_fit_engine`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
   [`extract_fit_parsnip`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
   [`extract_mold`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
+  [`extract_parameter_set_dials`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
   [`extract_preprocessor`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
   [`extract_recipe`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
   [`extract_spec_parsnip`](https://hardhat.tidymodels.org/reference/hardhat-extract.html),
