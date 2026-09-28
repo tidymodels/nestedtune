@@ -1,13 +1,13 @@
 # M124: Averaged out-of-fold predictions
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP2, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it adds an argument to an exported method
-- **Branch/PR:** —
+- **Branch/PR:** m124-averaged-predictions
 
 ## Goal
 
@@ -43,7 +43,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 
 ## Tasks
 
-- [ ] T1: Write the AC1 to AC4 tests first, in a new `tests/testthat/test-collect-predictions-summarize.R` with the file-level `skip_heavy_on_cran()` of M118. Use deterministic engines for AC1. Regression takes `fixed_workflow()`. Both classification runs take a `logistic_reg()` workflow, not the ranger `cls_workflow()`, whose per-fold probabilities differ from `fit_resamples()` (criteria audit). Censored takes `srv_workflow()` with `dist` fixed and `srv_set_metrics()`, under `skip_if_no_censored()` (LESSONS M101). Run the tests and record that they fail.
+- [x] T1: Write the AC1 to AC4 tests first, in a new `tests/testthat/test-collect-predictions-summarize.R` with the file-level `skip_heavy_on_cran()` of M118. Use deterministic engines for AC1. Regression takes `fixed_workflow()`. Both classification runs take a `logistic_reg()` workflow, not the ranger `cls_workflow()`, whose per-fold probabilities differ from `fit_resamples()` (criteria audit). Censored takes `srv_workflow()` with `dist` fixed and `srv_set_metrics()`, under `skip_if_no_censored()` (LESSONS M101). Run the tests and record that they fail.
 - [ ] T2: Add `summarize` to `collect_predictions.nested_results()` in `R/nested-results-collect.R`. Write an internal averaging helper that drops the labels and `.config`, groups by `.row`, and picks its rule from the saved columns. Probabilities take the probability rule, and `.pred_class` alone takes the vote. A numeric `.pred` takes the mean. A list `.pred`, `.pred_time` or `.pred_linear_pred` takes the censored rules. Call no `tune:::` function. Grep the helper's name first (LESSONS M41).
 - [ ] T3: Write the AC5 to AC7 tests, then the code. Break folds with `break_fold()` for AC5. Pass `summarize` through `stack_set()` in `R/nested-results-set.R` for AC6. Refuse a `.pred_quantile` column for AC7.
 - [ ] T4: Write the AC8 help text and example, and the `NEWS.md` bullet. Append a D-entry that extends D-054 with the argument. It records the average across selected candidates with `.config` dropped, the choice of rule from saved columns, and the quantile refusal. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
@@ -57,6 +57,8 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: plan gate chose one row per data row over tune's grouping by candidate, because folds select different candidates; falsified by users needing per-candidate averages.
 - 2026-09-28: plan chose the rule from saved columns over the recorded metric set, because a default-metric run records none; falsified by columns contradicting metric types.
 - 2026-09-28: plan chose refusing quantile predictions over porting tune's rule, because no quantile run can check it; falsified by tune accepting quantile metrics.
+- 2026-09-28: implement started on branch `m124-averaged-predictions`. The question gate was skipped because the plan left no choice open.
+- 2026-09-28: T1 done. 14 tests in `test-collect-predictions-summarize.R` all error with `rlib_error_dots_nonempty` naming `summarize`, before any code. Grid seeds 21 (regression) and 25 (classification) give repeats that select two candidates.
 
 ## Decisions
 
