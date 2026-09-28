@@ -54,8 +54,8 @@ Config/Needs/website: tidymodels, tidyverse/tidytemplate, pkgdown
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 Config/testthat/start-first: parallel-identity, time-series-designs,
-    nested-tune-race-oracles, nested-tune-grid-oracles,
-    nested-tune-bayes-oracles, nested-results-print, nested-tune-finalize,
+    time-series-inner-bayes-anneal, nested-tune-race-oracles,
+    nested-tune-grid-oracles, nested-tune-bayes-oracles, nested-results-print, nested-tune-finalize,
     time-series-bayes, model-spec-input, nested-tune-grid-failures,
-    time-series-race
+    time-series-race, time-series-inner-race
 Config/roxygen2/version: 8.1.0

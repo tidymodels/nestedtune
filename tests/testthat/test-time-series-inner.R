@@ -68,7 +68,7 @@ for (design in names(TS_INNER_DESIGNS)) {
     ),
     {
       skip_if_no_engines()
-      d <- make_ts_data()
+      d <- spec$data()
       wf <- det_workflow(d)
       ms <- ts_metrics()
       grid <- det_grid()
@@ -95,7 +95,7 @@ for (design in names(TS_INNER_DESIGNS)) {
   )
 
   test_that(sprintf("inner %s splits match rsample::nested_cv()", design), {
-    d <- make_ts_data()
+    d <- spec$data()
 
     ref <- spec$build(d)
     lean <- lean_of(d)
@@ -114,7 +114,7 @@ for (design in names(TS_INNER_DESIGNS)) {
     ),
     {
       skip_if_no_engines()
-      d <- make_ts_data()
+      d <- spec$data()
       final <- expect_final_matches_reference(
         d,
         spec$build(d),
@@ -126,3 +126,27 @@ for (design in names(TS_INNER_DESIGNS)) {
     }
   )
 }
+
+# M120 AC4: the sliding-index fixture runs on dates with weekend gaps, so its
+# tests reach splits the sliding-window fixture does not build. Both share the
+# outer rolling-origin splits, which index rows and not dates.
+test_that("the inner sliding-index fixture builds splits sliding-window does not", {
+  window <- TS_INNER_DESIGNS[["sliding-window"]]
+  index <- TS_INNER_DESIGNS[["sliding-index"]]
+  w <- window$build(window$data())
+  x <- index$build(index$data())
+
+  expect_identical(
+    lapply(x$splits, function(s) s$in_id),
+    lapply(w$splits, function(s) s$in_id)
+  )
+  inner_ids <- function(folds, i) {
+    lapply(folds$inner_resamples[[i]]$splits, function(s) s$in_id)
+  }
+  differs <- vapply(
+    seq_len(nrow(x)),
+    function(i) !identical(inner_ids(x, i), inner_ids(w, i)),
+    logical(1)
+  )
+  expect_true(all(differs))
+})

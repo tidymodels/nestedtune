@@ -1913,6 +1913,18 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-083 stands, read as follows. It narrows the clauses of D-074 and D-078 that leave inner designs other than `rolling_origin()` unclaimed: the three sliding designs are claimed on D-083's terms, and every other inner design stays unclaimed. The other tuners were left out to hold CI time. Whether they behave the same on these designs is untested, as D-083's falsifier states.
 **Consequences:** none for the code. (Corrects D-083's heading, Decision and Consequences, and narrows D-074's Consequences clause on inner designs.)
 
+### D-085 (2026-09-27): inner `sliding_window()`, `sliding_index()` and `sliding_period()` designs under an outer `rolling_origin()` are claimed under every orchestrator and `nested_workflow_map()`, with the other tuners' final fits claimed on sliding-period alone. Supersedes the clauses of D-083 and D-084 that leave the other orchestrators and `nested_workflow_map()` unclaimed with these inner designs
+
+**Context:** D-083 claims the three inner sliding designs under an outer `rolling_origin()` for `nested_tune_grid()` and its final fit alone, and D-084 states that the other tuners were left out to hold CI time. Unlike the outer design, the inner design reaches the tuner. M120 tests the Bayes, racing and annealing tuners on the three designs against their reference loops, and their final fits on the sliding-period design. It also tests `nested_fit_resamples()` and `nested_workflow_map()` on the three designs. The sliding-index fixture moves to weekday-only dates, so its splits differ from the sliding-window fixture's.
+**Decision:** the claim covers the three inner designs under all six orchestrators and `nested_workflow_map()`. `nested_final_fit()` is claimed for grid results on all three designs and for the other four tuners' results on sliding-period. `nested_fit_resamples()` is claimed only to accept these designs, because it reads no inner design. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state this. No package code changed. Considered and rejected at M120's plan gate: final fits on all three designs for the four tuners, because the rebuild of each inner design is tested under grid and each tuner's run on it is tested directly.
+**Consequences:** the four tuners' final fits on the inner sliding-window and sliding-index designs stay unclaimed, in the candidate row. So does every function other than grid on a sliding outer design with an inner sliding design, where M121 takes grid. Falsified by a tuner's final fit failing on an inner sliding-window or sliding-index design where its run passes. (Supersedes D-083's Decision clause leaving the other orchestrators and `nested_workflow_map()` unclaimed with these inner designs, and D-084's clause stating that they are untested.)
+
+### D-086 (2026-09-27): `nested_fit_resamples()` checks the inner design but fits nothing on it. Corrects D-085's Decision
+
+**Context:** M120's claim audit found that D-085's reason for claiming `nested_fit_resamples()` only to accept these designs, "because it reads no inner design", is untrue. The function runs `check_nested()` over the inner design at entry and ships each fold's inner rset with the fold. It skips only the inner tuning stage.
+**Decision:** D-085 stands, with that reason read as "because it checks the inner design but fits nothing on it". The help, `NEWS.md` and M120's AC3 and AC5 use the same words.
+**Consequences:** none for the code. (Corrects D-085's Decision.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

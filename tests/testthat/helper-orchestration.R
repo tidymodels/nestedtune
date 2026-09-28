@@ -645,18 +645,33 @@ TS_DATA <- list(
   "sliding-period" = make_ts_data
 )
 
+# `make_reg_data()` with a `date` column of weekdays only, starting on
+# Wednesday 2020-01-01, so the dates have a two-day gap every weekend (M120).
+# The inner sliding-index fixture runs on it for this reason. On the gap-free
+# dates of `make_ts_data()`, a 39-day `lookback` covers 40 rows, the same as
+# `lookback = 39` in the sliding-window design. There the sliding-index design
+# builds the sliding-window design's splits.
+make_ts_weekday_data <- function() {
+  d <- make_reg_data()
+  days <- seq(as.Date("2020-01-01"), by = "day", length.out = 2L * nrow(d))
+  days <- days[!format(days, "%u") %in% c("6", "7")]
+  d$date <- days[seq_len(nrow(d))]
+  d
+}
+
 # The three inner sliding designs (M119), each under the rolling-origin outer
-# design, built on `make_ts_data()` because two of them need `date`. The
-# sliding-window and sliding-index designs have four, six and eight inner
-# resamples across the three outer folds, and sliding-period has four, five
-# and seven (counted 2026-09-27 with `sapply(x$inner_resamples, nrow)` on
-# each fixture). `sliding_period()`
+# design. The sliding-window and sliding-period designs are built on
+# `make_ts_data()`, and the sliding-index design on `make_ts_weekday_data()`
+# (M120). Across the three outer folds, sliding-window has four, six and
+# eight inner resamples, sliding-index seven, nine and eleven, and
+# sliding-period four, five and seven. These counts come from
+# `sapply(x$inner_resamples, nrow)` on each fixture, run 2026-09-27. The
+# racers at `burn_in = 2` need at least three in every fold. On the weekday
+# dates a 39-day `lookback` covers 28 rows, so the sliding-index splits differ
+# from the sliding-window ones in every fold. `sliding_period()`
 # takes analysis sets of the current week and the five weeks before it, and
 # holds out the next week. A fold's first analysis set is shorter, because
 # the data starts on a Wednesday, and its last held-out week can be partial.
-# `date` has no gaps, so the sliding-index design builds the same splits as
-# the sliding-window one, and its tests show only that the index-based class
-# runs.
 ts_inner_window_nested <- function(data) {
   rsample::nested_cv(
     data,
@@ -691,11 +706,12 @@ ts_inner_period_nested <- function(data) {
 }
 
 # The inner sliding designs by name: the nested builder, the inner split
-# class it builds, and its literal inner call for a reference final fit to
-# build on the full data (M119).
+# class it builds, its literal inner call for a reference final fit to build
+# on the full data (M119), and the data builder it runs on (M120).
 TS_INNER_DESIGNS <- list(
   "sliding-window" = list(
     build = ts_inner_window_nested,
+    data = make_ts_data,
     split_class = "sliding_window_split",
     inner = function(data) {
       rsample::sliding_window(data, lookback = 39, assess_stop = 1, step = 5)
@@ -703,6 +719,7 @@ TS_INNER_DESIGNS <- list(
   ),
   "sliding-index" = list(
     build = ts_inner_index_nested,
+    data = make_ts_weekday_data,
     split_class = "sliding_index_split",
     inner = function(data) {
       rsample::sliding_index(
@@ -716,6 +733,7 @@ TS_INNER_DESIGNS <- list(
   ),
   "sliding-period" = list(
     build = ts_inner_period_nested,
+    data = make_ts_data,
     split_class = "sliding_period_split",
     inner = function(data) {
       rsample::sliding_period(data, index = date, period = "week", lookback = 5)
@@ -741,15 +759,23 @@ expect_ts_matches_reference <- function(res, ref) {
   }
 }
 
-# A final fit against a reference final fit built over `ts_inner()` (M110).
-expect_ts_final_matches <- function(final, ref, d) {
+# A final fit against a reference final fit built over the fixture's literal
+# inner call (M110), comparing the inner `in_id` and `out_id` values (M120).
+# `split_class` is the class the fixture's literal inner call builds, so the
+# reference and the final fit are both shown to run on that design (M120).
+expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
   expect_identical(
     lapply(final$tuning$splits, function(s) s$in_id),
     lapply(ref$tuned$splits, function(s) s$in_id)
   )
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$out_id),
+    lapply(ref$tuned$splits, function(s) s$out_id)
+  )
   # The reference's inner design is the literal call's, not a default.
-  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
+  expect_s3_class(ref$tuned$splits[[1]], split_class)
+  expect_s3_class(final$tuning$splits[[1]], split_class)
   expect_identical(final$selected, ref$selected)
   expect_identical(
     predict(extract_workflow(final), new_data = d),
