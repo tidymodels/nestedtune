@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-27 (M118 done; validate green, 18 reference-stalene
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M119 | Inner sliding-window, sliding-index and sliding-period designs | in-progress | — | normal | milestones/M119-inner-sliding-designs.md |
+| M119 | Inner sliding-window, sliding-index and sliding-period designs | review | — | normal | milestones/M119-inner-sliding-designs.md |
 | M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | done | — | normal | milestones/archive/M118-cran-test-time.md |
 | M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | done | — | normal | milestones/archive/M117-fit-resamples-metrics-mode.md |
 | M116 | The summaries and the final fit's print name the metric that selects | done | — | normal | milestones/archive/M116-selecting-metric-printed.md |

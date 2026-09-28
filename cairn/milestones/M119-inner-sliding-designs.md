@@ -1,6 +1,6 @@
 # M119: Inner sliding-window, sliding-index and sliding-period designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - [x] T2: Add `tests/testthat/test-time-series-inner.R`. Call `skip_heavy_on_cran()` at the top and `skip_if_no_engines()` in each engine block. Write the AC1 and AC2 blocks, looping over the new list. If AC2 fails, stop and replan, because the fix is a code change.
 - [x] T3: Give `expect_final_matches_reference()` in `test-time-series-designs.R` an inner-design argument. Its default keeps today's `rolling_origin()` call. If the new file needs it, move it to `helper-orchestration.R`. Write the AC3 blocks.
 - [x] T4: Edit the time-series paragraph in `R/nested-tune-grid.R` and `R/nested-resamples.R`, and the `NEWS.md` entry, to AC4's wording. Run `devtools::document()`. Add a D-entry that extends D-078 with the claim and its bound, and supersedes its clause that leaves any inner design other than `rolling_origin()` unclaimed.
-- [ ] T5: Time the new file serially. If it runs over 30 s, add it to `Config/testthat/start-first`. Run `devtools::test()` and `devtools::check()`.
+- [x] T5: Time the new file serially. If it runs over 30 s, add it to `Config/testthat/start-first`. Run `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -54,6 +54,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: T4 done. Help, `NEWS.md` and D-083 written, `devtools::document()` rewrote six Rd files, both prose sweeps clean. No "inner" hit in R/, man/, NEWS.md, vignettes/ or the README limits the tested inner designs to `rolling_origin()`.
 - 2026-09-27: claim audit: 16 claims read, 2 corrected — tests/testthat/helper-orchestration.R (the inner resample counts, and the six-week sliding-period analysis sets). Re-read by the same reader is pending.
 - 2026-09-27: the same reader re-read the two corrected claims and the added partial-week clause once, and found that all three hold.
+- 2026-09-27: T5 done. The new file runs in 24 s serially, under 30 s, so `start-first` is unchanged. `devtools::check()`: 0 errors, 0 warnings, 0 notes, 9 min 27 s. Status set to review.
 
 ## Decisions
 
