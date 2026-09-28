@@ -9,9 +9,9 @@
   tune's rules for `summarize = TRUE`. Because each fold selected its own
   candidate, the average spans those candidates, and the fold labels and
   `.config` are dropped. Quantile predictions are refused. The average
-  refuses saved predictions whose `.row` column no longer holds each row
-  its fold held out exactly once. It also refuses three edited shapes that
-  its rules cannot read: two factor outcome columns, a `.pred_class` column with no
+  refuses saved predictions whose `.row` column no longer holds exactly
+  the rows its fold held out, each once. It also refuses three edited shapes that
+  its rules cannot read: two or more factor outcome columns, a `.pred_class` column with no
   factor outcome, and a censored `.pred` entry with no `.eval_time`. A
   `NULL` censored entry is left out of its row's average. A metric computed
   on the averages describes several fitted models, not the tuning

@@ -120,15 +120,16 @@ is refused with class \code{nestedtune_collect_predictions_predictions}. The
 per-fold table, with \code{summarize = FALSE}, is not checked. Three shapes
 are refused with class \code{nestedtune_summarize_columns}:
 \itemize{
-\item two or more factor outcome columns, where the average reads one;
-\item a \code{.pred_class} column with no factor outcome column;
-\item a censored \code{.pred} entry that is not \code{NULL} and has no \code{.eval_time}
+\item Two or more factor outcome columns, where the average reads one.
+\item A \code{.pred_class} column with no factor outcome column.
+\item A censored \code{.pred} entry that is not \code{NULL} and has no \code{.eval_time}
 column.
 }
 
-An outcome column here is any column other than the prediction columns,
-\code{.row}, \code{.config}, \code{.case_weights}, \code{.iter}, \code{.eval_time} and the fold
-labels.
+An outcome column here is any column other than the prediction columns
+and the fold labels. The columns tune adds beside the predictions are not
+outcome columns either. Those are \code{.row}, \code{.config} and \code{.case_weights}.
+\code{.iter} and \code{.eval_time} are not outcome columns either.
 }
 
 \examples{

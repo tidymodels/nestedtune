@@ -274,14 +274,15 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' per-fold table, with `summarize = FALSE`, is not checked. Three shapes
 #' are refused with class `nestedtune_summarize_columns`:
 #'
-#' * two or more factor outcome columns, where the average reads one;
-#' * a `.pred_class` column with no factor outcome column;
-#' * a censored `.pred` entry that is not `NULL` and has no `.eval_time`
+#' * Two or more factor outcome columns, where the average reads one.
+#' * A `.pred_class` column with no factor outcome column.
+#' * A censored `.pred` entry that is not `NULL` and has no `.eval_time`
 #'   column.
 #'
-#' An outcome column here is any column other than the prediction columns,
-#' `.row`, `.config`, `.case_weights`, `.iter`, `.eval_time` and the fold
-#' labels.
+#' An outcome column here is any column other than the prediction columns
+#' and the fold labels. The columns tune adds beside the predictions are not
+#' outcome columns either. Those are `.row`, `.config` and `.case_weights`.
+#' `.iter` and `.eval_time` are not outcome columns either.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -434,7 +435,8 @@ average_fold_predictions <- function(
 
 # Grouped statistics over `v`, one per group `1:n` of the integer `group`,
 # each group non-empty. They are written with grouped sums and one sort
-# rather than a call per group (M126: 100,002 rows took 0.8 s that way).
+# rather than a call per group (M126: the benchmark's 100,002-row
+# probability table took 0.8 s that way, `benchmarks/averaging-speed.R`).
 # The mean ignores missing values, and a group with none left gives `NaN`,
 # as `mean(na.rm = TRUE)` does. Its rounding can differ from `mean()`'s in
 # the last bits, because `mean()` refines its sum in a second pass.
@@ -453,7 +455,9 @@ mean_by <- function(v, group, n) {
 }
 
 # The median, missing when any value in the group is, as `stats::median()`
-# is by default.
+# is by default. For an even group it halves the sum of the middle two,
+# where `stats::median()` calls `mean()`, so the two can differ in the last
+# bit.
 median_by <- function(v, group, n) {
   v <- as.double(v)
   size <- tabulate(group, n)
