@@ -68,7 +68,8 @@ design's fold labels follow \code{wflow_id}, each in its own column: \code{id}, 
 from \code{collect_selections()} to \code{collect_extracts()} stack their
 per-fold tables the same way. \code{compute_metrics()} scores each
 workflow's saved predictions with the metric set you give it.
-\code{augment()} gives each workflow's data rows with its predictions.
+\code{augment()} gives each workflow's data rows with its predictions,
+averaged per row on a design that holds out a row more than once.
 }
 \section{Workflows and folds that failed}{
 

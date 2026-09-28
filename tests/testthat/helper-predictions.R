@@ -36,3 +36,48 @@ plant_row_mismatch <- function(x, i, case) {
 }
 
 row_mismatch_cases <- c("missing", "repeated", "na", "foreign", "no_row")
+
+# The data rows no outer assessment set of `x` holds, read off the splits.
+never_held_rows <- function(x) {
+  n <- nrow(x$splits[[1L]]$data)
+  setdiff(seq_len(n), unlist(lapply(x$splits, rsample::complement)))
+}
+
+# `augment()`'s refusal of a design that leaves rows out of every
+# assessment set (M125). When more than five rows are left out, it counts
+# them and names the first five. Otherwise it names all of them. `never`
+# comes from never_held_rows().
+expect_names_never_held <- function(x, never) {
+  cnd <- rlang::catch_cnd(augment(x), "error")
+  expect_s3_class(cnd, "nestedtune_augment_rows")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
+  # cli wraps the message at the console width.
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(msg, "every data row at least once", fixed = TRUE)
+  if (length(never) > 5L) {
+    shown <- never[1:5]
+    expected <- sprintf(
+      "No outer fold holds out %d rows. The first five are %s, and %d.",
+      length(never),
+      paste(shown[1:4], collapse = ", "),
+      shown[[5L]]
+    )
+  } else {
+    expected <- sprintf(
+      "No outer fold holds out %s %s.",
+      if (length(never) == 1L) "row" else "rows",
+      if (length(never) == 1L) {
+        never
+      } else {
+        paste0(
+          paste(never[-length(never)], collapse = ", "),
+          if (length(never) > 2L) "," else "",
+          " and ",
+          never[[length(never)]]
+        )
+      }
+    )
+  }
+  expect_match(msg, expected, fixed = TRUE)
+  invisible(msg)
+}
