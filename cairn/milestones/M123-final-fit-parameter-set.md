@@ -1,6 +1,6 @@
 # M123: The parameter set a final fit searched
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -40,7 +40,7 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - [x] T1: Write the AC1 to AC3 tests first (four AC1 cases), in the test file of the D-068 extractors. Cases (c) and (d) use a ranger model and take the ranger skip (LESSONS M101). Run the tests before T2 and record that they fail.
 - [x] T2: Add `extract_parameter_set_dials.nested_final_fit()` to `R/nested-final-fit.R`, where the `extract-nested_final_fit` topic lives. Read the set from the stored tuning run, not from the trained workflow, which holds no `tune()` placeholders. Refuse with `check_tuning_run()` and `rlang::check_dots_empty()`. Import and re-export the generic in `R/reexports.R`. Append a D-entry that extends D-068 with this method.
 - [x] T3: Add the `NEWS.md` bullet. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
-- [ ] T4: Run `devtools::document()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
+- [x] T4: Run `devtools::document()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
 ## Work log
 
@@ -59,6 +59,7 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - claim audit: 19 claims read, 2 corrected — R/nested-final-fit.R, tests/testthat/test-nested-final-fit-extract.R
 - 2026-09-28: The claim audit found the help's finalize sentence false for `nested_tune_bayes()`, which refuses an unknown range. The sentence is narrowed to `nested_tune_grid()`, and a test comment now names the ranges it narrows. The same reader re-read both and found them correct.
 - 2026-09-28: T4's first `devtools::check()` gave 1 warning, because the tests called `hardhat::` and hardhat is not declared. The tests now call `tune::extract_parameter_set_dials()`, the same function object re-exported, so no dependency changed. `document()` gives no diff after the fix, and `pkgdown::check_pkgdown()` finds no problem.
+- 2026-09-28: T4 done. The second `devtools::check()` on the final code gave 0 errors, 0 warnings and 0 notes. Status set to review.
 
 ## Decisions
 
