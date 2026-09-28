@@ -412,11 +412,16 @@ An inner <code><a href="https://rsample.tidymodels.org/reference/slide-resamplin
 <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested for the results of
 those four tuners on the sliding-period design alone.
 <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept these designs. It checks the
-inner design but fits nothing on it. The other three outer designs are not
-tested with these inner designs. Any other inner design is not tested.
+inner design but fits nothing on it. Any other inner design is not tested.
 <code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
 assessment sets leave rows out. When the assessment sets overlap, its
 error also counts the rows held out more than once.</p>
+<p>An outer <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> gives nine
+pairs, and each pair is tested under <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>.
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>, <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>
+and the other four tuners are not tested on these pairs.</p>
     </div>
     <div class="section level2">
     <h2 id="finalizing-a-parameter-range">Finalizing a parameter range<a class="anchor" aria-label="anchor" href="#finalizing-a-parameter-range"></a></h2>

@@ -120,8 +120,23 @@ is tested for the results of those four tuners on the sliding-period
 design alone.
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
 is tested to accept these designs. It checks the inner design but fits
-nothing on it. The other three outer designs are not tested with these
-inner designs. Any other inner design is not tested.
+nothing on it.
+
+An outer
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+or
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+with one of these three inner designs gives nine pairs. Each pair is
+tested to give the same splits as
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
+and each is tested under
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+and the other four tuners are not tested on these pairs. Any other inner
+design is not tested.
 
 ## Memory
 
