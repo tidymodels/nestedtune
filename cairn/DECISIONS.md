@@ -1961,6 +1961,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `augment()` refuses only a design that leaves some data row out of every assessment set, with class `nestedtune_augment_rows`. The message names the first five such rows and no design type. On a design that holds some row out more than once, every row joins its entry in the `summarize = TRUE` average. So one design never mixes averaged and saved values. On a design that holds each row out once, the saved predictions are joined as they are. Saved quantile predictions on the averaged path are refused with class `nestedtune_summarize_quantile`, as D-091 keeps them refused there. Considered and rejected: joining tune's `NA` rows for rows never held out, which the M125 plan gate declined.
 **Consequences:** D-063's refusal clause and its Consequences clause on the `summarize = TRUE` candidate row are superseded. The rest of D-063 stands. Falsified by users needing rows never held out augmented, or by a postprocessed class that users need kept on a repeated design.
 
+### D-093 (2026-09-28): D-092 also supersedes D-078's clause on the message `augment()` gives an overlapping time-series design. Corrects D-092's heading and Consequences
+
+**Context:** M125's review found that D-092 names only D-063. M125 also removed what D-078 decided for `augment()`: a message about overlapping time-series assessment sets, chosen by the class of the first outer split.
+**Decision:** D-092 stands, and it also supersedes D-078's clause on that message. `augment()` gives one message for every design it refuses, and the message names no design type. D-078's support claims for the four outer time-series designs stand.
+**Consequences:** D-078's falsifier about a time-series split class the check does not list no longer applies to `augment()`, because the check reads no split class.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

@@ -359,7 +359,13 @@ test_that("quantile predictions on a design holding a row out twice are refused 
   cnd <- rlang::catch_cnd(augment(planted), "error")
   expect_s3_class(cnd, "nestedtune_summarize_quantile")
   expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
-  expect_match(conditionMessage(cnd), "augment", fixed = TRUE)
+  # The augment() wording, not collect_predictions()'s.
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(
+    msg,
+    "The outer design holds some data rows out more than once",
+    fixed = TRUE
+  )
 
   # A design holding each row out once joins such a column as saved.
   once <- augment_run(d, det_nested(d))
@@ -371,6 +377,69 @@ test_that("quantile predictions on a design holding a row out twice are refused 
   }
   aug <- augment(once)
   expect_identical(aug$.pred_quantile, aug$.pred)
+})
+
+# A saved class that disagrees with the saved probabilities, as a
+# postprocessor's threshold can leave it: each fold's `.pred_class` is set
+# to the class other than the larger-probability one. A tie goes to the
+# first level, "event", as in `class_from_probs()`.
+plant_minority_class <- function(x) {
+  for (i in which(x$.completed)) {
+    x <- edit_fold_predictions(x, i, function(p) {
+      p$.pred_class <- factor(
+        ifelse(p$.pred_event >= p$.pred_other, "other", "event"),
+        levels = levels(p$.pred_class)
+      )
+      p
+    })
+  }
+  x
+}
+
+test_that("on a design holding each row out once, a saved class that disagrees with the probabilities is joined as saved", {
+  skip_if_no_engines(stochastic = TRUE)
+  d <- cls_data()
+  set.seed(3)
+  res <- memoised(nested_tune_grid(
+    cls_workflow(d),
+    cls_nested(d),
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    event_level = "second",
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+  expect_identical(levels(d$y), c("event", "other"))
+  planted <- plant_minority_class(res)
+  aug <- augment(planted)
+  saved <- collect_predictions(planted)
+  expect_identical(
+    aug$.pred_class,
+    saved$.pred_class[match(seq_len(nrow(d)), saved$.row)]
+  )
+  # The control: the planted class is not the larger-probability class, so
+  # averaging or recomputing it would change the column.
+  argmax <- ifelse(aug$.pred_event >= aug$.pred_other, "event", "other")
+  expect_true(any(as.character(aug$.pred_class) != argmax))
+})
+
+test_that("on a design holding a row out more than once, a saved class is recomputed from the averaged probabilities", {
+  skip_if_no_engines(stochastic = TRUE)
+  d <- cls_data()
+  res <- memoised(nested_tune_grid(
+    cls_workflow(d),
+    repeated_folds(d, 36, stratify = TRUE),
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    event_level = "second",
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+  expect_identical(levels(d$y), c("event", "other"))
+  aug <- augment(plant_minority_class(res))
+  # The class with the larger averaged probability, whatever was saved. The
+  # design has rows whose averaged probabilities tie at 0.5.
+  argmax <- ifelse(aug$.pred_event >= aug$.pred_other, "event", "other")
+  expect_identical(as.character(aug$.pred_class), argmax)
+  expect_identical(aug, augment(res))
 })
 
 test_that("a run without saved predictions is refused with nestedtune_column_not_saved", {

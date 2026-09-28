@@ -56,6 +56,7 @@
 - 2026-09-28: the same reader re-read the three corrections and the singular "that row" wording in `check_held_out()`, and all held. `test-augment.R`, `test-time-series-designs.R`, `test-help-structure.R`, `test-sweep-prose.R` and both prose sweeps are clean after the fixes.
 - 2026-09-28: T4 done on 332efcf0. `devtools::check()`: 0 errors, 0 warnings, 0 notes. `document()` left no diff, and `check_pkgdown()` found no problems. Full `devtools::test()` passed on the T2 code, and only docs, a comment and one message line changed after it. Status set to review.
 - 2026-09-28: review checkpoint. AC1 to AC4 are verified and ticked. `devtools::check()` for AC5 is still running. The three reviewers reported, and their findings await triage at the gate.
+- 2026-09-28: step-7 approval: m125-augment-repeated-designs approved for merge, after the gate fixes pass.
 
 ## Decisions
 
@@ -87,3 +88,10 @@ Independent review: three fresh lenses ran, [O] diff-bug, [S] blame-history and 
 - O10: the separate NEWS bullet on the five-row naming describes a change to an unreleased feature. Proposed: reject, because NEWS keeps such bullets within the development version.
 - O12: the quantile test uses a plain column in place of hardhat's `quantile_pred`. Proposed: reject, because this predates M125 and D-091 records why.
 - O13: `hold_counts()` and two inline counts repeat `never_held_rows()`. Proposed: reject as style.
+
+Gate triage, 2026-09-28: the maintainer accepted every proposed disposition.
+
+- Fixed on the branch. D-093 appended, correcting D-092. `check_no_quantile()` takes a required `verb`, passed at both calls. Two tests in `test-augment.R` plant a class that disagrees with the probabilities. On a once-design it survives. On a repeated design it is recomputed, with ties going to the first level. Forcing the averaged path on in the namespace failed the once-design test. The help now says "without repeats" and that the hold-out count reads failed folds too. The quantile test matches the x-bullet text.
+- After the fixes: `test-augment.R` ran 198 expectations with 0 failed, and `test-time-series-designs.R`, `test-collect-predictions-summarize.R`, `test-help-structure.R` and `test-sweep-prose.R` were clean. The six prose sweeps, `document()` with no further diff, `check_pkgdown()` and `air format --check` were clean.
+- Follow-up (O1, O8, O9): the averaging edge-case candidate row is rewritten at hygiene.
+- Rejected (O6, O7, O10, O12, O13), with the reasons above.

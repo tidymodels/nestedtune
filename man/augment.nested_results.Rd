@@ -47,13 +47,15 @@ predicts new data with it.
 
 The outer design must hold out every data row at least once.
 
-A v-fold or grouped v-fold design holds out each row once. There, each
-row joins the predictions that its one outer fold saved, as they are.
+A v-fold or grouped v-fold design without repeats holds out each row
+once. There, each row joins the predictions that its one outer fold
+saved, as they are.
 
 A repeated v-fold design holds out each row once per repeat, and a
 Monte Carlo design can hold out a row several times. On a design that
 holds out some row more than once, every row joins its averaged
-prediction, the rows held out once included. The average is the one
+prediction, the rows held out once included. The count of times a row
+is held out reads every outer fold, the failed ones included. The average is the one
 \code{collect_predictions(summarize = TRUE)} gives, and
 \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}} states its rules. For example, a
 \code{.pred_class} saved beside class probabilities is recomputed from the

@@ -308,7 +308,11 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
   if (summarize) {
-    check_no_quantile(x, call = rlang::current_env())
+    check_no_quantile(
+      x,
+      verb = "collect_predictions",
+      call = rlang::current_env()
+    )
   }
   warn_partial_summary(x, noun = "table")
   out <- stack_fold_column(
@@ -398,12 +402,8 @@ average_fold_predictions <- function(preds, drop) {
 # column with the other folds raises. `augment()` averages on a design that
 # holds a row out more than once, and refuses under the same class there
 # (M125).
-check_no_quantile <- function(
-  x,
-  verb = c("collect_predictions", "augment"),
-  call = rlang::caller_env()
-) {
-  verb <- rlang::arg_match(verb)
+check_no_quantile <- function(x, verb, call = rlang::caller_env()) {
+  verb <- rlang::arg_match(verb, c("collect_predictions", "augment"))
   has <- vapply(
     x$.predictions[x$.completed],
     function(p) ".pred_quantile" %in% names(p),
@@ -847,13 +847,15 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #'
 #' The outer design must hold out every data row at least once.
 #'
-#' A v-fold or grouped v-fold design holds out each row once. There, each
-#' row joins the predictions that its one outer fold saved, as they are.
+#' A v-fold or grouped v-fold design without repeats holds out each row
+#' once. There, each row joins the predictions that its one outer fold
+#' saved, as they are.
 #'
 #' A repeated v-fold design holds out each row once per repeat, and a
 #' Monte Carlo design can hold out a row several times. On a design that
 #' holds out some row more than once, every row joins its averaged
-#' prediction, the rows held out once included. The average is the one
+#' prediction, the rows held out once included. The count of times a row
+#' is held out reads every outer fold, the failed ones included. The average is the one
 #' `collect_predictions(summarize = TRUE)` gives, and
 #' [collect_predictions.nested_results()] states its rules. For example, a
 #' `.pred_class` saved beside class probabilities is recomputed from the
