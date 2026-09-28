@@ -500,18 +500,20 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' Extract the parts of a final fit's workflow
 #'
 #' These methods reach the fitted model, the preprocessor and the outcome
-#' names of the workflow that [nested_final_fit()] trained. Each one gives
-#' the same answer as the same call on [extract_workflow()]'s output.
+#' names of the workflow that [nested_final_fit()] trained. Each one except
+#' `extract_parameter_set_dials()` gives the same answer as the same call on
+#' [extract_workflow()]'s output.
 #'
-#' `extract_parameter_set_dials()` is the exception. The trained workflow
-#' holds no `tune()` placeholder, so this method reads the parameter set
-#' from the tuning run that [extract_tune_results()] returns. It is the set
-#' tune stored for that run: `param_info` when the call gave one, otherwise
-#' the untrained workflow's set. Where [nested_tune_grid()] was given `grid`
-#' as a number, tune first finalized any unknown range, such as the upper
-#' bound of `mtry`, on the predictors. With a data-frame `grid`, the returned
-#' set can keep an unknown range. A fit from [nested_fit_resamples()] ran no
-#' tuning and is refused with condition class `nestedtune_no_tuning_run`.
+#' The trained workflow holds no `tune()` placeholder, so
+#' `extract_parameter_set_dials()` reads the parameter set from the tuning
+#' run that [extract_tune_results()] returns. It is the set tune stored for
+#' that run. That set starts from `param_info` if the call gave one, and from
+#' the untrained workflow's set otherwise. If tune built the candidates
+#' itself, as for a numeric `grid` or for [nested_tune_sim_anneal()], it
+#' first finalized any unknown range, such as the upper bound of `mtry`, on
+#' the predictors. With a data-frame `grid`, the returned set can keep an
+#' unknown range. A fit from [nested_fit_resamples()] ran no tuning and is
+#' refused with condition class `nestedtune_no_tuning_run`.
 #'
 #' @param x A `nested_final_fit` from [nested_final_fit()].
 #' @param ... Must be empty. A workflow's methods other than

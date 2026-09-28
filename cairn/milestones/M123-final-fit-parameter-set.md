@@ -60,6 +60,9 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - 2026-09-28: The claim audit found the help's finalize sentence false for `nested_tune_bayes()`, which refuses an unknown range. The sentence is narrowed to `nested_tune_grid()`, and a test comment now names the ranges it narrows. The same reader re-read both and found them correct.
 - 2026-09-28: T4's first `devtools::check()` gave 1 warning, because the tests called `hardhat::` and hardhat is not declared. The tests now call `tune::extract_parameter_set_dials()`, the same function object re-exported, so no dependency changed. `document()` gives no diff after the fix, and `pkgdown::check_pkgdown()` finds no problem.
 - 2026-09-28: T4 done. The second `devtools::check()` on the final code gave 0 errors, 0 warnings and 0 notes. Status set to review.
+- 2026-09-28: correction to the claim-audit line above. `nested_tune_bayes()` does not refuse an unknown range at entry. Every outer fold fails with a warning, and `nested_final_fit()` then refuses with class `nestedtune_no_completed_folds`.
+- 2026-09-28: review gate fixed O1 to O3 in the help and rejected O4, O5, O6 and O8.
+- step-7 approval: m123-final-fit-parameter-set approved for merge
 
 ## Decisions
 
@@ -73,11 +76,12 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - AC5: `devtools::check()` on 2026-09-28 at `3129a5f1`: 0 errors, 0 warnings, 0 notes.
 - Consistency gate: `cairn_validate.py` exit 0, with 18 advisory warnings on reference staleness that predate this branch. `devtools::document()` gives no diff. `pkgdown::check_pkgdown()` finds no problem. The six gating prose sweeps exit 0. README is not touched. No new top-level file. No DESIGN principle changed, so `cairn_impact` is skipped.
 - Reviewers: three lenses, because the tier is user-facing. The blame-history lens found nothing against D-068 or D-089. The prior-review lens found no regression of the M106 lessons. The PR comment probe found only one comment, on an unrelated file. The diff-bug lens found no code bug and ranked 8 findings. The session re-ran O1 and O2: with `grid = 3`, racing, annealing, and a `param_info` with an unknown range all return `mtry` as `[1, 4]`.
-- O1: the help names only `nested_tune_grid()` with a numeric `grid` as a case where tune finalizes an unknown range. Racing and annealing finalize too, so a reader can infer the opposite. Disposition pending at the gate.
-- O2: the help says that for a call with `param_info`, the stored set is that object. A `param_info` with an unknown range comes back finalized, not as that object. Disposition pending at the gate.
-- O3: the topic description says each method gives the same answer as the call on `extract_workflow()`'s output, and this method does not. Disposition pending at the gate.
-- O4: test (c) cannot tell a full-data finalize from one on a row subset, because the bound of `mtry` depends only on the column count. Disposition pending at the gate.
-- O5: under `devtools::test()`, the `nestedtune::` call resolves even without the `export()` line. Only `R CMD check` tests the installed package. Disposition pending at the gate.
-- O6: only grid is tested, which AC1 allows. Disposition pending at the gate.
-- O7: a work-log line says `nested_tune_bayes()` refuses an unknown range. In fact every outer fold fails, and `nested_final_fit()` then refuses. Disposition pending at the gate.
-- O8: `@importFrom tune extract_parameter_set_dials` appears in two files. NAMESPACE holds it once. Disposition pending at the gate.
+- O1: the help names only `nested_tune_grid()` with a numeric `grid` as a case where tune finalizes an unknown range. Racing and annealing finalize too, so a reader can infer the opposite. Fixed now: the help says tune finalizes where it built the candidates itself, as for a numeric `grid` or for `nested_tune_sim_anneal()`.
+- O2: the help says that for a call with `param_info`, the stored set is that object. A `param_info` with an unknown range comes back finalized, not as that object. Fixed now: the help says the set starts from `param_info`, and the finalize sentence then applies to it.
+- O3: the topic description says each method gives the same answer as the call on `extract_workflow()`'s output, and this method does not. Fixed now: the description names `extract_parameter_set_dials()` as the exception.
+- O4: test (c) cannot tell a full-data finalize from one on a row subset, because the bound of `mtry` depends only on the column count. Rejected: a row subset gives the same set, so a user sees no difference.
+- O5: under `devtools::test()`, the `nestedtune::` call resolves even without the `export()` line. Only `R CMD check` tests the installed package. Rejected: AC5's `R CMD check` runs the test on the installed package.
+- O6: only grid is tested, which AC1 allows. Rejected: AC1 covers grid only, and the session probed racing and annealing.
+- O7: a work-log line says `nested_tune_bayes()` refuses an unknown range. In fact every outer fold fails, and `nested_final_fit()` then refuses. Fixed now: a work-log line corrects it, after a session probe gave the fold warning and class `nestedtune_no_completed_folds`.
+- O8: `@importFrom tune extract_parameter_set_dials` appears in two files. NAMESPACE holds it once. Rejected: no effect on the built package.
+- Fix-now re-check, 2026-09-28: after the help edit, `document()` gives no further diff, the six prose sweeps exit 0, `pkgdown::check_pkgdown()` finds no problem, and `devtools::check()` gives 0 errors, 0 warnings, 0 notes.

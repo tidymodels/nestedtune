@@ -45,19 +45,21 @@ the tuning run stored.
 }
 \description{
 These methods reach the fitted model, the preprocessor and the outcome
-names of the workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained. Each one gives
-the same answer as the same call on \code{\link[=extract_workflow]{extract_workflow()}}'s output.
+names of the workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained. Each one except
+\code{extract_parameter_set_dials()} gives the same answer as the same call on
+\code{\link[=extract_workflow]{extract_workflow()}}'s output.
 }
 \details{
-\code{extract_parameter_set_dials()} is the exception. The trained workflow
-holds no \code{tune()} placeholder, so this method reads the parameter set
-from the tuning run that \code{\link[=extract_tune_results]{extract_tune_results()}} returns. It is the set
-tune stored for that run: \code{param_info} when the call gave one, otherwise
-the untrained workflow's set. Where \code{\link[=nested_tune_grid]{nested_tune_grid()}} was given \code{grid}
-as a number, tune first finalized any unknown range, such as the upper
-bound of \code{mtry}, on the predictors. With a data-frame \code{grid}, the returned
-set can keep an unknown range. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no
-tuning and is refused with condition class \code{nestedtune_no_tuning_run}.
+The trained workflow holds no \code{tune()} placeholder, so
+\code{extract_parameter_set_dials()} reads the parameter set from the tuning
+run that \code{\link[=extract_tune_results]{extract_tune_results()}} returns. It is the set tune stored for
+that run. That set starts from \code{param_info} if the call gave one, and from
+the untrained workflow's set otherwise. If tune built the candidates
+itself, as for a numeric \code{grid} or for \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, it
+first finalized any unknown range, such as the upper bound of \code{mtry}, on
+the predictors. With a data-frame \code{grid}, the returned set can keep an
+unknown range. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and is
+refused with condition class \code{nestedtune_no_tuning_run}.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
