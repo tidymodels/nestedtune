@@ -682,7 +682,11 @@ ts_inner_period_nested <- function(data) {
   rsample::nested_cv(
     data,
     outside = rsample::rolling_origin(initial = 60, assess = 1, skip = 9),
-    inside = rsample::sliding_period(index = date, period = "week", lookback = 5)
+    inside = rsample::sliding_period(
+      index = date,
+      period = "week",
+      lookback = 5
+    )
   )
 }
 
