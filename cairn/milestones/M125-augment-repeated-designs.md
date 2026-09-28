@@ -21,10 +21,10 @@
 
 ## Acceptance criteria
 
-- [ ] AC1: The design under test holds some data row out more than once and every row at least once. On it, `augment()` returns one row per data row, in the data's order. Each prediction column holds the value `collect_predictions(res, summarize = TRUE)` gives for that row's `.row`. A test asserts this on a repeated v-fold design for a regression, a probability classification and a censored regression. A second test asserts it for a regression on a Monte Carlo design, after it shows that the design holds every row out.
-- [ ] AC2: An outer design that leaves some data row out of every assessment set is refused with class `nestedtune_augment_rows`. The message names those rows, up to the first five of them. A test asserts this on a Monte Carlo design with such a row, on a rolling-origin design, and on an overlapping sliding-window design.
-- [ ] AC3: On a run where some folds failed, a row that only failed folds held out holds a missing value in every prediction column. The call warns once with class `nestedtune_partial_summary`. A test asserts both on a repeated v-fold design.
-- [ ] AC4: On a design that holds each row out exactly once, `augment()` joins the saved predictions without averaging. It returns the same table as before this milestone. The existing `test-augment.R` tests for such designs pass.
+- [x] AC1: The design under test holds some data row out more than once and every row at least once. On it, `augment()` returns one row per data row, in the data's order. Each prediction column holds the value `collect_predictions(res, summarize = TRUE)` gives for that row's `.row`. A test asserts this on a repeated v-fold design for a regression, a probability classification and a censored regression. A second test asserts it for a regression on a Monte Carlo design, after it shows that the design holds every row out.
+- [x] AC2: An outer design that leaves some data row out of every assessment set is refused with class `nestedtune_augment_rows`. The message names those rows, up to the first five of them. A test asserts this on a Monte Carlo design with such a row, on a rolling-origin design, and on an overlapping sliding-window design.
+- [x] AC3: On a run where some folds failed, a row that only failed folds held out holds a missing value in every prediction column. The call warns once with class `nestedtune_partial_summary`. A test asserts both on a repeated v-fold design.
+- [x] AC4: On a design that holds each row out exactly once, `augment()` joins the saved predictions without averaging. It returns the same table as before this milestone. The existing `test-augment.R` tests for such designs pass.
 - [ ] AC5: The `augment.nested_results` help page says which designs are accepted. It says that repeated predictions are averaged as `collect_predictions(summarize = TRUE)` averages them. It says that a design holding each row out once joins the saved predictions as they are. The `augment()` bullet in `NEWS.md` says so too. `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
 
 ## Coverage
@@ -55,7 +55,15 @@
 - claim audit: 50 claims read, 3 corrected — R/nested-tune-grid.R, tests/testthat/helper-predictions.R, NEWS.md
 - 2026-09-28: the same reader re-read the three corrections and the singular "that row" wording in `check_held_out()`, and all held. `test-augment.R`, `test-time-series-designs.R`, `test-help-structure.R`, `test-sweep-prose.R` and both prose sweeps are clean after the fixes.
 - 2026-09-28: T4 done on 332efcf0. `devtools::check()`: 0 errors, 0 warnings, 0 notes. `document()` left no diff, and `check_pkgdown()` found no problems. Full `devtools::test()` passed on the T2 code, and only docs, a comment and one message line changed after it. Status set to review.
+- 2026-09-28: review checkpoint. AC1 to AC4 are verified and ticked. `devtools::check()` for AC5 is still running. The three reviewers reported, and their findings await triage at the gate.
 
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-09-28 on 7f3b8058. `main` had not moved since the branch was cut, so no merge was needed. Test runs set `NESTEDTUNE_FULL_SUITE=true` and `NOT_CRAN=true`: without them both files skip whole.
+
+- AC1: `test-augment.R` and `test-time-series-designs.R` ran together, 52 blocks and 595 expectations, 0 failed, 0 errors, 0 skipped. The four AC1 tests pass (repeated v-fold regression, probability classification and censored regression, and Monte Carlo regression). `expect_averaged_augment()` checks that every row is held out and some row more than once. It then compares each prediction column with `collect_predictions(summarize = TRUE)` matched on `.row`, in data order. The Monte Carlo test first asserts `never_held_rows()` is empty.
+- AC2: the same run. The Monte Carlo test passes, with more than five rows left out and some rows held out twice. The rolling-origin and overlapping sliding-window tests in `test-time-series-designs.R` pass too. Each asserts class `nestedtune_augment_rows` and the exact "first five" text through `expect_names_never_held()`. A second test covers two rows and one row named in full.
+- AC3: the same run. The failed-fold test breaks fold 1 and the repeat-two fold holding its first row. It asserts one warning of class `nestedtune_partial_summary` and `NA` in every prediction column for exactly the rows only those folds held out. The other rows equal the averaged table.
+- AC4: the `test-augment.R` tests for once-designs (lines 57 to 139 and 376 on) are unchanged by the branch and pass in the same run. A direct check also ran. Three saved runs on once-designs went through `augment()` under `main`'s source and under the branch. They were a regression, a probability classification, and a regression with one failed fold. The output was `identical()` for all three.
