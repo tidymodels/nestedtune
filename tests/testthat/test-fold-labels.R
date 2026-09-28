@@ -83,7 +83,10 @@ test_that("AC1: a repeated design's per-fold tables carry id and id2 from the de
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- repeated_label_design(d)
-  expect_identical(names(folds)[names(folds) %in% c("id", "id2")], c("id", "id2"))
+  expect_identical(
+    names(folds)[names(folds) %in% c("id", "id2")],
+    c("id", "id2")
+  )
   res <- label_run(folds, d)
   expect_identical(nrow(res), 4L)
   expect_true(all(res$.completed))
@@ -202,7 +205,9 @@ test_that("AC3: the performance plot's fold axis pastes the design's labels and 
     as.character(q$data$fold),
     rep(pasted, each = per_fold)[-1L]
   )
-  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(q))))
+  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(
+    q
+  ))))
 
   expect_no_error(utils::capture.output(print(res), type = "message"))
 })
@@ -268,5 +273,7 @@ test_that("AC3: a set's performance plot builds on a repeated design", {
   res <- label_set_run(repeated_label_design(d), d)
   p <- autoplot(res, type = "performance")
   expect_s3_class(p, "ggplot")
-  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(p))))
+  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(
+    p
+  ))))
 })
