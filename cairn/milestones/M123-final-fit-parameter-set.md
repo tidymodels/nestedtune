@@ -37,8 +37,8 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 
 ## Tasks
 
-- [ ] T1: Write the AC1 to AC3 tests first (four AC1 cases), in the test file of the D-068 extractors. Cases (c) and (d) use a ranger model and take the ranger skip (LESSONS M101). Run the tests before T2 and record that they fail.
-- [ ] T2: Add `extract_parameter_set_dials.nested_final_fit()` to `R/nested-final-fit.R`, where the `extract-nested_final_fit` topic lives. Read the set from the stored tuning run, not from the trained workflow, which holds no `tune()` placeholders. Refuse with `check_tuning_run()` and `rlang::check_dots_empty()`. Import and re-export the generic in `R/reexports.R`. Append a D-entry that extends D-068 with this method.
+- [x] T1: Write the AC1 to AC3 tests first (four AC1 cases), in the test file of the D-068 extractors. Cases (c) and (d) use a ranger model and take the ranger skip (LESSONS M101). Run the tests before T2 and record that they fail.
+- [x] T2: Add `extract_parameter_set_dials.nested_final_fit()` to `R/nested-final-fit.R`, where the `extract-nested_final_fit` topic lives. Read the set from the stored tuning run, not from the trained workflow, which holds no `tune()` placeholders. Refuse with `check_tuning_run()` and `rlang::check_dots_empty()`. Import and re-export the generic in `R/reexports.R`. Append a D-entry that extends D-068 with this method.
 - [ ] T3: Add the `NEWS.md` bullet. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
 - [ ] T4: Run `devtools::document()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
@@ -53,6 +53,8 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - re-audit: AC1 (full) — returned 4 findings on the narrowed draft: the first sentence promised what the run searched rather than what tune stored, "Grid stands for the other tuners" was unbounded, the data-frame case went unstated, and "that set" had a loose antecedent.
 - 2026-09-28: amendment gate chose to narrow AC1 and add case (d) over narrowing alone, because the help must explain the `[1, ?]` a user can see.
 - re-audit: AC1 (full) — returned 6 findings: (c) needed a formula workflow, sentence order, (d)'s help clause was not checkable, the other-tuner clause lacked evidence, the Goal says "searched", and T1's ranger skip missed (d). The user accepted the tightened wording. The Goal is left unchanged. T1 and T2 got minor edits: the ranger skip covers (d), and the topic lives in `R/nested-final-fit.R`.
+- 2026-09-28: T1 done. Five new tests in `test-nested-final-fit-extract.R` cover cases (a) to (d), the two refusals and the re-export. Before T2, all five failed because `extract_parameter_set_dials` was not found in the package.
+- 2026-09-28: T2 done. The method reads `attr(x$tuning, "parameters")`, and the help topic, the re-export and D-089 are added. The file's tests and the full suite pass, and both prose sweeps are clean. The re-export test builds the data before the workflow, because a nested `det_workflow(make_reg_data())` draws the `step_pca()` id before the data seed.
 
 ## Decisions
 

@@ -269,3 +269,133 @@ test_that("the workflow extractors refuse a stray argument", {
     expect_error(fn(final, nonesuch = 1), class = "rlib_error_dots_nonempty")
   }
 })
+
+# The parameter set a final fit's tuning run searched. The trained workflow
+# holds no `tune()` placeholder, so handing the call to it, as the extractors
+# above do, would return an empty set. Each expected value below is built
+# from the orchestrator call's inputs, never read off the final fit.
+test_that("the final fit answers extract_parameter_set_dials() from its run", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+
+  # (b) No `param_info`, and `num_comp` has a known range: tune stores the
+  # untrained workflow's own set.
+  final <- final_for_extract()
+  expect_identical(
+    extract_parameter_set_dials(final),
+    hardhat::extract_parameter_set_dials(wf)
+  )
+
+  # (a) A `param_info` with a known range narrower than the default: tune
+  # stores that object, so the result is it and not the workflow's set.
+  pinfo <- stats::update(
+    hardhat::extract_parameter_set_dials(wf),
+    num_comp = dials::num_comp(c(1L, 3L))
+  )
+  folds <- final_nested(d)
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    param_info = pinfo
+  ))
+  set.seed(21)
+  final_pinfo <- memoised(nested_final_fit(wf, res))
+  expect_identical(extract_parameter_set_dials(final_pinfo), pinfo)
+  expect_false(identical(pinfo, hardhat::extract_parameter_set_dials(wf)))
+})
+
+# ranger's `mtry` has an upper bound that is unknown until the predictors are
+# seen. tune fills it in for a grid it builds from a size, and leaves it
+# unknown for a grid given as a data frame, which it does not need to build.
+mtry_workflow <- function() {
+  spec <- parsnip::set_mode(
+    parsnip::set_engine(
+      parsnip::rand_forest(mtry = tune::tune(), trees = 25),
+      "ranger",
+      num.threads = 1
+    ),
+    "regression"
+  )
+  workflows::workflow(y ~ x1 + x2 + x3 + x4, spec)
+}
+
+mtry_final <- function(grid) {
+  d <- make_reg_data()
+  wf <- mtry_workflow()
+  folds <- final_nested(d)
+  set.seed(22)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = grid,
+    metrics = reg_metrics()
+  ))
+  set.seed(21)
+  memoised(nested_final_fit(wf, res))
+}
+
+test_that("a numeric grid gives the set finalized on the full data", {
+  skip_if_no_engines(stochastic = TRUE)
+
+  d <- make_reg_data()
+  untrained <- hardhat::extract_parameter_set_dials(mtry_workflow())
+  expected <- dials::finalize(untrained, d[c("x1", "x2", "x3", "x4")])
+
+  # (c) The control: the expected set differs from the untrained one, so the
+  # identity below shows the finalize step and not a stored copy.
+  expect_true(dials::has_unknowns(untrained$object[[1]]))
+  expect_false(dials::has_unknowns(expected$object[[1]]))
+
+  final <- suppressMessages(mtry_final(grid = 3))
+  expect_identical(extract_parameter_set_dials(final), expected)
+})
+
+test_that("a data-frame grid gives the set with the range still unknown", {
+  skip_if_no_engines(stochastic = TRUE)
+
+  # (d) The help states this case.
+  final <- mtry_final(grid = data.frame(mtry = c(1L, 3L)))
+  result <- extract_parameter_set_dials(final)
+  expect_identical(
+    result,
+    hardhat::extract_parameter_set_dials(mtry_workflow())
+  )
+  expect_true(dials::has_unknowns(result$object[[1]]))
+})
+
+test_that("extract_parameter_set_dials() refuses a fit with no run, and dots", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  fixed <- nested_final_fit(fixed_workflow(d), fit_resamples_results(d))
+  expect_error(
+    extract_parameter_set_dials(fixed),
+    class = "nestedtune_no_tuning_run"
+  )
+
+  final <- final_for_extract()
+  expect_error(
+    extract_parameter_set_dials(final, nonesuch = 1),
+    class = "rlib_error_dots_nonempty"
+  )
+})
+
+test_that("extract_parameter_set_dials() is re-exported", {
+  skip_if_no_engines()
+
+  # The data is built before the workflow, as `final_for_extract()` builds
+  # it. `step_pca()` draws its id from the stream, and a nested
+  # `det_workflow(make_reg_data())` draws it before the data's own seed.
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  final <- final_for_extract()
+  expect_identical(
+    nestedtune::extract_parameter_set_dials(final),
+    hardhat::extract_parameter_set_dials(wf)
+  )
+})

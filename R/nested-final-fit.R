@@ -503,13 +503,25 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' names of the workflow that [nested_final_fit()] trained. Each one gives
 #' the same answer as the same call on [extract_workflow()]'s output.
 #'
+#' `extract_parameter_set_dials()` is the exception. The trained workflow
+#' holds no `tune()` placeholder, so this method reads the parameter set
+#' from the tuning run that [extract_tune_results()] returns. It is the set
+#' tune stored for that run: `param_info` when the call gave one, otherwise
+#' the untrained workflow's set. Where tune built the grid from a number, it
+#' first finalized any unknown range, such as the upper bound of `mtry`, on
+#' the predictors. With a data-frame `grid`, the returned set can keep an
+#' unknown range. A fit from [nested_fit_resamples()] ran no tuning and is
+#' refused with condition class `nestedtune_no_tuning_run`.
+#'
 #' @param x A `nested_final_fit` from [nested_final_fit()].
 #' @param ... Must be empty. A workflow's methods other than
 #'   `extract_recipe()` ignore an argument they do not know, so these refuse
 #'   it rather than pass it on.
 #' @param estimated For `extract_recipe()`, whether to return the trained
 #'   recipe (`TRUE`, the default) or the recipe as it was given.
-#' @return What the same call returns for the trained workflow.
+#' @return What the same call returns for the trained workflow. For
+#'   `extract_parameter_set_dials()`, a dials `parameters` object, the set
+#'   the tuning run stored.
 #' @seealso [extract_workflow()], [extract_tune_results()]
 #' @name extract-nested_final_fit
 #' @template example-setup
@@ -519,6 +531,7 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' extract_fit_parsnip(final)
 #' extract_recipe(final)
 #' outcome_names(final)
+#' extract_parameter_set_dials(final)
 NULL
 
 #' @rdname extract-nested_final_fit
@@ -575,4 +588,19 @@ extract_spec_parsnip.nested_final_fit <- function(x, ...) {
 outcome_names.nested_final_fit <- function(x, ...) {
   rlang::check_dots_empty()
   outcome_names(x$workflow)
+}
+
+# Read off the tuning run, not the trained workflow: finalizing replaced each
+# `tune()` placeholder, so the workflow's own method returns an empty set.
+#' @rdname extract-nested_final_fit
+#' @importFrom tune extract_parameter_set_dials
+#' @export
+extract_parameter_set_dials.nested_final_fit <- function(x, ...) {
+  rlang::check_dots_empty()
+  check_tuning_run(
+    x,
+    "extract_parameter_set_dials",
+    call = rlang::current_env()
+  )
+  attr(x$tuning, "parameters")
 }
