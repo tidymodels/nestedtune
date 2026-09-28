@@ -68,8 +68,15 @@
   `nested_workflow_map()`. `nested_final_fit()` is tested for the results of
   those four tuners on the sliding-period design alone.
   `nested_fit_resamples()` is tested to accept these designs. It checks the
-  inner design but fits nothing on it. The other three outer designs are not
-  tested with these inner designs. Any other inner design is not tested.
+  inner design but fits nothing on it. Any other inner design is not tested.
+
+* An outer `rsample::sliding_window()`, `rsample::sliding_index()` or
+  `rsample::sliding_period()` design with an inner design of one of these
+  three kinds gives nine pairs. `nested_resamples()` builds each pair with
+  the same splits as `rsample::nested_cv()`, and each pair is tested under
+  `nested_tune_grid()`. `nested_final_fit()`, `nested_fit_resamples()`,
+  `nested_workflow_map()` and the other four tuners are not tested on these
+  pairs.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no

@@ -1925,6 +1925,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-085 stands, with that reason read as "because it checks the inner design but fits nothing on it". The help, `NEWS.md` and M120's AC3 and AC5 use the same words.
 **Consequences:** none for the code. (Corrects D-085's Decision.)
 
+### D-087 (2026-09-27): the nine pairs of an outer and an inner design, both drawn from `sliding_window()`, `sliding_index()` and `sliding_period()`, are claimed under `nested_resamples()` and `nested_tune_grid()`. Supersedes the clauses of D-083 and D-084 that leave the three sliding outer designs unclaimed with inner sliding designs
+
+**Context:** D-083 claims the three inner sliding designs under an outer `rolling_origin()` alone, and leaves the three sliding outer designs unclaimed with them. D-084 reads D-083's claim as bound to those terms. M121 tests each of the nine pairs on weekday-only dates, so the index designs differ from the window ones. Each pair's splits match `rsample::nested_cv()`, and `nested_tune_grid()` matches the reference loop on each. In every fold after the first, the outer analysis window does not start at row 1, so the tests reach the step that re-points the inner splits at that window. No package code changed.
+**Decision:** the claim covers the nine pairs under `nested_resamples()` and `nested_tune_grid()`. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state it. They also state that `nested_final_fit()`, `nested_fit_resamples()`, `nested_workflow_map()` and the other four tuners are not tested on these pairs. Considered and rejected at M121's plan gate: five of the nine pairs, because the help would then need a list of exceptions.
+**Consequences:** every function other than grid on these pairs stays unclaimed, in the inner-design candidate row. Falsified by a pair failing under a function other than grid where it passes under grid. (Supersedes D-083's Decision clause leaving the three sliding outer designs unclaimed with these inner designs, and D-084's reading of D-083's claim as bound to an outer `rolling_origin()`.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
