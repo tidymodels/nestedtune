@@ -1,13 +1,13 @@
 # M122: Repeated-design fold labels in per-fold metrics
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes the columns of existing per-fold tables
-- **Branch/PR:** —
+- **Branch/PR:** m122-repeated-fold-labels
 
 ## Goal
 
@@ -37,7 +37,7 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 
 ## Tasks
 
-- [ ] T1: Write the AC1 and AC2 tests first, in a new `tests/testthat/test-fold-labels.R`. Give it a file-level `skip_heavy_on_cran()`. Build the expected labels from the rsample design rows. The set test takes the workflow-set skip and the engine skip (LESSONS M101). Run the tests before T2 and record that they fail on the pasted `id`.
+- [x] T1: Write the AC1 and AC2 tests first, in a new `tests/testthat/test-fold-labels.R`. Give it a file-level `skip_heavy_on_cran()`. Build the expected labels from the rsample design rows. The set test takes the workflow-set skip and the engine skip (LESSONS M101). Run the tests before T2 and record that they fail on the pasted `id`.
 - [ ] T2: Change `per_fold_metrics()` (`R/nested-results.R:1126`) to write each recorded label column. If the record cannot label the rows, keep one `id` from `fold_ids()`. Make `plot_performance()` (`R/nested-results-plot.R:272`) and `plot_set_performance()` (`R/nested-results-plot.R:627`) paste the labels for the fold axis. Update the test that pins the pasted `id` (`tests/testthat/test-compute-metrics.R:220`). Read the join at `vignettes/tuners.Rmd:340` and every other `by = "id"` join that `grep` finds under `vignettes/`.
 - [ ] T3: Write the AC3 tests. They cover the built plot's fold levels and point count on the repeated design, the set plot build, and the print.
 - [ ] T4: Update the three help pages and add the `NEWS.md` bullet. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
@@ -48,6 +48,7 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 - 2026-09-28: created by /milestone-plan from the "What M106 left" candidate row, split from M123 at the plan gate.
 - 2026-09-28: criteria audit (full mode, fresh [O] reader) read the combined draft and returned 14 findings, each with one fix, all applied before the gate. For this milestone it removed the wide shape from `compute_metrics()`, which has no `type` argument. It fixed the test design and added the set's `compute_metrics()`. It added the set plot, the print, and the join note in `NEWS.md`. The split then moved the criteria between files without a change of wording.
 - 2026-09-28: plan chose separate label columns over keeping the pasted `id` and documenting it, because D-036 has every reader take the labels from the record and tune's tables carry `id` and `id2`; falsified by a reader that needs one key column per fold.
+- 2026-09-28: T1 done. `tests/testthat/test-fold-labels.R` holds three tests for AC1 and AC2. Before T2 they fail with 24 failures on the pasted `id` (for example `wide$id` reads "Repeat1, Fold1" where the design gives "Repeat1").
 
 ## Decisions
 

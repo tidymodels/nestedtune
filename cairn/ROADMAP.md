@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-28 (status audit after the triage pass: validate gr
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M122 | Repeated-design fold labels in per-fold metrics | planned | — | normal | milestones/M122-repeated-fold-labels.md |
+| M122 | Repeated-design fold labels in per-fold metrics | in-progress | — | normal | milestones/M122-repeated-fold-labels.md |
 | M123 | The parameter set a final fit searched | planned | — | normal | milestones/M123-final-fit-parameter-set.md |
 | M121 | Sliding outer designs with inner sliding designs | done | — | normal | milestones/archive/M121-sliding-outer-inner-pairs.md |
 | M120 | Inner sliding designs under the other orchestrators | done | — | normal | milestones/archive/M120-inner-sliding-orchestrators.md |
