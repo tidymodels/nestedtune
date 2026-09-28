@@ -2,14 +2,14 @@
 #
 # Oracle provenance. The expected labels are read from the rsample design
 # object the run was given, row by row, and repeated once per metric in the
-# order the metric set lists them. Nothing expected is read from the result,
-# so a table that pasted the labels or reordered the folds fails.
+# order the metric set lists them. No expected fold label is read from the
+# result, so a table that pasted the labels or reordered the folds fails.
 
 skip_heavy_on_cran()
 
 # The repeated design: v = 2 repeated twice, four outer folds labelled by
-# `id` (the repeat) and `id2` (the fold). Returned beside the run, so a test
-# reads its expected labels from the design.
+# `id` (the repeat) and `id2` (the fold). The tests keep the design beside the
+# run, so a test reads its expected labels from the design.
 repeated_label_design <- function(d) {
   set.seed(41)
   nested_resamples(
@@ -68,8 +68,8 @@ design_labels <- function(folds, cols, each) {
 
 n_metrics <- function(ms) length(attr(ms, "metrics"))
 
-# Every column of `tbl` other than the label columns holds no value that
-# pastes two of the design's labels together.
+# No character or factor column of `tbl` holds a value that pastes two of the
+# design's labels together.
 expect_no_pasted_label <- function(tbl, folds) {
   pasted <- paste(folds$id, folds$id2, sep = ", ")
   for (nm in names(tbl)) {
