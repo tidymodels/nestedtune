@@ -51,6 +51,7 @@
 - 2026-09-28: T1 done. Eight tests in `test-augment.R` (AC1 x4, AC2 x2, AC3, quantile refusal) and three rewritten in `test-time-series-designs.R`, with shared `never_held_rows()` and `expect_names_never_held()` in `helper-predictions.R`. All eleven fail on the old code. The `TIME_SERIES_SPLITS` test is removed.
 - 2026-09-28: checkpoint, T2 and T3 written but not ticked. `check_held_out()` replaces `check_held_out_once()`, `augment()` averages on repeated designs, D-092 appended, help pages and NEWS updated. `test-augment.R`, `test-time-series-designs.R`, `test-collect-predictions-summarize.R`, the doc-reading test files, both prose sweeps and `check_pkgdown()` are clean. The full `devtools::test()` run is still pending.
 - 2026-09-28: T2 and T3 done. Full `devtools::test()`: 13054 expectations, 0 failed, 0 errors.
+- 2026-09-28: checkpoint, T4 started. `devtools::check()` and the claim audit ([O] fresh reader) are running.
 
 ## Decisions
 
