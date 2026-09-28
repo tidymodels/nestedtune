@@ -1,13 +1,13 @@
 # M126: Edge cases of averaged predictions
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes what two exported readers refuse and how fast they average
-- **Branch/PR:** —
+- **Branch/PR:** m126-averaging-edge-cases
 
 ## Goal
 

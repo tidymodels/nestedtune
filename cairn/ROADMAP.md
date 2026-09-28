@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-28 (M125 archived, M122 row pruned, averaging edge-
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M126 | Edge cases of averaged predictions | planned | — | high | milestones/M126-averaging-edge-cases.md |
+| M126 | Edge cases of averaged predictions | in-progress | — | high | milestones/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |
 | M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |
 | M123 | The parameter set a final fit searched | done | — | normal | milestones/archive/M123-final-fit-parameter-set.md |
