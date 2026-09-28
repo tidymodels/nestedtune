@@ -93,5 +93,6 @@ Gate triage, 2026-09-28: the maintainer accepted every proposed disposition.
 
 - Fixed on the branch. D-093 appended, correcting D-092. `check_no_quantile()` takes a required `verb`, passed at both calls. Two tests in `test-augment.R` plant a class that disagrees with the probabilities. On a once-design it survives. On a repeated design it is recomputed, with ties going to the first level. Forcing the averaged path on in the namespace failed the once-design test. The help now says "without repeats" and that the hold-out count reads failed folds too. The quantile test matches the x-bullet text.
 - After the fixes: `test-augment.R` ran 198 expectations with 0 failed, and `test-time-series-designs.R`, `test-collect-predictions-summarize.R`, `test-help-structure.R` and `test-sweep-prose.R` were clean. The six prose sweeps, `document()` with no further diff, `check_pkgdown()` and `air format --check` were clean.
+- `devtools::check()` on the fixed tree (5b36f377) reported 0 errors, 0 warnings and 0 notes in 8m 2s.
 - Follow-up (O1, O8, O9): the averaging edge-case candidate row is rewritten at hygiene.
 - Rejected (O6, O7, O10, O12, O13), with the reasons above.
