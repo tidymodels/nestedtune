@@ -17,7 +17,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 
 **In:** a `summarize` argument on `collect_predictions()` for a `nested_results` and a `nested_results_set`. The average spans every completed fold that held the row out, whatever candidate each fold selected. So the averaged table drops the fold labels and `.config`. The kind of average follows the prediction columns the run saved, which is the kind tune picks from the metric types. One D-entry records the choices. The help page, the example and `NEWS.md` state the argument.
 
-**Out:** `augment()` on a design that holds a row out more than once → M125. Averaging quantile predictions, refused here → a new candidate row. tune 2.1.0 refuses a quantile metric set, so no run exists to check an average against. The `parameters` argument is not offered, because each fold predicted with the parameters it selected. The help page says so. A bad `summarize` value gets base R's error, as `collect_metrics()` gives, the stance M092's review took.
+**Out:** `augment()` on a design that holds a row out more than once → M125. Averaging quantile predictions, refused here → a new candidate row. tune 2.1.0 refuses a quantile metric set passed to it, but it runs a quantile model on its default metric and averages those predictions. A check of a port against that average needs a quantile engine such as quantreg in Suggests, which is a dependency change for its own gate. The `parameters` argument is not offered, because each fold predicted with the parameters it selected. The help page says so. A bad `summarize` value gets base R's error, as `collect_metrics()` gives, the stance M092's review took.
 
 ## Acceptance criteria
 
@@ -63,6 +63,9 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: T3 checkpoint, not yet checked off. AC5 to AC7 tests and code written. Before the code, AC6 errored on `summarize` in the set method's `...` and AC7 raised no `nestedtune_summarize_quantile`. AC5 already passed on T2's helper. The test file passes. The full suite is still running. D-090 is drafted for T4.
 - 2026-09-28: T3 done. Full suite 1080 tests, 0 failing. Prose sweep clean.
 - 2026-09-28: T4 done. Help section "Averaging across the folds", the `summarize` and `...` params on both pages, a repeated-design example (run: 32 rows for mtcars' 32), a `NEWS.md` bullet, and D-090. `document()` rewrote two Rd files. Both prose sweeps clean.
+- 2026-09-28: claim audit (fresh [O] reader) read 63 claims and returned 5. Missing votes now count as a class, as tune counts them, with a test that failed first. A row with all-missing averaged probabilities gets a missing class, tune's first level being the one stated departure, with a test. Three test comments corrected.
+- 2026-09-28: amendment gate, Scope Out: the user kept the quantile refusal and chose to correct its reason. tune averages quantile predictions from a default-metric run, so the reason is now the quantreg dependency that a check needs. D-091 supersedes D-090's two false clauses. The candidate row is corrected in place.
+- 2026-09-28: the AC7 test planted a `hardhat::quantile_pred`, and `check()` warned that hardhat is undeclared. It now plants a plain column under that name, so Suggests is unchanged.
 
 ## Decisions
 

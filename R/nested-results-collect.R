@@ -233,16 +233,20 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' `summarize = TRUE` averages, for each data row, the predictions of every
 #' completed fold that held the row out. A row that no completed fold held
 #' out is left out, and a partial run warns once, as above. The rules are
-#' tune's for `summarize = TRUE`, and the columns the run saved decide which
-#' rule applies.
+#' tune's for `summarize = TRUE`, except where a rule below says otherwise.
+#' The columns the run saved decide which rule applies.
 #'
 #' * A numeric prediction, such as a regression's `.pred`, is its mean with
 #'   missing values ignored.
 #' * Class probabilities are each averaged the same way, then divided by the
 #'   row's sum of those averages. A `.pred_class` saved beside them is
 #'   recomputed as the class with the largest averaged probability. It is
-#'   recomputed whatever a postprocessor set in the saved predictions.
+#'   recomputed whatever a postprocessor set in the saved predictions. A row
+#'   whose averaged probabilities are missing gets a missing class, where
+#'   tune gives it the first level.
 #' * A `.pred_class` saved without probabilities is the most frequent class.
+#'   A missing vote counts as a class of its own, as in tune, so the class
+#'   is missing only when missing votes outnumber every level.
 #' * A censored run takes the median `.pred_time`, which is missing if any
 #'   fold's value is. The survival probabilities in `.pred` take, per
 #'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
@@ -329,7 +333,8 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
 # `class_summarize()`, `numeric_summarize()` and `surv_summarize()`, read
 # 2026-09-28), written here rather than called, because tune's internals
 # carry no stability promise (M28). Ties go to the first level in factor
-# order.
+# order. One departure: a row whose averaged probabilities are missing gets
+# a missing class, where `prob_summarize()` gives it the first level.
 average_fold_predictions <- function(preds, drop) {
   preds <- preds[setdiff(names(preds), drop)]
   rows <- sort(unique(preds$.row))
@@ -385,9 +390,12 @@ average_fold_predictions <- function(preds, drop) {
 }
 
 # Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
-# quantile metric set in `fit_resamples()`, so no run exists to check an
-# average against. Read per fold before stacking, so the refusal is this one
-# and not whatever binding a quantile column with the other folds raises.
+# quantile metric set passed to `fit_resamples()`, but it runs a quantile
+# model on its default metric and averages those predictions with
+# `quantile_summarize()`. That rule is not ported, because checking a port
+# against it needs a quantile engine in Suggests. Read per fold before
+# stacking, so the refusal is this one and not whatever binding a quantile
+# column with the other folds raises.
 check_no_quantile <- function(x, call = rlang::caller_env()) {
   has <- vapply(
     x$.predictions[x$.completed],
@@ -423,12 +431,14 @@ class_from_probs <- function(probs, prob_cols, saved) {
   )
 }
 
-# The most frequent class per row. `max.col(ties.method = "first")` takes the
-# first level among tied counts. A row whose every vote is missing has none.
+# The most frequent class per row. A missing vote is counted as a class of
+# its own, placed after the levels, as tune's `dplyr::count()` counts it, so
+# it wins only when it outnumbers every level. `max.col(ties.method =
+# "first")` takes the first level among tied counts.
 class_by_vote <- function(v, group) {
-  counts <- unclass(table(group, v))
+  counts <- unclass(table(group, addNA(v, ifany = FALSE)))
   idx <- max.col(counts, ties.method = "first")
-  idx[rowSums(counts) == 0L] <- NA_integer_
+  idx[idx > nlevels(v)] <- NA_integer_
   factor(levels(v)[idx], levels = levels(v), ordered = is.ordered(v))
 }
 

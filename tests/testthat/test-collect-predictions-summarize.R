@@ -118,7 +118,8 @@ srv_pair <- function() {
 }
 
 # The grid runs AC2 reads. Seeds 21 and 25 were picked because the repeats
-# select two different candidates under them, which each test asserts.
+# select two different candidates under them. The regression and
+# probability tests assert this.
 grid_reg_run <- function() {
   d <- make_reg_data()
   set.seed(21)
@@ -309,7 +310,8 @@ test_that("AC1: a censored regression average equals tune's", {
 # ---- AC2: across the candidates the folds selected ------------------------
 
 # One missing value planted in fold 1's first saved row, so the rule that
-# ignores missing values is exercised. A run's own predictions carry none.
+# ignores missing values is exercised. The regression and probability runs'
+# own predictions carry none.
 plant_missing <- function(x, column) {
   edit_fold_predictions(x, 1L, function(p) {
     if (is.list(p[[column]])) {
@@ -375,7 +377,7 @@ test_that("AC2: a missing .pred_time makes the row's median missing", {
 
 # ---- AC3: ties go to the first level ---------------------------------------
 
-# The folds holding `row` out, in fold order, and each one's position of it.
+# The folds holding `row` out, in fold order.
 holders <- function(x, row) {
   which(vapply(x$.predictions, function(p) row %in% p$.row, logical(1)))
 }
@@ -428,6 +430,22 @@ test_that("AC3: a two-class vote tie goes to the first level, in either order", 
   )
 })
 
+test_that("AC3: a missing vote counts as a class of its own, as tune counts it", {
+  skip_if_no_engines()
+  # Three votes on one row. A repeated design holds a row out once per
+  # repeat, so the vote is put to the helper directly. tune 2.1.0's
+  # `class_summarize()` returns NA for (NA, NA, "a"), read 2026-09-28.
+  lv <- c("a", "b")
+  vote <- function(v) {
+    class_by_vote(factor(v, levels = lv), factor(rep(1L, length(v))))
+  }
+  expect_true(is.na(vote(c(NA, NA, "a"))))
+  # A tie between a missing vote and a level goes to the level.
+  expect_identical(as.character(vote(c(NA, "b"))), "b")
+  expect_identical(as.character(vote(c("b", "b", NA))), "b")
+  expect_identical(levels(vote(c(NA, "b"))), lv)
+})
+
 test_that("AC3: a tie that excludes the first level goes to the earlier tied level", {
   skip_if_no_engines()
   res <- relevel_class(class_pair()$res, c("event", "other", "third"))
@@ -436,6 +454,19 @@ test_that("AC3: a tie that excludes the first level goes to the earlier tied lev
     planted <- plant_row(res, row, ".pred_class", votes)
     expect_identical(as.character(avg_class(planted, row)), "other")
   }
+})
+
+test_that("a row whose averaged probabilities are missing gets a missing class", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  planted <- plant_row(res, row, ".pred_event", c(NA, NA))
+  avg <- collect_predictions(planted, summarize = TRUE)
+  mine <- avg[avg$.row == row, ]
+  expect_true(is.na(mine$.pred_event))
+  expect_true(is.na(mine$.pred_class))
+  # The other rows keep their class.
+  expect_false(anyNA(avg$.pred_class[avg$.row != row]))
 })
 
 test_that("AC3: a tie between averaged probabilities goes to the first level", {
@@ -596,11 +627,10 @@ test_that("AC6: a set's average is each workflow's own, bound under wflow_id", {
 test_that("AC7: summarize = TRUE refuses saved quantile predictions", {
   skip_if_no_engines()
   res <- reg_pair()$res
+  # The refusal reads the column's name, so a plain column stands in for
+  # hardhat's `quantile_pred` type, keeping hardhat out of Suggests.
   res <- edit_fold_predictions(res, 2L, function(p) {
-    p$.pred_quantile <- hardhat::quantile_pred(
-      cbind(p$.pred - 1, p$.pred + 1),
-      quantile_levels = c(0.25, 0.75)
-    )
+    p$.pred_quantile <- p$.pred
     p
   })
   expect_error(

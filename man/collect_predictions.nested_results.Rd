@@ -78,16 +78,20 @@ control slots save inside tune, are not kept.
 \code{summarize = TRUE} averages, for each data row, the predictions of every
 completed fold that held the row out. A row that no completed fold held
 out is left out, and a partial run warns once, as above. The rules are
-tune's for \code{summarize = TRUE}, and the columns the run saved decide which
-rule applies.
+tune's for \code{summarize = TRUE}, except where a rule below says otherwise.
+The columns the run saved decide which rule applies.
 \itemize{
 \item A numeric prediction, such as a regression's \code{.pred}, is its mean with
 missing values ignored.
 \item Class probabilities are each averaged the same way, then divided by the
 row's sum of those averages. A \code{.pred_class} saved beside them is
 recomputed as the class with the largest averaged probability. It is
-recomputed whatever a postprocessor set in the saved predictions.
+recomputed whatever a postprocessor set in the saved predictions. A row
+whose averaged probabilities are missing gets a missing class, where
+tune gives it the first level.
 \item A \code{.pred_class} saved without probabilities is the most frequent class.
+A missing vote counts as a class of its own, as in tune, so the class
+is missing only when missing votes outnumber every level.
 \item A censored run takes the median \code{.pred_time}, which is missing if any
 fold's value is. The survival probabilities in \code{.pred} take, per
 \code{.eval_time}, the mean \code{.pred_survival} and \code{.weight_censored} with
