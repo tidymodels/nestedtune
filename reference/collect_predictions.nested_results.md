@@ -16,6 +16,8 @@ one such column into a single table, the design's fold labels first.
   columns
   [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
   produced: the outcome, the prediction columns, `.row` and `.config`.
+  With `summarize = TRUE` it gives one averaged row per data row
+  instead. See Averaging across the folds.
 
 - [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   gives one row per completed fold, the fold's value in an `.extracts`
@@ -26,7 +28,7 @@ one such column into a single table, the design's fold labels first.
 
 ``` r
 # S3 method for class 'nested_results'
-collect_predictions(x, ...)
+collect_predictions(x, ..., summarize = FALSE)
 
 # S3 method for class 'nested_results'
 collect_extracts(x, ...)
@@ -42,14 +44,24 @@ collect_extracts(x, ...)
 
 - ...:
 
-  Not used. It must be empty. tune's `summarize` and `parameters`
-  arguments are not offered here.
+  Not used. It must be empty. tune's `parameters` argument is not
+  offered here, because each fold predicted with the parameters it
+  selected.
+
+- summarize:
+
+  For
+  [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  whether to average the predictions per data row (`TRUE`) or return
+  them per fold (`FALSE`, the default). See Averaging across the folds.
 
 ## Value
 
 A tibble: the design's fold labels (`id`, and `id2` on a repeated
 design), then the stacked prediction columns, or the `.extracts` list
-column.
+column. With `summarize = TRUE`, the columns of the per-fold table in
+the same order, less the fold labels and `.config`, with one row per
+`.row` in `.row` order.
 
 ## Folds that failed, and columns not saved
 
@@ -72,6 +84,43 @@ per repeat. On a Monte Carlo design it appears as often as it was held
 out. These are the outer fit's predictions on the assessment rows. The
 inner tuning run's own predictions and extracts, which the same two
 control slots save inside tune, are not kept.
+
+## Averaging across the folds
+
+`summarize = TRUE` averages, for each data row, the predictions of every
+completed fold that held the row out. A row that no completed fold held
+out is left out, and a partial run warns once, as above. The rules are
+tune's for `summarize = TRUE`, except where a rule below says otherwise.
+The columns the run saved decide which rule applies.
+
+- A numeric prediction, such as a regression's `.pred`, is its mean with
+  missing values ignored.
+
+- Class probabilities are each averaged the same way, then divided by
+  the row's sum of those averages. A `.pred_class` saved beside them is
+  recomputed as the class with the largest averaged probability. It is
+  recomputed whatever a postprocessor set in the saved predictions. A
+  row whose averaged probabilities are missing gets a missing class,
+  where tune gives it the first level.
+
+- A `.pred_class` saved without probabilities is the most frequent
+  class. A missing vote counts as a class of its own, as in tune, so the
+  class is missing only when missing votes outnumber every level.
+
+- A censored run takes the median `.pred_time`, which is missing if any
+  fold's value is. The survival probabilities in `.pred` take, per
+  `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
+  missing values ignored.
+
+A tie, between votes or between averaged probabilities, goes to the
+first of the tied levels in the factor's level order.
+
+tune's own average groups the rows by candidate. Here each fold selected
+its own candidate, so the average spans the candidates the folds
+selected, and the fold labels and `.config` are dropped. Quantile
+predictions are not averaged: a run whose saved predictions carry a
+`.pred_quantile` column is refused with class
+`nestedtune_summarize_quantile`.
 
 ## See also
 
@@ -129,4 +178,34 @@ collect_extracts(res)
 #>   <chr> <list>   
 #> 1 Fold1 <dbl [2]>
 #> 2 Fold2 <dbl [2]>
+
+# A repeated design holds each row out once per repeat. The average
+# gives one prediction per row.
+set.seed(3)
+repeated <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2, repeats = 2),
+  inside = rsample::vfold_cv(v = 2)
+)
+res_rep <- nested_tune_grid(
+  wf,
+  repeated,
+  grid = data.frame(num_comp = 1:2),
+  control = tune::control_grid(save_pred = TRUE)
+)
+collect_predictions(res_rep, summarize = TRUE)
+#> # A tibble: 32 × 3
+#>      mpg .pred  .row
+#>    <dbl> <dbl> <int>
+#>  1  21    22.6     1
+#>  2  21    23.7     2
+#>  3  22.8  25.4     3
+#>  4  21.4  19.4     4
+#>  5  18.7  15.7     5
+#>  6  18.1  20.6     6
+#>  7  14.3  14.3     7
+#>  8  24.4  23.5     8
+#>  9  22.8  23.1     9
+#> 10  19.2  23.1    10
+#> # ℹ 22 more rows
 ```

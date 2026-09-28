@@ -96,7 +96,7 @@ workflow's saved predictions with the metric set you give it.
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results_set'</span></span>
-<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results_set'</span></span>
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -124,7 +124,10 @@ and not a silent no-op.</p></dd>
 <dt id="arg-summarize">summarize<a class="anchor" aria-label="anchor" href="#arg-summarize"></a></dt>
 <dd><p>Whether to average each workflow's per-fold metrics
 (<code>TRUE</code>, the default) or return them one row per outer fold (<code>FALSE</code>),
-as on <code><a href="collect_metrics.nested_results.html">collect_metrics.nested_results()</a></code>.</p></dd>
+as on <code><a href="collect_metrics.nested_results.html">collect_metrics.nested_results()</a></code>. For <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code>,
+whether to average each workflow's predictions per data row (<code>TRUE</code>)
+or return them per fold (<code>FALSE</code>, the default there), as on
+<code><a href="collect_predictions.nested_results.html">collect_predictions.nested_results()</a></code>.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>

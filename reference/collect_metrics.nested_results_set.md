@@ -36,7 +36,7 @@ collect_inner_metrics(x, ...)
 collect_notes(x, ...)
 
 # S3 method for class 'nested_results_set'
-collect_predictions(x, ...)
+collect_predictions(x, ..., summarize = FALSE)
 
 # S3 method for class 'nested_results_set'
 collect_extracts(x, ...)
@@ -65,6 +65,11 @@ augment(x, ...)
   Whether to average each workflow's per-fold metrics (`TRUE`, the
   default) or return them one row per outer fold (`FALSE`), as on
   [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
+  For
+  [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  whether to average each workflow's predictions per data row (`TRUE`)
+  or return them per fold (`FALSE`, the default there), as on
+  [`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md).
 
 - type:
 

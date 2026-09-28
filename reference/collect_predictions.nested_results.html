@@ -9,7 +9,9 @@ workflow. These two methods on tune's generics stack one such column
 into a single table, the design's fold labels first.
 collect_predictions() gives one row per assessment row of every
 completed fold, with the columns tune::last_fit() produced: the
-outcome, the prediction columns, .row and .config.
+outcome, the prediction columns, .row and .config. With
+summarize = TRUE it gives one averaged row per data row instead. See
+Averaging across the folds.
 collect_extracts() gives one row per completed fold, the fold's value in
 an .extracts list column. A completed fold whose extract function
 errored holds NULL there, and its .notes say why.
@@ -24,7 +26,9 @@ workflow. These two methods on tune's generics stack one such column
 into a single table, the design's fold labels first.
 collect_predictions() gives one row per assessment row of every
 completed fold, with the columns tune::last_fit() produced: the
-outcome, the prediction columns, .row and .config.
+outcome, the prediction columns, .row and .config. With
+summarize = TRUE it gives one averaged row per data row instead. See
+Averaging across the folds.
 collect_extracts() gives one row per completed fold, the fold's value in
 an .extracts list column. A completed fold whose extract function
 errored holds NULL there, and its .notes say why.
@@ -84,7 +88,9 @@ whatever the control's <code>extract</code> function returned for the fold's fit
 workflow. These two methods on tune's generics stack one such column
 into a single table, the design's fold labels first.</p><ul><li><p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code> gives one row per assessment row of every
 completed fold, with the columns <code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code> produced: the
-outcome, the prediction columns, <code>.row</code> and <code>.config</code>.</p></li>
+outcome, the prediction columns, <code>.row</code> and <code>.config</code>. With
+<code>summarize = TRUE</code> it gives one averaged row per data row instead. See
+Averaging across the folds.</p></li>
 <li><p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> gives one row per completed fold, the fold's value in
 an <code>.extracts</code> list column. A completed fold whose extract function
 errored holds <code>NULL</code> there, and its <code>.notes</code> say why.</p></li>
@@ -93,7 +99,7 @@ errored holds <code>NULL</code> there, and its <code>.notes</code> say why.</p><
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'nested_results'</span></span>
-<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results'</span></span>
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -109,15 +115,24 @@ See <code><a href="collect_metrics.nested_results.html">collect_metrics.nested_r
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Not used. It must be empty. tune's <code>summarize</code> and <code>parameters</code>
-arguments are not offered here.</p></dd>
+<dd><p>Not used. It must be empty. tune's <code>parameters</code> argument is not
+offered here, because each fold predicted with the parameters it
+selected.</p></dd>
+
+
+<dt id="arg-summarize">summarize<a class="anchor" aria-label="anchor" href="#arg-summarize"></a></dt>
+<dd><p>For <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions()</a></code>, whether to average the
+predictions per data row (<code>TRUE</code>) or return them per fold (<code>FALSE</code>, the
+default). See Averaging across the folds.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble: the design's fold labels (<code>id</code>, and <code>id2</code> on a repeated
 design), then the stacked prediction columns, or the <code>.extracts</code> list
-column.</p>
+column. With <code>summarize = TRUE</code>, the columns of the per-fold table in
+the same order, less the fold labels and <code>.config</code>, with one row per
+<code>.row</code> in <code>.row</code> order.</p>
     </div>
     <div class="section level2">
     <h2 id="folds-that-failed-and-columns-not-saved">Folds that failed, and columns not saved<a class="anchor" aria-label="anchor" href="#folds-that-failed-and-columns-not-saved"></a></h2>
@@ -143,6 +158,39 @@ per repeat. On a Monte Carlo design it appears as often as it was held
 out. These are the outer fit's predictions on the assessment rows.
 The inner tuning run's own predictions and extracts, which the same two
 control slots save inside tune, are not kept.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="averaging-across-the-folds">Averaging across the folds<a class="anchor" aria-label="anchor" href="#averaging-across-the-folds"></a></h2>
+
+
+
+<p><code>summarize = TRUE</code> averages, for each data row, the predictions of every
+completed fold that held the row out. A row that no completed fold held
+out is left out, and a partial run warns once, as above. The rules are
+tune's for <code>summarize = TRUE</code>, except where a rule below says otherwise.
+The columns the run saved decide which rule applies.</p><ul><li><p>A numeric prediction, such as a regression's <code>.pred</code>, is its mean with
+missing values ignored.</p></li>
+<li><p>Class probabilities are each averaged the same way, then divided by the
+row's sum of those averages. A <code>.pred_class</code> saved beside them is
+recomputed as the class with the largest averaged probability. It is
+recomputed whatever a postprocessor set in the saved predictions. A row
+whose averaged probabilities are missing gets a missing class, where
+tune gives it the first level.</p></li>
+<li><p>A <code>.pred_class</code> saved without probabilities is the most frequent class.
+A missing vote counts as a class of its own, as in tune, so the class
+is missing only when missing votes outnumber every level.</p></li>
+<li><p>A censored run takes the median <code>.pred_time</code>, which is missing if any
+fold's value is. The survival probabilities in <code>.pred</code> take, per
+<code>.eval_time</code>, the mean <code>.pred_survival</code> and <code>.weight_censored</code> with
+missing values ignored.</p></li>
+</ul><p>A tie, between votes or between averaged probabilities, goes to the first
+of the tied levels in the factor's level order.</p>
+<p>tune's own average groups the rows by candidate. Here each fold selected
+its own candidate, so the average spans the candidates the folds
+selected, and the fold labels and <code>.config</code> are dropped. Quantile
+predictions are not averaged: a run whose saved predictions carry a
+<code>.pred_quantile</code> column is refused with class
+<code>nestedtune_summarize_quantile</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -198,6 +246,36 @@ workflow-set run</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Fold1 <span style="color: #949494;">&lt;dbl [2]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Fold2 <span style="color: #949494;">&lt;dbl [2]&gt;</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A repeated design holds each row out once per repeat. The average</span></span></span>
+<span class="r-in"><span><span class="co"># gives one prediction per row.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">repeated</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_resamples.html">nested_resamples</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">mtcars</span>,</span></span>
+<span class="r-in"><span>  outside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span>, repeats <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  inside <span class="op">=</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="nested_tune_grid.html">nested_tune_grid</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">wf</span>,</span></span>
+<span class="r-in"><span>  <span class="va">repeated</span>,</span></span>
+<span class="r-in"><span>  grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  control <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/control_grid.html" class="external-link">control_grid</a></span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_predictions</a></span><span class="op">(</span><span class="va">res_rep</span>, summarize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 32 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mpg .pred  .row</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  21    22.6     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  21    23.7     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  22.8  25.4     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  21.4  19.4     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  18.7  15.7     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  18.1  20.6     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  14.3  14.3     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  24.4  23.5     8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  22.8  23.1     9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  19.2  23.1    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 22 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
