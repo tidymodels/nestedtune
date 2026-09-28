@@ -21,9 +21,9 @@ Each sliding outer design with each inner sliding design is tested and documente
 
 ## Acceptance criteria
 
-- [ ] AC1: One test runs for each of the nine pairs, built on the M120 data builder with gaps in `date`. It asserts that `nested_resamples()` builds the same outer and inner splits as `rsample::nested_cv()`, row for row. It asserts that the first outer split and the first inner split have the two designs' split classes. All nine tests pass under `devtools::test()`.
-- [ ] AC2: One test runs for each of the nine pairs, on the design `nested_resamples()` builds. It asserts that `nested_tune_grid()` completes every fold. It asserts that the seeds, `.metrics` and `.selected` equal those of `reference_nested_loop()`. It asserts that the first outer split and the first inner split have the two designs' split classes. All nine tests pass under `devtools::test()`.
-- [ ] AC3: This criterion covers the three texts M120's AC5 names. The command `git diff main -- R/nested-tune-grid.R R/nested-resamples.R NEWS.md` lists the sentences this milestone adds or changes in them. Each such sentence claims only pairs of an outer and an inner design that an AC1 or AC2 test runs. It claims them only for `nested_resamples()` and `nested_tune_grid()`, never for `nested_final_fit()`. After the change, no sentence in the three texts calls a pair untested that an AC1 or AC2 test runs.
+- [x] AC1: One test runs for each of the nine pairs, built on the M120 data builder with gaps in `date`. It asserts that `nested_resamples()` builds the same outer and inner splits as `rsample::nested_cv()`, row for row. It asserts that the first outer split and the first inner split have the two designs' split classes. All nine tests pass under `devtools::test()`.
+- [x] AC2: One test runs for each of the nine pairs, on the design `nested_resamples()` builds. It asserts that `nested_tune_grid()` completes every fold. It asserts that the seeds, `.metrics` and `.selected` equal those of `reference_nested_loop()`. It asserts that the first outer split and the first inner split have the two designs' split classes. All nine tests pass under `devtools::test()`.
+- [x] AC3: This criterion covers the three texts M120's AC5 names. The command `git diff main -- R/nested-tune-grid.R R/nested-resamples.R NEWS.md` lists the sentences this milestone adds or changes in them. Each such sentence claims only pairs of an outer and an inner design that an AC1 or AC2 test runs. It claims them only for `nested_resamples()` and `nested_tune_grid()`, never for `nested_final_fit()`. After the change, no sentence in the three texts calls a pair untested that an AC1 or AC2 test runs.
 - [ ] AC4: `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
 
 ## Coverage
@@ -55,3 +55,9 @@ Each sliding outer design with each inner sliding design is tested and documente
 ## Decisions
 
 ## Review
+
+Evidence at `a7a754a0`, 2026-09-27. Main had not moved since the branch was cut.
+
+- AC1: `devtools::test(filter = "time-series-pairs")` ran the nine "<pair> splits match rsample::nested_cv()" tests, one per name in `TS_SLIDING_PAIRS`, with 0 failures, 0 skips and 0 errors. Each builds on `make_ts_weekday_data()`, asserts the first outer and first inner split classes, and runs `expect_outer_identical()` and `expect_inner_identical()` against `ts_pair_reference()`, the pair's call with `rsample::nested_cv()` in place of `nested_resamples()`.
+- AC2: the same run passed the nine "nested_tune_grid() on the <pair> pair matches a hand-rolled reference loop" tests with 0 failures, 0 skips and 0 errors. Each runs on `spec$build(d)`, the pair's `nested_resamples()` call, asserts both split classes, and calls `expect_ts_matches_reference()`, which asserts `.completed` on every fold, both seed columns, and each fold's `.metrics` and `.selected` against `reference_nested_loop()`. At implement, with the inner index remap planted as a no-op, each grid test failed 5 assertions.
+- AC3: the named `git diff main` lists one changed sentence and one new passage per text. The changed sentence drops "The other three outer designs are not tested with these inner designs." The new passages claim the nine pairs, the AC1 and AC2 pairs, under `nested_resamples()` (splits) and `nested_tune_grid()` alone, and put `nested_final_fit()` in the not-tested list. A grep for "not tested", "untested", "unclaimed" and "not supported" across the three texts finds only "Any other inner design is not tested" and the new not-tested lists, none of which names a pair or function an AC1 or AC2 test runs.
