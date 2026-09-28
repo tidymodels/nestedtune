@@ -41,8 +41,8 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 
 - [x] T1: Add a data builder with gaps in `date` to `helper-orchestration.R` and give each `TS_INNER_DESIGNS` entry its data builder. Move the sliding-index entry onto the new builder, and make `test-time-series-inner.R` build each design on its entry's data. Keep at least 3 inner resamples in every outer fold of each fixture, because the racers refuse fewer at `burn_in = 2`. Recount them, and state the counts and the counting command in the fixture comment. Add the AC4 test, then run the M119 tests.
 - [x] T2: Give `expect_ts_final_matches()` the expected inner split class as an argument, defaulting to `"rof_split"`. It hard-codes that class today (`helper-orchestration.R:752`). The existing callers keep passing.
-- [ ] T3: Write the AC1 tests in a new `test-time-series-*.R` file with a file-level `skip_heavy_on_cran()` and an oracle header naming the reference loops. Each test takes its tuner's skip helper, for example `skip_if_no_race_fixture()`, because the hard-dependency leg installs no Suggests (LESSONS M101).
-- [ ] T4: Write the AC2 final-fit tests with the reference final-fit helpers' `inner_design` argument, and write the AC3 tests. Time each new file serially. Split a file that runs far longer than the others, and add a long one to `Config/testthat/start-first` (LESSONS M16).
+- [x] T3: Write the AC1 tests in a new `test-time-series-*.R` file with a file-level `skip_heavy_on_cran()` and an oracle header naming the reference loops. Each test takes its tuner's skip helper, for example `skip_if_no_race_fixture()`, because the hard-dependency leg installs no Suggests (LESSONS M101).
+- [x] T4: Write the AC2 final-fit tests with the reference final-fit helpers' `inner_design` argument, and write the AC3 tests. Time each new file serially. Split a file that runs far longer than the others, and add a long one to `Config/testthat/start-first` (LESSONS M16).
 - [ ] T5: Update the three AC5 texts and run `devtools::document()`. Append a D-entry that claims the new triples. It supersedes the clauses of D-083 and D-084 that leave the other orchestrators and `nested_workflow_map()` unclaimed here. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
 - [ ] T6: Run `devtools::test()` and `devtools::check()`, and record the new files' serial times in the work log.
 
@@ -55,6 +55,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: implement started on `m120-inner-sliding-orchestrators`. No question gate, because the plan leaves no API, naming or dependency choice open.
 - 2026-09-27: T1 done. `make_ts_weekday_data()` gives weekday-only dates, and the sliding-index fixture runs on it with 7, 9 and 11 inner resamples. `test-time-series-inner.R` passes 10 of 10. On `make_ts_data()` the new check reads no difference, so it can fail.
 - 2026-09-27: T2 done. `expect_ts_final_matches()` takes `split_class`, checks it on the reference and the final fit, and now compares `out_id` too. Its three callers pass 9 of 9.
+- 2026-09-27: T3 and T4 done in one pass. The files are split by tuner family, so each holds its AC1 runs and the AC2 final fits that reuse them. `test-time-series-inner-bayes-anneal.R` passes 8 of 8 in 52 s, `test-time-series-inner-race.R` 8 of 8 in 36 s, and `test-time-series-inner-other.R` (AC3) 6 of 6 in 14 s. Each time is serial with the package load. The first two join `Config/testthat/start-first`.
 
 ## Decisions
 
