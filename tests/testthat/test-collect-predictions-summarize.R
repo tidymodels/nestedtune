@@ -206,7 +206,9 @@ hand_average <- function(p, outcome) {
       per_row(p[[paste0(".pred_", l)]], function(v) mean(v, na.rm = TRUE))
     })
     probs <- probs / rowSums(probs)
-    for (l in lvls) out[[paste0(".pred_", l)]] <- unname(probs[, l])
+    for (l in lvls) {
+      out[[paste0(".pred_", l)]] <- unname(probs[, l])
+    }
     first_max <- apply(probs, 1, function(r) which(r == max(r))[[1L]])
     out$.pred_class <- factor(lvls[first_max], levels = lvls)
   }
@@ -223,12 +225,20 @@ hand_average <- function(p, outcome) {
       times <- unique(mine$.eval_time)
       data.frame(
         .eval_time = times,
-        .pred_survival = vapply(times, function(t) {
-          mean(mine$.pred_survival[mine$.eval_time == t], na.rm = TRUE)
-        }, numeric(1)),
-        .weight_censored = vapply(times, function(t) {
-          mean(mine$.weight_censored[mine$.eval_time == t], na.rm = TRUE)
-        }, numeric(1))
+        .pred_survival = vapply(
+          times,
+          function(t) {
+            mean(mine$.pred_survival[mine$.eval_time == t], na.rm = TRUE)
+          },
+          numeric(1)
+        ),
+        .weight_censored = vapply(
+          times,
+          function(t) {
+            mean(mine$.weight_censored[mine$.eval_time == t], na.rm = TRUE)
+          },
+          numeric(1)
+        )
       )
     })
   }
@@ -272,7 +282,9 @@ test_that("AC1: summarize defaults to FALSE, the per-fold table", {
     collect_predictions(res),
     collect_predictions(res, summarize = FALSE)
   )
-  expect_true(all(c("id", "id2", ".config") %in% names(collect_predictions(res))))
+  expect_true(all(
+    c("id", "id2", ".config") %in% names(collect_predictions(res))
+  ))
 })
 
 test_that("AC1: a regression average equals tune's on the same outer splits", {
@@ -356,7 +368,9 @@ test_that("AC2: a censored average takes the median time and the mean survival",
   # The planted row's first survival probability comes from its other fold.
   # `.weight_censored` is missing in some rows of the run itself, so only
   # `.pred_survival` is asserted here.
-  expect_false(is.na(avg$.pred[[which(avg$.row == target)]]$.pred_survival[[1L]]))
+  expect_false(is.na(avg$.pred[[which(avg$.row == target)]]$.pred_survival[[
+    1L
+  ]]))
   expect_matches_hand(avg, hand_average(p, outcome), outcome)
 })
 
@@ -425,7 +439,10 @@ test_that("AC3: a two-class vote tie goes to the first level, in either order", 
   }
   # A clear majority is not a tie: both folds say "other".
   expect_identical(
-    as.character(avg_class(plant_row(res, row, ".pred_class", c("other", "other")), row)),
+    as.character(avg_class(
+      plant_row(res, row, ".pred_class", c("other", "other")),
+      row
+    )),
     "other"
   )
 })
@@ -550,9 +567,14 @@ partial_design <- function() {
   d <- make_reg_data()
   folds <- repeated_pair(d, 46)$folds
   held_1 <- rsample::complement(folds$splits[[1L]])
-  second <- which(vapply(4:6, function(i) {
-    held_1[[1L]] %in% rsample::complement(folds$splits[[i]])
-  }, logical(1))) + 3L
+  second <- which(vapply(
+    4:6,
+    function(i) {
+      held_1[[1L]] %in% rsample::complement(folds$splits[[i]])
+    },
+    logical(1)
+  )) +
+    3L
   folds <- break_fold(folds, 1L, "outer fit")
   folds <- break_fold(folds, second, "outer fit")
   list(folds = folds, broken = c(1L, second), data = d)
@@ -605,7 +627,10 @@ test_that("AC5: failed folds are left out of the average, with one warning", {
   # A row held out by one failed and one completed fold takes the completed
   # fold's prediction.
   r <- one_failed[[1L]]
-  keeper <- setdiff(which(vapply(held, function(h) r %in% h, logical(1))), broken)
+  keeper <- setdiff(
+    which(vapply(held, function(h) r %in% h, logical(1))),
+    broken
+  )
   expect_length(keeper, 1L)
   kept <- res$.predictions[[keeper]]
   expect_identical(avg$.pred[avg$.row == r], kept$.pred[kept$.row == r])
