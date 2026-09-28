@@ -1,6 +1,6 @@
 # M124: Averaged out-of-fold predictions
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -47,7 +47,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - [x] T2: Add `summarize` to `collect_predictions.nested_results()` in `R/nested-results-collect.R`. Write an internal averaging helper that drops the labels and `.config`, groups by `.row`, and picks its rule from the saved columns. Probabilities take the probability rule, and `.pred_class` alone takes the vote. A numeric `.pred` takes the mean. A list `.pred`, `.pred_time` or `.pred_linear_pred` takes the censored rules. Call no `tune:::` function. Grep the helper's name first (LESSONS M41).
 - [x] T3: Write the AC5 to AC7 tests, then the code. Break folds with `break_fold()` for AC5. Pass `summarize` through `stack_set()` in `R/nested-results-set.R` for AC6. Refuse a `.pred_quantile` column for AC7.
 - [x] T4: Write the AC8 help text and example, and the `NEWS.md` bullet. Append a D-entry that extends D-054 with the argument. It records the average across selected candidates with `.config` dropped, the choice of rule from saved columns, and the quantile refusal. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
-- [ ] T5: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
+- [x] T5: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
 ## Work log
 
@@ -66,6 +66,8 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: claim audit (fresh [O] reader) read 63 claims and returned 5. Missing votes now count as a class, as tune counts them, with a test that failed first. A row with all-missing averaged probabilities gets a missing class, tune's first level being the one stated departure, with a test. Three test comments corrected.
 - 2026-09-28: amendment gate, Scope Out: the user kept the quantile refusal and chose to correct its reason. tune averages quantile predictions from a default-metric run, so the reason is now the quantreg dependency that a check needs. D-091 supersedes D-090's two false clauses. The candidate row is corrected in place.
 - 2026-09-28: the AC7 test planted a `hardhat::quantile_pred`, and `check()` warned that hardhat is undeclared. It now plants a plain column under that name, so Suggests is unchanged.
+- 2026-09-28: claim audit: 63 claims read, 5 corrected — R/nested-results-collect.R, tests/testthat/test-collect-predictions-summarize.R. The same reader re-read the 5 and found that all hold.
+- 2026-09-28: T5 done. `document()` gives no diff. Both prose sweeps clean. `check_pkgdown()` finds no problems. Full suite 1082 tests, 0 failing. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. Status set to review.
 
 ## Decisions
 

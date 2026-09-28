@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-28 (M123 archived, M120 row pruned, validate green)
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M124 | Averaged out-of-fold predictions | in-progress | — | normal | milestones/M124-averaged-predictions.md |
+| M124 | Averaged out-of-fold predictions | review | — | normal | milestones/M124-averaged-predictions.md |
 | M125 | augment() on repeated and Monte Carlo designs | planned | M124 | normal | milestones/M125-augment-repeated-designs.md |
 | M123 | The parameter set a final fit searched | done | — | normal | milestones/archive/M123-final-fit-parameter-set.md |
 | M122 | Repeated-design fold labels in per-fold metrics | done | — | normal | milestones/archive/M122-repeated-fold-labels.md |
