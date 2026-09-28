@@ -7,7 +7,7 @@
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes the columns of existing per-fold tables
-- **Branch/PR:** m122-repeated-fold-labels
+- **Branch/PR:** m122-repeated-fold-labels · https://github.com/tidymodels/nestedtune/pull/137
 
 ## Goal
 
