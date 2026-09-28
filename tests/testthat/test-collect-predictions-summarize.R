@@ -196,7 +196,7 @@ hand_average <- function(p, outcome) {
   f <- factor(p$.row, levels = rows)
   per_row <- function(v, fn) as.vector(tapply(v, f, fn))
   out <- list(.row = rows, outcome = p[[outcome]][match(rows, p$.row)])
-  if (is.numeric(p$.pred)) {
+  if (is.numeric(p[[".pred"]])) {
     out$.pred <- per_row(p$.pred, function(v) mean(v, na.rm = TRUE))
   }
   if (is.factor(p[[outcome]]) && ".pred_class" %in% names(p)) {
@@ -212,7 +212,7 @@ hand_average <- function(p, outcome) {
   if (".pred_time" %in% names(p)) {
     out$.pred_time <- per_row(p$.pred_time, stats::median)
   }
-  if (is.list(p$.pred)) {
+  if (is.list(p[[".pred"]])) {
     long <- do.call(
       rbind,
       Map(function(tbl, r) cbind(.row = r, as.data.frame(tbl)), p$.pred, p$.row)
@@ -308,11 +308,27 @@ test_that("AC1: a censored regression average equals tune's", {
 
 # ---- AC2: across the candidates the folds selected ------------------------
 
+# One missing value planted in fold 1's first saved row, so the rule that
+# ignores missing values is exercised. A run's own predictions carry none.
+plant_missing <- function(x, column) {
+  edit_fold_predictions(x, 1L, function(p) {
+    if (is.list(p[[column]])) {
+      p[[column]][[1L]]$.pred_survival[[1L]] <- NA
+      p[[column]][[1L]]$.weight_censored[[1L]] <- NA
+    } else {
+      p[[column]][[1L]] <- NA
+    }
+    p
+  })
+}
+
 test_that("AC2: a regression average spans the candidates the repeats selected", {
   skip_if_no_engines()
   res <- grid_reg_run()
   expect_gte(length(unique(collect_selections(res)$num_comp)), 2L)
+  res <- plant_missing(res, ".pred")
   avg <- collect_predictions(res, summarize = TRUE)
+  expect_false(anyNA(avg$.pred))
   expect_matches_hand(avg, hand_average(collect_predictions(res), "y"), "y")
 })
 
@@ -320,7 +336,9 @@ test_that("AC2: a probability average is renormalized and names its class", {
   skip_if_no_engines()
   res <- grid_prob_run()
   expect_gte(length(unique(collect_selections(res)$num_comp)), 2L)
+  res <- plant_missing(res, ".pred_event")
   avg <- collect_predictions(res, summarize = TRUE)
+  expect_false(anyNA(avg$.pred_event))
   expect_matches_hand(avg, hand_average(collect_predictions(res), "y"), "y")
 })
 
@@ -328,9 +346,15 @@ test_that("AC2: a censored average takes the median time and the mean survival",
   skip_if_no_engines()
   skip_if_no_censored()
   res <- grid_srv_run()
+  target <- res$.predictions[[1L]]$.row[[1L]]
+  res <- plant_missing(res, ".pred")
   p <- collect_predictions(res)
   outcome <- "survival::Surv(time, event)"
   avg <- collect_predictions(res, summarize = TRUE)
+  # The planted row's first survival probability comes from its other fold.
+  # `.weight_censored` is missing in some rows of the run itself, so only
+  # `.pred_survival` is asserted here.
+  expect_false(is.na(avg$.pred[[which(avg$.row == target)]]$.pred_survival[[1L]]))
   expect_matches_hand(avg, hand_average(p, outcome), outcome)
 })
 

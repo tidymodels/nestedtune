@@ -245,17 +245,139 @@ NULL
 
 #' @rdname collect_predictions.nested_results
 #' @export
-collect_predictions.nested_results <- function(x, ...) {
+collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   rlang::check_dots_empty()
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
   warn_partial_summary(x, noun = "table")
-  stack_fold_column(
+  out <- stack_fold_column(
     x,
     ".predictions",
     completed_only = TRUE,
     call = rlang::current_env()
   )
+  if (summarize) {
+    out <- average_fold_predictions(out, drop = c(id_columns(x), ".config"))
+  }
+  out
+}
+
+# One averaged prediction per data row (M124). The average spans every
+# completed fold that held the row out, whatever candidate each fold
+# selected, so the fold labels and `.config` are dropped: neither names
+# anything a row's average shares. The rule for each column is read from
+# the columns the run saved, which tune picked from the metric types. The
+# run's metric set is not read, because a run on tune's default metrics
+# records none. The rules are tune 2.1.0's (`prob_summarize()`,
+# `class_summarize()`, `numeric_summarize()` and `surv_summarize()`, read
+# 2026-09-28), written here rather than called, because tune's internals
+# carry no stability promise (M28). Ties go to the first level in factor
+# order.
+average_fold_predictions <- function(preds, drop) {
+  preds <- preds[setdiff(names(preds), drop)]
+  rows <- sort(unique(preds$.row))
+  group <- factor(match(preds$.row, rows), levels = seq_along(rows))
+  first <- match(rows, preds$.row)
+  per_row <- function(v, fn) {
+    vapply(split(v, group), fn, numeric(1), USE.NAMES = FALSE)
+  }
+  mean_na_rm <- function(v) mean(v, na.rm = TRUE)
+
+  nms <- names(preds)
+  # A factor outcome names the probability columns, one per level, so a
+  # level named like `time` is never read as a censored column.
+  others <- nms[!startsWith(nms, ".pred") & nms != ".row"]
+  outcome <- Filter(function(nm) is.factor(preds[[nm]]), others)
+  prob_cols <- if (length(outcome) == 1L) {
+    intersect(paste0(".pred_", levels(preds[[outcome]])), nms)
+  } else {
+    character(0)
+  }
+  if (length(prob_cols) > 0L) {
+    probs <- matrix(
+      unlist(lapply(prob_cols, function(nm) per_row(preds[[nm]], mean_na_rm))),
+      ncol = length(prob_cols)
+    )
+    probs <- probs / rowSums(probs)
+  }
+
+  cols <- lapply(nms, function(nm) {
+    v <- preds[[nm]]
+    if (nm %in% prob_cols) {
+      return(probs[, match(nm, prob_cols)])
+    }
+    if (nm == ".pred_class" && length(prob_cols) > 0L) {
+      return(class_from_probs(probs, prob_cols, v))
+    }
+    if (nm == ".pred_class") {
+      return(class_by_vote(v, group))
+    }
+    if (nm == ".pred_time") {
+      return(per_row(v, stats::median))
+    }
+    if (nm == ".pred" && is.list(v)) {
+      return(average_survival(v, group))
+    }
+    if (startsWith(nm, ".pred") && is.numeric(v)) {
+      return(per_row(v, mean_na_rm))
+    }
+    vctrs::vec_slice(v, first)
+  })
+  names(cols) <- nms
+  new_tbl(cols)
+}
+
+# The class at the largest averaged probability. `which.max()` returns the
+# first of tied maxima, and `prob_cols` is in factor order.
+class_from_probs <- function(probs, prob_cols, saved) {
+  idx <- apply(probs, 1L, function(r) {
+    if (all(is.na(r))) NA_integer_ else which.max(r)
+  })
+  labels <- substring(prob_cols, nchar(".pred_") + 1L)
+  factor(
+    labels[idx],
+    levels = levels(saved),
+    ordered = is.ordered(saved)
+  )
+}
+
+# The most frequent class per row. `max.col(ties.method = "first")` takes the
+# first level among tied counts. A row whose every vote is missing has none.
+class_by_vote <- function(v, group) {
+  counts <- unclass(table(group, v))
+  idx <- max.col(counts, ties.method = "first")
+  idx[rowSums(counts) == 0L] <- NA_integer_
+  factor(levels(v)[idx], levels = levels(v), ordered = is.ordered(v))
+}
+
+# The censored `.pred` list column: per row and `.eval_time`, the mean of
+# every other column with missing values ignored, in the order the times
+# first appear.
+average_survival <- function(v, group) {
+  sizes <- vapply(v, function(t) if (is.null(t)) 0L else nrow(t), integer(1))
+  long <- vctrs::vec_rbind(!!!v)
+  long_group <- rep(as.integer(group), sizes)
+  key <- vctrs::vec_group_id(
+    vctrs::new_data_frame(list(g = long_group, t = long$.eval_time))
+  )
+  first <- match(seq_len(attr(key, "n")), key)
+  averaged <- lapply(names(long), function(nm) {
+    if (nm == ".eval_time") {
+      return(long$.eval_time[first])
+    }
+    vapply(
+      split(long[[nm]], factor(key, levels = seq_along(first))),
+      function(x) mean(x, na.rm = TRUE),
+      numeric(1),
+      USE.NAMES = FALSE
+    )
+  })
+  names(averaged) <- names(long)
+  averaged <- new_tbl(averaged)
+  owner <- factor(long_group[first], levels = seq_len(nlevels(group)))
+  unname(lapply(split(seq_along(first), owner), function(i) {
+    vctrs::vec_slice(averaged, i)
+  }))
 }
 
 #' @rdname collect_predictions.nested_results
