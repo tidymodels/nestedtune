@@ -55,8 +55,16 @@
   design for `nested_tune_bayes()` results. `nested_workflow_map()` is
   tested on the rolling-origin design.
   `nested_resamples()` builds all four designs with the same splits as
-  `rsample::nested_cv()`. An inner design other than
-  `rsample::rolling_origin()` is not tested.
+  `rsample::nested_cv()`.
+
+* An outer `rsample::rolling_origin()` design with an inner
+  `rsample::sliding_window()`, `rsample::sliding_index()` or
+  `rsample::sliding_period()` design is tested under `nested_tune_grid()`,
+  and so is `nested_final_fit()` for its results. `nested_resamples()`
+  builds these three designs with the same splits as
+  `rsample::nested_cv()`. The other orchestrators, `nested_workflow_map()`
+  and the other three outer designs are not tested with these inner
+  designs. Any other inner design is not tested.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no

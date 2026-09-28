@@ -141,52 +141,8 @@ test_that("sliding-window splits match rsample::nested_cv()", {
   expect_inner_identical(lean, ref)
 })
 
-expect_final_matches_reference <- function(d, folds) {
-  wf <- det_workflow(d)
-  ms <- ts_metrics()
-  grid <- det_grid()
-
-  set.seed(20)
-  res <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
-  set.seed(31)
-  final <- nested_final_fit(wf, res)
-
-  # The reference runs under the final fit's own two seeds, with the kind
-  # pinned, and builds its inner design from the fixture's literal call on
-  # the full data.
-  set.seed(
-    final$tuning_seed,
-    kind = "Mersenne-Twister",
-    normal.kind = "Inversion",
-    sample.kind = "Rejection"
-  )
-  inner <- rsample::rolling_origin(d, initial = 40, assess = 1, skip = 4)
-  tuned <- tune::tune_grid(
-    wf,
-    resamples = inner,
-    grid = grid,
-    metrics = ms,
-    control = tune::control_grid(allow_par = FALSE)
-  )
-  best <- tune::select_best(tuned, metric = "rmse")
-  set.seed(
-    final$fit_seed,
-    kind = "Mersenne-Twister",
-    normal.kind = "Inversion",
-    sample.kind = "Rejection"
-  )
-  ref <- parsnip::fit(tune::finalize_workflow(wf, best), data = d)
-
-  expect_identical(
-    lapply(final$tuning$splits, function(s) s$in_id),
-    lapply(inner$splits, function(s) s$in_id)
-  )
-  expect_identical(final$selected, best)
-  expect_identical(
-    predict(final, new_data = d),
-    predict(ref, new_data = d)
-  )
-}
+# expect_final_matches_reference() is in helper-orchestration.R, so the inner
+# sliding designs' file can reach it (M119).
 
 test_that("the final fit on a rolling-origin design matches a hand-rolled reference", {
   skip_if_no_engines()

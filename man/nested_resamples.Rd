@@ -63,7 +63,15 @@ results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nes
 on the rolling-origin design, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their
 results, plus the sliding-window design for \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}
 results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on the rolling-origin design.
-An inner design other than \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is not tested.
+
+An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an inner
+\code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
+\code{\link[rsample:sliding_period]{rsample::sliding_period()}} is tested to give the same splits as
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on these three
+designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for its results. The other
+orchestrators, \code{\link[=nested_workflow_map]{nested_workflow_map()}} and the other three outer designs
+are not tested with these inner designs. Any other inner design is not
+tested.
 }
 
 \section{Memory}{
