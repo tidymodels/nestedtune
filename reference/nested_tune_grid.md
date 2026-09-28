@@ -285,10 +285,20 @@ design is tested with an outer
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
 under `nested_tune_grid()`, and so is
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for its results. The other orchestrators,
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-and the other three outer designs are not tested with these inner
-designs. Any other inner design is not tested.
+for its results. These designs are also tested under
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
+[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+and
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md).
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+is tested for the results of those four tuners on the sliding-period
+design alone.
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+is tested to accept these designs. It checks the inner design but fits
+nothing on it. The other three outer designs are not tested with these
+inner designs. Any other inner design is not tested.
 [`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
 refuses these designs, because their assessment sets leave rows out.
 When the assessment sets overlap, its error also counts the rows held

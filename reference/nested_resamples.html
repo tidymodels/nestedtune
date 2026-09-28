@@ -140,10 +140,14 @@ results. <code><a href="nested_workflow_map.html">nested_workflow_map()</a></cod
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> is tested to give the same splits as
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> is tested on these three
-designs, and so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for its results. The other
-orchestrators, <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> and the other three outer designs
-are not tested with these inner designs. Any other inner design is not
-tested.</p>
+designs, and so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for its results. These designs are
+also tested under <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> and
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested for the results of
+those four tuners on the sliding-period design alone.
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept these designs. It checks the
+inner design but fits nothing on it. The other three outer designs are not
+tested with these inner designs. Any other inner design is not tested.</p>
     </div>
     <div class="section level2">
     <h2 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h2>
