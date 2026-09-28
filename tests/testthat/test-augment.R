@@ -140,31 +140,236 @@ test_that("on a censored-regression run, whose outcome names no data column, the
 
 # ---- AC5: refusals and failed folds --------------------------------------
 
-test_that("an outer design holding a row out other than once is refused with nestedtune_augment_rows", {
+test_that("AC2: a Monte Carlo design that leaves rows out of every assessment set is refused, naming the first five", {
   skip_if_no_engines()
   d <- make_reg_data()
-  set.seed(34)
-  repeated <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3, repeats = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
   set.seed(35)
   monte_carlo <- nested_resamples(
     d,
     outside = rsample::mc_cv(prop = 0.75, times = 3),
     inside = rsample::vfold_cv(v = 3)
   )
-  for (folds in list(repeated, monte_carlo)) {
-    res <- augment_run(d, folds)
-    cnd <- rlang::catch_cnd(augment(res), "error")
-    expect_s3_class(cnd, "nestedtune_augment_rows")
-    expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
-    # A design that holds a row out twice keeps the message naming it (M108),
-    # and is not called a time-series design (M111).
-    expect_match(conditionMessage(cnd), "Monte Carlo", fixed = TRUE)
-    expect_no_match(conditionMessage(cnd), "time-series", fixed = TRUE)
+  res <- augment_run(d, monte_carlo)
+  never <- never_held_rows(res)
+  expect_gt(length(never), 5L)
+  # The design also holds some rows out more than once: the refusal is for
+  # the rows left out, not for the repeats.
+  counts <- tabulate(
+    unlist(lapply(res$splits, rsample::complement)),
+    nbins = nrow(d)
+  )
+  expect_true(any(counts > 1L))
+  msg <- expect_names_never_held(res, never)
+  expect_no_match(msg, "Monte Carlo", fixed = TRUE)
+  expect_no_match(msg, "time-series", fixed = TRUE)
+})
+
+test_that("AC2: a design leaving five or fewer rows out names all of them", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, det_nested(d))
+  # Moving two of fold 1's held-out rows into its analysis set leaves them
+  # out of every assessment set.
+  moved <- rsample::complement(res$splits[[1L]])[1:2]
+  res$splits[[1L]]$in_id <- sort(c(res$splits[[1L]]$in_id, moved))
+  expect_identical(never_held_rows(res), sort(moved))
+  expect_names_never_held(res, sort(moved))
+  # And one row, named in the singular.
+  res$splits[[1L]]$in_id <- setdiff(res$splits[[1L]]$in_id, moved[[2L]])
+  expect_identical(never_held_rows(res), moved[[1L]])
+  expect_names_never_held(res, moved[[1L]])
+})
+
+# ---- M125: designs that hold a row out more than once ----------------------
+#
+# Oracle: `collect_predictions(summarize = TRUE)`, whose averages M124 checked
+# against tune's own and against a base R one. Each data row's prediction
+# columns must be that row's entry in the averaged table.
+
+# Each data row's count of outer assessment sets holding it.
+hold_counts <- function(x) {
+  tabulate(
+    unlist(lapply(x$splits, rsample::complement)),
+    nbins = nrow(x$splits[[1L]]$data)
+  )
+}
+
+expect_averaged_augment <- function(x, outcome = "y") {
+  counts <- hold_counts(x)
+  # The precondition AC1 names: every row held out, some more than once.
+  expect_true(all(counts >= 1L))
+  expect_true(any(counts > 1L))
+  aug <- augment(x)
+  data <- x$splits[[1L]]$data
+  avg <- suppressWarnings(collect_predictions(x, summarize = TRUE))
+  pred_cols <- grep("^\\.pred", names(avg), value = TRUE)
+  at <- match(seq_len(nrow(data)), avg$.row)
+  expect_identical(nrow(aug), nrow(data))
+  expect_identical(
+    names(aug),
+    c(intersect(outcome, names(data)), pred_cols, setdiff(names(data), outcome))
+  )
+  for (nm in pred_cols) {
+    expect_identical(aug[[nm]], avg[[nm]][at], info = nm)
   }
+  for (nm in names(data)) {
+    expect_identical(aug[[nm]], data[[nm]], info = nm)
+  }
+  invisible(aug)
+}
+
+repeated_folds <- function(data, seed, stratify = FALSE) {
+  set.seed(seed)
+  if (stratify) {
+    return(nested_resamples(
+      data,
+      outside = rsample::vfold_cv(v = 3, repeats = 2, strata = y),
+      inside = rsample::vfold_cv(v = 3, strata = y)
+    ))
+  }
+  nested_resamples(
+    data,
+    outside = rsample::vfold_cv(v = 3, repeats = 2),
+    inside = rsample::vfold_cv(v = 3)
+  )
+}
+
+test_that("AC1: on a repeated v-fold regression, each row joins its averaged prediction", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, repeated_folds(d, 34))
+  aug <- expect_averaged_augment(res)
+  expect_false(anyNA(aug$.pred))
+})
+
+test_that("AC1: on a repeated v-fold probability classification, each row joins its averaged probabilities and class", {
+  skip_if_no_engines(stochastic = TRUE)
+  d <- cls_data()
+  res <- memoised(nested_tune_grid(
+    cls_workflow(d),
+    repeated_folds(d, 36, stratify = TRUE),
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    event_level = "second",
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+  aug <- expect_averaged_augment(res)
+  expect_identical(
+    names(aug)[1:4],
+    c("y", ".pred_class", ".pred_event", ".pred_other")
+  )
+  expect_identical(levels(aug$.pred_class), levels(d$y))
+  expect_equal(aug$.pred_event + aug$.pred_other, rep(1, nrow(d)))
+})
+
+test_that("AC1: on a repeated v-fold censored regression, each row joins its averaged survival and time", {
+  skip_if_no_censored()
+  d <- srv_data()
+  res <- suppressWarnings(memoised(nested_tune_grid(
+    srv_workflow(d),
+    repeated_folds(d, 37),
+    grid = srv_grid(),
+    metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+  aug <- expect_averaged_augment(res, outcome = character(0))
+  expect_type(aug$.pred, "list")
+  expect_true(".pred_time" %in% names(aug))
+})
+
+test_that("AC1: on a Monte Carlo design that holds every row out, each row joins its averaged prediction", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  set.seed(38)
+  folds <- nested_resamples(
+    d,
+    outside = rsample::mc_cv(prop = 0.5, times = 12),
+    inside = rsample::vfold_cv(v = 3)
+  )
+  res <- memoised(nested_fit_resamples(
+    fixed_workflow(d),
+    folds,
+    metrics = reg_metrics(),
+    control = tune::control_resamples(save_pred = TRUE)
+  ))
+  # The design holds every row out, which a Monte Carlo draw need not do.
+  expect_length(never_held_rows(res), 0L)
+  aug <- expect_averaged_augment(res)
+  expect_false(anyNA(aug$.pred))
+})
+
+test_that("AC3: a row that only failed folds held out holds NA, with one nestedtune_partial_summary warning", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  folds <- repeated_folds(d, 39)
+  # Fold 1 of repeat 1, and the repeat-2 fold holding fold 1's first row.
+  # The rows both hold out are held out by failed folds only.
+  held_1 <- rsample::complement(folds$splits[[1L]])
+  second <- 3L +
+    which(vapply(
+      4:6,
+      function(i) held_1[[1L]] %in% rsample::complement(folds$splits[[i]]),
+      logical(1)
+    ))
+  folds <- break_fold(folds, 1L, "inner tuning")
+  folds <- break_fold(folds, second, "inner tuning")
+  res <- augment_run(d, folds)
+  expect_identical(which(!res$.completed), c(1L, second))
+
+  warnings <- list()
+  aug <- withCallingHandlers(
+    augment(res),
+    warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 1L)
+  expect_s3_class(warnings[[1L]], "nestedtune_partial_summary")
+
+  held <- lapply(res$splits, rsample::complement)
+  only_failed <- setdiff(
+    seq_len(nrow(d)),
+    unlist(held[res$.completed])
+  )
+  expect_setequal(only_failed, intersect(held_1, held[[second]]))
+  expect_gt(length(only_failed), 0L)
+  pred_cols <- grep("^\\.pred", names(aug), value = TRUE)
+  for (nm in pred_cols) {
+    expect_identical(which(is.na(aug[[nm]])), sort(only_failed), info = nm)
+  }
+  # Every other row joins its average over the completed folds.
+  avg <- suppressWarnings(collect_predictions(res, summarize = TRUE))
+  kept <- setdiff(seq_len(nrow(d)), only_failed)
+  expect_identical(aug$.pred[kept], avg$.pred[match(kept, avg$.row)])
+})
+
+test_that("quantile predictions on a design holding a row out twice are refused with nestedtune_summarize_quantile", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, repeated_folds(d, 34))
+  # The refusal reads the column's name, so a plain column stands in for
+  # hardhat's `quantile_pred` type, as in the collect_predictions() test.
+  planted <- edit_fold_predictions(res, 2L, function(p) {
+    p$.pred_quantile <- p$.pred
+    p
+  })
+  cnd <- rlang::catch_cnd(augment(planted), "error")
+  expect_s3_class(cnd, "nestedtune_summarize_quantile")
+  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
+  expect_match(conditionMessage(cnd), "augment", fixed = TRUE)
+
+  # A design holding each row out once joins such a column as saved.
+  once <- augment_run(d, det_nested(d))
+  for (i in seq_len(nrow(once))) {
+    once <- edit_fold_predictions(once, i, function(p) {
+      p$.pred_quantile <- p$.pred
+      p
+    })
+  }
+  aug <- augment(once)
+  expect_identical(aug$.pred_quantile, aug$.pred)
 })
 
 test_that("a run without saved predictions is refused with nestedtune_column_not_saved", {

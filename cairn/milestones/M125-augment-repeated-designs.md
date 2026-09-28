@@ -1,13 +1,13 @@
 # M125: augment() on repeated and Monte Carlo designs
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M124
 - **Driving RR:** —
 - **Principles touched:** GP1, GP3, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs an exported method accepts
-- **Branch/PR:** —
+- **Branch/PR:** m125-augment-repeated-designs
 
 ## Goal
 
@@ -37,8 +37,8 @@
 
 ## Tasks
 
-- [ ] T1: Write the AC1 to AC3 tests first in `tests/testthat/test-augment.R`. Rewrite the test at `test-augment.R:143`, which asserts that repeated and Monte Carlo designs are refused. Update the overlapping-design message assertion in `test-time-series-designs.R:345`. For AC3, break folds in every repeat that together hold one row (criteria audit). For example, break the first fold of repeat one with `break_fold()`, and the repeat-two folds holding its rows. Run the tests and record that they fail.
-- [ ] T2: Change `check_held_out_once()` in `R/nested-results-collect.R` to refuse only rows held out never. For a row held out more than once, `augment.nested_results()` joins M124's averaged table. Append a D-entry that supersedes D-063's refusal clause. It says that M124's two oracles, tune's own average and a base R one, meet the precondition D-063 named.
+- [x] T1: Write the AC1 to AC3 tests first in `tests/testthat/test-augment.R`. Rewrite the test at `test-augment.R:143`, which asserts that repeated and Monte Carlo designs are refused. Update the overlapping-design message assertion in `test-time-series-designs.R:345`. For AC3, break folds in every repeat that together hold one row (criteria audit). For example, break the first fold of repeat one with `break_fold()`, and the repeat-two folds holding its rows. Run the tests and record that they fail.
+- [ ] T2: Change `check_held_out_once()` in `R/nested-results-collect.R` to refuse only rows held out never. For a row held out more than once, `augment.nested_results()` joins M124's averaged table. Append a D-entry that supersedes D-063's refusal clause. It says that M124's two oracles, tune's own average and a base R one, meet the precondition D-063 named. On the averaged path, refuse saved quantile predictions with class `nestedtune_summarize_quantile` (implement gate). The refusal names the first five rows never held out, not cli's first three and last two. It uses one message for every design, so `TIME_SERIES_SPLITS` and its test go (implement gate).
 - [ ] T3: Update the `augment.nested_results` help page, the set help line at `R/nested-results-set.R:24`, and the `augment()` bullet in `NEWS.md`. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
 - [ ] T4: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
@@ -47,6 +47,8 @@
 - 2026-09-28: created by /milestone-plan, split from M124 at the plan gate.
 - 2026-09-28: criteria audit (full mode, fresh [O] reader) read both drafts. Here it limited AC1 to designs that hold a row out more than once, so AC4 and AC1 cannot disagree on a postprocessed class. It pinned the five-row truncation in AC2 and named the tests to rewrite.
 - 2026-09-28: plan gate chose refusing designs with rows never held out over tune's `NA` rows, keeping today's refusal; falsified by users needing them augmented.
+- 2026-09-28: implement gate chose two things. The averaged path refuses quantile predictions with the existing class `nestedtune_summarize_quantile`. Every design gets one refusal message, with no time-series hint. Found that cli's truncation names the first three and last two rows, not AC2's first five. T2 now covers both (minor amendment).
+- 2026-09-28: T1 done. Eight tests in `test-augment.R` (AC1 x4, AC2 x2, AC3, quantile refusal) and three rewritten in `test-time-series-designs.R`, with shared `never_held_rows()` and `expect_names_never_held()` in `helper-predictions.R`. All eleven fail on the old code. The `TIME_SERIES_SPLITS` test is removed.
 
 ## Decisions
 

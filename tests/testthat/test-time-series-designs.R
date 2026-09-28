@@ -275,21 +275,16 @@ test_that("collect_predictions() returns each outer-assessment row once per fold
   }
 })
 
+# `expect_names_never_held()` is in helper-predictions.R (M125).
 expect_augment_names_never_held <- function(res, d) {
   never <- setdiff(
     seq_len(nrow(d)),
     unlist(lapply(res$splits, rsample::complement))
   )
   expect_length(never, 87L)
-
-  cnd <- rlang::catch_cnd(augment(res), "error")
-  expect_s3_class(cnd, "nestedtune_augment_rows")
-  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
-  msg <- cli::ansi_strip(conditionMessage(cnd))
-  # cli shortens the row list to its first three and last two.
-  expect_identical(c(head(never, 3L), tail(never, 2L)), c(1:3, 89:90))
-  expect_match(msg, "87 rows: 1, 2, 3, ", fixed = TRUE)
-  expect_match(msg, "89, and 90.", fixed = TRUE)
+  expect_identical(never[1:5], 1:5)
+  msg <- expect_names_never_held(res, never)
+  expect_match(msg, "The first five are 1, 2, 3, 4, and 5.", fixed = TRUE)
   expect_no_match(msg, "repeated", ignore.case = TRUE)
   expect_no_match(msg, "Monte Carlo", fixed = TRUE)
 }
@@ -321,7 +316,7 @@ ts_overlap_nested <- function(data) {
   )
 }
 
-test_that("augment() on an overlapping sliding-window result counts both kinds of row", {
+test_that("augment() refuses an overlapping sliding-window result for the rows it leaves out", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- ts_pred_run(d, ts_overlap_nested)
@@ -332,26 +327,13 @@ test_that("augment() on an overlapping sliding-window result counts both kinds o
   )
   expect_identical(c(sum(counts == 0L), sum(counts > 1L)), c(69L, 1L))
 
-  cnd <- rlang::catch_cnd(augment(res), "error")
-  expect_s3_class(cnd, "nestedtune_augment_rows")
-  expect_identical(conditionCall(cnd)[[1L]], as.name("augment"))
-  # cli wraps the message at the console width.
-  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
-  expect_match(
-    msg,
-    "holds out 69 rows never and 1 row more than once.",
-    fixed = TRUE
-  )
-  expect_match(msg, "time-series design", fixed = TRUE)
+  # The row held out twice is not what is refused (M125): the message names
+  # the rows left out and says nothing of a design type.
+  msg <- expect_names_never_held(res, which(counts == 0L))
+  expect_no_match(msg, "more than once", fixed = TRUE)
+  expect_no_match(msg, "time-series", fixed = TRUE)
   expect_no_match(msg, "repeated", ignore.case = TRUE)
   expect_no_match(msg, "Monte Carlo", fixed = TRUE)
-})
-
-# The overlap test above reaches one of the four classes. TS_SPLIT_CLASS is
-# checked against a real fixture of each design, so a class dropped from or
-# misspelled in the package's list fails here (M111).
-test_that("augment()'s time-series classes are the four designs' split classes", {
-  expect_setequal(TIME_SERIES_SPLITS, unlist(TS_SPLIT_CLASS, use.names = FALSE))
 })
 
 # ---- The other orchestrators (M110) ------------------------------------------
