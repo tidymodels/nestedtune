@@ -28,6 +28,7 @@
 - [ ] AC5: Tests assert four paths the M124 and M125 reviews found untested. `collect_predictions(summarize = TRUE)` and `augment()` on a `nested_results_set` whose workflow saved `.pred_quantile` refuse with class `nestedtune_summarize_quantile`. A planted `.pred_linear_pred` column averages to each row's mean with missing values ignored, compared with a base R average. A row whose probabilities average to a tie, where one fold's probability is missing, takes the first tied level. On a repeated censored design with a failed fold, `augment()` gives NULL in `.pred` for a row only failed folds held out.
 - [ ] AC6: `benchmarks/averaging-speed.R` builds three stacked tables in which each of 33,334 data rows is held out by 3 folds. The first has 10 class probabilities and a class, the second a class alone, the third a censored `.pred` and `.pred_time`. On each table, the branch's `average_fold_predictions()` output agrees with a frozen copy of the M124 code held in the script. Agreement is `all.equal(tolerance = 1e-12)` on numeric columns and `identical()` on factor columns. On the first table, the branch's median of five runs is at most one quarter of the frozen copy's. The script's output is logged in the work log.
 - [ ] AC7: The `collect_predictions.nested_results` help page, in "Averaging across the folds", states the AC1 and AC2 refusals and the AC3 NULL rule. The `NEWS.md` bullet for `summarize` states them too. The "Designs and folds refused" section of the `augment.nested_results` help page states the AC2 refusal, and that the name collision is checked before averaging. `devtools::test()` passes, `devtools::check()` reports 0 errors, 0 warnings and 0 notes, and every command `Rscript benchmarks/sweep-prose.R --list-gating` prints runs clean.
+- [ ] AC8: The `collect_predictions.nested_results` and `augment.nested_results` help pages state that a metric computed on averaged predictions describes an average of several fitted models, not the tuning procedure. So it is not the nested estimate. Both pages name `collect_metrics()` for that estimate.
 
 ## Coverage
 
@@ -38,6 +39,7 @@
 - AC5 → T1
 - AC6 → T4
 - AC7 → T5, T6
+- AC8 → T5
 
 ## Tasks
 
@@ -45,7 +47,7 @@
 - [ ] T2: Call `check_predictions_rows()` from `collect_predictions.nested_results()` when `summarize` is `TRUE` (`R/nested-results-collect.R:306`), adding `"collect_predictions"` to its `verb` choices at `:1005`. Confirm the set method re-signals it naming the workflow.
 - [ ] T3: In `average_fold_predictions()` (`:342`) and `average_survival()` (`:462`), add the AC2 refusal and the AC3 NULL rule. The refusal takes a `verb` and words its message per reader, as `check_no_quantile()` does. In `augment.nested_results()` (`:909`), move the collision check ahead of `check_no_quantile()` and the averaging, reading the prediction column names from the saved tables.
 - [ ] T4: Write `benchmarks/averaging-speed.R`. Its frozen M124 copy includes `class_from_probs()`, `class_by_vote()` and `average_survival()`. Run it for the baseline. Rewrite the per-row averages with grouped sums (`rowsum()` or `vctrs` grouping) across the numeric, probability, vote and survival paths. Re-run T1's tests and the script, and log the medians.
-- [ ] T5: Append a D-entry that extends D-090 with the AC1 check, the AC2 refusal and the AC3 NULL rule. It states that the NULL rule has one oracle, because it decides only which entries enter an average that M124 checked against two. Add the `DESIGN.md` Known issues entry named in Out. Update the help section, the `augment.nested_results` refusal section, and the `summarize` bullet in `NEWS.md`. Run the prose sweeps.
+- [ ] T5: Append a D-entry that extends D-090 with the AC1 check, the AC2 refusal and the AC3 NULL rule. It states that the NULL rule has one oracle, because it decides only which entries enter an average that M124 checked against two. Add the `DESIGN.md` Known issues entry named in Out. Add the AC8 sentence to both help pages. Update the help section, the `augment.nested_results` refusal section, and the `summarize` bullet in `NEWS.md`. Run the prose sweeps.
 - [ ] T6: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
 ## Work log
@@ -56,6 +58,8 @@
 - 2026-09-28: plan gate chose the row check under `summarize = TRUE` only over every call, because the per-fold table then stays as it is. Falsified by a user report of a per-fold table with mismatched rows misleading an analysis.
 - 2026-09-28: plan gate chose named refusals for the three shapes over documenting the silent average, the stance `check_predictions_rows()` takes toward edited objects. Falsified by tune producing one of the shapes from a real run.
 - 2026-09-28: plan gate chose one oracle for the NULL rule over adding tune's average as a second. Falsified by tune's average of a planted NULL entry differing from the base R one.
+- 2026-09-28: user asked, before implementation, for a help warning against scoring averaged predictions as the nested estimate. AC8 added, mapped to T5.
+- 2026-09-28: criteria audit of AC8 (full mode, fresh [O] reader). The first draft said such a score can be better than one model's and backed it with an RMSE test. On the `fixed_workflow` fixture the averaged RMSE fell below `collect_metrics()`'s on seed 41 but not on 2 of seeds 1 to 20, so the direction is not fixed. AC8 now states only that the score describes an average of fitted models, and needs no numeric test.
 
 ## Decisions
 
