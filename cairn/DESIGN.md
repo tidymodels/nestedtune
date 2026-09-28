@@ -508,24 +508,16 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   `.github/workflows/pr-commands.yaml` offers a `/style` command that runs
   `styler::style_pkg()`, a different formatter from the `air` this repository
   adopted, so using it commits a tree `format-suggest.yaml` then flags line by
-  line — treat `/style` as unavailable here. `format-suggest.yaml` runs on
-  `pull_request_target` with `posit-dev/setup-air@v1` and
-  `reviewdog/action-suggester@v1` on moving tags under `pull-requests: write`,
-  and its `permissions:` block zeroes `contents`, which works only because this
-  repository is public. `lock.yaml` declares no `permissions:` block at all, so
-  its nightly run depends on the repository's default workflow token being
-  writable; that setting could not be read at review. The moving-tag half is
-  carried by the standing candidate row that tracks the pkgdown deploy pin.
-  The shared-blob boundary is those three files alone (corrected M78): this
-  repository's own CI workflows are held at no shared blob and diverge from
-  the r-lib stock templates deliberately. `pkgdown.yaml` builds the site in a
-  job at `read-all` and publishes from a second job that runs nothing it
-  checked out, so the job executing the ref's vignettes and `@examples` never
-  holds a token able to write here, and it removes this repository's internal
-  markdown before the build; `R-CMD-check-hard.yaml` carries the
-  `paths-ignore` list its three siblings carry. Each departure carries an
-  in-file comment naming the property it buys, so a later template sync is a
-  merge rather than a copy.
+  line. Treat `/style` as unavailable here. `format-suggest.yaml` runs on
+  `pull_request_target` with actions on moving tags under
+  `pull-requests: write` (a candidate row carries the moving tags), and its
+  `permissions:` block zeroes `contents`, which works only because this
+  repository is public. `lock.yaml` declares no `permissions:` block, so its
+  nightly run depends on the default workflow token being writable, a setting
+  that could not be read at review. The shared-blob boundary is those three
+  files alone (corrected M78). This repository's own workflows diverge from
+  the r-lib templates by design, each departure carrying an in-file comment
+  naming what it buys. Compressed 2026-09-28.
 
 - `dplyr::group_by()`, `dplyr::rowwise()` and `tibble::as_tibble()` leave the
   run's recorded attributes readable on the object they return. None of the
@@ -606,3 +598,19 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   the tuned score there. Accepted at M91's hygiene: the package documents the
   nested procedure, and advice for the un-nested case is outside it. Revisit on
   a user asking what to report without nesting, or the next estimate.Rmd pass.
+
+- `benchmarks/sweep-prose.R` reads some prose wrongly. It sweeps a loose
+  list's continuation paragraph, and a comment opened partway through a line
+  leaks its body. It drops a prose line opening `2020. ` as a numbered item,
+  with the lines under it. An indented fence inside a chunk can close that
+  chunk early. The parse fixture's plant assertions are all negative, so a
+  parser dropping too much is ruled out only indirectly. Neither the sweep nor
+  M096's duplicate-line command reads a roxygen `@templateVar` body, so the
+  tail sentences in `FORCED_TAIL` and `SETTABLE_TAIL` sit outside both
+  checks. M089's Review section and M097's archive state each in full.
+  Accepted at the 2026-09-28 triage pass, because the row carried findings
+  from two reviews and none of them has cost a page its sweep. Revisit on one
+  costing a real page its sweep, or on the next milestone touching
+  `rmd_paragraphs()` or the roxygen reader. Routed from candidates
+  2026-09-28; added 2026-09-12 at M089's review gate (findings 3-6, 9, 10),
+  extended at M097's review.
