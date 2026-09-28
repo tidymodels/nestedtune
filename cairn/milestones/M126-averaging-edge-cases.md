@@ -1,6 +1,6 @@
 # M126: Edge cases of averaged predictions
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -70,6 +70,7 @@
 - 2026-09-28: claim audit: 65 claims read, 2 corrected — NEWS.md (the row-check wording now says exactly the rows each once, and "two or more" factor outcome columns). Also tightened, not counted: the `mean_by()` timing comment names the probability table, and the `median_by()` comment states its last-bit difference from `stats::median()` on even groups.
 - 2026-09-28: T6 done. `devtools::document()` is current, `pkgdown::check_pkgdown()` finds no problems, and `devtools::check()` at `85aaa2de` gives 0 errors, 0 warnings and 0 notes, its test run included. Status set to review.
 - 2026-09-28: review return 1 (defect): AC6 fails. `benchmarks/averaging-speed.R` deals folds so one fold can hold a row more than once, and 25,971 of 33,334 rows are not held out by 3 folds. Fix the fold assignment so each row is in each of the 3 folds once, re-run the script, and log its output. AC1 to AC5, AC7, AC8 and the gate pass (Review section). Status back to in-progress.
+- 2026-09-28: review return 1 fixed. `benchmarks/averaging-speed.R` now stacks the 3 folds one after another, each holding every row once in its own random order, and stops unless every row is held out by 3 distinct folds. That guard stops on the old dealing (7,363 of 33,334 rows). Script output on R 4.6.1 aarch64-apple-darwin23: 33,334 of 33,334 rows held out by 3 distinct folds. Probabilities agree TRUE, frozen 0.559 s, branch 0.030 s, ratio 0.054. Class agree TRUE, 0.018 s and 0.018 s, ratio 1.000. Censored agree TRUE, 0.784 s and 0.359 s, ratio 0.458. No `R/` file changed. Status set to review.
 
 ## Decisions
 

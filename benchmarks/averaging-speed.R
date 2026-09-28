@@ -10,9 +10,10 @@
 #
 #   Rscript benchmarks/averaging-speed.R
 #
-# Three stacked tables, each holding each of 33,334 data rows out in 3 folds
-# (100,002 rows): 10 class probabilities with a class, a class alone, and a
-# censored `.pred` with `.pred_time`. A few values are missing, so the rules
+# Three stacked tables in which each of 3 folds holds each of 33,334 data
+# rows out once (100,002 rows): 10 class probabilities with a class, a class
+# alone, and a censored `.pred` with `.pred_time`. The script stops if a row
+# is not held out by 3 distinct folds. A few values are missing, so the rules
 # that ignore them run.
 
 suppressMessages(pkgload::load_all(".", quiet = TRUE))
@@ -144,8 +145,19 @@ local(
 n_rows <- 33334L
 n_folds <- 3L
 set.seed(126)
-row <- sample(rep(seq_len(n_rows), n_folds))
-fold <- rep(seq_len(n_folds), length.out = length(row))
+# Stacked fold by fold: each fold holds every data row once, in its own
+# random order.
+row <- unlist(lapply(seq_len(n_folds), function(f) sample(n_rows)))
+fold <- rep(seq_len(n_folds), each = n_rows)
+folds_per_row <- vapply(
+  split(fold, row),
+  function(f) length(unique(f)),
+  integer(1)
+)
+stopifnot(
+  all(tabulate(row, n_rows) == n_folds),
+  all(folds_per_row == n_folds)
+)
 lv <- paste0("c", 1:10)
 outcome <- factor(sample(lv, n_rows, replace = TRUE), levels = lv)
 
@@ -249,7 +261,16 @@ tables <- list(
   class = class_table,
   censored = srv_table
 )
-cat("stacked rows per table:", nrow(prob_table), "\n\n")
+cat("stacked rows per table:", nrow(prob_table), "\n")
+cat(
+  "data rows held out by",
+  n_folds,
+  "distinct folds:",
+  sum(folds_per_row == n_folds),
+  "of",
+  n_rows,
+  "\n\n"
+)
 for (nm in names(tables)) {
   tbl <- tables[[nm]]
   ok <- agree(branch_avg(tbl), frozen_avg(tbl))
