@@ -43,6 +43,7 @@ Each sliding outer design with each inner sliding design is tested and documente
 ## Work log
 
 - 2026-09-27: created by /milestone-plan. Absorbs the outer-design part of the inner-design candidate row. The criteria audit ran in full mode and returned 3 findings on this milestone, all fixed before the gate.
+- 2026-09-27: the full-mode re-audit of the final wording returned no findings on this milestone.
 - 2026-09-27: plan gate chose all nine pairs over a five-pair cross, so the help makes one claim with no list of exceptions. Falsified by the suite time the nine pairs add pushing a CI check step near its cap.
 
 ## Decisions
