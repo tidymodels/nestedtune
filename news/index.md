@@ -171,14 +171,11 @@
   [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
   and the other four tuners are not tested on these pairs.
 
-- When an outer design leaves rows out of every assessment set and holds
-  no row out twice,
+- When an outer design leaves rows out of every assessment set,
   [`augment()`](https://generics.r-lib.org/reference/augment.html) now
-  names those rows in its error. It no longer names a repeated or Monte
-  Carlo design as the cause. When a time-series design’s assessment sets
-  overlap, the error counts the rows left out and the rows held out more
-  than once, and does not name a repeated or Monte Carlo design. The
-  condition class is still `nestedtune_augment_rows`.
+  names the first five of those rows in its error, or all of them when
+  there are five or fewer. The error names no design type. The condition
+  class is still `nestedtune_augment_rows`.
 
 - [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
@@ -359,10 +356,15 @@
   does, and it does not run the inner selection again. Its `event_level`
   defaults to the level the run recorded.
   [`augment()`](https://generics.r-lib.org/reference/augment.html) joins
-  each data row’s out-of-fold prediction onto the data. It refuses an
-  outer design that holds a row out other than exactly once. It also
-  refuses a fold whose saved predictions do not hold exactly the rows
-  that fold held out, each once.
+  each data row’s out-of-fold prediction onto the data. On a design that
+  holds each row out once, it joins the saved predictions as they are. A
+  repeated v-fold or a Monte Carlo design can hold some row out more
+  than once. There, every row joins the average that
+  `collect_predictions(summarize = TRUE)` gives for it. On such a design
+  it refuses saved quantile predictions, because that average does not
+  cover them. It refuses an outer design that leaves some row out of
+  every assessment set. It also refuses a fold whose saved predictions
+  do not hold exactly the rows that fold held out, each once.
 
 - The coverage job no longer fails after every test passed. Daemons
   started by the test suite write their coverage traces to a directory

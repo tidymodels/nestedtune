@@ -18,7 +18,8 @@ stack their per-fold tables the same way.
 [`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
 scores each workflow's saved predictions with the metric set you give
 it. [`augment()`](https://generics.r-lib.org/reference/augment.html)
-gives each workflow's data rows with its predictions.
+gives each workflow's data rows with its predictions, averaged per row
+on a design that holds out a row more than once.
 
 ## Usage
 

@@ -2,9 +2,10 @@
 
 [`augment()`](https://generics.r-lib.org/reference/augment.html) returns
 the data a nested run was given, one row per data row, with the
-predictions made for that row when its outer fold held it out. You can
-plot or inspect every row's out-of-fold prediction beside its
-predictors.
+predictions made for that row when an outer fold held it out. On a
+design that holds a row out more than once, those predictions are
+averaged. You can plot or inspect every row's out-of-fold prediction
+beside its predictors.
 
 ## Usage
 
@@ -50,24 +51,43 @@ and its own
 [`augment()`](https://generics.r-lib.org/reference/augment.html) method
 predicts new data with it.
 
+## Designs accepted, and averaged predictions
+
+The outer design must hold out every data row at least once.
+
+A v-fold or grouped v-fold design without repeats holds out each row
+once. There, each row joins the predictions that its one outer fold
+saved, as they are.
+
+A repeated v-fold design holds out each row once per repeat, and a Monte
+Carlo design can hold out a row several times. On a design that holds
+out some row more than once, every row joins its averaged prediction,
+the rows held out once included. The count of times a row is held out
+reads every outer fold, the failed ones included. The average is the one
+`collect_predictions(summarize = TRUE)` gives, and
+[`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+states its rules. For example, a `.pred_class` saved beside class
+probabilities is recomputed from the averaged probabilities, whatever
+class a postprocessor set.
+
 ## Designs and folds refused
 
-The outer design must hold out every data row exactly once, as a v-fold
-or grouped v-fold design does. A repeated v-fold or a Monte Carlo design
-is refused with class `nestedtune_augment_rows`, because it predicts
-some rows more than once or not at all. Read its predictions with
-[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-instead. A
+A design that leaves some data row out of every assessment set is
+refused with class `nestedtune_augment_rows`. The message names the
+first five of those rows, or all of them when there are five or fewer. A
+Monte Carlo design can leave rows out. A
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
 [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
 [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 or
 [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-design leaves rows out of every assessment set and is refused with the
-same class. When no row is held out twice, the message names the rows
-left out. When its assessment sets overlap, the message counts the rows
-left out and the rows held out more than once, and does not name a
-repeated or Monte Carlo design.
+design leaves out at least the rows before its first assessment set.
+Read the predictions such a design has with
+[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html).
+
+On a design that holds out some row more than once, saved quantile
+predictions are refused with class `nestedtune_summarize_quantile`,
+because `collect_predictions(summarize = TRUE)` does not average them.
 
 A run whose control did not set `save_pred = TRUE` is refused with class
 `nestedtune_column_not_saved`. A run in which no fold completed is
@@ -76,12 +96,13 @@ refused with class `nestedtune_no_completed_folds`.
 A completed fold whose saved predictions do not match the rows it held
 out is refused with class `nestedtune_augment_predictions`. Its `.row`
 column must hold each of those rows once and no other row. On a run with
-some failed folds, the rows those folds held out hold a missing value in
-every prediction column, with a warning of class
-`nestedtune_partial_summary`. A missing value is `NA`, or `NULL` in a
-list column such as the `.pred` of a censored-regression run. A data
-column whose name is also a prediction column's name is refused with
-class `nestedtune_collect_name_collision`.
+some failed folds, a row that only failed folds held out holds a missing
+value in every prediction column, with a warning of class
+`nestedtune_partial_summary`. A row that a completed fold also held out
+takes the average over the completed folds. A missing value is `NA`, or
+`NULL` in a list column such as the `.pred` of a censored-regression
+run. A data column whose name is also a prediction column's name is
+refused with class `nestedtune_collect_name_collision`.
 
 ## See also
 

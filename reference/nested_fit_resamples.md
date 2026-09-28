@@ -363,9 +363,9 @@ design alone. `nested_fit_resamples()` is tested to accept these
 designs. It checks the inner design but fits nothing on it. Any other
 inner design is not tested.
 [`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
-refuses these designs, because their assessment sets leave rows out.
-When the assessment sets overlap, its error also counts the rows held
-out more than once.
+refuses these designs, because their assessment sets leave rows out. Its
+error names the rows left out. When there are more than five, it names
+the first five.
 
 An outer
 [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),

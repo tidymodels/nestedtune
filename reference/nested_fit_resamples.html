@@ -365,8 +365,8 @@ those four tuners on the sliding-period design alone.
 <code>nested_fit_resamples()</code> is tested to accept these designs. It checks the
 inner design but fits nothing on it. Any other inner design is not tested.
 <code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
-assessment sets leave rows out. When the assessment sets overlap, its
-error also counts the rows held out more than once.</p>
+assessment sets leave rows out. Its error names the rows left out. When
+there are more than five, it names the first five.</p>
 <p>An outer <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> gives nine
