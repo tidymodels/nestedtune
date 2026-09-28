@@ -1,0 +1,11 @@
+# M125: augment() on repeated and Monte Carlo designs
+
+**Status:** done (2026-09-28, PR #140 https://github.com/tidymodels/nestedtune/pull/140)
+
+**Goal:** `augment()` accepts a nested run whose outer design holds every data row out at least once, and joins each row's averaged prediction.
+
+**Outcome:** `check_held_out()` in `R/nested-results-collect.R` replaces `check_held_out_once()`. It refuses only a design that leaves some row out of every assessment set, with class `nestedtune_augment_rows`. The message names the first five such rows and no design type, so `TIME_SERIES_SPLITS` and its test went. It counts hold-outs over every fold, the failed ones included, and returns whether some row is held out more than once. On such a design `augment.nested_results()` joins M124's `average_fold_predictions()` table for every row, so a postprocessed class is recomputed from the averaged probabilities. Saved quantile predictions are refused there with `nestedtune_summarize_quantile`, through `check_no_quantile()`, which now takes a required `verb`. A design holding each row out once joins the saved predictions unchanged. The help page, the set help line, the time-series help and `NEWS.md` state it. The tests in `test-augment.R` and `test-time-series-designs.R` use `collect_predictions(summarize = TRUE)` as the oracle and plant a class that disagrees with the probabilities. They share `never_held_rows()` and `expect_names_never_held()` in `helper-predictions.R`.
+
+**Decisions:** D-092 supersedes D-063's refusal clause. D-093 corrects D-092 to supersede D-078's time-series message clause as well.
+
+**Review:** Three fresh reviewers found no failing criterion. AC4 was also shown by `identical()` output under `main` and the branch on three once-design runs. At the gate, 7 findings were fixed. The fixes were D-093, the required `verb`, two planted-class tests, two help sentences and a tighter quantile message match. One planted test first failed on an exact 0.5 tie, which goes to the first level. O1, O8 and O9 went to the averaging edge-case candidate row, which was promoted to `[high]` at hygiene. O6, O7, O10, O12 and O13 were rejected. A timed-out CI wait resumed and merged on 14 green checks. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. Nothing was graduated or retired.
