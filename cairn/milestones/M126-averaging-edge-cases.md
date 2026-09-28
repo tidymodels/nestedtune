@@ -43,7 +43,7 @@
 
 ## Tasks
 
-- [ ] T1: Write the AC1 to AC5 tests first, in `tests/testthat/test-collect-predictions-summarize.R` and `test-augment.R`, reusing `helper-predictions.R`. Run them and record which fail. The AC5 tests cover existing behavior, so record the ones that pass at once.
+- [x] T1: Write the AC1 to AC5 tests first, in `tests/testthat/test-collect-predictions-summarize.R` and `test-augment.R`, reusing `helper-predictions.R`. Run them and record which fail. The AC5 tests cover existing behavior, so record the ones that pass at once.
 - [ ] T2: Call `check_predictions_rows()` from `collect_predictions.nested_results()` when `summarize` is `TRUE` (`R/nested-results-collect.R:306`), adding `"collect_predictions"` to its `verb` choices at `:1005`. Confirm the set method re-signals it naming the workflow.
 - [ ] T3: In `average_fold_predictions()` (`:342`) and `average_survival()` (`:462`), add the AC2 refusal and the AC3 NULL rule. The refusal takes a `verb` and words its message per reader, as `check_no_quantile()` does. In `augment.nested_results()` (`:909`), move the collision check ahead of `check_no_quantile()` and the averaging, reading the prediction column names from the saved tables.
 - [ ] T4: Write `benchmarks/averaging-speed.R`. Its frozen M124 copy includes `class_from_probs()`, `class_by_vote()` and `average_survival()`. Run it for the baseline. Rewrite the per-row averages with grouped sums (`rowsum()` or `vctrs` grouping) across the numeric, probability, vote and survival paths. Re-run T1's tests and the script, and log the medians.
@@ -60,6 +60,7 @@
 - 2026-09-28: plan gate chose one oracle for the NULL rule over adding tune's average as a second. Falsified by tune's average of a planted NULL entry differing from the base R one.
 - 2026-09-28: user asked, before implementation, for a help warning against scoring averaged predictions as the nested estimate. AC8 added, mapped to T5.
 - 2026-09-28: criteria audit of AC8 (full mode, fresh [O] reader). The first draft said such a score can be better than one model's and backed it with an RMSE test. On the `fixed_workflow` fixture the averaged RMSE fell below `collect_metrics()`'s on seed 41 but not on 2 of seeds 1 to 20, so the direction is not fixed. AC8 now states only that the score describes an average of fitted models, and needs no numeric test.
+- 2026-09-28: T1 done. The new tests fail as expected: the five AC1 mismatch cases and the set case, the four AC2 plants, two of the three AC3 plants (the NULL row gets a 0-row tibble, the all-NULL table raises vctrs' internal error), and both AC4 tests (the quantile refusal and no refusal come first). The first AC3 plant and all four AC5 tests pass at once, as they cover existing behavior. The AC5 censored test first failed because edition 3's `expect_warning()` returns the warning, not the value, which the test now avoids.
 
 ## Decisions
 
