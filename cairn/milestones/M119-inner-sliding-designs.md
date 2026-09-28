@@ -55,6 +55,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: claim audit: 16 claims read, 2 corrected — tests/testthat/helper-orchestration.R (the inner resample counts, and the six-week sliding-period analysis sets). Re-read by the same reader is pending.
 - 2026-09-27: the same reader re-read the two corrected claims and the added partial-week clause once, and found that all three hold.
 - 2026-09-27: T5 done. The new file runs in 24 s serially, under 30 s, so `start-first` is unchanged. `devtools::check()`: 0 errors, 0 warnings, 0 notes, 9 min 27 s. Status set to review.
+- step-7 approval: m119-inner-sliding-designs approved for merge
 
 ## Decisions
 
@@ -80,3 +81,4 @@ Evidence gathered 2026-09-27 on the branch at `2c3a15e7`. Main had not moved, so
   - F9: the AC1 reference reads the fixture's own inner splits.
   - F10: the fixture calls are spelled out in three places.
   - F11: AC3's grid result is a cache hit on AC1's build.
+- Triage at the gate (user chose the proposed triage): F2 fixed (lead sentence names the inner sliding designs). F6 fixed (`out_id` assertion in `expect_final_matches_reference()`). F7 and the prior-review note fixed (comment gives the counting procedure and date, the short first analysis set, and the index-equals-window fact). F3-F5 fixed by D-084. F1 goes to the follow-up inner-design candidate row. Rejected: F8 (precedent recorded in `test-time-series-designs.R`, no second oracle type for pass-through checks), F9 (intended, AC2 covers split building), F10 (maintenance only, an edit to one copy fails loudly), F11 (intended, the test still runs alone).

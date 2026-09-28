@@ -313,8 +313,9 @@ assembled by hand can index rows its outer fold never sees.
 Time-series designs are supported for an outer
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} are tested on all four, and so is
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, and for the inner sliding designs named
+below. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} are tested on
+all four outer designs, and so is
 \code{\link[=nested_final_fit]{nested_final_fit()}} for their results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}},
 \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}}, \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and
 \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested on the rolling-origin design, and

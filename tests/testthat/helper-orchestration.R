@@ -649,9 +649,14 @@ TS_DATA <- list(
 # design, built on `make_ts_data()` because two of them need `date`. The
 # sliding-window and sliding-index designs have four, six and eight inner
 # resamples across the three outer folds, and sliding-period has four, five
-# and seven. `sliding_period()` takes analysis sets of the current week and
-# the five weeks before it, and holds out the next week, which in a fold's
-# last resample can be a partial week.
+# and seven (counted 2026-09-27 with `sapply(x$inner_resamples, nrow)` on
+# each fixture). `sliding_period()`
+# takes analysis sets of the current week and the five weeks before it, and
+# holds out the next week. A fold's first analysis set is shorter, because
+# the data starts on a Wednesday, and its last held-out week can be partial.
+# `date` has no gaps, so the sliding-index design builds the same splits as
+# the sliding-window one, and its tests show only that the index-based class
+# runs.
 ts_inner_window_nested <- function(data) {
   rsample::nested_cv(
     data,
@@ -792,6 +797,12 @@ expect_final_matches_reference <- function(d, folds, inner = ts_inner) {
   expect_identical(
     lapply(final$tuning$splits, function(s) s$in_id),
     lapply(inner_rs$splits, function(s) s$in_id)
+  )
+  # A sliding design's assessment set is not the complement of its analysis
+  # set, so the held-out rows are compared as well (M119 review).
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$out_id),
+    lapply(inner_rs$splits, function(s) s$out_id)
   )
   expect_identical(final$selected, best)
   expect_identical(

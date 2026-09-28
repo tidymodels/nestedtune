@@ -1907,6 +1907,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the claim covers those three designs under `nested_tune_grid()`, under `nested_final_fit()` for its results, and in `nested_resamples()`. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state it and state what is not tested. The other five orchestrators, `nested_workflow_map()`, and the three sliding outer designs are not claimed with these inner designs. Considered and rejected at M119's plan gate: all seven functions, and all four outer designs, each because it adds CI time without reaching a code path the grid run does not.
 **Consequences:** one candidate row holds the unclaimed pairs. Falsified by a tuner failing on an inner sliding design that passes under grid, or by a sliding outer design failing with an inner sliding design that passes under rolling-origin. (Supersedes D-078's Consequences clause on inner designs other than `rolling_origin()`.)
 
+### D-084 (2026-09-27): D-083 claims the three inner sliding designs only, and narrows D-074's inner-design clause as well as D-078's. Corrects D-083's heading, Decision and Consequences
+
+**Context:** M119's review found three faults in D-083. Its heading and Consequences supersede D-078's clause "leaving every inner design other than `rolling_origin()` unclaimed", but it claims three inner designs only. It leaves D-074's matching Consequences clause live. Its Decision rejects testing the other tuners because they reach no code path the grid run does not, which no test shows.
+**Decision:** D-083 stands, read as follows. It narrows the clauses of D-074 and D-078 that leave inner designs other than `rolling_origin()` unclaimed: the three sliding designs are claimed on D-083's terms, and every other inner design stays unclaimed. The other tuners were left out to hold CI time. Whether they behave the same on these designs is untested, as D-083's falsifier states.
+**Consequences:** none for the code. (Corrects D-083's heading, Decision and Consequences, and narrows D-074's Consequences clause on inner designs.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

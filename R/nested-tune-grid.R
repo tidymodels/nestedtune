@@ -126,8 +126,9 @@
 #' Time-series designs are supported for an outer
 #' [rsample::rolling_origin()], [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] with an inner
-#' [rsample::rolling_origin()]. [nested_tune_grid()] and
-#' [nested_fit_resamples()] are tested on all four, and so is
+#' [rsample::rolling_origin()], and for the inner sliding designs named
+#' below. [nested_tune_grid()] and [nested_fit_resamples()] are tested on
+#' all four outer designs, and so is
 #' [nested_final_fit()] for their results. [nested_tune_bayes()],
 #' [nested_tune_race_anova()], [nested_tune_race_win_loss()] and
 #' [nested_tune_sim_anneal()] are tested on the rolling-origin design, and
