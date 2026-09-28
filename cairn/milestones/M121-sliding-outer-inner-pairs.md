@@ -49,6 +49,7 @@ Each sliding outer design with each inner sliding design is tested and documente
 - 2026-09-27: T1 done. `TS_SLIDING_PAIRS` holds the nine pairs on `make_ts_weekday_data()`, with 3 or 4 outer folds and 2 to 7 inner resamples per fold, counted in the fixture comment. `ts_pair_reference()` rebuilds a pair's call with `rsample::nested_cv()`.
 - 2026-09-27: T2 done. `test-time-series-pairs-window.R`, `-index.R` and `-period.R` each pass 6 of 6, serially in 11.4 s, 10.8 s and 14.2 s with the package load. None runs far longer than the rest, so no split and no `start-first` entry. With the inner index remap planted as a no-op, each grid test fails 5 assertions. The full suite ran 1051 tests with 0 failures and 0 skips.
 - 2026-09-27: T3 done. The sentence calling the three sliding outer designs untested with these inner designs is replaced in the two help sections and `NEWS.md` by the nine-pair claim, which names the functions not tested on the pairs. D-087 appended. `devtools::document()` rewrote six Rd files, and all six gating prose sweeps print clean.
+- 2026-09-27: claim audit: 30 claims read, 2 corrected — helper-orchestration.R, R/nested-tune-grid.R. The corrections are the outer sliding-index window, a 69-day lookback spanning 70 days, and the grid help's nine-pair sentences, moved after the `augment()` sentences with `augment()` added to the not-tested list. The re-read found both accurate.
 
 ## Decisions
 

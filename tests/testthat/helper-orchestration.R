@@ -746,8 +746,9 @@ TS_INNER_DESIGNS <- list(
 # and its literal `nested_resamples()` call. All nine run on
 # `make_ts_weekday_data()`, so the index designs differ from the window ones.
 # The outer sliding-window design takes 60-row windows. The outer
-# sliding-index design takes 69-day windows, which hold 50 rows on the
-# weekday dates, so it builds four outer folds to sliding-window's three.
+# sliding-index design takes a 69-day lookback, so each window spans 70 days
+# and holds 50 rows on the weekday dates. It builds four outer folds to
+# sliding-window's three.
 # The outer sliding-period design takes twelve-week windows, every second
 # week. The inner calls are those of TS_INNER_DESIGNS. Counted with
 # `sapply(x$inner_resamples, nrow)` on each pair's call, run 2026-09-27:
