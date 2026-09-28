@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-28 (triage: compressed the #91 pass, function-setting comparison, recipe template, desirability, macOS P3M, NEWS bullets and variance rows and the vendored-CI Known issue; split the published-site row into three; routed the sweep-prose partition row to Known issues; nothing dropped, no decision entry; validate green)._
+_Last hygiene check: 2026-09-28 (status audit after the triage pass: validate green, nothing changed)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
