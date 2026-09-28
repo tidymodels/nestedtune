@@ -105,7 +105,10 @@ tables hold.</p></dd>
 
 <p>Summarized, there is one row per metric, with the mean across outer folds,
 the number of folds <code>n</code> behind it, and the standard error of that mean.
-Unsummarized, there is one row per outer fold and metric. On a design
+Unsummarized, there is one row per outer fold and metric. The first
+columns are the design's fold labels, each in its own column: <code>id</code>, and
+<code>id2</code> on a repeated design, as in tune's own table. A join on a repeated
+design's folds uses both columns. On a design
 weighted with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> the unsummarized shape also
 carries each fold's weight in a <code>.weight</code> column.</p>
 <p><code>type = "wide"</code> turns either shape into one column per metric, as tune's

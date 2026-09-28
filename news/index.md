@@ -2,6 +2,17 @@
 
 ## nestedtune 0.0.0.9000
 
+- The per-fold tables of `collect_metrics(summarize = FALSE)` and
+  `compute_metrics(summarize = FALSE)` carry the design’s fold labels
+  each in its own column, as tune’s tables do. On a repeated design they
+  now carry `id` and `id2`. Before, they carried one `id` that pasted
+  the two together, such as `"Repeat1, Fold1"`, and that pasted `id` is
+  gone. A join on a repeated design’s folds uses both columns. The wide
+  shape of
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  and the tables of a workflow-set result follow. The performance plot
+  still labels its folds `"Repeat1, Fold1"`.
+
 - [`summary()`](https://rdrr.io/r/base/summary.html) of a nested result,
   of a workflow-set result and of a final fit, and the final fit’s
   print, name the metric that chose the selected candidates. A line such

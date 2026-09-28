@@ -8,7 +8,9 @@ tables in the set's order, under a `wflow_id` column placed first.
 
 [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
 gives one row per workflow and metric, or per workflow, outer fold and
-metric with `summarize = FALSE`. The five from
+metric with `summarize = FALSE`. There, the design's fold labels follow
+`wflow_id`, each in its own column: `id`, and `id2` on a repeated
+design. The five from
 [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
 to
 [`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)

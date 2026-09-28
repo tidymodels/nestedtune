@@ -96,7 +96,9 @@ recorded. tune's own method defaults to <code>"first"</code> instead.</p></dd>
     <p>A tibble, summarized or per fold as <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> returns
 it in the long shape. Given
 the metric set and the event level the run used, it is identical to
-<code>collect_metrics(x, summarize = summarize)</code>.</p>
+<code>collect_metrics(x, summarize = summarize)</code>. Per fold, the first
+columns are the design's fold labels, each in its own column: <code>id</code>,
+and <code>id2</code> on a repeated design.</p>
     </div>
     <div class="section level2">
     <h2 id="what-is-scored-again-and-what-is-not">What is scored again, and what is not<a class="anchor" aria-label="anchor" href="#what-is-scored-again-and-what-is-not"></a></h2>

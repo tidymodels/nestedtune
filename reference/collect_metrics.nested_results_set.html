@@ -4,7 +4,9 @@ with the same eight functions that read one workflow's run. Each calls
 its single-workflow method on every element and binds the tables in the
 set's order, under a wflow_id column placed first.
 collect_metrics() gives one row per workflow and metric, or per
-workflow, outer fold and metric with summarize = FALSE. The five
+workflow, outer fold and metric with summarize = FALSE. There, the
+design's fold labels follow wflow_id, each in its own column: id, and
+id2 on a repeated design. The five
 from collect_selections() to collect_extracts() stack their
 per-fold tables the same way. compute_metrics() scores each
 workflow's saved predictions with the metric set you give it.
@@ -13,7 +15,9 @@ with the same eight functions that read one workflow's run. Each calls
 its single-workflow method on every element and binds the tables in the
 set's order, under a wflow_id column placed first.
 collect_metrics() gives one row per workflow and metric, or per
-workflow, outer fold and metric with summarize = FALSE. The five
+workflow, outer fold and metric with summarize = FALSE. There, the
+design's fold labels follow wflow_id, each in its own column: id, and
+id2 on a repeated design. The five
 from collect_selections() to collect_extracts() stack their
 per-fold tables the same way. compute_metrics() scores each
 workflow's saved predictions with the metric set you give it.
@@ -68,7 +72,9 @@ with the same eight functions that read one workflow's run. Each calls
 its single-workflow method on every element and binds the tables in the
 set's order, under a <code>wflow_id</code> column placed first.</p>
 <p><code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> gives one row per workflow and metric, or per
-workflow, outer fold and metric with <code>summarize = FALSE</code>. The five
+workflow, outer fold and metric with <code>summarize = FALSE</code>. There, the
+design's fold labels follow <code>wflow_id</code>, each in its own column: <code>id</code>, and
+<code>id2</code> on a repeated design. The five
 from <code><a href="collect_selections.html">collect_selections()</a></code> to <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_extracts()</a></code> stack their
 per-fold tables the same way. <code><a href="https://tune.tidymodels.org/reference/compute_metrics.html" class="external-link">compute_metrics()</a></code> scores each
 workflow's saved predictions with the metric set you give it.
