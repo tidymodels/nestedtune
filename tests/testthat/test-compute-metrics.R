@@ -221,7 +221,8 @@ test_that("a numeric metric set the run did not use is yardstick on each fold's 
     )
   })
   per_fold <- suppressWarnings(compute_metrics(res, ms, summarize = FALSE))
-  expect_identical(per_fold$id, fold_ids(res)[by_hand$fold])
+  expect_identical(per_fold$id, res$id[by_hand$fold])
+  expect_identical(per_fold$id2, res$id2[by_hand$fold])
   expect_identical(per_fold$.metric, by_hand$.metric)
   expect_identical(per_fold$.estimate, by_hand$.estimate)
   # The NA fold scored NA on both metrics, and only it did.

@@ -176,3 +176,43 @@ test_that("AC2: a set over a repeated design carries wflow_id, id and id2 as sep
   expect_identical(scored$id2, rep(folds$id2, times = n_wf))
   expect_no_pasted_label(scored, folds)
 })
+
+test_that("AC3: the performance plot's fold axis pastes the design's labels and draws each non-missing estimate", {
+  skip_if_no_engines()
+  skip_if_not_installed("ggplot2")
+  d <- make_reg_data()
+  folds <- repeated_label_design(d)
+  res <- label_run(folds, d)
+  pasted <- paste(folds$id, folds$id2, sep = ", ")
+  per_fold <- n_metrics(reg_metrics())
+
+  p <- autoplot(res, type = "performance")
+  expect_identical(levels(p$data$fold), pasted)
+  expect_identical(nrow(p$data), nrow(folds) * per_fold)
+  expect_identical(as.character(p$data$fold), rep(pasted, each = per_fold))
+
+  # One estimate emptied: the first metric of the first fold draws no point,
+  # and the fold keeps its slot on the axis.
+  holed <- res
+  holed$.metrics[[1L]]$.estimate[[1L]] <- NA_real_
+  q <- autoplot(holed, type = "performance")
+  expect_identical(levels(q$data$fold), pasted)
+  expect_identical(nrow(q$data), nrow(folds) * per_fold - 1L)
+  expect_identical(
+    as.character(q$data$fold),
+    rep(pasted, each = per_fold)[-1L]
+  )
+  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(q))))
+
+  expect_no_error(utils::capture.output(print(res), type = "message"))
+})
+
+test_that("AC3: a set's performance plot builds on a repeated design", {
+  skip_if_no_wset_fixture()
+  skip_if_not_installed("ggplot2")
+  d <- make_reg_data()
+  res <- label_set_run(repeated_label_design(d), d)
+  p <- autoplot(res, type = "performance")
+  expect_s3_class(p, "ggplot")
+  expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(p))))
+})

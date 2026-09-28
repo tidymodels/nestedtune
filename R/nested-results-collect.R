@@ -312,7 +312,9 @@ collect_extracts.nested_results <- function(x, ...) {
 #' @return A tibble, summarized or per fold as [collect_metrics()] returns
 #'   it in the long shape. Given
 #'   the metric set and the event level the run used, it is identical to
-#'   `collect_metrics(x, summarize = summarize)`.
+#'   `collect_metrics(x, summarize = summarize)`. Per fold, the first
+#'   columns are the design's fold labels, each in its own column: `id`,
+#'   and `id2` on a repeated design.
 #'
 #' @section What is scored again, and what is not:
 #'

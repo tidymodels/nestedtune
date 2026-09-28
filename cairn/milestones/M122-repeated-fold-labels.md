@@ -38,9 +38,9 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 ## Tasks
 
 - [x] T1: Write the AC1 and AC2 tests first, in a new `tests/testthat/test-fold-labels.R`. Give it a file-level `skip_heavy_on_cran()`. Build the expected labels from the rsample design rows. The set test takes the workflow-set skip and the engine skip (LESSONS M101). Run the tests before T2 and record that they fail on the pasted `id`.
-- [ ] T2: Change `per_fold_metrics()` (`R/nested-results.R:1126`) to write each recorded label column. If the record cannot label the rows, keep one `id` from `fold_ids()`. Make `plot_performance()` (`R/nested-results-plot.R:272`) and `plot_set_performance()` (`R/nested-results-plot.R:627`) paste the labels for the fold axis. Update the test that pins the pasted `id` (`tests/testthat/test-compute-metrics.R:220`). Read the join at `vignettes/tuners.Rmd:340` and every other `by = "id"` join that `grep` finds under `vignettes/`.
-- [ ] T3: Write the AC3 tests. They cover the built plot's fold levels and point count on the repeated design, the set plot build, and the print.
-- [ ] T4: Update the three help pages and add the `NEWS.md` bullet. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
+- [x] T2: Change `per_fold_metrics()` (`R/nested-results.R:1126`) to write each recorded label column. If the record cannot label the rows, keep one `id` from `fold_ids()`. Make `plot_performance()` (`R/nested-results-plot.R:272`) and `plot_set_performance()` (`R/nested-results-plot.R:627`) paste the labels for the fold axis. Update the test that pins the pasted `id` (`tests/testthat/test-compute-metrics.R:220`). Read the join at `vignettes/tuners.Rmd:340` and every other `by = "id"` join that `grep` finds under `vignettes/`.
+- [x] T3: Write the AC3 tests. They cover the built plot's fold levels and point count on the repeated design, the set plot build, and the print.
+- [x] T4: Update the three help pages and add the `NEWS.md` bullet. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
 - [ ] T5: Run `devtools::document()` and `devtools::check()`.
 
 ## Work log
@@ -49,6 +49,9 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 - 2026-09-28: criteria audit (full mode, fresh [O] reader) read the combined draft and returned 14 findings, each with one fix, all applied before the gate. For this milestone it removed the wide shape from `compute_metrics()`, which has no `type` argument. It fixed the test design and added the set's `compute_metrics()`. It added the set plot, the print, and the join note in `NEWS.md`. The split then moved the criteria between files without a change of wording.
 - 2026-09-28: plan chose separate label columns over keeping the pasted `id` and documenting it, because D-036 has every reader take the labels from the record and tune's tables carry `id` and `id2`; falsified by a reader that needs one key column per fold.
 - 2026-09-28: T1 done. `tests/testthat/test-fold-labels.R` holds three tests for AC1 and AC2. Before T2 they fail with 24 failures on the pasted `id` (for example `wide$id` reads "Repeat1, Fold1" where the design gives "Repeat1").
+- 2026-09-28: T2 done. `per_fold_metrics()` writes each recorded label column, with helpers `usable_label_columns()`, `per_fold_label_columns()` and `paste_labels()` beside `fold_ids()`. `plot_performance()` pastes the labels for its axis. `plot_set_performance()` reads no fold label, so it needed no change. `test-compute-metrics.R` now asserts `id` and `id2`. The one vignette join on `id` (`vignettes/tuners.Rmd:340`) runs on a single-column design and is unchanged. Full `devtools::test()`: 0 failures, 12,696 passes. The eight affected files pass on their own too.
+- 2026-09-28: T3 done. Two AC3 tests were added to `test-fold-labels.R`, and the file passes with 65 expectations. The plot test goes red when the old `per_fold$id` axis line is planted back, and green once the fix is restored.
+- 2026-09-28: T4 done. The three help pages and one `NEWS.md` bullet now describe the label columns, and `devtools::document()` rewrote the three Rd files. Both sweeps are clean. T2 to T4 share one checkpoint commit because their files were edited together.
 
 ## Decisions
 
