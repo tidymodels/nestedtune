@@ -1919,6 +1919,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the claim covers the three inner designs under all six orchestrators and `nested_workflow_map()`. `nested_final_fit()` is claimed for grid results on all three designs and for the other four tuners' results on sliding-period. `nested_fit_resamples()` is claimed only to accept these designs, because it reads no inner design. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state this. No package code changed. Considered and rejected at M120's plan gate: final fits on all three designs for the four tuners, because the rebuild of each inner design is tested under grid and each tuner's run on it is tested directly.
 **Consequences:** the four tuners' final fits on the inner sliding-window and sliding-index designs stay unclaimed, in the candidate row. So does every function other than grid on a sliding outer design with an inner sliding design, where M121 takes grid. Falsified by a tuner's final fit failing on an inner sliding-window or sliding-index design where its run passes. (Supersedes D-083's Decision clause leaving the other orchestrators and `nested_workflow_map()` unclaimed with these inner designs, and D-084's clause stating that they are untested.)
 
+### D-086 (2026-09-27): `nested_fit_resamples()` checks the inner design but fits nothing on it. Corrects D-085's Decision
+
+**Context:** M120's claim audit found that D-085's reason for claiming `nested_fit_resamples()` only to accept these designs, "because it reads no inner design", is untrue. The function runs `check_nested()` over the inner design at entry and ships each fold's inner rset with the fold. It skips only the inner tuning stage.
+**Decision:** D-085 stands, with that reason read as "because it checks the inner design but fits nothing on it". The help, `NEWS.md` and M120's AC3 and AC5 use the same words.
+**Consequences:** none for the code. (Corrects D-085's Decision.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
