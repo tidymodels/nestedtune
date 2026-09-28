@@ -25,7 +25,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - [x] AC2: For each of the three designs, a test calls `nested_resamples()` with the same `outside` and `inside` calls. It asserts that the splits match `rsample::nested_cv()`'s through `expect_outer_identical()` and `expect_inner_identical()`.
 - [x] AC3: For each of the three designs, a test runs `nested_final_fit()` on the `nested_tune_grid()` result. The reference runs under the final fit's recorded seeds. It evaluates the fixture's literal inner call on the full data, then runs `tune::tune_grid()`, `tune::select_best()` and `fit()`. The test asserts identical inner split `in_id`s, an identical selected row, and identical predictions on the full data.
 - [x] AC4: The help of `nested_tune_grid()` and of `nested_resamples()` states the three inner designs as tested. So does `NEWS.md`. Each of the three texts names the outer `rolling_origin()`, `nested_tune_grid()`, and `nested_final_fit()` for its results. Each also says that the other orchestrators and the other outer designs are not tested with these inner designs. The reviewer reads every hit of `grep -rn -i 'inner' R/ man/ NEWS.md vignettes/ README.md README.Rmd`. No hit limits the tested inner designs to `rolling_origin()` alone.
-- [ ] AC5: `devtools::test()` passes with 0 failures. `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
+- [x] AC5: `devtools::test()` passes with 0 failures. `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
 
 ## Coverage
 
@@ -66,3 +66,17 @@ Evidence gathered 2026-09-27 on the branch at `2c3a15e7`. Main had not moved, so
 - AC2 evidence: each "inner ... splits match rsample::nested_cv()" block calls `nested_resamples()` with the fixture's `outside` and `inside` calls (`TS_INNER_LEAN_CALLS`). It asserts both split classes, `expect_outer_identical()` and `expect_inner_identical()`. The blocks passed with 55, 55 and 51 expectations.
 - AC3 evidence: each "the final fit on an inner ... design matches a hand-rolled reference" block runs `expect_final_matches_reference()` with the fixture's literal inner call as `inner`. The helper sets the final fit's `tuning_seed`, builds the inner design on the full data, and runs `tune_grid()` and `select_best()`. It then fits under `fit_seed` and asserts identical inner `in_id`s, selected row and predictions. The block also asserts the rebuilt inner split class. All three passed, 4 expectations each. A copy passing the default `rolling_origin()` call failed all three (implement work log).
 - AC4 evidence: `R/nested-tune-grid.R:138-143`, `R/nested-resamples.R:53-60` and `NEWS.md:60-67` each name the three inner designs as tested. Each names the outer `rolling_origin()`, `nested_tune_grid()`, and `nested_final_fit()` for its results. Each says the other orchestrators, `nested_workflow_map()` and the other three outer designs are not tested with them. The grep gives 679 hits. A hit that limits the tested inner designs to `rolling_origin()` has to name it, and the hits naming `rolling` are only these new lines and `NEWS.md:49`. `NEWS.md:49` states the outer-design support and limits nothing. I also read the 45 hits naming a design, a test or support. The vignettes and README have no time-series text.
+- AC5 evidence: `devtools::test()` gave 1010 blocks, 0 failures and 0 errors. `devtools::check()` gave 0 errors, 0 warnings and 0 notes (8 min 36 s).
+- Consistency gate: `cairn_validate.py` passed, coverage complete, with 18 reference-staleness advisories. `devtools::document()` made no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps were clean. `NEWS.md` has an entry, with no milestone number. There are no new top-level files, the branch does not touch the README, and no principle changed.
+- Independent review: the three reviewers ran fresh. Blame-history found nothing. Prior-review found no past finding reintroduced, and noted that the resample counts in the fixture comment are not pinned to a procedure. The diff-bug reviewer ranked 11 findings, none blocking:
+  - F1: on gap-free daily dates, the sliding-index fixture builds the same inner splits as sliding-window (confirmed by probe), so it proves the split class only.
+  - F2: the `nested_tune_grid()` help's lead sentence still says time-series designs are supported with an inner `rolling_origin()`.
+  - F3: D-083 does not supersede D-074's matching "inner designs other than `rolling_origin()`" clause.
+  - F4: D-083's title and parenthetical state the supersession wider than the three designs.
+  - F5: D-083's rejection rationale says the other tuners reach no new code path, which is untested.
+  - F6: the final-fit helper compares inner `in_id`s only, not `out_id`s.
+  - F7: the fixture comment's six-week analysis sets are 36 rows in each first resample, because the data starts mid-week.
+  - F8: all oracles in the new file are the live reference type.
+  - F9: the AC1 reference reads the fixture's own inner splits.
+  - F10: the fixture calls are spelled out in three places.
+  - F11: AC3's grid result is a cache hit on AC1's build.
