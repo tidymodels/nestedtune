@@ -45,7 +45,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 
 - [x] T1: Write the AC1 to AC4 tests first, in a new `tests/testthat/test-collect-predictions-summarize.R` with the file-level `skip_heavy_on_cran()` of M118. Use deterministic engines for AC1. Regression takes `fixed_workflow()`. Both classification runs take a `logistic_reg()` workflow, not the ranger `cls_workflow()`, whose per-fold probabilities differ from `fit_resamples()` (criteria audit). Censored takes `srv_workflow()` with `dist` fixed and `srv_set_metrics()`, under `skip_if_no_censored()` (LESSONS M101). Run the tests and record that they fail.
 - [x] T2: Add `summarize` to `collect_predictions.nested_results()` in `R/nested-results-collect.R`. Write an internal averaging helper that drops the labels and `.config`, groups by `.row`, and picks its rule from the saved columns. Probabilities take the probability rule, and `.pred_class` alone takes the vote. A numeric `.pred` takes the mean. A list `.pred`, `.pred_time` or `.pred_linear_pred` takes the censored rules. Call no `tune:::` function. Grep the helper's name first (LESSONS M41).
-- [ ] T3: Write the AC5 to AC7 tests, then the code. Break folds with `break_fold()` for AC5. Pass `summarize` through `stack_set()` in `R/nested-results-set.R` for AC6. Refuse a `.pred_quantile` column for AC7.
+- [x] T3: Write the AC5 to AC7 tests, then the code. Break folds with `break_fold()` for AC5. Pass `summarize` through `stack_set()` in `R/nested-results-set.R` for AC6. Refuse a `.pred_quantile` column for AC7.
 - [ ] T4: Write the AC8 help text and example, and the `NEWS.md` bullet. Append a D-entry that extends D-054 with the argument. It records the average across selected candidates with `.config` dropped, the choice of rule from saved columns, and the quantile refusal. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
 - [ ] T5: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
@@ -61,6 +61,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: T1 done. 14 tests in `test-collect-predictions-summarize.R` all error with `rlib_error_dots_nonempty` naming `summarize`, before any code. Grid seeds 21 (regression) and 25 (classification) give repeats that select two candidates.
 - 2026-09-28: T2 done. `average_fold_predictions()` and three rule helpers in `R/nested-results-collect.R`. The AC2 tests now plant one missing value each, because a run's own predictions carry none in `.pred` or `.pred_survival`. Eight planted defects (tie order, renormalization, missing-value handling, `.config` kept, saved class kept) each turn 1 to 4 tests red. Full suite 1077 tests, 0 failing. Both prose sweeps clean.
 - 2026-09-28: T3 checkpoint, not yet checked off. AC5 to AC7 tests and code written. Before the code, AC6 errored on `summarize` in the set method's `...` and AC7 raised no `nestedtune_summarize_quantile`. AC5 already passed on T2's helper. The test file passes. The full suite is still running. D-090 is drafted for T4.
+- 2026-09-28: T3 done. Full suite 1080 tests, 0 failing. Prose sweep clean.
 
 ## Decisions
 
