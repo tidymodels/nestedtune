@@ -327,7 +327,12 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
     call = rlang::current_env()
   )
   if (summarize) {
-    out <- average_fold_predictions(out, drop = c(id_columns(x), ".config"))
+    out <- average_fold_predictions(
+      out,
+      drop = c(id_columns(x), ".config"),
+      verb = "collect_predictions",
+      call = rlang::current_env()
+    )
   }
   out
 }
@@ -344,8 +349,16 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
 # carry no stability promise (M28). Ties go to the first level in factor
 # order. One departure: a row whose averaged probabilities are missing gets
 # a missing class, where `prob_summarize()` gives it the first level.
-average_fold_predictions <- function(preds, drop) {
+# `verb` and `call` name the reader in the refusal of a table the rules
+# would misread (M126), `check_average_columns()`.
+average_fold_predictions <- function(
+  preds,
+  drop,
+  verb,
+  call = rlang::caller_env()
+) {
   preds <- preds[setdiff(names(preds), drop)]
+  check_average_columns(preds, verb = verb, call = call)
   rows <- sort(unique(preds$.row))
   group <- factor(match(preds$.row, rows), levels = seq_along(rows))
   first <- match(rows, preds$.row)
@@ -357,8 +370,7 @@ average_fold_predictions <- function(preds, drop) {
   nms <- names(preds)
   # A factor outcome names the probability columns, one per level, so a
   # level named like `time` is never read as a censored column.
-  others <- nms[!startsWith(nms, ".pred") & nms != ".row"]
-  outcome <- Filter(function(nm) is.factor(preds[[nm]]), others)
+  outcome <- factor_outcomes(preds)
   prob_cols <- if (length(outcome) == 1L) {
     intersect(paste0(".pred_", levels(preds[[outcome]])), nms)
   } else {
@@ -396,6 +408,72 @@ average_fold_predictions <- function(preds, drop) {
   })
   names(cols) <- nms
   new_tbl(cols)
+}
+
+# The factor columns among a prediction table's outcome columns: those that
+# are not predictions and not a column tune adds beside them, as in
+# `outcome_column()`.
+factor_outcomes <- function(preds) {
+  nms <- names(preds)
+  others <- setdiff(
+    nms[!startsWith(nms, ".pred")],
+    c(".row", ".config", ".case_weights", ".iter", ".eval_time")
+  )
+  Filter(function(nm) is.factor(preds[[nm]]), others)
+}
+
+# Three shapes the averaging rules would misread (M126). With two factor
+# outcomes, which one names the probability columns is unknown. A saved
+# class beside no factor outcome leaves the probability columns unnamed, so
+# they would be averaged without renormalizing and the class voted. A
+# censored `.pred` entry without `.eval_time` has no time to average at.
+# tune 2.1.0 writes none of these, so each means the object was edited. Read
+# after the fold labels and `.config` are dropped.
+check_average_columns <- function(preds, verb, call = rlang::caller_env()) {
+  verb <- rlang::arg_match(verb, c("collect_predictions", "augment"))
+  factors <- factor_outcomes(preds)
+  problem <- if (length(factors) >= 2L) {
+    "The saved predictions carry {length(factors)} factor outcome columns, \\
+     {.field {factors}}, where the average reads one."
+  } else if (length(factors) == 0L && ".pred_class" %in% names(preds)) {
+    "The saved predictions carry a {.field .pred_class} column but no \\
+     factor outcome column."
+  } else if (is.list(preds[[".pred"]]) && !all(has_eval_time(preds$.pred))) {
+    "A saved {.field .pred} entry has no {.field .eval_time} column."
+  }
+  if (is.null(problem)) {
+    return(invisible(preds))
+  }
+  msg <- switch(
+    verb,
+    collect_predictions = c(
+      "{.code summarize = TRUE} cannot average the saved predictions.",
+      x = problem
+    ),
+    augment = c(
+      "{.fn augment} cannot average the saved predictions.",
+      x = problem,
+      i = "The outer design holds some data rows out more than once, so \\
+           {.fn augment} averages their predictions."
+    )
+  )
+  cli::cli_abort(
+    c(
+      msg,
+      i = "A saved prediction table must keep the columns the run returned."
+    ),
+    class = "nestedtune_summarize_columns",
+    call = call
+  )
+}
+
+# Whether each censored `.pred` entry is NULL or carries `.eval_time`.
+has_eval_time <- function(entries) {
+  vapply(
+    entries,
+    function(t) is.null(t) || ".eval_time" %in% names(t),
+    logical(1)
+  )
 }
 
 # Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
@@ -463,9 +541,15 @@ class_by_vote <- function(v, group) {
 
 # The censored `.pred` list column: per row and `.eval_time`, the mean of
 # every other column with missing values ignored, in the order the times
-# first appear.
+# first appear. A NULL entry is left out, and a row whose every entry is
+# NULL holds NULL (M126), the value `augment()` gives a list column's row
+# that no completed fold held out.
 average_survival <- function(v, group) {
   sizes <- vapply(v, function(t) if (is.null(t)) 0L else nrow(t), integer(1))
+  out <- vector("list", nlevels(group))
+  if (sum(sizes) == 0L) {
+    return(out)
+  }
   long <- vctrs::vec_rbind(!!!v)
   long_group <- rep(as.integer(group), sizes)
   key <- vctrs::vec_group_id(
@@ -486,9 +570,12 @@ average_survival <- function(v, group) {
   names(averaged) <- names(long)
   averaged <- new_tbl(averaged)
   owner <- factor(long_group[first], levels = seq_len(nlevels(group)))
-  unname(lapply(split(seq_along(first), owner), function(i) {
+  entries <- split(seq_along(first), owner)
+  filled <- lengths(entries) > 0L
+  out[filled] <- lapply(entries[filled], function(i) {
     vctrs::vec_slice(averaged, i)
-  }))
+  })
+  out
 }
 
 #' @rdname collect_predictions.nested_results
@@ -920,19 +1007,12 @@ augment.nested_results <- function(x, ...) {
   data <- x$splits[[1L]]$data
   repeated <- check_held_out(x, nrow(data), call = call)
   check_predictions_rows(x, verb = "augment", call = call)
-  if (repeated) {
-    check_no_quantile(x, verb = "augment", call = call)
-  }
-  preds <- stack_fold_column(
-    x,
-    ".predictions",
-    completed_only = TRUE,
-    call = call
-  )
-  if (repeated) {
-    preds <- average_fold_predictions(preds, drop = c(id_columns(x), ".config"))
-  }
-  pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
+  # The collision is read off the saved tables' names, before any refusal
+  # the average raises (M126): averaging keeps every `.pred` column's name.
+  pred_cols <- unique(unlist(lapply(
+    x$.predictions[x$.completed],
+    function(p) grep("^\\.pred", names(p), value = TRUE)
+  )))
   clash <- intersect(pred_cols, names(data))
   if (length(clash) > 0L) {
     cli::cli_abort(
@@ -945,6 +1025,24 @@ augment.nested_results <- function(x, ...) {
       call = call
     )
   }
+  if (repeated) {
+    check_no_quantile(x, verb = "augment", call = call)
+  }
+  preds <- stack_fold_column(
+    x,
+    ".predictions",
+    completed_only = TRUE,
+    call = call
+  )
+  if (repeated) {
+    preds <- average_fold_predictions(
+      preds,
+      drop = c(id_columns(x), ".config"),
+      verb = "augment",
+      call = call
+    )
+  }
+  pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
   warn_partial_summary(x, noun = "table")
 
   joined <- lapply(pred_cols, function(nm) {
