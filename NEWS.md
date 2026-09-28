@@ -230,10 +230,11 @@
   the data. On a design that holds each row out once, it joins the saved
   predictions as they are. A repeated v-fold or a Monte Carlo design can
   hold some row out more than once. There, every row joins the average
-  that `collect_predictions(summarize = TRUE)` gives for it.
-  It refuses an outer design that leaves some row out of every assessment
-  set. It also refuses a fold whose saved predictions do not hold exactly
-  the rows that fold held out, each once.
+  that `collect_predictions(summarize = TRUE)` gives for it. On such a
+  design it refuses saved quantile predictions, because that average does
+  not cover them. It refuses an outer design that leaves some row out of
+  every assessment set. It also refuses a fold whose saved predictions do
+  not hold exactly the rows that fold held out, each once.
 
 * The coverage job no longer fails after every test passed. Daemons started
   by the test suite write their coverage traces to a directory of their own,

@@ -147,8 +147,8 @@
 #' [nested_fit_resamples()] is tested to accept these designs. It checks the
 #' inner design but fits nothing on it. Any other inner design is not tested.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
-#' assessment sets leave rows out. Its error names the first five rows left
-#' out.
+#' assessment sets leave rows out. Its error names the rows left out. When
+#' there are more than five, it names the first five.
 #'
 #' An outer [rsample::sliding_window()], [rsample::sliding_index()] or
 #' [rsample::sliding_period()] with an inner [rsample::sliding_window()],

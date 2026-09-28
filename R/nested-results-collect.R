@@ -982,8 +982,8 @@ check_held_out <- function(x, n, call = rlang::caller_env()) {
        at least once.",
       x = listed,
       i = "A design whose assessment sets do not cover the data has no \\
-           prediction for those rows. Read the predictions it has with \\
-           {.fn collect_predictions}."
+           prediction for {cli::qty(never)}{?that row/those rows}. Read the \\
+           predictions it has with {.fn collect_predictions}."
     ),
     class = "nestedtune_augment_rows",
     call = call

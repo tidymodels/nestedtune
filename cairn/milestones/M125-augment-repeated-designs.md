@@ -52,6 +52,8 @@
 - 2026-09-28: checkpoint, T2 and T3 written but not ticked. `check_held_out()` replaces `check_held_out_once()`, `augment()` averages on repeated designs, D-092 appended, help pages and NEWS updated. `test-augment.R`, `test-time-series-designs.R`, `test-collect-predictions-summarize.R`, the doc-reading test files, both prose sweeps and `check_pkgdown()` are clean. The full `devtools::test()` run is still pending.
 - 2026-09-28: T2 and T3 done. Full `devtools::test()`: 13054 expectations, 0 failed, 0 errors.
 - 2026-09-28: checkpoint, T4 started. `devtools::check()` and the claim audit ([O] fresh reader) are running.
+- claim audit: 50 claims read, 3 corrected — R/nested-tune-grid.R, tests/testthat/helper-predictions.R, NEWS.md
+- 2026-09-28: the same reader re-read the three corrections and the singular "that row" wording in `check_held_out()`, and all held. `test-augment.R`, `test-time-series-designs.R`, `test-help-structure.R`, `test-sweep-prose.R` and both prose sweeps are clean after the fixes.
 
 ## Decisions
 

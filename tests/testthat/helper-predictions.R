@@ -44,8 +44,9 @@ never_held_rows <- function(x) {
 }
 
 # `augment()`'s refusal of a design that leaves rows out of every
-# assessment set (M125): it counts them and names the first five, or all of
-# them when there are five or fewer. `never` comes from never_held_rows().
+# assessment set (M125). When more than five rows are left out, it counts
+# them and names the first five. Otherwise it names all of them. `never`
+# comes from never_held_rows().
 expect_names_never_held <- function(x, never) {
   cnd <- rlang::catch_cnd(augment(x), "error")
   expect_s3_class(cnd, "nestedtune_augment_rows")
