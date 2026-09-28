@@ -1,6 +1,6 @@
 # M126: Edge cases of averaged predictions
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@
 - [x] T3: In `average_fold_predictions()` (`:342`) and `average_survival()` (`:462`), add the AC2 refusal and the AC3 NULL rule. The refusal takes a `verb` and words its message per reader, as `check_no_quantile()` does. In `augment.nested_results()` (`:909`), move the collision check ahead of `check_no_quantile()` and the averaging, reading the prediction column names from the saved tables.
 - [x] T4: Write `benchmarks/averaging-speed.R`. Its frozen M124 copy includes `class_from_probs()`, `class_by_vote()` and `average_survival()`. Run it for the baseline. Rewrite the per-row averages with grouped sums (`rowsum()` or `vctrs` grouping) across the numeric, probability, vote and survival paths. Re-run T1's tests and the script, and log the medians.
 - [x] T5: Append a D-entry that extends D-090 with the AC1 check, the AC2 refusal and the AC3 NULL rule. It states that the NULL rule has one oracle, because it decides only which entries enter an average that M124 checked against two. Add the `DESIGN.md` Known issues entry named in Out. Add the AC8 sentence to both help pages. Update the help section, the `augment.nested_results` refusal section, and the `summarize` bullet in `NEWS.md`. Run the prose sweeps.
-- [ ] T6: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
+- [x] T6: Run `devtools::document()`, `devtools::test()`, `devtools::check()` and `pkgdown::check_pkgdown()`.
 
 ## Work log
 
@@ -68,6 +68,7 @@
 - 2026-09-28: T5 done. D-094 extends D-090 and D-092's order of refusals. `DESIGN.md` Known issues gains the two unrefused shapes. The `collect_predictions` help states the AC1 and AC2 refusals, the NULL rule and the AC8 sentence, the `augment` help states the AC2 refusal, the collision order and the AC8 sentence, and the `NEWS.md` bullet states them. `devtools::document()` rewrote the two Rd files, and all six gating prose sweeps print clean.
 - 2026-09-28: correction to the T5 line: the manual sweep loop passed `--roxygen --spans` and `--roxygen --plain` as one zsh word each, so those two sweeps did not run. The full `devtools::test()` run (13,150 passed, 4 failed) caught them in `test-sweep-prose.R`: two semicolons in the new help list and a sentence with five code spans. Fixed, and each gating command now runs clean, invoked through `bash -c`.
 - 2026-09-28: claim audit: 65 claims read, 2 corrected — NEWS.md (the row-check wording now says exactly the rows each once, and "two or more" factor outcome columns). Also tightened, not counted: the `mean_by()` timing comment names the probability table, and the `median_by()` comment states its last-bit difference from `stats::median()` on even groups.
+- 2026-09-28: T6 done. `devtools::document()` is current, `pkgdown::check_pkgdown()` finds no problems, and `devtools::check()` at `85aaa2de` gives 0 errors, 0 warnings and 0 notes, its test run included. Status set to review.
 
 ## Decisions
 
