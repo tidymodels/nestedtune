@@ -101,3 +101,19 @@ Evidence gathered 2026-09-28 at `91b33de9`, the branch current with `origin/main
 - AC4: pass. The two `test-augment.R` tests the pass 1 line names are unchanged and pass in the suite run above.
 - AC5: pass. The four tests the pass 1 line names are unchanged and pass in the suite run above.
 - AC6: pass. The script now stacks 3 folds, each a random order of all 33,334 data rows. It stops unless every row is held out by 3 distinct folds. It printed 33,334 of 33,334 rows held out by 3 distinct folds, 100,002 stacked rows per table. The three tables are 10 probabilities with a class, a class alone, and a censored `.pred` with `.pred_time`. Agreement uses `all.equal(tolerance = 1e-12)` on double columns and the survival entries, `identical()` otherwise. Output: probabilities agree TRUE, frozen 0.787 s, branch 0.042 s, ratio 0.053. Class agree TRUE, 0.025 s and 0.026 s. Censored agree TRUE, 1.103 s and 0.472 s. Each time is the median of five runs, and 0.053 is under 0.25. The implement-side run is in the work log.
+
+Independent review, three fresh readers on `git diff main..HEAD`. The prior-review reader found no regression of an earlier review finding and no real PR threads on the touched files. The blame-history reader found no regression. It noted two limits the plan accepted: the two unrefused shapes in Known issues, and the last-bit rounding of the grouped sums. The diff-bug reader reported 13 findings, ranked:
+
+1. `mean_by()` (`R/nested-results-collect.R:446`) sums with `rowsum()` and skips the second pass `mean()` takes. Probabilities with equal true means can round 1 ulp apart, so `max.col()` gives the tie to the wrong level. Reproduced here: `.pred_a = c(0.6, 0.4, 0.2)`, `.pred_b = 0.2`, `.pred_c = c(0.2, 0.4, 0.6)` gives a 0.39999999999999996669 and c 0.40000000000000007772, class c. `mean()` gives both 0.40000000000000002220, and M124 gave class a. The help says a tie goes to the first level.
+2. The AC5 tie test uses 0.5 values, exact in binary, so it cannot see finding 1.
+3. The benchmark's agreement never reaches the even-group median or a missing `.pred_time`, and its censored entries share one `.eval_time` set with no NULL entry.
+4. A censored row whose entries are 0-row tibbles now holds NULL, where M124 gave a 0-row tibble. The help names only NULL entries.
+5. `mean_by()` takes `n` and never uses it, so an empty group shortens its output with no error. No current caller makes one.
+6. The grouped sums overflow to `Inf` for values near 1e308, where `mean()` does not.
+7. The AC6 agreement ran only on aarch64 macOS, where `long double` equals `double`. On x86_64 `mean()` sums in 80 bits, so the gap can be larger.
+8. `collect_predictions()` warns about a partial run before it refuses a bad shape, so the order of warning and refusal differs by reader and by check.
+9. The row-check message says `collect_predictions()` needs exact rows, but names neither `summarize = TRUE` nor the per-fold table as the way out.
+10. The `NEWS.md` `augment()` bullet does not name the new shape refusal or the collision order. AC7 binds only the `summarize` bullet.
+11. The outcome-column paragraph says "not outcome columns either" twice. `NEWS.md` lines 13 and 14 run past 80 characters. The NEWS bullet leaves out "that is not NULL" for shape three.
+12. `factor_outcomes()` and `outcome_column()` each hard-code the same list of non-outcome columns.
+13. AC6 was unticked with a fail line. Pass 2 above records its new evidence.
