@@ -56,6 +56,9 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - 2026-09-28: T1 done. Five new tests in `test-nested-final-fit-extract.R` cover cases (a) to (d), the two refusals and the re-export. Before T2, all five failed because `extract_parameter_set_dials` was not found in the package.
 - 2026-09-28: T2 done. The method reads `attr(x$tuning, "parameters")`, and the help topic, the re-export and D-089 are added. The file's tests and the full suite pass, and both prose sweeps are clean. The re-export test builds the data before the workflow, because a nested `det_workflow(make_reg_data())` draws the `step_pca()` id before the data seed.
 - 2026-09-28: T3 done. `NEWS.md` has one bullet for the new method, and both prose sweeps (`--plain`, `--roxygen --plain`) are clean.
+- claim audit: 19 claims read, 2 corrected — R/nested-final-fit.R, tests/testthat/test-nested-final-fit-extract.R
+- 2026-09-28: The claim audit found the help's finalize sentence false for `nested_tune_bayes()`, which refuses an unknown range. The sentence is narrowed to `nested_tune_grid()`, and a test comment now names the ranges it narrows. The same reader re-read both and found them correct.
+- 2026-09-28: T4's first `devtools::check()` gave 1 warning, because the tests called `hardhat::` and hardhat is not declared. The tests now call `tune::extract_parameter_set_dials()`, the same function object re-exported, so no dependency changed. `document()` gives no diff after the fix, and `pkgdown::check_pkgdown()` finds no problem.
 
 ## Decisions
 

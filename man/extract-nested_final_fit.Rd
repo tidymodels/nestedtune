@@ -53,11 +53,11 @@ the same answer as the same call on \code{\link[=extract_workflow]{extract_workf
 holds no \code{tune()} placeholder, so this method reads the parameter set
 from the tuning run that \code{\link[=extract_tune_results]{extract_tune_results()}} returns. It is the set
 tune stored for that run: \code{param_info} when the call gave one, otherwise
-the untrained workflow's set. Where tune built the grid from a number, it
-first finalized any unknown range, such as the upper bound of \code{mtry}, on
-the predictors. With a data-frame \code{grid}, the returned set can keep an
-unknown range. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and is
-refused with condition class \code{nestedtune_no_tuning_run}.
+the untrained workflow's set. Where \code{\link[=nested_tune_grid]{nested_tune_grid()}} was given \code{grid}
+as a number, tune first finalized any unknown range, such as the upper
+bound of \code{mtry}, on the predictors. With a data-frame \code{grid}, the returned
+set can keep an unknown range. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no
+tuning and is refused with condition class \code{nestedtune_no_tuning_run}.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

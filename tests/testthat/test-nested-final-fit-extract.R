@@ -273,7 +273,10 @@ test_that("the workflow extractors refuse a stray argument", {
 # The parameter set a final fit's tuning run searched. The trained workflow
 # holds no `tune()` placeholder, so handing the call to it, as the extractors
 # above do, would return an empty set. Each expected value below is built
-# from the orchestrator call's inputs, never read off the final fit.
+# from the orchestrator call's inputs, never read off the final fit. The
+# expected sets are built with `tune::extract_parameter_set_dials()`, which is
+# hardhat's generic re-exported, because hardhat is not declared in
+# DESCRIPTION.
 test_that("the final fit answers extract_parameter_set_dials() from its run", {
   skip_if_no_engines()
 
@@ -285,13 +288,14 @@ test_that("the final fit answers extract_parameter_set_dials() from its run", {
   final <- final_for_extract()
   expect_identical(
     extract_parameter_set_dials(final),
-    hardhat::extract_parameter_set_dials(wf)
+    tune::extract_parameter_set_dials(wf)
   )
 
-  # (a) A `param_info` with a known range narrower than the default: tune
-  # stores that object, so the result is it and not the workflow's set.
+  # (a) A `param_info` whose range, [1, 3], is narrower than the workflow's
+  # [1, 4]: tune stores that object, so the result is it and not the
+  # workflow's set.
   pinfo <- stats::update(
-    hardhat::extract_parameter_set_dials(wf),
+    tune::extract_parameter_set_dials(wf),
     num_comp = dials::num_comp(c(1L, 3L))
   )
   folds <- final_nested(d)
@@ -306,7 +310,7 @@ test_that("the final fit answers extract_parameter_set_dials() from its run", {
   set.seed(21)
   final_pinfo <- memoised(nested_final_fit(wf, res))
   expect_identical(extract_parameter_set_dials(final_pinfo), pinfo)
-  expect_false(identical(pinfo, hardhat::extract_parameter_set_dials(wf)))
+  expect_false(identical(pinfo, tune::extract_parameter_set_dials(wf)))
 })
 
 # ranger's `mtry` has an upper bound that is unknown until the predictors are
@@ -343,7 +347,7 @@ test_that("a numeric grid gives the set finalized on the full data", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- make_reg_data()
-  untrained <- hardhat::extract_parameter_set_dials(mtry_workflow())
+  untrained <- tune::extract_parameter_set_dials(mtry_workflow())
   expected <- dials::finalize(untrained, d[c("x1", "x2", "x3", "x4")])
 
   # (c) The control: the expected set differs from the untrained one, so the
@@ -363,7 +367,7 @@ test_that("a data-frame grid gives the set with the range still unknown", {
   result <- extract_parameter_set_dials(final)
   expect_identical(
     result,
-    hardhat::extract_parameter_set_dials(mtry_workflow())
+    tune::extract_parameter_set_dials(mtry_workflow())
   )
   expect_true(dials::has_unknowns(result$object[[1]]))
 })
@@ -396,6 +400,6 @@ test_that("extract_parameter_set_dials() is re-exported", {
   final <- final_for_extract()
   expect_identical(
     nestedtune::extract_parameter_set_dials(final),
-    hardhat::extract_parameter_set_dials(wf)
+    tune::extract_parameter_set_dials(wf)
   )
 })

@@ -507,11 +507,11 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' holds no `tune()` placeholder, so this method reads the parameter set
 #' from the tuning run that [extract_tune_results()] returns. It is the set
 #' tune stored for that run: `param_info` when the call gave one, otherwise
-#' the untrained workflow's set. Where tune built the grid from a number, it
-#' first finalized any unknown range, such as the upper bound of `mtry`, on
-#' the predictors. With a data-frame `grid`, the returned set can keep an
-#' unknown range. A fit from [nested_fit_resamples()] ran no tuning and is
-#' refused with condition class `nestedtune_no_tuning_run`.
+#' the untrained workflow's set. Where [nested_tune_grid()] was given `grid`
+#' as a number, tune first finalized any unknown range, such as the upper
+#' bound of `mtry`, on the predictors. With a data-frame `grid`, the returned
+#' set can keep an unknown range. A fit from [nested_fit_resamples()] ran no
+#' tuning and is refused with condition class `nestedtune_no_tuning_run`.
 #'
 #' @param x A `nested_final_fit` from [nested_final_fit()].
 #' @param ... Must be empty. A workflow's methods other than
