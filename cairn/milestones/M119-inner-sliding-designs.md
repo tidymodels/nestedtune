@@ -7,7 +7,7 @@
 - **Principles touched:** IP1, GP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — the help and `NEWS.md` state which designs a user can rely on
-- **Branch/PR:** m119-inner-sliding-designs
+- **Branch/PR:** m119-inner-sliding-designs, https://github.com/tidymodels/nestedtune/pull/134
 
 ## Goal
 
