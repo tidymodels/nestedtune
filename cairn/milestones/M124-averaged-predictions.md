@@ -59,7 +59,8 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: plan chose refusing quantile predictions over porting tune's rule, because no quantile run can check it; falsified by tune accepting quantile metrics.
 - 2026-09-28: implement started on branch `m124-averaged-predictions`. The question gate was skipped because the plan left no choice open.
 - 2026-09-28: T1 done. 14 tests in `test-collect-predictions-summarize.R` all error with `rlib_error_dots_nonempty` naming `summarize`, before any code. Grid seeds 21 (regression) and 25 (classification) give repeats that select two candidates.
-- 2026-09-28: T2 done. `average_fold_predictions()` and three rule helpers in `R/nested-results-collect.R`. The AC2 tests now plant one missing value each, because a run's own predictions carry none in `.pred` or `.pred_survival`. Eight planted defects (tie order, renormalization, missing-value handling, `.config` kept, saved class kept) each turn 1 to 4 tests red. Full suite 1077 tests, 0 failing; both prose sweeps clean.
+- 2026-09-28: T2 done. `average_fold_predictions()` and three rule helpers in `R/nested-results-collect.R`. The AC2 tests now plant one missing value each, because a run's own predictions carry none in `.pred` or `.pred_survival`. Eight planted defects (tie order, renormalization, missing-value handling, `.config` kept, saved class kept) each turn 1 to 4 tests red. Full suite 1077 tests, 0 failing. Both prose sweeps clean.
+- 2026-09-28: T3 checkpoint, not yet checked off. AC5 to AC7 tests and code written. Before the code, AC6 errored on `summarize` in the set method's `...` and AC7 raised no `nestedtune_summarize_quantile`. AC5 already passed on T2's helper. The test file passes. The full suite is still running. D-090 is drafted for T4.
 
 ## Decisions
 

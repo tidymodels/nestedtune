@@ -249,6 +249,9 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   rlang::check_dots_empty()
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
+  if (summarize) {
+    check_no_quantile(x, call = rlang::current_env())
+  }
   warn_partial_summary(x, noun = "table")
   out <- stack_fold_column(
     x,
@@ -325,6 +328,31 @@ average_fold_predictions <- function(preds, drop) {
   })
   names(cols) <- nms
   new_tbl(cols)
+}
+
+# Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
+# quantile metric set in `fit_resamples()`, so no run exists to check an
+# average against. Read per fold before stacking, so the refusal is this one
+# and not whatever binding a quantile column with the other folds raises.
+check_no_quantile <- function(x, call = rlang::caller_env()) {
+  has <- vapply(
+    x$.predictions[x$.completed],
+    function(p) ".pred_quantile" %in% names(p),
+    logical(1)
+  )
+  if (!any(has)) {
+    return(invisible(x))
+  }
+  cli::cli_abort(
+    c(
+      "{.code summarize = TRUE} cannot average quantile predictions.",
+      x = "The saved predictions carry a {.field .pred_quantile} column.",
+      i = "Call {.fn collect_predictions} with {.code summarize = FALSE} \\
+           for the per-fold predictions."
+    ),
+    class = "nestedtune_summarize_quantile",
+    call = call
+  )
 }
 
 # The class at the largest averaged probability. `which.max()` returns the

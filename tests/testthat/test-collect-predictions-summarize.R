@@ -489,3 +489,122 @@ test_that("AC4: a Monte Carlo run averages over the union of assessment rows", {
   expect_lt(length(held_out_rows(res)), nrow(res$splits[[1L]]$data))
   expect_averaged_shape(res, "id")
 })
+
+# ---- AC5: a run with failed folds ------------------------------------------
+
+# Fold 1 and the repeat-2 fold holding fold 1's first held-out row, both
+# broken at the outer fit. The rows both held out were held out by failed
+# folds only.
+partial_design <- function() {
+  d <- make_reg_data()
+  folds <- repeated_pair(d, 46)$folds
+  held_1 <- rsample::complement(folds$splits[[1L]])
+  second <- which(vapply(4:6, function(i) {
+    held_1[[1L]] %in% rsample::complement(folds$splits[[i]])
+  }, logical(1))) + 3L
+  folds <- break_fold(folds, 1L, "outer fit")
+  folds <- break_fold(folds, second, "outer fit")
+  list(folds = folds, broken = c(1L, second), data = d)
+}
+
+partial_run <- function() {
+  design <- partial_design()
+  folds <- design$folds
+  wf <- fixed_workflow(design$data)
+  suppressWarnings(memoised(nested_fit_resamples(
+    wf,
+    folds,
+    metrics = reg_metrics(),
+    control = tune::control_resamples(save_pred = TRUE)
+  )))
+}
+
+# Every warning `expr` raises, muffled, in order.
+all_warnings <- function(expr) {
+  warnings <- list()
+  value <- withCallingHandlers(
+    expr,
+    warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  list(value = value, warnings = warnings)
+}
+
+test_that("AC5: failed folds are left out of the average, with one warning", {
+  skip_if_no_engines()
+  broken <- partial_design()$broken
+  res <- partial_run()
+  expect_identical(which(!res$.completed), broken)
+
+  got <- all_warnings(collect_predictions(res, summarize = TRUE))
+  expect_length(got$warnings, 1L)
+  expect_s3_class(got$warnings[[1L]], "nestedtune_partial_summary")
+  avg <- got$value
+
+  held <- lapply(res$splits, rsample::complement)
+  only_failed <- intersect(held[[broken[[1L]]]], held[[broken[[2L]]]])
+  one_failed <- setdiff(held[[broken[[1L]]]], held[[broken[[2L]]]])
+  expect_gt(length(only_failed), 0L)
+  expect_gt(length(one_failed), 0L)
+
+  # A row only failed folds held out is left out.
+  expect_false(any(only_failed %in% avg$.row))
+  # A row held out by one failed and one completed fold takes the completed
+  # fold's prediction.
+  r <- one_failed[[1L]]
+  keeper <- setdiff(which(vapply(held, function(h) r %in% h, logical(1))), broken)
+  expect_length(keeper, 1L)
+  kept <- res$.predictions[[keeper]]
+  expect_identical(avg$.pred[avg$.row == r], kept$.pred[kept$.row == r])
+})
+
+# ---- AC6: a workflow set ---------------------------------------------------
+
+set_run <- function() {
+  d <- make_reg_data()
+  set.seed(47)
+  wset <- wset_fixed(d)
+  folds <- repeated_pair(d, 47)$folds
+  ms <- reg_metrics()
+  memoised(nested_workflow_map(
+    object = wset,
+    fn = "nested_fit_resamples",
+    resamples = folds,
+    metrics = ms,
+    control = tune::control_resamples(save_pred = TRUE)
+  ))
+}
+
+test_that("AC6: a set's average is each workflow's own, bound under wflow_id", {
+  skip_if_no_wset_fixture("nested_fit_resamples")
+  res <- set_run()
+  expect_identical(res$wflow_id, c("fixed", "baseline"))
+  tables <- lapply(res$result, collect_predictions, summarize = TRUE)
+  names(tables) <- res$wflow_id
+  expected <- dplyr::bind_rows(tables, .id = "wflow_id")
+  got <- collect_predictions(res, summarize = TRUE)
+  expect_equal(got, expected)
+  expect_false(any(c("id", "id2", ".config") %in% names(got)))
+  # The default is still the per-fold table.
+  expect_true("id2" %in% names(collect_predictions(res)))
+})
+
+# ---- AC7: quantile predictions are refused ---------------------------------
+
+test_that("AC7: summarize = TRUE refuses saved quantile predictions", {
+  skip_if_no_engines()
+  res <- reg_pair()$res
+  res <- edit_fold_predictions(res, 2L, function(p) {
+    p$.pred_quantile <- hardhat::quantile_pred(
+      cbind(p$.pred - 1, p$.pred + 1),
+      quantile_levels = c(0.25, 0.75)
+    )
+    p
+  })
+  expect_error(
+    collect_predictions(res, summarize = TRUE),
+    class = "nestedtune_summarize_quantile"
+  )
+})

@@ -134,9 +134,17 @@ collect_notes.nested_results_set <- function(x, ...) {
 
 #' @rdname collect_metrics.nested_results_set
 #' @export
-collect_predictions.nested_results_set <- function(x, ...) {
+collect_predictions.nested_results_set <- function(
+  x,
+  ...,
+  summarize = FALSE
+) {
   rlang::check_dots_empty()
-  stack_set(x, collect_predictions, call = rlang::current_env())
+  stack_set(
+    x,
+    function(r) collect_predictions(r, summarize = summarize),
+    call = rlang::current_env()
+  )
 }
 
 #' @rdname collect_metrics.nested_results_set
