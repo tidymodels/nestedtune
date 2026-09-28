@@ -944,11 +944,19 @@ TS_SLIDING_PAIRS <- list(
 )
 
 # A pair's call with `rsample::nested_cv()` in place of `nested_resamples()`,
-# so the reference design takes the pair's arguments as written (M121).
+# so the reference design takes the pair's arguments as written (M121). It
+# stops on a body that is not one `nested_resamples()` call, so a changed
+# fixture cannot swap out some other function or drop a statement.
 ts_pair_reference <- function(pair, d) {
   cl <- body(pair$build)
   if (identical(cl[[1]], as.name("{"))) {
+    if (length(cl) != 2L) {
+      stop("A pair's `build` body must be one `nested_resamples()` call.")
+    }
     cl <- cl[[2]]
+  }
+  if (!identical(cl[[1]], as.name("nested_resamples"))) {
+    stop("A pair's `build` body must be one `nested_resamples()` call.")
   }
   cl[[1]] <- quote(rsample::nested_cv)
   eval(cl, list(d = d), environment(pair$build))

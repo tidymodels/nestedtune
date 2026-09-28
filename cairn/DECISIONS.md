@@ -1931,6 +1931,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the claim covers the nine pairs under `nested_resamples()` and `nested_tune_grid()`. The help of `nested_tune_grid()` and `nested_resamples()` and `NEWS.md` state it. They also state that `nested_final_fit()`, `nested_fit_resamples()`, `nested_workflow_map()` and the other four tuners are not tested on these pairs. Considered and rejected at M121's plan gate: five of the nine pairs, because the help would then need a list of exceptions.
 **Consequences:** every function other than grid on these pairs stays unclaimed, in the inner-design candidate row. Falsified by a pair failing under a function other than grid where it passes under grid. (Supersedes D-083's Decision clause leaving the three sliding outer designs unclaimed with these inner designs, and D-084's reading of D-083's claim as bound to an outer `rolling_origin()`.)
 
+### D-088 (2026-09-27): D-087 leaves every function but `nested_resamples()` and grid unclaimed on the nine pairs, and fulfils D-085's grid clause. Corrects D-087's Decision and Consequences
+
+**Context:** M121's review found four faults in D-087. Its Consequences say every function other than grid stays unclaimed on the nine pairs, but its Decision also claims `nested_resamples()`. It supersedes "D-084's reading of D-083's claim as bound to an outer `rolling_origin()`", but D-084's words are that the inner sliding designs are claimed "on D-083's terms". It does not cite the D-085 Consequences clause that left grid on these pairs to M121. Its falsifier names the unclaimed functions, so it cannot falsify the claim.
+**Decision:** D-087 stands, read as follows. Every function other than `nested_resamples()` and `nested_tune_grid()` stays unclaimed on the nine pairs. D-087 supersedes D-083's Decision clause leaving the three sliding outer designs unclaimed with these inner designs, and so narrows D-084's "on D-083's terms" by that clause alone. It fulfils the part of D-085's Consequences that leaves grid on a sliding outer design with an inner sliding design to M121. Falsified by a sliding outer design with an inner sliding design whose splits differ from `rsample::nested_cv()`, or whose `nested_tune_grid()` run differs from the reference loop.
+**Consequences:** the grid help drops `augment()` from its list of functions not tested on the pairs, so the three texts name the same functions D-087's Decision names. (Corrects D-087's Decision and Consequences.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

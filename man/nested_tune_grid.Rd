@@ -212,9 +212,8 @@ An outer \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} gives nine
 pairs, and each pair is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}.
-\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, \code{\link[=nested_workflow_map]{nested_workflow_map()}},
-\code{\link[=augment.nested_results]{augment()}} and the other four tuners are not
-tested on these pairs.
+\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, \code{\link[=nested_workflow_map]{nested_workflow_map()}}
+and the other four tuners are not tested on these pairs.
 }
 
 \section{Finalizing a parameter range}{

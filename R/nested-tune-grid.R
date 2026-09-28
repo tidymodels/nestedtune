@@ -154,9 +154,8 @@
 #' [rsample::sliding_period()] with an inner [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] gives nine
 #' pairs, and each pair is tested under [nested_tune_grid()].
-#' [nested_final_fit()], [nested_fit_resamples()], [nested_workflow_map()],
-#' [`augment()`][augment.nested_results] and the other four tuners are not
-#' tested on these pairs.
+#' [nested_final_fit()], [nested_fit_resamples()], [nested_workflow_map()]
+#' and the other four tuners are not tested on these pairs.
 #'
 #' @section Finalizing a parameter range:
 #'

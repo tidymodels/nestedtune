@@ -51,6 +51,8 @@ Each sliding outer design with each inner sliding design is tested and documente
 - 2026-09-27: T3 done. The sentence calling the three sliding outer designs untested with these inner designs is replaced in the two help sections and `NEWS.md` by the nine-pair claim, which names the functions not tested on the pairs. D-087 appended. `devtools::document()` rewrote six Rd files, and all six gating prose sweeps print clean.
 - 2026-09-27: claim audit: 30 claims read, 2 corrected — helper-orchestration.R, R/nested-tune-grid.R. The corrections are the outer sliding-index window, a 69-day lookback spanning 70 days, and the grid help's nine-pair sentences, moved after the `augment()` sentences with `augment()` added to the not-tested list. The re-read found both accurate.
 - 2026-09-27: T4 done. The full suite ran 1051 tests with 0 failures and 0 skips on the tree before the claim-audit fixes, which changed only comments and help text. `devtools::check()` on the final tree gave 0 errors, 0 warnings and 0 notes. The new files' serial times are in the T2 line. Status set to review.
+- 2026-09-27: review gate fix-now work landed: D-088, `augment()` dropped from the grid help's not-tested list, and a shape check in `ts_pair_reference()`.
+- step-7 approval: m121-sliding-outer-inner-pairs approved for merge
 
 ## Decisions
 
@@ -75,3 +77,5 @@ Independent review (user-facing tier, three lenses). Blame-history [S]: no findi
 - F7: the three test files are identical apart from the outer name. Proposed: reject, because the one-file-per-outer-design shape follows M119 and M120, and the split holds parallel timing.
 - F8: the class assertions read only fold 1's first outer and inner split. Proposed: reject, because AC1 and AC2 ask for exactly that and a hand check found no other class in any fold.
 - F9: AC4 had no evidence line yet. Resolved by the AC4 line above.
+
+Triage at the gate (2026-09-27): the maintainer chose the proposed dispositions. F1, F3, F4 and F5 fixed in D-088. F2 fixed: the grid help's not-tested list drops `augment()`. F6 fixed: `ts_pair_reference()` stops on a body that is not one `nested_resamples()` call, shown to fire on a `nested_cv()` head and on a two-statement body. F7 and F8 rejected for the reasons above. F9 resolved. After the fixes, the 18 pair tests pass with 0 failures, the six prose sweeps print clean and `cairn_validate` passes.
