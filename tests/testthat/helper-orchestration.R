@@ -758,15 +758,23 @@ expect_ts_matches_reference <- function(res, ref) {
   }
 }
 
-# A final fit against a reference final fit built over `ts_inner()` (M110).
-expect_ts_final_matches <- function(final, ref, d) {
+# A final fit against a reference final fit built over the fixture's literal
+# inner call (M110), comparing the inner `in_id` and `out_id` values (M120).
+# `split_class` is the class the fixture's literal inner call builds, so the
+# reference and the final fit are both shown to run on that design (M120).
+expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
   expect_identical(
     lapply(final$tuning$splits, function(s) s$in_id),
     lapply(ref$tuned$splits, function(s) s$in_id)
   )
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$out_id),
+    lapply(ref$tuned$splits, function(s) s$out_id)
+  )
   # The reference's inner design is the literal call's, not a default.
-  expect_s3_class(ref$tuned$splits[[1]], "rof_split")
+  expect_s3_class(ref$tuned$splits[[1]], split_class)
+  expect_s3_class(final$tuning$splits[[1]], split_class)
   expect_identical(final$selected, ref$selected)
   expect_identical(
     predict(extract_workflow(final), new_data = d),
