@@ -207,6 +207,60 @@ test_that("AC3: the performance plot's fold axis pastes the design's labels and 
   expect_no_error(utils::capture.output(print(res), type = "message"))
 })
 
+test_that("a fold with no metrics rows leaves the later folds' labels on their own rows", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  folds <- repeated_label_design(d)
+  res <- label_run(folds, d)
+  per_fold <- n_metrics(reg_metrics())
+
+  # A failed fold's metrics table is empty, so the second fold gives no rows.
+  # The folds after it must keep their own labels rather than shift up.
+  holed <- res
+  holed$.metrics[[2L]] <- holed$.metrics[[2L]][0L, ]
+  kept <- setdiff(seq_len(nrow(folds)), 2L)
+
+  long <- collect_metrics(holed, summarize = FALSE)
+  expect_identical(long$id, rep(folds$id[kept], each = per_fold))
+  expect_identical(long$id2, rep(folds$id2[kept], each = per_fold))
+  expect_identical(
+    long$.estimate,
+    unlist(lapply(res$.metrics[kept], `[[`, ".estimate"), use.names = FALSE)
+  )
+})
+
+test_that("a record that cannot label the rows gives one id of row positions", {
+  skip_if_no_engines()
+  skip_if_not_installed("ggplot2")
+  d <- make_reg_data()
+  folds <- repeated_label_design(d)
+  res <- label_run(folds, d)
+  positions <- paste("row", seq_len(nrow(folds)))
+  per_fold <- n_metrics(reg_metrics())
+
+  unlabelled <- res
+  attr(unlabelled, "id_columns") <- character(0)
+
+  long <- collect_metrics(unlabelled, summarize = FALSE)
+  expect_identical(names(long)[[1L]], "id")
+  expect_false("id2" %in% names(long))
+  expect_identical(long$id, rep(positions, each = per_fold))
+
+  wide <- collect_metrics(unlabelled, summarize = FALSE, type = "wide")
+  expect_identical(wide$id, positions)
+  expect_false("id2" %in% names(wide))
+
+  p <- autoplot(unlabelled, type = "performance")
+  expect_identical(levels(p$data$fold), positions)
+
+  # The passing control: the record as the constructor wrote it labels the
+  # rows from the design, so the fallback is reached by the unusable record.
+  expect_identical(
+    collect_metrics(res, summarize = FALSE)$id2,
+    rep(folds$id2, each = per_fold)
+  )
+})
+
 test_that("AC3: a set's performance plot builds on a repeated design", {
   skip_if_no_wset_fixture()
   skip_if_not_installed("ggplot2")

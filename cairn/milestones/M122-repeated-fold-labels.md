@@ -54,6 +54,8 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 - 2026-09-28: T4 done. The three help pages and one `NEWS.md` bullet now describe the label columns, and `devtools::document()` rewrote the three Rd files. Both sweeps are clean. T2 to T4 share one checkpoint commit because their files were edited together.
 - 2026-09-28: claim audit: 26 claims read, 3 corrected — tests/testthat/test-fold-labels.R (three test comments reworded; no help, NEWS or code claim was wrong).
 - 2026-09-28: T5 done. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The comment-only edits from the claim audit landed after the check started, and `test-fold-labels.R` passed again afterwards with 65 expectations. Status set to review.
+- 2026-09-28: review: all five criteria verified, gate clean, three reviewers found no bug. Two test gaps (R1, R3) fixed on the branch at the gate.
+- 2026-09-28: step-7 approval: m122-repeated-fold-labels approved for merge
 
 ## Decisions
 
@@ -80,3 +82,5 @@ Independent review: three fresh reviewers. The prior-review lens found that the 
 - R7 (diff-bug): no reachable label-name collision. Noted.
 - R8 (diff-bug): other `fold_ids()` callers, docs and the vignette join are consistent. Noted.
 - R9 (blame-history): a mid-sentence source line break in the roxygen of `R/nested-results-set.R`. Proposed: reject, as style.
+
+Triage at the gate: the maintainer accepted every proposed disposition. Two new tests in `test-fold-labels.R` fix R1 and R3. One covers a fold with no metrics rows, and one covers the fallback. The file now runs 75 expectations with 0 failures. A planted label shift and a planted fallback on `x$id` each turned the matching new test red, and the code was restored. The weighted path in R3 has no new test. R2, R4, R5, R6 and R9 are rejected for the reasons above, and R7 and R8 are noted.
