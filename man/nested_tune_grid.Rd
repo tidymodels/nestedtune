@@ -204,8 +204,7 @@ An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 those four tuners on the sliding-period design alone.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs. It checks the
 inner design but fits nothing on it. The other three outer designs are not
-tested with these
-inner designs. Any other inner design is not tested.
+tested with these inner designs. Any other inner design is not tested.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out. When the assessment sets overlap, its
 error also counts the rows held out more than once.

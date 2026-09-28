@@ -75,8 +75,7 @@ also tested under \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\
 those four tuners on the sliding-period design alone.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs. It checks the
 inner design but fits nothing on it. The other three outer designs are not
-tested with these
-inner designs. Any other inner design is not tested.
+tested with these inner designs. Any other inner design is not tested.
 }
 
 \section{Memory}{

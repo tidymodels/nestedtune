@@ -69,8 +69,7 @@
   those four tuners on the sliding-period design alone.
   `nested_fit_resamples()` is tested to accept these designs. It checks the
   inner design but fits nothing on it. The other three outer designs are not
-  tested with these
-  inner designs. Any other inner design is not tested.
+  tested with these inner designs. Any other inner design is not tested.
 
 * When an outer design leaves rows out of every assessment set and holds
   no row out twice, `augment()` now names those rows in its error. It no

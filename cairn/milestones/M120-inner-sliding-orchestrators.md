@@ -63,6 +63,8 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: re-audit: AC5 (full) — D-085 and one test comment still used the old phrase. D-086 corrects D-085, and the comment was fixed. The optional "or equivalent" wording was not taken, because the help uses the exact phrase.
 - 2026-09-27: the four claim-audit fixes and the new phrase applied to the help, `NEWS.md` and two test files. The AC4 check now requires a difference in every fold. `devtools::document()` rewrote six Rd files, both prose sweeps are clean, and the inner files pass 32 of 32.
 - 2026-09-27: T6 done. The full suite ran 1033 tests with 0 failures and 0 skips, on the tree before the claim-audit fixes. `devtools::check()` on the final tree gave 0 errors, 0 warnings and 0 notes. The new files' serial times are in the T3-T4 line. Status set to review.
+- 2026-09-27: review: AC1-AC6 verified with fresh evidence, the gate is clean, and three reviewers found no bug. The maintainer chose to fix O5-O7 and P1 now and send O1 to the candidate row.
+- 2026-09-27: step-7 approval: m120-inner-sliding-orchestrators approved for merge
 
 ## Decisions
 
@@ -89,3 +91,15 @@ Independent review: three fresh reviewers ran. The blame-history reviewer found 
 - O7: the `make_ts_weekday_data()` comment has one long sentence that is hard to read.
 - O8: race test names use the `RACERS` names, not the exported function names. This follows the existing race files.
 - O9: `ts_inner_outer()` restates the outer `rolling_origin()` call. A drift fails loudly.
+
+Triage at the gate, chosen by the maintainer:
+- O1: follow-up. It joins the inner-design candidate row in `ROADMAP.md`. AC5 holds, because a triple names the function and not its `fn` argument.
+- O2: rejected. DECISIONS is append-only, and D-086 already narrows D-085's claim for `nested_fit_resamples()`.
+- O3: rejected. The map's `.metrics` and seeds equal the hand calls, and the hand calls must complete.
+- O4: rejected. It is what AC1 asks for, and the reference equality covers the design's use.
+- O5, O6 and P1: fixed now. The sentence is reflowed in both R files and `NEWS.md`, and the Rd files are regenerated. The DESCRIPTION line is rewrapped.
+- O7: fixed now. The comment is split into three sentences.
+- O8: rejected. The names follow the existing race files.
+- O9: rejected. A drift fails a test, so it cannot pass unseen.
+
+After the fixes, `devtools::document()` rewrote the six Rd files, and the six gating sweeps are clean. `test-time-series-inner.R` passes 10 of 10 blocks, and `air format --check` changes nothing. The text of the AC5 sentences is unchanged, so the AC5 evidence stands.
