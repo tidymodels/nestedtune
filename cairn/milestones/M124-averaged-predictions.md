@@ -69,6 +69,8 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: claim audit: 63 claims read, 5 corrected — R/nested-results-collect.R, tests/testthat/test-collect-predictions-summarize.R. The same reader re-read the 5 and found that all hold.
 - 2026-09-28: T5 done. `document()` gives no diff. Both prose sweeps clean. `check_pkgdown()` finds no problems. Full suite 1082 tests, 0 failing. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. Status set to review.
 - 2026-09-28: review gate fixes committed (O3 orderedness from the outcome with a test that failed first, O8 NEWS wording). The full `check()` after them is still running.
+- 2026-09-28: `devtools::check()` on 8792eac8 gives 0 errors, 0 warnings, 0 notes, with examples and the full suite run.
+- 2026-09-28: step-7 approval: m124-averaged-predictions approved for merge
 
 ## Decisions
 
