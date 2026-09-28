@@ -28,7 +28,10 @@
 #'   and not a silent no-op.
 #' @param summarize Whether to average each workflow's per-fold metrics
 #'   (`TRUE`, the default) or return them one row per outer fold (`FALSE`),
-#'   as on [collect_metrics.nested_results()].
+#'   as on [collect_metrics.nested_results()]. For `collect_predictions()`,
+#'   whether to average each workflow's predictions per data row (`TRUE`)
+#'   or return them per fold (`FALSE`, the default there), as on
+#'   [collect_predictions.nested_results()].
 #' @param type For `collect_metrics()`, the table's shape: `"long"` (the
 #'   default) or `"wide"`, as on [collect_metrics.nested_results()]. The wide
 #'   shape is keyed on `wflow_id` too, and a metric one workflow did not
@@ -134,9 +137,17 @@ collect_notes.nested_results_set <- function(x, ...) {
 
 #' @rdname collect_metrics.nested_results_set
 #' @export
-collect_predictions.nested_results_set <- function(x, ...) {
+collect_predictions.nested_results_set <- function(
+  x,
+  ...,
+  summarize = FALSE
+) {
   rlang::check_dots_empty()
-  stack_set(x, collect_predictions, call = rlang::current_env())
+  stack_set(
+    x,
+    function(r) collect_predictions(r, summarize = summarize),
+    call = rlang::current_env()
+  )
 }
 
 #' @rdname collect_metrics.nested_results_set

@@ -186,19 +186,27 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' * `collect_predictions()` gives one row per assessment row of every
 #'   completed fold, with the columns `tune::last_fit()` produced: the
-#'   outcome, the prediction columns, `.row` and `.config`.
+#'   outcome, the prediction columns, `.row` and `.config`. With
+#'   `summarize = TRUE` it gives one averaged row per data row instead. See
+#'   Averaging across the folds.
 #' * `collect_extracts()` gives one row per completed fold, the fold's value in
 #'   an `.extracts` list column. A completed fold whose extract function
 #'   errored holds `NULL` there, and its `.notes` say why.
 #'
 #' @param x A `nested_results` run with a control that asked for the column.
 #'   See [collect_metrics.nested_results()] for what the object is.
-#' @param ... Not used. It must be empty. tune's `summarize` and `parameters`
-#'   arguments are not offered here.
+#' @param ... Not used. It must be empty. tune's `parameters` argument is not
+#'   offered here, because each fold predicted with the parameters it
+#'   selected.
+#' @param summarize For `collect_predictions()`, whether to average the
+#'   predictions per data row (`TRUE`) or return them per fold (`FALSE`, the
+#'   default). See Averaging across the folds.
 #'
 #' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated
 #'   design), then the stacked prediction columns, or the `.extracts` list
-#'   column.
+#'   column. With `summarize = TRUE`, the columns of the per-fold table in
+#'   the same order, less the fold labels and `.config`, with one row per
+#'   `.row` in `.row` order.
 #'
 #' @section Folds that failed, and columns not saved:
 #'
@@ -220,6 +228,40 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' The inner tuning run's own predictions and extracts, which the same two
 #' control slots save inside tune, are not kept.
 #'
+#' @section Averaging across the folds:
+#'
+#' `summarize = TRUE` averages, for each data row, the predictions of every
+#' completed fold that held the row out. A row that no completed fold held
+#' out is left out, and a partial run warns once, as above. The rules are
+#' tune's for `summarize = TRUE`, except where a rule below says otherwise.
+#' The columns the run saved decide which rule applies.
+#'
+#' * A numeric prediction, such as a regression's `.pred`, is its mean with
+#'   missing values ignored.
+#' * Class probabilities are each averaged the same way, then divided by the
+#'   row's sum of those averages. A `.pred_class` saved beside them is
+#'   recomputed as the class with the largest averaged probability. It is
+#'   recomputed whatever a postprocessor set in the saved predictions. A row
+#'   whose averaged probabilities are missing gets a missing class, where
+#'   tune gives it the first level.
+#' * A `.pred_class` saved without probabilities is the most frequent class.
+#'   A missing vote counts as a class of its own, as in tune, so the class
+#'   is missing only when missing votes outnumber every level.
+#' * A censored run takes the median `.pred_time`, which is missing if any
+#'   fold's value is. The survival probabilities in `.pred` take, per
+#'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
+#'   missing values ignored.
+#'
+#' A tie, between votes or between averaged probabilities, goes to the first
+#' of the tied levels in the factor's level order.
+#'
+#' tune's own average groups the rows by candidate. Here each fold selected
+#' its own candidate, so the average spans the candidates the folds
+#' selected, and the fold labels and `.config` are dropped. Quantile
+#' predictions are not averaged: a run whose saved predictions carry a
+#' `.pred_quantile` column is refused with class
+#' `nestedtune_summarize_quantile`.
+#'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
 #' # Ask the control to keep the predictions and a coefficient extract.
@@ -237,6 +279,22 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' collect_predictions(res)
 #' collect_extracts(res)
 #'
+#' # A repeated design holds each row out once per repeat. The average
+#' # gives one prediction per row.
+#' set.seed(3)
+#' repeated <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 2, repeats = 2),
+#'   inside = rsample::vfold_cv(v = 2)
+#' )
+#' res_rep <- nested_tune_grid(
+#'   wf,
+#'   repeated,
+#'   grid = data.frame(num_comp = 1:2),
+#'   control = tune::control_grid(save_pred = TRUE)
+#' )
+#' collect_predictions(res_rep, summarize = TRUE)
+#'
 #' @templateVar LINKS [collect_selections()], [collect_metrics()], [nested_tune_grid()]
 #' @templateVar WHAT functions
 #' @template seealso-reader
@@ -245,17 +303,174 @@ NULL
 
 #' @rdname collect_predictions.nested_results
 #' @export
-collect_predictions.nested_results <- function(x, ...) {
+collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   rlang::check_dots_empty()
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
+  if (summarize) {
+    check_no_quantile(x, call = rlang::current_env())
+  }
   warn_partial_summary(x, noun = "table")
-  stack_fold_column(
+  out <- stack_fold_column(
     x,
     ".predictions",
     completed_only = TRUE,
     call = rlang::current_env()
   )
+  if (summarize) {
+    out <- average_fold_predictions(out, drop = c(id_columns(x), ".config"))
+  }
+  out
+}
+
+# One averaged prediction per data row (M124). The average spans every
+# completed fold that held the row out, whatever candidate each fold
+# selected, so the fold labels and `.config` are dropped: neither names
+# anything a row's average shares. The rule for each column is read from
+# the columns the run saved, which tune picked from the metric types. The
+# run's metric set is not read, because a run on tune's default metrics
+# records none. The rules are tune 2.1.0's (`prob_summarize()`,
+# `class_summarize()`, `numeric_summarize()` and `surv_summarize()`, read
+# 2026-09-28), written here rather than called, because tune's internals
+# carry no stability promise (M28). Ties go to the first level in factor
+# order. One departure: a row whose averaged probabilities are missing gets
+# a missing class, where `prob_summarize()` gives it the first level.
+average_fold_predictions <- function(preds, drop) {
+  preds <- preds[setdiff(names(preds), drop)]
+  rows <- sort(unique(preds$.row))
+  group <- factor(match(preds$.row, rows), levels = seq_along(rows))
+  first <- match(rows, preds$.row)
+  per_row <- function(v, fn) {
+    vapply(split(v, group), fn, numeric(1), USE.NAMES = FALSE)
+  }
+  mean_na_rm <- function(v) mean(v, na.rm = TRUE)
+
+  nms <- names(preds)
+  # A factor outcome names the probability columns, one per level, so a
+  # level named like `time` is never read as a censored column.
+  others <- nms[!startsWith(nms, ".pred") & nms != ".row"]
+  outcome <- Filter(function(nm) is.factor(preds[[nm]]), others)
+  prob_cols <- if (length(outcome) == 1L) {
+    intersect(paste0(".pred_", levels(preds[[outcome]])), nms)
+  } else {
+    character(0)
+  }
+  if (length(prob_cols) > 0L) {
+    probs <- matrix(
+      unlist(lapply(prob_cols, function(nm) per_row(preds[[nm]], mean_na_rm))),
+      ncol = length(prob_cols)
+    )
+    probs <- probs / rowSums(probs)
+  }
+
+  cols <- lapply(nms, function(nm) {
+    v <- preds[[nm]]
+    if (nm %in% prob_cols) {
+      return(probs[, match(nm, prob_cols)])
+    }
+    if (nm == ".pred_class" && length(prob_cols) > 0L) {
+      return(class_from_probs(probs, prob_cols, v, preds[[outcome]]))
+    }
+    if (nm == ".pred_class") {
+      return(class_by_vote(v, group))
+    }
+    if (nm == ".pred_time") {
+      return(per_row(v, stats::median))
+    }
+    if (nm == ".pred" && is.list(v)) {
+      return(average_survival(v, group))
+    }
+    if (startsWith(nm, ".pred") && is.numeric(v)) {
+      return(per_row(v, mean_na_rm))
+    }
+    vctrs::vec_slice(v, first)
+  })
+  names(cols) <- nms
+  new_tbl(cols)
+}
+
+# Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
+# quantile metric set passed to `fit_resamples()`, but it runs a quantile
+# model on its default metric and averages those predictions with
+# `quantile_summarize()`. That rule is not ported, because checking a port
+# against it needs a quantile engine in Suggests. Read per fold before
+# stacking, so the refusal is this one and not whatever binding a quantile
+# column with the other folds raises.
+check_no_quantile <- function(x, call = rlang::caller_env()) {
+  has <- vapply(
+    x$.predictions[x$.completed],
+    function(p) ".pred_quantile" %in% names(p),
+    logical(1)
+  )
+  if (!any(has)) {
+    return(invisible(x))
+  }
+  cli::cli_abort(
+    c(
+      "{.code summarize = TRUE} cannot average quantile predictions.",
+      x = "The saved predictions carry a {.field .pred_quantile} column.",
+      i = "Call {.fn collect_predictions} with {.code summarize = FALSE} \\
+           for the per-fold predictions."
+    ),
+    class = "nestedtune_summarize_quantile",
+    call = call
+  )
+}
+
+# The class at the largest averaged probability. `which.max()` returns the
+# first of tied maxima, and `prob_cols` is in factor order. Orderedness
+# follows the outcome, as in tune's `prob_summarize()`, not the saved class.
+class_from_probs <- function(probs, prob_cols, saved, outcome) {
+  idx <- apply(probs, 1L, function(r) {
+    if (all(is.na(r))) NA_integer_ else which.max(r)
+  })
+  labels <- substring(prob_cols, nchar(".pred_") + 1L)
+  factor(
+    labels[idx],
+    levels = levels(saved),
+    ordered = is.ordered(outcome)
+  )
+}
+
+# The most frequent class per row. A missing vote is counted as a class of
+# its own, placed after the levels, as tune's `dplyr::count()` counts it, so
+# it wins only when it outnumbers every level. `max.col(ties.method =
+# "first")` takes the first level among tied counts.
+class_by_vote <- function(v, group) {
+  counts <- unclass(table(group, addNA(v, ifany = FALSE)))
+  idx <- max.col(counts, ties.method = "first")
+  idx[idx > nlevels(v)] <- NA_integer_
+  factor(levels(v)[idx], levels = levels(v), ordered = is.ordered(v))
+}
+
+# The censored `.pred` list column: per row and `.eval_time`, the mean of
+# every other column with missing values ignored, in the order the times
+# first appear.
+average_survival <- function(v, group) {
+  sizes <- vapply(v, function(t) if (is.null(t)) 0L else nrow(t), integer(1))
+  long <- vctrs::vec_rbind(!!!v)
+  long_group <- rep(as.integer(group), sizes)
+  key <- vctrs::vec_group_id(
+    vctrs::new_data_frame(list(g = long_group, t = long$.eval_time))
+  )
+  first <- match(seq_len(attr(key, "n")), key)
+  averaged <- lapply(names(long), function(nm) {
+    if (nm == ".eval_time") {
+      return(long$.eval_time[first])
+    }
+    vapply(
+      split(long[[nm]], factor(key, levels = seq_along(first))),
+      function(x) mean(x, na.rm = TRUE),
+      numeric(1),
+      USE.NAMES = FALSE
+    )
+  })
+  names(averaged) <- names(long)
+  averaged <- new_tbl(averaged)
+  owner <- factor(long_group[first], levels = seq_len(nlevels(group)))
+  unname(lapply(split(seq_along(first), owner), function(i) {
+    vctrs::vec_slice(averaged, i)
+  }))
 }
 
 #' @rdname collect_predictions.nested_results

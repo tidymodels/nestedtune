@@ -19,7 +19,7 @@
 
 \method{collect_notes}{nested_results_set}(x, ...)
 
-\method{collect_predictions}{nested_results_set}(x, ...)
+\method{collect_predictions}{nested_results_set}(x, ..., summarize = FALSE)
 
 \method{collect_extracts}{nested_results_set}(x, ...)
 
@@ -35,7 +35,10 @@ and not a silent no-op.}
 
 \item{summarize}{Whether to average each workflow's per-fold metrics
 (\code{TRUE}, the default) or return them one row per outer fold (\code{FALSE}),
-as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}.}
+as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}. For \code{collect_predictions()},
+whether to average each workflow's predictions per data row (\code{TRUE})
+or return them per fold (\code{FALSE}, the default there), as on
+\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}.}
 
 \item{type}{For \code{collect_metrics()}, the table's shape: \code{"long"} (the
 default) or \code{"wide"}, as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}. The wide

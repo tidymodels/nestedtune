@@ -5,7 +5,7 @@
 \alias{collect_extracts.nested_results}
 \title{Stack the outer fit's predictions or extracts across the outer folds}
 \usage{
-\method{collect_predictions}{nested_results}(x, ...)
+\method{collect_predictions}{nested_results}(x, ..., summarize = FALSE)
 
 \method{collect_extracts}{nested_results}(x, ...)
 }
@@ -13,13 +13,20 @@
 \item{x}{A \code{nested_results} run with a control that asked for the column.
 See \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}} for what the object is.}
 
-\item{...}{Not used. It must be empty. tune's \code{summarize} and \code{parameters}
-arguments are not offered here.}
+\item{...}{Not used. It must be empty. tune's \code{parameters} argument is not
+offered here, because each fold predicted with the parameters it
+selected.}
+
+\item{summarize}{For \code{collect_predictions()}, whether to average the
+predictions per data row (\code{TRUE}) or return them per fold (\code{FALSE}, the
+default). See Averaging across the folds.}
 }
 \value{
 A tibble: the design's fold labels (\code{id}, and \code{id2} on a repeated
 design), then the stacked prediction columns, or the \code{.extracts} list
-column.
+column. With \code{summarize = TRUE}, the columns of the per-fold table in
+the same order, less the fold labels and \code{.config}, with one row per
+\code{.row} in \code{.row} order.
 }
 \description{
 \code{collect_predictions()} and \code{collect_extracts()} give you the outer
@@ -33,7 +40,9 @@ into a single table, the design's fold labels first.
 \itemize{
 \item \code{collect_predictions()} gives one row per assessment row of every
 completed fold, with the columns \code{tune::last_fit()} produced: the
-outcome, the prediction columns, \code{.row} and \code{.config}.
+outcome, the prediction columns, \code{.row} and \code{.config}. With
+\code{summarize = TRUE} it gives one averaged row per data row instead. See
+Averaging across the folds.
 \item \code{collect_extracts()} gives one row per completed fold, the fold's value in
 an \code{.extracts} list column. A completed fold whose extract function
 errored holds \code{NULL} there, and its \code{.notes} say why.
@@ -61,6 +70,43 @@ per repeat. On a Monte Carlo design it appears as often as it was held
 out. These are the outer fit's predictions on the assessment rows.
 The inner tuning run's own predictions and extracts, which the same two
 control slots save inside tune, are not kept.
+}
+
+\section{Averaging across the folds}{
+
+
+\code{summarize = TRUE} averages, for each data row, the predictions of every
+completed fold that held the row out. A row that no completed fold held
+out is left out, and a partial run warns once, as above. The rules are
+tune's for \code{summarize = TRUE}, except where a rule below says otherwise.
+The columns the run saved decide which rule applies.
+\itemize{
+\item A numeric prediction, such as a regression's \code{.pred}, is its mean with
+missing values ignored.
+\item Class probabilities are each averaged the same way, then divided by the
+row's sum of those averages. A \code{.pred_class} saved beside them is
+recomputed as the class with the largest averaged probability. It is
+recomputed whatever a postprocessor set in the saved predictions. A row
+whose averaged probabilities are missing gets a missing class, where
+tune gives it the first level.
+\item A \code{.pred_class} saved without probabilities is the most frequent class.
+A missing vote counts as a class of its own, as in tune, so the class
+is missing only when missing votes outnumber every level.
+\item A censored run takes the median \code{.pred_time}, which is missing if any
+fold's value is. The survival probabilities in \code{.pred} take, per
+\code{.eval_time}, the mean \code{.pred_survival} and \code{.weight_censored} with
+missing values ignored.
+}
+
+A tie, between votes or between averaged probabilities, goes to the first
+of the tied levels in the factor's level order.
+
+tune's own average groups the rows by candidate. Here each fold selected
+its own candidate, so the average spans the candidates the folds
+selected, and the fold labels and \code{.config} are dropped. Quantile
+predictions are not averaged: a run whose saved predictions carry a
+\code{.pred_quantile} column is refused with class
+\code{nestedtune_summarize_quantile}.
 }
 
 \examples{
@@ -93,6 +139,22 @@ res <- nested_tune_grid(
 
 collect_predictions(res)
 collect_extracts(res)
+
+# A repeated design holds each row out once per repeat. The average
+# gives one prediction per row.
+set.seed(3)
+repeated <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2, repeats = 2),
+  inside = rsample::vfold_cv(v = 2)
+)
+res_rep <- nested_tune_grid(
+  wf,
+  repeated,
+  grid = data.frame(num_comp = 1:2),
+  control = tune::control_grid(save_pred = TRUE)
+)
+collect_predictions(res_rep, summarize = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
