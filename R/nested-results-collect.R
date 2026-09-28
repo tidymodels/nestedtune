@@ -308,6 +308,11 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
   if (summarize) {
+    check_predictions_rows(
+      x,
+      verb = "collect_predictions",
+      call = rlang::current_env()
+    )
     check_no_quantile(
       x,
       verb = "collect_predictions",
@@ -997,12 +1002,18 @@ check_held_out <- function(x, n, call = rlang::caller_env()) {
 # be left missing without a word, and a repeated one would overwrite another.
 # `compute_metrics()` scores the rows as they are, so a repeated row would
 # count twice and a foreign one would be scored against a row the fold
-# analysed (M100). tune 2.1.0 has no path to any of these short of an edit
-# to the object, so any mismatch refuses, under the class of the reader
-# that found it: `nestedtune_<verb>_predictions`. The values are compared
-# as whole numbers: a double `.row` holding the same values is accepted.
+# analysed (M100). `collect_predictions(summarize = TRUE)` averages by
+# `.row`, so a repeated row would weigh twice in its average (M126); the
+# per-fold table is not checked, as it only shows what was saved. tune 2.1.0
+# has no path to any of these short of an edit to the object, so any
+# mismatch refuses, under the class of the reader that found it:
+# `nestedtune_<verb>_predictions`. The values are compared as whole numbers:
+# a double `.row` holding the same values is accepted.
 check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
-  verb <- rlang::arg_match(verb, c("augment", "compute_metrics"))
+  verb <- rlang::arg_match(
+    verb,
+    c("augment", "compute_metrics", "collect_predictions")
+  )
   bad <- vapply(
     which(x$.completed),
     function(i) !predictions_match_rows(x$.predictions[[i]], x$splits[[i]]),
