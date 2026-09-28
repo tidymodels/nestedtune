@@ -94,9 +94,24 @@ for their results, plus the sliding-window design for
 [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
 results.
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-is tested on the rolling-origin design. An inner design other than
+is tested on the rolling-origin design.
+
+An outer
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-is not tested.
+with an inner
+[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+or
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+is tested to give the same splits as
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+is tested on these three designs, and so is
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+for its results. The other orchestrators,
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+and the other three outer designs are not tested with these inner
+designs. Any other inner design is not tested.
 
 ## Memory
 

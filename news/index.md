@@ -102,9 +102,26 @@
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   builds all four designs with the same splits as
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-  An inner design other than
+
+- An outer
   [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-  is not tested.
+  design with an inner
+  [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+  [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  or
+  [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
+  design is tested under
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  and so is
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  for its results.
+  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+  builds these three designs with the same splits as
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
+  The other orchestrators,
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  and the other three outer designs are not tested with these inner
+  designs. Any other inner design is not tested.
 
 - When an outer design leaves rows out of every assessment set and holds
   no row out twice,
