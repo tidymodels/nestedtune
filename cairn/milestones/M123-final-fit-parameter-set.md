@@ -84,4 +84,4 @@ A final fit answers tune's `extract_parameter_set_dials()` with the parameter se
 - O6: only grid is tested, which AC1 allows. Rejected: AC1 covers grid only, and the session probed racing and annealing.
 - O7: a work-log line says `nested_tune_bayes()` refuses an unknown range. In fact every outer fold fails, and `nested_final_fit()` then refuses. Fixed now: a work-log line corrects it, after a session probe gave the fold warning and class `nestedtune_no_completed_folds`.
 - O8: `@importFrom tune extract_parameter_set_dials` appears in two files. NAMESPACE holds it once. Rejected: no effect on the built package.
-- Fix-now re-check, 2026-09-28: after the help edit, `document()` gives no further diff, the six prose sweeps exit 0, `pkgdown::check_pkgdown()` finds no problem, and `devtools::check()` gives 0 errors, 0 warnings, 0 notes.
+- Fix-now re-check, 2026-09-28: after the help edit, `document()` gives no further diff and the six prose sweeps exit 0. `pkgdown::check_pkgdown()` finds no problem. `devtools::check()` gives 0 errors, 0 warnings, 0 notes.
