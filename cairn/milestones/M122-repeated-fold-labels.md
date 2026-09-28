@@ -21,11 +21,11 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 
 ## Acceptance criteria
 
-- [ ] AC1: The claimed domain is rsample outer designs, which record one or two label columns. The test designs are `rsample::vfold_cv(v = 2, repeats = 2)` and a single-column design. On a `nested_results`, three unsummarized tables carry each recorded label column as its own column. The tables are those of `collect_metrics()` (long and wide) and `compute_metrics()`. No column holds the labels pasted together. Each row's labels equal those of its outer fold. A test builds the expected labels from the design object's rows, not from the result. The summarized tables have the same column names on both designs.
-- [ ] AC2: The run is a `nested_results_set` from `nested_workflow_map()` over the repeated design. On it, `collect_metrics(summarize = FALSE)` (long and wide) and `compute_metrics(summarize = FALSE)` carry `wflow_id`, `id` and `id2` as separate columns. A test asserts this as AC1 asserts.
-- [ ] AC3: On the repeated design, `autoplot(type = "performance")` on a `nested_results` draws one point for each non-missing per-fold estimate. Its fold axis levels are `paste(id, id2, sep = ", ")` of the outer design, in design order. A test asserts the built plot's levels and point count. A test also builds the set's performance plot and prints the `nested_results`, both without error.
-- [ ] AC4: Three help pages say that the unsummarized table carries the design's label columns: `id`, and `id2` on a repeated design. The pages are `collect_metrics.nested_results`, `collect_metrics.nested_results_set` and `compute_metrics.nested_results`. A `NEWS.md` bullet says that the pasted `id` is gone. It says that a join on a repeated design uses both columns.
-- [ ] AC5: `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
+- [x] AC1: The claimed domain is rsample outer designs, which record one or two label columns. The test designs are `rsample::vfold_cv(v = 2, repeats = 2)` and a single-column design. On a `nested_results`, three unsummarized tables carry each recorded label column as its own column. The tables are those of `collect_metrics()` (long and wide) and `compute_metrics()`. No column holds the labels pasted together. Each row's labels equal those of its outer fold. A test builds the expected labels from the design object's rows, not from the result. The summarized tables have the same column names on both designs.
+- [x] AC2: The run is a `nested_results_set` from `nested_workflow_map()` over the repeated design. On it, `collect_metrics(summarize = FALSE)` (long and wide) and `compute_metrics(summarize = FALSE)` carry `wflow_id`, `id` and `id2` as separate columns. A test asserts this as AC1 asserts.
+- [x] AC3: On the repeated design, `autoplot(type = "performance")` on a `nested_results` draws one point for each non-missing per-fold estimate. Its fold axis levels are `paste(id, id2, sep = ", ")` of the outer design, in design order. A test asserts the built plot's levels and point count. A test also builds the set's performance plot and prints the `nested_results`, both without error.
+- [x] AC4: Three help pages say that the unsummarized table carries the design's label columns: `id`, and `id2` on a repeated design. The pages are `collect_metrics.nested_results`, `collect_metrics.nested_results_set` and `compute_metrics.nested_results`. A `NEWS.md` bullet says that the pasted `id` is gone. It says that a join on a repeated design uses both columns.
+- [x] AC5: `devtools::check()` reports 0 errors, 0 warnings and 0 notes.
 
 ## Coverage
 
@@ -58,3 +58,25 @@ Every per-fold metrics table labels a repeated design's folds with the design's 
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-09-28 on `m122-repeated-fold-labels` at f06424dd, level with `origin/main`.
+
+- AC1: `test-fold-labels.R` runs 65 expectations, 0 failed, 0 skipped. Its two AC1 tests check `id` and `id2` on the long and wide `collect_metrics()` tables and on `compute_metrics()`, per row against the design's rows. They check that no column holds a pasted label, and that the summarized names match between the single and repeated designs.
+- AC2: the AC2 test in the same run passes. On a `nested_workflow_map()` set over `vfold_cv(v = 2, repeats = 2)`, the long, wide and `compute_metrics()` tables start with `wflow_id`, `id` and `id2`. Each value matches the design's rows for both workflows.
+- AC3: the two AC3 tests in the same run pass. The built plot's fold levels equal `paste(id, id2, sep = ", ")` in design order, with 8 points (4 folds, 2 metrics). With one estimate set to `NA`, it draws 7 points and keeps all four levels. The set plot builds, and the print runs without error.
+- AC4: read in the diff. The three Rd files for `collect_metrics.nested_results`, `collect_metrics.nested_results_set` and `compute_metrics.nested_results` say that the unsummarized table carries `id`, and `id2` on a repeated design. The `NEWS.md` bullet says that the pasted `id` is gone and that a join on a repeated design uses both columns.
+- AC5: `devtools::check()` on f06424dd reported 0 errors, 0 warnings and 0 notes, in 8 min 34 s.
+
+Consistency gate: `cairn_validate.py` exit 0, with 18 references-staleness advisories that predate this milestone. No principle text changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. README is untouched. `NEWS.md` has the entry. No new top-level files. All six gating prose sweeps are clean.
+
+Independent review: three fresh reviewers. The prior-review lens found that the diff resolves M106's deferred F3, with no finding. The blame-history lens found no conflict with a past milestone or decision. The diff-bug lens found no correctness bug in probes on a failed fold, a dropped record and a factor `id2`. Findings, ranked, with the proposed disposition:
+
+- R1 (diff-bug): if the record cannot label the rows, a fallback writes one `id` from `fold_ids()`. No test covers that fallback. Proposed: fix now, with one test.
+- R2 (diff-bug): in that fallback the table's `id` holds "row 1" to "row 4", but the object keeps its real `id`. A join by `id` then matches nothing. The behavior predates this milestone. Proposed: reject, as pre-existing and reachable only after the record is lost.
+- R3 (diff-bug): no test puts a failed fold, or a weighted design, under the repeated design. Proposed: fix now, with one failed-fold test.
+- R4 (diff-bug): the branch test in `per_fold_metrics()` calls `id_columns()` twice. One `is.null(usable_label_columns(x))` test is enough. Proposed: reject, as style.
+- R5 (diff-bug): the tests take the expected labels from the `nested_resamples()` object, not from the raw rsample object. Proposed: reject, because that object is the design the run was given.
+- R6 (diff-bug): the set-plot test only checks that the plot builds. Proposed: reject, because the set plot reads no fold label and AC3 asks for a build.
+- R7 (diff-bug): no reachable label-name collision. Noted.
+- R8 (diff-bug): other `fold_ids()` callers, docs and the vignette join are consistent. Noted.
+- R9 (blame-history): a mid-sentence source line break in the roxygen of `R/nested-results-set.R`. Proposed: reject, as style.
