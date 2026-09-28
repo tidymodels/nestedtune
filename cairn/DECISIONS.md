@@ -1937,6 +1937,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-087 stands, read as follows. Every function other than `nested_resamples()` and `nested_tune_grid()` stays unclaimed on the nine pairs. D-087 supersedes D-083's Decision clause leaving the three sliding outer designs unclaimed with these inner designs, and so narrows D-084's "on D-083's terms" by that clause alone. It fulfils the part of D-085's Consequences that leaves grid on a sliding outer design with an inner sliding design to M121. Falsified by a sliding outer design with an inner sliding design whose splits differ from `rsample::nested_cv()`, or whose `nested_tune_grid()` run differs from the reference loop.
 **Consequences:** the grid help drops `augment()` from its list of functions not tested on the pairs, so the three texts name the same functions D-087's Decision names. (Corrects D-087's Decision and Consequences.)
 
+### D-089 (2026-09-28): a `nested_final_fit` answers `extract_parameter_set_dials()` from its tuning run, and the generic is re-exported. Extends D-068 with an eighth extractor
+
+**Context:** M106 left `extract_parameter_set_dials()` unanswered on a final fit. The trained workflow holds no `tune()` placeholder, so handing the call to it, as D-068's seven methods do, returns an empty set.
+**Decision:** the method returns the parameter set tune stored on the final fit's tuning run. It refuses a fit with no tuning run with class `nestedtune_no_tuning_run`, and a non-empty `...`. The generic is imported from tune and re-exported, as D-068's are. The help states that a data-frame `grid` can leave a range such as `mtry`'s unknown, because tune finalizes only a grid it builds from a number. Considered and rejected: finalizing the returned set on the full data, which returns a set the run did not store.
+**Consequences:** `nested_results` and `nested_results_set` still do not answer it, in the M106 candidate row. Falsified by tune adding a `tune_results` method whose answer differs from the stored set.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

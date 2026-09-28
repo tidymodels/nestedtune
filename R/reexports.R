@@ -34,6 +34,10 @@ tune::extract_spec_parsnip
 #' @export
 tune::outcome_names
 
+#' @importFrom tune extract_parameter_set_dials
+#' @export
+tune::extract_parameter_set_dials
+
 #' @importFrom ggplot2 autoplot
 #' @export
 ggplot2::autoplot
