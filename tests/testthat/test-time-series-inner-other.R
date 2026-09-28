@@ -4,11 +4,12 @@
 # recorded in the test file that asserts them.
 #
 # O1 -- type "live" (reference implementation). Source: tune::fit_resamples()
-#   run by hand on the fixture's outer splits. Pinned by the
+#   run by hand on the fixture's outer `rolling_origin()` design, built on
+#   its own from the same call. Pinned by the
 #   "nested_fit_resamples() matches fit_resamples() on an inner ... design"
 #   tests. Satisfies M120 AC3 for nested_fit_resamples(). It shows only that
-#   the design is accepted, because nested_fit_resamples() tunes nothing and
-#   reads no inner design.
+#   the design is accepted, because nested_fit_resamples() checks the inner
+#   design but fits nothing on it.
 #
 # O2 -- type "live" (reference implementation). Source: hand_call() in
 #   helper-orchestration.R, which runs each workflow of the set through its

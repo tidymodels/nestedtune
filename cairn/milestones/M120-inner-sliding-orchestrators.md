@@ -1,6 +1,6 @@
 # M120: Inner sliding designs under the other orchestrators
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -44,7 +44,7 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - [x] T3: Write the AC1 tests in a new `test-time-series-*.R` file with a file-level `skip_heavy_on_cran()` and an oracle header naming the reference loops. Each test takes its tuner's skip helper, for example `skip_if_no_race_fixture()`, because the hard-dependency leg installs no Suggests (LESSONS M101).
 - [x] T4: Write the AC2 final-fit tests with the reference final-fit helpers' `inner_design` argument, and write the AC3 tests. Time each new file serially. Split a file that runs far longer than the others, and add a long one to `Config/testthat/start-first` (LESSONS M16).
 - [x] T5: Update the three AC5 texts and run `devtools::document()`. Append a D-entry that claims the new triples. It supersedes the clauses of D-083 and D-084 that leave the other orchestrators and `nested_workflow_map()` unclaimed here. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
-- [ ] T6: Run `devtools::test()` and `devtools::check()`, and record the new files' serial times in the work log.
+- [x] T6: Run `devtools::test()` and `devtools::check()`, and record the new files' serial times in the work log.
 
 ## Work log
 
@@ -61,6 +61,8 @@ An inner `sliding_window()`, `sliding_index()` or `sliding_period()` design unde
 - 2026-09-27: amendment at a mini gate, approved by the user. AC3 and AC5 changed "reads no inner design" to "checks the inner design but fits nothing on it", because `nested_fit_resamples()` runs `check_nested()` on the inner design and ships it with each fold.
 - 2026-09-27: re-audit: AC3 (full) — nothing.
 - 2026-09-27: re-audit: AC5 (full) — D-085 and one test comment still used the old phrase. D-086 corrects D-085, and the comment was fixed. The optional "or equivalent" wording was not taken, because the help uses the exact phrase.
+- 2026-09-27: the four claim-audit fixes and the new phrase applied to the help, `NEWS.md` and two test files. The AC4 check now requires a difference in every fold. `devtools::document()` rewrote six Rd files, both prose sweeps are clean, and the inner files pass 32 of 32.
+- 2026-09-27: T6 done. The full suite ran 1033 tests with 0 failures and 0 skips, on the tree before the claim-audit fixes. `devtools::check()` on the final tree gave 0 errors, 0 warnings and 0 notes. The new files' serial times are in the T3-T4 line. Status set to review.
 
 ## Decisions
 

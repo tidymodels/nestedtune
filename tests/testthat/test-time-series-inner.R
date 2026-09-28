@@ -148,5 +148,5 @@ test_that("the inner sliding-index fixture builds splits sliding-window does not
     function(i) !identical(inner_ids(x, i), inner_ids(w, i)),
     logical(1)
   )
-  expect_true(any(differs))
+  expect_true(all(differs))
 })

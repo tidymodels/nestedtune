@@ -648,7 +648,8 @@ TS_DATA <- list(
 # `make_reg_data()` with a `date` column of weekdays only, starting on
 # Wednesday 2020-01-01, so the dates have a two-day gap every weekend (M120).
 # The inner sliding-index fixture runs on it, because on the gap-free dates of
-# `make_ts_data()` a 39-day `lookback` covers 39 rows and the design builds
+# `make_ts_data()` a 39-day `lookback` covers 40 rows, as `lookback = 39`
+# does in the sliding-window design, and the design builds
 # the sliding-window design's splits.
 make_ts_weekday_data <- function() {
   d <- make_reg_data()
