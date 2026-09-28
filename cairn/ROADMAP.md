@@ -1,15 +1,14 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-27 (M119 done; validate green, 18 staleness advisories; 2 rows trimmed for bytes)._
+_Last hygiene check: 2026-09-27 (M120 done; validate green, 18 staleness advisories)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M120 | Inner sliding designs under the other orchestrators | review | — | normal | milestones/M120-inner-sliding-orchestrators.md |
 | M121 | Sliding outer designs with inner sliding designs | planned | M120 | normal | milestones/M121-sliding-outer-inner-pairs.md |
+| M120 | Inner sliding designs under the other orchestrators | done | — | normal | milestones/archive/M120-inner-sliding-orchestrators.md |
 | M119 | Inner sliding-window, sliding-index and sliding-period designs | done | — | normal | milestones/archive/M119-inner-sliding-designs.md |
 | M118 | The test step CRAN runs uses at most 120 s of CPU, and CI still runs every slow test | done | — | normal | milestones/archive/M118-cran-test-time.md |
-| M117 | `nested_fit_resamples()` refuses a metric set that does not suit the model's mode | done | — | normal | milestones/archive/M117-fit-resamples-metrics-mode.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
