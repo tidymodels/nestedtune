@@ -1,6 +1,6 @@
 # M121: Sliding outer designs with inner sliding designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M120
 - **Driving RR:** —
@@ -38,7 +38,7 @@ Each sliding outer design with each inner sliding design is tested and documente
 - [x] T1: Add the nine pair fixtures to `helper-orchestration.R`, each with its outer and inner split class and its literal `nested_resamples()` call. Choose the parameters so that each design has at least three outer folds and every outer fold holds at least one inner resample. State the counts and the counting command in the fixture comment.
 - [x] T2: Write the AC1 and AC2 tests in new `test-time-series-*.R` files with a file-level `skip_heavy_on_cran()` and an oracle header. Time each file serially. Split a file that runs far longer than the others, and add a long one to `Config/testthat/start-first` (LESSONS M16).
 - [x] T3: Update the three texts and run `devtools::document()`. Append a D-entry that claims the nine pairs under `nested_resamples()` and `nested_tune_grid()`. It supersedes the D-083 and D-084 clauses that leave the three sliding outer designs unclaimed with inner sliding designs. Run `Rscript benchmarks/sweep-prose.R --plain` and `--roxygen --plain`.
-- [ ] T4: Run `devtools::test()` and `devtools::check()`, and record the new files' serial times in the work log.
+- [x] T4: Run `devtools::test()` and `devtools::check()`, and record the new files' serial times in the work log.
 
 ## Work log
 
@@ -50,6 +50,7 @@ Each sliding outer design with each inner sliding design is tested and documente
 - 2026-09-27: T2 done. `test-time-series-pairs-window.R`, `-index.R` and `-period.R` each pass 6 of 6, serially in 11.4 s, 10.8 s and 14.2 s with the package load. None runs far longer than the rest, so no split and no `start-first` entry. With the inner index remap planted as a no-op, each grid test fails 5 assertions. The full suite ran 1051 tests with 0 failures and 0 skips.
 - 2026-09-27: T3 done. The sentence calling the three sliding outer designs untested with these inner designs is replaced in the two help sections and `NEWS.md` by the nine-pair claim, which names the functions not tested on the pairs. D-087 appended. `devtools::document()` rewrote six Rd files, and all six gating prose sweeps print clean.
 - 2026-09-27: claim audit: 30 claims read, 2 corrected — helper-orchestration.R, R/nested-tune-grid.R. The corrections are the outer sliding-index window, a 69-day lookback spanning 70 days, and the grid help's nine-pair sentences, moved after the `augment()` sentences with `augment()` added to the not-tested list. The re-read found both accurate.
+- 2026-09-27: T4 done. The full suite ran 1051 tests with 0 failures and 0 skips on the tree before the claim-audit fixes, which changed only comments and help text. `devtools::check()` on the final tree gave 0 errors, 0 warnings and 0 notes. The new files' serial times are in the T2 line. Status set to review.
 
 ## Decisions
 
