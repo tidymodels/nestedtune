@@ -486,6 +486,26 @@ test_that("AC3: a tie between averaged probabilities goes to the first level", {
   }
 })
 
+test_that("an ordered outcome gives an ordered class, whatever the saved class is", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  # tune's `prob_summarize()` reads orderedness from the outcome. Here the
+  # outcome is ordered and the saved class is not.
+  for (i in seq_len(nrow(res))) {
+    res <- edit_fold_predictions(res, i, function(p) {
+      p$y <- factor(as.character(p$y), levels = levels(p$y), ordered = TRUE)
+      p$.pred_class <- factor(
+        as.character(p$.pred_class),
+        levels = levels(p$.pred_class)
+      )
+      p
+    })
+  }
+  avg <- collect_predictions(res, summarize = TRUE)
+  expect_true(is.ordered(avg$.pred_class))
+  expect_identical(levels(avg$.pred_class), levels(avg$y))
+})
+
 # ---- AC4: the table's rows and columns ------------------------------------
 
 held_out_rows <- function(x) {

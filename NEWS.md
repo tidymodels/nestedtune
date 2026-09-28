@@ -3,8 +3,9 @@
 * `collect_predictions()` on a nested result or a workflow-set result
   gains `summarize`, which defaults to `FALSE`. With `summarize = TRUE` it
   returns one averaged prediction per data row, over every completed outer
-  fold that held the row out. On a repeated or Monte Carlo design, a row
-  held out more than once now has one prediction. The average follows
+  fold that held the row out. So on a repeated or Monte Carlo design, a
+  row held out more than once gets one prediction there. The default
+  per-fold table is unchanged. The average follows
   tune's rules for `summarize = TRUE`. Because each fold selected its own
   candidate, the average spans those candidates, and the fold labels and
   `.config` are dropped. Quantile predictions are refused.

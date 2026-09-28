@@ -68,6 +68,7 @@ A user reads one averaged out-of-fold prediction per data row from a nested run 
 - 2026-09-28: the AC7 test planted a `hardhat::quantile_pred`, and `check()` warned that hardhat is undeclared. It now plants a plain column under that name, so Suggests is unchanged.
 - 2026-09-28: claim audit: 63 claims read, 5 corrected — R/nested-results-collect.R, tests/testthat/test-collect-predictions-summarize.R. The same reader re-read the 5 and found that all hold.
 - 2026-09-28: T5 done. `document()` gives no diff. Both prose sweeps clean. `check_pkgdown()` finds no problems. Full suite 1082 tests, 0 failing. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. Status set to review.
+- 2026-09-28: review gate fixes committed (O3 orderedness from the outcome with a test that failed first, O8 NEWS wording). The full `check()` after them is still running.
 
 ## Decisions
 
@@ -100,4 +101,6 @@ Independent review, 2026-09-28: three fresh reviewers, the full fan-out for a us
 - O10 (diff): the criteria were unticked at review start. Proposed: reject, review ticks them.
 - S1 (history): the shared `...` param now gives the `parameters` reason on `collect_extracts()` too. The shared text predates the branch. Proposed: reject.
 - S2 (prior review): `collect_predictions()` never calls `check_predictions_rows()`, which M93 and M100 added for `augment()` and `compute_metrics()`. A duplicated `.row` in one fold now biases an average without a warning. The gap predates the branch. Proposed: follow-up.
+
+Gate triage, 2026-09-28, the user's choice: O3 and O8 fixed now. The O7 ordered-outcome test was written first and failed ("`is.ordered(avg$.pred_class)` ... FALSE"). `class_from_probs()` now reads orderedness from the outcome, and the test passes. The NEWS bullet now says that the default per-fold table is unchanged. O1, O2, O5, O6, S2 and the rest of O7 went to one candidate row in `ROADMAP.md`. O4, O9, O10 and S1 were rejected for the reasons above. After the fixes, the test file passes, all six prose sweeps are clean, and `document()` gives no diff.
 

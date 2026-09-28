@@ -369,7 +369,7 @@ average_fold_predictions <- function(preds, drop) {
       return(probs[, match(nm, prob_cols)])
     }
     if (nm == ".pred_class" && length(prob_cols) > 0L) {
-      return(class_from_probs(probs, prob_cols, v))
+      return(class_from_probs(probs, prob_cols, v, preds[[outcome]]))
     }
     if (nm == ".pred_class") {
       return(class_by_vote(v, group))
@@ -418,8 +418,9 @@ check_no_quantile <- function(x, call = rlang::caller_env()) {
 }
 
 # The class at the largest averaged probability. `which.max()` returns the
-# first of tied maxima, and `prob_cols` is in factor order.
-class_from_probs <- function(probs, prob_cols, saved) {
+# first of tied maxima, and `prob_cols` is in factor order. Orderedness
+# follows the outcome, as in tune's `prob_summarize()`, not the saved class.
+class_from_probs <- function(probs, prob_cols, saved, outcome) {
   idx <- apply(probs, 1L, function(r) {
     if (all(is.na(r))) NA_integer_ else which.max(r)
   })
@@ -427,7 +428,7 @@ class_from_probs <- function(probs, prob_cols, saved) {
   factor(
     labels[idx],
     levels = levels(saved),
-    ordered = is.ordered(saved)
+    ordered = is.ordered(outcome)
   )
 }
 
