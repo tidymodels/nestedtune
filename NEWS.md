@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* `collect_predictions()` on a nested result or a workflow-set result
+  gains `summarize`, which defaults to `FALSE`. With `summarize = TRUE` it
+  returns one averaged prediction per data row, over every completed outer
+  fold that held the row out. On a repeated or Monte Carlo design, a row
+  held out more than once now has one prediction. The average follows
+  tune's rules for `summarize = TRUE`. Because each fold selected its own
+  candidate, the average spans those candidates, and the fold labels and
+  `.config` are dropped. Quantile predictions are refused.
+
 * The per-fold tables of `collect_metrics(summarize = FALSE)` and
   `compute_metrics(summarize = FALSE)` carry the design's fold labels
   each in its own column, as tune's tables do. On a repeated design they

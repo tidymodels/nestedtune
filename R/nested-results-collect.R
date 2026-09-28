@@ -186,19 +186,27 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' * `collect_predictions()` gives one row per assessment row of every
 #'   completed fold, with the columns `tune::last_fit()` produced: the
-#'   outcome, the prediction columns, `.row` and `.config`.
+#'   outcome, the prediction columns, `.row` and `.config`. With
+#'   `summarize = TRUE` it gives one averaged row per data row instead. See
+#'   Averaging across the folds.
 #' * `collect_extracts()` gives one row per completed fold, the fold's value in
 #'   an `.extracts` list column. A completed fold whose extract function
 #'   errored holds `NULL` there, and its `.notes` say why.
 #'
 #' @param x A `nested_results` run with a control that asked for the column.
 #'   See [collect_metrics.nested_results()] for what the object is.
-#' @param ... Not used. It must be empty. tune's `summarize` and `parameters`
-#'   arguments are not offered here.
+#' @param ... Not used. It must be empty. tune's `parameters` argument is not
+#'   offered here, because each fold predicted with the parameters it
+#'   selected.
+#' @param summarize For `collect_predictions()`, whether to average the
+#'   predictions per data row (`TRUE`) or return them per fold (`FALSE`, the
+#'   default). See Averaging across the folds.
 #'
 #' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated
 #'   design), then the stacked prediction columns, or the `.extracts` list
-#'   column.
+#'   column. With `summarize = TRUE`, the columns of the per-fold table in
+#'   the same order, less the fold labels and `.config`, with one row per
+#'   `.row` in `.row` order.
 #'
 #' @section Folds that failed, and columns not saved:
 #'
@@ -220,6 +228,36 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' The inner tuning run's own predictions and extracts, which the same two
 #' control slots save inside tune, are not kept.
 #'
+#' @section Averaging across the folds:
+#'
+#' `summarize = TRUE` averages, for each data row, the predictions of every
+#' completed fold that held the row out. A row that no completed fold held
+#' out is left out, and a partial run warns once, as above. The rules are
+#' tune's for `summarize = TRUE`, and the columns the run saved decide which
+#' rule applies.
+#'
+#' * A numeric prediction, such as a regression's `.pred`, is its mean with
+#'   missing values ignored.
+#' * Class probabilities are each averaged the same way, then divided by the
+#'   row's sum of those averages. A `.pred_class` saved beside them is
+#'   recomputed as the class with the largest averaged probability. It is
+#'   recomputed whatever a postprocessor set in the saved predictions.
+#' * A `.pred_class` saved without probabilities is the most frequent class.
+#' * A censored run takes the median `.pred_time`, which is missing if any
+#'   fold's value is. The survival probabilities in `.pred` take, per
+#'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
+#'   missing values ignored.
+#'
+#' A tie, between votes or between averaged probabilities, goes to the first
+#' of the tied levels in the factor's level order.
+#'
+#' tune's own average groups the rows by candidate. Here each fold selected
+#' its own candidate, so the average spans the candidates the folds
+#' selected, and the fold labels and `.config` are dropped. Quantile
+#' predictions are not averaged: a run whose saved predictions carry a
+#' `.pred_quantile` column is refused with class
+#' `nestedtune_summarize_quantile`.
+#'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
 #' # Ask the control to keep the predictions and a coefficient extract.
@@ -236,6 +274,22 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #'
 #' collect_predictions(res)
 #' collect_extracts(res)
+#'
+#' # A repeated design holds each row out once per repeat. The average
+#' # gives one prediction per row.
+#' set.seed(3)
+#' repeated <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 2, repeats = 2),
+#'   inside = rsample::vfold_cv(v = 2)
+#' )
+#' res_rep <- nested_tune_grid(
+#'   wf,
+#'   repeated,
+#'   grid = data.frame(num_comp = 1:2),
+#'   control = tune::control_grid(save_pred = TRUE)
+#' )
+#' collect_predictions(res_rep, summarize = TRUE)
 #'
 #' @templateVar LINKS [collect_selections()], [collect_metrics()], [nested_tune_grid()]
 #' @templateVar WHAT functions
