@@ -1,15 +1,14 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-28 (status audit after the triage pass: validate green, nothing changed)._
+_Last hygiene check: 2026-09-28 (M122 archived, M119 row pruned, validate green)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M122 | Repeated-design fold labels in per-fold metrics | review | — | normal | milestones/M122-repeated-fold-labels.md |
 | M123 | The parameter set a final fit searched | planned | — | normal | milestones/M123-final-fit-parameter-set.md |
+| M122 | Repeated-design fold labels in per-fold metrics | done | — | normal | milestones/archive/M122-repeated-fold-labels.md |
 | M121 | Sliding outer designs with inner sliding designs | done | — | normal | milestones/archive/M121-sliding-outer-inner-pairs.md |
 | M120 | Inner sliding designs under the other orchestrators | done | — | normal | milestones/archive/M120-inner-sliding-orchestrators.md |
-| M119 | Inner sliding-window, sliding-index and sliding-period designs | done | — | normal | milestones/archive/M119-inner-sliding-designs.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
