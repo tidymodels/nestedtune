@@ -68,6 +68,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
 - claim audit: 46 claims read, 2 corrected — NEWS.md, tests/testthat/test-design-support.R
 - 2026-09-28: T5 done. The NEWS bullet is added. `devtools::test()` passed with no failures and no skips, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min. Status set to review.
 - 2026-09-28: review gate chose to fix before the merge vote. Outer `validation_set()` becomes `Yes` with a footnote, and the gate directed the fixes for O3, O4, O7, O8, S2 and S3 on the branch. O2 goes to a candidate row at hygiene, because ROADMAP is one line under its cap until the M124 row is pruned.
+- step-7 approval: m127-readme-design-table approved for merge
 
 ## Decisions
 
