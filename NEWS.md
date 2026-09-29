@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* A `loo_cv()`, `apparent()` or `permutations()` design, or an outer
+  bootstrap, is now refused even when the design no longer carries that
+  design's class. This covers a row subset such as `folds[1:2, ]`, a design
+  rebuilt from its splits with `rsample::manual_rset()`, and a design with
+  one such split among valid ones. nestedtune finds the design from the
+  class that each split keeps. Before, such an outer design ran unrefused.
+  The error has class `nestedtune_bad_design` and names the rsample
+  function, as the outer bootstrap refusals now also do.
+
 * `loo_cv()`, `apparent()` and `permutations()` are now refused in either
   loop, because none gives a valid nested estimate there.
   `nested_resamples()` refuses them when it builds the design. The seven

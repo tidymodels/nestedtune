@@ -114,16 +114,20 @@ Refused means that nestedtune stops with an error before any fold runs.
 `nested_resamples()` refuses the design when it builds it. The seven
 functions that take a nested design, such as `nested_tune_grid()`,
 refuse it in a design built another way, for example with
-`rsample::nested_cv()`. An outer bootstrap can put the same row in both
-the inner analysis set and the inner assessment set, which makes the
-estimate invalid. As the outer loop, `loo_cv()` holds out one row per
-fold. R² then cannot be computed, and the average RMSE is the mean
-absolute error. As the outer loop, `apparent()` scores its one fold on
-the rows it trained on. As the outer loop, `permutations()` gives each
-fold no assessment set. As the inner loop, tune refuses `loo_cv()` and
-`permutations()`, and it reports that no results are available for
-`apparent()`. So without the refusal, a tuning run with one of these
-inner designs fails every outer fold.
+`rsample::nested_cv()`. A row subset of such a design, such as
+`folds[1:2, ]`, loses the design’s class, but it is still refused. So is
+a design rebuilt from its splits with `rsample::manual_rset()`, and a
+design with one such split among valid ones. nestedtune finds the design
+from the class that each split keeps. An outer bootstrap can put the
+same row in both the inner analysis set and the inner assessment set,
+which makes the estimate invalid. As the outer loop, `loo_cv()` holds
+out one row per fold. R² then cannot be computed, and the average RMSE
+is the mean absolute error. As the outer loop, `apparent()` scores its
+one fold on the rows it trained on. As the outer loop, `permutations()`
+gives each fold no assessment set. As the inner loop, tune refuses
+`loo_cv()` and `permutations()`, and it reports that no results are
+available for `apparent()`. So without the refusal, a tuning run with
+one of these inner designs fails every outer fold.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

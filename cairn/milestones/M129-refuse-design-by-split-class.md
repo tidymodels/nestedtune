@@ -67,6 +67,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: T2 done. `devtools::test()` gave 0 failures.
 - 2026-09-29: checkpoint, T3 half-done. `nested_resamples()` reads the split classes of `outside` and of each inner rset, and the constructor tests pass in full mode. The bootstrap headlines are unchanged, so the existing bootstrap tests needed no edit. The full suite is still running.
 - 2026-09-29: T3 done. `devtools::test()` gave 0 failures.
+- 2026-09-29: checkpoint, T4 half-done. The README paragraph, the NEWS bullet and the help for `nested_resamples()` and `nested_tune_grid()` are updated. A test for one refused split in `outside` was added, because the new help text claims it. All six gating prose sweeps are clean. The full suite and `devtools::check()` are still running.
 
 ## Decisions
 

@@ -120,8 +120,12 @@
 #' a design using a bootstrap for the outer loop, or [rsample::loo_cv()],
 #' [rsample::apparent()] or [rsample::permutations()] for either loop. The
 #' error has condition class `nestedtune_bad_design`. It names every
-#' offending row, column, inner split, index or outer fold. A refusal of one
-#' of those three rsample functions names it. The checks exist because
+#' offending row, column, inner split, index or outer fold. A refusal of a
+#' bootstrap or of one of those three rsample functions names the function.
+#' The design is found from the class of its splits as well as its own
+#' class. So a row subset of such a design is refused, and so is a design
+#' rebuilt with [rsample::manual_rset()] from its splits or holding one such
+#' split among valid ones. The checks exist because
 #' [rsample::nested_cv()] builds a design whatever its `inside` argument
 #' returned, and because a design assembled by hand can index rows its outer
 #' fold never sees.

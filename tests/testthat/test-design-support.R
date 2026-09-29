@@ -561,6 +561,18 @@ test_that("nested_resamples() refuses an outside rebuilt from refused splits", {
     )
     expect_names_design(cnd, design)
   }
+  # One refused split among valid ones is enough.
+  set.seed(1)
+  mixed <- rsample::manual_rset(
+    c(rsample::vfold_cv(d, v = 3)$splits, rsample::loo_cv(d)$splits[1]),
+    paste0("Fold", 1:4)
+  )
+  cnd <- expect_error(
+    nested_resamples(d, outside = mixed, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "Row 4 of", fixed = TRUE)
 })
 
 test_that("nested_resamples() refuses an inside that returns refused splits", {

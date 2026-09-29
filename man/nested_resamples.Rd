@@ -53,8 +53,11 @@ Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:app
 \code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds
 them. None of them gives a valid nested estimate there. The
 README's table of resampling designs gives the reason for each. Both
-refusals have condition class \code{nestedtune_bad_design}, and a refusal of one
-of these three names the rsample function.
+refusals have condition class \code{nestedtune_bad_design}, and each names the
+rsample function. The design is found from the class of its splits as well
+as its own class. So an \code{outside} rset rebuilt with
+\code{\link[rsample:manual_rset]{rsample::manual_rset()}} from such splits is refused too, and so is one
+with a single such split among valid ones.
 }
 
 \section{Time-series designs}{
