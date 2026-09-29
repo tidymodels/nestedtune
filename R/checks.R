@@ -489,6 +489,19 @@ split_designs <- function(x) {
 # in either loop.
 outer_refused_designs <- c("group_bootstraps", "bootstraps", refused_designs)
 
+# The design an inner rset (or anything else) carries that the inner loop
+# refuses, or NA. The rset class decides first; only if it names none are the
+# split classes read (D-097), the first refused one naming the design.
+inner_refused_design <- function(x) {
+  by_class <- refused_design(x)
+  if (!is.na(by_class)) {
+    return(by_class)
+  }
+  found <- split_designs(x)
+  found <- found[found %in% refused_designs]
+  if (length(found) == 0L) NA_character_ else found[[1L]]
+}
+
 # Every outer split whose class marks a design the outer loop refuses, grouped
 # by design, so one message names every offending row. `arg` names the
 # argument the design came in as.
@@ -571,12 +584,14 @@ refused_design_reason <- function(design, role) {
   )
 }
 
-# Every inner rset carrying a refused design, grouped by design, so one
-# message names every offending outer fold.
+# Every inner element carrying a refused design, by its rset class or by its
+# split classes, grouped by design, so one message names every offending
+# outer fold. An element that is not a data frame of splits carries none and
+# is left to the column class check below.
 check_inner_refused <- function(resamples, call = rlang::caller_env()) {
   found <- vapply(
     resamples[["inner_resamples"]],
-    refused_design,
+    inner_refused_design,
     character(1)
   )
   if (all(is.na(found))) {
@@ -589,7 +604,7 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
       n <- length(bad)
       where <- paste(
         "{cli::qty(n)}Element{?s} {bad} of {.field inner_resamples}",
-        "{cli::qty(n)}{?is/are} {.fn rsample::{design}}."
+        "{cli::qty(n)}{?holds/hold} {.fn rsample::{design}} splits."
       )
       paste(
         cli::format_inline(where),

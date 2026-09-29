@@ -63,6 +63,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: implement started on branch m129-refuse-design-by-split-class. No question gate, because the plan left nothing open.
 - 2026-09-29: checkpoint, T1 half-done. `check_outer_splits()` and the outer tests are written, and `test-design-support.R` passes in full mode. The full `devtools::test()` run is still going, so T1 stays unticked.
 - 2026-09-29: T1 done. `devtools::test()` gave 0 failures, and `air format` reflowed the two touched files.
+- 2026-09-29: checkpoint, T2 half-done. `inner_refused_design()` and the inner tests are written, and `test-design-support.R` passes in full mode. The inner message now says an element holds a design's splits. The full suite is still running.
 
 ## Decisions
 
