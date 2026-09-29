@@ -46,7 +46,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 
 ## Tasks
 
-- [ ] T1: Outer loop in the entry check. First write the AC1 tests and the outer cases of AC2, AC4 and AC5 in `tests/testthat/test-design-support.R`. Use the `entry_refusal()` stand-in (line 163). Then extend `refused_design()` (`R/checks.R:431`). If the rset class names no refused design, it infers one from the split classes. Map `group_boot_split`, `boot_split`, `perm_split` and `loo_split` to their functions. If the design carries no `boot_split` or `perm_split`, map `apparent_split` to `apparent()`. Fold the outer bootstrap check (`R/checks.R:353`) into this path. Its message names the function and the split positions.
+- [x] T1: Outer loop in the entry check. First write the AC1 tests and the outer cases of AC2, AC4 and AC5 in `tests/testthat/test-design-support.R`. Use the `entry_refusal()` stand-in (line 163). Then extend `refused_design()` (`R/checks.R:431`). If the rset class names no refused design, it infers one from the split classes. Map `group_boot_split`, `boot_split`, `perm_split` and `loo_split` to their functions. If the design carries no `boot_split` or `perm_split`, map `apparent_split` to `apparent()`. Fold the outer bootstrap check (`R/checks.R:353`) into this path. Its message names the function and the split positions.
 - [ ] T2: Inner loop in the entry check. First write the AC3 tests and the inner cases of AC2, AC4 and AC5. Then make `check_inner_refused()` (`R/checks.R:469`) read split classes from each element that is a data frame with a `splits` list column. Leave every other element to `check_column_class()`.
 - [ ] T3: The constructor. First write the `nested_resamples()` cases of AC4 and AC5. Then give `nested_resamples()` (`R/nested-resamples.R:157`, `:172`) and `inner_resamples_from_split()` (`:237`) the same inference. Make the bootstrap message name the function. Update the existing bootstrap tests (`test-design-support.R:86`) where the message text changes.
 - [ ] T4: Documentation and checks. Add the AC6 sentences to the Refused paragraph (`README.Rmd:112`) and run `devtools::build_readme()`. Add the NEWS bullet. Read the help text at `R/nested-resamples.R:40` and `R/nested-tune-grid.R:121`. Change it only where it says how a design is recognized. Run `devtools::document()`, the prose sweep, `devtools::test()` and `devtools::check()`.
@@ -62,6 +62,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: the recheck found two items, both in AC2. "Comes from a refused design" also covered `make_splits()` rebuilds, and "the split's position" was unclear for the inner and one-split cases. AC2 was reworded to fix both. AC1 and AC3-AC7 gave no finding.
 - 2026-09-29: implement started on branch m129-refuse-design-by-split-class. No question gate, because the plan left nothing open.
 - 2026-09-29: checkpoint, T1 half-done. `check_outer_splits()` and the outer tests are written, and `test-design-support.R` passes in full mode. The full `devtools::test()` run is still going, so T1 stays unticked.
+- 2026-09-29: T1 done. `devtools::test()` gave 0 failures, and `air format` reflowed the two touched files.
 
 ## Decisions
 

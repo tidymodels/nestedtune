@@ -468,7 +468,11 @@ split_designs <- function(x) {
         function(cls) inherits(split, cls),
         names(refused_split_classes)
       )
-      if (length(hit) == 0L) NA_character_ else refused_split_classes[[hit[[1L]]]]
+      if (length(hit) == 0L) {
+        NA_character_
+      } else {
+        refused_split_classes[[hit[[1L]]]]
+      }
     },
     character(1),
     USE.NAMES = FALSE

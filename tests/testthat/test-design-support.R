@@ -329,23 +329,26 @@ rebuilt <- function(rset) {
 for (design in names(REFUSED_OUTER)) {
   local({
     design <- design
-    test_that(sprintf("a row subset of an outer %s design is refused", design), {
-      skip_if_no_engines()
-      d <- support_data(n = 30)
-      wf <- det_workflow(d)
-      whole <- quiet_nested_cv(d, REFUSED_OUTER[[design]], V3)
-      for (cut in names(ROW_CUTS)) {
-        part <- ROW_CUTS[[cut]](whole, 1:2)
-        expect_false(inherits(part, "rset"))
-        cnd <- entry_refusal(nested_tune_grid(wf, part, grid = det_grid()))
-        expect_names_design(cnd, design)
-        expect_match(conditionMessage(cnd), "Rows 1 and 2", fixed = TRUE)
-        expect_identical(
-          rlang::call_name(conditionCall(cnd)),
-          "nested_tune_grid"
-        )
+    test_that(
+      sprintf("a row subset of an outer %s design is refused", design),
+      {
+        skip_if_no_engines()
+        d <- support_data(n = 30)
+        wf <- det_workflow(d)
+        whole <- quiet_nested_cv(d, REFUSED_OUTER[[design]], V3)
+        for (cut in names(ROW_CUTS)) {
+          part <- ROW_CUTS[[cut]](whole, 1:2)
+          expect_false(inherits(part, "rset"))
+          cnd <- entry_refusal(nested_tune_grid(wf, part, grid = det_grid()))
+          expect_names_design(cnd, design)
+          expect_match(conditionMessage(cnd), "Rows 1 and 2", fixed = TRUE)
+          expect_identical(
+            rlang::call_name(conditionCall(cnd)),
+            "nested_tune_grid"
+          )
+        }
       }
-    })
+    )
   })
 }
 
