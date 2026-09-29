@@ -32,7 +32,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - [x] AC4: `rsample::manual_rset()` rebuilds the splits of `loo_cv()`, `permutations()`, `apparent()`, `bootstraps()` and `group_bootstraps()` designs. Each rebuild is refused as the `outside` argument of `nested_resamples()` and as the outer design at `nested_tune_grid()`. Rebuilds of `loo_cv()`, `permutations()` and `apparent()` splits are refused as every inner design at `nested_tune_grid()`. Each of the 13 refusals has class `nestedtune_bad_design` and names the rsample function. The `nested_tune_grid()` refusals come before any fold runs.
 - [x] AC5: A test shows that each of these designs reaches the fold dispatch, so `nested_tune_grid()` raises the stand-in's `nestedtune_sentinel` error. The first is the first two rows of a `rsample::nested_cv()` design with outer and inner `vfold_cv()`. The second has an outer `manual_rset()` of `vfold_cv()` splits. The others have an inner `bootstraps(apparent = TRUE)` or `group_bootstraps(apparent = TRUE)`, plain and rebuilt with `manual_rset()`. The same test shows that `nested_resamples()` builds with `inside = rsample::bootstraps(times = 3, apparent = TRUE)`. It also builds with an outer `manual_rset()` of `vfold_cv()` splits. An inner element that is not a data frame still gets the malformed-column refusal.
 - [x] AC6: The README's Refused paragraph, knitted into `README.md`, and one new `NEWS.md` bullet say three things. A row subset of a refused design is refused. So is a `manual_rset()` rebuilt from its splits, and a design with one such split among others.
-- [ ] AC7: `devtools::test()` gives 0 failures, `devtools::check()` gives 0 errors and 0 warnings, and `Rscript benchmarks/sweep-prose.R --plain` is clean.
+- [x] AC7: `devtools::test()` gives 0 failures, `devtools::check()` gives 0 errors and 0 warnings, and `Rscript benchmarks/sweep-prose.R --plain` is clean.
 
 ## Coverage
 
@@ -73,6 +73,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: the claim audit reader re-read the 5 corrected claims once, and all 5 hold.
 - 2026-09-29: T4 done. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The six gating prose sweeps and `air format --check` are clean. Status set to review.
 - 2026-09-29: review checkpoint. AC1 to AC6 have evidence and ticks. The three reviewers reported. The full suite and `devtools::check()` for AC7 are still running.
+- 2026-09-29: review pre-gate checkpoint. All seven criteria have evidence and ticks, and the consistency gate passed. No finding shows a criterion failing. 17 findings go to the gate with proposed dispositions.
 
 ## Decisions
 
@@ -86,6 +87,7 @@ Evidence run 2026-09-29 on the branch head `689b24ac`, which already contains `o
 - AC4: three blocks pass. "an outer manual_rset() rebuilt from refused splits is refused at entry" covers 5 designs (19). "nested_resamples() refuses an outside rebuilt from refused splits" covers 5 designs (19). "an inner manual_rset() rebuilt from refused splits is refused at entry" covers `loo_cv()`, `permutations()` and `apparent()` (12). Each of the 13 refusals has the class and the function name. On main, 13 of 19, both constructor blocks, and 9 of 12 fail.
 - AC5: four control blocks pass on the branch and on main. The first is "the entry check still admits a subset or rebuild of a v-fold design" (2). The second is "an inner bootstrap with its apparent split still reaches the folds" (6). The third is "nested_resamples() still builds a bootstrap inside and a rebuilt v-fold outside" (3). The fourth is "an inner element that is not a data frame is still malformed" (2).
 - AC6: `README.Rmd` lines 116 to 121 and the knitted `README.md` lines 117 to 120 carry the three statements. A row subset is refused, a `manual_rset()` rebuild is refused, and one such split among valid ones is refused. `devtools::build_readme()` gave no diff. The one new `NEWS.md` bullet says the same three things.
+- AC7: `devtools::test()` gave 0 failures, 0 warnings, 0 skips and 13474 passes. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 12m 44s. `Rscript benchmarks/sweep-prose.R --plain` exits 0.
 
 Consistency gate, 2026-09-29: `cairn_validate.py` exits 0, with 18 references-staleness advisories and no FAIL. No `DESIGN.md` principle changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `build_readme()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0, and `air format --check .` exits 0. NEWS has the bullet, and no new top-level file was added.
 
