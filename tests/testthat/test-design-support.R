@@ -288,3 +288,413 @@ test_that("a validation_set() call cannot be built in either role", {
   expect_match(conditionMessage(outer$parent), "must be empty")
   expect_match(conditionMessage(inner$parent), "must be empty")
 })
+
+# A row subset or a manual_rset() rebuild of a refused design loses the class
+# its rset carries, but each split keeps its own (M129). The entry check
+# reads the split classes, so these designs are refused as the plain ones are.
+REFUSED_OUTER <- list(
+  loo_cv = quote(rsample::loo_cv()),
+  permutations = quote(rsample::permutations(permute = y, times = 3)),
+  bootstraps = quote(rsample::bootstraps(times = 3)),
+  group_bootstraps = quote(rsample::group_bootstraps(group = g, times = 3))
+)
+
+ROW_CUTS <- list(
+  bracket = function(x, i) x[i, ],
+  slice = function(x, i) dplyr::slice(x, i),
+  vec_slice = function(x, i) vctrs::vec_slice(x, i)
+)
+
+# rsample::nested_cv() can warn for an outer bootstrap (a bare bootstraps()
+# call or a bootstraps rset), which is not under test.
+quiet_nested_cv <- function(d, outside, inside) {
+  suppressWarnings(nested_cv_design(d, outside, inside))
+}
+
+# The refusal names the function in full, since `bootstraps()` alone would
+# also match inside `group_bootstraps()`.
+expect_names_design <- function(cnd, design) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  expect_match(
+    conditionMessage(cnd),
+    paste0("rsample::", design, "()"),
+    fixed = TRUE
+  )
+}
+
+# The rebuild keeps the splits and their ids and nothing else of the design.
+rebuilt <- function(rset) {
+  rsample::manual_rset(rset$splits, rset$id)
+}
+
+for (design in names(REFUSED_OUTER)) {
+  local({
+    design <- design
+    test_that(
+      sprintf("a row subset of an outer %s design is refused", design),
+      {
+        skip_if_no_engines()
+        d <- support_data(n = 30)
+        wf <- det_workflow(d)
+        whole <- quiet_nested_cv(d, REFUSED_OUTER[[design]], V3)
+        for (cut in names(ROW_CUTS)) {
+          part <- ROW_CUTS[[cut]](whole, 1:2)
+          expect_false(inherits(part, "rset"))
+          cnd <- entry_refusal(nested_tune_grid(wf, part, grid = det_grid()))
+          expect_names_design(cnd, design)
+          expect_match(conditionMessage(cnd), "Rows 1 and 2", fixed = TRUE)
+          expect_identical(
+            rlang::call_name(conditionCall(cnd)),
+            "nested_tune_grid"
+          )
+        }
+      }
+    )
+  })
+}
+
+test_that("an outer manual_rset() rebuilt from refused splits is refused at entry", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  outer <- c(REFUSED_OUTER, apparent = quote(rsample::apparent()))
+  for (design in names(outer)) {
+    set.seed(1)
+    rset <- eval(rlang::call_modify(outer[[design]], data = quote(d)))
+    again <- rebuilt(rset)
+    expect_s3_class(again, "manual_rset")
+    folds <- quiet_nested_cv(d, again, V3)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, design)
+  }
+
+  # A bootstrap's apparent split is named as part of the bootstrap.
+  set.seed(1)
+  again <- rebuilt(rsample::bootstraps(d, times = 3, apparent = TRUE))
+  folds <- quiet_nested_cv(d, again, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "bootstraps")
+  expect_match(conditionMessage(cnd), "Rows 1, 2, 3, and 4", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "apparent()", fixed = TRUE)
+})
+
+test_that("one outer split from a refused design refuses the whole design", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  set.seed(1)
+  folds <- rsample::vfold_cv(d, v = 3)$splits
+  with_one <- function(extra) {
+    outer <- rsample::manual_rset(c(folds, extra), paste0("Fold", 1:4))
+    quiet_nested_cv(d, outer, V3)
+  }
+
+  cnd <- entry_refusal(nested_tune_grid(
+    wf,
+    with_one(rsample::loo_cv(d)$splits[1]),
+    grid = det_grid()
+  ))
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "Row 4 of", fixed = TRUE)
+
+  cnd <- entry_refusal(nested_tune_grid(
+    wf,
+    with_one(rsample::apparent(d)$splits),
+    grid = det_grid()
+  ))
+  expect_names_design(cnd, "apparent")
+  expect_match(conditionMessage(cnd), "Row 4 of", fixed = TRUE)
+
+  # The last row of a bootstrap with its apparent split is that split alone,
+  # which scores its fold on the rows it trained on.
+  boots <- quiet_nested_cv(
+    d,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE)),
+    V3
+  )
+  last <- boots[4, ]
+  expect_s3_class(last$splits[[1]], "apparent_split")
+  cnd <- entry_refusal(nested_tune_grid(wf, last, grid = det_grid()))
+  expect_names_design(cnd, "apparent")
+  expect_no_match(conditionMessage(cnd), "bootstraps()", fixed = TRUE)
+})
+
+test_that("the entry check still admits a subset or rebuild of a v-fold design", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  whole <- nested_cv_design(d, V3, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, whole[1:2, ], grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+
+  set.seed(1)
+  again <- rebuilt(rsample::vfold_cv(d, v = 3))
+  folds <- quiet_nested_cv(d, again, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+})
+
+# The inner loop refuses the three designs, and a row subset of an inner
+# design loses its rset class too. The refusal names the design rather than
+# only calling the column malformed.
+REFUSED_INNER <- list(
+  loo_cv = quote(rsample::loo_cv()),
+  permutations = quote(rsample::permutations(permute = y, times = 3))
+)
+
+for (design in names(REFUSED_INNER)) {
+  local({
+    design <- design
+    test_that(
+      sprintf("a row subset of an inner %s design is refused", design),
+      {
+        skip_if_no_engines()
+        d <- support_data(n = 30)
+        wf <- det_workflow(d)
+        whole <- nested_cv_design(d, V3, REFUSED_INNER[[design]])
+        for (cut in names(ROW_CUTS)) {
+          folds <- whole
+          folds$inner_resamples <- lapply(
+            folds$inner_resamples,
+            ROW_CUTS[[cut]],
+            i = 1:2
+          )
+          expect_false(inherits(folds$inner_resamples[[1]], "rset"))
+          cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+          expect_names_design(cnd, design)
+          expect_match(
+            conditionMessage(cnd),
+            "Elements 1, 2, and 3",
+            fixed = TRUE
+          )
+          expect_no_match(conditionMessage(cnd), "malformed", fixed = TRUE)
+        }
+      }
+    )
+  })
+}
+
+test_that("a row subset of one fold's inner design names that fold alone", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, REFUSED_INNER$loo_cv)
+  folds$inner_resamples[[2]] <- folds$inner_resamples[[2]][1:2, ]
+  folds$inner_resamples[c(1, 3)] <- nested_cv_design(d, V3, V3)$inner_resamples[
+    c(1, 3)
+  ]
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "Element 2 of", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "Elements", fixed = TRUE)
+})
+
+test_that("an inner manual_rset() rebuilt from refused splits is refused at entry", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  inner <- c(REFUSED_INNER, apparent = quote(rsample::apparent()))
+  for (design in names(inner)) {
+    folds <- nested_cv_design(d, V3, inner[[design]])
+    folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+    expect_s3_class(folds$inner_resamples[[1]], "manual_rset")
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, design)
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+  }
+})
+
+test_that("one inner split from a refused design refuses its fold", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, V3)
+  inner <- folds$inner_resamples[[2]]
+  one_loo <- rsample::loo_cv(rsample::analysis(folds$splits[[2]]))$splits[1]
+  folds$inner_resamples[[2]] <- rsample::manual_rset(
+    c(inner$splits, one_loo),
+    paste0("Fold", 1:4)
+  )
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "Element 2 of", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "Elements", fixed = TRUE)
+})
+
+test_that("an inner bootstrap with its apparent split still reaches the folds", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  boots <- list(
+    bootstraps = quote(rsample::bootstraps(times = 3, apparent = TRUE)),
+    group_bootstraps = quote(
+      rsample::group_bootstraps(group = g, times = 3, apparent = TRUE)
+    )
+  )
+  for (design in names(boots)) {
+    folds <- nested_cv_design(d, V3, boots[[design]])
+    expect_s3_class(
+      folds$inner_resamples[[1]]$splits[[4]],
+      "apparent_split"
+    )
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_sentinel")
+
+    folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_sentinel")
+  }
+})
+
+test_that("an inner element that is not a data frame is still malformed", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, V3)
+  folds$inner_resamples[[2]] <- "not a design"
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  expect_match(conditionMessage(cnd), "malformed", fixed = TRUE)
+})
+
+# nested_resamples() reads the split classes of the rset it is handed as
+# `outside`, and of each inner rset its `inside` call returns (M129).
+test_that("nested_resamples() refuses an outside rebuilt from refused splits", {
+  d <- support_data(n = 30)
+  outer <- c(REFUSED_OUTER, apparent = quote(rsample::apparent()))
+  for (design in names(outer)) {
+    set.seed(1)
+    again <- rebuilt(eval(rlang::call_modify(outer[[design]], data = quote(d))))
+    cnd <- expect_error(
+      nested_resamples(d, outside = again, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, design)
+  }
+  # One refused split among valid ones is enough.
+  set.seed(1)
+  mixed <- rsample::manual_rset(
+    c(rsample::vfold_cv(d, v = 3)$splits, rsample::loo_cv(d)$splits[1]),
+    paste0("Fold", 1:4)
+  )
+  cnd <- expect_error(
+    nested_resamples(d, outside = mixed, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "Row 4 of", fixed = TRUE)
+})
+
+test_that("nested_resamples() refuses an inside that returns refused splits", {
+  d <- support_data(n = 30)
+  rebuilt_loo <- function(data) rebuilt(rsample::loo_cv(data))
+  cnd <- expect_error(
+    nested_resamples(
+      d,
+      outside = rsample::vfold_cv(v = 3),
+      inside = rebuilt_loo()
+    ),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "loo_cv")
+})
+
+test_that("nested_resamples() still builds a bootstrap inside and a rebuilt v-fold outside", {
+  d <- support_data(n = 30)
+  set.seed(1)
+  folds <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = rsample::bootstraps(times = 3, apparent = TRUE)
+  )
+  expect_s3_class(folds$inner_resamples[[1]]$splits[[4]], "apparent_split")
+
+  set.seed(1)
+  again <- rebuilt(rsample::vfold_cv(d, v = 3))
+  folds <- nested_resamples(
+    d,
+    outside = again,
+    inside = rsample::vfold_cv(v = 3)
+  )
+  expect_s3_class(folds, "manual_rset")
+  expect_identical(nrow(folds), 3L)
+})
+
+test_that("the plain outer bootstrap refusals name the function", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  boots <- list(
+    bootstraps = quote(rsample::bootstraps(times = 3)),
+    group_bootstraps = quote(rsample::group_bootstraps(group = g, times = 3))
+  )
+  for (design in names(boots)) {
+    set.seed(1)
+    rset <- eval(rlang::call_modify(boots[[design]], data = quote(d)))
+    expect_s3_class(rset, design)
+    cnd <- expect_error(
+      nested_resamples(d, outside = rset, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, design)
+
+    folds <- quiet_nested_cv(d, boots[[design]], V3)
+    expect_s3_class(folds, design)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, design)
+    # The entry check serves seven functions, so its hint names none.
+    expect_match(conditionMessage(cnd), "nestedtune refuses", fixed = TRUE)
+    expect_no_match(conditionMessage(cnd), "nested_tune_grid()", fixed = TRUE)
+  }
+})
+
+# tune refuses an inner loo_cv() or permutations() design by its rset class,
+# so a design found by its split classes would run in tune. Its refusal gives
+# the design's own flaw, the reason the outer loop gives, instead.
+test_that("an inner design found by its splits is refused for its own flaw", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, REFUSED_INNER$loo_cv)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+
+  folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "one row per fold", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+
+  # Elements refused for different reasons get one line each.
+  whole <- nested_cv_design(d, V3, REFUSED_INNER$loo_cv)
+  folds$inner_resamples[[3]] <- whole$inner_resamples[[3]]
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_match(conditionMessage(cnd), "Elements 1 and 2 of", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "Element 3 of", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "one row per fold", fixed = TRUE)
+})
+
+test_that("nested_resamples() names the outer fold whose inner splits it refuses", {
+  d <- support_data(n = 30)
+  mixed_in <- function(data) {
+    folds <- rsample::vfold_cv(data, v = 3)
+    rsample::manual_rset(
+      c(folds$splits, rsample::apparent(data)$splits),
+      paste0("Fold", 1:4)
+    )
+  }
+  cnd <- expect_error(
+    nested_resamples(
+      d,
+      outside = rsample::vfold_cv(v = 3),
+      inside = mixed_in()
+    ),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "apparent")
+  expect_match(conditionMessage(cnd), "splits for outer fold 1", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "rows it trained on", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "cannot be an", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "tune reports", fixed = TRUE)
+})

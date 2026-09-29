@@ -41,8 +41,12 @@
 #' [rsample::permutations()] are refused in either loop, where rsample builds
 #' them. None of them gives a valid nested estimate there. The
 #' README's table of resampling designs gives the reason for each. Both
-#' refusals have condition class `nestedtune_bad_design`, and a refusal of one
-#' of these three names the rsample function.
+#' refusals have condition class `nestedtune_bad_design`, and each names the
+#' rsample function. The design is found from the class of its splits as well
+#' as its own class. So an `outside` rset rebuilt with
+#' [rsample::manual_rset()] from such splits is refused too, and so is one
+#' with a single such split among valid ones. The same holds for the rset
+#' that `inside` returns for each outer fold, and that refusal names the fold.
 #'
 #' @section Time-series designs:
 #'
@@ -158,8 +162,7 @@ nested_resamples <- function(data, outside, inside, ...) {
     cli::cli_abort(
       c(
         "{.arg outside} cannot be a bootstrap.",
-        x = "The same row can land in both the inner analysis and inner \\
-             assessment set, so the nested estimate would be invalid.",
+        x = refused_design_reason(bootstrap_design(outside), "outer"),
         i = "{.fn rsample::nested_cv} only warns here; \\
              {.fn nested_resamples} refuses."
       ),
@@ -179,6 +182,9 @@ nested_resamples <- function(data, outside, inside, ...) {
       class = "nestedtune_bad_design"
     )
   }
+  # An rset whose own class names none of these, such as a manual_rset()
+  # rebuild, is read by its split classes (D-097).
+  check_outer_splits(outside, "outside", call = environment())
 
   inner_cl <- cl[["inside"]]
   if (!rlang::is_call(inner_cl)) {
@@ -190,14 +196,19 @@ nested_resamples <- function(data, outside, inside, ...) {
     ))
   }
 
-  inner <- lapply(
-    outside$splits,
-    inner_resamples_from_split,
-    cl = inner_cl,
-    env = env,
-    data = data,
-    call = environment()
-  )
+  # By position rather than by Map(), which would evaluate the `inside` call
+  # it was handed instead of passing it on.
+  frame <- environment()
+  inner <- lapply(seq_along(outside$splits), function(fold) {
+    inner_resamples_from_split(
+      outside$splits[[fold]],
+      fold,
+      cl = inner_cl,
+      env = env,
+      data = data,
+      call = frame
+    )
+  })
 
   out <- outside
   out[["inner_resamples"]] <- inner
@@ -213,7 +224,7 @@ nested_resamples <- function(data, outside, inside, ...) {
 # call, so the inner specification sees exactly what rsample would hand it --
 # same rows, same order, same columns, so the same seed draws the same splits --
 # while the returned splits reference `data` instead.
-inner_resamples_from_split <- function(split, cl, env, data, call) {
+inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
   outer_idx <- as.integer(split$in_id)
   analysis_frame <- as.data.frame(split)
 
@@ -234,13 +245,17 @@ inner_resamples_from_split <- function(split, cl, env, data, call) {
       call = call
     )
   }
-  refused <- refused_design(inner_rset)
+  refused <- inner_refused_design(inner_rset)
   if (!is.na(refused)) {
+    # A design found by its split classes can be mixed, so the headline names
+    # the splits and the outer fold rather than calling it that design.
+    headline <- if (is.na(refused_design(inner_rset))) {
+      "{.arg inside} gave {.fn rsample::{refused}} splits for outer fold {fold}."
+    } else {
+      "{.arg inside} cannot be an {.fn rsample::{refused}} design."
+    }
     cli::cli_abort(
-      c(
-        "{.arg inside} cannot be an {.fn rsample::{refused}} design.",
-        x = refused_design_reason(refused, "inner")
-      ),
+      c(headline, x = inner_refused_reason(inner_rset, refused)),
       class = "nestedtune_bad_design",
       call = call
     )
