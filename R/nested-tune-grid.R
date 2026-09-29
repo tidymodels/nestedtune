@@ -125,7 +125,9 @@
 #' The design is found from the class of its splits as well as its own
 #' class. So a row subset of such a design is refused, and so is a design
 #' rebuilt with [rsample::manual_rset()] from its splits or holding one such
-#' split among valid ones. The checks exist because
+#' split among valid ones. An apparent split beside bootstrap or permutation
+#' splits counts as part of that design, because those functions add one as
+#' an option. The checks exist because
 #' [rsample::nested_cv()] builds a design whatever its `inside` argument
 #' returned, and because a design assembled by hand can index rows its outer
 #' fold never sees.

@@ -477,10 +477,15 @@ split_designs <- function(x) {
     character(1),
     USE.NAMES = FALSE
   )
-  # bootstraps() and permutations() add an apparent split as an option, so
-  # beside their splits it belongs to that design, not to apparent().
-  if (any(found %in% c("group_bootstraps", "bootstraps", "permutations"))) {
-    found[found %in% "apparent"] <- NA_character_
+  # bootstraps(), group_bootstraps() and permutations() add an apparent split
+  # as an option, so beside their splits it belongs to that design, not to
+  # apparent().
+  host <- intersect(
+    c("group_bootstraps", "bootstraps", "permutations"),
+    found
+  )
+  if (length(host) > 0L) {
+    found[found %in% "apparent"] <- host[[1L]]
   }
   found
 }

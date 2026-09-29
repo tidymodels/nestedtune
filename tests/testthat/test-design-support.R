@@ -305,7 +305,8 @@ ROW_CUTS <- list(
   vec_slice = function(x, i) vctrs::vec_slice(x, i)
 )
 
-# rsample::nested_cv() warns for an outer bootstrap, which is not under test.
+# rsample::nested_cv() can warn for an outer bootstrap (a bare bootstraps()
+# call or a bootstraps rset), which is not under test.
 quiet_nested_cv <- function(d, outside, inside) {
   suppressWarnings(nested_cv_design(d, outside, inside))
 }
@@ -366,6 +367,15 @@ test_that("an outer manual_rset() rebuilt from refused splits is refused at entr
     cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
     expect_names_design(cnd, design)
   }
+
+  # A bootstrap's apparent split is named as part of the bootstrap.
+  set.seed(1)
+  again <- rebuilt(rsample::bootstraps(d, times = 3, apparent = TRUE))
+  folds <- quiet_nested_cv(d, again, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "bootstraps")
+  expect_match(conditionMessage(cnd), "Rows 1, 2, 3, and 4", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "apparent()", fixed = TRUE)
 })
 
 test_that("one outer split from a refused design refuses the whole design", {
