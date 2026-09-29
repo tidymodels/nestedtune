@@ -94,7 +94,7 @@ design.
 | `group_bootstraps()` | Refused    | Yes        |
 | `loo_cv()`           | No         | No         |
 | `apparent()`         | No         | No         |
-| `validation_set()`   | No         | No         |
+| `validation_set()`   | Yes[^1]    | No         |
 | `permutations()`     | No         | No         |
 | `rolling_origin()`   | Yes        | Yes        |
 | `sliding_window()`   | Yes        | Yes        |
@@ -103,10 +103,10 @@ design.
 
 Yes means that the test suite runs the design in that loop through
 `nested_tune_grid()` and that every outer fold completes. It holds for
-the arguments those tests use. For the first eleven functions, the
-design in the other loop is a v-fold design. For the four time-series
-functions, it is another time-series design. An inner time-series design
-is tested only with a time-series outer design. The “Time-series
+the arguments those tests use. For a Yes cell in the first eleven rows,
+the design in the other loop is a v-fold design. For a Yes cell in the
+four time-series rows, it is a time-series design. An inner time-series
+design is tested only with a time-series outer design. The “Time-series
 designs” section of `?nested_resamples` says which other functions are
 tested on each time-series design.
 
@@ -120,13 +120,14 @@ computed, and the average RMSE is the mean absolute error. As the inner
 loop, tune refuses `loo_cv()`, so every outer fold fails. As the outer
 loop, `apparent()` scores its one fold on the rows it trained on. As the
 inner loop, tune reports that no results are available, so every outer
-fold fails. `validation_set()` takes a split from
-`initial_validation_split()` rather than a data frame, so
-`nested_resamples()` cannot build it in either loop. As the outer loop,
-`permutations()` gives each fold no assessment set, so every outer fold
-fails. As the inner loop, tune refuses it, so every outer fold fails.
+fold fails. As the inner loop, `validation_set()` cannot be built,
+because it takes a split from `initial_validation_split()` rather than a
+data frame. As the outer loop, `permutations()` gives each fold no
+assessment set, so every outer fold fails. As the inner loop, tune
+refuses it, so every outer fold fails.
 
-A cell reads Untested when no test runs the design in that loop.
+A cell reads Untested when no test shows whether the design works in
+that loop.
 
 Learn more:
 
@@ -146,3 +147,11 @@ Learn more:
 - [Running the outer loop in
   parallel](https://nestedtune.tidymodels.org/articles/parallel.html),
   the same call on a pool of mirai daemons.
+
+[^1]: Build the validation set before the call, with
+    `split <- initial_validation_split(data)` and
+    `validation_set(split)`. Then pass
+    `rbind(training(split), validation(split))` as `data`, because those
+    are the rows the validation set refers to. A call such as
+    `outside = validation_set()` cannot be built, because the function
+    takes a split rather than a data frame.

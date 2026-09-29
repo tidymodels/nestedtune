@@ -67,6 +67,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
 - 2026-09-28: T4 done. The README section follows the example chunk and holds the table and four paragraphs, with the `No` reasons worded from the observed fold notes. The six gating sweeps are clean, and `devtools::build_readme()` added only the new section to `README.md`.
 - claim audit: 46 claims read, 2 corrected — NEWS.md, tests/testthat/test-design-support.R
 - 2026-09-28: T5 done. The NEWS bullet is added. `devtools::test()` passed with no failures and no skips, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min. Status set to review.
+- 2026-09-28: review gate chose to fix before the merge vote. Outer `validation_set()` becomes `Yes` with a footnote, and the gate directed the fixes for O3, O4, O7, O8, S2 and S3 on the branch. O2 goes to a candidate row at hygiene, because ROADMAP is one line under its cap until the M124 row is pruned.
 
 ## Decisions
 
@@ -81,6 +82,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
   - `permutations()`: outer `No`, because every outer fold fails, since a permutation split has no assessment set. Inner `No`, because every outer fold fails with tune's note that permutation samples are not suitable for tuning. New tests.
   - `rolling_origin()`: outer `Yes` and inner `Yes` with a time-series outer design. Backed by `test-time-series-designs.R` "a rolling-origin design matches a hand-rolled reference loop".
   - `sliding_window()`, `sliding_index()`, `sliding_period()`: outer `Yes`, backed by `test-time-series-designs.R` ("a sliding-window design matches a hand-rolled reference loop" and the two `sprintf` tests). Inner `Yes` with an outer `rolling_origin()`, backed by the three `test-time-series-inner.R` tests "nested_tune_grid() on an inner %s design matches a hand-rolled reference loop". Each asserts `.completed` through `expect_ts_matches_reference()`.
+- 2026-09-28 (review): outer `validation_set()` moves from `No` to `Yes` with a footnote. This supersedes the T1 ledger line for that cell. A set built beforehand, passed with `data` equal to its training and validation rows, is accepted and completes its one outer fold. The new test "an outer validation set built beforehand completes its one fold" backs the cell. The call form still fails, and inner `validation_set()` stays `No`. The table now has 21 `Yes`, 2 `Refused` and 7 `No` cells.
 
 ## Review
 
@@ -112,3 +114,20 @@ Three fresh reviewers ran: [O] diff-bug, [S] blame-history and [S] prior-review.
 - S2: The README sentence on the v-fold partner of the first eleven functions also seems to cover their `Refused` and `No` cells.
 - S3: The fixture test in `test-sweep-prose.R` plants one leak per dropped line class, and it has no pipe-table plant or `--paragraphs` check.
 - S4: `suppressWarnings()` around the outer `loo_cv()` run can hide an unrelated warning.
+
+### Dispositions
+
+The maintainer chose to fix before the merge vote. They picked `Yes` with a footnote for O1 and left the other fixes to the session.
+
+- O1: fixed. Outer `validation_set()` reads `Yes` with a footnote on how to build it. The inner reason now names the inner loop alone. The new test backs the outer cell, as the Decisions line records.
+- O2: follow-up. A candidate row lands at hygiene.
+- O3: fixed. The inner `Yes` tests check the class of every inner rset and the row count.
+- O4: fixed. `expect_every_fold_fails()` first checks that there is at least one row.
+- O5: rejected. The refusal and its message test predate this branch, and AC3 names the bootstrap refusal.
+- O6: rejected. No swept page has a line block, and the roxygen path already drops the same lines.
+- O7 and S2: fixed. The README names a v-fold partner for a `Yes` cell in the first eleven rows. It names a time-series partner for a `Yes` cell in the time-series rows.
+- O8: fixed. `Untested` now reads "no test shows whether the design works in that loop".
+- O9: rejected. The tests that need no engines run without them, which is a minor departure from T2's wording.
+- S1: rejected. AC5 requires the prose to define all four values.
+- S3: fixed. `fixtures/sweep-prose-parse.Rmd` has a pipe-table plant with an indented row, and the parse test checks that no paragraph holds it. On that fixture, the script on `main` read the table as a paragraph and reported a modal in it. The branch script did neither.
+- S4: rejected. The test asserts the values the README names, so a hidden warning does not change what it checks.

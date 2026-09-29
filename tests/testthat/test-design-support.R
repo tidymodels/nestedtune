@@ -72,7 +72,10 @@ for (design in names(SUPPORTED$inner)) {
       skip_if_no_engines()
       run <- support_run(support_data(), V3, SUPPORTED$inner[[design]])
       expect_s3_class(run$folds, "vfold_cv")
-      expect_s3_class(run$folds$inner_resamples[[1]], design)
+      for (inner in run$folds$inner_resamples) {
+        expect_s3_class(inner, design)
+      }
+      expect_identical(nrow(run$res), nrow(run$folds))
       expect_true(all(run$res$.completed))
     })
   })
@@ -98,6 +101,7 @@ test_that("an outer group bootstrap is refused, as a call and as an object", {
 
 # Every outer fold failed, each with a note naming why.
 expect_every_fold_fails <- function(res, pattern) {
+  expect_gt(nrow(res), 0L)
   expect_false(any(res$.completed))
   for (notes in res$.notes) {
     expect_true(any(grepl(pattern, notes$note)))
@@ -157,7 +161,26 @@ test_that("an inner apparent design fails every fold in tune", {
   expect_every_fold_fails(run$res, "No results are available")
 })
 
-test_that("validation_set() cannot be built in either role", {
+test_that("an outer validation set built beforehand completes its one fold", {
+  skip_if_no_engines()
+  set.seed(53)
+  split <- rsample::initial_validation_split(support_data())
+  vs <- rsample::validation_set(split)
+  d <- rbind(rsample::training(split), rsample::validation(split))
+  run <- support_run(d, vs, V3)
+  expect_s3_class(run$folds$splits[[1]], "val_split")
+  expect_identical(nrow(run$res), 1L)
+  expect_true(all(run$res$.completed))
+  # the fold holds out the validation rows, apart from the rows it trains on
+  outer <- run$res$splits[[1]]
+  expect_identical(
+    nrow(rsample::assessment(outer)),
+    nrow(rsample::validation(split))
+  )
+  expect_length(intersect(outer$in_id, outer$out_id), 0L)
+})
+
+test_that("a validation_set() call cannot be built in either role", {
   d <- support_data()
   outer <- expect_error(
     nested_resamples(

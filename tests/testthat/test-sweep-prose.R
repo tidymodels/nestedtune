@@ -76,7 +76,8 @@ test_that("the parse drops every planted leak and keeps the prose beside it", {
     `comment body` = at("This middle line would be read"),
     `indented fence` = at("an indented fence whose body"),
     `bulleted wrap` = at("should be read as the procedure's error"),
-    `numbered item` = at("reports it as ordinary prose with far more")
+    `numbered item` = at("reports it as ordinary prose with far more"),
+    `pipe table` = at("a table row that should never be read")
   )
   straddle <- at("The reader takes the")
   closing <- at("The page ends on a short prose line.")
