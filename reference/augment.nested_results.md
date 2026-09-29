@@ -70,6 +70,12 @@ states its rules. For example, a `.pred_class` saved beside class
 probabilities is recomputed from the averaged probabilities, whatever
 class a postprocessor set.
 
+A metric computed on averaged predictions describes an average of
+several fitted models, not the tuning procedure, so it is not the nested
+estimate.
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+gives that estimate.
+
 ## Designs and folds refused
 
 A design that leaves some data row out of every assessment set is
@@ -88,6 +94,11 @@ Read the predictions such a design has with
 On a design that holds out some row more than once, saved quantile
 predictions are refused with class `nestedtune_summarize_quantile`,
 because `collect_predictions(summarize = TRUE)` does not average them.
+On such a design, the three edited shapes of saved predictions that the
+average refuses are refused here too, with class
+`nestedtune_summarize_columns`.
+[`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
+lists them.
 
 A run whose control did not set `save_pred = TRUE` is refused with class
 `nestedtune_column_not_saved`. A run in which no fold completed is
@@ -102,7 +113,8 @@ value in every prediction column, with a warning of class
 takes the average over the completed folds. A missing value is `NA`, or
 `NULL` in a list column such as the `.pred` of a censored-regression
 run. A data column whose name is also a prediction column's name is
-refused with class `nestedtune_collect_name_collision`.
+refused with class `nestedtune_collect_name_collision`, before either
+refusal of the average.
 
 ## See also
 

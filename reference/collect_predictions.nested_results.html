@@ -182,7 +182,8 @@ is missing only when missing votes outnumber every level.</p></li>
 <li><p>A censored run takes the median <code>.pred_time</code>, which is missing if any
 fold's value is. The survival probabilities in <code>.pred</code> take, per
 <code>.eval_time</code>, the mean <code>.pred_survival</code> and <code>.weight_censored</code> with
-missing values ignored.</p></li>
+missing values ignored. A <code>NULL</code> entry in <code>.pred</code> is left out of its
+row's average, and a row whose every entry is <code>NULL</code> holds <code>NULL</code>.</p></li>
 </ul><p>A tie, between votes or between averaged probabilities, goes to the first
 of the tied levels in the factor's level order.</p>
 <p>tune's own average groups the rows by candidate. Here each fold selected
@@ -191,6 +192,22 @@ selected, and the fold labels and <code>.config</code> are dropped. Quantile
 predictions are not averaged: a run whose saved predictions carry a
 <code>.pred_quantile</code> column is refused with class
 <code>nestedtune_summarize_quantile</code>.</p>
+<p>A metric computed on these averages describes an average of several
+fitted models, not the tuning procedure, so it is not the nested
+estimate. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> gives that estimate.</p>
+<p>The average reads the saved predictions as the run returned them, and
+refuses two kinds of edited table. A completed fold whose <code>.row</code> column
+does not hold each row the fold held out exactly once, and no other row,
+is refused with class <code>nestedtune_collect_predictions_predictions</code>. The
+per-fold table, with <code>summarize = FALSE</code>, is not checked. Three shapes
+are refused with class <code>nestedtune_summarize_columns</code>:</p><ul><li><p>Two or more factor outcome columns, where the average reads one.</p></li>
+<li><p>A <code>.pred_class</code> column with no factor outcome column.</p></li>
+<li><p>A censored <code>.pred</code> entry that is not <code>NULL</code> and has no <code>.eval_time</code>
+column.</p></li>
+</ul><p>An outcome column here is any column other than the prediction columns
+and the fold labels. The columns tune adds beside the predictions are not
+outcome columns either. Those are <code>.row</code>, <code>.config</code> and <code>.case_weights</code>.
+Nor are <code>.iter</code> and <code>.eval_time</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

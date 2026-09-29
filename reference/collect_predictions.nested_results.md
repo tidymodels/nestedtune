@@ -110,7 +110,8 @@ The columns the run saved decide which rule applies.
 - A censored run takes the median `.pred_time`, which is missing if any
   fold's value is. The survival probabilities in `.pred` take, per
   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
-  missing values ignored.
+  missing values ignored. A `NULL` entry in `.pred` is left out of its
+  row's average, and a row whose every entry is `NULL` holds `NULL`.
 
 A tie, between votes or between averaged probabilities, goes to the
 first of the tied levels in the factor's level order.
@@ -121,6 +122,31 @@ selected, and the fold labels and `.config` are dropped. Quantile
 predictions are not averaged: a run whose saved predictions carry a
 `.pred_quantile` column is refused with class
 `nestedtune_summarize_quantile`.
+
+A metric computed on these averages describes an average of several
+fitted models, not the tuning procedure, so it is not the nested
+estimate.
+[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+gives that estimate.
+
+The average reads the saved predictions as the run returned them, and
+refuses two kinds of edited table. A completed fold whose `.row` column
+does not hold each row the fold held out exactly once, and no other row,
+is refused with class `nestedtune_collect_predictions_predictions`. The
+per-fold table, with `summarize = FALSE`, is not checked. Three shapes
+are refused with class `nestedtune_summarize_columns`:
+
+- Two or more factor outcome columns, where the average reads one.
+
+- A `.pred_class` column with no factor outcome column.
+
+- A censored `.pred` entry that is not `NULL` and has no `.eval_time`
+  column.
+
+An outcome column here is any column other than the prediction columns
+and the fold labels. The columns tune adds beside the predictions are
+not outcome columns either. Those are `.row`, `.config` and
+`.case_weights`. Nor are `.iter` and `.eval_time`.
 
 ## See also
 
