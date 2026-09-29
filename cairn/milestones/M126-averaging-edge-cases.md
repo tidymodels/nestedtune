@@ -7,7 +7,7 @@
 - **Principles touched:** GP2, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes what two exported readers refuse and how fast they average
-- **Branch/PR:** m126-averaging-edge-cases
+- **Branch/PR:** m126-averaging-edge-cases · https://github.com/tidymodels/nestedtune/pull/141
 
 ## Goal
 
