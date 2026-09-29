@@ -57,6 +57,8 @@ Why 3.2.3: testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/test
 - 2026-09-29: plan gate chose a 3.2.3 floor over the lowest passing release and over keeping 3.0.0. The lowest passing release leaves 3.2.2 and its known error inside the range. The suite's `local_mocked_bindings()` calls already exceed 3.0.0. Falsified by the AC2 or AC3 run failing at 3.2.3 for a testthat reason.
 - 2026-09-29: plan gate chose one-time runs at the floor over a CI job pinned to it. The job costs a 15-25 minute run per push, for a Suggests entry that only test runners read. Falsified by a test adopting a testthat function newer than the floor without anyone noticing.
 - 2026-09-29: plan gate chose both check runs over the CRAN-conditions run alone. Only the full run reaches the 46 snapshot files and the custom reporter. Falsified by the full run adding no failure mode that the CRAN run lacks.
+- 2026-09-29: /milestone-implement set in-progress and cut `m130-testthat-floor`. At T1, testthat 3.2.3 and 3.2.2 failed to compile under R 4.6.1: `reassign.c` calls `SET_FORMALS`, `SET_BODY` and `SET_CLOENV`, which R 4.6 no longer declares. testthat 3.3.0 (published 2025-11-13, `R (>= 4.1.0)`) built and loaded. The machine has no other R and no rig.
+- 2026-09-29: implement gate chose to re-plan at a 3.3.0 floor. It rejected verifying 3.2.3 on a CI job with R 4.5, or on a local R 4.5 the user installs. The goal names 3.2.3, so M130 returns to planned. The branch held no code and was deleted.
 
 ## Decisions
 
