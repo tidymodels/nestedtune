@@ -720,6 +720,8 @@ for (case in row_mismatch_cases) {
       for (other in labels[-2L]) {
         expect_no_match(flat_message(cnd), other, fixed = TRUE)
       }
+      # The message points to the per-fold table the check leaves alone.
+      expect_match(flat_message(cnd), "summarize = FALSE", fixed = TRUE)
       # The per-fold table reads the same run without a condition.
       expect_no_condition(per_fold <- collect_predictions(planted))
       expect_s3_class(per_fold, "tbl_df")
@@ -925,4 +927,23 @@ test_that("M126 AC5: a probability tie with one missing probability goes to the 
     expect_identical(mine$.pred_other, 0.5)
     expect_identical(as.character(mine$.pred_class), "event")
   }
+})
+
+test_that("M126: a probability tie whose plain sums round apart goes to the first level", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  # Both true means are 0.2, and `mean()` gives both the same double. The
+  # plain sum 0.05 + 0.35 rounds below 0.2 + 0.2, so an average without
+  # `mean()`'s second pass gives the tie to "other".
+  event <- c(0.05, 0.35)
+  other <- c(0.2, 0.2)
+  expect_identical(mean(event), mean(other))
+  expect_lt(sum(event), sum(other))
+  planted <- plant_row(res, row, ".pred_event", event)
+  planted <- plant_row(planted, row, ".pred_other", other)
+  avg <- collect_predictions(planted, summarize = TRUE)
+  mine <- avg[avg$.row == row, ]
+  expect_identical(mine$.pred_event, mine$.pred_other)
+  expect_identical(as.character(mine$.pred_class), "event")
 })

@@ -71,6 +71,7 @@
 - 2026-09-28: T6 done. `devtools::document()` is current, `pkgdown::check_pkgdown()` finds no problems, and `devtools::check()` at `85aaa2de` gives 0 errors, 0 warnings and 0 notes, its test run included. Status set to review.
 - 2026-09-28: review return 1 (defect): AC6 fails. `benchmarks/averaging-speed.R` deals folds so one fold can hold a row more than once, and 25,971 of 33,334 rows are not held out by 3 folds. Fix the fold assignment so each row is in each of the 3 folds once, re-run the script, and log its output. AC1 to AC5, AC7, AC8 and the gate pass (Review section). Status back to in-progress.
 - 2026-09-28: review return 1 fixed. `benchmarks/averaging-speed.R` now stacks the 3 folds one after another, each holding every row once in its own random order, and stops unless every row is held out by 3 distinct folds. That guard stops on the old dealing (7,363 of 33,334 rows). Script output on R 4.6.1 aarch64-apple-darwin23: 33,334 of 33,334 rows held out by 3 distinct folds. Probabilities agree TRUE, frozen 0.559 s, branch 0.030 s, ratio 0.054. Class agree TRUE, 0.018 s and 0.018 s, ratio 1.000. Censored agree TRUE, 0.784 s and 0.359 s, ratio 0.458. No `R/` file changed. Status set to review.
+- 2026-09-28: review gate, pass 2: the user chose to fix findings 1, 2, 5, 9, 10 and 11 on the branch before approval (Review section). Findings 3, 4 and 8 went to one candidate row. After the fix, `mean_by()` equals `mean()` on 2,000 random groups, and the benchmark ratio is 0.090.
 
 ## Decisions
 
@@ -121,3 +122,15 @@ Independent review, three fresh readers on `git diff main..HEAD`. The prior-revi
 11. The outcome-column paragraph says "not outcome columns either" twice. `NEWS.md` lines 13 and 14 run past 80 characters. The NEWS bullet leaves out "that is not NULL" for shape three.
 12. `factor_outcomes()` and `outcome_column()` each hard-code the same list of non-outcome columns.
 13. AC6 was unticked with a fail line. Pass 2 above records its new evidence.
+
+Triage at the gate, 2026-09-28, the user choosing to fix first:
+- Finding 1: fix now. `mean_by()` adds `mean()`'s second pass, skipped where the first estimate is not finite.
+- Finding 2: fix now. A new test plants `.pred_event = c(0.05, 0.35)` and `.pred_other = c(0.2, 0.2)`. It fails on the code before the fix, with class other, and passes after it.
+- Finding 5: fix now. `mean_by()` fills each group `1:n` and gives `NaN` to a group with no rows.
+- Finding 9: fix now. Under `collect_predictions`, the message names `summarize = TRUE` and points to `summarize = FALSE`, and the AC1 tests assert that.
+- Findings 10 and 11: fix now, in `NEWS.md` and the roxygen paragraph.
+- Findings 3, 4 and 8: follow-up, one ROADMAP candidate row.
+- Finding 6: rejected. Predictions near 1e308 do not occur.
+- Finding 7: rejected. It is an untested platform, and the fix narrows the gap there.
+- Finding 12: rejected. `outcome_column()` held the list before the branch, and the two lists agree.
+- Finding 13: no change needed. Pass 2 re-verified AC6.

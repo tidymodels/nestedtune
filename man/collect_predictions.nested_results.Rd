@@ -129,7 +129,7 @@ column.
 An outcome column here is any column other than the prediction columns
 and the fold labels. The columns tune adds beside the predictions are not
 outcome columns either. Those are \code{.row}, \code{.config} and \code{.case_weights}.
-\code{.iter} and \code{.eval_time} are not outcome columns either.
+Nor are \code{.iter} and \code{.eval_time}.
 }
 
 \examples{

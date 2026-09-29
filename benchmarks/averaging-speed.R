@@ -6,7 +6,8 @@
 # version, in one R session on one machine, so the ratio is what it reports.
 # It also checks that the two agree on each table: numeric columns within
 # `all.equal(tolerance = 1e-12)`, factor columns `identical()`. The rewrite
-# uses grouped sums, whose rounding differs from `mean()`'s in the last bits.
+# uses grouped sums with `mean()`'s second pass. Where `long double` is wider
+# than `double`, their rounding can differ from `mean()`'s in the last bits.
 #
 #   Rscript benchmarks/averaging-speed.R
 #

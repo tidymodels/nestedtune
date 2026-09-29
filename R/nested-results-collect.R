@@ -282,7 +282,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' An outcome column here is any column other than the prediction columns
 #' and the fold labels. The columns tune adds beside the predictions are not
 #' outcome columns either. Those are `.row`, `.config` and `.case_weights`.
-#' `.iter` and `.eval_time` are not outcome columns either.
+#' Nor are `.iter` and `.eval_time`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -433,13 +433,19 @@ average_fold_predictions <- function(
   new_tbl(cols)
 }
 
-# Grouped statistics over `v`, one per group `1:n` of the integer `group`,
-# each group non-empty. They are written with grouped sums and one sort
-# rather than a call per group (M126: the benchmark's 100,002-row
-# probability table took 0.8 s that way, `benchmarks/averaging-speed.R`).
-# The mean ignores missing values, and a group with none left gives `NaN`,
-# as `mean(na.rm = TRUE)` does. Its rounding can differ from `mean()`'s in
-# the last bits, because `mean()` refines its sum in a second pass.
+# Grouped statistics over `v`, one per group `1:n` of the integer `group`.
+# They are written with grouped sums and one sort rather than a call per
+# group (M126: the benchmark's 100,002-row probability table took 0.8 s
+# that way, `benchmarks/averaging-speed.R`).
+# The mean ignores missing values, and a group with none left, or with no
+# rows, gives `NaN`, as `mean(na.rm = TRUE)` does. Like `mean()`, it adds a
+# second pass: the mean of each value's distance from the first estimate,
+# skipped where that estimate is not finite. Without it, two groups with the
+# same true mean can round one step apart, and a probability tie goes to
+# the wrong level. Where `long double` is `double`, as on aarch64 macOS, the
+# result equals `mean()`'s (2,000 random groups with missing values, R 4.6.1,
+# 2026-09-28). Where `long double` is wider, `mean()` sums in it, so the two
+# can differ in the last bits; that case was not run.
 #
 # `v` can be a matrix, averaged column by column in one pass, which gives a
 # matrix; a vector gives a vector.
@@ -449,13 +455,20 @@ mean_by <- function(v, group, n) {
   }
   seen <- !is.na(v)
   v[!seen] <- 0
-  sums <- rowsum(v, group, reorder = TRUE)
   counts <- rowsum(seen + 0, group, reorder = TRUE)
-  unname(sums / counts)
+  est <- rowsum(v, group, reorder = TRUE) / counts
+  dev <- v - est[match(group, as.integer(rownames(est))), , drop = FALSE]
+  dev[!seen] <- 0
+  refine <- rowsum(dev, group, reorder = TRUE) / counts
+  finite <- is.finite(est)
+  est[finite] <- est[finite] + refine[finite]
+  out <- matrix(NaN, n, ncol(v))
+  out[as.integer(rownames(est)), ] <- est
+  out
 }
 
 # The median, missing when any value in the group is, as `stats::median()`
-# is by default. For an even group it halves the sum of the middle two,
+# is by default. Every group `1:n` must hold a row. For an even group it halves the sum of the middle two,
 # where `stats::median()` calls `mean()`, so the two can differ in the last
 # bit.
 median_by <- function(v, group, n) {
@@ -1191,15 +1204,26 @@ check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
     return(invisible(x))
   }
   labels <- fold_ids(x)[bad]
+  msg <- c(
+    "{.fn {verb}} needs each fold's saved predictions to hold exactly \\
+     the rows that fold held out, each once.",
+    x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
+         {?its/their} held-out rows.",
+    i = "A saved prediction table must keep its {.field .row} column as \\
+         the run returned it."
+  )
+  if (verb == "collect_predictions") {
+    msg[[1L]] <- "{.code summarize = TRUE} needs each fold's saved \\
+                  predictions to hold exactly the rows that fold held out, \\
+                  each once."
+    msg <- c(
+      msg,
+      i = "Call {.fn collect_predictions} with {.code summarize = FALSE} \\
+           for the per-fold predictions."
+    )
+  }
   cli::cli_abort(
-    c(
-      "{.fn {verb}} needs each fold's saved predictions to hold exactly \\
-       the rows that fold held out, each once.",
-      x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
-           {?its/their} held-out rows.",
-      i = "A saved prediction table must keep its {.field .row} column as \\
-           the run returned it."
-    ),
+    msg,
     class = paste0("nestedtune_", verb, "_predictions"),
     call = call
   )
