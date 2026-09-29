@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M128: Refuse the resampling designs the README marks No
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -53,7 +53,7 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 - [x] T2: In `R/nested-resamples.R`, refuse the three outer designs next to the bootstrap refusal (line 150). Refuse the three inner designs in `inner_resamples_from_split()`, right after `eval_spec()`. Give the new refusals and the bootstrap refusal class `nestedtune_bad_design`. Each message gives the reason the README gives today for that design in that role. An outer `loo_cv()` scores one row per fold, so R² cannot be computed and the averaged RMSE is the mean absolute error. An outer `apparent()` scores the rows it trained on. An outer `permutations()` gives each fold no assessment set. As inner designs, tune refuses `loo_cv()` and `permutations()` and reports no results for `apparent()`.
 - [x] T3: Write the AC2 tests first, then add the refusals to `check_nested()` in `R/checks.R`. Place them after the bootstrap check and before the element checks. The inner check reads each `inner_resamples` element with `inherits()`, because the class checks come later. The racer and annealer tests pass over legs where `tuner_ready()` is false (LESSONS, M101). `nested_workflow_map()` re-signals the error with its class kept (LESSONS, M73), so its test asserts the class.
 - [x] T4: Edit the `README.Rmd` table and its Refused and No paragraphs, then run `devtools::build_readme()`. Edit the roxygen in `R/nested-resamples.R` and at `R/nested-tune-grid.R:119`, then run `devtools::document()`. Add one `NEWS.md` bullet. Run `benchmarks/sweep-prose.R` over the touched pages.
-- [ ] T5: Run `devtools::test()` and `devtools::check()`. Compare any note with one run on `main` in the same environment.
+- [x] T5: Run `devtools::test()` and `devtools::check()`. Compare any note with one run on `main` in the same environment.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -71,6 +71,7 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 - 2026-09-29: T4 done. README table and paragraphs, the two help passages and one NEWS bullet. `build_readme()` and `document()` regenerated `README.md` and six `man/` pages. The six gating sweeps are clean.
 - 2026-09-29: claim audit: 50 claims read, 3 corrected — R/checks.R, R/nested-resamples.R, README.Rmd
 - 2026-09-29: the claim audit reader ([O]) re-read the three corrections once and all hold. The inner reasons now name only the folds that use the design. The help sentence covers the two refusals it describes. The README states the inner failure as the case without the refusal.
+- 2026-09-29: T5 done. `devtools::test()` on the branch gave 0 failures. `devtools::check()` on the branch gave 0 errors, 0 warnings and 0 notes. On `main`, run in a worktree, it gave 0 errors, 0 warnings and 1 note about the worktree's `.git` file. Status set to `review`.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
