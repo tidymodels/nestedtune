@@ -5,6 +5,7 @@ _Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review lef
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M127 | README table of supported resampling designs | planned | — | normal | milestones/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |
 | M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |
@@ -12,6 +13,7 @@ _Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review lef
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
+- [high] Refuse at entry the designs M127's table marks `No`. Outer `apparent()` scores its one fold on its own training rows. Outer `loo_cv()` scores one row per fold. Inner `loo_cv()`, `apparent()` and `permutations()` fail on every outer fold after the whole loop runs. Added 2026-09-28 at M127's plan gate (GP3, D-095). Refusing is new exported behavior, and outer `loo_cv()` needs its own judgment. Promote after M127 merges, or on a user report of one of these designs
 - [low] Decide whether DESCRIPTION's `testthat (>= 3.0.0)` must rise to 3.2.3, which fixed an error from `skip()` called outside a test. The 41 file-level `skip_heavy_on_cran()` calls from M118 use that path. Added 2026-09-27 at M118's review (finding O7). Raising a minimum version is a dependency change and needs its own gate. Promote on a report of that error under an older testthat, or at the next release walk
 - Put the Tibshirani and Tibshirani (2009) corrected flat estimate beside the nested one, read from the final fit's stored tuning run through tune's `debias_estimate()`. Added 2026-09-11 at issue [#95](https://github.com/tidymodels/nestedtune/issues/95)'s plan gate (D-062, tune#917 holds the code). The nested record cannot carry it, because `.inner_metrics` is summarized (D-043). Shipping it trades GP5 and amends D-014's no-claim posture on the stored run, so it takes a D-entry at its gate. Promote when tune exports the function and a source validates the correction for a tuned workflow, or when a user asks for the comparison
 - What #91 still asks for after M84-M87 and M96: the maintainers' human pass over the guides and help pages (topepo's PR offer in the thread). M96 took the `@param` inheritance and templates and dropped the guides' "you" item (2026-09-15). M87 routed the passive-voice and -ing entries to DESIGN Known issues. [#91](https://github.com/tidymodels/nestedtune/issues/91) stays open. Promote on the issue author's PR offer landing
