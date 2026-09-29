@@ -134,3 +134,5 @@ Triage at the gate, 2026-09-28, the user choosing to fix first:
 - Finding 7: rejected. It is an untested platform, and the fix narrows the gap there.
 - Finding 12: rejected. `outcome_column()` held the list before the branch, and the two lists agree.
 - Finding 13: no change needed. Pass 2 re-verified AC6.
+
+After the fixes, at `b4af516f`: `devtools::test()` gave 0 failed, 0 warnings, 0 skipped, 13,163 passed. One roxygen line changed during that run, so `test-sweep-prose.R` and `test-collect-predictions-summarize.R` ran again on the final tree, with 0 failed. `devtools::check()` started after the last edit and gave 0 errors, 0 warnings and 0 notes. All six gating prose sweeps print clean, and `devtools::document()` is current. The benchmark still shows 33,334 of 33,334 rows held out by 3 distinct folds. Probabilities agree TRUE, frozen 0.790 s, branch 0.071 s, ratio 0.090. Class agree TRUE, 0.026 s and 0.027 s. Censored agree TRUE, 1.143 s and 0.559 s. AC1 to AC8 still hold.
