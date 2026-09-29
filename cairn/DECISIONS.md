@@ -1979,6 +1979,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the README table is the package's statement of which rsample designs it supports in each loop. A cell reads `Yes` only when a test runs the design in that role through `nested_tune_grid()`. It reads `Refused` only for a refusal that nestedtune writes, and `No` for a design that fails or gives an estimate that is not valid. Every other cell reads `Untested`. `?nested_resamples` keeps the per-function detail for the time-series designs, and the table points there.
 **Consequences:** the table claims nothing for the other five functions. The `No` designs stay unrefused, which departs from GP3 until a candidate row's refusals ship. Falsified by a user report of a failure on a `Yes` design, or by an rsample or tune release that changes the behavior behind a `No` cell.
 
+### D-096 (2026-09-29): `nested_resamples()` and the entry check refuse outer and inner `loo_cv()`, `apparent()` and `permutations()` designs. Supersedes D-095's clause that leaves the `No` designs unrefused
+
+**Context:** D-095 left the README's `No` designs unrefused, which departs from GP3. Outer `loo_cv()` runs, but each fold scores one row, so the averaged RMSE is the mean absolute error. Outer `apparent()` scores its fold on the rows it trained on. The other four designs fail every fold after the whole loop runs. `rsample::nested_cv()` builds all six.
+**Decision:** `nested_resamples()` refuses the six designs at construction. `check_nested()` refuses them for all seven entry functions, `nested_fit_resamples()` included. Both use class `nestedtune_bad_design`, and the outer bootstrap refusal in `nested_resamples()` gains that class. The six README cells read `Refused`. Inner `validation_set()` stays `No`, because it cannot be built.
+**Consequences:** the outer `loo_cv()` refusal matches tune, which refuses leave-one-out for a flat run. Falsified by a tune release that tunes on leave-one-out or permutations, or by a source that gives a valid nested estimate from one-row outer folds. (Supersedes D-095's Consequences clause that the `No` designs stay unrefused.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
