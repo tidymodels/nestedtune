@@ -73,6 +73,7 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 - 2026-09-29: the claim audit reader ([O]) re-read the three corrections once and all hold. The inner reasons now name only the folds that use the design. The help sentence covers the two refusals it describes. The README states the inner failure as the case without the refusal.
 - 2026-09-29: T5 done. `devtools::test()` on the branch gave 0 failures. `devtools::check()` on the branch gave 0 errors, 0 warnings and 0 notes. On `main`, run in a worktree, it gave 0 errors, 0 warnings and 1 note about the worktree's `.git` file. Status set to `review`.
 - 2026-09-29: review in progress. AC1-AC4 evidence recorded and ticked, and the consistency gate passed. AC5's `devtools::check()` run is pending. Three reviewers reported, and their findings are not yet triaged.
+- 2026-09-29: step-7 approval: m128-refuse-unsupported-designs approved for merge, with the recommended fixes applied first.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
@@ -105,4 +106,6 @@ Findings from three fresh reviewers ([O] diff-bug O1-O11, [S] blame-history S1-S
 - S3 / P1: the "Next, because the checks above judge the whole object" comment in `check_nested()` is stale. Proposed: fix now.
 - S5 / P2: the older README-table NEWS bullet still says why designs "fail". Proposed: fix now.
 - S6: the inner refusal at entry is tested only through `nested_tune_grid()`. Proposed: reject, because the code is shared and AC2 fixes the test set.
+
+Gate triage (2026-09-29): the user chose "Fix, then merge", which accepts every proposed disposition above. Fixed on the branch: O2/S1 (the inner lead now reads "that tuning cannot use", each reason says "each outer fold that tunes on it", and the README says "a tuning run"), O3 (`air format`), O7 (the DESIGN bullet names the three designs), O10/S4, S3/P1 and S5/P2. Follow-up rows: O1 and O6 got a new candidate row on row-subset designs, and O4/S2 extended the README-to-test row. Rejected with the reasons given: O5, O8, O9, O11 and S6. After the fixes, the affected test files passed, the six sweeps are clean, `air` is clean, and `document()` and `build_readme()` were re-run.
 

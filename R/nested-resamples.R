@@ -39,7 +39,7 @@
 #'
 #' Second, [rsample::loo_cv()], [rsample::apparent()] and
 #' [rsample::permutations()] are refused in either loop, where rsample builds
-#' all six designs. None of them gives a valid nested estimate there. The
+#' them. None of them gives a valid nested estimate there. The
 #' README's table of resampling designs gives the reason for each. Both
 #' refusals have condition class `nestedtune_bad_design`, and a refusal of one
 #' of these three names the rsample function.
@@ -173,7 +173,7 @@ nested_resamples <- function(data, outside, inside, ...) {
   if (!is.na(refused)) {
     cli::cli_abort(
       c(
-        "{.arg outside} cannot be a {.fn rsample::{refused}} design.",
+        "{.arg outside} cannot be an {.fn rsample::{refused}} design.",
         x = refused_design_reason(refused, "outer")
       ),
       class = "nestedtune_bad_design"
@@ -238,7 +238,7 @@ inner_resamples_from_split <- function(split, cl, env, data, call) {
   if (!is.na(refused)) {
     cli::cli_abort(
       c(
-        "{.arg inside} cannot be a {.fn rsample::{refused}} design.",
+        "{.arg inside} cannot be an {.fn rsample::{refused}} design.",
         x = refused_design_reason(refused, "inner")
       ),
       class = "nestedtune_bad_design",

@@ -51,7 +51,7 @@ analysis and the inner assessment set, which makes the estimate invalid.
 
 Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
 \code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds
-all six designs. None of them gives a valid nested estimate there. The
+them. None of them gives a valid nested estimate there. The
 README's table of resampling designs gives the reason for each. Both
 refusals have condition class \code{nestedtune_bad_design}, and a refusal of one
 of these three names the rsample function.

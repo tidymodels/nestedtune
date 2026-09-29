@@ -381,8 +381,9 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
     )
   }
   check_inner_refused(resamples, call = call)
-  # Next, because the checks above judge the whole object and these judge it
-  # element by element. Neither column is checked by anything upstream: a
+  # Next the two class checks, which judge each element of the list columns;
+  # the checks above judge the whole object or read only element classes.
+  # Neither column is checked by anything upstream: a
   # design whose `inside` produced no rset is refused by nested_resamples()
   # (M18) but built without complaint by rsample::nested_cv(), and nothing at
   # all guards `splits`. Left to the drivers, both shapes cost a full run and
@@ -450,15 +451,15 @@ refused_design_reason <- function(design, role) {
     ),
     "inner loo_cv" = paste(
       "tune refuses {.fn rsample::loo_cv} as a tuning design, so each outer",
-      "fold that uses it would fail."
+      "fold that tunes on it would fail."
     ),
     "inner apparent" = paste(
       "tune reports no results for {.fn rsample::apparent}, so each outer",
-      "fold that uses it would fail."
+      "fold that tunes on it would fail."
     ),
     "inner permutations" = paste(
       "tune refuses {.fn rsample::permutations} as a tuning design, so each",
-      "outer fold that uses it would fail."
+      "outer fold that tunes on it would fail."
     )
   )
 }
@@ -496,7 +497,7 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
     rep("x", length(lines))
   )
   cli::cli_abort(
-    c("{.arg resamples} has an inner design no fold can tune on.", bullets),
+    c("{.arg resamples} has an inner design that tuning cannot use.", bullets),
     class = "nestedtune_bad_design",
     call = call
   )

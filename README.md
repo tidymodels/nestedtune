@@ -122,8 +122,8 @@ absolute error. As the outer loop, `apparent()` scores its one fold on
 the rows it trained on. As the outer loop, `permutations()` gives each
 fold no assessment set. As the inner loop, tune refuses `loo_cv()` and
 `permutations()`, and it reports that no results are available for
-`apparent()`. So without the refusal, a run with one of these inner
-designs fails every outer fold.
+`apparent()`. So without the refusal, a tuning run with one of these
+inner designs fails every outer fold.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

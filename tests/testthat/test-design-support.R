@@ -121,20 +121,30 @@ for (design in names(REFUSED)) {
     design <- design
     spec <- REFUSED[[design]]
 
-    test_that(sprintf("an outer %s design is refused, as a call and as an object", design), {
-      d <- support_data()
-      expect_refused(
-        eval(bquote(nested_resamples(d, outside = .(spec), inside = .(V3)))),
+    test_that(
+      sprintf(
+        "an outer %s design is refused, as a call and as an object",
         design
-      )
-      set.seed(1)
-      built <- eval(rlang::call_modify(spec, data = quote(d)))
-      expect_s3_class(built, design)
-      expect_refused(
-        nested_resamples(d, outside = built, inside = rsample::vfold_cv(v = 3)),
-        design
-      )
-    })
+      ),
+      {
+        d <- support_data()
+        expect_refused(
+          eval(bquote(nested_resamples(d, outside = .(spec), inside = .(V3)))),
+          design
+        )
+        set.seed(1)
+        built <- eval(rlang::call_modify(spec, data = quote(d)))
+        expect_s3_class(built, design)
+        expect_refused(
+          nested_resamples(
+            d,
+            outside = built,
+            inside = rsample::vfold_cv(v = 3)
+          ),
+          design
+        )
+      }
+    )
 
     test_that(sprintf("an inner %s design is refused", design), {
       d <- support_data()

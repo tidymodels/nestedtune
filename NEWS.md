@@ -12,7 +12,7 @@
 
 * The README has a table of 15 rsample resampling functions. It says
   whether each one works as the outer loop and as the inner loop, and why
-  the ones that do not work fail or give no valid estimate. A design
+  the ones that do not work are refused or give no valid estimate. A design
   marked as working is one the tests run through `nested_tune_grid()`.
 
 * `collect_predictions()` on a nested result or a workflow-set result

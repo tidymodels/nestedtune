@@ -121,9 +121,10 @@
 #' [rsample::apparent()] or [rsample::permutations()] for either loop. The
 #' error has condition class `nestedtune_bad_design`. It names every
 #' offending row, column, inner split, index or outer fold. A refusal of one
-#' of those three rsample functions names it. The checks exist because [rsample::nested_cv()] builds a
-#' design whatever its `inside` argument returned, and because a design
-#' assembled by hand can index rows its outer fold never sees.
+#' of those three rsample functions names it. The checks exist because
+#' [rsample::nested_cv()] builds a design whatever its `inside` argument
+#' returned, and because a design assembled by hand can index rows its outer
+#' fold never sees.
 #'
 #' Time-series designs are supported for an outer
 #' [rsample::rolling_origin()], [rsample::sliding_window()],

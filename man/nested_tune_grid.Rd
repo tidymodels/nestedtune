@@ -179,9 +179,10 @@ a design using a bootstrap for the outer loop, or \code{\link[rsample:loo_cv]{rs
 \code{\link[rsample:apparent]{rsample::apparent()}} or \code{\link[rsample:permutations]{rsample::permutations()}} for either loop. The
 error has condition class \code{nestedtune_bad_design}. It names every
 offending row, column, inner split, index or outer fold. A refusal of one
-of those three rsample functions names it. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
-design whatever its \code{inside} argument returned, and because a design
-assembled by hand can index rows its outer fold never sees.
+of those three rsample functions names it. The checks exist because
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
+returned, and because a design assembled by hand can index rows its outer
+fold never sees.
 
 Time-series designs are supported for an outer
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
