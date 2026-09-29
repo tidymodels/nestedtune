@@ -158,8 +158,7 @@ nested_resamples <- function(data, outside, inside, ...) {
     cli::cli_abort(
       c(
         "{.arg outside} cannot be a bootstrap.",
-        x = "The same row can land in both the inner analysis and inner \\
-             assessment set, so the nested estimate would be invalid.",
+        x = refused_design_reason(bootstrap_design(outside), "outer"),
         i = "{.fn rsample::nested_cv} only warns here; \\
              {.fn nested_resamples} refuses."
       ),
@@ -179,6 +178,9 @@ nested_resamples <- function(data, outside, inside, ...) {
       class = "nestedtune_bad_design"
     )
   }
+  # An rset whose own class names none of these, such as a manual_rset()
+  # rebuild, is read by its split classes (D-097).
+  check_outer_splits(outside, "outside", call = environment())
 
   inner_cl <- cl[["inside"]]
   if (!rlang::is_call(inner_cl)) {
@@ -234,7 +236,7 @@ inner_resamples_from_split <- function(split, cl, env, data, call) {
       call = call
     )
   }
-  refused <- refused_design(inner_rset)
+  refused <- inner_refused_design(inner_rset)
   if (!is.na(refused)) {
     cli::cli_abort(
       c(

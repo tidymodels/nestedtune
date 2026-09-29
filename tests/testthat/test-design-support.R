@@ -546,3 +546,54 @@ test_that("an inner element that is not a data frame is still malformed", {
   expect_s3_class(cnd, "nestedtune_bad_design")
   expect_match(conditionMessage(cnd), "malformed", fixed = TRUE)
 })
+
+# nested_resamples() reads the split classes of the rset it is handed as
+# `outside`, and of each inner rset its `inside` call returns (M129).
+test_that("nested_resamples() refuses an outside rebuilt from refused splits", {
+  d <- support_data(n = 30)
+  outer <- c(REFUSED_OUTER, apparent = quote(rsample::apparent()))
+  for (design in names(outer)) {
+    set.seed(1)
+    again <- rebuilt(eval(rlang::call_modify(outer[[design]], data = quote(d))))
+    cnd <- expect_error(
+      nested_resamples(d, outside = again, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, design)
+  }
+})
+
+test_that("nested_resamples() refuses an inside that returns refused splits", {
+  d <- support_data(n = 30)
+  rebuilt_loo <- function(data) rebuilt(rsample::loo_cv(data))
+  cnd <- expect_error(
+    nested_resamples(
+      d,
+      outside = rsample::vfold_cv(v = 3),
+      inside = rebuilt_loo()
+    ),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "loo_cv")
+})
+
+test_that("nested_resamples() still builds a bootstrap inside and a rebuilt v-fold outside", {
+  d <- support_data(n = 30)
+  set.seed(1)
+  folds <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = rsample::bootstraps(times = 3, apparent = TRUE)
+  )
+  expect_s3_class(folds$inner_resamples[[1]]$splits[[4]], "apparent_split")
+
+  set.seed(1)
+  again <- rebuilt(rsample::vfold_cv(d, v = 3))
+  folds <- nested_resamples(
+    d,
+    outside = again,
+    inside = rsample::vfold_cv(v = 3)
+  )
+  expect_s3_class(folds, "manual_rset")
+  expect_identical(nrow(folds), 3L)
+})
