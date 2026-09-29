@@ -57,7 +57,8 @@ refusals have condition class \code{nestedtune_bad_design}, and each names the
 rsample function. The design is found from the class of its splits as well
 as its own class. So an \code{outside} rset rebuilt with
 \code{\link[rsample:manual_rset]{rsample::manual_rset()}} from such splits is refused too, and so is one
-with a single such split among valid ones.
+with a single such split among valid ones. The same holds for the rset
+that \code{inside} returns for each outer fold, and that refusal names the fold.
 }
 
 \section{Time-series designs}{

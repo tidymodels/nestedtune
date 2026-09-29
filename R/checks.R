@@ -355,8 +355,7 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
       c(
         "{.arg resamples} cannot use a bootstrap for the outer loop.",
         x = refused_design_reason(bootstrap_design(resamples), "outer"),
-        i = "{.fn rsample::nested_cv} only warns here; {.fn nested_tune_grid} \\
-             refuses."
+        i = "{.fn rsample::nested_cv} only warns here; nestedtune refuses."
       ),
       class = "nestedtune_bad_design",
       call = call
@@ -490,10 +489,6 @@ split_designs <- function(x) {
   found
 }
 
-# The outer loop refuses both bootstraps as well as the three designs refused
-# in either loop.
-outer_refused_designs <- c("group_bootstraps", "bootstraps", refused_designs)
-
 # The design an inner rset (or anything else) carries that the inner loop
 # refuses, or NA. The rset class decides first; only if it names none are the
 # split classes read (D-097), the first refused one naming the design.
@@ -507,12 +502,20 @@ inner_refused_design <- function(x) {
   if (length(found) == 0L) NA_character_ else found[[1L]]
 }
 
+# Why the inner loop refuses `design` in `x`. tune refuses these designs by
+# their rset class alone, so a design found by its split classes would run in
+# tune. For such a design the reason is the design's own flaw, which is the
+# one the outer loop gives.
+inner_refused_reason <- function(x, design) {
+  role <- if (is.na(refused_design(x))) "outer" else "inner"
+  refused_design_reason(design, role)
+}
+
 # Every outer split whose class marks a design the outer loop refuses, grouped
 # by design, so one message names every offending row. `arg` names the
 # argument the design came in as.
 check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
   found <- split_designs(x)
-  found[!found %in% outer_refused_designs] <- NA_character_
   if (all(is.na(found))) {
     return(invisible(x))
   }
@@ -590,30 +593,36 @@ refused_design_reason <- function(design, role) {
 }
 
 # Every inner element carrying a refused design, by its rset class or by its
-# split classes, grouped by design, so one message names every offending
-# outer fold. An element that is not a data frame of splits carries none and
-# is left to the column class check below.
+# split classes, grouped by design and by the reason given, so one message
+# names every offending outer fold. An element that is not a data frame of
+# splits carries none and is left to the column class check below.
 check_inner_refused <- function(resamples, call = rlang::caller_env()) {
-  found <- vapply(
-    resamples[["inner_resamples"]],
-    inner_refused_design,
-    character(1)
-  )
+  inner <- resamples[["inner_resamples"]]
+  found <- vapply(inner, inner_refused_design, character(1))
   if (all(is.na(found))) {
     return(invisible(resamples))
   }
+  reasons <- rep(NA_character_, length(found))
+  hit <- which(!is.na(found))
+  reasons[hit] <- vapply(
+    hit,
+    function(i) inner_refused_reason(inner[[i]], found[[i]]),
+    character(1)
+  )
+  key <- paste(found, reasons)
   lines <- vapply(
-    unique(found[!is.na(found)]),
-    function(design) {
-      bad <- which(found == design)
+    unique(key[hit]),
+    function(k) {
+      bad <- which(key == k)
       n <- length(bad)
+      design <- found[[bad[[1L]]]]
       where <- paste(
         "{cli::qty(n)}Element{?s} {bad} of {.field inner_resamples}",
         "{cli::qty(n)}{?holds/hold} {.fn rsample::{design}} splits."
       )
       paste(
         cli::format_inline(where),
-        cli::format_inline(refused_design_reason(design, "inner"))
+        cli::format_inline(reasons[[bad[[1L]]]])
       )
     },
     character(1)

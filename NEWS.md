@@ -6,10 +6,13 @@
   split keeps. The seven functions that take a nested design refuse a row
   subset such as `folds[1:2, ]`, a design rebuilt from its splits with
   `rsample::manual_rset()`, and a design with one such split among valid
-  ones. `nested_resamples()` refuses such a rebuilt or mixed `outside`, and
-  refuses a row-subset `outside` as before, because it is not an rset.
-  Before, such an outer design ran unrefused. The new error has class
-  `nestedtune_bad_design` and names the rsample function, as the outer
+  ones, in either loop. `nested_resamples()` refuses such a rebuilt or mixed
+  `outside`, and refuses a row-subset `outside` as before, because it is not
+  an rset. It also refuses an `inside` that returns such splits, and names
+  the outer fold. Before, such an outer design and a rebuilt or mixed inner
+  design ran unrefused. A row subset of an inner design got an error that
+  called the column malformed. The new error has
+  class `nestedtune_bad_design` and names the rsample function, as the outer
   bootstrap refusals now also do.
 
 * `loo_cv()`, `apparent()` and `permutations()` are now refused in either

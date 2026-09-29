@@ -619,3 +619,82 @@ test_that("nested_resamples() still builds a bootstrap inside and a rebuilt v-fo
   expect_s3_class(folds, "manual_rset")
   expect_identical(nrow(folds), 3L)
 })
+
+test_that("the plain outer bootstrap refusals name the function", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  boots <- list(
+    bootstraps = quote(rsample::bootstraps(times = 3)),
+    group_bootstraps = quote(rsample::group_bootstraps(group = g, times = 3))
+  )
+  for (design in names(boots)) {
+    set.seed(1)
+    rset <- eval(rlang::call_modify(boots[[design]], data = quote(d)))
+    expect_s3_class(rset, design)
+    cnd <- expect_error(
+      nested_resamples(d, outside = rset, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, design)
+
+    folds <- quiet_nested_cv(d, boots[[design]], V3)
+    expect_s3_class(folds, design)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, design)
+    # The entry check serves seven functions, so its hint names none.
+    expect_match(conditionMessage(cnd), "nestedtune refuses", fixed = TRUE)
+    expect_no_match(conditionMessage(cnd), "nested_tune_grid()", fixed = TRUE)
+  }
+})
+
+# tune refuses an inner loo_cv() or permutations() design by its rset class,
+# so a design found by its split classes would run in tune. Its refusal gives
+# the design's own flaw, the reason the outer loop gives, instead.
+test_that("an inner design found by its splits is refused for its own flaw", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, REFUSED_INNER$loo_cv)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+
+  folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "loo_cv")
+  expect_match(conditionMessage(cnd), "one row per fold", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+
+  # Elements refused for different reasons get one line each.
+  whole <- nested_cv_design(d, V3, REFUSED_INNER$loo_cv)
+  folds$inner_resamples[[3]] <- whole$inner_resamples[[3]]
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_match(conditionMessage(cnd), "Elements 1 and 2 of", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "Element 3 of", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "tune refuses", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "one row per fold", fixed = TRUE)
+})
+
+test_that("nested_resamples() names the outer fold whose inner splits it refuses", {
+  d <- support_data(n = 30)
+  mixed_in <- function(data) {
+    folds <- rsample::vfold_cv(data, v = 3)
+    rsample::manual_rset(
+      c(folds$splits, rsample::apparent(data)$splits),
+      paste0("Fold", 1:4)
+    )
+  }
+  cnd <- expect_error(
+    nested_resamples(
+      d,
+      outside = rsample::vfold_cv(v = 3),
+      inside = mixed_in()
+    ),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "apparent")
+  expect_match(conditionMessage(cnd), "splits for outer fold 1", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "rows it trained on", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "cannot be an", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "tune reports", fixed = TRUE)
+})
