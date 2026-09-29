@@ -126,3 +126,5 @@ Triage at the gate, 2026-09-29: the maintainer accepted every proposed dispositi
 - O5, O8, O10, S1, S2 and S3 were rejected, and S5 was noted, for the reasons above.
 
 The three new test blocks fail on the pre-fix code (4, 5 and 4 failures), and they pass on the branch.
+
+Rerun after the fixes, 2026-09-29, on `89335d9f`: `devtools::test()` gave 0 failures, 0 warnings, 0 skips and 13508 passes. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The six prose sweeps, `air format --check`, `pkgdown::check_pkgdown()` and the `document()` no-diff check are clean. `cairn_validate.py` passes, after the M126 done row was pruned to keep `ROADMAP.md` under 60 lines.
