@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-29 (M128 archived, M125 row pruned, row-subset desi
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M129 | Recognize a refused design by its split classes | in-progress | — | high | milestones/M129-refuse-design-by-split-class.md |
+| M129 | Recognize a refused design by its split classes | review | — | high | milestones/M129-refuse-design-by-split-class.md |
 | M128 | Refuse the resampling designs the README marks No | done | — | high | milestones/archive/M128-refuse-unsupported-designs.md |
 | M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |

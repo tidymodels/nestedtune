@@ -1,6 +1,6 @@
 # M129: Recognize a refused design by its split classes
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -49,7 +49,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - [x] T1: Outer loop in the entry check. First write the AC1 tests and the outer cases of AC2, AC4 and AC5 in `tests/testthat/test-design-support.R`. Use the `entry_refusal()` stand-in (line 163). Then extend `refused_design()` (`R/checks.R:431`). If the rset class names no refused design, it infers one from the split classes. Map `group_boot_split`, `boot_split`, `perm_split` and `loo_split` to their functions. If the design carries no `boot_split` or `perm_split`, map `apparent_split` to `apparent()`. Fold the outer bootstrap check (`R/checks.R:353`) into this path. Its message names the function and the split positions.
 - [x] T2: Inner loop in the entry check. First write the AC3 tests and the inner cases of AC2, AC4 and AC5. Then make `check_inner_refused()` (`R/checks.R:469`) read split classes from each element that is a data frame with a `splits` list column. Leave every other element to `check_column_class()`.
 - [x] T3: The constructor. First write the `nested_resamples()` cases of AC4 and AC5. Then give `nested_resamples()` (`R/nested-resamples.R:157`, `:172`) and `inner_resamples_from_split()` (`:237`) the same inference. Make the bootstrap message name the function. Update the existing bootstrap tests (`test-design-support.R:86`) where the message text changes.
-- [ ] T4: Documentation and checks. Add the AC6 sentences to the Refused paragraph (`README.Rmd:112`) and run `devtools::build_readme()`. Add the NEWS bullet. Read the help text at `R/nested-resamples.R:40` and `R/nested-tune-grid.R:121`. Change it only where it says how a design is recognized. Run `devtools::document()`, the prose sweep, `devtools::test()` and `devtools::check()`.
+- [x] T4: Documentation and checks. Add the AC6 sentences to the Refused paragraph (`README.Rmd:112`) and run `devtools::build_readme()`. Add the NEWS bullet. Read the help text at `R/nested-resamples.R:40` and `R/nested-tune-grid.R:121`. Change it only where it says how a design is recognized. Run `devtools::document()`, the prose sweep, `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -70,6 +70,8 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: checkpoint, T4 half-done. The README paragraph, the NEWS bullet and the help for `nested_resamples()` and `nested_tune_grid()` are updated. A test for one refused split in `outside` was added, because the new help text claims it. All six gating prose sweeps are clean. The full suite and `devtools::check()` are still running.
 - 2026-09-29: claim audit: 52 claims read, 5 corrected — NEWS.md, README.Rmd, README.md, R/checks.R, R/nested-resamples.R, R/nested-tune-grid.R, tests/testthat/test-design-support.R
 - 2026-09-29: the claim audit's fixes. `split_designs()` now counts an apparent split beside bootstrap or permutation splits as part of that design, so the message names its row, and a test checks this. The NEWS bullet separates `nested_resamples()` from the seven functions. The README and `?nested_tune_grid` explain the apparent split. Two comments were corrected. The first full-suite run was stopped because these fixes changed the code under test.
+- 2026-09-29: the claim audit reader re-read the 5 corrected claims once, and all 5 hold.
+- 2026-09-29: T4 done. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The six gating prose sweeps and `air format --check` are clean. Status set to review.
 
 ## Decisions
 
