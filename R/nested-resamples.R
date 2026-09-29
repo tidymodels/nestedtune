@@ -33,9 +33,16 @@
 #' Each inner split keeps the class and the resample id rsample gives it, so
 #' `labels()` and [rsample::add_resample_id()] behave the same.
 #'
-#' One behavior differs on purpose: an outer bootstrap is refused rather than
-#' warned about. The same row can otherwise land in both the inner analysis and
-#' the inner assessment set, which makes the estimate invalid.
+#' Two behaviors differ on purpose. First, an outer bootstrap is refused
+#' rather than warned about. The same row can otherwise land in both the inner
+#' analysis and the inner assessment set, which makes the estimate invalid.
+#'
+#' Second, [rsample::loo_cv()], [rsample::apparent()] and
+#' [rsample::permutations()] are refused in either loop, where rsample builds
+#' all six designs. None of them gives a valid nested estimate there. The
+#' README's table of resampling designs gives the reason for each. Every
+#' refusal here has condition class `nestedtune_bad_design`, and a refusal of
+#' one of these three names the rsample function.
 #'
 #' @section Time-series designs:
 #'

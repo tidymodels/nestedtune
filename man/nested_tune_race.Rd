@@ -336,10 +336,12 @@ must index only rows the outer split's \code{in_id} holds, in its \code{in_id} a
 any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
 row the outer fold holds out.
 
-A design breaking any of this, or using a bootstrap for the outer loop, is
-refused before anything is fitted. The error has condition class
-\code{nestedtune_bad_design} and names every offending row, column, inner
-split or index. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
+A design breaking any of this is refused before anything is fitted. So is
+a design using a bootstrap for the outer loop, or \code{\link[rsample:loo_cv]{rsample::loo_cv()}},
+\code{\link[rsample:apparent]{rsample::apparent()}} or \code{\link[rsample:permutations]{rsample::permutations()}} for either loop. The
+error has condition class \code{nestedtune_bad_design}. It names every
+offending row, column, inner split, index or outer fold. A refusal of one
+of those three rsample functions names it. The checks exist because \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a
 design whatever its \code{inside} argument returned, and because a design
 assembled by hand can index rows its outer fold never sees.
 
