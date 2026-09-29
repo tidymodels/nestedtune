@@ -363,6 +363,24 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
       call = call
     )
   }
+  # The designs no nested estimate can use (D-096), which rsample::nested_cv()
+  # builds without complaint. nested_resamples() refuses them at construction;
+  # these catch designs built elsewhere, in both loops. The inner check reads
+  # each element with inherits(), because the class checks below have not yet
+  # vouched for it.
+  refused <- refused_design(resamples)
+  if (!is.na(refused)) {
+    cli::cli_abort(
+      c(
+        "{.arg resamples} cannot use {.fn rsample::{refused}} for the outer \\
+         loop.",
+        x = refused_design_reason(refused, "outer")
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  check_inner_refused(resamples, call = call)
   # Next, because the checks above judge the whole object and these judge it
   # element by element. Neither column is checked by anything upstream: a
   # design whose `inside` produced no rset is refused by nested_resamples()
@@ -415,23 +433,72 @@ refused_design <- function(x) {
 }
 
 # Why `design` is refused in `role`, naming the rsample function. The reasons
-# are the ones the README's resampling table gives.
+# are the ones the README's resampling table gives. Built with paste(), not
+# a line continuation, because cli::format_inline() keeps the backslash.
 refused_design_reason <- function(design, role) {
   switch(
     paste(role, design),
-    "outer loo_cv" = "{.fn rsample::loo_cv} holds out one row per fold, so \\
-      R-squared cannot be computed and the averaged RMSE is the mean \\
-      absolute error.",
-    "outer apparent" = "{.fn rsample::apparent} scores its one fold on the \\
-      rows it trained on.",
-    "outer permutations" = "{.fn rsample::permutations} gives each fold no \\
-      assessment set.",
-    "inner loo_cv" = "tune refuses {.fn rsample::loo_cv} as a tuning \\
-      design, so every outer fold would fail.",
-    "inner apparent" = "tune reports no results for \\
-      {.fn rsample::apparent}, so every outer fold would fail.",
-    "inner permutations" = "tune refuses {.fn rsample::permutations} as a \\
-      tuning design, so every outer fold would fail."
+    "outer loo_cv" = paste(
+      "{.fn rsample::loo_cv} holds out one row per fold, so R-squared cannot",
+      "be computed and the averaged RMSE is the mean absolute error."
+    ),
+    "outer apparent" = paste(
+      "{.fn rsample::apparent} scores its one fold on the rows it trained on."
+    ),
+    "outer permutations" = paste(
+      "{.fn rsample::permutations} gives each fold no assessment set."
+    ),
+    "inner loo_cv" = paste(
+      "tune refuses {.fn rsample::loo_cv} as a tuning design, so every outer",
+      "fold would fail."
+    ),
+    "inner apparent" = paste(
+      "tune reports no results for {.fn rsample::apparent}, so every outer",
+      "fold would fail."
+    ),
+    "inner permutations" = paste(
+      "tune refuses {.fn rsample::permutations} as a tuning design, so every",
+      "outer fold would fail."
+    )
+  )
+}
+
+# Every inner rset carrying a refused design, grouped by design, so one
+# message names every offending outer fold.
+check_inner_refused <- function(resamples, call = rlang::caller_env()) {
+  found <- vapply(
+    resamples[["inner_resamples"]],
+    refused_design,
+    character(1)
+  )
+  if (all(is.na(found))) {
+    return(invisible(resamples))
+  }
+  lines <- vapply(
+    unique(found[!is.na(found)]),
+    function(design) {
+      bad <- which(found == design)
+      n <- length(bad)
+      where <- paste(
+        "{cli::qty(n)}Element{?s} {bad} of {.field inner_resamples}",
+        "{cli::qty(n)}{?is/are} {.fn rsample::{design}}."
+      )
+      paste(
+        cli::format_inline(where),
+        cli::format_inline(refused_design_reason(design, "inner"))
+      )
+    },
+    character(1)
+  )
+  # Handed over as values, so cli does not parse the formatted text again.
+  bullets <- rlang::set_names(
+    sprintf("{lines[[%d]]}", seq_along(lines)),
+    rep("x", length(lines))
+  )
+  cli::cli_abort(
+    c("{.arg resamples} has an inner design no fold can tune on.", bullets),
+    class = "nestedtune_bad_design",
+    call = call
   )
 }
 

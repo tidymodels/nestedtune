@@ -146,6 +146,96 @@ for (design in names(REFUSED)) {
   })
 }
 
+# The entry check refuses the same six designs in a design built elsewhere,
+# since rsample::nested_cv() builds all six (M128). A stand-in for the fold
+# dispatch makes a design that got past the check fail with its own class,
+# so a passing test shows the refusal fired before any fold ran.
+entry_refusal <- function(expr) {
+  sentinel <- function(...) {
+    rlang::abort("fitting began", class = "nestedtune_sentinel")
+  }
+  testthat::local_mocked_bindings(dispatch_folds = sentinel)
+  tryCatch(expr, error = function(cnd) cnd)
+}
+
+expect_entry_refused <- function(cnd, design) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  expect_match(conditionMessage(cnd), paste0(design, "()"), fixed = TRUE)
+}
+
+nested_cv_design <- function(d, outside, inside) {
+  set.seed(1)
+  eval(bquote(rsample::nested_cv(d, outside = .(outside), inside = .(inside))))
+}
+
+test_that("the entry check refuses the six designs rsample::nested_cv() builds", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (design in names(REFUSED)) {
+    outer <- nested_cv_design(d, REFUSED[[design]], V3)
+    expect_s3_class(outer, design)
+    cnd <- entry_refusal(nested_tune_grid(wf, outer, grid = det_grid()))
+    expect_entry_refused(cnd, design)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    inner <- nested_cv_design(d, V3, REFUSED[[design]])
+    for (rset in inner$inner_resamples) {
+      expect_s3_class(rset, design)
+    }
+    cnd <- entry_refusal(nested_tune_grid(wf, inner, grid = det_grid()))
+    expect_entry_refused(cnd, design)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+  }
+})
+
+test_that("the entry check names the one outer fold whose inner design is refused", {
+  skip_if_no_engines()
+  d <- support_data()
+  wf <- det_workflow(d)
+  folds <- det_nested(d)
+  folds$inner_resamples[[2]] <-
+    rsample::apparent(rsample::analysis(folds$splits[[2]]))
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_entry_refused(cnd, "apparent")
+  expect_match(conditionMessage(cnd), "Element 2 of", fixed = TRUE)
+  expect_no_match(conditionMessage(cnd), "Elements", fixed = TRUE)
+})
+
+test_that("every other orchestrator refuses an outer leave-one-out design at entry", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  outer <- nested_cv_design(d, quote(rsample::loo_cv()), V3)
+  calls <- list(
+    nested_tune_bayes = quote(nested_tune_bayes(wf, outer)),
+    nested_tune_race_anova = quote(
+      nested_tune_race_anova(wf, outer, grid = det_grid())
+    ),
+    nested_tune_race_win_loss = quote(
+      nested_tune_race_win_loss(wf, outer, grid = det_grid())
+    ),
+    nested_tune_sim_anneal = quote(nested_tune_sim_anneal(wf, outer)),
+    nested_fit_resamples = quote(nested_fit_resamples(fixed_workflow(d), outer))
+  )
+  for (fn in names(calls)) {
+    # The racers and the annealer refuse a missing finetune first.
+    if (!tuner_ready(fn)) {
+      next
+    }
+    cnd <- entry_refusal(eval(calls[[fn]]))
+    expect_entry_refused(cnd, "loo_cv")
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  }
+  # The map re-signals the orchestrator's refusal with its class kept.
+  skip_if_no_wset_fixture()
+  cnd <- entry_refusal(
+    nested_workflow_map(wset_two(d), resamples = outer, grid = det_grid())
+  )
+  expect_entry_refused(cnd, "loo_cv")
+})
+
 test_that("an outer validation set built beforehand completes its one fold", {
   skip_if_no_engines()
   set.seed(53)

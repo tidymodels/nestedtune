@@ -3325,6 +3325,17 @@ partial_warnings <- function(expr) {
   warnings
 }
 
+# Whether the packages an orchestrator's tuner needs are installed, read off
+# the package's registry. On a workflow, the racers and the annealer refuse a
+# missing finetune before anything else, so a check that runs after that one
+# is only reachable where these are present. Shared since M128 by
+# test-model-spec-input.R and test-design-support.R.
+tuner_ready <- function(fn) {
+  key <- sub("^nested_", "", fn)
+  requires <- tuner_registry[[key]]$requires
+  all(vapply(requires, rlang::is_installed, logical(1)))
+}
+
 # What a map run needs beyond the engines: workflowsets for the set, dials
 # for the Bayesian tuner, and the routed tuner's own packages read off the
 # registry, keyed by the orchestrator's name less its prefix.

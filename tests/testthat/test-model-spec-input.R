@@ -15,16 +15,6 @@ ORCHESTRATORS <- c(
   "nested_fit_resamples"
 )
 
-# Whether the packages an orchestrator's tuner needs are installed, read off
-# the package's registry. On a workflow, the racers and the annealer refuse a
-# missing finetune before anything else, so a check that runs after that one
-# is only reachable where these are present.
-tuner_ready <- function(fn) {
-  key <- sub("^nested_", "", fn)
-  requires <- tuner_registry[[key]]$requires
-  all(vapply(requires, rlang::is_installed, logical(1)))
-}
-
 bare_spec <- function() parsnip::linear_reg()
 
 # The export called by its own name, so a condition's call is the export's
