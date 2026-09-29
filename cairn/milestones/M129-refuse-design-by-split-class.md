@@ -75,6 +75,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: review checkpoint. AC1 to AC6 have evidence and ticks. The three reviewers reported. The full suite and `devtools::check()` for AC7 are still running.
 - 2026-09-29: review pre-gate checkpoint. All seven criteria have evidence and ticks, and the consistency gate passed. No finding shows a criterion failing. 17 findings go to the gate with proposed dispositions.
 - 2026-09-29: triage gate. The maintainer chose to fix 8 findings, file 1 follow-up row and reject the rest. The fixes are committed. The full suite and `devtools::check()` rerun, and then the merge is put to the maintainer again.
+- 2026-09-29: step-7 approval: m129-refuse-design-by-split-class approved for merge
 
 ## Decisions
 
