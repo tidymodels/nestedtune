@@ -131,3 +131,11 @@ The maintainer chose to fix before the merge vote. They picked `Yes` with a foot
 - S1: rejected. AC5 requires the prose to define all four values.
 - S3: fixed. `fixtures/sweep-prose-parse.Rmd` has a pipe-table plant with an indented row, and the parse test checks that no paragraph holds it. On that fixture, the script on `main` read the table as a paragraph and reported a modal in it. The branch script did neither.
 - S4: rejected. The test asserts the values the README names, so a hidden warning does not change what it checks.
+
+### Re-verification after the fixes
+
+- AC1: The table has 21 `Yes`, 2 `Refused` and 7 `No` cells. The outer `validation_set()` cell carries one footnote marker, which AC1 allows. A fresh `devtools::build_readme()` left no diff.
+- AC2: The new outer `validation_set()` test uses a `vfold_cv(v = 3)` partner and asserts `.completed` on its one row. `test-design-support.R` passed 19 tests with no failures.
+- AC4: Seven `No` cells remain, and the README reason for inner `validation_set()` names the inner loop alone. The call-form test still pins it.
+- AC5 and AC6: The README prose still meets AC5. All six gating sweeps exited 0 with `clean`, and `test-sweep-prose.R` passed 5 tests.
+- AC7: The full suite with `NOT_CRAN=true` gave 13256 passes, 0 failures and 0 skips. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min 42 s. `cairn_validate.py` exited 0.
