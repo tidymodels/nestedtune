@@ -379,8 +379,15 @@ or
 [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
 for either loop. The error has condition class `nestedtune_bad_design`.
 It names every offending row, column, inner split, index or outer fold.
-A refusal of one of those three rsample functions names it. The checks
-exist because
+A refusal of a bootstrap or of one of those three rsample functions
+names the function. The design is found from the class of its splits as
+well as its own class. So a row subset of such a design is refused, and
+so is a design rebuilt with
+[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
+from its splits or holding one such split among valid ones. An apparent
+split beside bootstrap or permutation splits counts as part of that
+design, because those functions add one as an option. The checks exist
+because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.

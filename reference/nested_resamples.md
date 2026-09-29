@@ -74,8 +74,13 @@ and
 are refused in either loop, where rsample builds them. None of them
 gives a valid nested estimate there. The README's table of resampling
 designs gives the reason for each. Both refusals have condition class
-`nestedtune_bad_design`, and a refusal of one of these three names the
-rsample function.
+`nestedtune_bad_design`, and each names the rsample function. The design
+is found from the class of its splits as well as its own class. So an
+`outside` rset rebuilt with
+[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
+from such splits is refused too, and so is one with a single such split
+among valid ones. The same holds for the rset that `inside` returns for
+each outer fold, and that refusal names the fold.
 
 ## Time-series designs
 

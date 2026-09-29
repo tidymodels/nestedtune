@@ -119,7 +119,17 @@ loop, `apparent()` scores its one fold on the rows it trained on. As the
 outer loop, `permutations()` gives each fold no assessment set. As the
 inner loop, tune refuses `loo_cv()` and `permutations()`, and it reports
 that no results are available for `apparent()`. So without the refusal,
-a tuning run with one of these inner designs fails every outer fold.
+a tuning run with one of these inner designs fails every outer fold. A
+row subset of a refused design, such as `folds[1:2, ]`, loses the
+design’s class, but it is still refused. So is a design rebuilt from its
+splits with
+[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html),
+and a design with one such split among valid ones. nestedtune finds the
+design from the class that each split keeps. An apparent split beside
+bootstrap or permutation splits counts as part of that design, because
+those functions add one as an option. tune runs such a rebuilt inner
+design, so nestedtune refuses it for the reason it gives in the outer
+loop.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

@@ -124,8 +124,12 @@ analysis and the inner assessment set, which makes the estimate invalid.</p>
 <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> are refused in either loop, where rsample builds
 them. None of them gives a valid nested estimate there. The
 README's table of resampling designs gives the reason for each. Both
-refusals have condition class <code>nestedtune_bad_design</code>, and a refusal of one
-of these three names the rsample function.</p>
+refusals have condition class <code>nestedtune_bad_design</code>, and each names the
+rsample function. The design is found from the class of its splits as well
+as its own class. So an <code>outside</code> rset rebuilt with
+<code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code> from such splits is refused too, and so is one
+with a single such split among valid ones. The same holds for the rset
+that <code>inside</code> returns for each outer fold, and that refusal names the fold.</p>
     </div>
     <div class="section level2">
     <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>
