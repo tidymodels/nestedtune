@@ -1,14 +1,13 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review leftovers row added, validate green)._
+_Last hygiene check: 2026-09-29 (M127 archived, M124 row pruned, README-to-test check row added, validate green)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M127 | README table of supported resampling designs | review | — | normal | milestones/M127-readme-design-table.md |
+| M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |
-| M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -57,3 +56,4 @@ _Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review lef
 - [low] `NEWS.md`'s development bullets read to the M84 plain-prose standard. Added 2026-09-10 at M84's plan gate (M84 Out), compressed 2026-09-28. The bullets are consolidated at the first release, so the pass belongs to that release walk's NEWS step. Promote only if a release is declared before then and the walk keeps the bullets as they are
 - [low] Cut the CI matrix on pull requests to ubuntu+windows, and cancel superseded runs on the default branch too — added 2026-07-27 — M11 Out, dropped at its gate. The repo is public, so minutes are free (`billable: 0`); the PR cut saves a median 0.0 min because windows is the critical path in 43 of 55 runs while losing R-devel and oldrel-1 coverage, and cancelling on the default branch can leave a commit with no completed check. Promote on evidence either premise has failed — the repo goes private, or windows stops being the critical path
 - [low] Variance estimation and inference on the nested estimate, `tune::int_pctl()`'s bootstrap intervals included (absorbed at M092's plan gate). Added 2026-07-25 (G6, the caveat half went to M25), compressed 2026-09-14 and 2026-09-28. `references/tidymodels-nested-cv-gaps.md` (G6) and the pages it cites own the sources and numbers. Four blockers. (1) Loss stability for a tune-then-fit procedure is unestablished and the shelf defines it five ways, so a synthesis note must reconcile them before anything compares two workflows. (2) The valid interval's estimand is this run's k-fold error, not the final model's. (3) The estimators need per-observation losses, which M68 keeps under `save_pred`. (4) `luo2026` bounds the power of any assumption-free test at v-fold nesting's fold ratio. Promote only on all four blockers clearing
+- [low] A test that reads the README resampling table and checks each cell against the test that backs it. Today the claim that a `Yes` cell has a test is kept by hand. Added 2026-09-29 at M127's review (finding O2). Promote on a README cell that disagrees with its test, or at the next change to a cell
