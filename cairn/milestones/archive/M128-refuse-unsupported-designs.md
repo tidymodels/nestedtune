@@ -1,0 +1,11 @@
+# M128: Refuse the resampling designs the README marks No
+
+**Status:** done (2026-09-29, PR #143 https://github.com/tidymodels/nestedtune/pull/143)
+
+**Goal:** A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations()` is refused at the call, before any fold runs.
+
+**Outcome:** `nested_resamples()` refuses the three outer designs next to the bootstrap refusal. It refuses the three inner designs per fold in `inner_resamples_from_split()`. `check_nested()` refuses the same six for all seven entry functions, `nested_fit_resamples()` included. The outer check comes after the bootstrap check. The inner check, `check_inner_refused()`, names the outer folds that use each refused design. Every refusal has class `nestedtune_bad_design` and names the rsample function. The outer bootstrap refusal in `nested_resamples()` gained that class. `refused_design()` and `refused_design_reason()` in `R/checks.R` serve both sites. Each reason is the one the README gives. The README table now shows six `Refused` cells, and inner `validation_set()` is the one `No` cell. The Refused paragraph names both refusal paths. The help for `?nested_resamples` and `?nested_tune_grid` and one NEWS bullet say the same. In `test-design-support.R`, refusal tests replace the six tests that pinned the old `No` behavior. The entry-check tests use a stand-in for `dispatch_folds`, so a refusal is shown to fire before any fold. `tuner_ready()` moved into `helper-orchestration.R`.
+
+**Decisions:** D-096, recorded at plan.
+
+**Review:** The pre-review claim audit read 50 claims and corrected 3. Three reviewers found 19 items. At the gate, the maintainer chose "Fix, then merge". The fixes: the inner refusal wording, which had been false for `nested_fit_resamples()`, `air` formatting, a stale `check_nested()` comment, the older NEWS bullet, the DESIGN convention bullet and wording nits. The row-subset gap (O1, O6) went to a new candidate row. The loss of the tests that watched tune's behavior (O4) extended the README-to-test row. Five findings were rejected with reasons. The M125 terminal row was pruned on the branch to keep ROADMAP under its line cap. `devtools::test()` gave 0 failures and `devtools::check()` gave 0 errors, 0 warnings and 0 notes. CI passed 14 checks. Nothing was graduated or retired.

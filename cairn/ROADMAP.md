@@ -1,11 +1,11 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-29 (M127 archived, M124 row pruned, README-to-test check row added, validate green)._
+_Last hygiene check: 2026-09-29 (M128 archived, M125 row pruned, row-subset design row added, validate green)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M128 | Refuse the resampling designs the README marks No | review | — | high | milestones/M128-refuse-unsupported-designs.md |
+| M128 | Refuse the resampling designs the README marks No | done | — | high | milestones/archive/M128-refuse-unsupported-designs.md |
 | M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
