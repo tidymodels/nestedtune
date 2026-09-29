@@ -1985,6 +1985,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `nested_resamples()` refuses the six designs at construction. `check_nested()` refuses them for all seven entry functions, `nested_fit_resamples()` included. Both use class `nestedtune_bad_design`, and the outer bootstrap refusal in `nested_resamples()` gains that class. The six README cells read `Refused`. Inner `validation_set()` stays `No`, because it cannot be built.
 **Consequences:** the outer `loo_cv()` refusal matches tune, which refuses leave-one-out for a flat run. Falsified by a tune release that tunes on leave-one-out or permutations, or by a source that gives a valid nested estimate from one-row outer folds. (Supersedes D-095's Consequences clause that the `No` designs stay unrefused.)
 
+### D-097 (2026-09-29): the refusals of D-096 and the outer bootstrap refusal recognize a design by its split classes as well as its rset class. Extends D-096
+
+**Context:** D-096's refusals read the rset class. A row subset of a nested design drops that class, and so does a `manual_rset()` rebuild. Each split keeps its own class. Probed at M129's plan gate, such designs run unrefused.
+**Decision:** if the rset class names no refused design, the check reads each split's class: `loo_split`, `perm_split`, `apparent_split`, `boot_split` or `group_boot_split`. One such split refuses the design, in the loop where D-096 or the bootstrap rule refuses that design. If the design carries no `boot_split` or `perm_split`, an `apparent_split` counts as `apparent()`. Those two designs add an apparent split as an option. `check_nested()` and `nested_resamples()` apply the same rule. Rejected: keeping the rset class through subset methods, because rsample owns the class and a user can build the table any way. Rejected: refusing every outer design with no rset class, because a subset of a supported design runs today.
+**Consequences:** a split rebuilt with `rsample::make_splits()` carries no trace of its design and stays unrecognized. Falsified by a supported design that the rule refuses, or by an rsample release that changes these split classes.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
