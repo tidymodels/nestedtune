@@ -92,10 +92,10 @@ design.
 | `clustering_cv()`    | Yes        | Yes        |
 | `bootstraps()`       | Refused    | Yes        |
 | `group_bootstraps()` | Refused    | Yes        |
-| `loo_cv()`           | No         | No         |
-| `apparent()`         | No         | No         |
+| `loo_cv()`           | Refused    | Refused    |
+| `apparent()`         | Refused    | Refused    |
 | `validation_set()`   | Yes[^1]    | No         |
-| `permutations()`     | No         | No         |
+| `permutations()`     | Refused    | Refused    |
 | `rolling_origin()`   | Yes        | Yes        |
 | `sliding_window()`   | Yes        | Yes        |
 | `sliding_index()`    | Yes        | Yes        |
@@ -110,21 +110,24 @@ design is tested only with a time-series outer design. The “Time-series
 designs” section of `?nested_resamples` says which other functions are
 tested on each time-series design.
 
-Refused means that `nested_resamples()` stops with an error. An outer
-bootstrap can put the same row in both the inner analysis set and the
-inner assessment set, which makes the estimate invalid.
+Refused means that nestedtune stops with an error before any fold runs.
+`nested_resamples()` refuses the design when it builds it. The seven
+functions that take a nested design, such as `nested_tune_grid()`,
+refuse it in a design built another way, for example with
+`rsample::nested_cv()`. An outer bootstrap can put the same row in both
+the inner analysis set and the inner assessment set, which makes the
+estimate invalid. As the outer loop, `loo_cv()` holds out one row per
+fold. R² then cannot be computed, and the average RMSE is the mean
+absolute error. As the outer loop, `apparent()` scores its one fold on
+the rows it trained on. As the outer loop, `permutations()` gives each
+fold no assessment set. As the inner loop, tune refuses `loo_cv()` and
+`permutations()`, and it reports that no results are available for
+`apparent()`. So without the refusal, a tuning run with one of these
+inner designs fails every outer fold.
 
 No means that the design gives no valid nested estimate in that loop. As
-the outer loop, `loo_cv()` holds out one row per fold. R² then cannot be
-computed, and the average RMSE is the mean absolute error. As the inner
-loop, tune refuses `loo_cv()`, so every outer fold fails. As the outer
-loop, `apparent()` scores its one fold on the rows it trained on. As the
-inner loop, tune reports that no results are available, so every outer
-fold fails. As the inner loop, `validation_set()` cannot be built,
-because it takes a split from `initial_validation_split()` rather than a
-data frame. As the outer loop, `permutations()` gives each fold no
-assessment set, so every outer fold fails. As the inner loop, tune
-refuses it, so every outer fold fails.
+the inner loop, `validation_set()` cannot be built, because it takes a
+split from `initial_validation_split()` rather than a data frame.
 
 A cell reads Untested when no test shows whether the design works in
 that loop.

@@ -45,9 +45,16 @@ and \code{\link[rsample:assessment]{rsample::assessment()}} return identical fra
 Each inner split keeps the class and the resample id rsample gives it, so
 \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same.
 
-One behavior differs on purpose: an outer bootstrap is refused rather than
-warned about. The same row can otherwise land in both the inner analysis and
-the inner assessment set, which makes the estimate invalid.
+Two behaviors differ on purpose. First, an outer bootstrap is refused
+rather than warned about. The same row can otherwise land in both the inner
+analysis and the inner assessment set, which makes the estimate invalid.
+
+Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
+\code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds
+them. None of them gives a valid nested estimate there. The
+README's table of resampling designs gives the reason for each. Both
+refusals have condition class \code{nestedtune_bad_design}, and a refusal of one
+of these three names the rsample function.
 }
 
 \section{Time-series designs}{

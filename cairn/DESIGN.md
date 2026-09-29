@@ -157,7 +157,9 @@ naming convention.
   plausible contributor to the slowdown reported in tune#148.
 - **Error on provably invalid resampling schemes.** An outer bootstrap is
   refused, not warned about — deliberately stricter than `rsample`, which only
-  warns. _(Tension to stress-test in Phase 2: this makes the ecosystem
+  warns. `loo_cv()`, `apparent()` and `permutations()` are refused in either
+  loop, which `rsample::nested_cv()` builds without a word (D-096, corrected
+  M128). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
