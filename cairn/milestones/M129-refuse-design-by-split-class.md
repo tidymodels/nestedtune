@@ -74,6 +74,7 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: T4 done. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The six gating prose sweeps and `air format --check` are clean. Status set to review.
 - 2026-09-29: review checkpoint. AC1 to AC6 have evidence and ticks. The three reviewers reported. The full suite and `devtools::check()` for AC7 are still running.
 - 2026-09-29: review pre-gate checkpoint. All seven criteria have evidence and ticks, and the consistency gate passed. No finding shows a criterion failing. 17 findings go to the gate with proposed dispositions.
+- 2026-09-29: triage gate. The maintainer chose to fix 8 findings, file 1 follow-up row and reject the rest. The fixes are committed. The full suite and `devtools::check()` rerun, and then the merge is put to the maintainer again.
 
 ## Decisions
 
@@ -110,3 +111,18 @@ Independent review, three fresh reviewers: [O] diff, [S] blame history, [S] prio
 - S3: the inner message changed from "is `rsample::X`" to "holds `rsample::X` splits". Proposed: reject, because the work log records this as intended.
 - S5: the NEWS claim that a row-subset `outside` is refused as before rests on rsample dropping the rset class. Proposed: noted, with nothing to do.
 - O8: after `boots[4, ]`, the message says "Row 1", which counts rows of the object passed in. Proposed: reject, because that is correct.
+
+Triage at the gate, 2026-09-29: the maintainer accepted every proposed disposition. The results follow.
+
+- O1 fixed. `inner_refused_reason()` gives the outer loop's reason for a design found by its split classes. It keeps the tune reason for an rset class. The session reran tune on a `manual_rset()` of `loo_cv()` splits, and it ran.
+- O2 fixed. `nested_resamples()` now says "`inside` gave `rsample::X()` splits for outer fold N" for a design found by its split classes.
+- P1 fixed. The new test "the plain outer bootstrap refusals name the function" covers both bootstraps at the constructor and at entry.
+- O6 fixed. The entry hint now says "nestedtune refuses", and the same test asserts it.
+- O7 fixed. The NEWS bullet and `?nested_resamples` now cover the inner loop and the `inside` refusal.
+- P2 and S4 fixed. The `cairn/DESIGN.md` Conventions bullet cites D-097.
+- O9 fixed. The line and `outer_refused_designs` were removed.
+- P3 fixed. The README sentences now come after the per-design reasons, still in the Refused paragraph.
+- O3 and O4 became one candidate row in `cairn/ROADMAP.md`. No existing row overlapped.
+- O5, O8, O10, S1, S2 and S3 were rejected, and S5 was noted, for the reasons above.
+
+The three new test blocks fail on the pre-fix code (4, 5 and 4 failures), and they pass on the branch.
