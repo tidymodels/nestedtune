@@ -2,6 +2,12 @@
 
 ## nestedtune 0.0.0.9000
 
+- The README has a table of 15 rsample resampling functions. It says
+  whether each one works as the outer loop and as the inner loop, and
+  why the ones that do not work fail or give no valid estimate. A design
+  marked as working is one the tests run through
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+
 - [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
   on a nested result or a workflow-set result gains `summarize`, which
   defaults to `FALSE`. With `summarize = TRUE` it returns one averaged

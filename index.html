@@ -129,6 +129,100 @@
 <span><span class="co">#&gt; 1  20.9</span></span>
 <span><span class="co">#&gt; 2  20.9</span></span>
 <span><span class="co">#&gt; 3  23.8</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="supported-resampling-designs">Supported resampling designs<a class="anchor" aria-label="anchor" href="#supported-resampling-designs"></a>
+</h2>
+<p>The table covers 15 resampling functions from rsample. It says whether each one works as the outer loop and as the inner loop of a nested design.</p>
+<table class="table">
+<thead><tr>
+<th>Function</th>
+<th>Outer loop</th>
+<th>Inner loop</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>vfold_cv()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>mc_cv()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>group_vfold_cv()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>group_mc_cv()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>clustering_cv()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>bootstraps()</code></td>
+<td>Refused</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>group_bootstraps()</code></td>
+<td>Refused</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>loo_cv()</code></td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>apparent()</code></td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>validation_set()</code></td>
+<td>Yes<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Build the validation set before the call, with &lt;code&gt;split &amp;lt;- initial_validation_split(data)&lt;/code&gt; and &lt;code&gt;validation_set(split)&lt;/code&gt;. Then pass &lt;code&gt;rbind(training(split), validation(split))&lt;/code&gt; as &lt;code&gt;data&lt;/code&gt;, because those are the rows the validation set refers to. A call such as &lt;code&gt;outside = validation_set()&lt;/code&gt; cannot be built, because the function takes a split rather than a data frame.&lt;/p&gt;"><sup>1</sup></a>
+</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>permutations()</code></td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>rolling_origin()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>sliding_window()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>sliding_index()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>sliding_period()</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Yes means that the test suite runs the design in that loop through <code><a href="reference/nested_tune_grid.html">nested_tune_grid()</a></code> and that every outer fold completes. It holds for the arguments those tests use. For a Yes cell in the first eleven rows, the design in the other loop is a v-fold design. For a Yes cell in the four time-series rows, it is a time-series design. An inner time-series design is tested only with a time-series outer design. The “Time-series designs” section of <code><a href="reference/nested_resamples.html">?nested_resamples</a></code> says which other functions are tested on each time-series design.</p>
+<p>Refused means that <code><a href="reference/nested_resamples.html">nested_resamples()</a></code> stops with an error. An outer bootstrap can put the same row in both the inner analysis set and the inner assessment set, which makes the estimate invalid.</p>
+<p>No means that the design gives no valid nested estimate in that loop. As the outer loop, <code>loo_cv()</code> holds out one row per fold. R² then cannot be computed, and the average RMSE is the mean absolute error. As the inner loop, tune refuses <code>loo_cv()</code>, so every outer fold fails. As the outer loop, <code>apparent()</code> scores its one fold on the rows it trained on. As the inner loop, tune reports that no results are available, so every outer fold fails. As the inner loop, <code>validation_set()</code> cannot be built, because it takes a split from <code>initial_validation_split()</code> rather than a data frame. As the outer loop, <code>permutations()</code> gives each fold no assessment set, so every outer fold fails. As the inner loop, tune refuses it, so every outer fold fails.</p>
+<p>A cell reads Untested when no test shows whether the design works in that loop.</p>
 <p>Learn more:</p>
 <ul>
 <li>
@@ -144,6 +238,8 @@
 </ul>
 </div>
 </div>
+
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">

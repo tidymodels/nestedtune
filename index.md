@@ -69,6 +69,62 @@ predict(final, new_data = mtcars[1:3, ])
 #> 3  23.8
 ```
 
+## Supported resampling designs
+
+The table covers 15 resampling functions from rsample. It says whether
+each one works as the outer loop and as the inner loop of a nested
+design.
+
+| Function             | Outer loop | Inner loop |
+|----------------------|------------|------------|
+| `vfold_cv()`         | Yes        | Yes        |
+| `mc_cv()`            | Yes        | Yes        |
+| `group_vfold_cv()`   | Yes        | Yes        |
+| `group_mc_cv()`      | Yes        | Yes        |
+| `clustering_cv()`    | Yes        | Yes        |
+| `bootstraps()`       | Refused    | Yes        |
+| `group_bootstraps()` | Refused    | Yes        |
+| `loo_cv()`           | No         | No         |
+| `apparent()`         | No         | No         |
+| `validation_set()`   | Yes[^1]    | No         |
+| `permutations()`     | No         | No         |
+| `rolling_origin()`   | Yes        | Yes        |
+| `sliding_window()`   | Yes        | Yes        |
+| `sliding_index()`    | Yes        | Yes        |
+| `sliding_period()`   | Yes        | Yes        |
+
+Yes means that the test suite runs the design in that loop through
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and that every outer fold completes. It holds for the arguments those
+tests use. For a Yes cell in the first eleven rows, the design in the
+other loop is a v-fold design. For a Yes cell in the four time-series
+rows, it is a time-series design. An inner time-series design is tested
+only with a time-series outer design. The “Time-series designs” section
+of
+[`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+says which other functions are tested on each time-series design.
+
+Refused means that
+[`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+stops with an error. An outer bootstrap can put the same row in both the
+inner analysis set and the inner assessment set, which makes the
+estimate invalid.
+
+No means that the design gives no valid nested estimate in that loop. As
+the outer loop, `loo_cv()` holds out one row per fold. R² then cannot be
+computed, and the average RMSE is the mean absolute error. As the inner
+loop, tune refuses `loo_cv()`, so every outer fold fails. As the outer
+loop, `apparent()` scores its one fold on the rows it trained on. As the
+inner loop, tune reports that no results are available, so every outer
+fold fails. As the inner loop, `validation_set()` cannot be built,
+because it takes a split from `initial_validation_split()` rather than a
+data frame. As the outer loop, `permutations()` gives each fold no
+assessment set, so every outer fold fails. As the inner loop, tune
+refuses it, so every outer fold fails.
+
+A cell reads Untested when no test shows whether the design works in
+that loop.
+
 Learn more:
 
 - [Nested
@@ -87,3 +143,11 @@ Learn more:
 - [Running the outer loop in
   parallel](https://nestedtune.tidymodels.org/articles/parallel.html),
   the same call on a pool of mirai daemons.
+
+[^1]: Build the validation set before the call, with
+    `split <- initial_validation_split(data)` and
+    `validation_set(split)`. Then pass
+    `rbind(training(split), validation(split))` as `data`, because those
+    are the rows the validation set refers to. A call such as
+    `outside = validation_set()` cannot be built, because the function
+    takes a split rather than a data frame.
