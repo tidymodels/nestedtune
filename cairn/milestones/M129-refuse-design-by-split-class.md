@@ -86,3 +86,25 @@ Evidence run 2026-09-29 on the branch head `689b24ac`, which already contains `o
 - AC4: three blocks pass. "an outer manual_rset() rebuilt from refused splits is refused at entry" covers 5 designs (19). "nested_resamples() refuses an outside rebuilt from refused splits" covers 5 designs (19). "an inner manual_rset() rebuilt from refused splits is refused at entry" covers `loo_cv()`, `permutations()` and `apparent()` (12). Each of the 13 refusals has the class and the function name. On main, 13 of 19, both constructor blocks, and 9 of 12 fail.
 - AC5: four control blocks pass on the branch and on main. The first is "the entry check still admits a subset or rebuild of a v-fold design" (2). The second is "an inner bootstrap with its apparent split still reaches the folds" (6). The third is "nested_resamples() still builds a bootstrap inside and a rebuilt v-fold outside" (3). The fourth is "an inner element that is not a data frame is still malformed" (2).
 - AC6: `README.Rmd` lines 116 to 121 and the knitted `README.md` lines 117 to 120 carry the three statements. A row subset is refused, a `manual_rset()` rebuild is refused, and one such split among valid ones is refused. `devtools::build_readme()` gave no diff. The one new `NEWS.md` bullet says the same three things.
+
+Consistency gate, 2026-09-29: `cairn_validate.py` exits 0, with 18 references-staleness advisories and no FAIL. No `DESIGN.md` principle changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `build_readme()` left no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps exit 0, and `air format --check .` exits 0. NEWS has the bullet, and no new top-level file was added.
+
+Independent review, three fresh reviewers: [O] diff, [S] blame history, [S] prior review record. Findings, most severe first, each with its proposed disposition:
+
+- O1: the inner reasons say tune refuses `loo_cv()` and `permutations()`, and that tune reports no results for `apparent()`. That holds only for the rset class. The session reran it: tune runs a `manual_rset()` of `loo_cv()` splits and averages RMSE over 20 one-row folds. So a rebuilt or mixed inner design is refused with a false reason. Proposed: fix now.
+- O2: `nested_resamples()` calls a mixed inner design "an `rsample::X` design" and names no fold. Proposed: fix now, with O1.
+- P1: the plain outer `bootstraps()` and `group_bootstraps()` refusals now name the function, which the Scope promises, but no test asserts it. Proposed: fix now.
+- O7: the NEWS bullet does not say that inner rebuilds used to run unrefused, or that `nested_resamples()` refuses an `inside` that returns refused splits. The roxygen at `R/nested-resamples.R:44` does not say it either. Proposed: fix now.
+- O6: the entry check's bootstrap hint says "`nested_tune_grid()` refuses" for every caller of `check_nested()`. This is older than M129, next to an edited line. Proposed: fix now.
+- P2 and S4: the Conventions bullet in `cairn/DESIGN.md` does not say that the refusals also read split classes. Proposed: fix now.
+- O9: in `check_outer_splits()`, the line that sets non-refused designs to `NA` never changes anything. Proposed: fix now.
+- O3: an apparent split beside bootstrap splits in an inner `manual_rset()` counts as part of the bootstrap. If its id is not "Apparent", tune scores it. This follows the D-097 rule. Proposed: follow-up, with O4.
+- O4: in a mixed outer design, an apparent split from a separate `apparent()` call is named as a bootstrap row. This follows the D-097 rule. Proposed: follow-up, with O3.
+- P3: the new README sentences sit between the paragraph's list of per-design reasons. Proposed: fix now, by moving them after the reasons.
+- O5: for an element with one refused split, the inner message still says "splits". It does not give the inner split's position. Proposed: reject, because AC2 and AC3 fix the element as the unit the message names.
+- O10: the rebuild tests do not check `conditionCall()`. No test covers an inner data frame without `splits`, or a zero-row inner subset. The reviewer ran both, and each gets the malformed refusal. Proposed: reject, because the sentinel check already shows the refusal comes before any fold.
+- S1: a whole outer bootstrap design and a row subset of it give different headlines. Proposed: reject, because the class is the same and both name the function.
+- S2: the last row of a `bootstraps(apparent = TRUE)` design is named `apparent()`, but the whole design is named `bootstraps()`. Proposed: reject, because AC2 asks for this.
+- S3: the inner message changed from "is `rsample::X`" to "holds `rsample::X` splits". Proposed: reject, because the work log records this as intended.
+- S5: the NEWS claim that a row-subset `outside` is refused as before rests on rsample dropping the rset class. Proposed: noted, with nothing to do.
+- O8: after `boots[4, ]`, the message says "Row 1", which counts rows of the object passed in. Proposed: reject, because that is correct.
