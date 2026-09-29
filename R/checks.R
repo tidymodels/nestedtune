@@ -449,16 +449,16 @@ refused_design_reason <- function(design, role) {
       "{.fn rsample::permutations} gives each fold no assessment set."
     ),
     "inner loo_cv" = paste(
-      "tune refuses {.fn rsample::loo_cv} as a tuning design, so every outer",
-      "fold would fail."
+      "tune refuses {.fn rsample::loo_cv} as a tuning design, so each outer",
+      "fold that uses it would fail."
     ),
     "inner apparent" = paste(
-      "tune reports no results for {.fn rsample::apparent}, so every outer",
-      "fold would fail."
+      "tune reports no results for {.fn rsample::apparent}, so each outer",
+      "fold that uses it would fail."
     ),
     "inner permutations" = paste(
-      "tune refuses {.fn rsample::permutations} as a tuning design, so every",
-      "outer fold would fail."
+      "tune refuses {.fn rsample::permutations} as a tuning design, so each",
+      "outer fold that uses it would fail."
     )
   )
 }

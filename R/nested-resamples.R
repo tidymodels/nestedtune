@@ -40,9 +40,9 @@
 #' Second, [rsample::loo_cv()], [rsample::apparent()] and
 #' [rsample::permutations()] are refused in either loop, where rsample builds
 #' all six designs. None of them gives a valid nested estimate there. The
-#' README's table of resampling designs gives the reason for each. Every
-#' refusal here has condition class `nestedtune_bad_design`, and a refusal of
-#' one of these three names the rsample function.
+#' README's table of resampling designs gives the reason for each. Both
+#' refusals have condition class `nestedtune_bad_design`, and a refusal of one
+#' of these three names the rsample function.
 #'
 #' @section Time-series designs:
 #'

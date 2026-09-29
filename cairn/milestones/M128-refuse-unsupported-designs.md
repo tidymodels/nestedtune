@@ -69,6 +69,8 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 - 2026-09-29: T2 done. `refused_design()` and `refused_design_reason()` in `R/checks.R` serve both refusal sites. Full suite 0 failures, plain prose sweep clean.
 - 2026-09-29: T3 done. `check_nested()` refuses the outer design and, through `check_inner_refused()`, every inner design, grouped by design with the outer fold positions. Before the change, each new assertion failed: the design reached the fold dispatch stand-in, or the racers' later burn-in check. `tuner_ready()` moved to `helper-orchestration.R` for the shared use. Full suite: the only failures were in `test-sweep-prose.R`, which read T4's README edits mid-run. The six sweeps are clean after T4.
 - 2026-09-29: T4 done. README table and paragraphs, the two help passages and one NEWS bullet. `build_readme()` and `document()` regenerated `README.md` and six `man/` pages. The six gating sweeps are clean.
+- 2026-09-29: claim audit: 50 claims read, 3 corrected — R/checks.R, R/nested-resamples.R, README.Rmd
+- 2026-09-29: the claim audit reader ([O]) re-read the three corrections once and all hold. The inner reasons now name only the folds that use the design. The help sentence covers the two refusals it describes. The README states the inner failure as the case without the refusal.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
