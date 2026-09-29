@@ -1,14 +1,13 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-28 (M125 archived, M122 row pruned, averaging edge-case row promoted, validate green)._
+_Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review leftovers row added, validate green)._
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M126 | Edge cases of averaged predictions | review | — | high | milestones/M126-averaging-edge-cases.md |
+| M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |
 | M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |
-| M123 | The parameter set a final fit searched | done | — | normal | milestones/archive/M123-final-fit-parameter-set.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
