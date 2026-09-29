@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M127: README table of supported resampling designs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -49,7 +49,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
 - [x] T2: Add `tests/testthat/test-design-support.R` with a test for each cell that the T1 ledger finds without a test on the terms of AC2, AC3 or AC4. The list from the plan probe is provisional. Inner: `mc_cv()`, `bootstraps()`, `group_vfold_cv()`, `group_mc_cv()`, `group_bootstraps()`, `clustering_cv()`. Outer: `mc_cv()`, `group_vfold_cv()`, `group_mc_cv()`, `clustering_cv()`. Also the outer `group_bootstraps()` refusal and the `No` cells. Each test uses the existing deterministic fixtures through `memoised()`. Give the file a file-level `skip_heavy_on_cran()` and `skip_if_no_engines()`.
 - [x] T3: Make the page path of `benchmarks/sweep-prose.R` drop a line that opens with `|`, as the roxygen path does at `benchmarks/sweep-prose.R:466`. Add it to the header's sentence on dropped lines. Add the AC6 test to `tests/testthat/test-sweep-prose.R`. Run it before the change to see it fail, and log the before and after results in the work log.
 - [x] T4: Write the README section after the example and before "Learn more", with the table and the prose under it. Run `devtools::build_readme()` and every gating prose sweep.
-- [ ] T5: Add the NEWS bullet. Run `devtools::test()` and `devtools::check()`.
+- [x] T5: Add the NEWS bullet. Run `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -66,6 +66,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
 - 2026-09-28: T3 done. Before the change, the new sweep test failed twice: the sentence mode reported the table as `3: 46 words` beside the closing sentence, and `--spans` reported `3: 6 spans`. After the change, `test-sweep-prose.R` passed in full. `air format` left the changed files as written.
 - 2026-09-28: T4 done. The README section follows the example chunk and holds the table and four paragraphs, with the `No` reasons worded from the observed fold notes. The six gating sweeps are clean, and `devtools::build_readme()` added only the new section to `README.md`.
 - claim audit: 46 claims read, 2 corrected — NEWS.md, tests/testthat/test-design-support.R
+- 2026-09-28: T5 done. The NEWS bullet is added. `devtools::test()` passed with no failures and no skips, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min. Status set to review.
 
 ## Decisions
 
