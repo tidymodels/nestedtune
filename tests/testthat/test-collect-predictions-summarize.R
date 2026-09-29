@@ -933,13 +933,13 @@ test_that("M126: a probability tie whose plain sums round apart goes to the firs
   skip_if_no_engines()
   res <- prob_pair()$res
   row <- res$.predictions[[1L]]$.row[[1L]]
-  # Both true means are 0.2, and `mean()` gives both the same double. The
-  # plain sum 0.05 + 0.35 rounds below 0.2 + 0.2, so an average without
-  # `mean()`'s second pass gives the tie to "other".
+  # Both true means are 0.2. In `double` arithmetic, 0.05 + 0.35 rounds
+  # below 0.2 + 0.2, so an average without `mean()`'s second pass gives the
+  # tie to "other". `mean()` and `sum()` are not the premise here: where
+  # `long double` is wider than `double`, as on x86_64 Linux, they sum in it.
   event <- c(0.05, 0.35)
   other <- c(0.2, 0.2)
-  expect_identical(mean(event), mean(other))
-  expect_lt(sum(event), sum(other))
+  expect_lt(event[[1L]] + event[[2L]], other[[1L]] + other[[2L]])
   planted <- plant_row(res, row, ".pred_event", event)
   planted <- plant_row(planted, row, ".pred_other", other)
   avg <- collect_predictions(planted, summarize = TRUE)

@@ -74,6 +74,7 @@
 - 2026-09-28: review gate, pass 2: the user chose to fix findings 1, 2, 5, 9, 10 and 11 on the branch before approval (Review section). Findings 3, 4 and 8 went to one candidate row. After the fix, `mean_by()` equals `mean()` on 2,000 random groups, and the benchmark ratio is 0.090.
 - step-7 approval: m126-averaging-edge-cases approved for merge
 - 2026-09-28: CI wait on PR #141 reached the watch ceiling. 5 checks passed and 8 were pending, none failed. Not merged. The approval marker stays for the resume.
+- 2026-09-28: resume on PR #141, still open. CI's `R-CMD-check-hard.yaml` ubuntu-latest (release) job failed one expectation: the new tie test's premise `expect_identical(mean(event), mean(other))`. x86_64 Linux sums `mean()` in `long double`, so the two means differ there. The branch's own assertions passed on that runner. The premise now reads `0.05 + 0.35 < 0.2 + 0.2` in `double`. The test still fails on the pre-fix code (`f3aad72f`) and passes after it. The PR conversation holds no reviews, comments or open threads.
 
 ## Decisions
 
