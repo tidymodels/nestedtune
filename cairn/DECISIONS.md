@@ -1991,6 +1991,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** if the rset class names no refused design, the check reads each split's class: `loo_split`, `perm_split`, `apparent_split`, `boot_split` or `group_boot_split`. One such split refuses the design, in the loop where D-096 or the bootstrap rule refuses that design. If the design carries no `boot_split` or `perm_split`, an `apparent_split` counts as `apparent()`. Those two designs add an apparent split as an option. `check_nested()` and `nested_resamples()` apply the same rule. Rejected: keeping the rset class through subset methods, because rsample owns the class and a user can build the table any way. Rejected: refusing every outer design with no rset class, because a subset of a supported design runs today.
 **Consequences:** a split rebuilt with `rsample::make_splits()` carries no trace of its design and stays unrecognized. Falsified by a supported design that the rule refuses, or by an rsample release that changes these split classes.
 
+### D-098 (2026-09-29): testthat in Suggests carries a `>= 3.3.0` floor. Extends the dependency set D-072 last touched
+
+**Context:** the floor read 3.0.0. The tests call `local_mocked_bindings()`, which testthat added in 3.1.7. testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/testthat issues 2038 and 2039). The file-level `skip_heavy_on_cran()` calls take that path under CRAN's conditions. 3.2.3 fixed the error. Releases 3.2.3 and older do not compile under R 4.6, so they cannot be run here.
+**Decision:** the floor is 3.3.0, the lowest release that compiles under R 4.6. M130 ran the tests at it under CRAN's conditions and with `NOT_CRAN=true`. Rejected: 3.2.3, which the `skip()` fix alone supports, because it does not run on R 4.6. Rejected: a CI job pinned to the floor, which stays a candidate row. It costs a full suite run per push, for an entry that only test runners read.
+**Consequences:** someone who runs the tests with testthat 3.2.3 on an older R must upgrade testthat. Falsified by a test failing at 3.3.0 for a testthat reason, or by a test adopting a testthat function newer than 3.3.0.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
