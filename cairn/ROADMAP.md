@@ -8,7 +8,6 @@ _Last hygiene check: 2026-09-29 (M128 archived, M125 row pruned, row-subset desi
 | M129 | Recognize a refused design by its split classes | review | — | high | milestones/M129-refuse-design-by-split-class.md |
 | M128 | Refuse the resampling designs the README marks No | done | — | high | milestones/archive/M128-refuse-unsupported-designs.md |
 | M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
-| M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
