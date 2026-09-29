@@ -33,7 +33,7 @@ Why 3.3.0: testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/test
 - [x] AC1: `DESCRIPTION` lists testthat in Suggests as `testthat (>= 3.3.0)`, and `desc::desc_get_deps("DESCRIPTION")` returns exactly one testthat row, of type `Suggests` with version `>= 3.3.0`.
 - [x] AC2: `R CMD check` starts with an `R_LIBS` whose first entry is a library holding testthat 3.3.0. Under it, the CRAN-conditions command in `benchmarks/cran-check-timing.md` (`NOT_CRAN` and `NESTEDTUNE_FULL_SUITE` unset) ends its `checking tests` step in `OK`, and its `tests/testthat.Rout` reports `FAIL 0`.
 - [x] AC3: Under the same `R_LIBS`, `env -u NESTEDTUNE_FULL_SUITE NOT_CRAN=true TESTTHAT_CPUS=2 _R_CHECK_CRAN_INCOMING_=false R CMD check --as-cran --no-manual nestedtune_*.tar.gz` ends its `checking tests` step in `OK`, and its `tests/testthat.Rout` reports `FAIL 0`.
-- [ ] AC4: `Rscript -e 'devtools::check()'`, run with the installed testthat, reports 0 errors and 0 warnings.
+- [x] AC4: `Rscript -e 'devtools::check()'`, run with the installed testthat, reports 0 errors and 0 warnings.
 
 ## Coverage
 
@@ -80,3 +80,18 @@ Fresh evidence, 2026-09-29, on `3c7eae33`. The default branch had not moved sinc
 - AC1: `DESCRIPTION` line 46 reads `testthat (>= 3.3.0),`. `desc::desc_get_deps("DESCRIPTION")` returns one testthat row: `Suggests`, `>= 3.3.0`.
 - AC2: `R_LIBS` held only the new 3.3.0 library, and `packageVersion("testthat")` under it read 3.3.0. The CRAN-conditions command from `benchmarks/cran-check-timing.md` printed `Running ‘testthat.R’ [132s/64s]`, then `[132s/64s] OK`, and ended `Status: OK`. `tests/testthat.Rout` reads `[ FAIL 0 | WARN 0 | SKIP 118 | PASS 6554 ]`.
 - AC3: under the same `R_LIBS`, the AC3 command printed `Running ‘testthat.R’ [790s/418s]`, then `[790s/418s] OK`, and ended `Status: OK`. `tests/testthat.Rout` reads `[ FAIL 0 | WARN 0 | SKIP 13 | PASS 13390 ]`.
+- AC4: with the installed testthat 3.3.2, `devtools::check()` returned 0 errors, 0 warnings and 0 notes.
+
+Consistency gate: `cairn_validate.py` exit 0, with 18 references-staleness advisories that predate M130. No principle changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. README was not touched. The six gating prose sweeps each exit 0. No new top-level file. `NEWS.md` has no entry, as Scope Out decided. `devtools::check()` is AC4 above.
+
+Independent review: three fresh reviewers ([O] diff-bug, [S] blame-history, [S] prior-review). Findings, most severe first, with the disposition proposed at the gate:
+
+- O1: `tests/testthat/test-nested-tune-grid-failures.R:744-746` says the declared floor is below 3.2.0 and calls `skip_if_not_installed("testthat", "3.2.0")`. After this diff the comment is false and the skip cannot fire at the declared floor. A read of the file shows it. Proposed: fix now, removing the comment and the skip.
+- O2: D-098 says releases 3.2.3 and older do not compile under R 4.6, but T1 built only 3.2.3 and 3.2.2. Review built 3.2.1 and 3.1.10 as well, and both failed on the same `SET_FORMALS` error in `reassign.c`. Proposed: reject, the claim holds for every release built.
+- O3 and S2: D-098 says `local_mocked_bindings()` came in 3.1.7. NEWS shows 3.1.7 added it as experimental, and binding into other packages came later, up to 3.2.1. The 3.3.0 floor is above all of these. Proposed: reject, the statement is true and the floor does not rest on it.
+- O4: D-098 cites "issues 2038 and 2039", and the reviewer found no record of 2038 offline. `gh` shows #2038 is the `skip()` issue and #2039 the pull request that fixed it. Proposed: reject, the citation is correct.
+- O5 and S1: the floor follows the R version on this machine, not the lowest testthat that works on R 4.1 to 4.5. D-098 states this tradeoff in Rejected and Consequences. Proposed: reject, a planned choice.
+- S3, S4, S5: history supports the change. The CI-at-the-floor candidate row stays open by D-098's choice. The criteria were unticked before review by design. Proposed: noted.
+- P1: early work-log lines still say the plan gate chose a 3.2.3 floor. Later lines supersede them, and the work log is append-only. Proposed: reject.
+- P2: the reworded CI candidate row agrees with M118 O7's triage. Proposed: noted.
+- The prior-review lens found no finding tied to an earlier review. Its GitHub probe found human comments only on PR #30, none about the testthat floor.
