@@ -9,7 +9,8 @@
 # whitespace or not; an HTML comment, from a line opening with `<!--`
 # through the line holding `-->`, or that opening line alone where no
 # `-->` follows it; a badge line, one opening `[![`; a
-# heading line, one opening `#`; and a list item, bulleted or numbered
+# heading line, one opening `#`; a pipe-table line, one opening `|`,
+# indented or not; and a list item, bulleted or numbered
 # (`[-*] ` or `[0-9]+. `, indented or not), together with the lines it
 # wraps onto, which run to the next blank line. A paragraph is a run of
 # the lines left, and any dropped line ends one. Backtick spans (inline
@@ -383,6 +384,8 @@ rmd_paragraphs <- function(path) {
   }
   keep[grepl("^\\[!\\[", lines)] <- FALSE
   keep[grepl("^#", lines)] <- FALSE
+  # a pipe-table line is not prose here either, as in a roxygen body
+  keep[grepl("^\\s*\\|", lines)] <- FALSE
   # a list item, bulleted or numbered, takes the lines it wraps onto with it;
   # the run ends at the next blank line whatever those lines are indented by.
   # A line already dropped is not read, so an item-shaped line inside the

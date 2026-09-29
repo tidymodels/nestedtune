@@ -76,7 +76,8 @@ test_that("the parse drops every planted leak and keeps the prose beside it", {
     `comment body` = at("This middle line would be read"),
     `indented fence` = at("an indented fence whose body"),
     `bulleted wrap` = at("should be read as the procedure's error"),
-    `numbered item` = at("reports it as ordinary prose with far more")
+    `numbered item` = at("reports it as ordinary prose with far more"),
+    `pipe table` = at("a table row that should never be read")
   )
   straddle <- at("The reader takes the")
   closing <- at("The page ends on a short prose line.")
@@ -168,6 +169,62 @@ test_that("an unclosed comment and a dropped item-shaped line take no prose", {
     plain(c("- An item", "  it should not be read.")),
     "clean"
   )
+})
+
+# A pipe table on a page is not prose (M127), as it is not in a roxygen body.
+# The table here joins to more than 30 words and names more than four
+# backtick spans, so the sentence mode and `--spans` would each report it if
+# it were read; the over-cap sentence after it shows the page is still read.
+
+test_that("a pipe table on a page is not swept, and the prose after it is", {
+  script <- testthat::test_path("..", "..", "benchmarks", "sweep-prose.R")
+  skip_if_not(file.exists(script), "sweep-prose.R not in the source tree")
+
+  page <- tempfile(fileext = ".Rmd")
+  on.exit(unlink(page), add = TRUE)
+  writeLines(
+    c(
+      "A short opening line.",
+      "",
+      "| Function | Outer loop | Inner loop |",
+      "|---|---|---|",
+      "| `vfold_cv()` | Yes | Yes |",
+      "  | `mc_cv()` | Yes | Yes |",
+      "| `group_vfold_cv()` | Yes | Yes |",
+      "| `group_mc_cv()` | Yes | Yes |",
+      "| `clustering_cv()` | Yes | Yes |",
+      "| `bootstraps()` | Refused | Yes |",
+      "",
+      paste(
+        "This closing sentence runs past the cap on purpose so the sweep",
+        "must still report it after the table even though the table itself",
+        "is no longer read as prose by any mode."
+      )
+    ),
+    page
+  )
+  sweep <- function(...) {
+    out <- suppressWarnings(system2(
+      "Rscript",
+      c(script, ..., "--pages", page),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+    as.character(sub("^.*:([0-9]+): ", "\\1: ", out))
+  }
+
+  expect_identical(
+    sweep(),
+    c(
+      paste(
+        "12: 33 words: This closing sentence runs past the cap on purpose so",
+        "the sweep must still report it after the table even though the",
+        "table itself is no longer read as prose by any mode."
+      ),
+      "1 hit(s)"
+    )
+  )
+  expect_identical(sweep("--spans"), "clean")
 })
 
 # The gating modes over the real pages and roxygen sources. The script owns

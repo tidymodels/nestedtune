@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-28 (M126 archived, M123 row pruned, M126 review lef
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M127 | README table of supported resampling designs | planned | — | normal | milestones/M127-readme-design-table.md |
+| M127 | README table of supported resampling designs | review | — | normal | milestones/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |
 | M124 | Averaged out-of-fold predictions | done | — | normal | milestones/archive/M124-averaged-predictions.md |

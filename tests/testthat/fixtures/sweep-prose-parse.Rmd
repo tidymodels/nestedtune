@@ -22,4 +22,8 @@ The reader takes the `id` columns and should read every fold from them.
    reports it as ordinary prose with far more than thirty separate words
    counted across the whole of its wrapped extent right here.
 
+| Design | Note |
+|---|---|
+  | a table row that should never be read as prose | none |
+
 The page ends on a short prose line.
