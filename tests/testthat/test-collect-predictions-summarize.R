@@ -683,3 +683,267 @@ test_that("AC7: summarize = TRUE refuses saved quantile predictions", {
     class = "nestedtune_summarize_quantile"
   )
 })
+
+# ---- M126: the edge cases of the average -----------------------------------
+#
+# The tests below are labelled with M126's criteria, not M124's above.
+
+# The message as one line, cli's wrapping and styling removed.
+flat_message <- function(cnd) {
+  gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+}
+
+# ---- M126 AC1: saved rows must match the rows each fold held out ----------
+
+for (case in row_mismatch_cases) {
+  test_that(
+    paste0(
+      "M126 AC1: the `",
+      case,
+      "` mismatch is refused under summarize = TRUE, naming the fold"
+    ),
+    {
+      skip_if_no_engines()
+      res <- reg_pair()$res
+      planted <- plant_row_mismatch(res, 2L, case)
+      cnd <- rlang::catch_cnd(
+        collect_predictions(planted, summarize = TRUE),
+        "error"
+      )
+      expect_s3_class(cnd, "nestedtune_collect_predictions_predictions")
+      expect_identical(
+        conditionCall(cnd)[[1L]],
+        as.name("collect_predictions")
+      )
+      labels <- fold_ids(res)
+      expect_match(flat_message(cnd), labels[[2L]], fixed = TRUE)
+      for (other in labels[-2L]) {
+        expect_no_match(flat_message(cnd), other, fixed = TRUE)
+      }
+      # The message points to the per-fold table the check leaves alone.
+      expect_match(flat_message(cnd), "summarize = FALSE", fixed = TRUE)
+      # The per-fold table reads the same run without a condition.
+      expect_no_condition(per_fold <- collect_predictions(planted))
+      expect_s3_class(per_fold, "tbl_df")
+    }
+  )
+}
+
+test_that("M126 AC1: a mismatch in one workflow of a set is refused", {
+  skip_if_no_wset_fixture("nested_fit_resamples")
+  res <- set_run()
+  res$result[[1L]] <- plant_row_mismatch(res$result[[1L]], 2L, "repeated")
+  expect_error(
+    collect_predictions(res, summarize = TRUE),
+    class = "nestedtune_collect_predictions_predictions"
+  )
+  expect_no_condition(collect_predictions(res))
+})
+
+# ---- M126 AC2: shapes the average misreads are refused ---------------------
+
+# Every fold's saved predictions edited by `edit()`.
+edit_all_folds <- function(x, edit) {
+  for (i in seq_len(nrow(x))) {
+    x <- edit_fold_predictions(x, i, edit)
+  }
+  x
+}
+
+# Both readers that average refuse `x` with class
+# `nestedtune_summarize_columns`, each under its own name. Every row of the
+# fixtures' repeated designs is held out twice, so `augment()` averages.
+expect_shape_refused <- function(x) {
+  for (verb in c("collect_predictions", "augment")) {
+    cnd <- rlang::catch_cnd(
+      if (verb == "augment") {
+        augment(x)
+      } else {
+        collect_predictions(x, summarize = TRUE)
+      },
+      "error"
+    )
+    expect_s3_class(cnd, "nestedtune_summarize_columns")
+    expect_identical(conditionCall(cnd)[[1L]], as.name(verb), info = verb)
+  }
+}
+
+test_that("M126 AC2: two factor outcome columns are refused", {
+  skip_if_no_engines()
+  res <- edit_all_folds(prob_pair()$res, function(p) {
+    p$also <- p$y
+    p
+  })
+  expect_shape_refused(res)
+})
+
+test_that("M126 AC2: a saved class beside no factor outcome column is refused", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  # The outcome removed, and the outcome kept as text.
+  expect_shape_refused(edit_all_folds(res, function(p) p[names(p) != "y"]))
+  expect_shape_refused(edit_all_folds(res, function(p) {
+    p$y <- as.character(p$y)
+    p
+  }))
+})
+
+test_that("M126 AC2: a censored .pred entry without .eval_time is refused", {
+  skip_if_no_engines()
+  skip_if_no_censored()
+  res <- edit_fold_predictions(srv_pair()$res, 1L, function(p) {
+    p$.pred[[1L]] <- p$.pred[[1L]][names(p$.pred[[1L]]) != ".eval_time"]
+    p
+  })
+  expect_shape_refused(res)
+})
+
+# ---- M126 AC3: NULL entries in a censored .pred ---------------------------
+
+# One row's survival average by base R: per `.eval_time`, the mean of the
+# row's non-NULL entries with missing values ignored.
+hand_survival <- function(entries) {
+  long <- do.call(
+    rbind,
+    lapply(Filter(Negate(is.null), entries), as.data.frame)
+  )
+  times <- unique(long$.eval_time)
+  data.frame(
+    .eval_time = times,
+    .pred_survival = vapply(
+      times,
+      function(t) mean(long$.pred_survival[long$.eval_time == t], na.rm = TRUE),
+      numeric(1)
+    ),
+    .weight_censored = vapply(
+      times,
+      function(t) {
+        mean(long$.weight_censored[long$.eval_time == t], na.rm = TRUE)
+      },
+      numeric(1)
+    )
+  )
+}
+
+# The saved `.pred` entries of `row`, one per fold holding it, in fold order.
+row_entries <- function(x, row) {
+  lapply(holders(x, row), function(i) {
+    p <- x$.predictions[[i]]
+    p$.pred[[which(p$.row == row)]]
+  })
+}
+
+test_that("M126 AC3: a NULL entry is left out of its row's average", {
+  skip_if_no_engines()
+  skip_if_no_censored()
+  res <- srv_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  expect_length(holders(res, row), 2L)
+  kept <- row_entries(res, row)[[2L]]
+  planted <- edit_fold_predictions(res, 1L, function(p) {
+    p$.pred[p$.row == row] <- list(NULL)
+    p
+  })
+  avg <- collect_predictions(planted, summarize = TRUE)
+  expect_equal(
+    as.data.frame(avg$.pred[[which(avg$.row == row)]]),
+    hand_survival(list(NULL, kept))
+  )
+})
+
+test_that("M126 AC3: a row whose every entry is NULL holds NULL", {
+  skip_if_no_engines()
+  skip_if_no_censored()
+  res <- srv_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  planted <- res
+  for (i in holders(res, row)) {
+    planted <- edit_fold_predictions(planted, i, function(p) {
+      p$.pred[p$.row == row] <- list(NULL)
+      p
+    })
+  }
+  avg <- collect_predictions(planted, summarize = TRUE)
+  expect_null(avg$.pred[[which(avg$.row == row)]])
+  # The other rows keep their averages.
+  others <- avg$.pred[avg$.row != row]
+  expect_true(all(vapply(others, is.data.frame, logical(1))))
+})
+
+test_that("M126 AC3: a table whose every entry is NULL averages to NULL entries", {
+  skip_if_no_engines()
+  skip_if_no_censored()
+  planted <- edit_all_folds(srv_pair()$res, function(p) {
+    p$.pred <- vector("list", nrow(p))
+    p
+  })
+  avg <- collect_predictions(planted, summarize = TRUE)
+  expect_identical(avg$.row, held_out_rows(planted))
+  expect_true(all(vapply(avg$.pred, is.null, logical(1))))
+})
+
+# ---- M126 AC5: paths the M124 and M125 reviews found untested --------------
+
+test_that("M126 AC5: a set refuses saved quantile predictions in both readers", {
+  skip_if_no_wset_fixture("nested_fit_resamples")
+  res <- set_run()
+  res$result[[1L]] <- edit_fold_predictions(res$result[[1L]], 2L, function(p) {
+    p$.pred_quantile <- p$.pred
+    p
+  })
+  expect_error(
+    collect_predictions(res, summarize = TRUE),
+    class = "nestedtune_summarize_quantile"
+  )
+  expect_error(augment(res), class = "nestedtune_summarize_quantile")
+})
+
+test_that("M126 AC5: a .pred_linear_pred column averages to its per-row mean", {
+  skip_if_no_engines()
+  res <- edit_all_folds(reg_pair()$res, function(p) {
+    p$.pred_linear_pred <- 2 * p$.pred + p$.row
+    p
+  })
+  res <- plant_missing(res, ".pred_linear_pred")
+  p <- collect_predictions(res)
+  avg <- collect_predictions(res, summarize = TRUE)
+  hand <- tapply(p$.pred_linear_pred, p$.row, mean, na.rm = TRUE)
+  expect_identical(avg$.row, as.integer(names(hand)))
+  expect_equal(avg$.pred_linear_pred, as.vector(hand))
+  expect_false(anyNA(avg$.pred_linear_pred))
+})
+
+test_that("M126 AC5: a probability tie with one missing probability goes to the first level", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  for (event in list(c(NA, 0.5), c(0.5, NA))) {
+    planted <- plant_row(res, row, ".pred_event", event)
+    planted <- plant_row(planted, row, ".pred_other", c(0.5, 0.5))
+    planted <- plant_row(planted, row, ".pred_class", c("other", "other"))
+    avg <- collect_predictions(planted, summarize = TRUE)
+    mine <- avg[avg$.row == row, ]
+    expect_identical(mine$.pred_event, 0.5)
+    expect_identical(mine$.pred_other, 0.5)
+    expect_identical(as.character(mine$.pred_class), "event")
+  }
+})
+
+test_that("M126: a probability tie whose plain sums round apart goes to the first level", {
+  skip_if_no_engines()
+  res <- prob_pair()$res
+  row <- res$.predictions[[1L]]$.row[[1L]]
+  # Both true means are 0.2. In `double` arithmetic, 0.05 + 0.35 rounds
+  # below 0.2 + 0.2, so an average without `mean()`'s second pass gives the
+  # tie to "other". `mean()` and `sum()` are not the premise here: where
+  # `long double` is wider than `double`, as on x86_64 Linux, they sum in it.
+  event <- c(0.05, 0.35)
+  other <- c(0.2, 0.2)
+  expect_lt(event[[1L]] + event[[2L]], other[[1L]] + other[[2L]])
+  planted <- plant_row(res, row, ".pred_event", event)
+  planted <- plant_row(planted, row, ".pred_other", other)
+  avg <- collect_predictions(planted, summarize = TRUE)
+  mine <- avg[avg$.row == row, ]
+  expect_identical(mine$.pred_event, mine$.pred_other)
+  expect_identical(as.character(mine$.pred_class), "event")
+})

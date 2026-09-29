@@ -60,6 +60,10 @@ is held out reads every outer fold, the failed ones included. The average is the
 \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}} states its rules. For example, a
 \code{.pred_class} saved beside class probabilities is recomputed from the
 averaged probabilities, whatever class a postprocessor set.
+
+A metric computed on averaged predictions describes an average of several
+fitted models, not the tuning procedure, so it is not the nested
+estimate. \code{\link[=collect_metrics]{collect_metrics()}} gives that estimate.
 }
 
 \section{Designs and folds refused}{
@@ -77,6 +81,10 @@ its first assessment set. Read the predictions such a design has with
 On a design that holds out some row more than once, saved quantile
 predictions are refused with class \code{nestedtune_summarize_quantile},
 because \code{collect_predictions(summarize = TRUE)} does not average them.
+On such a design, the three edited shapes of saved predictions that the
+average refuses are refused here too, with class
+\code{nestedtune_summarize_columns}. \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}
+lists them.
 
 
 A run whose control did not set \code{save_pred = TRUE} is refused with class
@@ -94,7 +102,8 @@ every prediction column, with a warning of class
 takes the average over the completed folds. A missing value is \code{NA}, or
 \code{NULL} in a list column such as the \code{.pred} of a censored-regression run.
 A data column whose name is also a prediction column's name is refused
-with class \code{nestedtune_collect_name_collision}.
+with class \code{nestedtune_collect_name_collision}, before either refusal of
+the average.
 }
 
 \examples{

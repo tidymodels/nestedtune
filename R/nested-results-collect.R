@@ -250,7 +250,8 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' * A censored run takes the median `.pred_time`, which is missing if any
 #'   fold's value is. The survival probabilities in `.pred` take, per
 #'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
-#'   missing values ignored.
+#'   missing values ignored. A `NULL` entry in `.pred` is left out of its
+#'   row's average, and a row whose every entry is `NULL` holds `NULL`.
 #'
 #' A tie, between votes or between averaged probabilities, goes to the first
 #' of the tied levels in the factor's level order.
@@ -261,6 +262,27 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' predictions are not averaged: a run whose saved predictions carry a
 #' `.pred_quantile` column is refused with class
 #' `nestedtune_summarize_quantile`.
+#'
+#' A metric computed on these averages describes an average of several
+#' fitted models, not the tuning procedure, so it is not the nested
+#' estimate. [collect_metrics()] gives that estimate.
+#'
+#' The average reads the saved predictions as the run returned them, and
+#' refuses two kinds of edited table. A completed fold whose `.row` column
+#' does not hold each row the fold held out exactly once, and no other row,
+#' is refused with class `nestedtune_collect_predictions_predictions`. The
+#' per-fold table, with `summarize = FALSE`, is not checked. Three shapes
+#' are refused with class `nestedtune_summarize_columns`:
+#'
+#' * Two or more factor outcome columns, where the average reads one.
+#' * A `.pred_class` column with no factor outcome column.
+#' * A censored `.pred` entry that is not `NULL` and has no `.eval_time`
+#'   column.
+#'
+#' An outcome column here is any column other than the prediction columns
+#' and the fold labels. The columns tune adds beside the predictions are not
+#' outcome columns either. Those are `.row`, `.config` and `.case_weights`.
+#' Nor are `.iter` and `.eval_time`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -308,6 +330,11 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   check_any_completed(x, action = "collect")
   check_column_saved(x, ".predictions", call = rlang::current_env())
   if (summarize) {
+    check_predictions_rows(
+      x,
+      verb = "collect_predictions",
+      call = rlang::current_env()
+    )
     check_no_quantile(
       x,
       verb = "collect_predictions",
@@ -322,7 +349,12 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
     call = rlang::current_env()
   )
   if (summarize) {
-    out <- average_fold_predictions(out, drop = c(id_columns(x), ".config"))
+    out <- average_fold_predictions(
+      out,
+      drop = c(id_columns(x), ".config"),
+      verb = "collect_predictions",
+      call = rlang::current_env()
+    )
   }
   out
 }
@@ -339,30 +371,38 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
 # carry no stability promise (M28). Ties go to the first level in factor
 # order. One departure: a row whose averaged probabilities are missing gets
 # a missing class, where `prob_summarize()` gives it the first level.
-average_fold_predictions <- function(preds, drop) {
+# `verb` and `call` name the reader in the refusal of a table the rules
+# would misread (M126), `check_average_columns()`.
+average_fold_predictions <- function(
+  preds,
+  drop,
+  verb,
+  call = rlang::caller_env()
+) {
   preds <- preds[setdiff(names(preds), drop)]
+  check_average_columns(preds, verb = verb, call = call)
   rows <- sort(unique(preds$.row))
-  group <- factor(match(preds$.row, rows), levels = seq_along(rows))
+  group <- match(preds$.row, rows)
   first <- match(rows, preds$.row)
-  per_row <- function(v, fn) {
-    vapply(split(v, group), fn, numeric(1), USE.NAMES = FALSE)
-  }
-  mean_na_rm <- function(v) mean(v, na.rm = TRUE)
+  n <- length(rows)
 
   nms <- names(preds)
   # A factor outcome names the probability columns, one per level, so a
   # level named like `time` is never read as a censored column.
-  others <- nms[!startsWith(nms, ".pred") & nms != ".row"]
-  outcome <- Filter(function(nm) is.factor(preds[[nm]]), others)
+  outcome <- factor_outcomes(preds)
   prob_cols <- if (length(outcome) == 1L) {
     intersect(paste0(".pred_", levels(preds[[outcome]])), nms)
   } else {
     character(0)
   }
   if (length(prob_cols) > 0L) {
-    probs <- matrix(
-      unlist(lapply(prob_cols, function(nm) per_row(preds[[nm]], mean_na_rm))),
-      ncol = length(prob_cols)
+    probs <- mean_by(
+      matrix(
+        unlist(lapply(prob_cols, function(nm) as.double(preds[[nm]]))),
+        ncol = length(prob_cols)
+      ),
+      group,
+      n
     )
     probs <- probs / rowSums(probs)
   }
@@ -376,21 +416,138 @@ average_fold_predictions <- function(preds, drop) {
       return(class_from_probs(probs, prob_cols, v, preds[[outcome]]))
     }
     if (nm == ".pred_class") {
-      return(class_by_vote(v, group))
+      return(class_by_vote(v, group, n))
     }
     if (nm == ".pred_time") {
-      return(per_row(v, stats::median))
+      return(median_by(v, group, n))
     }
     if (nm == ".pred" && is.list(v)) {
-      return(average_survival(v, group))
+      return(average_survival(v, group, n))
     }
     if (startsWith(nm, ".pred") && is.numeric(v)) {
-      return(per_row(v, mean_na_rm))
+      return(mean_by(v, group, n))
     }
     vctrs::vec_slice(v, first)
   })
   names(cols) <- nms
   new_tbl(cols)
+}
+
+# Grouped statistics over `v`, one per group `1:n` of the integer `group`.
+# They are written with grouped sums and one sort rather than a call per
+# group (M126: the benchmark's 100,002-row probability table took 0.8 s
+# that way, `benchmarks/averaging-speed.R`).
+# The mean ignores missing values, and a group with none left, or with no
+# rows, gives `NaN`, as `mean(na.rm = TRUE)` does. Like `mean()`, it adds a
+# second pass: the mean of each value's distance from the first estimate,
+# skipped where that estimate is not finite. Without it, two groups with the
+# same true mean can round one step apart, and a probability tie goes to
+# the wrong level. Where `long double` is `double`, as on aarch64 macOS, the
+# result equals `mean()`'s (2,000 random groups with missing values, R 4.6.1,
+# 2026-09-28). Where `long double` is wider, `mean()` sums in it, so the two
+# can differ in the last bits; that case was not run.
+#
+# `v` can be a matrix, averaged column by column in one pass, which gives a
+# matrix; a vector gives a vector.
+mean_by <- function(v, group, n) {
+  if (!is.matrix(v)) {
+    return(as.vector(mean_by(matrix(as.double(v)), group, n)))
+  }
+  seen <- !is.na(v)
+  v[!seen] <- 0
+  counts <- rowsum(seen + 0, group, reorder = TRUE)
+  est <- rowsum(v, group, reorder = TRUE) / counts
+  dev <- v - est[match(group, as.integer(rownames(est))), , drop = FALSE]
+  dev[!seen] <- 0
+  refine <- rowsum(dev, group, reorder = TRUE) / counts
+  finite <- is.finite(est)
+  est[finite] <- est[finite] + refine[finite]
+  out <- matrix(NaN, n, ncol(v))
+  out[as.integer(rownames(est)), ] <- est
+  out
+}
+
+# The median, missing when any value in the group is, as `stats::median()`
+# is by default. Every group `1:n` must hold a row. For an even group it halves the sum of the middle two,
+# where `stats::median()` calls `mean()`, so the two can differ in the last
+# bit.
+median_by <- function(v, group, n) {
+  v <- as.double(v)
+  size <- tabulate(group, n)
+  o <- order(group, v)
+  sorted <- v[o]
+  start <- cumsum(size) - size
+  lo <- sorted[start + (size + 1L) %/% 2L]
+  hi <- sorted[start + size %/% 2L + 1L]
+  out <- (lo + hi) / 2
+  out[tabulate(group[is.na(v)], n) > 0L] <- NA_real_
+  out
+}
+
+# The factor columns among a prediction table's outcome columns: those that
+# are not predictions and not a column tune adds beside them, as in
+# `outcome_column()`.
+factor_outcomes <- function(preds) {
+  nms <- names(preds)
+  others <- setdiff(
+    nms[!startsWith(nms, ".pred")],
+    c(".row", ".config", ".case_weights", ".iter", ".eval_time")
+  )
+  Filter(function(nm) is.factor(preds[[nm]]), others)
+}
+
+# Three shapes the averaging rules would misread (M126). With two factor
+# outcomes, which one names the probability columns is unknown. A saved
+# class beside no factor outcome leaves the probability columns unnamed, so
+# they would be averaged without renormalizing and the class voted. A
+# censored `.pred` entry without `.eval_time` has no time to average at.
+# tune 2.1.0 writes none of these, so each means the object was edited. Read
+# after the fold labels and `.config` are dropped.
+check_average_columns <- function(preds, verb, call = rlang::caller_env()) {
+  verb <- rlang::arg_match(verb, c("collect_predictions", "augment"))
+  factors <- factor_outcomes(preds)
+  problem <- if (length(factors) >= 2L) {
+    "The saved predictions carry {length(factors)} factor outcome columns, \\
+     {.field {factors}}, where the average reads one."
+  } else if (length(factors) == 0L && ".pred_class" %in% names(preds)) {
+    "The saved predictions carry a {.field .pred_class} column but no \\
+     factor outcome column."
+  } else if (is.list(preds[[".pred"]]) && !all(has_eval_time(preds$.pred))) {
+    "A saved {.field .pred} entry has no {.field .eval_time} column."
+  }
+  if (is.null(problem)) {
+    return(invisible(preds))
+  }
+  msg <- switch(
+    verb,
+    collect_predictions = c(
+      "{.code summarize = TRUE} cannot average the saved predictions.",
+      x = problem
+    ),
+    augment = c(
+      "{.fn augment} cannot average the saved predictions.",
+      x = problem,
+      i = "The outer design holds some data rows out more than once, so \\
+           {.fn augment} averages their predictions."
+    )
+  )
+  cli::cli_abort(
+    c(
+      msg,
+      i = "A saved prediction table must keep the columns the run returned."
+    ),
+    class = "nestedtune_summarize_columns",
+    call = call
+  )
+}
+
+# Whether each censored `.pred` entry is NULL or carries `.eval_time`.
+has_eval_time <- function(entries) {
+  vapply(
+    entries,
+    function(t) is.null(t) || ".eval_time" %in% names(t),
+    logical(1)
+  )
 }
 
 # Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
@@ -430,13 +587,14 @@ check_no_quantile <- function(x, verb, call = rlang::caller_env()) {
   cli::cli_abort(msg, class = "nestedtune_summarize_quantile", call = call)
 }
 
-# The class at the largest averaged probability. `which.max()` returns the
-# first of tied maxima, and `prob_cols` is in factor order. Orderedness
-# follows the outcome, as in tune's `prob_summarize()`, not the saved class.
+# The class at the largest averaged probability. `max.col(ties.method =
+# "first")` returns the first of tied maxima, comparing exactly, and
+# `prob_cols` is in factor order. A row holding a missing probability is
+# missing throughout, because renormalizing divides it by a missing sum, and
+# `max.col()` gives it a missing class. Orderedness follows the outcome, as
+# in tune's `prob_summarize()`, not the saved class.
 class_from_probs <- function(probs, prob_cols, saved, outcome) {
-  idx <- apply(probs, 1L, function(r) {
-    if (all(is.na(r))) NA_integer_ else which.max(r)
-  })
+  idx <- max.col(probs, ties.method = "first")
   labels <- substring(prob_cols, nchar(".pred_") + 1L)
   factor(
     labels[idx],
@@ -448,8 +606,10 @@ class_from_probs <- function(probs, prob_cols, saved, outcome) {
 # The most frequent class per row. A missing vote is counted as a class of
 # its own, placed after the levels, as tune's `dplyr::count()` counts it, so
 # it wins only when it outnumbers every level. `max.col(ties.method =
-# "first")` takes the first level among tied counts.
-class_by_vote <- function(v, group) {
+# "first")` takes the first level among tied counts. `group` numbers the
+# rows `1:n`.
+class_by_vote <- function(v, group, n = max(as.integer(group))) {
+  group <- factor(as.integer(group), levels = seq_len(n))
   counts <- unclass(table(group, addNA(v, ifany = FALSE)))
   idx <- max.col(counts, ties.method = "first")
   idx[idx > nlevels(v)] <- NA_integer_
@@ -458,32 +618,37 @@ class_by_vote <- function(v, group) {
 
 # The censored `.pred` list column: per row and `.eval_time`, the mean of
 # every other column with missing values ignored, in the order the times
-# first appear.
-average_survival <- function(v, group) {
-  sizes <- vapply(v, function(t) if (is.null(t)) 0L else nrow(t), integer(1))
-  long <- vctrs::vec_rbind(!!!v)
-  long_group <- rep(as.integer(group), sizes)
+# first appear. A NULL entry is left out, and a row whose every entry is
+# NULL holds NULL (M126), the value `augment()` gives a list column's row
+# that no completed fold held out. `group` numbers the rows `1:n`.
+average_survival <- function(v, group, n) {
+  sizes <- vctrs::list_sizes(v)
+  out <- vector("list", n)
+  if (sum(sizes) == 0L) {
+    return(out)
+  }
+  long <- vctrs::list_unchop(v)
+  long_group <- rep(group, sizes)
   key <- vctrs::vec_group_id(
     vctrs::new_data_frame(list(g = long_group, t = long$.eval_time))
   )
-  first <- match(seq_len(attr(key, "n")), key)
+  n_key <- attr(key, "n")
+  first <- match(seq_len(n_key), key)
   averaged <- lapply(names(long), function(nm) {
     if (nm == ".eval_time") {
       return(long$.eval_time[first])
     }
-    vapply(
-      split(long[[nm]], factor(key, levels = seq_along(first))),
-      function(x) mean(x, na.rm = TRUE),
-      numeric(1),
-      USE.NAMES = FALSE
-    )
+    mean_by(long[[nm]], key, n_key)
   })
   names(averaged) <- names(long)
   averaged <- new_tbl(averaged)
-  owner <- factor(long_group[first], levels = seq_len(nlevels(group)))
-  unname(lapply(split(seq_along(first), owner), function(i) {
-    vctrs::vec_slice(averaged, i)
-  }))
+  entries <- split(
+    seq_len(n_key),
+    factor(long_group[first], levels = seq_len(n))
+  )
+  filled <- lengths(entries) > 0L
+  out[filled] <- vctrs::vec_chop(averaged, indices = unname(entries[filled]))
+  out
 }
 
 #' @rdname collect_predictions.nested_results
@@ -861,6 +1026,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' `.pred_class` saved beside class probabilities is recomputed from the
 #' averaged probabilities, whatever class a postprocessor set.
 #'
+#' A metric computed on averaged predictions describes an average of several
+#' fitted models, not the tuning procedure, so it is not the nested
+#' estimate. [collect_metrics()] gives that estimate.
+#'
 #' @section Designs and folds refused:
 #'
 #' A design that leaves some data row out of every assessment set is
@@ -875,6 +1044,10 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' On a design that holds out some row more than once, saved quantile
 #' predictions are refused with class `nestedtune_summarize_quantile`,
 #' because `collect_predictions(summarize = TRUE)` does not average them.
+#' On such a design, the three edited shapes of saved predictions that the
+#' average refuses are refused here too, with class
+#' `nestedtune_summarize_columns`. [collect_predictions.nested_results()]
+#' lists them.
 #'
 #' @templateVar TITLE Designs and folds refused
 #' @template refusals-saved-run
@@ -889,7 +1062,8 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' takes the average over the completed folds. A missing value is `NA`, or
 #' `NULL` in a list column such as the `.pred` of a censored-regression run.
 #' A data column whose name is also a prediction column's name is refused
-#' with class `nestedtune_collect_name_collision`.
+#' with class `nestedtune_collect_name_collision`, before either refusal of
+#' the average.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -915,19 +1089,12 @@ augment.nested_results <- function(x, ...) {
   data <- x$splits[[1L]]$data
   repeated <- check_held_out(x, nrow(data), call = call)
   check_predictions_rows(x, verb = "augment", call = call)
-  if (repeated) {
-    check_no_quantile(x, verb = "augment", call = call)
-  }
-  preds <- stack_fold_column(
-    x,
-    ".predictions",
-    completed_only = TRUE,
-    call = call
-  )
-  if (repeated) {
-    preds <- average_fold_predictions(preds, drop = c(id_columns(x), ".config"))
-  }
-  pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
+  # The collision is read off the saved tables' names, before any refusal
+  # the average raises (M126): averaging keeps every `.pred` column's name.
+  pred_cols <- unique(unlist(lapply(
+    x$.predictions[x$.completed],
+    function(p) grep("^\\.pred", names(p), value = TRUE)
+  )))
   clash <- intersect(pred_cols, names(data))
   if (length(clash) > 0L) {
     cli::cli_abort(
@@ -940,6 +1107,24 @@ augment.nested_results <- function(x, ...) {
       call = call
     )
   }
+  if (repeated) {
+    check_no_quantile(x, verb = "augment", call = call)
+  }
+  preds <- stack_fold_column(
+    x,
+    ".predictions",
+    completed_only = TRUE,
+    call = call
+  )
+  if (repeated) {
+    preds <- average_fold_predictions(
+      preds,
+      drop = c(id_columns(x), ".config"),
+      verb = "augment",
+      call = call
+    )
+  }
+  pred_cols <- grep("^\\.pred", names(preds), value = TRUE)
   warn_partial_summary(x, noun = "table")
 
   joined <- lapply(pred_cols, function(nm) {
@@ -997,12 +1182,18 @@ check_held_out <- function(x, n, call = rlang::caller_env()) {
 # be left missing without a word, and a repeated one would overwrite another.
 # `compute_metrics()` scores the rows as they are, so a repeated row would
 # count twice and a foreign one would be scored against a row the fold
-# analysed (M100). tune 2.1.0 has no path to any of these short of an edit
-# to the object, so any mismatch refuses, under the class of the reader
-# that found it: `nestedtune_<verb>_predictions`. The values are compared
-# as whole numbers: a double `.row` holding the same values is accepted.
+# analysed (M100). `collect_predictions(summarize = TRUE)` averages by
+# `.row`, so a repeated row would weigh twice in its average (M126); the
+# per-fold table is not checked, as it only shows what was saved. tune 2.1.0
+# has no path to any of these short of an edit to the object, so any
+# mismatch refuses, under the class of the reader that found it:
+# `nestedtune_<verb>_predictions`. The values are compared as whole numbers:
+# a double `.row` holding the same values is accepted.
 check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
-  verb <- rlang::arg_match(verb, c("augment", "compute_metrics"))
+  verb <- rlang::arg_match(
+    verb,
+    c("augment", "compute_metrics", "collect_predictions")
+  )
   bad <- vapply(
     which(x$.completed),
     function(i) !predictions_match_rows(x$.predictions[[i]], x$splits[[i]]),
@@ -1013,15 +1204,26 @@ check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
     return(invisible(x))
   }
   labels <- fold_ids(x)[bad]
+  msg <- c(
+    "{.fn {verb}} needs each fold's saved predictions to hold exactly \\
+     the rows that fold held out, each once.",
+    x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
+         {?its/their} held-out rows.",
+    i = "A saved prediction table must keep its {.field .row} column as \\
+         the run returned it."
+  )
+  if (verb == "collect_predictions") {
+    msg[[1L]] <- "{.code summarize = TRUE} needs each fold's saved \\
+                  predictions to hold exactly the rows that fold held out, \\
+                  each once."
+    msg <- c(
+      msg,
+      i = "Call {.fn collect_predictions} with {.code summarize = FALSE} \\
+           for the per-fold predictions."
+    )
+  }
   cli::cli_abort(
-    c(
-      "{.fn {verb}} needs each fold's saved predictions to hold exactly \\
-       the rows that fold held out, each once.",
-      x = "The saved predictions of fold{?s} {.val {labels}} do not match \\
-           {?its/their} held-out rows.",
-      i = "A saved prediction table must keep its {.field .row} column as \\
-           the run returned it."
-    ),
+    msg,
     class = paste0("nestedtune_", verb, "_predictions"),
     call = call
   )

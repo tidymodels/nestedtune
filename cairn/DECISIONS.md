@@ -1967,6 +1967,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-092 stands, and it also supersedes D-078's clause on that message. `augment()` gives one message for every design it refuses, and the message names no design type. D-078's support claims for the four outer time-series designs stand.
 **Consequences:** D-078's falsifier about a time-series split class the check does not list no longer applies to `augment()`, because the check reads no split class.
 
+### D-094 (2026-09-28): the average refuses a saved-prediction table it would misread, `collect_predictions(summarize = TRUE)` checks the saved rows, and a NULL censored entry is left out. Extends D-090, and D-092's order of refusals
+
+**Context:** M124's and M125's reviews found edited prediction tables that the D-090 average read wrong without a word: a duplicated `.row`, no single factor outcome, and a censored entry that is NULL or has no `.eval_time`. tune 2.1.0 writes none of them.
+**Decision:** `collect_predictions(summarize = TRUE)` runs the row check `augment()` and `compute_metrics()` run, with class `nestedtune_collect_predictions_predictions`. The per-fold table is not checked. Both readers that average refuse three shapes with class `nestedtune_summarize_columns`: two factor outcome columns, a saved `.pred_class` with no factor outcome column, and a censored `.pred` entry that is not NULL and has no `.eval_time`. A NULL censored entry is left out of its row's average, and a row with no other entry holds NULL. `augment()` checks a name collision before any averaging refusal. The means are computed with grouped sums, so they can differ from `mean()` in the last bits. The NULL rule has one oracle, a base R average, which departs from GP2: the rule decides only which entries enter an average that M124 checked against two. Considered and rejected at M126's plan gate: documenting the silent average, and checking the per-fold table too.
+**Consequences:** D-090 and D-092 stand. Two further edited shapes still average without a message, in a `DESIGN.md` Known issues entry. Falsified by tune writing one of the refused shapes from a real run, or by tune's average of a NULL entry differing from the base R one.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

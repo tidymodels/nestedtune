@@ -95,7 +95,8 @@ is missing only when missing votes outnumber every level.
 \item A censored run takes the median \code{.pred_time}, which is missing if any
 fold's value is. The survival probabilities in \code{.pred} take, per
 \code{.eval_time}, the mean \code{.pred_survival} and \code{.weight_censored} with
-missing values ignored.
+missing values ignored. A \code{NULL} entry in \code{.pred} is left out of its
+row's average, and a row whose every entry is \code{NULL} holds \code{NULL}.
 }
 
 A tie, between votes or between averaged probabilities, goes to the first
@@ -107,6 +108,28 @@ selected, and the fold labels and \code{.config} are dropped. Quantile
 predictions are not averaged: a run whose saved predictions carry a
 \code{.pred_quantile} column is refused with class
 \code{nestedtune_summarize_quantile}.
+
+A metric computed on these averages describes an average of several
+fitted models, not the tuning procedure, so it is not the nested
+estimate. \code{\link[=collect_metrics]{collect_metrics()}} gives that estimate.
+
+The average reads the saved predictions as the run returned them, and
+refuses two kinds of edited table. A completed fold whose \code{.row} column
+does not hold each row the fold held out exactly once, and no other row,
+is refused with class \code{nestedtune_collect_predictions_predictions}. The
+per-fold table, with \code{summarize = FALSE}, is not checked. Three shapes
+are refused with class \code{nestedtune_summarize_columns}:
+\itemize{
+\item Two or more factor outcome columns, where the average reads one.
+\item A \code{.pred_class} column with no factor outcome column.
+\item A censored \code{.pred} entry that is not \code{NULL} and has no \code{.eval_time}
+column.
+}
+
+An outcome column here is any column other than the prediction columns
+and the fold labels. The columns tune adds beside the predictions are not
+outcome columns either. Those are \code{.row}, \code{.config} and \code{.case_weights}.
+Nor are \code{.iter} and \code{.eval_time}.
 }
 
 \examples{

@@ -8,7 +8,15 @@
   per-fold table is unchanged. The average follows
   tune's rules for `summarize = TRUE`. Because each fold selected its own
   candidate, the average spans those candidates, and the fold labels and
-  `.config` are dropped. Quantile predictions are refused.
+  `.config` are dropped. Quantile predictions are refused. The average
+  refuses saved predictions whose `.row` column no longer holds exactly
+  the rows its fold held out, each once. It also refuses three edited
+  shapes that its rules cannot read: two or more factor outcome columns, a
+  `.pred_class` column with no factor outcome, and a censored `.pred` entry
+  that is not `NULL` and has no `.eval_time`. A `NULL` censored entry is
+  left out of its row's average. A metric computed
+  on the averages describes several fitted models, not the tuning
+  procedure, so `collect_metrics()` stays the nested estimate.
 
 * The per-fold tables of `collect_metrics(summarize = FALSE)` and
   `compute_metrics(summarize = FALSE)` carry the design's fold labels
@@ -232,9 +240,11 @@
   hold some row out more than once. There, every row joins the average
   that `collect_predictions(summarize = TRUE)` gives for it. On such a
   design it refuses saved quantile predictions, because that average does
-  not cover them. It refuses an outer design that leaves some row out of
-  every assessment set. It also refuses a fold whose saved predictions do
-  not hold exactly the rows that fold held out, each once.
+  not cover them. It refuses there the three edited shapes that average
+  refuses. It refuses an outer design that leaves some row out of every
+  assessment set. It also refuses a fold whose saved predictions do not
+  hold exactly the rows that fold held out, each once. A data column named
+  like a prediction column is refused before any refusal of the average.
 
 * The coverage job no longer fails after every test passed. Daemons started
   by the test suite write their coverage traces to a directory of their own,

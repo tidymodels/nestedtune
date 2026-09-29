@@ -582,3 +582,71 @@ test_that("a data column named like a prediction column is refused, not renamed"
   expect_s3_class(cnd, "nestedtune_collect_name_collision")
   expect_match(conditionMessage(cnd), ".pred", fixed = TRUE)
 })
+
+# ---- M126: the name collision before the averaging refusals ----------------
+
+test_that("M126 AC4: on a repeated design, a name collision is refused before the quantile refusal", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, repeated_folds(d, 34))
+  planted <- edit_fold_predictions(res, 2L, function(p) {
+    p$.pred_quantile <- p$.pred
+    p
+  })
+  planted$splits[[1L]]$data$.pred <- 1
+  expect_error(augment(planted), class = "nestedtune_collect_name_collision")
+})
+
+test_that("M126 AC4: on a repeated design, a name collision is refused before a shape the average misreads", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  res <- augment_run(d, repeated_folds(d, 34))
+  # A saved class beside a numeric outcome, which the average refuses.
+  planted <- res
+  for (i in seq_len(nrow(res))) {
+    planted <- edit_fold_predictions(planted, i, function(p) {
+      p$.pred_class <- factor(
+        ifelse(p$.pred > 0, "a", "b"),
+        levels = c("a", "b")
+      )
+      p
+    })
+  }
+  expect_error(augment(planted), class = "nestedtune_summarize_columns")
+  planted$splits[[1L]]$data$.pred <- 1
+  expect_error(augment(planted), class = "nestedtune_collect_name_collision")
+})
+
+# ---- M126 AC5: the censored NULL row on the averaged path ------------------
+
+test_that("M126 AC5: on a repeated censored design, a row only failed folds held out holds NULL in .pred", {
+  skip_if_no_censored()
+  d <- srv_data()
+  folds <- repeated_folds(d, 37)
+  held_1 <- rsample::complement(folds$splits[[1L]])
+  second <- 3L +
+    which(vapply(
+      4:6,
+      function(i) held_1[[1L]] %in% rsample::complement(folds$splits[[i]]),
+      logical(1)
+    ))
+  folds <- break_fold(folds, 1L, "inner tuning")
+  folds <- break_fold(folds, second, "inner tuning")
+  res <- suppressWarnings(memoised(nested_tune_grid(
+    srv_workflow(d),
+    folds,
+    grid = srv_grid(),
+    metrics = srv_set_metrics(),
+    eval_time = srv_eval_times(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+  expect_identical(which(!res$.completed), c(1L, second))
+  expect_true(any(hold_counts(res) > 1L))
+
+  expect_warning(aug <- augment(res), class = "nestedtune_partial_summary")
+  only_failed <- intersect(held_1, rsample::complement(res$splits[[second]]))
+  expect_gt(length(only_failed), 0L)
+  is_null <- vapply(aug$.pred, is.null, logical(1))
+  expect_identical(which(is_null), sort(only_failed))
+  expect_true(all(is.na(aug$.pred_time[only_failed])))
+})
