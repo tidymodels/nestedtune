@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M130: Raise the testthat minimum to 3.3.0
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** low
 - **Depends on:** —
 - **Driving RR:** —
@@ -68,6 +68,8 @@ Why 3.3.0: testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/test
 - 2026-09-29: T3 raised the floor to `>= 3.3.0`, and `desc_get_deps()` returns one testthat row, `Suggests` `>= 3.3.0`. With the 3.3.0 library first on `R_LIBS`, the AC2 run printed `Running ‘testthat.R’ [101s/49s]`, then `[101s/50s] OK`, and `testthat.Rout` read `[ FAIL 0 | WARN 0 | SKIP 118 | PASS 6554 ]`. The AC3 run printed `Running ‘testthat.R’ [784s/412s]`, then `[785s/413s] OK`, and `[ FAIL 0 | WARN 0 | SKIP 13 | PASS 13390 ]`. The fallback to 3.3.1 or 3.3.2 was not needed. The Review section is review's to write, so the quotes live here for review to re-run or cite.
 - 2026-09-29: T4 appended D-098, the 3.3.0 floor with its three reasons and its falsifiers.
 - 2026-09-29: T5 with the installed testthat 3.3.2: `devtools::test()` failed 0 and passed 13508, and `devtools::check()` returned 0 errors, 0 warnings and 0 notes. No roxygen, `R/` or prose file changed, so the verify slot's other steps do not apply.
+- 2026-09-29: claim audit: 1 claims read, 0 corrected (`DESCRIPTION`). The fresh [O] reader found the 3.3.0 floor holds, and noted that 3.3.0 is the lowest release run here and not a proven minimum, as D-098 already states.
+- 2026-09-29: all tasks done, status set to review.
 
 ## Decisions
 

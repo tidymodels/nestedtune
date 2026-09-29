@@ -4,7 +4,7 @@ _Last hygiene check: 2026-09-29 (M129 archived, M126 row pruned, apparent-split 
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M130 | Raise the testthat minimum to 3.3.0 | in-progress | — | low | milestones/M130-testthat-floor.md |
+| M130 | Raise the testthat minimum to 3.3.0 | review | — | low | milestones/M130-testthat-floor.md |
 | M129 | Recognize a refused design by its split classes | done | — | high | milestones/archive/M129-refuse-design-by-split-class.md |
 | M128 | Refuse the resampling designs the README marks No | done | — | high | milestones/archive/M128-refuse-unsupported-designs.md |
 | M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
