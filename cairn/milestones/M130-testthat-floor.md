@@ -32,7 +32,7 @@ Why 3.3.0: testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/test
 
 - [x] AC1: `DESCRIPTION` lists testthat in Suggests as `testthat (>= 3.3.0)`, and `desc::desc_get_deps("DESCRIPTION")` returns exactly one testthat row, of type `Suggests` with version `>= 3.3.0`.
 - [x] AC2: `R CMD check` starts with an `R_LIBS` whose first entry is a library holding testthat 3.3.0. Under it, the CRAN-conditions command in `benchmarks/cran-check-timing.md` (`NOT_CRAN` and `NESTEDTUNE_FULL_SUITE` unset) ends its `checking tests` step in `OK`, and its `tests/testthat.Rout` reports `FAIL 0`.
-- [ ] AC3: Under the same `R_LIBS`, `env -u NESTEDTUNE_FULL_SUITE NOT_CRAN=true TESTTHAT_CPUS=2 _R_CHECK_CRAN_INCOMING_=false R CMD check --as-cran --no-manual nestedtune_*.tar.gz` ends its `checking tests` step in `OK`, and its `tests/testthat.Rout` reports `FAIL 0`.
+- [x] AC3: Under the same `R_LIBS`, `env -u NESTEDTUNE_FULL_SUITE NOT_CRAN=true TESTTHAT_CPUS=2 _R_CHECK_CRAN_INCOMING_=false R CMD check --as-cran --no-manual nestedtune_*.tar.gz` ends its `checking tests` step in `OK`, and its `tests/testthat.Rout` reports `FAIL 0`.
 - [ ] AC4: `Rscript -e 'devtools::check()'`, run with the installed testthat, reports 0 errors and 0 warnings.
 
 ## Coverage
@@ -79,3 +79,4 @@ Fresh evidence, 2026-09-29, on `3c7eae33`. The default branch had not moved sinc
 
 - AC1: `DESCRIPTION` line 46 reads `testthat (>= 3.3.0),`. `desc::desc_get_deps("DESCRIPTION")` returns one testthat row: `Suggests`, `>= 3.3.0`.
 - AC2: `R_LIBS` held only the new 3.3.0 library, and `packageVersion("testthat")` under it read 3.3.0. The CRAN-conditions command from `benchmarks/cran-check-timing.md` printed `Running ‘testthat.R’ [132s/64s]`, then `[132s/64s] OK`, and ended `Status: OK`. `tests/testthat.Rout` reads `[ FAIL 0 | WARN 0 | SKIP 118 | PASS 6554 ]`.
+- AC3: under the same `R_LIBS`, the AC3 command printed `Running ‘testthat.R’ [790s/418s]`, then `[790s/418s] OK`, and ended `Status: OK`. `tests/testthat.Rout` reads `[ FAIL 0 | WARN 0 | SKIP 13 | PASS 13390 ]`.
