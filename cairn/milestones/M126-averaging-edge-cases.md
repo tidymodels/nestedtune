@@ -72,6 +72,7 @@
 - 2026-09-28: review return 1 (defect): AC6 fails. `benchmarks/averaging-speed.R` deals folds so one fold can hold a row more than once, and 25,971 of 33,334 rows are not held out by 3 folds. Fix the fold assignment so each row is in each of the 3 folds once, re-run the script, and log its output. AC1 to AC5, AC7, AC8 and the gate pass (Review section). Status back to in-progress.
 - 2026-09-28: review return 1 fixed. `benchmarks/averaging-speed.R` now stacks the 3 folds one after another, each holding every row once in its own random order, and stops unless every row is held out by 3 distinct folds. That guard stops on the old dealing (7,363 of 33,334 rows). Script output on R 4.6.1 aarch64-apple-darwin23: 33,334 of 33,334 rows held out by 3 distinct folds. Probabilities agree TRUE, frozen 0.559 s, branch 0.030 s, ratio 0.054. Class agree TRUE, 0.018 s and 0.018 s, ratio 1.000. Censored agree TRUE, 0.784 s and 0.359 s, ratio 0.458. No `R/` file changed. Status set to review.
 - 2026-09-28: review gate, pass 2: the user chose to fix findings 1, 2, 5, 9, 10 and 11 on the branch before approval (Review section). Findings 3, 4 and 8 went to one candidate row. After the fix, `mean_by()` equals `mean()` on 2,000 random groups, and the benchmark ratio is 0.090.
+- step-7 approval: m126-averaging-edge-cases approved for merge
 
 ## Decisions
 
