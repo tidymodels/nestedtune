@@ -387,12 +387,15 @@ as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class
 must index only rows the outer split's <code>in_id</code> holds, in its <code>in_id</code> and
 any non-<code>NA</code> <code>out_id</code>. So no inner analysis or assessment set reaches a
 row the outer fold holds out.</p>
-<p>A design breaking any of this, or using a bootstrap for the outer loop, is
-refused before anything is fitted. The error has condition class
-<code>nestedtune_bad_design</code> and names every offending row, column, inner
-split or index. The checks exist because <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a
-design whatever its <code>inside</code> argument returned, and because a design
-assembled by hand can index rows its outer fold never sees.</p>
+<p>A design breaking any of this is refused before anything is fitted. So is
+a design using a bootstrap for the outer loop, or <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code>,
+<code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> for either loop. The
+error has condition class <code>nestedtune_bad_design</code>. It names every
+offending row, column, inner split, index or outer fold. A refusal of one
+of those three rsample functions names it. The checks exist because
+<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a design whatever its <code>inside</code> argument
+returned, and because a design assembled by hand can index rows its outer
+fold never sees.</p>
 <p>Time-series designs are supported for an outer
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner

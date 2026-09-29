@@ -61,9 +61,21 @@ class and the resample id rsample gives it, so
 [`rsample::add_resample_id()`](https://rsample.tidymodels.org/reference/add_resample_id.html)
 behave the same.
 
-One behavior differs on purpose: an outer bootstrap is refused rather
-than warned about. The same row can otherwise land in both the inner
-analysis and the inner assessment set, which makes the estimate invalid.
+Two behaviors differ on purpose. First, an outer bootstrap is refused
+rather than warned about. The same row can otherwise land in both the
+inner analysis and the inner assessment set, which makes the estimate
+invalid.
+
+Second,
+[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html),
+[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
+and
+[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
+are refused in either loop, where rsample builds them. None of them
+gives a valid nested estimate there. The README's table of resampling
+designs gives the reason for each. Both refusals have condition class
+`nestedtune_bad_design`, and a refusal of one of these three names the
+rsample function.
 
 ## Time-series designs
 
