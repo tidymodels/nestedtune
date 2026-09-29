@@ -65,6 +65,7 @@ The README carries a table that says whether nestedtune supports each of 15 rsam
 - 2026-09-28: T2 done. `tests/testthat/test-design-support.R` holds 10 `Yes` tests, the outer `group_bootstraps()` refusal, and 7 tests pinning the 8 `No` cells. The file passed with `NOT_CRAN=true`: 31 expectations in 23 s.
 - 2026-09-28: T3 done. Before the change, the new sweep test failed twice: the sentence mode reported the table as `3: 46 words` beside the closing sentence, and `--spans` reported `3: 6 spans`. After the change, `test-sweep-prose.R` passed in full. `air format` left the changed files as written.
 - 2026-09-28: T4 done. The README section follows the example chunk and holds the table and four paragraphs, with the `No` reasons worded from the observed fold notes. The six gating sweeps are clean, and `devtools::build_readme()` added only the new section to `README.md`.
+- claim audit: 46 claims read, 2 corrected — NEWS.md, tests/testthat/test-design-support.R
 
 ## Decisions
 

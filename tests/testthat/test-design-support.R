@@ -175,7 +175,8 @@ test_that("validation_set() cannot be built in either role", {
     ),
     "`inside` could not be evaluated"
   )
-  # The cause is validation_set() refusing a data frame: it takes a split.
+  # The cause is validation_set() having no `data` argument: it takes a
+  # split, so the `data` nestedtune passes lands in `...`, which must be empty.
   expect_match(conditionMessage(outer$parent), "must be empty")
   expect_match(conditionMessage(inner$parent), "must be empty")
 })
