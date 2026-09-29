@@ -402,6 +402,39 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   invisible(resamples)
 }
 
+# The rsample designs refused in either loop (M128, D-096): each gives no
+# valid nested estimate there, and most fail every fold only after the whole
+# loop has run. rsample::nested_cv() builds all six pairings.
+refused_designs <- c("loo_cv", "apparent", "permutations")
+
+# The refused design an rset (or anything else) carries, or NA. Class
+# inspection only, so it is safe on an element no class check has vouched for.
+refused_design <- function(x) {
+  hit <- refused_designs[vapply(refused_designs, inherits, logical(1), x = x)]
+  if (length(hit) == 0L) NA_character_ else hit[[1L]]
+}
+
+# Why `design` is refused in `role`, naming the rsample function. The reasons
+# are the ones the README's resampling table gives.
+refused_design_reason <- function(design, role) {
+  switch(
+    paste(role, design),
+    "outer loo_cv" = "{.fn rsample::loo_cv} holds out one row per fold, so \\
+      R-squared cannot be computed and the averaged RMSE is the mean \\
+      absolute error.",
+    "outer apparent" = "{.fn rsample::apparent} scores its one fold on the \\
+      rows it trained on.",
+    "outer permutations" = "{.fn rsample::permutations} gives each fold no \\
+      assessment set.",
+    "inner loo_cv" = "tune refuses {.fn rsample::loo_cv} as a tuning \\
+      design, so every outer fold would fail.",
+    "inner apparent" = "tune reports no results for \\
+      {.fn rsample::apparent}, so every outer fold would fail.",
+    "inner permutations" = "tune refuses {.fn rsample::permutations} as a \\
+      tuning design, so every outer fold would fail."
+  )
+}
+
 # The names under which rsample's and tune's readers find a design's id
 # columns: both packages' col_starts_with_id() is grepl() on this pattern
 # (rsample 1.3.2, tune 2.1.0), so a label column named outside it is one

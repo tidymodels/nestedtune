@@ -2,7 +2,9 @@
 #
 # A `Yes` cell is a design that runs through nested_tune_grid() with a v-fold
 # partner in the other role and completes every outer fold. A `Refused` cell
-# is the bootstrap refusal. A `No` cell is pinned by the behavior the README
+# is a refusal nestedtune writes: the bootstrap refusal, and the refusals of
+# `loo_cv()`, `apparent()` and `permutations()` in either role (M128). The one
+# `No` cell, an inner `validation_set()`, is pinned by the behavior the README
 # gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
 # outer bootstrap, the time-series designs) are not repeated here.
 
@@ -89,77 +91,60 @@ test_that("an outer group bootstrap is refused, as a call and as an object", {
       outside = rsample::group_bootstraps(group = g, times = 3),
       inside = rsample::vfold_cv(v = 3)
     ),
-    "cannot be a bootstrap"
+    "cannot be a bootstrap",
+    class = "nestedtune_bad_design"
   )
   set.seed(1)
   boots <- rsample::group_bootstraps(d, group = g, times = 3)
   expect_error(
     nested_resamples(d, outside = boots, inside = rsample::vfold_cv(v = 3)),
-    "cannot be a bootstrap"
+    "cannot be a bootstrap",
+    class = "nestedtune_bad_design"
   )
 })
 
-# Every outer fold failed, each with a note naming why.
-expect_every_fold_fails <- function(res, pattern) {
-  expect_gt(nrow(res), 0L)
-  expect_false(any(res$.completed))
-  for (notes in res$.notes) {
-    expect_true(any(grepl(pattern, notes$note)))
-  }
+# The three designs refused in either role (M128). Each name is the class
+# the design's rset carries and the function the refusal must name.
+REFUSED <- list(
+  loo_cv = quote(rsample::loo_cv()),
+  apparent = quote(rsample::apparent()),
+  permutations = quote(rsample::permutations(permute = y, times = 3))
+)
+
+expect_refused <- function(expr, design) {
+  cnd <- expect_error(expr, class = "nestedtune_bad_design")
+  expect_match(conditionMessage(cnd), paste0(design, "()"), fixed = TRUE)
 }
 
-test_that("an outer leave-one-out design scores one row per fold", {
-  skip_if_no_engines()
-  run <- suppressWarnings(support_run(
-    support_data(n = 30),
-    quote(rsample::loo_cv()),
-    V3,
-    control = tune::control_grid(save_pred = TRUE)
-  ))
-  held <- vapply(
-    run$res$splits,
-    function(s) nrow(rsample::assessment(s)),
-    integer(1)
-  )
-  expect_true(all(held == 1L))
-  expect_true(all(run$res$.completed))
-  m <- collect_metrics(run$res)
-  expect_true(is.na(m$mean[m$.metric == "rsq"]))
-  # RMSE over one row is that row's absolute error, so their mean is the
-  # mean absolute error.
-  p <- collect_predictions(run$res)
-  expect_equal(m$mean[m$.metric == "rmse"], mean(abs(p$.pred - p$y)))
-})
+for (design in names(REFUSED)) {
+  local({
+    design <- design
+    spec <- REFUSED[[design]]
 
-test_that("an inner leave-one-out design fails every fold in tune", {
-  skip_if_no_engines()
-  expect_warning(
-    run <- support_run(support_data(n = 30), V3, quote(rsample::loo_cv())),
-    class = "nestedtune_failed_folds"
-  )
-  expect_every_fold_fails(
-    run$res,
-    "Leave-one-out cross-validation is not currently supported"
-  )
-})
+    test_that(sprintf("an outer %s design is refused, as a call and as an object", design), {
+      d <- support_data()
+      expect_refused(
+        eval(bquote(nested_resamples(d, outside = .(spec), inside = .(V3)))),
+        design
+      )
+      set.seed(1)
+      built <- eval(rlang::call_modify(spec, data = quote(d)))
+      expect_s3_class(built, design)
+      expect_refused(
+        nested_resamples(d, outside = built, inside = rsample::vfold_cv(v = 3)),
+        design
+      )
+    })
 
-test_that("an outer apparent design scores the rows it trained on", {
-  skip_if_no_engines()
-  run <- support_run(support_data(), quote(rsample::apparent()), V3)
-  expect_identical(nrow(run$res), 1L)
-  expect_true(run$res$.completed)
-  split <- run$res$splits[[1]]
-  expect_identical(rsample::assessment(split), rsample::analysis(split))
-})
-
-test_that("an inner apparent design fails every fold in tune", {
-  skip_if_no_engines()
-  expect_warning(
-    run <- support_run(support_data(), V3, quote(rsample::apparent())),
-    class = "nestedtune_failed_folds"
-  )
-  expect_every_fold_fails(run$res, "No results are available")
-})
+    test_that(sprintf("an inner %s design is refused", design), {
+      d <- support_data()
+      expect_refused(
+        eval(bquote(nested_resamples(d, outside = .(V3), inside = .(spec)))),
+        design
+      )
+    })
+  })
+}
 
 test_that("an outer validation set built beforehand completes its one fold", {
   skip_if_no_engines()
@@ -202,33 +187,4 @@ test_that("a validation_set() call cannot be built in either role", {
   # split, so the `data` nestedtune passes lands in `...`, which must be empty.
   expect_match(conditionMessage(outer$parent), "must be empty")
   expect_match(conditionMessage(inner$parent), "must be empty")
-})
-
-test_that("an outer permutation design fails every fold for want of an assessment set", {
-  skip_if_no_engines()
-  expect_warning(
-    run <- support_run(
-      support_data(),
-      quote(rsample::permutations(permute = y, times = 3)),
-      V3
-    ),
-    class = "nestedtune_failed_folds"
-  )
-  expect_every_fold_fails(run$res, "no assessment data set")
-})
-
-test_that("an inner permutation design fails every fold in tune", {
-  skip_if_no_engines()
-  expect_warning(
-    run <- support_run(
-      support_data(),
-      V3,
-      quote(rsample::permutations(permute = y, times = 3))
-    ),
-    class = "nestedtune_failed_folds"
-  )
-  expect_every_fold_fails(
-    run$res,
-    "Permutation samples are not suitable for tuning"
-  )
 })

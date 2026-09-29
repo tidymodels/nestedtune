@@ -5,7 +5,7 @@ _Last hygiene check: 2026-09-29 (M127 archived, M124 row pruned, README-to-test 
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M128 | Refuse the resampling designs the README marks No | planned | — | high | milestones/M128-refuse-unsupported-designs.md |
+| M128 | Refuse the resampling designs the README marks No | in-progress | — | high | milestones/M128-refuse-unsupported-designs.md |
 | M127 | README table of supported resampling designs | done | — | normal | milestones/archive/M127-readme-design-table.md |
 | M126 | Edge cases of averaged predictions | done | — | high | milestones/archive/M126-averaging-edge-cases.md |
 | M125 | augment() on repeated and Monte Carlo designs | done | M124 | normal | milestones/archive/M125-augment-repeated-designs.md |

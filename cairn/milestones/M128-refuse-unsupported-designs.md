@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M128: Refuse the resampling designs the README marks No
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP1, GP3   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** user-facing — new refusals in exported functions   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m128-refuse-unsupported-designs   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -49,8 +49,8 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits); substantive change is amend-via-gate. -->
 
-- [ ] T1: Write the AC1 tests first in `tests/testthat/test-design-support.R`. Replace the six tests that pin the old `No` behavior (the outer and inner `loo_cv()`, `apparent()` and `permutations()` blocks, lines 111-230). Add a class assertion to the group-bootstrap test at line 84. Keep the two `validation_set()` tests. Update the header comment's definitions of the `Refused` and `No` cells. Show that each new test fails on today's code because no refusal fires.
-- [ ] T2: In `R/nested-resamples.R`, refuse the three outer designs next to the bootstrap refusal (line 150). Refuse the three inner designs in `inner_resamples_from_split()`, right after `eval_spec()`. Give the new refusals and the bootstrap refusal class `nestedtune_bad_design`. Each message gives the reason the README gives today for that design in that role. An outer `loo_cv()` scores one row per fold, so R² cannot be computed and the averaged RMSE is the mean absolute error. An outer `apparent()` scores the rows it trained on. An outer `permutations()` gives each fold no assessment set. As inner designs, tune refuses `loo_cv()` and `permutations()` and reports no results for `apparent()`.
+- [x] T1: Write the AC1 tests first in `tests/testthat/test-design-support.R`. Replace the six tests that pin the old `No` behavior (the outer and inner `loo_cv()`, `apparent()` and `permutations()` blocks, lines 111-230). Add a class assertion to the group-bootstrap test at line 84. Keep the two `validation_set()` tests. Update the header comment's definitions of the `Refused` and `No` cells. Show that each new test fails on today's code because no refusal fires.
+- [x] T2: In `R/nested-resamples.R`, refuse the three outer designs next to the bootstrap refusal (line 150). Refuse the three inner designs in `inner_resamples_from_split()`, right after `eval_spec()`. Give the new refusals and the bootstrap refusal class `nestedtune_bad_design`. Each message gives the reason the README gives today for that design in that role. An outer `loo_cv()` scores one row per fold, so R² cannot be computed and the averaged RMSE is the mean absolute error. An outer `apparent()` scores the rows it trained on. An outer `permutations()` gives each fold no assessment set. As inner designs, tune refuses `loo_cv()` and `permutations()` and reports no results for `apparent()`.
 - [ ] T3: Write the AC2 tests first, then add the refusals to `check_nested()` in `R/checks.R`. Place them after the bootstrap check and before the element checks. The inner check reads each `inner_resamples` element with `inherits()`, because the class checks come later. The racer and annealer tests pass over legs where `tuner_ready()` is false (LESSONS, M101). `nested_workflow_map()` re-signals the error with its class kept (LESSONS, M73), so its test asserts the class.
 - [ ] T4: Edit the `README.Rmd` table and its Refused and No paragraphs, then run `devtools::build_readme()`. Edit the roxygen in `R/nested-resamples.R` and at `R/nested-tune-grid.R:119`, then run `devtools::document()`. Add one `NEWS.md` bullet. Run `benchmarks/sweep-prose.R` over the touched pages.
 - [ ] T5: Run `devtools::test()` and `devtools::check()`. Compare any note with one run on `main` in the same environment.
@@ -64,6 +64,9 @@ A nested design with an outer or inner `loo_cv()`, `apparent()` or `permutations
 - 2026-09-29: plan gate chose one refusal rule for all seven functions over skipping the inner check in `nested_fit_resamples()`, because `nested_resamples()` already refuses these inner designs at construction. Falsified by a user who needs such an `rsample::nested_cv()` design in `nested_fit_resamples()`.
 - 2026-09-29: plan chose class `nestedtune_bad_design` for the `nested_resamples()` refusals over a new class, because every entry-check refusal already carries it. Falsified by a caller who needs to tell a construction refusal from an entry refusal.
 - 2026-09-29: the audit reader rechecked the revised wording and found two new problems, both fixed. AC2 now covers any design passed in, so the mixed case falls inside its domain. T2 now takes each refusal reason from the README's current text.
+- 2026-09-29: implement started on branch `m128-refuse-unsupported-designs`. No question gate, because the plan left no implementation choice open.
+- 2026-09-29: T1 done. Six refusal tests and the bootstrap class assertion replace the six `No` tests. Before T2, all seven failed, each on a missing `nestedtune_bad_design` error.
+- 2026-09-29: T2 done. `refused_design()` and `refused_design_reason()` in `R/checks.R` serve both refusal sites. Full suite 0 failures, plain prose sweep clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
