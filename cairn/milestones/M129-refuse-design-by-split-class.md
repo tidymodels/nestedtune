@@ -1,13 +1,13 @@
 # M129: Recognize a refused design by its split classes
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** —
+- **Branch/PR:** m129-refuse-design-by-split-class
 
 ## Goal
 
@@ -60,6 +60,8 @@ If any split of a nested design carries the class of a refused rsample design, t
 - 2026-09-29: plan gate chose all three shapes (row subsets, `manual_rset()` rebuilds, mixed splits) over row subsets alone, at priority high.
 - 2026-09-29: the revised criteria wording went back to the same reader for a recheck. Its result was still pending at the plan commit.
 - 2026-09-29: the recheck found two items, both in AC2. "Comes from a refused design" also covered `make_splits()` rebuilds, and "the split's position" was unclear for the inner and one-split cases. AC2 was reworded to fix both. AC1 and AC3-AC7 gave no finding.
+- 2026-09-29: implement started on branch m129-refuse-design-by-split-class. No question gate, because the plan left nothing open.
+- 2026-09-29: checkpoint, T1 half-done. `check_outer_splits()` and the outer tests are written, and `test-design-support.R` passes in full mode. The full `devtools::test()` run is still going, so T1 stays unticked.
 
 ## Decisions
 
