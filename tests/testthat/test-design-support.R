@@ -997,3 +997,70 @@ test_that("an outer apparent split under another id is named as apparent()", {
     expect_no_match(msg, "apparent()", fixed = TRUE)
   }
 })
+
+# tune leaves every split whose id is "Apparent" out of its estimates, so any
+# split but a bootstrap's own apparent split would drop out of inner tuning
+# with nothing said (M132, D-100). The ids are relabelled in place, which
+# keeps the rset class.
+relabel_first <- function(build, factor_id = FALSE) {
+  function(data) {
+    rset <- build(data)
+    ids <- as.character(rset$id)
+    ids[[1]] <- "Apparent"
+    rset$id <- if (factor_id) factor(ids) else ids
+    rset
+  }
+}
+
+RELABELLED <- list(
+  "v-fold" = relabel_first(function(data) rsample::vfold_cv(data, v = 3)),
+  "v-fold, factor id" = relabel_first(
+    function(data) rsample::vfold_cv(data, v = 3),
+    factor_id = TRUE
+  ),
+  bootstrap = relabel_first(function(data) rsample::bootstraps(data, times = 3))
+)
+
+APPARENT_ID_REASON <- "tune leaves every split whose id is \"Apparent\" out"
+
+test_that("an inner split relabelled Apparent is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (name in names(RELABELLED)) {
+    build <- RELABELLED[[name]]
+    inner <- build(d)
+    expect_s3_class(inner, "rset")
+    expect_identical(is.factor(inner$id), grepl("factor", name))
+    expect_identical(as.character(inner$id[[1]]), "Apparent")
+    expect_false(inherits(inner$splits[[1]], "apparent_split"))
+
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_bad_design")
+    expect_match(flat_message(cnd), APPARENT_ID_REASON, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+      class = "nestedtune_bad_design"
+    )
+    expect_match(flat_message(cnd), APPARENT_ID_REASON, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "outer fold 1", fixed = TRUE)
+  }
+})
+
+test_that("a bootstrap's own apparent split still reaches the folds", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(
+    d,
+    V3,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  )
+  expect_identical(folds$inner_resamples[[1]]$id[[4]], "Apparent")
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+})

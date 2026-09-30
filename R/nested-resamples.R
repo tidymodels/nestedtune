@@ -267,6 +267,17 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
       call = call
     )
   }
+  if (length(misread_apparent_rows(inner_rset)) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave a split under the id {.val Apparent} for outer \\
+         fold {fold} that is not the apparent split of a bootstrap.",
+        x = "{apparent_id_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
 
   # Rebuilding the splits from scratch would drop everything rsample attaches
   # beyond the indices -- the split subclass and the per-split `id` tibble that

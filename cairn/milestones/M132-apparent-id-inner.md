@@ -1,13 +1,13 @@
 # M132: Refuse an inner "Apparent" split that tune drops or a race misreads
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** —
+- **Branch/PR:** m132-apparent-id-inner
 
 ## Goal
 
@@ -40,8 +40,8 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 
 ## Tasks
 
-- [ ] T1: Write the AC1 tests first, in `tests/testthat/test-design-support.R`. Relabel the ids with `$<-` or `rsample::manual_rset()`. `rebuilt()` (line 326) keeps the original ids, so it does not work here. Use `entry_refusal()` (line 163) for the `nested_tune_grid()` cases. For `nested_resamples()`, give `inside` a call to a local builder. The refusals fail on the current code, and the `apparent = TRUE` control passes.
-- [ ] T2: Add the AC1 rule in `R/checks.R`, beside `check_inner_refused()` (line 599). Reuse `apparent_ids()` and `split_designs()`. Call the rule from `check_nested()` and from `inner_resamples_from_split()` (`R/nested-resamples.R:231`). Give cli the message text as values (M83 lesson). Update the comments at `R/checks.R:479` and `:495`.
+- [x] T1: Write the AC1 tests first, in `tests/testthat/test-design-support.R`. Relabel the ids with `$<-` or `rsample::manual_rset()`. `rebuilt()` (line 326) keeps the original ids, so it does not work here. Use `entry_refusal()` (line 163) for the `nested_tune_grid()` cases. For `nested_resamples()`, give `inside` a call to a local builder. The refusals fail on the current code, and the `apparent = TRUE` control passes.
+- [x] T2: Add the AC1 rule in `R/checks.R`, beside `check_inner_refused()` (line 599). Reuse `apparent_ids()` and `split_designs()`. Call the rule from `check_nested()` and from `inner_resamples_from_split()` (`R/nested-resamples.R:231`). Give cli the message text as values (M83 lesson). Update the comments at `R/checks.R:479` and `:495`.
 - [ ] T3: Write the AC2 tests first. If `tuner_ready()` is false, the racer tests skip. The map tests take `skip_if_no_wset_fixture()` (M101 lesson). To show that no fold of the unmarked first workflow ran, mock `nested_fit_resamples()` with a function that fails on any call.
 - [ ] T4: Add the AC2 rule as a helper in `R/checks.R`. Call it at the entry of the racers in `R/nested-tune-race.R`. Also call it in the pre-loop of `nested_workflow_map()` (`R/nested-workflow-map.R:191`), for each workflow that routes to a racer.
 - [ ] T5: Write the AC3 tests first. Then apply the AC1 rule in `nested_final_fit()` to the rset that `eval_inside_spec()` returns (`R/nested-final-fit.R:424`). For a racer result alone, also apply the AC2 rule.
@@ -56,6 +56,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - 2026-09-29: the plan gate chose to refuse, over dropping the apparent split before the race. Dropping changes the design without a word, and the inner record then differs from a direct finetune call. Falsified by a user who needs the split kept in a raced inner record.
 - 2026-09-29: the plan gate chose to refuse a renamed "Apparent" split, over a warning that GP3 rules out. Falsified by a supported design that uses the id "Apparent" for a split that tune must score.
 - 2026-09-29: the plan gate chose to check the design that `nested_final_fit()` rebuilds, over leaving it out. Then no path tunes on such a design.
+- 2026-09-29: T1 and T2 done. `check_inner_apparent_ids()` and `misread_apparent_rows()` in `R/checks.R` refuse an inner split under the id "Apparent" that is not an apparent split, from `check_nested()` and `inner_resamples_from_split()`. The two new tests failed on the old code at the fold-dispatch sentinel and pass now. `devtools::test()` gave 0 failures, and the plain prose sweep is clean.
 
 ## Decisions
 
