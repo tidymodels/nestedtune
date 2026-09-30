@@ -632,3 +632,12 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   shapes that do say what the average would misread. Accepted at M126's plan
   gate, 2026-09-28: tune 2.1.0 writes neither shape, so each needs an edit
   to the object. Revisit on a user report of either shape.
+
+- An outer design that holds an apparent split from a separate
+  `rsample::apparent()` call, under the id "Apparent", beside bootstrap
+  splits is refused with that split named as a `rsample::bootstraps()` row.
+  The split is identical to the one `bootstraps(apparent = TRUE)` adds, so
+  no check can tell the two apart (D-099). No user-facing text says this.
+  The design is refused either way, so only the named function is wrong.
+  Accepted at M131's review gate, 2026-09-29 (finding P3). Revisit on a user
+  report of the naming misleading them.
