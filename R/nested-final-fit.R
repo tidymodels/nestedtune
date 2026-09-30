@@ -145,9 +145,13 @@
 #' with class `nestedtune_bad_final_fit_args`.
 #'
 #' Last, before tuning, the inner design is rebuilt on all the data from
-#' the recorded inner specification. tune leaves every split with the
-#' id "Apparent" out of its estimates. So the design is refused with class
-#' `nestedtune_bad_design` if it holds such a split that is not the
+#' the recorded inner specification. It is refused with class
+#' `nestedtune_bad_design` if it is an [rsample::loo_cv()],
+#' [rsample::apparent()] or [rsample::permutations()] design, found as the
+#' entry checks find one. It is also refused if it holds a split with a
+#' missing `id`, or two splits with the same values in every id column.
+#' tune leaves every split with the id "Apparent" out of its estimates. So
+#' the design is also refused if it holds such a split that is not the
 #' apparent split of a bootstrap. For a race it is also refused if it holds
 #' an apparent split, since the race eliminates candidates on that split's
 #' score. The entry checks of the other functions refuse each rule where it

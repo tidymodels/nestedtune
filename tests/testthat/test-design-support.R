@@ -1065,6 +1065,119 @@ test_that("a bootstrap's own apparent split still reaches the folds", {
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
+# tune drops a split whose id is NA from its estimate and adds an empty metric
+# row, and it miscounts the resamples of a design whose ids repeat (M133,
+# D-102). The ids are edited in place, which keeps the rset class.
+edit_ids <- function(build, edit) {
+  function(data) edit(build(data))
+}
+
+vfold3 <- function(data) rsample::vfold_cv(data, v = 3)
+vfold3x2 <- function(data) rsample::vfold_cv(data, v = 3, repeats = 2)
+
+first_id_missing <- function(as_id) {
+  function(rset) {
+    ids <- as.character(rset$id)
+    ids[[1]] <- NA
+    rset$id <- as_id(ids)
+    rset
+  }
+}
+
+MISSING_ID <- list(
+  character = edit_ids(vfold3, first_id_missing(identity)),
+  factor = edit_ids(vfold3, first_id_missing(factor)),
+  "factor NA level" = edit_ids(
+    vfold3,
+    first_id_missing(function(ids) addNA(factor(ids)))
+  )
+)
+
+REPEATED_ID <- list(
+  id = edit_ids(vfold3, function(rset) {
+    rset$id[[2]] <- rset$id[[1]]
+    rset
+  }),
+  "id and id2" = edit_ids(vfold3x2, function(rset) {
+    rset$id2[[2]] <- rset$id2[[1]]
+    rset
+  }),
+  "missing id2" = edit_ids(vfold3x2, function(rset) {
+    rset$id2[1:2] <- NA
+    rset
+  })
+)
+
+MISSING_ID_REASON <- "tune leaves a split with a missing id out of its estimates"
+REPEATED_ID_REASON <- "tune miscounts the resamples of a design whose ids repeat"
+
+expect_id_refusals <- function(builds, reason, d, wf) {
+  for (name in names(builds)) {
+    build <- builds[[name]]
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_bad_design")
+    expect_match(flat_message(cnd), reason, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+      class = "nestedtune_bad_design"
+    )
+    expect_match(flat_message(cnd), reason, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "outer fold 1", fixed = TRUE)
+  }
+}
+
+test_that("an inner split with a missing id is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  # The NA level reads as a missing label, although is.na() does not see it.
+  level <- MISSING_ID[["factor NA level"]](d)
+  expect_false(anyNA(level$id))
+  expect_true(is.na(as.character(level$id[[1]])))
+  expect_id_refusals(MISSING_ID, MISSING_ID_REASON, d, wf)
+})
+
+test_that("a missing inner id in one outer fold names that element alone", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(d, V3, V3)
+  folds$inner_resamples[[2]]$id[[1]] <- NA
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  expect_match(flat_message(cnd), MISSING_ID_REASON, fixed = TRUE)
+  expect_match(conditionMessage(cnd), "Element 2 of", fixed = TRUE)
+})
+
+test_that("an inner design whose ids repeat is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  expect_id_refusals(REPEATED_ID, REPEATED_ID_REASON, d, wf)
+})
+
+test_that("repeated v-fold ids and a missing id2 still reach the folds", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  one_missing_id2 <- edit_ids(vfold3x2, function(rset) {
+    rset$id2[[1]] <- NA
+    rset
+  })
+  # The id column repeats across id2 in a repeated design, so only the pair
+  # of the two columns tells the splits apart.
+  expect_true(anyDuplicated(vfold3x2(d)$id) > 0L)
+  for (build in list(vfold3x2, one_missing_id2)) {
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_sentinel")
+  }
+})
+
 # finetune's race eliminates candidates on unsummarized metrics, which keep
 # a bootstrap's apparent split, so the two racers refuse that split (M132,
 # D-100). The other tuners read tune's summarized estimate, which leaves it

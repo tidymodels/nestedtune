@@ -1,13 +1,13 @@
 # M133: Refuse inner ids that tune misreads, at entry and at the final fit
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP3, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** —
+- **Branch/PR:** m133-inner-id-rules
 
 ## Goal
 
@@ -54,6 +54,8 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - 2026-09-30: plan gate chose refusing a missing value in `id` alone over every id column, as D-047 does for the outer folds. tune drops a split only by its `id`: an NA `id2` gave n = 6 of 6 in `fit_resamples()` and `tune_race_anova()`. Falsified by a tune or finetune release that reads `id2` to filter or pair resamples.
 - 2026-09-30: plan gate chose refusing a repeated inner id tuple now over a candidate row. tune miscounts such a design: 3 folds with one id repeated gave n = 5. Falsified by a tune release that keys its estimate on the split rather than the id.
 - 2026-09-30: re-audit of the gate-changed criteria (full mode, same Opus reader) returned 7 findings, all fixed. AC1 names the site's own "Apparent" rules and runs its element-2 case through `nested_tune_grid()`. AC2 compares NA `id2` values as equal, with a case. AC3 splits the NA and repeat calls, adds the `vfold_apparent()` change and keeps the entry messages unchanged.
+- 2026-09-30: implement started on branch m133-inner-id-rules. No question gate, since the plan left no choice open.
+- 2026-09-30: checkpoint. T1 to T4 code and tests written; the design-support and final-fit-checks files pass. The new entry tests failed first by reaching the fold sentinel. T5 docs edited but not yet rendered. Full suite still running, so no task is ticked yet.
 
 ## Decisions
 
