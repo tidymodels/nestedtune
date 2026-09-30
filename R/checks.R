@@ -1295,30 +1295,61 @@ check_column_class <- function(
   column,
   class,
   hint,
+  arg = "resamples",
   call = rlang::caller_env()
 ) {
-  elements <- resamples[[column]]
-  ok <- vapply(elements, inherits, logical(1), class)
-  if (all(ok)) {
+  lines <- malformed_lines(resamples[[column]], class, "Element")
+  if (length(lines) == 0L) {
     return(invisible(resamples))
   }
-  bad <- which(!ok)
-  n <- length(bad)
-  types <- vapply(
-    elements[bad],
-    function(e) cli::format_inline("{.obj_type_friendly {e}}"),
-    character(1)
-  )
   cli::cli_abort(
     c(
-      "{.arg resamples} has a malformed {.field {column}} column.",
-      x = "{cli::qty(n)}Element{?s} {bad} {cli::qty(n)}{?is/are} {types}, \\
-           not {.cls {class}}.",
+      "{.arg {arg}} has a malformed {.field {column}} column.",
+      value_bullets(lines),
       i = hint
     ),
     class = "nestedtune_bad_design",
     call = call
   )
+}
+
+# The lines naming each element of `elements` that is not a well-formed
+# `class` object, `noun` naming one element and `after` following its
+# position: first those that lack the class, then those that carry it but
+# are not a list. Every reader of a split takes it to be the list rsample
+# builds, so such an element would crash the first one (M135). Empty when
+# every element is well formed.
+malformed_lines <- function(elements, class, noun, after = "") {
+  has_class <- vapply(elements, inherits, logical(1), class)
+  wrong <- which(!has_class)
+  atomic <- which(has_class & !vapply(elements, is.list, logical(1)))
+  types <- vapply(
+    elements[wrong],
+    function(e) cli::format_inline("{.obj_type_friendly {e}}"),
+    character(1)
+  )
+  n <- length(wrong)
+  m <- length(atomic)
+  c(
+    if (n > 0L) {
+      cli::format_inline(paste0(
+        "{noun}{cli::qty(n)}{?s} {wrong}{after} {cli::qty(n)}{?is/are} ",
+        "{types}, not {.cls {class}}."
+      ))
+    },
+    if (m > 0L) {
+      cli::format_inline(paste0(
+        "{noun}{cli::qty(m)}{?s} {atomic}{after} {cli::qty(m)}{?has/have} ",
+        "class {.cls {class}} but {cli::qty(m)}{?is not a list/are not lists}."
+      ))
+    }
+  )
+}
+
+# Formatted `lines` as "x" bullets, their braces doubled so cli does not
+# parse the text again.
+value_bullets <- function(lines) {
+  rlang::set_names(gsub("([{}])", "\\1\\1", lines), rep("x", length(lines)))
 }
 
 # An inner design with no rows gives its fold nothing to tune on; tune would
@@ -1473,26 +1504,20 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     stats::setNames(bullets, rep("x", length(bullets)))
   }
 
+  # An element that carries the class but is not a list counts as not an
+  # rsplit, since every rule below reads it as one (M135).
   not_rsplit <- lapply(inner, function(rs) {
-    which(!vapply(rs[["splits"]], inherits, logical(1), "rsplit"))
+    malformed_lines(rs[["splits"]], "rsplit", "inner split")
   })
   bad <- which(lengths(not_rsplit) > 0L)
   if (length(bad) > 0L) {
-    bullets <- vapply(
-      bad,
-      function(f) {
-        pos <- not_rsplit[[f]]
-        cli::format_inline(paste(
-          "Outer fold {f}: inner {cli::qty(length(pos))}split{?s} {pos}",
-          "{?is/are} not {.cls rsplit}."
-        ))
-      },
-      character(1)
-    )
+    bullets <- unlist(lapply(bad, function(f) {
+      paste0("Outer fold ", f, ": ", not_rsplit[[f]])
+    }))
     cli::cli_abort(
       c(
         "{.arg resamples} has an inner split that is not an {.cls rsplit}.",
-        x_bullets(bullets),
+        value_bullets(bullets),
         i = "Every element of an inner design's {.field splits} column is one \\
              {.cls rsplit}, as {.fn rsample::vfold_cv} and its kin build them."
       ),

@@ -169,6 +169,16 @@ nested_resamples <- function(data, outside, inside, ...) {
       x = "Got {.obj_type_friendly {outside}}."
     ))
   }
+  # Every check below reads each split as the list rsample builds (M135).
+  check_column_class(
+    outside,
+    "splits",
+    "rsplit",
+    hint = "Every element of an {.cls rset}'s {.field splits} column is one \\
+            {.cls rsplit}, as {.fn rsample::vfold_cv} and its kin build them.",
+    arg = "outside",
+    call = environment()
+  )
   # An rset carries the data its indices refer to. If that is not the data we
   # were handed, remapping those indices onto `data` would silently produce
   # inner splits drawn from rows the outer fold assigned to assessment -- a
@@ -341,6 +351,25 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
         "{.arg inside} gave a split under the id {.val Apparent} for outer \\
          fold {fold} that is not the apparent split of a bootstrap.",
         x = "{apparent_id_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+
+  # The remap below reads each split as the list rsample builds (M135).
+  lines <- malformed_lines(
+    inner_rset[["splits"]],
+    "rsplit",
+    "Split",
+    after = " of that fold's inner design"
+  )
+  if (length(lines) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave a split for outer fold {fold} that is not an \\
+         {.cls rsplit}.",
+        value_bullets(lines)
       ),
       class = "nestedtune_bad_design",
       call = call
