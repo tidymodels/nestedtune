@@ -59,7 +59,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: T2 code in: `apparent_ids()`, `renamed_apparent()` and the hint in `R/checks.R` and `R/nested-resamples.R`. The design-support file passes (46 blocks). T1's factor case had built the id "1" through `c()` and was fixed. T3's README.Rmd, NEWS, roxygen and DESIGN edits are in. Checkpoint: the full suite is running, and T2 is not yet ticked.
 - 2026-09-29: the full suite passed on the T2 code (1157 test blocks, 0 failures), so T2 is ticked. `devtools::document()` rewrote six Rd files, `devtools::build_readme()` changed only the Refused paragraph, and both prose sweeps are clean. `devtools::check()` and a final suite run are in progress.
 - 2026-09-29: claim audit: 41 claims read, 1 corrected — NEWS.md
-- 2026-09-29: the corrected NEWS claim now covers a bootstraps rset renamed in place as well as a `manual_rset()` rebuild. It went back to the same reader for its one re-read.
+- 2026-09-29: the corrected NEWS claim now covers a bootstraps rset renamed in place as well as a `manual_rset()` rebuild. It went back to the same reader for its one re-read, which found it true and asked only for the paragraph to be rewrapped.
 
 ## Decisions
 

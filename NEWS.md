@@ -6,11 +6,10 @@
   it trained on. So an inner bootstrap design whose apparent split carries
   another id is refused as an `apparent()` design. This holds whether the id
   was changed in place or the design was rebuilt with `rsample::manual_rset()`.
-  The
-  error says that a bootstrap keeps its apparent split only under the id
-  "Apparent". In the outer loop, the error now names that
-  split as an `apparent()` row. Before, the inner design ran and tune averaged
-  that split's score into the estimate.
+  The error says that a bootstrap keeps its apparent split only under the id
+  "Apparent". In the outer loop, the error now names that split as an
+  `apparent()` row. Before, the inner design ran and tune averaged that
+  split's score into the estimate.
 
 * A `loo_cv()`, `apparent()` or `permutations()` design, or an outer
   bootstrap, is now refused even when the design no longer carries that
