@@ -1100,22 +1100,29 @@ race_call <- function(fn, wf, folds) {
   )
 }
 
-test_that("the racers refuse a bootstrap's apparent split at entry", {
+# One test per racer, so a racer that is not ready reports its own skip.
+for (fn in RACE_EXPORTS) {
+  test_that(paste(fn, "refuses a bootstrap's apparent split at entry"), {
+    skip_if_no_engines()
+    skip_if_not(tuner_ready(fn))
+    d <- support_data(n = 30)
+    folds <- nested_cv_design(
+      d,
+      V3,
+      quote(rsample::bootstraps(times = 3, apparent = TRUE))
+    )
+    cnd <- entry_refusal(race_call(fn, det_workflow(d), folds))
+    expect_race_refused(cnd)
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  })
+}
+
+test_that("a race refuses the apparent split of rebuilt and grouped bootstraps", {
   skip_if_no_engines()
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
   d <- support_data(n = 30)
   wf <- det_workflow(d)
   boots <- quote(rsample::bootstraps(times = 3, apparent = TRUE))
-  for (fn in RACE_EXPORTS) {
-    if (!tuner_ready(fn)) {
-      next
-    }
-    folds <- nested_cv_design(d, V3, boots)
-    cnd <- entry_refusal(race_call(fn, wf, folds))
-    expect_race_refused(cnd)
-    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
-  }
-
-  skip_if_not(tuner_ready("nested_tune_race_anova"))
   # A group bootstrap, a manual_rset() rebuild and a factor id, under one race.
   designs <- list(
     group_bootstraps = function() {
@@ -1165,26 +1172,30 @@ test_that("a race still reaches the folds on a bootstrap without its apparent sp
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-test_that("the map refuses a bootstrap's apparent split before any workflow runs", {
-  skip_if_no_engines()
-  d <- support_data(n = 30)
-  folds <- nested_cv_design(
-    d,
-    V3,
-    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+for (fn in RACE_EXPORTS) {
+  test_that(
+    paste("the map under", fn, "refuses a bootstrap's apparent split first"),
+    {
+      skip_if_no_engines()
+      skip_if_no_wset_fixture(fn)
+      d <- support_data(n = 30)
+      folds <- nested_cv_design(
+        d,
+        V3,
+        quote(rsample::bootstraps(times = 3, apparent = TRUE))
+      )
+      # The unmarked workflow comes first and routes to
+      # nested_fit_resamples(), which accepts the design. The sentinel stands
+      # in for the fold dispatch, so the bad-design class shows that none of
+      # its folds ran.
+      set <- workflowsets::as_workflow_set(
+        fixed = fixed_workflow(d),
+        tuned = det_workflow(d)
+      )
+      cnd <- entry_refusal(
+        nested_workflow_map(set, fn = fn, resamples = folds, grid = det_grid())
+      )
+      expect_race_refused(cnd)
+    }
   )
-  # The unmarked workflow comes first and routes to nested_fit_resamples(),
-  # which accepts the design. The sentinel stands in for the fold dispatch,
-  # so the bad-design class shows that none of its folds ran.
-  for (fn in RACE_EXPORTS) {
-    skip_if_no_wset_fixture(fn)
-    set <- workflowsets::as_workflow_set(
-      fixed = fixed_workflow(d),
-      tuned = det_workflow(d)
-    )
-    cnd <- entry_refusal(
-      nested_workflow_map(set, fn = fn, resamples = folds, grid = det_grid())
-    )
-    expect_race_refused(cnd)
-  }
-})
+}

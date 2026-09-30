@@ -325,8 +325,8 @@ counts as part of that design only if its id is "Apparent". Under any
 other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}} split. In the inner loop,
 tune leaves every split with the id "Apparent" out of its estimates,
 whatever the split's class. So any other inner split with that id is
-refused. Otherwise the fold tunes on fewer resamples than its design
-holds. The checks exist because
+refused. Otherwise each outer fold that tunes on it uses fewer resamples
+than its design holds. The checks exist because
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
 returned, and because a design assembled by hand can index rows its outer
 fold never sees.

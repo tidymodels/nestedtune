@@ -137,11 +137,11 @@ or permutation splits counts as part of that design only if its id is
 because tune scores it on the rows it trained on. In the inner loop,
 tune leaves every split with the id “Apparent” out of its estimates,
 whatever the split’s class. So nestedtune refuses any other inner split
-with that id. Otherwise the fold tunes on fewer resamples than its
-design holds. The two racing functions also refuse the apparent split of
-a bootstrap. finetune eliminates race candidates on the score of each
-split, and the score of that split comes from the rows the model trained
-on.
+with that id. Otherwise each outer fold that tunes on it uses fewer
+resamples than its design holds. The two racing functions also refuse
+the apparent split of a bootstrap. finetune eliminates race candidates
+on the score of each split, and the score of that split comes from the
+rows the model trained on.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

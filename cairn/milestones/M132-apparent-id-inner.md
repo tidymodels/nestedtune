@@ -65,6 +65,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - 2026-09-30: T6 done. The full suite at `e0b1f1a6` failed only in `test-sweep-prose.R`. The `--roxygen` sweep found two sentences over 30 words in the final fit's help. After the split, all three sweep modes are clean and that test passes. `devtools::check()` at `e0b1f1a6` gave 0 errors, 0 warnings and 0 notes. Status set to review.
 - 2026-09-30: review checkpoint. AC1-AC4 evidence recorded and ticked, and `devtools::check()` for AC5 still running at this commit.
 - 2026-09-30: pre-gate checkpoint. AC5 and the consistency gate are recorded and green. Thirteen reviewer findings are logged, and none shows a criterion failing.
+- 2026-09-30: gate fixes checkpoint. F1-F5 are fixed, D-101 is added and F6-F8 are one candidate row. The two changed test files pass and all six sweeps are clean. The full suite on this tree was still running at this commit.
 
 ## Decisions
 
@@ -94,3 +95,13 @@ Findings from three fresh reviewers: O is the diff reviewer, B the blame-history
 - F11 (B4): the map's race refusal names no workflow. The design is shared by the whole call, so there is no one workflow to name. Proposed: reject.
 - F12 (O8): two "Apparent" apparent splits beside bootstrap splits are accepted. tune drops both, and the racers refuse them. Proposed: reject, informational.
 - F13 (B5): the final fit of an untuned result never builds an inner design, so it skips the check. This matches M70. Proposed: noted.
+
+Triage, 2026-09-30: the maintainer accepted every proposed disposition.
+
+- F1 fixed. The headline now says "an inner split that tune would leave out of its estimates". The reason says "each outer fold that tunes on it would use fewer resamples". The inherited help and the README say the same.
+- F2 fixed. Each racer's entry case and each map case is its own `test_that()` block with its own skip. The rebuilt and grouped cases moved to a separate block.
+- F3 fixed. The final fit's paragraph on its rebuilt design now comes last in "What is refused", opening with "Last, just before tuning". Every other check in `nested_final_fit()` runs before `final_fit_worker()`.
+- F4 fixed. The DESIGN paragraph on `nested_final_fit()` names `check_final_inner()`.
+- F5 fixed by D-101, which corrects D-100's site list. A probe under `nested_workflow_map()` with `fn = "nested_fit_resamples"` showed its consequence: the refusal carries the prefix `Workflow "a":`.
+- F6, F7 and F8 became one candidate row in ROADMAP, "M132's review leftovers".
+- F9, F10, F11 and F12 rejected, and F13 noted, for the reasons above.

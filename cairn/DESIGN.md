@@ -413,7 +413,9 @@ one in which no outer fold completed (`check_completed_folds()`, class
 the summary doors), rebuilds the tuner description from the `procedure` attribute (`procedure_tuner()`,
 `R/tuner.R`), then draws two seeds and hands everything to
 `final_fit_worker()`, which sets the tuning seed, re-evaluates the recorded
-`inside` call against the full data, runs the recorded tuner through the same
+`inside` call against the full data, refuses that design where it breaks the
+two "Apparent" rules (`check_final_inner()`, class `nestedtune_bad_design`,
+D-100, M132), runs the recorded tuner through the same
 `run_tuner()` the loop uses, selects, finalizes, sets the fit seed, and fits
 on every row. The seed scope is D-016: building an `rset`
 draws from the RNG, so the construction sits inside the tuning seed's scope

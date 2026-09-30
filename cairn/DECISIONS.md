@@ -2009,6 +2009,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** in the inner loop, a split whose id is "Apparent" is refused unless it is an apparent split beside bootstrap splits. Under `nested_tune_race_anova()` and `nested_tune_race_win_loss()`, that apparent split is refused too. The entry check, `nested_resamples()`, the pre-loop of `nested_workflow_map()` and the design that `nested_final_fit()` rebuilds apply both rules, with class `nestedtune_bad_design`. Rejected for the racers: documenting the flaw and running, because the split gives a race nothing. Rejected: dropping the split before the race, because that changes the design without a word and the inner record then differs from a direct finetune call. Rejected for a renamed split: a warning, which GP3 rules out.
 **Consequences:** the racers depart from finetune, which runs such a design. GP1 allows this as a documented divergence. The outer loop does not change, because the package scores outer folds itself. Falsified by a finetune release whose race leaves the "Apparent" split out, or by a tune release that scores a split whose id is "Apparent". (Narrows D-099.)
 
+### D-101 (2026-09-30): which "Apparent" rule each site applies. Corrects D-100's Decision
+
+**Context:** M132's review found that D-100's Decision says four sites apply both rules. `nested_resamples()` does not know the tuner, and the pre-loop of `nested_workflow_map()` reads the design only for the race.
+**Decision:** D-100 stands, with its site list corrected. The entry check `check_nested()` applies the first rule, and the two racers apply the race rule at their entry after it. The final fit's rebuilt design gets the first rule. If the recorded tuner is a racer, it also gets the race rule. `nested_resamples()` applies the first rule alone. The map pre-loop applies the race rule alone, and each workflow's entry check applies the first rule before any of its folds runs.
+**Consequences:** under `nested_workflow_map()`, a design broken by the first rule is refused by the first workflow's entry check, so its message names that workflow.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

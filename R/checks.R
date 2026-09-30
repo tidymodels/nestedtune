@@ -547,8 +547,8 @@ misread_apparent_rows <- function(x) {
 
 apparent_id_reason <- paste(
   'tune leaves every split whose id is "Apparent" out of its estimates, so',
-  "the fold would tune on fewer resamples than its design holds. Give the",
-  "split another id."
+  "each outer fold that tunes on it would use fewer resamples than its",
+  "design holds. Give the split another id."
 )
 
 # The two racers. finetune 1.3.0 eliminates race candidates on
@@ -643,7 +643,8 @@ check_inner_apparent_ids <- function(resamples, call = rlang::caller_env()) {
   # The reason is handed over as a value, so cli does not parse it again.
   cli::cli_abort(
     c(
-      "{.arg resamples} has an inner split that tuning would leave out.",
+      "{.arg resamples} has an inner split that tune would leave out of its \\
+       estimates.",
       x = "{cli::qty(n)}Element{?s} {hit} of {.field inner_resamples} \\
            {cli::qty(n)}{?holds/hold} a split under the id {.val Apparent} \\
            that is not the apparent split of a bootstrap.",
