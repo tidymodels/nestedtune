@@ -105,3 +105,5 @@ Triage, 2026-09-30: the maintainer accepted every proposed disposition.
 - F5 fixed by D-101, which corrects D-100's site list. A probe under `nested_workflow_map()` with `fn = "nested_fit_resamples"` showed its consequence: the refusal carries the prefix `Workflow "a":`.
 - F6, F7 and F8 became one candidate row in ROADMAP, "M132's review leftovers".
 - F9, F10, F11 and F12 rejected, and F13 noted, for the reasons above.
+
+Re-verified after the fixes, on `8963aab9`. The first suite run at `dd32dc7a` failed twice in `test-sweep-prose.R`, because the roxygen sweep flagged "just" in the F3 paragraph, and `8963aab9` drops the word. On `8963aab9`, `devtools::test()` gave 0 failures, 0 skips and 13740 passes. `devtools::check()` gave 0 errors, 0 warnings and 0 notes, and all six sweeps exit 0 with "clean".
