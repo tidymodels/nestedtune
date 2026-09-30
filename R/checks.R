@@ -942,19 +942,58 @@ split_shares_rows <- function(split, rows = NULL) {
   if (!is.null(rows) && length(rows) != n) {
     return(FALSE)
   }
-  held_out <- tryCatch(rsample::complement(split), error = function(cnd) NULL)
   in_frame <- function(idx) {
     is.numeric(idx) && !anyNA(idx) && all(idx >= 1L & idx <= n)
   }
   trained <- split[["in_id"]]
-  if (!in_frame(trained) || !in_frame(held_out)) {
+  if (!in_frame(trained)) {
+    return(FALSE)
+  }
+  if (identical(split[["out_id"]], NA) && complement_is_default(split)) {
+    # rsample's rsplit method gives every frame row outside `in_id` here,
+    # which shares no frame row with it; only a row that `rows` repeats can.
+    if (is.null(rows)) {
+      return(FALSE)
+    }
+    # The same set, found without the unique() that method hashes the
+    # training rows with, which dominated this check's time (M134, T5).
+    outside <- rep(TRUE, n)
+    outside[trained] <- FALSE
+    held_out <- which(outside)
+  } else {
+    held_out <- tryCatch(
+      rsample::complement(split),
+      error = function(cnd) NULL
+    )
+  }
+  if (!in_frame(held_out)) {
     return(FALSE)
   }
   if (!is.null(rows)) {
     trained <- rows[trained]
     held_out <- rows[held_out]
   }
-  any(held_out %in% trained)
+  # A marked vector rather than %in%, which hashes the training rows anew
+  # for every split (M134, T5).
+  seen <- logical(max(c(0L, trained, held_out)))
+  seen[trained] <- TRUE
+  any(seen[held_out])
+}
+
+# Whether rsample::complement() reaches its rsplit method for `split`: no
+# class ahead of "rsplit" has a complement method registered, by rsample
+# (the apparent, rolling-origin and sliding splits) or by another package.
+complement_is_default <- function(split) {
+  cls <- class(split)
+  ahead <- cls[seq_len(match("rsplit", cls) - 1L)]
+  registered <- asNamespace("rsample")[[".__S3MethodsTable__."]]
+  !any(vapply(
+    paste0("complement.", ahead),
+    exists,
+    logical(1),
+    envir = registered,
+    inherits = FALSE
+  ))
 }
 
 # The positions of the splits of `x` that share rows, for split_shares_rows()
