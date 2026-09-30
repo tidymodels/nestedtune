@@ -526,12 +526,14 @@ apparent_id_hint <- paste(
   "keeps its apparent split only under that id."
 )
 
-# The rows of `x` whose id is "Apparent" but whose split is not an apparent
-# split. tune leaves every row under that id out of its estimates, so a fold
-# tuning on `x` would use fewer resamples than it holds, and nothing would say
-# so (M132, D-100). A bootstrap's own apparent split carries the id on
-# purpose, and an apparent split beside no bootstrap splits is refused as
-# apparent() before this is read. Class inspection only, like
+# The rows of `x` whose id is "Apparent" but whose split is not the apparent
+# split of a bootstrap design. tune leaves every row under that id out of its
+# estimates, so a fold tuning on `x` would use fewer resamples than it holds,
+# and nothing would say so (M132, D-100). Only a bootstrap's own apparent
+# split carries the id on purpose, and split_designs() names that split's
+# design as its bootstrap. The rule stands alone: at entry an apparent split
+# beside no bootstrap splits is refused as apparent() first, but the final
+# fit's rebuilt design gets no such check. Class inspection only, like
 # split_designs().
 misread_apparent_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
@@ -539,7 +541,8 @@ misread_apparent_rows <- function(x) {
     return(integer())
   }
   is_apparent <- vapply(splits, inherits, logical(1), "apparent_split")
-  which(apparent_ids(x) & !is_apparent)
+  joined <- split_designs(x) %in% c("bootstraps", "group_bootstraps")
+  which(apparent_ids(x) & !(is_apparent & joined))
 }
 
 apparent_id_reason <- paste(
@@ -555,9 +558,11 @@ apparent_id_reason <- paste(
 # trained on, although tune's estimate leaves that split out (M132, D-100).
 racer_tuners <- c("tune_race_anova", "tune_race_win_loss")
 
-# Whether `x` holds an apparent split. Any id counts: under another id the
-# entry check has already refused the split as apparent(). Class inspection
-# only, like split_designs().
+# Whether `x` holds an apparent split. Any id counts, because the race
+# misreads an apparent split under any id. At a racer's entry, one under
+# another id has already been refused as apparent(), but the map and the
+# final fit read this with no entry check before it. Class inspection only,
+# like split_designs().
 holds_apparent_split <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   is.list(splits) &&

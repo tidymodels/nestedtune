@@ -139,7 +139,8 @@
 #' bootstrap, since tune leaves every split with that id out of its
 #' estimates. For a race it is also refused if it holds an apparent split,
 #' since the race eliminates candidates on that split's score. The entry
-#' checks of the other functions refuse both, so this refusal reaches a
+#' checks of the other functions refuse each rule where it applies, so this
+#' refusal reaches a
 #' record made before those checks, or an inner specification that labels
 #' the whole data differently.
 #'

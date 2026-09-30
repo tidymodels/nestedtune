@@ -61,6 +61,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - 2026-09-29: checkpoint, T5 not yet ticked. `check_final_inner()` in `R/checks.R` is called from `final_fit_worker()`. The two AC3 tests in `test-nested-final-fit-checks.R` failed on the old code, because each final fit ran through, and they pass now. The full-suite run for T5 was still going at this commit.
 - 2026-09-29: T5 done. The full suite on the checkpoint tree gave 0 failures, and the plain prose sweep is clean.
 - 2026-09-29: checkpoint, T6 not yet ticked. The README paragraph, `?nested_resamples`, the "Nested designs" section of `?nested_tune_grid`, the racers' details, the "What is refused" section of `?nested_final_fit`, NEWS and the DESIGN convention bullet state the rules. Both prose sweeps are clean. The full suite and `devtools::check()` were still running at this commit.
+- 2026-09-29: claim audit: 48 claims read, 4 corrected. R/checks.R, R/nested-final-fit.R. `check_final_inner()` accepted v-fold splits beside an apparent split under the id "Apparent", which the entry check refuses. `misread_apparent_rows()` now accepts that id only on an apparent split that joins a bootstrap design, and a new final-fit case failed before the fix and passes after it. Two comments assumed an entry check ran first, and the final fit's help said the entry checks "refuse both". The earlier suite run was stopped, because its code changed.
 
 ## Decisions
 

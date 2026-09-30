@@ -442,19 +442,28 @@ test_that("the final fit refuses an inner split relabelled Apparent", {
     folds$id[[1]] <- "Apparent"
     folds
   }
-  attr(res, "inside") <- quote(relabelled_vfold())
-
-  cnd <- expect_error(
-    nested_final_fit(wf, res),
-    class = "nestedtune_bad_design"
-  )
-  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
-  expect_match(
-    msg,
-    "tune leaves every split whose id is \"Apparent\" out",
-    fixed = TRUE
-  )
-  expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+  # An apparent split beside v-fold splits alone, which the entry check
+  # refuses as apparent() and nothing else reads in the final fit.
+  vfold_apparent <- function(data) {
+    rsample::manual_rset(
+      c(rsample::vfold_cv(data, v = 3)$splits, rsample::apparent(data)$splits),
+      c(paste0("Fold", 1:3), "Apparent")
+    )
+  }
+  for (inside in list(quote(relabelled_vfold()), quote(vfold_apparent()))) {
+    attr(res, "inside") <- inside
+    cnd <- expect_error(
+      nested_final_fit(wf, res),
+      class = "nestedtune_bad_design"
+    )
+    msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+    expect_match(
+      msg,
+      "tune leaves every split whose id is \"Apparent\" out",
+      fixed = TRUE
+    )
+    expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+  }
 })
 
 test_that("the final fit of a race refuses a bootstrap's apparent split", {
