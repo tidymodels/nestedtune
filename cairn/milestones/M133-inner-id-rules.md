@@ -1,6 +1,6 @@
 # M133: Refuse inner ids that tune misreads, at entry and at the final fit
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -62,7 +62,34 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - 2026-09-30: amendment: AC1 reads `id` with `is.na()`, and the `addNA()` case moves from the refusals to a passing control. T1 gains that control through `nested_resamples()` and the final fit. It also gains an AC2 case with two NA levels.
 - 2026-09-30: re-audit: AC1 (full) returned four findings, none changing the text. D-102's reading needed a correction (D-105). Two NA levels reach the repeated-id rule, which is right, and gained a case. More entry points were added to T1. The tune clause in the control stays as its reason.
 - 2026-09-30: at `6ea5ddbe`, `devtools::document()` left no diff, and `devtools::test()` gave 0 failures, 0 errors and 0 skips. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. Both prose sweeps were clean, and `air` passed on the touched files. T1 to T5 ticked, status set to review.
+- 2026-09-30: review pass 1 returned to in-progress (defect return 1). AC3 fails: six of ten final-fit test calls assert headline text, not the reason, so they pass with the reason removed. AC1, AC2 and AC4 verified, and `devtools::check()` not run. Findings R1 to R14 in the Review section.
 
 ## Decisions
 
 ## Review
+
+Pass 1, 2026-09-30, at `256a4851`. The branch holds `origin/main`, so no merge was needed.
+
+- AC1: the full suite gave 0 failures and 0 skips. `test-design-support.R` asserts the class, the reason, "Elements 1, 2, and 3" and "outer fold 1" for a character and a factor NA id. It runs both through `nested_tune_grid()` and `nested_resamples()`. It asserts "Element 2 of" for the one-fold case, and it has both passing controls. A probe ran at all three sites. There a `loo_cv()` design with an NA id gets the `loo_cv()` refusal. An NA id beside a relabelled "Apparent" split gets the missing-id refusal.
+- AC2: the same suite run passes the `id`, `id` and `id2`, NA `id2` and two-NA-level cases, and the `vfold_cv(repeats = 2)` control. A probe showed two NA ids get the missing-id message alone, and a repeated id beside a relabelled "Apparent" split gets the repeated-id refusal.
+- AC3: fails. `expect_final_refused()` matches `case$reason`, and for six of the ten calls that text is "rsample::loo_cv()", "rsample::apparent()" or "rsample::permutations()". A probe printed each message, and the headline "gave `rsample::X()` splits" holds that text. So those six tests pass with the reason bullet removed, and they do not assert the reason. The six calls are `loo_cv()`, `apparent()`, `permutations()`, the two `manual_rset()` split cases and `vfold_apparent()`. The other four calls assert reason text found only in the reason bullet. The code's rule order and messages are right, and no final-fit message holds "outer fold".
+- AC4: `devtools::document()` left no diff. The rendered `man/nested_resamples.Rd`, `man/nested_tune_grid.Rd` ("Nested designs") and `man/nested_final_fit.Rd` ("What is refused") state the rules, as do the README paragraph and one NEWS bullet. `devtools::build_readme()` left no diff.
+- AC5: not complete. `devtools::test()` gave 0 failures and the six gating prose sweeps were clean. `devtools::check()` was not run, because the AC3 return makes it stale.
+- Gate: `cairn_validate` passed with 18 references-staleness advisories. `pkgdown::check_pkgdown()` found no problems. No new top-level files.
+
+Reviewer findings, ranked by the reviewers, carried untriaged to the next gate:
+
+- R1 (all three reviewers): the six final-fit tests above assert headline text, not the reason. This is the AC3 failure.
+- R2 (prior-review lens): at entry, the new missing-id and repeated-id reasons say "each outer fold that tunes on it". `check_nested()` also runs from `nested_fit_resamples()`, which tunes nothing, the wording M128 and M132 F1 corrected. `apparent_id_reason` on main has the same wording.
+- R3 (blame lens): the header comment of `check_final_inner()` (`R/checks.R`, about line 726) still describes only the two "Apparent" rules.
+- R4 (Opus): numeric ids that differ past 15 significant digits read as one label under `as.character()`, so `c(1, 1.0000000000000002, 2)` is refused though tune counts n = 3. The reviewer ran both.
+- R5 (Opus): `check_inner_ids()` runs before the `inner_resamples` class check. So a plain tibble with a repeated id gets the repeated-id message in place of the "not an rset" one. Same class.
+- R6 (Opus): `nested_workflow_map()`'s pre-loop applies the race rule before the entry check's id rules. So a bootstrap apparent split plus an NA id gets the race refusal there, but the missing-id refusal from a racer. That order predates the branch.
+- R7 (Opus): one non-atomic id column switches off the repeat check for the whole design.
+- R8 (Opus): no test pins the order of the id rules before the "Apparent" rules. The probes above show it holds.
+- R9 (Opus): the `missing_id_rows()` mask in `repeated_id_rows()` changes no outcome, since each site runs the missing-id rule first.
+- R10 (Opus): an `id2` column with no `id` column that repeats is refused as repeated.
+- R11 (prior-review lens): the "8 result rows for 6 splits" probe cited in the `repeated_id_rows()` comment is not in the work log.
+- R12 (Opus, blame lens, prior-review lens): the README and DESIGN splices were not re-wrapped, and "if it is an [rsample::loo_cv()]" in `?nested_final_fit` reads awkwardly.
+- R13 (blame lens, prior-review lens): at the final fit, a design found by its split classes gets the outer-loop reason, which matches the entry convention of D-097.
+- R14 (blame lens): D-102's Consequences says a missing `id2` still runs, but two NA `id2` values under one `id` are refused as repeated. Only one NA `id2` runs.
