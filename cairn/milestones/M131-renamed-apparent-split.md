@@ -1,13 +1,13 @@
 # M131: Keep a renamed apparent split out of a bootstrap design
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** —
+- **Branch/PR:** m131-renamed-apparent-split
 
 ## Goal
 
@@ -41,7 +41,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 
 ## Tasks
 
-- [ ] T1: Tests first, in `tests/testthat/test-design-support.R`. Build the designs with `rsample::manual_rset()` directly, because `rebuilt()` (line 326) keeps the original ids. Use `entry_refusal()` (line 163) for the `nested_tune_grid()` cases. Expect AC1's seven refusals and AC3's "A" cases to fail on the current code. Expect AC1's v-fold control, AC2 and AC3's "Apparent" case to pass today, as guards.
+- [x] T1: Tests first, in `tests/testthat/test-design-support.R`. Build the designs with `rsample::manual_rset()` directly, because `rebuilt()` (line 326) keeps the original ids. Use `entry_refusal()` (line 163) for the `nested_tune_grid()` cases. Expect AC1's seven refusals and AC3's "A" cases to fail on the current code. Expect AC1's v-fold control, AC2 and AC3's "Apparent" case to pass today, as guards.
 - [ ] T2: Change `split_designs()` (`R/checks.R:458`). For an apparent split, compare `as.character()` of its row's id with "Apparent", the comparison tune makes. The host rule takes the split on a match alone, and an NA id is no match. If `x` has no id column of the same length as its splits, no apparent split joins the host. Add the hint to the inner refusals in `check_inner_refused()` (`R/checks.R:599`) and `inner_resamples_from_split()` (`R/nested-resamples.R:248`). Add it only for an element whose apparent split has bootstrap splits beside it. Hand the text to cli as a value. Update the comments at `R/checks.R:479`.
 - [ ] T3: Documentation and checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change the help at `R/nested-tune-grid.R:128` and `R/nested-resamples.R:40`, add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
 
@@ -54,6 +54,8 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: plan gate chose a hint in the inner refusal over a bare refusal, at priority normal.
 - 2026-09-29: the revised criteria went back to the same reader for a recheck. Its result was still pending at the plan commit.
 - 2026-09-29: the recheck found all 9 repairs held and 2 new items. T2 now says an NA id is no match, and AC3's last case now covers both entries.
+- 2026-09-29: implement started on branch m131-renamed-apparent-split. No question gate, because the plan left no choice open.
+- 2026-09-29: T1 added five test blocks to `test-design-support.R`. On the pre-fix code, the AC1 block fails (6 failures and an error) and the AC3 block fails its 8 "A" expectations. The v-fold control, AC2 and AC3's "Apparent" case pass. Checkpoint: red until T2.
 
 ## Decisions
 
