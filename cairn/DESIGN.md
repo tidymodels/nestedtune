@@ -172,7 +172,8 @@ naming convention.
   assessment sets share a row is refused in both loops, which catches a
   `make_splits()` rebuild that no class names. An index into an outer
   analysis set counts as the data row it copies, and the bootstrap's own
-  apparent split is exempt (D-103, D-104, M134). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  apparent split is exempt (D-103, D-104, M134). It also refuses
+  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate

@@ -154,7 +154,10 @@ counts as the data row it copies. An outer split can repeat a row, as a
 rebuilt bootstrap does. The design is then refused if an inner split
 puts one copy of that row in each set. The apparent split of an inner
 bootstrap design is exempt under the id “Apparent”, because tune leaves
-it out of its estimates.
+it out of its estimates. This rule also refuses
+`rsample::rolling_origin()` with `lag` above 0 in either loop, because
+each assessment set then holds the last `lag` analysis rows. Use
+`lag = 0`, and build the lagged predictors before resampling.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

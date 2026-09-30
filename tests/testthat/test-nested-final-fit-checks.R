@@ -557,6 +557,11 @@ FINAL_REFUSED <- list(
     inside = quote(rebuilt_boots_apparent()),
     reason = c("Split 4 of", "scores the model on rows it trained on")
   ),
+  # A lag puts the last analysis rows of each split in its assessment set.
+  "rolling_origin() with a lag" = list(
+    inside = quote(rsample::rolling_origin(initial = 60, assess = 10, lag = 2)),
+    reason = c("scores the model on rows it trained on", "Use `lag = 0`")
+  ),
   # An apparent split beside v-fold splits alone, which the entry check
   # refuses as apparent(). Before M133 the final fit told it to rename.
   "apparent split beside v-fold splits" = list(

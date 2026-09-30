@@ -13,7 +13,11 @@
   to give it another id. The apparent split of an inner bootstrap design stays
   exempt under the id "Apparent", because tune leaves it out of its
   estimates. `nested_resamples()`, the entry checks and the inner design
-  that `nested_final_fit()` rebuilds all apply the rule.
+  that `nested_final_fit()` rebuilds all apply the rule. The rule also
+  refuses `rsample::rolling_origin()` with `lag` above 0 in either loop,
+  because each assessment set then holds the last `lag` analysis rows.
+  Before, such a design ran. The error suggests `lag = 0`, with the lagged
+  predictors built before resampling.
 
 * An inner split whose `id` is missing is now refused, and so is an inner
   design in which two splits carry the same values in every id column. tune

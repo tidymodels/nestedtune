@@ -782,7 +782,8 @@ check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
          analysis and assessment sets share rows.",
         x = "{cli::qty(n)}Split{?s} {shared} of the rebuilt design \\
              {cli::qty(n)}{?shares/share} rows.",
-        i = "{reason}"
+        i = "{reason}",
+        lag_hint(inner[["splits"]][shared])
       ),
       class = "nestedtune_bad_design",
       call = call
@@ -1009,6 +1010,24 @@ overlap_rows <- function(x, rows = NULL) {
   which(vapply(splits, split_shares_rows, logical(1), rows = rows))
 }
 
+# rsample::rolling_origin() starts each assessment set `lag` rows before its
+# analysis set ends (rsample 1.3.2), so with `lag` above 0 each split shares
+# its last `lag` analysis rows. tune scores them, so the rule refuses it, and
+# the message says how to keep the lagged predictors (M134, R1).
+lag_advice <- paste(
+  "An `rsample::rolling_origin()` split with `lag` above 0 puts its last",
+  "`lag` analysis rows in its assessment set. Use `lag = 0`, and build the",
+  "lagged predictors before resampling."
+)
+
+# The hint for `splits`, the splits a refusal names: NULL unless one is a
+# rolling-origin split.
+lag_hint <- function(splits) {
+  if (any(vapply(splits, inherits, logical(1), "rof_split"))) {
+    c(i = "{lag_advice}")
+  }
+}
+
 outer_overlap_reason <- paste(
   "Such a fold scores the model on rows it trained on, so the nested",
   "estimate would not measure performance on new data."
@@ -1092,12 +1111,17 @@ check_inner_overlap <- function(resamples, call = rlang::caller_env()) {
     rep("x", length(lines))
   )
   reason <- inner_overlap_reason()
+  shared <- unlist(
+    Map(function(e, pos) inner[[e]][["splits"]][pos], hit, found[hit]),
+    recursive = FALSE
+  )
   cli::cli_abort(
     c(
       "{.arg resamples} has an inner split whose analysis and assessment \\
        sets share rows.",
       bullets,
-      i = "{reason}"
+      i = "{reason}",
+      lag_hint(shared)
     ),
     class = "nestedtune_bad_design",
     call = call
@@ -1120,7 +1144,8 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
        rows.",
       x = "{cli::qty(n)}Row{?s} {rows} of {.arg {arg}} \\
            {cli::qty(n)}{?holds such a split/hold such splits}.",
-      i = "{outer_overlap_reason}"
+      i = "{outer_overlap_reason}",
+      lag_hint(x[["splits"]][rows])
     ),
     class = "nestedtune_bad_design",
     call = call

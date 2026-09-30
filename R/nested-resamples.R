@@ -60,7 +60,8 @@
 #' then miscounts the resamples.
 #'
 #' An `outside` split whose assessment set holds a row of its analysis set
-#' is refused. Such a fold scores the model on rows it trained on. The rule reads the rows, so it also catches a split rebuilt with
+#' is refused. Such a fold scores the model on rows it trained on. The rule
+#' reads the rows, so it also catches a split rebuilt with
 #' [rsample::make_splits()], which keeps no class that names its design. An
 #' `inside` that gives such a split is refused too, and the refusal names
 #' the outer fold and the split. There, each index into the fold's analysis
@@ -101,6 +102,12 @@
 #' [nested_final_fit()], [nested_fit_resamples()], [nested_workflow_map()]
 #' and the other four tuners are not tested on these pairs. Any other inner
 #' design is not tested.
+#'
+#' Every test above uses [rsample::rolling_origin()] with its default
+#' `lag = 0`. A `lag` above 0 is refused as an `outside` and as an
+#' `inside`, because each assessment set then holds the last `lag` rows of
+#' its analysis set. Use `lag = 0`, and build the lagged predictors before
+#' resampling.
 #'
 #' @section Memory:
 #'
@@ -300,7 +307,8 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
          assessment sets share rows.",
         x = "{cli::qty(n)}Split{?s} {shared} of that fold's inner design \\
              {cli::qty(n)}{?shares/share} rows.",
-        i = "{reason}"
+        i = "{reason}",
+        lag_hint(inner_rset[["splits"]][shared])
       ),
       class = "nestedtune_bad_design",
       call = call
