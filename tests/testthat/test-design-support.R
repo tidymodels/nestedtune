@@ -1531,6 +1531,19 @@ test_that("an inner v-fold split rebuilt to share one row is refused", {
     cnd,
     "Elements 1, 2, and 3 of inner_resamples: split 2."
   )
+
+  # nested_fit_resamples() shares the check and tunes nothing, so the reason
+  # does not say that the fold tunes (M132 F1, M134 R3).
+  cnd <- entry_refusal(nested_fit_resamples(fixed_workflow(d), folds))
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: split 2."
+  )
+  expect_no_match(flat_message(cnd), "tune", fixed = TRUE)
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_fit_resamples"
+  )
 })
 
 # An outer bootstrap rebuilt with make_splits() is refused by no class, and

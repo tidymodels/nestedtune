@@ -1033,19 +1033,19 @@ outer_overlap_reason <- paste(
   "estimate would not measure performance on new data."
 )
 
-# Why an inner split that shares rows is refused, where it is tuned on: each
-# outer fold at entry, or the one tuning run of the final fit.
+# Why an inner split that shares rows is refused: at entry, for every outer
+# fold, which nested_fit_resamples() fits without tuning, or for the one
+# tuning run of the final fit.
 inner_overlap_reason <- function(final = FALSE) {
   cost <- if (final) {
-    "so the final fit would rank"
+    "so the final fit would rank candidates partly on those rows."
   } else {
-    "so each outer fold that tunes on it would rank"
+    paste(
+      "so the inner results of each outer fold that uses it would rest",
+      "partly on those rows."
+    )
   }
-  paste(
-    "Such a split scores the model on rows it trained on,",
-    cost,
-    "candidates partly on rows the model trained on."
-  )
+  paste("Such a split scores the model on rows it trained on,", cost)
 }
 
 # The inner splits of `x` that share rows, less a bootstrap's own apparent
