@@ -373,8 +373,9 @@ refused, because it scores the model on rows it trained on. The rule
 reads the rows, so it also catches a split rebuilt with
 \code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
 index into an outer split's analysis set counts as the data row it
-copies. The apparent split of an inner bootstrap design is exempt under
-the id "Apparent", because tune leaves it out of its estimates. The checks
+copies. The apparent split of an inner bootstrap design is exempt from
+this rule under the id "Apparent", because tune leaves it out of its
+estimates. The checks
 exist because
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
 returned, and because a design assembled by hand can index rows its outer

@@ -67,8 +67,8 @@
 #' the outer fold and the split. There, each index into the fold's analysis
 #' set counts as the data row it copies. So if the outer split repeats a
 #' row, an inner split that puts one copy in each set is refused. The
-#' apparent split of a bootstrap under the id "Apparent" is exempt, because
-#' tune leaves it out of its estimates.
+#' apparent split of a bootstrap under the id "Apparent" is exempt from this
+#' rule, because tune leaves it out of its estimates.
 #'
 #' @section Time-series designs:
 #'
@@ -103,8 +103,8 @@
 #' and the other four tuners are not tested on these pairs. Any other inner
 #' design is not tested.
 #'
-#' Every test above uses [rsample::rolling_origin()] with its default
-#' `lag = 0`. A `lag` above 0 is refused as an `outside` and as an
+#' Every test above that uses [rsample::rolling_origin()] leaves `lag` at
+#' its default of 0. A `lag` above 0 is refused as an `outside` and as an
 #' `inside`, because each assessment set then holds the last `lag` rows of
 #' its analysis set. Use `lag = 0`, and build the lagged predictors before
 #' resampling.
@@ -308,7 +308,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
         x = "{cli::qty(n)}Split{?s} {shared} of that fold's inner design \\
              {cli::qty(n)}{?shares/share} rows.",
         i = "{reason}",
-        lag_hint(inner_rset[["splits"]][shared])
+        lag_hint(list(inner_rset))
       ),
       class = "nestedtune_bad_design",
       call = call

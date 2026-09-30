@@ -79,8 +79,8 @@ reads the rows, so it also catches a split rebuilt with
 the outer fold and the split. There, each index into the fold's analysis
 set counts as the data row it copies. So if the outer split repeats a
 row, an inner split that puts one copy in each set is refused. The
-apparent split of a bootstrap under the id "Apparent" is exempt, because
-tune leaves it out of its estimates.
+apparent split of a bootstrap under the id "Apparent" is exempt from this
+rule, because tune leaves it out of its estimates.
 }
 
 \section{Time-series designs}{
@@ -117,8 +117,8 @@ nine pairs. Each pair is tested to give the same splits as
 and the other four tuners are not tested on these pairs. Any other inner
 design is not tested.
 
-Every test above uses \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with its default
-\code{lag = 0}. A \code{lag} above 0 is refused as an \code{outside} and as an
+Every test above that uses \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} leaves \code{lag} at
+its default of 0. A \code{lag} above 0 is refused as an \code{outside} and as an
 \code{inside}, because each assessment set then holds the last \code{lag} rows of
 its analysis set. Use \code{lag = 0}, and build the lagged predictors before
 resampling.

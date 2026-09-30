@@ -1668,10 +1668,24 @@ test_that("an inner rolling_origin() with a lag is refused, naming the lag", {
   expect_lag_refused(cnd, "of inner_resamples: splits")
 })
 
-# The hint is for a lag alone: a split rebuilt to share rows does not get it.
+# The hint reads the design's `lag`, so a shared row that no lag put there
+# gets no hint, a rolling_origin() split edited to share one included.
 test_that("a shared row that no lag put there gets no lag hint", {
   skip_if_no_engines()
   d <- support_data(n = 30)
+  edited <- rsample::rolling_origin(d, initial = 20, assess = 5, skip = 4)
+  expect_identical(attr(edited, "lag"), 0)
+  split <- edited$splits[[1]]
+  split$out_id <- c(split$out_id, split$in_id[[20]])
+  edited$splits[[1]] <- split
+  expect_s3_class(edited$splits[[1]], "rof_split")
+  cnd <- expect_error(
+    nested_resamples(d, outside = edited, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+  expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
+
   outer <- overlap_outer(d, "one_row")
   cnd <- expect_error(
     nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),

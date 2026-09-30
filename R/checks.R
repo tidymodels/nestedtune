@@ -785,7 +785,7 @@ check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
         x = "{cli::qty(n)}Split{?s} {shared} of the rebuilt design \\
              {cli::qty(n)}{?shares/share} rows.",
         i = "{reason}",
-        lag_hint(inner[["splits"]][shared])
+        lag_hint(list(inner))
       ),
       class = "nestedtune_bad_design",
       call = call
@@ -938,7 +938,11 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
 # which reads each split class's own rule. Anything malformed shares no row
 # here and is left to the checks that judge it.
 split_shares_rows <- function(split, rows = NULL) {
-  if (!inherits(split, "rsplit") || !is.data.frame(split[["data"]])) {
+  if (
+    !inherits(split, "rsplit") ||
+      !is.list(split) ||
+      !is.data.frame(split[["data"]])
+  ) {
     return(FALSE)
   }
   n <- nrow(split[["data"]])
@@ -1013,19 +1017,29 @@ overlap_rows <- function(x, rows = NULL) {
 }
 
 # rsample::rolling_origin() starts each assessment set `lag` rows before its
-# analysis set ends (rsample 1.3.2), so with `lag` above 0 each split shares
-# its last `lag` analysis rows. tune scores them, so the rule refuses it, and
-# the message says how to keep the lagged predictors (M134, R1).
+# analysis set ends, so it holds `assess + lag` rows (rsample 1.3.2). With
+# `lag` above 0 each split shares its last `lag` analysis rows. tune scores
+# them, so the rule refuses it, and the message says how to keep the lagged
+# predictors (M134, R1).
 lag_advice <- paste(
-  "An `rsample::rolling_origin()` split with `lag` above 0 puts its last",
-  "`lag` analysis rows in its assessment set. Use `lag = 0`, and build the",
-  "lagged predictors before resampling."
+  "A `rsample::rolling_origin()` design with `lag` above 0 puts the last",
+  "`lag` analysis rows of each split in its assessment set. Use `lag = 0`,",
+  "and build the lagged predictors before resampling."
 )
 
-# The hint for `splits`, the splits a refusal names: NULL unless one is a
-# rolling-origin split.
-lag_hint <- function(splits) {
-  if (any(vapply(splits, inherits, logical(1), "rof_split"))) {
+# The hint for `rsets`, the designs whose splits a refusal names: NULL unless
+# one is a rolling_origin() design whose `lag` attribute is above 0. A
+# rebuilt or edited split carries no lag, so it gets no hint.
+lag_hint <- function(rsets) {
+  lagged <- vapply(
+    rsets,
+    function(x) {
+      lag <- attr(x, "lag", exact = TRUE)
+      inherits(x, "rolling_origin") && is.numeric(lag) && isTRUE(lag > 0)
+    },
+    logical(1)
+  )
+  if (any(lagged)) {
     c(i = "{lag_advice}")
   }
 }
@@ -1065,10 +1079,11 @@ inner_overlap_rows <- function(x, rows = NULL) {
 # check_inner_splits().
 fold_overlap_rows <- function(split, inner) {
   splits <- if (is.data.frame(inner)) inner[["splits"]]
+  is_split <- function(s) inherits(s, "rsplit") && is.list(s)
   if (
-    !inherits(split, "rsplit") ||
+    !is_split(split) ||
       !is.list(splits) ||
-      !all(vapply(splits, inherits, logical(1), "rsplit"))
+      !all(vapply(splits, is_split, logical(1)))
   ) {
     return(integer())
   }
@@ -1113,17 +1128,13 @@ check_inner_overlap <- function(resamples, call = rlang::caller_env()) {
     rep("x", length(lines))
   )
   reason <- inner_overlap_reason()
-  shared <- unlist(
-    Map(function(e, pos) inner[[e]][["splits"]][pos], hit, found[hit]),
-    recursive = FALSE
-  )
   cli::cli_abort(
     c(
       "{.arg resamples} has an inner split whose analysis and assessment \\
        sets share rows.",
       bullets,
       i = "{reason}",
-      lag_hint(shared)
+      lag_hint(inner[hit])
     ),
     class = "nestedtune_bad_design",
     call = call
@@ -1147,7 +1158,7 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
       x = "{cli::qty(n)}Row{?s} {rows} of {.arg {arg}} \\
            {cli::qty(n)}{?holds such a split/hold such splits}.",
       i = "{outer_overlap_reason}",
-      lag_hint(x[["splits"]][rows])
+      lag_hint(list(x))
     ),
     class = "nestedtune_bad_design",
     call = call
