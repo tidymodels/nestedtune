@@ -1,13 +1,13 @@
 # M134: Refuse a split that assesses rows it trains on
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M133
 - **Driving RR:** —
 - **Principles touched:** IP1, IP4, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** —
+- **Branch/PR:** m134-overlapping-splits
 
 ## Goal
 
@@ -37,8 +37,8 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 
 ## Tasks
 
-- [ ] T1: Write the AC1 tests first, in `tests/testthat/test-design-support.R`. Build the splits with `rsample::make_splits()` and wrap them with `rsample::manual_rset()`. The refusals fail on the current code, and the `apparent()` test passes.
-- [ ] T2: Add a helper in `R/checks.R` that finds the splits of an rset whose analysis and assessment indexes share a row, reading `rsample::complement()`. It reads only `rsplit` elements and leaves malformed ones to the later checks. Apply it to the outer splits in `check_nested()` after `check_outer_splits()` (line 383), and in `nested_resamples()` after its `check_outer_splits()` call. Give cli the reasons as values (M83 lesson).
+- [x] T1: Write the AC1 tests first, in `tests/testthat/test-design-support.R`. Build the splits with `rsample::make_splits()` and wrap them with `rsample::manual_rset()`. The refusals fail on the current code, and the `apparent()` test passes.
+- [x] T2: Add a helper in `R/checks.R` that finds the splits of an rset whose analysis and assessment indexes share a row, reading `rsample::complement()`. It reads only `rsplit` elements and leaves malformed ones to the later checks. Apply it to the outer splits in `check_nested()` after `check_outer_splits()` (line 383), and in `nested_resamples()` after its `check_outer_splits()` call. Give cli the reasons as values (M83 lesson).
 - [ ] T3: Write the AC2 tests first. The racer case skips where `tuner_ready()` is false (M101 lesson). Case 8 goes beside the "Apparent" block of `tests/testthat/test-nested-final-fit-checks.R`.
 - [ ] T4: Apply the helper to the inner splits. If an inner split's frame is not the outer split's own, map its indexes through the outer `in_id`. `check_inner_splits()` tells the two frames apart (`R/checks.R:1003`). Call it in `check_nested()` after `check_inner_refused()`, in `inner_resamples_from_split()` after the refused-design check, and in `check_final_inner()` after the rules of M133's AC3 first two groups. Keep the exemption in step with `misread_apparent_rows()`.
 - [ ] T5: Measure the added check time (GP4). Time `check_nested()` before and after the change on a `nested_resamples()` design of 10^5 rows with 10 outer and 10 inner folds. Record both times and the commit in the work log.
@@ -51,6 +51,8 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: plan gate chose refusing shared row indexes over recognizing a rebuilt split's design, since nothing in a `make_splits()` split names its design. It also rejected fixing only F8's message, which leaves the outer leak open. Falsified by a supported rsample design whose splits share rows by design, other than the bootstrap's apparent split.
 - 2026-09-30: the criteria audit (see M133's work log) moved the IP1 citation to AC1 alone, since an inner overlap never reaches an outer assessment row. It also stated the rule order, the exemption and the index reading.
 - 2026-09-30: the re-audit found that the exemption held only outside the racers. `check_nested()` does not know the tuner and runs before the race rule, so a racer got the overlap message as planned. The exemption now holds under every tuner, and D-104 corrects D-103. AC2 also places the rule after M133 AC3's first two groups and names case 5's entry point.
+- 2026-09-30: implement started on branch `m134-overlapping-splits`. Question gate skipped: the plan leaves no API, naming or dependency choice open.
+- 2026-09-30: T1 and T2 done. The AC1 refusal tests failed first (the design reached the fold dispatch), and the `apparent()` test passed. `split_shares_rows()`, `overlap_rows()` and `check_outer_overlap()` in `R/checks.R` run after `check_outer_splits()` in `check_nested()` and `nested_resamples()`. `devtools::test()` 0 failures, `--plain` sweep clean.
 
 ## Decisions
 

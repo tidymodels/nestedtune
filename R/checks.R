@@ -381,6 +381,9 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # A row subset or a manual_rset() rebuild loses the rset class these read,
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
+  # A split rebuilt with make_splits() carries no class to read, so each
+  # split's rows are read next (M134, D-103).
+  check_outer_overlap(resamples, "resamples", call = call)
   check_inner_refused(resamples, call = call)
   check_inner_ids(resamples, call = call)
   check_inner_apparent_ids(resamples, call = call)
@@ -885,6 +888,74 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
     c(
       "{.arg {arg}} has splits from a design the outer loop cannot use.",
       bullets
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
+
+# Whether the assessment set of `split` holds a row of its analysis set (M134,
+# D-103). `rows` gives the data row each index of the split's frame stands
+# for: NULL when the frame is the data, or the outer split's `in_id` when it
+# is that split's analysis set, so a row the outer split repeats is caught
+# under both of its positions. The assessment set is rsample::complement()'s,
+# which reads each split class's own rule. Anything malformed shares no row
+# here and is left to the checks that judge it.
+split_shares_rows <- function(split, rows = NULL) {
+  if (!inherits(split, "rsplit") || !is.data.frame(split[["data"]])) {
+    return(FALSE)
+  }
+  n <- nrow(split[["data"]])
+  if (!is.null(rows) && length(rows) != n) {
+    return(FALSE)
+  }
+  held_out <- tryCatch(rsample::complement(split), error = function(cnd) NULL)
+  in_frame <- function(idx) {
+    is.numeric(idx) && !anyNA(idx) && all(idx >= 1L & idx <= n)
+  }
+  trained <- split[["in_id"]]
+  if (!in_frame(trained) || !in_frame(held_out)) {
+    return(FALSE)
+  }
+  if (!is.null(rows)) {
+    trained <- rows[trained]
+    held_out <- rows[held_out]
+  }
+  any(held_out %in% trained)
+}
+
+# The positions of the splits of `x` that share rows, for split_shares_rows()
+# with the same `rows`. Class inspection only, like split_designs().
+overlap_rows <- function(x, rows = NULL) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  if (!is.list(splits)) {
+    return(integer())
+  }
+  which(vapply(splits, split_shares_rows, logical(1), rows = rows))
+}
+
+outer_overlap_reason <- paste(
+  "Such a fold scores the model on rows it trained on, so the nested",
+  "estimate would not measure performance on new data."
+)
+
+# Every outer split that shares rows, in one message. `arg` names the
+# argument the design came in as. An apparent split shares every row, but
+# check_outer_splits() has refused it by its class before this runs.
+check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
+  rows <- overlap_rows(x)
+  if (length(rows) == 0L) {
+    return(invisible(x))
+  }
+  n <- length(rows)
+  # The reason is handed over as a value, so cli does not parse it again.
+  cli::cli_abort(
+    c(
+      "{.arg {arg}} has a split whose analysis and assessment sets share \\
+       rows.",
+      x = "{cli::qty(n)}Row{?s} {rows} of {.arg {arg}} \\
+           {cli::qty(n)}{?holds such a split/hold such splits}.",
+      i = "{outer_overlap_reason}"
     ),
     class = "nestedtune_bad_design",
     call = call

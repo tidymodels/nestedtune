@@ -196,6 +196,9 @@ nested_resamples <- function(data, outside, inside, ...) {
   # An rset whose own class names none of these, such as a manual_rset()
   # rebuild, is read by its split classes (D-097).
   check_outer_splits(outside, "outside", call = environment())
+  # A split rebuilt with make_splits() carries no class to read, so each
+  # split's rows are read next (M134, D-103).
+  check_outer_overlap(outside, "outside", call = environment())
 
   inner_cl <- cl[["inside"]]
   if (!rlang::is_call(inner_cl)) {

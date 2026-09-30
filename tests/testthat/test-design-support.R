@@ -1327,3 +1327,93 @@ for (fn in RACE_EXPORTS) {
     }
   )
 }
+
+# A split whose assessment set holds a row of its analysis set scores the
+# model on rows it trained on. Both loops refuse it, whatever its class says,
+# so a split rebuilt with make_splits() cannot hide it (M134, D-103).
+OVERLAP_REASON <- "scores the model on rows it trained on"
+
+# Three v-fold splits of `d`, with one split that shares rows added or edited.
+overlap_outer <- function(d, kind) {
+  set.seed(1)
+  splits <- rsample::vfold_cv(d, v = 3)$splits
+  if (identical(kind, "edited")) {
+    # The split keeps its class, and its assessment set gains a training row.
+    split <- splits[[2]]
+    split$out_id <- c(as.integer(rsample::complement(split)), split$in_id[[1]])
+    splits[[2]] <- split
+  } else {
+    assessment <- switch(kind, equal = 1:20, one_row = 20:30)
+    extra <- rsample::make_splits(
+      list(analysis = 1:20, assessment = assessment),
+      d
+    )
+    splits <- c(splits, list(extra))
+  }
+  rsample::manual_rset(splits, paste0("Fold", seq_along(splits)))
+}
+
+OVERLAP_OUTER <- list(
+  equal = list(row = "Row 4 of"),
+  one_row = list(row = "Row 4 of"),
+  edited = list(row = "Row 2 of")
+)
+
+test_that("an outer split that shares rows is refused at entry and at construction", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (kind in names(OVERLAP_OUTER)) {
+    outer <- overlap_outer(d, kind)
+    expect_s3_class(outer, "manual_rset")
+    if (identical(kind, "edited")) {
+      expect_s3_class(outer$splits[[2]], "vfold_split")
+    }
+
+    folds <- quiet_nested_cv(d, outer, V3)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_bad_design")
+    expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE, info = kind)
+    expect_match(
+      conditionMessage(cnd),
+      paste(OVERLAP_OUTER[[kind]]$row, "`resamples`"),
+      fixed = TRUE,
+      info = kind
+    )
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE, info = kind)
+    expect_match(
+      conditionMessage(cnd),
+      paste(OVERLAP_OUTER[[kind]]$row, "`outside`"),
+      fixed = TRUE,
+      info = kind
+    )
+  }
+})
+
+# An apparent split shares every row too, but the refusal by its split class
+# comes first and names the design.
+test_that("an outer manual_rset() of apparent() splits keeps the apparent() refusal", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  outer <- rsample::manual_rset(rsample::apparent(d)$splits, "Whole")
+  expect_s3_class(outer$splits[[1]], "apparent_split")
+
+  folds <- quiet_nested_cv(d, outer, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+})
