@@ -102,4 +102,6 @@ Gate triage, 2026-09-29: the maintainer accepted every proposed disposition. The
 - O9: the hint tests match the whole hint on the flattened message. The no-hint tests match its opening words.
 - O3 and O4 are one new `[low]` candidate row. P3 goes to DESIGN Known issues at hygiene. S1, O2, S2 and O7 are rejected for the reasons above.
 
+After the fixes, at `76f8ff88`: `devtools::test()` gave 0 failures and 13664 passing expectations. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 11 min 36 s. The six gating sweeps exited 0, and `document()` and `build_readme()` left no diff beyond the README rewrap. AC1 to AC5 still hold.
+
 - AC4: each site was read by grep for "apparent" and "part of". The README Refused paragraph (README.md:131-135) says the split counts as part of the design "only if its id is “Apparent”". `build_readme()` gave no diff. The shared help text puts that sentence in all five tuning pages, for example `nested_tune_grid.Rd:189`. `nested_resamples.Rd:62-63` and the new NEWS.md bullet (lines 3-4) say the same. No other sentence at the four sites says that an apparent split counts as part of such a design. Pass.
