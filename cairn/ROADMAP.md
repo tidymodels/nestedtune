@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-30 (M133 archived, M130 row pruned, D-106 added, validate green)._
+_Last hygiene check: 2026-09-30 (M134 archived, M131 row pruned, validate green)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M134 | Refuse a split that assesses rows it trains on | review | M133 | normal | milestones/M134-overlapping-splits.md |
+| M134 | Refuse a split that assesses rows it trains on | done | M133 | normal | milestones/archive/M134-overlapping-splits.md |
 | M133 | Refuse inner ids that tune misreads, at entry and at the final fit | done | — | normal | milestones/archive/M133-inner-id-rules.md |
 | M132 | Refuse an inner "Apparent" split that tune drops or a race misreads | done | — | normal | milestones/archive/M132-apparent-id-inner.md |
-| M131 | Keep a renamed apparent split out of a bootstrap design | done | — | normal | milestones/archive/M131-renamed-apparent-split.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
