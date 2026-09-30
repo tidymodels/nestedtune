@@ -1029,7 +1029,7 @@ lag_advice <- paste(
 
 # The hint for `rsets`, the designs whose splits a refusal names: NULL unless
 # one is a rolling_origin() design whose `lag` attribute is above 0. A
-# rebuilt or edited split carries no lag, so it gets no hint.
+# design rebuilt with manual_rset() carries no lag, so it gets no hint.
 lag_hint <- function(rsets) {
   lagged <- vapply(
     rsets,
