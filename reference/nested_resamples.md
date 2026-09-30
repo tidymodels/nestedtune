@@ -80,7 +80,12 @@ is found from the class of its splits as well as its own class. So an
 [`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
 from such splits is refused too, and so is one with a single such split
 among valid ones. The same holds for the rset that `inside` returns for
-each outer fold, and that refusal names the fold.
+each outer fold, and that refusal names the fold. An apparent split
+beside bootstrap or permutation splits counts as part of that design
+only if its id is "Apparent", the id tune leaves out of its estimates.
+Under any other id, it counts as an
+[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
+split, so an `inside` that adds one to bootstrap splits is refused.
 
 ## Time-series designs
 

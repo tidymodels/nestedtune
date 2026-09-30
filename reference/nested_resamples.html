@@ -129,7 +129,11 @@ rsample function. The design is found from the class of its splits as well
 as its own class. So an <code>outside</code> rset rebuilt with
 <code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code> from such splits is refused too, and so is one
 with a single such split among valid ones. The same holds for the rset
-that <code>inside</code> returns for each outer fold, and that refusal names the fold.</p>
+that <code>inside</code> returns for each outer fold, and that refusal names the fold.
+An apparent split beside bootstrap or permutation splits counts as part of
+that design only if its id is "Apparent", the id tune leaves out of its
+estimates. Under any other id, it counts as an <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code>
+split, so an <code>inside</code> that adds one to bootstrap splits is refused.</p>
     </div>
     <div class="section level2">
     <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>
