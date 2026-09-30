@@ -1,6 +1,6 @@
 # M132: Refuse an inner "Apparent" split that tune drops or a race misreads
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - [x] T3: Write the AC2 tests first. If `tuner_ready()` is false, the racer tests skip. The map tests take `skip_if_no_wset_fixture()` (M101 lesson). To show that no fold of the unmarked first workflow ran, mock the fold dispatch with the `entry_refusal()` sentinel, which fails on any call.
 - [x] T4: Add the AC2 rule as a helper in `R/checks.R`. Call it at the entry of the racers in `R/nested-tune-race.R`. Also call it in the pre-loop of `nested_workflow_map()` (`R/nested-workflow-map.R:191`), for each workflow that routes to a racer.
 - [x] T5: Write the AC3 tests first. Then apply the AC1 rule in `nested_final_fit()` to the rset that `eval_inside_spec()` returns (`R/nested-final-fit.R:424`). For a racer result alone, also apply the AC2 rule.
-- [ ] T6: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40` and the "Nested designs" section at `R/nested-tune-grid.R:115`. Add text for the racers alone in `R/nested-tune-race.R`. Add the final fit's check to its "What is refused" section (`R/nested-final-fit.R:98`). Add the NEWS bullet and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
+- [x] T6: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40` and the "Nested designs" section at `R/nested-tune-grid.R:115`. Add text for the racers alone in `R/nested-tune-race.R`. Add the final fit's check to its "What is refused" section (`R/nested-final-fit.R:98`). Add the NEWS bullet and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -62,6 +62,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - 2026-09-29: T5 done. The full suite on the checkpoint tree gave 0 failures, and the plain prose sweep is clean.
 - 2026-09-29: checkpoint, T6 not yet ticked. The README paragraph, `?nested_resamples`, the "Nested designs" section of `?nested_tune_grid`, the racers' details, the "What is refused" section of `?nested_final_fit`, NEWS and the DESIGN convention bullet state the rules. Both prose sweeps are clean. The full suite and `devtools::check()` were still running at this commit.
 - 2026-09-29: claim audit: 48 claims read, 4 corrected. R/checks.R, R/nested-final-fit.R. `check_final_inner()` accepted v-fold splits beside an apparent split under the id "Apparent", which the entry check refuses. `misread_apparent_rows()` now accepts that id only on an apparent split that joins a bootstrap design, and a new final-fit case failed before the fix and passes after it. Two comments assumed an entry check ran first, and the final fit's help said the entry checks "refuse both". The earlier suite run was stopped, because its code changed.
+- 2026-09-30: T6 done. The full suite at `e0b1f1a6` failed only in `test-sweep-prose.R`. The `--roxygen` sweep found two sentences over 30 words in the final fit's help. After the split, all three sweep modes are clean and that test passes. `devtools::check()` at `e0b1f1a6` gave 0 errors, 0 warnings and 0 notes. Status set to review.
 
 ## Decisions
 
