@@ -3,8 +3,10 @@
 * An apparent split beside bootstrap or permutation splits now needs the id
   "Apparent" to count as part of that design. tune leaves a split with that id
   out of its estimates. Under any other id, tune scores the split on the rows
-  it trained on. So an inner design rebuilt with `rsample::manual_rset()` from
-  bootstrap splits and such a split is refused as an `apparent()` design. The
+  it trained on. So an inner bootstrap design whose apparent split carries
+  another id is refused as an `apparent()` design. This holds whether the id
+  was changed in place or the design was rebuilt with `rsample::manual_rset()`.
+  The
   error says that a bootstrap keeps its apparent split only under the id
   "Apparent". In the outer loop, the error now names that
   split as an `apparent()` row. Before, the inner design ran and tune averaged
