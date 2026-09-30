@@ -2015,6 +2015,18 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-100 stands, with its site list corrected. The entry check `check_nested()` applies the first rule, and the two racers apply the race rule at their entry after it. The final fit's rebuilt design gets the first rule. If the recorded tuner is a racer, it also gets the race rule. `nested_resamples()` applies the first rule alone. The map pre-loop applies the race rule alone, and each workflow's entry check applies the first rule before any of its folds runs.
 **Consequences:** under `nested_workflow_map()`, a design broken by the first rule is refused by the first workflow's entry check, so its message names that workflow.
 
+### D-102 (2026-09-30): the inner loop refuses a missing id and a repeated id tuple, and the final fit's rebuilt inner design gets the entry check's design rules. Extends D-047 to the inner loop and D-101's final-fit clause
+
+**Context:** tune 2.1.0 leaves a split whose `id` is NA out of its estimate and adds an empty metric row. It miscounts the resamples of a design whose id tuples repeat. The inner loop refused neither, and D-047 refuses missing and repeated labels for the outer folds only. M132's review found that the final fit's rebuilt inner design gets only the two "Apparent" rules of D-101. So an `inside` of `apparent()` is told to rename its split, which fixes nothing.
+**Decision:** `check_nested()`, `nested_resamples()` and the final fit's rebuilt design refuse an inner split whose `id`, read with `as.character()`, is NA. They also refuse an inner design in which two splits carry the same values in every id column. Both use class `nestedtune_bad_design`. The rebuilt design also gets the refusals of D-096, D-097 and D-099, before the id rules and the "Apparent" rules. Rejected: refusing a missing value in `id2` to `id9`, as D-047 does for the outer folds, because tune reads such a design correctly.
+**Consequences:** an inner design with a missing `id2` still runs. Falsified by a tune release that keeps a split with a missing id, or that reads `id2` to filter or pair resamples.
+
+### D-103 (2026-09-30): both loops refuse a split whose analysis and assessment sets share a row. Narrows D-097's Consequences clause on `make_splits()` rebuilds
+
+**Context:** D-097 left a split rebuilt with `rsample::make_splits()` unrecognized, because it carries no trace of its design. An outer `manual_rset()` holding a rebuilt apparent split runs, and the package scores that fold on the rows it trained on, which IP1 forbids. A rebuilt outer bootstrap runs too, and its inner splits then share rows between analysis and assessment. Among the supported designs, only an apparent split shares rows.
+**Decision:** in both loops, a split whose analysis and assessment sets share a row index of the data is refused, with class `nestedtune_bad_design`. An index into an outer analysis frame counts as the data row it copies. The rule runs after the class-based refusals and before the id rules. In the inner loop outside the racers, an `apparent_split` whose id is "Apparent" beside bootstrap splits is exempt, because tune leaves it out (D-100). Rejected: recognizing a rebuilt split's design, since nothing in the split names it. Rejected: fixing only the message a rebuilt apparent split gets, which leaves the outer leak open.
+**Consequences:** a rebuilt design stays unrecognized as its design, but it can no longer score a fold on rows it trained on. Falsified by a supported rsample design whose splits share rows by design, other than the bootstrap's apparent split.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
