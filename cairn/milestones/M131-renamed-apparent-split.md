@@ -1,6 +1,6 @@
 # M131: Keep a renamed apparent split out of a bootstrap design
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -43,7 +43,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 
 - [x] T1: Tests first, in `tests/testthat/test-design-support.R`. Build the designs with `rsample::manual_rset()` directly, because `rebuilt()` (line 326) keeps the original ids. Use `entry_refusal()` (line 163) for the `nested_tune_grid()` cases. Expect AC1's seven refusals and AC3's "A" cases to fail on the current code. Expect AC1's v-fold control, AC2 and AC3's "Apparent" case to pass today, as guards.
 - [x] T2: Change `split_designs()` (`R/checks.R:458`). For an apparent split, compare `as.character()` of its row's id with "Apparent", the comparison tune makes. The host rule takes the split on a match alone, and an NA id is no match. If `x` has no id column of the same length as its splits, no apparent split joins the host. Add the hint to the inner refusals in `check_inner_refused()` (`R/checks.R:599`) and `inner_resamples_from_split()` (`R/nested-resamples.R:248`). Add it only for an element whose apparent split has bootstrap splits beside it. Hand the text to cli as a value. Update the comments at `R/checks.R:479`.
-- [ ] T3: Documentation and checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change the help at `R/nested-tune-grid.R:128` and `R/nested-resamples.R:40`, add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
+- [x] T3: Documentation and checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change the help at `R/nested-tune-grid.R:128` and `R/nested-resamples.R:40`, add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -60,6 +60,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: the full suite passed on the T2 code (1157 test blocks, 0 failures), so T2 is ticked. `devtools::document()` rewrote six Rd files, `devtools::build_readme()` changed only the Refused paragraph, and both prose sweeps are clean. `devtools::check()` and a final suite run are in progress.
 - 2026-09-29: claim audit: 41 claims read, 1 corrected — NEWS.md
 - 2026-09-29: the corrected NEWS claim now covers a bootstraps rset renamed in place as well as a `manual_rset()` rebuild. It went back to the same reader for its one re-read, which found it true and asked only for the paragraph to be rewrapped.
+- 2026-09-29: at `b38c5400`, `devtools::check()` gave 0 errors, 0 warnings and 0 notes, and `devtools::test()` gave 1157 test blocks with 0 failures. Only the NEWS bullet's text changed after that. T3 is ticked, and the status is review.
 
 ## Decisions
 
