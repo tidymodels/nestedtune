@@ -66,6 +66,7 @@ Tuning runs on an inner design only where tune and finetune read each of its spl
 - 2026-09-30: review checkpoint. AC1-AC4 evidence recorded and ticked, and `devtools::check()` for AC5 still running at this commit.
 - 2026-09-30: pre-gate checkpoint. AC5 and the consistency gate are recorded and green. Thirteen reviewer findings are logged, and none shows a criterion failing.
 - 2026-09-30: gate fixes checkpoint. F1-F5 are fixed, D-101 is added and F6-F8 are one candidate row. The two changed test files pass and all six sweeps are clean. The full suite on this tree was still running at this commit.
+- step-7 approval: m132-apparent-id-inner approved for merge
 
 ## Decisions
 
