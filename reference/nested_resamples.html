@@ -141,6 +141,16 @@ An <code>inside</code> that gives a split with a missing <code>id</code> is refu
 because tune leaves that split out of its estimates. So is an <code>inside</code>
 that gives two splits the same values in every id column, because tune
 then miscounts the resamples.</p>
+<p>An <code>outside</code> split whose assessment set holds a row of its analysis set
+is refused. Such a fold scores the model on rows it trained on. The rule
+reads the rows, so it also catches a split rebuilt with
+<code><a href="https://rsample.tidymodels.org/reference/make_splits.html" class="external-link">rsample::make_splits()</a></code>, which keeps no class that names its design. An
+<code>inside</code> that gives such a split is refused too, and the refusal names
+the outer fold and the split. There, each index into the fold's analysis
+set counts as the data row it copies. So if the outer split repeats a
+row, an inner split that puts one copy in each set is refused. The
+apparent split of a bootstrap under the id "Apparent" is exempt from this
+rule, because tune leaves it out of its estimates.</p>
     </div>
     <div class="section level2">
     <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>
@@ -175,6 +185,11 @@ nine pairs. Each pair is tested to give the same splits as
 <code><a href="nested_final_fit.html">nested_final_fit()</a></code>, <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>, <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>
 and the other four tuners are not tested on these pairs. Any other inner
 design is not tested.</p>
+<p>Every test above that uses <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> leaves <code>lag</code> at
+its default of 0. A <code>lag</code> above 0 is refused as an <code>outside</code> and as an
+<code>inside</code>, because each assessment set then holds the last <code>lag</code> rows of
+its analysis set. Use <code>lag = 0</code>, and build the lagged predictors before
+resampling.</p>
     </div>
     <div class="section level2">
     <h2 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h2>

@@ -187,16 +187,18 @@ the recorded inner specification. It is refused with class
 [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
 or
 [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
-design, found as the entry checks find one. It is also refused if it
-holds a split with a missing `id`, or two splits with the same values in
-every id column. tune leaves every split with the id "Apparent" out of
-its estimates. So the design is also refused if it holds such a split
-that is not the apparent split of a bootstrap. For a race it is also
-refused if it holds an apparent split, since the race eliminates
-candidates on that split's score. The entry checks of the other
-functions refuse each rule where it applies. So this refusal reaches a
-record made before those checks, or an inner specification that labels
-the whole data differently.
+design, found as the entry checks find one. It is also refused if a
+split's assessment set holds a row of its analysis set, unless that
+split is the apparent split of a bootstrap under the id "Apparent". It
+is also refused if it holds a split with a missing `id`, or two splits
+with the same values in every id column. tune leaves every split with
+the id "Apparent" out of its estimates. So the design is also refused if
+it holds such a split that is not the apparent split of a bootstrap. For
+a race it is also refused if it holds an apparent split, since the race
+eliminates candidates on that split's score. The entry checks of the
+other functions refuse each rule where it applies. So this refusal
+reaches a record made before those checks, or an inner specification
+that labels the whole data differently.
 
 ## What to report
 

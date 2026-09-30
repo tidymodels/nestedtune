@@ -94,6 +94,18 @@ because tune leaves that split out of its estimates. So is an `inside`
 that gives two splits the same values in every id column, because tune
 then miscounts the resamples.
 
+An `outside` split whose assessment set holds a row of its analysis set
+is refused. Such a fold scores the model on rows it trained on. The rule
+reads the rows, so it also catches a split rebuilt with
+[`rsample::make_splits()`](https://rsample.tidymodels.org/reference/make_splits.html),
+which keeps no class that names its design. An `inside` that gives such
+a split is refused too, and the refusal names the outer fold and the
+split. There, each index into the fold's analysis set counts as the data
+row it copies. So if the outer split repeats a row, an inner split that
+puts one copy in each set is refused. The apparent split of a bootstrap
+under the id "Apparent" is exempt from this rule, because tune leaves it
+out of its estimates.
+
 ## Time-series designs
 
 An outer
@@ -166,6 +178,13 @@ and each is tested under
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
 and the other four tuners are not tested on these pairs. Any other inner
 design is not tested.
+
+Every test above that uses
+[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+leaves `lag` at its default of 0. A `lag` above 0 is refused as an
+`outside` and as an `inside`, because each assessment set then holds the
+last `lag` rows of its analysis set. Use `lag = 0`, and build the lagged
+predictors before resampling.
 
 ## Memory
 
