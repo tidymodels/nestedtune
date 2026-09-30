@@ -741,9 +741,6 @@ test_that("an error raised by last_fit() is recorded against the outer fit", {
 
 test_that("an error while finalizing is this fold's failure, not the run's", {
   skip_if_no_engines()
-  # Mocking a binding in another package needs testthat 3.2.0; the declared
-  # floor is lower, so this skips rather than raising it for one test.
-  skip_if_not_installed("testthat", "3.2.0")
   d <- make_reg_data()
 
   # finalize_workflow() sits between selection and the fit. Nothing reachable
