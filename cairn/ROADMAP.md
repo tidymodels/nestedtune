@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-29 (M131 archived, M128 row pruned, one known issue added, validate green)._
+_Last hygiene check: 2026-09-30 (M132 archived, M129 row pruned, D-101 added, validate green)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M132 | Refuse an inner "Apparent" split that tune drops or a race misreads | review | — | normal | milestones/M132-apparent-id-inner.md |
+| M132 | Refuse an inner "Apparent" split that tune drops or a race misreads | done | — | normal | milestones/archive/M132-apparent-id-inner.md |
 | M131 | Keep a renamed apparent split out of a bootstrap design | done | — | normal | milestones/archive/M131-renamed-apparent-split.md |
 | M130 | Raise the testthat minimum to 3.3.0 | done | — | low | milestones/archive/M130-testthat-floor.md |
-| M129 | Recognize a refused design by its split classes | done | — | high | milestones/archive/M129-refuse-design-by-split-class.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
