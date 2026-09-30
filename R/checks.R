@@ -382,6 +382,7 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
   check_inner_refused(resamples, call = call)
+  check_inner_ids(resamples, call = call)
   check_inner_apparent_ids(resamples, call = call)
   # Next the two class checks, which judge each element of the list columns;
   # the checks above judge the whole object or read only element classes.
@@ -531,10 +532,9 @@ apparent_id_hint <- paste(
 # estimates, so a fold tuning on `x` would use fewer resamples than it holds,
 # and nothing would say so (M132, D-100). Only a bootstrap's own apparent
 # split carries the id on purpose, and split_designs() names that split's
-# design as its bootstrap. The rule stands alone: at entry an apparent split
-# beside no bootstrap splits is refused as apparent() first, but the final
-# fit's rebuilt design gets no such check. Class inspection only, like
-# split_designs().
+# design as its bootstrap. The rule stands alone, although at entry and in
+# the final fit an apparent split beside no bootstrap splits is refused as
+# apparent() first (M133). Class inspection only, like split_designs().
 misread_apparent_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   if (!is.list(splits)) {
@@ -550,6 +550,128 @@ apparent_id_reason <- paste(
   "each outer fold that tunes on it would use fewer resamples than its",
   "design holds. Give the split another id."
 )
+
+# The rows of `x` whose `id` is missing. tune 2.1.0 keeps the rows whose id
+# is not "Apparent" (tune:::estimate_tune_results()), and that comparison
+# gives NA for a missing id, so the split drops out of its estimate and an
+# empty metric row joins it (M133, D-102). A factor whose NA is a level
+# answers FALSE to is.na(), the comparison gives TRUE, and tune keeps the
+# split, so it is not refused (D-105). Only `id` is read: tune filters on no
+# other id column. Class inspection only, like split_designs().
+missing_id_rows <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  ids <- if (is.data.frame(x)) x[["id"]]
+  if (!is.list(splits) || !is.atomic(ids) || length(ids) != length(splits)) {
+    return(integer())
+  }
+  which(is.na(ids))
+}
+
+# The rows of `x` that share their values in every id column with another
+# row, read as labels. tune miscounts the resamples of such a design (M133,
+# D-102). A repeated design's `id` repeats across `id2`, so only the whole
+# set of id columns tells its splits apart. Two missing values compare equal,
+# as tune treats them when it assembles its results: two NA `id2` values
+# under one `id` gave 8 result rows for 6 splits (probed at M133). A factor's
+# NA level reads as missing here too. A row whose `id` is NA is left to
+# missing_id_rows().
+repeated_id_rows <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  if (!is.list(splits)) {
+    return(integer())
+  }
+  cols <- names(x)[is_id_name(names(x))]
+  labels <- lapply(cols, function(col) x[[col]])
+  fits <- vapply(
+    labels,
+    function(v) is.atomic(v) && length(v) == length(splits),
+    logical(1)
+  )
+  if (length(cols) == 0L || !all(fits)) {
+    return(integer())
+  }
+  values <- lapply(labels, as.character)
+  names(values) <- cols
+  repeated <- vctrs::vec_duplicate_detect(vctrs::new_data_frame(values))
+  repeated[seq_along(splits) %in% missing_id_rows(x)] <- FALSE
+  which(repeated)
+}
+
+# Why each id rule refuses, and what it costs where the design is tuned: each
+# outer fold at entry, or the one tuning run of the final fit (M133).
+id_rule_reason <- function(rule, final = FALSE) {
+  if (identical(rule, "apparent") && !final) {
+    return(apparent_id_reason)
+  }
+  what <- switch(
+    rule,
+    missing = "tune leaves a split with a missing id out of its estimates,",
+    repeated = "tune miscounts the resamples of a design whose ids repeat,",
+    apparent = paste(
+      'tune leaves every split whose id is "Apparent" out of its',
+      "estimates,"
+    )
+  )
+  cost <- if (final) {
+    "so the final fit would tune on"
+  } else {
+    "so each outer fold that tunes on it would use"
+  }
+  count <- switch(
+    rule,
+    repeated = "the wrong number of resamples.",
+    "fewer resamples than its design holds."
+  )
+  fix <- switch(
+    rule,
+    missing = "Give every split an id.",
+    repeated = "Give every split its own ids.",
+    apparent = "Give the split another id."
+  )
+  paste(what, cost, count, fix)
+}
+
+# Every inner element holding a split with a missing id, and then every one
+# holding splits whose ids repeat, each named in one message (M133, D-102).
+check_inner_ids <- function(resamples, call = rlang::caller_env()) {
+  inner <- resamples[["inner_resamples"]]
+  if (!is.list(inner)) {
+    return(invisible(resamples))
+  }
+  rules <- list(
+    missing = list(
+      rows = missing_id_rows,
+      header = "{.arg resamples} has an inner split with a missing id.",
+      holds = "a split whose {.field id} is missing."
+    ),
+    repeated = list(
+      rows = repeated_id_rows,
+      header = "{.arg resamples} has an inner design whose ids repeat.",
+      holds = "splits that carry the same ids."
+    )
+  )
+  for (rule in names(rules)) {
+    spec <- rules[[rule]]
+    hit <- which(lengths(lapply(inner, spec$rows)) > 0L)
+    if (length(hit) == 0L) {
+      next
+    }
+    n <- length(hit)
+    reason <- id_rule_reason(rule)
+    where <- cli::format_inline(paste(
+      "{cli::qty(n)}Element{?s} {hit} of {.field inner_resamples}",
+      "{cli::qty(n)}{?holds/hold}",
+      spec$holds
+    ))
+    # Handed over as values, so cli does not parse the text again.
+    cli::cli_abort(
+      c(spec$header, x = "{where}", i = "{reason}"),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  invisible(resamples)
+}
 
 # The two racers. finetune 1.3.0 eliminates race candidates on
 # `tune::collect_metrics(summarize = FALSE)` (test_parameters_gls() and
@@ -601,17 +723,63 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
   )
 }
 
-# The two "Apparent" rules on the one inner rset `nested_final_fit()` rebuilds
-# on the whole data (M132, D-100). No entry check reads it: it comes from the
+# The entry check's design rules, id rules and "Apparent" rules on the one
+# inner rset `nested_final_fit()` rebuilds on the whole data (M132, D-100;
+# M133, D-102). No entry check reads it: it comes from the
 # recorded `inside`, which a record made before the rules, or an `inside`
 # that labels the whole data differently, can turn into such a design.
 check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
+  # The entry check's rules, in its order (M133, D-102): the refused designs
+  # and the rule on an apparent split beside bootstrap splits, then the two id
+  # rules, then the two "Apparent" rules. No reason names an outer fold, since
+  # the rebuilt design belongs to none: a design refused by its rset class
+  # and each id rule speak of the final fit's one tuning run, and a design
+  # found by its split classes gets its own flaw, as at entry.
+  refused <- inner_refused_design(inner)
+  if (!is.na(refused)) {
+    hint <- if (renamed_apparent(inner, refused)) {
+      c(i = "{apparent_id_hint}")
+    }
+    reason <- inner_refused_reason(inner, refused, final = TRUE)
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave \\
+         {.fn rsample::{refused}} splits.",
+        x = reason,
+        hint
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (length(missing_id_rows(inner)) > 0L) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave a split with a \\
+         missing id.",
+        x = "{id_rule_reason('missing', final = TRUE)}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (length(repeated_id_rows(inner)) > 0L) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave splits whose ids \\
+         repeat.",
+        x = "{id_rule_reason('repeated', final = TRUE)}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
   if (length(misread_apparent_rows(inner)) > 0L) {
     cli::cli_abort(
       c(
         "The design's inner resampling specification gave a split under the \\
          id {.val Apparent} that is not the apparent split of a bootstrap.",
-        x = "{apparent_id_reason}"
+        x = "{id_rule_reason('apparent', final = TRUE)}"
       ),
       class = "nestedtune_bad_design",
       call = call
@@ -672,8 +840,14 @@ inner_refused_design <- function(x) {
 # their rset class alone, so a design found by its split classes would run in
 # tune. For such a design the reason is the design's own flaw, which is the
 # one the outer loop gives.
-inner_refused_reason <- function(x, design) {
-  role <- if (is.na(refused_design(x))) "outer" else "inner"
+inner_refused_reason <- function(x, design, final = FALSE) {
+  role <- if (is.na(refused_design(x))) {
+    "outer"
+  } else if (final) {
+    "final"
+  } else {
+    "inner"
+  }
   refused_design_reason(design, role)
 }
 
@@ -754,6 +928,19 @@ refused_design_reason <- function(design, role) {
     "inner permutations" = paste(
       "tune refuses {.fn rsample::permutations} as a tuning design, so each",
       "outer fold that tunes on it would fail."
+    ),
+    # The design nested_final_fit() rebuilds on the whole data (M133).
+    "final loo_cv" = paste(
+      "tune refuses {.fn rsample::loo_cv} as a tuning design, so the final",
+      "fit would fail."
+    ),
+    "final apparent" = paste(
+      "tune reports no results for {.fn rsample::apparent}, so the final fit",
+      "would fail."
+    ),
+    "final permutations" = paste(
+      "tune refuses {.fn rsample::permutations} as a tuning design, so the",
+      "final fit would fail."
     )
   )
 }
@@ -816,8 +1003,10 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
 # The names under which rsample's and tune's readers find a design's id
 # columns: both packages' col_starts_with_id() is grepl() on this pattern
 # (rsample 1.3.2, tune 2.1.0), so a label column named outside it is one
-# tune's own summaries would ignore. Used by the entry check alone; the
-# results class reads its labels from the record D-036 fixed, never by name.
+# tune's own summaries would ignore. Used by the entry check and by the
+# inner repeated-id rule, which `nested_resamples()` and the final fit also
+# run; the results class reads its labels from the record D-036 fixed, never
+# by name.
 is_id_name <- function(x) {
   grepl("(^id$)|(^id[1-9]$)", x)
 }

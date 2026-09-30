@@ -54,6 +54,10 @@
 #' tune leaves every inner split with the id "Apparent" out of its
 #' estimates, whatever the split's class. So an `inside` that gives any other
 #' split that id is refused too, and the refusal names the outer fold.
+#' An `inside` that gives a split with a missing `id` is refused as well,
+#' because tune leaves that split out of its estimates. So is an `inside`
+#' that gives two splits the same values in every id column, because tune
+#' then miscounts the resamples.
 #'
 #' @section Time-series designs:
 #'
@@ -266,6 +270,27 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
     }
     cli::cli_abort(
       c(headline, x = inner_refused_reason(inner_rset, refused), hint),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  # The two id rules of check_inner_ids(), for this one fold (M133, D-102).
+  if (length(missing_id_rows(inner_rset)) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave a split with a missing id for outer fold {fold}.",
+        x = "{id_rule_reason('missing')}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (length(repeated_id_rows(inner_rset)) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave splits whose ids repeat for outer fold {fold}.",
+        x = "{id_rule_reason('repeated')}"
+      ),
       class = "nestedtune_bad_design",
       call = call
     )

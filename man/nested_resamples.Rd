@@ -66,6 +66,10 @@ split, so an \code{inside} that adds one to bootstrap splits is refused.
 tune leaves every inner split with the id "Apparent" out of its
 estimates, whatever the split's class. So an \code{inside} that gives any other
 split that id is refused too, and the refusal names the outer fold.
+An \code{inside} that gives a split with a missing \code{id} is refused as well,
+because tune leaves that split out of its estimates. So is an \code{inside}
+that gives two splits the same values in every id column, because tune
+then miscounts the resamples.
 }
 
 \section{Time-series designs}{

@@ -4,7 +4,7 @@ _Last hygiene check: 2026-09-30 (M132 archived, M129 row pruned, D-101 added, va
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M133 | Refuse inner ids that tune misreads, at entry and at the final fit | planned | — | normal | milestones/M133-inner-id-rules.md |
+| M133 | Refuse inner ids that tune misreads, at entry and at the final fit | review | — | normal | milestones/M133-inner-id-rules.md |
 | M134 | Refuse a split that assesses rows it trains on | planned | M133 | normal | milestones/M134-overlapping-splits.md |
 | M132 | Refuse an inner "Apparent" split that tune drops or a race misreads | done | — | normal | milestones/archive/M132-apparent-id-inner.md |
 | M131 | Keep a renamed apparent split out of a bootstrap design | done | — | normal | milestones/archive/M131-renamed-apparent-split.md |

@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* An inner split whose `id` is missing is now refused, and so is an inner
+  design in which two splits carry the same values in every id column. tune
+  leaves the first split out of its estimates, and it miscounts the
+  resamples of the second design. `nested_final_fit()` now applies these
+  rules to the inner design it rebuilds on all the data. It also refuses
+  `loo_cv()`, `apparent()` and `permutations()` designs there, where before
+  it told an `apparent()` design to rename its split. Each refusal has
+  class `nestedtune_bad_design`.
+
 * An inner split with the id "Apparent" is now refused unless it is the
   apparent split of a bootstrap design. tune leaves every split with that id
   out of its estimates, so before, such a fold tuned on fewer resamples than

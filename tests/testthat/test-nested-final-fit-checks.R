@@ -442,28 +442,166 @@ test_that("the final fit refuses an inner split relabelled Apparent", {
     folds$id[[1]] <- "Apparent"
     folds
   }
+  attr(res, "inside") <- quote(relabelled_vfold())
+  cnd <- expect_error(
+    nested_final_fit(wf, res),
+    class = "nestedtune_bad_design"
+  )
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(
+    msg,
+    "tune leaves every split whose id is \"Apparent\" out",
+    fixed = TRUE
+  )
+  expect_no_match(msg, "outer fold", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+})
+
+# The rebuilt design also gets the entry check's design refusals and its two
+# id rules, in the entry check's order: the refused designs first, then the
+# id rules, then the "Apparent" rules (M133, D-102). The messages never name
+# an outer fold.
+# The builders `inside` calls, at file level: the final fit evaluates
+# `inside` in the frame that calls it, which is expect_final_refused()'s.
+loo_splits <- function(data) {
+  rsample::manual_rset(
+    rsample::loo_cv(data)$splits,
+    paste0("Split", seq_len(nrow(data)))
+  )
+}
+permutation_splits <- function(data) {
+  perms <- rsample::permutations(data, permute = y, times = 3, apparent = TRUE)
+  rsample::manual_rset(perms$splits, perms$id)
+}
+renamed_bootstraps <- function(data) {
+  boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
+  rsample::manual_rset(boots$splits, c(paste0("Bootstrap", 1:3), "Whole"))
+}
+missing_id_vfold <- function(data) {
+  folds <- rsample::vfold_cv(data, v = 3)
+  folds$id[[1]] <- NA
+  folds
+}
+repeated_id_vfold <- function(data) {
+  folds <- rsample::vfold_cv(data, v = 3)
+  folds$id[[2]] <- folds$id[[1]]
+  folds
+}
+vfold_apparent <- function(data) {
+  rsample::manual_rset(
+    c(rsample::vfold_cv(data, v = 3)$splits, rsample::apparent(data)$splits),
+    c(paste0("Fold", 1:3), "Apparent")
+  )
+}
+
+# Each reason is text found in the message's bullets and not in its
+# headline, which already names the design or the id flaw, so matching the
+# headline alone would pass with the bullets gone.
+FINAL_REFUSED <- list(
+  "loo_cv()" = list(
+    inside = quote(rsample::loo_cv()),
+    reason = "tune refuses `rsample::loo_cv()` as a tuning design, so the final fit would fail."
+  ),
+  "apparent()" = list(
+    inside = quote(rsample::apparent()),
+    reason = "tune reports no results for `rsample::apparent()`, so the final fit would fail."
+  ),
+  "permutations()" = list(
+    inside = quote(
+      rsample::permutations(permute = y, times = 3, apparent = TRUE)
+    ),
+    reason = "tune refuses `rsample::permutations()` as a tuning design, so the final fit would fail."
+  ),
+  # A design found by its split classes gets its own flaw, as at entry.
+  "loo_cv() splits" = list(
+    inside = quote(loo_splits()),
+    reason = "`rsample::loo_cv()` holds out one row per fold"
+  ),
+  "permutations() splits" = list(
+    inside = quote(permutation_splits()),
+    reason = "`rsample::permutations()` gives each fold no assessment set."
+  ),
+  "renamed bootstrap apparent split" = list(
+    inside = quote(renamed_bootstraps()),
+    reason = c(
+      "`rsample::apparent()` scores its one fold on the rows it trained on.",
+      "tune leaves out an apparent split whose id is \"Apparent\""
+    )
+  ),
+  "missing id" = list(
+    inside = quote(missing_id_vfold()),
+    reason = "tune leaves a split with a missing id out of its estimates"
+  ),
+  "repeated id" = list(
+    inside = quote(repeated_id_vfold()),
+    reason = "tune miscounts the resamples of a design whose ids repeat"
+  ),
   # An apparent split beside v-fold splits alone, which the entry check
-  # refuses as apparent() and nothing else reads in the final fit.
-  vfold_apparent <- function(data) {
-    rsample::manual_rset(
-      c(rsample::vfold_cv(data, v = 3)$splits, rsample::apparent(data)$splits),
-      c(paste0("Fold", 1:3), "Apparent")
-    )
+  # refuses as apparent(). Before M133 the final fit told it to rename.
+  "apparent split beside v-fold splits" = list(
+    inside = quote(vfold_apparent()),
+    reason = "`rsample::apparent()` scores its one fold on the rows it trained on."
+  )
+)
+
+expect_final_refused <- function(wf, res, case) {
+  attr(res, "inside") <- case$inside
+  cnd <- expect_error(
+    nested_final_fit(wf, res),
+    class = "nestedtune_bad_design"
+  )
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  for (reason in case$reason) {
+    expect_match(msg, reason, fixed = TRUE)
   }
-  for (inside in list(quote(relabelled_vfold()), quote(vfold_apparent()))) {
-    attr(res, "inside") <- inside
-    cnd <- expect_error(
-      nested_final_fit(wf, res),
-      class = "nestedtune_bad_design"
-    )
-    msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
-    expect_match(
-      msg,
-      "tune leaves every split whose id is \"Apparent\" out",
-      fixed = TRUE
-    )
-    expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
-  }
+  expect_no_match(msg, "outer fold", fixed = TRUE)
+  expect_no_match(msg, "Give the split another id", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+  msg
+}
+
+# One block per case, so a failure names the case it came from.
+for (name in names(FINAL_REFUSED)) {
+  test_that(paste0("the final fit refuses the inner case: ", name), {
+    skip_if_no_engines()
+
+    d <- make_reg_data()
+    wf <- det_workflow(d)
+    res <- final_results(d)
+    expect_final_refused(wf, res, FINAL_REFUSED[[name]])
+  })
+}
+
+# tune keeps a split whose factor id has NA as a level, so the final fit
+# tunes on such a design (D-105).
+na_level_vfold <- function(data) {
+  folds <- rsample::vfold_cv(data, v = 3)
+  ids <- as.character(folds$id)
+  ids[[1]] <- NA
+  folds$id <- addNA(factor(ids))
+  folds
+}
+
+test_that("the final fit tunes on an inner id whose NA is a factor level", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  res <- final_results(d)
+  attr(res, "inside") <- quote(na_level_vfold())
+  fit <- nested_final_fit(wf, res)
+  expect_s3_class(fit, "nested_final_fit")
+})
+
+test_that("the final fit of a race refuses permutations as permutations", {
+  skip_if_no_race_fixture("tune_race_anova")
+
+  d <- make_reg_data()
+  res <- race_final_results("tune_race_anova", d)
+  set.seed(27)
+  wf <- det_workflow(d)
+  msg <- expect_final_refused(wf, res, FINAL_REFUSED[["permutations()"]])
+  expect_no_match(msg, "eliminates candidates on the score", fixed = TRUE)
 })
 
 test_that("the final fit of a race refuses a bootstrap's apparent split", {
