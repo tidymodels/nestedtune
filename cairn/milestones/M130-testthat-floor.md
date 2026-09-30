@@ -70,6 +70,8 @@ Why 3.3.0: testthat 3.2.2 errors on a `skip()` called outside a test (r-lib/test
 - 2026-09-29: T5 with the installed testthat 3.3.2: `devtools::test()` failed 0 and passed 13508, and `devtools::check()` returned 0 errors, 0 warnings and 0 notes. No roxygen, `R/` or prose file changed, so the verify slot's other steps do not apply.
 - 2026-09-29: claim audit: 1 claims read, 0 corrected (`DESCRIPTION`). The fresh [O] reader found the 3.3.0 floor holds, and noted that 3.3.0 is the lowest release run here and not a proven minimum, as D-098 already states.
 - 2026-09-29: all tasks done, status set to review.
+- 2026-09-29: /milestone-review ran AC1 to AC4 again and passed each one. Three reviewers found one fix-now item (O1), and it is fixed on the branch.
+- 2026-09-29: step-7 approval: m130-testthat-floor approved for merge
 
 ## Decisions
 
@@ -94,4 +96,5 @@ Independent review: three fresh reviewers ([O] diff-bug, [S] blame-history, [S] 
 - S3, S4, S5: history supports the change. The CI-at-the-floor candidate row stays open by D-098's choice. The criteria were unticked before review by design. Proposed: noted.
 - P1: early work-log lines still say the plan gate chose a 3.2.3 floor. Later lines supersede them, and the work log is append-only. Proposed: reject.
 - P2: the reworded CI candidate row agrees with M118 O7's triage. Proposed: noted.
+- Gate triage, 2026-09-29: the user took every proposed disposition. O1 was fixed on the branch. The comment and the skip were removed, and the file then ran 25 tests with 0 failed.
 - The prior-review lens found no finding tied to an earlier review. Its GitHub probe found human comments only on PR #30, none about the testthat floor.
