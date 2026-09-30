@@ -477,17 +477,52 @@ split_designs <- function(x) {
     USE.NAMES = FALSE
   )
   # bootstraps(), group_bootstraps() and permutations() add an apparent split
-  # as an option, so beside their splits it belongs to that design, not to
-  # apparent().
+  # as an option, under the id "Apparent". Beside their splits, an apparent
+  # split with that id belongs to that design, not to apparent(). Under any
+  # other id tune scores it on the rows it trained on, so it stays apparent()
+  # (D-099).
   host <- intersect(
     c("group_bootstraps", "bootstraps", "permutations"),
     found
   )
   if (length(host) > 0L) {
-    found[found %in% "apparent"] <- host[[1L]]
+    found[found %in% "apparent" & apparent_ids(x)] <- host[[1L]]
   }
   found
 }
+
+# Whether each row of `x` carries the id that tune leaves out of its
+# estimates. tune 2.1.0 keeps only the rows whose id is not "Apparent"
+# (tune:::estimate_tune_results()), and its comparison reads a factor by its
+# labels.
+# An NA id is no match, and an id column that is missing or not one value per
+# split marks no row.
+apparent_ids <- function(x) {
+  n <- length(x[["splits"]])
+  ids <- x[["id"]]
+  if (!is.atomic(ids) || length(ids) != n) {
+    return(rep(FALSE, n))
+  }
+  as.character(ids) %in% "Apparent"
+}
+
+# Whether `x` holds an apparent split that its id alone keeps apart from the
+# bootstrap splits beside it, which the inner refusal then says how to keep.
+# Only a refusal that names apparent() as `design` gets the hint, so it never
+# follows a bullet naming another design.
+renamed_apparent <- function(x, design) {
+  if (!identical(design, "apparent")) {
+    return(FALSE)
+  }
+  found <- split_designs(x)
+  any(found %in% "apparent") &&
+    any(found %in% c("bootstraps", "group_bootstraps"))
+}
+
+apparent_id_hint <- paste(
+  'tune leaves out an apparent split whose id is "Apparent", so a bootstrap',
+  "keeps its apparent split only under that id."
+)
 
 # The design an inner rset (or anything else) carries that the inner loop
 # refuses, or NA. The rset class decides first; only if it names none are the
@@ -632,8 +667,16 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
     sprintf("{lines[[%d]]}", seq_along(lines)),
     rep("x", length(lines))
   )
+  # The hint is handed over as a value too, since it holds no cli markup.
+  hint <- if (any(mapply(renamed_apparent, inner[hit], found[hit]))) {
+    c(i = "{apparent_id_hint}")
+  }
   cli::cli_abort(
-    c("{.arg resamples} has an inner design that tuning cannot use.", bullets),
+    c(
+      "{.arg resamples} has an inner design that tuning cannot use.",
+      bullets,
+      hint
+    ),
     class = "nestedtune_bad_design",
     call = call
   )

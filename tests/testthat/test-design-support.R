@@ -698,3 +698,302 @@ test_that("nested_resamples() names the outer fold whose inner splits it refuses
   expect_no_match(conditionMessage(cnd), "cannot be an", fixed = TRUE)
   expect_no_match(conditionMessage(cnd), "tune reports", fixed = TRUE)
 })
+
+# An apparent split beside bootstrap splits joins the bootstrap only under
+# the id "Apparent", the one split tune leaves out of its estimates. Any other
+# id is scored on the rows the split trained on, so it counts as apparent()
+# (M131, D-099). Each design is built with manual_rset() directly, because
+# rebuilt() keeps the ids a design already has.
+APPARENT_HINT <- paste(
+  'tune leaves out an apparent split whose id is "Apparent", so a bootstrap',
+  "keeps its apparent split only under that id."
+)
+# Its opening words, so a message holding any part of the hint is caught.
+APPARENT_HINT_HEAD <- "tune leaves out an apparent split"
+
+# The message on one line, so a sentence that cli wrapped is matched whole.
+flat_message <- function(cnd) {
+  gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+}
+
+# The host's splits, then one apparent split whose id is `id`.
+with_apparent <- function(data, host, id) {
+  hosts <- list(
+    bootstraps = function() {
+      splits <- rsample::bootstraps(data, times = 3)$splits
+      list(splits = splits, ids = paste0("Bootstrap", 1:3))
+    },
+    group_bootstraps = function() {
+      splits <- rsample::group_bootstraps(data, group = g, times = 3)$splits
+      list(splits = splits, ids = paste0("Bootstrap", 1:3))
+    },
+    mixed = function() {
+      splits <- c(
+        rsample::vfold_cv(data, v = 2)$splits,
+        rsample::bootstraps(data, times = 2)$splits
+      )
+      list(
+        splits = splits,
+        ids = c("Fold1", "Fold2", "Bootstrap1", "Bootstrap2")
+      )
+    }
+  )
+  built <- hosts[[host]]()
+  # c() would turn a factor into its integer code, so join the labels.
+  ids <- c(built$ids, as.character(id))
+  if (is.factor(id)) {
+    ids <- factor(ids)
+  }
+  rsample::manual_rset(c(built$splits, rsample::apparent(data)$splits), ids)
+}
+
+# A bootstraps() rset whose apparent split was renamed in place keeps its
+# rset class.
+renamed_bootstraps <- function(data) {
+  boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
+  boots$id[[4]] <- "A"
+  boots
+}
+
+# The same inner design, built on each outer fold's analysis set.
+with_inner <- function(folds, build) {
+  folds$inner_resamples <- lapply(
+    folds$splits,
+    function(split) build(rsample::analysis(split))
+  )
+  folds
+}
+
+APPARENT_HOSTS <- c("bootstraps", "group_bootstraps", "mixed")
+
+test_that("an inner apparent split under another id is refused beside bootstrap splits", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  builds <- list(renamed = renamed_bootstraps)
+  for (host in APPARENT_HOSTS) {
+    for (id in c("apparent", "Bootstrap4")) {
+      builds[[paste(host, id)]] <- local({
+        host <- host
+        id <- id
+        function(data) with_apparent(data, host, id)
+      })
+    }
+  }
+  expect_length(builds, 7L)
+  expect_s3_class(renamed_bootstraps(d), "bootstraps")
+
+  for (name in names(builds)) {
+    build <- builds[[name]]
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, "apparent")
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+    expect_no_match(conditionMessage(cnd), "bootstraps()", fixed = TRUE)
+    expect_match(flat_message(cnd), APPARENT_HINT, fixed = TRUE)
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, "apparent")
+    expect_match(conditionMessage(cnd), "splits for outer fold 1", fixed = TRUE)
+    expect_no_match(conditionMessage(cnd), "bootstraps()", fixed = TRUE)
+    expect_match(flat_message(cnd), APPARENT_HINT, fixed = TRUE)
+  }
+})
+
+test_that("an inner apparent split beside v-fold splits alone gets no id hint", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  build <- function(data) {
+    rsample::manual_rset(
+      c(rsample::vfold_cv(data, v = 3)$splits, rsample::apparent(data)$splits),
+      c(paste0("Fold", 1:3), "Apparent")
+    )
+  }
+  folds <- with_inner(nested_cv_design(d, V3, V3), build)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), APPARENT_HINT_HEAD, fixed = TRUE)
+
+  cnd <- expect_error(
+    nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), APPARENT_HINT_HEAD, fixed = TRUE)
+})
+
+test_that("an inner apparent split with an NA id is refused beside bootstrap splits", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (id in list(NA_character_, factor(NA_character_))) {
+    build <- function(data) with_apparent(data, "bootstraps", id)
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    inner_id <- folds$inner_resamples[[1]]$id
+    expect_identical(is.factor(inner_id), is.factor(id))
+    expect_true(is.na(inner_id[[length(inner_id)]]))
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_names_design(cnd, "apparent")
+    expect_match(flat_message(cnd), APPARENT_HINT, fixed = TRUE)
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+      class = "nestedtune_bad_design"
+    )
+    expect_names_design(cnd, "apparent")
+    expect_match(flat_message(cnd), APPARENT_HINT, fixed = TRUE)
+  }
+})
+
+test_that("an apparent split joins no bootstrap in a table with no id column", {
+  d <- support_data(n = 30)
+  splits <- c(
+    rsample::bootstraps(d, times = 2)$splits,
+    rsample::apparent(d)$splits
+  )
+  expect_identical(
+    split_designs(tibble::tibble(splits = splits)),
+    c("bootstraps", "bootstraps", "apparent")
+  )
+  # The control: the same splits under the id "Apparent" join the bootstrap.
+  expect_identical(
+    split_designs(tibble::tibble(
+      splits = splits,
+      id = c("Bootstrap1", "Bootstrap2", "Apparent")
+    )),
+    c("bootstraps", "bootstraps", "bootstraps")
+  )
+})
+
+test_that("a refusal that names another design gets no id hint", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  # The loo_cv() split comes first, so the refusal names loo_cv(), although a
+  # renamed apparent split sits beside the bootstrap splits.
+  build <- function(data) {
+    rsample::manual_rset(
+      c(
+        rsample::loo_cv(data)$splits[1],
+        rsample::bootstraps(data, times = 2)$splits,
+        rsample::apparent(data)$splits
+      ),
+      c("Resample1", "Bootstrap1", "Bootstrap2", "A")
+    )
+  }
+  folds <- with_inner(nested_cv_design(d, V3, V3), build)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "loo_cv")
+  expect_no_match(flat_message(cnd), APPARENT_HINT_HEAD, fixed = TRUE)
+
+  cnd <- expect_error(
+    nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "loo_cv")
+  expect_no_match(flat_message(cnd), APPARENT_HINT_HEAD, fixed = TRUE)
+})
+
+test_that("an inner apparent split named Apparent still joins its bootstrap", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (host in APPARENT_HOSTS) {
+    for (id in list("Apparent", factor("Apparent"))) {
+      build <- function(data) with_apparent(data, host, id)
+      folds <- with_inner(nested_cv_design(d, V3, V3), build)
+      inner_id <- folds$inner_resamples[[1]]$id
+      expect_identical(is.factor(inner_id), is.factor(id))
+      expect_identical(as.character(inner_id[[length(inner_id)]]), "Apparent")
+      cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+      expect_s3_class(cnd, "nestedtune_sentinel")
+
+      built <- nested_resamples(
+        d,
+        outside = rsample::vfold_cv(v = 3),
+        inside = build()
+      )
+      last <- nrow(built$inner_resamples[[1]])
+      expect_s3_class(
+        built$inner_resamples[[1]]$splits[[last]],
+        "apparent_split"
+      )
+    }
+  }
+})
+
+# The outer loop refuses both designs, so only the naming is under test: each
+# bullet is matched whole, which ties the rows to the function named.
+
+test_that("an outer apparent split under another id is named as apparent()", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  set.seed(1)
+  hosts <- list(
+    bootstraps = rsample::bootstraps(d, times = 3)$splits,
+    permutations = rsample::permutations(d, permute = y, times = 3)$splits
+  )
+  outer_with <- function(host, id) {
+    rsample::manual_rset(
+      c(
+        rsample::vfold_cv(d, v = 2)$splits,
+        hosts[[host]],
+        rsample::apparent(d)$splits
+      ),
+      c("Fold1", "Fold2", paste0("Resample", 1:3), id)
+    )
+  }
+  both_entries <- function(outer) {
+    folds <- quiet_nested_cv(d, outer, V3)
+    list(
+      resamples = entry_refusal(nested_tune_grid(wf, folds, grid = det_grid())),
+      outside = expect_error(
+        nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+        class = "nestedtune_bad_design"
+      )
+    )
+  }
+
+  for (host in names(hosts)) {
+    cnds <- both_entries(outer_with(host, "A"))
+    for (arg in names(cnds)) {
+      cnd <- cnds[[arg]]
+      expect_s3_class(cnd, "nestedtune_bad_design")
+      msg <- flat_message(cnd)
+      expect_match(
+        msg,
+        sprintf("Row 6 of `%s` holds a `rsample::apparent()` split.", arg),
+        fixed = TRUE
+      )
+      expect_match(
+        msg,
+        sprintf(
+          "Rows 3, 4, and 5 of `%s` hold `rsample::%s()` splits.",
+          arg,
+          host
+        ),
+        fixed = TRUE
+      )
+    }
+  }
+
+  # Under the id "Apparent" the split cannot be told from the bootstrap's own.
+  cnds <- both_entries(outer_with("bootstraps", "Apparent"))
+  for (arg in names(cnds)) {
+    msg <- flat_message(cnds[[arg]])
+    expect_match(
+      msg,
+      sprintf(
+        "Rows 3, 4, 5, and 6 of `%s` hold `rsample::bootstraps()` splits.",
+        arg
+      ),
+      fixed = TRUE
+    )
+    expect_no_match(msg, "apparent()", fixed = TRUE)
+  }
+})

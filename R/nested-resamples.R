@@ -47,6 +47,10 @@
 #' [rsample::manual_rset()] from such splits is refused too, and so is one
 #' with a single such split among valid ones. The same holds for the rset
 #' that `inside` returns for each outer fold, and that refusal names the fold.
+#' An apparent split beside bootstrap or permutation splits counts as part of
+#' that design only if its id is "Apparent", the id tune leaves out of its
+#' estimates. Under any other id, it counts as an [rsample::apparent()]
+#' split, so an `inside` that adds one to bootstrap splits is refused.
 #'
 #' @section Time-series designs:
 #'
@@ -254,8 +258,11 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
     } else {
       "{.arg inside} cannot be an {.fn rsample::{refused}} design."
     }
+    hint <- if (renamed_apparent(inner_rset, refused)) {
+      c(i = "{apparent_id_hint}")
+    }
     cli::cli_abort(
-      c(headline, x = inner_refused_reason(inner_rset, refused)),
+      c(headline, x = inner_refused_reason(inner_rset, refused), hint),
       class = "nestedtune_bad_design",
       call = call
     )

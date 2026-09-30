@@ -59,6 +59,10 @@ as its own class. So an \code{outside} rset rebuilt with
 \code{\link[rsample:manual_rset]{rsample::manual_rset()}} from such splits is refused too, and so is one
 with a single such split among valid ones. The same holds for the rset
 that \code{inside} returns for each outer fold, and that refusal names the fold.
+An apparent split beside bootstrap or permutation splits counts as part of
+that design only if its id is "Apparent", the id tune leaves out of its
+estimates. Under any other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}}
+split, so an \code{inside} that adds one to bootstrap splits is refused.
 }
 
 \section{Time-series designs}{
