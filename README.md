@@ -128,13 +128,13 @@ such as `folds[1:2, ]`, loses the design’s class, but it is still
 refused. So is a design rebuilt from its splits with
 `rsample::manual_rset()`, and a design with one such split among valid
 ones. nestedtune finds the design from the class that each split keeps.
-Bootstrap and permutation designs can add an apparent split with the id
-“Apparent”, and tune leaves a split with that id out of its estimates.
-So an apparent split beside bootstrap or permutation splits counts as
-part of that design only if its id is “Apparent”. Under any other id, it
-counts as an `apparent()` split, because tune scores it on the rows it
-trained on. tune runs such a rebuilt inner design, so nestedtune refuses
-it for the reason it gives in the outer loop.
+tune runs such a rebuilt inner design, so nestedtune refuses it for the
+reason it gives in the outer loop. Bootstrap and permutation designs can
+add an apparent split with the id “Apparent”, and tune leaves a split
+with that id out of its estimates. So an apparent split beside bootstrap
+or permutation splits counts as part of that design only if its id is
+“Apparent”. Under any other id, it counts as an `apparent()` split,
+because tune scores it on the rows it trained on.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a

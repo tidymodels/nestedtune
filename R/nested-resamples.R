@@ -258,7 +258,9 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
     } else {
       "{.arg inside} cannot be an {.fn rsample::{refused}} design."
     }
-    hint <- if (renamed_apparent(inner_rset)) c(i = "{apparent_id_hint}")
+    hint <- if (renamed_apparent(inner_rset, refused)) {
+      c(i = "{apparent_id_hint}")
+    }
     cli::cli_abort(
       c(headline, x = inner_refused_reason(inner_rset, refused), hint),
       class = "nestedtune_bad_design",

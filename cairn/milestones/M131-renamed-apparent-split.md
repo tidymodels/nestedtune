@@ -63,6 +63,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: at `b38c5400`, `devtools::check()` gave 0 errors, 0 warnings and 0 notes, and `devtools::test()` gave 1157 test blocks with 0 failures. Only the NEWS bullet's text changed after that. T3 is ticked, and the status is review.
 - 2026-09-29: review started. AC4 has its evidence, and the three reviewers reported. The suite and `devtools::check()` are still running. Checkpoint.
 - 2026-09-29: review evidence recorded for all five criteria, the consistency gate passed and the 13 findings are logged with proposed dispositions. Pre-gate checkpoint.
+- 2026-09-29: gate triage accepted all proposed dispositions. The six fixes are in, and the design-support file passes 49 blocks. The full suite and `devtools::check()` are running on the fixed code. Checkpoint.
 
 ## Decisions
 
@@ -92,5 +93,13 @@ Independent review: three fresh reviewers ([O] diff, [S] blame history, [S] prio
 - O2: the hint follows all bullets, so it can sit beside an element where renaming changes nothing, such as v-fold splits with an "Apparent" split. Proposed: reject, because the hint stays true and per-element hints cost more than they give.
 - S2: no test gives an inner permutation host a renamed apparent split. Proposed: reject, because inner `permutations()` is refused either way and D-099 gives the hint to bootstrap hosts only.
 - O7: "Under any other id, it counts as an `rsample::apparent()` split" can suggest that `apparent()` gives another id. Proposed: reject, because the sentence is about how the split is counted, and the Out list records that the two splits are identical.
+
+Gate triage, 2026-09-29: the maintainer accepted every proposed disposition. The six fixes landed on the branch:
+- O1: `renamed_apparent()` takes the named design and returns FALSE unless it is `apparent()`. The new block "a refusal that names another design gets no id hint" passes. With the old rule restored for one run, it failed twice, once at each entry.
+- P1: README.Rmd now puts the id sentences after "tune runs such a rebuilt inner design". `build_readme()` rewrapped README.md to match.
+- P2 and O8: the NEWS bullet names the `inside` refusal and the outer fold. It keeps "Before" with the inner design, and it limits the outer naming to a `manual_rset()` rebuild.
+- O5: new blocks cover an inner NA id and factor NA id at both entries (18 expectations), and `split_designs()` on a table with no id column, with a control under the id "Apparent".
+- O9: the hint tests match the whole hint on the flattened message. The no-hint tests match its opening words.
+- O3 and O4 are one new `[low]` candidate row. P3 goes to DESIGN Known issues at hygiene. S1, O2, S2 and O7 are rejected for the reasons above.
 
 - AC4: each site was read by grep for "apparent" and "part of". The README Refused paragraph (README.md:131-135) says the split counts as part of the design "only if its id is “Apparent”". `build_readme()` gave no diff. The shared help text puts that sentence in all five tuning pages, for example `nested_tune_grid.Rd:189`. `nested_resamples.Rd:62-63` and the new NEWS.md bullet (lines 3-4) say the same. No other sentence at the four sites says that an apparent split counts as part of such a design. Pass.

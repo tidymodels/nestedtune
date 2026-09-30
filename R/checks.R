@@ -508,7 +508,12 @@ apparent_ids <- function(x) {
 
 # Whether `x` holds an apparent split that its id alone keeps apart from the
 # bootstrap splits beside it, which the inner refusal then says how to keep.
-renamed_apparent <- function(x) {
+# Only a refusal that names apparent() as `design` gets the hint, so it never
+# follows a bullet naming another design.
+renamed_apparent <- function(x, design) {
+  if (!identical(design, "apparent")) {
+    return(FALSE)
+  }
   found <- split_designs(x)
   any(found %in% "apparent") &&
     any(found %in% c("bootstraps", "group_bootstraps"))
@@ -663,7 +668,7 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
     rep("x", length(lines))
   )
   # The hint is handed over as a value too, since it holds no cli markup.
-  hint <- if (any(vapply(inner[hit], renamed_apparent, logical(1)))) {
+  hint <- if (any(mapply(renamed_apparent, inner[hit], found[hit]))) {
     c(i = "{apparent_id_hint}")
   }
   cli::cli_abort(
