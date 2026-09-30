@@ -169,3 +169,5 @@ Gate dispositions, pass 2, 2026-09-30. The user took the recommended triage and 
 - S16: rejected as a duplicate of R4, which a candidate row already holds.
 
 Corrections, 2026-09-30. The AC4 line of pass 2 gives the check time as 9 min 12 s. The log at `3727680e` shows 9 min 52 s, with 0 errors, 0 warnings and 0 notes, so the result stands. The S5 line says a new test holds the no-hint case. At `61ba9f7a` that test failed, because its design kept every row. It was rebuilt on six splits, and its fresh results follow.
+
+- Fresh results at `74e93d9c`, each read from its log file. `test-design-support.R` gave 74 blocks, 0 failed, 0 errors, 0 skipped. `devtools::test()` gave no failures and no errors. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 11 min 6 s. `air format --check` passed on every tracked R file.
