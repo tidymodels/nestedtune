@@ -147,8 +147,8 @@ An \code{id} naming no row of a set is refused with class
 with no \code{id}, and an \code{id} given beside a plain workflow are each refused
 with class \code{nestedtune_bad_final_fit_args}.
 
-Last, just before tuning, the inner design is rebuilt on all the data
-from the recorded inner specification. tune leaves every split with the
+Last, before tuning, the inner design is rebuilt on all the data from
+the recorded inner specification. tune leaves every split with the
 id "Apparent" out of its estimates. So the design is refused with class
 \code{nestedtune_bad_design} if it holds such a split that is not the
 apparent split of a bootstrap. For a race it is also refused if it holds
