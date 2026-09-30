@@ -946,7 +946,9 @@ split_shares_rows <- function(split, rows = NULL) {
     return(FALSE)
   }
   n <- nrow(split[["data"]])
-  if (!is.null(rows) && length(rows) != n) {
+  # An NA in `rows`, from an outer `in_id` holding NA, names no data row, so
+  # such a fold is left as found (M134 review, S1).
+  if (!is.null(rows) && (length(rows) != n || anyNA(rows))) {
     return(FALSE)
   }
   in_frame <- function(idx) {

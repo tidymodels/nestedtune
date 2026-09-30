@@ -173,6 +173,9 @@
 #' those four tuners on the sliding-period design alone.
 #' [nested_fit_resamples()] is tested to accept these designs. It checks the
 #' inner design but fits nothing on it. Any other inner design is not tested.
+#' Each of these tests leaves the `lag` of [rsample::rolling_origin()] at its
+#' default of 0. A `lag` above 0 is refused in either loop, as
+#' [nested_resamples()] explains.
 #' [`augment()`][augment.nested_results] refuses these designs, because their
 #' assessment sets leave rows out. Its error names the rows left out. When
 #' there are more than five, it names the first five.

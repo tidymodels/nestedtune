@@ -404,6 +404,9 @@ An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 those four tuners on the sliding-period design alone.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs. It checks the
 inner design but fits nothing on it. Any other inner design is not tested.
+Each of these tests leaves the \code{lag} of \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at its
+default of 0. A \code{lag} above 0 is refused in either loop, as
+\code{\link[=nested_resamples]{nested_resamples()}} explains.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out. Its error names the rows left out. When
 there are more than five, it names the first five.

@@ -77,6 +77,8 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: T7 to T10 done. `devtools::check()` at `264869ad` gave 0 errors, 0 warnings and 0 notes. The only later commit changes one comment. Status set to review.
 - 2026-09-30: review pass 2 started at `3727680e`, which contains main `b182fa6a`, so no sync merge. No PR exists. The four criterion boxes were unticked, because the pass 1 evidence predates T7 to T10. Each is ticked again as its pass 2 evidence lands.
 - 2026-09-30: review pass 2 pre-gate checkpoint. AC1 to AC4 verified and ticked, and the consistency gate passed. Sixteen findings are logged as S1 to S16 for the approval gate. S1 is a new unclassed crash that main does not have.
+- 2026-09-30: step-7 approval: m134-overlapping-splits approved for merge, after the fix-now items S1 to S8.
+- 2026-09-30: fix-now items S1 to S8 landed. `devtools::test()` gave 0 failures, with the same one empty-block skip. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min 4 s. All six prose sweeps, `air format --check`, `document()`, `build_readme()` and `cairn_validate.py` are clean.
 
 ## Decisions
 
@@ -147,3 +149,19 @@ Review findings, pass 2. Three fresh reviewers read the branch again: an Opus di
 - S16 (history): `index_held_out_both` no longer puts one row in both sets. This is R4, already a candidate row.
 
 Two more items reached the session in a message that claimed to be the Opus report but did not come through the agent channel. The real report does not hold them, so they are not logged as findings: the final-fit `lag` case asserts no location, and no test covers `lag` at or above `assess`.
+
+Gate dispositions, pass 2, 2026-09-30. The user took the recommended triage and approved the merge after the fixes.
+
+- S1: fixed. For an outer `in_id` that holds NA, `split_shares_rows()` now leaves the fold as it found it. A new test failed first on "vector size cannot be NA" and now passes.
+- S2: fixed. D-108 corrects D-107's hint sentence.
+- S3: fixed with `air format`. `air format --check` now passes on every tracked R file.
+- S4: fixed. `?nested_tune_grid` says its time-series tests leave `lag` at 0 and that a `lag` above 0 is refused.
+- S5: fixed in NEWS, which now says a design subset by rows is refused with no hint. A new test holds that case.
+- S6, S7, S8: fixed. The tests match the whole hint, assert the call, and compare the `lag` with `expect_equal()`.
+- S9, S10: follow-up, added to the M134 leftovers row.
+- S11: rejected, because the hint stays true.
+- S12: rejected, because the DESIGN note covers that whole bullet.
+- S13: rejected as style, and the sweeps pass.
+- S14: rejected, because the user kept the `Yes` cells at the first gate (D-107).
+- S15: rejected, because `inner_frame_kinds()` reads no split class.
+- S16: rejected as a duplicate of R4, which a candidate row already holds.
