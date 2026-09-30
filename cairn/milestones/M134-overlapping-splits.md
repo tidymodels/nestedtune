@@ -79,6 +79,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: review pass 2 pre-gate checkpoint. AC1 to AC4 verified and ticked, and the consistency gate passed. Sixteen findings are logged as S1 to S16 for the approval gate. S1 is a new unclassed crash that main does not have.
 - 2026-09-30: step-7 approval: m134-overlapping-splits approved for merge, after the fix-now items S1 to S8.
 - 2026-09-30: fix-now items S1 to S8 landed. `devtools::test()` gave 0 failures, with the same one empty-block skip. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min 4 s. All six prose sweeps, `air format --check`, `document()`, `build_readme()` and `cairn_validate.py` are clean.
+- 2026-09-30: PR #149 opened. The CI watch reached the session's time limit and was stopped. At that point 4 checks had passed (build, format-suggest, both prose-sweep runs), 8 were pending, and none had failed. Not merged yet.
 
 ## Decisions
 
