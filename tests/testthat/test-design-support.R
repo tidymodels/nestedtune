@@ -1329,8 +1329,9 @@ for (fn in RACE_EXPORTS) {
 }
 
 # A split whose assessment set holds a row of its analysis set scores the
-# model on rows it trained on. Both loops refuse it, whatever its class says,
-# so a split rebuilt with make_splits() cannot hide it (M134, D-103).
+# model on rows it trained on. Both loops refuse it by its rows, so a split
+# rebuilt with make_splits() cannot hide it (M134, D-103). The one exception
+# is a bootstrap's own apparent split under the id "Apparent" (D-104).
 OVERLAP_REASON <- "scores the model on rows it trained on"
 
 # Three v-fold splits of `d`, with one split that shares rows added or edited.

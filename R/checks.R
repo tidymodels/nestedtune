@@ -955,8 +955,10 @@ split_shares_rows <- function(split, rows = NULL) {
     if (is.null(rows)) {
       return(FALSE)
     }
-    # The same set, found without the unique() that method hashes the
-    # training rows with, which dominated this check's time (M134, T5).
+    # The same set for any nonempty `in_id`, which rsample::rsplit()
+    # requires, found without the unique() that method hashes the training
+    # rows with, which dominated this check's time (M134, T5). An empty
+    # `in_id` gives FALSE either way.
     outside <- rep(TRUE, n)
     outside[trained] <- FALSE
     held_out <- which(outside)
@@ -997,7 +999,8 @@ complement_is_default <- function(split) {
 }
 
 # The positions of the splits of `x` that share rows, for split_shares_rows()
-# with the same `rows`. Class inspection only, like split_designs().
+# with the same `rows`. It reads each split's indexes, but like
+# split_designs() it is safe on an element no class check has vouched for.
 overlap_rows <- function(x, rows = NULL) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   if (!is.list(splits)) {
