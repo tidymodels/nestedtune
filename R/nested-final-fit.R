@@ -144,6 +144,16 @@
 #' with no `id`, and an `id` given beside a plain workflow are each refused
 #' with class `nestedtune_bad_final_fit_args`.
 #'
+#' Last, before tuning, the inner design is rebuilt on all the data from
+#' the recorded inner specification. tune leaves every split with the
+#' id "Apparent" out of its estimates. So the design is refused with class
+#' `nestedtune_bad_design` if it holds such a split that is not the
+#' apparent split of a bootstrap. For a race it is also refused if it holds
+#' an apparent split, since the race eliminates candidates on that split's
+#' score. The entry checks of the other functions refuse each rule where it
+#' applies. So this refusal reaches a record made before those checks, or
+#' an inner specification that labels the whole data differently.
+#'
 #' @section What to report:
 #'
 #' Report the estimate [collect_metrics()] returns from the results object
@@ -422,6 +432,7 @@ final_fit_worker <- function(
   # passing.
   set_fold_seed(seeds[[1L]])
   inner <- eval_inside_spec(inside, data, env, call = call)
+  check_final_inner(inner, tuner$tuner, call = call)
   tuned <- run_tuner(
     tuner,
     object = object,

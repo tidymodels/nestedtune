@@ -997,3 +997,205 @@ test_that("an outer apparent split under another id is named as apparent()", {
     expect_no_match(msg, "apparent()", fixed = TRUE)
   }
 })
+
+# tune leaves every split whose id is "Apparent" out of its estimates, so any
+# split but a bootstrap's own apparent split would drop out of inner tuning
+# with nothing said (M132, D-100). The ids are relabelled in place, which
+# keeps the rset class.
+relabel_first <- function(build, factor_id = FALSE) {
+  function(data) {
+    rset <- build(data)
+    ids <- as.character(rset$id)
+    ids[[1]] <- "Apparent"
+    rset$id <- if (factor_id) factor(ids) else ids
+    rset
+  }
+}
+
+RELABELLED <- list(
+  "v-fold" = relabel_first(function(data) rsample::vfold_cv(data, v = 3)),
+  "v-fold, factor id" = relabel_first(
+    function(data) rsample::vfold_cv(data, v = 3),
+    factor_id = TRUE
+  ),
+  bootstrap = relabel_first(function(data) rsample::bootstraps(data, times = 3))
+)
+
+APPARENT_ID_REASON <- "tune leaves every split whose id is \"Apparent\" out"
+
+test_that("an inner split relabelled Apparent is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (name in names(RELABELLED)) {
+    build <- RELABELLED[[name]]
+    inner <- build(d)
+    expect_s3_class(inner, "rset")
+    expect_identical(is.factor(inner$id), grepl("factor", name))
+    expect_identical(as.character(inner$id[[1]]), "Apparent")
+    expect_false(inherits(inner$splits[[1]], "apparent_split"))
+
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_bad_design")
+    expect_match(flat_message(cnd), APPARENT_ID_REASON, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "Elements 1, 2, and 3", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = rsample::vfold_cv(v = 3), inside = build()),
+      class = "nestedtune_bad_design"
+    )
+    expect_match(flat_message(cnd), APPARENT_ID_REASON, fixed = TRUE)
+    expect_match(conditionMessage(cnd), "outer fold 1", fixed = TRUE)
+  }
+})
+
+test_that("a bootstrap's own apparent split still reaches the folds", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(
+    d,
+    V3,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  )
+  expect_identical(folds$inner_resamples[[1]]$id[[4]], "Apparent")
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+})
+
+# finetune's race eliminates candidates on unsummarized metrics, which keep
+# a bootstrap's apparent split, so the two racers refuse that split (M132,
+# D-100). The other tuners read tune's summarized estimate, which leaves it
+# out, and keep accepting it.
+RACE_APPARENT_REASON <- c(
+  "eliminates candidates on the score",
+  "rows the model trained on"
+)
+
+expect_race_refused <- function(cnd) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  for (reason in RACE_APPARENT_REASON) {
+    expect_match(flat_message(cnd), reason, fixed = TRUE)
+  }
+}
+
+# The exports, where the helpers' RACERS names the tuners.
+RACE_EXPORTS <- c("nested_tune_race_anova", "nested_tune_race_win_loss")
+
+race_call <- function(fn, wf, folds) {
+  switch(
+    fn,
+    nested_tune_race_anova = nested_tune_race_anova(
+      wf,
+      folds,
+      grid = det_grid()
+    ),
+    nested_tune_race_win_loss = nested_tune_race_win_loss(
+      wf,
+      folds,
+      grid = det_grid()
+    )
+  )
+}
+
+# One test per racer, so a racer that is not ready reports its own skip.
+for (fn in RACE_EXPORTS) {
+  test_that(paste(fn, "refuses a bootstrap's apparent split at entry"), {
+    skip_if_no_engines()
+    skip_if_not(tuner_ready(fn))
+    d <- support_data(n = 30)
+    folds <- nested_cv_design(
+      d,
+      V3,
+      quote(rsample::bootstraps(times = 3, apparent = TRUE))
+    )
+    cnd <- entry_refusal(race_call(fn, det_workflow(d), folds))
+    expect_race_refused(cnd)
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  })
+}
+
+test_that("a race refuses the apparent split of rebuilt and grouped bootstraps", {
+  skip_if_no_engines()
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  boots <- quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  # A group bootstrap, a manual_rset() rebuild and a factor id, under one race.
+  designs <- list(
+    group_bootstraps = function() {
+      nested_cv_design(
+        d,
+        V3,
+        quote(rsample::group_bootstraps(group = g, times = 3, apparent = TRUE))
+      )
+    },
+    rebuilt = function() {
+      folds <- nested_cv_design(d, V3, boots)
+      folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+      expect_s3_class(folds$inner_resamples[[1]], "manual_rset")
+      folds
+    },
+    factor_id = function() {
+      with_inner(
+        nested_cv_design(d, V3, V3),
+        function(data) with_apparent(data, "bootstraps", factor("Apparent"))
+      )
+    }
+  )
+  for (name in names(designs)) {
+    folds <- designs[[name]]()
+    inner <- folds$inner_resamples[[1]]
+    last <- nrow(inner)
+    expect_s3_class(inner$splits[[last]], "apparent_split")
+    expect_identical(as.character(inner$id[[last]]), "Apparent")
+    cnd <- entry_refusal(
+      nested_tune_race_anova(wf, folds, grid = det_grid())
+    )
+    expect_race_refused(cnd)
+  }
+})
+
+test_that("a race still reaches the folds on a bootstrap without its apparent split", {
+  skip_if_no_engines()
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(
+    d,
+    V3,
+    quote(rsample::bootstraps(times = 4, apparent = FALSE))
+  )
+  cnd <- entry_refusal(nested_tune_race_anova(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+})
+
+for (fn in RACE_EXPORTS) {
+  test_that(
+    paste("the map under", fn, "refuses a bootstrap's apparent split first"),
+    {
+      skip_if_no_engines()
+      skip_if_no_wset_fixture(fn)
+      d <- support_data(n = 30)
+      folds <- nested_cv_design(
+        d,
+        V3,
+        quote(rsample::bootstraps(times = 3, apparent = TRUE))
+      )
+      # The unmarked workflow comes first and routes to
+      # nested_fit_resamples(), which accepts the design. The sentinel stands
+      # in for the fold dispatch, so the bad-design class shows that none of
+      # its folds ran.
+      set <- workflowsets::as_workflow_set(
+        fixed = fixed_workflow(d),
+        tuned = det_workflow(d)
+      )
+      cnd <- entry_refusal(
+        nested_workflow_map(set, fn = fn, resamples = folds, grid = det_grid())
+      )
+      expect_race_refused(cnd)
+    }
+  )
+}

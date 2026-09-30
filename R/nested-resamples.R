@@ -51,6 +51,9 @@
 #' that design only if its id is "Apparent", the id tune leaves out of its
 #' estimates. Under any other id, it counts as an [rsample::apparent()]
 #' split, so an `inside` that adds one to bootstrap splits is refused.
+#' tune leaves every inner split with the id "Apparent" out of its
+#' estimates, whatever the split's class. So an `inside` that gives any other
+#' split that id is refused too, and the refusal names the outer fold.
 #'
 #' @section Time-series designs:
 #'
@@ -263,6 +266,17 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
     }
     cli::cli_abort(
       c(headline, x = inner_refused_reason(inner_rset, refused), hint),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (length(misread_apparent_rows(inner_rset)) > 0L) {
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave a split under the id {.val Apparent} for outer \\
+         fold {fold} that is not the apparent split of a bootstrap.",
+        x = "{apparent_id_reason}"
+      ),
       class = "nestedtune_bad_design",
       call = call
     )

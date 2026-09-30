@@ -382,6 +382,7 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
   check_inner_refused(resamples, call = call)
+  check_inner_apparent_ids(resamples, call = call)
   # Next the two class checks, which judge each element of the list columns;
   # the checks above judge the whole object or read only element classes.
   # Neither column is checked by anything upstream: a
@@ -494,7 +495,8 @@ split_designs <- function(x) {
 # Whether each row of `x` carries the id that tune leaves out of its
 # estimates. tune 2.1.0 keeps only the rows whose id is not "Apparent"
 # (tune:::estimate_tune_results()), and its comparison reads a factor by its
-# labels.
+# labels. It drops a split of any class under that id, so
+# misread_apparent_rows() reads this too.
 # An NA id is no match, and an id column that is missing or not one value per
 # split marks no row.
 apparent_ids <- function(x) {
@@ -523,6 +525,135 @@ apparent_id_hint <- paste(
   'tune leaves out an apparent split whose id is "Apparent", so a bootstrap',
   "keeps its apparent split only under that id."
 )
+
+# The rows of `x` whose id is "Apparent" but whose split is not the apparent
+# split of a bootstrap design. tune leaves every row under that id out of its
+# estimates, so a fold tuning on `x` would use fewer resamples than it holds,
+# and nothing would say so (M132, D-100). Only a bootstrap's own apparent
+# split carries the id on purpose, and split_designs() names that split's
+# design as its bootstrap. The rule stands alone: at entry an apparent split
+# beside no bootstrap splits is refused as apparent() first, but the final
+# fit's rebuilt design gets no such check. Class inspection only, like
+# split_designs().
+misread_apparent_rows <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  if (!is.list(splits)) {
+    return(integer())
+  }
+  is_apparent <- vapply(splits, inherits, logical(1), "apparent_split")
+  joined <- split_designs(x) %in% c("bootstraps", "group_bootstraps")
+  which(apparent_ids(x) & !(is_apparent & joined))
+}
+
+apparent_id_reason <- paste(
+  'tune leaves every split whose id is "Apparent" out of its estimates, so',
+  "each outer fold that tunes on it would use fewer resamples than its",
+  "design holds. Give the split another id."
+)
+
+# The two racers. finetune 1.3.0 eliminates race candidates on
+# `tune::collect_metrics(summarize = FALSE)` (test_parameters_gls() and
+# test_parameters_bt(), read 2026-09-29), which keeps the split whose id is
+# "Apparent". So a race drops candidates on a score from the rows the model
+# trained on, although tune's estimate leaves that split out (M132, D-100).
+racer_tuners <- c("tune_race_anova", "tune_race_win_loss")
+
+# Whether `x` holds an apparent split. Any id counts, because the race
+# misreads an apparent split under any id. At a racer's entry, one under
+# another id has already been refused as apparent(), but the map and the
+# final fit read this with no entry check before it. Class inspection only,
+# like split_designs().
+holds_apparent_split <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  is.list(splits) &&
+    any(vapply(splits, inherits, logical(1), "apparent_split"))
+}
+
+race_apparent_reason <- paste(
+  "A race eliminates candidates on the score of every split it has run, and",
+  "the score of an apparent split comes from the rows the model trained on.",
+  "Build the bootstrap with `apparent = FALSE`."
+)
+
+# Every inner element holding an apparent split, for a racer's entry and for
+# `nested_workflow_map()` before its first workflow runs. `resamples` may be
+# anything, since the map reads it before any class check.
+check_race_apparent <- function(resamples, call = rlang::caller_env()) {
+  inner <- if (is.data.frame(resamples)) resamples[["inner_resamples"]]
+  if (!is.list(inner)) {
+    return(invisible(resamples))
+  }
+  hit <- which(vapply(inner, holds_apparent_split, logical(1)))
+  if (length(hit) == 0L) {
+    return(invisible(resamples))
+  }
+  n <- length(hit)
+  # The reason is handed over as a value, so cli does not parse it again.
+  cli::cli_abort(
+    c(
+      "{.arg resamples} has an inner design that a race would misread.",
+      x = "{cli::qty(n)}Element{?s} {hit} of {.field inner_resamples} \\
+           {cli::qty(n)}{?holds/hold} an apparent split.",
+      i = "{race_apparent_reason}"
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
+
+# The two "Apparent" rules on the one inner rset `nested_final_fit()` rebuilds
+# on the whole data (M132, D-100). No entry check reads it: it comes from the
+# recorded `inside`, which a record made before the rules, or an `inside`
+# that labels the whole data differently, can turn into such a design.
+check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
+  if (length(misread_apparent_rows(inner)) > 0L) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave a split under the \\
+         id {.val Apparent} that is not the apparent split of a bootstrap.",
+        x = "{apparent_id_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (tuner %in% racer_tuners && holds_apparent_split(inner)) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave an apparent split, \\
+         which the race cannot use.",
+        x = "{race_apparent_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  invisible(inner)
+}
+
+# Every inner element holding a split that misread_apparent_rows() finds, so
+# one message names every offending outer fold.
+check_inner_apparent_ids <- function(resamples, call = rlang::caller_env()) {
+  inner <- resamples[["inner_resamples"]]
+  hit <- which(lengths(lapply(inner, misread_apparent_rows)) > 0L)
+  if (length(hit) == 0L) {
+    return(invisible(resamples))
+  }
+  n <- length(hit)
+  # The reason is handed over as a value, so cli does not parse it again.
+  cli::cli_abort(
+    c(
+      "{.arg resamples} has an inner split that tune would leave out of its \\
+       estimates.",
+      x = "{cli::qty(n)}Element{?s} {hit} of {.field inner_resamples} \\
+           {cli::qty(n)}{?holds/hold} a split under the id {.val Apparent} \\
+           that is not the apparent split of a bootstrap.",
+      i = "{apparent_id_reason}"
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
 
 # The design an inner rset (or anything else) carries that the inner loop
 # refuses, or NA. The rset class decides first; only if it names none are the

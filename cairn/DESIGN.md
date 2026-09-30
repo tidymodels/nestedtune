@@ -163,7 +163,10 @@ naming convention.
   class, so a row subset, a `manual_rset()` rebuild or one such split among
   valid ones is refused too (D-097, M129). An apparent split beside bootstrap
   or permutation splits counts as part of that design only under the id
-  "Apparent", which tune leaves out of its estimates (D-099, M131). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  "Apparent", which tune leaves out of its estimates (D-099, M131). Any other
+  inner split under that id is refused, and the two racers refuse a
+  bootstrap's apparent split too, because finetune's race reads its score
+  (D-100, M132). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
@@ -410,7 +413,9 @@ one in which no outer fold completed (`check_completed_folds()`, class
 the summary doors), rebuilds the tuner description from the `procedure` attribute (`procedure_tuner()`,
 `R/tuner.R`), then draws two seeds and hands everything to
 `final_fit_worker()`, which sets the tuning seed, re-evaluates the recorded
-`inside` call against the full data, runs the recorded tuner through the same
+`inside` call against the full data, refuses that design where it breaks the
+two "Apparent" rules (`check_final_inner()`, class `nestedtune_bad_design`,
+D-100, M132), runs the recorded tuner through the same
 `run_tuner()` the loop uses, selects, finalizes, sets the fit seed, and fits
 on every row. The seed scope is D-016: building an `rset`
 draws from the RNG, so the construction sits inside the tuning seed's scope

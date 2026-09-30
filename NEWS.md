@@ -1,5 +1,17 @@
 # nestedtune 0.0.0.9000
 
+* An inner split with the id "Apparent" is now refused unless it is the
+  apparent split of a bootstrap design. tune leaves every split with that id
+  out of its estimates, so before, such a fold tuned on fewer resamples than
+  its design held, with nothing said. `nested_tune_race_anova()` and
+  `nested_tune_race_win_loss()` also refuse the apparent split of a
+  bootstrap, such as the one `bootstraps(apparent = TRUE)` adds. finetune
+  eliminates race candidates on its score, which comes from the rows the
+  model trained on. If a workflow in a set routes to a racer,
+  `nested_workflow_map()` refuses such a design before any workflow runs.
+  `nested_final_fit()` applies both rules to the inner design it rebuilds on
+  all the data. Each refusal has class `nestedtune_bad_design`.
+
 * An apparent split beside bootstrap or permutation splits now needs the id
   "Apparent" to count as part of that design. tune leaves a split with that id
   out of its estimates. Under any other id, tune scores the split on the rows
