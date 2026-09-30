@@ -422,6 +422,7 @@ final_fit_worker <- function(
   # passing.
   set_fold_seed(seeds[[1L]])
   inner <- eval_inside_spec(inside, data, env, call = call)
+  check_final_inner(inner, tuner$tuner, call = call)
   tuned <- run_tuner(
     tuner,
     object = object,

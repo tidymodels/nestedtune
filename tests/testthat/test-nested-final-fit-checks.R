@@ -425,3 +425,53 @@ test_that("a missing engine package is refused by the final fit", {
 
   expect_error(nested_final_fit(missing_engine, res), "not installed")
 })
+
+# The final fit rebuilds its inner design from the recorded `inside`, which
+# no entry check reads, so it applies the two "Apparent" rules itself (M132,
+# D-100). Each result here has its `inside` replaced, standing in for a
+# record made before the rules or an `inside` that labels the whole data
+# differently.
+test_that("the final fit refuses an inner split relabelled Apparent", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  res <- final_results(d)
+  relabelled_vfold <- function(data) {
+    folds <- rsample::vfold_cv(data, v = 3)
+    folds$id[[1]] <- "Apparent"
+    folds
+  }
+  attr(res, "inside") <- quote(relabelled_vfold())
+
+  cnd <- expect_error(
+    nested_final_fit(wf, res),
+    class = "nestedtune_bad_design"
+  )
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(
+    msg,
+    "tune leaves every split whose id is \"Apparent\" out",
+    fixed = TRUE
+  )
+  expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+})
+
+test_that("the final fit of a race refuses a bootstrap's apparent split", {
+  skip_if_no_race_fixture("tune_race_anova")
+
+  d <- make_reg_data()
+  res <- race_final_results("tune_race_anova", d)
+  set.seed(27)
+  wf <- det_workflow(d)
+  attr(res, "inside") <- quote(rsample::bootstraps(times = 4, apparent = TRUE))
+
+  cnd <- expect_error(
+    nested_final_fit(wf, res),
+    class = "nestedtune_bad_design"
+  )
+  msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
+  expect_match(msg, "eliminates candidates on the score", fixed = TRUE)
+  expect_match(msg, "rows the model trained on", fixed = TRUE)
+  expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+})

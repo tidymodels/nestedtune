@@ -596,6 +596,36 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
   )
 }
 
+# The two "Apparent" rules on the one inner rset `nested_final_fit()` rebuilds
+# on the whole data (M132, D-100). No entry check reads it: it comes from the
+# recorded `inside`, which a record made before the rules, or an `inside`
+# that labels the whole data differently, can turn into such a design.
+check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
+  if (length(misread_apparent_rows(inner)) > 0L) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave a split under the \\
+         id {.val Apparent} that is not the apparent split of a bootstrap.",
+        x = "{apparent_id_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  if (tuner %in% racer_tuners && holds_apparent_split(inner)) {
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave an apparent split, \\
+         which the race cannot use.",
+        x = "{race_apparent_reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  invisible(inner)
+}
+
 # Every inner element holding a split that misread_apparent_rows() finds, so
 # one message names every offending outer fold.
 check_inner_apparent_ids <- function(resamples, call = rlang::caller_env()) {
