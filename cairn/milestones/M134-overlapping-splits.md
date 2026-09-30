@@ -1,6 +1,6 @@
 # M134: Refuse a split that assesses rows it trains on
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M133
 - **Driving RR:** —
@@ -42,7 +42,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - [x] T3: Write the AC2 tests first. The racer case skips where `tuner_ready()` is false (M101 lesson). Case 8 goes beside the "Apparent" block of `tests/testthat/test-nested-final-fit-checks.R`.
 - [x] T4: Apply the helper to the inner splits. If an inner split's frame is not the outer split's own, map its indexes through the outer `in_id`. `check_inner_splits()` tells the two frames apart (`R/checks.R:1003`). Call it in `check_nested()` after `check_inner_refused()`, in `inner_resamples_from_split()` after the refused-design check, and in `check_final_inner()` after the rules of M133's AC3 first two groups. Keep the exemption in step with `misread_apparent_rows()`.
 - [x] T5: Measure the added check time (GP4). Time `check_nested()` before and after the change on a `nested_resamples()` design of 10^5 rows with 10 outer and 10 inner folds. Record both times and the commit in the work log.
-- [ ] T6: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40`, the "Nested designs" section at `R/nested-tune-grid.R:102`, and the "What is refused" section at `R/nested-final-fit.R:98`. Add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
+- [x] T6: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40`, the "Nested designs" section at `R/nested-tune-grid.R:102`, and the "What is refused" section at `R/nested-final-fit.R:98`. Add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -59,6 +59,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: T6 checkpoint, not yet checked off. The README, the three help sites, NEWS and the DESIGN bullet state both rules. All six gating sweeps are clean and `devtools::test()` gives 0 failures. `devtools::check()` is still running.
 - 2026-09-30: claim audit: 40 claims read, 3 corrected — R/checks.R, tests/testthat/test-design-support.R
 - 2026-09-30: the claim audit's fresh Opus reader found no false claim. It found three comments worded loosely: the complement shortcut gives the same set only for a nonempty `in_id`, `overlap_rows()` reads indexes and not only classes, and one test comment left out the exemption. All three were reworded and the same reader cleared them on its one re-read.
+- 2026-09-30: T6 done. `devtools::check()` at `cc4f2c5a` gave 0 errors, 0 warnings and 0 notes. The only later commit changes three comments. Status set to review.
 
 ## Decisions
 
