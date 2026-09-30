@@ -136,7 +136,11 @@ estimates. Under any other id, it counts as an <code><a href="https://rsample.ti
 split, so an <code>inside</code> that adds one to bootstrap splits is refused.
 tune leaves every inner split with the id "Apparent" out of its
 estimates, whatever the split's class. So an <code>inside</code> that gives any other
-split that id is refused too, and the refusal names the outer fold.</p>
+split that id is refused too, and the refusal names the outer fold.
+An <code>inside</code> that gives a split with a missing <code>id</code> is refused as well,
+because tune leaves that split out of its estimates. So is an <code>inside</code>
+that gives two splits the same values in every id column, because tune
+then miscounts the resamples.</p>
     </div>
     <div class="section level2">
     <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>

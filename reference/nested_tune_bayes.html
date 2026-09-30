@@ -401,7 +401,11 @@ other id, it counts as an <code><a href="https://rsample.tidymodels.org/referenc
 tune leaves every split with the id "Apparent" out of its estimates,
 whatever the split's class. So any other inner split with that id is
 refused. Otherwise each outer fold that tunes on it uses fewer resamples
-than its design holds. The checks exist because
+than its design holds. An inner split whose <code>id</code> is missing is refused as
+well, because tune leaves it out of its estimates too. So is an inner
+design in which two splits carry the same values in every id column, such
+as <code>id</code> and <code>id2</code>, because tune then miscounts its resamples. The checks
+exist because
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a design whatever its <code>inside</code> argument
 returned, and because a design assembled by hand can index rows its outer
 fold never sees.</p>

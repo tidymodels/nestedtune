@@ -326,7 +326,11 @@ only if its id is "Apparent". Under any other id, it counts as an
 split. In the inner loop, tune leaves every split with the id "Apparent"
 out of its estimates, whatever the split's class. So any other inner
 split with that id is refused. Otherwise each outer fold that tunes on
-it uses fewer resamples than its design holds. The checks exist because
+it uses fewer resamples than its design holds. An inner split whose `id`
+is missing is refused as well, because tune leaves it out of its
+estimates too. So is an inner design in which two splits carry the same
+values in every id column, such as `id` and `id2`, because tune then
+miscounts its resamples. The checks exist because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.

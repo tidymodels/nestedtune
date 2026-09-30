@@ -88,7 +88,11 @@ Under any other id, it counts as an
 split, so an `inside` that adds one to bootstrap splits is refused. tune
 leaves every inner split with the id "Apparent" out of its estimates,
 whatever the split's class. So an `inside` that gives any other split
-that id is refused too, and the refusal names the outer fold.
+that id is refused too, and the refusal names the outer fold. An
+`inside` that gives a split with a missing `id` is refused as well,
+because tune leaves that split out of its estimates. So is an `inside`
+that gives two splits the same values in every id column, because tune
+then miscounts the resamples.
 
 ## Time-series designs
 
