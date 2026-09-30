@@ -7,7 +7,7 @@
 - **Principles touched:** IP1, IP4, GP3, GP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported functions refuse
-- **Branch/PR:** m134-overlapping-splits
+- **Branch/PR:** m134-overlapping-splits · https://github.com/tidymodels/nestedtune/pull/149
 
 ## Goal
 
