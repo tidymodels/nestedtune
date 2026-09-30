@@ -85,7 +85,10 @@ beside bootstrap or permutation splits counts as part of that design
 only if its id is "Apparent", the id tune leaves out of its estimates.
 Under any other id, it counts as an
 [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-split, so an `inside` that adds one to bootstrap splits is refused.
+split, so an `inside` that adds one to bootstrap splits is refused. tune
+leaves every inner split with the id "Apparent" out of its estimates,
+whatever the split's class. So an `inside` that gives any other split
+that id is refused too, and the refusal names the outer fold.
 
 ## Time-series designs
 

@@ -213,6 +213,15 @@ class <code><a href="https://tune.tidymodels.org/reference/collect_predictions.h
 <code>nestedtune_unknown_id</code>. A set given with <code>results</code> supplied, a set given
 with no <code>id</code>, and an <code>id</code> given beside a plain workflow are each refused
 with class <code>nestedtune_bad_final_fit_args</code>.</p>
+<p>Last, before tuning, the inner design is rebuilt on all the data from
+the recorded inner specification. tune leaves every split with the
+id "Apparent" out of its estimates. So the design is refused with class
+<code>nestedtune_bad_design</code> if it holds such a split that is not the
+apparent split of a bootstrap. For a race it is also refused if it holds
+an apparent split, since the race eliminates candidates on that split's
+score. The entry checks of the other functions refuse each rule where it
+applies. So this refusal reaches a record made before those checks, or
+an inner specification that labels the whole data differently.</p>
     </div>
     <div class="section level2">
     <h2 id="what-to-report">What to report<a class="anchor" aria-label="anchor" href="#what-to-report"></a></h2>

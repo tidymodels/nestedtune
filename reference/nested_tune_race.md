@@ -217,6 +217,16 @@ refused at entry, before any fold runs.
 `grid` is the design the race is offered. A data frame must have one
 column per tuned parameter and no other column.
 
+An inner design that holds an apparent split, such as the one
+`bootstraps(apparent = TRUE)` adds, is refused at entry with class
+`nestedtune_bad_design`. finetune eliminates race candidates on the
+score of each split it has run, and the score of an apparent split comes
+from the rows the model trained on. Build the bootstrap with
+`apparent = FALSE`. If a workflow in a set routes to a racer,
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+refuses such a design before its first workflow runs. The other tuners
+accept the split, because tune leaves it out of its estimates.
+
 `param_info` reaches the inner call as
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
 takes it. The section on finalizing a parameter range says where a range
@@ -402,7 +412,10 @@ and permutation designs can add an apparent split with the id
 beside bootstrap or permutation splits counts as part of that design
 only if its id is "Apparent". Under any other id, it counts as an
 [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-split. The checks exist because
+split. In the inner loop, tune leaves every split with the id "Apparent"
+out of its estimates, whatever the split's class. So any other inner
+split with that id is refused. Otherwise each outer fold that tunes on
+it uses fewer resamples than its design holds. The checks exist because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.

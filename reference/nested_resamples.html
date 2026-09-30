@@ -133,7 +133,10 @@ that <code>inside</code> returns for each outer fold, and that refusal names the
 An apparent split beside bootstrap or permutation splits counts as part of
 that design only if its id is "Apparent", the id tune leaves out of its
 estimates. Under any other id, it counts as an <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code>
-split, so an <code>inside</code> that adds one to bootstrap splits is refused.</p>
+split, so an <code>inside</code> that adds one to bootstrap splits is refused.
+tune leaves every inner split with the id "Apparent" out of its
+estimates, whatever the split's class. So an <code>inside</code> that gives any other
+split that id is refused too, and the refusal names the outer fold.</p>
     </div>
     <div class="section level2">
     <h2 id="time-series-designs">Time-series designs<a class="anchor" aria-label="anchor" href="#time-series-designs"></a></h2>

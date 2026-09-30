@@ -323,7 +323,10 @@ and permutation designs can add an apparent split with the id
 beside bootstrap or permutation splits counts as part of that design
 only if its id is "Apparent". Under any other id, it counts as an
 [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-split. The checks exist because
+split. In the inner loop, tune leaves every split with the id "Apparent"
+out of its estimates, whatever the split's class. So any other inner
+split with that id is refused. Otherwise each outer fold that tunes on
+it uses fewer resamples than its design holds. The checks exist because
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
 builds a design whatever its `inside` argument returned, and because a
 design assembled by hand can index rows its outer fold never sees.

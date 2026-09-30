@@ -263,6 +263,16 @@ BradleyTerry2, which fits the win/loss model. A missing package is refused
 at entry, before any fold runs.</p>
 <p><code>grid</code> is the design the race is offered. A data frame must have one
 column per tuned parameter and no other column.</p>
+<p>An inner design that holds an apparent split, such as the one
+<code>bootstraps(apparent = TRUE)</code> adds, is refused at entry with class
+<code>nestedtune_bad_design</code>. finetune eliminates race candidates on the score
+of each split it has run, and the score of an apparent split comes from
+the rows the model trained on. Build the bootstrap with
+<code>apparent = FALSE</code>. If a workflow in a set routes to a racer,
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> refuses such a design before its first workflow
+runs. The
+other tuners accept the split, because tune leaves it out of its
+estimates.</p>
 <p><code>param_info</code> reaches the inner call as <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> takes it. The
 section on finalizing a parameter range says where a range that depends
 on the data is finalized.</p>
@@ -429,8 +439,11 @@ split among valid ones. Bootstrap and permutation designs can add an
 apparent split with the id "Apparent", which tune leaves out of its
 estimates. So an apparent split beside bootstrap or permutation splits
 counts as part of that design only if its id is "Apparent". Under any
-other id, it counts as an <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> split. The checks exist
-because
+other id, it counts as an <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> split. In the inner loop,
+tune leaves every split with the id "Apparent" out of its estimates,
+whatever the split's class. So any other inner split with that id is
+refused. Otherwise each outer fold that tunes on it uses fewer resamples
+than its design holds. The checks exist because
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a design whatever its <code>inside</code> argument
 returned, and because a design assembled by hand can index rows its outer
 fold never sees.</p>
