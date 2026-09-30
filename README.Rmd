@@ -141,6 +141,16 @@ It refuses an inner design in which two splits carry the same values in every
 id column, because tune then miscounts its resamples. The two racing functions also refuse the apparent split of
 a bootstrap. finetune eliminates race candidates on the score of each split,
 and the score of that split comes from the rows the model trained on.
+In either loop, nestedtune also refuses a split whose assessment set holds a
+row of its analysis set, because it scores the model on rows it trained on.
+This rule reads the rows themselves, so it also catches a split rebuilt with
+`rsample::make_splits()`, which keeps no class that names its design. In the
+inner loop, an index into an outer analysis set counts as the data row it
+copies. An outer split can repeat a row, as a rebuilt bootstrap does. The
+design is then refused if an inner split puts one copy of that row in each set.
+The apparent
+split of an inner bootstrap design is exempt under the id "Apparent", because
+tune leaves it out of its estimates.
 
 No means that the design gives no valid nested estimate in that loop. As
 the inner loop, `validation_set()` cannot be built, because it takes a split

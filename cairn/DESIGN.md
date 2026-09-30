@@ -168,7 +168,11 @@ naming convention.
   bootstrap's apparent split too, because finetune's race reads its score
   (D-100, M132). An inner split with a missing `id`, and an inner design
   whose id tuples repeat, are refused as well, because tune drops the first
-  and miscounts the second (D-102, M133). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  and miscounts the second (D-102, M133). A split whose analysis and
+  assessment sets share a row is refused in both loops, which catches a
+  `make_splits()` rebuild that no class names. An index into an outer
+  analysis set counts as the data row it copies, and the bootstrap's own
+  apparent split is exempt (D-103, D-104, M134). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate

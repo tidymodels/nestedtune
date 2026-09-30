@@ -59,6 +59,16 @@
 #' that gives two splits the same values in every id column, because tune
 #' then miscounts the resamples.
 #'
+#' An `outside` split whose assessment set holds a row of its analysis set
+#' is refused. Such a fold scores the model on rows it trained on. The rule reads the rows, so it also catches a split rebuilt with
+#' [rsample::make_splits()], which keeps no class that names its design. An
+#' `inside` that gives such a split is refused too, and the refusal names
+#' the outer fold and the split. There, each index into the fold's analysis
+#' set counts as the data row it copies. So if the outer split repeats a
+#' row, an inner split that puts one copy in each set is refused. The
+#' apparent split of a bootstrap under the id "Apparent" is exempt, because
+#' tune leaves it out of its estimates.
+#'
 #' @section Time-series designs:
 #'
 #' An outer [rsample::rolling_origin()], [rsample::sliding_window()],

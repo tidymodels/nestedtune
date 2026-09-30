@@ -70,6 +70,16 @@ An \code{inside} that gives a split with a missing \code{id} is refused as well,
 because tune leaves that split out of its estimates. So is an \code{inside}
 that gives two splits the same values in every id column, because tune
 then miscounts the resamples.
+
+An \code{outside} split whose assessment set holds a row of its analysis set
+is refused. Such a fold scores the model on rows it trained on. The rule reads the rows, so it also catches a split rebuilt with
+\code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
+\code{inside} that gives such a split is refused too, and the refusal names
+the outer fold and the split. There, each index into the fold's analysis
+set counts as the data row it copies. So if the outer split repeats a
+row, an inner split that puts one copy in each set is refused. The
+apparent split of a bootstrap under the id "Apparent" is exempt, because
+tune leaves it out of its estimates.
 }
 
 \section{Time-series designs}{

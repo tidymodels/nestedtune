@@ -1,5 +1,20 @@
 # nestedtune 0.0.0.9000
 
+* A split whose assessment set holds a row of its analysis set is now
+  refused in either loop, with class `nestedtune_bad_design`. Such a split
+  scores the model on rows it trained on. Before, a split rebuilt with
+  `rsample::make_splits()` escaped the refusals that read a design's class.
+  Such an outer split ran, and its fold was scored on its training rows.
+  In the inner loop, an index into an outer analysis set counts as the data
+  row it copies. An outer split can repeat a row, as a rebuilt bootstrap
+  does. The design is then refused if an inner split puts one copy of that
+  row in each set. An inner apparent split rebuilt with `make_splits()`
+  under the id "Apparent" now gets this refusal. Before, the error told you
+  to give it another id. The apparent split of an inner bootstrap design stays
+  exempt under the id "Apparent", because tune leaves it out of its
+  estimates. `nested_resamples()`, the entry checks and the inner design
+  that `nested_final_fit()` rebuilds all apply the rule.
+
 * An inner split whose `id` is missing is now refused, and so is an inner
   design in which two splits carry the same values in every id column. tune
   leaves the first split out of its estimates, and it miscounts the
