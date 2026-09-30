@@ -560,16 +560,17 @@ expect_final_refused <- function(wf, res, case) {
   msg
 }
 
-test_that("the final fit refuses the designs and ids the entry check refuses", {
-  skip_if_no_engines()
+# One block per case, so a failure names the case it came from.
+for (name in names(FINAL_REFUSED)) {
+  test_that(paste0("the final fit refuses the inner case: ", name), {
+    skip_if_no_engines()
 
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  res <- final_results(d)
-  for (name in names(FINAL_REFUSED)) {
+    d <- make_reg_data()
+    wf <- det_workflow(d)
+    res <- final_results(d)
     expect_final_refused(wf, res, FINAL_REFUSED[[name]])
-  }
-})
+  })
+}
 
 # tune keeps a split whose factor id has NA as a level, so the final fit
 # tunes on such a design (D-105).

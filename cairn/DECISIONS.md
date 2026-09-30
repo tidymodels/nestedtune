@@ -2039,6 +2039,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-102 stands, except that the missing-id rule reads `id` with `is.na()`, as tune's comparison does. A factor id with NA as a level runs. The repeated-id rule keeps reading every id column with `as.character()`. So two NA levels in one column count as the same label, which tune also miscounts. The outer rule of D-047 is unchanged. It refuses such a label, because the results object names each outer fold by its label. Rejected: refusing the level with its own reason, because the plan gate refuses only what tune misreads.
 **Consequences:** the two loops read an NA level differently, for the reasons above. Falsified by a tune release that drops a split whose id is an NA level.
 
+### D-106 (2026-09-30): one missing `id2` runs, and two missing `id2` values under one `id` are refused. Corrects D-102's Consequences
+
+**Context:** D-102's Consequences say that an inner design with a missing `id2` still runs. The repeated-id rule reads two missing values in one column as the same label, as tune does when it assembles its results. So two splits with the same `id` and a missing `id2` are refused, and D-105 left that clause as it was.
+**Decision:** D-102 and D-105 stand. A missing `id2` is not refused for being missing. A split with a missing `id2` runs unless another split carries the same values in every id column, a missing `id2` included. tune miscounts that design.
+**Consequences:** no behavior changes, and the record now matches the code.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

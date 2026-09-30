@@ -68,6 +68,8 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - 2026-09-30: claim audit: 4 claims read, 1 corrected — tests/testthat/test-nested-final-fit-checks.R. The renamed-bootstrap case matched the hint alone, so it now asserts the ✖ bullet too. The re-read found the corrected comment holds.
 - 2026-09-30: at `c62be79c`, `devtools::test()` gave 0 failures, 0 errors and 0 skips over 1177 blocks. The final-fit file passed again after the renamed-bootstrap edit. Both plain prose sweeps were clean, and `devtools::document()` left no diff. `devtools::check()` is running.
 - 2026-09-30: `devtools::check()` gave 0 errors, 0 warnings and 0 notes at `2fd73e11`. T6 ticked, status set to review.
+- 2026-09-30: review pass 2 verified AC1 to AC5 at `857bd7e6`. The gate fixes S1 to S3 added D-106, a comment fix and one test block per final-fit case.
+- 2026-09-30: step-7 approval: m133-inner-id-rules approved for merge
 
 ## Decisions
 
@@ -129,3 +131,5 @@ Reviewer findings, pass 2, ranked. Opus diff lens, Sonnet blame lens and Sonnet 
 - S16 (prior-review lens): the final-fit help does not name the D-099 rule. [reject: "found as the entry checks find one" covers it]
 - S17 (blame lens): D-102 has no pointer to D-105. [reject: DECISIONS is append-only, and D-100 and D-101 follow the same practice]
 - S18 (blame lens): the "Apparent" reason text lives in `apparent_id_reason` and in `id_rule_reason()`. [reject: the two texts serve different sites]
+
+Gate triage, 2026-09-30: the user chose to fix S1 to S3 and then merge. S4 to S18 are rejected for the reasons in brackets. S1 is fixed by D-106. S2 is fixed in the `is_id_name()` comment, which now names both callers, as `grep` shows. S3 is fixed: each `FINAL_REFUSED` case is now its own named `test_that()` block. `test-nested-final-fit-checks.R` then gave 29 blocks with 0 failures and 0 skips, and `air` passed on both files.

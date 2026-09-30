@@ -1003,8 +1003,10 @@ check_inner_refused <- function(resamples, call = rlang::caller_env()) {
 # The names under which rsample's and tune's readers find a design's id
 # columns: both packages' col_starts_with_id() is grepl() on this pattern
 # (rsample 1.3.2, tune 2.1.0), so a label column named outside it is one
-# tune's own summaries would ignore. Used by the entry check alone; the
-# results class reads its labels from the record D-036 fixed, never by name.
+# tune's own summaries would ignore. Used by the entry check and by the
+# inner repeated-id rule, which `nested_resamples()` and the final fit also
+# run; the results class reads its labels from the record D-036 fixed, never
+# by name.
 is_id_name <- function(x) {
   grepl("(^id$)|(^id[1-9]$)", x)
 }
