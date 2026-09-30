@@ -98,7 +98,7 @@ Gate triage, 2026-09-29: the maintainer accepted every proposed disposition. The
 - O1: `renamed_apparent()` takes the named design and returns FALSE unless it is `apparent()`. The new block "a refusal that names another design gets no id hint" passes. With the old rule restored for one run, it failed twice, once at each entry.
 - P1: README.Rmd now puts the id sentences after "tune runs such a rebuilt inner design". `build_readme()` rewrapped README.md to match.
 - P2 and O8: the NEWS bullet names the `inside` refusal and the outer fold. It keeps "Before" with the inner design, and it limits the outer naming to a `manual_rset()` rebuild.
-- O5: new blocks cover an inner NA id and factor NA id at both entries (18 expectations), and `split_designs()` on a table with no id column, with a control under the id "Apparent".
+- O5: a new block covers an inner NA id and factor NA id at both entries (18 expectations). Another covers `split_designs()` on a table with no id column, with a control under the id "Apparent".
 - O9: the hint tests match the whole hint on the flattened message. The no-hint tests match its opening words.
 - O3 and O4 are one new `[low]` candidate row. P3 goes to DESIGN Known issues at hygiene. S1, O2, S2 and O7 are rejected for the reasons above.
 
