@@ -391,7 +391,9 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   check_inner_ids(resamples, call = call)
   check_inner_apparent_ids(resamples, call = call)
   # Next the two class checks, which judge each element of the list columns;
-  # the checks above judge the whole object or read only element classes.
+  # the checks above judge the whole object or read element classes, except
+  # the two overlap rules, which read split indexes but skip any element
+  # that is not a well-formed rsplit (split_shares_rows()).
   # Neither column is checked by anything upstream: a
   # design whose `inside` produced no rset is refused by nested_resamples()
   # (M18) but built without complaint by rsample::nested_cv(), and nothing at

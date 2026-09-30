@@ -421,9 +421,9 @@ the summary doors), rebuilds the tuner description from the `procedure` attribut
 `R/tuner.R`), then draws two seeds and hands everything to
 `final_fit_worker()`, which sets the tuning seed, re-evaluates the recorded
 `inside` call against the full data, refuses that design where it breaks the
-entry check's refused-design and id rules or the two "Apparent" rules, in the
-entry check's order (`check_final_inner()`, class `nestedtune_bad_design`,
-D-100, D-102, M132, M133), runs the recorded tuner through the same
+entry check's refused-design, shared-row and id rules or the two "Apparent"
+rules, in the entry check's order (`check_final_inner()`, class
+`nestedtune_bad_design`, D-100, D-102, D-103, D-107, M132, M133, M134), runs the recorded tuner through the same
 `run_tuner()` the loop uses, selects, finalizes, sets the fit seed, and fits
 on every row. The seed scope is D-016: building an `rset`
 draws from the RNG, so the construction sits inside the tuning seed's scope

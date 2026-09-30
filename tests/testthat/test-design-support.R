@@ -1485,23 +1485,21 @@ test_that("an inner design of rebuilt bootstrap splits is refused by its rows", 
   }
 })
 
-test_that("a race gets the row refusal for a rebuilt apparent split named Apparent", {
-  skip_if_no_engines()
-  skip_if_not(tuner_ready("nested_tune_race_anova"))
-  d <- support_data(n = 30)
-  folds <- with_inner(
-    nested_cv_design(d, V3, V3),
-    rebuilt_boots_apparent("Apparent")
-  )
-  cnd <- entry_refusal(
-    nested_tune_race_anova(det_workflow(d), folds, grid = det_grid())
-  )
-  expect_inner_overlap(cnd, "Elements 1, 2, and 3 of inner_resamples: split 4.")
-  expect_identical(
-    rlang::call_name(conditionCall(cnd)),
-    "nested_tune_race_anova"
-  )
-})
+# One test per racer, so a racer that is not ready reports its own skip.
+for (fn in RACE_EXPORTS) {
+  test_that(paste(fn, "gets the row refusal for a rebuilt apparent split named Apparent"), {
+    skip_if_no_engines()
+    skip_if_not(tuner_ready(fn))
+    d <- support_data(n = 30)
+    folds <- with_inner(
+      nested_cv_design(d, V3, V3),
+      rebuilt_boots_apparent("Apparent")
+    )
+    cnd <- entry_refusal(race_call(fn, det_workflow(d), folds))
+    expect_inner_overlap(cnd, "Elements 1, 2, and 3 of inner_resamples: split 4.")
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  })
+}
 
 # A v-fold design whose second split is rebuilt to share one row, under its
 # ordinary id.

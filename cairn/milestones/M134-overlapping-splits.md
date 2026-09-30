@@ -46,7 +46,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - [x] T7: Review finding R1, the user's choice at the gate: keep refusing `rolling_origin(lag = k)`, and state it. The criteria stay as they are, since AC1 and AC2 already refuse such a split. The refusal names `lag` and suggests `lag = 0` with the lagged predictors built first. Test an outer and an inner `lag` design. The README, the time-series section of `?nested_resamples` and NEWS name the refusal. Add a D-entry that supersedes D-103's premise and falsifier, and names D-099 (R11).
 - [x] T8: Review finding R2. Make the M59 control `nested_cv_manual_repeat` hold under any seed, for example with an inner design grouped on a unique column.
 - [x] T9: Review finding R3. Reword `inner_overlap_reason()` so it holds for `nested_fit_resamples()`, which tunes nothing.
-- [ ] T10: Review findings R5, R6, R8 and R12. Add the overlap rule to the final-fit paragraph of `cairn/DESIGN.md`. Run the rebuilt apparent split case under both racers, each in its own block with its own skip. Correct the two comments in `check_nested()`. Wrap the long roxygen line and the README line break.
+- [x] T10: Review findings R5, R6, R8 and R12. Add the overlap rule to the final-fit paragraph of `cairn/DESIGN.md`. Run the rebuilt apparent split case under both racers, each in its own block with its own skip. Correct the two comments in `check_nested()`. Wrap the long roxygen line and the README line break.
 
 ## Work log
 
@@ -71,6 +71,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: T7 done. The outer, inner and final-fit lag tests failed first on the missing hint, and the no-hint control passed. `lag_hint()` in `R/checks.R` adds the hint at all four overlap refusals. README, `?nested_resamples`, NEWS, the DESIGN bullet and D-107 state the refusal. The long roxygen line and the README break from R12 were fixed with it. `devtools::test()` gave 1197 blocks, 0 failed, and both plain sweeps were clean.
 - 2026-09-30: T8 done. The M59 control now groups its inner folds on `x1`, whose values are distinct. Probe over 40 seeds: `check_nested()` refused the old design under 29 and the grouped one under 0. `devtools::test()` gave 1197 blocks, 0 failed.
 - 2026-09-30: T9 done. A `nested_fit_resamples()` run of case 5 failed first on the word "tune" in the reason. The entry reason now speaks of each outer fold's inner results. The final-fit reason still says the fit ranks candidates, since that path returns before this check when nothing was tuned. `devtools::test()` gave 1197 blocks, 0 failed, and the `--plain` sweep was clean.
+- 2026-09-30: T10 done. The DESIGN final-fit paragraph names the shared-row rule. The rebuilt apparent split case runs under both racers, one block each, and neither skipped. Of R8's two comments, the one saying the earlier checks read only classes was corrected. The other speaks only of the three rules after it, which still holds. R12 was fixed in T7. `devtools::test()` gave 1198 blocks, 0 failed, and the `--plain` sweep was clean.
 
 ## Decisions
 
