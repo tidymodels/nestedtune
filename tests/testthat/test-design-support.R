@@ -1417,3 +1417,182 @@ test_that("an outer manual_rset() of apparent() splits keeps the apparent() refu
   expect_names_design(cnd, "apparent")
   expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
 })
+
+# The inner loop refuses the same splits (M134, D-103). A bootstraps() design
+# whose every split is rebuilt with make_splits() loses every split class, so
+# its apparent split is caught by its rows, whatever id it carries. Before
+# this rule, the id "Apparent" got the advice to rename the split, which
+# would then have been scored.
+rebuilt_boots_apparent <- function(apparent_id) {
+  function(data) {
+    boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
+    splits <- lapply(boots$splits, function(split) {
+      rsample::make_splits(
+        list(
+          analysis = split$in_id,
+          assessment = as.integer(rsample::complement(split))
+        ),
+        data
+      )
+    })
+    ids <- c(paste0("Bootstrap", 1:3), as.character(apparent_id))
+    rset <- rsample::manual_rset(splits, ids)
+    if (is.factor(apparent_id)) {
+      rset$id <- factor(ids)
+    }
+    rset
+  }
+}
+
+REBUILT_APPARENT <- list(
+  "id Apparent" = "Apparent",
+  "factor id Apparent" = factor("Apparent"),
+  "another id" = "Whole"
+)
+
+RENAME_ADVICE <- "Give the split another id"
+
+expect_inner_overlap <- function(cnd, where, rename = FALSE) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  msg <- flat_message(cnd)
+  expect_match(msg, OVERLAP_REASON, fixed = TRUE)
+  expect_match(msg, where, fixed = TRUE)
+  if (!rename) {
+    expect_no_match(msg, RENAME_ADVICE, fixed = TRUE)
+  }
+}
+
+test_that("an inner design of rebuilt bootstrap splits is refused by its rows", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (name in names(REBUILT_APPARENT)) {
+    id <- REBUILT_APPARENT[[name]]
+    build <- rebuilt_boots_apparent(id)
+    inner <- build(d)
+    expect_false(any(vapply(inner$splits, inherits, logical(1), "boot_split")))
+    expect_false(inherits(inner$splits[[4]], "apparent_split"))
+    expect_identical(is.factor(inner$id), is.factor(id))
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_inner_overlap(
+      cnd,
+      "Elements 1, 2, and 3 of inner_resamples: split 4.",
+      rename = identical(name, "another id")
+    )
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+  }
+})
+
+test_that("a race gets the row refusal for a rebuilt apparent split named Apparent", {
+  skip_if_no_engines()
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
+  d <- support_data(n = 30)
+  folds <- with_inner(
+    nested_cv_design(d, V3, V3),
+    rebuilt_boots_apparent("Apparent")
+  )
+  cnd <- entry_refusal(
+    nested_tune_race_anova(det_workflow(d), folds, grid = det_grid())
+  )
+  expect_inner_overlap(cnd, "Elements 1, 2, and 3 of inner_resamples: split 4.")
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_tune_race_anova"
+  )
+})
+
+# A v-fold design whose second split is rebuilt to share one row, under its
+# ordinary id.
+vfold_one_shared <- function(data) {
+  rset <- rsample::vfold_cv(data, v = 3)
+  split <- rset$splits[[2]]
+  rset$splits[[2]] <- rsample::make_splits(
+    list(
+      analysis = split$in_id,
+      assessment = c(as.integer(rsample::complement(split)), split$in_id[[1]])
+    ),
+    data
+  )
+  rset
+}
+
+test_that("an inner v-fold split rebuilt to share one row is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  inner <- vfold_one_shared(d)
+  expect_s3_class(inner, "vfold_cv")
+  expect_identical(inner$id[[2]], "Fold2")
+  folds <- with_inner(nested_cv_design(d, V3, V3), vfold_one_shared)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: split 2."
+  )
+})
+
+# An outer bootstrap rebuilt with make_splits() is refused by no class, and
+# its splits share no rows. But its analysis set repeats rows, so an inner
+# v-fold split puts some data row in both of its sets.
+rebuilt_outer_boots <- function(d) {
+  set.seed(7)
+  boots <- rsample::bootstraps(d, times = 3)
+  splits <- lapply(boots$splits, function(split) {
+    rsample::make_splits(
+      list(
+        analysis = split$in_id,
+        assessment = as.integer(rsample::complement(split))
+      ),
+      d
+    )
+  })
+  rsample::manual_rset(splits, paste0("Bootstrap", 1:3))
+}
+
+test_that("an inner split that shares a row the outer split repeats is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  outer <- rebuilt_outer_boots(d)
+  expect_true(anyDuplicated(outer$splits[[1]]$in_id) > 0L)
+
+  set.seed(1)
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_inner_overlap(cnd, "outer fold 1 whose")
+  expect_match(
+    flat_message(cnd),
+    "Splits 1, 2, and 3 of that fold's inner design share rows.",
+    fixed = TRUE
+  )
+
+  # rsample::nested_cv() builds the inner splits on each analysis set, where
+  # the repeated row sits at two positions.
+  set.seed(1)
+  folds <- rsample::nested_cv(d, outside = outer, inside = rsample::vfold_cv(v = 3))
+  cnd <- entry_refusal(
+    nested_tune_grid(det_workflow(d), folds, grid = det_grid())
+  )
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: splits 1, 2, and 3."
+  )
+})
+
+# The bootstrap's own apparent split shares every row too, and tune leaves it
+# out of its estimates, so it is exempt and the design runs (D-104).
+test_that("an inner bootstrap with its apparent split completes every fold", {
+  skip_if_no_engines()
+  run <- support_run(
+    support_data(),
+    V3,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  )
+  apparent <- run$folds$inner_resamples[[1]]$splits[[4]]
+  expect_s3_class(apparent, "apparent_split")
+  expect_true(any(rsample::complement(apparent) %in% apparent$in_id))
+  expect_identical(nrow(run$res), nrow(run$folds))
+  expect_true(all(run$res$.completed))
+})

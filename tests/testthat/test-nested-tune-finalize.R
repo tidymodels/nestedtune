@@ -348,18 +348,21 @@ test_that("AC4: an inner rset the rebuild does not apply to reaches run_tuner() 
 
   # An evaluated manual outer split whose `in_id` repeats a row: the inverse
   # of the remap is ambiguous there, so the frame is left as the design holds
-  # it.
+  # it. The inner folds group on `x1`, whose values are all distinct, so both
+  # copies of a row land on one side of every inner split: a copy on each
+  # side would share a row, which the design refuses (M134).
   repeated <- rsample::make_splits(
     list(analysis = c(1:60, 1:5), assessment = 61:90),
     d
   )
   expect_gt(anyDuplicated(repeated$in_id), 0L)
+  expect_false(anyDuplicated(d$x1) > 0L)
   outer <- rsample::manual_rset(list(repeated, repeated), c("a", "b"))
   set.seed(4)
   manual <- nested_resamples(
     d,
     outside = outer,
-    inside = rsample::vfold_cv(v = 2)
+    inside = rsample::group_vfold_cv(group = x1, v = 2)
   )
   seen <- record_run_tuner_resamples(
     nested_tune_grid(wf, manual, grid = det_grid(), metrics = ms)

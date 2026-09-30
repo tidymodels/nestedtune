@@ -385,6 +385,9 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # split's rows are read next (M134, D-103).
   check_outer_overlap(resamples, "resamples", call = call)
   check_inner_refused(resamples, call = call)
+  # The same rule on the inner splits, before the id rules, so a rebuilt
+  # apparent split under the id "Apparent" is not told to take another id.
+  check_inner_overlap(resamples, call = call)
   check_inner_ids(resamples, call = call)
   check_inner_apparent_ids(resamples, call = call)
   # Next the two class checks, which judge each element of the list columns;
@@ -543,9 +546,21 @@ misread_apparent_rows <- function(x) {
   if (!is.list(splits)) {
     return(integer())
   }
+  which(apparent_ids(x) & !bootstrap_apparent(x))
+}
+
+# Whether each split of `x` is a bootstrap's own apparent split: of class
+# `apparent_split`, and joined to the bootstrap splits beside it, which
+# split_designs() does only under the id "Apparent". tune leaves that split
+# out of its estimates, so misread_apparent_rows() and the inner rule on
+# shared rows both exempt it (D-100, D-104). Class inspection only.
+bootstrap_apparent <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  if (!is.list(splits)) {
+    return(logical())
+  }
   is_apparent <- vapply(splits, inherits, logical(1), "apparent_split")
-  joined <- split_designs(x) %in% c("bootstraps", "group_bootstraps")
-  which(apparent_ids(x) & !(is_apparent & joined))
+  is_apparent & split_designs(x) %in% c("bootstraps", "group_bootstraps")
 }
 
 apparent_id_reason <- paste(
@@ -733,8 +748,9 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
 # that labels the whole data differently, can turn into such a design.
 check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
   # The entry check's rules, in its order (M133, D-102): the refused designs
-  # and the rule on an apparent split beside bootstrap splits, then the two id
-  # rules, then the two "Apparent" rules. No reason names an outer fold, since
+  # and the rule on an apparent split beside bootstrap splits, then the rule
+  # on shared rows (M134, D-103), then the two id rules, then the two
+  # "Apparent" rules. No reason names an outer fold, since
   # the rebuilt design belongs to none: a design refused by its rset class
   # and each id rule speak of the final fit's one tuning run, and a design
   # found by its split classes gets its own flaw, as at entry.
@@ -750,6 +766,23 @@ check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
          {.fn rsample::{refused}} splits.",
         x = reason,
         hint
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
+  # The rebuilt design indexes the whole data, so its indexes are data rows.
+  shared <- inner_overlap_rows(inner)
+  if (length(shared) > 0L) {
+    n <- length(shared)
+    reason <- inner_overlap_reason(final = TRUE)
+    cli::cli_abort(
+      c(
+        "The design's inner resampling specification gave a split whose \\
+         analysis and assessment sets share rows.",
+        x = "{cli::qty(n)}Split{?s} {shared} of the rebuilt design \\
+             {cli::qty(n)}{?shares/share} rows.",
+        i = "{reason}"
       ),
       class = "nestedtune_bad_design",
       call = call
@@ -938,6 +971,96 @@ outer_overlap_reason <- paste(
   "Such a fold scores the model on rows it trained on, so the nested",
   "estimate would not measure performance on new data."
 )
+
+# Why an inner split that shares rows is refused, where it is tuned on: each
+# outer fold at entry, or the one tuning run of the final fit.
+inner_overlap_reason <- function(final = FALSE) {
+  cost <- if (final) {
+    "so the final fit would rank"
+  } else {
+    "so each outer fold that tunes on it would rank"
+  }
+  paste(
+    "Such a split scores the model on rows it trained on,",
+    cost,
+    "candidates partly on rows the model trained on."
+  )
+}
+
+# The inner splits of `x` that share rows, less a bootstrap's own apparent
+# split, which tune leaves out of its estimates (D-104). Under the two
+# racers the race rule still refuses that split.
+inner_overlap_rows <- function(x, rows = NULL) {
+  setdiff(overlap_rows(x, rows), which(bootstrap_apparent(x)))
+}
+
+# The same, for the inner design of one outer fold of a design that may have
+# been built anywhere. Its splits index the outer split's own frame or that
+# split's analysis set, told apart as check_inner_splits() tells them, and
+# the second are read through the outer `in_id`. A fold whose splits are not
+# all rsplits, or whose frames are another or disagree, is left to
+# check_inner_splits().
+fold_overlap_rows <- function(split, inner) {
+  splits <- if (is.data.frame(inner)) inner[["splits"]]
+  if (
+    !inherits(split, "rsplit") ||
+      !is.list(splits) ||
+      !all(vapply(splits, inherits, logical(1), "rsplit"))
+  ) {
+    return(integer())
+  }
+  kind <- unique(inner_frame_kinds(split, lapply(splits, `[[`, "data")))
+  if (length(kind) != 1L || identical(kind, "other")) {
+    return(integer())
+  }
+  rows <- if (identical(kind, "analysis")) as.integer(split[["in_id"]])
+  inner_overlap_rows(inner, rows)
+}
+
+# Every inner element holding a split that shares rows, grouped by the
+# splits found, so one message names every offending outer fold.
+check_inner_overlap <- function(resamples, call = rlang::caller_env()) {
+  outer <- resamples[["splits"]]
+  inner <- resamples[["inner_resamples"]]
+  if (!is.list(outer) || !is.list(inner)) {
+    return(invisible(resamples))
+  }
+  found <- Map(fold_overlap_rows, outer, inner)
+  hit <- which(lengths(found) > 0L)
+  if (length(hit) == 0L) {
+    return(invisible(resamples))
+  }
+  key <- vapply(found[hit], paste, character(1), collapse = " ")
+  lines <- vapply(
+    unique(key),
+    function(k) {
+      elements <- hit[key == k]
+      pos <- found[[elements[[1L]]]]
+      cli::format_inline(paste(
+        "{cli::qty(length(elements))}Element{?s} {elements} of",
+        "{.field inner_resamples}: {cli::qty(length(pos))}split{?s} {pos}."
+      ))
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
+  # Handed over as values, so cli does not parse the formatted text again.
+  bullets <- rlang::set_names(
+    sprintf("{lines[[%d]]}", seq_along(lines)),
+    rep("x", length(lines))
+  )
+  reason <- inner_overlap_reason()
+  cli::cli_abort(
+    c(
+      "{.arg resamples} has an inner split whose analysis and assessment \\
+       sets share rows.",
+      bullets,
+      i = "{reason}"
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
 
 # Every outer split that shares rows, in one message. `arg` names the
 # argument the design came in as. An apparent split shares every row, but
@@ -1296,48 +1419,18 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     )
   }
 
-  # Which frame each inner split carries: the outer split's own ("whole"),
-  # its analysis set, or neither ("other"). A fold's splits must all carry
-  # one of the first two. A fold whose splits all carry another frame gets
-  # one bullet; a fold whose splits disagree names every split with what it
-  # carries, the ones on another frame first. When the analysis set cannot
-  # be built (an outer `in_id` past the frame, M54) the splits not on the
-  # outer frame are left to `last_fit()` rather than judged against nothing.
+  # Which frame each inner split carries (inner_frame_kinds()). A fold's
+  # splits must all carry the outer split's own frame or its analysis set.
+  # A fold whose splits all carry another frame gets one bullet; a fold whose
+  # splits disagree names every split with what it carries, the ones on
+  # another frame first.
   whole <- vector("list", n)
   kind <- vector("list", n)
   for (f in seq_len(n)) {
     split <- outer[[f]]
     frames <- lapply(inner[[f]][["splits"]], function(s) s[["data"]])
-    is_whole <- vapply(frames, identical, logical(1), split[["data"]])
-    is_analysis <- rep(FALSE, length(frames))
-    left <- FALSE
-    if (!all(is_whole)) {
-      analysis <- outer_analysis(split)
-      if (is.null(analysis)) {
-        left <- TRUE
-      } else {
-        # One deep compare per distinct frame: the first split not on the
-        # outer frame is compared against the analysis set, and the others
-        # share its verdict when they carry the same frame (a pointer
-        # compare when it is the same object, as `nested_cv()` builds them).
-        rest <- which(!is_whole)
-        first <- rest[[1L]]
-        is_analysis[[first]] <- identical(frames[[first]], analysis)
-        for (s in rest[-1L]) {
-          is_analysis[[s]] <- if (identical(frames[[s]], frames[[first]])) {
-            is_analysis[[first]]
-          } else {
-            identical(frames[[s]], analysis)
-          }
-        }
-      }
-    }
-    whole[[f]] <- is_whole
-    kind[[f]] <- if (left) {
-      NULL
-    } else {
-      ifelse(is_whole, "whole", ifelse(is_analysis, "analysis", "other"))
-    }
+    whole[[f]] <- vapply(frames, identical, logical(1), split[["data"]])
+    kind[[f]] <- inner_frame_kinds(split, frames)
   }
   disagrees <- function(k) {
     !is.null(k) && (any(k == "other") || length(unique(k)) > 1L)
@@ -1442,6 +1535,39 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     )
   }
   invisible(resamples)
+}
+
+# Which frame each of an outer split's inner splits carries, given their
+# frames: the outer split's own ("whole"), its analysis set ("analysis"), or
+# neither ("other"). NULL when the analysis set cannot be built (an outer
+# `in_id` past the frame, M54): the splits not on the outer frame are then
+# left to `last_fit()` rather than judged against nothing. Read by
+# check_inner_splits() and by the rule on shared rows.
+inner_frame_kinds <- function(split, frames) {
+  is_whole <- vapply(frames, identical, logical(1), split[["data"]])
+  if (all(is_whole)) {
+    return(rep("whole", length(frames)))
+  }
+  analysis <- outer_analysis(split)
+  if (is.null(analysis)) {
+    return(NULL)
+  }
+  # One deep compare per distinct frame: the first split not on the outer
+  # frame is compared against the analysis set, and the others share its
+  # verdict when they carry the same frame (a pointer compare when it is the
+  # same object, as `nested_cv()` builds them).
+  is_analysis <- rep(FALSE, length(frames))
+  rest <- which(!is_whole)
+  first <- rest[[1L]]
+  is_analysis[[first]] <- identical(frames[[first]], analysis)
+  for (s in rest[-1L]) {
+    is_analysis[[s]] <- if (identical(frames[[s]], frames[[first]])) {
+      is_analysis[[first]]
+    } else {
+      identical(frames[[s]], analysis)
+    }
+  }
+  ifelse(is_whole, "whole", ifelse(is_analysis, "analysis", "other"))
 }
 
 # The outer split's analysis set, or NULL when it cannot be built: an outer

@@ -493,6 +493,21 @@ vfold_apparent <- function(data) {
     c(paste0("Fold", 1:3), "Apparent")
   )
 }
+# Every split of a bootstrap with its apparent split, rebuilt with
+# make_splits(), so no split keeps its class (M134, D-103).
+rebuilt_boots_apparent <- function(data) {
+  boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
+  splits <- lapply(boots$splits, function(split) {
+    rsample::make_splits(
+      list(
+        analysis = split$in_id,
+        assessment = as.integer(rsample::complement(split))
+      ),
+      data
+    )
+  })
+  rsample::manual_rset(splits, boots$id)
+}
 
 # Each reason is text found in the message's bullets and not in its
 # headline, which already names the design or the id flaw, so matching the
@@ -535,6 +550,12 @@ FINAL_REFUSED <- list(
   "repeated id" = list(
     inside = quote(repeated_id_vfold()),
     reason = "tune miscounts the resamples of a design whose ids repeat"
+  ),
+  # The rebuilt apparent split keeps the id "Apparent", but the rule on its
+  # rows comes before the id rules, so it is not told to rename the split.
+  "rebuilt bootstrap apparent split" = list(
+    inside = quote(rebuilt_boots_apparent()),
+    reason = c("Split 4 of", "scores the model on rows it trained on")
   ),
   # An apparent split beside v-fold splits alone, which the entry check
   # refuses as apparent(). Before M133 the final fit told it to rename.

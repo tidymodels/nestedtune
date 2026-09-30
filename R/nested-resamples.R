@@ -277,6 +277,25 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
       call = call
     )
   }
+  # The rule of check_inner_overlap(), for this one fold (M134, D-103). The
+  # inner splits index the analysis frame, so each index is read as the data
+  # row the outer `in_id` puts there.
+  shared <- inner_overlap_rows(inner_rset, outer_idx)
+  if (length(shared) > 0L) {
+    n <- length(shared)
+    reason <- inner_overlap_reason()
+    cli::cli_abort(
+      c(
+        "{.arg inside} gave a split for outer fold {fold} whose analysis and \\
+         assessment sets share rows.",
+        x = "{cli::qty(n)}Split{?s} {shared} of that fold's inner design \\
+             {cli::qty(n)}{?shares/share} rows.",
+        i = "{reason}"
+      ),
+      class = "nestedtune_bad_design",
+      call = call
+    )
+  }
   # The two id rules of check_inner_ids(), for this one fold (M133, D-102).
   if (length(missing_id_rows(inner_rset)) > 0L) {
     cli::cli_abort(

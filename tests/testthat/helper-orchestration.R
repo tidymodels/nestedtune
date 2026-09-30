@@ -2933,25 +2933,31 @@ malformed_designs <- function(data) {
     x <- base
     fragments <- character(0)
     for (f in at) {
+      # `index_of` may give two indexes: the first goes to `in_id` and the
+      # last to `out_id`. One held-out row in both slots of a split would
+      # meet the rule on shared rows first (M134), which is not under test.
       i <- index_of(f)
       s <- x$inner_resamples[[f]]$splits[[n_inner]]
       if (slot %in% c("in_id", "both")) {
-        s$in_id <- c(s$in_id, i)
+        s$in_id <- c(s$in_id, i[[1L]])
       }
       if (slot %in% c("out_id", "both")) {
-        s$out_id <- c(s$out_id, i)
+        s$out_id <- c(s$out_id, i[[length(i)]])
       }
       x$inner_resamples[[f]]$splits[[n_inner]] <- s
       fragments <- c(
         fragments,
         sprintf("Outer fold %d, inner split %d", f, n_inner),
-        sprintf("holds %d", i)
+        sprintf("holds %d", unique(i))
       )
     }
     record(x, fragments = fragments)
   }
   held_out <- function(f) {
     as.integer(rsample::complement(base$splits[[f]])[[1L]])
+  }
+  held_out_pair <- function(f) {
+    as.integer(rsample::complement(base$splits[[f]])[1:2])
   }
   past_end <- function(f) 999999L
   not_rsplit <- list(
@@ -2994,7 +3000,11 @@ malformed_designs <- function(data) {
     inner_rules[[paste0("inner_frame_mixed_", fp)]] <- plant_mixed(at)
     for (slot in c("in_id", "out_id", "both")) {
       inner_rules[[paste("index_held_out", slot, fp, sep = "_")]] <-
-        plant_index(at, slot, held_out)
+        plant_index(
+          at,
+          slot,
+          if (identical(slot, "both")) held_out_pair else held_out
+        )
       inner_rules[[paste("index_past_end", slot, fp, sep = "_")]] <-
         plant_index(at, slot, past_end)
     }
