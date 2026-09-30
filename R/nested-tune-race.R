@@ -28,6 +28,17 @@
 #' `grid` is the design the race is offered. A data frame must have one
 #' column per tuned parameter and no other column.
 #'
+#' An inner design that holds an apparent split, such as the one
+#' `bootstraps(apparent = TRUE)` adds, is refused at entry with class
+#' `nestedtune_bad_design`. finetune eliminates race candidates on the score
+#' of each split it has run, and the score of an apparent split comes from
+#' the rows the model trained on. Build the bootstrap with
+#' `apparent = FALSE`. If a workflow in a set routes to a racer,
+#' [nested_workflow_map()] refuses such a design before its first workflow
+#' runs. The
+#' other tuners accept the split, because tune leaves it out of its
+#' estimates.
+#'
 #' @template details-param-info
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_race_anova

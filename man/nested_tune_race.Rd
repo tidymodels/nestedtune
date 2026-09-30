@@ -170,6 +170,17 @@ at entry, before any fold runs.
 \code{grid} is the design the race is offered. A data frame must have one
 column per tuned parameter and no other column.
 
+An inner design that holds an apparent split, such as the one
+\code{bootstraps(apparent = TRUE)} adds, is refused at entry with class
+\code{nestedtune_bad_design}. finetune eliminates race candidates on the score
+of each split it has run, and the score of an apparent split comes from
+the rows the model trained on. Build the bootstrap with
+\code{apparent = FALSE}. If a workflow in a set routes to a racer,
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} refuses such a design before its first workflow
+runs. The
+other tuners accept the split, because tune leaves it out of its
+estimates.
+
 \code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
 section on finalizing a parameter range says where a range that depends
 on the data is finalized.
@@ -349,8 +360,11 @@ split among valid ones. Bootstrap and permutation designs can add an
 apparent split with the id "Apparent", which tune leaves out of its
 estimates. So an apparent split beside bootstrap or permutation splits
 counts as part of that design only if its id is "Apparent". Under any
-other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}} split. The checks exist
-because
+other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}} split. In the inner loop,
+tune leaves every split with the id "Apparent" out of its estimates,
+whatever the split's class. So any other inner split with that id is
+refused. Otherwise the fold tunes on fewer resamples than its design
+holds. The checks exist because
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
 returned, and because a design assembled by hand can index rows its outer
 fold never sees.

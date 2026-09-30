@@ -51,6 +51,9 @@
 #' that design only if its id is "Apparent", the id tune leaves out of its
 #' estimates. Under any other id, it counts as an [rsample::apparent()]
 #' split, so an `inside` that adds one to bootstrap splits is refused.
+#' tune leaves every inner split with the id "Apparent" out of its
+#' estimates, whatever the split's class. So an `inside` that gives any other
+#' split that id is refused too, and the refusal names the outer fold.
 #'
 #' @section Time-series designs:
 #'

@@ -136,6 +136,16 @@ identity in it. One is
 no longer a \code{nested_results}, because an operation that added or removed
 rows returned a plain tibble. And one has no rows.
 
+The inner design is rebuilt on all the data from the recorded inner
+specification. It is refused with class \code{nestedtune_bad_design} if it
+holds a split with the id "Apparent" that is not the apparent split of a
+bootstrap, since tune leaves every split with that id out of its
+estimates. For a race it is also refused if it holds an apparent split,
+since the race eliminates candidates on that split's score. The entry
+checks of the other functions refuse both, so this refusal reaches a
+record made before those checks, or an inner specification that labels
+the whole data differently.
+
 A results object in which no outer fold completed is refused next, with class
 \code{nestedtune_no_completed_folds}. There is no estimate to report the model
 with, and \code{summary()} lists the stage each fold failed at. That is the

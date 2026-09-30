@@ -163,7 +163,10 @@ naming convention.
   class, so a row subset, a `manual_rset()` rebuild or one such split among
   valid ones is refused too (D-097, M129). An apparent split beside bootstrap
   or permutation splits counts as part of that design only under the id
-  "Apparent", which tune leaves out of its estimates (D-099, M131). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  "Apparent", which tune leaves out of its estimates (D-099, M131). Any other
+  inner split under that id is refused, and the two racers refuse a
+  bootstrap's apparent split too, because finetune's race reads its score
+  (D-100, M132). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
