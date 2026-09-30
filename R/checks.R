@@ -551,27 +551,29 @@ apparent_id_reason <- paste(
   "design holds. Give the split another id."
 )
 
-# The rows of `x` whose `id`, read as a label, is missing. tune 2.1.0 keeps
-# the rows whose id is not "Apparent" (tune:::estimate_tune_results()), and
-# that comparison gives NA for a missing id, so the split drops out of its
-# estimate and an empty metric row joins it (M133, D-102). A factor whose NA
-# is a level answers FALSE to is.na() but labels the split with nothing all
-# the same. Only `id` is read: tune filters on no other id column. Class
-# inspection only, like split_designs().
+# The rows of `x` whose `id` is missing. tune 2.1.0 keeps the rows whose id
+# is not "Apparent" (tune:::estimate_tune_results()), and that comparison
+# gives NA for a missing id, so the split drops out of its estimate and an
+# empty metric row joins it (M133, D-102). A factor whose NA is a level
+# answers FALSE to is.na(), the comparison gives TRUE, and tune keeps the
+# split, so it is not refused (D-105). Only `id` is read: tune filters on no
+# other id column. Class inspection only, like split_designs().
 missing_id_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   ids <- if (is.data.frame(x)) x[["id"]]
   if (!is.list(splits) || !is.atomic(ids) || length(ids) != length(splits)) {
     return(integer())
   }
-  which(is.na(as.character(ids)))
+  which(is.na(ids))
 }
 
 # The rows of `x` that share their values in every id column with another
 # row, read as labels. tune miscounts the resamples of such a design (M133,
 # D-102). A repeated design's `id` repeats across `id2`, so only the whole
 # set of id columns tells its splits apart. Two missing values compare equal,
-# as tune's own summaries treat them; a row whose `id` is missing is left to
+# as tune treats them when it assembles its results: two NA `id2` values
+# under one `id` gave 8 result rows for 6 splits (probed at M133). A factor's
+# NA level reads as missing here too. A row whose `id` is NA is left to
 # missing_id_rows().
 repeated_id_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
@@ -728,8 +730,10 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
 check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
   # The entry check's rules, in its order (M133, D-102): the refused designs
   # and the rule on an apparent split beside bootstrap splits, then the two id
-  # rules, then the two "Apparent" rules. The reasons speak of the final fit's
-  # one tuning run, since the rebuilt design belongs to no outer fold.
+  # rules, then the two "Apparent" rules. No reason names an outer fold, since
+  # the rebuilt design belongs to none: a design refused by its rset class
+  # and each id rule speak of the final fit's one tuning run, and a design
+  # found by its split classes gets its own flaw, as at entry.
   refused <- inner_refused_design(inner)
   if (!is.na(refused)) {
     hint <- if (renamed_apparent(inner, refused)) {

@@ -1086,12 +1086,19 @@ first_id_missing <- function(as_id) {
 
 MISSING_ID <- list(
   character = edit_ids(vfold3, first_id_missing(identity)),
-  factor = edit_ids(vfold3, first_id_missing(factor)),
-  "factor NA level" = edit_ids(
-    vfold3,
-    first_id_missing(function(ids) addNA(factor(ids)))
-  )
+  factor = edit_ids(vfold3, first_id_missing(factor))
 )
+
+# A factor whose NA is a level: is.na() does not see it, tune's comparison
+# with "Apparent" gives TRUE, and tune keeps the split (D-105).
+na_level_ids <- function(rows) {
+  function(rset) {
+    ids <- as.character(rset$id)
+    ids[rows] <- NA
+    rset$id <- addNA(factor(ids))
+    rset
+  }
+}
 
 REPEATED_ID <- list(
   id = edit_ids(vfold3, function(rset) {
@@ -1105,7 +1112,9 @@ REPEATED_ID <- list(
   "missing id2" = edit_ids(vfold3x2, function(rset) {
     rset$id2[1:2] <- NA
     rset
-  })
+  }),
+  # Two NA levels read as one missing label, and tune counts them together.
+  "two NA levels" = edit_ids(vfold3, na_level_ids(1:2))
 )
 
 MISSING_ID_REASON <- "tune leaves a split with a missing id out of its estimates"
@@ -1134,10 +1143,6 @@ test_that("an inner split with a missing id is refused", {
   skip_if_no_engines()
   d <- support_data(n = 30)
   wf <- det_workflow(d)
-  # The NA level reads as a missing label, although is.na() does not see it.
-  level <- MISSING_ID[["factor NA level"]](d)
-  expect_false(anyNA(level$id))
-  expect_true(is.na(as.character(level$id[[1]])))
   expect_id_refusals(MISSING_ID, MISSING_ID_REASON, d, wf)
 })
 
@@ -1171,11 +1176,21 @@ test_that("repeated v-fold ids and a missing id2 still reach the folds", {
   # The id column repeats across id2 in a repeated design, so only the pair
   # of the two columns tells the splits apart.
   expect_true(anyDuplicated(vfold3x2(d)$id) > 0L)
-  for (build in list(vfold3x2, one_missing_id2)) {
+  one_na_level <- edit_ids(vfold3, na_level_ids(1))
+  level <- one_na_level(d)
+  expect_false(anyNA(level$id))
+  expect_true(is.na(levels(level$id)[level$id[[1]]]))
+  for (build in list(vfold3x2, one_missing_id2, one_na_level)) {
     folds <- with_inner(nested_cv_design(d, V3, V3), build)
     cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
     expect_s3_class(cnd, "nestedtune_sentinel")
   }
+  built <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = one_na_level()
+  )
+  expect_s3_class(built, "nested_resamples")
 })
 
 # finetune's race eliminates candidates on unsummarized metrics, which keep

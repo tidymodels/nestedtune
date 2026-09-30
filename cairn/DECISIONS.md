@@ -2033,6 +2033,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-103 stands, with its exemption corrected. An `apparent_split` whose id is "Apparent" beside bootstrap splits is exempt from the overlap rule under every tuner. Under the two racers, the race rule of D-100 still refuses it.
 **Consequences:** the racers' refusal of that split keeps its message, and no design refused before is accepted.
 
+### D-105 (2026-09-30): the missing-id rule reads the inner `id` with `is.na()`, so a factor's NA level is not refused. Corrects D-102's Decision
+
+**Context:** D-102 reads the inner `id` with `as.character()`, which turns a factor's NA level into NA. M133's claim audit found that tune keeps such a split. Its comparison with "Apparent" gives TRUE for the level, so the refusal's reason, that tune leaves the split out, was false there.
+**Decision:** D-102 stands, except that the missing-id rule reads `id` with `is.na()`, as tune's comparison does. A factor id with NA as a level runs. The repeated-id rule keeps reading every id column with `as.character()`. So two NA levels in one column count as the same label, which tune also miscounts. The outer rule of D-047 is unchanged. It refuses such a label, because the results object names each outer fold by its label. Rejected: refusing the level with its own reason, because the plan gate refuses only what tune misreads.
+**Consequences:** the two loops read an NA level differently, for the reasons above. Falsified by a tune release that drops a split whose id is an NA level.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

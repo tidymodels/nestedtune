@@ -459,8 +459,8 @@ test_that("the final fit refuses an inner split relabelled Apparent", {
 
 # The rebuilt design also gets the entry check's design refusals and its two
 # id rules, in the entry check's order: the refused designs first, then the
-# id rules, then the "Apparent" rules (M133, D-102). The messages speak of
-# the one tuning run the final fit makes, never of an outer fold.
+# id rules, then the "Apparent" rules (M133, D-102). The messages never name
+# an outer fold.
 # The builders `inside` calls, at file level: the final fit evaluates
 # `inside` in the frame that calls it, which is expect_final_refused()'s.
 loo_splits <- function(data) {
@@ -560,6 +560,27 @@ test_that("the final fit refuses the designs and ids the entry check refuses", {
   for (name in names(FINAL_REFUSED)) {
     expect_final_refused(wf, res, FINAL_REFUSED[[name]])
   }
+})
+
+# tune keeps a split whose factor id has NA as a level, so the final fit
+# tunes on such a design (D-105).
+na_level_vfold <- function(data) {
+  folds <- rsample::vfold_cv(data, v = 3)
+  ids <- as.character(folds$id)
+  ids[[1]] <- NA
+  folds$id <- addNA(factor(ids))
+  folds
+}
+
+test_that("the final fit tunes on an inner id whose NA is a factor level", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  res <- final_results(d)
+  attr(res, "inside") <- quote(na_level_vfold())
+  fit <- nested_final_fit(wf, res)
+  expect_s3_class(fit, "nested_final_fit")
 })
 
 test_that("the final fit of a race refuses permutations as permutations", {
