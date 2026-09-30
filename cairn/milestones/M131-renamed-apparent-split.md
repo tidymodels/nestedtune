@@ -64,6 +64,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: review started. AC4 has its evidence, and the three reviewers reported. The suite and `devtools::check()` are still running. Checkpoint.
 - 2026-09-29: review evidence recorded for all five criteria, the consistency gate passed and the 13 findings are logged with proposed dispositions. Pre-gate checkpoint.
 - 2026-09-29: gate triage accepted all proposed dispositions. The six fixes are in, and the design-support file passes 49 blocks. The full suite and `devtools::check()` are running on the fixed code. Checkpoint.
+- step-7 approval: m131-renamed-apparent-split approved for merge
 
 ## Decisions
 
