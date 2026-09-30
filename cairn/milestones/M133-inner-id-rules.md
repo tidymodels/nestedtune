@@ -1,6 +1,6 @@
 # M133: Refuse inner ids that tune misreads, at entry and at the final fit
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - [x] T3: Write the AC3 tests first, beside the "Apparent" block of `tests/testthat/test-nested-final-fit-checks.R` (line 429). The racer case skips where `tuner_ready()` is false (M101 lesson).
 - [x] T4: Extend `check_final_inner()` (`R/checks.R:608`). Run `inner_refused_design()` with a reason about the rebuilt design, with the `renamed_apparent()` hint. Then run the AC1 and AC2 rules, then the two "Apparent" rules. Update the comment on `misread_apparent_rows()` (line 531), which says that the final fit gets no refused-design check.
 - [x] T5: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40` and the "Nested designs" section at `R/nested-tune-grid.R:102`. Add the final fit's checks to its "What is refused" section (`R/nested-final-fit.R:98`). Add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
-- [ ] T6: In `FINAL_REFUSED`, give the six design cases reason text that only the reason bullet holds, so each test fails with the reason removed. Show that by removing it once. Update the header comment of `check_final_inner()`, which names only the "Apparent" rules.
+- [x] T6: In `FINAL_REFUSED`, give the six design cases reason text that only the reason bullet holds, so each test fails with the reason removed. Show that by removing it once. Update the header comment of `check_final_inner()`, which names only the "Apparent" rules.
 
 ## Work log
 
@@ -67,6 +67,7 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - 2026-09-30: implement resumed after review pass 1. No question gate. Added T6 (Coverage AC3 → T3, T4, T6). Checkpoint: T6 tests edited, and with the reason blanked the seven design cases fail. The full suite and the claim re-read are still running, so T6 is not ticked.
 - 2026-09-30: claim audit: 4 claims read, 1 corrected — tests/testthat/test-nested-final-fit-checks.R. The renamed-bootstrap case matched the hint alone, so it now asserts the ✖ bullet too. The re-read found the corrected comment holds.
 - 2026-09-30: at `c62be79c`, `devtools::test()` gave 0 failures, 0 errors and 0 skips over 1177 blocks. The final-fit file passed again after the renamed-bootstrap edit. Both plain prose sweeps were clean, and `devtools::document()` left no diff. `devtools::check()` is running.
+- 2026-09-30: `devtools::check()` gave 0 errors, 0 warnings and 0 notes at `2fd73e11`. T6 ticked, status set to review.
 
 ## Decisions
 
