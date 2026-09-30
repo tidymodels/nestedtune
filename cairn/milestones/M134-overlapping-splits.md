@@ -75,6 +75,8 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: claim audit: 95 claims read, 6 corrected — R/checks.R, R/nested-resamples.R, R/nested-tune-grid.R, tests/testthat/test-design-support.R
 - 2026-09-30: the fresh Opus reader found two false claims. The overlap rules crashed on an atomic `rsplit`, and the lag hint keyed on the split class, not the lag. It also found four loose ones: the NEWS and advice wording, the "every test uses `lag = 0`" sentence, the "exempt" sentence on the race page, and the `assess + lag` size. All six were fixed at `264869ad`, and the same reader cleared them on its one re-read. Its nit on the `lag_hint()` comment was reworded after. The crash in `check_inner_splits()` on that element is also on main, and went to the M134 leftovers row.
 - 2026-09-30: T7 to T10 done. `devtools::check()` at `264869ad` gave 0 errors, 0 warnings and 0 notes. The only later commit changes one comment. Status set to review.
+- 2026-09-30: review pass 2 started at `3727680e`, which contains main `b182fa6a`, so no sync merge. No PR exists. The four criterion boxes were unticked, because the pass 1 evidence predates T7 to T10. Each is ticked again as its pass 2 evidence lands.
+- 2026-09-30: review pass 2 pre-gate checkpoint. AC1 to AC4 verified and ticked, and the consistency gate passed. Sixteen findings are logged as S1 to S16 for the approval gate. S1 is a new unclassed crash that main does not have.
 
 ## Decisions
 
@@ -113,3 +115,35 @@ Gate dispositions, 2026-09-30. The user sent the milestone back and chose to kee
 - R9: rejected, because AC1 sets that order.
 - R10: rejected, because Scope Out keeps rebuilt designs unrecognized.
 - R11: rejected as a separate item. T7's D-entry names D-099.
+
+### Pass 2
+
+Evidence gathered 2026-09-30 at `3727680e`, after T7 to T10. The branch already contains main `b182fa6a`, so no sync merge was needed. No PR exists yet.
+
+- AC1: `test-design-support.R` run alone with `NOT_CRAN=true` gave 72 blocks, 0 failed, 0 errors, 0 skipped. The block "an outer split that shares rows is refused at entry and at construction" passes, and so does the `apparent()` block. The new outer `lag` block passes too. Code read: `check_outer_overlap()` still runs after `check_outer_splits()` in `check_nested()` and in `nested_resamples()`.
+- AC2: in the same run, the blocks for cases 1 to 7 and the passing control pass. Case 4 runs under `nested_tune_race_anova()` and under `nested_tune_race_win_loss()`, one block each, and neither skipped. Case 8 is the "rebuilt bootstrap apparent split" block of `test-nested-final-fit-checks.R`, which gave 31 blocks, 0 failed, 0 errors, 0 skipped. Code read: the overlap rule still runs after the refused-design check and before the id and "Apparent" rules, at entry, at construction and in `check_final_inner()`.
+- AC3: diff read. The README "Refused" paragraph, the `outside` block of `?nested_resamples` and the "Nested designs" section of `?nested_tune_grid` state both rules. The "What is refused" section of `?nested_final_fit` names the shared-row rule. `NEWS.md` has one bullet for both rules, and it now names the `lag` refusal. `devtools::document()` and `devtools::build_readme()` left no diff.
+- AC4: `devtools::test()` with the summary reporter gave 0 failures and 0 errors. Its one skip is the empty block at `test-suite-hygiene.R:25`, which an older candidate row lists. The `Yes` design tests in `test-design-support.R` pass in the 72-block run above. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min 12 s. All six gating prose sweeps exited 0.
+
+Consistency gate, pass 2: `cairn_validate.py` exited 0, with 18 staleness advisories on `references/` pages only. `cairn_impact.py --changed` found no changed principle in `DESIGN.md`. `document()` and `build_readme()` left no diff, and `pkgdown::check_pkgdown()` found no problems. `NEWS.md` has the entry, and the branch adds no new file.
+
+Review findings, pass 2. Three fresh reviewers read the branch again: an Opus diff reviewer, a Sonnet history reviewer and a Sonnet prior-review reviewer. Duplicates are merged, and the most severe comes first. The disposition of each is set at the approval gate.
+
+- S1 (Opus): if an outer `in_id` holds NA, `nested_resamples()` now stops with the unclassed error "vector size cannot be NA". The inner overlap rule maps indexes through that `in_id` and never checks it (`R/checks.R:987`, from `R/nested-resamples.R:300`). Probe: main `b182fa6a` builds the same design without error.
+- S2 (Opus): D-107 says the refusal adds the hint for a named rolling-origin split. Since `264869ad`, `lag_hint()` reads the rset's class and `lag` attribute instead.
+- S3 (prior-review): `air format --check` fails on `tests/testthat/test-design-support.R`, and passes on main's copy. The org `format-suggest` workflow flags any reflow (LESSONS M50).
+- S4 (Opus, prior-review): the time-series paragraph of `?nested_tune_grid` at `R/nested-tune-grid.R:153` says an outer `rolling_origin()` is supported, with no word on `lag`. Every tuner page inherits it.
+- S5 (Opus): an rset that drops its `lag` attribute loses the hint. Probe: `nested_cv(d, rolling_origin(lag = 2), vfold_cv())[1:2, ]` is refused with the class but no hint. NEWS says the error suggests `lag = 0` with no condition, and the README names `folds[1:2, ]` as a common rebuild.
+- S6 (Opus, prior-review): `LAG_HINT` in `test-design-support.R:1615` matches only "Use `lag = 0`", a part of the hint. M131 O9 was fixed by matching the whole hint.
+- S7 (prior-review): `expect_lag_refused()` asserts no `conditionCall()`, while the other overlap tests do (M108 R3).
+- S8 (history): `test-design-support.R:1677` asserts `attr(edited, "lag")` is the double 0 with `expect_identical()`, so an rsample release that stores an integer breaks it.
+- S9 (Opus): `rsample::validation_time_split(lag = 3)` is refused in either loop with no hint. rsample 1.3.2 deprecates it, and the README table does not list it.
+- S10 (Opus): an outer `out_id` of 1.5 is refused as a shared row, because `in_frame()` accepts a double that is not whole. Also, `complement_is_default()` reads only registered methods, so an unregistered `complement()` method is skipped.
+- S11 (prior-review): the `lag` hint reads every named split. So if one named split is lagged and another overlaps for another reason, the message still gives the hint. The hint stays true in that case.
+- S12 (history, prior-review): in `cairn/DESIGN.md`, the `lag` sentence now sits just before the "Tension to stress-test" note.
+- S13 (prior-review): the README "Refused" paragraph is one long block, and `?nested_final_fit` has three "It is also refused if" sentences in a row. The sweeps pass.
+- S14 (history): the README table keeps `rolling_origin()` at `Yes` while `lag` above 0 is refused.
+- S15 (history): the M59 control now uses `group_vfold_cv()`, not `vfold_cv()`. Code read: `inner_frame_kinds()` compares frames and reads no split class.
+- S16 (history): `index_held_out_both` no longer puts one row in both sets. This is R4, already a candidate row.
+
+Two more items reached the session in a message that claimed to be the Opus report but did not come through the agent channel. The real report does not hold them, so they are not logged as findings: the final-fit `lag` case asserts no location, and no test covers `lag` at or above `assess`.
