@@ -206,6 +206,13 @@ nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
       }
     })
   }
+  # A race misreads a bootstrap's apparent split, which the other routes
+  # accept (D-100). The design comes from the call alone, so it is read once,
+  # before an earlier workflow on another route runs on it.
+  racers <- paste0("nested_", racer_tuners)
+  if (any(routes %in% racers)) {
+    check_race_apparent(dots[["resamples"]], call = call)
+  }
 
   # The seed envelope. Each orchestrator puts the caller's state back on
   # exit (D-011), so a session that had drawn would hand every workflow the

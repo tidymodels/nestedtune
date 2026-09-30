@@ -548,6 +548,54 @@ apparent_id_reason <- paste(
   "split another id."
 )
 
+# The two racers. finetune 1.3.0 eliminates race candidates on
+# `tune::collect_metrics(summarize = FALSE)` (test_parameters_gls() and
+# test_parameters_bt(), read 2026-09-29), which keeps the split whose id is
+# "Apparent". So a race drops candidates on a score from the rows the model
+# trained on, although tune's estimate leaves that split out (M132, D-100).
+racer_tuners <- c("tune_race_anova", "tune_race_win_loss")
+
+# Whether `x` holds an apparent split. Any id counts: under another id the
+# entry check has already refused the split as apparent(). Class inspection
+# only, like split_designs().
+holds_apparent_split <- function(x) {
+  splits <- if (is.data.frame(x)) x[["splits"]]
+  is.list(splits) &&
+    any(vapply(splits, inherits, logical(1), "apparent_split"))
+}
+
+race_apparent_reason <- paste(
+  "A race eliminates candidates on the score of every split it has run, and",
+  "the score of an apparent split comes from the rows the model trained on.",
+  "Build the bootstrap with `apparent = FALSE`."
+)
+
+# Every inner element holding an apparent split, for a racer's entry and for
+# `nested_workflow_map()` before its first workflow runs. `resamples` may be
+# anything, since the map reads it before any class check.
+check_race_apparent <- function(resamples, call = rlang::caller_env()) {
+  inner <- if (is.data.frame(resamples)) resamples[["inner_resamples"]]
+  if (!is.list(inner)) {
+    return(invisible(resamples))
+  }
+  hit <- which(vapply(inner, holds_apparent_split, logical(1)))
+  if (length(hit) == 0L) {
+    return(invisible(resamples))
+  }
+  n <- length(hit)
+  # The reason is handed over as a value, so cli does not parse it again.
+  cli::cli_abort(
+    c(
+      "{.arg resamples} has an inner design that a race would misread.",
+      x = "{cli::qty(n)}Element{?s} {hit} of {.field inner_resamples} \\
+           {cli::qty(n)}{?holds/hold} an apparent split.",
+      i = "{race_apparent_reason}"
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
+
 # Every inner element holding a split that misread_apparent_rows() finds, so
 # one message names every offending outer fold.
 check_inner_apparent_ids <- function(resamples, call = rlang::caller_env()) {

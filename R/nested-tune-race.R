@@ -316,6 +316,7 @@ nested_tune_race <- function(
   check_workflow(object, call = call)
   check_untuned_workflow(object, call = call)
   check_nested(resamples, call = call)
+  check_race_apparent(resamples, call = call)
   check_grid(grid, call = call)
   check_grid_params(object, grid, call = call)
   check_metrics(metrics, call = call)

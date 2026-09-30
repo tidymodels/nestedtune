@@ -1064,3 +1064,127 @@ test_that("a bootstrap's own apparent split still reaches the folds", {
   cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
+
+# finetune's race eliminates candidates on unsummarized metrics, which keep
+# a bootstrap's apparent split, so the two racers refuse that split (M132,
+# D-100). The other tuners read tune's summarized estimate, which leaves it
+# out, and keep accepting it.
+RACE_APPARENT_REASON <- c(
+  "eliminates candidates on the score",
+  "rows the model trained on"
+)
+
+expect_race_refused <- function(cnd) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  for (reason in RACE_APPARENT_REASON) {
+    expect_match(flat_message(cnd), reason, fixed = TRUE)
+  }
+}
+
+# The exports, where the helpers' RACERS names the tuners.
+RACE_EXPORTS <- c("nested_tune_race_anova", "nested_tune_race_win_loss")
+
+race_call <- function(fn, wf, folds) {
+  switch(
+    fn,
+    nested_tune_race_anova = nested_tune_race_anova(
+      wf,
+      folds,
+      grid = det_grid()
+    ),
+    nested_tune_race_win_loss = nested_tune_race_win_loss(
+      wf,
+      folds,
+      grid = det_grid()
+    )
+  )
+}
+
+test_that("the racers refuse a bootstrap's apparent split at entry", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  boots <- quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  for (fn in RACE_EXPORTS) {
+    if (!tuner_ready(fn)) {
+      next
+    }
+    folds <- nested_cv_design(d, V3, boots)
+    cnd <- entry_refusal(race_call(fn, wf, folds))
+    expect_race_refused(cnd)
+    expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+  }
+
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
+  # A group bootstrap, a manual_rset() rebuild and a factor id, under one race.
+  designs <- list(
+    group_bootstraps = function() {
+      nested_cv_design(
+        d,
+        V3,
+        quote(rsample::group_bootstraps(group = g, times = 3, apparent = TRUE))
+      )
+    },
+    rebuilt = function() {
+      folds <- nested_cv_design(d, V3, boots)
+      folds$inner_resamples <- lapply(folds$inner_resamples, rebuilt)
+      expect_s3_class(folds$inner_resamples[[1]], "manual_rset")
+      folds
+    },
+    factor_id = function() {
+      with_inner(
+        nested_cv_design(d, V3, V3),
+        function(data) with_apparent(data, "bootstraps", factor("Apparent"))
+      )
+    }
+  )
+  for (name in names(designs)) {
+    folds <- designs[[name]]()
+    inner <- folds$inner_resamples[[1]]
+    last <- nrow(inner)
+    expect_s3_class(inner$splits[[last]], "apparent_split")
+    expect_identical(as.character(inner$id[[last]]), "Apparent")
+    cnd <- entry_refusal(
+      nested_tune_race_anova(wf, folds, grid = det_grid())
+    )
+    expect_race_refused(cnd)
+  }
+})
+
+test_that("a race still reaches the folds on a bootstrap without its apparent split", {
+  skip_if_no_engines()
+  skip_if_not(tuner_ready("nested_tune_race_anova"))
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  folds <- nested_cv_design(
+    d,
+    V3,
+    quote(rsample::bootstraps(times = 4, apparent = FALSE))
+  )
+  cnd <- entry_refusal(nested_tune_race_anova(wf, folds, grid = det_grid()))
+  expect_s3_class(cnd, "nestedtune_sentinel")
+})
+
+test_that("the map refuses a bootstrap's apparent split before any workflow runs", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  folds <- nested_cv_design(
+    d,
+    V3,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  )
+  # The unmarked workflow comes first and routes to nested_fit_resamples(),
+  # which accepts the design. The sentinel stands in for the fold dispatch,
+  # so the bad-design class shows that none of its folds ran.
+  for (fn in RACE_EXPORTS) {
+    skip_if_no_wset_fixture(fn)
+    set <- workflowsets::as_workflow_set(
+      fixed = fixed_workflow(d),
+      tuned = det_workflow(d)
+    )
+    cnd <- entry_refusal(
+      nested_workflow_map(set, fn = fn, resamples = folds, grid = det_grid())
+    )
+    expect_race_refused(cnd)
+  }
+})
