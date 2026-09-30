@@ -65,6 +65,8 @@ The entry check and the final fit refuse an inner design that tune misreads by i
 - 2026-09-30: at `6ea5ddbe`, `devtools::document()` left no diff, and `devtools::test()` gave 0 failures, 0 errors and 0 skips. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. Both prose sweeps were clean, and `air` passed on the touched files. T1 to T5 ticked, status set to review.
 - 2026-09-30: review pass 1 returned to in-progress (defect return 1). AC3 fails: six of ten final-fit test calls assert headline text, not the reason, so they pass with the reason removed. AC1, AC2 and AC4 verified, and `devtools::check()` not run. Findings R1 to R14 in the Review section.
 - 2026-09-30: implement resumed after review pass 1. No question gate. Added T6 (Coverage AC3 → T3, T4, T6). Checkpoint: T6 tests edited, and with the reason blanked the seven design cases fail. The full suite and the claim re-read are still running, so T6 is not ticked.
+- 2026-09-30: claim audit: 4 claims read, 1 corrected — tests/testthat/test-nested-final-fit-checks.R. The renamed-bootstrap case matched the hint alone, so it now asserts the ✖ bullet too. The re-read found the corrected comment holds.
+- 2026-09-30: at `c62be79c`, `devtools::test()` gave 0 failures, 0 errors and 0 skips over 1177 blocks. The final-fit file passed again after the renamed-bootstrap edit. Both plain prose sweeps were clean, and `devtools::document()` left no diff. `devtools::check()` is running.
 
 ## Decisions
 
