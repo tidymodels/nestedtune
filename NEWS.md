@@ -18,8 +18,8 @@
   because each assessment set then holds the last `lag` analysis rows.
   Before, such a design ran. While the design keeps its `lag` setting, the
   error suggests `lag = 0`, with the lagged predictors built before
-  resampling. A design subset by rows loses that setting, and is refused
-  with no hint.
+  resampling. A design cut to fewer rows loses that setting, and is
+  refused with no hint.
 
 * An inner split whose `id` is missing is now refused, and so is an inner
   design in which two splits carry the same values in every id column. tune

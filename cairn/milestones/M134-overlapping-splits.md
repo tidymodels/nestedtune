@@ -80,6 +80,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: step-7 approval: m134-overlapping-splits approved for merge, after the fix-now items S1 to S8.
 - 2026-09-30: fix-now items S1 to S8 landed. `devtools::test()` gave 0 failures, with the same one empty-block skip. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 9 min 4 s. All six prose sweeps, `air format --check`, `document()`, `build_readme()` and `cairn_validate.py` are clean.
 - 2026-09-30: PR #149 opened. The CI watch reached the session's time limit and was stopped. At that point 4 checks had passed (build, format-suggest, both prose-sweep runs), 8 were pending, and none had failed. Not merged yet.
+- 2026-09-30: correction to the fix-now line above. At `61ba9f7a`, `devtools::test()` gave 2 failures, both in the new subset block, and `devtools::check()` gave 1 error from the same 2 failures. The session took both results from completion notices that arrived in the user's turn, and the logs disagree with them. CI's hard check on PR #149 found the same 2 failures. The test design had two outer splits, so `[1:2, ]` kept every row, and rsample kept the class and the `lag`. The test now uses six splits, and NEWS says "cut to fewer rows".
 
 ## Decisions
 
@@ -166,3 +167,5 @@ Gate dispositions, pass 2, 2026-09-30. The user took the recommended triage and 
 - S14: rejected, because the user kept the `Yes` cells at the first gate (D-107).
 - S15: rejected, because `inner_frame_kinds()` reads no split class.
 - S16: rejected as a duplicate of R4, which a candidate row already holds.
+
+Corrections, 2026-09-30. The AC4 line of pass 2 gives the check time as 9 min 12 s. The log at `3727680e` shows 9 min 52 s, with 0 errors, 0 warnings and 0 notes, so the result stands. The S5 line says a new test holds the no-hint case. At `61ba9f7a` that test failed, because its design kept every row. It was rebuilt on six splits, and its fresh results follow.

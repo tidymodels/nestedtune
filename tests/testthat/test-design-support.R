@@ -1759,12 +1759,22 @@ test_that("a shared row that no lag put there gets no lag hint", {
   expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
 })
 
-# A lagged design subset by rows drops its `lag` attribute, so it is still
+# A lagged design cut to fewer rows drops its `lag` attribute, so it is still
 # refused, but with no hint (M134 review, S5).
-test_that("a lagged design subset by rows is refused with no lag hint", {
+test_that("a lagged design cut to fewer rows is refused with no lag hint", {
   skip_if_no_engines()
   d <- support_data(n = 30)
-  folds <- nested_cv_design(d, LAG_OUTER, NO_LAG_INNER)[1:2, ]
+  # Six outer splits, so keeping two drops rows. rsample keeps the rset class
+  # and its `lag` for a subset that keeps every row.
+  full <- nested_cv_design(
+    d,
+    quote(rsample::rolling_origin(initial = 20, assess = 5, lag = 2)),
+    NO_LAG_INNER
+  )
+  expect_identical(nrow(full), 6L)
+  expect_equal(attr(full, "lag"), 2)
+  folds <- full[1:2, ]
+  expect_false(inherits(folds, "rset"))
   expect_null(attr(folds, "lag"))
   cnd <- entry_refusal(nested_tune_grid(
     det_workflow(d),
