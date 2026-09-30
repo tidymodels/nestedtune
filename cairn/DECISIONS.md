@@ -2057,6 +2057,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-107 stands, except for which refusals get the hint. If a design the refusal names is a `rolling_origin()` rset whose `lag` attribute is above 0, the refusal adds the hint. A design that lost that attribute, such as one subset by rows, is refused with no hint. Rejected: reading the lag from the splits, which do not carry it.
 **Consequences:** NEWS names the no-hint case, and a test holds it.
 
+### D-109 (2026-09-30): an outer held-out row shared by both sets of an inner split is refused by the containment rule, and two M134 leftovers need no fix. Narrows D-103's Decision
+
+**Context:** M135's plan gate took the M134 leftovers row. Under D-103, an inner split on the outer frame that holds an outer held-out row in both sets gets the shared-rows message, not the message that names the leak. Two items needed no fix. A deprecated `rsample::validation_time_split(lag = k)` is refused with no `lag` hint, and its rset keeps no `lag` setting. An index of 1.5 is refused as a shared row, and R reads it as row 1.
+**Decision:** the shared-rows rule of D-103 counts, for an inner split on the outer frame, only rows the outer `in_id` holds. The containment rule of D-049 refuses the held-out row later in the check order, with the same class. Rejected: a `lag` hint for `validation_time_split()`. Under D-108 the hint reads the design's `lag` setting, which that rset does not keep, and the function is deprecated. Rejected: a separate refusal for a non-whole index. The model would be scored on the row R reads, so the shared-rows refusal is true.
+**Consequences:** such a split names the leak, and no design refused before runs. Falsified by a split with a held-out row in both sets that the containment rule does not refuse.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
