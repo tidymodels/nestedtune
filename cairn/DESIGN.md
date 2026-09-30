@@ -168,7 +168,12 @@ naming convention.
   bootstrap's apparent split too, because finetune's race reads its score
   (D-100, M132). An inner split with a missing `id`, and an inner design
   whose id tuples repeat, are refused as well, because tune drops the first
-  and miscounts the second (D-102, M133). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  and miscounts the second (D-102, M133). A split whose analysis and
+  assessment sets share a row is refused in both loops, which catches a
+  `make_splits()` rebuild that no class names. An index into an outer
+  analysis set counts as the data row it copies, and the bootstrap's own
+  apparent split is exempt (D-103, D-104, M134). It also refuses
+  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107, D-108). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
@@ -416,9 +421,9 @@ the summary doors), rebuilds the tuner description from the `procedure` attribut
 `R/tuner.R`), then draws two seeds and hands everything to
 `final_fit_worker()`, which sets the tuning seed, re-evaluates the recorded
 `inside` call against the full data, refuses that design where it breaks the
-entry check's refused-design and id rules or the two "Apparent" rules, in the
-entry check's order (`check_final_inner()`, class `nestedtune_bad_design`,
-D-100, D-102, M132, M133), runs the recorded tuner through the same
+entry check's refused-design, shared-row and id rules or the two "Apparent"
+rules, in the entry check's order (`check_final_inner()`, class
+`nestedtune_bad_design`, D-100, D-102, D-103, D-107, M132, M133, M134), runs the recorded tuner through the same
 `run_tuner()` the loop uses, selects, finalizes, sets the fit seed, and fits
 on every row. The seed scope is D-016: building an `rset`
 draws from the RNG, so the construction sits inside the tuning seed's scope

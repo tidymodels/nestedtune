@@ -275,7 +275,15 @@ refused. Otherwise each outer fold that tunes on it uses fewer resamples
 than its design holds. An inner split whose \code{id} is missing is refused as
 well, because tune leaves it out of its estimates too. So is an inner
 design in which two splits carry the same values in every id column, such
-as \code{id} and \code{id2}, because tune then miscounts its resamples. The checks
+as \code{id} and \code{id2}, because tune then miscounts its resamples. In either
+loop, a split whose assessment set holds a row of its analysis set is
+refused, because it scores the model on rows it trained on. The rule
+reads the rows, so it also catches a split rebuilt with
+\code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
+index into an outer split's analysis set counts as the data row it
+copies. The apparent split of an inner bootstrap design is exempt from
+this rule under the id "Apparent", because tune leaves it out of its
+estimates. The checks
 exist because
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
 returned, and because a design assembled by hand can index rows its outer
@@ -304,6 +312,9 @@ An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 those four tuners on the sliding-period design alone.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs. It checks the
 inner design but fits nothing on it. Any other inner design is not tested.
+Each of these tests leaves the \code{lag} of \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at its
+default of 0. A \code{lag} above 0 is refused in either loop, as
+\code{\link[=nested_resamples]{nested_resamples()}} explains.
 \code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
 assessment sets leave rows out. Its error names the rows left out. When
 there are more than five, it names the first five.

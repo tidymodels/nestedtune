@@ -1327,3 +1327,460 @@ for (fn in RACE_EXPORTS) {
     }
   )
 }
+
+# A split whose assessment set holds a row of its analysis set scores the
+# model on rows it trained on. Both loops refuse it by its rows, so a split
+# rebuilt with make_splits() cannot hide it (M134, D-103). The one exception
+# is a bootstrap's own apparent split under the id "Apparent" (D-104).
+OVERLAP_REASON <- "scores the model on rows it trained on"
+
+# Three v-fold splits of `d`, with one split that shares rows added or edited.
+overlap_outer <- function(d, kind) {
+  set.seed(1)
+  splits <- rsample::vfold_cv(d, v = 3)$splits
+  if (identical(kind, "edited")) {
+    # The split keeps its class, and its assessment set gains a training row.
+    split <- splits[[2]]
+    split$out_id <- c(as.integer(rsample::complement(split)), split$in_id[[1]])
+    splits[[2]] <- split
+  } else {
+    assessment <- switch(kind, equal = 1:20, one_row = 20:30)
+    extra <- rsample::make_splits(
+      list(analysis = 1:20, assessment = assessment),
+      d
+    )
+    splits <- c(splits, list(extra))
+  }
+  rsample::manual_rset(splits, paste0("Fold", seq_along(splits)))
+}
+
+OVERLAP_OUTER <- list(
+  equal = list(row = "Row 4 of"),
+  one_row = list(row = "Row 4 of"),
+  edited = list(row = "Row 2 of")
+)
+
+test_that("an outer split that shares rows is refused at entry and at construction", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (kind in names(OVERLAP_OUTER)) {
+    outer <- overlap_outer(d, kind)
+    expect_s3_class(outer, "manual_rset")
+    if (identical(kind, "edited")) {
+      expect_s3_class(outer$splits[[2]], "vfold_split")
+    }
+
+    folds <- quiet_nested_cv(d, outer, V3)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_s3_class(cnd, "nestedtune_bad_design")
+    expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE, info = kind)
+    expect_match(
+      conditionMessage(cnd),
+      paste(OVERLAP_OUTER[[kind]]$row, "`resamples`"),
+      fixed = TRUE,
+      info = kind
+    )
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+
+    cnd <- expect_error(
+      nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+      class = "nestedtune_bad_design"
+    )
+    expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE, info = kind)
+    expect_match(
+      conditionMessage(cnd),
+      paste(OVERLAP_OUTER[[kind]]$row, "`outside`"),
+      fixed = TRUE,
+      info = kind
+    )
+  }
+})
+
+# An apparent split shares every row too, but the refusal by its split class
+# comes first and names the design.
+test_that("an outer manual_rset() of apparent() splits keeps the apparent() refusal", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  outer <- rsample::manual_rset(rsample::apparent(d)$splits, "Whole")
+  expect_s3_class(outer$splits[[1]], "apparent_split")
+
+  folds <- quiet_nested_cv(d, outer, V3)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_names_design(cnd, "apparent")
+  expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+})
+
+# The inner loop refuses the same splits (M134, D-103). A bootstraps() design
+# whose every split is rebuilt with make_splits() loses every split class, so
+# its apparent split is caught by its rows, whatever id it carries. Before
+# this rule, the id "Apparent" got the advice to rename the split, which
+# would then have been scored.
+rebuilt_boots_apparent <- function(apparent_id) {
+  function(data) {
+    boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
+    splits <- lapply(boots$splits, function(split) {
+      rsample::make_splits(
+        list(
+          analysis = split$in_id,
+          assessment = as.integer(rsample::complement(split))
+        ),
+        data
+      )
+    })
+    ids <- c(paste0("Bootstrap", 1:3), as.character(apparent_id))
+    rset <- rsample::manual_rset(splits, ids)
+    if (is.factor(apparent_id)) {
+      rset$id <- factor(ids)
+    }
+    rset
+  }
+}
+
+REBUILT_APPARENT <- list(
+  "id Apparent" = "Apparent",
+  "factor id Apparent" = factor("Apparent"),
+  "another id" = "Whole"
+)
+
+RENAME_ADVICE <- "Give the split another id"
+
+expect_inner_overlap <- function(cnd, where, rename = FALSE) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  msg <- flat_message(cnd)
+  expect_match(msg, OVERLAP_REASON, fixed = TRUE)
+  expect_match(msg, where, fixed = TRUE)
+  if (!rename) {
+    expect_no_match(msg, RENAME_ADVICE, fixed = TRUE)
+  }
+}
+
+test_that("an inner design of rebuilt bootstrap splits is refused by its rows", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  for (name in names(REBUILT_APPARENT)) {
+    id <- REBUILT_APPARENT[[name]]
+    build <- rebuilt_boots_apparent(id)
+    inner <- build(d)
+    expect_false(any(vapply(inner$splits, inherits, logical(1), "boot_split")))
+    expect_false(inherits(inner$splits[[4]], "apparent_split"))
+    expect_identical(is.factor(inner$id), is.factor(id))
+    folds <- with_inner(nested_cv_design(d, V3, V3), build)
+    cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+    expect_inner_overlap(
+      cnd,
+      "Elements 1, 2, and 3 of inner_resamples: split 4.",
+      rename = identical(name, "another id")
+    )
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
+  }
+})
+
+# One test per racer, so a racer that is not ready reports its own skip.
+for (fn in RACE_EXPORTS) {
+  test_that(
+    paste(
+      fn,
+      "gets the row refusal for a rebuilt apparent split named Apparent"
+    ),
+    {
+      skip_if_no_engines()
+      skip_if_not(tuner_ready(fn))
+      d <- support_data(n = 30)
+      folds <- with_inner(
+        nested_cv_design(d, V3, V3),
+        rebuilt_boots_apparent("Apparent")
+      )
+      cnd <- entry_refusal(race_call(fn, det_workflow(d), folds))
+      expect_inner_overlap(
+        cnd,
+        "Elements 1, 2, and 3 of inner_resamples: split 4."
+      )
+      expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+    }
+  )
+}
+
+# A v-fold design whose second split is rebuilt to share one row, under its
+# ordinary id.
+vfold_one_shared <- function(data) {
+  rset <- rsample::vfold_cv(data, v = 3)
+  split <- rset$splits[[2]]
+  rset$splits[[2]] <- rsample::make_splits(
+    list(
+      analysis = split$in_id,
+      assessment = c(as.integer(rsample::complement(split)), split$in_id[[1]])
+    ),
+    data
+  )
+  rset
+}
+
+test_that("an inner v-fold split rebuilt to share one row is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  wf <- det_workflow(d)
+  inner <- vfold_one_shared(d)
+  expect_s3_class(inner, "vfold_cv")
+  expect_identical(inner$id[[2]], "Fold2")
+  folds <- with_inner(nested_cv_design(d, V3, V3), vfold_one_shared)
+  cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: split 2."
+  )
+
+  # nested_fit_resamples() shares the check and tunes nothing, so the reason
+  # does not say that the fold tunes (M132 F1, M134 R3).
+  cnd <- entry_refusal(nested_fit_resamples(fixed_workflow(d), folds))
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: split 2."
+  )
+  expect_no_match(flat_message(cnd), "tune", fixed = TRUE)
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_fit_resamples"
+  )
+})
+
+# An outer bootstrap rebuilt with make_splits() is refused by no class, and
+# its splits share no rows. But its analysis set repeats rows, so an inner
+# v-fold split puts some data row in both of its sets.
+rebuilt_outer_boots <- function(d) {
+  set.seed(7)
+  boots <- rsample::bootstraps(d, times = 3)
+  splits <- lapply(boots$splits, function(split) {
+    rsample::make_splits(
+      list(
+        analysis = split$in_id,
+        assessment = as.integer(rsample::complement(split))
+      ),
+      d
+    )
+  })
+  rsample::manual_rset(splits, paste0("Bootstrap", 1:3))
+}
+
+test_that("an inner split that shares a row the outer split repeats is refused", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  outer <- rebuilt_outer_boots(d)
+  expect_true(anyDuplicated(outer$splits[[1]]$in_id) > 0L)
+
+  set.seed(1)
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_inner_overlap(cnd, "outer fold 1 whose")
+  expect_match(
+    flat_message(cnd),
+    "Splits 1, 2, and 3 of that fold's inner design share rows.",
+    fixed = TRUE
+  )
+
+  # rsample::nested_cv() builds the inner splits on each analysis set, where
+  # the repeated row sits at two positions.
+  set.seed(1)
+  folds <- rsample::nested_cv(
+    d,
+    outside = outer,
+    inside = rsample::vfold_cv(v = 3)
+  )
+  cnd <- entry_refusal(
+    nested_tune_grid(det_workflow(d), folds, grid = det_grid())
+  )
+  expect_inner_overlap(
+    cnd,
+    "Elements 1, 2, and 3 of inner_resamples: splits 1, 2, and 3."
+  )
+})
+
+# The inner rule reads each index through the outer `in_id`. An NA there is
+# not a shared row, so the rule leaves the design as it found it, and no
+# internal error escapes (M134 review, S1).
+test_that("an NA in an outer in_id does not break the inner row rule", {
+  d <- support_data(n = 30)
+  set.seed(1)
+  outer <- rsample::vfold_cv(d, v = 3)
+  outer$splits[[1]]$in_id[1] <- NA
+
+  set.seed(1)
+  res <- nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3))
+  expect_s3_class(res, "nested_resamples")
+  expect_identical(nrow(res), 3L)
+})
+
+# The bootstrap's own apparent split shares every row too, and tune leaves it
+# out of its estimates, so it is exempt and the design runs (D-104).
+test_that("an inner bootstrap with its apparent split completes every fold", {
+  skip_if_no_engines()
+  run <- support_run(
+    support_data(),
+    V3,
+    quote(rsample::bootstraps(times = 3, apparent = TRUE))
+  )
+  apparent <- run$folds$inner_resamples[[1]]$splits[[4]]
+  expect_s3_class(apparent, "apparent_split")
+  expect_true(any(rsample::complement(apparent) %in% apparent$in_id))
+  expect_identical(nrow(run$res), nrow(run$folds))
+  expect_true(all(run$res$.completed))
+})
+
+# rolling_origin() with `lag` above 0 puts the last `lag` analysis rows in
+# each assessment set, and tune scores them, so the rule refuses it in either
+# loop. The message then says how to keep the lagged predictors (M134, R1).
+LAG_HINT <- paste(
+  "A `rsample::rolling_origin()` design with `lag` above 0 puts the last",
+  "`lag` analysis rows of each split in its assessment set. Use `lag = 0`,",
+  "and build the lagged predictors before resampling."
+)
+LAG_OUTER <- quote(rsample::rolling_origin(
+  initial = 20,
+  assess = 5,
+  skip = 4,
+  lag = 2
+))
+LAG_INNER <- quote(rsample::rolling_origin(initial = 10, assess = 3, lag = 1))
+NO_LAG_OUTER <- quote(rsample::rolling_origin(
+  initial = 20,
+  assess = 5,
+  skip = 4
+))
+NO_LAG_INNER <- quote(rsample::rolling_origin(initial = 10, assess = 3))
+
+expect_lag_refused <- function(cnd, where, fn) {
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  msg <- flat_message(cnd)
+  expect_match(msg, OVERLAP_REASON, fixed = TRUE)
+  expect_match(msg, where, fixed = TRUE)
+  expect_match(msg, LAG_HINT, fixed = TRUE)
+  expect_identical(rlang::call_name(conditionCall(cnd)), fn)
+}
+
+test_that("an outer rolling_origin() with a lag is refused, naming the lag", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  outer <- rsample::rolling_origin(
+    d,
+    initial = 20,
+    assess = 5,
+    skip = 4,
+    lag = 2
+  )
+  split <- outer$splits[[1]]
+  expect_s3_class(split, "rof_split")
+  expect_true(any(rsample::complement(split) %in% split$in_id))
+
+  cnd <- expect_error(
+    eval(bquote(nested_resamples(
+      d,
+      outside = .(LAG_OUTER),
+      inside = .(NO_LAG_INNER)
+    ))),
+    class = "nestedtune_bad_design"
+  )
+  expect_lag_refused(cnd, "of `outside`", "nested_resamples")
+
+  folds <- nested_cv_design(d, LAG_OUTER, NO_LAG_INNER)
+  cnd <- entry_refusal(nested_tune_grid(
+    det_workflow(d),
+    folds,
+    grid = det_grid()
+  ))
+  expect_lag_refused(cnd, "of `resamples`", "nested_tune_grid")
+})
+
+test_that("an inner rolling_origin() with a lag is refused, naming the lag", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  cnd <- expect_error(
+    eval(bquote(nested_resamples(
+      d,
+      outside = .(NO_LAG_OUTER),
+      inside = .(LAG_INNER)
+    ))),
+    class = "nestedtune_bad_design"
+  )
+  expect_lag_refused(cnd, "outer fold 1 whose", "nested_resamples")
+
+  folds <- nested_cv_design(d, NO_LAG_OUTER, LAG_INNER)
+  cnd <- entry_refusal(nested_tune_grid(
+    det_workflow(d),
+    folds,
+    grid = det_grid()
+  ))
+  expect_lag_refused(cnd, "of inner_resamples: splits", "nested_tune_grid")
+})
+
+# The hint reads the design's `lag`, so a shared row that no lag put there
+# gets no hint, a rolling_origin() split edited to share one included.
+test_that("a shared row that no lag put there gets no lag hint", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  edited <- rsample::rolling_origin(d, initial = 20, assess = 5, skip = 4)
+  expect_equal(attr(edited, "lag"), 0)
+  split <- edited$splits[[1]]
+  split$out_id <- c(split$out_id, split$in_id[[20]])
+  edited$splits[[1]] <- split
+  expect_s3_class(edited$splits[[1]], "rof_split")
+  cnd <- expect_error(
+    nested_resamples(d, outside = edited, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+  expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
+
+  outer <- overlap_outer(d, "one_row")
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+  expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
+
+  folds <- with_inner(nested_cv_design(d, V3, V3), vfold_one_shared)
+  cnd <- entry_refusal(nested_tune_grid(
+    det_workflow(d),
+    folds,
+    grid = det_grid()
+  ))
+  expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+  expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
+})
+
+# A lagged design cut to fewer rows drops its `lag` attribute, so it is still
+# refused, but with no hint (M134 review, S5).
+test_that("a lagged design cut to fewer rows is refused with no lag hint", {
+  skip_if_no_engines()
+  d <- support_data(n = 30)
+  # Six outer splits, so keeping two drops rows. rsample keeps the rset class
+  # and its `lag` for a subset that keeps every row.
+  full <- nested_cv_design(
+    d,
+    quote(rsample::rolling_origin(initial = 20, assess = 5, lag = 2)),
+    NO_LAG_INNER
+  )
+  expect_identical(nrow(full), 6L)
+  expect_equal(attr(full, "lag"), 2)
+  folds <- full[1:2, ]
+  expect_false(inherits(folds, "rset"))
+  expect_null(attr(folds, "lag"))
+  cnd <- entry_refusal(nested_tune_grid(
+    det_workflow(d),
+    folds,
+    grid = det_grid()
+  ))
+  expect_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
+  expect_no_match(flat_message(cnd), LAG_HINT, fixed = TRUE)
+})

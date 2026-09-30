@@ -70,6 +70,17 @@ An \code{inside} that gives a split with a missing \code{id} is refused as well,
 because tune leaves that split out of its estimates. So is an \code{inside}
 that gives two splits the same values in every id column, because tune
 then miscounts the resamples.
+
+An \code{outside} split whose assessment set holds a row of its analysis set
+is refused. Such a fold scores the model on rows it trained on. The rule
+reads the rows, so it also catches a split rebuilt with
+\code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
+\code{inside} that gives such a split is refused too, and the refusal names
+the outer fold and the split. There, each index into the fold's analysis
+set counts as the data row it copies. So if the outer split repeats a
+row, an inner split that puts one copy in each set is refused. The
+apparent split of a bootstrap under the id "Apparent" is exempt from this
+rule, because tune leaves it out of its estimates.
 }
 
 \section{Time-series designs}{
@@ -105,6 +116,12 @@ nine pairs. Each pair is tested to give the same splits as
 \code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, \code{\link[=nested_workflow_map]{nested_workflow_map()}}
 and the other four tuners are not tested on these pairs. Any other inner
 design is not tested.
+
+Every test above that uses \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} leaves \code{lag} at
+its default of 0. A \code{lag} above 0 is refused as an \code{outside} and as an
+\code{inside}, because each assessment set then holds the last \code{lag} rows of
+its analysis set. Use \code{lag = 0}, and build the lagged predictors before
+resampling.
 }
 
 \section{Memory}{

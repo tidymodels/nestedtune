@@ -2045,6 +2045,18 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** D-102 and D-105 stand. A missing `id2` is not refused for being missing. A split with a missing `id2` runs unless another split carries the same values in every id column, a missing `id2` included. tune miscounts that design.
 **Consequences:** no behavior changes, and the record now matches the code.
 
+### D-107 (2026-09-30): both loops refuse `rsample::rolling_origin()` with `lag` above 0. Corrects D-103's Context and Consequences, and annotates D-099's Rejected clause
+
+**Context:** D-103 says that among the supported designs only an apparent split shares rows, and names such a design as its falsifier. M134's review found one. `rolling_origin()` with `lag` above 0 starts each assessment set `lag` rows before its analysis set ends, and tune scores those rows. The README marks `rolling_origin()` `Yes` in both loops, from tests that all use `lag = 0`.
+**Decision:** the rule of D-103 and D-104 stands, and a lagged `rolling_origin()` is refused in both loops. The refusal adds a hint when a split it names is a rolling-origin split. The hint says to use `lag = 0` and build the lagged predictors before resampling. The README table keeps its `Yes` cells, and the prose under it and the time-series help name the refusal. Rejected: exempting the lag rows, because each fold is then scored partly on rows the model trained on. D-099's Rejected clause says M129 keeps rebuilt bootstrap designs running. Under D-103 such a rebuild runs only while no split shares rows.
+**Consequences:** a design that ran before is refused, and its message says how to keep it. Falsified by a supported rsample design, other than the two named here, whose splits share rows by design.
+
+### D-108 (2026-09-30): the `lag` hint reads the design's `lag` setting, not the split class. Corrects D-107's Decision
+
+**Context:** D-107 says the refusal adds the hint for a named rolling-origin split. Before merge, M134's claim audit changed the hint to read the design instead, because a rolling-origin split edited to share a row got the hint with `lag` at 0. M134's second review found D-107 unchanged.
+**Decision:** D-107 stands, except for which refusals get the hint. If a design the refusal names is a `rolling_origin()` rset whose `lag` attribute is above 0, the refusal adds the hint. A design that lost that attribute, such as one subset by rows, is refused with no hint. Rejected: reading the lag from the splits, which do not carry it.
+**Consequences:** NEWS names the no-hint case, and a test holds it.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

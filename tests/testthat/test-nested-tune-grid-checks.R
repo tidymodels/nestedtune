@@ -852,11 +852,16 @@ test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
     list(repeat_split, repeat_split),
     c("Fold1", "Fold2")
   )
+  # The inner folds group on `x1`, whose values are all distinct, so both
+  # copies of the repeated row land on one side of every inner split under
+  # any seed: a copy on each side would share a row, which the design
+  # refuses (M134).
+  expect_false(anyDuplicated(d$x1) > 0L)
   set.seed(1)
   manual_repeat <- rsample::nested_cv(
     d,
     outside = manual_outer,
-    inside = rsample::vfold_cv(v = 2)
+    inside = rsample::group_vfold_cv(group = x1, v = 2)
   )
   expect_true(anyDuplicated(manual_repeat$splits[[1L]]$in_id) > 0L)
 
