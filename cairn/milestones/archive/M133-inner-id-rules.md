@@ -1,0 +1,11 @@
+# M133: Refuse inner ids that tune misreads, at entry and at the final fit
+
+**Status:** done (2026-09-30, PR #148 https://github.com/tidymodels/nestedtune/pull/148)
+
+**Goal:** The entry check and the final fit refuse an inner design that tune misreads by its ids or cannot use (D-102).
+
+**Outcome:** `R/checks.R` gained `missing_id_rows()`, `repeated_id_rows()`, `check_inner_ids()` and `id_rule_reason()`. tune 2.1.0 leaves a split whose `id` is NA out of its estimates, and it miscounts a design whose id tuples repeat. So the inner loop refuses both, with class `nestedtune_bad_design`. The missing-id rule reads `id` with `is.na()`, so a factor's NA level runs (D-105). The repeated-id rule reads every id column with `as.character()`, and two missing values count as equal (D-106). `check_nested()` and `inner_resamples_from_split()` apply both rules before their "Apparent" rules. `check_final_inner()` now gives the design `nested_final_fit()` rebuilds the entry check's refused-design rules, then the id rules, then the "Apparent" and race rules. Before, it told an `apparent()` design to rename its split. The README, `?nested_resamples` and the "Nested designs" help state the rules. So do the final fit's "What is refused", NEWS and the DESIGN convention bullet. `test-design-support.R` and `test-nested-final-fit-checks.R` gained the tests, one block per final-fit case.
+
+**Decisions:** D-102, recorded at plan. D-105, recorded during implement, reads the missing `id` with `is.na()`. D-106, recorded at review, corrects D-102's Consequences on missing `id2` values.
+
+**Review:** Pass 1 returned the milestone to in-progress (one defect return). Six final-fit tests matched headline text, so they passed with the reason removed, and AC3 failed. T6 fixed that. Pass 2 verified all five criteria at `857bd7e6`: `devtools::test()` gave 0 failures and 0 skips, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes. Three reviewers reported findings. The maintainer chose to fix three at the gate. They were D-106 (S1), the stale `is_id_name()` comment (S2) and one test block per final-fit case (S3). The other 15 findings (S4 to S18) were rejected with reasons in the milestone file at `e92146e8`. PR #148 had no reviews or comments, and CI passed every check. No lesson was added or retired.
