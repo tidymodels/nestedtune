@@ -2027,6 +2027,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** in both loops, a split whose analysis and assessment sets share a row index of the data is refused, with class `nestedtune_bad_design`. An index into an outer analysis frame counts as the data row it copies. The rule runs after the class-based refusals and before the id rules. In the inner loop outside the racers, an `apparent_split` whose id is "Apparent" beside bootstrap splits is exempt, because tune leaves it out (D-100). Rejected: recognizing a rebuilt split's design, since nothing in the split names it. Rejected: fixing only the message a rebuilt apparent split gets, which leaves the outer leak open.
 **Consequences:** a rebuilt design stays unrecognized as its design, but it can no longer score a fold on rows it trained on. Falsified by a supported rsample design whose splits share rows by design, other than the bootstrap's apparent split.
 
+### D-104 (2026-09-30): the overlap rule exempts the bootstrap's own apparent split under every tuner. Corrects D-103's Decision
+
+**Context:** D-103 exempts that split only outside the racers. `check_nested()` does not know the tuner and runs before the racers' race rule, and the final fit runs the overlap rule before its race rule. So the exemption as written gives a racer the overlap message in place of the race message, against the site order of D-101.
+**Decision:** D-103 stands, with its exemption corrected. An `apparent_split` whose id is "Apparent" beside bootstrap splits is exempt from the overlap rule under every tuner. Under the two racers, the race rule of D-100 still refuses it.
+**Consequences:** the racers' refusal of that split keeps its message, and no design refused before is accepted.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
