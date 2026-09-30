@@ -1997,6 +1997,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the floor is 3.3.0, the lowest release that compiles under R 4.6. M130 ran the tests at it under CRAN's conditions and with `NOT_CRAN=true`. Rejected: 3.2.3, which the `skip()` fix alone supports, because it does not run on R 4.6. Rejected: a CI job pinned to the floor, which stays a candidate row. It costs a full suite run per push, for an entry that only test runners read.
 **Consequences:** someone who runs the tests with testthat 3.2.3 on an older R must upgrade testthat. Falsified by a test failing at 3.3.0 for a testthat reason, or by a test adopting a testthat function newer than 3.3.0.
 
+### D-099 (2026-09-29): an apparent split beside bootstrap or permutation splits counts as part of that design only if its id is "Apparent". Narrows D-097's clause on apparent splits
+
+**Context:** D-097 counts every apparent split beside bootstrap or permutation splits as part of that design. tune leaves out of its estimates the one split whose id is "Apparent". Probed at M131's plan gate, an inner `manual_rset()` of bootstrap splits and an apparent split with another id passes the entry check. tune then averages that split in, and it scores that split on the rows it trained on.
+**Decision:** in both loops, take an apparent split beside bootstrap or permutation splits. If `as.character()` of its id is "Apparent", the comparison tune makes, the split joins that design. Any other apparent split counts as `apparent()`. For an inner element with bootstrap splits, the refusal says that tune leaves out an apparent split whose id is "Apparent". Rejected: refusing every apparent split in an inner design that lost its bootstrap class. tune leaves the "Apparent" split out, and M129 keeps such rebuilds running.
+**Consequences:** in the outer loop, an apparent split with the id "Apparent" beside bootstrap splits is still named as a bootstrap row. A split from a separate `apparent()` call is named the same way, because the two splits are identical. Falsified by a tune release that scores a split whose id is "Apparent", or that leaves out a split by another rule. (Narrows D-097.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
