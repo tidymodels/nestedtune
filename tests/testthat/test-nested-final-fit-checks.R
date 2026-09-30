@@ -494,32 +494,39 @@ vfold_apparent <- function(data) {
   )
 }
 
+# Each reason is text found in the message's bullets and not in its
+# headline, which already names the design or the id flaw, so matching the
+# headline alone would pass with the bullets gone.
 FINAL_REFUSED <- list(
   "loo_cv()" = list(
     inside = quote(rsample::loo_cv()),
-    reason = "rsample::loo_cv()"
+    reason = "tune refuses `rsample::loo_cv()` as a tuning design, so the final fit would fail."
   ),
   "apparent()" = list(
     inside = quote(rsample::apparent()),
-    reason = "rsample::apparent()"
+    reason = "tune reports no results for `rsample::apparent()`, so the final fit would fail."
   ),
   "permutations()" = list(
     inside = quote(
       rsample::permutations(permute = y, times = 3, apparent = TRUE)
     ),
-    reason = "rsample::permutations()"
+    reason = "tune refuses `rsample::permutations()` as a tuning design, so the final fit would fail."
   ),
+  # A design found by its split classes gets its own flaw, as at entry.
   "loo_cv() splits" = list(
     inside = quote(loo_splits()),
-    reason = "rsample::loo_cv()"
+    reason = "`rsample::loo_cv()` holds out one row per fold"
   ),
   "permutations() splits" = list(
     inside = quote(permutation_splits()),
-    reason = "rsample::permutations()"
+    reason = "`rsample::permutations()` gives each fold no assessment set."
   ),
   "renamed bootstrap apparent split" = list(
     inside = quote(renamed_bootstraps()),
-    reason = "tune leaves out an apparent split whose id is \"Apparent\""
+    reason = c(
+      "`rsample::apparent()` scores its one fold on the rows it trained on.",
+      "tune leaves out an apparent split whose id is \"Apparent\""
+    )
   ),
   "missing id" = list(
     inside = quote(missing_id_vfold()),
@@ -533,7 +540,7 @@ FINAL_REFUSED <- list(
   # refuses as apparent(). Before M133 the final fit told it to rename.
   "apparent split beside v-fold splits" = list(
     inside = quote(vfold_apparent()),
-    reason = "rsample::apparent()"
+    reason = "`rsample::apparent()` scores its one fold on the rows it trained on."
   )
 )
 
@@ -544,7 +551,9 @@ expect_final_refused <- function(wf, res, case) {
     class = "nestedtune_bad_design"
   )
   msg <- gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
-  expect_match(msg, case$reason, fixed = TRUE)
+  for (reason in case$reason) {
+    expect_match(msg, reason, fixed = TRUE)
+  }
   expect_no_match(msg, "outer fold", fixed = TRUE)
   expect_no_match(msg, "Give the split another id", fixed = TRUE)
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))

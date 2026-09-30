@@ -723,8 +723,9 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
   )
 }
 
-# The two "Apparent" rules on the one inner rset `nested_final_fit()` rebuilds
-# on the whole data (M132, D-100). No entry check reads it: it comes from the
+# The entry check's design rules, id rules and "Apparent" rules on the one
+# inner rset `nested_final_fit()` rebuilds on the whole data (M132, D-100;
+# M133, D-102). No entry check reads it: it comes from the
 # recorded `inside`, which a record made before the rules, or an `inside`
 # that labels the whole data differently, can turn into such a design.
 check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
