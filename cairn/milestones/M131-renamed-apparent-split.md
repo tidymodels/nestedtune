@@ -56,6 +56,7 @@ If an apparent split sits beside bootstrap or permutation splits, it counts as p
 - 2026-09-29: the recheck found all 9 repairs held and 2 new items. T2 now says an NA id is no match, and AC3's last case now covers both entries.
 - 2026-09-29: implement started on branch m131-renamed-apparent-split. No question gate, because the plan left no choice open.
 - 2026-09-29: T1 added five test blocks to `test-design-support.R`. On the pre-fix code, the AC1 block fails (6 failures and an error) and the AC3 block fails its 8 "A" expectations. The v-fold control, AC2 and AC3's "Apparent" case pass. Checkpoint: red until T2.
+- 2026-09-29: T2 code in: `apparent_ids()`, `renamed_apparent()` and the hint in `R/checks.R` and `R/nested-resamples.R`. The design-support file passes (46 blocks). T1's factor case had built the id "1" through `c()` and was fixed. T3's README.Rmd, NEWS, roxygen and DESIGN edits are in. Checkpoint: the full suite is running, and T2 is not yet ticked.
 
 ## Decisions
 

@@ -1,5 +1,15 @@
 # nestedtune 0.0.0.9000
 
+* An apparent split beside bootstrap or permutation splits now needs the id
+  "Apparent" to count as part of that design. tune leaves a split with that id
+  out of its estimates. Under any other id, tune scores the split on the rows
+  it trained on. So an inner design rebuilt with `rsample::manual_rset()` from
+  bootstrap splits and such a split is refused as an `apparent()` design. The
+  error says that a bootstrap keeps its apparent split only under the id
+  "Apparent". In the outer loop, the error now names that
+  split as an `apparent()` row. Before, the inner design ran and tune averaged
+  that split's score into the estimate.
+
 * A `loo_cv()`, `apparent()` or `permutations()` design, or an outer
   bootstrap, is now refused even when the design no longer carries that
   design's class. nestedtune finds the design from the class that each

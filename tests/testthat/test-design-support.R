@@ -729,7 +729,8 @@ with_apparent <- function(data, host, id) {
     }
   )
   built <- hosts[[host]]()
-  ids <- c(built$ids, id)
+  # c() would turn a factor into its integer code, so join the labels.
+  ids <- c(built$ids, as.character(id))
   if (is.factor(id)) {
     ids <- factor(ids)
   }
@@ -823,7 +824,9 @@ test_that("an inner apparent split named Apparent still joins its bootstrap", {
     for (id in list("Apparent", factor("Apparent"))) {
       build <- function(data) with_apparent(data, host, id)
       folds <- with_inner(nested_cv_design(d, V3, V3), build)
-      expect_identical(is.factor(folds$inner_resamples[[1]]$id), is.factor(id))
+      inner_id <- folds$inner_resamples[[1]]$id
+      expect_identical(is.factor(inner_id), is.factor(id))
+      expect_identical(as.character(inner_id[[length(inner_id)]]), "Apparent")
       cnd <- entry_refusal(nested_tune_grid(wf, folds, grid = det_grid()))
       expect_s3_class(cnd, "nestedtune_sentinel")
 
