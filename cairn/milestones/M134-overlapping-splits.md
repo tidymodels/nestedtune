@@ -1,6 +1,6 @@
 # M134: Refuse a split that assesses rows it trains on
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M133
 - **Driving RR:** —
@@ -43,6 +43,10 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - [x] T4: Apply the helper to the inner splits. If an inner split's frame is not the outer split's own, map its indexes through the outer `in_id`. `check_inner_splits()` tells the two frames apart (`R/checks.R:1003`). Call it in `check_nested()` after `check_inner_refused()`, in `inner_resamples_from_split()` after the refused-design check, and in `check_final_inner()` after the rules of M133's AC3 first two groups. Keep the exemption in step with `misread_apparent_rows()`.
 - [x] T5: Measure the added check time (GP4). Time `check_nested()` before and after the change on a `nested_resamples()` design of 10^5 rows with 10 outer and 10 inner folds. Record both times and the commit in the work log.
 - [x] T6: Update the documentation and run the checks. Change the Refused paragraph in `README.Rmd` and run `devtools::build_readme()`. Change `R/nested-resamples.R:40`, the "Nested designs" section at `R/nested-tune-grid.R:102`, and the "What is refused" section at `R/nested-final-fit.R:98`. Add the NEWS bullet, and update the DESIGN.md convention bullet on invalid designs. Run `devtools::document()`, both prose sweeps, `devtools::test()` and `devtools::check()`.
+- [ ] T7: Review finding R1, the user's choice at the gate: keep refusing `rolling_origin(lag = k)`, and state it. First take the criterion amendment through the gate (step 6), because no criterion names `lag` today. The refusal names `lag` and suggests `lag = 0` with the lagged predictors built first. Test an outer and an inner `lag` design. The README, the time-series section of `?nested_resamples` and NEWS name the refusal. Add a D-entry that supersedes D-103's premise and falsifier, and names D-099 (R11).
+- [ ] T8: Review finding R2. Make the M59 control `nested_cv_manual_repeat` hold under any seed, for example with an inner design grouped on a unique column.
+- [ ] T9: Review finding R3. Reword `inner_overlap_reason()` so it holds for `nested_fit_resamples()`, which tunes nothing.
+- [ ] T10: Review findings R5, R6, R8 and R12. Add the overlap rule to the final-fit paragraph of `cairn/DESIGN.md`. Run the rebuilt apparent split case under both racers, each in its own block with its own skip. Correct the two comments in `check_nested()`. Wrap the long roxygen line and the README line break.
 
 ## Work log
 
@@ -62,6 +66,7 @@ A split that assesses rows it also trains on is refused in both loops, whatever 
 - 2026-09-30: T6 done. `devtools::check()` at `cc4f2c5a` gave 0 errors, 0 warnings and 0 notes. The only later commit changes three comments. Status set to review.
 - 2026-09-30: review checkpoint. AC1 to AC3 verified and ticked. AC4 waits on the full check and a fresh `devtools::test()`, and three reviewers are running.
 - 2026-09-30: review pre-gate checkpoint. AC4 verified and ticked, and the consistency gate passed. Twelve review findings are logged as R1 to R12 for the approval gate. R1 shows that `rolling_origin(lag = k)` is refused, which is the falsifier D-103 records.
+- 2026-09-30: defect return 1 from the review gate. The user judged R1 a defect in what the package does for users. Status set back to in-progress, with T7 to T10 added for R1, R2, R3, R5, R6, R8 and R12. R4 and R7 went to candidate rows.
 
 ## Decisions
 
@@ -90,3 +95,13 @@ Review findings. Three fresh reviewers read the branch: an Opus diff reviewer, a
 - R10 (Opus): a rebuilt outer bootstrap runs with an inner design grouped on a unique row, while `bootstraps()` stays refused. Scope Out keeps rebuilds unrecognized (D-097).
 - R11 (Sonnet history): D-099's Rejected clause says rebuilt designs keep running. D-103 does not name D-099.
 - R12 (two lenses): `R/nested-resamples.R:63` holds a 132-character roxygen line, and `README.Rmd:151` breaks after "The apparent".
+
+Gate dispositions, 2026-09-30. The user sent the milestone back and chose to keep the `lag` refusal and document it.
+
+- R1: fix now, as T7. The user judged it a defect in what the package does for users, so it returns the milestone.
+- R2, R3: fix now, as T8 and T9.
+- R5, R6, R8, R12: fix now, as T10.
+- R4, R7: follow-up, each a new candidate row.
+- R9: rejected, because AC1 sets that order.
+- R10: rejected, because Scope Out keeps rebuilt designs unrecognized.
+- R11: rejected as a separate item. T7's D-entry names D-099.
