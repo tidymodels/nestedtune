@@ -218,3 +218,78 @@ test_that("a complement() method in an attached environment is not read", {
   expect_false(any(rsample::complement(split) %in% split$in_id))
   expect_identical(check_nested(design), design)
 })
+
+# An inner split on the outer split's frame that puts a row the outer split
+# holds out in both of its sets leaks that row into the tuning. The
+# containment rule names that leak, so the shared-rows rule leaves such a row
+# to it (M135, D-109). A shared row the outer split holds is still refused as
+# shared.
+CONTAINED <- paste(
+  "`resamples` has an inner split indexing rows its outer fold does not",
+  "hold."
+)
+
+# A nested_resamples() design, whose inner splits index the outer frame,
+# with the first inner split of the first outer fold passed to `edit` along
+# with a row that outer split holds out.
+edit_whole_inner <- function(edit) {
+  d <- shape_data()
+  set.seed(3)
+  design <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = rsample::vfold_cv(v = 2)
+  )
+  outer <- design$splits[[1]]
+  held <- setdiff(seq_len(nrow(d)), outer$in_id)[[1]]
+  split <- design$inner_resamples[[1]]$splits[[1]]
+  stopifnot(identical(split$data, outer$data))
+  design$inner_resamples[[1]]$splits[[1]] <- edit(split, held)
+  design
+}
+
+expect_contained <- function(design) {
+  cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+  expect_match(one_line(cnd), CONTAINED, fixed = TRUE)
+  expect_match(one_line(cnd), "Outer fold 1, inner split 1", fixed = TRUE)
+  expect_no_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+}
+
+test_that("a held-out row in both sets of an inner split is refused as a leak", {
+  design <- edit_whole_inner(function(split, held) {
+    split$in_id <- c(split$in_id, held)
+    split$out_id <- c(split$out_id, held)
+    split
+  })
+  expect_contained(design)
+})
+
+test_that("a held-out row a global complement() adds is refused as a leak", {
+  out <- NULL
+  extra <- NULL
+  local_global_complement("held_split", function(x, ...) c(out, extra))
+  design <- edit_whole_inner(function(split, held) {
+    out <<- split$out_id
+    extra <<- held
+    split$in_id <- c(split$in_id, held)
+    reclass_split(split, "held_split")
+  })
+  split <- design$inner_resamples[[1]]$splits[[1]]
+  expect_identical(split$out_id, NA)
+  expect_true(extra %in% rsample::complement(split))
+  expect_contained(design)
+})
+
+test_that("a held row in both sets of an inner split is still refused as shared", {
+  design <- edit_whole_inner(function(split, held) {
+    split$out_id <- c(split$out_id, split$in_id[[1]])
+    split
+  })
+  cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+  expect_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+  expect_match(
+    one_line(cnd),
+    "Element 1 of inner_resamples: split 1.",
+    fixed = TRUE
+  )
+})

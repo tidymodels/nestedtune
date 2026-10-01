@@ -936,8 +936,11 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
 # is that split's analysis set, so a row the outer split repeats is caught
 # under both of its positions. The assessment set is rsample::complement()'s,
 # which reads each split class's own rule. Anything malformed shares no row
-# here and is left to the checks that judge it.
-split_shares_rows <- function(split, rows = NULL) {
+# here and is left to the checks that judge it. `hold`, when given, marks the
+# data rows the outer split holds, and a shared row outside it is left to the
+# containment rule of check_inner_splits(), which names the leak (M135,
+# D-109).
+split_shares_rows <- function(split, rows = NULL, hold = NULL) {
   if (
     !inherits(split, "rsplit") ||
       !is.list(split) ||
@@ -988,7 +991,11 @@ split_shares_rows <- function(split, rows = NULL) {
   # for every split (M134, T5).
   seen <- logical(max(c(0L, trained, held_out)))
   seen[trained] <- TRUE
-  any(seen[held_out])
+  if (is.null(hold)) {
+    return(any(seen[held_out]))
+  }
+  shared <- held_out[seen[held_out]]
+  any(hold[shared] %in% TRUE)
 }
 
 # Whether rsample::complement() reaches its rsplit method for `split`: no
@@ -1035,14 +1042,20 @@ complement_envs <- function() {
 }
 
 # The positions of the splits of `x` that share rows, for split_shares_rows()
-# with the same `rows`. It reads each split's indexes, but like
+# with the same `rows` and `hold`. It reads each split's indexes, but like
 # split_designs() it is safe on an element no class check has vouched for.
-overlap_rows <- function(x, rows = NULL) {
+overlap_rows <- function(x, rows = NULL, hold = NULL) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   if (!is.list(splits)) {
     return(integer())
   }
-  which(vapply(splits, split_shares_rows, logical(1), rows = rows))
+  which(vapply(
+    splits,
+    split_shares_rows,
+    logical(1),
+    rows = rows,
+    hold = hold
+  ))
 }
 
 # rsample::rolling_origin() starts each assessment set `lag` rows before its
@@ -1096,15 +1109,17 @@ inner_overlap_reason <- function(final = FALSE) {
 # The inner splits of `x` that share rows, less a bootstrap's own apparent
 # split, which tune leaves out of its estimates (D-104). Under the two
 # racers the race rule still refuses that split.
-inner_overlap_rows <- function(x, rows = NULL) {
-  setdiff(overlap_rows(x, rows), which(bootstrap_apparent(x)))
+inner_overlap_rows <- function(x, rows = NULL, hold = NULL) {
+  setdiff(overlap_rows(x, rows, hold), which(bootstrap_apparent(x)))
 }
 
 # The same, for the inner design of one outer fold of a design that may have
 # been built anywhere. Its splits index the outer split's own frame or that
 # split's analysis set, told apart as check_inner_splits() tells them, and
-# the second are read through the outer `in_id`. A fold whose splits are not
-# all rsplits, or whose frames are another or disagree, is left to
+# the second are read through the outer `in_id`. On the outer frame, only a
+# shared row the outer `in_id` holds counts: a held-out row is left to the
+# containment rule, which names the leak (M135, D-109). A fold whose splits
+# are not all rsplits, or whose frames are another or disagree, is left to
 # check_inner_splits().
 fold_overlap_rows <- function(split, inner) {
   splits <- if (is.data.frame(inner)) inner[["splits"]]
@@ -1120,8 +1135,18 @@ fold_overlap_rows <- function(split, inner) {
   if (length(kind) != 1L || identical(kind, "other")) {
     return(integer())
   }
-  rows <- if (identical(kind, "analysis")) as.integer(split[["in_id"]])
-  inner_overlap_rows(inner, rows)
+  if (identical(kind, "analysis")) {
+    return(inner_overlap_rows(inner, as.integer(split[["in_id"]])))
+  }
+  frame <- split[["data"]]
+  if (!is.data.frame(frame)) {
+    return(integer())
+  }
+  outer_in <- suppressWarnings(as.integer(split[["in_id"]]))
+  outer_in <- outer_in[!is.na(outer_in) & outer_in >= 1L]
+  hold <- logical(nrow(frame))
+  hold[outer_in[outer_in <= nrow(frame)]] <- TRUE
+  inner_overlap_rows(inner, hold = hold)
 }
 
 # Every inner element holding a split that shares rows, grouped by the
