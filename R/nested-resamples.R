@@ -459,32 +459,39 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # `is_fold_payload()`'s shared-frame check also passes, which is why the test
 # here is against the outer frame.
 #
-# Each inner index maps by occurrence: the r-th mention of a data row, within
-# one `in_id` or one explicit `out_id`, goes to the r-th position of that row
-# in the outer `in_id`. Without repeats that is `match()`. Under an outer
-# `in_id` that repeats a row (an evaluated `manual_rset()`), `match()` would
-# collapse the copies onto one position, while the occurrence map keeps the
-# rows, their order and multiplicity, and gives distinct `.row` values to the
-# copies tune assesses. The positions are rsample's own when each split that
-# holds a copy of a row holds every earlier copy of it, in ascending order,
-# as a grouped or v-fold inner does once the overlap rule has refused a split
+# Each inner index maps by occurrence (occurrence_map()): the r-th mention of
+# a data row, within one `in_id` or one explicit `out_id`, goes to the r-th
+# position of that row in the outer `in_id`. Without repeats that is
+# `match()`, which runs in its place. Under an outer `in_id` that repeats a
+# row (an evaluated `manual_rset()`), `match()` would collapse the copies
+# onto one position, while the occurrence map keeps the rows, their order
+# and multiplicity, and gives distinct `.row` values to the copies tune
+# assesses. The positions are rsample's own when each split that holds a
+# copy of a row holds every earlier copy of it, in ascending order, as a
+# grouped or v-fold inner does once the overlap rule has refused a split
 # that parts the copies. Any other inner, such as `mc_cv()`, a bootstrap, or
 # a rolling or sliding window that holds only a later copy, gets the same
 # rows at other positions, which nothing downstream reads. Past the last copy
-# the map cycles through the copies again from the first.
-# An inner bootstrap from `nested_resamples()` reaches that, and so does a
-# hand-built split that mentions a row more often than the outer split holds
-# it.
+# the map cycles through the copies again from the first. An inner bootstrap
+# from `nested_resamples()` reaches that, and so does a hand-built split that
+# mentions a row more often than the outer split holds it.
 #
 # A logical `NA` `out_id` is rsample's "the complement". Without repeats it
 # stays as it is, since the complement over the analysis frame is the right
 # set. Under repeats it would also take the copies of the rows the inner
 # split trains on, so it becomes every position whose data row lies in
 # `rsample::complement()` of the split read over the whole frame: each copy
-# the outer split holds, and no outer held-out row. A split whose complement
-# rsample cannot derive leaves the rset as it is, for tune to fail on. So
-# does an index the outer split does not hold, which the entry check has
-# already refused. It is never mapped to `NA`.
+# the outer split holds, and no outer held-out row.
+#
+# Some designs keep the whole frame. One is an outer `in_id` that holds an
+# `NA`, a fractional index or one past the data, left for `last_fit()` to
+# refuse as the fold's outer-fit failure rather than raised here as its inner
+# one. Another is an inner split whose complement rsample cannot derive, left
+# for tune to fail on. A third is an inner index the outer split does not
+# hold, which the entry check has already refused. No index is mapped to
+# `NA`. The fold can still report inner metrics, so under repeats every
+# other logical `NA` `out_id` is made explicit on the whole frame
+# (whole_frame_inner()).
 analysis_framed_inner <- function(inner, split) {
   outer_idx <- as.integer(split$in_id)
   shared <- vapply(
@@ -496,53 +503,45 @@ analysis_framed_inner <- function(inner, split) {
     return(inner)
   }
   repeats <- anyDuplicated(outer_idx) > 0L
-  copies <- base::split(seq_along(outer_idx), outer_idx)
+  whole_frame <- function() {
+    if (repeats) whole_frame_inner(inner, outer_idx) else inner
+  }
+  if (
+    anyNA(outer_idx) ||
+      !all(split$in_id == outer_idx) ||
+      any(outer_idx < 1L) ||
+      max(outer_idx) > nrow(split$data)
+  ) {
+    return(whole_frame())
+  }
+  map <- if (repeats) {
+    occurrence_map(outer_idx)
+  } else {
+    function(idx) {
+      out <- match(as.integer(idx), outer_idx)
+      if (anyNA(out)) NULL else out
+    }
+  }
 
   splits <- vector("list", length(inner$splits))
   for (i in seq_along(splits)) {
     inner_split <- inner$splits[[i]]
-    in_id <- occurrence_positions(inner_split$in_id, copies)
+    in_id <- map(inner_split$in_id)
     out_id <- inner_split$out_id
     if (!identical(out_id, NA)) {
-      out_id <- occurrence_positions(out_id, copies)
+      out_id <- map(out_id)
     } else if (repeats) {
-      held <- tryCatch(
-        rsample::complement(inner_split),
-        error = function(cnd) NULL
-      )
+      held <- outer_complement(inner_split)
       out_id <- if (is.null(held)) NULL else which(outer_idx %in% held)
     }
     if (is.null(in_id) || is.null(out_id)) {
-      return(inner)
+      return(whole_frame())
     }
     inner_split$in_id <- in_id
     inner_split$out_id <- out_id
     splits[[i]] <- inner_split
   }
-  # Materialized only once every index is known to map, and only when the
-  # outer split's own `in_id` lies inside its frame: one reaching past the
-  # data is left for `last_fit()` to refuse, as the fold's outer-fit failure,
-  # rather than raised here as its inner one -- whether the inner indices
-  # happen to map (an index appended to `in_id`) or not (one replaced). The
-  # fold still reports its inner metrics, so under repeats a logical `NA`
-  # `out_id` is made explicit on the whole frame, as the data rows of its
-  # positions.
-  if (any(outer_idx < 1L) || max(outer_idx) > nrow(split$data)) {
-    if (!repeats) {
-      return(inner)
-    }
-    whole <- Map(
-      function(inner_split, mapped) {
-        if (identical(inner_split$out_id, NA)) {
-          inner_split$out_id <- outer_idx[mapped$out_id]
-        }
-        inner_split
-      },
-      inner$splits,
-      splits
-    )
-    return(replace_splits(inner, whole))
-  }
+  # Materialized only once every index is known to map.
   analysis_frame <- rsample::analysis(split)
   splits <- lapply(splits, function(inner_split) {
     inner_split$data <- analysis_frame
@@ -551,34 +550,68 @@ analysis_framed_inner <- function(inner, split) {
   replace_splits(inner, splits)
 }
 
-# The positions in the analysis frame of the data rows `idx` names, mapped by
-# occurrence (analysis_framed_inner()). `copies` holds, for each data row of
-# the outer `in_id`, its positions there in order. NULL when an index has no
-# position. Indices are read with `as.integer()`, as the entry check reads
-# them.
-occurrence_positions <- function(idx, copies) {
-  idx <- as.integer(idx)
-  if (length(idx) == 0L) {
-    return(integer(0))
+# The rows of the whole frame an inner split assesses, or NULL when rsample
+# cannot derive them.
+outer_complement <- function(inner_split) {
+  tryCatch(rsample::complement(inner_split), error = function(cnd) NULL)
+}
+
+# The inner rset on the whole frame under an outer `in_id` that repeats a
+# row, where analysis_framed_inner() cannot re-point it. Each logical `NA`
+# `out_id` whose complement rsample can derive becomes the data rows of that
+# complement that the outer split holds, each copy once, so it holds no
+# outer held-out row (IP1). A split whose complement rsample cannot derive is
+# left as it is, and the others are still made explicit.
+whole_frame_inner <- function(inner, outer_idx) {
+  splits <- inner$splits
+  changed <- FALSE
+  for (i in seq_along(splits)) {
+    if (!identical(splits[[i]]$out_id, NA)) {
+      next
+    }
+    held <- outer_complement(splits[[i]])
+    if (is.null(held)) {
+      next
+    }
+    splits[[i]]$out_id <- outer_idx[outer_idx %in% held]
+    changed <- TRUE
   }
-  if (anyNA(idx)) {
-    return(NULL)
+  if (changed) replace_splits(inner, splits) else inner
+}
+
+# The occurrence map of an outer `in_id` that repeats a row, as a function of
+# one inner index vector (analysis_framed_inner()). It returns the analysis
+# frame positions, or NULL when an index has no position. Indices are read
+# with `as.integer()`, as the entry check reads them. Memory is linear in
+# the two vectors.
+occurrence_map <- function(outer_idx) {
+  # The positions of the outer `in_id` sorted by data row. order() keeps
+  # ties in their original order, so each row's copies stay in order.
+  by_row <- order(outer_idx)
+  runs <- rle(outer_idx[by_row])
+  start <- cumsum(c(0L, runs$lengths[-length(runs$lengths)]))
+  function(idx) {
+    idx <- as.integer(idx)
+    if (length(idx) == 0L) {
+      return(integer(0))
+    }
+    if (anyNA(idx)) {
+      return(NULL)
+    }
+    row <- match(idx, runs$values)
+    if (anyNA(row)) {
+      return(NULL)
+    }
+    # The 0-based rank of each mention among the mentions of its row, in the
+    # order of `idx`.
+    o <- order(idx)
+    sorted <- idx[o]
+    first <- c(TRUE, sorted[-1L] != sorted[-length(sorted)])
+    run <- seq_along(sorted)
+    mention <- integer(length(idx))
+    mention[o] <- run - cummax(ifelse(first, run, 0L))
+    by_row[start[row] + mention %% runs$lengths[row] + 1L]
   }
-  found <- copies[as.character(idx)]
-  n <- lengths(found)
-  if (any(n == 0L)) {
-    return(NULL)
-  }
-  # The 0-based rank of each mention among the mentions of its row, in the
-  # order of `idx`. order() keeps ties in their original order.
-  o <- order(idx)
-  sorted <- idx[o]
-  first <- c(TRUE, sorted[-1L] != sorted[-length(sorted)])
-  run <- seq_along(sorted)
-  mention <- integer(length(idx))
-  mention[o] <- run - cummax(ifelse(first, run, 0L))
-  offset <- cumsum(c(0L, n[-length(n)]))
-  unlist(found, use.names = FALSE)[offset + mention %% n + 1L]
 }
 
 # As in `inner_resamples_from_split()`: the rset's class, id columns and

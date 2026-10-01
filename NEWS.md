@@ -2,14 +2,15 @@
 
 * The tuning results change for a design whose outer split repeats a row in
   its `in_id`. Each inner tuning call now gets its inner splits on the outer
-  fold's analysis set, as it does for every other design. Before, the inner
-  splits stayed on the whole data. So tune finalized some parameter ranges
-  on a frame that held the outer fold's held-out rows. An example is a
-  `min_n()` range finalized by row count. Each copy of a repeated row is
-  its own row of the analysis set. Take an inner assessment set that the
-  design leaves as the complement. It now holds every copy that the outer
-  split holds of each row that the inner split does not train on.
-  Under the fix below it held each row once.
+  fold's analysis set. It already did so for a design with no repeated row.
+  Before, the inner splits stayed on the whole data. So tune finalized some
+  parameter ranges on a frame that held the outer fold's held-out rows. An
+  example is a `min_n()` range finalized by row count. Each copy of a
+  repeated row is its own row of the analysis set. Take an inner assessment
+  set that the design leaves as the complement. It now holds every copy
+  that the outer split holds of each row that the inner split does not
+  train on. The next item, the fix for a leak of outer held-out rows, held
+  each row once.
 
 * Fixed a leak of outer held-out rows into inner tuning. Take an outer split
   whose `in_id` repeats a row, and an inner split on the outer split's frame

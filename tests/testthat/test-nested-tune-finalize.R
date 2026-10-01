@@ -454,12 +454,19 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
   # The third split mentions row 1 three times, once more than the outer
   # split holds it.
   outer <- repeated_outer_split(d)
-  inner_in <- list(1:30, 31:60, c(1L, 1L, 1L, 2:30))
+  # The fourth split holds its `out_id` explicitly, mentioning row 1 three
+  # times, and maps it apart from its `in_id`.
+  inner_in <- list(1:30, 31:60, c(1L, 1L, 1L, 2:30), 31:60)
+  inner_out <- list(NA, NA, NA, c(1L, 1L, 1L, 2:30))
   inner <- rsample::manual_rset(
-    lapply(inner_in, function(idx) {
-      rsample::make_splits(list(analysis = idx, assessment = NA), d)
-    }),
-    c("Inner1", "Inner2", "Inner3")
+    Map(
+      function(idx, out) {
+        rsample::make_splits(list(analysis = idx, assessment = out), d)
+      },
+      inner_in,
+      inner_out
+    ),
+    c("Inner1", "Inner2", "Inner3", "Inner4")
   )
   design <- rsample::manual_rset(list(outer), "Fold1")
   design$inner_resamples <- list(inner)
@@ -469,14 +476,15 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
   )
   expect_length(seen, 1L)
   splits <- seen[[1L]]$splits
-  expect_length(splits, 3L)
+  expect_length(splits, 4L)
 
   # Positions in the 65-row analysis frame. The r-th mention of a row maps
   # to its r-th copy, and past the last copy back to the first. Each
-  # assessment set is every position whose row lies outside the inner
-  # `in_id` over the whole frame, so each copy the outer split holds.
-  want_in <- list(1:30, 31:60, c(1L, 61L, 1L, 2:30))
-  want_out <- list(31:60, c(1:30, 61:65), 31:60)
+  # assessment set left as the complement is every position whose row lies
+  # outside the inner `in_id` over the whole frame, so each copy the outer
+  # split holds.
+  want_in <- list(1:30, 31:60, c(1L, 61L, 1L, 2:30), 31:60)
+  want_out <- list(31:60, c(1:30, 61:65), 31:60, c(1L, 61L, 1L, 2:30))
   frame <- rsample::analysis(outer)
   for (s in seq_along(splits)) {
     expect_identical(splits[[s]]$data, frame)
@@ -496,6 +504,11 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
   expect_identical(
     sort(REPEATED_IN[splits[[2L]]$out_id]),
     sort(c(1:30, 1:5))
+  )
+  # The explicit `out_id` reads the same rows as over the whole frame.
+  expect_identical(
+    rsample::assessment(splits[[4L]]),
+    rsample::assessment(inner$splits[[4L]])
   )
 })
 
@@ -538,8 +551,64 @@ test_that("under a repeated outer row that reaches past the data a logical NA in
   want_out <- list(31:60, c(1:30, 1:5))
   for (s in seq_along(splits)) {
     expect_identical(splits[[s]]$data, d)
+    expect_identical(splits[[s]]$in_id, inner$splits[[s]]$in_id)
     expect_identical(splits[[s]]$out_id, want_out[[s]])
   }
+})
+
+test_that("under a repeated outer row a fractional outer index fails at the outer fit", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  # A fractional index appended to the outer `in_id`: it reads as row 1
+  # under `as.integer()`, but vctrs refuses to slice by it, so the split is
+  # left for last_fit() to refuse rather than materialized for the inner
+  # call.
+  outer <- repeated_outer_split(d)
+  outer$in_id <- c(outer$in_id, 1.5)
+  inner <- rsample::manual_rset(
+    lapply(list(1:30, 31:60), function(idx) {
+      rsample::make_splits(list(analysis = idx, assessment = NA), d)
+    }),
+    c("Inner1", "Inner2")
+  )
+  design <- rsample::manual_rset(list(outer), "Fold1")
+  design$inner_resamples <- list(inner)
+
+  res <- suppressWarnings(
+    nested_tune_grid(
+      det_workflow(d),
+      design,
+      grid = det_grid(),
+      metrics = reg_metrics()
+    )
+  )
+  expect_false(res$.completed)
+  expect_identical(res$.notes[[1L]]$location[[1L]], "outer fit")
+})
+
+test_that("under a repeated outer row a split whose complement rsample cannot derive leaves the other splits repaired", {
+  d <- make_reg_data()
+  outer <- repeated_outer_split(d)
+  splits <- lapply(list(1:30, 31:60, c(1:20, 31:40)), function(idx) {
+    rsample::make_splits(list(analysis = idx, assessment = NA), d)
+  })
+  # A rolling-origin split class reads a stored `out_id`, so its complement
+  # errors on the logical NA.
+  class(splits[[1L]]) <- c("rof_split", class(splits[[1L]]))
+  expect_error(rsample::complement(splits[[1L]]))
+  inner <- rsample::manual_rset(splits, c("Inner1", "Inner2", "Inner3"))
+
+  framed <- analysis_framed_inner(inner, outer)
+  # The whole frame stays, the underivable split as it was, and the others
+  # hold the outer rows of their complement, each copy once.
+  for (s in seq_along(framed$splits)) {
+    expect_identical(framed$splits[[s]]$data, d)
+    expect_identical(framed$splits[[s]]$in_id, splits[[s]]$in_id)
+  }
+  expect_identical(framed$splits[[1L]]$out_id, NA)
+  expect_identical(framed$splits[[2L]]$out_id, c(1:30, 1:5))
+  expect_identical(framed$splits[[3L]]$out_id, c(21:30, 41:60))
 })
 
 test_that("under a repeated outer row every candidate a fold searched lies inside the range its 65 analysis rows finalize", {

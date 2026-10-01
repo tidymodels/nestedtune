@@ -94,3 +94,13 @@ Independent review: three fresh-context reviewers (Opus diff-bug, Sonnet blame-h
 - F8 (blame 6): the O1 test cannot tell the two folds apart, because both hold one split. Proposed: reject, because T3 planned it that way and the comment says so.
 - F9 (blame 7): positions differ from rsample's for inner designs whose positions do not ascend. Proposed: reject, because RR09 R3 accepted it, the code comment states it, and nothing downstream reads the positions.
 - F10 (blame 3, diff-bug 5): the new `return(inner)` exits and a shared counter across `in_id` and `out_id` are untested. The overlap rule makes a shared counter unobservable on an accepted design. Proposed: covered by F2 and F5, with a test for the per-split repair added under F2.
+
+Gate triage (2026-10-01, the user's choice at the step-7 chip): F1 to F6 fix now, F10 folded into F2 and F5, F7 to F9 rejected for the reasons above. No finding shows a criterion failing, so status stays review. Approval is asked again after the fixes, because they change code.
+
+Fix-now work (2026-10-01):
+- F1: `match()` runs when no row repeats. Five folds at 1e6 rows took 0.64 s and 0.83 s on the branch against 0.50 s and 0.65 s on main, in two paired runs.
+- F2: `whole_frame_inner()` makes each derivable logical `NA` `out_id` explicit on every whole-frame return under repeats, skipping only the split it cannot derive. A new test calls `analysis_framed_inner()` with a `rof_split` among three splits, and it fails twice on the pre-fix code.
+- F3: the outer guard also refuses an `NA` or non-whole outer index. A new test with `1.5` appended asserts the "outer fit" location, and it fails on the pre-fix code.
+- F4: `occurrence_map()` replaces `occurrence_positions()`, with memory linear in the two vectors. It matched a brute-force map on 500 random cases.
+- F5: the hand-built test has a fourth split with an explicit `out_id` `c(1L, 1L, 1L, 2:30)` mapping to `c(1L, 61L, 1L, 2:30)`. The past-the-data test asserts `in_id` unchanged.
+- F6: NEWS says "It already did so for a design with no repeated row" and names the next item. DESIGN describes the whole-frame path and `whole_frame_inner()`.

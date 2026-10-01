@@ -342,14 +342,19 @@ through the preprocessor, so the inner call receives that rebuilt `rset`
 rather than the design's `inner_resamples` element, and finalizes on the
 analysis rows alone (IP1). A `nested_cv()` design's inner `rset` reaches tune
 on the frame the design holds. Each inner index maps by occurrence
-(`occurrence_positions()`): the r-th mention of a data row goes to the r-th
+(`occurrence_map()`, `match()` when no row repeats): the r-th mention of a data row goes to the r-th
 copy of that row in the outer `in_id`, wrapping to the first copy past the
 last. So under an outer split whose `in_id` repeats a row the rows, their
 order and multiplicity are kept, and the assessed copies keep distinct
 `.row` values. Under such a split a logical `NA` `out_id` becomes every
 analysis-frame position whose data row lies in `rsample::complement()` of the
 split read over the whole frame: each copy the outer split holds, no outer
-held-out row (IP1). The rebuild leaves the
+held-out row (IP1). An outer `in_id` with an `NA`, a fractional index or
+one past the data keeps the whole frame, left for `last_fit()` to refuse as
+the fold's outer-fit failure. So does an inner split the map cannot place.
+Under repeats `whole_frame_inner()` then makes each derivable logical `NA`
+`out_id` explicit as the outer rows of its complement. The fold still
+reports inner metrics. The rebuild leaves the
 design, its size and the wire payload unchanged, each running fold
 materializing one analysis-set copy for the tune call's duration. Then
 `run_tuner()` assembles the inner call with `rlang::call2()` in the
