@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-30 (M136 archived, M133 row pruned, validate green)._
+_Last hygiene check: 2026-10-01 (M137 archived, M134 row pruned, validate green)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M137 | Test the split-check gaps M135's review left | review | — | normal | milestones/M137-split-check-tests.md |
+| M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
 | M136 | README table of supported tuning functions, and shorter table prose | done | — | normal | milestones/archive/M136-tuning-table.md |
 | M135 | Close the split-check gaps M134's review left | done | — | normal | milestones/archive/M135-split-check-gaps.md |
-| M134 | Refuse a split that assesses rows it trains on | done | M133 | normal | milestones/archive/M134-overlapping-splits.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
