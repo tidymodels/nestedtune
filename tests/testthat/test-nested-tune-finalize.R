@@ -372,3 +372,46 @@ test_that("AC4: an inner rset the rebuild does not apply to reaches run_tuner() 
     expect_identical(seen[[i]], manual$inner_resamples[[i]])
   }
 })
+
+test_that("a logical NA inner out_id under a repeated outer row assesses only the outer rows", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  ms <- reg_metrics()
+
+  # An outer split whose `in_id` repeats rows 1 to 5, and inner splits on the
+  # whole frame whose `out_id` is the logical NA, rsample's "the complement".
+  # Over the whole frame that complement holds the outer held-out rows 61 to
+  # 90, which IP1 keeps out of the inner loop.
+  outer_in <- c(1:60, 1:5)
+  outer_out <- 61:90
+  outer <- rsample::make_splits(
+    list(analysis = outer_in, assessment = outer_out),
+    d
+  )
+  inner_in <- list(1:30, 31:60)
+  inner <- rsample::manual_rset(
+    lapply(inner_in, function(idx) {
+      rsample::make_splits(list(analysis = idx, assessment = NA), d)
+    }),
+    c("Inner1", "Inner2")
+  )
+  design <- rsample::manual_rset(list(outer), "Fold1")
+  design$inner_resamples <- list(inner)
+
+  seen <- record_run_tuner_resamples(
+    nested_tune_grid(wf, design, grid = det_grid(), metrics = ms)
+  )
+  expect_length(seen, 1L)
+  splits <- seen[[1L]]$splits
+  expect_length(splits, 2L)
+  for (s in seq_along(splits)) {
+    # The frame is the whole data, as the design holds it, so the indices
+    # are data rows.
+    expect_identical(splits[[s]]$data, d)
+    assessed <- rsample::complement(splits[[s]])
+    expect_false(any(assessed %in% outer_out))
+    expect_setequal(assessed, setdiff(outer_in, inner_in[[s]]))
+  }
+})

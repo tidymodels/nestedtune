@@ -1,5 +1,11 @@
 # nestedtune 0.0.0.9000
 
+* Fixed a leak of outer held-out rows into inner tuning. Take an outer split
+  whose `in_id` repeats a row, and an inner split on the outer split's frame
+  whose `out_id` is the logical `NA`. The inner assessment set was every row
+  outside the inner `in_id`, so it held the outer fold's held-out rows. Now
+  it holds only rows that the outer split holds.
+
 * The nested tuning functions and `nested_fit_resamples()` now refuse a
   design whose outer or inner splits hold an `NA` in an `in_id` or
   `out_id`. The error has class `nestedtune_bad_design`,
