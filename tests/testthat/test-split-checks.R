@@ -28,6 +28,32 @@ one_line <- function(cnd) {
   gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
 }
 
+# The same design passed to nested_tune_grid() is refused there with the
+# class and message that `cnd`, check_nested()'s refusal, carries, and the
+# refusal names nested_tune_grid() as its call. recipes comes with tune, so
+# the workflow needs no skip.
+expect_grid_refuses <- function(design, cnd, info = NULL) {
+  data <- shape_data()
+  rec <- recipes::step_poly(
+    recipes::recipe(y ~ x, data = data),
+    x,
+    degree = tune::tune()
+  )
+  wf <- workflows::workflow(rec, parsnip::linear_reg())
+  grid_cnd <- expect_error(
+    nested_tune_grid(wf, design, grid = 2),
+    class = "nestedtune_bad_design",
+    info = info
+  )
+  expect_identical(class(grid_cnd), class(cnd), info = info)
+  expect_identical(one_line(grid_cnd), one_line(cnd), info = info)
+  expect_identical(
+    rlang::call_name(conditionCall(grid_cnd)),
+    "nested_tune_grid",
+    info = info
+  )
+}
+
 expect_not_list <- function(cnd, where, info) {
   expect_s3_class(cnd, "nestedtune_bad_design")
   expect_match(one_line(cnd), where, fixed = TRUE, info = info)
@@ -49,6 +75,7 @@ test_that("check_nested() refuses an outer split that is not a list", {
     cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
     expect_not_list(cnd, "Element 2 has class <rsplit>", type)
     expect_match(one_line(cnd), "malformed splits column", fixed = TRUE)
+    expect_grid_refuses(design, cnd, type)
   }
 })
 
@@ -58,6 +85,7 @@ test_that("check_nested() refuses an inner split that is not a list", {
     design$inner_resamples[[2]]$splits[[1]] <- NOT_LIST[[type]]
     cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
     expect_not_list(cnd, "Outer fold 2: inner split 1 has class <rsplit>", type)
+    expect_grid_refuses(design, cnd, type)
   }
 })
 
@@ -73,6 +101,11 @@ test_that("nested_resamples() refuses an outside split that is not a list", {
     )
     expect_not_list(cnd, "Element 2 has class <rsplit>", type)
     expect_match(one_line(cnd), "`outside` has a malformed", fixed = TRUE)
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "nested_resamples",
+      info = type
+    )
   }
 })
 
@@ -91,6 +124,11 @@ test_that("nested_resamples() refuses an inside split that is not a list", {
     )
     expect_not_list(cnd, "Split 1 of that fold's inner design has class", type)
     expect_match(one_line(cnd), "for outer fold 1", fixed = TRUE, info = type)
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "nested_resamples",
+      info = type
+    )
   }
 })
 
@@ -104,6 +142,7 @@ test_that("two outer splits that are not lists are both named", {
     "Elements 1 and 3 have class <rsplit> but are not lists.",
     fixed = TRUE
   )
+  expect_grid_refuses(design, cnd)
 })
 
 # nested_resamples() gives an element that lacks the class the same check,
@@ -120,6 +159,7 @@ test_that("nested_resamples() refuses a split that is not an rsplit", {
     )
     expect_match(one_line(cnd), "Element 3 is ", fixed = TRUE)
     expect_match(one_line(cnd), "not <rsplit>", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
 
     set.seed(2)
     cnd <- expect_error(
@@ -136,6 +176,7 @@ test_that("nested_resamples() refuses a split that is not an rsplit", {
       fixed = TRUE
     )
     expect_match(one_line(cnd), "not <rsplit>", fixed = TRUE)
+    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
   }
 })
 
@@ -186,6 +227,7 @@ test_that("an outer split whose global complement() shares a row is refused", {
   cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
   expect_match(one_line(cnd), OUTER_SHARED, fixed = TRUE)
   expect_match(one_line(cnd), "Row 2 of `resamples`", fixed = TRUE)
+  expect_grid_refuses(design, cnd)
 })
 
 test_that("an inner split whose global complement() shares a row is refused", {
@@ -201,6 +243,7 @@ test_that("an inner split whose global complement() shares a row is refused", {
     "Element 3 of inner_resamples: split 2.",
     fixed = TRUE
   )
+  expect_grid_refuses(design, cnd)
 })
 
 # R's dispatch skips the search path between the global environment and
@@ -253,6 +296,7 @@ expect_contained <- function(design) {
   expect_match(one_line(cnd), CONTAINED, fixed = TRUE)
   expect_match(one_line(cnd), "Outer fold 1, inner split 1", fixed = TRUE)
   expect_no_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+  expect_grid_refuses(design, cnd)
 }
 
 test_that("a held-out row in both sets of an inner split is refused as a leak", {
@@ -262,6 +306,37 @@ test_that("a held-out row in both sets of an inner split is refused as a leak", 
     split
   })
   expect_contained(design)
+})
+
+# An index outside the frame is not a row the outer split holds, whichever
+# side of the frame it falls on. An NA `out_id` is rsample's "the
+# complement", so the NA plant goes in the `in_id` alone.
+test_that("an inner index outside the frame is refused as a leak", {
+  n <- nrow(shape_data())
+  plants <- list(in_id = c(0L, -1L, NA, n + 1L), out_id = c(0L, -1L, n + 1L))
+  for (slot in names(plants)) {
+    for (value in plants[[slot]]) {
+      info <- paste(slot, value)
+      design <- edit_whole_inner(function(split, held) {
+        stopifnot(!anyNA(split$out_id))
+        split[[slot]] <- c(split[[slot]], value)
+        split
+      })
+      cnd <- expect_error(
+        check_nested(design),
+        class = "nestedtune_bad_design",
+        info = info
+      )
+      expect_match(one_line(cnd), CONTAINED, fixed = TRUE, info = info)
+      expect_match(
+        one_line(cnd),
+        paste0("Outer fold 1, inner split 1: ", slot, " holds ", value, ","),
+        fixed = TRUE,
+        info = info
+      )
+      expect_grid_refuses(design, cnd, info)
+    }
+  }
 })
 
 test_that("a held-out row a global complement() adds is refused as a leak", {
@@ -292,4 +367,23 @@ test_that("a held row in both sets of an inner split is still refused as shared"
     "Element 1 of inner_resamples: split 1.",
     fixed = TRUE
   )
+  expect_grid_refuses(design, cnd)
+})
+
+# An NA in the outer `in_id` marks no row, so the held row is still counted.
+test_that("a held shared row is refused when the outer in_id holds an NA", {
+  design <- edit_whole_inner(function(split, held) {
+    split$out_id <- c(split$out_id, split$in_id[[1]])
+    split
+  })
+  design$splits[[1]]$in_id <- c(design$splits[[1]]$in_id, NA)
+  cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+  expect_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+  expect_no_match(one_line(cnd), CONTAINED, fixed = TRUE)
+  expect_match(
+    one_line(cnd),
+    "Element 1 of inner_resamples: split 1.",
+    fixed = TRUE
+  )
+  expect_grid_refuses(design, cnd)
 })
