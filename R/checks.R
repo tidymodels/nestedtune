@@ -1265,8 +1265,8 @@ na_line <- function(split, pos) {
 }
 
 na_index_reason <- paste(
-  "An NA index names no data row. rsample reads it as a row of NAs, or",
-  "fails when it builds the complement. The one exception is an `out_id`",
+  "An NA index names no data row. rsample reads it as rows of NAs, or",
+  "fails when it builds the assessment set. The one exception is an `out_id`",
   "that is the logical NA, which tells rsample to find the assessment set",
   "with `rsample::complement()`."
 )
@@ -1754,9 +1754,11 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     outer_in <- as.integer(outer[[f]][["in_id"]])
     # The rows the outer split holds, marked once for the fold rather than
     # hashed by %in% for every split (M135, T5). An index outside the frame
-    # is read with %in%, so every index gets the answer %in% gives. No NA
-    # reaches here but the logical NA `out_id`, dropped below:
-    # check_na_indices() refuses every other (M138).
+    # is read with %in%, so every index gets the answer %in% gives. Of the
+    # NAs a split stores, check_na_indices() has refused all but the logical
+    # NA `out_id`, dropped below. An NA here can still come from as.integer()
+    # on an index out of integer range, which held() counts as a row the
+    # outer split does not hold (M138).
     mark <- logical(NROW(outer[[f]][["data"]]))
     marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
     mark[marked[marked <= length(mark)]] <- TRUE

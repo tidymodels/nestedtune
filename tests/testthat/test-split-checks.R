@@ -272,9 +272,7 @@ CONTAINED <- paste(
   "hold."
 )
 
-# A nested_resamples() design, whose inner splits index the outer frame,
-# with the first inner split of the first outer fold passed to `edit` along
-# with a row that outer split holds out.
+# A nested_resamples() design, whose inner splits index the outer frame.
 whole_design <- function() {
   set.seed(3)
   nested_resamples(
@@ -284,6 +282,8 @@ whole_design <- function() {
   )
 }
 
+# That design, with the first inner split of the first outer fold passed to
+# `edit` along with a row that outer split holds out.
 edit_whole_inner <- function(edit) {
   design <- whole_design()
   outer <- design$splits[[1]]
@@ -373,8 +373,8 @@ test_that("a held row in both sets of an inner split is still refused as shared"
   expect_grid_refuses(design, cnd)
 })
 
-# An NA in a split's row indices names no data row. rsample reads it as a
-# row of NAs, or fails when it builds the complement. Both loops refuse it,
+# An NA in a split's row indices names no data row. rsample reads it as
+# rows of NAs, or fails when it builds the assessment set. Both loops refuse it,
 # except an `out_id` that is the logical NA, which rsample reads as the
 # complement (M138, D-111).
 NA_REFUSED <- "`resamples` has a split whose row indices hold an `NA`."
@@ -448,7 +448,7 @@ test_that("check_nested() refuses an NA in each slot of a nested_resamples() des
   }
 })
 
-test_that("check_nested() refuses an NA in each in_id of an nested_cv() design", {
+test_that("check_nested() refuses an NA in each in_id of a nested_cv() design", {
   for (inner in list(NULL, 1L)) {
     info <- if (is.null(inner)) "outer" else "inner"
     design <- edit_split(split_design(), 2L, inner, function(split) {
