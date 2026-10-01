@@ -1267,7 +1267,8 @@ na_line <- function(split, pos) {
 na_index_reason <- paste(
   "An NA index names no data row. rsample reads it as a row of NAs, or",
   "fails when it builds the complement. The one exception is an `out_id`",
-  "that is the logical NA, which rsample reads as every row outside `in_id`."
+  "that is the logical NA, which tells rsample to find the assessment set",
+  "with `rsample::complement()`."
 )
 
 abort_na_indices <- function(lines, arg, call) {

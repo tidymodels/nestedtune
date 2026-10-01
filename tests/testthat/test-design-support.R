@@ -1609,19 +1609,25 @@ test_that("an inner split that shares a row the outer split repeats is refused",
   )
 })
 
-# The inner rule reads each index through the outer `in_id`. An NA there is
-# not a shared row, so the rule leaves the design as it found it, and no
-# internal error escapes (M134 review, S1).
-test_that("an NA in an outer in_id does not break the inner row rule", {
+# An NA in an outer `in_id` names no data row, so the constructor refuses
+# the design before the inner row rule reads it through that `in_id`
+# (M134 review, S1; M138, D-111).
+test_that("an NA in an outer in_id is refused before the inner row rule", {
   d <- support_data(n = 30)
   set.seed(1)
   outer <- rsample::vfold_cv(d, v = 3)
   outer$splits[[1]]$in_id[1] <- NA
 
   set.seed(1)
-  res <- nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3))
-  expect_s3_class(res, "nested_resamples")
-  expect_identical(nrow(res), 3L)
+  cnd <- expect_error(
+    nested_resamples(d, outside = outer, inside = rsample::vfold_cv(v = 3)),
+    class = "nestedtune_bad_design"
+  )
+  expect_match(
+    flat_message(cnd),
+    "Row 1 of `outside`: in_id holds an `NA`.",
+    fixed = TRUE
+  )
 })
 
 # The bootstrap's own apparent split shares every row too, and tune leaves it

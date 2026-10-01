@@ -525,3 +525,40 @@ test_that("check_nested() accepts the logical NA out_id of both constructors", {
     expect_identical(split$out_id, NA)
   }
 })
+
+# nested_resamples() runs the outer half of the rule on `outside`, so it does
+# not build a design every driver refuses (M138, D-111).
+test_that("nested_resamples() refuses an NA in an outside split", {
+  d <- shape_data()
+  # Every plant but the lone NA `in_id`.
+  for (plant in NA_PLANTS[c(1L, 2L, 4L, 5L)]) {
+    info <- paste(plant$slot, plant$label)
+    set.seed(2)
+    outside <- rsample::vfold_cv(d, v = 3)
+    split <- explicit_out(outside$splits[[2]])
+    split[[plant$slot]] <- plant$value(split[[plant$slot]])
+    outside$splits[[2]] <- split
+    cnd <- expect_error(
+      nested_resamples(d, outside = outside, inside = rsample::vfold_cv(v = 2)),
+      class = "nestedtune_bad_design",
+      info = info
+    )
+    expect_match(
+      one_line(cnd),
+      "`outside` has a split whose row indices hold an `NA`.",
+      fixed = TRUE,
+      info = info
+    )
+    expect_match(
+      one_line(cnd),
+      paste0("Row 2 of `outside`: ", plant$slot, " holds an `NA`."),
+      fixed = TRUE,
+      info = info
+    )
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "nested_resamples",
+      info = info
+    )
+  }
+})

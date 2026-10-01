@@ -609,10 +609,11 @@ execution in RR01, and tune 1.x seeded differently (D-012).
 
 - Index-slot shapes `check_inner_splits()` leaves to rsample. A non-numeric
   `in_id` coerces with a warning and reports `NA`; a fractional index truncates
-  and passes containment; an element-wise `NA` in `out_id` is dropped; a
-  non-data.frame outer `$data` reports as a frame mismatch; and an empty inner
-  `in_id` passes containment, which the fixture vehicle `break_inner_split()`
-  relies on. Accepted at M59's review (O5, O6, O7, O9, O15): each is a shape
+  and passes containment; a non-data.frame outer `$data` reports as a frame
+  mismatch; and an empty inner `in_id` passes containment, which the fixture
+  vehicle `break_inner_split()` relies on. (corrected M138: an `NA` in any
+  `in_id` or `out_id`, less the logical `NA` `out_id`, is now refused before
+  containment, per D-111.) Accepted at M59's review (O5, O6, O7, O9, O15): each is a shape
   rsample itself admits, and the entry check holds the shapes this package
   owns. Revisit on a user reaching one of these past the entry check, or if
   rsample refuses one of them earlier. Routed from candidates 2026-09-11; added
