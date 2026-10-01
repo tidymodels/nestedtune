@@ -56,7 +56,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - 2026-10-01: implement started on branch `m138-na-split-indices`. The question gate was skipped, because the plan left nothing open.
 - 2026-10-01: T1 and T2 done. The new blocks failed first with the containment and shared-rows refusals. `check_na_indices()` now runs after `check_outer_splits()`, and the AC3 test mocks it away to show the later refusals. A `nested_resamples()` design stores explicit inner `out_id` values, so the AC5 test reads the logical `NA` from the outer splits there. `devtools::test()` reports 0 failures.
 - 2026-10-01: checkpoint, T3 and T4 written but not yet checked off. `check_outer_na()` runs in `nested_resamples()`. The AC4 tests and the changed `test-design-support.R` test pass. Docs and NEWS are updated, and `devtools::document()` and both prose sweeps are clean. The full `devtools::test()` run for these two tasks is still going.
-- 2026-10-01: T3 and T4 done. The full `devtools::test()` run reports 0 failures. The NEWS bullet names the nested tuning functions and `nested_fit_resamples()`, because `check_nested()` is not exported. The docs and the error say that the logical `NA` `out_id` tells rsample to use `rsample::complement()`, because rolling-origin and sliding splits have their own complement methods.
+- 2026-10-01: T3 and T4 done. The full `devtools::test()` run reports 0 failures. The NEWS bullet names the nested tuning functions and `nested_fit_resamples()`, because `check_nested()` is not exported. The docs and the error say that the logical `NA` `out_id` tells rsample to use `rsample::complement()`. Rolling-origin and sliding splits have their own complement methods.
 
 ## Decisions
 
