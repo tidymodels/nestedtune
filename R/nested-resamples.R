@@ -557,8 +557,9 @@ outer_complement <- function(inner_split) {
 # The inner rset on the whole frame, where analysis_framed_inner() cannot
 # re-point it. Each logical `NA` `out_id` whose complement rsample can derive
 # becomes the data rows of that complement that the outer split holds, each
-# copy once, so it holds no outer held-out row (IP1). A split whose complement rsample cannot derive is
-# left as it is, and the others are still made explicit.
+# copy once, so it holds no outer held-out row (IP1). A split whose
+# complement rsample cannot derive is left as it is, and the others are
+# still made explicit.
 whole_frame_inner <- function(inner, outer_idx) {
   splits <- inner$splits
   changed <- FALSE

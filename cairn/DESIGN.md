@@ -344,9 +344,9 @@ analysis rows alone (IP1). A `nested_cv()` design's inner `rset` reaches tune
 on the frame the design holds. Each inner index maps by occurrence
 (`occurrence_map()`, `match()` when no row repeats): the r-th mention of a
 data row goes to the r-th copy of that row in the outer `in_id`, wrapping
-to the first copy past the last. So under an outer split whose `in_id` repeats a row the rows, their
-order and multiplicity are kept, and the assessed copies keep distinct
-`.row` values. Under such a split a logical `NA` `out_id` becomes every
+to the first copy past the last. So under an outer split whose `in_id`
+repeats a row the rows, their order and multiplicity are kept, and the
+assessed copies keep distinct `.row` values. Under such a split a logical `NA` `out_id` becomes every
 analysis-frame position whose data row lies in `rsample::complement()` of the
 split read over the whole frame: each copy the outer split holds, no outer
 held-out row (IP1). An outer `in_id` with an `NA`, a fractional index, or
