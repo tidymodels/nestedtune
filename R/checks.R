@@ -940,7 +940,12 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
 # data rows the outer split holds, and a shared row outside it is left to the
 # containment rule of check_inner_splits(), which names the leak (M135,
 # D-109).
-split_shares_rows <- function(split, rows = NULL, hold = NULL) {
+split_shares_rows <- function(
+  split,
+  rows = NULL,
+  hold = NULL,
+  repeats = !is.null(rows) && anyDuplicated(rows) > 0L
+) {
   if (
     !inherits(split, "rsplit") ||
       !is.list(split) ||
@@ -954,6 +959,14 @@ split_shares_rows <- function(split, rows = NULL, hold = NULL) {
   if (!is.null(rows) && (length(rows) != n || anyNA(rows))) {
     return(FALSE)
   }
+  default <- identical(split[["out_id"]], NA) && complement_is_default(split)
+  # rsample's rsplit method gives every frame row outside `in_id` here,
+  # which shares no frame row with it; only a row that `rows` repeats can.
+  # `repeats` says whether `rows` repeats one, which overlap_rows() finds once
+  # for a fold rather than once for each split (M135, T5).
+  if (default && !repeats) {
+    return(FALSE)
+  }
   in_frame <- function(idx) {
     is.numeric(idx) && !anyNA(idx) && all(idx >= 1L & idx <= n)
   }
@@ -961,12 +974,7 @@ split_shares_rows <- function(split, rows = NULL, hold = NULL) {
   if (!in_frame(trained)) {
     return(FALSE)
   }
-  if (identical(split[["out_id"]], NA) && complement_is_default(split)) {
-    # rsample's rsplit method gives every frame row outside `in_id` here,
-    # which shares no frame row with it; only a row that `rows` repeats can.
-    if (is.null(rows)) {
-      return(FALSE)
-    }
+  if (default) {
     # The same set for any nonempty `in_id`, which rsample::rsplit()
     # requires, found without the unique() that method hashes the training
     # rows with, which dominated this check's time (M134, T5). An empty
@@ -1054,7 +1062,8 @@ overlap_rows <- function(x, rows = NULL, hold = NULL) {
     split_shares_rows,
     logical(1),
     rows = rows,
-    hold = hold
+    hold = hold,
+    repeats = !is.null(rows) && anyDuplicated(rows) > 0L
   ))
 }
 
@@ -1649,13 +1658,26 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
       next
     }
     outer_in <- as.integer(outer[[f]][["in_id"]])
+    # The rows the outer split holds, marked once for the fold rather than
+    # hashed by %in% for every split (M135, T5). An index outside the frame
+    # is read with %in%, so every index gets the answer %in% gives.
+    mark <- logical(NROW(outer[[f]][["data"]]))
+    marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
+    mark[marked[marked <= length(mark)]] <- TRUE
+    held <- function(idx) {
+      inside <- !is.na(idx) & idx >= 1L & idx <= length(mark)
+      out <- logical(length(idx))
+      out[inside] <- mark[idx[inside]]
+      out[!inside] <- idx[!inside] %in% outer_in
+      out
+    }
     splits <- inner[[f]][["splits"]]
     for (s in seq_along(splits)) {
       in_id <- as.integer(splits[[s]][["in_id"]])
       out_id <- as.integer(splits[[s]][["out_id"]])
       out_id <- out_id[!is.na(out_id)]
-      in_bad <- unique(in_id[!(in_id %in% outer_in)])
-      out_bad <- unique(out_id[!(out_id %in% outer_in)])
+      in_bad <- unique(in_id[!held(in_id)])
+      out_bad <- unique(out_id[!held(out_id)])
       if (length(in_bad) == 0L && length(out_bad) == 0L) {
         next
       }
