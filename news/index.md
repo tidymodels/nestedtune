@@ -2,6 +2,17 @@
 
 ## nestedtune 0.0.0.9000
 
+- The README has a second table, which lists eight tuning functions from
+  tune, finetune, workflowsets and tidyclust and the nestedtune function
+  for each. Seven are supported, and `tidyclust::tune_cluster()` is not.
+  The prose under the resampling table is shorter. The reason for each
+  refused design now sits in the “Differences from rsample” section of
+  [`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md).
+  The error for an outer bootstrap no longer says that
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+  only warns about it, because rsample builds a `group_bootstraps()`
+  call with no warning.
+
 - Four refusals of malformed designs changed, each with class
   `nestedtune_bad_design`.
 

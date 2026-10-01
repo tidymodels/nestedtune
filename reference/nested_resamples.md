@@ -61,10 +61,15 @@ class and the resample id rsample gives it, so
 [`rsample::add_resample_id()`](https://rsample.tidymodels.org/reference/add_resample_id.html)
 behave the same.
 
-Two behaviors differ on purpose. First, an outer bootstrap is refused
-rather than warned about. The same row can otherwise land in both the
-inner analysis and the inner assessment set, which makes the estimate
-invalid.
+Two behaviors differ on purpose. First, an outer
+[`rsample::bootstraps()`](https://rsample.tidymodels.org/reference/bootstraps.html)
+or
+[`rsample::group_bootstraps()`](https://rsample.tidymodels.org/reference/group_bootstraps.html)
+is refused, where
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+warns about it or builds it without a warning. Without the refusal, the
+same row can land in both the inner analysis and the inner assessment
+set, which makes the estimate invalid.
 
 Second,
 [`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html),
@@ -72,11 +77,33 @@ Second,
 and
 [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
 are refused in either loop, where rsample builds them. None of them
-gives a valid nested estimate there. The README's table of resampling
-designs gives the reason for each. Both refusals have condition class
-`nestedtune_bad_design`, and each names the rsample function. The design
-is found from the class of its splits as well as its own class. So an
-`outside` rset rebuilt with
+gives a valid nested estimate there. As the outer loop,
+[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html)
+holds out one row per fold. R-squared then cannot be computed, and the
+averaged RMSE is the mean absolute error. As the outer loop,
+[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
+scores its one fold on the rows it trained on, and
+[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
+gives each fold no assessment set. As the inner loop, tune refuses
+[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html)
+and
+[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html),
+and it reports no results for
+[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html).
+Without the refusal, each outer fold that tunes on one of them fails.
+Both refusals have condition class `nestedtune_bad_design`, and each
+names the rsample function and gives its reason.
+
+One design is not refused but cannot be built as `inside`.
+[`rsample::validation_set()`](https://rsample.tidymodels.org/reference/validation_set.html)
+takes a split from
+[`rsample::initial_validation_split()`](https://rsample.tidymodels.org/reference/initial_validation_split.html)
+rather than a data frame. So `inside = validation_set()` fails when it
+is evaluated on an outer fold's analysis set, and nestedtune stops with
+an error that names `inside`.
+
+The design is found from the class of its splits as well as its own
+class. So an `outside` rset rebuilt with
 [`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
 from such splits is refused too, and so is one with a single such split
 among valid ones. The same holds for the rset that `inside` returns for

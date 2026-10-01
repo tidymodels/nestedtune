@@ -117,15 +117,29 @@ added, one inner <code>rset</code> per outer split.</p>
 and <code><a href="https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html" class="external-link">rsample::assessment()</a></code> return identical frames, attributes included.
 Each inner split keeps the class and the resample id rsample gives it, so
 <code><a href="https://rdrr.io/r/base/labels.html" class="external-link">labels()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/add_resample_id.html" class="external-link">rsample::add_resample_id()</a></code> behave the same.</p>
-<p>Two behaviors differ on purpose. First, an outer bootstrap is refused
-rather than warned about. The same row can otherwise land in both the inner
-analysis and the inner assessment set, which makes the estimate invalid.</p>
+<p>Two behaviors differ on purpose. First, an outer
+<code><a href="https://rsample.tidymodels.org/reference/bootstraps.html" class="external-link">rsample::bootstraps()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/group_bootstraps.html" class="external-link">rsample::group_bootstraps()</a></code> is refused, where
+<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> warns about it or builds it without a warning.
+Without the refusal, the same row can land in both the inner analysis and
+the inner assessment set, which makes the estimate invalid.</p>
 <p>Second, <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> and
 <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> are refused in either loop, where rsample builds
-them. None of them gives a valid nested estimate there. The
-README's table of resampling designs gives the reason for each. Both
-refusals have condition class <code>nestedtune_bad_design</code>, and each names the
-rsample function. The design is found from the class of its splits as well
+them. None of them gives a valid nested estimate there. As the outer loop,
+<code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code> holds out one row per fold. R-squared then cannot be
+computed, and the averaged RMSE is the mean absolute error. As the outer
+loop, <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> scores its one fold on the rows it trained on,
+and <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> gives each fold no assessment set. As the
+inner loop, tune refuses <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code>,
+and it reports no results for <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code>. Without the refusal,
+each outer fold that tunes on one of them fails. Both refusals have
+condition class <code>nestedtune_bad_design</code>, and each names the rsample
+function and gives its reason.</p>
+<p>One design is not refused but cannot be built as <code>inside</code>.
+<code><a href="https://rsample.tidymodels.org/reference/validation_set.html" class="external-link">rsample::validation_set()</a></code> takes a split from
+<code><a href="https://rsample.tidymodels.org/reference/initial_validation_split.html" class="external-link">rsample::initial_validation_split()</a></code> rather than a data frame. So
+<code>inside = validation_set()</code> fails when it is evaluated on an outer fold's
+analysis set, and nestedtune stops with an error that names <code>inside</code>.</p>
+<p>The design is found from the class of its splits as well
 as its own class. So an <code>outside</code> rset rebuilt with
 <code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code> from such splits is refused too, and so is one
 with a single such split among valid ones. The same holds for the rset

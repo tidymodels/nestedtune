@@ -94,77 +94,63 @@ design.
 | `sliding_period()`   | Yes        | Yes        |
 
 Yes means that the test suite runs the design in that loop through
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and that every outer fold completes. It holds for the arguments those
-tests use. For a Yes cell in the first eleven rows, the design in the
-other loop is a v-fold design. For a Yes cell in the four time-series
-rows, it is a time-series design. An inner time-series design is tested
-only with a time-series outer design. The “Time-series designs” section
-of
-[`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-says which other functions are tested on each time-series design.
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+with the arguments those tests use, and that every outer fold completes.
+The design in the other loop is a v-fold design, or a time-series design
+for the four time-series rows.
 
 Refused means that nestedtune stops with an error before any fold runs.
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-refuses the design when it builds it. The seven functions that take a
-nested design, such as
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-refuse it in a design built another way, for example with
+refuses such a design when it builds it, and each nestedtune function
+refuses one built another way, such as with
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-An outer bootstrap can put the same row in both the inner analysis set
-and the inner assessment set, which makes the estimate invalid. As the
-outer loop, `loo_cv()` holds out one row per fold. R² then cannot be
-computed, and the average RMSE is the mean absolute error. As the outer
-loop, `apparent()` scores its one fold on the rows it trained on. As the
-outer loop, `permutations()` gives each fold no assessment set. As the
-inner loop, tune refuses `loo_cv()` and `permutations()`, and it reports
-that no results are available for `apparent()`. So without the refusal,
-a tuning run with one of these inner designs fails every outer fold. A
-row subset of a refused design, such as `folds[1:2, ]`, loses the
-design’s class, but it is still refused. So is a design rebuilt from its
-splits with
-[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html),
-and a design with one such split among valid ones. nestedtune finds the
-design from the class that each split keeps. tune runs such a rebuilt
-inner design, so nestedtune refuses it for the reason it gives in the
-outer loop. Bootstrap and permutation designs can add an apparent split
-with the id “Apparent”, and tune leaves a split with that id out of its
-estimates. So an apparent split beside bootstrap or permutation splits
-counts as part of that design only if its id is “Apparent”. Under any
-other id, it counts as an `apparent()` split, because tune scores it on
-the rows it trained on. In the inner loop, tune leaves every split with
-the id “Apparent” out of its estimates, whatever the split’s class. So
-nestedtune refuses any other inner split with that id. Otherwise each
-outer fold that tunes on it uses fewer resamples than its design holds.
-nestedtune also refuses an inner split whose `id` is missing, because
-tune leaves that split out of its estimates too. It refuses an inner
-design in which two splits carry the same values in every id column,
-because tune then miscounts its resamples. The two racing functions also
-refuse the apparent split of a bootstrap. finetune eliminates race
-candidates on the score of each split, and the score of that split comes
-from the rows the model trained on. In either loop, nestedtune also
-refuses a split whose assessment set holds a row of its analysis set,
-because it scores the model on rows it trained on. This rule reads the
-rows themselves, so it also catches a split rebuilt with
-[`rsample::make_splits()`](https://rsample.tidymodels.org/reference/make_splits.html),
-which keeps no class that names its design. In the inner loop, an index
-into an outer analysis set counts as the data row it copies. An outer
-split can repeat a row, as a rebuilt bootstrap does. The design is then
-refused if an inner split puts one copy of that row in each set. The
-apparent split of an inner bootstrap design is exempt under the id
-“Apparent”, because tune leaves it out of its estimates. This rule also
-refuses
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-with `lag` above 0 in either loop, because each assessment set then
-holds the last `lag` analysis rows. Use `lag = 0`, and build the lagged
-predictors before resampling.
+No means that the design cannot be built in that loop. The “Differences
+from rsample” section of
+[`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+gives the reason for each Refused and No cell. The same page also gives
+the rules that refuse a single split in either loop. The two racing
+functions also refuse an inner apparent split, as
+[`?nested_tune_race`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
+explains.
 
-No means that the design gives no valid nested estimate in that loop. As
-the inner loop, `validation_set()` cannot be built, because it takes a
-split from `initial_validation_split()` rather than a data frame.
+## Supported tuning functions
 
-A cell reads Untested when no test shows whether the design works in
-that loop.
+The table lists tuning functions from tune, finetune, workflowsets and
+tidyclust, and the nestedtune function that does each one’s job on a
+nested design.
+
+| Function | nestedtune function | Supported |
+|----|----|----|
+| [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html) | [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md) | Yes |
+| [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html) | [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md) | Yes |
+| [`tune::fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html) | [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md) | Yes |
+| [`finetune::tune_race_anova()`](https://finetune.tidymodels.org/reference/tune_race_anova.html) | [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md) | Yes |
+| [`finetune::tune_race_win_loss()`](https://finetune.tidymodels.org/reference/tune_race_win_loss.html) | [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md) | Yes |
+| [`finetune::tune_sim_anneal()`](https://finetune.tidymodels.org/reference/tune_sim_anneal.html) | [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md) | Yes |
+| [`workflowsets::workflow_map()`](https://workflowsets.tidymodels.org/reference/workflow_map.html) | [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md) | Yes |
+| `tidyclust::tune_cluster()` |  | No |
+
+Yes means that nestedtune exports a nested counterpart that does the
+row’s job on a nested design. The test suite runs it with `vfold_cv()`
+in both loops, and every outer fold completes.
+[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+and
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+run no search of their own. The first scores a workflow with nothing to
+tune, and the second runs each workflow of a set through one of the
+other six functions. No means that no nestedtune function does the row’s
+job. For `tune_cluster()`, nothing yet settles what a nested estimate of
+a clustering metric means.
+
+The resampling table’s Yes cells were tested through
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+The “Time-series designs” section of
+[`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+says which time-series designs the other six functions are tested on.
+[Choosing the inner
+tuner](https://nestedtune.tidymodels.org/articles/tuners.html) runs the
+Bayesian search, the two racing searches and simulated annealing on one
+example.
 
 Learn more:
 

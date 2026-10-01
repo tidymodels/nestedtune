@@ -45,7 +45,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="nestedtune-0009000">nestedtune 0.0.0.9000<a class="anchor" aria-label="anchor" href="#nestedtune-0009000"></a></h2>
-<ul><li>
+<ul><li><p>The README has a second table, which lists eight tuning functions from tune, finetune, workflowsets and tidyclust and the nestedtune function for each. Seven are supported, and <code>tidyclust::tune_cluster()</code> is not. The prose under the resampling table is shorter. The reason for each refused design now sits in the “Differences from rsample” section of <code><a href="../reference/nested_resamples.html">?nested_resamples</a></code>. The error for an outer bootstrap no longer says that <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> only warns about it, because rsample builds a <code>group_bootstraps()</code> call with no warning.</p></li>
+<li>
 <p>Four refusals of malformed designs changed, each with class <code>nestedtune_bad_design</code>.</p>
 <ul><li><p>If an element of a <code>splits</code> column has the <code>rsplit</code> class but is not a list, it is now refused in either loop. <code>check_nested()</code> also refuses an element of the <code>inner_resamples</code> column that has the <code>rset</code> class but is not a list. Before, the check stopped with an R error such as “subscript out of bounds”.</p></li>
 <li><p><code><a href="../reference/nested_resamples.html">nested_resamples()</a></code> refuses an element of <code>outside</code>, or of the rset that <code>inside</code> gives, that is not an <code>rsplit</code> at all. The refusal of an inner split that is a list but not an <code>rsplit</code> now says that it is a list.</p></li>
