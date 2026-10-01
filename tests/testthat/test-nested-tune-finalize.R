@@ -9,13 +9,20 @@
 #   `nrow(rsample::analysis(split))` -- and outside it, by up to 20 on the
 #   200-row fixture, when tune reads the full frame instead. Pinned by "AC2:
 #   every candidate a fold searched lies inside the range its analysis rows
-#   finalize".
+#   finalize". Under an outer split that repeats a row, the 65-row analysis
+#   frame gives 6 to 32 and the 90-row whole frame 9 to 45. Pinned by "under
+#   a repeated outer row every candidate a fold searched lies inside the range
+#   its 65 analysis rows finalize".
 #
 # O2 -- type "live" (reference implementation). Source: rsample::nested_cv()
 #   built under the same seed, whose inner splits carry each outer fold's
 #   analysis set as their own frame, so tune finalizes on it by construction.
 #   Pinned by "AC3: a nested_resamples() design and the nested_cv() design it
 #   matches tune identically", which asserts the inner rows identical first.
+#   Under an outer split that repeats a row the reference is the same outer
+#   splits with `inside` evaluated on each fold's analysis frame under the
+#   same seed. Pinned by "under a repeated outer row a nested_resamples()
+#   design and its analysis-frame reference tune identically".
 #
 # O1 and O2 are the >=2 independent oracle types GP2 requires. AC1 is the
 # row-identity assertion behind both: the frame every finalizer call is handed
@@ -533,4 +540,107 @@ test_that("under a repeated outer row that reaches past the data a logical NA in
     expect_identical(splits[[s]]$data, d)
     expect_identical(splits[[s]]$out_id, want_out[[s]])
   }
+})
+
+test_that("under a repeated outer row every candidate a fold searched lies inside the range its 65 analysis rows finalize", {
+  skip_if_no_engines(stochastic = TRUE)
+  skip_if_not_installed("dials")
+
+  d <- make_reg_data()
+  design <- repeated_grouped_design(d)
+  wf <- stoch_workflow(d)
+
+  # Both folds hold the one repeated split, so a recorded frame matches
+  # either fold's analysis frame, and expect_frames_are_analysis_rows(),
+  # which wants exactly one, does not apply. Each frame is matched to the
+  # analysis frame at both fold positions instead.
+  keys <- analysis_keys(design)
+  expect_length(keys, 2L)
+  record <- new_frame_record()
+  set.seed(1)
+  res <- suppressMessages(nested_tune_grid(
+    wf,
+    design,
+    param_info = frac_param_info(wf, record),
+    grid = 5,
+    metrics = reg_metrics()
+  ))
+  expect_true(all(res$.completed))
+  expect_gte(length(record$frames), nrow(design))
+  for (frame in record$frames) {
+    expect_identical(frame$n, 65L)
+    for (i in seq_along(keys)) {
+      expect_identical(frame$x1, keys[[i]])
+    }
+  }
+
+  # What makes the assertion discriminating: the whole frame gives 9 to 45.
+  bounds <- floor(65 * FINALIZE_FRAC)
+  expect_identical(bounds, c(6, 32))
+  expect_identical(floor(nrow(d) * FINALIZE_FRAC), c(9, 45))
+  for (i in seq_len(nrow(design))) {
+    candidates <- unique(res$.inner_metrics[[i]]$min_n)
+    expect_gt(length(candidates), 1L)
+    # Which candidates, if any, fall outside the fold's own range.
+    outside <- candidates[candidates < bounds[[1L]] | candidates > bounds[[2L]]]
+    expect_identical(
+      outside,
+      candidates[0],
+      label = sprintf("fold %d candidates outside [6, 32]", i)
+    )
+  }
+})
+
+test_that("under a repeated outer row a nested_resamples() design and its analysis-frame reference tune identically", {
+  skip_if_no_engines(stochastic = TRUE)
+  skip_if_not_installed("dials")
+
+  d <- make_reg_data()
+  lean <- repeated_grouped_design(d)
+  # The same outer splits, with the inner rsets built on each fold's
+  # analysis frame under the same seed.
+  ref <- lean
+  ref$inner_resamples <- repeated_grouped_reference(lean)
+  # The precondition: the two designs hold the same inner rows.
+  expect_inner_identical(lean, ref)
+  wf <- stoch_workflow(d)
+  ms <- reg_metrics()
+
+  # Two direct calls, never memoised() (the M46 lesson).
+  set.seed(3)
+  lean_res <- suppressMessages(nested_tune_grid(
+    wf,
+    lean,
+    param_info = frac_param_info(wf),
+    grid = 5,
+    metrics = ms
+  ))
+  set.seed(3)
+  ref_res <- suppressMessages(nested_tune_grid(
+    wf,
+    ref,
+    param_info = frac_param_info(wf),
+    grid = 5,
+    metrics = ms
+  ))
+  expect_true(all(lean_res$.completed))
+  expect_identical(lean_res$.inner_metrics, ref_res$.inner_metrics)
+  expect_identical(lean_res$.metrics, ref_res$.metrics)
+})
+
+test_that("the rebuild under a repeated outer row draws nothing from the RNG", {
+  d <- make_reg_data()
+  design <- repeated_grouped_design(d)
+  set.seed(9)
+  before <- .Random.seed
+  framed <- analysis_framed_inner(
+    design$inner_resamples[[1L]],
+    design$splits[[1L]]
+  )
+  expect_identical(.Random.seed, before)
+  # The rebuild ran: the frame is the analysis set.
+  expect_identical(
+    framed$splits[[1L]]$data,
+    rsample::analysis(design$splits[[1L]])
+  )
 })
