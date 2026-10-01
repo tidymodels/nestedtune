@@ -1,6 +1,6 @@
 # M136: README table of supported tuning functions, and shorter table prose
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - [x] T2: In the "Differences from rsample" section of `R/nested-resamples.R` (lines 29-72), state the reason for each `Refused` cell and for the inner `validation_set()` `No` cell. Replace the sentence at line 43 that says the README gives the reasons. Point the comment at `R/checks.R:1232` at `?nested_resamples`. Run `devtools::document()`.
 - [x] T3: Add the "Supported tuning functions" section, its table and its prose to `README.Rmd`, per AC1-AC3. Check the word count with the AC4 command.
 - [x] T4: For each `Yes` row, find the test that runs the row's function with `vfold_cv()` in both loops and asserts that every fold completed. Record each one as a file:line in the work log. `test-nested-workflow-map-oracles.R:47-48` shows completion only through identity with a reference run. Add a direct `all(.completed)` assertion there.
-- [ ] T5: Add the NEWS bullet. Run `devtools::build_readme()`, every gating prose sweep, `devtools::document()` and `devtools::check()`.
+- [x] T5: Add the NEWS bullet. Run `devtools::build_readme()`, every gating prose sweep, `devtools::document()` and `devtools::check()`.
 
 ## Work log
 
@@ -65,6 +65,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - 2026-09-30: discovered sub-task under T5. The claim audit's outside-diff finding was first a candidate row, which put ROADMAP at its 60-line cap. It is fixed here instead, because the bootstrap error hint contradicted the corrected help sentence. Both hints now read "builds this design, with a warning at most", from a run where `nested_cv()` warned for `bootstraps()` but not for a `group_bootstraps()` call. `test-design-support.R` asserts the text, NEWS says so, and the candidate row is removed. Affected tests: 2033 expectations, 0 failed.
 - 2026-09-30: first `devtools::check()`: 0 errors, 0 warnings, 0 notes, on the tree before the claim-audit fixes. Rerunning on the final tree.
 - 2026-09-30: the claim reader re-read the hint fix: hint, NEWS sentence and test TRUE, the `R/checks.R` comment IMPRECISE. The comment now names the rset case, and the test also matches the `nested_resamples()` hint. `test-design-support.R`: 755 expectations, 0 failed.
+- 2026-09-30: T5 done. Second `devtools::check()`: 0 errors, 0 warnings, 0 notes, on the tree after the hint fix and before the last comment and test edit. `document()` leaves no diff. Status set to review.
 
 ## Decisions
 
