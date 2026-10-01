@@ -340,13 +340,17 @@ recomputed, the inverse of `inner_resamples_from_split()`; tune finalizes an
 unknown parameter range on the first inner split's whole frame, molded
 through the preprocessor, so the inner call receives that rebuilt `rset`
 rather than the design's `inner_resamples` element, and finalizes on the
-analysis rows alone (IP1). A `nested_cv()` design's inner `rset`, and one
-under an outer split whose `in_id` repeats a row, reach tune on the frame the
-design holds. In the second shape, `complement_within_outer()` sets each
-logical `NA` `out_id` to the complement's rows that the outer split holds.
-Over the whole frame, the logical `NA` reads as a set that holds the outer
-held-out rows (IP1). In both shapes the
-design, its size and the wire payload do not change, each running fold
+analysis rows alone (IP1). A `nested_cv()` design's inner `rset` reaches tune
+on the frame the design holds. Each inner index maps by occurrence
+(`occurrence_positions()`): the r-th mention of a data row goes to the r-th
+copy of that row in the outer `in_id`, wrapping to the first copy past the
+last. So under an outer split whose `in_id` repeats a row the rows, their
+order and multiplicity are kept, and the assessed copies keep distinct
+`.row` values. Under such a split a logical `NA` `out_id` becomes every
+analysis-frame position whose data row lies in `rsample::complement()` of the
+split read over the whole frame: each copy the outer split holds, no outer
+held-out row (IP1). The rebuild leaves the
+design, its size and the wire payload unchanged, each running fold
 materializing one analysis-set copy for the tune call's duration. Then
 `run_tuner()` assembles the inner call with `rlang::call2()` in the
 registry's namespace — `tune_grid()`, `tune_bayes()`, `tune_race_anova()` or
