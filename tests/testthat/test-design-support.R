@@ -644,6 +644,8 @@ test_that("the plain outer bootstrap refusals name the function", {
     expect_names_design(cnd, design)
     # The entry check serves seven functions, so its hint names none.
     expect_match(conditionMessage(cnd), "nestedtune refuses", fixed = TRUE)
+    # rsample builds a group_bootstraps() call with no warning (M136).
+    expect_match(conditionMessage(cnd), "with a warning at most", fixed = TRUE)
     expect_no_match(conditionMessage(cnd), "nested_tune_grid()", fixed = TRUE)
   }
 })

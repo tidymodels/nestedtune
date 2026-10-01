@@ -346,7 +346,8 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
       call = call
     )
   }
-  # rsample only warns for a bootstrap here. The same row can land in both the
+  # rsample builds a bootstrap here, with a warning at most: it warns for
+  # bootstraps() and builds a group_bootstraps() call silently. The same row can land in both the
   # inner analysis and the inner assessment set, which makes the estimate
   # invalid rather than merely unusual, so this refuses (GP3). nested_resamples()
   # already refuses at construction; this catches designs built elsewhere.
@@ -355,7 +356,8 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
       c(
         "{.arg resamples} cannot use a bootstrap for the outer loop.",
         x = refused_design_reason(bootstrap_design(resamples), "outer"),
-        i = "{.fn rsample::nested_cv} only warns here; nestedtune refuses."
+        i = "{.fn rsample::nested_cv} builds this design, with a warning at \\
+             most; nestedtune refuses."
       ),
       class = "nestedtune_bad_design",
       call = call

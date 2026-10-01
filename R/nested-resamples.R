@@ -217,8 +217,8 @@ nested_resamples <- function(data, outside, inside, ...) {
       c(
         "{.arg outside} cannot be a bootstrap.",
         x = refused_design_reason(bootstrap_design(outside), "outer"),
-        i = "{.fn rsample::nested_cv} only warns here; \\
-             {.fn nested_resamples} refuses."
+        i = "{.fn rsample::nested_cv} builds this design, with a warning at \\
+             most; {.fn nested_resamples} refuses."
       ),
       class = "nestedtune_bad_design"
     )

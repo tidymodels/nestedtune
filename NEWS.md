@@ -5,7 +5,9 @@
   each. Seven are supported, and `tidyclust::tune_cluster()` is not. The
   prose under the resampling table is shorter. The reason for each refused
   design now sits in the "Differences from rsample" section of
-  `?nested_resamples`.
+  `?nested_resamples`. The error for an outer bootstrap no longer says that
+  `rsample::nested_cv()` only warns about it, because rsample builds a
+  `group_bootstraps()` call with no warning.
 
 * Four refusals of malformed designs changed, each with class
   `nestedtune_bad_design`.
