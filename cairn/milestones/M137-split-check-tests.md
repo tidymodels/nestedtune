@@ -1,13 +1,13 @@
 # M137: Test the split-check gaps M135's review left
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP3
 - **Resolves:** —
 - **Surface tier:** internal — it adds tests only, and no exported behavior changes
-- **Branch/PR:** —
+- **Branch/PR:** m137-split-check-tests
 
 ## Goal
 
@@ -44,6 +44,9 @@ The split-check tests reach the index shapes, the NA outer `in_id` and the condi
 
 - 2026-09-30: created by /milestone-plan from the candidate row "M135's review leftovers on split-check tests" (B1, P1, P3), which the plan commit removes.
 - 2026-09-30: reduced criteria audit (fresh Opus reader) returned one finding. AC3's search missed blocks that refuse only through `expect_contained()` or `expect_not_list()`. AC3 now also covers blocks that call a helper holding the string. The reader said that T2's planted edit fails at `expect_error`. That note was not taken, because a probe showed that the NA outer `in_id` makes the containment rule refuse row 1.
+- 2026-09-30: T1 added the seven-plant index test. With `held()` edited to answer `TRUE` outside the frame, `check_nested()` accepted the `in_id` 0 plant and the test failed at its `expect_error()`. Edit reverted, `R/checks.R` matches main.
+- 2026-09-30: T2 added the NA outer `in_id` test, the NA appended to the outer `in_id`. With the early return planted in `fold_overlap_rows()`, `check_nested()` accepted the design and the test failed at its `expect_error()`, not on the containment message T2 expected. The plan-time reader's note was right for this placement. Edit reverted.
+- 2026-09-30: checkpoint. T1 and T2 tests are committed and the full suite is still running, so neither task is ticked yet.
 - 2026-09-30: plan gate chose a `nested_tune_grid()` pass in every refusal block over one block per refusal message. The per-message set is a recalled list. Falsified by a refusal in the file that `nested_tune_grid()` meets with a different, earlier message.
 - 2026-09-30: plan gate chose planted-defect runs in AC1 and AC2 over passing tests alone. A new test is shown able to fail before it is trusted. Falsified by evidence that the planted edits are not defects a real change to `R/checks.R` can make.
 

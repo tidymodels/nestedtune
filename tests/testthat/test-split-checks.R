@@ -264,6 +264,32 @@ test_that("a held-out row in both sets of an inner split is refused as a leak", 
   expect_contained(design)
 })
 
+# An index outside the frame is not a row the outer split holds, whichever
+# side of the frame it falls on. An NA `out_id` is rsample's "the
+# complement", so the NA plant goes in the `in_id` alone.
+test_that("an inner index outside the frame is refused as a leak", {
+  n <- nrow(shape_data())
+  plants <- list(in_id = c(0L, -1L, NA, n + 1L), out_id = c(0L, -1L, n + 1L))
+  for (slot in names(plants)) {
+    for (value in plants[[slot]]) {
+      info <- paste(slot, value)
+      design <- edit_whole_inner(function(split, held) {
+        stopifnot(!anyNA(split$out_id))
+        split[[slot]] <- c(split[[slot]], value)
+        split
+      })
+      cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+      expect_match(one_line(cnd), CONTAINED, fixed = TRUE, info = info)
+      expect_match(
+        one_line(cnd),
+        paste0("Outer fold 1, inner split 1: ", slot, " holds ", value, ","),
+        fixed = TRUE,
+        info = info
+      )
+    }
+  }
+})
+
 test_that("a held-out row a global complement() adds is refused as a leak", {
   out <- NULL
   extra <- NULL
@@ -285,6 +311,22 @@ test_that("a held row in both sets of an inner split is still refused as shared"
     split$out_id <- c(split$out_id, split$in_id[[1]])
     split
   })
+  cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+  expect_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+  expect_match(
+    one_line(cnd),
+    "Element 1 of inner_resamples: split 1.",
+    fixed = TRUE
+  )
+})
+
+# An NA in the outer `in_id` marks no row, so the held row is still counted.
+test_that("a held shared row is refused when the outer in_id holds an NA", {
+  design <- edit_whole_inner(function(split, held) {
+    split$out_id <- c(split$out_id, split$in_id[[1]])
+    split
+  })
+  design$splits[[1]]$in_id <- c(design$splits[[1]]$in_id, NA)
   cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
   expect_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
   expect_match(
