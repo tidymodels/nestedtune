@@ -62,6 +62,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - 2026-10-01: the re-read cleared two corrections. It found the `check_inner_splits()` comment still imprecise for `out_id`, so I took its wording. It also found that an inner `out_id` index beyond integer range passes every rule. That shape went into the DESIGN.md Known issues entry on index slots, because a candidate row puts ROADMAP.md at its 60-line cap.
 - 2026-10-01: T5 done. The planted-defect runs passed their test. `devtools::check()` reports 0 errors, 0 warnings and 0 notes. It ran before the claim-audit fixes, which changed only comments and the error's reason text. On the final code, the split-check file passes, `devtools::document()` leaves no diff, `air format --check` and both prose sweeps are clean, and `cairn_validate` passes. Status set to review.
 - 2026-10-01: review found no failing criterion. Three reviewers gave 19 findings. The gate took the fix-now set, which changes two comments, five tests and DESIGN.md, and changes no package behavior.
+- step-7 approval: m138-na-split-indices approved for merge
 
 ## Decisions
 
