@@ -4,7 +4,7 @@ _Last hygiene check: 2026-09-30 (M136 archived, M133 row pruned, validate green)
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M137 | Test the split-check gaps M135's review left | in-progress | — | normal | milestones/M137-split-check-tests.md |
+| M137 | Test the split-check gaps M135's review left | review | — | normal | milestones/M137-split-check-tests.md |
 | M136 | README table of supported tuning functions, and shorter table prose | done | — | normal | milestones/archive/M136-tuning-table.md |
 | M135 | Close the split-check gaps M134's review left | done | — | normal | milestones/archive/M135-split-check-gaps.md |
 | M134 | Refuse a split that assesses rows it trains on | done | M133 | normal | milestones/archive/M134-overlapping-splits.md |
