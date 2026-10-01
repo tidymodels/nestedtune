@@ -491,3 +491,46 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
     sort(c(1:30, 1:5))
   )
 })
+
+test_that("under a repeated outer row that reaches past the data a logical NA inner out_id still holds only outer rows", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  ms <- reg_metrics()
+
+  # A row past the data appended to the outer `in_id`: the frame stays whole,
+  # for last_fit() to refuse, but the fold still reports its inner metrics.
+  outer <- repeated_outer_split(d)
+  outer$in_id <- c(outer$in_id, 999999L)
+  inner <- rsample::manual_rset(
+    lapply(list(1:30, 31:60), function(idx) {
+      rsample::make_splits(list(analysis = idx, assessment = NA), d)
+    }),
+    c("Inner1", "Inner2")
+  )
+  design <- rsample::manual_rset(list(outer), "Fold1")
+  design$inner_resamples <- list(inner)
+
+  seen <- list()
+  original <- run_tuner
+  local_mocked_bindings(
+    run_tuner = function(tuner, object, resamples, ...) {
+      seen[[length(seen) + 1L]] <<- resamples
+      original(tuner, object = object, resamples = resamples, ...)
+    }
+  )
+  res <- suppressWarnings(
+    nested_tune_grid(wf, design, grid = det_grid(), metrics = ms)
+  )
+  expect_false(res$.completed)
+  expect_identical(res$.notes[[1L]]$location[[1L]], "outer fit")
+  expect_length(seen, 1L)
+  splits <- seen[[1L]]$splits
+  # Data rows of the whole frame, each copy the outer split holds.
+  want_out <- list(31:60, c(1:30, 1:5))
+  for (s in seq_along(splits)) {
+    expect_identical(splits[[s]]$data, d)
+    expect_identical(splits[[s]]$out_id, want_out[[s]])
+  }
+})
