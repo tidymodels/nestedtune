@@ -2069,6 +2069,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** a second README table lists eight functions from tune, finetune, workflowsets and tidyclust. A row reads `Yes` only when nestedtune exports a nested counterpart that a test runs with `vfold_cv()` in both loops, with every outer fold completing. A row reads `No` when no nestedtune function does its job. The prose under both tables keeps definitions and pointers. `?nested_resamples` gives the reason for each `Refused` and `No` cell.
 **Consequences:** a reader follows a pointer to the help page for the reason behind a refusal. Known gaps inside supported tuners stay off the README. Falsified by a user misled by the README about a refusal or a tuner, or by a tune, finetune or workflowsets release that adds a tuning function.
 
+### D-111 (2026-10-01): both loops and `nested_resamples()` refuse an `NA` in a split's `in_id` or `out_id`, except the logical `NA` `out_id`. Narrows D-049's `out_id` clause and the DESIGN.md Known issues entry on index shapes
+
+**Context:** an `NA` in an outer `in_id` passes `check_nested()`. The fold then fails inside rsample, and `print()` of the results errors. An `NA` in both an outer and an inner `in_id` passes the containment rule, because `%in%` matches the two NAs. `rsample::make_splits()` refuses an `NA` in the analysis indices. So the Known issues reason, that rsample admits the shape, does not hold for it.
+**Decision:** `check_nested()` refuses an `NA` in an outer or inner `in_id` or `out_id`, with class `nestedtune_bad_design`, before the shared-rows and containment rules. `nested_resamples()` refuses the same in its `outside` splits. Only an `out_id` identical to the logical `NA` is exempt, because rsample reads only that value as the complement. Rejected: a fix to the containment rule alone, which leaves an outer-only `NA` to fail at run time. Rejected: exempting any all-`NA` `out_id`, which rsample reads as indices that give rows of NAs.
+**Consequences:** a design with an `NA` index never reaches a fit. D-049's phrase "any non-`NA` `out_id`" now means any `out_id` other than the logical `NA`. The Known issues entry loses its clause on an element-wise `NA` in `out_id`. Falsified by a real design that needs an `NA` index to run, or by an rsample release that reads another `NA` value as the complement.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
