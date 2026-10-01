@@ -2,7 +2,8 @@
 
 * Three refusals of malformed splits changed, each with class
   `nestedtune_bad_design`. If an element of a `splits` column has the
-  `rsplit` class but is not a list, it is now refused in either loop. Before, the check stopped with an R error such as "subscript out of
+  `rsplit` class but is not a list, it is now refused in either loop.
+  Before, the check stopped with an R error such as "subscript out of
   bounds". `nested_resamples()` also refuses an element of `outside`, or of
   the rset that `inside` gives, that is not an `rsplit` at all. Next, take an
   inner split on the outer split's frame that puts a row the outer split
