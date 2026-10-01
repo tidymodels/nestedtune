@@ -7,7 +7,7 @@
 - **Principles touched:** IP1, GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes the tuning results of the exported nested tuning functions
-- **Branch/PR:** m139-repeated-row-inner-frame
+- **Branch/PR:** m139-repeated-row-inner-frame, https://github.com/tidymodels/nestedtune/pull/155
 
 ## Goal
 
