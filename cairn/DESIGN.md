@@ -341,7 +341,11 @@ unknown parameter range on the first inner split's whole frame, molded
 through the preprocessor, so the inner call receives that rebuilt `rset`
 rather than the design's `inner_resamples` element, and finalizes on the
 analysis rows alone (IP1). A `nested_cv()` design's inner `rset`, and one
-under an outer split whose `in_id` repeats a row, reach tune untouched; the
+under an outer split whose `in_id` repeats a row, reach tune on the frame the
+design holds. In the second shape, `complement_within_outer()` sets each
+logical `NA` `out_id` to the complement's rows that the outer split holds.
+Over the whole frame, the logical `NA` reads as a set that holds the outer
+held-out rows (IP1). In both shapes the
 design, its size and the wire payload do not change, each running fold
 materializing one analysis-set copy for the tune call's duration. Then
 `run_tuner()` assembles the inner call with `rlang::call2()` in the

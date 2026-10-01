@@ -453,13 +453,12 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # splits `is_fold_payload()`'s shared-frame check also passes, which is why the
 # test here is against the outer frame), and an outer split whose `in_id`
 # repeats a row (an evaluated `manual_rset()`), where `match()` would collapse
-# the repeats onto one position. An index the outer split does not hold is
-# left alone the same way rather than mapped to `NA`.
+# the repeats onto one position. In the second shape a logical `NA` `out_id`
+# is still made explicit (complement_within_outer()), since over the whole
+# frame it would reach the outer held-out rows. An index the outer split does
+# not hold is left alone the same way rather than mapped to `NA`.
 analysis_framed_inner <- function(inner, split) {
   outer_idx <- as.integer(split$in_id)
-  if (anyDuplicated(outer_idx) > 0L) {
-    return(inner)
-  }
   shared <- vapply(
     inner$splits,
     function(inner_split) identical(inner_split$data, split$data),
@@ -467,6 +466,9 @@ analysis_framed_inner <- function(inner, split) {
   )
   if (!all(shared)) {
     return(inner)
+  }
+  if (anyDuplicated(outer_idx) > 0L) {
+    return(complement_within_outer(inner, outer_idx))
   }
 
   # An all-`NA` `out_id` is rsample's "the complement", derivable from the
@@ -507,6 +509,41 @@ analysis_framed_inner <- function(inner, split) {
   # As in `inner_resamples_from_split()`: the rset's class, id columns and
   # attributes are kept, the splits swapped, and the fingerprint recomputed
   # because it describes the indices.
+  out <- inner
+  out[["splits"]] <- splits
+  attr(out, "fingerprint") <-
+    attr(rsample::manual_rset(splits, inner$id), "fingerprint")
+  out
+}
+
+# The inner rset under an outer split whose `in_id` repeats a row, where
+# analysis_framed_inner() leaves the whole frame in place. There a logical
+# `NA` `out_id` reads as every frame row outside the inner `in_id`, the outer
+# held-out rows among them, which IP1 keeps out of the inner loop. So each
+# such split gets an explicit `out_id`: rsample's complement, kept to the rows
+# the outer split holds, each once. A split whose complement rsample cannot
+# derive is left for tune to fail on, as before. Nothing here draws from the
+# RNG.
+complement_within_outer <- function(inner, outer_idx) {
+  splits <- inner$splits
+  changed <- FALSE
+  for (i in seq_along(splits)) {
+    if (!identical(splits[[i]]$out_id, NA)) {
+      next
+    }
+    held <- tryCatch(
+      rsample::complement(splits[[i]]),
+      error = function(cnd) NULL
+    )
+    if (is.null(held)) {
+      next
+    }
+    splits[[i]]$out_id <- held[held %in% outer_idx]
+    changed <- TRUE
+  }
+  if (!changed) {
+    return(inner)
+  }
   out <- inner
   out[["splits"]] <- splits
   attr(out, "fingerprint") <-
