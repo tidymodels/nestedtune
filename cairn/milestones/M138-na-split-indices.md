@@ -55,7 +55,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - 2026-10-01: plan gate chose a refusal in `nested_resamples()` too over a candidate row, because the constructor otherwise builds a design that every driver refuses (GP3). Falsified by a user who builds such a design on purpose and repairs it before a driver runs.
 - 2026-10-01: implement started on branch `m138-na-split-indices`. The question gate was skipped, because the plan left nothing open.
 - 2026-10-01: T1 and T2 done. The new blocks failed first with the containment and shared-rows refusals. `check_na_indices()` now runs after `check_outer_splits()`, and the AC3 test mocks it away to show the later refusals. A `nested_resamples()` design stores explicit inner `out_id` values, so the AC5 test reads the logical `NA` from the outer splits there. `devtools::test()` reports 0 failures.
-- 2026-10-01: checkpoint, T3 and T4 written but not yet checked off. `check_outer_na()` runs in `nested_resamples()`, the AC4 tests and the changed `test-design-support.R` test pass, docs and NEWS are updated, and `devtools::document()` and both prose sweeps are clean. The full `devtools::test()` run for these two tasks is still going.
+- 2026-10-01: checkpoint, T3 and T4 written but not yet checked off. `check_outer_na()` runs in `nested_resamples()`. The AC4 tests and the changed `test-design-support.R` test pass. Docs and NEWS are updated, and `devtools::document()` and both prose sweeps are clean. The full `devtools::test()` run for these two tasks is still going.
 
 ## Decisions
 
