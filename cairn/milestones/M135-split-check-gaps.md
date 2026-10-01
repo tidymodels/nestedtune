@@ -1,6 +1,6 @@
 # M135: Close the split-check gaps M134's review left
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,7 +52,7 @@ D-109 records the message change of item (1) as a narrowing of D-103.
 - [x] T3: In `fold_overlap_rows()`, take a fold whose inner splits carry the outer frame. Count only the shared rows that the outer `in_id` holds, so the containment rule gets a held-out row. Write the three AC2 tests first. The second one needs T2.
 - [x] T4: Write `benchmarks/split-check-speed.R`. It exports the plan commit with `git archive` and loads that tree and the working tree in turn with `pkgload::load_all()`. For each tree, it builds the two AC4 designs with a fixed seed, times `check_nested()` 5 times on each, and prints the medians. Run it on the plan commit alone and record the medians in the work log.
 - [x] T5: Make the two slow parts faster with no change to any refusal. In `split_shares_rows()`, if `rows` repeats no value, return FALSE for a default-complement split. Check that once per fold, not once per split. In the containment loop of `check_inner_splits()`, mark the outer `in_id` once per fold in a logical vector, in place of `%in%` for each split. Run the T4 script and record the four medians.
-- [ ] T6: Add the NEWS bullet. Then run the full verify slot and `devtools::check()`.
+- [x] T6: Add the NEWS bullet. Then run the full verify slot and `devtools::check()`.
 
 ## Work log
 
@@ -72,3 +72,6 @@ D-109 records the message change of item (1) as a narrowing of D-103.
 - 2026-09-30: T3 done. On the outer frame, `fold_overlap_rows()` passes a mark of the outer `in_id` to `split_shares_rows()`. That function then counts only a shared row the outer split holds. The two held-out-row tests got the shared-rows headline on the T2 code. The held-row control passed before and after. The full suite gave 0 failures and the sweep was clean.
 - 2026-09-30: T4 done. `Rscript benchmarks/split-check-speed.R base` on the plan commit `e499a7f3` (R 4.6.1, aarch64-apple-darwin23) gave medians of 0.975 s on the `nested_cv()` design and 6.744 s on the `nested_resamples()` design.
 - 2026-09-30: T5 done. If `rows` repeats no value, `split_shares_rows()` returns FALSE for a default-complement split, and the repeat test runs once per fold. The containment loop marks the outer `in_id` once per fold. `Rscript benchmarks/split-check-speed.R` at `315951b6` gave base medians of 1.091 s and 7.835 s and working-tree medians of 0.077 s and 0.938 s. The drops were 92.9% (`nested_cv()`) and 88.0% (`nested_resamples()`). The full suite gave 0 failures and the sweep was clean.
+- 2026-09-30: T6 done. NEWS gained two bullets under the development heading. `devtools::document()` changed nothing, all six gating sweep modes were clean, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes.
+- claim audit: 60 claims read, 0 corrected — NEWS.md, R/checks.R, R/nested-resamples.R, benchmarks/split-check-speed.R, tests/testthat/test-split-checks.R. The reader called one test comment loose but not false, and its wording ("stopped with an unrelated error") was applied.
+- 2026-09-30: status set to review.

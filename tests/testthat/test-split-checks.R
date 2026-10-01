@@ -107,7 +107,7 @@ test_that("two outer splits that are not lists are both named", {
 })
 
 # nested_resamples() gives an element that lacks the class the same check,
-# where it once crashed as well.
+# where it once stopped with an unrelated error as well.
 test_that("nested_resamples() refuses a split that is not an rsplit", {
   d <- shape_data()
   for (element in list(list(a = 1), 5L)) {
