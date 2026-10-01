@@ -495,7 +495,10 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
     expect_identical(splits[[s]]$in_id, want_in[[s]])
     expect_identical(splits[[s]]$out_id, want_out[[s]])
     rows <- REPEATED_IN[splits[[s]]$out_id]
-    expect_identical(rsample::assessment(splits[[s]]), vctrs::vec_slice(d, rows))
+    expect_identical(
+      rsample::assessment(splits[[s]]),
+      vctrs::vec_slice(d, rows)
+    )
     # No outer held-out row, and no row the split trains on.
     expect_identical(intersect(rows, REPEATED_OUT), integer(0))
     expect_identical(intersect(rows, inner_in[[s]]), integer(0))

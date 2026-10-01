@@ -65,6 +65,7 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 - 2026-10-01: review gate triage. F1 to F6 were fixed on the branch at the user's choice, and F11, a regression of the F3 fix found on re-read, was fixed too. F7 to F9 were rejected. The removed candidate row is noted in the Review section.
 - step-7 approval: m139-repeated-row-inner-frame approved for merge
 - 2026-10-01: PR #155 opened and bound in the app. CI read as 1 check pending. Stopped before the merge marker and the merge, because this session does not poll CI. Resume with /milestone-review M139.
+- 2026-10-01: resume on PR #155 (open, approval on record). CI check `format-suggest` failed on one test line 82 characters wide (`test-nested-tune-finalize.R:498`). Wrapped it. `air format --check` is clean on the three changed R files, and the test file passes 13 tests. Pushed, so CI restarts on the new head.
 
 ## Decisions
 
