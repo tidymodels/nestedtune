@@ -2063,6 +2063,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the shared-rows rule of D-103 counts, for an inner split on the outer frame, only rows the outer `in_id` holds. The containment rule of D-049 refuses the held-out row later in the check order, with the same class. Rejected: a `lag` hint for `validation_time_split()`. Under D-108 the hint reads the design's `lag` setting, which that rset does not keep, and the function is deprecated. Rejected: a separate refusal for a non-whole index. The model would be scored on the row R reads, so the shared-rows refusal is true.
 **Consequences:** such a split names the leak, and no design refused before runs. Falsified by a split with a held-out row in both sets that the containment rule does not refuse.
 
+### D-110 (2026-09-30): the README states support for eight tuning functions in a second table, and the reasons for the resampling table's refusals live in `?nested_resamples`. Extends D-095
+
+**Context:** the README says which resampling designs work in each loop, but not which tuning functions run. Its resampling prose grew as refusal rules were added, and the help page already states most of those rules.
+**Decision:** a second README table lists eight functions from tune, finetune, workflowsets and tidyclust. A row reads `Yes` only when nestedtune exports a nested counterpart that a test runs with `vfold_cv()` in both loops, with every outer fold completing. A row reads `No` when no nestedtune function does its job. The prose under both tables keeps definitions and pointers. `?nested_resamples` gives the reason for each `Refused` and `No` cell.
+**Consequences:** a reader follows a pointer to the help page for the reason behind a refusal. Known gaps inside supported tuners stay off the README. Falsified by a user misled by the README about a refusal or a tuner, or by a tune, finetune or workflowsets release that adds a tuning function.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
