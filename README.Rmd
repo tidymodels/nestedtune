@@ -119,6 +119,38 @@ the rows the validation set refers to. A call such as
 `outside = validation_set()` cannot be built, because the function takes a
 split rather than a data frame.
 
+## Supported tuning functions
+
+The table lists tuning functions from tune, finetune, workflowsets and
+tidyclust, and the nestedtune function that does each one's job on a nested
+design.
+
+| Function | nestedtune function | Supported |
+|---|---|---|
+| `tune::tune_grid()` | `nested_tune_grid()` | Yes |
+| `tune::tune_bayes()` | `nested_tune_bayes()` | Yes |
+| `tune::fit_resamples()` | `nested_fit_resamples()` | Yes |
+| `finetune::tune_race_anova()` | `nested_tune_race_anova()` | Yes |
+| `finetune::tune_race_win_loss()` | `nested_tune_race_win_loss()` | Yes |
+| `finetune::tune_sim_anneal()` | `nested_tune_sim_anneal()` | Yes |
+| `workflowsets::workflow_map()` | `nested_workflow_map()` | Yes |
+| `tidyclust::tune_cluster()` | | No |
+
+Yes means that nestedtune exports a nested counterpart that does the row's
+job on a nested design. The test suite runs it with `vfold_cv()` in both
+loops, and every outer fold completes. `nested_fit_resamples()` and
+`nested_workflow_map()` run no search of their own. The first scores a
+workflow with nothing to tune, and the second runs each workflow of a set
+through one of the other six functions. No means that no nestedtune function
+does the row's job. For `tune_cluster()`, nothing yet settles what a nested
+estimate of a clustering metric means.
+
+The resampling table's Yes cells were tested through `nested_tune_grid()`.
+The "Time-series designs" section of `?nested_resamples` says which
+time-series designs the other six functions are tested on. [Choosing the
+inner tuner](https://nestedtune.tidymodels.org/articles/tuners.html) runs
+each function on one example.
+
 Learn more:
 
 - [Nested cross-validation](https://nestedtune.tidymodels.org/articles/nested-cv.html),

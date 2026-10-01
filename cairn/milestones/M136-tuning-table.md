@@ -43,7 +43,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 
 - [x] T1: Shorten the resampling prose in `README.Rmd` (lines 80-175 at 10e1e775). Keep the 17 table lines as they are. Cut the `Yes` paragraph to about 50 words. Replace the per-design reasons and the extra refusal rules with one pointer to `?nested_resamples`. Move the reason for the inner `validation_set()` `No` cell to the help. Drop the Untested paragraph, because no cell reads Untested and D-095 keeps the rule. Keep the `[^validation]` footnote before "Learn more:".
 - [x] T2: In the "Differences from rsample" section of `R/nested-resamples.R` (lines 29-72), state the reason for each `Refused` cell and for the inner `validation_set()` `No` cell. Replace the sentence at line 43 that says the README gives the reasons. Point the comment at `R/checks.R:1232` at `?nested_resamples`. Run `devtools::document()`.
-- [ ] T3: Add the "Supported tuning functions" section, its table and its prose to `README.Rmd`, per AC1-AC3. Check the word count with the AC4 command.
+- [x] T3: Add the "Supported tuning functions" section, its table and its prose to `README.Rmd`, per AC1-AC3. Check the word count with the AC4 command.
 - [ ] T4: For each `Yes` row, find the test that runs the row's function with `vfold_cv()` in both loops and asserts that every fold completed. Record each one as a file:line in the work log. `test-nested-workflow-map-oracles.R:47-48` shows completion only through identity with a reference run. Add a direct `all(.completed)` assertion there.
 - [ ] T5: Add the NEWS bullet. Run `devtools::build_readme()`, every gating prose sweep, `devtools::document()` and `devtools::check()`.
 
@@ -58,6 +58,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - 2026-09-30: implement started on branch m136-tuning-table. Question gate skipped, because the plan left nothing open.
 - 2026-09-30: T1 done. The resampling section is 197 words by the AC4 command, down from 789. Its 17 table lines match 10e1e775, and the plain sweep is clean.
 - 2026-09-30: T2 done. `?nested_resamples` now names both outer bootstrap designs and gives the reason for each of the six loo, apparent and permutations cells. It also gives why an inner `validation_set()` fails, read from a run of `inside = validation_set()`. The README sentence and the `R/checks.R` comment now point to the help. `grep -rn README R/ man/` is empty, and both plain sweeps are clean.
+- 2026-09-30: T3 done. The "Supported tuning functions" section sits before "Learn more:" with the eight AC1 rows. The two sections hold 351 words by the AC4 command, and the plain sweep is clean.
 
 ## Decisions
 
