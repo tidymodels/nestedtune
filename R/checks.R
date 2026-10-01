@@ -992,19 +992,46 @@ split_shares_rows <- function(split, rows = NULL) {
 }
 
 # Whether rsample::complement() reaches its rsplit method for `split`: no
-# class ahead of "rsplit" has a complement method registered, by rsample
-# (the apparent, rolling-origin and sliding splits) or by another package.
+# class ahead of "rsplit" has a complement method where dispatch looks for
+# one (complement_envs()).
 complement_is_default <- function(split) {
   cls <- class(split)
   ahead <- cls[seq_len(match("rsplit", cls) - 1L)]
-  registered <- asNamespace("rsample")[[".__S3MethodsTable__."]]
+  if (length(ahead) == 0L) {
+    return(TRUE)
+  }
+  envs <- complement_envs()
   !any(vapply(
     paste0("complement.", ahead),
-    exists,
-    logical(1),
-    envir = registered,
-    inherits = FALSE
+    function(name) {
+      any(vapply(
+        envs,
+        function(env) {
+          exists(name, envir = env, mode = "function", inherits = FALSE)
+        },
+        logical(1)
+      ))
+    },
+    logical(1)
   ))
+}
+
+# The environments where S3 dispatch finds a complement() method for a call
+# from rsample's code, as the one assessment() makes for tune: rsample's
+# namespace and the parents of it up to the global environment, rsample's
+# table of registered methods (the apparent, rolling-origin and sliding
+# splits, and any other package's), and base. Dispatch skips the search path
+# between the global environment and base, so a method in an attached
+# environment is never called and is not looked for (M135).
+complement_envs <- function() {
+  ns <- asNamespace("rsample")
+  envs <- list(ns[[".__S3MethodsTable__."]])
+  env <- ns
+  while (!identical(env, globalenv()) && !identical(env, emptyenv())) {
+    envs <- c(envs, env)
+    env <- parent.env(env)
+  }
+  c(envs, globalenv(), baseenv())
 }
 
 # The positions of the splits of `x` that share rows, for split_shares_rows()
