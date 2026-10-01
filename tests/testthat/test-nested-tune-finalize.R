@@ -345,57 +345,114 @@ test_that("AC4: an inner rset the rebuild does not apply to reaches run_tuner() 
   for (i in seq_along(seen)) {
     expect_identical(seen[[i]], ref$inner_resamples[[i]])
   }
+})
 
-  # An evaluated manual outer split whose `in_id` repeats a row: the inverse
-  # of the remap is ambiguous there, so the frame is left as the design holds
-  # it. The inner folds group on `x1`, whose values are all distinct, so both
-  # copies of a row land on one side of every inner split: a copy on each
-  # side would share a row, which the design refuses (M134).
-  repeated <- rsample::make_splits(
-    list(analysis = c(1:60, 1:5), assessment = 61:90),
+# The repeated outer split: an evaluated manual split whose `in_id` holds rows
+# 1 to 5 twice, so its analysis frame has 65 rows, with rows 61 to 90 held
+# out.
+REPEATED_IN <- c(1:60, 1:5)
+REPEATED_OUT <- 61:90
+
+repeated_outer_split <- function(d) {
+  rsample::make_splits(
+    list(analysis = REPEATED_IN, assessment = REPEATED_OUT),
     d
   )
-  expect_gt(anyDuplicated(repeated$in_id), 0L)
-  expect_false(anyDuplicated(d$x1) > 0L)
-  outer <- rsample::manual_rset(list(repeated, repeated), c("a", "b"))
+}
+
+# Two folds holding the repeated split, with inner folds grouped on `x1`.
+# Its values are all distinct, so both copies of a row land on one side of
+# every inner split: a copy on each side would share a row, which the design
+# refuses (M134).
+repeated_grouped_design <- function(d) {
+  split <- repeated_outer_split(d)
+  outer <- rsample::manual_rset(list(split, split), c("a", "b"))
   set.seed(4)
-  manual <- nested_resamples(
+  nested_resamples(
     d,
     outside = outer,
     inside = rsample::group_vfold_cv(group = x1, v = 2)
   )
+}
+
+# The inner rsets the grouped design stands for: the seed set once, then
+# `inside` evaluated on each fold's analysis frame in fold order.
+repeated_grouped_reference <- function(design) {
+  set.seed(4)
+  lapply(design$splits, function(split) {
+    rsample::group_vfold_cv(rsample::analysis(split), group = x1, v = 2)
+  })
+}
+
+test_that("under a repeated outer row a nested_resamples() design reaches run_tuner() on the analysis set", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  ms <- reg_metrics()
+  expect_false(anyDuplicated(d$x1) > 0L)
+  design <- repeated_grouped_design(d)
+  ref <- repeated_grouped_reference(design)
+
   seen <- record_run_tuner_resamples(
-    nested_tune_grid(wf, manual, grid = det_grid(), metrics = ms)
+    nested_tune_grid(wf, design, grid = det_grid(), metrics = ms)
   )
-  expect_length(seen, nrow(manual))
+  expect_length(seen, nrow(design))
   for (i in seq_along(seen)) {
-    expect_identical(seen[[i]], manual$inner_resamples[[i]])
+    frame <- rsample::analysis(design$splits[[i]])
+    expect_identical(nrow(frame), 65L)
+    held <- design$inner_resamples[[i]]$splits
+    got <- seen[[i]]$splits
+    want <- ref[[i]]$splits
+    expect_length(got, length(held))
+    expect_length(want, length(held))
+    for (j in seq_along(got)) {
+      expect_identical(got[[j]]$data, frame)
+      # The rows, their order and multiplicity, as the design's split gives
+      # them over the whole frame. Its `out_id` is explicit.
+      expect_false(identical(held[[j]]$out_id, NA))
+      expect_identical(
+        rsample::analysis(got[[j]]),
+        rsample::analysis(held[[j]])
+      )
+      expect_identical(
+        rsample::assessment(got[[j]]),
+        rsample::assessment(held[[j]])
+      )
+      # The reference rows first, then its indices.
+      expect_identical(
+        rsample::analysis(got[[j]]),
+        rsample::analysis(want[[j]])
+      )
+      expect_identical(
+        rsample::assessment(got[[j]]),
+        rsample::assessment(want[[j]])
+      )
+      expect_identical(got[[j]]$in_id, want[[j]]$in_id)
+      expect_identical(got[[j]]$out_id, rsample::complement(want[[j]]))
+    }
   }
 })
 
-test_that("a logical NA inner out_id under a repeated outer row assesses only the outer rows", {
+test_that("under a repeated outer row a hand-built inner design maps by occurrence and assesses each outer copy", {
   skip_if_no_engines()
 
   d <- make_reg_data()
   wf <- det_workflow(d)
   ms <- reg_metrics()
 
-  # An outer split whose `in_id` repeats rows 1 to 5, and inner splits on the
-  # whole frame whose `out_id` is the logical NA, rsample's "the complement".
-  # Over the whole frame that complement holds the outer held-out rows 61 to
-  # 90, which IP1 keeps out of the inner loop.
-  outer_in <- c(1:60, 1:5)
-  outer_out <- 61:90
-  outer <- rsample::make_splits(
-    list(analysis = outer_in, assessment = outer_out),
-    d
-  )
-  inner_in <- list(1:30, 31:60)
+  # Inner splits on the whole frame whose `out_id` is the logical NA,
+  # rsample's "the complement". Over the whole frame that complement holds
+  # the outer held-out rows 61 to 90, which IP1 keeps out of the inner loop.
+  # The third split mentions row 1 three times, once more than the outer
+  # split holds it.
+  outer <- repeated_outer_split(d)
+  inner_in <- list(1:30, 31:60, c(1L, 1L, 1L, 2:30))
   inner <- rsample::manual_rset(
     lapply(inner_in, function(idx) {
       rsample::make_splits(list(analysis = idx, assessment = NA), d)
     }),
-    c("Inner1", "Inner2")
+    c("Inner1", "Inner2", "Inner3")
   )
   design <- rsample::manual_rset(list(outer), "Fold1")
   design$inner_resamples <- list(inner)
@@ -405,13 +462,32 @@ test_that("a logical NA inner out_id under a repeated outer row assesses only th
   )
   expect_length(seen, 1L)
   splits <- seen[[1L]]$splits
-  expect_length(splits, 2L)
+  expect_length(splits, 3L)
+
+  # Positions in the 65-row analysis frame. The r-th mention of a row maps
+  # to its r-th copy, and past the last copy back to the first. Each
+  # assessment set is every position whose row lies outside the inner
+  # `in_id` over the whole frame, so each copy the outer split holds.
+  want_in <- list(1:30, 31:60, c(1L, 61L, 1L, 2:30))
+  want_out <- list(31:60, c(1:30, 61:65), 31:60)
+  frame <- rsample::analysis(outer)
   for (s in seq_along(splits)) {
-    # The frame is the whole data, as the design holds it, so the indices
-    # are data rows.
-    expect_identical(splits[[s]]$data, d)
-    assessed <- rsample::complement(splits[[s]])
-    expect_false(any(assessed %in% outer_out))
-    expect_setequal(assessed, setdiff(outer_in, inner_in[[s]]))
+    expect_identical(splits[[s]]$data, frame)
+    expect_identical(
+      rsample::analysis(splits[[s]]),
+      rsample::analysis(inner$splits[[s]])
+    )
+    expect_identical(splits[[s]]$in_id, want_in[[s]])
+    expect_identical(splits[[s]]$out_id, want_out[[s]])
+    rows <- REPEATED_IN[splits[[s]]$out_id]
+    expect_identical(rsample::assessment(splits[[s]]), vctrs::vec_slice(d, rows))
+    # No outer held-out row, and no row the split trains on.
+    expect_identical(intersect(rows, REPEATED_OUT), integer(0))
+    expect_identical(intersect(rows, inner_in[[s]]), integer(0))
   }
+  # The second split assesses rows 1 to 5 twice, once per outer copy.
+  expect_identical(
+    sort(REPEATED_IN[splits[[2L]]$out_id]),
+    sort(c(1:30, 1:5))
+  )
 })

@@ -1,13 +1,13 @@
 # M139: Frame the inner splits on the analysis set under a repeated outer row
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes the tuning results of the exported nested tuning functions
-- **Branch/PR:** —
+- **Branch/PR:** m139-repeated-row-inner-frame
 
 ## Goal
 
@@ -41,7 +41,7 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 
 ## Tasks
 
-- [ ] T1: Write the tests first in `tests/testthat/test-nested-tune-finalize.R`. Rewrite the repeated half of the AC4 test (`:349-371`), which asserts that the design's own rset reaches `run_tuner()`. Rewrite the hotfix test (`:375-417`), which asserts that the frame is the whole data. Both then assert AC1 to AC3. Add the third hand-built inner split, `c(1L, 1L, 1L, 2:30)`. Show that each new expectation fails on the plan-commit code.
+- [x] T1: Write the tests first in `tests/testthat/test-nested-tune-finalize.R`. Rewrite the repeated half of the AC4 test (`:349-371`), which asserts that the design's own rset reaches `run_tuner()`. Rewrite the hotfix test (`:375-417`), which asserts that the frame is the whole data. Both then assert AC1 to AC3. Add the third hand-built inner split, `c(1L, 1L, 1L, 2:30)`. Show that each new expectation fails on the plan-commit code.
 - [ ] T2: In `analysis_framed_inner()` (`R/nested-resamples.R:460`), replace the early return with the occurrence map. Read indices with `as.integer()`, and leave the rset unmapped when an index has no position, never writing an `NA` position. Give a logical `NA` `out_id`, tested with `identical(out_id, NA)`, the complement as `which(outer_idx %in% held)`, keeping the hotfix's `tryCatch` around `rsample::complement()`. Fold `complement_within_outer()` in or remove it. The comment names the inner bootstrap from `nested_resamples()` as the design that reaches the wrap, and says the map is exact in positions only for ascending analysis positions (RR09 R2, R3). Keep the shared-frame check and the out-of-range guard. Draw nothing from the RNG.
 - [ ] T3: Add the O1 and O2 tests for the repeated shape (AC4, AC5), and name them in the oracle header of the file. Both fixture folds hold one split, and `expect_frames_are_analysis_rows()` needs one matching fold. So assert the recorded `n` of each frame and match frames by fold position. Assert `.Random.seed` identical before and after `analysis_framed_inner()` on the repeated fixture (RR09 R4). Show that O1 fails on the plan-commit code.
 - [ ] T4: Update the docs. These are the `@section Finalizing a parameter range` passage (`R/nested-tune-grid.R:193-206`), the comments at `R/nested-resamples.R:431-458` and `:519-526`, and the DESIGN.md Architecture paragraph (`:341-351`). Also read the "Reproducing one fold by hand" section (`R/nested-tune-grid.R:323-327`) and the hotfix NEWS bullet, which RR09 found stay true. Add a NEWS entry. Run the AC6 grep and record the hit ledger in one work-log line. Run `devtools::document()`.
@@ -54,6 +54,8 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 - 2026-10-01: plan gate chose to assess each copy that the outer split holds over each row once (the hotfix rule of 2026-10-01). It matches what `nested_resamples()` writes and what a design built on the analysis set gives. Falsified by a hand-built design whose scores then differ from its `nested_resamples()` equivalent.
 - 2026-10-01: plan gate chose the stronger review before it set the test bar. Blocked on RB09.
 - 2026-10-01: RR09 ingested. Correction to the occurrence-map line above: the map gives the rsample indices only for designs with ascending analysis positions (vfold, grouped, rolling and sliding). For `mc_cv()` and inner bootstraps it gives the same rows, order and multiplicity at other positions (RR09 R3). AC3 and the Scope rule were restated through `rsample::complement()` (R1), and RR09, a fresh reader, checked that wording on the fixture. Status set back to planned, not in-progress, because no work had started.
+- 2026-10-01: implement started on branch m139-repeated-row-inner-frame. No question gate, because RR09 settled the open choices. A new NEWS bullet sits beside the hotfix bullet, and `complement_within_outer()` is folded into the map.
+- 2026-10-01: T1 done. The repeated half of the old AC4 test and the hotfix test became two tests: the grouped design against its seeded reference, and the hand-built design with the third split `c(1L, 1L, 1L, 2:30)`. On the plan-commit code they fail 18 expectations, all on the frame, the mapped `in_id` or the `out_id`.
 
 ## Decisions
 
