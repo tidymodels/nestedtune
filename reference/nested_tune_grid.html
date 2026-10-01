@@ -347,9 +347,15 @@ analysis rows, never on the rows that fold holds out. On a
 inner resamples re-pointed at its analysis set, not the design's own
 <code>inner_resamples</code> element, which indexes the whole data. A design from
 <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> already carries the analysis set and is passed as
-it is. So is the design's element under an outer split that repeats a
-row, an evaluated <code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code>, where the re-pointing is
-ambiguous. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> finalizes on the full data.</p>
+it is. An outer split that repeats a row, an evaluated
+<code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code>, gives an analysis set that holds each copy of
+the row. The re-pointing then sends the first mention of the row in an
+inner split to its first copy, the second mention to its second copy,
+and so on. A mention past the last copy, which an inner bootstrap can
+draw, starts again at the first copy. An inner assessment set that the
+design leaves as the complement holds each copy of every row that the
+inner split does not train on. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> finalizes on the
+full data.</p>
     </div>
     <div class="section level2">
     <h2 id="evaluation-times">Evaluation times<a class="anchor" aria-label="anchor" href="#evaluation-times"></a></h2>

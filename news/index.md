@@ -2,6 +2,29 @@
 
 ## nestedtune 0.0.0.9000
 
+- The tuning results change for a design whose outer split repeats a row
+  in its `in_id`. Each inner tuning call now gets its inner splits on
+  the outer fold’s analysis set. It already did so for a design with no
+  repeated row. Before, the inner splits stayed on the whole data. So
+  tune finalized some parameter ranges on a frame that held the outer
+  fold’s held-out rows. An example is a `min_n()` range finalized by row
+  count. Each copy of a repeated row is its own row of the analysis set.
+  Take an inner assessment set that the design leaves as the complement.
+  It now holds every copy that the outer split holds of each row that
+  the inner split does not train on. The next item, the fix for a leak
+  of outer held-out rows, held each row once. That fix now covers a
+  second case. There the outer split repeats no row. Its `in_id` holds
+  an index that is fractional, below 1, past the data or too large for
+  an integer. The fold still fails, and its inner metrics come from
+  assessment sets that hold only rows the outer split holds.
+
+- Fixed a leak of outer held-out rows into inner tuning. Take an outer
+  split whose `in_id` repeats a row, and an inner split on the outer
+  split’s frame whose `out_id` is the logical `NA`. The inner assessment
+  set was every row outside the inner `in_id`, so it held the outer
+  fold’s held-out rows. Now it holds only rows that the outer split
+  holds.
+
 - The nested tuning functions and
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   now refuse a design whose outer or inner splits hold an `NA` in an
