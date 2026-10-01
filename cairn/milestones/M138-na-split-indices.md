@@ -1,6 +1,6 @@
 # M138: Refuse an NA in a split's row indices
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - [x] T2: Add the rule to `R/checks.R`. It reads `splits` and the `splits` of each `inner_resamples` element. It skips an element that is not a list with the `rsplit` class, because the class rules refuse that element later. Call the rule in `check_nested()` before `check_outer_overlap()`. Use the class `nestedtune_bad_design`, and write bullets in the style of the other rules. Pass values to cli as values (LESSONS, M83). If the `NA` path of `held()` in `check_inner_splits()` can no longer be reached, update its comment. The T1 tests then pass.
 - [x] T3: In `nested_resamples()`, run the outer half of the rule on `outside` after `check_outer_splits()` (`R/nested-resamples.R:241`). Add the AC4 tests. The test at `tests/testthat/test-design-support.R:1615` expects such a design to build. Change it to expect the refusal.
 - [x] T4: Update the docs. At `R/nested-tune-grid.R:116`, replace the phrase "any non-`NA` `out_id`" with a statement of the rule. Add a sentence to `?nested_resamples`. Run `devtools::document()`. Add a NEWS bullet. In DESIGN.md Known issues, find the entry "Index-slot shapes `check_inner_splits()` leaves to rsample". Remove its clause on an element-wise `NA` in `out_id`, and mark the entry `corrected M138`.
-- [ ] T5: Do the planted-defect runs. Remove the rule's call from `check_nested()`, and see the AC1, AC2 and AC3 tests fail. Remove the call from `nested_resamples()`, and see the AC4 tests fail. Restore both calls. Then run `devtools::test()` and `devtools::check()`. Run `air format --check` on the touched files.
+- [x] T5: Do the planted-defect runs. Remove the rule's call from `check_nested()`, and see the AC1, AC2 and AC3 tests fail. Remove the call from `nested_resamples()`, and see the AC4 tests fail. Restore both calls. Then run `devtools::test()` and `devtools::check()`. Run `air format --check` on the touched files.
 
 ## Work log
 
@@ -60,6 +60,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - 2026-10-01: checkpoint during T5. The planted-defect runs passed their test: stubbing `check_na_indices()` failed the AC1, AC2 and AC3 blocks, and stubbing `check_outer_na()` failed the AC4 block. Without the rule, the plants were accepted. The claim-audit corrections are applied, and the reader's re-read and `devtools::check()` are still running.
 - claim audit: 33 claims read, 3 corrected — R/checks.R, tests/testthat/test-split-checks.R
 - 2026-10-01: the re-read cleared two corrections. It found the `check_inner_splits()` comment still imprecise for `out_id`, so I took its wording. It also found that an inner `out_id` index beyond integer range passes every rule. That shape went into the DESIGN.md Known issues entry on index slots, because a candidate row puts ROADMAP.md at its 60-line cap.
+- 2026-10-01: T5 done. The planted-defect runs passed their test. `devtools::check()` reports 0 errors, 0 warnings and 0 notes. It ran before the claim-audit fixes, which changed only comments and the error's reason text. On the final code, the split-check file passes, `devtools::document()` leaves no diff, `air format --check` and both prose sweeps are clean, and `cairn_validate` passes. Status set to review.
 
 ## Decisions
 
