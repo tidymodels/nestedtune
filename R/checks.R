@@ -385,6 +385,9 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # A row subset or a manual_rset() rebuild loses the rset class these read,
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
+  # Before the rules that read row indices, which would otherwise refuse an
+  # NA index under another reason or pass it (M138, D-111).
+  check_na_indices(resamples, call = call)
   # A split rebuilt with make_splits() carries no class to read, so each
   # split's rows are read next (M134, D-103).
   check_outer_overlap(resamples, "resamples", call = call)
@@ -1232,6 +1235,91 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
   )
 }
 
+# The slots of `split` that hold a value for which is.na() is TRUE, less an
+# `out_id` identical to the logical NA, rsample's mark for the complement
+# (M138, D-111). An element that is not a list with the rsplit class gives
+# none: the class rules refuse it later.
+na_slots <- function(split) {
+  if (!inherits(split, "rsplit") || !is.list(split)) {
+    return(character())
+  }
+  out_id <- split[["out_id"]]
+  hit <- c(
+    in_id = anyNA(split[["in_id"]]),
+    out_id = anyNA(out_id) && !identical(out_id, NA)
+  )
+  names(hit)[hit]
+}
+
+# The line naming the slots of `split` that hold an NA, after `pos`, or
+# nothing when none does. `pos` is handed over as a value.
+na_line <- function(split, pos) {
+  slots <- na_slots(split)
+  if (length(slots) == 0L) {
+    return(character())
+  }
+  n <- length(slots)
+  cli::format_inline(
+    "{pos}: {.field {slots}} {cli::qty(n)}hold{?s/} an {.code NA}."
+  )
+}
+
+na_index_reason <- paste(
+  "An NA index names no data row. rsample reads it as a row of NAs, or",
+  "fails when it builds the complement. The one exception is an `out_id`",
+  "that is the logical NA, which rsample reads as every row outside `in_id`."
+)
+
+abort_na_indices <- function(lines, arg, call) {
+  if (length(lines) == 0L) {
+    return(invisible())
+  }
+  # The reason is handed over as a value, so cli does not parse it again.
+  cli::cli_abort(
+    c(
+      "{.arg {arg}} has a split whose row indices hold an {.code NA}.",
+      value_bullets(lines),
+      i = "{na_index_reason}"
+    ),
+    class = "nestedtune_bad_design",
+    call = call
+  )
+}
+
+# Every outer and inner split holding an NA index, in one message, each named
+# by its outer fold and, for an inner split, its position in that fold.
+check_na_indices <- function(resamples, call = rlang::caller_env()) {
+  outer <- resamples[["splits"]]
+  inner <- resamples[["inner_resamples"]]
+  if (!is.list(outer)) {
+    return(invisible(resamples))
+  }
+  lines <- lapply(seq_along(outer), function(f) {
+    rs <- if (is.list(inner)) inner[[f]]
+    splits <- if (is.data.frame(rs)) rs[["splits"]]
+    inner_lines <- if (is.list(splits)) {
+      lapply(seq_along(splits), function(s) {
+        na_line(splits[[s]], paste0("Outer fold ", f, ", inner split ", s))
+      })
+    }
+    c(na_line(outer[[f]], paste("Outer fold", f)), unlist(inner_lines))
+  })
+  abort_na_indices(unlist(lines), "resamples", call)
+  invisible(resamples)
+}
+
+# The outer half of the rule, for the design `nested_resamples()` takes as
+# `outside`, whose splits are named by row as check_outer_overlap() names
+# them.
+check_outer_na <- function(x, arg, call = rlang::caller_env()) {
+  splits <- x[["splits"]]
+  lines <- lapply(seq_along(splits), function(f) {
+    na_line(splits[[f]], cli::format_inline("Row {f} of {.arg {arg}}"))
+  })
+  abort_na_indices(unlist(lines), arg, call)
+  invisible(x)
+}
+
 # Why `design` is refused in `role`, naming the rsample function. The reasons
 # are the ones the "Differences from rsample" section of ?nested_resamples
 # gives. Built with paste(), not a line continuation, because
@@ -1665,7 +1753,9 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     outer_in <- as.integer(outer[[f]][["in_id"]])
     # The rows the outer split holds, marked once for the fold rather than
     # hashed by %in% for every split (M135, T5). An index outside the frame
-    # is read with %in%, so every index gets the answer %in% gives.
+    # is read with %in%, so every index gets the answer %in% gives. No NA
+    # reaches here but the logical NA `out_id`, dropped below:
+    # check_na_indices() refuses every other (M138).
     mark <- logical(NROW(outer[[f]][["data"]]))
     marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
     mark[marked[marked <= length(mark)]] <- TRUE
