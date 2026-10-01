@@ -458,6 +458,14 @@ execution in RR01, and tune 1.x seeded differently (D-012).
 
 ## Known issues
 
+- A `complement()` method in the global environment that returns any row
+  outside the data turns off the shared-rows rule for its split. The rule then
+  reads none of the rows that method returns, so a row the method also puts in
+  the analysis set is not refused. Accepted at M135's review gate,
+  2026-09-30. NEWS states the in-frame condition, and M135's question gate
+  narrowed the criterion to a method that returns only rows of the data.
+  Revisit on a user report of such a method.
+
 - The devel-vctrs leg's scheduled and dispatched runs (M102) fire from no
   commit, so `.github/ci-usage.py`'s commit-driven accounting and its
   recorded baseline (`.github/ci-usage-baseline.md`, 2026-08-11 to
