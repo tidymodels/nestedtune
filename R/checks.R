@@ -936,8 +936,16 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
 # is that split's analysis set, so a row the outer split repeats is caught
 # under both of its positions. The assessment set is rsample::complement()'s,
 # which reads each split class's own rule. Anything malformed shares no row
-# here and is left to the checks that judge it.
-split_shares_rows <- function(split, rows = NULL) {
+# here and is left to the checks that judge it. `hold`, when given, marks the
+# data rows the outer split holds, and a shared row outside it is left to the
+# containment rule of check_inner_splits(), which names the leak (M135,
+# D-109).
+split_shares_rows <- function(
+  split,
+  rows = NULL,
+  hold = NULL,
+  repeats = !is.null(rows) && anyDuplicated(rows) > 0L
+) {
   if (
     !inherits(split, "rsplit") ||
       !is.list(split) ||
@@ -951,6 +959,14 @@ split_shares_rows <- function(split, rows = NULL) {
   if (!is.null(rows) && (length(rows) != n || anyNA(rows))) {
     return(FALSE)
   }
+  default <- identical(split[["out_id"]], NA) && complement_is_default(split)
+  # rsample's rsplit method gives every frame row outside `in_id` here,
+  # which shares no frame row with it; only a row that `rows` repeats can.
+  # `repeats` says whether `rows` repeats one, which overlap_rows() finds once
+  # for a fold rather than once for each split (M135, T5).
+  if (default && !repeats) {
+    return(FALSE)
+  }
   in_frame <- function(idx) {
     is.numeric(idx) && !anyNA(idx) && all(idx >= 1L & idx <= n)
   }
@@ -958,12 +974,7 @@ split_shares_rows <- function(split, rows = NULL) {
   if (!in_frame(trained)) {
     return(FALSE)
   }
-  if (identical(split[["out_id"]], NA) && complement_is_default(split)) {
-    # rsample's rsplit method gives every frame row outside `in_id` here,
-    # which shares no frame row with it; only a row that `rows` repeats can.
-    if (is.null(rows)) {
-      return(FALSE)
-    }
+  if (default) {
     # The same set for any nonempty `in_id`, which rsample::rsplit()
     # requires, found without the unique() that method hashes the training
     # rows with, which dominated this check's time (M134, T5). An empty
@@ -988,34 +999,72 @@ split_shares_rows <- function(split, rows = NULL) {
   # for every split (M134, T5).
   seen <- logical(max(c(0L, trained, held_out)))
   seen[trained] <- TRUE
-  any(seen[held_out])
+  if (is.null(hold)) {
+    return(any(seen[held_out]))
+  }
+  shared <- held_out[seen[held_out]]
+  any(hold[shared] %in% TRUE)
 }
 
 # Whether rsample::complement() reaches its rsplit method for `split`: no
-# class ahead of "rsplit" has a complement method registered, by rsample
-# (the apparent, rolling-origin and sliding splits) or by another package.
+# class ahead of "rsplit" has a complement method where dispatch looks for
+# one (complement_envs()).
 complement_is_default <- function(split) {
   cls <- class(split)
   ahead <- cls[seq_len(match("rsplit", cls) - 1L)]
-  registered <- asNamespace("rsample")[[".__S3MethodsTable__."]]
+  if (length(ahead) == 0L) {
+    return(TRUE)
+  }
+  envs <- complement_envs()
   !any(vapply(
     paste0("complement.", ahead),
-    exists,
-    logical(1),
-    envir = registered,
-    inherits = FALSE
+    function(name) {
+      any(vapply(
+        envs,
+        function(env) {
+          exists(name, envir = env, mode = "function", inherits = FALSE)
+        },
+        logical(1)
+      ))
+    },
+    logical(1)
   ))
 }
 
+# The environments where S3 dispatch finds a complement() method for a call
+# from rsample's code, as the one assessment() makes for tune: rsample's
+# namespace and the parents of it up to the global environment, rsample's
+# table of registered methods (the apparent, rolling-origin and sliding
+# splits, and any other package's), and base. Dispatch skips the search path
+# between the global environment and base, so a method in an attached
+# environment is never called and is not looked for (M135).
+complement_envs <- function() {
+  ns <- asNamespace("rsample")
+  envs <- list(ns[[".__S3MethodsTable__."]])
+  env <- ns
+  while (!identical(env, globalenv()) && !identical(env, emptyenv())) {
+    envs <- c(envs, env)
+    env <- parent.env(env)
+  }
+  c(envs, globalenv(), baseenv())
+}
+
 # The positions of the splits of `x` that share rows, for split_shares_rows()
-# with the same `rows`. It reads each split's indexes, but like
+# with the same `rows` and `hold`. It reads each split's indexes, but like
 # split_designs() it is safe on an element no class check has vouched for.
-overlap_rows <- function(x, rows = NULL) {
+overlap_rows <- function(x, rows = NULL, hold = NULL) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   if (!is.list(splits)) {
     return(integer())
   }
-  which(vapply(splits, split_shares_rows, logical(1), rows = rows))
+  which(vapply(
+    splits,
+    split_shares_rows,
+    logical(1),
+    rows = rows,
+    hold = hold,
+    repeats = !is.null(rows) && anyDuplicated(rows) > 0L
+  ))
 }
 
 # rsample::rolling_origin() starts each assessment set `lag` rows before its
@@ -1069,15 +1118,17 @@ inner_overlap_reason <- function(final = FALSE) {
 # The inner splits of `x` that share rows, less a bootstrap's own apparent
 # split, which tune leaves out of its estimates (D-104). Under the two
 # racers the race rule still refuses that split.
-inner_overlap_rows <- function(x, rows = NULL) {
-  setdiff(overlap_rows(x, rows), which(bootstrap_apparent(x)))
+inner_overlap_rows <- function(x, rows = NULL, hold = NULL) {
+  setdiff(overlap_rows(x, rows, hold), which(bootstrap_apparent(x)))
 }
 
 # The same, for the inner design of one outer fold of a design that may have
 # been built anywhere. Its splits index the outer split's own frame or that
 # split's analysis set, told apart as check_inner_splits() tells them, and
-# the second are read through the outer `in_id`. A fold whose splits are not
-# all rsplits, or whose frames are another or disagree, is left to
+# the second are read through the outer `in_id`. On the outer frame, only a
+# shared row the outer `in_id` holds counts: a held-out row is left to the
+# containment rule, which names the leak (M135, D-109). A fold whose splits
+# are not all rsplits, or whose frames are another or disagree, is left to
 # check_inner_splits().
 fold_overlap_rows <- function(split, inner) {
   splits <- if (is.data.frame(inner)) inner[["splits"]]
@@ -1093,8 +1144,18 @@ fold_overlap_rows <- function(split, inner) {
   if (length(kind) != 1L || identical(kind, "other")) {
     return(integer())
   }
-  rows <- if (identical(kind, "analysis")) as.integer(split[["in_id"]])
-  inner_overlap_rows(inner, rows)
+  if (identical(kind, "analysis")) {
+    return(inner_overlap_rows(inner, as.integer(split[["in_id"]])))
+  }
+  frame <- split[["data"]]
+  if (!is.data.frame(frame)) {
+    return(integer())
+  }
+  outer_in <- suppressWarnings(as.integer(split[["in_id"]]))
+  outer_in <- outer_in[!is.na(outer_in) & outer_in >= 1L]
+  hold <- logical(nrow(frame))
+  hold[outer_in[outer_in <= nrow(frame)]] <- TRUE
+  inner_overlap_rows(inner, hold = hold)
 }
 
 # Every inner element holding a split that shares rows, grouped by the
@@ -1295,30 +1356,61 @@ check_column_class <- function(
   column,
   class,
   hint,
+  arg = "resamples",
   call = rlang::caller_env()
 ) {
-  elements <- resamples[[column]]
-  ok <- vapply(elements, inherits, logical(1), class)
-  if (all(ok)) {
+  lines <- malformed_lines(resamples[[column]], class, "Element")
+  if (length(lines) == 0L) {
     return(invisible(resamples))
   }
-  bad <- which(!ok)
-  n <- length(bad)
-  types <- vapply(
-    elements[bad],
-    function(e) cli::format_inline("{.obj_type_friendly {e}}"),
-    character(1)
-  )
   cli::cli_abort(
     c(
-      "{.arg resamples} has a malformed {.field {column}} column.",
-      x = "{cli::qty(n)}Element{?s} {bad} {cli::qty(n)}{?is/are} {types}, \\
-           not {.cls {class}}.",
+      "{.arg {arg}} has a malformed {.field {column}} column.",
+      value_bullets(lines),
       i = hint
     ),
     class = "nestedtune_bad_design",
     call = call
   )
+}
+
+# The lines naming each element of `elements` that is not a well-formed
+# `class` object, `noun` naming one element and `after` following its
+# position: first those that lack the class, then those that carry it but
+# are not a list. Every reader of a split takes it to be the list rsample
+# builds, so such an element would crash the first one (M135). Empty when
+# every element is well formed.
+malformed_lines <- function(elements, class, noun, after = "") {
+  has_class <- vapply(elements, inherits, logical(1), class)
+  wrong <- which(!has_class)
+  atomic <- which(has_class & !vapply(elements, is.list, logical(1)))
+  types <- vapply(
+    elements[wrong],
+    function(e) cli::format_inline("{.obj_type_friendly {e}}"),
+    character(1)
+  )
+  n <- length(wrong)
+  m <- length(atomic)
+  c(
+    if (n > 0L) {
+      cli::format_inline(paste0(
+        "{noun}{cli::qty(n)}{?s} {wrong}{after} {cli::qty(n)}{?is/are} ",
+        "{types}, not {.cls {class}}."
+      ))
+    },
+    if (m > 0L) {
+      cli::format_inline(paste0(
+        "{noun}{cli::qty(m)}{?s} {atomic}{after} {cli::qty(m)}{?has/have} ",
+        "class {.cls {class}} but {cli::qty(m)}{?is not a list/are not lists}."
+      ))
+    }
+  )
+}
+
+# Formatted `lines` as "x" bullets, their braces doubled so cli does not
+# parse the text again.
+value_bullets <- function(lines) {
+  rlang::set_names(gsub("([{}])", "\\1\\1", lines), rep("x", length(lines)))
 }
 
 # An inner design with no rows gives its fold nothing to tune on; tune would
@@ -1473,26 +1565,20 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     stats::setNames(bullets, rep("x", length(bullets)))
   }
 
+  # An element that carries the class but is not a list counts as not an
+  # rsplit, since every rule below reads it as one (M135).
   not_rsplit <- lapply(inner, function(rs) {
-    which(!vapply(rs[["splits"]], inherits, logical(1), "rsplit"))
+    malformed_lines(rs[["splits"]], "rsplit", "inner split")
   })
   bad <- which(lengths(not_rsplit) > 0L)
   if (length(bad) > 0L) {
-    bullets <- vapply(
-      bad,
-      function(f) {
-        pos <- not_rsplit[[f]]
-        cli::format_inline(paste(
-          "Outer fold {f}: inner {cli::qty(length(pos))}split{?s} {pos}",
-          "{?is/are} not {.cls rsplit}."
-        ))
-      },
-      character(1)
-    )
+    bullets <- unlist(lapply(bad, function(f) {
+      paste0("Outer fold ", f, ": ", not_rsplit[[f]])
+    }))
     cli::cli_abort(
       c(
         "{.arg resamples} has an inner split that is not an {.cls rsplit}.",
-        x_bullets(bullets),
+        value_bullets(bullets),
         i = "Every element of an inner design's {.field splits} column is one \\
              {.cls rsplit}, as {.fn rsample::vfold_cv} and its kin build them."
       ),
@@ -1572,13 +1658,26 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
       next
     }
     outer_in <- as.integer(outer[[f]][["in_id"]])
+    # The rows the outer split holds, marked once for the fold rather than
+    # hashed by %in% for every split (M135, T5). An index outside the frame
+    # is read with %in%, so every index gets the answer %in% gives.
+    mark <- logical(NROW(outer[[f]][["data"]]))
+    marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
+    mark[marked[marked <= length(mark)]] <- TRUE
+    held <- function(idx) {
+      inside <- !is.na(idx) & idx >= 1L & idx <= length(mark)
+      out <- logical(length(idx))
+      out[inside] <- mark[idx[inside]]
+      out[!inside] <- idx[!inside] %in% outer_in
+      out
+    }
     splits <- inner[[f]][["splits"]]
     for (s in seq_along(splits)) {
       in_id <- as.integer(splits[[s]][["in_id"]])
       out_id <- as.integer(splits[[s]][["out_id"]])
       out_id <- out_id[!is.na(out_id)]
-      in_bad <- unique(in_id[!(in_id %in% outer_in)])
-      out_bad <- unique(out_id[!(out_id %in% outer_in)])
+      in_bad <- unique(in_id[!held(in_id)])
+      out_bad <- unique(out_id[!held(out_id)])
       if (length(in_bad) == 0L && length(out_bad) == 0L) {
         next
       }
