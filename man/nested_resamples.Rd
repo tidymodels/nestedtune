@@ -46,9 +46,10 @@ Each inner split keeps the class and the resample id rsample gives it, so
 \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same.
 
 Two behaviors differ on purpose. First, an outer
-\code{\link[rsample:bootstraps]{rsample::bootstraps()}} or \code{\link[rsample:group_bootstraps]{rsample::group_bootstraps()}} is refused
-rather than warned about. The same row can otherwise land in both the inner
-analysis and the inner assessment set, which makes the estimate invalid.
+\code{\link[rsample:bootstraps]{rsample::bootstraps()}} or \code{\link[rsample:group_bootstraps]{rsample::group_bootstraps()}} is refused, where
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} warns about it or builds it without a warning.
+Without the refusal, the same row can land in both the inner analysis and
+the inner assessment set, which makes the estimate invalid.
 
 Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
 \code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds

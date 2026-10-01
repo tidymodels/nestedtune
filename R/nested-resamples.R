@@ -34,9 +34,10 @@
 #' `labels()` and [rsample::add_resample_id()] behave the same.
 #'
 #' Two behaviors differ on purpose. First, an outer
-#' [rsample::bootstraps()] or [rsample::group_bootstraps()] is refused
-#' rather than warned about. The same row can otherwise land in both the inner
-#' analysis and the inner assessment set, which makes the estimate invalid.
+#' [rsample::bootstraps()] or [rsample::group_bootstraps()] is refused, where
+#' [rsample::nested_cv()] warns about it or builds it without a warning.
+#' Without the refusal, the same row can land in both the inner analysis and
+#' the inner assessment set, which makes the estimate invalid.
 #'
 #' Second, [rsample::loo_cv()], [rsample::apparent()] and
 #' [rsample::permutations()] are refused in either loop, where rsample builds

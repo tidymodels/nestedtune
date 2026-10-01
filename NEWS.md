@@ -1,5 +1,12 @@
 # nestedtune 0.0.0.9000
 
+* The README has a second table, which lists eight tuning functions from
+  tune, finetune, workflowsets and tidyclust and the nestedtune function for
+  each. Seven are supported, and `tidyclust::tune_cluster()` is not. The
+  prose under the resampling table is shorter. The reason for each refused
+  design now sits in the "Differences from rsample" section of
+  `?nested_resamples`.
+
 * Four refusals of malformed designs changed, each with class
   `nestedtune_bad_design`.
 

@@ -109,8 +109,8 @@ Refused means that nestedtune stops with an error before any fold runs. This
 holds for a design that `nested_resamples()` builds and for one built
 another way, such as with `rsample::nested_cv()`. No means that the design
 cannot be built in that loop. The "Differences from rsample" section
-of `?nested_resamples` gives the reason for each Refused and No cell. It
-also gives the rules that refuse a single split in either loop.
+of `?nested_resamples` gives the reason for each Refused and No cell. The
+same page also gives the rules that refuse a single split in either loop.
 
 [^validation]: Build the validation set before the call, with
 `split <- initial_validation_split(data)` and `validation_set(split)`. Then
@@ -149,7 +149,8 @@ The resampling table's Yes cells were tested through `nested_tune_grid()`.
 The "Time-series designs" section of `?nested_resamples` says which
 time-series designs the other six functions are tested on. [Choosing the
 inner tuner](https://nestedtune.tidymodels.org/articles/tuners.html) runs
-each function on one example.
+the Bayesian search, the two racing searches and simulated annealing on one
+example.
 
 Learn more:
 
