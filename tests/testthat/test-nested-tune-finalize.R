@@ -587,6 +587,75 @@ test_that("under a repeated outer row a fractional outer index fails at the oute
   expect_identical(res$.notes[[1L]]$location[[1L]], "outer fit")
 })
 
+test_that("without repeats an outer index the frame cannot slice still keeps a logical NA inner out_id inside the outer rows", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  inner <- rsample::manual_rset(
+    lapply(list(2:30, 31:60), function(idx) {
+      rsample::make_splits(list(analysis = idx, assessment = NA), d)
+    }),
+    c("Inner1", "Inner2")
+  )
+  # A row past the data and a fractional index, each appended to an outer
+  # `in_id` with no repeats. Both leave the whole frame for last_fit() to
+  # refuse, and the fold still reports its inner metrics. Each case runs in
+  # its own function, so its mock ends with it.
+  run_case <- function(extra) {
+    outer <- rsample::make_splits(
+      list(analysis = 2:60, assessment = 61:90),
+      d
+    )
+    outer$in_id <- c(outer$in_id, extra)
+    design <- rsample::manual_rset(list(outer), "Fold1")
+    design$inner_resamples <- list(inner)
+    seen <- list()
+    original <- run_tuner
+    local_mocked_bindings(
+      run_tuner = function(tuner, object, resamples, ...) {
+        seen[[length(seen) + 1L]] <<- resamples
+        original(tuner, object = object, resamples = resamples, ...)
+      }
+    )
+    res <- suppressWarnings(
+      nested_tune_grid(
+        det_workflow(d),
+        design,
+        grid = det_grid(),
+        metrics = reg_metrics()
+      )
+    )
+    list(res = res, seen = seen)
+  }
+  for (extra in list(999999L, 1.5)) {
+    run <- run_case(extra)
+    res <- run$res
+    seen <- run$seen
+    label <- paste("extra", extra)
+    expect_false(res$.completed, label = label)
+    expect_identical(res$.notes[[1L]]$location[[1L]], "outer fit")
+    expect_gt(nrow(res$.inner_metrics[[1L]]), 0L)
+    expect_length(seen, 1L)
+    splits <- seen[[1L]]$splits
+    for (s in seq_along(splits)) {
+      expect_identical(splits[[s]]$data, d)
+      assessed <- splits[[s]]$out_id
+      expect_false(identical(assessed, NA), label = label)
+      # No outer held-out row, and no row the split trains on.
+      expect_identical(intersect(assessed, 61:90), integer(0), label = label)
+      expect_identical(
+        intersect(assessed, splits[[s]]$in_id),
+        integer(0),
+        label = label
+      )
+    }
+    if (identical(extra, 999999L)) {
+      expect_identical(splits[[1L]]$out_id, 31:60)
+      expect_identical(splits[[2L]]$out_id, 2:30)
+    }
+  }
+})
+
 test_that("under a repeated outer row a split whose complement rsample cannot derive leaves the other splits repaired", {
   d <- make_reg_data()
   outer <- repeated_outer_split(d)

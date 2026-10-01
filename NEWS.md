@@ -10,7 +10,10 @@
   set that the design leaves as the complement. It now holds every copy
   that the outer split holds of each row that the inner split does not
   train on. The next item, the fix for a leak of outer held-out rows, held
-  each row once.
+  each row once. That fix now also covers an outer split with no repeated
+  row whose `in_id` reaches past the data or holds a fractional index. The
+  fold still fails, and its inner metrics come from assessment sets that
+  hold only rows the outer split holds.
 
 * Fixed a leak of outer held-out rows into inner tuning. Take an outer split
   whose `in_id` repeats a row, and an inner split on the outer split's frame

@@ -484,12 +484,12 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # the outer split holds, and no outer held-out row.
 #
 # Some designs keep the whole frame. One is an outer `in_id` that holds an
-# `NA`, a fractional index or one past the data, left for `last_fit()` to
-# refuse as the fold's outer-fit failure rather than raised here as its inner
-# one. Another is an inner split whose complement rsample cannot derive, left
-# for tune to fail on. A third is an inner index the outer split does not
-# hold, which the entry check has already refused. No index is mapped to
-# `NA`. The fold can still report inner metrics, so under repeats every
+# `NA`, a fractional index, or one below 1 or past the data, left for
+# `last_fit()` to refuse as the fold's outer-fit failure rather than raised
+# here as its inner one. Another is an inner split whose complement rsample
+# cannot derive, left for tune to fail on. A third is an inner index the
+# outer split does not hold, which the entry check has already refused. No
+# index is mapped to `NA`. The fold can still report inner metrics, so every
 # other logical `NA` `out_id` is made explicit on the whole frame
 # (whole_frame_inner()).
 analysis_framed_inner <- function(inner, split) {
@@ -503,9 +503,7 @@ analysis_framed_inner <- function(inner, split) {
     return(inner)
   }
   repeats <- anyDuplicated(outer_idx) > 0L
-  whole_frame <- function() {
-    if (repeats) whole_frame_inner(inner, outer_idx) else inner
-  }
+  whole_frame <- function() whole_frame_inner(inner, outer_idx)
   if (
     anyNA(outer_idx) ||
       !all(split$in_id == outer_idx) ||
@@ -556,11 +554,10 @@ outer_complement <- function(inner_split) {
   tryCatch(rsample::complement(inner_split), error = function(cnd) NULL)
 }
 
-# The inner rset on the whole frame under an outer `in_id` that repeats a
-# row, where analysis_framed_inner() cannot re-point it. Each logical `NA`
-# `out_id` whose complement rsample can derive becomes the data rows of that
-# complement that the outer split holds, each copy once, so it holds no
-# outer held-out row (IP1). A split whose complement rsample cannot derive is
+# The inner rset on the whole frame, where analysis_framed_inner() cannot
+# re-point it. Each logical `NA` `out_id` whose complement rsample can derive
+# becomes the data rows of that complement that the outer split holds, each
+# copy once, so it holds no outer held-out row (IP1). A split whose complement rsample cannot derive is
 # left as it is, and the others are still made explicit.
 whole_frame_inner <- function(inner, outer_idx) {
   splits <- inner$splits
