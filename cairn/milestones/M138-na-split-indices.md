@@ -1,13 +1,13 @@
 # M138: Refuse an NA in a split's row indices
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, IP1
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported drivers and `nested_resamples()` refuse
-- **Branch/PR:** —
+- **Branch/PR:** m138-na-split-indices
 
 ## Goal
 
