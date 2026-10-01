@@ -67,6 +67,8 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - 2026-09-30: the claim reader re-read the hint fix: hint, NEWS sentence and test TRUE, the `R/checks.R` comment IMPRECISE. The comment now names the rset case, and the test also matches the `nested_resamples()` hint. `test-design-support.R`: 755 expectations, 0 failed.
 - 2026-09-30: T5 done. Second `devtools::check()`: 0 errors, 0 warnings, 0 notes, on the tree after the hint fix and before the last comment and test edit. `document()` leaves no diff. Status set to review.
 - 2026-09-30: review started. AC1 to AC6 verified with fresh evidence. AC7 waits on `devtools::check()`, and the three reviewers are still running.
+- 2026-09-30: step-7 approval: m136-tuning-table approved for merge, with gate fixes F1 to F6 first.
+- 2026-09-30: gate fixes F1 to F6 committed in 2a5a1fbf. The final `devtools::check()` on that tree is running.
 
 ## Decisions
 
@@ -101,3 +103,5 @@ Independent review: three fresh reviewers. An Opus reviewer read the diff, a Son
 - F13 (past reviews): the help says "each outer fold that tunes on one of them fails", and `nested_fit_resamples()` tunes nothing. Proposed: reject, because the sentence speaks only of folds that tune.
 - F14 (Opus): the help's `validation_set()` wording is loose. Proposed: reject, because the reviewer found it true.
 - F15 (Opus): the `tune_cluster()` reason has no recorded basis. Proposed: reject, because AC2 requires that sentence and D-110 records the row.
+
+Gate triage: the user accepted the proposed dispositions. F1 to F6 were fixed now in 2a5a1fbf with the drafted text, and F7 to F15 are rejected for the reasons above. A run of rsample confirmed the F4 comment: a bare `bootstraps()` call and a bootstrap rset warn, while `rsample::bootstraps()` and `group_bootstraps()` build with no warning. After the fixes, the AC4 command gives 378 words. The 17 table lines still match 10e1e775, all six gating sweeps are clean, and `grep -rn README R/ man/` prints nothing. `document()` and `build_readme()` were rerun and committed with the fixes.
