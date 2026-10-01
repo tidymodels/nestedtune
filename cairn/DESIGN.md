@@ -156,8 +156,8 @@ naming convention.
   explicitly rather than by hope. Nested parallelism oversubscribes cores, a
   plausible contributor to the slowdown reported in tune#148.
 - **Error on provably invalid resampling schemes.** An outer bootstrap is
-  refused, not warned about — deliberately stricter than `rsample`, which only
-  warns. `loo_cv()`, `apparent()` and `permutations()` are refused in either
+  refused, not warned about — deliberately stricter than `rsample`, which
+  builds it with a warning at most (corrected M136). `loo_cv()`, `apparent()` and `permutations()` are refused in either
   loop, which `rsample::nested_cv()` builds without a word (D-096, corrected
   M128). A design is recognized by its split classes as well as its rset
   class, so a row subset, a `manual_rset()` rebuild or one such split among

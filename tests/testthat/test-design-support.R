@@ -4,8 +4,8 @@
 # partner in the other role and completes every outer fold. A `Refused` cell
 # is a refusal nestedtune writes: the bootstrap refusal, and the refusals of
 # `loo_cv()`, `apparent()` and `permutations()` in either role (M128). The one
-# `No` cell, an inner `validation_set()`, is pinned by the behavior the README
-# gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
+# `No` cell, an inner `validation_set()`, is pinned by the behavior
+# ?nested_resamples gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
 # outer bootstrap, the time-series designs) are not repeated here.
 
 skip_heavy_on_cran()
@@ -637,6 +637,7 @@ test_that("the plain outer bootstrap refusals name the function", {
       class = "nestedtune_bad_design"
     )
     expect_names_design(cnd, design)
+    expect_match(conditionMessage(cnd), "with a warning at most", fixed = TRUE)
 
     folds <- quiet_nested_cv(d, boots[[design]], V3)
     expect_s3_class(folds, design)
@@ -644,6 +645,8 @@ test_that("the plain outer bootstrap refusals name the function", {
     expect_names_design(cnd, design)
     # The entry check serves seven functions, so its hint names none.
     expect_match(conditionMessage(cnd), "nestedtune refuses", fixed = TRUE)
+    # rsample builds a group_bootstraps() call with no warning (M136).
+    expect_match(conditionMessage(cnd), "with a warning at most", fixed = TRUE)
     expect_no_match(conditionMessage(cnd), "nested_tune_grid()", fixed = TRUE)
   }
 })

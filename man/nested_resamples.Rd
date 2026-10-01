@@ -45,16 +45,32 @@ and \code{\link[rsample:assessment]{rsample::assessment()}} return identical fra
 Each inner split keeps the class and the resample id rsample gives it, so
 \code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same.
 
-Two behaviors differ on purpose. First, an outer bootstrap is refused
-rather than warned about. The same row can otherwise land in both the inner
-analysis and the inner assessment set, which makes the estimate invalid.
+Two behaviors differ on purpose. First, an outer
+\code{\link[rsample:bootstraps]{rsample::bootstraps()}} or \code{\link[rsample:group_bootstraps]{rsample::group_bootstraps()}} is refused, where
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} warns about it or builds it without a warning.
+Without the refusal, the same row can land in both the inner analysis and
+the inner assessment set, which makes the estimate invalid.
 
 Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
 \code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds
-them. None of them gives a valid nested estimate there. The
-README's table of resampling designs gives the reason for each. Both
-refusals have condition class \code{nestedtune_bad_design}, and each names the
-rsample function. The design is found from the class of its splits as well
+them. None of them gives a valid nested estimate there. As the outer loop,
+\code{\link[rsample:loo_cv]{rsample::loo_cv()}} holds out one row per fold. R-squared then cannot be
+computed, and the averaged RMSE is the mean absolute error. As the outer
+loop, \code{\link[rsample:apparent]{rsample::apparent()}} scores its one fold on the rows it trained on,
+and \code{\link[rsample:permutations]{rsample::permutations()}} gives each fold no assessment set. As the
+inner loop, tune refuses \code{\link[rsample:loo_cv]{rsample::loo_cv()}} and \code{\link[rsample:permutations]{rsample::permutations()}},
+and it reports no results for \code{\link[rsample:apparent]{rsample::apparent()}}. Without the refusal,
+each outer fold that tunes on one of them fails. Both refusals have
+condition class \code{nestedtune_bad_design}, and each names the rsample
+function and gives its reason.
+
+One design is not refused but cannot be built as \code{inside}.
+\code{\link[rsample:validation_set]{rsample::validation_set()}} takes a split from
+\code{\link[rsample:initial_validation_split]{rsample::initial_validation_split()}} rather than a data frame. So
+\code{inside = validation_set()} fails when it is evaluated on an outer fold's
+analysis set, and nestedtune stops with an error that names \code{inside}.
+
+The design is found from the class of its splits as well
 as its own class. So an \code{outside} rset rebuilt with
 \code{\link[rsample:manual_rset]{rsample::manual_rset()}} from such splits is refused too, and so is one
 with a single such split among valid ones. The same holds for the rset

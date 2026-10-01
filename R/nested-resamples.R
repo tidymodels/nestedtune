@@ -33,16 +33,32 @@
 #' Each inner split keeps the class and the resample id rsample gives it, so
 #' `labels()` and [rsample::add_resample_id()] behave the same.
 #'
-#' Two behaviors differ on purpose. First, an outer bootstrap is refused
-#' rather than warned about. The same row can otherwise land in both the inner
-#' analysis and the inner assessment set, which makes the estimate invalid.
+#' Two behaviors differ on purpose. First, an outer
+#' [rsample::bootstraps()] or [rsample::group_bootstraps()] is refused, where
+#' [rsample::nested_cv()] warns about it or builds it without a warning.
+#' Without the refusal, the same row can land in both the inner analysis and
+#' the inner assessment set, which makes the estimate invalid.
 #'
 #' Second, [rsample::loo_cv()], [rsample::apparent()] and
 #' [rsample::permutations()] are refused in either loop, where rsample builds
-#' them. None of them gives a valid nested estimate there. The
-#' README's table of resampling designs gives the reason for each. Both
-#' refusals have condition class `nestedtune_bad_design`, and each names the
-#' rsample function. The design is found from the class of its splits as well
+#' them. None of them gives a valid nested estimate there. As the outer loop,
+#' [rsample::loo_cv()] holds out one row per fold. R-squared then cannot be
+#' computed, and the averaged RMSE is the mean absolute error. As the outer
+#' loop, [rsample::apparent()] scores its one fold on the rows it trained on,
+#' and [rsample::permutations()] gives each fold no assessment set. As the
+#' inner loop, tune refuses [rsample::loo_cv()] and [rsample::permutations()],
+#' and it reports no results for [rsample::apparent()]. Without the refusal,
+#' each outer fold that tunes on one of them fails. Both refusals have
+#' condition class `nestedtune_bad_design`, and each names the rsample
+#' function and gives its reason.
+#'
+#' One design is not refused but cannot be built as `inside`.
+#' [rsample::validation_set()] takes a split from
+#' [rsample::initial_validation_split()] rather than a data frame. So
+#' `inside = validation_set()` fails when it is evaluated on an outer fold's
+#' analysis set, and nestedtune stops with an error that names `inside`.
+#'
+#' The design is found from the class of its splits as well
 #' as its own class. So an `outside` rset rebuilt with
 #' [rsample::manual_rset()] from such splits is refused too, and so is one
 #' with a single such split among valid ones. The same holds for the rset
@@ -201,8 +217,8 @@ nested_resamples <- function(data, outside, inside, ...) {
       c(
         "{.arg outside} cannot be a bootstrap.",
         x = refused_design_reason(bootstrap_design(outside), "outer"),
-        i = "{.fn rsample::nested_cv} only warns here; \\
-             {.fn nested_resamples} refuses."
+        i = "{.fn rsample::nested_cv} builds this design, with a warning at \\
+             most; {.fn nested_resamples} refuses."
       ),
       class = "nestedtune_bad_design"
     )
