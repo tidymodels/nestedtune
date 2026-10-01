@@ -64,6 +64,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - 2026-09-30: T5 in progress. NEWS bullet added, README rebuilt, `document()` run, all six gating sweeps clean at 361 words. `devtools::check()` still running at this checkpoint.
 - 2026-09-30: discovered sub-task under T5. The claim audit's outside-diff finding was first a candidate row, which put ROADMAP at its 60-line cap. It is fixed here instead, because the bootstrap error hint contradicted the corrected help sentence. Both hints now read "builds this design, with a warning at most", from a run where `nested_cv()` warned for `bootstraps()` but not for a `group_bootstraps()` call. `test-design-support.R` asserts the text, NEWS says so, and the candidate row is removed. Affected tests: 2033 expectations, 0 failed.
 - 2026-09-30: first `devtools::check()`: 0 errors, 0 warnings, 0 notes, on the tree before the claim-audit fixes. Rerunning on the final tree.
+- 2026-09-30: the claim reader re-read the hint fix: hint, NEWS sentence and test TRUE, the `R/checks.R` comment IMPRECISE. The comment now names the rset case, and the test also matches the `nested_resamples()` hint. `test-design-support.R`: 755 expectations, 0 failed.
 
 ## Decisions
 

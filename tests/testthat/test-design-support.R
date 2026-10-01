@@ -637,6 +637,7 @@ test_that("the plain outer bootstrap refusals name the function", {
       class = "nestedtune_bad_design"
     )
     expect_names_design(cnd, design)
+    expect_match(conditionMessage(cnd), "with a warning at most", fixed = TRUE)
 
     folds <- quiet_nested_cv(d, boots[[design]], V3)
     expect_s3_class(folds, design)
