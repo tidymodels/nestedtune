@@ -11,6 +11,9 @@
 #   Rscript benchmarks/split-check-speed.R base       # the base commit alone
 #   Rscript benchmarks/split-check-speed.R both <ref> # another base commit
 #
+# Run it from the repo root. It loads the working tree from "." and runs
+# `git archive` in the current directory.
+#
 # The base commit defaults to e499a7f3, the commit that planned M135. The
 # script exports it with `git archive` into a temporary directory and loads
 # that tree and the working tree in turn with `pkgload::load_all()`.

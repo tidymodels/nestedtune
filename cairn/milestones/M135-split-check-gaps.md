@@ -75,6 +75,8 @@ D-109 records the message change of item (1) as a narrowing of D-103.
 - 2026-09-30: T6 done. NEWS gained two bullets under the development heading. `devtools::document()` changed nothing, all six gating sweep modes were clean, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes.
 - claim audit: 60 claims read, 0 corrected — NEWS.md, R/checks.R, R/nested-resamples.R, benchmarks/split-check-speed.R, tests/testthat/test-split-checks.R. The reader called one test comment loose but not false, and its wording ("stopped with an unrelated error") was applied.
 - 2026-09-30: status set to review.
+- 2026-09-30: review: gate fixes landed (NEWS rewrite, benchmark header line, test-gap candidate row). The six sweeps and `test-sweep-prose.R` passed after them.
+- step-7 approval: m135-split-check-gaps approved for merge
 
 ## Review
 
@@ -104,3 +106,10 @@ Independent review: three fresh reviewers (Opus diff-bug, Sonnet blame-history, 
 - P1: no new refusal test asserts the condition call, which M134 asked of the overlap tests.
 - P2: a design with a shared held-out row and an id defect now gets the id refusal. Message change only.
 - P3: no test passes an NA outer `in_id` through the new `hold` path.
+
+Triage at the merge gate, accepted by the user:
+
+- Fixed now: D1, D2, D5 and B5 by a rewrite of the first NEWS bullet into four sub-bullets. D6 by a run-from-root line in the benchmark header. The D6 drops stay above 80%, and that rerun overlapped the full suite.
+- Follow-up: B1, P1 and P3 as one candidate row.
+- Rejected: D3, because the split is still refused and AC2 covers only splits that share held-out rows alone. D4 and B3, because they are reasoning only and no design reaches them. B2, because it predates this milestone. B4, because it has no failure scenario.
+- Noted: P2, a message change only.
