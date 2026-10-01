@@ -62,6 +62,8 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 - 2026-10-01: claim audit: 30 claims read, 4 corrected — R/nested-resamples.R, R/nested-tune-grid.R, man/nested_tune_*.Rd, NEWS.md
 - 2026-10-01: claim audit detail. The wrong claim was that rsample's positions survive for every ascending design. A rolling inner that holds only the later copies of rows 1 to 5 gets positions 1:5 for rsample's 61:65, with the same rows (reproduced). The comment now states the condition. The other three corrections complete the cycling wording and the unmapped-index case. The NEWS sentence on the assessment set is clearer. The same reader re-read all five passages and found them right.
 - 2026-10-01: T5 done after the claim-audit commit. `devtools::test()`: 1226 tests, 0 failed, 0 skipped. `devtools::check()`: 0 errors, 0 warnings, 0 notes. Both prose sweeps clean. Status set to review.
+- 2026-10-01: review gate triage. F1 to F6 were fixed on the branch at the user's choice, and F11, a regression of the F3 fix found on re-read, was fixed too. F7 to F9 were rejected. The removed candidate row is noted in the Review section.
+- step-7 approval: m139-repeated-row-inner-frame approved for merge
 
 ## Decisions
 
