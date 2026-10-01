@@ -1,5 +1,14 @@
 # nestedtune 0.0.0.9000
 
+* The nested tuning functions and `nested_fit_resamples()` now refuse a
+  design whose outer or inner splits hold an `NA` in an `in_id` or
+  `out_id`. The error has class `nestedtune_bad_design`,
+  and it names each outer fold, inner split and slot that holds one.
+  `nested_resamples()` refuses the same in a split of `outside`. Before, an
+  `NA` in an outer `in_id` passed the entry check, and the fold failed
+  inside rsample. An `out_id` that is the logical `NA` is still accepted,
+  because rsample reads it as the complement.
+
 * The README has a second table, which lists eight tuning functions from
   tune, finetune, workflowsets and tidyclust and the nestedtune function for
   each. Seven are supported, and `tidyclust::tune_cluster()` is not. The

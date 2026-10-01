@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-01 (M137 archived, M134 row pruned, validate green)
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M138 | Refuse an NA in a split's row indices | planned | — | normal | milestones/M138-na-split-indices.md |
+| M138 | Refuse an NA in a split's row indices | review | — | normal | milestones/M138-na-split-indices.md |
 | M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
 | M136 | README table of supported tuning functions, and shorter table prose | done | — | normal | milestones/archive/M136-tuning-table.md |
 | M135 | Close the split-check gaps M134's review left | done | — | normal | milestones/archive/M135-split-check-gaps.md |

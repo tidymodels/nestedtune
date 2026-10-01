@@ -252,8 +252,11 @@ of a fold's inner splits carry one data frame: either the outer split's
 own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
 as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
 must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
-any non-\code{NA} \code{out_id}. So no inner analysis or assessment set reaches a
-row the outer fold holds out.
+in any \code{out_id} other than the logical \code{NA}. So no inner analysis or
+assessment set reaches a row the outer fold holds out. No \code{in_id} or
+\code{out_id}, outer or inner, holds an \code{NA}. The one exception is an \code{out_id}
+that is the logical \code{NA}, which tells rsample to find the assessment set
+with \code{\link[rsample:complement]{rsample::complement()}}.
 
 A design breaking any of this is refused before anything is fitted. So is
 a design using a bootstrap for the outer loop, or \code{\link[rsample:loo_cv]{rsample::loo_cv()}},

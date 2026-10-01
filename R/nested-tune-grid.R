@@ -113,8 +113,11 @@
 #' own frame, as [nested_resamples()] builds, or that split's analysis set,
 #' as [rsample::nested_cv()] builds. An inner split carrying the outer frame
 #' must index only rows the outer split's `in_id` holds, in its `in_id` and
-#' any non-`NA` `out_id`. So no inner analysis or assessment set reaches a
-#' row the outer fold holds out.
+#' in any `out_id` other than the logical `NA`. So no inner analysis or
+#' assessment set reaches a row the outer fold holds out. No `in_id` or
+#' `out_id`, outer or inner, holds an `NA`. The one exception is an `out_id`
+#' that is the logical `NA`, which tells rsample to find the assessment set
+#' with [rsample::complement()].
 #'
 #' A design breaking any of this is refused before anything is fitted. So is
 #' a design using a bootstrap for the outer loop, or [rsample::loo_cv()],
