@@ -58,6 +58,8 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - 2026-10-01: checkpoint, T3 and T4 written but not yet checked off. `check_outer_na()` runs in `nested_resamples()`. The AC4 tests and the changed `test-design-support.R` test pass. Docs and NEWS are updated, and `devtools::document()` and both prose sweeps are clean. The full `devtools::test()` run for these two tasks is still going.
 - 2026-10-01: T3 and T4 done. The full `devtools::test()` run reports 0 failures. The NEWS bullet names the nested tuning functions and `nested_fit_resamples()`, because `check_nested()` is not exported. The docs and the error say that the logical `NA` `out_id` tells rsample to use `rsample::complement()`. Rolling-origin and sliding splits have their own complement methods.
 - 2026-10-01: checkpoint during T5. The planted-defect runs passed their test: stubbing `check_na_indices()` failed the AC1, AC2 and AC3 blocks, and stubbing `check_outer_na()` failed the AC4 block. Without the rule, the plants were accepted. The claim-audit corrections are applied, and the reader's re-read and `devtools::check()` are still running.
+- claim audit: 33 claims read, 3 corrected — R/checks.R, tests/testthat/test-split-checks.R
+- 2026-10-01: the re-read cleared two corrections. It found the `check_inner_splits()` comment still imprecise for `out_id`, so I took its wording. It also found that an inner `out_id` index beyond integer range passes every rule. That shape went into the DESIGN.md Known issues entry on index slots, because a candidate row would put ROADMAP.md at its 60-line cap.
 
 ## Decisions
 

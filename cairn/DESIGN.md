@@ -613,7 +613,10 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   mismatch; and an empty inner `in_id` passes containment, which the fixture
   vehicle `break_inner_split()` relies on. (corrected M138: an `NA` in any
   `in_id` or `out_id`, less the logical `NA` `out_id`, is now refused before
-  containment, per D-111.) Accepted at M59's review (O5, O6, O7, O9, O15): each is a shape
+  containment, per D-111.) Also, an inner `out_id` index beyond integer
+  range, such as `1e10`, coerces to `NA` with a warning and is dropped, so it
+  passes every rule. M138's claim audit found it, and it is not yet accepted
+  or fixed. Accepted at M59's review (O5, O6, O7, O9, O15): each is a shape
   rsample itself admits, and the entry check holds the shapes this package
   owns. Revisit on a user reaching one of these past the entry check, or if
   rsample refuses one of them earlier. Routed from candidates 2026-09-11; added

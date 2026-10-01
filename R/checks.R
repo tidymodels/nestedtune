@@ -1757,8 +1757,9 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     # is read with %in%, so every index gets the answer %in% gives. Of the
     # NAs a split stores, check_na_indices() has refused all but the logical
     # NA `out_id`, dropped below. An NA here can still come from as.integer()
-    # on an index out of integer range, which held() counts as a row the
-    # outer split does not hold (M138).
+    # on an index out of integer range. In `in_id`, held() counts it as a row
+    # the outer split does not hold. In `out_id`, it is dropped with the
+    # logical NA, so this rule does not see it (M138).
     mark <- logical(NROW(outer[[f]][["data"]]))
     marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
     mark[marked[marked <= length(mark)]] <- TRUE
