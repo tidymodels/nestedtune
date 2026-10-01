@@ -1229,7 +1229,8 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
 }
 
 # Why `design` is refused in `role`, naming the rsample function. The reasons
-# are the ones the README's resampling table gives. Built with paste(), not
+# are the ones the "Differences from rsample" section of ?nested_resamples
+# gives. Built with paste(), not
 # a line continuation, because cli::format_inline() keeps the backslash.
 refused_design_reason <- function(design, role) {
   switch(
