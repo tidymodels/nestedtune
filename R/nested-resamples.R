@@ -48,9 +48,9 @@
 #' and [rsample::permutations()] gives each fold no assessment set. As the
 #' inner loop, tune refuses [rsample::loo_cv()] and [rsample::permutations()],
 #' and it reports no results for [rsample::apparent()]. Without the refusal,
-#' each outer fold that tunes on one of them fails. Both refusals have condition class
-#' `nestedtune_bad_design`, and each names the rsample function and gives its
-#' reason.
+#' each outer fold that tunes on one of them fails. Both refusals have
+#' condition class `nestedtune_bad_design`, and each names the rsample
+#' function and gives its reason.
 #'
 #' One design is not refused but cannot be built as `inside`.
 #' [rsample::validation_set()] takes a split from

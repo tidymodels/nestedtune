@@ -4,8 +4,8 @@
 # partner in the other role and completes every outer fold. A `Refused` cell
 # is a refusal nestedtune writes: the bootstrap refusal, and the refusals of
 # `loo_cv()`, `apparent()` and `permutations()` in either role (M128). The one
-# `No` cell, an inner `validation_set()`, is pinned by the behavior the README
-# gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
+# `No` cell, an inner `validation_set()`, is pinned by the behavior
+# ?nested_resamples gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
 # outer bootstrap, the time-series designs) are not repeated here.
 
 skip_heavy_on_cran()

@@ -60,9 +60,9 @@ loop, \code{\link[rsample:apparent]{rsample::apparent()}} scores its one fold on
 and \code{\link[rsample:permutations]{rsample::permutations()}} gives each fold no assessment set. As the
 inner loop, tune refuses \code{\link[rsample:loo_cv]{rsample::loo_cv()}} and \code{\link[rsample:permutations]{rsample::permutations()}},
 and it reports no results for \code{\link[rsample:apparent]{rsample::apparent()}}. Without the refusal,
-each outer fold that tunes on one of them fails. Both refusals have condition class
-\code{nestedtune_bad_design}, and each names the rsample function and gives its
-reason.
+each outer fold that tunes on one of them fails. Both refusals have
+condition class \code{nestedtune_bad_design}, and each names the rsample
+function and gives its reason.
 
 One design is not refused but cannot be built as \code{inside}.
 \code{\link[rsample:validation_set]{rsample::validation_set()}} takes a split from

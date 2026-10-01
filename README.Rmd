@@ -105,12 +105,14 @@ Yes means that the test suite runs the design in that loop through
 outer fold completes. The design in the other loop is a v-fold design, or a
 time-series design for the four time-series rows.
 
-Refused means that nestedtune stops with an error before any fold runs. This
-holds for a design that `nested_resamples()` builds and for one built
-another way, such as with `rsample::nested_cv()`. No means that the design
-cannot be built in that loop. The "Differences from rsample" section
-of `?nested_resamples` gives the reason for each Refused and No cell. The
-same page also gives the rules that refuse a single split in either loop.
+Refused means that nestedtune stops with an error before any fold runs.
+`nested_resamples()` refuses such a design when it builds it, and each
+nestedtune function refuses one built another way, such as with
+`rsample::nested_cv()`. No means that the design cannot be built in that
+loop. The "Differences from rsample" section of `?nested_resamples` gives
+the reason for each Refused and No cell. The same page also gives the rules
+that refuse a single split in either loop. The two racing functions also
+refuse an inner apparent split, as `?nested_tune_race` explains.
 
 [^validation]: Build the validation set before the call, with
 `split <- initial_validation_split(data)` and `validation_set(split)`. Then

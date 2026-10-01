@@ -346,9 +346,10 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
       call = call
     )
   }
-  # rsample builds a bootstrap here, with a warning at most. It warns for a
-  # bootstraps() call or any bootstrap rset, and builds a group_bootstraps()
-  # call with no bootstrap warning. The same row can land in both the
+  # rsample builds a bootstrap here, with a warning at most. It warns when the
+  # call text starts with bootstraps( and for any bootstrap rset, so an
+  # rsample::bootstraps() or group_bootstraps() call builds with no bootstrap
+  # warning. The same row can land in both the
   # inner analysis and the inner assessment set, which makes the estimate
   # invalid rather than merely unusual, so this refuses (GP3). nested_resamples()
   # already refuses at construction; this catches designs built elsewhere.
@@ -1233,8 +1234,8 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
 
 # Why `design` is refused in `role`, naming the rsample function. The reasons
 # are the ones the "Differences from rsample" section of ?nested_resamples
-# gives. Built with paste(), not
-# a line continuation, because cli::format_inline() keeps the backslash.
+# gives. Built with paste(), not a line continuation, because
+# cli::format_inline() keeps the backslash.
 refused_design_reason <- function(design, role) {
   switch(
     paste(role, design),
