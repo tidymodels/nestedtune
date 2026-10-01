@@ -2,6 +2,33 @@
 
 ## nestedtune 0.0.0.9000
 
+- Four refusals of malformed designs changed, each with class
+  `nestedtune_bad_design`.
+
+  - If an element of a `splits` column has the `rsplit` class but is not
+    a list, it is now refused in either loop. `check_nested()` also
+    refuses an element of the `inner_resamples` column that has the
+    `rset` class but is not a list. Before, the check stopped with an R
+    error such as “subscript out of bounds”.
+
+  - [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+    refuses an element of `outside`, or of the rset that `inside` gives,
+    that is not an `rsplit` at all. The refusal of an inner split that
+    is a list but not an `rsplit` now says that it is a list.
+
+  - Take an inner split on the outer split’s frame whose two sets share
+    only rows that the outer split holds out. It now gets the error that
+    says it indexes rows its outer fold does not hold, which names the
+    leak. Before, it got the error about shared rows.
+
+  - Take a split whose `out_id` is `NA` and whose class has a
+    `complement()` method in the global environment. If every row that
+    method returns is a row of the data, the rule on shared rows now
+    reads those rows, as rsample does. Before, the rule read the rows of
+    rsample’s own method.
+
+- The entry check runs faster on designs with many large inner splits.
+
 - A split whose assessment set holds a row of its analysis set is now
   refused in either loop, with class `nestedtune_bad_design`. Such a
   split scores the model on rows it trained on. Before, a split rebuilt
