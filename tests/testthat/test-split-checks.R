@@ -315,6 +315,24 @@ test_that("a held-out row in both sets of an inner split is refused as a leak", 
 # side of the frame it falls on. An NA index is refused before this rule
 # reads it (M138).
 test_that("an inner index outside the frame is refused as a leak", {
+  # An `in_id` index beyond integer range coerces to NA. The outer `in_id`
+  # holds no such index, so held() counts it as a row not held (M138).
+  design <- edit_whole_inner(function(split, held) {
+    split$in_id <- c(split$in_id, 1e10)
+    split
+  })
+  cnd <- expect_error(
+    suppressWarnings(check_nested(design)),
+    class = "nestedtune_bad_design"
+  )
+  expect_match(one_line(cnd), CONTAINED, fixed = TRUE)
+  expect_match(
+    one_line(cnd),
+    "Outer fold 1, inner split 1: in_id holds NA,",
+    fixed = TRUE
+  )
+  suppressWarnings(expect_grid_refuses(design, cnd))
+
   n <- nrow(shape_data())
   plants <- list(in_id = c(0L, -1L, n + 1L), out_id = c(0L, -1L, n + 1L))
   for (slot in names(plants)) {
@@ -421,6 +439,9 @@ expect_na_refused <- function(design, where, info = NULL) {
   for (w in c(NA_REFUSED, where)) {
     expect_match(one_line(cnd), w, fixed = TRUE, info = info)
   }
+  # No position but the planted ones is named.
+  named <- gregexpr("Outer fold [0-9]+(, inner split [0-9]+)?: ", one_line(cnd))
+  expect_identical(sum(named[[1]] > 0L), length(where), info = info)
   expect_grid_refuses(design, cnd, info)
   invisible(cnd)
 }
@@ -468,8 +489,10 @@ test_that("the NA refusal names every position and slot that holds one", {
     split$out_id <- NA_integer_
     split
   })
-  cnd <- expect_na_refused(design, na_where(1L, NULL, "in_id"))
-  expect_match(one_line(cnd), na_where(3L, 2L, "out_id"), fixed = TRUE)
+  expect_na_refused(
+    design,
+    c(na_where(1L, NULL, "in_id"), na_where(3L, 2L, "out_id"))
+  )
 
   design <- edit_split(whole_design(), 2L, 1L, function(split) {
     split$in_id <- c(split$in_id, NA)
@@ -477,6 +500,24 @@ test_that("the NA refusal names every position and slot that holds one", {
     split
   })
   expect_na_refused(design, na_where(2L, 1L, c("in_id", "out_id")))
+})
+
+# Before M138, an NA in an outer `in_id` and in an inner `in_id` of the same
+# fold passed the containment rule, because %in% matches the two NAs (M137
+# review B2, B3).
+test_that("an NA in the outer and an inner in_id of one fold is refused", {
+  design <- edit_split(whole_design(), 1L, NULL, function(split) {
+    split$in_id <- c(split$in_id, NA)
+    split
+  })
+  design <- edit_split(design, 1L, 1L, function(split) {
+    split$in_id <- c(split$in_id, NA)
+    split
+  })
+  expect_na_refused(
+    design,
+    c(na_where(1L, NULL, "in_id"), na_where(1L, 1L, "in_id"))
+  )
 })
 
 # Without the NA rule, a later rule would refuse each of these designs, so
@@ -522,7 +563,7 @@ test_that("check_nested() accepts the logical NA out_id of both constructors", {
     expect_identical(check_nested(design), design, info = name)
   }
   for (split in designs$nested_cv$inner_resamples[[1]]$splits) {
-    expect_identical(split$out_id, NA)
+    expect_identical(split$out_id, NA, info = "nested_cv inner")
   }
 })
 
@@ -530,8 +571,7 @@ test_that("check_nested() accepts the logical NA out_id of both constructors", {
 # not build a design every driver refuses (M138, D-111).
 test_that("nested_resamples() refuses an NA in an outside split", {
   d <- shape_data()
-  # Every plant but the lone NA `in_id`.
-  for (plant in NA_PLANTS[c(1L, 2L, 4L, 5L)]) {
+  for (plant in NA_PLANTS) {
     info <- paste(plant$slot, plant$label)
     set.seed(2)
     outside <- rsample::vfold_cv(d, v = 3)

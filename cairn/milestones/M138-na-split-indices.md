@@ -61,6 +61,7 @@ A probe on 2026-10-01 showed the defect. An `NA` in an outer `in_id` passes `che
 - claim audit: 33 claims read, 3 corrected — R/checks.R, tests/testthat/test-split-checks.R
 - 2026-10-01: the re-read cleared two corrections. It found the `check_inner_splits()` comment still imprecise for `out_id`, so I took its wording. It also found that an inner `out_id` index beyond integer range passes every rule. That shape went into the DESIGN.md Known issues entry on index slots, because a candidate row puts ROADMAP.md at its 60-line cap.
 - 2026-10-01: T5 done. The planted-defect runs passed their test. `devtools::check()` reports 0 errors, 0 warnings and 0 notes. It ran before the claim-audit fixes, which changed only comments and the error's reason text. On the final code, the split-check file passes, `devtools::document()` leaves no diff, `air format --check` and both prose sweeps are clean, and `cairn_validate` passes. Status set to review.
+- 2026-10-01: review found no failing criterion. Three reviewers gave 19 findings. The gate took the fix-now set, which changes two comments, five tests and DESIGN.md, and changes no package behavior.
 
 ## Decisions
 
@@ -98,3 +99,9 @@ Findings from three fresh reviewers, ranked within each lens. D is the diff-bug 
 - P2: the shape M137 B2, B3 and O6 named, an `NA` in the outer and inner `in_id` of one fold, has no plant of its own.
 - P3: one new loop in the AC5 block has no `info` label, which M137 O1 asked for.
 - P4: the same shape as D1.
+
+Triage at the gate, 2026-10-01. The maintainer took every recommended disposition.
+
+- Fixed on the branch: D1's comment and H4, both in `check_inner_splits()`. D3, as a count of named positions in `expect_na_refused()`, shown to fail with 2 named against 1 expected. D5, P3, H1 as a `1e10` `in_id` plant, and P2 as its own block. D4 and H3, as a rewrite of the Known issues entry that keeps O7 out of the accepted list. D9, as a sentence in the Conventions bullet. After the fixes, `test-split-checks.R` passes 20 blocks and `test-design-support.R` passes 74, with no warning and no skip. `air format --check`, the plain sweep and `cairn_validate` are clean.
+- Deferred to the Known issues entry, as open shapes: D1's shape and P4, D8, H2 and H5. ROADMAP.md has 59 of its 60 lines, so a candidate row was not used.
+- Rejected: D2, which the fresh `devtools::check()` run answers. D6, because AC2 sets the entry check's wording and the constructor matches `check_outer_overlap()`. D7, because the plan set the rule's place in `check_nested()`. D10, because cli does not format text passed as a value. P1, because D-111 records the reversal.

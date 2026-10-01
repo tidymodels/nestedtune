@@ -173,7 +173,7 @@ naming convention.
   `make_splits()` rebuild that no class names. An index into an outer
   analysis set counts as the data row it copies, and the bootstrap's own
   apparent split is exempt (D-103, D-104, M134). It also refuses
-  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107, D-108). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107, D-108). A split whose `in_id` or `out_id` holds an `NA` is refused in both loops and by `nested_resamples()`. The one exception is an `out_id` that is the logical `NA`, rsample's mark for the complement (D-111, M138). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
@@ -611,16 +611,20 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   `in_id` coerces with a warning and reports `NA`; a fractional index truncates
   and passes containment; a non-data.frame outer `$data` reports as a frame
   mismatch; and an empty inner `in_id` passes containment, which the fixture
-  vehicle `break_inner_split()` relies on. (corrected M138: an `NA` in any
-  `in_id` or `out_id`, less the logical `NA` `out_id`, is now refused before
-  containment, per D-111.) Also, an inner `out_id` index beyond integer
-  range, such as `1e10`, coerces to `NA` with a warning and is dropped, so it
-  passes every rule. M138's claim audit found it, and it is not yet accepted
-  or fixed. Accepted at M59's review (O5, O6, O7, O9, O15): each is a shape
-  rsample itself admits, and the entry check holds the shapes this package
-  owns. Revisit on a user reaching one of these past the entry check, or if
-  rsample refuses one of them earlier. Routed from candidates 2026-09-11; added
-  2026-09-04 — M59 review O5, O6, O7, O9, O15.
+  vehicle `break_inner_split()` relies on. Accepted at M59's review (O5, O6,
+  O9, O15): each is a shape rsample itself admits, and the entry check holds
+  the shapes this package owns. Revisit on a user reaching one of these past
+  the entry check, or if rsample refuses one of them earlier. (corrected
+  M138: O7, an element-wise `NA` in `out_id`, is now refused before
+  containment with every other `NA` index but the logical `NA` `out_id`, per
+  D-111.) Three more shapes are open, not accepted and not fixed. An inner
+  `out_id` index beyond integer range, such as `1e10`, coerces to `NA` with a
+  warning and is dropped, so it passes every rule. An index beyond integer
+  range in both an outer and an inner `in_id` passes containment, because
+  both coerce to `NA` and `%in%` matches them. It passed before M138 too. A
+  `NULL` `out_id` passes every rule, and rsample gives an empty assessment
+  set. M138's claim audit and review found them. Routed from candidates
+  2026-09-11; added 2026-09-04 — M59 review O5, O6, O7, O9, O15.
 
 - The guides say what to report after nesting, but not what to report when a
   user skips it. `vignettes/estimate.Rmd`'s tall-data paragraph (Wilimitis and
