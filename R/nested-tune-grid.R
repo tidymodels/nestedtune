@@ -201,9 +201,15 @@
 #' inner resamples re-pointed at its analysis set, not the design's own
 #' `inner_resamples` element, which indexes the whole data. A design from
 #' [rsample::nested_cv()] already carries the analysis set and is passed as
-#' it is. So is the design's element under an outer split that repeats a
-#' row, an evaluated [rsample::manual_rset()], where the re-pointing is
-#' ambiguous. [nested_final_fit()] finalizes on the full data.
+#' it is. An outer split that repeats a row, an evaluated
+#' [rsample::manual_rset()], gives an analysis set that holds each copy of
+#' the row. The re-pointing then sends the first mention of the row in an
+#' inner split to its first copy, the second mention to its second copy,
+#' and so on. A mention past the last copy, which an inner bootstrap can
+#' draw, starts again at the first copy. An inner assessment set that the
+#' design leaves as the complement holds each copy of every row that the
+#' inner split does not train on. [nested_final_fit()] finalizes on the
+#' full data.
 #'
 #' @section Evaluation times:
 #'

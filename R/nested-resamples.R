@@ -410,6 +410,12 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
   # because its inner splits index a frame that *is* the analysis set, so the
   # complement is derivable; ours index the whole data, where the complement
   # would sweep in the outer fold's assessment rows.
+  #
+  # Under an outer `in_id` that repeats a row, an inner bootstrap can draw
+  # the copies of a row more times in total than the outer split holds it,
+  # so `in_id` then mentions that row more often. analysis_framed_inner()
+  # maps such an index back by cycling through the copies again from the
+  # first.
   splits <- lapply(inner_rset$splits, function(inner_split) {
     assessment_idx <- outer_idx[as.integer(rsample::complement(inner_split))]
     inner_split$in_id <- outer_idx[as.integer(inner_split$in_id)]
@@ -448,15 +454,44 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # analysis frame is materialized once per fold, in the worker, for the tune
 # call's duration (GP4). Nothing here draws from the RNG.
 #
-# Two shapes are left as they are, since the inverse does not apply: an inner
-# rset whose frame is not the outer split's (a `nested_cv()` design, whose
-# splits `is_fold_payload()`'s shared-frame check also passes, which is why the
-# test here is against the outer frame), and an outer split whose `in_id`
-# repeats a row (an evaluated `manual_rset()`), where `match()` would collapse
-# the repeats onto one position. In the second shape a logical `NA` `out_id`
-# is still made explicit (complement_within_outer()), since over the whole
-# frame it would reach the outer held-out rows. An index the outer split does
-# not hold is left alone the same way rather than mapped to `NA`.
+# An inner rset whose frame is not the outer split's is left as it is, since
+# the inverse does not apply: a `nested_cv()` design, whose splits
+# `is_fold_payload()`'s shared-frame check also passes, which is why the test
+# here is against the outer frame.
+#
+# Each inner index maps by occurrence (occurrence_map()): the r-th mention of
+# a data row, within one `in_id` or one explicit `out_id`, goes to the r-th
+# position of that row in the outer `in_id`. Without repeats that is
+# `match()`, which runs in its place. Under an outer `in_id` that repeats a
+# row (an evaluated `manual_rset()`), `match()` would collapse the copies
+# onto one position, while the occurrence map keeps the rows, their order
+# and multiplicity, and gives distinct `.row` values to the copies tune
+# assesses. The positions are rsample's own when each split that holds a
+# copy of a row holds every earlier copy of it, in ascending order, as a
+# grouped or v-fold inner does once the overlap rule has refused a split
+# that parts the copies. Any other inner, such as `mc_cv()`, a bootstrap, or
+# a rolling or sliding window that holds only a later copy, gets the same
+# rows at other positions, which nothing downstream reads. Past the last copy
+# the map cycles through the copies again from the first. An inner bootstrap
+# from `nested_resamples()` reaches that, and so does a hand-built split that
+# mentions a row more often than the outer split holds it.
+#
+# A logical `NA` `out_id` is rsample's "the complement". Without repeats it
+# stays as it is, since the complement over the analysis frame is the right
+# set. Under repeats it would also take the copies of the rows the inner
+# split trains on, so it becomes every position whose data row lies in
+# `rsample::complement()` of the split read over the whole frame: each copy
+# the outer split holds, and no outer held-out row.
+#
+# Some designs keep the whole frame. One is an outer `in_id` that holds an
+# `NA`, a fractional index, or one below 1 or past the data, left for
+# `last_fit()` to refuse as the fold's outer-fit failure rather than raised
+# here as its inner one. Another is an inner split whose complement rsample
+# cannot derive, left for tune to fail on. A third is an inner index the
+# outer split does not hold, which the entry check has already refused. No
+# index is mapped to `NA`. The fold can still report inner metrics, so every
+# other logical `NA` `out_id` is made explicit on the whole frame
+# (whole_frame_inner()).
 analysis_framed_inner <- function(inner, split) {
   outer_idx <- as.integer(split$in_id)
   shared <- vapply(
@@ -467,83 +502,120 @@ analysis_framed_inner <- function(inner, split) {
   if (!all(shared)) {
     return(inner)
   }
-  if (anyDuplicated(outer_idx) > 0L) {
-    return(complement_within_outer(inner, outer_idx))
+  repeats <- anyDuplicated(outer_idx) > 0L
+  whole_frame <- function() whole_frame_inner(inner, outer_idx)
+  if (
+    anyNA(outer_idx) ||
+      !all(split$in_id == outer_idx) ||
+      any(outer_idx < 1L) ||
+      max(outer_idx) > nrow(split$data)
+  ) {
+    return(whole_frame())
+  }
+  map <- if (repeats) {
+    occurrence_map(outer_idx)
+  } else {
+    function(idx) {
+      out <- match(as.integer(idx), outer_idx)
+      if (anyNA(out)) NULL else out
+    }
   }
 
-  # An all-`NA` `out_id` is rsample's "the complement", derivable from the
-  # frame, and stays as it is; any other index is a position in `split$data`
-  # that must have a position in the analysis frame.
-  remap <- function(idx) {
-    if (all(is.na(idx))) {
-      return(idx)
-    }
-    out <- match(as.integer(idx), outer_idx)
-    if (anyNA(out)) NULL else out
-  }
   splits <- vector("list", length(inner$splits))
   for (i in seq_along(splits)) {
     inner_split <- inner$splits[[i]]
-    in_id <- remap(inner_split$in_id)
-    out_id <- remap(inner_split$out_id)
+    in_id <- map(inner_split$in_id)
+    out_id <- inner_split$out_id
+    if (!identical(out_id, NA)) {
+      out_id <- map(out_id)
+    } else if (repeats) {
+      held <- outer_complement(inner_split)
+      out_id <- if (is.null(held)) NULL else which(outer_idx %in% held)
+    }
     if (is.null(in_id) || is.null(out_id)) {
-      return(inner)
+      return(whole_frame())
     }
     inner_split$in_id <- in_id
     inner_split$out_id <- out_id
     splits[[i]] <- inner_split
   }
-  # Materialized only once every index is known to map, and only when the
-  # outer split's own `in_id` lies inside its frame: one reaching past the
-  # data is left for `last_fit()` to refuse, as the fold's outer-fit failure,
-  # rather than raised here as its inner one -- whether the inner indices
-  # happen to map (an index appended to `in_id`) or not (one replaced).
-  if (any(outer_idx < 1L) || max(outer_idx) > nrow(split$data)) {
-    return(inner)
-  }
+  # Materialized only once every index is known to map.
   analysis_frame <- rsample::analysis(split)
   splits <- lapply(splits, function(inner_split) {
     inner_split$data <- analysis_frame
     inner_split
   })
-  # As in `inner_resamples_from_split()`: the rset's class, id columns and
-  # attributes are kept, the splits swapped, and the fingerprint recomputed
-  # because it describes the indices.
-  out <- inner
-  out[["splits"]] <- splits
-  attr(out, "fingerprint") <-
-    attr(rsample::manual_rset(splits, inner$id), "fingerprint")
-  out
+  replace_splits(inner, splits)
 }
 
-# The inner rset under an outer split whose `in_id` repeats a row, where
-# analysis_framed_inner() leaves the whole frame in place. There a logical
-# `NA` `out_id` reads as every frame row outside the inner `in_id`, the outer
-# held-out rows among them, which IP1 keeps out of the inner loop. So each
-# such split gets an explicit `out_id`: rsample's complement, kept to the rows
-# the outer split holds, each once. A split whose complement rsample cannot
-# derive is left for tune to fail on, as before. Nothing here draws from the
-# RNG.
-complement_within_outer <- function(inner, outer_idx) {
+# The rows of the whole frame an inner split assesses, or NULL when rsample
+# cannot derive them.
+outer_complement <- function(inner_split) {
+  tryCatch(rsample::complement(inner_split), error = function(cnd) NULL)
+}
+
+# The inner rset on the whole frame, where analysis_framed_inner() cannot
+# re-point it. Each logical `NA` `out_id` whose complement rsample can derive
+# becomes the data rows of that complement that the outer split holds, each
+# copy once, so it holds no outer held-out row (IP1). A split whose
+# complement rsample cannot derive is left as it is, and the others are
+# still made explicit.
+whole_frame_inner <- function(inner, outer_idx) {
   splits <- inner$splits
   changed <- FALSE
   for (i in seq_along(splits)) {
     if (!identical(splits[[i]]$out_id, NA)) {
       next
     }
-    held <- tryCatch(
-      rsample::complement(splits[[i]]),
-      error = function(cnd) NULL
-    )
+    held <- outer_complement(splits[[i]])
     if (is.null(held)) {
       next
     }
-    splits[[i]]$out_id <- held[held %in% outer_idx]
+    splits[[i]]$out_id <- outer_idx[outer_idx %in% held]
     changed <- TRUE
   }
-  if (!changed) {
-    return(inner)
+  if (changed) replace_splits(inner, splits) else inner
+}
+
+# The occurrence map of an outer `in_id` that repeats a row, as a function of
+# one inner index vector (analysis_framed_inner()). It returns the analysis
+# frame positions, or NULL when an index has no position. Indices are read
+# with `as.integer()`, as the entry check reads them. Memory is linear in
+# the two vectors.
+occurrence_map <- function(outer_idx) {
+  # The positions of the outer `in_id` sorted by data row. order() keeps
+  # ties in their original order, so each row's copies stay in order.
+  by_row <- order(outer_idx)
+  runs <- rle(outer_idx[by_row])
+  start <- cumsum(c(0L, runs$lengths[-length(runs$lengths)]))
+  function(idx) {
+    idx <- as.integer(idx)
+    if (length(idx) == 0L) {
+      return(integer(0))
+    }
+    if (anyNA(idx)) {
+      return(NULL)
+    }
+    row <- match(idx, runs$values)
+    if (anyNA(row)) {
+      return(NULL)
+    }
+    # The 0-based rank of each mention among the mentions of its row, in the
+    # order of `idx`.
+    o <- order(idx)
+    sorted <- idx[o]
+    first <- c(TRUE, sorted[-1L] != sorted[-length(sorted)])
+    run <- seq_along(sorted)
+    mention <- integer(length(idx))
+    mention[o] <- run - cummax(ifelse(first, run, 0L))
+    by_row[start[row] + mention %% runs$lengths[row] + 1L]
   }
+}
+
+# As in `inner_resamples_from_split()`: the rset's class, id columns and
+# attributes are kept, the splits swapped, and the fingerprint recomputed
+# because it describes the indices.
+replace_splits <- function(inner, splits) {
   out <- inner
   out[["splits"]] <- splits
   attr(out, "fingerprint") <-

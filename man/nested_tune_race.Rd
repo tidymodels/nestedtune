@@ -434,9 +434,15 @@ analysis rows, never on the rows that fold holds out. On a
 inner resamples re-pointed at its analysis set, not the design's own
 \code{inner_resamples} element, which indexes the whole data. A design from
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}} already carries the analysis set and is passed as
-it is. So is the design's element under an outer split that repeats a
-row, an evaluated \code{\link[rsample:manual_rset]{rsample::manual_rset()}}, where the re-pointing is
-ambiguous. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.
+it is. An outer split that repeats a row, an evaluated
+\code{\link[rsample:manual_rset]{rsample::manual_rset()}}, gives an analysis set that holds each copy of
+the row. The re-pointing then sends the first mention of the row in an
+inner split to its first copy, the second mention to its second copy,
+and so on. A mention past the last copy, which an inner bootstrap can
+draw, starts again at the first copy. An inner assessment set that the
+design leaves as the complement holds each copy of every row that the
+inner split does not train on. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the
+full data.
 }
 
 \section{Evaluation times}{
