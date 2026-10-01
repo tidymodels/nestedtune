@@ -45,6 +45,7 @@ for (fn in MAP_FNS) {
         expect_identical(res$workflow[[i]], wf)
         hand <- hand_call(fn, wf, folds, ms, seed = 31)
         expect_true(all(hand$.completed))
+        expect_true(all(res$result[[i]]$.completed))
         expect_identical(res$result[[i]], hand)
       }
       # The routing, read off each element's record: the tuned workflow ran
