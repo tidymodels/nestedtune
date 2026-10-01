@@ -1,5 +1,20 @@
 # nestedtune 0.0.0.9000
 
+* Three refusals of malformed splits changed, each with class
+  `nestedtune_bad_design`. If an element of a `splits` column has the
+  `rsplit` class but is not a list, it is now refused in either loop. Before, the check stopped with an R error such as "subscript out of
+  bounds". `nested_resamples()` also refuses an element of `outside`, or of
+  the rset that `inside` gives, that is not an `rsplit` at all. Next, take an
+  inner split on the outer split's frame that puts a row the outer split
+  holds out in both of its sets. It now gets the error that says it indexes
+  rows its outer fold does not hold, which names the leak. Before, it got
+  the error about shared rows. Last, take a split whose `out_id` is `NA` and
+  whose class has a `complement()` method in the global environment. The
+  rule on shared rows now reads the rows that method returns, as rsample
+  does. Before, the rule read the rows of rsample's own method.
+
+* The entry check runs faster on designs with many large inner splits.
+
 * A split whose assessment set holds a row of its analysis set is now
   refused in either loop, with class `nestedtune_bad_design`. Such a split
   scores the model on rows it trained on. Before, a split rebuilt with
