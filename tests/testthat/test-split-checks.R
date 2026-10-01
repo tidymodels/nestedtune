@@ -42,8 +42,10 @@ expect_grid_refuses <- function(design, cnd, info = NULL) {
   wf <- workflows::workflow(rec, parsnip::linear_reg())
   grid_cnd <- expect_error(
     nested_tune_grid(wf, design, grid = 2),
-    class = "nestedtune_bad_design"
+    class = "nestedtune_bad_design",
+    info = info
   )
+  expect_identical(class(grid_cnd), class(cnd), info = info)
   expect_identical(one_line(grid_cnd), one_line(cnd), info = info)
   expect_identical(
     rlang::call_name(conditionCall(grid_cnd)),
@@ -99,7 +101,11 @@ test_that("nested_resamples() refuses an outside split that is not a list", {
     )
     expect_not_list(cnd, "Element 2 has class <rsplit>", type)
     expect_match(one_line(cnd), "`outside` has a malformed", fixed = TRUE)
-    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "nested_resamples",
+      info = type
+    )
   }
 })
 
@@ -118,7 +124,11 @@ test_that("nested_resamples() refuses an inside split that is not a list", {
     )
     expect_not_list(cnd, "Split 1 of that fold's inner design has class", type)
     expect_match(one_line(cnd), "for outer fold 1", fixed = TRUE, info = type)
-    expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
+    expect_identical(
+      rlang::call_name(conditionCall(cnd)),
+      "nested_resamples",
+      info = type
+    )
   }
 })
 
@@ -312,7 +322,11 @@ test_that("an inner index outside the frame is refused as a leak", {
         split[[slot]] <- c(split[[slot]], value)
         split
       })
-      cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
+      cnd <- expect_error(
+        check_nested(design),
+        class = "nestedtune_bad_design",
+        info = info
+      )
       expect_match(one_line(cnd), CONTAINED, fixed = TRUE, info = info)
       expect_match(
         one_line(cnd),
@@ -365,6 +379,7 @@ test_that("a held shared row is refused when the outer in_id holds an NA", {
   design$splits[[1]]$in_id <- c(design$splits[[1]]$in_id, NA)
   cnd <- expect_error(check_nested(design), class = "nestedtune_bad_design")
   expect_match(one_line(cnd), INNER_SHARED, fixed = TRUE)
+  expect_no_match(one_line(cnd), CONTAINED, fixed = TRUE)
   expect_match(
     one_line(cnd),
     "Element 1 of inner_resamples: split 1.",

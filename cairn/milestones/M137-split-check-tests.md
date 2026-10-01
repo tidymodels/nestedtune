@@ -56,6 +56,8 @@ The split-check tests reach the index shapes, the NA outer `in_id` and the condi
 - 2026-09-30: implement done, status set to review.
 - 2026-09-30: plan gate chose a `nested_tune_grid()` pass in every refusal block over one block per refusal message. The per-message set is a recalled list. Falsified by a refusal in the file that `nested_tune_grid()` meets with a different, earlier message.
 - 2026-09-30: plan gate chose planted-defect runs in AC1 and AC2 over passing tests alone. A new test is shown able to fail before it is trusted. Falsified by evidence that the planted edits are not defects a real change to `R/checks.R` can make.
+- 2026-10-01: review fixes O1 to O4 and B4 landed in the test file, and B2, B3 and O6 went to a candidate row.
+- 2026-10-01: step-7 approval: m137-split-check-tests approved for merge
 
 ## Decisions
 
@@ -96,3 +98,5 @@ Findings from three fresh reviewers. O is the Opus diff reviewer, B the blame-hi
 - P1: the T1 work log showed only the first plant failing under the `held()` plant. Resolved by the AC1 probe line above, with no change to the branch.
 - P2: the bullet assertion matches a prefix of the bullet, not the whole bullet. Reject: the headline is matched whole, and the prefix names the slot and value up to its comma.
 - P3: the NA test does not reach the construction path in `nested_resamples()`. Reject: `test-design-support.R:1615` covers that path, and AC2 names `check_nested()`.
+
+Gate, 2026-10-01: the user took the recommended dispositions. O1 to O4 and B4 were fixed in the test file. B2, B3 and O6 became a ROADMAP candidate row. The other findings were rejected with the reasons above. After the fixes, the test file passed with 180 expectations, and `air format --check` was clean. With the AC1 and AC2 plants, each planted copy failed only its own block. The full suite was not run again locally, and CI on the PR runs it.
