@@ -1,13 +1,13 @@
 # M136: README table of supported tuning functions, and shorter table prose
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, GP5
 - **Resolves:** —
 - **Surface tier:** user-facing — the README and `?nested_resamples` are what users read
-- **Branch/PR:** —
+- **Branch/PR:** m136-tuning-table
 
 ## Goal
 
@@ -41,7 +41,7 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 
 ## Tasks
 
-- [ ] T1: Shorten the resampling prose in `README.Rmd` (lines 80-175 at 10e1e775). Keep the 17 table lines as they are. Cut the `Yes` paragraph to about 50 words. Replace the per-design reasons and the extra refusal rules with one pointer to `?nested_resamples`. Move the reason for the inner `validation_set()` `No` cell to the help. Drop the Untested paragraph, because no cell reads Untested and D-095 keeps the rule. Keep the `[^validation]` footnote before "Learn more:".
+- [x] T1: Shorten the resampling prose in `README.Rmd` (lines 80-175 at 10e1e775). Keep the 17 table lines as they are. Cut the `Yes` paragraph to about 50 words. Replace the per-design reasons and the extra refusal rules with one pointer to `?nested_resamples`. Move the reason for the inner `validation_set()` `No` cell to the help. Drop the Untested paragraph, because no cell reads Untested and D-095 keeps the rule. Keep the `[^validation]` footnote before "Learn more:".
 - [ ] T2: In the "Differences from rsample" section of `R/nested-resamples.R` (lines 29-72), state the reason for each `Refused` cell and for the inner `validation_set()` `No` cell. Replace the sentence at line 43 that says the README gives the reasons. Point the comment at `R/checks.R:1232` at `?nested_resamples`. Run `devtools::document()`.
 - [ ] T3: Add the "Supported tuning functions" section, its table and its prose to `README.Rmd`, per AC1-AC3. Check the word count with the AC4 command.
 - [ ] T4: For each `Yes` row, find the test that runs the row's function with `vfold_cv()` in both loops and asserts that every fold completed. Record each one as a file:line in the work log. `test-nested-workflow-map-oracles.R:47-48` shows completion only through identity with a reference run. Add a direct `all(.completed)` assertion there.
@@ -55,6 +55,8 @@ The README says which tidymodels tuning functions nestedtune supports, and both 
 - 2026-09-30: plan gate chose eight rows over ten (adding `last_fit()` and `fit_best()`) and over six (search functions only). Falsified by a reader who looks for `last_fit()` in the table and misses `nested_final_fit()`.
 - 2026-09-30: plan gate left the known gaps inside supported tuners off the README. The help pages hold them, and each README claim needs upkeep as a gap closes. Falsified by a user surprised by one of the gaps.
 - 2026-09-30: plan set the word limit at 400 over 350. The parts that stay already hold about 274 words in today's wording. Falsified by a draft that is still hard to scan at 400 words.
+- 2026-09-30: implement started on branch m136-tuning-table. Question gate skipped, because the plan left nothing open.
+- 2026-09-30: T1 done. The resampling section is 197 words by the AC4 command, down from 789. Its 17 table lines match 10e1e775, and the plain sweep is clean.
 
 ## Decisions
 

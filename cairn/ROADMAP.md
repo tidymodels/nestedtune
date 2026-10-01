@@ -4,7 +4,7 @@ _Last hygiene check: 2026-09-30 (M135 archived, M132 row pruned, validate green)
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M136 | README table of supported tuning functions, and shorter table prose | planned | — | normal | milestones/M136-tuning-table.md |
+| M136 | README table of supported tuning functions, and shorter table prose | in-progress | — | normal | milestones/M136-tuning-table.md |
 | M135 | Close the split-check gaps M134's review left | done | — | normal | milestones/archive/M135-split-check-gaps.md |
 | M134 | Refuse a split that assesses rows it trains on | done | M133 | normal | milestones/archive/M134-overlapping-splits.md |
 | M133 | Refuse inner ids that tune misreads, at entry and at the final fit | done | — | normal | milestones/archive/M133-inner-id-rules.md |
