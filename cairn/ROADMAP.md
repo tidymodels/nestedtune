@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-01 (M138 archived, M135 row pruned, validate green)._
+_Last hygiene check: 2026-10-01 (M139 archived, M136 row pruned, validate green)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M139 | Frame the inner splits on the analysis set under a repeated outer row | review | — | normal | milestones/M139-repeated-row-inner-frame.md |
+| M139 | Frame the inner splits on the analysis set under a repeated outer row | done | — | normal | milestones/archive/M139-repeated-row-inner-frame.md |
 | M138 | Refuse an NA in a split's row indices | done | — | normal | milestones/archive/M138-na-split-indices.md |
 | M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
-| M136 | README table of supported tuning functions, and shorter table prose | done | — | normal | milestones/archive/M136-tuning-table.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -46,6 +45,7 @@ _Last hygiene check: 2026-10-01 (M138 archived, M135 row pruned, validate green)
 - Desirability selection under the two racing tuners and simulated annealing, and on censored regression models, all of which refuse the rule after M109. Added 2026-09-21 at M109's plan gate. Racing drops candidates before the end, so the rule needs its own oracle there, and desirability2 ranks every evaluation time on a censored model. The row also holds M109's deferred review findings, which its archive lists. Promote when desirability2 documents its selector for racing results, or on a user asking
 - Nested tuning of a tidyclust model through `tune_cluster()` — added 2026-09-21 at the M106-M109 plan gate. Nothing settles what a nested estimate of a clustering metric means, and no oracle exists (RB tripwire: no-oracle), so the next step is a `/milestone-brief` escalation on that question. Adding tidyclust to Suggests takes a D-entry. Promote when an RR answers the question
 - M126's review leftovers on averaged predictions, added 2026-09-28 at M126's review gate (`milestones/archive/M126-averaging-edge-cases.md`, findings 3, 4 and 8). (3) `benchmarks/averaging-speed.R` compares no even-group `.pred_time` median, no missing `.pred_time`, no NULL censored entry, and only one `.eval_time` set. (4) A censored row whose entries have 0 rows now averages to NULL, where M124 gave a 0-row tibble. The help names only NULL entries. (8) `collect_predictions(summarize = TRUE)` warns about a partial run before it refuses a bad shape, and `augment()` warns after. Promote on a user report of a 0-row entry, a median that disagrees with `stats::median()`, or the warning order misleading a reader
+- Add `air format --check` on the changed R files to the profile's verify slot. The CI check `format-suggest` failed PR #155 on one test line that `air` wraps, and the fix cost a second CI run. LESSONS.md is at its byte budget, so the lesson lives here. Added 2026-10-01 at M139's review. Promote at the next milestone that changes R files, or on a second such failure
 - [low] A CI job that runs the suite at the testthat floor in `DESCRIPTION`. Added 2026-09-29 at M130's plan gate, which chose one-time check runs at the floor over this job (3.3.0 since the re-plan, corrected 2026-09-29). The 3.0.0 floor went stale because tests adopted newer testthat functions and no job ran the floor. Promote on a test adopting a testthat function newer than the floor unnoticed
 - [low] Take macOS back off P3M once pkgdepends reads zstd. Added 2026-09-21, corrected the same day when PR [#119](https://github.com/tidymodels/nestedtune/pull/119) merged. #119 routes the macOS leg through P3M because the pak installs cannot extract CRAN's zstd macOS binaries (r-lib/pkgdepends#485). P3M binaries link OpenMP, which once broke `gower` on runners with no libomp. `.github/workflows/R-CMD-check.yaml` records both failure modes beside the line. Promote when pkgdepends ships zstd support, or when a P3M macOS binary breaks the way `gower` did
 - [low] `.github/CODEOWNERS`, the tidymodels convention M33 left behind. Promote once understudies are assigned here — added 2026-08-28 — D-025, D-026, split 2026-09-16
