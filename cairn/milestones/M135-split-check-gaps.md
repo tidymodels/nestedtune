@@ -35,7 +35,7 @@ D-109 records the message change of item (1) as a narrowing of D-103.
 - [x] AC2: In a design with no other defect, take an inner split built on the frame of its outer split. Its analysis and assessment sets share only rows that the outer split holds out. `check_nested()` refuses it with the containment headline, which says that the inner split indexes rows its outer fold does not hold. It does not give the shared-rows headline. Two tests plant a held-out row in both sets. One puts it in an explicit `out_id`. The other gives an `NA` `out_id` and a `complement()` method in the global environment that returns the row. A third test plants a row that the outer split holds in both sets, and asserts the shared-rows headline.
 - [x] AC3: In a design with no other defect, take a split whose `out_id` is the logical `NA` and that is not a bootstrap's own apparent split. `rsample::complement()` dispatches it to a method defined in the global environment. The overlap rule reads the rows that method returns. Say the method returns only indexes of the split's frame, and one of them is a row of the split's analysis set. Then `check_nested()` refuses the design with the shared-rows headline. This holds for an outer split and for an inner split. Main runs each of these designs.
 - [x] AC4: Two designs have 10^5 rows, 10 outer v-folds and 50 inner bootstraps. `rsample::nested_cv()` builds one and `nested_resamples()` builds the other. On each design, the median of 5 runs of `check_nested()` falls by at least 80% against the code at the plan commit. Both code versions are timed in the same R session.
-- [ ] AC5: `NEWS.md` names the three changed refusals and the faster check under the development heading. `devtools::test()` gives 0 failures. `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep exits 0.
+- [x] AC5: `NEWS.md` names the three changed refusals and the faster check under the development heading. `devtools::test()` gives 0 failures. `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep exits 0.
 
 ## Coverage
 
@@ -84,3 +84,23 @@ Run on 2026-09-30 at `dbe2bc7b`. Main had not moved since the branch was cut fro
 - AC2: the two held-out-row tests and the held-row control passed on the branch. On main, the explicit `out_id` test failed 3 expectations, getting the shared-rows headline. The global-complement test passed on main too, because main ignores the global method, so no row is shared and containment fires. T3's log shows the same test got the shared-rows headline on the T2 code. The control passed on main.
 - AC3: the outer and inner global-complement tests passed on the branch, and on main `check_nested()` ran both designs. The attached-environment control passed on both.
 - AC4: `Rscript benchmarks/split-check-speed.R` timed base `e499a7f3` and the working tree in one session. On the `nested_cv()` design the median fell from 0.659 s to 0.078 s, a drop of 88.2%. On the `nested_resamples()` design it fell from 6.767 s to 0.943 s, a drop of 86.1%.
+- AC5: `NEWS.md` has two bullets under `# nestedtune 0.0.0.9000`, one for the changed refusals and one for the faster check. `devtools::test()` gave 0 failures and 0 errors in 1212 tests. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. The six commands `sweep-prose.R --list-gating` prints each exited 0.
+
+Consistency gate: `cairn_validate.py` passed, with 18 references-staleness advisories that predate this milestone. No principle text changed, so `cairn_impact` was skipped. `devtools::document()` left no diff. `pkgdown::check_pkgdown()` found no problems. README is untouched. `benchmarks/` is in `.Rbuildignore`.
+
+Independent review: three fresh reviewers (Opus diff-bug, Sonnet blame-history, Sonnet prior-review). None found a failing criterion. Findings, most severe first within each lens:
+
+- D1: a global `complement()` method that also returns a row outside the frame escapes the shared-rows rule. NEWS says without limit that the rule reads that method's rows. A probe showed it.
+- D2: NEWS leaves out two message changes. An `inner_resamples` element with class `rset` that is not a list is now refused with a named element. An inner split that is a list but not an `rsplit` now reads "is a list, not <rsplit>". A probe showed both.
+- D3: a split that shares a held row and a held-out row still gets the shared-rows headline. It is refused either way, and AC2 covers only splits that share held-out rows alone.
+- D4: on a whole-frame fold, the overlap rule calls a custom `complement()` on the whole-frame split. The run can call it on the analysis frame. Reasoning only.
+- D5: NEWS says "Three refusals" and describes four.
+- D6: a rerun during the full suite gave drops of 86.2% and 86.5%. The benchmark script works only from the repo root, and its header does not say so.
+- B1: no test reaches the new `held()` fallback for an index of 0, a negative index, NA or one past the frame.
+- B2: the new `value_bullets()` escapes braces and the older `x_bullets()` does not. Pre-existing.
+- B3: `complement_envs()` assumes R's default lookup order, which an environment variable can change.
+- B4: the method probe matches by name only. No failure scenario found.
+- B5: the NEWS bullet packs three changes into one paragraph.
+- P1: no new refusal test asserts the condition call, which M134 asked of the overlap tests.
+- P2: a design with a shared held-out row and an id defect now gets the id refusal. Message change only.
+- P3: no test passes an NA outer `in_id` through the new `hold` path.
