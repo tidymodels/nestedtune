@@ -1,6 +1,6 @@
 # M139: Frame the inner splits on the analysis set under a repeated outer row
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 - [x] T2: In `analysis_framed_inner()` (`R/nested-resamples.R:460`), replace the early return with the occurrence map. Read indices with `as.integer()`, and leave the rset unmapped when an index has no position, never writing an `NA` position. Give a logical `NA` `out_id`, tested with `identical(out_id, NA)`, the complement as `which(outer_idx %in% held)`, keeping the hotfix's `tryCatch` around `rsample::complement()`. Fold `complement_within_outer()` in or remove it. The comment names the inner bootstrap from `nested_resamples()` as the design that reaches the wrap, and says the map is exact in positions only for ascending analysis positions (RR09 R2, R3). Keep the shared-frame check and the out-of-range guard. Draw nothing from the RNG.
 - [x] T3: Add the O1 and O2 tests for the repeated shape (AC4, AC5), and name them in the oracle header of the file. Both fixture folds hold one split, and `expect_frames_are_analysis_rows()` needs one matching fold. So assert the recorded `n` of each frame and match frames by fold position. Assert `.Random.seed` identical before and after `analysis_framed_inner()` on the repeated fixture (RR09 R4). Show that O1 fails on the plan-commit code.
 - [x] T4: Update the docs. These are the `@section Finalizing a parameter range` passage (`R/nested-tune-grid.R:193-206`), the comments at `R/nested-resamples.R:431-458` and `:519-526`, and the DESIGN.md Architecture paragraph (`:341-351`). Also read the "Reproducing one fold by hand" section (`R/nested-tune-grid.R:323-327`) and the hotfix NEWS bullet, which RR09 found stay true. Add a NEWS entry. Run the AC6 grep and record the hit ledger in one work-log line. Run `devtools::document()`.
-- [ ] T5: Run the verify slot: `devtools::test()`, `devtools::check()`, and both prose sweeps.
+- [x] T5: Run the verify slot: `devtools::test()`, `devtools::check()`, and both prose sweeps.
 
 ## Work log
 
@@ -61,6 +61,7 @@ Under an outer split whose `in_id` repeats a row, each inner tuning call gets it
 - 2026-10-01: T4 done. The help passage, DESIGN Architecture paragraph and a new NEWS bullet state the new frame, and `devtools::document()` rewrote four Rd files. AC6 grep ledger: 134 hits. The frame hits are `R/nested-resamples.R:414`, `:463-477` and `:522`, `R/nested-tune-grid.R:204` and DESIGN.md `:347`, all new behavior. The other hits are ids, repeated designs, held-out predictions or code. The "Reproducing one fold by hand" section and the hotfix NEWS bullet stay true. Both prose sweeps are clean.
 - 2026-10-01: claim audit: 30 claims read, 4 corrected — R/nested-resamples.R, R/nested-tune-grid.R, man/nested_tune_*.Rd, NEWS.md
 - 2026-10-01: claim audit detail. The wrong claim was that rsample's positions survive for every ascending design. A rolling inner that holds only the later copies of rows 1 to 5 gets positions 1:5 for rsample's 61:65, with the same rows (reproduced). The comment now states the condition. The other three corrections complete the cycling wording and the unmapped-index case. The NEWS sentence on the assessment set is clearer. The same reader re-read all five passages and found them right.
+- 2026-10-01: T5 done after the claim-audit commit. `devtools::test()`: 1226 tests, 0 failed, 0 skipped. `devtools::check()`: 0 errors, 0 warnings, 0 notes. Both prose sweeps clean. Status set to review.
 
 ## Decisions
 

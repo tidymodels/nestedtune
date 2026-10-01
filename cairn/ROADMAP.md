@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-01 (M138 archived, M135 row pruned, validate green)
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M139 | Frame the inner splits on the analysis set under a repeated outer row | in-progress | — | normal | milestones/M139-repeated-row-inner-frame.md |
+| M139 | Frame the inner splits on the analysis set under a repeated outer row | review | — | normal | milestones/M139-repeated-row-inner-frame.md |
 | M138 | Refuse an NA in a split's row indices | done | — | normal | milestones/archive/M138-na-split-indices.md |
 | M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
 | M136 | README table of supported tuning functions, and shorter table prose | done | — | normal | milestones/archive/M136-tuning-table.md |
