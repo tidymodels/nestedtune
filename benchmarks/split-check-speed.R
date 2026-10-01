@@ -78,7 +78,10 @@ time_tree <- function(path, label) {
     },
     numeric(1)
   )
-  cat(sprintf("%-12s %-18s median %.3f s\n", label, names(medians), medians))
+  cat(
+    sprintf("%-12s %-18s median %.3f s\n", label, names(medians), medians),
+    sep = ""
+  )
   medians
 }
 
@@ -86,5 +89,5 @@ base <- time_tree(export_tree(base_ref), paste0("base ", base_ref))
 if (identical(which_trees, "both")) {
   work <- time_tree(".", "working tree")
   drop <- 100 * (1 - work / base)
-  cat(sprintf("drop on %-18s %.1f%%\n", names(drop), drop))
+  cat(sprintf("drop on %-18s %.1f%%\n", names(drop), drop), sep = "")
 }
