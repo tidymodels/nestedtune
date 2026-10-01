@@ -133,6 +133,13 @@ puts one copy in each set is refused. The apparent split of a bootstrap
 under the id "Apparent" is exempt from this rule, because tune leaves it
 out of its estimates.
 
+An `outside` split whose `in_id` or `out_id` holds an `NA` is refused,
+and the refusal names the split and the slot. rsample reads an `NA`
+index as a row of `NA` values, or fails when it builds the assessment
+set. The one exception is an `out_id` that is the logical `NA`, which
+tells rsample to find the assessment set with
+[`rsample::complement()`](https://rsample.tidymodels.org/reference/complement.html).
+
 ## Time-series designs
 
 An outer
