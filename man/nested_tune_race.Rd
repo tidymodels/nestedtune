@@ -438,9 +438,11 @@ it is. An outer split that repeats a row, an evaluated
 \code{\link[rsample:manual_rset]{rsample::manual_rset()}}, gives an analysis set that holds each copy of
 the row. The re-pointing then sends the first mention of the row in an
 inner split to its first copy, the second mention to its second copy,
-and so on. An inner assessment set that the design leaves as the
-complement holds each copy of every row that the inner split does not
-train on. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the full data.
+and so on. A mention past the last copy, which an inner bootstrap can
+draw, starts again at the first copy. An inner assessment set that the
+design leaves as the complement holds each copy of every row that the
+inner split does not train on. \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes on the
+full data.
 }
 
 \section{Evaluation times}{

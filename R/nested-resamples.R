@@ -414,7 +414,8 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
   # Under an outer `in_id` that repeats a row, an inner bootstrap can draw
   # the copies of a row more times in total than the outer split holds it,
   # so `in_id` then mentions that row more often. analysis_framed_inner()
-  # maps such an index back by wrapping to the first copy.
+  # maps such an index back by cycling through the copies again from the
+  # first.
   splits <- lapply(inner_rset$splits, function(inner_split) {
     assessment_idx <- outer_idx[as.integer(rsample::complement(inner_split))]
     inner_split$in_id <- outer_idx[as.integer(inner_split$in_id)]
@@ -464,10 +465,13 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # `in_id` that repeats a row (an evaluated `manual_rset()`), `match()` would
 # collapse the copies onto one position, while the occurrence map keeps the
 # rows, their order and multiplicity, and gives distinct `.row` values to the
-# copies tune assesses. The positions are rsample's own only for designs
-# whose analysis positions ascend (vfold, grouped, rolling and sliding). An
-# `mc_cv()` or bootstrap inner gets the same rows at other positions, which
-# nothing downstream reads. Past the last copy the map wraps to the first.
+# copies tune assesses. The positions are rsample's own when each split that
+# holds a copy of a row holds every earlier copy of it, in ascending order,
+# as a grouped or v-fold inner does once the overlap rule has refused a split
+# that parts the copies. Any other inner, such as `mc_cv()`, a bootstrap, or
+# a rolling or sliding window that holds only a later copy, gets the same
+# rows at other positions, which nothing downstream reads. Past the last copy
+# the map cycles through the copies again from the first.
 # An inner bootstrap from `nested_resamples()` reaches that, and so does a
 # hand-built split that mentions a row more often than the outer split holds
 # it.
@@ -478,8 +482,9 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 # split trains on, so it becomes every position whose data row lies in
 # `rsample::complement()` of the split read over the whole frame: each copy
 # the outer split holds, and no outer held-out row. A split whose complement
-# rsample cannot derive, or an index the outer split does not hold, leaves
-# the rset as it is, for tune to fail on, rather than mapped to `NA`.
+# rsample cannot derive leaves the rset as it is, for tune to fail on. So
+# does an index the outer split does not hold, which the entry check has
+# already refused. It is never mapped to `NA`.
 analysis_framed_inner <- function(inner, split) {
   outer_idx <- as.integer(split$in_id)
   shared <- vapply(
