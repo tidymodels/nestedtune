@@ -37,8 +37,8 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 
 ## Tasks
 
-- [ ] T1: Give `reference_final_fit()` in `tests/testthat/helper-orchestration.R` an `inner_design` argument, as `reference_bayes_final_fit()` and `reference_race_final_fit()` have. Its seeds then come from the recorded seeds, not from the final fit's own.
-- [ ] T2: Add the AC1 tests, in a new file so that no one file runs alone for long (the M110 lesson). Use the skip guards that the M101 lesson names. Plant a defect in `nested_final_fit()` that keeps the split class but changes the splits. For example, rebuild the inner design on the data less its last row. Show each test red, then remove the plant.
+- [x] T1: Give `reference_final_fit()` in `tests/testthat/helper-orchestration.R` an `inner_design` argument, as `reference_bayes_final_fit()` and `reference_race_final_fit()` have. Its seeds then come from the recorded seeds, not from the final fit's own.
+- [x] T2: Add the AC1 tests by looping the sliding-period final-fit tests of `test-time-series-inner-bayes-anneal.R` and `test-time-series-inner-race.R` over the three inner designs, so each run comes from that file's fixture cache. Use the skip guards that the M101 lesson names. Plant a defect in `nested_final_fit()` that keeps the split class but changes the splits. For example, rebuild the inner design on the data less its first row or its last five rows. Show each test red, then remove the plant.
 - [ ] T3: Add the AC2 tests to `tests/testthat/test-time-series-inner-other.R`. Pass the arguments that `wset_map_args(fn)` gives.
 - [ ] T4: Add the AC3 tests in a new `tests/testthat/test-time-series-pairs-other.R`. Give the window/window pair's literal inner call to the final-fit reference from `TS_INNER_DESIGNS[["sliding-window"]]$inner`.
 - [ ] T5: Add the AC4 test to the same file. Move `frac_min_n()` and `FINALIZE_FRAC` from `test-nested-tune-finalize.R` to a helper, because the new file needs them. Guard the test with `skip_if_no_engines(stochastic = TRUE)` and `skip_if_not_installed("dials")`. Replace `analysis_framed_inner()` with a function that returns its inner rset unchanged, and show the test red. Remove the plant.
@@ -55,6 +55,10 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - 2026-10-01: plan gate chose to add the eight final-fit tests over keeping M120's rejection. The help then states no exception for the final fit on inner sliding designs. Falsified by nothing in the code: the choice is about the claim, and it costs about 27 s of serial test time.
 - 2026-10-01: AC4 and AC5 changed at the gate and went back to the same fresh reader for the full audit questions. The plan was committed before its result, which the next line records. The pair's outer analysis sets hold 60 of 90 rows. So `min_n` finalizes to 6 to 30 there, and to 9 to 45 on the whole frame (by execution).
 - 2026-10-01: the second audit pass (full mode, AC4 and AC5) found AC4 satisfiable by execution, with both oracles and the T5 plant going red. It returned four findings, all fixed. T6 no longer calls M121's claim false, because M121 planted a different defect. AC5 names the "Nested designs" section and its inherited copies, and exempts AC4. AC4 pins `grid = 5` and asserts the bound gap. T5 names its skip guards.
+- 2026-10-01: implement started on branch `m140-inner-design-gaps`. No question gate, because the plan left no choice open.
+- 2026-10-01: T1 done in `ae5fffb1`. The full suite on that commit ran 1229 tests with 0 failures, 0 errors and 0 skips.
+- 2026-10-01: T2 amended (minor). A new file took 103 s serially, because it rebuilt each tuner run that the M120 files already cache. So the eight tests loop the M120 files' final-fit tests over all three inner designs instead.
+- 2026-10-01: T2 plants. Dropping the last row left the sliding-window splits unchanged, so those four tests stayed green. Dropping the first row kept every split position, so the racers' window tests stayed green. `expect_ts_final_matches()` compared positions only, so it now also compares each split's frame. With that change, both the drop-first plant and the drop-last-five plant failed all 12 final-fit tests. The 9 other callers' tests pass.
 
 ## Decisions
 

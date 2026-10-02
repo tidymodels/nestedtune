@@ -1,6 +1,6 @@
 # nested_tune_bayes() and nested_tune_sim_anneal() on the three inner sliding
 # designs under an outer `rolling_origin()` (M120), and their final fits on
-# the sliding-period design. The fixtures are TS_INNER_DESIGNS in
+# the three designs (M120, M140). The fixtures are TS_INNER_DESIGNS in
 # helper-orchestration.R. DESIGN Conventions: oracles are recorded in the test
 # file that asserts them.
 #
@@ -14,14 +14,13 @@
 #
 # O2 -- type "live" (reference implementation). Source:
 #   reference_bayes_final_fit() and reference_anneal_final_fit() in
-#   helper-orchestration.R, handed the fixture's literal inner
-#   `sliding_period()` call as `inner_design`, so the reference builds the
-#   inner design on the full data from its own spelling of the call. Pinned by
-#   "the <tuner> final fit on an inner sliding-period result matches its
-#   reference". Satisfies M120 AC2 for these tuners. The other two inner
-#   designs get no final-fit test here (M120 plan gate): the rebuild of each
-#   inner design is tested under grid in test-time-series-inner.R, and each
-#   tuner's run on it by O1.
+#   helper-orchestration.R, handed the fixture's literal inner call as
+#   `inner_design`, so the reference builds the inner design on the full data
+#   from its own spelling of the call. Pinned by "the <tuner> final fit on an
+#   inner ... result matches its reference". Satisfies M120 AC2 for these
+#   tuners on the sliding-period design, and M140 AC1 on the sliding-window
+#   and sliding-index designs. Each run comes from the fixture cache that the
+#   O1 test filled.
 #
 # O1 and O2 check that the orchestrators give what tune and finetune give when
 # run by hand. The estimate itself adds nothing new for these designs, so no
@@ -124,55 +123,69 @@ for (design in names(TS_INNER_DESIGNS)) {
   )
 }
 
-test_that("the Bayesian final fit on an inner sliding-period result matches its reference", {
-  skip_if_no_bayes_fixture()
-  spec <- TS_INNER_DESIGNS[["sliding-period"]]
-  d <- spec$data()
-  wf <- bayes_workflow(d)
-  folds <- spec$build(d)
-  p <- bayes_param_info(wf)
-  ms <- ts_metrics()
+for (design in names(TS_INNER_DESIGNS)) {
+  spec <- TS_INNER_DESIGNS[[design]]
 
-  res <- ts_inner_bayes_run(wf, folds, p, ms)
-  set.seed(41)
-  final <- nested_final_fit(wf, res)
-  ref <- reference_bayes_final_fit(
-    wf,
-    d,
-    iter = 2,
-    initial = 3,
-    objective = tune::exp_improve(),
-    param_info = p,
-    metrics = ms,
-    seed = 41,
-    metric_name = "rmse",
-    inner_design = spec$inner
+  test_that(
+    sprintf(
+      "the Bayesian final fit on an inner %s result matches its reference",
+      design
+    ),
+    {
+      skip_if_no_bayes_fixture()
+      d <- spec$data()
+      wf <- bayes_workflow(d)
+      folds <- spec$build(d)
+      p <- bayes_param_info(wf)
+      ms <- ts_metrics()
+
+      res <- ts_inner_bayes_run(wf, folds, p, ms)
+      set.seed(41)
+      final <- nested_final_fit(wf, res)
+      ref <- reference_bayes_final_fit(
+        wf,
+        d,
+        iter = 2,
+        initial = 3,
+        objective = tune::exp_improve(),
+        param_info = p,
+        metrics = ms,
+        seed = 41,
+        metric_name = "rmse",
+        inner_design = spec$inner
+      )
+      expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
+    }
   )
-  expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
-})
 
-test_that("the annealing final fit on an inner sliding-period result matches its reference", {
-  skip_if_no_anneal_fixture()
-  spec <- TS_INNER_DESIGNS[["sliding-period"]]
-  d <- spec$data()
-  wf <- det_workflow(d)
-  folds <- spec$build(d)
-  ms <- ts_metrics()
-  ctrl <- anneal_control()
+  test_that(
+    sprintf(
+      "the annealing final fit on an inner %s result matches its reference",
+      design
+    ),
+    {
+      skip_if_no_anneal_fixture()
+      d <- spec$data()
+      wf <- det_workflow(d)
+      folds <- spec$build(d)
+      ms <- ts_metrics()
+      ctrl <- anneal_control()
 
-  res <- ts_inner_anneal_run(wf, folds, ms, ctrl)
-  set.seed(43)
-  final <- nested_final_fit(wf, res)
-  ref <- reference_anneal_final_fit(
-    wf,
-    d,
-    iter = 2,
-    initial = 3,
-    metrics = ms,
-    seed = 43,
-    metric_name = "rmse",
-    control = ctrl,
-    inner_design = spec$inner
+      res <- ts_inner_anneal_run(wf, folds, ms, ctrl)
+      set.seed(43)
+      final <- nested_final_fit(wf, res)
+      ref <- reference_anneal_final_fit(
+        wf,
+        d,
+        iter = 2,
+        initial = 3,
+        metrics = ms,
+        seed = 43,
+        metric_name = "rmse",
+        control = ctrl,
+        inner_design = spec$inner
+      )
+      expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
+    }
   )
-  expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
-})
+}

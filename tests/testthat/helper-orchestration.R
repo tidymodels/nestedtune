@@ -1002,6 +1002,12 @@ expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
     lapply(final$tuning$splits, function(s) s$out_id),
     lapply(ref$tuned$splits, function(s) s$out_id)
   )
+  # The same positions on another frame are other rows, so the frames are
+  # compared as well (M140).
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$data),
+    lapply(ref$tuned$splits, function(s) s$data)
+  )
   # The reference's inner design is the literal call's, not a default.
   expect_s3_class(ref$tuned$splits[[1]], split_class)
   expect_s3_class(final$tuning$splits[[1]], split_class)
