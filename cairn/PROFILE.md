@@ -1,7 +1,6 @@
 # Toolchain profile: r-package
 
-<!-- A cairn *toolchain profile*: the language-specific slots the operational skills read. The Validation
-     doctrine is universal, not a slot (skills/shared/validation-doctrine.md); all seven slots must be non-empty — cairn_validate FAILs on a missing or empty slot. -->
+<!-- A cairn *toolchain profile*: the language-specific slots the operational skills read. The Validation doctrine is universal, not a slot (skills/shared/validation-doctrine.md); all seven slots must be non-empty — cairn_validate FAILs on a missing or empty slot. -->
 
 The R-package toolchain: devtools/roxygen/testthat/pkgdown, CRAN release.
 
