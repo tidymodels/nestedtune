@@ -229,11 +229,13 @@ An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} under \code{\link[=nested_tune_grid]{nested_tune_grid()}}, and so is
 \code{\link[=nested_final_fit]{nested_final_fit()}} for its results. These designs are also tested under
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
-\code{\link[=nested_workflow_map]{nested_workflow_map()}}. \code{\link[=nested_final_fit]{nested_final_fit()}} is tested for the results of
-those four tuners on the sliding-period design alone.
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept these designs. It checks the
-inner design but fits nothing on it. Any other inner design is not tested.
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, and so is
+\code{\link[=nested_final_fit]{nested_final_fit()}} for the results of those four tuners.
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on these three designs with its default
+\code{fn}. With \code{fn} set to each of those four tuners, it is tested on the
+sliding-period design alone. \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept
+these designs. It checks the inner design but fits nothing on it. Any
+other inner design is not tested.
 Each of these tests leaves the \code{lag} of \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at its
 default of 0. A \code{lag} above 0 is refused in either loop, as
 \code{\link[=nested_resamples]{nested_resamples()}} explains.
@@ -244,9 +246,15 @@ there are more than five, it names the first five.
 An outer \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
 \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} gives nine
-pairs, and each pair is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}.
-\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, \code{\link[=nested_workflow_map]{nested_workflow_map()}}
-and the other four tuners are not tested on these pairs.
+pairs, and each pair is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}. The pair of an
+outer and an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}} is also tested under
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
+\code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
+inner design but fits nothing on it. On the other eight pairs, no
+function but \code{\link[=nested_resamples]{nested_resamples()}} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
 }
 
 \section{Finalizing a parameter range}{

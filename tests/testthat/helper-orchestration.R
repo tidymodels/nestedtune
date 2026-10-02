@@ -60,6 +60,39 @@ stoch_workflow <- function(data) {
 
 stoch_grid <- function() data.frame(min_n = c(2L, 10L, 25L))
 
+FINALIZE_FRAC <- c(1 / 10, 5 / 10)
+
+# A `min_n` whose upper bound is unknown until a frame is seen, finalized by
+# dials::get_n_frac_range() over FINALIZE_FRAC. With `record` an environment,
+# the finalizer first appends what it was handed -- the row count and the
+# sorted first predictor -- so a test can say which rows tune read. Shared by
+# test-nested-tune-finalize.R and test-time-series-pairs-other.R (M140).
+frac_min_n <- function(record = NULL) {
+  finalizer <- function(object, x, ...) {
+    if (!is.null(record)) {
+      record$frames[[length(record$frames) + 1L]] <- list(
+        n = nrow(x),
+        x1 = sort(x$x1)
+      )
+    }
+    dials::get_n_frac_range(object, x, frac = FINALIZE_FRAC)
+  }
+  dials::new_quant_param(
+    type = "integer",
+    range = c(2L, dials::unknown()),
+    inclusive = c(TRUE, TRUE),
+    label = c(min_n = "Minimal Node Size"),
+    finalize = finalizer
+  )
+}
+
+frac_param_info <- function(wf, record = NULL) {
+  update(
+    tune::extract_parameter_set_dials(wf),
+    min_n = frac_min_n(record)
+  )
+}
+
 # The two fixed workflows `nested_fit_resamples()` runs (M70): nothing marked
 # with `tune()`, so the five tuning orchestrators refuse them at entry and
 # the new one scores them on the outer folds alone. `fixed_workflow()` is
@@ -358,7 +391,9 @@ forced_bayes_control <- function(
 #
 # The rset is built after the tuning seed is set, which is the ordering D-016
 # fixed: building an rset draws from the RNG, so a reference that built it
-# earlier would disagree with a correct implementation.
+# earlier would disagree with a correct implementation. `inner_design` is a
+# function of the data that makes the design's `inside` call, read by
+# reference_inner() (M140).
 reference_final_fit <- function(
   wf,
   data,
@@ -366,7 +401,8 @@ reference_final_fit <- function(
   metrics,
   seed,
   metric_name,
-  v = 3
+  v = 3,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -377,7 +413,7 @@ reference_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- tune::tune_grid(
     wf,
     resamples = inner,
@@ -999,6 +1035,12 @@ expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
   expect_identical(
     lapply(final$tuning$splits, function(s) s$out_id),
     lapply(ref$tuned$splits, function(s) s$out_id)
+  )
+  # The same positions on another frame are other rows, so the frames are
+  # compared as well (M140).
+  expect_identical(
+    lapply(final$tuning$splits, function(s) s$data),
+    lapply(ref$tuned$splits, function(s) s$data)
   )
   # The reference's inner design is the literal call's, not a default.
   expect_s3_class(ref$tuned$splits[[1]], split_class)

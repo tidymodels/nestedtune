@@ -1,6 +1,6 @@
 # The two racing tuners on the three inner sliding designs under an outer
-# `rolling_origin()` (M120), and their final fits on the sliding-period
-# design. The fixtures are TS_INNER_DESIGNS in helper-orchestration.R, each
+# `rolling_origin()` (M120), and their final fits on the three designs (M120,
+# M140). The fixtures are TS_INNER_DESIGNS in helper-orchestration.R, each
 # with at least three inner resamples in every fold, which a racer at
 # `burn_in = 2` needs. DESIGN Conventions: oracles are recorded in the test
 # file that asserts them.
@@ -14,10 +14,12 @@
 #
 # O2 -- type "live" (reference implementation). Source:
 #   reference_race_final_fit() in helper-orchestration.R, handed the fixture's
-#   literal inner `sliding_period()` call as `inner_design`, so the reference
-#   builds the inner design on the full data from its own spelling of the
-#   call. Pinned by "the <racer> final fit on an inner sliding-period result
-#   matches its reference". Satisfies M120 AC2 for these tuners.
+#   literal inner call as `inner_design`, so the reference builds the inner
+#   design on the full data from its own spelling of the call. Pinned by "the
+#   <racer> final fit on an inner ... result matches its reference".
+#   Satisfies M120 AC2 for these tuners on the sliding-period design, and
+#   M140 AC1 on the sliding-window and sliding-index designs. Each run comes
+#   from the fixture cache that the O1 test filled.
 #
 # O1 and O2 check that the orchestrators give what finetune gives when run by
 # hand. The estimate itself adds nothing new for these designs, so no second
@@ -78,37 +80,41 @@ for (design in names(TS_INNER_DESIGNS)) {
   }
 }
 
-for (fn in RACERS) {
-  test_that(
-    sprintf(
-      "the %s final fit on an inner sliding-period result matches its reference",
-      fn
-    ),
-    {
-      skip_if_no_race_fixture(fn)
-      spec <- TS_INNER_DESIGNS[["sliding-period"]]
-      d <- spec$data()
-      wf <- det_workflow(d)
-      folds <- spec$build(d)
-      ms <- ts_metrics()
-      g <- det_grid()
-      ctrl <- race_control()
+for (design in names(TS_INNER_DESIGNS)) {
+  spec <- TS_INNER_DESIGNS[[design]]
 
-      res <- ts_inner_race_run(fn, wf, folds, g, ms, ctrl)
-      set.seed(42)
-      final <- nested_final_fit(wf, res)
-      ref <- reference_race_final_fit(
+  for (fn in RACERS) {
+    test_that(
+      sprintf(
+        "the %s final fit on an inner %s result matches its reference",
         fn,
-        wf,
-        d,
-        grid = g,
-        metrics = ms,
-        seed = 42,
-        metric_name = "rmse",
-        control = ctrl,
-        inner_design = spec$inner
-      )
-      expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
-    }
-  )
+        design
+      ),
+      {
+        skip_if_no_race_fixture(fn)
+        d <- spec$data()
+        wf <- det_workflow(d)
+        folds <- spec$build(d)
+        ms <- ts_metrics()
+        g <- det_grid()
+        ctrl <- race_control()
+
+        res <- ts_inner_race_run(fn, wf, folds, g, ms, ctrl)
+        set.seed(42)
+        final <- nested_final_fit(wf, res)
+        ref <- reference_race_final_fit(
+          fn,
+          wf,
+          d,
+          grid = g,
+          metrics = ms,
+          seed = 42,
+          metric_name = "rmse",
+          control = ctrl,
+          inner_design = spec$inner
+        )
+        expect_ts_final_matches(final, ref, d, split_class = spec$split_class)
+      }
+    )
+  }
 }

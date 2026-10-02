@@ -54,37 +54,8 @@ finalize_nested_cv <- function(data, seed = 54) {
   )
 }
 
-FINALIZE_FRAC <- c(1 / 10, 5 / 10)
-
-# A `min_n` whose upper bound is unknown until a frame is seen, finalized by
-# dials::get_n_frac_range() over FINALIZE_FRAC. With `record` an environment,
-# the finalizer first appends what it was handed -- the row count and the
-# sorted first predictor -- so a test can say which rows tune read.
-frac_min_n <- function(record = NULL) {
-  finalizer <- function(object, x, ...) {
-    if (!is.null(record)) {
-      record$frames[[length(record$frames) + 1L]] <- list(
-        n = nrow(x),
-        x1 = sort(x$x1)
-      )
-    }
-    dials::get_n_frac_range(object, x, frac = FINALIZE_FRAC)
-  }
-  dials::new_quant_param(
-    type = "integer",
-    range = c(2L, dials::unknown()),
-    inclusive = c(TRUE, TRUE),
-    label = c(min_n = "Minimal Node Size"),
-    finalize = finalizer
-  )
-}
-
-frac_param_info <- function(wf, record = NULL) {
-  update(
-    tune::extract_parameter_set_dials(wf),
-    min_n = frac_min_n(record)
-  )
-}
+# FINALIZE_FRAC, frac_min_n() and frac_param_info() sit in
+# helper-orchestration.R, which test-time-series-pairs-other.R shares (M140).
 
 new_frame_record <- function() {
   record <- new.env(parent = emptyenv())
