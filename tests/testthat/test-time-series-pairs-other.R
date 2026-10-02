@@ -26,9 +26,9 @@
 #
 # O4 -- type "live" (reference implementation). Source: reference_final_fit()
 #   in helper-orchestration.R, handed TS_INNER_DESIGNS' sliding-window inner
-#   call as `inner_design`. Its arguments match the pair's `inside` call. Pinned by "the grid final fit on
-#   the ... pair matches its reference". Satisfies M140 AC3 for
-#   nested_final_fit().
+#   call as `inner_design`. Its arguments match the pair's `inside` call.
+#   Pinned by "the grid final fit on the ... pair matches its reference".
+#   Satisfies M140 AC3 for nested_final_fit().
 #
 # O1 to O4 check that the functions give what tune and finetune give when run
 # by hand. The estimate itself adds nothing new for this pair, so no second

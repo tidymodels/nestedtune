@@ -1,6 +1,6 @@
 # M140: Inner-design gaps under the other functions
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -69,6 +69,7 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - 2026-10-01: T9 start-first. `time-series-inner-bayes-anneal` and `time-series-inner-race` were already queued. `time-series-pairs-other` joins the end of the list.
 - 2026-10-01: T9 `verify` slot. The full suite at `7a5bd343` plus the DESCRIPTION change ran 1249 tests with 0 failures, 0 errors and 0 skips. `air format --check .`, `devtools::document()` and both prose sweeps are clean.
 - claim audit: 34 claims read, 3 corrected — R/nested-resamples.R, R/nested-tune-grid.R, NEWS.md, tests/testthat/helper-orchestration.R, tests/testthat/test-time-series-pairs-other.R
+- 2026-10-01: the claim auditor re-read the three corrections once, and all three hold. It noted one comment line over 80 characters, which is now rewrapped. Status set to review.
 
 ## Decisions
 

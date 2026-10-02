@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-01 status audit after the triage pass and the air v
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M140 | Inner-design gaps under the other functions | in-progress | — | normal | milestones/M140-inner-design-gaps.md |
+| M140 | Inner-design gaps under the other functions | review | — | normal | milestones/M140-inner-design-gaps.md |
 | M139 | Frame the inner splits on the analysis set under a repeated outer row | done | — | normal | milestones/archive/M139-repeated-row-inner-frame.md |
 | M138 | Refuse an NA in a split's row indices | done | — | normal | milestones/archive/M138-na-split-indices.md |
 | M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
