@@ -1,6 +1,6 @@
 # M141: Refuse a split index that is not a row number, and an empty assessment set
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -47,7 +47,7 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - [x] T2: Widen `na_slots()` and `na_line()` in `R/checks.R` to the full rule, and rename them and `check_na_indices()` to fit it. Each line says what the slot holds: an `NA`, a value outside integer range, a non-numeric vector, or nothing. Call `as.integer()` under `suppressWarnings()`. Hand values to cli as values (LESSONS, M83). Update the comments in `check_inner_splits()` (`:1755` to `:1765`) on values beyond integer range, which the containment rule no longer meets. Move the block at `tests/testthat/test-split-checks.R:317`, which plants `1e10` in an inner `in_id` and expects the containment refusal, into the AC1 and AC6 tests. Update the `NA_REFUSED` header (`:398`) and the header asserted at `:586` to the new message. Run `devtools::test()`, and change any other test that planted a newly refused shape. The T1 tests then pass.
 - [x] T3: Run the same rule in `nested_resamples()` on `outside` (`R/nested-resamples.R:257`). Add the AC4 tests and the second AC5 test.
 - [x] T4: Update the docs. Restate the rule at `R/nested-tune-grid.R:118` and `R/nested-resamples.R:89`, and run `devtools::document()`. Add a NEWS bullet. In DESIGN.md Known issues, edit the entry "Index-slot shapes `check_inner_splits()` leaves to rsample". Remove its non-numeric clause and its sentence on the three open shapes. Add the empty-complement shape, and mark the entry `corrected M141`.
-- [ ] T5: Do the planted-defect runs. Stub the rule's call in `check_nested()`, and see the AC1, AC2, AC3, AC5 and AC6 tests fail. Stub its call in `nested_resamples()`, and see the AC4 tests fail. Restore both calls. Run `devtools::test()`, `devtools::check()`, both prose sweeps, and `air format --check .`.
+- [x] T5: Do the planted-defect runs. Stub the rule's call in `check_nested()`, and see the AC1, AC2, AC3, AC5 and AC6 tests fail. Stub its call in `nested_resamples()`, and see the AC4 tests fail. Restore both calls. Run `devtools::test()`, `devtools::check()`, both prose sweeps, and `air format --check .`.
 
 ## Work log
 
@@ -64,6 +64,7 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - 2026-10-01: claim audit delegated to a fresh Opus reader, running.
 - claim audit: 33 claims read, 3 corrected — NEWS.md
 - 2026-10-01: claim audit corrections applied. "below 1" became "negative", because an index of 0 is dropped by vctrs and the fold runs. The `3e9` "before" sentence now says that it passed in most slots, and that in an inner `in_id` it was refused as not held. "says what the slot holds" became "says how the slot breaks the rule". The reader also found that a fractional outer `in_id` stops `check_nested()` under `nested_cv()` with a raw vctrs error. That is out of scope and was added to the Known issues entry on index shapes.
+- 2026-10-01: T5 done. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. All six gating sweeps and `air format --check .` are clean. Status set to review.
 
 ## Decisions
 
