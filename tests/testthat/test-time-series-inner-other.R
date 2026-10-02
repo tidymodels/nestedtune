@@ -15,7 +15,9 @@
 #   helper-orchestration.R, which runs each workflow of the set through its
 #   own orchestrator by hand under the same seed. Pinned by the "a workflow
 #   set on an inner ... design matches the hand calls" tests. Satisfies M120
-#   AC3 for nested_workflow_map().
+#   AC3 for nested_workflow_map(). The same oracle pins "a workflow set run
+#   with fn = ... on an inner sliding-period design matches the hand calls",
+#   one test for each tuner other than grid. Satisfies M140 AC2.
 
 skip_heavy_on_cran()
 
@@ -101,6 +103,64 @@ for (design in names(TS_INNER_DESIGNS)) {
         wf <- wset$info[[i]]$workflow[[1L]]
         hand <- hand_call("nested_tune_grid", wf, folds, ms, seed = 26)
         expect_true(all(hand$.completed))
+        expect_identical(res$result[[i]]$.tuning_seed, hand$.tuning_seed)
+        expect_identical(
+          res$result[[i]]$.outer_fit_seed,
+          hand$.outer_fit_seed
+        )
+        expect_identical(res$result[[i]]$.metrics, hand$.metrics)
+        expect_identical(res$result[[i]]$.selected, hand$.selected)
+      }
+    }
+  )
+}
+
+# The map with each tuner other than grid, on the inner sliding-period design
+# alone (M140). Each tuner's own run is tested on all three inner designs in
+# test-time-series-inner-bayes-anneal.R and test-time-series-inner-race.R.
+for (fn in c(
+  "nested_tune_bayes",
+  "nested_tune_race_anova",
+  "nested_tune_race_win_loss",
+  "nested_tune_sim_anneal"
+)) {
+  test_that(
+    sprintf(
+      "a workflow set run with fn = %s on an inner sliding-period design matches the hand calls",
+      fn
+    ),
+    {
+      skip_if_no_wset_fixture(fn)
+      spec <- TS_INNER_DESIGNS[["sliding-period"]]
+      d <- spec$data()
+      wset <- wset_two(d)
+      folds <- spec$build(d)
+      expect_s3_class(
+        folds$inner_resamples[[1]]$splits[[1]],
+        spec$split_class
+      )
+      ms <- ts_metrics()
+
+      set.seed(27)
+      res <- rlang::inject(nested_workflow_map(
+        wset,
+        fn = fn,
+        resamples = folds,
+        metrics = ms,
+        !!!wset_map_args(fn)
+      ))
+
+      expect_identical(res$wflow_id, c("tuned", "fixed"))
+      for (i in seq_len(nrow(wset))) {
+        wf <- wset$info[[i]]$workflow[[1L]]
+        hand <- hand_call(fn, wf, folds, ms, seed = 27)
+        expect_true(all(hand$.completed))
+        # A race that drops no candidate scores as grid does on this fixture,
+        # so the tuner that ran is compared as well.
+        expect_identical(
+          attr(res$result[[i]], "procedure")$tuner,
+          attr(hand, "procedure")$tuner
+        )
         expect_identical(res$result[[i]]$.tuning_seed, hand$.tuning_seed)
         expect_identical(
           res$result[[i]]$.outer_fit_seed,
