@@ -66,6 +66,8 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - 2026-10-01: claim audit corrections applied. "below 1" became "negative", because an index of 0 is dropped by vctrs and the fold runs. The `3e9` "before" sentence now says that it passed in most slots, and that in an inner `in_id` it was refused as not held. "says what the slot holds" became "says how the slot breaks the rule". The reader also found that a fractional outer `in_id` stops `check_nested()` under `nested_cv()` with a raw vctrs error. That is out of scope and was added to the Known issues entry on index shapes.
 - 2026-10-01: T5 done. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes. All six gating sweeps and `air format --check .` are clean. Status set to review.
 - 2026-10-01: review checkpoint, half-done. AC1 to AC6 evidence recorded and ticked. `devtools::check()` for AC7 is running, and the gate and triage are still owed.
+- 2026-10-01: review gate. 17 findings, none failing a criterion. The maintainer took fix 8, reject 7. The fixes are tests and tracking records only, and the split-check file and its planted run pass.
+- step-7 approval: m141-index-shapes approved for merge
 
 ## Decisions
 
@@ -82,3 +84,24 @@ Fresh runs on 2026-10-01 at `01eb538b`. The branch is level with `origin/main`. 
 - AC7: three texts state the rule and the logical `NA` exemption, read in the branch diff. They are the NEWS bullet, the `outside` paragraph of `?nested_resamples` and the design paragraph of `?nested_tune_grid`. The Known issues entry on index shapes lists five shapes. They are a fractional index, a non-data-frame `$data`, an empty inner `in_id`, an outer `in_id` past the frame within integer range, and an empty complement. AC1 to AC4 refuse none of these. `devtools::test()` gave 0 failures. `devtools::check()` gave 0 errors, 0 warnings and 0 notes in 12 min 24 s.
 
 Consistency gate. `cairn_validate.py` exit 0, with 18 references-staleness advisories that this branch did not touch. `cairn_impact.py --changed` finds no changed principle. `devtools::document()` gives no diff. `pkgdown::check_pkgdown()` finds no problems. README is untouched. NEWS has the entry. No new top-level file. All six gating prose sweeps exit 0, and `air format --check .` is clean under air 0.12.0.
+
+Independent review: three fresh reviewers, an Opus diff-bug lens, a Sonnet history lens and a Sonnet prior-review lens. The PR-comment probe found no human threads on these files. No finding shows a criterion failing, so status stays `review`. The maintainer took the recommended triage at the gate.
+
+- Fix now, diff 1: a classed numeric, a matrix or an integer64 slot passes `is.numeric()` and fails the fold in vctrs. Added to the Known issues entry. A stricter rule is not taken, because an integer64 inner `in_id` runs.
+- Fix now, diff 2: a negative or empty outer `in_id` passes and is not in Known issues. Added to the entry.
+- Fix now, diff 3 and prior 2: no test plants two slots of one split, so the joined and plural clauses are not asserted. Added the block "the index refusal joins two bad slots of one split in one line".
+- Fix now, history 5: no test plants `3e9` in the outer and an inner `in_id` of one fold, the hole of M138's review. Added the block "3e9 in the outer and an inner in_id of one fold is refused".
+- Fix now, diff 6: the `outside` shape loop asserts no absence of warnings. Wrapped in `expect_no_warning()`.
+- Fix now, prior 1: two type checks in the doubles loop name no design. `expect_type()` takes no `info`, so they became `expect_identical(typeof(...), info = name)`.
+- Fix now, history 2: the DESIGN.md principle on refusing invalid designs named only the `NA` rule. It now names the D-114 shapes.
+- Fix now, history 3: the M139 DESIGN.md paragraph said an outer `NA` `in_id` keeps the whole frame. Marked corrected M141.
+- Rejected, history 1: the NEWS claim that a fractional outer `in_id` fold still fails. A probe on a `nested_resamples()` design ran the fold to a note. The `nested_cv()` case is already in Known issues.
+- Rejected, diff 4: the header "not valid row numbers" for an empty `out_id`. The bullet says "is empty".
+- Rejected, diff 5: clauses ordered by shape, not slot. That is the order the plan set.
+- Rejected, diff 7: `nested_resamples()` does not check the inner splits that `inside` builds. The drivers' entry check refuses them, and AC4 does not cover them.
+- Rejected, history 6 and prior 3: NEWS "most slots" and the dropped index 0. The claim audit read both.
+- Rejected, history 4: the `check_inner_splits()` comment does not call the kept guards a second line. The comment states the invariant, and the guards are in plain view.
+- Rejected, history 7: no benchmark for the new pass. It is linear, the same order as M138's `anyNA()`.
+- No defect, diff 8 to 10: NA, NaN, `-Inf` and `-2147483648` are classed as the plan says. The tests assert class and message. The NEWS claims probed hold.
+
+After the fixes, `test-split-checks.R` gives 1061 passes and 0 failures, and `air format --check .` is clean. With `check_split_indices()` stubbed, 10 blocks fail, the two new ones among them.

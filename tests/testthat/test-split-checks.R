@@ -691,6 +691,65 @@ test_that("the index refusal names every bad position once, by its first shape",
   }
 })
 
+# A split with two bad slots gets one line: a clause per shape, in the rule's
+# order, and one plural clause when both slots share a shape.
+test_that("the index refusal joins two bad slots of one split in one line", {
+  mixed <- edit_split(whole_design(), 2L, 1L, function(split) {
+    split <- explicit_out(split)
+    split$in_id <- c(split$in_id, 3e9)
+    split$out_id <- as.character(split$out_id)
+    split
+  })
+  expect_index_refused(
+    mixed,
+    paste0(
+      "Outer fold 2, inner split 1: out_id ",
+      shape_words("out_id", "type"),
+      ", and in_id ",
+      shape_words("in_id", "range"),
+      "."
+    )
+  )
+
+  both <- list(
+    type = as.character,
+    range = function(x) c(x, 3e9)
+  )
+  for (shape in names(both)) {
+    design <- edit_split(whole_design(), 2L, 1L, function(split) {
+      split <- explicit_out(split)
+      split$in_id <- both[[shape]](split$in_id)
+      split$out_id <- both[[shape]](split$out_id)
+      split
+    })
+    expect_index_refused(
+      design,
+      bad_where(2L, 1L, c("in_id", "out_id"), shape),
+      shape
+    )
+  }
+})
+
+# as.integer() reads 3e9 as NA in both slots, and %in% matches the two NAs,
+# so without the rule the containment rule passed this fold (M138's review).
+test_that("3e9 in the outer and an inner in_id of one fold is refused", {
+  design <- edit_split(whole_design(), 2L, NULL, function(split) {
+    split$in_id <- c(split$in_id, 3e9)
+    split
+  })
+  design <- edit_split(design, 2L, 1L, function(split) {
+    split$in_id <- c(split$in_id, 3e9)
+    split
+  })
+  expect_index_refused(
+    design,
+    c(
+      bad_where(2L, NULL, "in_id", "range"),
+      bad_where(2L, 1L, "in_id", "range")
+    )
+  )
+})
+
 # Without the rule, the containment rule reads each of these with
 # as.integer(), which warns and gives NA, a row the outer split does not hold.
 test_that("the index rule runs before the containment rule, with no warning", {
@@ -741,8 +800,13 @@ test_that("check_nested() accepts row indices stored as doubles", {
       splits <- lapply(design$inner_resamples[[f]]$splits, as_double)
       design$inner_resamples[[f]]$splits <- splits
     }
-    expect_type(design$splits[[1]]$in_id, "double")
-    expect_type(design$inner_resamples[[1]]$splits[[1]]$in_id, "double")
+    # expect_type() takes no `info`, so the design is named this way.
+    expect_identical(typeof(design$splits[[1]]$in_id), "double", info = name)
+    expect_identical(
+      typeof(design$inner_resamples[[1]]$splits[[1]]$in_id),
+      "double",
+      info = name
+    )
     expect_identical(check_nested(design), design, info = name)
   }
   inner <- designs$nested_resamples$inner_resamples[[1]]$splits[[1]]
@@ -833,7 +897,7 @@ test_that("nested_resamples() refuses each index shape in an outside split", {
         shape_words(slot, plant$shape),
         "."
       )
-      expect_outside_refused(outside, where, info)
+      expect_no_warning(expect_outside_refused(outside, where, info))
     }
   }
 })

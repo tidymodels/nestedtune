@@ -173,7 +173,7 @@ naming convention.
   `make_splits()` rebuild that no class names. An index into an outer
   analysis set counts as the data row it copies, and the bootstrap's own
   apparent split is exempt (D-103, D-104, M134). It also refuses
-  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107, D-108). A split whose `in_id` or `out_id` holds an `NA` is refused in both loops and by `nested_resamples()`. The one exception is an `out_id` that is the logical `NA`, rsample's mark for the complement (D-111, M138). _(Tension to stress-test in Phase 2: this makes the ecosystem
+  `rolling_origin()` with `lag` above 0, with a hint to use `lag = 0` (D-107, D-108). A split whose `in_id` or `out_id` holds an `NA` is refused in both loops and by `nested_resamples()`. The one exception is an `out_id` that is the logical `NA`, rsample's mark for the complement (D-111, M138). The same refusal covers a non-numeric slot, a value outside integer range, and a `NULL` or empty `out_id` (D-114, M141). _(Tension to stress-test in Phase 2: this makes the ecosystem
   inconsistent, and the stricter behavior must be defended in issues.)_
 - **The final model is a separate object, never a field on the results.** A
   final-fit path exists because users need it, but the nested estimate
@@ -349,9 +349,11 @@ repeats a row the rows, their order and multiplicity are kept, and the
 assessed copies keep distinct `.row` values. Under such a split a logical `NA` `out_id` becomes every
 analysis-frame position whose data row lies in `rsample::complement()` of the
 split read over the whole frame: each copy the outer split holds, no outer
-held-out row (IP1). An outer `in_id` with an `NA`, a fractional index, or
-one below 1 or past the data keeps the whole frame, left for `last_fit()` to
-refuse as the fold's outer-fit failure. So does an inner split the map
+held-out row (IP1). An outer `in_id` with a fractional index, or one below
+1 or past the data, keeps the whole frame, left for `last_fit()` to refuse
+as the fold's outer-fit failure. (corrected M141: an `NA` and a value
+outside integer range no longer reach this step. The entry check refuses
+them, per D-111 and D-114.) So does an inner split the map
 cannot place. With or without repeats, `whole_frame_inner()` then makes
 each derivable logical `NA` `out_id` explicit as the outer rows of its
 complement. The fold still reports inner metrics. The rebuild leaves the
@@ -638,8 +640,14 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   before containment with every other `NA` index but the logical `NA`
   `out_id`, per D-111.) (corrected M141: a non-numeric slot, a value outside
   integer range, and a `NULL` or empty `out_id` are now refused by the same
-  rule, per D-114.) Routed from candidates 2026-09-11; added 2026-09-04 — M59
-  review O5, O6, O7, O9, O15.
+  rule, per D-114.) (added M141 review: an outer `in_id` that holds a
+  negative index, or is empty, passes the rule. A negative index fails the
+  fold in vctrs. The containment rule refuses an empty one, but its message
+  hides the cause. A slot that is numeric but classed, a matrix, or
+  `bit64::integer64` passes `is.numeric()` and fails the fold in vctrs. An
+  integer64 inner `in_id` runs, so a stricter type rule would refuse a shape
+  that works. Observed 2026-10-01.) Routed from candidates 2026-09-11; added
+  2026-09-04 — M59 review O5, O6, O7, O9, O15.
 
 - The guides say what to report after nesting, but not what to report when a
   user skips it. `vignettes/estimate.Rmd`'s tall-data paragraph (Wilimitis and
