@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-01 triage. Compressed the closure-comparison, M079-leftovers and pre-M14-stalls rows, re-rated the stalls row low, split the index-shapes Known issue into a row. No drops, no D-entry, validate green._
+_Last hygiene check: 2026-10-01 status audit after the triage pass and the air verify-slot commit. Nothing to fix, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
