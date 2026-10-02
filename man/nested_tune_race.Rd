@@ -346,8 +346,8 @@ as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split 
 must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
 in any \code{out_id} other than the logical \code{NA}. So no inner analysis or
 assessment set reaches a row the outer fold holds out. Every \code{in_id} and
-\code{out_id}, outer or inner, is a numeric vector with no \code{NA} and no value
-outside integer range, and no \code{out_id} is \code{NULL} or empty. The one
+\code{out_id}, outer or inner, is a numeric vector with no \code{NA}. None holds a
+value outside integer range, and no \code{out_id} is \code{NULL} or empty. The one
 exception is an \code{out_id} that is the logical \code{NA}, which tells rsample to
 find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
 
