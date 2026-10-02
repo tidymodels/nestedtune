@@ -31,6 +31,25 @@
 # O1 to O4 check that the functions give what tune and finetune give when run
 # by hand. The estimate itself adds nothing new for this pair, so no second
 # oracle type is asked of them here.
+#
+# One test on this pair reaches the step that re-points each fold's inner
+# splits at its outer analysis frame, which the tests above cannot see: a
+# fixed grid scores the same rows on either frame. Its `min_n` range is
+# finalized from the frame's row count, so it differs between the frames.
+# Pinned by "a range finalized from the data on the ... pair is finalized on
+# each fold's analysis rows". Satisfies M140 AC4 with two oracle types:
+#
+# O5 -- type "analytic" (closed form). Source: dials::get_n_frac_range(), whose
+#   finalized range is `floor(nrow(x) * frac)` of the frame it is handed (the
+#   O1 record in test-nested-tune-finalize.R). Every candidate a fold searched
+#   lies inside `floor(n * FINALIZE_FRAC)`, `n` being the row count of that
+#   fold's outer analysis set: 6 to 30 on its 60 rows, where the 90-row frame
+#   gives 9 to 45.
+#
+# O6 -- type "live" (reference implementation). Source: rsample::nested_cv()
+#   on the pair's own call, rebuilt by ts_pair_reference(). Its inner splits
+#   carry each outer fold's analysis set as their frame, so tune finalizes on
+#   it by construction.
 
 skip_heavy_on_cran()
 
@@ -259,5 +278,72 @@ test_that(
       inner_design = pair_inner
     )
     expect_ts_final_matches(final, ref, d, split_class = pair_spec$inner_class)
+  }
+)
+
+test_that(
+  sprintf(
+    "a range finalized from the data on the %s pair is finalized on each fold's analysis rows",
+    pair
+  ),
+  {
+    skip_if_no_engines(stochastic = TRUE)
+    skip_if_not_installed("dials")
+    d <- make_ts_weekday_data()
+    wf <- stoch_workflow(d)
+    ms <- ts_metrics()
+    lean <- pair_folds(d)
+    ref <- ts_pair_reference(pair_spec, d)
+    # The precondition for O6: the two designs hold the same inner rows.
+    expect_inner_identical(lean, ref)
+
+    # Two direct calls, never memoised() (the M42 lesson).
+    set.seed(3)
+    lean_res <- suppressMessages(nested_tune_grid(
+      wf,
+      lean,
+      param_info = frac_param_info(wf),
+      grid = 5,
+      metrics = ms
+    ))
+    set.seed(3)
+    ref_res <- suppressMessages(nested_tune_grid(
+      wf,
+      ref,
+      param_info = frac_param_info(wf),
+      grid = 5,
+      metrics = ms
+    ))
+    expect_true(all(lean_res$.completed))
+
+    # O5.
+    full_upper <- floor(nrow(d) * FINALIZE_FRAC[[2L]])
+    for (i in seq_len(nrow(lean))) {
+      n <- nrow(rsample::analysis(lean$splits[[i]]))
+      bounds <- floor(n * FINALIZE_FRAC)
+      # What makes the assertion discriminating: a range read off the whole
+      # frame reaches past the fold's own upper bound.
+      expect_gt(full_upper, bounds[[2L]])
+      candidates <- unique(lean_res$.inner_metrics[[i]]$min_n)
+      expect_gt(length(candidates), 1L)
+      outside <- candidates[
+        candidates < bounds[[1L]] | candidates > bounds[[2L]]
+      ]
+      expect_identical(
+        outside,
+        candidates[0],
+        label = sprintf(
+          "fold %d candidates outside [%d, %d]",
+          i,
+          bounds[[1L]],
+          bounds[[2L]]
+        )
+      )
+    }
+
+    # O6.
+    expect_identical(lean_res$.inner_metrics, ref_res$.inner_metrics)
+    expect_identical(lean_res$.metrics, ref_res$.metrics)
+    expect_identical(lean_res$.selected, ref_res$.selected)
   }
 )

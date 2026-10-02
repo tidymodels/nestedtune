@@ -60,6 +60,39 @@ stoch_workflow <- function(data) {
 
 stoch_grid <- function() data.frame(min_n = c(2L, 10L, 25L))
 
+FINALIZE_FRAC <- c(1 / 10, 5 / 10)
+
+# A `min_n` whose upper bound is unknown until a frame is seen, finalized by
+# dials::get_n_frac_range() over FINALIZE_FRAC. With `record` an environment,
+# the finalizer first appends what it was handed -- the row count and the
+# sorted first predictor -- so a test can say which rows tune read. Shared by
+# test-nested-tune-finalize.R and test-time-series-pairs-other.R (M140).
+frac_min_n <- function(record = NULL) {
+  finalizer <- function(object, x, ...) {
+    if (!is.null(record)) {
+      record$frames[[length(record$frames) + 1L]] <- list(
+        n = nrow(x),
+        x1 = sort(x$x1)
+      )
+    }
+    dials::get_n_frac_range(object, x, frac = FINALIZE_FRAC)
+  }
+  dials::new_quant_param(
+    type = "integer",
+    range = c(2L, dials::unknown()),
+    inclusive = c(TRUE, TRUE),
+    label = c(min_n = "Minimal Node Size"),
+    finalize = finalizer
+  )
+}
+
+frac_param_info <- function(wf, record = NULL) {
+  update(
+    tune::extract_parameter_set_dials(wf),
+    min_n = frac_min_n(record)
+  )
+}
+
 # The two fixed workflows `nested_fit_resamples()` runs (M70): nothing marked
 # with `tune()`, so the five tuning orchestrators refuse them at entry and
 # the new one scores them on the outer folds alone. `fixed_workflow()` is
