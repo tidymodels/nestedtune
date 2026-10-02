@@ -345,10 +345,11 @@ own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or tha
 as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
 must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
 in any \code{out_id} other than the logical \code{NA}. So no inner analysis or
-assessment set reaches a row the outer fold holds out. No \code{in_id} or
-\code{out_id}, outer or inner, holds an \code{NA}. The one exception is an \code{out_id}
-that is the logical \code{NA}, which tells rsample to find the assessment set
-with \code{\link[rsample:complement]{rsample::complement()}}.
+assessment set reaches a row the outer fold holds out. Every \code{in_id} and
+\code{out_id}, outer or inner, is a numeric vector with no \code{NA} and no value
+outside integer range, and no \code{out_id} is \code{NULL} or empty. The one
+exception is an \code{out_id} that is the logical \code{NA}, which tells rsample to
+find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
 
 A design breaking any of this is refused before anything is fitted. So is
 a design using a bootstrap for the outer loop, or \code{\link[rsample:loo_cv]{rsample::loo_cv()}},

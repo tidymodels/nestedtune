@@ -620,19 +620,23 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   any evidence a real specification depends on its calling frame. Routed from
   candidates 2026-09-11; added 2026-07-30 — M18 review finding A2.
 
-- Index-slot shapes `check_inner_splits()` leaves to rsample. A non-numeric
-  `in_id` coerces with a warning and reports `NA`; a fractional index truncates
-  and passes containment; a non-data.frame outer `$data` reports as a frame
-  mismatch; and an empty inner `in_id` passes containment, which the fixture
-  vehicle `break_inner_split()` relies on. Accepted at M59's review (O5, O6,
-  O9, O15): each is a shape rsample itself admits, and the entry check holds
-  the shapes this package owns. Revisit on a user reaching one of these past
-  the entry check, or if rsample refuses one of them earlier. (corrected
-  M138: O7, an element-wise `NA` in `out_id`, is now refused before
-  containment with every other `NA` index but the logical `NA` `out_id`, per
-  D-111.) Three open shapes M138 found moved to a candidate row 2026-10-01.
-  Routed from candidates 2026-09-11; added 2026-09-04 — M59 review O5, O6,
-  O7, O9, O15.
+- Index-slot shapes `check_inner_splits()` leaves to rsample. A fractional
+  index truncates and passes containment. A non-data.frame outer `$data`
+  reports as a frame mismatch. An empty inner `in_id` passes containment,
+  which the fixture vehicle `break_inner_split()` relies on. An outer `in_id`
+  past the frame, within integer range, is left to `rsample::analysis()` and
+  `last_fit()` (D-049). A logical `NA` `out_id` whose complement is empty
+  passes, because the entry check does not compute complements. rsample
+  builds it only for a split that holds every row. Accepted at M59's review
+  (O5, O6, O9, O15): each is a shape rsample itself admits, and the entry
+  check holds the shapes this package owns. Revisit on a user reaching one of
+  these past the entry check, or if rsample refuses one of them earlier.
+  (corrected M138: O7, an element-wise `NA` in `out_id`, is now refused
+  before containment with every other `NA` index but the logical `NA`
+  `out_id`, per D-111.) (corrected M141: a non-numeric slot, a value outside
+  integer range, and a `NULL` or empty `out_id` are now refused by the same
+  rule, per D-114.) Routed from candidates 2026-09-11; added 2026-09-04 — M59
+  review O5, O6, O7, O9, O15.
 
 - The guides say what to report after nesting, but not what to report when a
   user skips it. `vignettes/estimate.Rmd`'s tall-data paragraph (Wilimitis and

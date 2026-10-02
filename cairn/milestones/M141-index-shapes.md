@@ -56,6 +56,8 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - 2026-10-01: plan gate chose refusing a `NULL` or length-0 `out_id` over computing each logical `NA` `out_id`'s complement too. rsample builds an empty complement only for a split that holds every row. Falsified by a design that reaches a driver with an empty complement.
 - 2026-10-01: plan chose one refusal over all four shapes over a separate refusal per shape, so a user sees every bad position at once. Falsified by a shape whose reason a shared message misstates.
 
+- 2026-10-01: checkpoint, half-done. T1 tests written and seen failing on the old code. T2 rule written (`check_split_indices()`, `check_outer_indices()`), with the `nested_resamples()` call renamed ahead of T3. `test-split-checks.R` passes, but the full suite has not finished, so T1 and T2 stay unticked. T4 docs, NEWS and DESIGN.md entry drafted. The NEWS item on the repeated-row fix loses "too large for an integer", a shape now refused at entry. Question gate skipped: nothing open.
+
 ## Decisions
 
 ## Review

@@ -98,11 +98,13 @@ row, an inner split that puts one copy in each set is refused. The
 apparent split of a bootstrap under the id "Apparent" is exempt from this
 rule, because tune leaves it out of its estimates.
 
-An \code{outside} split whose \code{in_id} or \code{out_id} holds an \code{NA} is refused,
-and the refusal names the split and the slot. rsample reads an \code{NA} index
-as a row of \code{NA} values, or fails when it builds the assessment set. The
-one exception is an \code{out_id} that is the logical \code{NA}, which tells rsample
-to find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
+An \code{outside} split is refused if its \code{in_id} or \code{out_id} holds an \code{NA},
+is not a numeric vector, or holds a value outside integer range. So is a
+split whose \code{out_id} is \code{NULL} or empty, which leaves it no assessment
+set. The refusal names every such split and slot. rsample reads an \code{NA}
+index as a row of \code{NA} values, or fails when it builds the assessment
+set. The one exception is an \code{out_id} that is the logical \code{NA}, which
+tells rsample to find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
 }
 
 \section{Time-series designs}{
