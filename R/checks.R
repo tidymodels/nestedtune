@@ -385,9 +385,10 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # A row subset or a manual_rset() rebuild loses the rset class these read,
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
-  # Before the rules that read row indices, which would otherwise refuse an
-  # NA index under another reason or pass it (M138, D-111).
-  check_na_indices(resamples, call = call)
+  # Before the rules that read row indices, which would otherwise refuse a bad
+  # index under another reason, with a coercion warning, or pass it (M138,
+  # D-111; M141, D-114).
+  check_split_indices(resamples, call = call)
   # A split rebuilt with make_splits() carries no class to read, so each
   # split's rows are read next (M134, D-103).
   check_outer_overlap(resamples, "resamples", call = call)
@@ -1235,61 +1236,98 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
   )
 }
 
-# The slots of `split` that hold a value for which is.na() is TRUE, less an
-# `out_id` identical to the logical NA, rsample's mark for the complement
-# (M138, D-111). An element that is not a list with the rsplit class gives
+# The shape of index slot `x`, which is `slot` of a split, if the index rule
+# refuses it, or NA. The first shape that applies names it: an NA, an empty
+# `out_id`, a vector that is not numeric, a value outside integer range. An
+# `out_id` identical to the logical NA is rsample's mark for the complement
+# and is exempt (M138, D-111; M141, D-114).
+index_shape <- function(x, slot) {
+  if (slot == "out_id" && identical(x, NA)) {
+    return(NA_character_)
+  }
+  if (anyNA(x)) {
+    return("na")
+  }
+  if (slot == "out_id" && length(x) == 0L) {
+    return("empty")
+  }
+  if (!is.numeric(x)) {
+    return("type")
+  }
+  if (anyNA(suppressWarnings(as.integer(x)))) {
+    return("range")
+  }
+  NA_character_
+}
+
+# The refused shape of each slot of `split`, named by slot, for the slots the
+# rule refuses. An element that is not a list with the rsplit class gives
 # none: the class rules refuse it later.
-na_slots <- function(split) {
+bad_index_slots <- function(split) {
   if (!inherits(split, "rsplit") || !is.list(split)) {
     return(character())
   }
-  out_id <- split[["out_id"]]
-  hit <- c(
-    in_id = anyNA(split[["in_id"]]),
-    out_id = anyNA(out_id) && !identical(out_id, NA)
+  shapes <- c(
+    in_id = index_shape(split[["in_id"]], "in_id"),
+    out_id = index_shape(split[["out_id"]], "out_id")
   )
-  names(hit)[hit]
+  shapes[!is.na(shapes)]
 }
 
-# The line naming the slots of `split` that hold an NA, after `pos`, or
-# nothing when none does. `pos` is handed over as a value.
-na_line <- function(split, pos) {
-  slots <- na_slots(split)
-  if (length(slots) == 0L) {
+# The line naming the refused slots of `split`, after `pos`, or nothing when
+# the rule refuses none. Slots with one shape share a clause. `pos` is handed
+# over as a value.
+index_line <- function(split, pos) {
+  shapes <- bad_index_slots(split)
+  if (length(shapes) == 0L) {
     return(character())
   }
-  n <- length(slots)
-  cli::format_inline(
-    "{pos}: {.field {slots}} {cli::qty(n)}hold{?s/} an {.code NA}."
-  )
+  parts <- character()
+  for (shape in c("na", "empty", "type", "range")) {
+    slots <- names(shapes)[shapes == shape]
+    n <- length(slots)
+    if (n == 0L) {
+      next
+    }
+    words <- switch(
+      shape,
+      na = "{cli::qty(n)}hold{?s/} an {.code NA}",
+      empty = "{cli::qty(n)}{?is/are} empty",
+      type = "{cli::qty(n)}{?is not a numeric vector/are not numeric vectors}",
+      range = "{cli::qty(n)}{?holds a value/hold values} outside integer range"
+    )
+    parts <- c(parts, cli::format_inline(paste("{.field {slots}}", words)))
+  }
+  paste0(pos, ": ", paste(parts, collapse = ", and "), ".")
 }
 
-na_index_reason <- paste(
-  "An NA index names no data row. rsample reads it as rows of NAs, or",
-  "fails when it builds the assessment set. The one exception is an `out_id`",
-  "that is the logical NA, which tells rsample to find the assessment set",
-  "with `rsample::complement()`."
+index_reason <- paste(
+  "Each row index must be a number within integer range. An NA index names",
+  "no data row: rsample reads it as rows of NAs, or fails when it builds the",
+  "assessment set. An empty `out_id` leaves the split no assessment set. The",
+  "one exception is an `out_id` that is the logical NA, which tells rsample",
+  "to find the assessment set with `rsample::complement()`."
 )
 
-abort_na_indices <- function(lines, arg, call) {
+abort_bad_indices <- function(lines, arg, call) {
   if (length(lines) == 0L) {
     return(invisible())
   }
   # The reason is handed over as a value, so cli does not parse it again.
   cli::cli_abort(
     c(
-      "{.arg {arg}} has a split whose row indices hold an {.code NA}.",
+      "{.arg {arg}} has a split whose row indices are not valid row numbers.",
       value_bullets(lines),
-      i = "{na_index_reason}"
+      i = "{index_reason}"
     ),
     class = "nestedtune_bad_design",
     call = call
   )
 }
 
-# Every outer and inner split holding an NA index, in one message, each named
-# by its outer fold and, for an inner split, its position in that fold.
-check_na_indices <- function(resamples, call = rlang::caller_env()) {
+# Every outer and inner split the index rule refuses, in one message, each
+# named by its outer fold and, for an inner split, its position in that fold.
+check_split_indices <- function(resamples, call = rlang::caller_env()) {
   outer <- resamples[["splits"]]
   inner <- resamples[["inner_resamples"]]
   if (!is.list(outer)) {
@@ -1300,24 +1338,24 @@ check_na_indices <- function(resamples, call = rlang::caller_env()) {
     splits <- if (is.data.frame(rs)) rs[["splits"]]
     inner_lines <- if (is.list(splits)) {
       lapply(seq_along(splits), function(s) {
-        na_line(splits[[s]], paste0("Outer fold ", f, ", inner split ", s))
+        index_line(splits[[s]], paste0("Outer fold ", f, ", inner split ", s))
       })
     }
-    c(na_line(outer[[f]], paste("Outer fold", f)), unlist(inner_lines))
+    c(index_line(outer[[f]], paste("Outer fold", f)), unlist(inner_lines))
   })
-  abort_na_indices(unlist(lines), "resamples", call)
+  abort_bad_indices(unlist(lines), "resamples", call)
   invisible(resamples)
 }
 
 # The outer half of the rule, for the design `nested_resamples()` takes as
 # `outside`, whose splits are named by row as check_outer_overlap() names
 # them.
-check_outer_na <- function(x, arg, call = rlang::caller_env()) {
+check_outer_indices <- function(x, arg, call = rlang::caller_env()) {
   splits <- x[["splits"]]
   lines <- lapply(seq_along(splits), function(f) {
-    na_line(splits[[f]], cli::format_inline("Row {f} of {.arg {arg}}"))
+    index_line(splits[[f]], cli::format_inline("Row {f} of {.arg {arg}}"))
   })
-  abort_na_indices(unlist(lines), arg, call)
+  abort_bad_indices(unlist(lines), arg, call)
   invisible(x)
 }
 
@@ -1754,14 +1792,10 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     outer_in <- as.integer(outer[[f]][["in_id"]])
     # The rows the outer split holds, marked once for the fold rather than
     # hashed by %in% for every split (M135, T5). An index outside the frame
-    # is read with %in%, so every index gets the answer %in% gives. Of the
-    # NAs a split stores, check_na_indices() has refused all but the logical
-    # NA `out_id`, dropped below. An NA here can still come from as.integer()
-    # on an index out of integer range. In `in_id`, held() reads it with %in%,
-    # so it counts as held only when the outer `in_id` also holds an index
-    # that coerces to NA, and then this rule passes the split. In `out_id`, it
-    # is dropped with the logical NA, so this rule does not see it. DESIGN.md
-    # Known issues lists both shapes (M138).
+    # is read with %in%, so every index gets the answer %in% gives.
+    # check_split_indices() has refused every index that is not numeric, is
+    # NA, or lies outside integer range, so as.integer() gives no NA here but
+    # the logical NA `out_id`, dropped below (M138, M141).
     mark <- logical(NROW(outer[[f]][["data"]]))
     marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
     mark[marked[marked <= length(mark)]] <- TRUE

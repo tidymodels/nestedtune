@@ -312,27 +312,9 @@ test_that("a held-out row in both sets of an inner split is refused as a leak", 
 })
 
 # An index outside the frame is not a row the outer split holds, whichever
-# side of the frame it falls on. An NA index is refused before this rule
-# reads it (M138).
+# side of the frame it falls on. An NA index, and an index beyond integer
+# range, is refused before this rule reads it (M138, M141).
 test_that("an inner index outside the frame is refused as a leak", {
-  # An `in_id` index beyond integer range coerces to NA. The outer `in_id`
-  # holds no such index, so held() counts it as a row not held (M138).
-  design <- edit_whole_inner(function(split, held) {
-    split$in_id <- c(split$in_id, 1e10)
-    split
-  })
-  cnd <- expect_error(
-    suppressWarnings(check_nested(design)),
-    class = "nestedtune_bad_design"
-  )
-  expect_match(one_line(cnd), CONTAINED, fixed = TRUE)
-  expect_match(
-    one_line(cnd),
-    "Outer fold 1, inner split 1: in_id holds NA,",
-    fixed = TRUE
-  )
-  suppressWarnings(expect_grid_refuses(design, cnd))
-
   n <- nrow(shape_data())
   plants <- list(in_id = c(0L, -1L, n + 1L), out_id = c(0L, -1L, n + 1L))
   for (slot in names(plants)) {
@@ -394,8 +376,11 @@ test_that("a held row in both sets of an inner split is still refused as shared"
 # An NA in a split's row indices names no data row. rsample reads it as
 # rows of NAs, or fails when it builds the assessment set. Both loops refuse it,
 # except an `out_id` that is the logical NA, which rsample reads as the
-# complement (M138, D-111).
-NA_REFUSED <- "`resamples` has a split whose row indices hold an `NA`."
+# complement (M138, D-111). The same refusal covers a slot that is not numeric,
+# a value outside integer range, and an empty `out_id` (M141, D-114).
+INDEX_REFUSED <- paste(
+  "`resamples` has a split whose row indices are not valid row numbers."
+)
 
 # `split` with a logical NA `out_id` replaced by the complement it stands
 # for, so a plant beside real indices has indices to go beside.
@@ -419,24 +404,43 @@ edit_split <- function(design, fold, inner, edit) {
   design
 }
 
-# The bullet naming `slots` of the split at that position.
-na_where <- function(fold, inner, slots) {
+# What the bullet says `slots` hold, for each shape the rule refuses.
+shape_words <- function(slots, shape) {
+  one <- length(slots) == 1L
+  switch(
+    shape,
+    na = if (one) "holds an `NA`" else "hold an `NA`",
+    empty = if (one) "is empty" else "are empty",
+    type = if (one) "is not a numeric vector" else "are not numeric vectors",
+    range = if (one) {
+      "holds a value outside integer range"
+    } else {
+      "hold values outside integer range"
+    }
+  )
+}
+
+# The bullet naming `slots` of the split at that position, which hold
+# `shape`.
+bad_where <- function(fold, inner, slots, shape) {
   pos <- if (is.null(inner)) {
     paste0("Outer fold ", fold)
   } else {
     paste0("Outer fold ", fold, ", inner split ", inner)
   }
-  verb <- if (length(slots) == 1L) "holds" else "hold"
-  paste0(pos, ": ", paste(slots, collapse = " and "), " ", verb, " an `NA`.")
+  words <- shape_words(slots, shape)
+  paste0(pos, ": ", paste(slots, collapse = " and "), " ", words, ".")
 }
 
-expect_na_refused <- function(design, where, info = NULL) {
+na_where <- function(fold, inner, slots) bad_where(fold, inner, slots, "na")
+
+expect_index_refused <- function(design, where, info = NULL) {
   cnd <- expect_error(
     check_nested(design),
     class = "nestedtune_bad_design",
     info = info
   )
-  for (w in c(NA_REFUSED, where)) {
+  for (w in c(INDEX_REFUSED, where)) {
     expect_match(one_line(cnd), w, fixed = TRUE, info = info)
   }
   # No position but the planted ones is named.
@@ -464,7 +468,7 @@ test_that("check_nested() refuses an NA in each slot of a nested_resamples() des
         split[[plant$slot]] <- plant$value(split[[plant$slot]])
         split
       })
-      expect_na_refused(design, na_where(2L, inner, plant$slot), info)
+      expect_index_refused(design, na_where(2L, inner, plant$slot), info)
     }
   }
 })
@@ -476,7 +480,7 @@ test_that("check_nested() refuses an NA in each in_id of a nested_cv() design", 
       split$in_id <- c(split$in_id, NA)
       split
     })
-    expect_na_refused(design, na_where(2L, inner, "in_id"), info)
+    expect_index_refused(design, na_where(2L, inner, "in_id"), info)
   }
 })
 
@@ -489,7 +493,7 @@ test_that("the NA refusal names every position and slot that holds one", {
     split$out_id <- NA_integer_
     split
   })
-  expect_na_refused(
+  expect_index_refused(
     design,
     c(na_where(1L, NULL, "in_id"), na_where(3L, 2L, "out_id"))
   )
@@ -499,7 +503,7 @@ test_that("the NA refusal names every position and slot that holds one", {
     split$out_id <- c(NA, NA)
     split
   })
-  expect_na_refused(design, na_where(2L, 1L, c("in_id", "out_id")))
+  expect_index_refused(design, na_where(2L, 1L, c("in_id", "out_id")))
 })
 
 # Before M138, an NA in an outer `in_id` and in an inner `in_id` of the same
@@ -514,7 +518,7 @@ test_that("an NA in the outer and an inner in_id of one fold is refused", {
     split$in_id <- c(split$in_id, NA)
     split
   })
-  expect_na_refused(
+  expect_index_refused(
     design,
     c(na_where(1L, NULL, "in_id"), na_where(1L, 1L, "in_id"))
   )
@@ -537,12 +541,12 @@ test_that("the NA rule runs before the containment and shared-rows rules", {
     split
   })
 
-  cnd <- expect_na_refused(contained, na_where(1L, 1L, "in_id"))
+  cnd <- expect_index_refused(contained, na_where(1L, 1L, "in_id"))
   expect_no_match(one_line(cnd), CONTAINED, fixed = TRUE)
-  cnd <- expect_na_refused(shared, na_where(1L, NULL, "in_id"))
+  cnd <- expect_index_refused(shared, na_where(1L, NULL, "in_id"))
   expect_no_match(one_line(cnd), OUTER_SHARED, fixed = TRUE)
 
-  local_mocked_bindings(check_na_indices = function(...) invisible())
+  local_mocked_bindings(check_split_indices = function(...) invisible())
   cnd <- expect_error(check_nested(contained), class = "nestedtune_bad_design")
   expect_match(one_line(cnd), CONTAINED, fixed = TRUE)
   cnd <- expect_error(check_nested(shared), class = "nestedtune_bad_design")
@@ -567,6 +571,248 @@ test_that("check_nested() accepts the logical NA out_id of both constructors", {
   }
 })
 
+# Each plant gives a slot's new value from its old one, and names the shape
+# the refusal reports. A value outside integer range coerces to NA with a
+# warning. A non-numeric slot fails the fold in vctrs or rsample. An empty
+# `out_id` leaves the split no assessment set (M141, D-114).
+INDEX_PLANTS <- list(
+  list(label = "3e9", shape = "range", value = function(x) c(x, 3e9)),
+  list(label = "-3e9", shape = "range", value = function(x) c(x, -3e9)),
+  list(label = "Inf", shape = "range", value = function(x) c(x, Inf)),
+  list(label = "character", shape = "type", value = as.character),
+  list(label = "factor", shape = "type", value = factor),
+  list(label = "list", shape = "type", value = as.list),
+  list(label = "TRUE", shape = "type", value = function(x) {
+    rep(TRUE, length(x))
+  }),
+  list(label = "NULL", shape = "empty", value = function(x) NULL),
+  list(label = "integer(0)", shape = "empty", value = function(x) integer(0))
+)
+
+plant_slots <- function(plant) {
+  if (plant$shape == "empty") "out_id" else c("in_id", "out_id")
+}
+
+# `split` with `plant` in `slot`. Assigned with `[<-`, so a NULL value keeps
+# the slot rather than dropping it.
+plant_index <- function(split, slot, plant) {
+  split <- explicit_out(split)
+  split[slot] <- list(plant$value(split[[slot]]))
+  split
+}
+
+test_that("check_nested() refuses each index shape in each slot of both designs", {
+  designs <- list(nested_resamples = whole_design(), nested_cv = split_design())
+  for (name in names(designs)) {
+    for (plant in INDEX_PLANTS) {
+      for (slot in plant_slots(plant)) {
+        for (inner in list(NULL, 1L)) {
+          info <- paste(name, slot, plant$label, if (is.null(inner)) "outer")
+          design <- edit_split(designs[[name]], 2L, inner, function(split) {
+            plant_index(split, slot, plant)
+          })
+          expect_index_refused(
+            design,
+            bad_where(2L, inner, slot, plant$shape),
+            info
+          )
+        }
+      }
+    }
+  }
+})
+
+# A slot that breaks the rule in more than one way is named once, by the
+# first of these shapes: an NA, an empty `out_id`, a non-numeric vector, a
+# value outside integer range.
+test_that("the index refusal names every bad position once, by its first shape", {
+  design <- edit_split(whole_design(), 1L, NULL, function(split) {
+    split$in_id <- c(split$in_id, NA)
+    split
+  })
+  design <- edit_split(design, 2L, 1L, function(split) {
+    split$in_id <- c(split$in_id, 3e9)
+    split
+  })
+  design <- edit_split(design, 3L, 2L, function(split) {
+    split$out_id <- integer(0)
+    split
+  })
+  design <- edit_split(design, 3L, NULL, function(split) {
+    split$in_id <- as.character(split$in_id)
+    split
+  })
+  expect_index_refused(
+    design,
+    c(
+      bad_where(1L, NULL, "in_id", "na"),
+      bad_where(2L, 1L, "in_id", "range"),
+      bad_where(3L, NULL, "in_id", "type"),
+      bad_where(3L, 2L, "out_id", "empty")
+    )
+  )
+
+  firsts <- list(
+    list(label = "NA and 3e9", shape = "na", value = function(x) c(x, NA, 3e9)),
+    list(
+      label = "character NA",
+      shape = "na",
+      value = function(x) c(as.character(x), NA)
+    ),
+    list(label = "character()", shape = "empty", value = function(x) {
+      character()
+    }),
+    list(label = "Inf as character", shape = "type", value = function(x) {
+      as.character(c(x, Inf))
+    })
+  )
+  for (plant in firsts) {
+    for (slot in plant_slots(plant)) {
+      info <- paste(slot, plant$label)
+      design <- edit_split(whole_design(), 2L, 1L, function(split) {
+        split[slot] <- list(plant$value(split[[slot]]))
+        split
+      })
+      cnd <- expect_index_refused(
+        design,
+        bad_where(2L, 1L, slot, plant$shape),
+        info
+      )
+      others <- setdiff(c("na", "empty", "type", "range"), plant$shape)
+      for (shape in others) {
+        expect_no_match(
+          one_line(cnd),
+          shape_words(slot, shape),
+          fixed = TRUE,
+          info = paste(info, shape)
+        )
+      }
+    }
+  }
+})
+
+# A split with two bad slots gets one line: a clause per shape, in the rule's
+# order, and one plural clause when both slots share a shape.
+test_that("the index refusal joins two bad slots of one split in one line", {
+  mixed <- edit_split(whole_design(), 2L, 1L, function(split) {
+    split <- explicit_out(split)
+    split$in_id <- c(split$in_id, 3e9)
+    split$out_id <- as.character(split$out_id)
+    split
+  })
+  expect_index_refused(
+    mixed,
+    paste0(
+      "Outer fold 2, inner split 1: out_id ",
+      shape_words("out_id", "type"),
+      ", and in_id ",
+      shape_words("in_id", "range"),
+      "."
+    )
+  )
+
+  both <- list(
+    type = as.character,
+    range = function(x) c(x, 3e9)
+  )
+  for (shape in names(both)) {
+    design <- edit_split(whole_design(), 2L, 1L, function(split) {
+      split <- explicit_out(split)
+      split$in_id <- both[[shape]](split$in_id)
+      split$out_id <- both[[shape]](split$out_id)
+      split
+    })
+    expect_index_refused(
+      design,
+      bad_where(2L, 1L, c("in_id", "out_id"), shape),
+      shape
+    )
+  }
+})
+
+# as.integer() reads 3e9 as NA in both slots, and %in% matches the two NAs,
+# so without the rule the containment rule passed this fold (M138's review).
+test_that("3e9 in the outer and an inner in_id of one fold is refused", {
+  design <- edit_split(whole_design(), 2L, NULL, function(split) {
+    split$in_id <- c(split$in_id, 3e9)
+    split
+  })
+  design <- edit_split(design, 2L, 1L, function(split) {
+    split$in_id <- c(split$in_id, 3e9)
+    split
+  })
+  expect_index_refused(
+    design,
+    c(
+      bad_where(2L, NULL, "in_id", "range"),
+      bad_where(2L, 1L, "in_id", "range")
+    )
+  )
+})
+
+# Without the rule, the containment rule reads each of these with
+# as.integer(), which warns and gives NA, a row the outer split does not hold.
+test_that("the index rule runs before the containment rule, with no warning", {
+  plants <- list(range = 3e9, type = "a")
+  designs <- lapply(plants, function(value) {
+    edit_split(whole_design(), 1L, 1L, function(split) {
+      split$in_id <- value
+      split
+    })
+  })
+  for (shape in names(designs)) {
+    where <- bad_where(1L, 1L, "in_id", shape)
+    cnd <- expect_no_warning(
+      expect_index_refused(designs[[shape]], where, shape)
+    )
+    expect_no_match(one_line(cnd), CONTAINED, fixed = TRUE, info = shape)
+  }
+
+  local_mocked_bindings(check_split_indices = function(...) invisible())
+  for (shape in names(designs)) {
+    expect_warning(
+      cnd <- expect_error(
+        check_nested(designs[[shape]]),
+        class = "nestedtune_bad_design"
+      ),
+      "NAs introduced by coercion",
+      info = shape
+    )
+    expect_match(one_line(cnd), CONTAINED, fixed = TRUE, info = shape)
+  }
+})
+
+# Every index of both constructors' designs as a double, as a design
+# rebuilt from saved values can store it.
+test_that("check_nested() accepts row indices stored as doubles", {
+  as_double <- function(split) {
+    split$in_id <- as.double(split$in_id)
+    if (!identical(split$out_id, NA)) {
+      split$out_id <- as.double(split$out_id)
+    }
+    split
+  }
+  designs <- list(nested_resamples = whole_design(), nested_cv = split_design())
+  for (name in names(designs)) {
+    design <- designs[[name]]
+    design$splits <- lapply(design$splits, as_double)
+    for (f in seq_along(design$inner_resamples)) {
+      splits <- lapply(design$inner_resamples[[f]]$splits, as_double)
+      design$inner_resamples[[f]]$splits <- splits
+    }
+    # expect_type() takes no `info`, so the design is named this way.
+    expect_identical(typeof(design$splits[[1]]$in_id), "double", info = name)
+    expect_identical(
+      typeof(design$inner_resamples[[1]]$splits[[1]]$in_id),
+      "double",
+      info = name
+    )
+    expect_identical(check_nested(design), design, info = name)
+  }
+  inner <- designs$nested_resamples$inner_resamples[[1]]$splits[[1]]
+  expect_type(as_double(inner)$out_id, "double")
+})
+
 # nested_resamples() runs the outer half of the rule on `outside`, so it does
 # not build a design every driver refuses (M138, D-111).
 test_that("nested_resamples() refuses an NA in an outside split", {
@@ -585,7 +831,7 @@ test_that("nested_resamples() refuses an NA in an outside split", {
     )
     expect_match(
       one_line(cnd),
-      "`outside` has a split whose row indices hold an `NA`.",
+      "`outside` has a split whose row indices are not valid row numbers.",
       fixed = TRUE,
       info = info
     )
@@ -601,4 +847,71 @@ test_that("nested_resamples() refuses an NA in an outside split", {
       info = info
     )
   }
+})
+
+OUTSIDE_REFUSED <- paste(
+  "`outside` has a split whose row indices are not valid row numbers."
+)
+
+# `outside` refused by nested_resamples(), naming each of `where` and no
+# other row.
+expect_outside_refused <- function(outside, where, info = NULL) {
+  cnd <- expect_error(
+    nested_resamples(
+      shape_data(),
+      outside = outside,
+      inside = rsample::vfold_cv(v = 2)
+    ),
+    class = "nestedtune_bad_design",
+    info = info
+  )
+  for (w in c(OUTSIDE_REFUSED, where)) {
+    expect_match(one_line(cnd), w, fixed = TRUE, info = info)
+  }
+  named <- gregexpr("Row [0-9]+ of `outside`: ", one_line(cnd))
+  expect_identical(sum(named[[1]] > 0L), length(where), info = info)
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_resamples",
+    info = info
+  )
+  invisible(cnd)
+}
+
+# nested_resamples() runs the rest of the rule on `outside` too (M141,
+# D-114).
+test_that("nested_resamples() refuses each index shape in an outside split", {
+  labels <- c("3e9", "character", "list", "NULL", "integer(0)")
+  plants <- Filter(function(plant) plant$label %in% labels, INDEX_PLANTS)
+  expect_length(plants, length(labels))
+  for (plant in plants) {
+    for (slot in plant_slots(plant)) {
+      info <- paste(slot, plant$label)
+      set.seed(2)
+      outside <- rsample::vfold_cv(shape_data(), v = 3)
+      outside$splits[[2]] <- plant_index(outside$splits[[2]], slot, plant)
+      where <- paste0(
+        "Row 2 of `outside`: ",
+        slot,
+        " ",
+        shape_words(slot, plant$shape),
+        "."
+      )
+      expect_no_warning(expect_outside_refused(outside, where, info))
+    }
+  }
+})
+
+test_that("the outside refusal names every bad row, each by its shape", {
+  set.seed(2)
+  outside <- rsample::vfold_cv(shape_data(), v = 3)
+  outside$splits[[1]]$in_id <- c(outside$splits[[1]]$in_id, NA)
+  outside$splits[[3]]$in_id <- as.list(outside$splits[[3]]$in_id)
+  expect_outside_refused(
+    outside,
+    c(
+      "Row 1 of `outside`: in_id holds an `NA`.",
+      "Row 3 of `outside`: in_id is not a numeric vector."
+    )
+  )
 })
