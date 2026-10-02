@@ -73,6 +73,7 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - 2026-10-01: review checkpoint, half done. AC1 to AC5 are verified and ticked, and the 13 findings are recorded. `devtools::check()` is still running, and the gate is not yet posed.
 - 2026-10-01: consistency gate passed, with `devtools::check()` at 0 errors, 0 warnings and 0 notes. Pre-gate checkpoint.
 - 2026-10-01: gate triage accepted. The fix-now work for F1 to F5 landed: D-113, the help and NEWS sentence, and the candidate row.
+- step-7 approval: m140-inner-design-gaps approved for merge
 
 ## Decisions
 
