@@ -315,11 +315,13 @@ An inner <code><a href="https://rsample.tidymodels.org/reference/slide-resamplin
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> under <code>nested_tune_grid()</code>, and so is
 <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for its results. These designs are also tested under
 <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> and
-<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested for the results of
-those four tuners on the sliding-period design alone.
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept these designs. It checks the
-inner design but fits nothing on it. Any other inner design is not tested.
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code>, and so is
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for the results of those four tuners.
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on these three designs with its default
+<code>fn</code>. With <code>fn</code> set to each of those four tuners, it is tested on the
+sliding-period design alone. <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept
+these designs. It checks the inner design but fits nothing on it. Any
+other inner design is not tested.
 Each of these tests leaves the <code>lag</code> of <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> at its
 default of 0. A <code>lag</code> above 0 is refused in either loop, as
 <code><a href="nested_resamples.html">nested_resamples()</a></code> explains.
@@ -329,9 +331,15 @@ there are more than five, it names the first five.</p>
 <p>An outer <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> gives nine
-pairs, and each pair is tested under <code>nested_tune_grid()</code>.
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code>, <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>, <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code>
-and the other four tuners are not tested on these pairs.</p>
+pairs, and each pair is tested under <code>nested_tune_grid()</code>. The pair of an
+outer and an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> is also tested under
+<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
+<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code> and
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> with its default <code>fn</code>. On that pair,
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested for <code>nested_tune_grid()</code> results, and
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept the design. It checks the
+inner design but fits nothing on it. On the other eight pairs, no
+function but <code><a href="nested_resamples.html">nested_resamples()</a></code> and <code>nested_tune_grid()</code> is tested.</p>
     </div>
     <div class="section level2">
     <h2 id="finalizing-a-parameter-range">Finalizing a parameter range<a class="anchor" aria-label="anchor" href="#finalizing-a-parameter-range"></a></h2>
