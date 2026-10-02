@@ -10,7 +10,8 @@ Run by `/milestone-implement` (per task) and `/hotfix` (gate-lite):
 - After roxygen changes: `Rscript -e 'devtools::document()'`.
 - After code changes, before a task is checked off: `Rscript -e 'devtools::test()'` clean.
 - Before a task touching `vignettes/`, `README.Rmd`, `R/` or `man-roxygen/` is checked off: `Rscript benchmarks/sweep-prose.R --plain` clean, and `--roxygen --plain` after roxygen changes.
-- `/hotfix` gate-lite: `devtools::test()` clean; `devtools::document()` if roxygen changed; `devtools::check()` if anything structural was touched.
+- Before a task that changes any `.R` file is checked off: `air format --check .` clean. This is the whole tree, as CI's `format-suggest` reads it. CI installs the latest `air` release, so keep the local `air` at that release (`air --version`).
+- `/hotfix` gate-lite: `devtools::test()` clean, `air format --check .` clean if any `.R` file changed, `devtools::document()` if roxygen changed, and `devtools::check()` if anything structural was touched.
 
 ## consistency-gate
 Toolchain checks `/milestone-review` runs *in addition to* the universal
