@@ -784,3 +784,70 @@ test_that("nested_resamples() refuses an NA in an outside split", {
     )
   }
 })
+
+OUTSIDE_REFUSED <- paste(
+  "`outside` has a split whose row indices are not valid row numbers."
+)
+
+# `outside` refused by nested_resamples(), naming each of `where` and no
+# other row.
+expect_outside_refused <- function(outside, where, info = NULL) {
+  cnd <- expect_error(
+    nested_resamples(
+      shape_data(),
+      outside = outside,
+      inside = rsample::vfold_cv(v = 2)
+    ),
+    class = "nestedtune_bad_design",
+    info = info
+  )
+  for (w in c(OUTSIDE_REFUSED, where)) {
+    expect_match(one_line(cnd), w, fixed = TRUE, info = info)
+  }
+  named <- gregexpr("Row [0-9]+ of `outside`: ", one_line(cnd))
+  expect_identical(sum(named[[1]] > 0L), length(where), info = info)
+  expect_identical(
+    rlang::call_name(conditionCall(cnd)),
+    "nested_resamples",
+    info = info
+  )
+  invisible(cnd)
+}
+
+# nested_resamples() runs the rest of the rule on `outside` too (M141,
+# D-114).
+test_that("nested_resamples() refuses each index shape in an outside split", {
+  labels <- c("3e9", "character", "list", "NULL", "integer(0)")
+  plants <- Filter(function(plant) plant$label %in% labels, INDEX_PLANTS)
+  expect_length(plants, length(labels))
+  for (plant in plants) {
+    for (slot in plant_slots(plant)) {
+      info <- paste(slot, plant$label)
+      set.seed(2)
+      outside <- rsample::vfold_cv(shape_data(), v = 3)
+      outside$splits[[2]] <- plant_index(outside$splits[[2]], slot, plant)
+      where <- paste0(
+        "Row 2 of `outside`: ",
+        slot,
+        " ",
+        shape_words(slot, plant$shape),
+        "."
+      )
+      expect_outside_refused(outside, where, info)
+    }
+  }
+})
+
+test_that("the outside refusal names every bad row, each by its shape", {
+  set.seed(2)
+  outside <- rsample::vfold_cv(shape_data(), v = 3)
+  outside$splits[[1]]$in_id <- c(outside$splits[[1]]$in_id, NA)
+  outside$splits[[3]]$in_id <- as.list(outside$splits[[3]]$in_id)
+  expect_outside_refused(
+    outside,
+    c(
+      "Row 1 of `outside`: in_id holds an `NA`.",
+      "Row 3 of `outside`: in_id is not a numeric vector."
+    )
+  )
+})
