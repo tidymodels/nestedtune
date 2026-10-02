@@ -630,14 +630,9 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   the entry check, or if rsample refuses one of them earlier. (corrected
   M138: O7, an element-wise `NA` in `out_id`, is now refused before
   containment with every other `NA` index but the logical `NA` `out_id`, per
-  D-111.) Three more shapes are open, not accepted and not fixed. An inner
-  `out_id` index beyond integer range, such as `1e10`, coerces to `NA` with a
-  warning and is dropped, so it passes every rule. An index beyond integer
-  range in both an outer and an inner `in_id` passes containment, because
-  both coerce to `NA` and `%in%` matches them. It passed before M138 too. A
-  `NULL` `out_id` passes every rule, and rsample gives an empty assessment
-  set. M138's claim audit and review found them. Routed from candidates
-  2026-09-11; added 2026-09-04 — M59 review O5, O6, O7, O9, O15.
+  D-111.) Three open shapes M138 found moved to a candidate row 2026-10-01.
+  Routed from candidates 2026-09-11; added 2026-09-04 — M59 review O5, O6,
+  O7, O9, O15.
 
 - The guides say what to report after nesting, but not what to report when a
   user skips it. `vignettes/estimate.Rmd`'s tall-data paragraph (Wilimitis and
