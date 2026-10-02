@@ -358,7 +358,8 @@ forced_bayes_control <- function(
 #
 # The rset is built after the tuning seed is set, which is the ordering D-016
 # fixed: building an rset draws from the RNG, so a reference that built it
-# earlier would disagree with a correct implementation.
+# earlier would disagree with a correct implementation. `inner_design` is the
+# design's literal `inside` call, read by reference_inner() (M140).
 reference_final_fit <- function(
   wf,
   data,
@@ -366,7 +367,8 @@ reference_final_fit <- function(
   metrics,
   seed,
   metric_name,
-  v = 3
+  v = 3,
+  inner_design = NULL
 ) {
   set.seed(seed)
   seeds <- sample.int(.Machine$integer.max, 2L)
@@ -377,7 +379,7 @@ reference_final_fit <- function(
     normal.kind = "Inversion",
     sample.kind = "Rejection"
   )
-  inner <- rsample::vfold_cv(data, v = v)
+  inner <- reference_inner(data, v, inner_design)
   tuned <- tune::tune_grid(
     wf,
     resamples = inner,

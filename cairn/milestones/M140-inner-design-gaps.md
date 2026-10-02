@@ -1,13 +1,13 @@
 # M140: Inner-design gaps under the other functions
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP2
 - **Resolves:** —
 - **Surface tier:** user-facing, because the help pages and NEWS state which designs each exported function is tested on
-- **Branch/PR:** —
+- **Branch/PR:** m140-inner-design-gaps
 
 ## Goal
 
