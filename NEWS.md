@@ -11,8 +11,8 @@
   that the outer split holds of each row that the inner split does not
   train on. The next item, the fix for a leak of outer held-out rows, held
   each row once. That fix now covers a second case. There the outer split
-  repeats no row. Its `in_id` holds an index that is fractional, below 1 or
-  past the data. The fold still fails, and its
+  repeats no row. Its `in_id` holds an index that is fractional, negative
+  or past the data. The fold still fails, and its
   inner metrics come from assessment sets that hold only rows the outer
   split holds.
 
@@ -34,13 +34,15 @@
 * The same refusal now covers three more shapes of row index. It refuses an
   `in_id` or `out_id` that is not a numeric vector, such as row numbers
   stored as character. It refuses a slot that holds a value outside integer
-  range. It also refuses an `out_id` that is `NULL` or empty. `nested_resamples()`
-  refuses the same in a split of `outside`. Before, a value such as `3e9`
-  passed the entry check with a coercion warning, and the fold failed inside
-  rsample. A character index failed the fold in vctrs. An empty inner
-  `out_id` was left out of tuning with no message. The `out_id` that is the
-  logical `NA` is still accepted. The error names each split and slot, and
-  says what the slot holds.
+  range. It also refuses an `out_id` that is `NULL` or empty.
+  `nested_resamples()` refuses the same in a split of `outside`. Before, a
+  value such as `3e9` passed the entry check in most slots, and the fold
+  failed inside rsample. The entry check refused it in an inner `in_id` of a
+  `nested_resamples()` design. It named it as a row the outer split does not
+  hold, with a coercion warning. A character index failed the fold in vctrs. An
+  empty inner `out_id` was left out of tuning with no message. The `out_id`
+  that is the logical `NA` is still accepted. The error names each split and
+  slot, and says how the slot breaks the rule.
 
 * The README has a second table, which lists eight tuning functions from
   tune, finetune, workflowsets and tidyclust and the nestedtune function for

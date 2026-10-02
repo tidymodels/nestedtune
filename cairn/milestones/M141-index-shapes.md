@@ -62,6 +62,8 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - 2026-10-01: T4 done in the T1-T2 commits. Both help paragraphs, a NEWS bullet, and the Known issues entry, which also gains the outer `in_id` past the frame within integer range, so the entry lists every shape the plan's Out section keeps there.
 - 2026-10-01: T5 planted runs. With the `check_nested()` call stubbed, the AC1, AC2, AC3, AC5 and AC6 refusal tests and M138's NA tests fail, and the doubles control passes. With the `nested_resamples()` call stubbed, the AC4 test, the second AC5 test and M138's outside test fail, the folds failing in vctrs with `vctrs_error_subscript_type`. Both calls restored. Full test and check running.
 - 2026-10-01: claim audit delegated to a fresh Opus reader, running.
+- claim audit: 33 claims read, 3 corrected — NEWS.md
+- 2026-10-01: claim audit corrections applied. "below 1" became "negative", because an index of 0 is dropped by vctrs and the fold runs. The `3e9` "before" sentence now says that it passed in most slots, and that in an inner `in_id` it was refused as not held. "says what the slot holds" became "says how the slot breaks the rule". The reader also found that a fractional outer `in_id` stops `check_nested()` under `nested_cv()` with a raw vctrs error. That is out of scope and was added to the Known issues entry on index shapes.
 
 ## Decisions
 

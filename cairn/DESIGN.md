@@ -621,7 +621,10 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   candidates 2026-09-11; added 2026-07-30 — M18 review finding A2.
 
 - Index-slot shapes `check_inner_splits()` leaves to rsample. A fractional
-  index truncates and passes containment. A non-data.frame outer `$data`
+  index truncates and passes containment. Under an `rsample::nested_cv()`
+  design, a fractional outer `in_id` instead stops `check_nested()` with a
+  raw vctrs "loss of precision" error. That error is not a classed refusal
+  (observed 2026-10-01, M141 claim audit). A non-data.frame outer `$data`
   reports as a frame mismatch. An empty inner `in_id` passes containment,
   which the fixture vehicle `break_inner_split()` relies on. An outer `in_id`
   past the frame, within integer range, is left to `rsample::analysis()` and
