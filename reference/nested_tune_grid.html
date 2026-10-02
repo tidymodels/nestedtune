@@ -260,10 +260,11 @@ own frame, as <code><a href="nested_resamples.html">nested_resamples()</a></code
 as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds. An inner split carrying the outer frame
 must index only rows the outer split's <code>in_id</code> holds, in its <code>in_id</code> and
 in any <code>out_id</code> other than the logical <code>NA</code>. So no inner analysis or
-assessment set reaches a row the outer fold holds out. No <code>in_id</code> or
-<code>out_id</code>, outer or inner, holds an <code>NA</code>. The one exception is an <code>out_id</code>
-that is the logical <code>NA</code>, which tells rsample to find the assessment set
-with <code><a href="https://rsample.tidymodels.org/reference/complement.html" class="external-link">rsample::complement()</a></code>.</p>
+assessment set reaches a row the outer fold holds out. Every <code>in_id</code> and
+<code>out_id</code>, outer or inner, is a numeric vector with no <code>NA</code>. None holds a
+value outside integer range, and no <code>out_id</code> is <code>NULL</code> or empty. The one
+exception is an <code>out_id</code> that is the logical <code>NA</code>, which tells rsample to
+find the assessment set with <code><a href="https://rsample.tidymodels.org/reference/complement.html" class="external-link">rsample::complement()</a></code>.</p>
 <p>A design breaking any of this is refused before anything is fitted. So is
 a design using a bootstrap for the outer loop, or <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code>,
 <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> for either loop. The
