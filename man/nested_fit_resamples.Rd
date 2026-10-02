@@ -330,11 +330,12 @@ An outer \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{
 pairs, and each pair is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}. The pair of an
 outer and an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}} is also tested under
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}},
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} and \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default
-\code{fn}. On that pair, \code{\link[=nested_final_fit]{nested_final_fit()}} is tested for
-\code{\link[=nested_tune_grid]{nested_tune_grid()}} results. These functions are not tested on the other
-eight pairs.
+\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
+\code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
+inner design but fits nothing on it. These functions are not tested on
+the other eight pairs.
 }
 
 \examples{

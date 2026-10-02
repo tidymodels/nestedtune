@@ -15,6 +15,8 @@
 #   run by hand on the pair's outer `sliding_window()` design, built on its
 #   own from the same call. Pinned by "nested_fit_resamples() on the ... pair
 #   matches fit_resamples()". Satisfies M140 AC3 for nested_fit_resamples().
+#   It shows only that the design is accepted, because nested_fit_resamples()
+#   checks the inner design but fits nothing on it.
 #
 # O3 -- type "live" (reference implementation). Source: hand_call() in
 #   helper-orchestration.R, which runs each workflow of the set through its
@@ -23,8 +25,8 @@
 #   nested_workflow_map().
 #
 # O4 -- type "live" (reference implementation). Source: reference_final_fit()
-#   in helper-orchestration.R, handed the pair's literal inner
-#   `sliding_window()` call as `inner_design`. Pinned by "the grid final fit on
+#   in helper-orchestration.R, handed TS_INNER_DESIGNS' sliding-window inner
+#   call as `inner_design`. Its arguments match the pair's `inside` call. Pinned by "the grid final fit on
 #   the ... pair matches its reference". Satisfies M140 AC3 for
 #   nested_final_fit().
 #
@@ -61,7 +63,8 @@ pair_outer <- function(data) {
   rsample::sliding_window(data, lookback = 59, assess_stop = 1, step = 10)
 }
 
-# The pair's literal inner call, for a reference final fit on the full data.
+# An inner call whose arguments match the pair's `inside` call, for a
+# reference final fit on the full data.
 pair_inner <- TS_INNER_DESIGNS[["sliding-window"]]$inner
 
 pair_folds <- function(d) {

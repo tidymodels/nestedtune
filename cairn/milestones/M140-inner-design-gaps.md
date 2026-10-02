@@ -45,7 +45,7 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - [x] T6: Record in one work-log line that two plants differ. M121 planted a no-op index remap, which leaves whole-data indices on the analysis frame, and every grid test failed. The audit replaced all of `analysis_framed_inner()` with the identity, and the grid tests stayed green. The T8 D-entry says that M121's tests catch a broken index remap but not a skipped re-pointing, and that AC4 closes that gap.
 - [x] T7: Rewrite the three AC5 passages. Amend the two `NEWS.md` bullets that contradict the new tests. One says the final fits are tested "on the sliding-period design alone". The other says the other functions "are not tested on these pairs". Run `devtools::document()` and both prose sweeps.
 - [x] T8: Write one D-entry. It supersedes D-085's rejection of these final fits, and the D-087 and D-088 clause that leaves the other functions unclaimed on the pairs. It gives the reason the pair tests are kept although D-075 and D-079 say the outer design reaches neither the tuner nor the final fit: they bound the help's claim to what a test runs (D-071). The plan commit already rewrote the inner-design candidate row to hold the Out remainder.
-- [ ] T9: Time each new or extended test file serially. Queue a long one in `Config/testthat/start-first`. Record the figures in one work-log line. Run the commands of the `verify` slot in `cairn/PROFILE.md`.
+- [x] T9: Time each new or extended test file serially. Queue a long one in `Config/testthat/start-first`. Record the figures in one work-log line. Run the commands of the `verify` slot in `cairn/PROFILE.md`.
 
 ## Work log
 
@@ -65,6 +65,10 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - 2026-10-01: T6. Two plants differ. M121's work log (`909021ad`) planted "the inner index remap" as a no-op, and each grid test failed 5 assertions. That leaves whole-data indices on the analysis frame, so the wrong rows are read. The T5 plant skips the whole re-pointing, which leaves the frame and the indices whole, so the same rows are read. Under it, the grid tests of the pair and the 7 AC3 tests stayed green. M121's tests catch a broken index remap but not a skipped re-pointing, and AC4 closes that gap.
 - 2026-10-01: T7 done. The two help sections and the two NEWS bullets state the new tested set, amended in place, so NEWS gains no separate bullet. `devtools::document()` rewrote `nested_resamples.Rd` and the five pages that inherit "Nested designs". Both prose sweeps are clean.
 - 2026-10-01: T8 done. D-112 records the new claims and supersedes D-085's rejection and the D-087 and D-088 pair clause.
+- 2026-10-01: T9 timing. The laptop ran on battery with a load average of 8 to 20, and an unchanged file took 49.1 s against its 11.4 s baseline, so absolute times are not usable (the M51 lesson). Paired serial runs of the `main` and branch versions, back to back: `test-time-series-inner-race.R` 44.3 to 73.5 s, `-inner-bayes-anneal.R` 64.9 to 151.3 s, `-inner-other.R` 20.4 to 45.1 s. The new `-pairs-other.R` took 96.9 s under the same load. The added serial time is above the plan's estimate of about 87 s, because each final fit runs its tuner on the full data. CI step times at review are the measure that counts.
+- 2026-10-01: T9 start-first. `time-series-inner-bayes-anneal` and `time-series-inner-race` were already queued. `time-series-pairs-other` joins the end of the list.
+- 2026-10-01: T9 verify. The full suite at `7a5bd343` plus the DESCRIPTION change ran 1249 tests with 0 failures, 0 errors and 0 skips. `air format --check .`, `devtools::document()` and both prose sweeps are clean.
+- claim audit: 34 claims read, 3 corrected — R/nested-resamples.R, R/nested-tune-grid.R, NEWS.md, tests/testthat/helper-orchestration.R, tests/testthat/test-time-series-pairs-other.R
 
 ## Decisions
 
