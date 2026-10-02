@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-01 status audit after the triage pass and the air verify-slot commit. Nothing to fix, validate green._
+_Last hygiene check: 2026-10-01 M140 archived, M137 row pruned, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M140 | Inner-design gaps under the other functions | review | — | normal | milestones/M140-inner-design-gaps.md |
+| M140 | Inner-design gaps under the other functions | done | — | normal | milestones/archive/M140-inner-design-gaps.md |
 | M139 | Frame the inner splits on the analysis set under a repeated outer row | done | — | normal | milestones/archive/M139-repeated-row-inner-frame.md |
 | M138 | Refuse an NA in a split's row indices | done | — | normal | milestones/archive/M138-na-split-indices.md |
-| M137 | Test the split-check gaps M135's review left | done | — | normal | milestones/archive/M137-split-check-tests.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
