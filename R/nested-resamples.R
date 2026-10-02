@@ -111,19 +111,24 @@
 #' [rsample::nested_cv()]. [nested_tune_grid()] is tested on these three
 #' designs, and so is [nested_final_fit()] for its results. These designs are
 #' also tested under [nested_tune_bayes()], [nested_tune_race_anova()],
-#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] and
-#' [nested_workflow_map()]. [nested_final_fit()] is tested for the results of
-#' those four tuners on the sliding-period design alone.
-#' [nested_fit_resamples()] is tested to accept these designs. It checks the
-#' inner design but fits nothing on it.
+#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()], and so is
+#' [nested_final_fit()] for the results of those four tuners.
+#' [nested_workflow_map()] is tested on these three designs with its default
+#' `fn`. With `fn` set to each of those four tuners, it is tested on the
+#' sliding-period design alone. [nested_fit_resamples()] is tested to accept
+#' these designs. It checks the inner design but fits nothing on it.
 #'
 #' An outer [rsample::sliding_window()], [rsample::sliding_index()] or
 #' [rsample::sliding_period()] with one of these three inner designs gives
 #' nine pairs. Each pair is tested to give the same splits as
 #' [rsample::nested_cv()], and each is tested under [nested_tune_grid()].
-#' [nested_final_fit()], [nested_fit_resamples()], [nested_workflow_map()]
-#' and the other four tuners are not tested on these pairs. Any other inner
-#' design is not tested.
+#' The pair of an outer and an inner [rsample::sliding_window()] is also
+#' tested under [nested_tune_bayes()], [nested_tune_race_anova()],
+#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()],
+#' [nested_fit_resamples()] and [nested_workflow_map()] with its default
+#' `fn`. On that pair, [nested_final_fit()] is tested for
+#' [nested_tune_grid()] results. These functions are not tested on the other
+#' eight pairs. Any other inner design is not tested.
 #'
 #' Every test above that uses [rsample::rolling_origin()] leaves `lag` at
 #' its default of 0. A `lag` above 0 is refused as an `outside` and as an

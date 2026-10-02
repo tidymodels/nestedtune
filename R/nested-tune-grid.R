@@ -171,11 +171,13 @@
 #' [rsample::rolling_origin()] under [nested_tune_grid()], and so is
 #' [nested_final_fit()] for its results. These designs are also tested under
 #' [nested_tune_bayes()], [nested_tune_race_anova()],
-#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()] and
-#' [nested_workflow_map()]. [nested_final_fit()] is tested for the results of
-#' those four tuners on the sliding-period design alone.
-#' [nested_fit_resamples()] is tested to accept these designs. It checks the
-#' inner design but fits nothing on it. Any other inner design is not tested.
+#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()], and so is
+#' [nested_final_fit()] for the results of those four tuners.
+#' [nested_workflow_map()] is tested on these three designs with its default
+#' `fn`. With `fn` set to each of those four tuners, it is tested on the
+#' sliding-period design alone. [nested_fit_resamples()] is tested to accept
+#' these designs. It checks the inner design but fits nothing on it. Any
+#' other inner design is not tested.
 #' Each of these tests leaves the `lag` of [rsample::rolling_origin()] at its
 #' default of 0. A `lag` above 0 is refused in either loop, as
 #' [nested_resamples()] explains.
@@ -186,9 +188,14 @@
 #' An outer [rsample::sliding_window()], [rsample::sliding_index()] or
 #' [rsample::sliding_period()] with an inner [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] gives nine
-#' pairs, and each pair is tested under [nested_tune_grid()].
-#' [nested_final_fit()], [nested_fit_resamples()], [nested_workflow_map()]
-#' and the other four tuners are not tested on these pairs.
+#' pairs, and each pair is tested under [nested_tune_grid()]. The pair of an
+#' outer and an inner [rsample::sliding_window()] is also tested under
+#' [nested_tune_bayes()], [nested_tune_race_anova()],
+#' [nested_tune_race_win_loss()], [nested_tune_sim_anneal()],
+#' [nested_fit_resamples()] and [nested_workflow_map()] with its default
+#' `fn`. On that pair, [nested_final_fit()] is tested for
+#' [nested_tune_grid()] results. These functions are not tested on the other
+#' eight pairs.
 #'
 #' @section Finalizing a parameter range:
 #'
