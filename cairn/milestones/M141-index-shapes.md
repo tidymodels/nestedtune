@@ -60,6 +60,8 @@ Probes on 2026-10-01 at `3a90e655` showed the defects. A value of `3e9` in any s
 - 2026-10-01: T1 and T2 done. The full suite failed only `test-sweep-prose.R`, on a 5-span sentence the T4 roxygen edit added mid-run. Split it, and all six sweeps and that file pass. `air format --check .` clean.
 - 2026-10-01: T3 done. AC4 plant loop and the second AC5 test added, and `test-split-checks.R` passes. The `nested_resamples()` call itself landed with T2's rename.
 - 2026-10-01: T4 done in the T1-T2 commits. Both help paragraphs, a NEWS bullet, and the Known issues entry, which also gains the outer `in_id` past the frame within integer range, so the entry lists every shape the plan's Out section keeps there.
+- 2026-10-01: T5 planted runs. With the `check_nested()` call stubbed, the AC1, AC2, AC3, AC5 and AC6 refusal tests and M138's NA tests fail, and the doubles control passes. With the `nested_resamples()` call stubbed, the AC4 test, the second AC5 test and M138's outside test fail, the folds failing in vctrs with `vctrs_error_subscript_type`. Both calls restored. Full test and check running.
+- 2026-10-01: claim audit delegated to a fresh Opus reader, running.
 
 ## Decisions
 
