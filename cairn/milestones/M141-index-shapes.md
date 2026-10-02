@@ -1,13 +1,13 @@
 # M141: Refuse a split index that is not a row number, and an empty assessment set
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, IP4
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes which designs the exported drivers and `nested_resamples()` refuse
-- **Branch/PR:** —
+- **Branch/PR:** m141-index-shapes
 
 ## Goal
 
