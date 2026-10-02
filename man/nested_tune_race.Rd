@@ -426,8 +426,8 @@ outer and an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()
 \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
 \code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
-inner design but fits nothing on it. These functions are not tested on
-the other eight pairs.
+inner design but fits nothing on it. On the other eight pairs, no
+function but \code{\link[=nested_resamples]{nested_resamples()}} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
 }
 
 \section{Finalizing a parameter range}{

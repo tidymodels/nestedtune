@@ -72,6 +72,7 @@ The inner-design gaps that M120 and M121 left are tested and documented.
 - 2026-10-01: the claim auditor re-read the three corrections once, and all three hold. It noted one comment line over 80 characters, which is now rewrapped. Status set to review.
 - 2026-10-01: review checkpoint, half done. AC1 to AC5 are verified and ticked, and the 13 findings are recorded. `devtools::check()` is still running, and the gate is not yet posed.
 - 2026-10-01: consistency gate passed, with `devtools::check()` at 0 errors, 0 warnings and 0 notes. Pre-gate checkpoint.
+- 2026-10-01: gate triage accepted. The fix-now work for F1 to F5 landed: D-113, the help and NEWS sentence, and the candidate row.
 
 ## Decisions
 
@@ -102,3 +103,5 @@ Independent review: three fresh-context reviewers (Opus diff-bug, Sonnet blame-h
 - F11 (diff 10): the AC boxes were unticked at status review. Recommended: reject, because review ticks them.
 - F12 (prior 5): the pair's grid final-fit test repeats a grid run of `test-time-series-pairs-window.R`. The two files do not share a cache. Recommended: reject, because the run takes a few seconds.
 - F13 (prior 6): `benchmarks/test-timing-baseline.md` still says "eleven heaviest files". Recommended: reject, because the count was already wrong before M140.
+
+Triage at the gate (2026-10-01): the maintainer accepted every recommended disposition. F1 to F3 are fixed by D-113, which corrects D-112. F4 is fixed: both help passages and `NEWS.md` now read "On the other eight pairs, no function but `nested_resamples()` and `nested_tune_grid()` is tested", and the six Rd pages are regenerated. F5 is fixed: the inner-design candidate row and D-113's Consequences name the two unclaimed combinations. F6 is noted, and the CI wait at merge measures it. F7 to F13 are rejected for the reasons above. After the fixes, the six prose sweeps, `air`, `cairn_validate` and the prose test files pass. A second `devtools::document()` gives no further diff.

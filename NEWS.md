@@ -261,7 +261,8 @@
   `fn`. On that pair, `nested_final_fit()` is tested for
   `nested_tune_grid()` results, and `nested_fit_resamples()` is tested to
   accept the design. It checks the inner design but fits nothing on it.
-  These functions are not tested on the other eight pairs.
+  On the other eight pairs, no function but `nested_resamples()` and
+  `nested_tune_grid()` is tested.
 
 * When an outer design leaves rows out of every assessment set,
   `augment()` now names the first five of those rows in its error, or all

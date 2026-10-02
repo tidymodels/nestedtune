@@ -142,8 +142,9 @@ tested under \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[
 \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
 \code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
-inner design but fits nothing on it. These functions are not tested on
-the other eight pairs. Any other inner design is not tested.
+inner design but fits nothing on it. On the other eight pairs, no
+function but \code{\link[=nested_resamples]{nested_resamples()}} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
+Any other inner design is not tested.
 
 Every test above that uses \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} leaves \code{lag} at
 its default of 0. A \code{lag} above 0 is refused as an \code{outside} and as an

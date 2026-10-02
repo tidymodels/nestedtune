@@ -128,8 +128,9 @@
 #' [nested_workflow_map()] with its default `fn`. On that pair,
 #' [nested_final_fit()] is tested for [nested_tune_grid()] results, and
 #' [nested_fit_resamples()] is tested to accept the design. It checks the
-#' inner design but fits nothing on it. These functions are not tested on
-#' the other eight pairs. Any other inner design is not tested.
+#' inner design but fits nothing on it. On the other eight pairs, no
+#' function but [nested_resamples()] and [nested_tune_grid()] is tested.
+#' Any other inner design is not tested.
 #'
 #' Every test above that uses [rsample::rolling_origin()] leaves `lag` at
 #' its default of 0. A `lag` above 0 is refused as an `outside` and as an
