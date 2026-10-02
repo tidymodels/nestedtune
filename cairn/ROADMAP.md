@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-01 M140 archived, M137 row pruned, validate green._
+_Last hygiene check: 2026-10-02 M141 archived, M138 row pruned, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M141 | Refuse a split index that is not a row number, and an empty assessment set | review | — | normal | milestones/M141-index-shapes.md |
+| M141 | Refuse a split index that is not a row number, and an empty assessment set | done | — | normal | milestones/archive/M141-index-shapes.md |
 | M140 | Inner-design gaps under the other functions | done | — | normal | milestones/archive/M140-inner-design-gaps.md |
 | M139 | Frame the inner splits on the analysis set under a repeated outer row | done | — | normal | milestones/archive/M139-repeated-row-inner-frame.md |
-| M138 | Refuse an NA in a split's row indices | done | — | normal | milestones/archive/M138-na-split-indices.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
