@@ -47,7 +47,7 @@ lacking the record or carrying no rows, and adds the Bayesian final-fit path
 with its oracles, RNG properties, print/summary and docs.
 
 The milestone's acceptance criteria were fixed at planning
-(`cairn/milestones/M46-final-fit-recorded-procedure.md`, AC1–AC7). At the
+(`cairn/milestones/M046-final-fit-recorded-procedure.md`, AC1–AC7). At the
 implementation gate three questions came up that the maintainer chose to send
 to independent review rather than settle in-session. The first is a measured
 conflict between a criterion as written and tune's behaviour; the other two
@@ -81,7 +81,7 @@ already carries the fitted workflow with its own retained recipe.
 Read these, in this order. Line numbers are as of commit `0debd6b` on branch
 `m046-final-fit-recorded-procedure`.
 
-- `cairn/milestones/M46-final-fit-recorded-procedure.md` — the whole file:
+- `cairn/milestones/M046-final-fit-recorded-procedure.md` — the whole file:
   goal, scope, AC1–AC7, tasks, work log (the 2026-09-02 line records the gate).
 - `cairn/DECISIONS.md` — entries D-014, D-016, D-023, D-040, D-041 (search
   `### D-0NN`). D-041 is the signature decision; D-023 the accessors.

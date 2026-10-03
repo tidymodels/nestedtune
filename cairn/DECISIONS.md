@@ -826,7 +826,7 @@ on `pak` resolving GitHub-style entries, which the local install at M32 T3
 exercised and the deploy job exercises on every publish. A theme package outside
 CRAN also means the site's appearance can change under this repo without a
 commit here; nothing pins it, on the same reasoning D-022 gave for declining a
-pkgdown floor. The milestone file `cairn/milestones/M32-tidymodels-org-conventions.md`
+pkgdown floor. The milestone file `cairn/milestones/M032-tidymodels-org-conventions.md`
 holds the sibling survey the choice rests on.
 
 
@@ -861,7 +861,7 @@ candidate rather than settled here, because vendoring at the shared blob is the
 whole point of the convergence. None of the three files carries a `push` or
 `pull_request` trigger, so `.github/ci-usage.py`'s filter rule does not reach
 them. Adopting the formatter also re-pointed a test helper's `file:line` ledger;
-the milestone file `cairn/milestones/M33-org-ci-workflows.md` holds the survey
+the milestone file `cairn/milestones/M033-org-ci-workflows.md` holds the survey
 and the reformatting evidence.
 
 
@@ -1085,7 +1085,7 @@ a plain table rather than refusing, which is what the acceptance criteria ask
 for and not what D-032's Consequences paragraph says. The ten `vec_ptype2` and
 `vec_cast` methods are no longer mirror images of each other, which vctrs asks
 a lattice to be; the measurements showing nothing in the package reaches that
-asymmetry are in `cairn/milestones/M37-vctrs-invariants.md`. Falsified by a
+asymmetry are in `cairn/milestones/M037-vctrs-invariants.md`. Falsified by a
 vctrs version that combines three or more tables in an order-dependent way
 through this lattice, or by `dplyr::bind_cols()` changing which argument's
 type it builds on.
@@ -1713,7 +1713,7 @@ selection for.
 
 ### D-059 (2026-09-07): a `nested_results_set` keeps its class through an operation exactly when every row left is one of the run's own workflows — extends to the set the invariant rule D-031 fixed for `nested_results`, and departs from its row clause
 
-**Context:** D-031 fixed for `nested_results` that a verb may reorder rows and add columns, and that adding or removing a row returns a bare tibble, because a fold table's record describes one design and fewer rows than the design's cannot answer for it (IP4). D-058 made the set a tibble of `wflow_id`, `workflow` and `result` with one `nested_results` per row and registered no subsetting method, so every subset keeps the class: a column subset prints a run it does not hold, an empty subset reaches the readers' all-failed refusal, and a repeated row stacks one workflow's metrics twice under its id (M71 review O2, O3; `cairn/milestones/M73-set-invariants.md` holds the measurements).
+**Context:** D-031 fixed for `nested_results` that a verb may reorder rows and add columns, and that adding or removing a row returns a bare tibble, because a fold table's record describes one design and fewer rows than the design's cannot answer for it (IP4). D-058 made the set a tibble of `wflow_id`, `workflow` and `result` with one `nested_results` per row and registered no subsetting method, so every subset keeps the class: a column subset prints a run it does not hold, an empty subset reaches the readers' all-failed refusal, and a repeated row stacks one workflow's metrics twice under its id (M71 review O2, O3; `cairn/milestones/M073-set-invariants.md` holds the measurements).
 
 **Decision:** the set's record is per row. An operation keeps the class and the `fn` attribute when the result holds the three record columns under their names with none repeated, at least one row, no repeated `wflow_id`, and each row's three values identical to the first data-frame argument's row of that id; otherwise it returns a bare tibble. A dropped or reordered workflow keeps the class, where D-031 sheds it, because each row's `nested_results` describes its own run whole; a repeated row, an added row, a swapped `result` or an empty set sheds it. Five doors route to the one rule — `dplyr_reconstruct()`, `[`, `vec_restore()`, base `rbind()` and `names<-` — as the single class's do. No `vec_ptype2`/`vec_cast` lattice is registered: a set combined with a bare table sheds through both doors under this rule, and a direct `vctrs::vec_cbind()` gives a bare tibble, documented. Considered and rejected: a structural check with no template comparison (binds two map runs into one set, but passes a row whose `result` was swapped for another run's); mirroring D-031's row clause (a `filter()` dropping a failed workflow before reading, the use that asked for this, would return a tibble the readers refuse).
 

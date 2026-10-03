@@ -77,7 +77,7 @@ the test bar.
   lines 335-355.
 - `cairn/DECISIONS.md`: read D-049, D-103, D-104, D-109 and D-111 whole.
   Find them with `grep -n '^### D-' cairn/DECISIONS.md`.
-- `cairn/milestones/archive/M54-inner-finalize-analysis-frame.md`.
+- `cairn/milestones/archive/M054-inner-finalize-analysis-frame.md`.
 - To run code: in the repo root, `Rscript -e 'pkgload::load_all(); ...'`.
   For a test file, `Rscript -e 'devtools::test(filter = "nested-tune-finalize")'`.
   An R string that carries a backslash goes in a script file, because

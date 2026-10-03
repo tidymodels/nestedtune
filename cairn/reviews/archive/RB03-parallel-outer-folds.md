@@ -105,7 +105,7 @@ Read:
   250–262; the seeding and restoration helpers `set_fold_seed()` and
   `restore_rng()` are 343–364. The roxygen `@section Reproducibility:` block
   (lines 37–68) is the documented contract.
-- `cairn/milestones/M07-parallel-outer-folds.md` — the milestone plan, its nine
+- `cairn/milestones/M007-parallel-outer-folds.md` — the milestone plan, its nine
   acceptance criteria, and its work log.
 - `cairn/DECISIONS.md` entries **D-011** and **D-016** in full. D-011 is the
   RNG contract; D-016 amends its scope for resample construction.

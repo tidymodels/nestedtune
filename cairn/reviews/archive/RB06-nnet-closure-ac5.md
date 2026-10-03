@@ -55,7 +55,7 @@ nothing to do with the article:
 M061 met the same shape once before: a planned `dials` guard was dropped by a
 mini-gate amendment because `tune` imports `dials`, so a dials-masked build
 fails at `library()` before any guard runs (its archive summary,
-`cairn/milestones/archive/M61-tuner-vignette.md`, Decisions paragraph).
+`cairn/milestones/archive/M061-tuner-vignette.md`, Decisions paragraph).
 
 The maintainer escalated rather than amending at the implement gate. Two
 things are open: what AC5 should certify about the article, and whether
@@ -73,7 +73,7 @@ present through the import closure.
   system-library packages are unmaskable) and the M57 line
   (`skip_if_not_installed()` on a Suggests package inside an Import's hard
   closure guards nothing).
-- `cairn/milestones/archive/M61-tuner-vignette.md` — the dials precedent.
+- `cairn/milestones/archive/M061-tuner-vignette.md` — the dials precedent.
 - `vignettes/articles/why-nest.Rmd` — the article; note it calls no
   `library()` on nestedtune and reads `why-nest.rds`.
 - `vignettes/articles/why-nest-sim.R` — the script; its `requireNamespace()`

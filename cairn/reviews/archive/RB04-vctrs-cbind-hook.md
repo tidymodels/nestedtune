@@ -92,7 +92,7 @@ All paths are relative to the repository root.
 - `tests/testthat/test-vctrs-compat.R` — the criteria as tests. The block at
   line 120 is the one this question decides; the file's header comment records
   which entry points reach which generic.
-- `cairn/milestones/M37-vctrs-invariants.md` — acceptance criteria and the
+- `cairn/milestones/M037-vctrs-invariants.md` — acceptance criteria and the
   work log, including the two rounds of measurement summarized above.
 - `cairn/DECISIONS.md`, entries D-031 (the dplyr half, and why the invariant
   set is every column the constructor writes) and D-032 (the vctrs half, the

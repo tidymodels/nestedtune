@@ -109,7 +109,7 @@ Read these files in the repository root. They are short.
   (quoted above), GP1 (delegation fidelity — divergence from what a user would
   get calling `tune` directly is permitted but must be documented, never
   silent), and GP4 (performance, explicitly subordinate to IP2).
-- `cairn/milestones/M02-outer-loop-orchestration.md` — the milestone's goal,
+- `cairn/milestones/M002-outer-loop-orchestration.md` — the milestone's goal,
   scope, acceptance criteria AC1–AC7, coverage map, and tasks T1–T9. T4 is the
   task this brief concerns; T8 is the leakage test.
 - `cairn/DECISIONS.md` — read D-002 (contract boundary), D-003 (pre-1.0

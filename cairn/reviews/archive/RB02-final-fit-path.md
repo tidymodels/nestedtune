@@ -96,7 +96,7 @@ installed; `Rscript -e 'devtools::test()'` runs the existing suite.
   object, never a field on the results", and GP1 (delegation fidelity), GP2
   (oracle verification), GP3 (hard to misuse over configurable), GP5 (don't
   ship inference the literature hasn't settled).
-- `cairn/milestones/M05-final-fit-path.md` — the milestone's goal, scope,
+- `cairn/milestones/M005-final-fit-path.md` — the milestone's goal, scope,
   acceptance criteria AC1–AC6, coverage map, and tasks T1–T8. T2 and T5 carry
   the tripwire tags that produced this brief.
 - `cairn/DECISIONS.md` — read D-002 (contract boundary), D-003 (pre-1.0
