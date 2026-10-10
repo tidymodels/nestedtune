@@ -96,9 +96,9 @@ Use \code{\link[=collect_metrics]{collect_metrics()}} for the estimate. \code{su
 \link[=autoplot.nested_results]{autoplot()} show it in other ways.
 
 \code{arrange()}, \code{mutate()} adding a column, and a join that matches one row
-per fold keep the class. Removing a fold or a column above returns a
-plain tibble, because the result no longer describes the design that
-ran. So do \code{slice()}, \code{bind_rows()} of two results, and
+per fold keep the class. Removing a fold or a column above
+returns a plain tibble, because the result no longer describes the
+design that ran. So do \code{slice()}, \code{bind_rows()} of two results, and
 \code{vctrs::vec_rbind(x)} alone. \code{bind_cols()} keeps the class only with the
 result as its first argument. \code{group_by()}, \code{rowwise()} and
 \code{tibble::as_tibble()} return their own classes and keep the attributes.

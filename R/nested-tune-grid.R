@@ -67,9 +67,9 @@
 #'   [autoplot()][autoplot.nested_results] show it in other ways.
 #'
 #'   `arrange()`, `mutate()` adding a column, and a join that matches one row
-#'   per fold keep the class. Removing a fold or a column above returns a
-#'   plain tibble, because the result no longer describes the design that
-#'   ran. So do `slice()`, `bind_rows()` of two results, and
+#'   per fold keep the class. Removing a fold or a column above
+#'   returns a plain tibble, because the result no longer describes the
+#'   design that ran. So do `slice()`, `bind_rows()` of two results, and
 #'   `vctrs::vec_rbind(x)` alone. `bind_cols()` keeps the class only with the
 #'   result as its first argument. `group_by()`, `rowwise()` and
 #'   `tibble::as_tibble()` return their own classes and keep the attributes.
