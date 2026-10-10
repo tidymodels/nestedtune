@@ -78,6 +78,14 @@ Evidence read at `20dcd6d2` (2026-10-10). `main` and `origin/main` are both `5ca
 - AC4: `test-control-slots.R` passes (148 expectations, read at `689e48c0`, whose package tree `git diff --quiet` shows equal to HEAD outside `cairn/`). `git diff main -- tests/testthat/test-control-slots.R` is empty, so the slot rules are unchanged. The file reads the bayes, race, sim-anneal and fit-resamples pages, takes the slots from tune's `formals()` and requires each slot under exactly one of the seven headings.
 - AC5: `R/nested-final-fit.R:63-65` (rendered at `man/nested_final_fit.Rd:62-64`) says: "The nested estimate describes the procedure that produced this model, not this model itself. Report [collect_metrics()] on `results` as the estimate for this model, because the model comes from the same procedure."
 
+Re-read at `b3c54fec`, after the fixes below:
+
+- AC1: Descriptions unchanged (29, 32, 28, 31, 21, 24, 35), all at most 40.
+- AC2: prose is bayes 811, race 858, sim-anneal 760, fit-resamples 549, workflow-map 477, final-fit 629 and nested_resamples 742. Each is under 1,714.9, and the total of 4,826 is under 5,171.5.
+- AC3: the grep still prints nothing on all seven pages.
+- AC4: `git diff main -- tests/testthat/test-control-slots.R` is still empty. The file passes at `b3c54fec` (148 expectations), run after the fixes were rebuilt.
+- AC5: the sentence now sits at `R/nested-final-fit.R:69-71` (`man/nested_final_fit.Rd:68-70`), worded as quoted above.
+
 spawned: diff-bug, blame-history, prior-review, plus the plan's fresh reader (`reader`, beside the tune, finetune, workflowsets and rsample pages, D-061 triage). They reported 67 findings: 45 fixed on the branch, 19 rejected, 3 sent on.
 
 - diff-bug #1: Bayes `seed` reason wrong — fix now
