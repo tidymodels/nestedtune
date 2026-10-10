@@ -7,8 +7,8 @@
 \method{print}{nested_results}(x, ..., n = NULL, width = NULL)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
 \item{...}{Not used. It must be empty, so \code{n} and \code{width} must be given by
 name in full.}

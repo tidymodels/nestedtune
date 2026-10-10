@@ -27,8 +27,7 @@
 the print method, the \code{summary.nested_results_set} that \code{summary()}
 returns.}
 
-\item{...}{Not used. It must be empty, so an argument given here is an error
-and not a silent no-op.}
+\item{...}{Not used, and must be empty.}
 
 \item{type}{Which view to draw: \code{"parameters"} (the default) or
 \code{"performance"}, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.}

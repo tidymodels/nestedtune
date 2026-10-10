@@ -26,8 +26,7 @@ all. A static metric's panel has no time and is drawn whatever
 did not score is refused with class \code{nestedtune_bad_plot_filter}, as is
 either argument given with \code{type = "parameters"}.}
 
-\item{...}{Not used. It must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
 A \code{ggplot} object.

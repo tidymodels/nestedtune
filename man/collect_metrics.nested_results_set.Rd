@@ -30,78 +30,38 @@
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
 
-\item{...}{Not used. It must be empty, so an argument given here is an error
-and not a silent no-op.}
+\item{...}{Not used, and must be empty.}
 
-\item{summarize}{Whether to average each workflow's per-fold metrics
-(\code{TRUE}, the default) or return them one row per outer fold (\code{FALSE}),
-as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}. For \code{collect_predictions()},
-whether to average each workflow's predictions per data row (\code{TRUE})
-or return them per fold (\code{FALSE}, the default there), as on
-\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}.}
+\item{summarize}{As on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}, and for
+\code{collect_predictions()} as on \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}.}
 
-\item{type}{For \code{collect_metrics()}, the table's shape: \code{"long"} (the
-default) or \code{"wide"}, as on \code{\link[=collect_metrics.nested_results]{collect_metrics.nested_results()}}. The wide
-shape is keyed on \code{wflow_id} too, and a metric one workflow did not
-score is \code{NA} in its rows.}
+\item{type}{For \code{collect_metrics()}, \code{"long"} (the default) or \code{"wide"}.
+The wide shape is keyed on \code{wflow_id} too, and a metric that a workflow
+did not score is \code{NA} in its rows.}
 
 \item{metrics, event_level}{As on \code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}. The
 default \code{event_level} takes each workflow's recorded level.}
 }
 \value{
-A tibble: \code{wflow_id} first, then the columns the single-workflow
-method returns for each element. The rows are bound in the set's order
-over the union of the elements' columns. Where an element lacks a
-column its rows hold \code{NA}, or \code{NULL} in a list column. An element whose
-table has no rows contributes none.
+A tibble with \code{wflow_id} first, then the columns that the method
+for one workflow returns, bound in the set's order. A column that one
+workflow lacks is \code{NA} in its rows, or \code{NULL} in a list column.
 }
 \description{
-You read a \code{nested_results_set}, what \code{\link[=nested_workflow_map]{nested_workflow_map()}} returns,
-with the same eight functions that read one workflow's run. Each calls
-its single-workflow method on every element and binds the tables in the
-set's order, under a \code{wflow_id} column placed first.
-
-\code{collect_metrics()} gives one row per workflow and metric, or per
-workflow, outer fold and metric with \code{summarize = FALSE}. There, the
-design's fold labels follow \code{wflow_id}, each in its own column: \code{id}, and
-\code{id2} on a repeated design. The five
-from \code{collect_selections()} to \code{collect_extracts()} stack their
-per-fold tables the same way. \code{compute_metrics()} scores each
-workflow's saved predictions with the metric set you give it.
-\code{augment()} gives each workflow's data rows with its predictions,
-averaged per row on a design that holds out a row more than once.
+These methods read a \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.
+Each one calls its method for one workflow on every workflow in the set,
+and stacks the tables under a \code{wflow_id} column.
 }
-\section{Workflows and folds that failed}{
+\details{
+Each function works as it does for one workflow, and its table follows
+\code{wflow_id}. A workflow in which no fold completed is left out with a
+warning. If no workflow completed a fold, the function gives an error.
+\code{collect_notes()} reads every workflow, the failed ones included.
 
-
-Failed folds are left out, as on one workflow: every function but
-\code{collect_notes()} takes the folds that completed. A workflow with some folds failed contributes the folds that
-ran. That function's own partial-run warning is raised once for it,
-with the workflow's id in front of the message. A workflow in which no
-fold completed is left out while another workflow completed one, warned
-about with class \code{nestedtune_partial_summary}. A set in which no
-workflow completed a fold is refused with class
-\code{nestedtune_no_completed_folds}.
-
-\code{collect_notes()} is the exception: it reads every workflow, including those
-in which no fold completed, and refuses nothing, because a failed workflow's
-notes are the reason to ask.
+Each workflow can have its own control, so one workflow can save
+predictions or extracts that another did not. A function that reads the
+column gives an error that names the workflow without it.
 }
-
-\section{Columns not saved, and colliding ids}{
-
-
-A control reaches each workflow of a set through the call's \code{...} or through
-its own \code{option} entry, so one workflow can keep what another did not.
-\code{collect_predictions()} and \code{collect_extracts()} therefore refuse a set in
-which a workflow with completed folds lacks the column. So do
-\code{compute_metrics()} and \code{augment()}, which read \code{.predictions}. The refusal
-has class \code{nestedtune_column_not_saved} and names the workflow.
-
-An element's table that already has a \code{wflow_id} column, a parameter given
-that id, is refused with class \code{nestedtune_collect_name_collision}.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

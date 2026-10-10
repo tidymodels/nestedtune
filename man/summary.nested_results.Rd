@@ -13,8 +13,7 @@
 \item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
 siblings.}
 
-\item{...}{Not used. It must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used, and must be empty.}
 
 \item{x}{A \code{summary.nested_results} object from \code{\link[=summary.nested_results]{summary.nested_results()}}.}
 }

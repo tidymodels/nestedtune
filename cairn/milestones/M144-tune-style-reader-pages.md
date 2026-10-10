@@ -44,7 +44,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 ## Tasks
 
 - [x] T1: Run `doc-profile.R` at the branch point and record the 24 pages' figures in the comparison note.
-- [ ] T2: Rewrite the collect, compute and augment pages and their set methods. Cut the standard-error argument on `collect_metrics` to the one sentence a user needs. The literature stays on `estimate.Rmd`.
+- [x] T2: Rewrite the collect, compute and augment pages and their set methods. Cut the standard-error argument on `collect_metrics` to the one sentence a user needs. The literature stays on `estimate.Rmd`.
 - [ ] T3: Rewrite `collect_selections`, `agreement`, `selection_rule`, `autoplot`, `extract_procedure`, `extract_scored_candidates` and `extract_tune_results`. Replace the in-prose pointers between sections with See Also links.
 - [ ] T4: Rewrite the print, summary, predict and extract pages for `nested_results`, `nested_results_set` and `nested_final_fit`, and `nestedtune-package`. Keep the IP3 sentence on each print and summary page.
 - [ ] T5: Run the AC3 sweep over the 24 pages. Rewrite the text-matching lines of any test that reads the old text.
@@ -56,3 +56,5 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-09: plan chose to drop the `nestedtune_*` class names from the help pages over keeping them, because tune names none and the condition carries its class; falsified by a user asking which class to catch.
 - 2026-10-10: input from M143's review (diff-bug #18). `R/extract-procedure.R:54` cites "Differences from calling tune directly" on every loop page, but the race and sim-anneal sections are titled "Differences from calling finetune directly". T3's rewrite of `extract_procedure` takes it.
 - 2026-10-10: implement started on branch `m144-tune-style-reader-pages` from `16fd160c`. T1: `doc-profile.R` reads the 24 pages at 9,116 prose words (AC2 cap 6,837), with 17 Descriptions over 40 words. The figures are in the comparison note.
+- 2026-10-10: T2: the five collect, compute and augment pages went from 3,218 to 1,282 prose words, Descriptions 19 to 31 words. Refusal lists and class names left, `refusals-saved-run.R` is deleted, and the `std_err` section is three sentences pointing to `vignette("estimate")`. Its two citations went to M145's work log, because that vignette cites neither. Suite, document, sweeps and air clean.
+- 2026-10-10: implement chose to run `devtools::test()` at T2 and again at T5 and T6, not after every roxygen-only task, because these tasks change no code and the suite takes 9 minutes.

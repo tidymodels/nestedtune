@@ -19,11 +19,10 @@ collect_inner_metrics(x, ...)
 \method{collect_notes}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
-\item{...}{Not used. It must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
 A tibble whose first columns are the design's fold labels and whose
