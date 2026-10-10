@@ -17,8 +17,9 @@ default) or return one row per outer fold (\code{FALSE}).}
 
 \item{type}{\code{"long"} (the default), one row per metric, or \code{"wide"}, one
 column per metric. The wide shape drops the estimator, \code{n}, \code{std_err}
-and \code{.weight}. It gives an error for a metric with two estimators, or
-one named like a key column such as \code{id}.}
+and \code{.weight}. It gives an error for a metric with two estimators. It
+also gives an error for a metric named like a key column, such as \code{id}
+in the per-fold table.}
 }
 \value{
 A tibble. Summarized, it has one row per metric, with \code{mean}, \code{n}

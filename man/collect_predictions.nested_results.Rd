@@ -24,8 +24,9 @@ predictions for each data row (\code{TRUE}) or return them per fold
 A tibble with the fold labels first (\code{id}, and \code{id2} on a
 repeated design). For \code{collect_predictions()}, the columns
 \code{\link[tune:last_fit]{tune::last_fit()}} saved follow: the outcome, the predictions, \code{.row}
-and \code{.config}. Averaged, the table has one row per data row in \code{.row}
-order, without the fold labels and \code{.config}.
+and \code{.config}. Averaged, the table has one row per data row that a
+completed fold held out, in \code{.row} order. It has no fold labels and no
+\code{.config}.
 }
 \description{
 \code{collect_predictions()} and \code{collect_extracts()} return what each outer

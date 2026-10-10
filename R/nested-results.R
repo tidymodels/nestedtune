@@ -772,8 +772,9 @@ new_tbl <- function(cols) {
 #'   default) or return one row per outer fold (`FALSE`).
 #' @param type `"long"` (the default), one row per metric, or `"wide"`, one
 #'   column per metric. The wide shape drops the estimator, `n`, `std_err`
-#'   and `.weight`. It gives an error for a metric with two estimators, or
-#'   one named like a key column such as `id`.
+#'   and `.weight`. It gives an error for a metric with two estimators. It
+#'   also gives an error for a metric named like a key column, such as `id`
+#'   in the per-fold table.
 #' @param ... Not used, and must be empty.
 #'
 #' @return A tibble. Summarized, it has one row per metric, with `mean`, `n`

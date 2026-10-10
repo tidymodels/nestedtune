@@ -62,3 +62,5 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-10: T4: the twelve print, summary, predict, extract and package pages went from 3,510 to 1,464 prose words. Each print and summary page has one sentence that the nested estimate describes the procedure, not a fitted model. The 24 pages total 3,990 prose words, 44% of the branch point.
 - 2026-10-10: T5: the AC3 grep prints nothing on the 24 pages. No test reads their text, so no test changed.
 - 2026-10-10: substantive amendment: Scope In gains "A guide sentence that points to text these pages drop." `vignettes/results.Rmd` said `?collect_selections` names the warning's class, which T3 removed, so T5 deleted that sentence. Page sweeps clean.
+- 2026-10-10: T6: NEWS bullet added, and the head figures are in the comparison note.
+- 2026-10-10: claim audit: 170 claims read, 2 corrected — R/nested-results.R, R/nested-results-collect.R

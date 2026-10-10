@@ -189,8 +189,9 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' @return A tibble with the fold labels first (`id`, and `id2` on a
 #'   repeated design). For `collect_predictions()`, the columns
 #'   [tune::last_fit()] saved follow: the outcome, the predictions, `.row`
-#'   and `.config`. Averaged, the table has one row per data row in `.row`
-#'   order, without the fold labels and `.config`.
+#'   and `.config`. Averaged, the table has one row per data row that a
+#'   completed fold held out, in `.row` order. It has no fold labels and no
+#'   `.config`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
