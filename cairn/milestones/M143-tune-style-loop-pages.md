@@ -1,13 +1,13 @@
 # M143: The other loop pages, the final fit and the design page read like tune's
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M142
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the help pages for the functions that run the loop
-- **Branch/PR:** —
+- **Branch/PR:** m143-tune-style-loop-pages
 
 ## Goal
 
@@ -46,7 +46,7 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 
 ## Tasks
 
-- [ ] T1: Run `doc-profile.R` at the branch point and record the seven pages' figures in the comparison note.
+- [x] T1: Run `doc-profile.R` at the branch point and record the seven pages' figures in the comparison note.
 - [ ] T2: Rewrite the bayes, race and sim-anneal pages, with the race and sim-anneal templates they alone use. Keep each tuner's own arguments and its Differences list. Point to `?nested_tune_grid` for what the loop pages share.
 - [ ] T3: Rewrite `nested_fit_resamples` and `nested_final_fit`. On the final-fit page, keep what it fits, what it returns, and the IP3 sentence. Move the refusal list out, because the error messages carry it.
 - [ ] T4: Rewrite `nested_workflow_map` and `nested_resamples`. On `nested_resamples`, keep the D-110 reasons and the D-085 claims in short lists.
@@ -57,3 +57,4 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 
 - 2026-10-09: created by /milestone-plan with M142, M144 and M145. M142's work log holds the collision sweep, the criteria audit and the gate's answers.
 - 2026-10-09: inputs from M142's review. `orchestrator` is still used on these pages, and the grid page no longer defines it (AC3 removes it). The bayes, race and sim-anneal Descriptions still open with "gives you an honest score" and carry an IP3 sentence the grid page moved to Details. `man-roxygen/differences-passed-shared.R` says the passed-through slots "behave as the grid page describes", and the grid page now gives them one short paragraph.
+- 2026-10-10: implement started on `m143-tune-style-loop-pages`, cut from `5ca197ee`. T1: the branch-point figures are in the comparison note. The seven pages hold 10,343 prose words, so AC2's total cap is 5,171, and the per-page cap is 1,714 (1.1 times `tune_bayes`'s 1,559).
