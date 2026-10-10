@@ -1,6 +1,6 @@
 # M145: The other four guides read like the tidymodels.org articles
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M142, M144
 - **Driving RR:** —
@@ -55,7 +55,7 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - [x] T3: Rewrite `tuners.Rmd` as one short section for each tuner and one for the workflow set. Drop the column meanings such as `.iter` and `n`, which the help pages hold.
 - [x] T4: Rewrite `results.Rmd` as one narrative. Drop the column tour, the failed-fold run, the dplyr class rules and the `event_level` note.
 - [x] T5: Rewrite `parallel.Rmd` as a short how-to. Cut the seeding detail to one sentence and a link to `?nested_tune_grid`.
-- [ ] T6: Run the verify slot, the gating sweeps and `pkgdown::check_pkgdown()`. Record the head figures and add a NEWS bullet. At review, one fresh reader reads the four pages beside the tidymodels.org articles. The gate triages every entry (D-061).
+- [x] T6: Run the verify slot, the gating sweeps and `pkgdown::check_pkgdown()`. Record the head figures and add a NEWS bullet. At review, one fresh reader reads the four pages beside the tidymodels.org articles. The gate triages every entry (D-061).
 
 ## Work log
 
@@ -72,3 +72,4 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - 2026-10-10: T6 in progress, not checked off. The NEWS bullet and the head figures in `references/tune-docs-comparison.md` are written. The six gating sweeps print clean, `pkgdown::check_pkgdown()` finds no problems, and the `error = TRUE` grep prints nothing. `devtools::test()` and the claim audit are running, and `devtools::check()` is still owed.
 - 2026-10-10: the claim audit's reader found 4 wrong claims and 2 loose ones, all fixed: the Bayle et al. coin-flip step (the paper shows a shrinking loss-difference variance), the Vabalas framing, the Arlot and Celisse "estimate" reading (their goal is model selection), and the parallel cost sentence (a probe timed the pool no slower). The print wording and the seed sentence are tightened too. Its re-read is pending.
 - 2026-10-10: claim audit: 96 claims read, 6 corrected — vignettes/estimate.Rmd, vignettes/tuners.Rmd, vignettes/articles/parallel.Rmd. The same reader re-read the 6 and found that all hold.
+- 2026-10-10: T6 done. `devtools::test()` passes with no failures, and `devtools::check()` gives 0 errors, 0 warnings and 0 notes with the vignettes rebuilt. No `.R` file and no roxygen changed, so `air` and `document()` are not owed. The fresh reader beside the tidymodels.org articles runs at review. Status set to review.
