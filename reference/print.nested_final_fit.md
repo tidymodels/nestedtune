@@ -1,20 +1,7 @@
 # Print a final fit
 
-Shows what the full-data search was, which parameters it selected, and
-which number to report for this model. It also names the accessors that
-reach what selection saw.
-
-The number to report is the nested estimate
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-returns from the results object the fit was built from. For a fit built
-from a workflow set, it is that workflow's rows of
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the set. The print says so. That estimate describes the procedure
-that produced this model. The stored tuning run has metrics, but
-selection consumed them. See
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for why those metrics are not the number to report and the nested
-estimate is.
+Printing a `nested_final_fit` shows the tuning run on all the data, the
+parameters it selected, and which number to report for this model.
 
 ## Usage
 
@@ -27,51 +14,35 @@ print(x, ...)
 
 - x:
 
-  A `nested_final_fit` object from
+  A `nested_final_fit` from
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
 
 - ...:
 
-  Not used. It must be empty. Passing an argument here raises an error
-  instead of leaving it silently ignored.
+  Not used, and must be empty.
 
 ## Value
 
 `x`, invisibly.
 
-## The procedure line
+## Details
 
-The line under the heading tells you what ran: the procedure, which is
-the tuner and its counts. A grid search or a race is named with the
-number of candidates, parameter settings, it scored. An iterating search
-is named with the initial candidates scored and requested and the
-iterations completed and requested. It can score fewer initial
-candidates than `initial` names and can stop short of `iter`.
+The number to report is the nested estimate from
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+on the nested run the fit was built from. For a workflow set, it is that
+workflow's rows. The nested estimate describes the procedure that
+produced this model, not the fitted model itself. The tuning run's own
+metrics were used to select, so they are optimistic on average.
 
-Where nothing was tuned the line reads "no tuning", the selection line
-reads "nothing to select", and the note says that
-[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
-and
-[`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
-refuse the object.
+The line under the heading names the tuner and its counts: the
+candidates a grid search or a race scored, or the initial candidates and
+iterations of an iterating search. A fit with nothing to tune reads "no
+tuning".
 
-## The selection rule
-
-When the selection was made by a rule other than the default, a line
-follows the `Selected:` line. It reads `Selected by:` and then the
-rule's name, orderings and limit, in the words the print of
-[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-uses after its class tag, for example
-`Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
-under the default rule and on a fit that tuned nothing. The summary's
-`select` component holds the rule as a value.
-
-Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-line names the metric that chose the candidate. An example is
-`Selecting metric: rmse`. Under the default rule it follows the
-`Selected:` line, and otherwise the `Selected by:` line. It is absent
-under the `"desirability"` rule, which chooses by its goals, on a fit
-that tuned nothing, and on a fit whose record holds no `first_metric`.
+Under a rule other than `"best"`, a line such as
+`Selected by: pct_loss by num_comp (limit = 5)` names the rule. A
+`Selecting metric:` line names the metric that chose the candidate. It
+is absent under the `"desirability"` rule.
 
 ## See also
 

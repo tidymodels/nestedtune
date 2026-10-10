@@ -1,15 +1,10 @@
 # Predicting from a nested run
 
-A nested run holds one model per outer fold, each fitted to estimate how
-the procedure performs, and none of them is the model to deploy.
-[`predict()`](https://rdrr.io/r/stats/predict.html) on its results
-therefore refuses, with class `nestedtune_predict_results`, and points
-you to
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-which fits that model on all the data. For a workflow set, the message
-names
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)'s
-`id` argument, which picks the workflow.
+[`predict()`](https://rdrr.io/r/stats/predict.html) on a nested run
+gives an error that points to
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
+The outer folds' models produce the estimate, and none of them is the
+model to deploy.
 
 ## Usage
 
@@ -34,6 +29,12 @@ predict(object, ...)
 ## Value
 
 None. The call is an error.
+
+## Details
+
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+fits the model to deploy on all the data. For a workflow set, its `id`
+argument picks the workflow.
 
 ## See also
 

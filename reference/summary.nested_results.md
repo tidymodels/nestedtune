@@ -1,14 +1,8 @@
 # Summarize a nested cross-validation result
 
-Answers what the run means. It says how much of the requested outer
-design ran, and which outer folds failed at which stage. It also says
-what each fold's inner tuning selected, and the estimate across the
-folds that completed.
-
-The selection lines are the part nothing else in the ecosystem shows.
-Outer folds that chose different parameters mean the tuning procedure,
-tune then select, is unstable on this data. Averaging the metrics hides
-that, so the summary marks it.
+[`summary()`](https://rdrr.io/r/base/summary.html) reports how much of
+the outer design ran, which folds failed and at which stage, what each
+fold selected, and the nested estimate.
 
 ## Usage
 
@@ -26,12 +20,11 @@ print(x, ...)
 
   A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or one of its siblings.
+  or a related function.
 
 - ...:
 
-  Not used. It must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used, and must be empty.
 
 - x:
 
@@ -39,76 +32,51 @@ print(x, ...)
 
 ## Value
 
-[`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
-class `summary.nested_results`, a list holding:
+[`summary()`](https://rdrr.io/r/base/summary.html) returns a
+`summary.nested_results`, a list with these components:
 
-- the outer resampling scheme's label
+- `outer_label`, the outer resampling scheme's label
 
-- the requested and completed fold counts
+- `requested` and `completed`, the fold counts
 
-- the failed folds, with the stage each failed at
+- `failures`, the failed folds and the stage each failed at
 
-- what the completed folds selected
+- `selection`, what the completed folds selected
 
-- the rule the folds selected by, as
+- `select` and `first_metric`, as
   [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it, under the name `select`. It is `NULL` on a
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  run, which applies no rule.
+  records them
 
-- the name of the first metric in the set, as
-  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it, under the name `first_metric`. It is `NULL` on a
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  run, and on a run built before the name was recorded.
+- `grids`, the candidates each fold scored
 
-- the candidates, the parameter settings, each fold searched
-
-- the metric estimates averaged over them
-
-Printing it is what most callers want. The components are there for one
-that needs a number rather than a line of text.
+- `estimate`, the averaged metrics, or `NULL` when no fold completed
 
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
 
-## The selection rule
+## Details
 
-When the run selected by a rule other than the default, the print adds a
-line directly under the "Selected parameters" heading. It reads
-`Selected by:` and then the rule's name, orderings and limit, in the
-words the print of
-[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-uses after its class tag, for example
-`Selected by: one_std_err by num_comp`. The line is absent under the
-default rule, so its presence is the signal. It prints whether or not
-any fold completed, because the rule describes the procedure the run
-asked for.
+Folds that selected different parameters show that the tuning procedure
+picks different values on different data. The averaged metrics hide
+this, so the summary marks it. The nested estimate describes the tuning
+procedure, not a fitted model.
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+fits the model to deploy.
 
-Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-line names the metric that chose each fold's candidate. It reads
-`Selecting metric:` and then the `first_metric` component, for example
-`Selecting metric: rmse`. Under the default rule it is the first line
-under the heading. It is absent under the `"desirability"` rule, which
-chooses by its goals, on a
+Under a rule other than `"best"`, a line such as
+`Selected by: one_std_err by num_comp` names the rule. A
+`Selecting metric:` line names the metric that chose each fold's
+candidate. It is absent under the `"desirability"` rule and on a
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-run, and on a run whose record holds no `first_metric`. It also prints
-when no fold completed.
+run.
 
-## A run that did not finish
-
-Summarizing a partly completed run warns and still returns the summary:
-the folds that ran are described, and the warning says the design asked
-for more. A run in which every fold failed behaves the same way and
-describes a failed run rather than refusing to answer. That is where
-this differs from
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-which errors when no outer fold completed.
+A run with failed folds gives a warning and still returns its summary,
+even when no fold completed.
 
 ## See also
 
 [`print.nested_results()`](https://nestedtune.tidymodels.org/reference/print.nested_results.md),
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md),
 [`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
 for a workflow-set run
 

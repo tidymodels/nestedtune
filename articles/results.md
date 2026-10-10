@@ -488,10 +488,8 @@ On a run with a failed fold, the readers answer over the folds that
 completed. [`summary()`](https://rdrr.io/r/base/summary.html), the
 collect functions and
 [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-each warn once and say how many folds the answer covers.
-[`?collect_selections`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-names the warning’s class. The one collect function that does not warn
-is
+each warn once and say how many folds the answer covers. The one collect
+function that does not warn is
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html),
 which reads every fold.
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)

@@ -1,10 +1,11 @@
-# Extract the parameter settings a final fit actually scored
+# Extract the candidates a final fit scored
 
-Returns the candidates, the parameter settings
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)'s
-tuning run evaluated. It is the full-data counterpart of the candidate
-set each outer fold's `.inner_metrics` table describes. It is derived
-the same way, so the two can be compared directly.
+`extract_scored_candidates()` returns the parameter settings that the
+tuning run of
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+scored, one row per candidate. Compare them with
+[`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+on the nested run.
 
 ## Usage
 
@@ -16,39 +17,25 @@ extract_scored_candidates(x, ...)
 
 - x:
 
-  A `nested_final_fit` object from
+  A `nested_final_fit` from
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
 
 - ...:
 
-  Not used. It must be empty. Passing an argument here raises an error
-  instead of leaving it silently ignored.
+  Not used, and must be empty.
 
 ## Value
 
-A tibble with one row per candidate scored. Each row has one column per
-tuned parameter plus tune's `.config` label, and `.iter` where the
-search iterated. It is the distinct parameter rows of the run's
-[`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-table, with everything tune wrote per metric dropped. So a candidate has
-one row here however many evaluation times it was scored at. The times
-and the scores are in `collect_metrics(extract_tune_results(x))`. A fit
-that ran no tuning scored no candidate and is refused with condition
-class `nestedtune_no_tuning_run`.
+A tibble with one column per tuned parameter, then `.config`, and
+`.iter` where the search iterated. A candidate scored at several
+evaluation times has one row. A final fit that ran no tuning gives an
+error.
 
-## Scored, not asked for
+## Details
 
-A `grid` given as a size is expanded by tune, and the expansion
-sometimes reaches fewer candidates than the number requested. A
-candidate that failed everywhere scored nothing. The Value section of
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-says how `attr(x, "grid")` and `.inner_metrics` can differ, and it holds
-here too.
-
-A candidate that failed on every inner resample is missing from this
-table, and a `nested_final_fit` has no `.notes` column to record it in.
-Look inside the run itself:
-`tune::collect_notes(extract_tune_results(x))`.
+tune can reach fewer candidates than a `grid` size asks for. A candidate
+that failed on every resample scored nothing and is missing here.
+`tune::collect_notes(extract_tune_results(x))` shows why it failed.
 
 ## See also
 

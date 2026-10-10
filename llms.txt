@@ -205,11 +205,10 @@ design.
 - [`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
   [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
   [`collect_notes(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-  : Stack a per-fold column of a nested resampling run across the outer
-  folds
+  : Collect each outer fold's selections, inner metrics or notes
 - [`collect_predictions(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
   [`collect_extracts(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md)
-  : Stack the outer fit's predictions or extracts across the outer folds
+  : Collect the predictions or extracts of a nested run's outer fits
 - [`compute_metrics(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/compute_metrics.nested_results.md)
   : Score the saved predictions of a nested run with a metric set
 - [`augment(`*`<nested_results>`*`)`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
@@ -228,9 +227,9 @@ design.
   : Tabulate how often each parameter setting was selected across the
   outer folds
 - [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  : Extract the record of what ran
+  : Extract the procedure a nested run used
 - [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  : Choose the rule each fold selects its parameters by
+  : Choose how each fold selects its candidate
 - [`collect_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_selections(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`collect_inner_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
@@ -239,7 +238,7 @@ design.
   [`collect_extracts(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`compute_metrics(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
   [`augment(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md)
-  : Stack each workflow's table of a workflow-set run under its id
+  : Collect the results of a workflow-set run
 - [`print(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/print.nested_results_set.md)
   : Print a workflow-set run
 - [`extract_workflow(`*`<nested_results_set>`*`)`](https://nestedtune.tidymodels.org/reference/extract_workflow.nested_results_set.md)
@@ -276,9 +275,9 @@ field on the results.
   [`extract_parameter_set_dials(`*`<nested_final_fit>`*`)`](https://nestedtune.tidymodels.org/reference/extract-nested_final_fit.md)
   : Extract the parts of a final fit's workflow
 - [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
-  : Extract the tuning run a final fit was selected from
+  : Extract the tuning run of a final fit
 - [`extract_scored_candidates()`](https://nestedtune.tidymodels.org/reference/extract_scored_candidates.md)
-  : Extract the parameter settings a final fit actually scored
+  : Extract the candidates a final fit scored
 
 ## Re-exports
 

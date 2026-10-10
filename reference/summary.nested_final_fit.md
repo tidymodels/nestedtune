@@ -1,23 +1,8 @@
 # Summarize a final fit
 
-[`summary()`](https://rdrr.io/r/base/summary.html) gives you the facts
-of the final fit as values rather than printed lines. Those are the
-full-data tuning run the selection came from, which search ran it and at
-what counts, how many parameter settings it scored, and which values it
-chose.
-
-The `estimate` component is always `NULL`, because the number to report
-for this model is not stored on it. That number is the nested estimate
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-returns from the results object the fit was built from. For a fit built
-from a workflow set, it is that workflow's rows of
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the set. The stored tuning run's metrics are selection-time
-quantities, so they do not fill the slot. See
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for the reason. The name is kept rather than left out, so the object
-states where that number is instead of leaving you to infer it from a
-missing name.
+[`summary()`](https://rdrr.io/r/base/summary.html) returns the facts of
+a final fit as values: the tuning run on all the data, the tuner and its
+counts, how many candidates it scored, and the selected values.
 
 ## Usage
 
@@ -33,13 +18,12 @@ print(x, ...)
 
 - object:
 
-  A `nested_final_fit` object from
+  A `nested_final_fit` from
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
 
 - ...:
 
-  Not used. It must be empty. Passing an argument here raises an error
-  instead of leaving it silently ignored.
+  Not used, and must be empty.
 
 - x:
 
@@ -47,68 +31,39 @@ print(x, ...)
 
 ## Value
 
-[`summary()`](https://rdrr.io/r/base/summary.html) returns an object of
-class `summary.nested_final_fit`, a list with these components:
+[`summary()`](https://rdrr.io/r/base/summary.html) returns a
+`summary.nested_final_fit`, a list with these components:
 
 - `tuning_label`, the tuning run's resampling label
 
-- `tuner`, the name of the tune or finetune function that ran, as
+- `tuner`, the tune or finetune function that ran
+
+- `candidates`, the number of candidates the run scored
+
+- `initial`, `initial_requested`, `iterations_completed` and
+  `iterations_requested`, the counts of an iterating search
+
+- `selection`, the selected parameter values
+
+- `select` and `first_metric`, as
   [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it
-
-- `candidates`, the number of parameter settings that run scored
-
-- `initial` and `initial_requested`, `iterations_completed` and
-  `iterations_requested`, the iterating tuners' counts
-
-- `selection`, the parameter values selection chose
-
-- `select`, the
-  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-  the selection was made by, as
-  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it
-
-- `first_metric`, the name of the first metric in the set, as
-  [`extract_procedure()`](https://nestedtune.tidymodels.org/reference/extract_procedure.md)
-  records it
+  records them
 
 - `estimate`, always `NULL`
 
-Printing it is what most callers want. The components are there for a
-caller that needs a value rather than a line of text.
-
 [`print()`](https://rdrr.io/r/base/print.html) returns `x`, invisibly.
 
-## The selection rule
+## Details
 
-When `select` names a rule other than the default, the print adds a line
-directly under the "Selected parameters" heading. It reads
-`Selected by:` and then the rule's name, orderings and limit, in the
-words the print of
-[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-uses after its class tag. The line is absent under the default rule and
-on a fit that tuned nothing.
+The `estimate` component is always `NULL`, because the number to report
+is not stored on the fit. It is the nested estimate from
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+on the nested run the fit was built from. The nested estimate describes
+the procedure that produced this model, not the fitted model itself.
 
-Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-line reads `Selecting metric:` and then a name. The name is the
-`first_metric` component. Under the default rule it is the first line
-under the heading. It is absent under the `"desirability"` rule, on a
-fit that tuned nothing, and on a fit whose record holds no
-`first_metric`.
-
-## Components that are absent
-
-The four counts are `NULL` on a grid or a racing fit, which iterate over
-nothing. They are carried rather than dropped, for the reason `estimate`
-is. The scored figures are counted from the tuning run's metrics table,
-and the requested ones are the counts the search was called with. A run
-whose metrics table cannot be read reports its scored figures as zero
-rather than failing to print.
-
-Where nothing was tuned there is no run to describe, so `tuning_label`
-is `NULL` and `candidates` is `0`. `selection` is empty, and `select`
-and `first_metric` are `NULL`, because no rule was applied.
+The four iteration counts are `NULL` for a grid search or a race. On a
+fit with nothing to tune, `candidates` is 0, `selection` is empty, and
+the other components but `tuner` are `NULL`.
 
 ## See also
 

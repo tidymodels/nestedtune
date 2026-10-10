@@ -122,14 +122,14 @@
           <code><a href="collect_selections.html">collect_selections()</a></code> <code><a href="collect_selections.html">collect_inner_metrics()</a></code> <code><a href="collect_selections.html">collect_notes(<i>&lt;nested_results&gt;</i>)</a></code>
 
         </dt>
-        <dd>Stack a per-fold column of a nested resampling run across the outer folds</dd>
+        <dd>Collect each outer fold's selections, inner metrics or notes</dd>
 
         <dt>
 
           <code><a href="collect_predictions.nested_results.html">collect_predictions(<i>&lt;nested_results&gt;</i>)</a></code> <code><a href="collect_predictions.nested_results.html">collect_extracts(<i>&lt;nested_results&gt;</i>)</a></code>
 
         </dt>
-        <dd>Stack the outer fit's predictions or extracts across the outer folds</dd>
+        <dd>Collect the predictions or extracts of a nested run's outer fits</dd>
 
         <dt>
 
@@ -185,21 +185,21 @@
           <code><a href="extract_procedure.html">extract_procedure()</a></code>
 
         </dt>
-        <dd>Extract the record of what ran</dd>
+        <dd>Extract the procedure a nested run used</dd>
 
         <dt>
 
           <code><a href="selection_rule.html">selection_rule()</a></code>
 
         </dt>
-        <dd>Choose the rule each fold selects its parameters by</dd>
+        <dd>Choose how each fold selects its candidate</dd>
 
         <dt>
 
           <code><a href="collect_metrics.nested_results_set.html">collect_metrics(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_selections(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_inner_metrics(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_notes(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_predictions(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">collect_extracts(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">compute_metrics(<i>&lt;nested_results_set&gt;</i>)</a></code> <code><a href="collect_metrics.nested_results_set.html">augment(<i>&lt;nested_results_set&gt;</i>)</a></code>
 
         </dt>
-        <dd>Stack each workflow's table of a workflow-set run under its id</dd>
+        <dd>Collect the results of a workflow-set run</dd>
 
         <dt>
 
@@ -271,14 +271,14 @@
           <code><a href="extract_tune_results.html">extract_tune_results()</a></code>
 
         </dt>
-        <dd>Extract the tuning run a final fit was selected from</dd>
+        <dd>Extract the tuning run of a final fit</dd>
 
         <dt>
 
           <code><a href="extract_scored_candidates.html">extract_scored_candidates()</a></code>
 
         </dt>
-        <dd>Extract the parameter settings a final fit actually scored</dd>
+        <dd>Extract the candidates a final fit scored</dd>
       </dl></div><div class="section level2">
       <h2 id="re-exports">Re-exports<a class="anchor" aria-label="anchor" href="#re-exports"></a></h2>
 

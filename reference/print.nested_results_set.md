@@ -1,10 +1,8 @@
 # Print a workflow-set run
 
-Shows which loop function the set ran through,
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-or a sibling, and how many workflows it holds. Then it prints one line
-per workflow: its id, how many of its outer folds completed, and the
-label of the tuner that ran for it.
+Printing a `nested_results_set` shows the nested function the set ran
+through and the number of workflows. Each workflow then gets a line with
+its id, how many outer folds completed, and the tuner that ran.
 
 ## Usage
 
@@ -22,18 +20,23 @@ print(x, ...)
 
 - ...:
 
-  Not used. It must be empty.
+  Not used, and must be empty.
 
 ## Value
 
-`x`, unchanged and invisible.
+`x`, invisibly.
+
+## Details
+
+[`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
+shows each workflow's selections and nested estimate. Each nested
+estimate describes its workflow's tuning procedure, not a fitted model.
 
 ## See also
 
 [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md),
 [`collect_metrics.nested_results_set()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results_set.md),
 [`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
-for what the run means
 
 ## Examples
 

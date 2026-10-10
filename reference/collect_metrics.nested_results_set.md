@@ -1,25 +1,9 @@
-# Stack each workflow's table of a workflow-set run under its id
+# Collect the results of a workflow-set run
 
-You read a `nested_results_set`, what
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-returns, with the same eight functions that read one workflow's run.
-Each calls its single-workflow method on every element and binds the
-tables in the set's order, under a `wflow_id` column placed first.
-
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-gives one row per workflow and metric, or per workflow, outer fold and
-metric with `summarize = FALSE`. There, the design's fold labels follow
-`wflow_id`, each in its own column: `id`, and `id2` on a repeated
-design. The five from
-[`collect_selections()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
-to
-[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-stack their per-fold tables the same way.
-[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
-scores each workflow's saved predictions with the metric set you give
-it. [`augment()`](https://generics.r-lib.org/reference/augment.html)
-gives each workflow's data rows with its predictions, averaged per row
-on a design that holds out a row more than once.
+These methods read a `nested_results_set` from
+[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md).
+Each one calls its method for one workflow on every workflow in the set,
+and stacks the tables under a `wflow_id` column.
 
 ## Usage
 
@@ -58,28 +42,24 @@ augment(x, ...)
 
 - ...:
 
-  Not used. It must be empty, so an argument given here is an error and
-  not a silent no-op.
+  Not used, and must be empty.
 
 - summarize:
 
-  Whether to average each workflow's per-fold metrics (`TRUE`, the
-  default) or return them one row per outer fold (`FALSE`), as on
-  [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
-  For
-  [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-  whether to average each workflow's predictions per data row (`TRUE`)
-  or return them per fold (`FALSE`, the default there), as on
+  As on
+  [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md),
+  and for
+  [`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  as on
   [`collect_predictions.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_predictions.nested_results.md).
 
 - type:
 
   For
   [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-  the table's shape: `"long"` (the default) or `"wide"`, as on
-  [`collect_metrics.nested_results()`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md).
-  The wide shape is keyed on `wflow_id` too, and a metric one workflow
-  did not score is `NA` in its rows.
+  `"long"` (the default) or `"wide"`. The wide shape is keyed on
+  `wflow_id` too, and a metric that a workflow did not score is `NA` in
+  its rows.
 
 - metrics, event_level:
 
@@ -89,47 +69,21 @@ augment(x, ...)
 
 ## Value
 
-A tibble: `wflow_id` first, then the columns the single-workflow method
-returns for each element. The rows are bound in the set's order over the
-union of the elements' columns. Where an element lacks a column its rows
-hold `NA`, or `NULL` in a list column. An element whose table has no
-rows contributes none.
+A tibble with `wflow_id` first, then the columns that the method for one
+workflow returns, bound in the set's order. A column that one workflow
+lacks is `NA` in its rows, or `NULL` in a list column.
 
-## Workflows and folds that failed
+## Details
 
-Failed folds are left out, as on one workflow: every function but
+A workflow in which no fold completed is left out with a warning. If no
+workflow completed a fold, the function gives an error.
 [`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-takes the folds that completed. A workflow with some folds failed
-contributes the folds that ran. That function's own partial-run warning
-is raised once for it, with the workflow's id in front of the message. A
-workflow in which no fold completed is left out while another workflow
-completed one, warned about with class `nestedtune_partial_summary`. A
-set in which no workflow completed a fold is refused with class
-`nestedtune_no_completed_folds`.
+reads every workflow, the failed ones included.
 
-[`collect_notes()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-is the exception: it reads every workflow, including those in which no
-fold completed, and refuses nothing, because a failed workflow's notes
-are the reason to ask.
-
-## Columns not saved, and colliding ids
-
-A control reaches each workflow of a set through the call's `...` or
-through its own `option` entry, so one workflow can keep what another
-did not.
-[`collect_predictions()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-and
-[`collect_extracts()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-therefore refuse a set in which a workflow with completed folds lacks
-the column. So do
-[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
-and [`augment()`](https://generics.r-lib.org/reference/augment.html),
-which read `.predictions`. The refusal has class
-`nestedtune_column_not_saved` and names the workflow.
-
-An element's table that already has a `wflow_id` column, a parameter
-given that id, is refused with class
-`nestedtune_collect_name_collision`.
+Each workflow can have its own control, so one workflow can save
+predictions or extracts that another did not. A function that reads
+saved predictions or extracts gives an error that names a workflow with
+completed folds that did not save them.
 
 ## See also
 

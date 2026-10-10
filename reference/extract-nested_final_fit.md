@@ -1,13 +1,10 @@
 # Extract the parts of a final fit's workflow
 
-These methods reach the fitted model, the preprocessor and the outcome
-names of the workflow that
+These methods return the fitted model, its specification, the
+preprocessor, the mold, the outcome names and the parameter set of the
+workflow that
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-trained. Each one except
-[`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
-gives the same answer as the same call on
-[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)'s
-output.
+trained.
 
 ## Usage
 
@@ -46,10 +43,7 @@ extract_parameter_set_dials(x, ...)
 
 - ...:
 
-  Must be empty. A workflow's methods other than
-  [`extract_recipe()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
-  ignore an argument they do not know, so these refuse it rather than
-  pass it on.
+  Not used, and must be empty.
 
 - estimated:
 
@@ -66,21 +60,22 @@ a dials `parameters` object, the set the tuning run stored.
 
 ## Details
 
-The trained workflow holds no `tune()` placeholder, so
+Each one except
 [`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
-reads the parameter set from the tuning run that
-[`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md)
-returns. It is the set tune stored for that run. That set starts from
-`param_info` if the call gave one, and from the untrained workflow's set
-otherwise. If tune built the candidates itself, as for a numeric `grid`
-or for
+returns what the same call on
+[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)'s
+output returns.
+
+[`extract_parameter_set_dials()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+reads the parameter set that tune stored for the final fit's tuning run,
+because the trained workflow holds no `tune()` placeholder. When tune
+built the candidates itself, as for a numeric `grid` or for
 [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
-it first finalized any unknown range, such as the upper bound of `mtry`,
-on the predictors. With a data-frame `grid`, the returned set can keep
-an unknown range. A fit from
+it finalized any unknown range on the predictors. With a data-frame
+`grid`, the set can keep an unknown range, such as the upper bound of
+`mtry`, so finalize it before use. A fit from
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-ran no tuning and is refused with condition class
-`nestedtune_no_tuning_run`.
+ran no tuning and gives an error.
 
 ## See also
 

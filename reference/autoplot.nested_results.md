@@ -1,21 +1,8 @@
 # Plot a nested cross-validation result
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-shows you whether the outer folds agreed, and how each scored: two views
-of a `nested_results`, both drawing one point per outer fold, with the
-folds in design order.
-
-`type = "parameters"`, the default, shows what each outer fold's inner
-tuning selected on a
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-run or a sibling's. A flat row of points means the folds agreed. Points
-at different heights mean they disagreed, so the tuning procedure is
-unstable on this data, which averaging the metrics hides.
-
-`type = "performance"` shows each outer fold's score on its held-out
-assessment set, with a rule at the nested estimate, the value
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-reports.
+draws one point per outer fold: the parameter values each fold selected,
+or each fold's score on the rows it held out.
 
 ## Usage
 
@@ -36,9 +23,7 @@ autoplot(
 
   A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or one of its siblings,
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  included.
+  or a related function.
 
 - type:
 
@@ -47,61 +32,44 @@ autoplot(
 - metric, eval_time:
 
   For `type = "performance"`, the metrics and the evaluation times to
-  draw panels for. `NULL`, the default, draws them all. A static
-  metric's panel has no time and is drawn whatever `eval_time` names, as
-  in tune's
+  draw. `NULL`, the default, draws them all. A metric that does not
+  depend on time is drawn whatever `eval_time` names, as in tune's
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html).
-  A metric or a time the run did not score is refused with class
-  `nestedtune_bad_plot_filter`, as is either argument given with
-  `type = "parameters"`.
 
 - ...:
 
-  Not used. It must be empty. An argument passed here is an error rather
-  than silently ignored.
+  Not used, and must be empty.
 
 ## Value
 
 A `ggplot` object.
 
-## Folds with nothing to draw
+## Details
 
-An outer fold that failed keeps its place on the x axis and draws no
-point, as does one that completed without recording a value for a
-parameter. Nothing is imputed and nothing leaves the axis, so the
-shortfall shows in the figure.
+The outer folds run along the x axis in design order. With
+`type = "parameters"`, each panel shows one tuned parameter, and the y
+axis is the value each fold selected. A flat row of points means the
+folds agreed. Points at different heights mean the tuning procedure
+picks different values on different data, which the averaged metrics
+hide.
 
-A run in which no fold completed is refused with class
-`nestedtune_no_completed_folds`, as
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-[`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md)
-and
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-refuse it. A run in which no completed fold selected a parameter, such
-as a
+With `type = "performance"`, each panel shows one metric, and the y axis
+is each fold's score. A line marks the nested estimate that
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+reports.
+
+A failed fold keeps its place on the x axis and draws no point. A panel
+label such as `rmse (from 2 folds)` shows that some completed folds gave
+no value there, such as an `NA` score. If no fold completed, the
+function gives an error. A run with no tuned parameters, such as a
 [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-result, is refused under `type = "parameters"` with class
-`nestedtune_no_tuned_parameters`. `type = "performance"` draws it.
-
-## What the labels say
-
-Panels can draw on different fold counts, so each panel says how many
-folds stand behind it, and the subtitle says how much of the requested
-design ran. A panel reading `mtry (2 of 3 chose)` or
-`rmse (from 2 folds)` had fewer than the run completed, and an
-unqualified one had them all. A requested metric that no completed fold
-scored keeps an empty panel rather than disappearing.
-
-The selected-value axis is numeric when every value drawn is a number
-and discrete otherwise. One axis cannot be both, and character-valued
-parameters are ordinary. On that discrete axis a fold that selected `NA`
-draws a point at `NA` rather than no point.
+result, can only be drawn with `type = "performance"`.
 
 ## See also
 
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
 [`print.nested_results()`](https://nestedtune.tidymodels.org/reference/print.nested_results.md),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md),
 [`summary.nested_results_set()`](https://nestedtune.tidymodels.org/reference/summary.nested_results_set.md)
 for the same two views of a workflow-set run
 

@@ -1,7 +1,8 @@
 # Extract one workflow of a workflow-set run
 
-Returns the workflow the set holds under one `wflow_id`, as it was
-given, with nothing fitted or finalized.
+[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
+returns the workflow a set holds under one `wflow_id`, as it was given,
+with nothing fitted or finalized.
 
 ## Usage
 
@@ -23,12 +24,12 @@ extract_workflow(x, id, ...)
 
 - ...:
 
-  Not used. It must be empty.
+  Not used, and must be empty.
 
 ## Value
 
-The workflow, untrained, as the set held it. An `id` naming no row of
-the set is refused with class `nestedtune_unknown_id`.
+The untrained workflow. An `id` that names no workflow in the set gives
+an error.
 
 ## See also
 

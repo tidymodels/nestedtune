@@ -1,11 +1,10 @@
 # Predict with the final model
 
-You can call [`predict()`](https://rdrr.io/r/stats/predict.html) and
+[`predict()`](https://rdrr.io/r/stats/predict.html) and
 [`augment()`](https://generics.r-lib.org/reference/augment.html) on a
-`nested_final_fit` directly: they are the trained workflow's own
-methods, reached without extracting it first. Each returns what the same
-call on
-[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)`(x)`
+`nested_final_fit` call the trained workflow's own methods. Each returns
+what the same call on the workflow from
+[`extract_workflow()`](https://hardhat.tidymodels.org/reference/hardhat-extract.html)
 returns.
 
 ## Usage
@@ -22,7 +21,7 @@ augment(x, new_data, eval_time = NULL, ...)
 
 - object, x:
 
-  A `nested_final_fit` object from
+  A `nested_final_fit` from
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
 
 - new_data:
@@ -34,59 +33,38 @@ augment(x, new_data, eval_time = NULL, ...)
   Passed to
   [`workflows::predict.workflow()`](https://workflows.tidymodels.org/reference/predict-workflow.html)
   unchanged. `type` selects the prediction type, such as `"numeric"`,
-  `"prob"` or `"survival"`, with the workflow's default when left unset.
+  `"prob"` or `"survival"`. Left unset, it takes the workflow's default.
 
 - ...:
 
-  For [`predict()`](https://rdrr.io/r/stats/predict.html), further
-  arguments for the model's predict method, passed on through the
-  workflow. For
+  For [`predict()`](https://rdrr.io/r/stats/predict.html), arguments for
+  the model's predict method, such as `level` with `type = "conf_int"`.
+  parsnip gives an error for a name outside its list of predict
+  arguments. For
   [`augment()`](https://generics.r-lib.org/reference/augment.html), not
-  used. It must be empty.
+  used, and must be empty.
 
 - eval_time:
 
-  For censored regression, the time or times at which to evaluate
-  survival probabilities, passed to the workflow's
-  [`augment()`](https://generics.r-lib.org/reference/augment.html)
-  method. Ignored otherwise.
+  For censored regression, the times at which to evaluate survival
+  probabilities in
+  [`augment()`](https://generics.r-lib.org/reference/augment.html).
+  Ignored otherwise.
 
 ## Value
 
-[`predict()`](https://rdrr.io/r/stats/predict.html) returns the tibble
-of predictions the workflow's
-[`predict()`](https://rdrr.io/r/stats/predict.html) method returns for
-`type`. [`augment()`](https://generics.r-lib.org/reference/augment.html)
-returns the workflow's prediction columns followed by the columns of
-`new_data`, with a `.resid` column where the outcome is present and the
-model is a regression.
+[`predict()`](https://rdrr.io/r/stats/predict.html) returns the
+workflow's tibble of predictions.
+[`augment()`](https://generics.r-lib.org/reference/augment.html) returns
+the prediction columns, then the columns of `new_data`, with a `.resid`
+column for a regression model when the outcome is present.
 
-## What the dots accept
+## Details
 
-[`predict()`](https://rdrr.io/r/stats/predict.html) forwards them, for
-example `level` with `type = "conf_int"` for an interval. `eval_time`
-with `type = "survival"` is another. A name outside parsnip's own short
-list of predict arguments is refused by parsnip. A listed one the model
-cannot use for the `type` asked is passed on, and whether it has any
-effect is parsnip's business, not this method's.
-
-[`augment()`](https://generics.r-lib.org/reference/augment.html) refuses
-the dots instead, and that refusal is the only one there is: workflows'
-own [`augment()`](https://generics.r-lib.org/reference/augment.html)
-method passes an unread argument on to parsnip, which ignores it.
-
-## Residuals on the training rows are not performance
-
-Augmenting the rows this model was fit on gives in-sample residuals.
-They say how the model fits data it has already seen, not how it does on
-data it has not. The number to report is
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the results object the fit was built from, or, for a fit built from a
-workflow set, that workflow's rows of
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
-on the set. See
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for why that is the number to report for this model.
+Residuals on the rows the model was fit on are in-sample, so they do not
+measure performance. Report the nested estimate from
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+on the nested run the fit was built from.
 
 ## See also
 

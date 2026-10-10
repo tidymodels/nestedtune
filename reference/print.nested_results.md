@@ -1,10 +1,7 @@
 # Print a nested cross-validation result
 
-Shows the object: its outer folds as the tibble rows they are, and the
-outer resampling scheme it came from. It also says how many folds did
-not complete, and points to
-[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
-for what the run means.
+Printing a `nested_results` shows its outer folds as tibble rows, the
+outer resampling scheme, and how many folds did not complete.
 
 ## Usage
 
@@ -19,44 +16,41 @@ print(x, ..., n = NULL, width = NULL)
 
   A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or one of its siblings.
+  or a related function.
 
 - ...:
 
-  Not used. It must be empty, so `n` and `width` must be given by name
-  in full.
+  Not used, and must be empty. Give `n` and `width` by name.
 
 - n:
 
   Number of fold rows to show, passed to tibble's printing. `NULL`, the
-  default, leaves the choice to tibble and its `print_max` and
-  `print_min` options. `Inf` shows every fold.
+  default, leaves the choice to tibble. `Inf` shows every fold.
 
 - width:
 
-  Width of the printed rows, passed to tibble's printing. `NULL`, the
-  default, uses the `width` option, and columns that do not fit are
-  named in the footer.
+  Width of the printed rows, passed to tibble's printing.
 
 ## Value
 
 `x`, invisibly.
 
-## When the folds searched different candidates
+## Details
 
-Folds can score different candidate sets, the parameter settings each
-inner search tried. When two or more completed folds did, and only then,
-the print adds a line with each fold's candidate count. A grid given as
-a size is the usual cause. It is expanded once per fold, under that
-fold's own seed, so a continuous parameter leaves every fold with
-candidates of its own. It matters for reading the selections: folds that
-disagreed were not choosing from the same menu.
+When the completed folds scored different sets of candidates, the print
+adds each fold's candidate count. A `grid` given as a size is the usual
+cause, because each fold builds its own grid under its own seed. Folds
+that disagree then did not choose from the same candidates.
+
+[`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md)
+shows the selections and the nested estimate. The nested estimate
+describes the tuning procedure, not a fitted model.
 
 ## See also
 
 [`summary.nested_results()`](https://nestedtune.tidymodels.org/reference/summary.nested_results.md),
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+[collect_metrics()](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
 
 ## Examples
 

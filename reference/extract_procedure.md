@@ -1,11 +1,10 @@
-# Extract the record of what ran
+# Extract the procedure a nested run used
 
-Returns the `procedure` record a nested result carries, the tune, select
-and fit steps as they were set. It says which tuner ran, that tuner's
-own arguments, the control as it took effect, and the workflow the run
-was given. A
+`extract_procedure()` returns what a nested run recorded about its
+procedure: the tuner and its arguments, the selection rule, the control
+and the workflow.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-carries the record it re-ran.
+runs this procedure again.
 
 ## Usage
 
@@ -17,33 +16,30 @@ extract_procedure(x, ...)
 
 - x:
 
-  A `nested_results` object from
+  A `nested_results` from
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  or one of its siblings, or a `nested_final_fit` object from
-  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md).
+  or a related function, or a `nested_final_fit`.
 
 - ...:
 
-  Not used. It must be empty. Passing an argument here raises an error
-  instead of leaving it silently ignored.
+  Not used, and must be empty.
 
 ## Value
 
-The stored record, unchanged: a named list with `tuner`, that tuner's
-own arguments, the arguments every loop function shares, `control` as it
-took effect, and the `workflow` identity. The section below says what
-each holds.
+A named list with these elements, in this order:
+
+- `tuner` and the tuner's own arguments
+
+- `param_info`, `event_level` and `eval_time`
+
+- `select` and `first_metric`
+
+- `control` and `workflow`
 
 ## Details
 
-Reading this record is how you see what a final fit will do before you
-ask for one. A final fit built from a results object re-runs exactly
-what the record describes.
-
-## What the record holds
-
-`tuner` names the tune or finetune function that ran, with that tuner's
-own arguments beside it:
+`tuner` names the tune or finetune function that ran, with its own
+arguments beside it:
 
 - `"tune_grid"`, with `grid`
 
@@ -53,48 +49,31 @@ own arguments beside it:
 
 - `"tune_sim_anneal"`, with `iter` and `initial`
 
-- `"fit_resamples"`, for a run with nothing to tune, with none
+- `"fit_resamples"`, with none
 
 `select` is the
-[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
-each fold selected by. `first_metric` is the name of the first metric in
-the set, as tune resolves it for the workflow. A run given no metric set
-names the first metric of tune's default set. Under the `"best"`,
-`"one_std_err"` and `"pct_loss"` rules, that metric chooses each fold's
-candidate. The Bayesian search, the two races and the annealing search
-steer on it under every rule. `param_info`, `event_level` and
-`eval_time` are as they were given. `control` is the control object the
-run was given, or tune's default when none was, with the slots this
-package forces already applied. On a Bayesian result `seed` is left out.
-A `"fit_resamples"` record carries no `param_info`, no `select` and no
-`first_metric`, because no parameter set was read and no rule applied.
-See "Differences from calling tune directly" on each loop function's
-help page for what those slots are.
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
+and `first_metric` is the first metric of the set, as tune resolves it.
+A run given no metric set names the first metric of tune's default set.
+`param_info`, `event_level` and `eval_time` are as given. `control` is
+the control that took effect, with the settings this package forces
+applied. On a Bayesian run, its `seed` is left out. A `"fit_resamples"`
+record has no `param_info`, `select` or `first_metric`.
 
-`workflow` is the identity of the model specification and the
-preprocessor the run was given: the model's type, engine, mode and
-arguments, and the preprocessor, each in deparsed form. A formula or a
-variables selection is held as written. A recipe is held as its steps in
-order, with each step's selectors and settings, and its random step ids
-left out. A case-weights column is held as written. A tailor
-postprocessor is held as its adjustments in order, each by type and
-arguments. A workflow with neither holds no entry for them. The workflow
-object itself is not stored, and no data rows are. A model argument is
-held as written, so a name bound outside the workflow is held as that
-name and not as its value.
+`workflow` describes the model, the preprocessor, and any case-weights
+column and tailor postprocessor as text.
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-compares the workflow it is handed against this entry and refuses one
-that differs, with class `nestedtune_workflow_mismatch`.
-
-On a `nested_results` the record travels as an attribute of the object.
-On a `nested_final_fit` it is the record the fit re-ran, which is the
-record of the results object it was built from.
+uses it to check that it gets the same workflow. A model argument is
+stored as written, so a variable's name is stored and not its value. The
+workflow object and the data are not stored.
 
 ## See also
 
 [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
+[`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
 [`extract_tune_results()`](https://nestedtune.tidymodels.org/reference/extract_tune_results.md),
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+and the other loop functions for what the forced control settings are
 
 ## Examples
 

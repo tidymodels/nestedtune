@@ -2,6 +2,18 @@
 
 ## nestedtune 0.0.0.9000
 
+- The help pages for reading a nested run are shorter and follow the
+  shape of tune’s help pages. They cover the collect, compute and
+  augment methods,
+  [`agreement()`](https://nestedtune.tidymodels.org/reference/agreement.md),
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html),
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md),
+  the extractors, and the print, summary and predict methods. The
+  condition classes and the lists of errors left these pages.
+  [`?collect_metrics.nested_results`](https://nestedtune.tidymodels.org/reference/collect_metrics.nested_results.md)
+  now states the standard error in three sentences and points to
+  [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md).
+
 - Seven more help pages are shorter and follow the shape of tune’s help
   pages:
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
