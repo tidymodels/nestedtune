@@ -108,13 +108,13 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'
 #' A `grid` given as a size is expanded by tune, and the expansion sometimes
 #' reaches fewer candidates than the number requested. A candidate that failed
-#' everywhere scored nothing. [nested_tune_grid()] gives the full account of
-#' how the two records
-#' diverge under `.inner_metrics`, and it holds here too.
+#' everywhere scored nothing. The Value section of [nested_tune_grid()] says
+#' how `attr(x, "grid")` and `.inner_metrics` can differ, and it holds here
+#' too.
 #'
-#' One pointer there does not carry over. A candidate that failed on every
-#' inner resample is missing from this table, and a `nested_final_fit` has no
-#' `.notes` column to record it in. Look inside the run itself:
+#' A candidate that failed on every inner resample is missing from this
+#' table, and a `nested_final_fit` has no `.notes` column to record it in.
+#' Look inside the run itself:
 #' `tune::collect_notes(extract_tune_results(x))`.
 #'
 #' @template example-setup

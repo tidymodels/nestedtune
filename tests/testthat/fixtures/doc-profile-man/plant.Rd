@@ -17,6 +17,8 @@ We record the plant here.
 }
 \details{
 Details refuse \code{refused} nothing. Two sentences here.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{x <- 1
+}\if{html}{\out{</div>}}
 }
 \section{Extra}{
 Section body \code{x}, words.

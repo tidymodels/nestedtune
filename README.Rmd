@@ -21,12 +21,14 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/tidymodels/nestedtune/graph/badge.svg)](https://app.codecov.io/gh/tidymodels/nestedtune)
 <!-- badges: end -->
 
-nestedtune runs nested cross-validation for tidymodels. Each outer fold
-tunes a workflow on its own inner resamples with tune or finetune. It then
-scores the chosen candidate on rows that the tuning never saw. The mean of
-the outer scores estimates how well the whole tuning procedure performs on
-new data. It is the number to report for the model that
-`nested_final_fit()` builds.
+The best score from ordinary tuning is optimistic, because the same
+resamples pick the winner. nestedtune runs nested cross-validation for
+tidymodels instead. Each outer fold tunes a workflow on its own inner
+resamples with tune or finetune. It then fits the chosen settings and
+scores them on rows that the tuning never saw. The mean of the outer scores
+estimates how well the whole procedure (tune, select, fit) performs on new
+data. Report it for the model that `nested_final_fit()` builds with the
+same procedure.
 
 ## Installation
 

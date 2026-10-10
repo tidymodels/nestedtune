@@ -40,9 +40,9 @@ nested_tune_grid(object, ...)
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
 with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specification.}
 
-\item{...}{On the generic, the arguments of the method. On a method, a
-control object from \code{\link[tune:control_grid]{tune::control_grid()}}, passed as \code{control}. Name
-every argument after \code{...}.}
+\item{...}{On the generic, the arguments of the method. On a method, pass
+\code{control = tune::control_grid()} here to set the control. Name every
+argument after \code{...}.}
 
 \item{preprocessor}{A formula or recipe, when \code{object} is a model
 specification.}
@@ -60,16 +60,17 @@ tuning parameter candidates. An integer denotes the number of candidate
 parameter sets to be created automatically.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
-set. Under the default selection rule, the first metric selects each
-fold's candidate, so put the metric you report first. Every metric is
-scored on the outer folds.}
+set. Under every rule but \code{"desirability"}, the first metric selects
+each fold's candidate, so put the metric you report first. The Bayes,
+race and annealing searches also steer on it. Every metric is scored on
+the outer folds.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
-Times that are missing, negative or not finite are an error.}
+Times that are not numeric, empty, missing, negative or not finite are an error. Zero, repeated and unordered times are passed on to tune.}
 
 \item{select}{A \code{\link[=selection_rule]{selection_rule()}} that each outer fold uses to pick its
 candidate. The default is \code{\link[tune:select_best]{tune::select_best()}} on the first metric.}
@@ -81,7 +82,10 @@ Beside the fold's split and labels, each row holds:
 \item \code{.metrics}, the metrics scored on the fold's assessment set.
 \item \code{.selected}, the candidate the fold's inner tuning chose.
 \item \code{.inner_metrics}, the inner run's metrics for every candidate that
-scored.
+scored. A fold that scored no candidate holds a zero-row table, never
+\code{NULL}. tune can reach fewer candidates than a \code{grid} size asks for,
+so \code{attr(res, "grid")}, the argument as given, can differ from these
+rows.
 \item \code{.completed}, whether the fold finished, and \code{.notes}, what went
 wrong.
 \item \code{.tuning_seed} and \code{.outer_fit_seed}, the fold's two seeds.
@@ -91,15 +95,21 @@ Use \code{\link[=collect_metrics]{collect_metrics()}} for the estimate. \code{su
 \code{\link[=collect_selections]{collect_selections()}}, \code{\link[=agreement]{agreement()}} and
 \link[=autoplot.nested_results]{autoplot()} show it in other ways.
 
-Reordering rows and adding columns keep the class. Removing a fold or a
-column above returns a plain tibble, because the result no longer
-describes the design that ran.
+\code{arrange()}, \code{mutate()} adding a column, and a join that matches one row
+per fold keep the class. Removing a fold or a column above returns a
+plain tibble, because the result no longer describes the design that
+ran. So do \code{slice()}, \code{bind_rows()} of two results, and
+\code{vctrs::vec_rbind(x)} alone. \code{bind_cols()} keeps the class only with the
+result as its first argument. \code{group_by()}, \code{rowwise()} and
+\code{tibble::as_tibble()} return their own classes and keep the attributes.
+A column you add is read as a fold label only when the design itself
+carries a column of that name.
 }
 \description{
 \code{nested_tune_grid()} estimates how well a model tuned with
 \code{\link[tune:tune_grid]{tune::tune_grid()}} performs on new data. Each outer fold tunes on its own
-inner resamples, and then fits and scores the chosen candidate on the rows
-it held out.
+inner resamples, fits the chosen candidate on its analysis set, and scores
+it on the rows it held out.
 }
 \details{
 For each outer fold, the function calls \code{\link[tune:tune_grid]{tune::tune_grid()}} on the fold's
@@ -110,7 +120,8 @@ the fold's analysis set and scores it on the assessment set.
 The estimate from \code{\link[=collect_metrics]{collect_metrics()}} describes this whole procedure (tune,
 select, fit) and not one fitted model. To get a model to
 deploy, call \code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the same procedure on all
-the data. The nested estimate is the number to report for that model.
+the data. The nested estimate is the number to report for that model,
+because the model comes from the same procedure.
 
 \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
 \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} run the same
@@ -134,9 +145,10 @@ or the rows, splits or folds at fault.
 Time-series designs work as well. \code{nested_tune_grid()} is tested with an
 outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
-inner design of any of those four kinds. Keep the \code{lag} of
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0. \code{\link[=nested_resamples]{nested_resamples()}} says which of these
-designs the other functions are tested on.
+inner design of any of those four kinds. Leave the \code{lag} of
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
+\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
+tested on.
 }
 
 \section{Finalizing a parameter range}{
@@ -151,10 +163,10 @@ outer fold's analysis set, never on the rows that fold holds out.
 \section{Evaluation times}{
 
 
-\code{eval_time} reaches every tune call that reads it, so a dynamic or
-integrated survival metric uses the times you name. With neither in the
-set, tune ignores the times with a warning. Each fold selects at the
-first of these times.
+The inner tuning and the outer scoring both use the times in \code{eval_time}.
+If the metric set has no dynamic or integrated survival metric, tune
+ignores the times with a warning. Each fold selects at the first of these
+times.
 }
 
 \section{Weighting the outer folds}{
@@ -172,8 +184,38 @@ scaled to sum to one.
 Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
 fold takes its seeds from that one seed by its position, so the result is
 the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
-and \code{.outer_fit_seed}. Engines that draw random numbers outside R, such
-as kernlab's SVMs, are not covered.
+and \code{.outer_fit_seed}. The function restores your random state on exit,
+even after an error. So two calls with no \code{set.seed()} between them give
+the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
+
+This covers randomness that flows through R's generator. Engines that
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
+pinned by any R-side scheme, here or in tune.
+}
+
+\section{Reproducing one fold}{
+
+
+Fold \code{i} runs the code below. On a \code{\link[=nested_resamples]{nested_resamples()}} design, \code{inner}
+is the fold's inner rset re-pointed at
+\code{rsample::analysis(resamples$splits[[i]])}. Under another \code{select}, the
+selection line uses \code{\link[tune:select_by_one_std_err]{tune::select_by_one_std_err()}} or
+\code{\link[tune:select_by_pct_loss]{tune::select_by_pct_loss()}}. A Bayesian fold also sets \code{control$seed} to
+the fold's tuning seed.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
+         normal.kind = "Inversion", sample.kind = "Rejection")
+tuned <- tune_grid(object, inner, grid = grid,
+                   param_info = param_info, metrics = metrics,
+                   eval_time = eval_time,
+                   control = extract_procedure(res)$control)
+final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
+         normal.kind = "Inversion", sample.kind = "Rejection")
+last_fit(final, resamples$splits[[i]], metrics = metrics,
+         eval_time = eval_time,
+         control = control_last_fit(event_level = event_level))
+}\if{html}{\out{</div>}}
 }
 
 \section{When a fold fails}{
@@ -198,11 +240,22 @@ mirai::daemons(0)
 
 The daemons load nestedtune from an installed library, and they do not
 inherit your session's options. Set what a fold needs with
-\code{\link[mirai:everywhere]{mirai::everywhere()}}. Before it sends the folds out, the function checks
-that every daemon can load the packages the run needs. The check waits
-up to 30 seconds, and \verb{options(nestedtune.preflight_timeout = <ms>)}
-changes that limit. On a pool with mirai's default dispatcher, an
-interrupt cancels the folds that are still running.
+\code{\link[mirai:everywhere]{mirai::everywhere()}}. Under \code{devtools::load_all()}, the daemons cannot
+see your development code, so run
+\code{mirai::everywhere(pkgload::load_all("<path>"))} first. A running daemon
+keeps the version it loaded, so restart the pool after you reinstall.
+
+Before it sends the folds out, the function checks that every daemon can
+load the packages the run needs. The check waits up to 30 seconds, and
+\verb{options(nestedtune.preflight_timeout = <ms>)} changes that limit. The
+folds themselves have no time limit. If every daemon dies after dispatch,
+the call waits until you interrupt it.
+
+Each fold is sent one copy of the data. A workflow built inside a
+function carries that function's environment to every fold, so build it
+at the top level. On a pool with mirai's default dispatcher, an interrupt
+cancels the folds that are still running. A pool started with
+\code{dispatcher = FALSE} cannot be cancelled, and the call warns about that.
 }
 
 \section{Differences from calling tune directly}{
@@ -212,8 +265,9 @@ A \code{\link[tune:control_grid]{tune::control_grid()}} passed through \code{...
 inner \code{tune_grid()} in every fold. The outer fit runs under its own
 \code{control_last_fit()}, and takes only \code{event_level}, \code{save_pred} and
 \code{extract} from the control. The result keeps the control that ran as
-\code{extract_procedure(res)$control}. Its settings differ
-from a direct \code{tune_grid()} call as follows.
+\code{extract_procedure(res)$control}, and \code{\link[=nested_final_fit]{nested_final_fit()}} runs again
+with it. Its settings differ from a direct \code{tune_grid()} call as
+follows.
 
 
 \strong{Forced: \code{allow_par}.} The inner tuning run and the outer fit run with
@@ -228,8 +282,11 @@ setting.
 
 
 \strong{Refused: none.} No setting is refused on its own. A control of another
-class, such as a \code{control_bayes()}, is an error.
+class is an error, even a \code{control_bayes()} that tune itself accepts.
 
+
+tune gives \code{\link[tune:control_resamples]{tune::control_resamples()}} and \code{\link[tune:control_last_fit]{tune::control_last_fit()}} the
+\code{control_grid} class, so both are accepted here.
 
 \strong{Passed through: \code{verbose}, \code{pkgs}, \code{parallel_over}, \code{workflow_size}.}
 Each reaches \code{tune_grid()} as given. \code{parallel_over} still sets the seed
@@ -276,7 +333,7 @@ res <- nested_tune_grid(wf, folds, grid = data.frame(num_comp = 1:2))
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 collect_metrics(res)
 
-# What each fold chose. Disagreement here is selection instability.
+# What each fold chose. Folds that disagree show the choice is unstable.
 res$.selected
 \dontshow{\}) # examplesIf}
 }

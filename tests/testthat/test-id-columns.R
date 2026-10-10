@@ -227,22 +227,11 @@ test_that("the changelog and the help page promise what the code now does", {
     gsub("\\s+", " ", paste(lines, collapse = " "))
   }
 
-  # Since M142 the help page no longer states the fold-label rule, so the
-  # changelog carries the promise and the help page must not carry the
-  # narrowed claim below either.
   promise <- "read as a fold label only when the design itself carr"
   for (nm in names(paths)) {
     text <- flat(paths[[nm]])
     expect_gt(nchar(text), 1000L)
-    if (identical(nm, "news")) {
-      expect_match(text, promise, fixed = TRUE)
-    } else {
-      expect_no_match(
-        text,
-        "unless you name it `id` or `id` followed by digits",
-        fixed = TRUE
-      )
-    }
+    expect_match(text, promise, fixed = TRUE)
   }
 
   # The narrowed claim M36 left in the changelog, gone.

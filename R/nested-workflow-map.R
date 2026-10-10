@@ -40,7 +40,8 @@
 #'   `"best"`, `"one_std_err"` and `"pct_loss"` rules of [selection_rule()],
 #'   its first metric chooses each fold's candidate, and every metric in it
 #'   is scored. The `metrics` entry of [nested_tune_grid()] says what `NULL`
-#'   means and how the `"desirability"` rule chooses instead. A set that
+#'   means, and [selection_rule()] says how the `"desirability"` rule chooses
+#'   instead. A set that
 #'   does not suit the model of any workflow the map runs is refused before
 #'   any workflow runs, a workflow routed to [nested_fit_resamples()]
 #'   included.

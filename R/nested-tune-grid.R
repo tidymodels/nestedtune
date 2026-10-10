@@ -3,8 +3,8 @@
 #' @description
 #' `nested_tune_grid()` estimates how well a model tuned with
 #' [tune::tune_grid()] performs on new data. Each outer fold tunes on its own
-#' inner resamples, and then fits and scores the chosen candidate on the rows
-#' it held out.
+#' inner resamples, fits the chosen candidate on its analysis set, and scores
+#' it on the rows it held out.
 #'
 #' @details
 #' For each outer fold, the function calls [tune::tune_grid()] on the fold's
@@ -15,7 +15,8 @@
 #' The estimate from [collect_metrics()] describes this whole procedure (tune,
 #' select, fit) and not one fitted model. To get a model to
 #' deploy, call [nested_final_fit()], which runs the same procedure on all
-#' the data. The nested estimate is the number to report for that model.
+#' the data. The nested estimate is the number to report for that model,
+#' because the model comes from the same procedure.
 #'
 #' [nested_tune_bayes()], [nested_tune_race_anova()],
 #' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] run the same
@@ -33,15 +34,16 @@
 #' @param resamples A nested resampling design from [nested_resamples()] or
 #'   [rsample::nested_cv()].
 #' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
-#'   set. Under the default selection rule, the first metric selects each
-#'   fold's candidate, so put the metric you report first. Every metric is
-#'   scored on the outer folds.
+#'   set. Under every rule but `"desirability"`, the first metric selects
+#'   each fold's candidate, so put the metric you report first. The Bayes,
+#'   race and annealing searches also steer on it. Every metric is scored on
+#'   the outer folds.
 #' @templateVar CONSTRUCTOR tune::control_grid()
 #' @templateVar PKG tune
 #' @template param-control-dots
 #' @templateVar SCOPE It applies to the inner tuning run and the outer scoring fit alike.
 #' @template param-event-level
-#' @templateVar REFUSED Times that are missing, negative or not finite are an error.
+#' @templateVar REFUSED Times that are not numeric, empty, missing, negative or not finite are an error. Zero, repeated and unordered times are passed on to tune.
 #' @template param-eval-time
 #' @param select A [selection_rule()] that each outer fold uses to pick its
 #'   candidate. The default is [tune::select_best()] on the first metric.
@@ -52,7 +54,10 @@
 #'   - `.metrics`, the metrics scored on the fold's assessment set.
 #'   - `.selected`, the candidate the fold's inner tuning chose.
 #'   - `.inner_metrics`, the inner run's metrics for every candidate that
-#'     scored.
+#'     scored. A fold that scored no candidate holds a zero-row table, never
+#'     `NULL`. tune can reach fewer candidates than a `grid` size asks for,
+#'     so `attr(res, "grid")`, the argument as given, can differ from these
+#'     rows.
 #'   - `.completed`, whether the fold finished, and `.notes`, what went
 #'     wrong.
 #'   - `.tuning_seed` and `.outer_fit_seed`, the fold's two seeds.
@@ -61,9 +66,15 @@
 #'   [collect_selections()], [agreement()] and
 #'   [autoplot()][autoplot.nested_results] show it in other ways.
 #'
-#'   Reordering rows and adding columns keep the class. Removing a fold or a
-#'   column above returns a plain tibble, because the result no longer
-#'   describes the design that ran.
+#'   `arrange()`, `mutate()` adding a column, and a join that matches one row
+#'   per fold keep the class. Removing a fold or a column above returns a
+#'   plain tibble, because the result no longer describes the design that
+#'   ran. So do `slice()`, `bind_rows()` of two results, and
+#'   `vctrs::vec_rbind(x)` alone. `bind_cols()` keeps the class only with the
+#'   result as its first argument. `group_by()`, `rowwise()` and
+#'   `tibble::as_tibble()` return their own classes and keep the attributes.
+#'   A column you add is read as a fold label only when the design itself
+#'   carries a column of that name.
 #'
 #' @section Nested designs:
 #'
@@ -78,9 +89,10 @@
 #' Time-series designs work as well. `nested_tune_grid()` is tested with an
 #' outer [rsample::rolling_origin()], [rsample::sliding_window()],
 #' [rsample::sliding_index()] or [rsample::sliding_period()] design and an
-#' inner design of any of those four kinds. Keep the `lag` of
-#' [rsample::rolling_origin()] at 0. [nested_resamples()] says which of these
-#' designs the other functions are tested on.
+#' inner design of any of those four kinds. Leave the `lag` of
+#' [rsample::rolling_origin()] at 0, because a larger `lag` is an error.
+#' [nested_resamples()] says which of these designs the other functions are
+#' tested on.
 #'
 #' @section Finalizing a parameter range:
 #'
@@ -91,14 +103,38 @@
 #'
 #' @section Evaluation times:
 #'
-#' `eval_time` reaches every tune call that reads it, so a dynamic or
-#' integrated survival metric uses the times you name. With neither in the
-#' set, tune ignores the times with a warning. Each fold selects at the
-#' first of these times.
+#' The inner tuning and the outer scoring both use the times in `eval_time`.
+#' If the metric set has no dynamic or integrated survival metric, tune
+#' ignores the times with a warning. Each fold selects at the first of these
+#' times.
 #'
 #' @template section-resample-weights
 #'
 #' @template section-reproducibility
+#'
+#' @section Reproducing one fold:
+#'
+#' Fold `i` runs the code below. On a [nested_resamples()] design, `inner`
+#' is the fold's inner rset re-pointed at
+#' `rsample::analysis(resamples$splits[[i]])`. Under another `select`, the
+#' selection line uses [tune::select_by_one_std_err()] or
+#' [tune::select_by_pct_loss()]. A Bayesian fold also sets `control$seed` to
+#' the fold's tuning seed.
+#'
+#' ```
+#' set.seed(res$.tuning_seed[[i]], kind = "Mersenne-Twister",
+#'          normal.kind = "Inversion", sample.kind = "Rejection")
+#' tuned <- tune_grid(object, inner, grid = grid,
+#'                    param_info = param_info, metrics = metrics,
+#'                    eval_time = eval_time,
+#'                    control = extract_procedure(res)$control)
+#' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
+#' set.seed(res$.outer_fit_seed[[i]], kind = "Mersenne-Twister",
+#'          normal.kind = "Inversion", sample.kind = "Rejection")
+#' last_fit(final, resamples$splits[[i]], metrics = metrics,
+#'          eval_time = eval_time,
+#'          control = control_last_fit(event_level = event_level))
+#' ```
 #'
 #' @section When a fold fails:
 #'
@@ -120,11 +156,22 @@
 #'
 #' The daemons load nestedtune from an installed library, and they do not
 #' inherit your session's options. Set what a fold needs with
-#' [mirai::everywhere()]. Before it sends the folds out, the function checks
-#' that every daemon can load the packages the run needs. The check waits
-#' up to 30 seconds, and `options(nestedtune.preflight_timeout = <ms>)`
-#' changes that limit. On a pool with mirai's default dispatcher, an
-#' interrupt cancels the folds that are still running.
+#' [mirai::everywhere()]. Under `devtools::load_all()`, the daemons cannot
+#' see your development code, so run
+#' `mirai::everywhere(pkgload::load_all("<path>"))` first. A running daemon
+#' keeps the version it loaded, so restart the pool after you reinstall.
+#'
+#' Before it sends the folds out, the function checks that every daemon can
+#' load the packages the run needs. The check waits up to 30 seconds, and
+#' `options(nestedtune.preflight_timeout = <ms>)` changes that limit. The
+#' folds themselves have no time limit. If every daemon dies after dispatch,
+#' the call waits until you interrupt it.
+#'
+#' Each fold is sent one copy of the data. A workflow built inside a
+#' function carries that function's environment to every fold, so build it
+#' at the top level. On a pool with mirai's default dispatcher, an interrupt
+#' cancels the folds that are still running. A pool started with
+#' `dispatcher = FALSE` cannot be cancelled, and the call warns about that.
 #'
 #' @section Differences from calling tune directly:
 #'
@@ -132,8 +179,9 @@
 #' inner `tune_grid()` in every fold. The outer fit runs under its own
 #' `control_last_fit()`, and takes only `event_level`, `save_pred` and
 #' `extract` from the control. The result keeps the control that ran as
-#' `extract_procedure(res)$control`. Its settings differ
-#' from a direct `tune_grid()` call as follows.
+#' `extract_procedure(res)$control`, and [nested_final_fit()] runs again
+#' with it. Its settings differ from a direct `tune_grid()` call as
+#' follows.
 #'
 #' @templateVar INNER inner tuning run
 #' @template differences-forced
@@ -147,6 +195,9 @@
 #' @templateVar OTHER control_bayes()
 #' @template differences-refused
 #' @section Differences from calling tune directly:
+#' tune gives [tune::control_resamples()] and [tune::control_last_fit()] the
+#' `control_grid` class, so both are accepted here.
+#'
 #' **Passed through: `verbose`, `pkgs`, `parallel_over`, `workflow_size`.**
 #' Each reaches `tune_grid()` as given. `parallel_over` still sets the seed
 #' each model fit starts from, so a stochastic engine's numbers depend on
@@ -172,7 +223,7 @@
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
 #' collect_metrics(res)
 #'
-#' # What each fold chose. Disagreement here is selection instability.
+#' # What each fold chose. Folds that disagree show the choice is unstable.
 #' res$.selected
 #'
 #' @seealso [nested_tune_bayes()], [nested_resamples()], [nested_final_fit()],

@@ -36,9 +36,9 @@ with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tun
 it, or a parsnip model specification with no marker, given with
 \code{preprocessor}. A workflow carrying a marker is refused at entry.}
 
-\item{...}{On the generic, the arguments of the method. On a method, a
-control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, passed as \code{control}. Name
-every argument after \code{...}.}
+\item{...}{On the generic, the arguments of the method. On a method, pass
+\code{control = tune::control_resamples()} here to set the control. Name every
+argument after \code{...}.}
 
 \item{preprocessor}{A formula or recipe, when \code{object} is a model
 specification.}
@@ -134,8 +134,13 @@ scaled to sum to one.
 Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
 fold takes its seeds from that one seed by its position, so the result is
 the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
-and \code{.outer_fit_seed}. Engines that draw random numbers outside R, such
-as kernlab's SVMs, are not covered.
+and \code{.outer_fit_seed}. The function restores your random state on exit,
+even after an error. So two calls with no \code{set.seed()} between them give
+the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
+
+This covers randomness that flows through R's generator. Engines that
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
+pinned by any R-side scheme, here or in tune.
 }
 
 \section{The two seeds on a run with no tuning}{
@@ -178,7 +183,7 @@ levels. \code{eval_time} is offered the same way, for the same reason.
 
 
 \strong{Refused: none.} No setting is refused on its own. A control of another
-class, such as a \code{control_bayes()}, is an error.
+class is an error, even a \code{control_bayes()} that tune itself accepts.
 
 
 \strong{Passed through: none.} There is no inner tuning call for a slot to be
@@ -218,9 +223,10 @@ or the rows, splits or folds at fault.
 Time-series designs work as well. \code{nested_tune_grid()} is tested with an
 outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
-inner design of any of those four kinds. Keep the \code{lag} of
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0. \code{\link[=nested_resamples]{nested_resamples()}} says which of these
-designs the other functions are tested on.
+inner design of any of those four kinds. Leave the \code{lag} of
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
+\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
+tested on.
 }
 
 \examples{

@@ -14,12 +14,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-Nested resampling estimates how well a tuning procedure performs on new
-data. It runs two loops. The inner loop tunes the model, and the outer loop
-scores the tuned model on rows that the tuning never saw.
+Nested resampling estimates how well a tuning procedure (tune, select,
+fit) performs on new data. It runs two loops. The inner loop tunes the
+model, and the outer loop scores the tuned model on rows that the tuning
+never saw.
 
 The best score from ordinary tuning is optimistic. The same resamples that
-score the candidates also pick the winner, so part of its score is luck.
+score the candidates (the settings tried) also pick the winner, so part of
+its score is luck.
 `vignette("estimate")` explains this in more detail.
 
 ```{r deps, include = FALSE}
@@ -58,7 +60,9 @@ library(nestedtune)
 ## The design
 
 We start with the design. `nested_resamples()` builds an outer resampling
-and attaches an inner resampling to each outer fold.
+and attaches an inner resampling to each outer fold. `mtcars` has
+`r nrow(mtcars)` rows, too few for real nested resampling, but it keeps this
+example fast.
 
 ```{r design}
 set.seed(1)
@@ -79,8 +83,6 @@ set alone, so the tuning in that fold never sees the fold's held-out rows.
 ```{r inner}
 folds$inner_resamples[[1]]
 ```
-
-`mtcars` has `r nrow(mtcars)` rows, which keeps this example fast.
 
 ## The model and the grid
 
@@ -165,8 +167,9 @@ n_min_n <- n_distinct(selected$min_n)
 ```
 
 Across `r nrow(res)` outer folds, `mtry` took `r n_mtry` distinct values
-and `min_n` took `r n_min_n`. When the folds disagree on a parameter, its
-value is largely arbitrary at this sample size.
+and `min_n` took `r n_min_n`. When the folds disagree on a parameter, the
+data does not pin its value down, so read little into the value chosen.
+The nested estimate still holds, because it scores the whole procedure.
 
 `autoplot()` draws the selections, one point per outer fold. A flat row
 means that the folds agreed.
@@ -214,28 +217,30 @@ final <- nested_final_fit(wf, res)
 final
 ```
 
-The outer folds play no part here. The object predicts directly.
+The outer folds play no part here. The object predicts directly, and
+`extract_workflow()` returns the fitted workflow to save.
 
 ```{r predict}
 predict(final, new_data = mtcars[1:3, ])
 ```
 
 `extract_tune_results()` returns the tuning run behind this model, and
-`show_best()` gives its best score.
+`show_best()` gives its best inner score. That is the number that
+`tune_grid()` alone reports.
 
 ```{r comparison}
-best_selection <- extract_tune_results(final) |>
+best_inner <- extract_tune_results(final) |>
   show_best(metric = "rmse", n = 1)
 
 tibble(
-  quantity = c("nested estimate (report this)", "best selection-time score"),
-  rmse = c(rmse_row$mean, best_selection$mean)
+  quantity = c("nested estimate (report this)", "best inner score"),
+  rmse = c(rmse_row$mean, best_inner$mean)
 )
 ```
 
-The best selection-time score is not an estimate of performance on new
-data, because the same resamples chose the model. Whether it lands above or
-below the nested estimate here means nothing.
+The best inner score is not an estimate of performance on new data,
+because the same resamples chose the model. It is optimistic on average.
+On one small dataset, it can land on either side of the nested estimate.
 
 ## The write-up
 
@@ -250,4 +255,5 @@ Here is a short report of this run.
 > procedure. The folds selected `r n_mtry` distinct values of `mtry` and
 > `r n_min_n` of `min_n`. The deployed model applies the same procedure to
 > the full dataset, which selected mtry = `r final$selected$mtry` and
-> min_n = `r final$selected$min_n`.
+> min_n = `r final$selected$min_n`. That RMSE is the number reported for the
+> deployed model, because the model comes from the same procedure.

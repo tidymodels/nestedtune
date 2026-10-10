@@ -14,7 +14,9 @@
 #
 # Guide pages: the page list `sweep-prose.R` declares, or the paths after
 # `--pages`. Prose, paragraphs and sentences follow `sweep-prose.R`'s Rmd
-# reader, so a table line and a list item are not prose. Every backtick span
+# reader, so a table line and a list item are not prose, and a blockquote's
+# `>` marker is dropped. `\if{}` and `\out{}` on a help page are not prose
+# either. Every backtick span
 # counts as one word.
 #
 # A coined term is a whole-word match of
@@ -40,11 +42,15 @@ sweep_env <- new.env()
 sweep_env$roxygen <- FALSE
 sweep_env$mark <- "•"
 local({
-  here <- dirname(sub(
-    "^--file=",
-    "",
-    grep("^--file=", commandArgs(FALSE), value = TRUE)[1]
-  ))
+  # The script's own folder, read from Rscript's `--file=`, which encodes a
+  # space as `~+~`; under `source()` there is none, so fall back to the
+  # folder the package root keeps it in.
+  file_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+  here <- if (length(file_arg)) {
+    dirname(gsub("~+~", " ", sub("^--file=", "", file_arg[1]), fixed = TRUE))
+  } else {
+    "benchmarks"
+  }
   exprs <- parse(file.path(here, "sweep-prose.R"), keep.source = FALSE)
   wanted <- c("strip_spans", "rmd_paragraphs", "split_runs", "sentences")
   for (e in exprs) {
@@ -93,7 +99,13 @@ guide_pages <- if ("--pages" %in% args) {
 } else {
   default_pages
 }
-man_dir <- if ("--man" %in% args) option_paths("--man")[1] else "man"
+man_dir <- if ("--man" %in% args) option_paths("--man") else "man"
+if (length(man_dir) != 1L || !dir.exists(man_dir)) {
+  stop("--man takes one existing directory", call. = FALSE)
+}
+
+# Base R has `%||%` only from 4.4.0, and DESCRIPTION declares an older R.
+`%||%` <- function(x, y) if (is.null(x)) y else x
 
 coined_pattern <- "\\b([Rr]ecord(s|ed|ing)?|[Rr]efus\\w*|orchestrators?|siblings?)\\b"
 one_word <- "•"
@@ -132,6 +144,11 @@ flatten_rd <- function(x) {
   }
   if (!is.null(tag) && tag %in% atomic_tags) {
     return(one_word)
+  }
+  # roxygen wraps a code block in `\if{html}{\out{<div ...>}}`, markup that
+  # is not prose
+  if (!is.null(tag) && tag %in% c("\\if", "\\out")) {
+    return("")
   }
   if (identical(tag, "\\href")) {
     return(flatten_rd(x[[2]]))
@@ -219,6 +236,11 @@ help <- do.call(rbind, help_rows)
 
 profile_page <- function(path) {
   paras <- sweep_env$rmd_paragraphs(path)
+  # a blockquote's `>` marker is not a word
+  paras <- lapply(paras, function(p) {
+    p$text <- sub("^\\s*>\\s?", "", p$text)
+    p
+  })
   para_sents <- lapply(paras, sweep_env$sentences, all = TRUE)
   para_words <- vapply(
     para_sents,

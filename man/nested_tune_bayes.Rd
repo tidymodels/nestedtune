@@ -44,9 +44,9 @@ nested_tune_bayes(object, ...)
 \item{object}{A \code{\link[workflows:workflow]{workflows::workflow()}} with at least one parameter marked
 with \code{\link[tune:tune]{tune::tune()}}, or a parsnip model specification.}
 
-\item{...}{On the generic, the arguments of the method. On a method, a
-control object from \code{\link[tune:control_bayes]{tune::control_bayes()}}, passed as \code{control}. Name
-every argument after \code{...}.}
+\item{...}{On the generic, the arguments of the method. On a method, pass
+\code{control = tune::control_bayes()} here to set the control. Name every
+argument after \code{...}.}
 
 \item{preprocessor}{A formula or recipe, when \code{object} is a model
 specification.}
@@ -61,9 +61,10 @@ a parameters set is derived from other arguments. Passing this argument can
 be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
-set. Under the default selection rule, the first metric selects each
-fold's candidate, so put the metric you report first. Every metric is
-scored on the outer folds.}
+set. Under every rule but \code{"desirability"}, the first metric selects
+each fold's candidate, so put the metric you report first. The Bayes,
+race and annealing searches also steer on it. Every metric is scored on
+the outer folds.}
 
 \item{initial}{The number of candidates each fold scores before the first
 iteration, a whole number of at least 2. A \code{tune_results} object, which
@@ -78,7 +79,7 @@ level of a two-class outcome is the event. It applies to the inner tuning run an
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
-Times that are missing, negative or not finite are an error.}
+Times that are not numeric, empty, missing, negative or not finite are an error. Zero, repeated and unordered times are passed on to tune.}
 
 \item{select}{A \code{\link[=selection_rule]{selection_rule()}} that each outer fold uses to pick its
 candidate. The default is \code{\link[tune:select_best]{tune::select_best()}} on the first metric.}
@@ -160,8 +161,13 @@ scaled to sum to one.
 Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
 fold takes its seeds from that one seed by its position, so the result is
 the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
-and \code{.outer_fit_seed}. Engines that draw random numbers outside R, such
-as kernlab's SVMs, are not covered.
+and \code{.outer_fit_seed}. The function restores your random state on exit,
+even after an error. So two calls with no \code{set.seed()} between them give
+the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
+
+This covers randomness that flows through R's generator. Engines that
+randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
+pinned by any R-side scheme, here or in tune.
 }
 
 \section{Differences from calling tune directly}{
@@ -247,9 +253,10 @@ or the rows, splits or folds at fault.
 Time-series designs work as well. \code{nested_tune_grid()} is tested with an
 outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
-inner design of any of those four kinds. Keep the \code{lag} of
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0. \code{\link[=nested_resamples]{nested_resamples()}} says which of these
-designs the other functions are tested on.
+inner design of any of those four kinds. Leave the \code{lag} of
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
+\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
+tested on.
 }
 
 \section{Finalizing a parameter range}{
@@ -264,10 +271,10 @@ outer fold's analysis set, never on the rows that fold holds out.
 \section{Evaluation times}{
 
 
-\code{eval_time} reaches every tune call that reads it, so a dynamic or
-integrated survival metric uses the times you name. With neither in the
-set, tune ignores the times with a warning. Each fold selects at the
-first of these times.
+The inner tuning and the outer scoring both use the times in \code{eval_time}.
+If the metric set has no dynamic or integrated survival metric, tune
+ignores the times with a warning. Each fold selects at the first of these
+times.
 }
 
 \examples{
