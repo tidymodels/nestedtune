@@ -65,10 +65,10 @@ made it.
 
 Arlot and Celisse (2010) report that 5 to 10 folds is the usual advice
 for model selection. They add that the best count depends on the problem.
-More
-outer folds give each model more training rows, and each outer fold adds a
-whole tuning run. For a grid, the tuning fits number the product of the
-two fold counts and the grid size.
+
+More outer folds give each model more training rows, and each outer fold
+adds a whole tuning run. For a grid, the tuning fits number the product of
+the two fold counts and the grid size.
 
 ## A slight pessimism
 
