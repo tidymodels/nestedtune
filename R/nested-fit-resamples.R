@@ -1,144 +1,78 @@
 #' Score a workflow with nothing to tune on a nested design
 #'
 #' @description
-#' `nested_fit_resamples()` gives you the score of a workflow with nothing
-#' to tune on the same outer folds a tuned workflow scores on. It runs the
-#' outer loop of a nested design with the inner stage skipped, because there
-#' is nothing to search. For each outer fold it fits the workflow on the
-#' fold's analysis set and scores it on the assessment set with
-#' [tune::last_fit()]. It is [nested_tune_grid()] with the inner tuner
-#' removed. So a fixed workflow and a tuned one score on identical outer
-#' folds, and their per-fold metrics join by fold label. That page is the
-#' reference for everything the orchestrators share.
-#'
-#' Use it for the baseline a tuned procedure is compared against. A plain
-#' `rset` of outer folds is what
-#' [tune::fit_resamples()] already serves. What this function adds is the
-#' same nested design, so the two runs' folds are the same rows.
+#' `nested_fit_resamples()` scores a workflow with nothing to tune on a
+#' nested design. Each outer fold fits the workflow on its analysis set and
+#' scores it on the rows it held out.
 #'
 #' @details
-#' `metrics` is read as [tune::fit_resamples()] reads it. There is no inner
-#' run to select on, so the set's order carries no weight here.
+#' Use it for a baseline to compare with a tuned workflow. On the same
+#' design, the two runs score the same outer folds, so their per-fold metrics
+#' join by fold label. [tune::fit_resamples()] does the same job on a plain
+#' set of folds. [nested_tune_grid()] documents what the loop functions
+#' share, such as the design, the seeds, failed folds and parallel execution.
+#'
+#' A workflow with a [tune::tune()] marker is an error here, and a workflow
+#' with none is an error in the tuning functions.
+#'
+#' Fold `i` is [tune::last_fit()] of `object` on `resamples$splits[[i]]`,
+#' under the seed in `res$.outer_fit_seed[[i]]`. Each fold also draws a
+#' tuning seed that nothing uses, so the outer-fit seeds match those of a
+#' tuned run on the same design.
+#'
+#' [collect_selections()], [collect_inner_metrics()] and [agreement()]
+#' return zero rows, and `autoplot(type = "parameters")` is an error.
+#' [nested_final_fit()] fits the workflow on all the data.
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::fit_resamples
 #' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
-#'   set. The outer loop scores every metric in the set, and
-#'   [collect_metrics()] reports each one. A metric set that does not suit
-#'   the model's mode, such as a classification metric on a regression
-#'   model, is refused before any fold runs.
-#' @param object A [workflows::workflow()] with no parameter marked for tuning
-#'   with [tune::tune()], every value fixed as [tune::fit_resamples()] takes
-#'   it, or a parsnip model specification with no marker, given with
-#'   `preprocessor`. A workflow carrying a marker is refused at entry.
+#'   set. Every metric is scored on the outer folds.
+#' @param object A [workflows::workflow()] with no parameter marked with
+#'   [tune::tune()], or a parsnip model specification given with
+#'   `preprocessor`.
 #' @templateVar CONSTRUCTOR tune::control_resamples()
 #' @templateVar PKG tune
 #' @template param-control-dots
-#' @templateVar SCOPE The one tune call a fold makes, the outer scoring fit, reads it.
+#' @templateVar SCOPE It applies to the outer scoring fit.
 #' @template param-event-level
-#' @templateVar REFUSED Anything not numeric, an empty vector, or an element that is missing, negative or not finite is refused at entry.
+#' @templateVar REFUSED Times that are not numeric, empty, missing, negative or not finite are an error.
 #' @template param-eval-time
 #'
-#' @return A `nested_results` with one row per outer fold and the columns
-#'   [nested_tune_grid()] documents, three of them holding what no tuning
-#'   leaves. `.selected` is a zero-row, zero-column tibble on every
-#'   completed fold and `NULL` on a failed one. `.inner_metrics` is a
-#'   zero-row table with tune's summary columns and no parameter column.
-#'   `.tuning_seed` holds the seed the loop drew for the fold's tuning
-#'   step, consumed by nothing. There is no `grid` attribute. The
-#'   `procedure` record names the tuner `"fit_resamples"`, and holds no
-#'   grid, parameter set or selection rule.
-#'
-#' @section One door for a fixed workflow, one for a tuned one:
-#'
-#' A workflow that still carries a [tune::tune()] marker is refused at
-#' entry with condition class `nestedtune_tuned_workflow`, which names the
-#' five orchestrators that tune. Each of those refuses a workflow with no
-#' marker, with class `nestedtune_untuned_workflow`, which names this one.
-#'
-#' The final fit ties the workflow to the record as well. The result
-#' records the identity of the workflow it ran under, and
-#' [nested_final_fit()] refuses a workflow whose identity differs, as its
-#' "What is refused" section says.
-#'
-#' @section What the reading functions answer:
-#'
-#' Every function that reads a `nested_results` answers on the result.
-#' [collect_metrics()], `summary()`, `print()`, [collect_notes()],
-#' [collect_predictions()][collect_predictions.nested_results] and
-#' [collect_extracts()][collect_predictions.nested_results] read what the
-#' outer fits produced. [collect_selections()], [collect_inner_metrics()]
-#' and [agreement()] return zero rows. `autoplot(type = "performance")`
-#' draws the fold scores, where `autoplot(type = "parameters")` refuses
-#' with class `nestedtune_no_tuned_parameters`, there being nothing to
-#' draw. [nested_final_fit()] accepts the result and fits the workflow on
-#' every row, with no tuning run.
-#'
-#' @inheritSection nested_tune_grid Nested designs
-#'
-#' @template section-resample-weights
-#'
-#' @template section-reproducibility
-#'
-#' @section The two seeds on a run with no tuning:
-#'
-#' A tuned run under the same session seed on the same design shares each
-#' fold's outer-fit seed with this one. The same `2 * n` seeds are drawn
-#' as on a tuned run. The record keeps one layout across the six
-#' orchestrators. The tuning seed is drawn and consumed by nothing. It is
-#' recorded as drawn rather than as `NA`, so the two seed columns read the
-#' same on every result. Fold `i` is exactly [tune::last_fit()] of `object`
-#' on `resamples$splits[[i]]` under `res$.outer_fit_seed[[i]]`, with no
-#' tuning line before it. The seed is set with the generator kind pinned:
-#' `set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")`.
+#' @return A `nested_results`, as [nested_tune_grid()] describes.
+#'   `.selected` is a zero-column tibble on each completed fold, and
+#'   `.inner_metrics` has zero rows. There is no `grid` attribute.
 #'
 #' @section Differences from calling tune directly:
 #'
-#' There is no `control` formal. A [tune::control_resamples()] passed
-#' through `...` as `control` is recorded, and two of its slots reach the
-#' outer fit. What is recorded is the control passed, or tune's default
-#' when none is, with the slots this package forces overwritten, as
-#' `extract_procedure(res)$control`. tune gives `control_resamples()`,
-#' [tune::control_grid()] and [tune::control_last_fit()] one class, so any
-#' of the three is accepted here as the same object.
+#' A [tune::control_resamples()] passed through `...` as `control` is kept
+#' as `extract_procedure(res)$control`. The one tune call a fold makes is
+#' the outer fit, which runs under its own [tune::control_last_fit()]. tune
+#' gives [tune::control_grid()] and `control_last_fit()` the same class, so
+#' both are accepted too.
 #'
-#' Every slot of `control_resamples()` falls under one of seven headings,
-#' most under the last. The one tune call a fold makes here is the outer
-#' scoring fit, whose own control this package builds.
+#' **Forced: `allow_par`.** The outer fit runs with `allow_par = FALSE`,
+#' because the outer folds carry the parallelism.
 #'
-#' **Forced: `allow_par`.** The outer fit runs at `allow_par = FALSE`
-#' whatever the control carries, because parallelism belongs over the outer
-#' folds.
-#'
-#' **Settable as its own argument: `event_level`.** The argument is the one
-#' place the level is set. A control at tune's default takes it. A control
-#' naming another level is refused at entry, and the refusal names both
-#' levels. `eval_time` is offered the same way, for the same reason.
+#' **Settable as its own argument: `event_level`.** Set the level with the
+#' `event_level` argument. A control that names another level is an error.
+#' `eval_time` is an argument too.
 #'
 #' @templateVar OTHER control_bayes()
 #' @template differences-refused
 #' @section Differences from calling tune directly:
-#' **Passed through: none.** There is no inner tuning call for a slot to be
-#' passed through to.
+#' **Passed through: none.** There is no inner tuning call.
 #'
 #' **Kept from the outer fit: `save_pred`, `extract`.** With
-#' `save_pred = TRUE` the result carries a `.predictions` list column: each
-#' completed fold's predictions on its assessment rows, as
-#' [tune::last_fit()] returns them. With `extract` a function, it carries
-#' an `.extracts` list column holding the function's value on each
-#' completed fold's fitted workflow. Here there is no inner run whose
-#' predictions and extracts are discarded. The outer fit's are the only
-#' ones, and they are still discarded on a run that did not ask.
+#' `save_pred = TRUE`, the result has a `.predictions` column. With an
+#' `extract` function, it has an `.extracts` column. Without them, the outer
+#' fit's predictions and extracts are still discarded.
 #'
-#' **Not returned: none.** There is no inner run, so there is nothing to
-#' withhold.
+#' **Not returned: none.** There is no inner run.
 #'
 #' **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
-#' `backend_options`, `workflow_size`.** Each governs an inner tuning call
-#' this function never makes. The outer fit runs
-#' under [tune::control_last_fit()] at the level and parallelism above,
-#' which reads none of these. The workflow's packages are required at
-#' entry, and the fitted workflow is reached through `extract`.
+#' `backend_options`, `workflow_size`.** Each one sets an inner tuning call
+#' that this function never makes.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
