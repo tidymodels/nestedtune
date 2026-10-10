@@ -87,6 +87,7 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 - 2026-10-09: T7 done. `devtools::check()` gives 0 errors, 0 warnings and 0 notes. `document()` leaves no diff, the six gating sweeps print clean, and `air` is clean. The fresh-reader report that T7 names runs at review. Status set to review.
 - 2026-10-09: review pass 1: three lenses plus the T7 reader. The fix-now set landed in `25f4887a` and `6e28cd4e` and added D-115. The first fix took the README opening to 84 words, over AC5's cap. It was cut to 76 before any evidence was recorded. No criterion failed on the final head, so there was no return.
 - 2026-10-09: review follow-ups routed to planned milestones, not new rows. M143 takes `orchestrator` still used on its pages, the sibling Descriptions' "honest score" and their IP3 sentence, and the `differences-passed-shared` pointer. M145 takes where a test set fits around nested resampling, and how to choose v in each loop.
+- 2026-10-10: step-7 approval: m142-tune-style-pilot approved for merge, with the #91 comment.
 
 ## Review
 
