@@ -13,163 +13,106 @@ nested_resamples(data, outside, inside, ...)
 \code{vfold_cv(v = 5)} or as an \code{rset} already built on \code{data}.}
 
 \item{inside}{The inner resampling, as an unevaluated call such as
-\code{vfold_cv(v = 5)}. It is evaluated once per outer fold, so an existing
-object is refused.}
+\code{vfold_cv(v = 5)}. It is evaluated on each outer fold's analysis set,
+so an \code{rset} is an error.}
 
-\item{...}{Not used. It must be empty. The three arguments above are all
-required, so a mistyped fourth is an error here.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
-An object of class \code{nested_resamples}, which also carries the classes
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} returns, so methods written against those keep
-working. It is the outer \code{rset} with an \code{inner_resamples} list column
-added, one inner \code{rset} per outer split.
+An object of class \code{nested_resamples}, which also carries the
+classes \code{\link[rsample:nested_cv]{rsample::nested_cv()}} returns. It is the outer \code{rset} with an
+\code{inner_resamples} column, one inner \code{rset} per outer split.
 }
 \description{
-\code{nested_resamples()} builds the nested resampling design
-\code{\link[=nested_tune_grid]{nested_tune_grid()}} and its siblings take: one row per outer fold, with
-that fold's inner resamples beside it. It is \code{\link[rsample:nested_cv]{rsample::nested_cv()}}'s
-structure, and for the same seed and the same specifications it selects
-the same rows.
-
-What differs is what the splits point at. rsample's inner splits index a
-fresh copy of each outer fold's analysis set. These index the one data
-frame you already have, so the design's size barely grows with the fold
-count.
+\code{nested_resamples()} builds a nested resampling design: one row per outer
+fold, with that fold's inner resamples beside it. It gives the same splits
+as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}, without a copy of the data for each outer fold.
 }
 \section{Differences from rsample}{
 
 
-Code written for an rsample split keeps working. \code{\link[rsample:analysis]{rsample::analysis()}}
-and \code{\link[rsample:assessment]{rsample::assessment()}} return identical frames, attributes included.
-Each inner split keeps the class and the resample id rsample gives it, so
-\code{labels()} and \code{\link[rsample:add_resample_id]{rsample::add_resample_id()}} behave the same.
+\code{\link[rsample:analysis]{rsample::analysis()}} and \code{\link[rsample:assessment]{rsample::assessment()}} return the same frames
+as on rsample's splits, and each inner split keeps rsample's class and
+id. These designs are an error, whether \code{nested_resamples()} or
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} built them:
+\itemize{
+\item An outer \code{\link[rsample:bootstraps]{rsample::bootstraps()}} or \code{\link[rsample:group_bootstraps]{rsample::group_bootstraps()}}. The
+same row can land in both the inner analysis and assessment sets.
+\item An outer \code{\link[rsample:loo_cv]{rsample::loo_cv()}}. Each fold holds out one row, so
+R-squared cannot be computed and the averaged RMSE is the mean absolute
+error.
+\item An outer \code{\link[rsample:apparent]{rsample::apparent()}}, whose one fold is scored on the rows it
+trained on.
+\item An outer \code{\link[rsample:permutations]{rsample::permutations()}}, whose folds have no assessment set.
+\item An inner \code{\link[rsample:loo_cv]{rsample::loo_cv()}} or \code{\link[rsample:permutations]{rsample::permutations()}}, which tune
+does not accept, or an inner \code{\link[rsample:apparent]{rsample::apparent()}}, for which tune
+reports no results.
+}
 
-Two behaviors differ on purpose. First, an outer
-\code{\link[rsample:bootstraps]{rsample::bootstraps()}} or \code{\link[rsample:group_bootstraps]{rsample::group_bootstraps()}} is refused, where
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} warns about it or builds it without a warning.
-Without the refusal, the same row can land in both the inner analysis and
-the inner assessment set, which makes the estimate invalid.
+A design is known by the class of its splits as well as its own class, so
+a design rebuilt with \code{\link[rsample:manual_rset]{rsample::manual_rset()}} is caught too. An inner
+\code{\link[rsample:validation_set]{rsample::validation_set()}} cannot be built, because it takes a split and
+not a data frame.
 
-Second, \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
-\code{\link[rsample:permutations]{rsample::permutations()}} are refused in either loop, where rsample builds
-them. None of them gives a valid nested estimate there. As the outer loop,
-\code{\link[rsample:loo_cv]{rsample::loo_cv()}} holds out one row per fold. R-squared then cannot be
-computed, and the averaged RMSE is the mean absolute error. As the outer
-loop, \code{\link[rsample:apparent]{rsample::apparent()}} scores its one fold on the rows it trained on,
-and \code{\link[rsample:permutations]{rsample::permutations()}} gives each fold no assessment set. As the
-inner loop, tune refuses \code{\link[rsample:loo_cv]{rsample::loo_cv()}} and \code{\link[rsample:permutations]{rsample::permutations()}},
-and it reports no results for \code{\link[rsample:apparent]{rsample::apparent()}}. Without the refusal,
-each outer fold that tunes on one of them fails. Both refusals have
-condition class \code{nestedtune_bad_design}, and each names the rsample
-function and gives its reason.
+A single split is an error in either loop if its assessment set holds a
+row of its analysis set. Inside an outer fold, two copies of one data row
+count as the same row. The apparent split of a bootstrap with the id
+"Apparent" is exempt, because tune leaves it out of its estimates. For
+the same reason, an inner split with the id "Apparent" is an error
+unless it is that split. So is an inner split with a missing \code{id}, or two
+inner splits with the same values in every id column.
 
-One design is not refused but cannot be built as \code{inside}.
-\code{\link[rsample:validation_set]{rsample::validation_set()}} takes a split from
-\code{\link[rsample:initial_validation_split]{rsample::initial_validation_split()}} rather than a data frame. So
-\code{inside = validation_set()} fails when it is evaluated on an outer fold's
-analysis set, and nestedtune stops with an error that names \code{inside}.
-
-The design is found from the class of its splits as well
-as its own class. So an \code{outside} rset rebuilt with
-\code{\link[rsample:manual_rset]{rsample::manual_rset()}} from such splits is refused too, and so is one
-with a single such split among valid ones. The same holds for the rset
-that \code{inside} returns for each outer fold, and that refusal names the fold.
-An apparent split beside bootstrap or permutation splits counts as part of
-that design only if its id is "Apparent", the id tune leaves out of its
-estimates. Under any other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}}
-split, so an \code{inside} that adds one to bootstrap splits is refused.
-tune leaves every inner split with the id "Apparent" out of its
-estimates, whatever the split's class. So an \code{inside} that gives any other
-split that id is refused too, and the refusal names the outer fold.
-An \code{inside} that gives a split with a missing \code{id} is refused as well,
-because tune leaves that split out of its estimates. So is an \code{inside}
-that gives two splits the same values in every id column, because tune
-then miscounts the resamples.
-
-An \code{outside} split whose assessment set holds a row of its analysis set
-is refused. Such a fold scores the model on rows it trained on. The rule
-reads the rows, so it also catches a split rebuilt with
-\code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
-\code{inside} that gives such a split is refused too, and the refusal names
-the outer fold and the split. There, each index into the fold's analysis
-set counts as the data row it copies. So if the outer split repeats a
-row, an inner split that puts one copy in each set is refused. The
-apparent split of a bootstrap under the id "Apparent" is exempt from this
-rule, because tune leaves it out of its estimates.
-
-An \code{outside} split is refused if its \code{in_id} or \code{out_id} holds an \code{NA},
-is not a numeric vector, or holds a value outside integer range. So is a
-split whose \code{out_id} is \code{NULL} or empty, which leaves it no assessment
-set. The refusal names every such split and slot. rsample reads an \code{NA}
-index as a row of \code{NA} values, or fails when it builds the assessment
-set. The one exception is an \code{out_id} that is the logical \code{NA}, which
-tells rsample to find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
+An outer split is an error if its \code{in_id} or \code{out_id} holds an \code{NA}, is
+not numeric, or holds a value outside integer range. So is an empty
+\code{out_id}. The logical \code{NA} \code{out_id}, which tells rsample to use
+\code{\link[rsample:complement]{rsample::complement()}}, is accepted.
 }
 
 \section{Time-series designs}{
 
 
-An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is tested to give the same splits as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
-are tested on all four designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their
-results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested
-on the rolling-origin design, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their
-results, plus the sliding-window design for \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}
-results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on the rolling-origin design.
+Below, the sliding designs are \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
+\code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, and the four
+other tuners are \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, the two racing functions and
+\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each pair of designs below gives the same
+splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. A final fit is tested on the results of
+the functions named with it.
+\itemize{
+\item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or a sliding design, with an inner
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}},
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} and their final fits are tested on all four.
+The four other tuners, their final fits and \code{\link[=nested_workflow_map]{nested_workflow_map()}} are
+tested on the rolling-origin outer design. The final fit of
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} is also tested on the sliding-window outer design.
+\item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an inner sliding design. All five
+tuners and their final fits are tested on all three.
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on all three with its default \code{fn},
+and with each of the four other tuners on sliding-period alone.
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} accepts these designs. It checks the inner
+design but fits nothing on it.
+\item A sliding design in both loops, which gives nine pairs.
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on all nine. On the sliding-window pair,
+the four other tuners, \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn},
+and the final fit of \code{\link[=nested_tune_grid]{nested_tune_grid()}} are tested, and
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} accepts the design. No other function is
+tested on the other eight pairs.
+}
 
-An outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an inner
-\code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} is tested to give the same splits as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on these three
-designs, and so is \code{\link[=nested_final_fit]{nested_final_fit()}} for its results. These designs are
-also tested under \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, and so is
-\code{\link[=nested_final_fit]{nested_final_fit()}} for the results of those four tuners.
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on these three designs with its default
-\code{fn}. With \code{fn} set to each of those four tuners, it is tested on the
-sliding-period design alone. \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept
-these designs. It checks the inner design but fits nothing on it.
-
-An outer \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} with one of these three inner designs gives
-nine pairs. Each pair is tested to give the same splits as
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, and each is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}.
-The pair of an outer and an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}} is also
-tested under \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
-\code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
-inner design but fits nothing on it. On the other eight pairs, no
-function but \code{\link[=nested_resamples]{nested_resamples()}} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
-Any other inner design is not tested.
-
-Every test above that uses \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} leaves \code{lag} at
-its default of 0. A \code{lag} above 0 is refused as an \code{outside} and as an
-\code{inside}, because each assessment set then holds the last \code{lag} rows of
-its analysis set. Use \code{lag = 0}, and build the lagged predictors before
-resampling.
+Any other inner design is not tested. A \code{lag} above 0 in
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} is an error in either loop, because each
+assessment set then holds the last \code{lag} rows of its analysis set. Build
+lagged predictors before resampling.
 }
 
 \section{Memory}{
 
 
-What you save is one copy of the analysis set per outer fold.
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} evaluates the inner specification against
-\code{as.data.frame(split)}, so every outer fold holds its own copy of that fold's
-analysis set. \code{nested_resamples()} runs the same specification against the
-same frame, keeps only the row indices it produces, and points them back at
-\code{data}. The index vectors remain, as they do in rsample, but the copies are
-gone.
-
-Sizes below are multiples of the source data, measured on
-\code{mlbench::LetterRecognition} (20000 x 17) with five inner folds under
-rsample 1.3.2 and R 4.6.1. They were recorded on 2026-07-25 beside the
-check \code{tests/testthat/test-nested-resamples-memory.R} makes of them:\tabular{rrr}{
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}} keeps a copy of each outer fold's analysis set.
+\code{nested_resamples()} keeps only row indices that point back at \code{data}.
+The sizes below are multiples of the source data. They were measured on
+\code{mlbench::LetterRecognition} (20000 x 17) with five inner folds, under
+rsample 1.3.2 and R 4.6.1, on 2026-07-25.
+\code{tests/testthat/test-nested-resamples-memory.R} checks them.\tabular{rrr}{
    outer folds \tab \code{rsample::nested_cv()} \tab \code{nested_resamples()} \cr
    2 \tab 2.2x \tab 1.2x \cr
    5 \tab 5.6x \tab 1.7x \cr
