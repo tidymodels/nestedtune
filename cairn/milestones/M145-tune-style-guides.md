@@ -1,13 +1,13 @@
 # M145: The other four guides read like the tidymodels.org articles
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M142, M144
 - **Driving RR:** —
 - **Principles touched:** IP3, GP5
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the guides on the package website and in the vignettes
-- **Branch/PR:** —
+- **Branch/PR:** m145-tune-style-guides
 
 ## Goal
 
@@ -50,7 +50,7 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 
 ## Tasks
 
-- [ ] T1: Run `doc-profile.R` at the branch point and record the four pages' figures in the comparison note.
+- [x] T1: Run `doc-profile.R` at the branch point and record the four pages' figures in the comparison note.
 - [ ] T2: Rewrite `estimate.Rmd`. Keep the meaning of the estimate, what to report, and the background with its citations, all shorter. Drop the statements about what the package does not offer, unless a reader needs one to act.
 - [ ] T3: Rewrite `tuners.Rmd` as one short section for each tuner and one for the workflow set. Drop the column meanings such as `.iter` and `n`, which the help pages hold.
 - [ ] T4: Rewrite `results.Rmd` as one narrative. Drop the column tour, the failed-fold run, the dplyr class rules and the `event_level` note.
@@ -63,3 +63,5 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - 2026-10-09: inputs from M142's review reader. No guide says where a held-out test set (`initial_split()` and `last_fit()`) fits around nested resampling. No guide says how to choose v for each loop. Both belong in `estimate.Rmd`, under this milestone's T2.
 - 2026-10-09: plan gate chose no optimism demonstration over a site-only simulation article, because M082 deleted such a page and one random draw can fail to show the gap; falsified by a user or maintainer asking to see the flat score's optimism shown.
 - 2026-10-10: input from M144 T2. `?collect_metrics` no longer cites Bengio and Grandvalet (2004) or Gauran, Ombao and Yu (2025) on why the fold scores give no valid standard error, and points to `vignette("estimate")`. That vignette's standard error section cites neither. T2 decides whether they belong there.
+- 2026-10-10: implement started on branch `m145-tune-style-guides`, cut from `f1446754`.
+- 2026-10-10: T1 done. At `f1446754`, `doc-profile.R` reads estimate 1,392 prose words, tuners 1,350, results 1,395 and parallel 510; the caps are 974, 945, 976 and 357, a paragraph mean of 37.5 and 2 coined terms. Figures are in `references/tune-docs-comparison.md`.
