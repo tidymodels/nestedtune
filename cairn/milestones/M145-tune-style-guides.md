@@ -32,11 +32,11 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 
 ## Acceptance criteria
 
-- [ ] AC1: For each of the four pages, `Rscript benchmarks/doc-profile.R` reports at most 70% of the page's prose words at this milestone's branch point.
-- [ ] AC2: On each of the four pages, the mean words per prose paragraph are at most the largest mean among the comparator copies M142 fetched, as `doc-profile.R` reports.
-- [ ] AC3: On each of the four pages, `doc-profile.R` counts at most 2 coined terms in the prose.
-- [ ] AC4: On the four pages, `doc-profile.R` counts no sentence that opens with "You" or "Your". `grep -n 'error = TRUE' vignettes/estimate.Rmd vignettes/tuners.Rmd vignettes/results.Rmd vignettes/articles/parallel.Rmd` prints nothing.
-- [ ] AC5: In `estimate.Rmd`, at least one sentence says what the nested estimate describes and what a user reports for the deployed model, and why (IP3). Review quotes it with its line. The page keeps a reference list for each source it cites.
+- [x] AC1: For each of the four pages, `Rscript benchmarks/doc-profile.R` reports at most 70% of the page's prose words at this milestone's branch point.
+- [x] AC2: On each of the four pages, the mean words per prose paragraph are at most the largest mean among the comparator copies M142 fetched, as `doc-profile.R` reports.
+- [x] AC3: On each of the four pages, `doc-profile.R` counts at most 2 coined terms in the prose.
+- [x] AC4: On the four pages, `doc-profile.R` counts no sentence that opens with "You" or "Your". `grep -n 'error = TRUE' vignettes/estimate.Rmd vignettes/tuners.Rmd vignettes/results.Rmd vignettes/articles/parallel.Rmd` prints nothing.
+- [x] AC5: In `estimate.Rmd`, at least one sentence says what the nested estimate describes and what a user reports for the deployed model, and why (IP3). Review quotes it with its line. The page keeps a reference list for each source it cites.
 - [ ] AC6: The verify slot is clean. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings with the vignettes built. Every gating prose sweep prints clean, and `pkgdown::check_pkgdown()` passes.
 
 ## Coverage
@@ -73,3 +73,13 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - 2026-10-10: the claim audit's reader found 4 wrong claims and 2 loose ones, all fixed: the Bayle et al. coin-flip step (the paper shows a shrinking loss-difference variance), the Vabalas framing, the Arlot and Celisse "estimate" reading (their goal is model selection), and the parallel cost sentence (a probe timed the pool no slower). The print wording and the seed sentence are tightened too. Its re-read is pending.
 - 2026-10-10: claim audit: 96 claims read, 6 corrected — vignettes/estimate.Rmd, vignettes/tuners.Rmd, vignettes/articles/parallel.Rmd. The same reader re-read the 6 and found that all hold.
 - 2026-10-10: T6 done. `devtools::test()` passes with no failures, and `devtools::check()` gives 0 errors, 0 warnings and 0 notes with the vignettes rebuilt. No `.R` file and no roxygen changed, so `air` and `document()` are not owed. The fresh reader beside the tidymodels.org articles runs at review. Status set to review.
+
+## Review
+
+Head `8dac9123`, branch point `f1446754`. `doc-profile.R` read the branch-point pages from `git show f1446754:<path>` copies.
+
+- AC1: prose words at head against the branch point: estimate 959 / 1,392 (68.9%), tuners 535 / 1,350 (39.6%), results 322 / 1,395 (23.1%), parallel 178 / 510 (34.9%). All at most 70%. Pass.
+- AC2: paragraph means at head: 34.2, 31.5, 23.0 and 25.4. The largest comparator mean is 37.5 (`org-start-tuning.qmd`), read in the same run. Pass.
+- AC3: coined terms at head: 0 on each of the four pages. Pass.
+- AC4: `doc-profile.R` counts 0 "You" openers on each page, and the `error = TRUE` grep prints nothing (exit 1). Pass.
+- AC5: `vignettes/estimate.Rmd:40`: "The estimate describes the procedure, not one fitted model, and we report it for the deployed model because `nested_final_fit()` runs that procedure on all the data." The page cites eight sources in prose (Arlot and Celisse, Bayle et al., Bengio and Grandvalet, Luo and Barber, Tibshirani and Tibshirani, Vabalas et al., Varma and Simon, Wilimitis and Walsh), and each has an entry at lines 130 to 156. Pass.
