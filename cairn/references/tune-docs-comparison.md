@@ -68,6 +68,8 @@ At the M143 branch point (`5ca197ee`, 2026-10-10), the script reads the seven pa
 | `tune::fit_resamples` | 983 | 39 | 5 | 0 |
 | `tune::last_fit` | 620 | 28 | 3 | 0 |
 
+At the M143 head (`90ad5811`, 2026-10-10), the same script reads the seven pages at: `nested_tune_bayes` 746 prose words (29-word Description), `nested_tune_race` 765 (32), `nested_tune_sim_anneal` 713 (28), `nested_fit_resamples` 507 (31), `nested_workflow_map` 383 (21), `nested_final_fit` 498 (24) and `nested_resamples` 726 (35). The seven total 4,338, against 10,343 at the branch point.
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune
