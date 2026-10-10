@@ -1,13 +1,13 @@
 # M144: The help pages for reading results read like tune's
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M142
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the help pages for the functions that read a nested run
-- **Branch/PR:** —
+- **Branch/PR:** m144-tune-style-reader-pages
 
 ## Goal
 
@@ -43,7 +43,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 
 ## Tasks
 
-- [ ] T1: Run `doc-profile.R` at the branch point and record the 24 pages' figures in the comparison note.
+- [x] T1: Run `doc-profile.R` at the branch point and record the 24 pages' figures in the comparison note.
 - [ ] T2: Rewrite the collect, compute and augment pages and their set methods. Cut the standard-error argument on `collect_metrics` to the one sentence a user needs. The literature stays on `estimate.Rmd`.
 - [ ] T3: Rewrite `collect_selections`, `agreement`, `selection_rule`, `autoplot`, `extract_procedure`, `extract_scored_candidates` and `extract_tune_results`. Replace the in-prose pointers between sections with See Also links.
 - [ ] T4: Rewrite the print, summary, predict and extract pages for `nested_results`, `nested_results_set` and `nested_final_fit`, and `nestedtune-package`. Keep the IP3 sentence on each print and summary page.
@@ -55,3 +55,4 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-09: created by /milestone-plan with M142, M143 and M145. M142's work log holds the collision sweep, the criteria audit and the gate's answers.
 - 2026-10-09: plan chose to drop the `nestedtune_*` class names from the help pages over keeping them, because tune names none and the condition carries its class; falsified by a user asking which class to catch.
 - 2026-10-10: input from M143's review (diff-bug #18). `R/extract-procedure.R:54` cites "Differences from calling tune directly" on every loop page, but the race and sim-anneal sections are titled "Differences from calling finetune directly". T3's rewrite of `extract_procedure` takes it.
+- 2026-10-10: implement started on branch `m144-tune-style-reader-pages` from `16fd160c`. T1: `doc-profile.R` reads the 24 pages at 9,116 prose words (AC2 cap 6,837), with 17 Descriptions over 40 words. The figures are in the comparison note.
