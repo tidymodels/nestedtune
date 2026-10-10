@@ -37,7 +37,7 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - [x] AC3: On each of the four pages, `doc-profile.R` counts at most 2 coined terms in the prose.
 - [x] AC4: On the four pages, `doc-profile.R` counts no sentence that opens with "You" or "Your". `grep -n 'error = TRUE' vignettes/estimate.Rmd vignettes/tuners.Rmd vignettes/results.Rmd vignettes/articles/parallel.Rmd` prints nothing.
 - [x] AC5: In `estimate.Rmd`, at least one sentence says what the nested estimate describes and what a user reports for the deployed model, and why (IP3). Review quotes it with its line. The page keeps a reference list for each source it cites.
-- [ ] AC6: The verify slot is clean. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings with the vignettes built. Every gating prose sweep prints clean, and `pkgdown::check_pkgdown()` passes.
+- [x] AC6: The verify slot is clean. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings with the vignettes built. Every gating prose sweep prints clean, and `pkgdown::check_pkgdown()` passes.
 
 ## Coverage
 
@@ -128,3 +128,11 @@ No finding shows a criterion failing, and none is a defect in what a page does f
 - reader, results.Rmd. Rejected, planned change: whether `save_pred` saves inner predictions, the unexplained columns, reading the output's agreement split, the runner-up and inner-against-outer gap, the `.config` labels, and "which class", all reference material the help pages hold. Rejected, style: "how much of the design ran".
 - reader, parallel.Rmd. Fixed: how many daemons, and what reaches them, through the new pointer to the parallel section. Rejected, planned change: why one daemon does not count, inner parallelism and tune's own support (help pages), no timing shown (M063), and checking only two columns. Rejected, style: "which call". Rejected, planned change: `nested-cv.Rmd` not linking these pages (M142's page).
 - reader, all pages. Rejected, planned change: no Introduction, session info or data description (`nested-cv.Rmd` sets up the example), and the terse voice (the M142 target). Rejected, planned change: the per-page gloss of "candidates" (M084's rule).
+
+Every fix-now item above landed in `29293479`.
+
+Re-read at `29293479`, after the fixes. AC1: estimate 973 / 1,392 (69.9%), tuners 589 / 1,350 (43.6%), results 358 / 1,395 (25.7%), parallel 199 / 510 (39.0%). AC2: means 36.0, 34.6, 25.6 and 28.4, against 37.5. AC3: 0 coined on each page. AC4: 0 "You" openers, and the `error = TRUE` grep prints nothing. AC5: the sentence now sits at `vignettes/estimate.Rmd:37`, unchanged, and the eight entries at lines 126 to 152. All still pass.
+
+- AC6: at `29293479`, `devtools::test()` finished with no failure or error, and `devtools::check()` gave 0 errors, 0 warnings and 0 notes with the vignettes rebuilt (14 min 40 s). The six gating sweeps from `--list-gating` print clean, and `pkgdown::check_pkgdown()` finds no problems. The verify slot owes no `air` or `document()` run (no `.R` or roxygen change), and `document()` left no diff. Pass.
+
+Consistency gate: `cairn_validate.py` passes (18 references-staleness advisories, none new). The toolchain checks: `document()` gave no diff. The README is not touched, `check_pkgdown()` passes, and NEWS has this milestone's bullet. No new top-level file was added, and `check()` passes clean. The gating sweeps print clean. No DESIGN principle changed, so `cairn_impact.py` is not owed.
