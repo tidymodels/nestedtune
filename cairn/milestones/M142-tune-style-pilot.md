@@ -43,7 +43,7 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 - [x] AC5: The `README.Rmd` prose between the title heading and `## Installation` is at most 80 words. Both support tables keep every row and cell they hold at the branch point.
 - [x] AC6: In the prose of `nested-cv.Rmd` and of `README.Rmd`, `doc-profile.R` counts at most 2 coined terms on each page.
 - [x] AC7: In `nested-cv.Rmd` and in `?nested_tune_grid`, at least one sentence says that the nested estimate describes the tuning procedure and not the deployed model. It also says that the nested estimate is the number to report for a model refit by `nested_final_fit()` (IP3). Review quotes each sentence with its line.
-- [ ] AC8: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean. README.md matches a fresh knit of README.Rmd.
+- [x] AC8: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean. README.md matches a fresh knit of README.Rmd.
 
 ## Coverage
 
@@ -101,7 +101,7 @@ Evidence, at the final branch head:
 - AC5: the README prose between the title heading and `## Installation` is 76 words. A diff of the table lines against `54ac8f31` is empty.
 - AC6: the script counts 0 coined terms on `nested-cv.Rmd` and 2 on `README.Rmd`.
 - AC7: `R/nested-tune-grid.R:15-19` says the estimate "describes this whole procedure (tune, select, fit) and not one fitted model". It adds that the nested estimate "is the number to report for that model", meaning the one `nested_final_fit()` builds, "because the model comes from the same procedure". `vignettes/nested-cv.Rmd:148-151` says the estimate "describes the whole procedure (tune, select, fit) and not one fitted model". It adds: "It is still the number to report for the model that `nested_final_fit()` fits below". A deployed model is one fitted model, so "not one fitted model" covers "not the deployed model".
-- AC8: pending the final suite and check.
+- AC8: at head `00ea69d9`, `devtools::test()` gives 15,498 passed and 0 failed. `devtools::check()` gives 0 errors, 0 warnings and 0 notes. `document()` leaves no diff, and the six gating sweeps print clean. `air format --check .` is clean, and README.md was re-knit at `6e28cd4e` with README.Rmd unchanged since. Two earlier runs failed. One was the wrapped "returns a plain tibble" pin, fixed in `00ea69d9`. The other was `test-parallel-interrupt.R:108`, the known flake on the M079 candidate row, which passed alone and in the final run.
 - Gate: `cairn_validate` passes with advisories only. `document()` leaves no diff, `pkgdown::check_pkgdown()` finds no problems, and there is no new top-level file. NEWS has a bullet, and README.md is re-knit. No principle text changed, so `cairn_impact` does not apply.
 
 Findings and dispositions:
