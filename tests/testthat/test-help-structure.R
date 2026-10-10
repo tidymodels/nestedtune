@@ -145,7 +145,7 @@ for (topic in names(SETTABLE_ANCHOR)) {
     lists <- section_lists(differences_body(topic))
     expect_length(lists, 1L)
     expect_false(grepl(
-      "behave as the grid page describes",
+      "behave as on",
       structure_text(lists[[1L]]),
       fixed = TRUE
     ))
@@ -155,7 +155,7 @@ for (topic in names(SETTABLE_ANCHOR)) {
     expect_gt(length(bullets), 0L)
     shared <- paragraph_with(
       rendered_paragraphs(lines),
-      "behave as the grid page describes"
+      "behave as on"
     )
     expect_gt(as.integer(names(shared)), max(bullets))
   })

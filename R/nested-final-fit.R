@@ -20,10 +20,12 @@
 #'
 #' @param object The [workflows::workflow()] the nested run used, or a
 #'   `nested_results_set` from [nested_workflow_map()] with `id` naming the
-#'   workflow to fit.
-#' @param results The `nested_results` from [nested_tune_grid()] or another
-#'   nested tuning function. The tuner and its arguments, the metrics,
-#'   `eval_time` and the selection rule are read from it.
+#'   workflow to fit. After a run on a model specification, pass
+#'   `workflows::workflow(preprocessor, spec)`.
+#' @param results The `nested_results` from [nested_tune_grid()], another
+#'   nested tuning function or [nested_fit_resamples()]. The tuner and its
+#'   arguments, the metrics, `eval_time` and the selection rule are read from
+#'   it.
 #' @param ... Not used, and must be empty.
 #' @param id For a `nested_results_set`, the `wflow_id` of the workflow to
 #'   fit. Leave `results` missing then.
@@ -46,15 +48,19 @@
 #' settings, picks a candidate with the same [selection_rule()], and fits
 #' the finalized workflow on all the data. A parameter range that depends on
 #' the data is finalized on all the rows. The outer folds and their choices
-#' play no part.
+#' play no part. Where nothing was tuned, the function only fits the workflow
+#' on all the data.
 #'
 #' The design keeps `inside` as a call, and this function evaluates it again
 #' in the environment you call from. Write it with literal arguments, such
 #' as `vfold_cv(v = 5)`. With `vfold_cv(v = k)`, another `k` in scope gives
 #' another design.
 #'
-#' A workflow that differs from the one the nested run used is an error, and
-#' the message names the first part that differs. A run in which some folds
+#' A workflow whose model or preprocessor differs from the one the nested run
+#' used is an error, and the message names the first part that differs.
+#' Model arguments and recipe functions are compared as written. So a name
+#' bound to another value is not caught, and neither is a function with the
+#' same body that uses other values. A run in which some folds
 #' failed is still fitted. To fit one workflow of a set, pass the set as
 #' `object`, name the workflow with `id`, and leave `results` missing.
 #'
@@ -62,15 +68,20 @@
 #'
 #' The nested estimate describes the procedure that produced this model, not
 #' this model itself. Report [collect_metrics()] on `results` as the estimate
-#' for this model, because the model comes from the same procedure. For a
-#' workflow from a set, report that workflow's rows, for a workflow you chose
-#' before you saw the set's estimates. If the outer folds chose different
-#' parameters, report that too.
+#' for this model, because the model comes from the same procedure. It
+#' averages over what each fold chose, so it says nothing about the setting
+#' this model carries. It describes new data drawn like your training data.
+#' If the outer folds chose different parameters, report that too.
 #'
-#' Do not report the metrics in `x$tuning`. They come from the resamples that
-#' chose the candidate, so they are optimistic. The nested estimate tends to
-#' be slightly pessimistic instead, because each outer fold trained on fewer
-#' rows.
+#' For a workflow from a set, report that workflow's rows only if you chose
+#' the workflow before you saw the set's estimates. A choice made from those
+#' estimates is a selection the outer loop did not nest.
+#'
+#' Do not report the metrics in the `tuning` element. They come from the
+#' resamples that chose the candidate, so they are optimistic on average. The
+#' nested estimate tends to be slightly pessimistic instead, because each
+#' outer fold trained on fewer rows. `vignette("estimate")` gives the sizes
+#' measured in two studies.
 #'
 #' @section Reproducibility:
 #'
@@ -78,17 +89,20 @@
 #' builds the inner resamples and tunes, and the second fits. Both are kept
 #' on the object, and your random state is restored on exit. So two calls
 #' with no `set.seed()` between them give the same model, as repeated
-#' [tune::tune_grid()] calls do.
+#' [tune::tune_grid()] calls do. [nested_tune_grid()] says what an R-side
+#' seed cannot pin.
 #'
 #' The code below redoes the fit by hand. The values come from
 #' [extract_procedure()], except `metrics`, which is
-#' `attr(results, "metrics")`. Only the tuning line changes with the tuner.
+#' `attr(results, "metrics")`, and `data`, the data the design was built on.
+#' Only the tuning line changes with the tuner.
 #'
 #' ```
 #' set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' inner <- <the design's `inside` specification>(data)
 #' control <- extract_procedure(fit)$control
+#' # Run the one tuning line for the recorded tuner.
 #' # Grid search and the races use the control as it is.
 #' tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
 #'   metrics = metrics, eval_time = eval_time, control = control)
@@ -128,7 +142,8 @@
 #' predict(final, new_data = mtcars[1:3, ])
 #'
 #' @seealso [nested_tune_grid()], [nested_tune_bayes()],
-#'   [predict.nested_final_fit()], [extract_workflow()]
+#'   [nested_workflow_map()], [predict.nested_final_fit()],
+#'   [extract_workflow()]
 #' @export
 nested_final_fit <- function(object, results, ..., id = NULL) {
   rlang::check_dots_empty()

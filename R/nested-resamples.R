@@ -1,4 +1,4 @@
-#' Build a nested resampling design without copying the data per outer fold
+#' Build a nested resampling design
 #'
 #' @description
 #' `nested_resamples()` builds a nested resampling design: one row per outer
@@ -59,8 +59,8 @@
 #' Below, the sliding designs are [rsample::sliding_window()],
 #' [rsample::sliding_index()] and [rsample::sliding_period()], and the four
 #' other tuners are [nested_tune_bayes()], the two racing functions and
-#' [nested_tune_sim_anneal()]. Each pair of designs below gives the same
-#' splits as [rsample::nested_cv()]. A final fit is tested on the results of
+#' [nested_tune_sim_anneal()]. Each pair of designs below is tested to give
+#' the same splits as [rsample::nested_cv()]. A final fit is tested on the results of
 #' the functions named with it.
 #'
 #' - Outer [rsample::rolling_origin()] or a sliding design, with an inner
@@ -79,8 +79,8 @@
 #'   [nested_tune_grid()] is tested on all nine. On the sliding-window pair,
 #'   the four other tuners, [nested_workflow_map()] with its default `fn`,
 #'   and the final fit of [nested_tune_grid()] are tested, and
-#'   [nested_fit_resamples()] accepts the design. No other function is
-#'   tested on the other eight pairs.
+#'   [nested_fit_resamples()] accepts the design. On the other eight pairs,
+#'   no function but `nested_resamples()` and [nested_tune_grid()] is tested.
 #'
 #' Any other inner design is not tested. A `lag` above 0 in
 #' [rsample::rolling_origin()] is an error in either loop, because each

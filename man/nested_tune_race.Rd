@@ -123,8 +123,8 @@ Each outer fold scores every candidate in \code{grid} on the first \code{burn_in
 inner resamples. It then drops the candidates that are clearly worse than
 the best, by a repeated-measures ANOVA or by a model of pairwise wins and
 losses. The rest are scored on the remaining resamples. \code{\link[=nested_tune_grid]{nested_tune_grid()}}
-documents what the loop functions share, such as the design, the seeds,
-failed folds and parallel execution.
+documents what the loop functions share, such as the design, what the
+estimate describes, the seeds, failed folds and parallel execution.
 
 Both functions need finetune, on each parallel daemon as well.
 \code{nested_tune_race_anova()} also needs lme4, and
@@ -133,13 +133,16 @@ Both functions need finetune, on each parallel daemon as well.
 Each fold's \code{.inner_metrics} holds every candidate its race scored,
 including the ones it dropped. In that table, \code{n} is the number of inner
 resamples each candidate was scored on, so a dropped candidate has a
-smaller \code{n}. The recorded grid, \code{attr(res, "grid")}, is the design the
-race was offered, exactly as given.
+smaller \code{n}. A candidate that failed on every inner resample is missing,
+and its failure is in \code{.notes}. The recorded grid, \code{attr(res, "grid")},
+is the design the race was offered, exactly as given.
 
-An inner design with an apparent split, such as
-\code{bootstraps(apparent = TRUE)} makes, is an error. A race drops candidates
-on the score of each split, and an apparent split is scored on the rows
-the model trained on.
+An inner design with an apparent split, such as the one
+\code{bootstraps(apparent = TRUE)} makes, is an error here, though finetune
+runs it. A race drops candidates on the score of each split, and an
+apparent split is scored on the rows the model trained on. The other
+tuners accept the split, because tune leaves it out of its estimates.
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} checks for it before its first workflow runs.
 }
 \section{Differences from calling finetune directly}{
 
@@ -154,17 +157,14 @@ Its settings differ from a direct call as follows.
 
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument, as on the grid page. A control left at \code{"first"}
-takes the argument's level, and a control set to any other level that
-differs from it is an error.
+\code{event_level} argument, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}. A control left at the
+default level, \code{"first"}, takes the argument's level. A control set to
+another level than the argument's is an error.
 \code{grid} and \code{eval_time} are the racing functions' own arguments, not control settings.
 
 
 \strong{Refused: none.} No setting is refused on its own. A control of another
-class is an error, even a \code{control_grid()} that finetune accepts. So is a
-\code{burn_in} that is not smaller than some fold's number of inner resamples.
-The default \code{burn_in} is 3, so a design with three inner resamples needs
-a \code{burn_in} of 2 or fewer.
+class is an error, even a \code{control_grid()} that finetune accepts.
 
 \strong{Passed through: \code{burn_in}, \code{alpha}, \code{num_ties}, \code{randomize},
 \code{verbose_elim}, \code{verbose}, \code{pkgs}, \code{parallel_over}, \code{workflow_size}.}
@@ -173,26 +173,32 @@ Each reaches the race as given:
 \item \code{burn_in}, \code{alpha}, \code{num_ties} and \code{randomize} act on each fold's race
 as in a direct call. With \code{randomize = TRUE}, the default, the fold's
 tuning seed sets which resamples the burn-in uses.
+\item A \code{burn_in} that is not smaller than some fold's number of inner
+resamples is an error before any fold runs. The default \code{burn_in} is 3,
+so a design with three inner resamples needs a \code{burn_in} of 2 or fewer.
 \item \code{verbose} and \code{verbose_elim} print from each fold, and only a serial
 run shows the output.
 }
 
 
-\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes.
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}.
 
 
-These settings were read from finetune 1.3.0. An older finetune can lack
-\code{workflow_size} in \code{control_race()}.
+These settings were read from finetune 1.3.0. The oldest finetune this
+package accepts can lack \code{workflow_size} in \code{control_race()}.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on the grid page,
-the outer fit's predictions and extracts are kept, and the inner race's
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, the outer fit's predictions and extracts are kept as
+\code{.predictions} and \code{.extracts} when you ask for them. The inner race's
 own are still discarded.
 
 
-\strong{Not returned: \code{save_workflow}.} The inner tuning results are not kept,
-so this setting returns nothing.
+\strong{Not returned: \code{save_workflow}.} The nested run does not keep the inner
+tuning results, so this setting returns nothing there.
+\code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}, which holds
+what the setting saved.
 
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
@@ -200,25 +206,20 @@ backend to reach at \code{allow_par = FALSE}.
 }
 
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
 rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
   recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
-set.seed(1)
-folds <- nested_resamples(
-  mtcars,
-  outside = rsample::vfold_cv(v = 2),
-  inside = rsample::vfold_cv(v = 2)
-)
-\dontshow{\}) # examplesIf}
-\dontshow{if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 # A race needs more inner resamples than its burn-in, so five inner folds.
 set.seed(1)
-folds5 <- nested_resamples(mtcars, outside = rsample::vfold_cv(v = 2),
-                           inside = rsample::vfold_cv(v = 5))
+folds5 <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 5)
+)
 
 set.seed(2)
 res <- nested_tune_race_anova(

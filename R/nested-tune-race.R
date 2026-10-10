@@ -11,8 +11,8 @@
 #' inner resamples. It then drops the candidates that are clearly worse than
 #' the best, by a repeated-measures ANOVA or by a model of pairwise wins and
 #' losses. The rest are scored on the remaining resamples. [nested_tune_grid()]
-#' documents what the loop functions share, such as the design, the seeds,
-#' failed folds and parallel execution.
+#' documents what the loop functions share, such as the design, what the
+#' estimate describes, the seeds, failed folds and parallel execution.
 #'
 #' Both functions need finetune, on each parallel daemon as well.
 #' `nested_tune_race_anova()` also needs lme4, and
@@ -21,13 +21,16 @@
 #' Each fold's `.inner_metrics` holds every candidate its race scored,
 #' including the ones it dropped. In that table, `n` is the number of inner
 #' resamples each candidate was scored on, so a dropped candidate has a
-#' smaller `n`. The recorded grid, `attr(res, "grid")`, is the design the
-#' race was offered, exactly as given.
+#' smaller `n`. A candidate that failed on every inner resample is missing,
+#' and its failure is in `.notes`. The recorded grid, `attr(res, "grid")`,
+#' is the design the race was offered, exactly as given.
 #'
-#' An inner design with an apparent split, such as
-#' `bootstraps(apparent = TRUE)` makes, is an error. A race drops candidates
-#' on the score of each split, and an apparent split is scored on the rows
-#' the model trained on.
+#' An inner design with an apparent split, such as the one
+#' `bootstraps(apparent = TRUE)` makes, is an error here, though finetune
+#' runs it. A race drops candidates on the score of each split, and an
+#' apparent split is scored on the rows the model trained on. The other
+#' tuners accept the split, because tune leaves it out of its estimates.
+#' [nested_workflow_map()] checks for it before its first workflow runs.
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_race_anova
@@ -49,10 +52,7 @@
 #' @template differences-settable
 #' @section Differences from calling finetune directly:
 #' **Refused: none.** No setting is refused on its own. A control of another
-#' class is an error, even a `control_grid()` that finetune accepts. So is a
-#' `burn_in` that is not smaller than some fold's number of inner resamples.
-#' The default `burn_in` is 3, so a design with three inner resamples needs
-#' a `burn_in` of 2 or fewer.
+#' class is an error, even a `control_grid()` that finetune accepts.
 #'
 #' **Passed through: `burn_in`, `alpha`, `num_ties`, `randomize`,
 #' `verbose_elim`, `verbose`, `pkgs`, `parallel_over`, `workflow_size`.**
@@ -61,6 +61,9 @@
 #' - `burn_in`, `alpha`, `num_ties` and `randomize` act on each fold's race
 #'   as in a direct call. With `randomize = TRUE`, the default, the fold's
 #'   tuning seed sets which resamples the burn-in uses.
+#' - A `burn_in` that is not smaller than some fold's number of inner
+#'   resamples is an error before any fold runs. The default `burn_in` is 3,
+#'   so a design with three inner resamples needs a `burn_in` of 2 or fewer.
 #' - `verbose` and `verbose_elim` print from each fold, and only a serial
 #'   run shows the output.
 #' @template differences-passed-shared
@@ -70,12 +73,20 @@
 #' @template differences-not-returned
 #' @template differences-inert
 #'
-#' @template example-setup
 #' @examplesIf rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))
+#' data(mtcars)
+#'
+#' rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
+#'   recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
+#' wf <- workflows::workflow(rec, parsnip::linear_reg())
+#'
 #' # A race needs more inner resamples than its burn-in, so five inner folds.
 #' set.seed(1)
-#' folds5 <- nested_resamples(mtcars, outside = rsample::vfold_cv(v = 2),
-#'                            inside = rsample::vfold_cv(v = 5))
+#' folds5 <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 5)
+#' )
 #'
 #' set.seed(2)
 #' res <- nested_tune_race_anova(

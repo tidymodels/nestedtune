@@ -77,3 +77,73 @@ Evidence read at `20dcd6d2` (2026-10-10). `main` and `origin/main` are both `5ca
 - AC3: the grep prints nothing on each of the seven `man/*.Rd` pages. A planted line holding `orchestrator` matches once, so the pattern can fail.
 - AC4: `test-control-slots.R` passes (148 expectations, read at `689e48c0`, whose package tree `git diff --quiet` shows equal to HEAD outside `cairn/`). `git diff main -- tests/testthat/test-control-slots.R` is empty, so the slot rules are unchanged. The file reads the bayes, race, sim-anneal and fit-resamples pages, takes the slots from tune's `formals()` and requires each slot under exactly one of the seven headings.
 - AC5: `R/nested-final-fit.R:63-65` (rendered at `man/nested_final_fit.Rd:62-64`) says: "The nested estimate describes the procedure that produced this model, not this model itself. Report [collect_metrics()] on `results` as the estimate for this model, because the model comes from the same procedure."
+
+spawned: diff-bug, blame-history, prior-review, plus the plan's fresh reader (`reader`, beside the tune, finetune, workflowsets and rsample pages, D-061 triage). They reported 67 findings: 45 fixed on the branch, 19 rejected, 3 sent on.
+
+- diff-bug #1: Bayes `seed` reason wrong — fix now
+- diff-bug #2: final-fit "a workflow that differs is an error" claims more than the identity check — fix now
+- diff-bug #3: "no other function" on the eight pairs leaves out `nested_resamples()` (D-113) — fix now
+- diff-bug #4: "gives the same splits" drops "tested" (D-071) — fix now
+- diff-bug #5: final-fit Details unconditional for a fit-resamples record, and `results` excludes it — fix now
+- diff-bug #6: IP3 caveats lost (marginal over selection, same population) — fix now
+- diff-bug #7: `x$tuning` names an undefined `x` — fix now
+- diff-bug #8: Bayes "ten iterations" unconditional — fix now
+- diff-bug #9: Bayes page no longer says the kept control drops `seed` — fix now
+- diff-bug #10: `save_workflow` pointer to the final fit's `$tuning` dropped — fix now
+- diff-bug #11: kept template reads unconditional and drops the column names — fix now
+- diff-bug #12: finetune version note drops the declared-floor gap — fix now
+- diff-bug #13: race page drops three facts — fix now for the failed-candidate note and the map's apparent-split check; the grid-column rule rejected, planned change (the error message carries it)
+- diff-bug #14: map error leaves results unclear, and the unread `result` column — fix now
+- diff-bug #15: fit-resamples Inert drops that packages are still required — fix now
+- diff-bug #16: "the grid page" in plain text, no link — fix now
+- diff-bug #17: grid page's finalizing rule versus Bayes — reject, false (the Bayes page states its own exception)
+- diff-bug #18: `?extract_procedure` cites the wrong section title on two pages — follow-up, M144's work log (its T3 rewrites that page)
+- blame-history #1: map subsetting sentences gone, and DESIGN Known issues points at a removed section — fix now (page sentences restored, DESIGN pointer corrected M143)
+- blame-history #2: function-body identity gap D-067 relies on — fix now (same fix as diff-bug #2)
+- blame-history #3: "What to report" drops the caveats and the source for "slightly pessimistic" — fix now (caveats back, `vignette("estimate")` pointer)
+- blame-history #4: tuner pages say nothing about what to report — fix now (the pointer sentence names what the estimate describes)
+- blame-history #5: "Not returned" false for the final fit — fix now
+- blame-history #6: race apparent-split divergence from finetune undocumented (GP1, D-100) — fix now
+- blame-history #7: lost pointer to what a seed cannot pin, and the sim-anneal `time_limit` caveat — fix now
+- blame-history #8: "tested" dropped — fix now (same as diff-bug #4)
+- blame-history #9: fit-resamples metric-mode error dropped — fix now
+- blame-history #10: smaller drops (`.notes` notes, record fields, mirai detail) — reject, planned change (implementation detail leaves the pages; the race failed-candidate note came back under diff-bug #13)
+- blame-history #11: orphan line at `R/nested-tune-grid.R:95` — reject, false (a wrapped line of one sentence)
+- prior-review #1: map `metrics` lost the first-metric rule and the `?selection_rule` pointer (M142 diff-bug #2) — fix now
+- prior-review #2: reproducibility and weights templates removed from four pages — reject, planned change (T2 points to `?nested_tune_grid`, which keeps both)
+- prior-review #3: "optimistic" stated flat (M142 reader #8) — fix now
+- prior-review #4: final-fit pointer to what a seed cannot pin — fix now (same as blame-history #7)
+- prior-review #5: `parallel_over` sentence dropped — reject, no defect (the grid page states it, which settles M142's follow-up)
+- prior-review #6: refused-plain template trimmed — reject, false (not a regression of M142 #14)
+- prior-review #7: "candidates" unglossed — reject, style
+- reader #1: no path to a final fit after a run on a model specification — fix now
+- reader #2: Bayes does not say how to finalize — fix now
+- reader #3: `option` precedence is the reverse of workflowsets' — fix now
+- reader #4: after a map error, are results returned — fix now
+- reader #5: `control` hidden in `...` — reject, recorded decision (D-042 keeps "no `control` formal")
+- reader #6: seven-heading scheme is jargon — reject, planned change (GP1, AC4)
+- reader #7: race "Refused: none" contradicts the `burn_in` rule — fix now (rule moved under Passed through)
+- reader #8: parallel backend only on the grid page — reject, planned change
+- reader #9: final-fit recipe's `data` undefined — fix now
+- reader #10: five tuning lines read as one script — fix now
+- reader #11: time-series section reads as a test matrix — reject, planned change (D-115 keeps the full claims)
+- reader #12: "Differences from rsample" is mostly validation rules — reject, planned change (D-110)
+- reader #13: map has no `seed` argument, unstated — fix now
+- reader #14: `event_level` sentence hard to parse — fix now
+- reader #15: inherited `metrics` text names desirability unexplained — follow-up, new candidate row
+- reader #16: inherited `eval_time` text drops tune's purpose sentence — follow-up, same row
+- reader #17: fit-resamples example builds unused tuned objects — fix now
+- reader #18: race example builds an unused `folds` — fix now
+- reader #19: map names "the three columns" before Value — fix now
+- reader #20: `save_history` label does not fit — reject, false (nothing reaches the result)
+- reader #21: finetune version note is a maintainer note — reject, false (it tells a user an older finetune can lack a slot)
+- reader #22: fit-resamples seed detail and inert list — reject, planned change (AC4 needs the list)
+- reader #23: the set condition in "What to report" is unclear — fix now
+- reader #24: no example of a set final fit — reject, false (Details states the call)
+- reader #25: memory test path and date — reject, planned change (the derived-figures rule pins a figure to its procedure)
+- reader #26: "design" for the race grid — reject, false (it is the grid design, tune's own term)
+- reader #27: missing words in the apparent-split sentence — fix now
+- reader #28: `?nested_resamples` title leads with an implementation detail — fix now (title is "Build a nested resampling design")
+- reader #29: "Default S3 method" in Usage — reject, style (roxygen output)
+- reader #30: sim-anneal `iter = 0` stated twice — fix now (reason moved into the argument)
+- reader #31: final-fit See Also omits `nested_workflow_map()` — fix now

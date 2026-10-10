@@ -101,17 +101,17 @@ Each outer fold scores \code{initial} candidates from a space-filling design. A
 Gaussian process then proposes \code{iter} more candidates, one at a time. The
 fold picks a candidate with \code{select}, fits it on its analysis set and
 scores it on the rows it held out. \code{\link[=nested_tune_grid]{nested_tune_grid()}} documents what the
-loop functions share, such as the design, the seeds, failed folds and
-parallel execution.
+loop functions share, such as the design, what the estimate describes, the
+seeds, failed folds and parallel execution.
 
 \code{iter = 0} scores the initial candidates and proposes nothing. tune stops a
-fold's search early when no new candidate remains, or after ten
-iterations in a row without improvement. The fold then keeps the
-candidates it scored.
+fold's search early when no new candidate remains, or after \code{no_improve}
+iterations in a row without improvement (ten by default). The fold then
+keeps the candidates it scored.
 
 \code{\link[tune:tune_bayes]{tune::tune_bayes()}} does not accept a parameter range that depends on the
-data, such as \code{mtry()}. Finalize the range before the call, or every fold
-fails.
+data, such as \code{mtry()}. Set its range in \code{param_info} before the call, or
+every fold fails.
 }
 \section{Differences from calling tune directly}{
 
@@ -119,17 +119,20 @@ fails.
 A \code{\link[tune:control_bayes]{tune::control_bayes()}} passed through \code{...} as \code{control} reaches the
 inner \code{tune_bayes()} in every fold, and \code{\link[=nested_final_fit]{nested_final_fit()}} runs again
 with it. For example, \code{control = control_bayes(no_improve = 5)} stops each
-search sooner. Its settings differ from a direct call as follows.
+search sooner. The result keeps the control that ran, without \code{seed}, as
+\code{extract_procedure(res)$control}. Its settings differ from a direct call as
+follows.
 
 \strong{Forced: \code{allow_par}, \code{seed}.} \code{allow_par} is \code{FALSE}, because the outer
-folds carry the parallelism. \code{seed} is set to the fold's tuning seed, so a
-fold's proposals do not depend on the folds that ran before it.
+folds carry the parallelism. \code{seed} is set to the fold's tuning seed. Left
+to tune, it is drawn from the random stream, so the proposals depend on
+how much of the stream tune used before it.
 
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument, as on the grid page. A control left at \code{"first"}
-takes the argument's level, and a control set to any other level that
-differs from it is an error.
+\code{event_level} argument, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}. A control left at the
+default level, \code{"first"}, takes the argument's level. A control set to
+another level than the argument's is an error.
 \code{iter}, \code{initial}, \code{objective} and \code{eval_time} are arguments of \code{tune_bayes()}, not control settings.
 
 
@@ -152,17 +155,20 @@ process that tuned the fold.
 }
 
 
-\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes.
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on the grid page,
-the outer fit's predictions and extracts are kept, and the inner search's
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, the outer fit's predictions and extracts are kept as
+\code{.predictions} and \code{.extracts} when you ask for them. The inner search's
 own are still discarded.
 
 
-\strong{Not returned: \code{save_workflow}.} The inner tuning results are not kept,
-so this setting returns nothing.
+\strong{Not returned: \code{save_workflow}.} The nested run does not keep the inner
+tuning results, so this setting returns nothing there.
+\code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}, which holds
+what the setting saved.
 
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no

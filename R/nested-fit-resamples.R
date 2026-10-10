@@ -10,7 +10,8 @@
 #' design, the two runs score the same outer folds, so their per-fold metrics
 #' join by fold label. [tune::fit_resamples()] does the same job on a plain
 #' set of folds. [nested_tune_grid()] documents what the loop functions
-#' share, such as the design, the seeds, failed folds and parallel execution.
+#' share, such as the design, what the estimate describes, the seeds, failed
+#' folds and parallel execution.
 #'
 #' A workflow with a [tune::tune()] marker is an error here, and a workflow
 #' with none is an error in the tuning functions.
@@ -27,7 +28,8 @@
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::fit_resamples
 #' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
-#'   set. Every metric is scored on the outer folds.
+#'   set. Every metric is scored on the outer folds. A set that does not suit
+#'   the model's mode is an error before any fold runs.
 #' @param object A [workflows::workflow()] with no parameter marked with
 #'   [tune::tune()], or a parsnip model specification given with
 #'   `preprocessor`.
@@ -55,9 +57,9 @@
 #' because the outer folds carry the parallelism.
 #'
 #' **Settable as its own argument: `event_level`.** Set the level with the
-#' `event_level` argument. A control left at `"first"` takes the argument's
-#' level, and a control set to any other level that differs from it is an
-#' error. `eval_time` is an argument too.
+#' `event_level` argument. A control left at the default level, `"first"`,
+#' takes the argument's level. A control set to another level than the
+#' argument's is an error. `eval_time` is an argument too.
 #'
 #' @templateVar OTHER control_bayes()
 #' @template differences-refused
@@ -73,12 +75,21 @@
 #'
 #' **Inert: `verbose`, `pkgs`, `save_workflow`, `parallel_over`,
 #' `backend_options`, `workflow_size`.** Each one sets an inner tuning call
-#' that this function never makes.
+#' that this function never makes. The workflow's packages must still be
+#' installed.
 #'
-#' @template example-setup
-#' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
+#' @examplesIf rlang::is_installed("yardstick")
+#' data(mtcars)
+#'
 #' # A fixed workflow: no tune() marker anywhere.
 #' fixed <- workflows::workflow(mpg ~ ., parsnip::linear_reg())
+#'
+#' set.seed(1)
+#' folds <- nested_resamples(
+#'   mtcars,
+#'   outside = rsample::vfold_cv(v = 2),
+#'   inside = rsample::vfold_cv(v = 2)
+#' )
 #'
 #' set.seed(2)
 #' res <- nested_fit_resamples(fixed, folds)

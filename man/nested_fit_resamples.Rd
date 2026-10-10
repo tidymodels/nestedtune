@@ -46,7 +46,8 @@ specification.}
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
-set. Every metric is scored on the outer folds.}
+set. Every metric is scored on the outer folds. A set that does not suit
+the model's mode is an error before any fold runs.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. It applies to the outer scoring fit.}
@@ -70,7 +71,8 @@ Use it for a baseline to compare with a tuned workflow. On the same
 design, the two runs score the same outer folds, so their per-fold metrics
 join by fold label. \code{\link[tune:fit_resamples]{tune::fit_resamples()}} does the same job on a plain
 set of folds. \code{\link[=nested_tune_grid]{nested_tune_grid()}} documents what the loop functions
-share, such as the design, the seeds, failed folds and parallel execution.
+share, such as the design, what the estimate describes, the seeds, failed
+folds and parallel execution.
 
 A workflow with a \code{\link[tune:tune]{tune::tune()}} marker is an error here, and a workflow
 with none is an error in the tuning functions.
@@ -97,9 +99,9 @@ the outer fit, which runs under its own \code{\link[tune:control_last_fit]{tune:
 because the outer folds carry the parallelism.
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument. A control left at \code{"first"} takes the argument's
-level, and a control set to any other level that differs from it is an
-error. \code{eval_time} is an argument too.
+\code{event_level} argument. A control left at the default level, \code{"first"},
+takes the argument's level. A control set to another level than the
+argument's is an error. \code{eval_time} is an argument too.
 
 
 \strong{Refused: none.} No setting is refused on its own. A control of another
@@ -117,16 +119,16 @@ fit's predictions and extracts are still discarded.
 
 \strong{Inert: \code{verbose}, \code{pkgs}, \code{save_workflow}, \code{parallel_over},
 \code{backend_options}, \code{workflow_size}.} Each one sets an inner tuning call
-that this function never makes.
+that this function never makes. The workflow's packages must still be
+installed.
 }
 
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("yardstick")) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
-rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
-  recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
-wf <- workflows::workflow(rec, parsnip::linear_reg())
+# A fixed workflow: no tune() marker anywhere.
+fixed <- workflows::workflow(mpg ~ ., parsnip::linear_reg())
 
 set.seed(1)
 folds <- nested_resamples(
@@ -134,10 +136,6 @@ folds <- nested_resamples(
   outside = rsample::vfold_cv(v = 2),
   inside = rsample::vfold_cv(v = 2)
 )
-\dontshow{\}) # examplesIf}
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
-# A fixed workflow: no tune() marker anywhere.
-fixed <- workflows::workflow(mpg ~ ., parsnip::linear_reg())
 
 set.seed(2)
 res <- nested_fit_resamples(fixed, folds)

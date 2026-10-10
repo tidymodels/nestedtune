@@ -11,17 +11,17 @@
 #' Gaussian process then proposes `iter` more candidates, one at a time. The
 #' fold picks a candidate with `select`, fits it on its analysis set and
 #' scores it on the rows it held out. [nested_tune_grid()] documents what the
-#' loop functions share, such as the design, the seeds, failed folds and
-#' parallel execution.
+#' loop functions share, such as the design, what the estimate describes, the
+#' seeds, failed folds and parallel execution.
 #'
 #' `iter = 0` scores the initial candidates and proposes nothing. tune stops a
-#' fold's search early when no new candidate remains, or after ten
-#' iterations in a row without improvement. The fold then keeps the
-#' candidates it scored.
+#' fold's search early when no new candidate remains, or after `no_improve`
+#' iterations in a row without improvement (ten by default). The fold then
+#' keeps the candidates it scored.
 #'
 #' [tune::tune_bayes()] does not accept a parameter range that depends on the
-#' data, such as `mtry()`. Finalize the range before the call, or every fold
-#' fails.
+#' data, such as `mtry()`. Set its range in `param_info` before the call, or
+#' every fold fails.
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
@@ -45,11 +45,14 @@
 #' A [tune::control_bayes()] passed through `...` as `control` reaches the
 #' inner `tune_bayes()` in every fold, and [nested_final_fit()] runs again
 #' with it. For example, `control = control_bayes(no_improve = 5)` stops each
-#' search sooner. Its settings differ from a direct call as follows.
+#' search sooner. The result keeps the control that ran, without `seed`, as
+#' `extract_procedure(res)$control`. Its settings differ from a direct call as
+#' follows.
 #'
 #' **Forced: `allow_par`, `seed`.** `allow_par` is `FALSE`, because the outer
-#' folds carry the parallelism. `seed` is set to the fold's tuning seed, so a
-#' fold's proposals do not depend on the folds that ran before it.
+#' folds carry the parallelism. `seed` is set to the fold's tuning seed. Left
+#' to tune, it is drawn from the random stream, so the proposals depend on
+#' how much of the stream tune used before it.
 #'
 #' @templateVar INNER inner search
 #' @templateVar SETTABLE_TAIL `iter`, `initial`, `objective` and `eval_time` are arguments of `tune_bayes()`, not control settings.

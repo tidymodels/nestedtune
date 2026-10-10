@@ -2,7 +2,7 @@
 % Please edit documentation in R/nested-resamples.R
 \name{nested_resamples}
 \alias{nested_resamples}
-\title{Build a nested resampling design without copying the data per outer fold}
+\title{Build a nested resampling design}
 \usage{
 nested_resamples(data, outside, inside, ...)
 }
@@ -74,8 +74,8 @@ not numeric, or holds a value outside integer range. So is an empty
 Below, the sliding designs are \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, and the four
 other tuners are \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, the two racing functions and
-\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each pair of designs below gives the same
-splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. A final fit is tested on the results of
+\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each pair of designs below is tested to give
+the same splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. A final fit is tested on the results of
 the functions named with it.
 \itemize{
 \item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or a sliding design, with an inner
@@ -94,8 +94,8 @@ design but fits nothing on it.
 \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on all nine. On the sliding-window pair,
 the four other tuners, \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn},
 and the final fit of \code{\link[=nested_tune_grid]{nested_tune_grid()}} are tested, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} accepts the design. No other function is
-tested on the other eight pairs.
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} accepts the design. On the other eight pairs,
+no function but \code{nested_resamples()} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
 }
 
 Any other inner design is not tested. A \code{lag} above 0 in

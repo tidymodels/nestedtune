@@ -11,10 +11,10 @@
 #' For `iter` iterations, it then changes the current candidate a little and
 #' keeps the new one or goes back, by finetune's annealing rule.
 #' [nested_tune_grid()] documents what the loop functions share, such as the
-#' design, the seeds, failed folds and parallel execution.
+#' design, what the estimate describes, the seeds, failed folds and parallel
+#' execution.
 #'
-#' finetune must be installed, on each parallel daemon as well. `iter = 0` is
-#' an error, because finetune 1.3.0 runs two iterations there and not none.
+#' finetune must be installed, on each parallel daemon as well.
 #'
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_sim_anneal
@@ -22,6 +22,8 @@
 #' @templateVar PKG finetune
 #' @template param-control-dots
 #' @param iter The number of search iterations, a whole number of at least 1.
+#'   `0` is an error, because finetune 1.3.0 runs two iterations there and
+#'   not none.
 #' @param initial The number of candidates each fold scores before the first
 #'   iteration, a whole number of at least 1. A `tune_results` object is an
 #'   error, because one tuning run cannot serve every outer fold.
@@ -52,7 +54,8 @@
 #'   `radius`, `flip` and `cooling_coef` set how it moves. All five act on
 #'   each fold's search as in a direct call.
 #' - `time_limit` is a wall-clock stop, and a wall-clock stop makes the
-#'   candidate set depend on the machine.
+#'   candidate set depend on the machine. Two runs with the same seed can
+#'   stop at different iterations.
 #' - `verbose_iter`, `TRUE` by default, prints the annealing log from every
 #'   fold of a serial run. Pass
 #'   `control = control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
@@ -62,8 +65,9 @@
 #' @template differences-finetune-version
 #' @template differences-kept
 #' @section Differences from calling finetune directly:
-#' **Not returned: `save_workflow`, `save_history`.** The inner tuning
-#' results are not kept, so `save_workflow` returns nothing. `save_history`
+#' **Not returned: `save_workflow`, `save_history`.** The nested run does not
+#' keep the inner tuning results, so `save_workflow` returns nothing there.
+#' [nested_final_fit()] keeps its own tuning run as `$tuning`. `save_history`
 #' writes finetune's search history to a file in the temporary directory of
 #' the process that tuned, and each fold overwrites the one before.
 #'

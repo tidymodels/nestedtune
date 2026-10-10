@@ -52,7 +52,9 @@ specification.}
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}.}
 
-\item{iter}{The number of search iterations, a whole number of at least 1.}
+\item{iter}{The number of search iterations, a whole number of at least 1.
+\code{0} is an error, because finetune 1.3.0 runs two iterations there and
+not none.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
 a parameters set is derived from other arguments. Passing this argument can
@@ -95,10 +97,10 @@ Each outer fold scores \code{initial} candidates from a space-filling design.
 For \code{iter} iterations, it then changes the current candidate a little and
 keeps the new one or goes back, by finetune's annealing rule.
 \code{\link[=nested_tune_grid]{nested_tune_grid()}} documents what the loop functions share, such as the
-design, the seeds, failed folds and parallel execution.
+design, what the estimate describes, the seeds, failed folds and parallel
+execution.
 
-finetune must be installed, on each parallel daemon as well. \code{iter = 0} is
-an error, because finetune 1.3.0 runs two iterations there and not none.
+finetune must be installed, on each parallel daemon as well.
 }
 \section{Differences from calling finetune directly}{
 
@@ -113,9 +115,9 @@ again with it. Its settings differ from a direct call as follows.
 
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument, as on the grid page. A control left at \code{"first"}
-takes the argument's level, and a control set to any other level that
-differs from it is an error.
+\code{event_level} argument, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}. A control left at the
+default level, \code{"first"}, takes the argument's level. A control set to
+another level than the argument's is an error.
 \code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()}, not control settings.
 
 
@@ -132,7 +134,8 @@ given:
 \code{radius}, \code{flip} and \code{cooling_coef} set how it moves. All five act on
 each fold's search as in a direct call.
 \item \code{time_limit} is a wall-clock stop, and a wall-clock stop makes the
-candidate set depend on the machine.
+candidate set depend on the machine. Two runs with the same seed can
+stop at different iterations.
 \item \code{verbose_iter}, \code{TRUE} by default, prints the annealing log from every
 fold of a serial run. Pass
 \code{control = control_sim_anneal(verbose_iter = FALSE)} for a quiet run.
@@ -140,21 +143,23 @@ fold of a serial run. Pass
 }
 
 
-\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes.
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}.
 
 
-These settings were read from finetune 1.3.0. An older finetune can lack
-\code{workflow_size} in \code{control_sim_anneal()}.
+These settings were read from finetune 1.3.0. The oldest finetune this
+package accepts can lack \code{workflow_size} in \code{control_sim_anneal()}.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on the grid page,
-the outer fit's predictions and extracts are kept, and the inner search's
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, the outer fit's predictions and extracts are kept as
+\code{.predictions} and \code{.extracts} when you ask for them. The inner search's
 own are still discarded.
 
 
-\strong{Not returned: \code{save_workflow}, \code{save_history}.} The inner tuning
-results are not kept, so \code{save_workflow} returns nothing. \code{save_history}
+\strong{Not returned: \code{save_workflow}, \code{save_history}.} The nested run does not
+keep the inner tuning results, so \code{save_workflow} returns nothing there.
+\code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}. \code{save_history}
 writes finetune's search history to a file in the temporary directory of
 the process that tuned, and each fold overwrites the one before.
 

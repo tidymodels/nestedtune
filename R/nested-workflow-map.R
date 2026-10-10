@@ -15,9 +15,10 @@
 #'
 #' @details
 #' The function works like [workflowsets::workflow_map()]. `fn` names the
-#' nested function to run, and its arguments come through `...`. An entry in
-#' the set's `option` column overrides an argument of the same name for that
-#' workflow alone. The workflows run in the set's order.
+#' nested function to run, and its arguments come through `...`. Unlike in
+#' workflowsets, an entry in the set's `option` column overrides an argument
+#' of the same name in `...`, for that workflow alone. The workflows run in
+#' the set's order, and the set's own `result` column is not read.
 #'
 #' A workflow with no [tune::tune()] marker runs through
 #' [nested_fit_resamples()], whatever `fn` names, so a baseline can sit
@@ -26,22 +27,28 @@
 #' one, and the fixed one runs under tune's default control unless its
 #' `option` entry names one.
 #'
-#' Each workflow starts from the same random state, so fold `i` of every
-#' workflow runs under the same two seeds. Each result is identical to a
-#' call by hand on that workflow, with the same arguments, after the same
-#' `set.seed()`.
+#' There is no `seed` argument, so call `set.seed()` first. Each workflow
+#' starts from the same random state, so fold `i` of every workflow runs
+#' under the same two seeds. Each result is identical to a call by hand on
+#' that workflow, with the same arguments, after the same `set.seed()`.
 #'
 #' An error from one workflow names that workflow at the front of its
-#' message and keeps its class. So does a warning about failed folds. After
-#' an error, the workflows before it have already run.
+#' message and keeps its class. So does a warning about failed folds. An
+#' error stops the call, so nothing is returned, even for the workflows that
+#' already ran.
 #'
 #' [collect_metrics()] and the other `collect_*()` functions stack each
 #' workflow's table under a `wflow_id` column. [nested_final_fit()] with an
-#' `id` fits one workflow. `dplyr::filter()`, `dplyr::arrange()`,
-#' `dplyr::mutate()` and `x[i, ]` keep the class while the three columns keep
-#' their values. An operation that empties the set, repeats a `wflow_id`,
-#' changes or drops one of the three columns, or brings in a row from
-#' elsewhere returns a plain tibble.
+#' `id` fits one workflow.
+#'
+#' `dplyr::filter()`, `dplyr::arrange()`, `dplyr::mutate()` and `x[i, ]` keep
+#' the class. They keep it only while the `wflow_id`, `workflow` and `result`
+#' columns keep their values. An operation that empties the set, repeats a
+#' `wflow_id`, changes or drops one of those columns, or brings in a row from
+#' elsewhere returns a plain tibble. So does a direct `vctrs::vec_cbind()`.
+#' `dplyr::group_by()`, `dplyr::rowwise()` and `tibble::as_tibble()` return
+#' other classes that still carry the `fn` attribute. A value replaced with
+#' `$<-` or `[[<-` is not checked.
 #'
 #' @inheritParams workflowsets::workflow_map
 #' @param fn The name of the function to run each workflow through. The
@@ -53,7 +60,8 @@
 #'   design, is required, and a `control` goes here as well. A name that `fn`
 #'   does not take is an error. A `metrics` set reaches every workflow, and
 #'   one that does not suit a workflow's model is an error before any
-#'   workflow runs.
+#'   workflow runs. Under every [selection_rule()] but `"desirability"`, its
+#'   first metric chooses each fold's candidate.
 #'
 #' @return A `nested_results_set`, a tibble with one row per workflow. Its
 #'   columns are `wflow_id`, `workflow`, and `result`, the workflow's

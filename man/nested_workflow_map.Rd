@@ -19,7 +19,8 @@ can have a parameter to tune.}
 design, is required, and a \code{control} goes here as well. A name that \code{fn}
 does not take is an error. A \code{metrics} set reaches every workflow, and
 one that does not suit a workflow's model is an error before any
-workflow runs.}
+workflow runs. Under every \code{\link[=selection_rule]{selection_rule()}} but \code{"desirability"}, its
+first metric chooses each fold's candidate.}
 }
 \value{
 A \code{nested_results_set}, a tibble with one row per workflow. Its
@@ -36,9 +37,10 @@ compare models on the same outer folds.
 }
 \details{
 The function works like \code{\link[workflowsets:workflow_map]{workflowsets::workflow_map()}}. \code{fn} names the
-nested function to run, and its arguments come through \code{...}. An entry in
-the set's \code{option} column overrides an argument of the same name for that
-workflow alone. The workflows run in the set's order.
+nested function to run, and its arguments come through \code{...}. Unlike in
+workflowsets, an entry in the set's \code{option} column overrides an argument
+of the same name in \code{...}, for that workflow alone. The workflows run in
+the set's order, and the set's own \code{result} column is not read.
 
 A workflow with no \code{\link[tune:tune]{tune::tune()}} marker runs through
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}, whatever \code{fn} names, so a baseline can sit
@@ -47,22 +49,28 @@ function takes. So a \code{grid} reaches the tuned workflows and not the fixed
 one, and the fixed one runs under tune's default control unless its
 \code{option} entry names one.
 
-Each workflow starts from the same random state, so fold \code{i} of every
-workflow runs under the same two seeds. Each result is identical to a
-call by hand on that workflow, with the same arguments, after the same
-\code{set.seed()}.
+There is no \code{seed} argument, so call \code{set.seed()} first. Each workflow
+starts from the same random state, so fold \code{i} of every workflow runs
+under the same two seeds. Each result is identical to a call by hand on
+that workflow, with the same arguments, after the same \code{set.seed()}.
 
 An error from one workflow names that workflow at the front of its
-message and keeps its class. So does a warning about failed folds. After
-an error, the workflows before it have already run.
+message and keeps its class. So does a warning about failed folds. An
+error stops the call, so nothing is returned, even for the workflows that
+already ran.
 
 \code{\link[=collect_metrics]{collect_metrics()}} and the other \verb{collect_*()} functions stack each
 workflow's table under a \code{wflow_id} column. \code{\link[=nested_final_fit]{nested_final_fit()}} with an
-\code{id} fits one workflow. \code{dplyr::filter()}, \code{dplyr::arrange()},
-\code{dplyr::mutate()} and \code{x[i, ]} keep the class while the three columns keep
-their values. An operation that empties the set, repeats a \code{wflow_id},
-changes or drops one of the three columns, or brings in a row from
-elsewhere returns a plain tibble.
+\code{id} fits one workflow.
+
+\code{dplyr::filter()}, \code{dplyr::arrange()}, \code{dplyr::mutate()} and \code{x[i, ]} keep
+the class. They keep it only while the \code{wflow_id}, \code{workflow} and \code{result}
+columns keep their values. An operation that empties the set, repeats a
+\code{wflow_id}, changes or drops one of those columns, or brings in a row from
+elsewhere returns a plain tibble. So does a direct \code{vctrs::vec_cbind()}.
+\code{dplyr::group_by()}, \code{dplyr::rowwise()} and \code{tibble::as_tibble()} return
+other classes that still carry the \code{fn} attribute. A value replaced with
+\verb{$<-} or \verb{[[<-} is not checked.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
