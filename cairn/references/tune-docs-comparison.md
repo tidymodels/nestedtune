@@ -50,6 +50,26 @@ At the M142 branch point (`54ac8f31`, 2026-10-09):
 
 At the M142 head (2026-10-09), the same script reads `nested_tune_grid` at 1,208 prose words with a 36-word Description (after the claim audit's fixes and the script's punctuation fix). It reads `nested-cv.Rmd` at 652 prose words in 24 paragraphs (mean 27.2, 0 coined), and `README.Rmd` at 397 prose words (mean 44.1, 2 coined). The shared templates also cut the sibling pages: `nested_tune_bayes` 1,528, `nested_tune_race` 1,641, `nested_tune_sim_anneal` 1,543 and `nested_fit_resamples` 1,282 (1,245 after the fixes).
 
+At the M143 branch point (`5ca197ee`, 2026-10-10), the script reads the seven pages M143 rewrites, beside their comparators:
+
+| Help page | prose | desc | sections | coined |
+|---|---|---|---|---|
+| `nested_tune_bayes` | 1,554 | 131 | 7 | 17 |
+| `nested_tune_race` | 1,664 | 152 | 7 | 20 |
+| `nested_tune_sim_anneal` | 1,567 | 128 | 7 | 18 |
+| `nested_fit_resamples` | 1,298 | 143 | 7 | 22 |
+| `nested_workflow_map` | 1,225 | 121 | 5 | 31 |
+| `nested_final_fit` | 1,753 | 113 | 6 | 40 |
+| `nested_resamples` | 1,282 | 81 | 3 | 23 |
+| the seven together | 10,343 | | | |
+| `tune::tune_bayes` | 1,559 | 14 | 9 | 0 |
+| `finetune::tune_race_anova` | 628 | 62 | 0 | 0 |
+| `finetune::tune_sim_anneal` | 865 | 30 | 0 | 0 |
+| `tune::fit_resamples` | 983 | 39 | 5 | 0 |
+| `tune::last_fit` | 620 | 28 | 3 | 0 |
+
+At the M143 head (`90ad5811`, 2026-10-10), the same script reads the seven pages at: `nested_tune_bayes` 746 prose words (29-word Description), `nested_tune_race` 765 (32), `nested_tune_sim_anneal` 713 (28), `nested_fit_resamples` 507 (31), `nested_workflow_map` 383 (21), `nested_final_fit` 498 (24) and `nested_resamples` 726 (35). The seven total 4,338, against 10,343 at the branch point.
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune

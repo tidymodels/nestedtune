@@ -53,7 +53,8 @@ specification.}
 \code{\link[rsample:nested_cv]{rsample::nested_cv()}}.}
 
 \item{iter}{The number of search iterations, a whole number of at least 1.
-The section on the iterations says why \code{0} is refused.}
+\code{0} is an error, because finetune 1.3.0 runs two iterations there and
+not none.}
 
 \item{param_info}{A \code{\link[dials:parameters]{dials::parameters()}} object or \code{NULL}. If none is given,
 a parameters set is derived from other arguments. Passing this argument can
@@ -66,8 +67,8 @@ race and annealing searches also steer on it. Every metric is scored on
 the outer folds.}
 
 \item{initial}{The number of candidates each fold scores before the first
-iteration, a whole number of at least 1 (finetune's default). A
-\code{tune_results} object, which finetune also accepts here, is refused.}
+iteration, a whole number of at least 1. A \code{tune_results} object is an
+error, because one tuning run cannot serve every outer fold.}
 
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
@@ -80,117 +81,48 @@ Times that are not numeric, empty, missing, negative or not finite are an error.
 candidate. The default is \code{\link[tune:select_best]{tune::select_best()}} on the first metric.}
 }
 \value{
-A \code{nested_results} shaped as \code{\link[=nested_tune_grid]{nested_tune_grid()}} documents, one
-row per outer fold. Each fold's \code{.inner_metrics} carries an \code{.iter}
-column after \code{.config}. It is \code{0} for the initial candidates, whose
-\code{.config} finetune prefixes \code{initial_}. It is \code{i} for the candidate the
-\code{i}-th iteration scored, labelled \verb{Iter<i>}. There is no \code{grid}
-attribute. The \code{procedure} record names the tuner \code{"tune_sim_anneal"}
-and holds \code{iter} and \code{initial} beside the arguments every orchestrator
-records.
+A \code{nested_results}, as \code{\link[=nested_tune_grid]{nested_tune_grid()}} describes. Each fold's
+\code{.inner_metrics} has an \code{.iter} column. It is \code{0} for the initial
+candidates and \code{i} for the candidate the \code{i}-th iteration scored. There
+is no \code{grid} attribute.
 }
 \description{
-\code{nested_tune_sim_anneal()} gives you an honest score for a model you
-tune with \code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}}. It is \code{\link[=nested_tune_grid]{nested_tune_grid()}} with
-the inner tuner swapped, and that page is the reference for everything
-the orchestrators share. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} is this function's
-nearest sibling. For each outer fold it scores \code{initial} candidates on
-that fold's inner resamples. Then for \code{iter} iterations it perturbs the
-current candidate, scores the perturbation, and keeps it or falls back
-by finetune's annealing rule. The fold then selects, finalizes, fits and
-scores on the outer split as the grid page describes.
-
-The estimate describes the annealing-and-fit procedure as a whole. The
-model to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which runs the recorded
-search once more on all the data, and the estimate is the number to
-report for that model.
+\code{nested_tune_sim_anneal()} estimates how well a model tuned with
+\code{\link[finetune:tune_sim_anneal]{finetune::tune_sim_anneal()}} performs on new data. It runs the loop of
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, with simulated annealing on each outer fold's inner
+resamples.
 }
 \details{
-finetune must be installed. A missing package is refused at entry, before
-any fold runs.
+Each outer fold scores \code{initial} candidates from a space-filling design.
+For \code{iter} iterations, it then changes the current candidate a little and
+keeps the new one or goes back, by finetune's annealing rule.
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} documents what the loop functions share, such as the
+design, what the estimate describes, the seeds, failed folds and parallel
+execution.
 
-\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
-section on finalizing a parameter range says where a range that depends
-on the data is finalized.
+finetune must be installed, on each parallel daemon as well.
 }
-\section{The initial candidates and the iterations}{
-
-
-Each fold draws its own space-filling set of \code{initial} candidates with
-\code{\link[dials:grid_space_filling]{dials::grid_space_filling()}} and scores it with \code{\link[tune:tune_grid]{tune::tune_grid()}}
-under its tuning seed, as \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} does. A \code{tune_results}
-object is refused as \code{initial} for the reason that page gives. Each
-iteration then perturbs the current candidate and scores the result on
-the fold's inner resamples.
-
-\code{iter = 0} is refused. finetune 1.3.0 iterates over
-\code{(existing_iter + 1):iter}, which at \code{iter = 0} is \code{1:0}, so it runs two
-iterations rather than none. \code{\link[tune:tune_bayes]{tune::tune_bayes()}} at \code{iter = 0} proposes
-nothing. finetune stops a fold's search early after
-\code{no_improve} consecutive iterations without improvement, or when
-\code{time_limit} is reached. \code{no_improve} is \code{Inf} by default, so never,
-unless the control sets it. The fold completes with the candidates
-scored so far, and nothing about the early stop reaches \code{.notes}.
-
-Annealing draws from the generator even with a deterministic engine.
-The initial candidates are a space-filling design drawn under the fold's
-tuning seed, and each perturbation is drawn from the stream that seed
-started. \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}} has no seed slot, so nothing
-is injected into the control. On the parallel path every daemon's
-library must hold finetune. The loop attaches it in each daemon
-before the first fold is sent, and warns where it cannot.
-}
-
-\section{Weighting the outer folds}{
-
-
-Weights set on the design with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} give a
-weighted average of the outer folds' estimates, as tune computes it. A
-fold that fails or scores \code{NA} is left out, and the other weights are
-scaled to sum to one.
-}
-
-\section{Reproducibility}{
-
-
-Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
-fold takes its seeds from that one seed by its position, so the result is
-the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
-and \code{.outer_fit_seed}. The function restores your random state on exit,
-even after an error. So two calls with no \code{set.seed()} between them give
-the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
-
-This covers randomness that flows through R's generator. Engines that
-randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
-pinned by any R-side scheme, here or in tune.
-}
-
 \section{Differences from calling finetune directly}{
 
 
-There is no \code{control} formal. A \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}} passed
-through \code{...} as \code{control} reaches the inner search in every fold and
-the final fit that re-runs the result. \code{control = control_sim_anneal( no_improve = 5, verbose_iter = FALSE)}, say, stops a fold's search
-sooner and keeps the console quiet. What runs is the control passed, or
-finetune's default when none is, with the slots this package forces
-overwritten. The result records that effective control as
-\code{extract_procedure(res)$control}. Every slot of \code{control_sim_anneal()}
-falls under one of seven headings.
+A \code{\link[finetune:control_sim_anneal]{finetune::control_sim_anneal()}} passed through \code{...} as \code{control}
+reaches the inner search in every fold, and \code{\link[=nested_final_fit]{nested_final_fit()}} runs
+again with it. Its settings differ from a direct call as follows.
 
 
 \strong{Forced: \code{allow_par}.} The inner search and the outer fit run with
 \code{allow_par = FALSE}, because the outer folds carry the parallelism.
 
 
-\strong{Settable as its own argument: \code{event_level}.} The argument is the one
-place the level is set, as on the grid page. A control at finetune's
-default takes it, and a control naming another level is refused at
-entry, with a refusal that names both.
-\code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()} rather than control slots, offered here as arguments and reaching it unchanged.
+\strong{Settable as its own argument: \code{event_level}.} Set the level with the
+\code{event_level} argument, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}. A control left at the
+default level, \code{"first"}, takes the argument's level. A control set to
+another level than the argument's is an error.
+\code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()}, not control settings.
 
 
-\strong{Refused: none.} No slot is refused on its own. A control of another
-class is refused at entry, as is the \code{event_level} conflict above.
+\strong{Refused: none.} No setting is refused on its own. A control of another
+class is an error.
 
 
 \strong{Passed through: \code{no_improve}, \code{restart}, \code{radius}, \code{flip},
@@ -198,88 +130,42 @@ class is refused at entry, as is the \code{event_level} conflict above.
 \code{parallel_over}, \code{workflow_size}.} Each reaches \code{tune_sim_anneal()} as
 given:
 \itemize{
-\item \code{no_improve} and \code{restart} set when a search stops or restarts from
-its best candidate. \code{radius} and \code{flip} set how far and how a
-perturbation moves, and \code{cooling_coef} how the acceptance probability
-cools. All five govern each fold's search as they do in a direct call.
+\item \code{no_improve} and \code{restart} set when a search stops or starts again.
+\code{radius}, \code{flip} and \code{cooling_coef} set how it moves. All five act on
+each fold's search as in a direct call.
 \item \code{time_limit} is a wall-clock stop, and a wall-clock stop makes the
-candidate set depend on the machine. Two runs under the same seed can
-stop at different iterations, which is outside what the seeds can
-promise.
-\item \code{verbose_iter}, \code{TRUE} in finetune's default, prints the annealing log
-from every fold of a serial run, one log per fold, and from a mirai
-daemon where nothing shows it. Pass
+candidate set depend on the machine. Two runs with the same seed can
+stop at different iterations.
+\item \code{verbose_iter}, \code{TRUE} by default, prints the annealing log from every
+fold of a serial run. Pass
 \code{control = control_sim_anneal(verbose_iter = FALSE)} for a quiet run.
-\code{verbose} likewise.
+\code{verbose} prints from each fold as well.
 }
 
 
-\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes. \code{parallel_over} changes the numbers a stochastic engine
-produces even at \code{allow_par = FALSE}.
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}.
 
 
-This classification was read on finetune 1.3.0. The version that added
-\code{workflow_size} to \code{control_sim_anneal()} is not named in finetune's NEWS,
-and the \verb{>= 1.0.1} floor this package declares does not require it.
+These settings were read from finetune 1.3.0. The oldest finetune this
+package accepts can lack \code{workflow_size} in \code{control_sim_anneal()}.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
-outer fit as well as the inner search. The outer fit's
-predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
-the grid page describes, and the inner search's own are still discarded.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, the outer fit's predictions and extracts are kept as
+\code{.predictions} and \code{.extracts} when you ask for them. The inner search's
+own are still discarded.
 
 
-\strong{Not returned: \code{save_workflow}, \code{save_history}.} \code{save_workflow} lands
-on the inner \code{tune_results} a fold record discards, so setting it costs
-the work and returns nothing. The final fit keeps its tuning run as
-\verb{$tuning}, where what it saved is reachable. \code{save_history} writes
-finetune's search history to \code{sa_history.RData} in the temporary
-directory of the process that tuned, a daemon's own on the parallel
-path. Every fold overwrites the last one's, and nothing of it reaches
-the result.
+\strong{Not returned: \code{save_workflow}, \code{save_history}.} The nested run does not
+keep the inner tuning results, so \code{save_workflow} returns nothing there.
+\code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}. \code{save_history}
+writes finetune's search history to a file in the temporary directory of
+the process that tuned, and each fold overwrites the one before.
 
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.
-}
-
-\section{Nested designs}{
-
-
-\code{resamples} has one row per outer fold: a \code{splits} column of outer splits,
-an \code{inner_resamples} column of inner rsets, and id columns. The function
-checks the design before it fits anything. An outer bootstrap is an
-error, and so are \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
-\code{\link[rsample:permutations]{rsample::permutations()}} in either loop. An inner split that reaches a
-row its outer fold holds out is an error too. Each error names the design,
-or the rows, splits or folds at fault.
-
-Time-series designs work as well. \code{nested_tune_grid()} is tested with an
-outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
-inner design of any of those four kinds. Leave the \code{lag} of
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
-\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
-tested on.
-}
-
-\section{Finalizing a parameter range}{
-
-
-A range that depends on the data, such as \code{mtry()}, is finalized on each
-outer fold's analysis set, never on the rows that fold holds out.
-\code{\link[=nested_final_fit]{nested_final_fit()}} finalizes it on all the data. A range set in
-\code{param_info} applies to every fold.
-}
-
-\section{Evaluation times}{
-
-
-The inner tuning and the outer scoring both use the times in \code{eval_time}.
-If the metric set has no dynamic or integrated survival metric, tune
-ignores the times with a warning. Each fold selects at the first of these
-times.
 }
 
 \examples{

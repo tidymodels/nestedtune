@@ -1,102 +1,61 @@
 #' Nested cross-validation with Bayesian optimization inside
 #'
 #' @description
-#' `nested_tune_bayes()` gives you an honest score for a model you tune
-#' with [tune::tune_bayes()]. It is [nested_tune_grid()] with the inner
-#' tuner swapped. For each outer fold it scores `initial` candidates on
-#' that fold's inner resamples and lets a Gaussian process propose `iter`
-#' more, one at a time. It then selects by `select`, finalizes the
-#' workflow, and fits and scores it on the outer split. The grid page is
-#' the reference for everything the two share: the design, the seeds,
-#' failed folds, parallel execution and what an operation on the result
-#' does.
-#'
-#' The estimate describes the whole search-and-fit procedure rather than
-#' any one model. The model to deploy comes from [nested_final_fit()],
-#' which runs the recorded search once more on all the data, and the
-#' estimate is the number to report for that model.
+#' `nested_tune_bayes()` estimates how well a model tuned with
+#' [tune::tune_bayes()] performs on new data. It runs the loop of
+#' [nested_tune_grid()], with a Bayesian search on each outer fold's inner
+#' resamples.
 #'
 #' @details
-#' `iter` reaches [tune::tune_bayes()] as given, and tune stops early when
-#' the search stalls. The number of search iterations, a non-negative whole
-#' number. The section on the iterations says what `0` does.
+#' Each outer fold scores `initial` candidates from a space-filling design. A
+#' Gaussian process then proposes `iter` more candidates, one at a time. The
+#' fold picks a candidate with `select`, fits it on its analysis set and
+#' scores it on the rows it held out. [nested_tune_grid()] documents what the
+#' loop functions share, such as the design, what the estimate describes, the
+#' seeds, failed folds and parallel execution.
 #'
-#' @template details-param-info
+#' `iter = 0` scores the initial candidates and proposes nothing. tune stops a
+#' fold's search early when no new candidate remains, or after `no_improve`
+#' iterations in a row without improvement (ten by default). The fold then
+#' keeps the candidates it scored.
+#'
+#' [tune::tune_bayes()] does not accept a parameter range that depends on the
+#' data, such as `mtry()`. Set its range in `param_info` before the call, or
+#' every fold fails.
+#'
 #' @inheritParams nested_tune_grid
 #' @inheritParams tune::tune_bayes
 #' @templateVar CONSTRUCTOR tune::control_bayes()
 #' @templateVar PKG tune
 #' @template param-control-dots
 #' @param initial The number of candidates each fold scores before the first
-#'   iteration, a whole number of at least 2. A `tune_results` object, which
-#'   tune also accepts here, is refused.
+#'   iteration, a whole number of at least 2. A `tune_results` object is an
+#'   error, because one tuning run cannot serve every outer fold.
 #' @param objective An acquisition function from tune. It decides which
 #'   candidate the Gaussian process proposes next: [tune::exp_improve()] (the
 #'   default), [tune::prob_improve()] or [tune::conf_bound()].
 #'
-#' @return A `nested_results` with one row per outer fold, the columns the
-#'   grid page documents. Each fold's `.inner_metrics` carries an `.iter`
-#'   column after `.config`. It is `0` for the initial candidates and `i`
-#'   for the candidate the `i`-th iteration proposed, so a fold's search
-#'   trajectory can be read from it. There is no `grid` attribute. The
-#'   `procedure` record names the tuner `"tune_bayes"`. It holds `iter`,
-#'   `initial` and `objective` beside the arguments every orchestrator
-#'   records.
-#'
-#' @section The initial candidates and the iterations:
-#'
-#' Each fold generates its own space-filling set of `initial` candidates
-#' from the parameter ranges with [dials::grid_space_filling()], and scores
-#' it with [tune::tune_grid()] under the fold's own tuning seed. A
-#' `tune_results` object is refused as `initial` because one tuning run
-#' cannot serve every outer fold: its candidates were scored on resamples
-#' that can hold a fold's assessment rows.
-#'
-#' Each iteration proposes one candidate and scores it on the fold's inner
-#' resamples. `iter = 0` scores the initial candidates and proposes
-#' nothing. The run is then [nested_tune_grid()] on the space-filling grid
-#' those candidates form. tune stops a fold's search early when no
-#' unscored candidate remains, and says so on the console. It also stops
-#' after ten consecutive iterations without improvement, its `no_improve`
-#' default, settable through the control. The fold then completes with the
-#' candidates scored so far, and nothing about the early stop reaches
-#' `.notes`.
-#'
-#' A parameter range that depends on the data is a case apart.
-#' [nested_tune_grid()] and the finetune tuners finalize such a range on
-#' the outer fold's analysis rows. [tune::tune_bayes()] refuses it before
-#' any frame is read, and every outer fold records that refusal as its
-#' failure. Finalize the range on the data first.
-#'
-#' @inheritSection nested_tune_grid Nested designs
-#' @inheritSection nested_tune_grid Finalizing a parameter range
-#' @inheritSection nested_tune_grid Evaluation times
-#'
-#' @template section-resample-weights
-#'
-#' @template section-reproducibility
+#' @return A `nested_results`, as [nested_tune_grid()] describes. Each fold's
+#'   `.inner_metrics` has an `.iter` column. It is `0` for the initial
+#'   candidates and `i` for the candidate the `i`-th iteration proposed.
+#'   There is no `grid` attribute.
 #'
 #' @section Differences from calling tune directly:
 #'
-#' There is no `control` formal. A [tune::control_bayes()] passed through
-#' `...` as `control` reaches the inner `tune_bayes()` in every fold and
-#' the final fit that re-runs the result. `control = control_bayes(no_improve
-#' = 5, uncertain = 3)`, say, stops a fold's search sooner. What runs is the
-#' control passed, or tune's default when none is, with the slots this
-#' package forces overwritten. The result records that effective control,
-#' `seed` left out, as `extract_procedure(res)$control`. Every slot of
-#' `control_bayes()` falls under one of seven headings.
+#' A [tune::control_bayes()] passed through `...` as `control` reaches the
+#' inner `tune_bayes()` in every fold, and [nested_final_fit()] runs again
+#' with it. For example, `control = control_bayes(no_improve = 5)` stops each
+#' search sooner. The result keeps the control that ran, without `seed`, as
+#' `extract_procedure(res)$control`. Its settings differ from a direct call as
+#' follows.
 #'
-#' **Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls a
-#' fold makes, because parallelism belongs over the outer folds. `seed` is
-#' the slot that drives the Gaussian process's proposals. tune draws it
-#' from the stream when it is not given. Were the slot left alone, a fold's
-#' proposals depend on how much of the stream tune consumed before
-#' reaching it. Here the control is given the fold's own tuning seed, the number
-#' `.tuning_seed` reports, whatever the control carried.
+#' **Forced: `allow_par`, `seed`.** `allow_par` is `FALSE`, because the outer
+#' folds carry the parallelism. `seed` is set to the fold's tuning seed. Left
+#' to tune, it is drawn from the random stream, so the proposals depend on
+#' how much of the stream tune used before it.
 #'
 #' @templateVar INNER inner search
-#' @templateVar SETTABLE_TAIL `iter`, `initial` and `objective` are arguments of `tune_bayes()` rather than control slots, offered here as arguments and reaching it unchanged. So is `eval_time`.
+#' @templateVar SETTABLE_TAIL `iter`, `initial`, `objective` and `eval_time` are arguments of `tune_bayes()`, not control settings.
 #' @template differences-settable
 #' @template differences-refused-plain
 #' @section Differences from calling tune directly:
@@ -104,16 +63,14 @@
 #' `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
 #' `workflow_size`.** Each reaches `tune_bayes()` as given:
 #'
-#' - `no_improve` and `uncertain` govern each fold's search as they do in a
-#'   direct call, so a fold sometimes stops short of `iter`. Its
-#'   `.inner_metrics` records how far it went.
-#' - `time_limit` stops a search by the clock. Two runs under the same seed
-#'   can then stop at different iterations on different machines, which is
-#'   outside what the seeds can promise.
-#' - `verbose` and `verbose_iter` print from a serial run, and from a mirai
-#'   daemon where nothing shows it.
+#' - `no_improve` and `uncertain` act on each fold's search as in a direct
+#'   call.
+#' - `time_limit` stops a search by the clock, so two runs with the same
+#'   seed can differ from one machine to another.
+#' - `verbose` and `verbose_iter` print from each fold, and only a serial
+#'   run shows the output.
 #' - `save_gp_scoring` writes its files to the temporary directory of the
-#'   process that tuned, a daemon's own on the parallel path.
+#'   process that tuned the fold.
 #' @template differences-passed-shared
 #' @template differences-kept
 #' @template differences-not-returned

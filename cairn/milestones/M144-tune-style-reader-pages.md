@@ -54,3 +54,4 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 
 - 2026-10-09: created by /milestone-plan with M142, M143 and M145. M142's work log holds the collision sweep, the criteria audit and the gate's answers.
 - 2026-10-09: plan chose to drop the `nestedtune_*` class names from the help pages over keeping them, because tune names none and the condition carries its class; falsified by a user asking which class to catch.
+- 2026-10-10: input from M143's review (diff-bug #18). `R/extract-procedure.R:54` cites "Differences from calling tune directly" on every loop page, but the race and sim-anneal sections are titled "Differences from calling finetune directly". T3's rewrite of `extract_procedure` takes it.

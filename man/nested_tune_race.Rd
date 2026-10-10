@@ -110,236 +110,116 @@ Times that are not numeric, empty, missing, negative or not finite are an error.
 candidate. The default is \code{\link[tune:select_best]{tune::select_best()}} on the first metric.}
 }
 \value{
-A \code{nested_results} with one row per outer fold and the columns
-\code{\link[=nested_tune_grid]{nested_tune_grid()}} documents. The \code{procedure} record names the tuner,
-\code{"tune_race_anova"} or \code{"tune_race_win_loss"}, and holds the \code{grid}
-beside the arguments every orchestrator records. The section below
-says what \code{.inner_metrics} and the recorded grid mean on a race.
+A \code{nested_results}, as \code{\link[=nested_tune_grid]{nested_tune_grid()}} describes.
 }
 \description{
-\code{nested_tune_race_anova()} and \code{nested_tune_race_win_loss()} give you an
-honest score for a model you tune with finetune's two racing tuners,
-\code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} and \code{\link[finetune:tune_race_win_loss]{finetune::tune_race_win_loss()}}. Each
-is \code{\link[=nested_tune_grid]{nested_tune_grid()}} with the inner tuner swapped, and that page is
-the reference for everything the racers share with the other
-orchestrators. For each outer fold the race scores every candidate in
-\code{grid} on the first \code{burn_in} inner resamples. It then drops the
-candidates that are already clearly worse than the best, by a
-repeated-measures ANOVA or by a Bradley-Terry model of pairwise wins and
-losses. The survivors are scored on the remaining resamples, and the
-fold then selects, finalizes, fits and scores on the outer split as the
-grid page describes.
-
-The estimate describes the race-and-fit procedure as a whole. The model
-to deploy comes from \code{\link[=nested_final_fit]{nested_final_fit()}}, which races the same grid once
-more on all the data, and the estimate is the number to report for that
-model.
+\code{nested_tune_race_anova()} and \code{nested_tune_race_win_loss()} estimate how
+well a model tuned with finetune's racing functions performs on new data.
+They run the loop of \code{\link[=nested_tune_grid]{nested_tune_grid()}}, with a race on each outer
+fold's inner resamples.
 }
 \details{
-Both functions need finetune installed. \code{nested_tune_race_anova()} also
-needs lme4, which fits the ANOVA, and \code{nested_tune_race_win_loss()}
-BradleyTerry2, which fits the win/loss model. A missing package is refused
-at entry, before any fold runs.
+Each outer fold scores every candidate in \code{grid} on the first \code{burn_in}
+inner resamples. It then drops the candidates that are clearly worse than
+the best, by a repeated-measures ANOVA or by a model of pairwise wins and
+losses. The rest are scored on the remaining resamples. \code{\link[=nested_tune_grid]{nested_tune_grid()}}
+documents what the loop functions share, such as the design, what the
+estimate describes, the seeds, failed folds and parallel execution.
 
-\code{grid} is the design the race is offered. A data frame must have one
-column per tuned parameter and no other column.
-
-An inner design that holds an apparent split, such as the one
-\code{bootstraps(apparent = TRUE)} adds, is refused at entry with class
-\code{nestedtune_bad_design}. finetune eliminates race candidates on the score
-of each split it has run, and the score of an apparent split comes from
-the rows the model trained on. Build the bootstrap with
-\code{apparent = FALSE}. If a workflow in a set routes to a racer,
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} refuses such a design before its first workflow
-runs. The
-other tuners accept the split, because tune leaves it out of its
-estimates.
-
-\code{param_info} reaches the inner call as \code{\link[tune:tune_grid]{tune::tune_grid()}} takes it. The
-section on finalizing a parameter range says where a range that depends
-on the data is finalized.
-}
-\section{What a race records}{
-
+Both functions need finetune, on each parallel daemon as well.
+\code{nested_tune_race_anova()} also needs lme4, and
+\code{nested_tune_race_win_loss()} needs BradleyTerry2.
 
 Each fold's \code{.inner_metrics} holds every candidate its race scored,
-eliminated candidates included: \verb{tune::collect_metrics(<the race>, all_configs = TRUE)}, where finetune's own default keeps the survivors
-alone. In that table \code{n} is the number of inner resamples each candidate
-was scored on. A candidate that survived to the end has the full inner
-resample count, and one eliminated along the way has fewer. The recorded
-\code{grid}, in the \code{procedure} record and as \code{attr(x, "grid")}, is the
-design the race was offered, exactly as given. What each candidate ran
-is \code{n}. A candidate that failed on every inner resample is absent, and
-its failure is in \code{.notes}.
+including the ones it dropped. In that table, \code{n} is the number of inner
+resamples each candidate was scored on, so a dropped candidate has a
+smaller \code{n}. A candidate that failed on every inner resample is missing,
+and its failure is in \code{.notes}. The recorded grid, \code{attr(res, "grid")},
+is the design the race was offered, exactly as given.
 
-A race draws from the generator even with a deterministic engine. With
-\code{randomize = TRUE}, finetune's default, the inner resamples are shuffled
-before the burn-in. So which resamples the burn-in uses, and with it
-which candidates are eliminated when, comes from the fold's tuning seed.
-On the parallel path every daemon's library must hold finetune. The loop
-attaches it in each daemon before the first fold is sent, and warns
-where it cannot.
+An inner design with an apparent split, such as the one
+\code{bootstraps(apparent = TRUE)} makes, is an error here, though finetune
+runs it. A race drops candidates on the score of each split, and an
+apparent split is scored on the rows the model trained on. The other
+tuners accept the split, because tune leaves it out of its estimates.
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} checks for it before its first workflow runs.
 }
-
-\section{Weighting the outer folds}{
-
-
-Weights set on the design with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} give a
-weighted average of the outer folds' estimates, as tune computes it. A
-fold that fails or scores \code{NA} is left out, and the other weights are
-scaled to sum to one.
-}
-
-\section{Reproducibility}{
-
-
-Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
-fold takes its seeds from that one seed by its position, so the result is
-the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
-and \code{.outer_fit_seed}. The function restores your random state on exit,
-even after an error. So two calls with no \code{set.seed()} between them give
-the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
-
-This covers randomness that flows through R's generator. Engines that
-randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
-pinned by any R-side scheme, here or in tune.
-}
-
 \section{Differences from calling finetune directly}{
 
 
-There is no \code{control} formal. A \code{\link[finetune:control_race]{finetune::control_race()}} passed
-through \code{...} as \code{control} reaches the inner race in every fold and the
-final fit that re-runs the result. \code{control = control_race(burn_in = 2)}, say, fits a design with three inner resamples. What runs is the
-control passed, or finetune's default when none is, with the slots this
-package forces overwritten. The result records that effective control
-as \code{extract_procedure(res)$control}. Every slot of \code{control_race()}
-falls under one of seven headings.
+A \code{\link[finetune:control_race]{finetune::control_race()}} passed through \code{...} as \code{control} reaches the
+inner race in every fold, and \code{\link[=nested_final_fit]{nested_final_fit()}} runs again with it.
+Its settings differ from a direct call as follows.
 
 
 \strong{Forced: \code{allow_par}.} The inner race and the outer fit run with
 \code{allow_par = FALSE}, because the outer folds carry the parallelism.
 
 
-\strong{Settable as its own argument: \code{event_level}.} The argument is the one
-place the level is set, as on the grid page. A control at finetune's
-default takes it, and a control naming another level is refused at
-entry, with a refusal that names both.
-\code{grid} and \code{eval_time} are the racing functions' own arguments rather than control slots, offered here as arguments and reaching them unchanged.
+\strong{Settable as its own argument: \code{event_level}.} Set the level with the
+\code{event_level} argument, as on \code{\link[=nested_tune_grid]{nested_tune_grid()}}. A control left at the
+default level, \code{"first"}, takes the argument's level. A control set to
+another level than the argument's is an error.
+\code{grid} and \code{eval_time} are the racing functions' own arguments, not control settings.
 
 
-\strong{Refused: none.} No slot is refused on its own. Three things are
-refused at entry. The first is a control of another class, such as a
-\code{control_grid()} that finetune itself accepts here. The second is
-the \code{event_level} conflict above, and the third a \code{burn_in} no fold's
-inner design can meet. finetune refuses
-a race whose resample count is not greater than \code{burn_in}. This package
-refuses the whole call before any fold runs when any outer fold's inner
-\code{rset} meets that condition, and the refusal names the count and the
-burn-in.
-\code{control_race()} defaults \code{burn_in} to 3, so a design with three inner
-resamples needs \code{control = control_race(burn_in = 2)} or fewer.
+\strong{Refused: none.} No setting is refused on its own. A control of another
+class is an error, even a \code{control_grid()} that finetune accepts.
 
 \strong{Passed through: \code{burn_in}, \code{alpha}, \code{num_ties}, \code{randomize},
 \code{verbose_elim}, \code{verbose}, \code{pkgs}, \code{parallel_over}, \code{workflow_size}.}
 Each reaches the race as given:
 \itemize{
-\item \code{burn_in}, \code{alpha}, \code{num_ties} and \code{randomize} govern each fold's race
-as they do in a direct call. \code{burn_in} is how many resamples every
-candidate is scored on before elimination starts. \code{alpha} is the
-significance level an elimination needs. \code{num_ties} is how many rounds
-two tied survivors are given before one is dropped. \code{randomize} is
-whether the resamples are shuffled first.
-\item \code{verbose_elim} prints finetune's elimination log from a serial run,
-once per fold, and from a mirai daemon where nothing shows it.
-\code{verbose} likewise.
+\item \code{burn_in}, \code{alpha}, \code{num_ties} and \code{randomize} act on each fold's race
+as in a direct call. With \code{randomize = TRUE}, the default, the fold's
+tuning seed sets which resamples the burn-in uses.
+\item A \code{burn_in} that is not smaller than some fold's number of inner
+resamples is an error before any fold runs. The default \code{burn_in} is 3,
+so a design with three inner resamples needs a \code{burn_in} of 2 or fewer.
+\item \code{verbose} and \code{verbose_elim} print from each fold, and only a serial
+run shows the output.
 }
 
 
-\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as the grid page
-describes. \code{parallel_over} changes the numbers a stochastic engine
-produces even at \code{allow_par = FALSE}.
+\code{pkgs}, \code{parallel_over} and \code{workflow_size} behave as on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}.
 
 
-This classification was read on finetune 1.3.0. The version that added
-\code{workflow_size} to \code{control_race()} is not named in finetune's NEWS,
-and the \verb{>= 1.0.1} floor this package declares does not require it.
+These settings were read from finetune 1.3.0. The oldest finetune this
+package accepts can lack \code{workflow_size} in \code{control_race()}.
 
 
-\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} Each reaches the
-outer fit as well as the inner race. The outer fit's
-predictions and extracts are kept as \code{.predictions} and \code{.extracts}, as
-the grid page describes, and the inner race's own are still discarded.
+\strong{Kept from the outer fit: \code{save_pred}, \code{extract}.} As on
+\code{\link[=nested_tune_grid]{nested_tune_grid()}}, the outer fit's predictions and extracts are kept as
+\code{.predictions} and \code{.extracts} when you ask for them. The inner race's
+own are still discarded.
 
 
-\strong{Not returned: \code{save_workflow}.} It lands on the inner \code{tune_results}
-a fold record discards, so setting it costs the work and returns
-nothing. The final fit keeps its own tuning run as \verb{$tuning}, where what
-it saved is reachable.
+\strong{Not returned: \code{save_workflow}.} The nested run does not keep the inner
+tuning results, so this setting returns nothing there.
+\code{\link[=nested_final_fit]{nested_final_fit()}} keeps its own tuning run as \verb{$tuning}, which holds
+what the setting saved.
 
 
 \strong{Inert: \code{backend_options}.} Options for a parallel backend, with no
 backend to reach at \code{allow_par = FALSE}.
 }
 
-\section{Nested designs}{
-
-
-\code{resamples} has one row per outer fold: a \code{splits} column of outer splits,
-an \code{inner_resamples} column of inner rsets, and id columns. The function
-checks the design before it fits anything. An outer bootstrap is an
-error, and so are \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
-\code{\link[rsample:permutations]{rsample::permutations()}} in either loop. An inner split that reaches a
-row its outer fold holds out is an error too. Each error names the design,
-or the rows, splits or folds at fault.
-
-Time-series designs work as well. \code{nested_tune_grid()} is tested with an
-outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
-inner design of any of those four kinds. Leave the \code{lag} of
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
-\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
-tested on.
-}
-
-\section{Finalizing a parameter range}{
-
-
-A range that depends on the data, such as \code{mtry()}, is finalized on each
-outer fold's analysis set, never on the rows that fold holds out.
-\code{\link[=nested_final_fit]{nested_final_fit()}} finalizes it on all the data. A range set in
-\code{param_info} applies to every fold.
-}
-
-\section{Evaluation times}{
-
-
-The inner tuning and the outer scoring both use the times in \code{eval_time}.
-If the metric set has no dynamic or integrated survival metric, tune
-ignores the times with a warning. Each fold selects at the first of these
-times.
-}
-
 \examples{
-\dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
 
 rec <- recipes::recipe(mpg ~ ., data = mtcars) |>
   recipes::step_pca(recipes::all_predictors(), num_comp = tune::tune())
 wf <- workflows::workflow(rec, parsnip::linear_reg())
 
-set.seed(1)
-folds <- nested_resamples(
-  mtcars,
-  outside = rsample::vfold_cv(v = 2),
-  inside = rsample::vfold_cv(v = 2)
-)
-\dontshow{\}) # examplesIf}
-\dontshow{if (rlang::is_installed(c("finetune", "lme4", "recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 # A race needs more inner resamples than its burn-in, so five inner folds.
 set.seed(1)
-folds5 <- nested_resamples(mtcars, outside = rsample::vfold_cv(v = 2),
-                           inside = rsample::vfold_cv(v = 5))
+folds5 <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 2),
+  inside = rsample::vfold_cv(v = 5)
+)
 
 set.seed(2)
 res <- nested_tune_race_anova(

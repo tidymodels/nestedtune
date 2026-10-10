@@ -15,255 +15,119 @@
 #' Fit the final model after nested cross-validation
 #'
 #' @description
-#' `nested_final_fit()` builds the model you deploy after a nested run. It
-#' runs the recorded procedure, tune, select and fit, once more with the
-#' whole dataset in hand. That means it rebuilds the inner resamples on every
-#' row, tunes with the recorded tuner, selects by the recorded
-#' [selection_rule()], and fits the finalized workflow on all the data.
+#' `nested_final_fit()` fits the model to deploy after a nested run. It runs
+#' the same procedure (tune, select, fit) once more on all the data.
 #'
-#' What comes back is the model to deploy. The number to report for it is
-#' [collect_metrics()] on the results object you passed in. When you passed a
-#' workflow set, it is that workflow's rows of [collect_metrics()] on the set,
-#' for a workflow chosen before seeing the set's estimates. The section on
-#' what to report gives the reason.
+#' @param object The [workflows::workflow()] the nested run used, or a
+#'   `nested_results_set` from [nested_workflow_map()] with `id` naming the
+#'   workflow to fit. After a run on a model specification, pass
+#'   `workflows::workflow(preprocessor, spec)`.
+#' @param results The `nested_results` from [nested_tune_grid()], another
+#'   nested tuning function or [nested_fit_resamples()]. The tuner and its
+#'   arguments, the metrics, `eval_time` and the selection rule are read from
+#'   it.
+#' @param ... Not used, and must be empty.
+#' @param id For a `nested_results_set`, the `wflow_id` of the workflow to
+#'   fit. Leave `results` missing then.
 #'
-#' @param object The [workflows::workflow()] the nested run was built around,
-#'   or a `nested_results_set` from [nested_workflow_map()] with `id` naming
-#'   the workflow to fit. A workflow is checked against the record before
-#'   anything is fitted.
-#' @param results The `nested_results` object from [nested_tune_grid()] or one
-#'   of its siblings whose estimate you will report for this model. Everything
-#'   the re-run needs is read from it.
-#' @param ... Not used. It must be empty. Everything the re-run needs, the grid
-#'   and the metrics included, now comes from `results`, so passing an
-#'   argument here is an error.
-#' @param id For a `nested_results_set` as `object`, the `wflow_id` of the
-#'   workflow to fit. `results` is then left missing. `NULL`, the default, for
-#'   a plain workflow.
-#'
-#' @return An object of class `nested_final_fit`. Its elements are:
+#' @return An object of class `nested_final_fit` with these elements:
 #'
 #'   - `workflow`, the trained workflow. The object answers
-#'     [predict()][predict.nested_final_fit] and `augment()` directly, and
-#'     [extract_workflow()] returns the workflow itself.
+#'     [predict()][predict.nested_final_fit] and `augment()` directly.
 #'   - `selected`, the parameters chosen, and `tuning`, the tuning run they
 #'     were chosen from.
 #'   - `tuning_seed` and `fit_seed`, the two seeds that reproduce it.
-#'   - `procedure`, the record re-run, as `results` carried it.
+#'   - `procedure`, the settings of the run, as `results` holds them.
 #'
 #'   Where nothing was tuned, `selected` is an empty table and `tuning` is
-#'   `NULL`. [extract_tune_results()] and [extract_scored_candidates()] then
-#'   refuse the object with class `nestedtune_no_tuning_run`, and its print
-#'   says no tuning ran.
+#'   `NULL`.
 #'
 #' @details
-#' The procedure a nested estimate describes is "resample this dataset by
-#' the inner specification, tune, select, fit". The dataset that procedure
-#' is meant for is all of yours. So the final model comes from running it
-#' again with nothing held out: the same convention as cross-validating a
-#' model and then refitting on everything, one level up.
+#' The function rebuilds the inner resamples on all the rows from the
+#' design's `inside` specification. It tunes with the same tuner and
+#' settings, picks a candidate with the same [selection_rule()], and fits
+#' the finalized workflow on all the data. A parameter range that depends on
+#' the data is finalized on all the rows. The outer folds and their choices
+#' play no part. Where nothing was tuned, the function only fits the workflow
+#' on all the data.
 #'
-#' The outer folds play no part here. Their selections belong to the
-#' estimate, which describes the procedure across the instability those
-#' selections reveal. They are not pooled or voted on to build this model.
+#' The design keeps `inside` as a call, and this function evaluates it again
+#' in the environment you call from. Write it with literal arguments, such
+#' as `vfold_cv(v = 5)`. With `vfold_cv(v = k)`, another `k` in scope gives
+#' another design.
 #'
-#' @section The results object:
-#'
-#' `results` supplies the inner resampling specification the design stored,
-#' the data every split references, the `procedure` record, and the metric
-#' set as `attr(results, "metrics")`. The record names the tuner and that
-#' tuner's own arguments, the grid or the iteration counts. It also holds
-#' `param_info`, `event_level`, `eval_time` and `select`, the
-#' [selection_rule()] the folds selected by. [extract_procedure()] shows
-#' you the record.
-#'
-#' A `param_info` parameter whose range is unknown until the data is seen
-#' is finalized here on the full data, because every row is this model's
-#' training data. Each outer fold of the nested run finalized it on that
-#' fold's analysis rows alone, so this model's candidate range can be wider
-#' than any fold's.
-#'
-#' A run in which some folds failed is still fitted. Its estimate is
-#' [collect_metrics()]'s, with that function's partial-run warning.
-#'
-#' @section Fitting one workflow of a set:
-#'
-#' [nested_workflow_map()] returns a `nested_results_set` holding each
-#' workflow beside its own results. Pass the set as `object`, name the row
-#' with `id`, and leave `results` missing. The fit is then
-#' `nested_final_fit(extract_workflow(object, id), object$result[[i]])`: the
-#' workflow and its record are read off one row, so the two cannot be
-#' mispaired.
-#'
-#' @section What is refused:
-#'
-#' A workflow whose model or preprocessor differs from the one the estimate
-#' was built around is refused here, before anything is fitted. Where the
-#' record names a tuner that
-#' takes a grid, `object` is first judged against the recorded grid as
-#' [nested_tune_grid()] judged it. Where nothing was tuned (see
-#' [nested_fit_resamples()]), the workflow must carry no [tune::tune()]
-#' marker, and one that does is refused with class
-#' `nestedtune_tuned_workflow`.
-#'
-#' Every record then carries the identity of the model specification and
-#' the preprocessor it ran under (see "What the record holds" on
-#' [extract_procedure()]), and `object` is compared against it. A workflow
-#' whose identity differs is refused with class
-#' `nestedtune_workflow_mismatch`, and the message names the first part
-#' that differs. The identity compares the model's type, engine, mode and
-#' arguments, and the preprocessor. A formula or a variables selection is
-#' compared as written. A recipe is compared as its steps in order, with
-#' each step's selectors and settings. It does not distinguish a model
-#' argument given as a name from the same name bound to another value,
-#' because the argument is recorded as written. A recipe setting that is a
-#' function is compared as its body, so two functions with one body that
-#' close over different values are not distinguished either. A case-weights
-#' column is compared as written, and a tailor postprocessor as its
-#' adjustments in order, each by type and arguments, when the workflow
-#' carries them. A workflow rebuilt from the same code passes, even though
-#' its recipe step ids differ.
-#'
-#' Four shapes of `results` are refused before any fitting, with condition
-#' class `nestedtune_bad_results`. One carries no record: it was built by an
-#' earlier version of nestedtune, or from a design assembled by hand rather
-#' than by [nested_resamples()] or [rsample::nested_cv()]. One carries a
-#' record from an earlier version, with no selection rule or no workflow
-#' identity in it. One is
-#' no longer a `nested_results`, because an operation that added or removed
-#' rows returned a plain tibble. And one has no rows.
-#'
-#' A results object in which no outer fold completed is refused next, with class
-#' `nestedtune_no_completed_folds`. There is no estimate to report the model
-#' with, and `summary()` lists the stage each fold failed at. That is the
-#' class [collect_metrics()], [autoplot()][autoplot.nested_results] and
-#' [agreement()] refuse it with.
-#'
-#' An `id` naming no row of a set is refused with class
-#' `nestedtune_unknown_id`. A set given with `results` supplied, a set given
-#' with no `id`, and an `id` given beside a plain workflow are each refused
-#' with class `nestedtune_bad_final_fit_args`.
-#'
-#' Last, before tuning, the inner design is rebuilt on all the data from
-#' the recorded inner specification. It is refused with class
-#' `nestedtune_bad_design` if it is an [rsample::loo_cv()],
-#' [rsample::apparent()] or [rsample::permutations()] design, found as the
-#' entry checks find one. It is also refused if a split's assessment set
-#' holds a row of its analysis set, unless that split is the apparent split
-#' of a bootstrap under the id "Apparent". It is also refused if it holds a
-#' split with a missing `id`, or two splits with the same values in every id
-#' column.
-#' tune leaves every split with the id "Apparent" out of its estimates. So
-#' the design is also refused if it holds such a split that is not the
-#' apparent split of a bootstrap. For a race it is also refused if it holds
-#' an apparent split, since the race eliminates candidates on that split's
-#' score. The entry checks of the other functions refuse each rule where it
-#' applies. So this refusal reaches a record made before those checks, or
-#' an inner specification that labels the whole data differently.
+#' A workflow whose model or preprocessor differs from the one the nested run
+#' used is an error, and the message names the first part that differs.
+#' Model arguments and recipe functions are compared as written. So a name
+#' bound to another value is not caught, and neither is a function with the
+#' same body that uses other values. A run in which some folds
+#' failed is still fitted. To fit one workflow of a set, pass the set as
+#' `object`, name the workflow with `id`, and leave `results` missing.
 #'
 #' @section What to report:
 #'
-#' Report the estimate [collect_metrics()] returns from the results object
-#' you handed over. For a fit built from a workflow set, report that
-#' workflow's rows of [collect_metrics()] on the set, for a workflow chosen
-#' before seeing the set's estimates. The estimate describes the whole
-#' tune-and-fit procedure that produced this model, measured on rows no part
-#' of that procedure ever saw. It is the number to report for this model,
-#' and no second number is computed on the model itself. The metrics inside
-#' the tuning run stored on it are not a number to report. They were computed
-#' on the resamples that chose the candidate, so they are selection-time
-#' quantities, optimistically biased as a claim about this model.
-#' `collect_metrics()` on `x$tuning` hands them over without saying so.
+#' The nested estimate describes the procedure that produced this model, not
+#' this model itself. Report [collect_metrics()] on `results` as the estimate
+#' for this model, because the model comes from the same procedure. It
+#' averages over what each fold chose, so it says nothing about the setting
+#' this model carries. It describes new data drawn like your training data.
+#' If the outer folds chose different parameters, report that too.
 #'
-#' Expect the nested estimate to run slightly pessimistic instead, because
-#' each outer fold trained on its analysis rows alone. Varma and Simon
-#' (2006) measured a 4.2-point overshoot at n = 40, and Wilimitis and Walsh
-#' (2023) about 1 to 2 percent of AUROC on 41,121 records. That offset
-#' shrinks with fold size and is not a correction to apply.
+#' For a workflow from a set, report that workflow's rows only if you chose
+#' the workflow before you saw the set's estimates. A choice made from those
+#' estimates is a selection the outer loop did not nest.
 #'
-#' Two things the estimate does not say. This model carries one parameter
-#' setting, but the estimate makes no claim about that setting in
-#' particular. It is marginal over selection: it averages over what each
-#' fold's tuning chose. And it describes new data drawn like your training
-#' data, not a different population, and not a model retrained at another
-#' size.
-#'
-#' If the outer folds disagreed about the best parameters, report that too.
+#' Do not report the metrics in the `tuning` element. They come from the
+#' resamples that chose the candidate, so they are optimistic on average. The
+#' nested estimate tends to be slightly pessimistic instead, because each
+#' outer fold trained on fewer rows. `vignette("estimate")` gives the sizes
+#' measured in two studies.
 #'
 #' @section Reproducibility:
 #'
-#' Seed the session before the call. There is no `seed` argument. Two seeds
-#' are drawn on entry and applied with the generator kind pinned: the first
-#' builds the inner resamples and tunes, the second fits. Both are kept on
-#' the object, and the caller's generator state is put back on the way out.
-#' So two calls with no `set.seed()` between them give the same model, as
-#' repeated `tune::tune_grid()` calls do. `?nested_tune_grid` covers the
-#' rest, including what an R-side seed cannot pin.
+#' Call `set.seed()` before the function. It draws two seeds: the first
+#' builds the inner resamples and tunes, and the second fits. Both are kept
+#' on the object, and your random state is restored on exit. So two calls
+#' with no `set.seed()` between them give the same model, as repeated
+#' [tune::tune_grid()] calls do. [nested_tune_grid()] says what an R-side
+#' seed cannot pin.
 #'
-#' You can redo the run by hand from those two seeds and the record
-#' [extract_procedure()] returns. Every value below comes from that record,
-#' except `metrics`, which is `attr(results, "metrics")`. Only the tuning
-#' line changes with the tuner. `control` is the record's own: the control
-#' the run was given or tune's default, with the slots this package forces
-#' already applied.
+#' The code below redoes the fit by hand. The values come from
+#' [extract_procedure()], except `metrics`, which is
+#' `attr(results, "metrics")`, and `data`, the data the design was built on.
+#' Only the tuning line changes with the tuner.
 #'
 #' ```
 #' set.seed(fit$tuning_seed, kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' inner <- <the design's `inside` specification>(data)
 #' control <- extract_procedure(fit)$control
-#' # A grid search takes the recorded control untouched. So does a race,
-#' # ANOVA or win/loss: its own draws, the resample order under `randomize`,
-#' # come from the stream the tuning seed set.
+#' # Run the one tuning line for the recorded tuner.
+#' # Grid search and the races use the control as it is.
 #' tuned <- tune_grid(object, inner, grid = grid, param_info = param_info,
 #'   metrics = metrics, eval_time = eval_time, control = control)
 #' tuned <- tune_race_anova(object, inner, grid = grid, param_info = param_info,
 #'   metrics = metrics, eval_time = eval_time, control = control)
 #' tuned <- tune_race_win_loss(object, inner, grid = grid, param_info = param_info,
 #'   metrics = metrics, eval_time = eval_time, control = control)
-#' # Annealing draws its perturbations from that stream too, and
-#' # `control_sim_anneal()` has no seed slot, so again nothing is set.
+#' # So does annealing.
 #' tuned <- tune_sim_anneal(object, inner, iter = iter, initial = initial,
 #'   param_info = param_info, metrics = metrics, eval_time = eval_time,
 #'   control = control)
-#' # Bayesian optimization is the one branch that sets a slot: its Gaussian
-#' # process takes the tuning seed, the rule every outer fold used, and the
-#' # recorded control carries no seed of its own.
+#' # A Bayesian search also sets the control's seed.
 #' control$seed <- fit$tuning_seed
 #' tuned <- tune_bayes(object, inner, iter = iter, initial = initial,
 #'   objective = objective, param_info = param_info, metrics = metrics,
 #'   eval_time = eval_time, control = control)
 #' final <- finalize_workflow(object, select_best(tuned, metric = <first metric>))
-#'   # Under the recorded default rule; select_by_one_std_err() or
-#'   # select_by_pct_loss() with the recorded orderings and limit otherwise.
+#'   # Or select_by_one_std_err() or select_by_pct_loss(), as `select` says.
 #' set.seed(fit$fit_seed, kind = "Mersenne-Twister",
 #'          normal.kind = "Inversion", sample.kind = "Rejection")
 #' fit(final, data)
 #' ```
 #'
-#' Where nothing was tuned there is no such line to redo. Both seeds are
-#' still drawn, so the object's seed layout is the one above. But the first
-#' is consumed by nothing and the inner specification is left unevaluated.
-#' The whole recipe is `fit(object, data)` under the second seed.
-#'
-#' Building the resamples sits inside the first seed's scope rather than
-#' before it. Constructing an `rset` draws from the generator. Were they
-#' built earlier, the run reproduces from the session seed alone, not from
-#' the two seeds above.
-#'
-#' @section The inner specification is re-evaluated:
-#'
-#' A nested design stores its `inside` argument as an unevaluated call, and
-#' the nested run records it on its result. This function evaluates it
-#' again, against the whole dataset, in the environment you call from
-#' rather than the one the design was built in.
-#'
-#' Write it with literal arguments. `inside = vfold_cv(v = 5)` is
-#' re-evaluated identically anywhere. `inside = vfold_cv(v = k)` is not. If
-#' `k` is gone by the time you call this you get an error naming the
-#' specification, and if some other `k` is in scope you silently get a
-#' different design. Building a design inside a function that parameterizes
-#' its resampling is the common way to meet this.
+#' Where nothing was tuned, the code is `fit(object, data)` under the second
+#' seed.
 #'
 #' @template example-setup
 #' @template example-run
@@ -277,16 +141,9 @@
 #'
 #' predict(final, new_data = mtcars[1:3, ])
 #'
-#' @references
-#' Varma, S., & Simon, R. (2006). Bias in error estimation when using
-#' cross-validation for model selection. *BMC Bioinformatics*, 7, 91.
-#'
-#' Wilimitis, D., & Walsh, C. G. (2023). Practical considerations and applied
-#' examples of cross-validation for model development and evaluation in health
-#' care: Tutorial. *JMIR AI*, 2, e49023.
-#'
 #' @seealso [nested_tune_grid()], [nested_tune_bayes()],
-#'   [predict.nested_final_fit()], [extract_workflow()]
+#'   [nested_workflow_map()], [predict.nested_final_fit()],
+#'   [extract_workflow()]
 #' @export
 nested_final_fit <- function(object, results, ..., id = NULL) {
   rlang::check_dots_empty()
