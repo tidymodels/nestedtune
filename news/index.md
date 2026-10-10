@@ -2,6 +2,22 @@
 
 ## nestedtune 0.0.0.9000
 
+- Seven more help pages are shorter and follow the shape of tune’s help
+  pages:
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+  the two racing functions,
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md),
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md),
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  and
+  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md).
+  The four loop pages point to
+  [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  for what the loop functions share. The condition classes left the
+  pages, and most lists of errors did too, because each error message
+  says what went wrong.
+
 - [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
   the nested cross-validation guide and the README opening are shorter
   and follow the shape of tune’s help pages and the tidymodels.org

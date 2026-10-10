@@ -1,23 +1,10 @@
 # Nested cross-validation with Bayesian optimization inside
 
-`nested_tune_bayes()` gives you an honest score for a model you tune
-with
-[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html).
-It is
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-with the inner tuner swapped. For each outer fold it scores `initial`
-candidates on that fold's inner resamples and lets a Gaussian process
-propose `iter` more, one at a time. It then selects by `select`,
-finalizes the workflow, and fits and scores it on the outer split. The
-grid page is the reference for everything the two share: the design, the
-seeds, failed folds, parallel execution and what an operation on the
-result does.
-
-The estimate describes the whole search-and-fit procedure rather than
-any one model. The model to deploy comes from
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md),
-which runs the recorded search once more on all the data, and the
-estimate is the number to report for that model.
+`nested_tune_bayes()` estimates how well a model tuned with
+[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
+performs on new data. It runs the loop of
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+with a Bayesian search on each outer fold's inner resamples.
 
 ## Usage
 
@@ -110,8 +97,8 @@ nested_tune_bayes(
 - initial:
 
   The number of candidates each fold scores before the first iteration,
-  a whole number of at least 2. A `tune_results` object, which tune also
-  accepts here, is refused.
+  a whole number of at least 2. A `tune_results` object is an error,
+  because one tuning run cannot serve every outer fold.
 
 - objective:
 
@@ -146,191 +133,94 @@ nested_tune_bayes(
 
 ## Value
 
-A `nested_results` with one row per outer fold, the columns the grid
-page documents. Each fold's `.inner_metrics` carries an `.iter` column
-after `.config`. It is `0` for the initial candidates and `i` for the
-candidate the `i`-th iteration proposed, so a fold's search trajectory
-can be read from it. There is no `grid` attribute. The `procedure`
-record names the tuner `"tune_bayes"`. It holds `iter`, `initial` and
-`objective` beside the arguments every orchestrator records.
+A `nested_results`, as
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+describes. Each fold's `.inner_metrics` has an `.iter` column. It is `0`
+for the initial candidates and `i` for the candidate the `i`-th
+iteration proposed. There is no `grid` attribute.
 
 ## Details
 
-`iter` reaches
-[`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
-as given, and tune stops early when the search stalls. The number of
-search iterations, a non-negative whole number. The section on the
-iterations says what `0` does.
-
-`param_info` reaches the inner call as
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-takes it. The section on finalizing a parameter range says where a range
-that depends on the data is finalized.
-
-## The initial candidates and the iterations
-
-Each fold generates its own space-filling set of `initial` candidates
-from the parameter ranges with
-[`dials::grid_space_filling()`](https://dials.tidymodels.org/reference/grid_space_filling.html),
-and scores it with
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-under the fold's own tuning seed. A `tune_results` object is refused as
-`initial` because one tuning run cannot serve every outer fold: its
-candidates were scored on resamples that can hold a fold's assessment
-rows.
-
-Each iteration proposes one candidate and scores it on the fold's inner
-resamples. `iter = 0` scores the initial candidates and proposes
-nothing. The run is then
+Each outer fold scores `initial` candidates from a space-filling design.
+A Gaussian process then proposes `iter` more candidates, one at a time.
+The fold picks a candidate with `select`, fits it on its analysis set
+and scores it on the rows it held out.
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-on the space-filling grid those candidates form. tune stops a fold's
-search early when no unscored candidate remains, and says so on the
-console. It also stops after ten consecutive iterations without
-improvement, its `no_improve` default, settable through the control. The
-fold then completes with the candidates scored so far, and nothing about
-the early stop reaches `.notes`.
+documents what the loop functions share, such as the design, what the
+estimate describes, the seeds, failed folds and parallel execution.
 
-A parameter range that depends on the data is a case apart.
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and the finetune tuners finalize such a range on the outer fold's
-analysis rows.
+`iter = 0` scores the initial candidates and proposes nothing. tune
+stops a fold's search early when no new candidate remains, or after
+`no_improve` iterations in a row without improvement (ten by default).
+The fold then keeps the candidates it scored.
+
 [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
-refuses it before any frame is read, and every outer fold records that
-refusal as its failure. Finalize the range on the data first.
-
-## Weighting the outer folds
-
-Weights set on the design with
-[`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
-give a weighted average of the outer folds' estimates, as tune computes
-it. A fold that fails or scores `NA` is left out, and the other weights
-are scaled to sum to one.
-
-## Reproducibility
-
-Call [`set.seed()`](https://rdrr.io/r/base/Random.html) before the
-function, as elsewhere in tidymodels. Each fold takes its seeds from
-that one seed by its position, so the result is the same serially and in
-parallel. The seeds are kept as `.tuning_seed` and `.outer_fit_seed`.
-The function restores your random state on exit, even after an error. So
-two calls with no [`set.seed()`](https://rdrr.io/r/base/Random.html)
-between them give the same result, as repeated
-[`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-calls do.
-
-This covers randomness that flows through R's generator. Engines that
-randomize outside it (kernlab's SVMs, the deep-learning engines) cannot
-be pinned by any R-side scheme, here or in tune.
+does not accept a parameter range that depends on the data, such as
+`mtry()`. Set its range in `param_info` before the call, or every fold
+fails.
 
 ## Differences from calling tune directly
 
-There is no `control` formal. A
+A
 [`tune::control_bayes()`](https://tune.tidymodels.org/reference/control_bayes.html)
 passed through `...` as `control` reaches the inner `tune_bayes()` in
-every fold and the final fit that re-runs the result.
-`control = control_bayes(no_improve = 5, uncertain = 3)`, say, stops a
-fold's search sooner. What runs is the control passed, or tune's default
-when none is, with the slots this package forces overwritten. The result
-records that effective control, `seed` left out, as
-`extract_procedure(res)$control`. Every slot of `control_bayes()` falls
-under one of seven headings.
+every fold, and
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+runs again with it. For example,
+`control = control_bayes(no_improve = 5)` stops each search sooner. The
+result keeps the control that ran, without `seed`, as
+`extract_procedure(res)$control`. Its settings differ from a direct call
+as follows.
 
-**Forced: `allow_par`, `seed`.** `allow_par = FALSE` on both tune calls
-a fold makes, because parallelism belongs over the outer folds. `seed`
-is the slot that drives the Gaussian process's proposals. tune draws it
-from the stream when it is not given. Were the slot left alone, a fold's
-proposals depend on how much of the stream tune consumed before reaching
-it. Here the control is given the fold's own tuning seed, the number
-`.tuning_seed` reports, whatever the control carried.
+**Forced: `allow_par`, `seed`.** `allow_par` is `FALSE`, because the
+outer folds carry the parallelism. `seed` is set to the fold's tuning
+seed. Left to tune, it is drawn from the random stream, so the proposals
+depend on how much of the stream tune used before it.
 
-**Settable as its own argument: `event_level`.** The argument is the one
-place the level is set, as on the grid page. A control at tune's default
-takes it, and a control naming another level is refused at entry, with a
-refusal that names both. `iter`, `initial` and `objective` are arguments
-of `tune_bayes()` rather than control slots, offered here as arguments
-and reaching it unchanged. So is `eval_time`.
+**Settable as its own argument: `event_level`.** Set the level with the
+`event_level` argument, as on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
+A control left at the default level, `"first"`, takes the argument's
+level. A control set to another level than the argument's is an error.
+`iter`, `initial`, `objective` and `eval_time` are arguments of
+`tune_bayes()`, not control settings.
 
-**Refused: none.** No slot is refused on its own. A control of another
-class is refused at entry, as is the `event_level` conflict above.
+**Refused: none.** No setting is refused on its own. A control of
+another class is an error.
 
 **Passed through: `no_improve`, `uncertain`, `time_limit`, `verbose`,
 `verbose_iter`, `save_gp_scoring`, `pkgs`, `parallel_over`,
 `workflow_size`.** Each reaches `tune_bayes()` as given:
 
-- `no_improve` and `uncertain` govern each fold's search as they do in a
-  direct call, so a fold sometimes stops short of `iter`. Its
-  `.inner_metrics` records how far it went.
+- `no_improve` and `uncertain` act on each fold's search as in a direct
+  call.
 
-- `time_limit` stops a search by the clock. Two runs under the same seed
-  can then stop at different iterations on different machines, which is
-  outside what the seeds can promise.
+- `time_limit` stops a search by the clock, so two runs with the same
+  seed can differ from one machine to another.
 
-- `verbose` and `verbose_iter` print from a serial run, and from a mirai
-  daemon where nothing shows it.
+- `verbose` and `verbose_iter` print from each fold, and only a serial
+  run shows the output.
 
 - `save_gp_scoring` writes its files to the temporary directory of the
-  process that tuned, a daemon's own on the parallel path.
+  process that tuned the fold.
 
-`pkgs`, `parallel_over` and `workflow_size` behave as the grid page
-describes. `parallel_over` changes the numbers a stochastic engine
-produces even at `allow_par = FALSE`.
+`pkgs`, `parallel_over` and `workflow_size` behave as on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
 
-**Kept from the outer fit: `save_pred`, `extract`.** Each reaches the
-outer fit as well as the inner search. The outer fit's predictions and
-extracts are kept as `.predictions` and `.extracts`, as the grid page
-describes, and the inner search's own are still discarded.
+**Kept from the outer fit: `save_pred`, `extract`.** As on
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+the outer fit's predictions and extracts are kept as `.predictions` and
+`.extracts` when you ask for them. The inner search's own are still
+discarded.
 
-**Not returned: `save_workflow`.** It lands on the inner `tune_results`
-a fold record discards, so setting it costs the work and returns
-nothing. The final fit keeps its own tuning run as `$tuning`, where what
-it saved is reachable.
+**Not returned: `save_workflow`.** The nested run does not keep the
+inner tuning results, so this setting returns nothing there.
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+keeps its own tuning run as `$tuning`, which holds what the setting
+saved.
 
 **Inert: `backend_options`.** Options for a parallel backend, with no
 backend to reach at `allow_par = FALSE`.
-
-## Nested designs
-
-`resamples` has one row per outer fold: a `splits` column of outer
-splits, an `inner_resamples` column of inner rsets, and id columns. The
-function checks the design before it fits anything. An outer bootstrap
-is an error, and so are
-[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html),
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-and
-[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
-in either loop. An inner split that reaches a row its outer fold holds
-out is an error too. Each error names the design, or the rows, splits or
-folds at fault.
-
-Time-series designs work as well.
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-is tested with an outer
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-design and an inner design of any of those four kinds. Leave the `lag`
-of
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-at 0, because a larger `lag` is an error.
-[`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-says which of these designs the other functions are tested on.
-
-## Finalizing a parameter range
-
-A range that depends on the data, such as `mtry()`, is finalized on each
-outer fold's analysis set, never on the rows that fold holds out.
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-finalizes it on all the data. A range set in `param_info` applies to
-every fold.
-
-## Evaluation times
-
-The inner tuning and the outer scoring both use the times in
-`eval_time`. If the metric set has no dynamic or integrated survival
-metric, tune ignores the times with a warning. Each fold selects at the
-first of these times.
 
 ## See also
 

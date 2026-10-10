@@ -178,8 +178,7 @@ Build the design the outer loop runs on: one outer fold per row, with
 that fold’s inner resamples beside it, and no copy of the data per fold.
 
 - [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-  : Build a nested resampling design without copying the data per outer
-  fold
+  : Build a nested resampling design
 
 ## Running the loop
 

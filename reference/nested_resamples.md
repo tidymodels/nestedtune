@@ -1,17 +1,10 @@
-# Build a nested resampling design without copying the data per outer fold
+# Build a nested resampling design
 
-`nested_resamples()` builds the nested resampling design
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and its siblings take: one row per outer fold, with that fold's inner
-resamples beside it. It is
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)'s
-structure, and for the same seed and the same specifications it selects
-the same rows.
-
-What differs is what the splits point at. rsample's inner splits index a
-fresh copy of each outer fold's analysis set. These index the one data
-frame you already have, so the design's size barely grows with the fold
-count.
+`nested_resamples()` builds a nested resampling design: one row per
+outer fold, with that fold's inner resamples beside it. It gives the
+same splits as
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
+without a copy of the data for each outer fold.
 
 ## Usage
 
@@ -33,229 +26,148 @@ nested_resamples(data, outside, inside, ...)
 - inside:
 
   The inner resampling, as an unevaluated call such as
-  `vfold_cv(v = 5)`. It is evaluated once per outer fold, so an existing
-  object is refused.
+  `vfold_cv(v = 5)`. It is evaluated on each outer fold's analysis set,
+  so an `rset` is an error.
 
 - ...:
 
-  Not used. It must be empty. The three arguments above are all
-  required, so a mistyped fourth is an error here.
+  Not used, and must be empty.
 
 ## Value
 
 An object of class `nested_resamples`, which also carries the classes
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-returns, so methods written against those keep working. It is the outer
-`rset` with an `inner_resamples` list column added, one inner `rset` per
-outer split.
+returns. It is the outer `rset` with an `inner_resamples` column, one
+inner `rset` per outer split.
 
 ## Differences from rsample
 
-Code written for an rsample split keeps working.
 [`rsample::analysis()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
 and
 [`rsample::assessment()`](https://rsample.tidymodels.org/reference/as.data.frame.rsplit.html)
-return identical frames, attributes included. Each inner split keeps the
-class and the resample id rsample gives it, so
-[`labels()`](https://rdrr.io/r/base/labels.html) and
-[`rsample::add_resample_id()`](https://rsample.tidymodels.org/reference/add_resample_id.html)
-behave the same.
-
-Two behaviors differ on purpose. First, an outer
-[`rsample::bootstraps()`](https://rsample.tidymodels.org/reference/bootstraps.html)
-or
-[`rsample::group_bootstraps()`](https://rsample.tidymodels.org/reference/group_bootstraps.html)
-is refused, where
+return the same frames as on rsample's splits, and each inner split
+keeps rsample's class and id. These designs are an error, whether
+`nested_resamples()` or
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-warns about it or builds it without a warning. Without the refusal, the
-same row can land in both the inner analysis and the inner assessment
-set, which makes the estimate invalid.
+built them:
 
-Second,
-[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html),
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-and
-[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
-are refused in either loop, where rsample builds them. None of them
-gives a valid nested estimate there. As the outer loop,
-[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html)
-holds out one row per fold. R-squared then cannot be computed, and the
-averaged RMSE is the mean absolute error. As the outer loop,
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-scores its one fold on the rows it trained on, and
-[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
-gives each fold no assessment set. As the inner loop, tune refuses
-[`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html)
-and
-[`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html),
-and it reports no results for
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html).
-Without the refusal, each outer fold that tunes on one of them fails.
-Both refusals have condition class `nestedtune_bad_design`, and each
-names the rsample function and gives its reason.
+- An outer
+  [`rsample::bootstraps()`](https://rsample.tidymodels.org/reference/bootstraps.html)
+  or
+  [`rsample::group_bootstraps()`](https://rsample.tidymodels.org/reference/group_bootstraps.html).
+  The same row can land in both the inner analysis and assessment sets.
 
-One design is not refused but cannot be built as `inside`.
-[`rsample::validation_set()`](https://rsample.tidymodels.org/reference/validation_set.html)
-takes a split from
-[`rsample::initial_validation_split()`](https://rsample.tidymodels.org/reference/initial_validation_split.html)
-rather than a data frame. So `inside = validation_set()` fails when it
-is evaluated on an outer fold's analysis set, and nestedtune stops with
-an error that names `inside`.
+- An outer
+  [`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html).
+  Each fold holds out one row, so R-squared cannot be computed and the
+  averaged RMSE is the mean absolute error.
 
-The design is found from the class of its splits as well as its own
-class. So an `outside` rset rebuilt with
+- An outer
+  [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html),
+  whose one fold is scored on the rows it trained on.
+
+- An outer
+  [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html),
+  whose folds have no assessment set.
+
+- An inner
+  [`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html)
+  or
+  [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html),
+  which tune does not accept, or an inner
+  [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html),
+  for which tune reports no results.
+
+A design is known by the class of its splits as well as its own class,
+so a design rebuilt with
 [`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
-from such splits is refused too, and so is one with a single such split
-among valid ones. The same holds for the rset that `inside` returns for
-each outer fold, and that refusal names the fold. An apparent split
-beside bootstrap or permutation splits counts as part of that design
-only if its id is "Apparent", the id tune leaves out of its estimates.
-Under any other id, it counts as an
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-split, so an `inside` that adds one to bootstrap splits is refused. tune
-leaves every inner split with the id "Apparent" out of its estimates,
-whatever the split's class. So an `inside` that gives any other split
-that id is refused too, and the refusal names the outer fold. An
-`inside` that gives a split with a missing `id` is refused as well,
-because tune leaves that split out of its estimates. So is an `inside`
-that gives two splits the same values in every id column, because tune
-then miscounts the resamples.
+is caught too. An inner
+[`rsample::validation_set()`](https://rsample.tidymodels.org/reference/validation_set.html)
+cannot be built, because it takes a split and not a data frame.
 
-An `outside` split whose assessment set holds a row of its analysis set
-is refused. Such a fold scores the model on rows it trained on. The rule
-reads the rows, so it also catches a split rebuilt with
-[`rsample::make_splits()`](https://rsample.tidymodels.org/reference/make_splits.html),
-which keeps no class that names its design. An `inside` that gives such
-a split is refused too, and the refusal names the outer fold and the
-split. There, each index into the fold's analysis set counts as the data
-row it copies. So if the outer split repeats a row, an inner split that
-puts one copy in each set is refused. The apparent split of a bootstrap
-under the id "Apparent" is exempt from this rule, because tune leaves it
-out of its estimates.
+A single split is an error in either loop if its assessment set holds a
+row of its analysis set. Inside an outer fold, two copies of one data
+row count as the same row. The apparent split of a bootstrap with the id
+"Apparent" is exempt, because tune leaves it out of its estimates. For
+the same reason, an inner split with the id "Apparent" is an error
+unless it is that split. So is an inner split with a missing `id`, or
+two inner splits with the same values in every id column.
 
-An `outside` split is refused if its `in_id` or `out_id` holds an `NA`,
-is not a numeric vector, or holds a value outside integer range. So is a
-split whose `out_id` is `NULL` or empty, which leaves it no assessment
-set. The refusal names every such split and slot. rsample reads an `NA`
-index as a row of `NA` values, or fails when it builds the assessment
-set. The one exception is an `out_id` that is the logical `NA`, which
-tells rsample to find the assessment set with
-[`rsample::complement()`](https://rsample.tidymodels.org/reference/complement.html).
+An outer split is an error if its `in_id` or `out_id` holds an `NA`, is
+not numeric, or holds a value outside integer range. So is an empty
+`out_id`. The logical `NA` `out_id`, which tells rsample to use
+[`rsample::complement()`](https://rsample.tidymodels.org/reference/complement.html),
+is accepted.
 
 ## Time-series designs
 
-An outer
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
+Below, the sliding designs are
 [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
 [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-with an inner
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-is tested to give the same splits as
+and
+[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
+and the four other tuners are
+[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
+the two racing functions and
+[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md).
+Each pair of designs below is tested to give the same splits as
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-are tested on all four designs, and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for their results.
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-and
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-are tested on the rolling-origin design, and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for their results, plus the sliding-window design for
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-results.
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-is tested on the rolling-origin design.
+A final fit is tested on the results of the functions named with it.
 
-An outer
+- Outer
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  or a sliding design, with an inner
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html).
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  and their final fits are tested on all four. The four other tuners,
+  their final fits and
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  are tested on the rolling-origin outer design. The final fit of
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  is also tested on the sliding-window outer design.
+
+- Outer
+  [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
+  with an inner sliding design. All five tuners and their final fits are
+  tested on all three.
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  is tested on all three with its default `fn`, and with each of the
+  four other tuners on sliding-period alone.
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  accepts these designs. It checks the inner design but fits nothing on
+  it.
+
+- A sliding design in both loops, which gives nine pairs.
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  is tested on all nine. On the sliding-window pair, the four other
+  tuners,
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  with its default `fn`, and the final fit of
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  are tested, and
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  accepts the design. On the other eight pairs, no function but
+  `nested_resamples()` and
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  is tested.
+
+Any other inner design is not tested. A `lag` above 0 in
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-with an inner
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-is tested to give the same splits as
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-is tested on these three designs, and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for its results. These designs are also tested under
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-and
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
-and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for the results of those four tuners.
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-is tested on these three designs with its default `fn`. With `fn` set to
-each of those four tuners, it is tested on the sliding-period design
-alone.
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-is tested to accept these designs. It checks the inner design but fits
-nothing on it.
-
-An outer
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-with one of these three inner designs gives nine pairs. Each pair is
-tested to give the same splits as
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
-and each is tested under
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
-The pair of an outer and an inner
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-is also tested under
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-and
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-with its default `fn`. On that pair,
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-is tested for
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-results, and
-[`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-is tested to accept the design. It checks the inner design but fits
-nothing on it. On the other eight pairs, no function but
-`nested_resamples()` and
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-is tested. Any other inner design is not tested.
-
-Every test above that uses
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-leaves `lag` at its default of 0. A `lag` above 0 is refused as an
-`outside` and as an `inside`, because each assessment set then holds the
-last `lag` rows of its analysis set. Use `lag = 0`, and build the lagged
-predictors before resampling.
+is an error in either loop, because each assessment set then holds the
+last `lag` rows of its analysis set. Build lagged predictors before
+resampling.
 
 ## Memory
 
-What you save is one copy of the analysis set per outer fold.
 [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-evaluates the inner specification against `as.data.frame(split)`, so
-every outer fold holds its own copy of that fold's analysis set.
-`nested_resamples()` runs the same specification against the same frame,
-keeps only the row indices it produces, and points them back at `data`.
-The index vectors remain, as they do in rsample, but the copies are
-gone.
-
-Sizes below are multiples of the source data, measured on
+keeps a copy of each outer fold's analysis set. `nested_resamples()`
+keeps only row indices that point back at `data`. The sizes below are
+multiples of the source data. They were measured on
 [`mlbench::LetterRecognition`](https://rdrr.io/pkg/mlbench/man/LetterRecognition.html)
-(20000 x 17) with five inner folds under rsample 1.3.2 and R 4.6.1. They
-were recorded on 2026-07-25 beside the check
-`tests/testthat/test-nested-resamples-memory.R` makes of them:
+(20000 x 17) with five inner folds, under rsample 1.3.2 and R 4.6.1, on
+2026-07-25. `tests/testthat/test-nested-resamples-memory.R` checks how
+fast each size grows with the number of outer folds.
 
 |  |  |  |
 |----|----|----|
