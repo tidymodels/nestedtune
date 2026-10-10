@@ -65,6 +65,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-10: T6: NEWS bullet added, and the head figures are in the comparison note.
 - 2026-10-10: claim audit: 170 claims read, 2 corrected — R/nested-results.R, R/nested-results-collect.R
 - 2026-10-10: T6: `devtools::test()` passes, `devtools::check()` gives 0 errors, 0 warnings and 0 notes, `document()` leaves no diff, and the six gating sweeps and air are clean. Implement done, status review.
+- 2026-10-10: step-7 approval: m144-tune-style-reader-pages approved for merge. The user chose no comment on #91.
 
 ## Review
 
