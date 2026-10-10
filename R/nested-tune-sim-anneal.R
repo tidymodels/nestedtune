@@ -1,94 +1,44 @@
 #' Nested cross-validation with simulated annealing inside
 #'
 #' @description
-#' `nested_tune_sim_anneal()` gives you an honest score for a model you
-#' tune with [finetune::tune_sim_anneal()]. It is [nested_tune_grid()] with
-#' the inner tuner swapped, and that page is the reference for everything
-#' the orchestrators share. [nested_tune_bayes()] is this function's
-#' nearest sibling. For each outer fold it scores `initial` candidates on
-#' that fold's inner resamples. Then for `iter` iterations it perturbs the
-#' current candidate, scores the perturbation, and keeps it or falls back
-#' by finetune's annealing rule. The fold then selects, finalizes, fits and
-#' scores on the outer split as the grid page describes.
-#'
-#' The estimate describes the annealing-and-fit procedure as a whole. The
-#' model to deploy comes from [nested_final_fit()], which runs the recorded
-#' search once more on all the data, and the estimate is the number to
-#' report for that model.
+#' `nested_tune_sim_anneal()` estimates how well a model tuned with
+#' [finetune::tune_sim_anneal()] performs on new data. It runs the loop of
+#' [nested_tune_grid()], with simulated annealing on each outer fold's inner
+#' resamples.
 #'
 #' @details
-#' finetune must be installed. A missing package is refused at entry, before
-#' any fold runs.
+#' Each outer fold scores `initial` candidates from a space-filling design.
+#' For `iter` iterations, it then changes the current candidate a little and
+#' keeps the new one or goes back, by finetune's annealing rule.
+#' [nested_tune_grid()] documents what the loop functions share, such as the
+#' design, the seeds, failed folds and parallel execution.
 #'
-#' @template details-param-info
+#' finetune must be installed, on each parallel daemon as well. `iter = 0` is
+#' an error, because finetune 1.3.0 runs two iterations there and not none.
+#'
 #' @inheritParams nested_tune_grid
 #' @inheritParams finetune::tune_sim_anneal
 #' @templateVar CONSTRUCTOR finetune::control_sim_anneal()
 #' @templateVar PKG finetune
 #' @template param-control-dots
 #' @param iter The number of search iterations, a whole number of at least 1.
-#'   The section on the iterations says why `0` is refused.
 #' @param initial The number of candidates each fold scores before the first
-#'   iteration, a whole number of at least 1 (finetune's default). A
-#'   `tune_results` object, which finetune also accepts here, is refused.
+#'   iteration, a whole number of at least 1. A `tune_results` object is an
+#'   error, because one tuning run cannot serve every outer fold.
 #'
-#' @return A `nested_results` shaped as [nested_tune_grid()] documents, one
-#'   row per outer fold. Each fold's `.inner_metrics` carries an `.iter`
-#'   column after `.config`. It is `0` for the initial candidates, whose
-#'   `.config` finetune prefixes `initial_`. It is `i` for the candidate the
-#'   `i`-th iteration scored, labelled `Iter<i>`. There is no `grid`
-#'   attribute. The `procedure` record names the tuner `"tune_sim_anneal"`
-#'   and holds `iter` and `initial` beside the arguments every orchestrator
-#'   records.
-#'
-#' @section The initial candidates and the iterations:
-#'
-#' Each fold draws its own space-filling set of `initial` candidates with
-#' [dials::grid_space_filling()] and scores it with [tune::tune_grid()]
-#' under its tuning seed, as [nested_tune_bayes()] does. A `tune_results`
-#' object is refused as `initial` for the reason that page gives. Each
-#' iteration then perturbs the current candidate and scores the result on
-#' the fold's inner resamples.
-#'
-#' `iter = 0` is refused. finetune 1.3.0 iterates over
-#' `(existing_iter + 1):iter`, which at `iter = 0` is `1:0`, so it runs two
-#' iterations rather than none. [tune::tune_bayes()] at `iter = 0` proposes
-#' nothing. finetune stops a fold's search early after
-#' `no_improve` consecutive iterations without improvement, or when
-#' `time_limit` is reached. `no_improve` is `Inf` by default, so never,
-#' unless the control sets it. The fold completes with the candidates
-#' scored so far, and nothing about the early stop reaches `.notes`.
-#'
-#' Annealing draws from the generator even with a deterministic engine.
-#' The initial candidates are a space-filling design drawn under the fold's
-#' tuning seed, and each perturbation is drawn from the stream that seed
-#' started. [finetune::control_sim_anneal()] has no seed slot, so nothing
-#' is injected into the control. On the parallel path every daemon's
-#' library must hold finetune. The loop attaches it in each daemon
-#' before the first fold is sent, and warns where it cannot.
-#'
-#' @inheritSection nested_tune_grid Nested designs
-#' @inheritSection nested_tune_grid Finalizing a parameter range
-#' @inheritSection nested_tune_grid Evaluation times
-#'
-#' @template section-resample-weights
-#'
-#' @template section-reproducibility
+#' @return A `nested_results`, as [nested_tune_grid()] describes. Each fold's
+#'   `.inner_metrics` has an `.iter` column. It is `0` for the initial
+#'   candidates and `i` for the candidate the `i`-th iteration scored. There
+#'   is no `grid` attribute.
 #'
 #' @section Differences from calling finetune directly:
 #'
-#' There is no `control` formal. A [finetune::control_sim_anneal()] passed
-#' through `...` as `control` reaches the inner search in every fold and
-#' the final fit that re-runs the result. `control = control_sim_anneal(
-#' no_improve = 5, verbose_iter = FALSE)`, say, stops a fold's search
-#' sooner and keeps the console quiet. What runs is the control passed, or
-#' finetune's default when none is, with the slots this package forces
-#' overwritten. The result records that effective control as
-#' `extract_procedure(res)$control`. Every slot of `control_sim_anneal()`
-#' falls under one of seven headings.
+#' A [finetune::control_sim_anneal()] passed through `...` as `control`
+#' reaches the inner search in every fold, and [nested_final_fit()] runs
+#' again with it. Its settings differ from a direct call as follows.
 #'
 #' @templateVar INNER inner search
-#' @templateVar SETTABLE_TAIL `iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()` rather than control slots, offered here as arguments and reaching it unchanged.
+#' @templateVar SETTABLE_TAIL `iter`, `initial` and `eval_time` are arguments of `tune_sim_anneal()`, not control settings.
 #' @template differences-forced
 #' @template differences-settable
 #' @template differences-refused-plain
@@ -98,32 +48,24 @@
 #' `parallel_over`, `workflow_size`.** Each reaches `tune_sim_anneal()` as
 #' given:
 #'
-#' - `no_improve` and `restart` set when a search stops or restarts from
-#'   its best candidate. `radius` and `flip` set how far and how a
-#'   perturbation moves, and `cooling_coef` how the acceptance probability
-#'   cools. All five govern each fold's search as they do in a direct call.
+#' - `no_improve` and `restart` set when a search stops or starts again.
+#'   `radius`, `flip` and `cooling_coef` set how it moves. All five act on
+#'   each fold's search as in a direct call.
 #' - `time_limit` is a wall-clock stop, and a wall-clock stop makes the
-#'   candidate set depend on the machine. Two runs under the same seed can
-#'   stop at different iterations, which is outside what the seeds can
-#'   promise.
-#' - `verbose_iter`, `TRUE` in finetune's default, prints the annealing log
-#'   from every fold of a serial run, one log per fold, and from a mirai
-#'   daemon where nothing shows it. Pass
+#'   candidate set depend on the machine.
+#' - `verbose_iter`, `TRUE` by default, prints the annealing log from every
+#'   fold of a serial run. Pass
 #'   `control = control_sim_anneal(verbose_iter = FALSE)` for a quiet run.
-#'   `verbose` likewise.
+#'   `verbose` prints from each fold as well.
 #' @template differences-passed-shared
 #' @templateVar VERSION_CTRL control_sim_anneal()
 #' @template differences-finetune-version
 #' @template differences-kept
 #' @section Differences from calling finetune directly:
-#' **Not returned: `save_workflow`, `save_history`.** `save_workflow` lands
-#' on the inner `tune_results` a fold record discards, so setting it costs
-#' the work and returns nothing. The final fit keeps its tuning run as
-#' `$tuning`, where what it saved is reachable. `save_history` writes
-#' finetune's search history to `sa_history.RData` in the temporary
-#' directory of the process that tuned, a daemon's own on the parallel
-#' path. Every fold overwrites the last one's, and nothing of it reaches
-#' the result.
+#' **Not returned: `save_workflow`, `save_history`.** The inner tuning
+#' results are not kept, so `save_workflow` returns nothing. `save_history`
+#' writes finetune's search history to a file in the temporary directory of
+#' the process that tuned, and each fold overwrites the one before.
 #'
 #' @template differences-inert
 #'
