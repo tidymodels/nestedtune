@@ -89,16 +89,17 @@ return zero rows, and \code{autoplot(type = "parameters")} is an error.
 
 A \code{\link[tune:control_resamples]{tune::control_resamples()}} passed through \code{...} as \code{control} is kept
 as \code{extract_procedure(res)$control}. The one tune call a fold makes is
-the outer fit, which runs under its own \code{\link[tune:control_last_fit]{tune::control_last_fit()}}. tune
-gives \code{\link[tune:control_grid]{tune::control_grid()}} and \code{control_last_fit()} the same class, so
-both are accepted too.
+the outer fit, which runs under its own \code{\link[tune:control_last_fit]{tune::control_last_fit()}}.
+\code{\link[tune:control_grid]{tune::control_grid()}} and \code{control_last_fit()} also carry the
+\code{control_resamples} class, so both are accepted too.
 
 \strong{Forced: \code{allow_par}.} The outer fit runs with \code{allow_par = FALSE},
 because the outer folds carry the parallelism.
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument. A control that names another level is an error.
-\code{eval_time} is an argument too.
+\code{event_level} argument. A control left at \code{"first"} takes the argument's
+level, and a control set to any other level that differs from it is an
+error. \code{eval_time} is an argument too.
 
 
 \strong{Refused: none.} No setting is refused on its own. A control of another

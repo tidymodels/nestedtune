@@ -94,7 +94,8 @@
 #' The sizes below are multiples of the source data. They were measured on
 #' `mlbench::LetterRecognition` (20000 x 17) with five inner folds, under
 #' rsample 1.3.2 and R 4.6.1, on 2026-07-25.
-#' `tests/testthat/test-nested-resamples-memory.R` checks them.
+#' `tests/testthat/test-nested-resamples-memory.R` checks how fast each size
+#' grows with the number of outer folds.
 #'
 #' | outer folds | `rsample::nested_cv()` | `nested_resamples()` |
 #' |-:|-:|-:|

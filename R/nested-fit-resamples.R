@@ -47,16 +47,17 @@
 #'
 #' A [tune::control_resamples()] passed through `...` as `control` is kept
 #' as `extract_procedure(res)$control`. The one tune call a fold makes is
-#' the outer fit, which runs under its own [tune::control_last_fit()]. tune
-#' gives [tune::control_grid()] and `control_last_fit()` the same class, so
-#' both are accepted too.
+#' the outer fit, which runs under its own [tune::control_last_fit()].
+#' [tune::control_grid()] and `control_last_fit()` also carry the
+#' `control_resamples` class, so both are accepted too.
 #'
 #' **Forced: `allow_par`.** The outer fit runs with `allow_par = FALSE`,
 #' because the outer folds carry the parallelism.
 #'
 #' **Settable as its own argument: `event_level`.** Set the level with the
-#' `event_level` argument. A control that names another level is an error.
-#' `eval_time` is an argument too.
+#' `event_level` argument. A control left at `"first"` takes the argument's
+#' level, and a control set to any other level that differs from it is an
+#' error. `eval_time` is an argument too.
 #'
 #' @templateVar OTHER control_bayes()
 #' @template differences-refused

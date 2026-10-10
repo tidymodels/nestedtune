@@ -52,16 +52,17 @@ workflow runs under the same two seeds. Each result is identical to a
 call by hand on that workflow, with the same arguments, after the same
 \code{set.seed()}.
 
-A warning or an error from one workflow names that workflow at the front
-of its message and keeps its class. After an error, the workflows before
-it have already run.
+An error from one workflow names that workflow at the front of its
+message and keeps its class. So does a warning about failed folds. After
+an error, the workflows before it have already run.
 
 \code{\link[=collect_metrics]{collect_metrics()}} and the other \verb{collect_*()} functions stack each
 workflow's table under a \code{wflow_id} column. \code{\link[=nested_final_fit]{nested_final_fit()}} with an
 \code{id} fits one workflow. \code{dplyr::filter()}, \code{dplyr::arrange()},
-\code{dplyr::mutate()} and \code{x[i, ]} keep the class. An operation that repeats
-a \code{wflow_id}, drops a column or brings in a row from elsewhere returns a
-plain tibble.
+\code{dplyr::mutate()} and \code{x[i, ]} keep the class while the three columns keep
+their values. An operation that empties the set, repeats a \code{wflow_id},
+changes or drops one of the three columns, or brings in a row from
+elsewhere returns a plain tibble.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

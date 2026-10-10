@@ -4,10 +4,10 @@
   pages: `nested_tune_bayes()`, the two racing functions,
   `nested_tune_sim_anneal()`, `nested_fit_resamples()`,
   `nested_workflow_map()`, `nested_final_fit()` and `nested_resamples()`.
-  Each one points to
-  `?nested_tune_grid` for what the loop functions share. The lists of
-  errors and condition classes left the pages, because each error message
-  says what went wrong.
+  The four loop pages point to
+  `?nested_tune_grid` for what the loop functions share. The condition
+  classes left the pages, and most lists of errors did too, because each
+  error message says what went wrong.
 
 * `?nested_tune_grid`, the nested cross-validation guide and the README
   opening are shorter and follow the shape of tune's help pages and the

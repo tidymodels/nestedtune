@@ -154,8 +154,9 @@ Its settings differ from a direct call as follows.
 
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument, as on the grid page. A control that names another
-level is an error.
+\code{event_level} argument, as on the grid page. A control left at \code{"first"}
+takes the argument's level, and a control set to any other level that
+differs from it is an error.
 \code{grid} and \code{eval_time} are the racing functions' own arguments, not control settings.
 
 

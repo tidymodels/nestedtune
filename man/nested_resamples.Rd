@@ -112,7 +112,8 @@ lagged predictors before resampling.
 The sizes below are multiples of the source data. They were measured on
 \code{mlbench::LetterRecognition} (20000 x 17) with five inner folds, under
 rsample 1.3.2 and R 4.6.1, on 2026-07-25.
-\code{tests/testthat/test-nested-resamples-memory.R} checks them.\tabular{rrr}{
+\code{tests/testthat/test-nested-resamples-memory.R} checks how fast each size
+grows with the number of outer folds.\tabular{rrr}{
    outer folds \tab \code{rsample::nested_cv()} \tab \code{nested_resamples()} \cr
    2 \tab 2.2x \tab 1.2x \cr
    5 \tab 5.6x \tab 1.7x \cr

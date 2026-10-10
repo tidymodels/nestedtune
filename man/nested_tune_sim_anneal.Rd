@@ -113,8 +113,9 @@ again with it. Its settings differ from a direct call as follows.
 
 
 \strong{Settable as its own argument: \code{event_level}.} Set the level with the
-\code{event_level} argument, as on the grid page. A control that names another
-level is an error.
+\code{event_level} argument, as on the grid page. A control left at \code{"first"}
+takes the argument's level, and a control set to any other level that
+differs from it is an error.
 \code{iter}, \code{initial} and \code{eval_time} are arguments of \code{tune_sim_anneal()}, not control settings.
 
 

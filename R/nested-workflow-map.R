@@ -31,16 +31,17 @@
 #' call by hand on that workflow, with the same arguments, after the same
 #' `set.seed()`.
 #'
-#' A warning or an error from one workflow names that workflow at the front
-#' of its message and keeps its class. After an error, the workflows before
-#' it have already run.
+#' An error from one workflow names that workflow at the front of its
+#' message and keeps its class. So does a warning about failed folds. After
+#' an error, the workflows before it have already run.
 #'
 #' [collect_metrics()] and the other `collect_*()` functions stack each
 #' workflow's table under a `wflow_id` column. [nested_final_fit()] with an
 #' `id` fits one workflow. `dplyr::filter()`, `dplyr::arrange()`,
-#' `dplyr::mutate()` and `x[i, ]` keep the class. An operation that repeats
-#' a `wflow_id`, drops a column or brings in a row from elsewhere returns a
-#' plain tibble.
+#' `dplyr::mutate()` and `x[i, ]` keep the class while the three columns keep
+#' their values. An operation that empties the set, repeats a `wflow_id`,
+#' changes or drops one of the three columns, or brings in a row from
+#' elsewhere returns a plain tibble.
 #'
 #' @inheritParams workflowsets::workflow_map
 #' @param fn The name of the function to run each workflow through. The
