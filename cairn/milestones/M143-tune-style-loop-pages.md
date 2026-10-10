@@ -56,3 +56,4 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 ## Work log
 
 - 2026-10-09: created by /milestone-plan with M142, M144 and M145. M142's work log holds the collision sweep, the criteria audit and the gate's answers.
+- 2026-10-09: inputs from M142's review. `orchestrator` is still used on these pages, and the grid page no longer defines it (AC3 removes it). The bayes, race and sim-anneal Descriptions still open with "gives you an honest score" and carry an IP3 sentence the grid page moved to Details. `man-roxygen/differences-passed-shared.R` says the passed-through slots "behave as the grid page describes", and the grid page now gives them one short paragraph.

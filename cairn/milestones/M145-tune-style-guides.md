@@ -60,4 +60,5 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 ## Work log
 
 - 2026-10-09: created by /milestone-plan with M142, M143 and M144. M142's work log holds the collision sweep, the criteria audit and the gate's answers.
+- 2026-10-09: inputs from M142's review reader. No guide says where a held-out test set (`initial_split()` and `last_fit()`) fits around nested resampling. No guide says how to choose v for each loop. Both belong in `estimate.Rmd`, under this milestone's T2.
 - 2026-10-09: plan gate chose no optimism demonstration over a site-only simulation article, because M082 deleted such a page and one random draw can fail to show the gap; falsified by a user or maintainer asking to see the flat score's optimism shown.
