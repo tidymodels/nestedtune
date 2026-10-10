@@ -78,3 +78,59 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
   - `man/summary.nested_results.Rd:36-37`: "The nested estimate describes the tuning procedure, not a fitted model."
   - `man/summary.nested_results_set.Rd:50-51`: "Each nested estimate describes its workflow's tuning procedure, not a fitted model."
   - `man/summary.nested_final_fit.Rd:44-46`: "The nested estimate describes the procedure that produced this model, not the fitted model itself."
+- spawned: diff-bug, blame-history, prior-review, and the plan's fresh reader beside tune's `collect_metrics`, `show_best` and `autoplot` pages (reader). Fixes landed in `b691fe58`.
+- diff-bug #1: `?collect_metrics.nested_results` lost the only sentence saying what to report and when (IP3) — fix now, fixed b691fe58.
+- diff-bug #2: the extractor Description says every method matches `extract_workflow()`, false for `extract_parameter_set_dials()` — fix now, fixed b691fe58.
+- diff-bug #3: the set summary page never says that choosing a workflow by its estimate is a selection — fix now, fixed b691fe58.
+- diff-bug #4: the `std_err` pointer says the vignette "says more" about a reason it does not cover — fix now (pointer reworded), fixed b691fe58. The citations stay with M145.
+- diff-bug #5: NEWS names `?collect_metrics`, which opens the re-export page — fix now, fixed b691fe58.
+- diff-bug #6: the package overview leaves out untuned workflows — fix now, fixed b691fe58.
+- diff-bug #7: `extract_procedure` says the control has every forced setting, but a Bayesian run drops `seed` — fix now, fixed b691fe58.
+- diff-bug #8: `collect_predictions` no longer says the saved columns pick the rule, nor what a `NULL` censored entry does — fix now, fixed b691fe58. The edited-table refusals stay out (planned change).
+- diff-bug #9: dropped argument facts. `limit` range and the `type` default restored, fixed b691fe58. The `autoplot` filter errors, older records without `first_metric`, and the `n`/`prop` collision rejected (planned change: each error message says what went wrong).
+- diff-bug #10: `[collect_metrics()]` links open the re-export page — fix now (links point to `collect_metrics.nested_results`), fixed b691fe58.
+- blame-history #1: the set summary no longer names the `Selected by:` and `Selecting metric:` lines that M116 required — fix now, fixed b691fe58.
+- blame-history #2: `augment` and `collect_predictions` dropped that a postprocessed `.pred_class` is recomputed (M125) — fix now, fixed b691fe58. The set-page clause rejected: the Description says each method works as for one workflow.
+- blame-history #3: the set `autoplot()` subtitle counts are no longer explained (M072, IP4) — fix now, fixed b691fe58.
+- blame-history #4: `extract_procedure` no longer names the case-weights column and tailor postprocessor, nor the default first metric — fix now, fixed b691fe58.
+- blame-history #5: `agreement` no longer says a no-value fold shares the `NA` row (M044) — fix now, fixed b691fe58. The `n`/`prop` collision rejected (planned change).
+- blame-history #6: the extractor page no longer says when tune finalizes a range (M123) — fix now, fixed b691fe58.
+- blame-history #7: the `NULL` censored entry rule left `collect_predictions` — fix now, fixed b691fe58.
+- blame-history #8: the two `std_err` citations left the help — follow-up, already in M145's work log.
+- blame-history #9: low-severity dropped details (count shortfalls, plot label forms, `.eval_time` rule, per-workflow warning prefix) — reject (planned change: length cut, each is shown in the output itself).
+- prior-review #1: what to report and why missing on the results pages — fix now (with diff-bug #1 and #3), fixed b691fe58.
+- prior-review #2: "optimistic" stated flat on two final-fit pages — fix now ("on average"), fixed b691fe58.
+- prior-review #3: the set page drops "with completed folds" from the unsaved-column error — fix now, fixed b691fe58.
+- prior-review #4: `extract_procedure` drops `seed` and the default first metric — fix now (with diff-bug #7), fixed b691fe58.
+- prior-review #5: the extractor exception dropped — fix now (with diff-bug #2), fixed b691fe58.
+- prior-review #6: no page says a run with no completed fold errors for predictions, compute and augment — reject (planned change: the error says so).
+- prior-review #7: predict and print pages lost "see `nested_final_fit()` for why" — reject (false as a gap: they say what to report and link `collect_metrics`, which now says why).
+- reader #1: the IP3 caveat repeats across pages — reject (planned change: AC4 requires it on six pages, and IP3 requires it where a user reads a number).
+- reader #2: "nested estimate" is never defined and merged with per-fold scores — fix now, fixed b691fe58.
+- reader #3: `.config` in `collect_predictions` is the outer fit's label, not the selected candidate's — fix now, fixed b691fe58.
+- reader #4: "three" names two different rule sets in `selection_rule` — fix now, fixed b691fe58.
+- reader #5: no `metric` argument, so where the ranking metric comes from is unclear — fix now, fixed b691fe58.
+- reader #6: "limit" in the desirability section reuses the argument's name — fix now ("`low` or `high` bound"), fixed b691fe58.
+- reader #7: the `summary.nested_results` Value does not name its components — fix now, fixed b691fe58.
+- reader #8: `estimate` always `NULL` reads like a bug — reject (false: Details gives the reason).
+- reader #9: printed lines not in code font — reject (false: they are code spans in the source and render quoted).
+- reader #10: `extract_workflow()`(x) renders split — fix now, fixed b691fe58.
+- reader #11: `autoplot` does not name its axes, when a panel has fewer folds, or "static" — fix now, fixed b691fe58.
+- reader #12: `collect_selections` does not name its columns — fix now, fixed b691fe58.
+- reader #13: `extract_scored_candidates` names an internal column — fix now, fixed b691fe58.
+- reader #14: the set collect page title and two sentences are unclear — fix now, fixed b691fe58.
+- reader #15: `x` on `collect_predictions` does not say which column — fix now, fixed b691fe58.
+- reader #16: the `.row` check sentences are internal — fix now (dropped from `collect_predictions`, reworded on `compute_metrics`), fixed b691fe58.
+- reader #17: `collect_metrics` Value leaves out `.metric` and `.estimator` — fix now, fixed b691fe58.
+- reader #18: the wide-shape errors sit in the argument text — reject (style).
+- reader #19: the workflow-gap sentence gives nothing to do — fix now (replaced with diff-bug #3's sentence), fixed b691fe58.
+- reader #20: `extract_procedure` Value is vague — fix now, fixed b691fe58.
+- reader #21: the extractor page does not say to finalize an unknown range, nor list all parts — fix now, fixed b691fe58.
+- reader #22: "no `.resid`" lacks the contrast with tune, and one sentence is hard to read — fix now, fixed b691fe58.
+- reader #23: "give it to the nested run" is vague — fix now, fixed b691fe58.
+- reader #24: the failed-fold and no-fold sentences repeat across pages — reject (IP4: each page says which folds its answer covers).
+- reader #25: `agreement` does not say when a fold has no value — reject (the case is rare and the page now says how `summary()` tells it apart).
+- reader #26: `predict.nested_results` "serve" — fix now, fixed b691fe58. The `...` wording rejected: "Not used" is true of a method that always errors.
+- reader #27: pages run longer per function than tune's — reject (AC2 is met, and the fixes above add only facts reviewers asked for).
+- reader #28: confirm the package URLs before release — reject (not in this diff, and the repository exists).
+- AC1-AC4 re-read after the fixes (2026-10-10, `b691fe58`). AC1: Descriptions 15 to 37 words, the largest `nestedtune-package` at 37, none over 40. AC2: 4,385 prose words against 9,116, 48.1%. AC3: the per-page grep prints nothing. AC4: the six sentences quoted above stand, now at `print.nested_results.Rd:34`, `print.nested_results_set.Rd:24-25`, `print.nested_final_fit.Rd:24-25`, `summary.nested_results.Rd:42-43`, `summary.nested_results_set.Rd:52-53` and `summary.nested_final_fit.Rd:44-46`.
