@@ -25,7 +25,8 @@ A \code{metrics} passed here reaches every workflow's run. Under the
 \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules of \code{\link[=selection_rule]{selection_rule()}},
 its first metric chooses each fold's candidate, and every metric in it
 is scored. The \code{metrics} entry of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says what \code{NULL}
-means and how the \code{"desirability"} rule chooses instead. A set that
+means, and \code{\link[=selection_rule]{selection_rule()}} says how the \code{"desirability"} rule chooses
+instead. A set that
 does not suit the model of any workflow the map runs is refused before
 any workflow runs, a workflow routed to \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
 included.}

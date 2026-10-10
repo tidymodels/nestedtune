@@ -1,5 +1,3 @@
 #' @section Differences from calling <%= PKG %> directly:
-#' **Forced: `allow_par`.** The <%= INNER %> and the outer scoring fit both
-#' run at `allow_par = FALSE`, whatever the control carries, because
-#' parallelism belongs over the outer folds.
-#' <%= if (exists("FORCED_TAIL", inherits = FALSE)) FORCED_TAIL else "" %>
+#' **Forced: `allow_par`.** The <%= INNER %> and the outer fit run with
+#' `allow_par = FALSE`, because the outer folds carry the parallelism.

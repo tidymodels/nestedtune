@@ -581,9 +581,16 @@ test_that("AC6: both help pages document `eval_time` and what this package refus
     expect_match(text, "\\item{event_level}", fixed = TRUE)
     expect_match(text, "\\item{eval_time}", fixed = TRUE)
     # What this package refuses ahead of tune, and what it lets through.
-    expect_match(text, "Refused here, ahead of tune", fixed = TRUE)
-    expect_match(text, "missing, negative or not finite", fixed = TRUE)
-    expect_match(text, "passed on untouched", fixed = TRUE)
+    expect_match(
+      text,
+      "not numeric, empty, missing, negative or not finite are an error",
+      fixed = TRUE
+    )
+    expect_match(
+      text,
+      "Zero, repeated and unordered times are passed on to tune",
+      fixed = TRUE
+    )
   }
 
   # And the section that lists what a caller can set names it beside

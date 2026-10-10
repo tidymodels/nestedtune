@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-10-09 by M142's plan from two read-only comparisons. The first read the installed tune 2.1.0 and finetune 1.3.0 help (`tools::Rd_db()`) against this package's `man/` at `b2bbb494`. The second read the guides and README at `b2bbb494` against tune's `vignettes/tune.Rmd`, `vignettes/acquisition_functions.Rmd` and `vignettes/extras/optimizations.Rmd`, the tune and finetune READMEs, and the tidymodels.org pages `start/tuning`, `learn/work/nested-resampling`, `learn/work/tune-svm` and `learn/work/bayes-opt`, read from GitHub's default branches.
 Pagination: —.
-Extraction: a 2026-10-09 snapshot, measured with throwaway scripts whose definitions differ from `benchmarks/doc-profile.R`, and M142 T2 replaces the figures below with the script's — observed 2026-10-09.
+Extraction: a 2026-10-09 snapshot. The first section's figures came from throwaway scripts, and the `doc-profile.R` section's figures were read directly from the script on the pinned comparator copies — observed 2026-10-09.
 
 **Scope.** This page records how far this package's documentation sits from tune's and tidymodels.org's in length, structure and voice. It also lists the patterns that make the gap. It is the target M142 to M145 read. It is not a style guide and not a source summary. It is a reference, not an authority: status lives in `ROADMAP.md`, decisions in `DECISIONS.md`, and architecture in `DESIGN.md`.
 
@@ -25,6 +25,32 @@ Help pages. This package has about 34,400 prose words over 32 pages, a median of
 | `collect_selections` / `show_best` | 437 / 319 | 146 / 62 |
 
 Guides. Length and code density already match tidymodels.org: the four larger guides run 1,350 to 1,400 prose words and 48 to 59 words a code chunk, against 1,137 to 1,279 and 41 to 60. The gaps are elsewhere. Paragraphs average 44 to 56 words here and 22 to 36 there. The coined terms (`record`, `refus*`, `orchestrator`, `sibling`, and `procedure`) run 13 to 31 per 1,000 words here and 0 to 11 there. Negations run 11 to 24 per 1,000 words here and 0.5 to 9 there. No page here uses "we", and the tidymodels.org pages use it 13 to 55 times per 1,000 words.
+
+## Measured with `benchmarks/doc-profile.R`
+
+The figures above came from throwaway scripts. The ones below come from `Rscript benchmarks/doc-profile.R --tune --pages <comparator copies> <pages>`, whose header defines every column, and they are the ones the M142 to M145 criteria read. The comparator copies sit on the gitignored shelf under `cairn/references/sources/tune-docs/`. They were fetched from tidymodels/tidymodels.org at `ed3cb150` and from tidymodels/tune at `d047fc3a`, on 2026-10-09.
+
+At the M142 branch point (`54ac8f31`, 2026-10-09):
+
+| Help page | prose | desc | args | arg_med | sections |
+|---|---|---|---|---|---|
+| `nested_tune_grid` | 4,960 | 159 | 10 | 37 | 12 |
+| `tune::tune_grid` | 1,557 | 33 | 9 | 13 | 6 |
+| `tune::tune_bayes` | 1,603 | 14 | 11 | 14 | 9 |
+
+| Guide page | prose | paras | para_mean | coined | you |
+|---|---|---|---|---|---|
+| `nested-cv.Rmd` | 1,350 | 31 | 43.5 | 3 | 1 |
+| `README.Rmd` | 534 | 10 | 53.4 | 6 | 1 |
+| tidymodels.org `learn/work/nested-resampling` | 1,137 | 32 | 35.5 | 0 | 0 |
+| tidymodels.org `start/tuning` | 1,238 | 33 | 37.5 | 0 | 3 |
+| tidymodels.org `learn/work/tune-svm` | 634 | 24 | 26.4 | 0 | 0 |
+| tidymodels.org `learn/work/bayes-opt` | 654 | 19 | 34.4 | 0 | 0 |
+| tune `vignettes/tune.Rmd` | 971 | 42 | 23.1 | 0 | 0 |
+
+At the M142 head (2026-10-09), the same script reads `nested_tune_grid` at 1,208 prose words with a 36-word Description (after the claim audit's fixes and the script's punctuation fix). It reads `nested-cv.Rmd` at 652 prose words in 24 paragraphs (mean 27.2, 0 coined), and `README.Rmd` at 397 prose words (mean 44.1, 2 coined). The shared templates also cut the sibling pages: `nested_tune_bayes` 1,528, `nested_tune_race` 1,641, `nested_tune_sim_anneal` 1,543 and `nested_fit_resamples` 1,282 (1,245 after the fixes).
+
+The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune
 

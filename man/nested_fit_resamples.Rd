@@ -36,23 +36,15 @@ with \code{\link[tune:tune]{tune::tune()}}, every value fixed as \code{\link[tun
 it, or a parsnip model specification with no marker, given with
 \code{preprocessor}. A workflow carrying a marker is refused at entry.}
 
-\item{...}{On the generic, the arguments of the method that \code{object}
-selects. On a method, a control object from \code{\link[tune:control_resamples]{tune::control_resamples()}}, as
-\code{control}, and nothing else. Every argument after \code{...} is matched by
-name. The section on differences from tune says what becomes of
-each slot.}
+\item{...}{On the generic, the arguments of the method. On a method, pass
+\code{control = tune::control_resamples()} here to set the control. Name every
+argument after \code{...}.}
 
-\item{preprocessor}{A formula or a recipe, when \code{object} is a model
-specification. The two are combined as
-\code{workflows::workflow(preprocessor, object)}, and the call runs as it
-does on that workflow. Other preprocessors, such as
-\code{\link[workflows:workflow_variables]{workflows::workflow_variables()}}, go through a workflow. A workflow
-already carries its preprocessor, so one given beside a workflow is
-refused.}
+\item{preprocessor}{A formula or recipe, when \code{object} is a model
+specification.}
 
 \item{resamples}{A nested resampling design from \code{\link[=nested_resamples]{nested_resamples()}} or
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}}, one row per outer fold. The section on nested
-designs says what the design must hold.}
+\code{\link[rsample:nested_cv]{rsample::nested_cv()}}.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
 set. The outer loop scores every metric in the set, and
@@ -130,43 +122,23 @@ every row, with no tuning run.
 \section{Weighting the outer folds}{
 
 
-Weights set on the design with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} reach the
-outer average. \code{collect_metrics()}, \code{summary()}, \code{autoplot()} and
-\code{compute_metrics()} then report the weighted mean of the folds'
-estimates. Their \code{std_err} is the weighted standard deviation over the
-square root of the effective sample size, as tune computes both. The
-per-fold table from \code{collect_metrics(summarize = FALSE)} carries each
-fold's weight in a \code{.weight} column. tune stores the weights scaled to
-sum to one, and stores none when they are equal, so equal weights give
-the unweighted average.
-
-A fold that fails, or that scores \code{NA} on a metric, is left out of that
-average and the remaining weights are scaled up to sum to one. \code{n} counts
-the folds that scored. The weights on a design's inner resamples are read
-by tune itself.
+Weights set on the design with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} give a
+weighted average of the outer folds' estimates, as tune computes it. A
+fold that fails or scores \code{NA} is left out, and the other weights are
+scaled to sum to one.
 }
 
 \section{Reproducibility}{
 
 
-Seed the session before the call, as elsewhere in tidymodels. There is no
-\code{seed} argument. On entry the function draws \code{2 * n} seeds in a single
-\code{sample.int(.Machine$integer.max, 2 * n)} call, where \code{n} is the number of
-outer folds. Fold \code{i} uses element \code{2 * i - 1} for its tuning step and
-element \code{2 * i} for its outer fit, each applied with the generator kind
-pinned. A fold's seed depends on its position, not on the order the folds
-run in. So the same seed gives the same result serially and in parallel,
-at any number of daemons. The two seeds are kept on the result as
-\code{.tuning_seed} and \code{.outer_fit_seed}, and \code{?nested_tune_grid} shows how to
-reproduce one fold by hand from them.
+Call \code{set.seed()} before the function, as elsewhere in tidymodels. Each
+fold takes its seeds from that one seed by its position, so the result is
+the same serially and in parallel. The seeds are kept as \code{.tuning_seed}
+and \code{.outer_fit_seed}. The function restores your random state on exit,
+even after an error. So two calls with no \code{set.seed()} between them give
+the same result, as repeated \code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
 
-The caller's RNG state and generator kind are restored on exit, including
-when the call errors, so a seeded script that draws afterwards is
-unaffected. One consequence: two consecutive calls with no \code{set.seed()}
-between them return identical results, exactly as repeated
-\code{\link[tune:tune_grid]{tune::tune_grid()}} calls do.
-
-This binds randomness that flows through R's generator. Engines that
+This covers randomness that flows through R's generator. Engines that
 randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 pinned by any R-side scheme, here or in tune.
 }
@@ -181,7 +153,8 @@ orchestrators. The tuning seed is drawn and consumed by nothing. It is
 recorded as drawn rather than as \code{NA}, so the two seed columns read the
 same on every result. Fold \code{i} is exactly \code{\link[tune:last_fit]{tune::last_fit()}} of \code{object}
 on \code{resamples$splits[[i]]} under \code{res$.outer_fit_seed[[i]]}, with no
-tuning line before it. The seed is applied as the grid page shows.
+tuning line before it. The seed is set with the generator kind pinned:
+\code{set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")}.
 }
 
 \section{Differences from calling tune directly}{
@@ -209,9 +182,8 @@ naming another level is refused at entry, and the refusal names both
 levels. \code{eval_time} is offered the same way, for the same reason.
 
 
-\strong{Refused: none.} No slot is refused on its own. What is refused at
-entry is a control of another class, such as a \code{control_bayes()} that
-tune itself accepts here, and the \code{event_level} conflict above.
+\strong{Refused: none.} No setting is refused on its own. A control of another
+class is an error, even a \code{control_bayes()} that tune itself accepts.
 
 
 \strong{Passed through: none.} There is no inner tuning call for a slot to be
@@ -240,103 +212,21 @@ entry, and the fitted workflow is reached through \code{extract}.
 \section{Nested designs}{
 
 
-\code{resamples} is a data frame with one row per outer fold. Its \code{splits}
-column holds that fold's \code{rsplit}, its \code{inner_resamples} column holds an
-\code{rset} with at least one row, and every other column labels the fold. A
-label column is named \code{id}, or \code{id} followed by a digit from 1 to 9, and
-holds character or factor values. Together the label columns give every
-outer fold a distinct label with no \code{NA}.
+\code{resamples} has one row per outer fold: a \code{splits} column of outer splits,
+an \code{inner_resamples} column of inner rsets, and id columns. The function
+checks the design before it fits anything. An outer bootstrap is an
+error, and so are \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
+\code{\link[rsample:permutations]{rsample::permutations()}} in either loop. An inner split that reaches a
+row its outer fold holds out is an error too. Each error names the design,
+or the rows, splits or folds at fault.
 
-Inside each inner \code{rset}, every element of \code{splits} is an \code{rsplit}. All
-of a fold's inner splits carry one data frame: either the outer split's
-own frame, as \code{\link[=nested_resamples]{nested_resamples()}} builds, or that split's analysis set,
-as \code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds. An inner split carrying the outer frame
-must index only rows the outer split's \code{in_id} holds, in its \code{in_id} and
-in any \code{out_id} other than the logical \code{NA}. So no inner analysis or
-assessment set reaches a row the outer fold holds out. Every \code{in_id} and
-\code{out_id}, outer or inner, is a numeric vector with no \code{NA}. None holds a
-value outside integer range, and no \code{out_id} is \code{NULL} or empty. The one
-exception is an \code{out_id} that is the logical \code{NA}, which tells rsample to
-find the assessment set with \code{\link[rsample:complement]{rsample::complement()}}.
-
-A design breaking any of this is refused before anything is fitted. So is
-a design using a bootstrap for the outer loop, or \code{\link[rsample:loo_cv]{rsample::loo_cv()}},
-\code{\link[rsample:apparent]{rsample::apparent()}} or \code{\link[rsample:permutations]{rsample::permutations()}} for either loop. The
-error has condition class \code{nestedtune_bad_design}. It names every
-offending row, column, inner split, index or outer fold. A refusal of a
-bootstrap or of one of those three rsample functions names the function.
-The design is found from the class of its splits as well as its own
-class. So a row subset of such a design is refused, and so is a design
-rebuilt with \code{\link[rsample:manual_rset]{rsample::manual_rset()}} from its splits or holding one such
-split among valid ones. Bootstrap and permutation designs can add an
-apparent split with the id "Apparent", which tune leaves out of its
-estimates. So an apparent split beside bootstrap or permutation splits
-counts as part of that design only if its id is "Apparent". Under any
-other id, it counts as an \code{\link[rsample:apparent]{rsample::apparent()}} split. In the inner loop,
-tune leaves every split with the id "Apparent" out of its estimates,
-whatever the split's class. So any other inner split with that id is
-refused. Otherwise each outer fold that tunes on it uses fewer resamples
-than its design holds. An inner split whose \code{id} is missing is refused as
-well, because tune leaves it out of its estimates too. So is an inner
-design in which two splits carry the same values in every id column, such
-as \code{id} and \code{id2}, because tune then miscounts its resamples. In either
-loop, a split whose assessment set holds a row of its analysis set is
-refused, because it scores the model on rows it trained on. The rule
-reads the rows, so it also catches a split rebuilt with
-\code{\link[rsample:make_splits]{rsample::make_splits()}}, which keeps no class that names its design. An
-index into an outer split's analysis set counts as the data row it
-copies. The apparent split of an inner bootstrap design is exempt from
-this rule under the id "Apparent", because tune leaves it out of its
-estimates. The checks
-exist because
-\code{\link[rsample:nested_cv]{rsample::nested_cv()}} builds a design whatever its \code{inside} argument
-returned, and because a design assembled by hand can index rows its outer
-fold never sees.
-
-Time-series designs are supported for an outer
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, and for the inner sliding designs named
-below. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} are tested on
-all four outer designs, and so is
-\code{\link[=nested_final_fit]{nested_final_fit()}} for their results. \code{\link[=nested_tune_bayes]{nested_tune_bayes()}},
-\code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}}, \code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and
-\code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} are tested on the rolling-origin design, and
-so is \code{\link[=nested_final_fit]{nested_final_fit()}} for their results, plus the sliding-window
-design for \code{\link[=nested_tune_bayes]{nested_tune_bayes()}} results. \code{\link[=nested_workflow_map]{nested_workflow_map()}} is
-tested on the rolling-origin design. The outer design never reaches the
-tuner: each tuner is handed one outer fold's inner resamples at a time.
-An inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design is tested with an outer
-\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} under \code{\link[=nested_tune_grid]{nested_tune_grid()}}, and so is
-\code{\link[=nested_final_fit]{nested_final_fit()}} for its results. These designs are also tested under
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, and so is
-\code{\link[=nested_final_fit]{nested_final_fit()}} for the results of those four tuners.
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on these three designs with its default
-\code{fn}. With \code{fn} set to each of those four tuners, it is tested on the
-sliding-period design alone. \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept
-these designs. It checks the inner design but fits nothing on it. Any
-other inner design is not tested.
-Each of these tests leaves the \code{lag} of \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at its
-default of 0. A \code{lag} above 0 is refused in either loop, as
-\code{\link[=nested_resamples]{nested_resamples()}} explains.
-\code{\link[=augment.nested_results]{augment()}} refuses these designs, because their
-assessment sets leave rows out. Its error names the rows left out. When
-there are more than five, it names the first five.
-
-An outer \code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} with an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
-\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} gives nine
-pairs, and each pair is tested under \code{\link[=nested_tune_grid]{nested_tune_grid()}}. The pair of an
-outer and an inner \code{\link[rsample:sliding_window]{rsample::sliding_window()}} is also tested under
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}}, \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} and
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn}. On that pair,
-\code{\link[=nested_final_fit]{nested_final_fit()}} is tested for \code{\link[=nested_tune_grid]{nested_tune_grid()}} results, and
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} is tested to accept the design. It checks the
-inner design but fits nothing on it. On the other eight pairs, no
-function but \code{\link[=nested_resamples]{nested_resamples()}} and \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested.
+Time-series designs work as well. \code{nested_tune_grid()} is tested with an
+outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
+\code{\link[rsample:sliding_index]{rsample::sliding_index()}} or \code{\link[rsample:sliding_period]{rsample::sliding_period()}} design and an
+inner design of any of those four kinds. Leave the \code{lag} of
+\code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} at 0, because a larger \code{lag} is an error.
+\code{\link[=nested_resamples]{nested_resamples()}} says which of these designs the other functions are
+tested on.
 }
 
 \examples{

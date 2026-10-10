@@ -118,12 +118,12 @@ paragraph_with <- function(paragraphs, anchor) {
 
 BULLET <- "^[[:space:]]*•"
 
-test_that("the grid page's forced paragraph carries the contention sentence", {
+test_that("the grid page's forced paragraph says why parallelism is off", {
   paragraphs <- rendered_paragraphs(rendered_differences("nested_tune_grid"))
   forced <- paragraph_with(paragraphs, "Forced:")
   expect_match(
     forced,
-    "Leaving parallelism to a caller puts two pools in contention.",
+    "because the outer folds carry the parallelism.",
     fixed = TRUE
   )
 })

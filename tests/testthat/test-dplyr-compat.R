@@ -369,7 +369,7 @@ test_that("the help page makes no promise about what subsetting rows keeps", {
     expect_gt(nchar(text), 1000L)
     # The passing control: the sentence that replaced the claim is present, so
     # the file being read is the one the claims would be in.
-    expect_match(text, "returns a bare tibble", fixed = TRUE)
+    expect_match(text, "returns a plain tibble", fixed = TRUE)
     for (claim in claims) {
       expect_no_match(text, claim, fixed = TRUE)
     }

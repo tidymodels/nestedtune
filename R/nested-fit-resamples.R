@@ -89,7 +89,8 @@
 #' recorded as drawn rather than as `NA`, so the two seed columns read the
 #' same on every result. Fold `i` is exactly [tune::last_fit()] of `object`
 #' on `resamples$splits[[i]]` under `res$.outer_fit_seed[[i]]`, with no
-#' tuning line before it. The seed is applied as the grid page shows.
+#' tuning line before it. The seed is set with the generator kind pinned:
+#' `set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")`.
 #'
 #' @section Differences from calling tune directly:
 #'

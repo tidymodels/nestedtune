@@ -34,13 +34,13 @@ the same way, so the two can be compared directly.
 
 A \code{grid} given as a size is expanded by tune, and the expansion sometimes
 reaches fewer candidates than the number requested. A candidate that failed
-everywhere scored nothing. \code{\link[=nested_tune_grid]{nested_tune_grid()}} gives the full account of
-how the two records
-diverge under \code{.inner_metrics}, and it holds here too.
+everywhere scored nothing. The Value section of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says
+how \code{attr(x, "grid")} and \code{.inner_metrics} can differ, and it holds here
+too.
 
-One pointer there does not carry over. A candidate that failed on every
-inner resample is missing from this table, and a \code{nested_final_fit} has no
-\code{.notes} column to record it in. Look inside the run itself:
+A candidate that failed on every inner resample is missing from this
+table, and a \code{nested_final_fit} has no \code{.notes} column to record it in.
+Look inside the run itself:
 \code{tune::collect_notes(extract_tune_results(x))}.
 }
 
