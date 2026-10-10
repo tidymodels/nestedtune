@@ -27,10 +27,10 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 
 ## Acceptance criteria
 
-- [ ] AC1: On each of the 24 rendered pages, the Description is at most 40 words, as `Rscript benchmarks/doc-profile.R` reports at the merge head. Before M142, 10 of the 24 were over 60 words, the largest at 152.
-- [ ] AC2: The 24 rendered pages together have at most 75% of their prose at this milestone's branch point. `doc-profile.R` reports both figures.
-- [ ] AC3: `grep -l -E 'nestedtune_[a-z_]+|orchestrator|sibling' man/<page>.Rd` prints nothing for each of the 24 pages at the merge head.
-- [ ] AC4: Six pages document print and summary methods: `print.nested_results`, `print.nested_results_set`, `print.nested_final_fit`, `summary.nested_results`, `summary.nested_results_set` and `summary.nested_final_fit`. On each, at least one sentence says that the nested estimate describes the procedure and not a fitted model (IP3). Review quotes each sentence with its line.
+- [x] AC1: On each of the 24 rendered pages, the Description is at most 40 words, as `Rscript benchmarks/doc-profile.R` reports at the merge head. Before M142, 10 of the 24 were over 60 words, the largest at 152.
+- [x] AC2: The 24 rendered pages together have at most 75% of their prose at this milestone's branch point. `doc-profile.R` reports both figures.
+- [x] AC3: `grep -l -E 'nestedtune_[a-z_]+|orchestrator|sibling' man/<page>.Rd` prints nothing for each of the 24 pages at the merge head.
+- [x] AC4: Six pages document print and summary methods: `print.nested_results`, `print.nested_results_set`, `print.nested_final_fit`, `summary.nested_results`, `summary.nested_results_set` and `summary.nested_final_fit`. On each, at least one sentence says that the nested estimate describes the procedure and not a fitted model (IP3). Review quotes each sentence with its line.
 - [ ] AC5: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean.
 
 ## Coverage
@@ -65,3 +65,16 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-10: T6: NEWS bullet added, and the head figures are in the comparison note.
 - 2026-10-10: claim audit: 170 claims read, 2 corrected — R/nested-results.R, R/nested-results-collect.R
 - 2026-10-10: T6: `devtools::test()` passes, `devtools::check()` gives 0 errors, 0 warnings and 0 notes, `document()` leaves no diff, and the six gating sweeps and air are clean. Implement done, status review.
+
+## Review
+
+- AC1 (2026-10-10, `b906d8eb`): `Rscript benchmarks/doc-profile.R` reads all 24 pages with a Description of 15 to 35 words. The largest is `print.nested_results_set` at 35, and none is over 40.
+- AC2 (2026-10-10, `b906d8eb`): `doc-profile.R` reads the 24 pages at 4,008 prose words, against 9,116 at the branch point `16fd160c` (comparison note). That is 44.0%, under the 75% cap.
+- AC3 (2026-10-10, `b906d8eb`): the grep, run once per page over the 24 named pages, prints nothing.
+- AC4 (2026-10-10, `b906d8eb`), one sentence per page from the generated Rd:
+  - `man/print.nested_results.Rd:34`: "The nested estimate describes the tuning procedure, not a fitted model."
+  - `man/print.nested_results_set.Rd:24-25`: "Each nested estimate describes its workflow's tuning procedure, not a fitted model."
+  - `man/print.nested_final_fit.Rd:24-25`: "The nested estimate describes the procedure that produced this model, not the fitted model itself."
+  - `man/summary.nested_results.Rd:36-37`: "The nested estimate describes the tuning procedure, not a fitted model."
+  - `man/summary.nested_results_set.Rd:50-51`: "Each nested estimate describes its workflow's tuning procedure, not a fitted model."
+  - `man/summary.nested_final_fit.Rd:44-46`: "The nested estimate describes the procedure that produced this model, not the fitted model itself."
