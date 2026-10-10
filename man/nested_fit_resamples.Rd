@@ -148,7 +148,8 @@ orchestrators. The tuning seed is drawn and consumed by nothing. It is
 recorded as drawn rather than as \code{NA}, so the two seed columns read the
 same on every result. Fold \code{i} is exactly \code{\link[tune:last_fit]{tune::last_fit()}} of \code{object}
 on \code{resamples$splits[[i]]} under \code{res$.outer_fit_seed[[i]]}, with no
-tuning line before it. The seed is applied as the grid page shows.
+tuning line before it. The seed is set with the generator kind pinned:
+\code{set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")}.
 }
 
 \section{Differences from calling tune directly}{
@@ -211,8 +212,8 @@ an \code{inner_resamples} column of inner rsets, and id columns. The function
 checks the design before it fits anything. An outer bootstrap is an
 error, and so are \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
 \code{\link[rsample:permutations]{rsample::permutations()}} in either loop. An inner split that reaches a
-row its outer fold holds out is an error too. Each error names the rows,
-splits or folds at fault.
+row its outer fold holds out is an error too. Each error names the design,
+or the rows, splits or folds at fault.
 
 Time-series designs work as well. \code{nested_tune_grid()} is tested with an
 outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},

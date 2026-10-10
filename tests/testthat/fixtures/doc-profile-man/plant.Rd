@@ -19,7 +19,7 @@ We record the plant here.
 Details refuse \code{refused} nothing. Two sentences here.
 }
 \section{Extra}{
-Section body words.
+Section body \code{x}, words.
 }
 \references{
 These refused words are not prose.

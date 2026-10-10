@@ -24,8 +24,8 @@ another. Nothing in the call changes between the two.
 This page starts a pool of two daemons and runs the getting-started guide's
 loop on it. It then shows that the result is identical to the same run made
 serially. Last, it says when a pool pays. The parallel section of
-`?nested_tune_grid` says what the call checks before it dispatches, what it
-sends to each daemon, and what happens on an interrupt.
+`?nested_tune_grid` says what the call checks before it dispatches and what
+happens on an interrupt.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "mirai", "ranger")

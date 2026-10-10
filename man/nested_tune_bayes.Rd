@@ -61,8 +61,9 @@ a parameters set is derived from other arguments. Passing this argument can
 be useful when parameter ranges need to be customized.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}, or \code{NULL} for tune's default
-set. The first metric selects each fold's candidate, so put the metric
-you report first. Every metric is scored on the outer folds.}
+set. Under the default selection rule, the first metric selects each
+fold's candidate, so put the metric you report first. Every metric is
+scored on the outer folds.}
 
 \item{initial}{The number of candidates each fold scores before the first
 iteration, a whole number of at least 2. A \code{tune_results} object, which
@@ -240,8 +241,8 @@ an \code{inner_resamples} column of inner rsets, and id columns. The function
 checks the design before it fits anything. An outer bootstrap is an
 error, and so are \code{\link[rsample:loo_cv]{rsample::loo_cv()}}, \code{\link[rsample:apparent]{rsample::apparent()}} and
 \code{\link[rsample:permutations]{rsample::permutations()}} in either loop. An inner split that reaches a
-row its outer fold holds out is an error too. Each error names the rows,
-splits or folds at fault.
+row its outer fold holds out is an error too. Each error names the design,
+or the rows, splits or folds at fault.
 
 Time-series designs work as well. \code{nested_tune_grid()} is tested with an
 outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}, \code{\link[rsample:sliding_window]{rsample::sliding_window()}},
@@ -263,8 +264,8 @@ outer fold's analysis set, never on the rows that fold holds out.
 \section{Evaluation times}{
 
 
-\code{eval_time} reaches every tune call that reads it, so a dynamic survival
-metric is measured at the times you name. With no such metric in the
+\code{eval_time} reaches every tune call that reads it, so a dynamic or
+integrated survival metric uses the times you name. With neither in the
 set, tune ignores the times with a warning. Each fold selects at the
 first of these times.
 }

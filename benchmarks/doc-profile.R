@@ -2,13 +2,15 @@
 # them with tune's. It reports and never gates: it exits 0 whatever it finds.
 #
 # Help pages: every `man/*.Rd` (or every `.Rd` in the directory after
-# `--man`), and with `--tune` the installed tune and finetune help as well. Prose is the text of `\description`, `\details`,
-# `\value`, every `\section` body, `\seealso`, and each argument's text in
-# `\arguments` without its label. `\references`, `\usage` and `\examples`
-# are not prose. Markup is flattened to its text, except that a `\code{}`,
-# `\verb{}`, `\preformatted{}`, `\eqn{}` or `\deqn{}` node counts as one
-# word wherever it sits. A word is a whitespace-separated token. Sentences
-# split as in `sweep-prose.R`.
+# `--man`), and with `--tune` the installed tune and finetune help as well.
+# Prose is the text of `\description`, `\details`, `\value`, every
+# `\section` body, `\seealso`, and each argument's text in `\arguments`
+# without its label. `\references`, `\usage` and `\examples` are not prose.
+# Markup is flattened to its text, except that a `\code{}`, `\verb{}`,
+# `\preformatted{}`, `\eqn{}`, `\deqn{}` or `\Sexpr{}` node becomes one
+# mark, so it counts as one word, or as part of the word it touches with no
+# space between. A word is a whitespace-separated token. Sentences split as
+# in `sweep-prose.R`.
 #
 # Guide pages: the page list `sweep-prose.R` declares, or the paths after
 # `--pages`. Prose, paragraphs and sentences follow `sweep-prose.R`'s Rmd
@@ -129,7 +131,7 @@ flatten_rd <- function(x) {
     return(paste(x, collapse = ""))
   }
   if (!is.null(tag) && tag %in% atomic_tags) {
-    return(paste0(" ", one_word, " "))
+    return(one_word)
   }
   if (identical(tag, "\\href")) {
     return(flatten_rd(x[[2]]))

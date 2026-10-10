@@ -37,16 +37,17 @@ test_that("doc-profile.R counts each measure on the planted pages", {
 
   help <- tables$help
   expect_identical(help$page, "plant.Rd")
-  # 5 description + 7 details + 4 value + 3 section + 2 see-also + 3 + 5
-  # argument words; the references section is left out
-  expect_identical(help$prose, 29L)
+  # 5 description + 7 details + 4 value + 4 section + 2 see-also + 3 + 5
+  # argument words; the references section is left out, and the section's
+  # `\code{x},` is one word with its comma
+  expect_identical(help$prose, 30L)
   expect_identical(help$desc, 5L)
   expect_identical(help$args, 2L)
   expect_equal(help$arg_med, 4)
   expect_identical(help$arg_max, 5L)
   expect_identical(help$sections, 1L)
-  # 29 words over 8 sentences
-  expect_equal(help$sent_mean, 3.6)
+  # 30 words over 8 sentences
+  expect_equal(help$sent_mean, 3.8)
   # "record" and "refuse"; the `\code{refused}` span and the references
   # section do not count
   expect_identical(help$coined, 2L)

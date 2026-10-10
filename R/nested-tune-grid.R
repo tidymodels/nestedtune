@@ -33,8 +33,9 @@
 #' @param resamples A nested resampling design from [nested_resamples()] or
 #'   [rsample::nested_cv()].
 #' @param metrics A [yardstick::metric_set()], or `NULL` for tune's default
-#'   set. The first metric selects each fold's candidate, so put the metric
-#'   you report first. Every metric is scored on the outer folds.
+#'   set. Under the default selection rule, the first metric selects each
+#'   fold's candidate, so put the metric you report first. Every metric is
+#'   scored on the outer folds.
 #' @templateVar CONSTRUCTOR tune::control_grid()
 #' @templateVar PKG tune
 #' @template param-control-dots
@@ -50,7 +51,8 @@
 #'
 #'   - `.metrics`, the metrics scored on the fold's assessment set.
 #'   - `.selected`, the candidate the fold's inner tuning chose.
-#'   - `.inner_metrics`, the inner run's metrics for every candidate.
+#'   - `.inner_metrics`, the inner run's metrics for every candidate that
+#'     scored.
 #'   - `.completed`, whether the fold finished, and `.notes`, what went
 #'     wrong.
 #'   - `.tuning_seed` and `.outer_fit_seed`, the fold's two seeds.
@@ -70,8 +72,8 @@
 #' checks the design before it fits anything. An outer bootstrap is an
 #' error, and so are [rsample::loo_cv()], [rsample::apparent()] and
 #' [rsample::permutations()] in either loop. An inner split that reaches a
-#' row its outer fold holds out is an error too. Each error names the rows,
-#' splits or folds at fault.
+#' row its outer fold holds out is an error too. Each error names the design,
+#' or the rows, splits or folds at fault.
 #'
 #' Time-series designs work as well. `nested_tune_grid()` is tested with an
 #' outer [rsample::rolling_origin()], [rsample::sliding_window()],
@@ -89,8 +91,8 @@
 #'
 #' @section Evaluation times:
 #'
-#' `eval_time` reaches every tune call that reads it, so a dynamic survival
-#' metric is measured at the times you name. With no such metric in the
+#' `eval_time` reaches every tune call that reads it, so a dynamic or
+#' integrated survival metric uses the times you name. With neither in the
 #' set, tune ignores the times with a warning. Each fold selects at the
 #' first of these times.
 #'
@@ -127,8 +129,10 @@
 #' @section Differences from calling tune directly:
 #'
 #' A [tune::control_grid()] passed through `...` as `control` reaches the
-#' inner `tune_grid()` in every fold and the outer fit. The result keeps the
-#' control that ran as `extract_procedure(res)$control`. Its settings differ
+#' inner `tune_grid()` in every fold. The outer fit runs under its own
+#' `control_last_fit()`, and takes only `event_level`, `save_pred` and
+#' `extract` from the control. The result keeps the control that ran as
+#' `extract_procedure(res)$control`. Its settings differ
 #' from a direct `tune_grid()` call as follows.
 #'
 #' @templateVar INNER inner tuning run
