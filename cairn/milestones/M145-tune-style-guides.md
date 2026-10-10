@@ -73,6 +73,7 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - 2026-10-10: the claim audit's reader found 4 wrong claims and 2 loose ones, all fixed: the Bayle et al. coin-flip step (the paper shows a shrinking loss-difference variance), the Vabalas framing, the Arlot and Celisse "estimate" reading (their goal is model selection), and the parallel cost sentence (a probe timed the pool no slower). The print wording and the seed sentence are tightened too. Its re-read is pending.
 - 2026-10-10: claim audit: 96 claims read, 6 corrected — vignettes/estimate.Rmd, vignettes/tuners.Rmd, vignettes/articles/parallel.Rmd. The same reader re-read the 6 and found that all hold.
 - 2026-10-10: T6 done. `devtools::test()` passes with no failures, and `devtools::check()` gives 0 errors, 0 warnings and 0 notes with the vignettes rebuilt. No `.R` file and no roxygen changed, so `air` and `document()` are not owed. The fresh reader beside the tidymodels.org articles runs at review. Status set to review.
+- 2026-10-10: step-7 approval: m145-tune-style-guides approved for merge. The user chose no comment on #91.
 
 ## Review
 
