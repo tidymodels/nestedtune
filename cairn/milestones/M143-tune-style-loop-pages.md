@@ -1,6 +1,6 @@
 # M143: The other loop pages, the final fit and the design page read like tune's
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M142
 - **Driving RR:** —
@@ -51,7 +51,7 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - [x] T3: Rewrite `nested_fit_resamples` and `nested_final_fit`. On the final-fit page, keep what it fits, what it returns, and the IP3 sentence. Move the refusal list out, because the error messages carry it.
 - [x] T4: Rewrite `nested_workflow_map` and `nested_resamples`. On `nested_resamples`, keep the D-110 reasons and the D-085 claims in short lists.
 - [x] T5: Rewrite the text-matching lines of any test that reads the old text, and keep the slot rules of `test-control-slots.R`.
-- [ ] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the seven pages beside their tune and finetune counterparts. The gate triages every entry (D-061).
+- [x] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the seven pages beside their tune and finetune counterparts. The gate triages every entry (D-061).
 
 ## Work log
 
@@ -65,3 +65,5 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - 2026-10-10: T5: no test edit was needed. The rewritten pages keep every anchor `test-control-slots.R`, `test-help-structure.R`, `test-tuner-registry.R` and `test-eval-time.R` read, and no page, guide or error message points at a removed section.
 - 2026-10-10: T6 in progress (checkpoint): the NEWS bullet is written and the head figures are in the comparison note. At `90ad5811`, `document()` leaves no diff, the six gating sweeps and `air format --check .` are clean, and the AC3 grep prints nothing on the seven pages. The full suite, `check()` and the claim audit are still running.
 - 2026-10-10: the full suite passed at `49fa840d` with no failure. claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. All six claimed more than the code does: map warnings, map subsetting, the control classes, the `event_level` conflict rule, the memory test, and the NEWS pointer claim. The seven pages now total 4,427 prose words. The reader's one re-read and `check()` are pending.
+- 2026-10-10: claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. The same reader re-read the six corrections once, and all six hold.
+- 2026-10-10: T6 done at `689e48c0`. `devtools::check()` gives 0 errors, 0 warnings and 0 notes, and it ran the tests on the corrected tree. `document()` leaves no diff, and the six gating sweeps and `air` are clean. Status set to review. The fresh reader beside tune's pages is review's step.
