@@ -20,48 +20,32 @@
 
 #' Predict with the final model
 #'
-#' You can call `predict()` and `augment()` on a `nested_final_fit`
-#' directly: they are the trained workflow's own methods, reached without
-#' extracting it first. Each returns what the same call on
+#' @description
+#' `predict()` and `augment()` on a `nested_final_fit` call the trained
+#' workflow's own methods. Each returns what the same call on
 #' [extract_workflow()]`(x)` returns.
 #'
-#' @param object,x A `nested_final_fit` object from [nested_final_fit()].
+#' @details
+#' Residuals on the rows the model was fit on are in-sample, so they do not
+#' measure performance. Report the nested estimate from [collect_metrics()]
+#' on the nested run the fit was built from.
+#'
+#' @param object,x A `nested_final_fit` from [nested_final_fit()].
 #' @param new_data A data frame of new observations to predict.
 #' @param type,opts Passed to [workflows::predict.workflow()] unchanged.
 #'   `type` selects the prediction type, such as `"numeric"`, `"prob"` or
-#'   `"survival"`, with the workflow's default when left unset.
-#' @param eval_time For censored regression, the time or times at which to
-#'   evaluate survival probabilities, passed to the workflow's `augment()`
-#'   method. Ignored otherwise.
-#' @param ... For `predict()`, further arguments for the model's predict
-#'   method, passed on through the workflow. For `augment()`, not used. It
-#'   must be empty.
+#'   `"survival"`.
+#' @param eval_time For censored regression, the times at which to evaluate
+#'   survival probabilities in `augment()`. Ignored otherwise.
+#' @param ... For `predict()`, arguments for the model's predict method,
+#'   such as `level` with `type = "conf_int"`. parsnip gives an error for a
+#'   name outside its list of predict arguments. For `augment()`, not used,
+#'   and must be empty.
 #'
-#' @return `predict()` returns the tibble of predictions the workflow's
-#'   `predict()` method returns for `type`. `augment()` returns the workflow's
-#'   prediction columns followed by the columns of `new_data`, with a `.resid`
-#'   column where the outcome is present and the model is a regression.
-#'
-#' @section What the dots accept:
-#'
-#' `predict()` forwards them, for example `level` with `type = "conf_int"`
-#' for an interval. `eval_time` with `type = "survival"` is another. A name
-#' outside parsnip's own short list of predict arguments is refused by
-#' parsnip. A listed one the model cannot use for the `type` asked is passed
-#' on, and whether it has any effect is parsnip's business, not this method's.
-#'
-#' `augment()` refuses the dots instead, and that refusal is the only one
-#' there is: workflows' own `augment()` method passes an unread argument on
-#' to parsnip, which ignores it.
-#'
-#' @section Residuals on the training rows are not performance:
-#'
-#' Augmenting the rows this model was fit on gives in-sample residuals. They
-#' say how the model fits data it has already seen, not how it does on data it
-#' has not. The number to report is [collect_metrics()] on the results object
-#' the fit was built from, or, for a fit built from a workflow set, that
-#' workflow's rows of [collect_metrics()] on the set. See [nested_final_fit()]
-#' for why that is the number to report for this model.
+#' @return `predict()` returns the workflow's tibble of predictions.
+#'   `augment()` returns the prediction columns, then the columns of
+#'   `new_data`, with a `.resid` column for a regression model when the
+#'   outcome is present.
 #'
 #' @template example-setup
 #' @template example-run

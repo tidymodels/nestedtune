@@ -10,80 +10,42 @@
 \method{print}{summary.nested_results}(x, ...)
 }
 \arguments{
-\item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{object}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
 \item{...}{Not used, and must be empty.}
 
 \item{x}{A \code{summary.nested_results} object from \code{\link[=summary.nested_results]{summary.nested_results()}}.}
 }
 \value{
-\code{summary()} returns an object of class \code{summary.nested_results}, a list
-holding:
-\itemize{
-\item the outer resampling scheme's label
-\item the requested and completed fold counts
-\item the failed folds, with the stage each failed at
-\item what the completed folds selected
-\item the rule the folds selected by, as \code{\link[=extract_procedure]{extract_procedure()}} records it,
-under the name \code{select}. It is \code{NULL} on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
-run, which applies no rule.
-\item the name of the first metric in the set, as \code{\link[=extract_procedure]{extract_procedure()}}
-records it, under the name \code{first_metric}. It is \code{NULL} on a
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run, and on a run built before the name was
-recorded.
-\item the candidates, the parameter settings, each fold searched
-\item the metric estimates averaged over them
-}
-
-Printing it is what most callers want. The components are there for one
-that needs a number rather than a line of text.
+\code{summary()} returns a \code{summary.nested_results}, a list. It holds the
+outer scheme's label, the requested and completed fold counts, the failed
+folds and the selections. It also holds the rule as \code{select}, the first
+metric's name as \code{first_metric}, each fold's candidates and the averaged
+estimates.
 
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-Answers what the run means. It says how much of the requested outer
-design ran, and which outer folds failed at which stage. It also says
-what each fold's inner tuning selected, and the estimate across the
-folds that completed.
-
-The selection lines are the part nothing else in the ecosystem shows.
-Outer folds that chose different parameters mean the tuning procedure,
-tune then select, is unstable on this data. Averaging the metrics hides
-that, so the summary marks it.
+\code{summary()} reports how much of the outer design ran, which folds failed
+and at which stage, what each fold selected, and the nested estimate.
 }
-\section{The selection rule}{
+\details{
+Folds that selected different parameters show that the tuning procedure
+picks different values on different data. The averaged metrics hide
+this, so the summary marks it. The nested estimate describes the tuning
+procedure, not a fitted model. \code{\link[=nested_final_fit]{nested_final_fit()}} fits the model to
+deploy.
 
+Under a rule other than \code{"best"}, a line such as
+\verb{Selected by: one_std_err by num_comp} names the rule. A
+\verb{Selecting metric:} line names the metric that chose each fold's
+candidate. It is absent under the \code{"desirability"} rule and on a
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run.
 
-When the run selected by a rule other than the default, the print adds
-a line directly under the "Selected parameters" heading. It reads
-\verb{Selected by:} and then the rule's name, orderings and limit, in the
-words the print of \code{\link[=selection_rule]{selection_rule()}} uses after its class tag, for
-example \verb{Selected by: one_std_err by num_comp}. The line is absent under
-the default rule, so its presence is the signal. It prints whether or not
-any fold completed, because the rule describes the procedure the run
-asked for.
-
-Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
-line names the metric that chose each fold's candidate. It reads
-\verb{Selecting metric:} and then the \code{first_metric} component, for example
-\verb{Selecting metric: rmse}. Under the default rule it is the first line
-under the heading. It is absent under the \code{"desirability"} rule, which
-chooses by its goals, on a \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} run, and on a run
-whose record holds no \code{first_metric}. It also prints when no fold
-completed.
+A run with failed folds gives a warning and still returns its summary,
+even when no fold completed.
 }
-
-\section{A run that did not finish}{
-
-
-Summarizing a partly completed run warns and still returns the summary: the
-folds that ran are described, and the warning says the design asked for
-more. A run in which every fold failed behaves the same way and describes a
-failed run rather than refusing to answer. That is where this differs from
-\code{\link[=collect_metrics]{collect_metrics()}}, which errors when no outer fold completed.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

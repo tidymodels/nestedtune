@@ -9,16 +9,20 @@
 \arguments{
 \item{x}{A \code{nested_results_set} from \code{\link[=nested_workflow_map]{nested_workflow_map()}}.}
 
-\item{...}{Not used. It must be empty.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
-\code{x}, unchanged and invisible.
+\code{x}, invisibly.
 }
 \description{
-Shows which loop function the set ran through, \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a
-sibling, and how many workflows it holds. Then it prints one line per
-workflow: its id, how many of its outer folds completed, and the label
-of the tuner that ran for it.
+Printing a \code{nested_results_set} shows the nested function the set ran
+through and the number of workflows. Each workflow then gets a line with
+its id, how many outer folds completed, and the tuner that ran.
+}
+\details{
+\code{\link[=summary.nested_results_set]{summary.nested_results_set()}} shows each workflow's selections and
+nested estimate. Each nested estimate describes its workflow's tuning
+procedure, not a fitted model.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
@@ -51,5 +55,5 @@ print(res)
 }
 \seealso{
 \code{\link[=nested_workflow_map]{nested_workflow_map()}}, \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}},
-\code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for what the run means
+\code{\link[=summary.nested_results_set]{summary.nested_results_set()}}
 }

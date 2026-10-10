@@ -1224,12 +1224,14 @@ paste_labels <- function(tbl, cols) {
 
 #' Predicting from a nested run
 #'
-#' A nested run holds one model per outer fold, each fitted to estimate how
-#' the procedure performs, and none of them is the model to deploy.
-#' `predict()` on its results therefore refuses, with class
-#' `nestedtune_predict_results`, and points you to [nested_final_fit()],
-#' which fits that model on all the data. For a workflow set, the message
-#' names `nested_final_fit()`'s `id` argument, which picks the workflow.
+#' @description
+#' `predict()` on a nested run gives an error that points to
+#' [nested_final_fit()]. The outer folds' models serve the estimate, and none
+#' of them is the model to deploy.
+#'
+#' @details
+#' [nested_final_fit()] fits the model to deploy on all the data. For a
+#' workflow set, its `id` argument picks the workflow.
 #'
 #' @param object A `nested_results` or a `nested_results_set`.
 #' @param ... Not used.

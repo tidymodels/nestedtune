@@ -31,9 +31,7 @@
 \arguments{
 \item{x}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Must be empty. A workflow's methods other than
-\code{extract_recipe()} ignore an argument they do not know, so these refuse
-it rather than pass it on.}
+\item{...}{Not used, and must be empty.}
 
 \item{estimated}{For \code{extract_recipe()}, whether to return the trained
 recipe (\code{TRUE}, the default) or the recipe as it was given.}
@@ -44,22 +42,16 @@ What the same call returns for the trained workflow. For
 the tuning run stored.
 }
 \description{
-These methods reach the fitted model, the preprocessor and the outcome
-names of the workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained. Each one except
-\code{extract_parameter_set_dials()} gives the same answer as the same call on
-\code{\link[=extract_workflow]{extract_workflow()}}'s output.
+These methods return the fitted model, the preprocessor and the outcome
+names of the workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained, as the same call
+on \code{\link[=extract_workflow]{extract_workflow()}}'s output does.
 }
 \details{
-The trained workflow holds no \code{tune()} placeholder, so
-\code{extract_parameter_set_dials()} reads the parameter set from the tuning
-run that \code{\link[=extract_tune_results]{extract_tune_results()}} returns. It is the set tune stored for
-that run. That set starts from \code{param_info} if the call gave one, and from
-the untrained workflow's set otherwise. If tune built the candidates
-itself, as for a numeric \code{grid} or for \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, it
-first finalized any unknown range, such as the upper bound of \code{mtry}, on
-the predictors. With a data-frame \code{grid}, the returned set can keep an
-unknown range. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and is
-refused with condition class \code{nestedtune_no_tuning_run}.
+\code{extract_parameter_set_dials()} reads the parameter set that tune stored
+for the final fit's tuning run, because the trained workflow holds no
+\code{tune()} placeholder. With a data-frame \code{grid}, the set can keep an
+unknown range, such as the upper bound of \code{mtry}. A fit from
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and gives an error.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

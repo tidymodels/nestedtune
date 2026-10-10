@@ -7,10 +7,9 @@
 extract_scored_candidates(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{x}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used. It must be empty. Passing an argument here raises an
-error instead of leaving it silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
 A tibble with one column per tuned parameter, then \code{.config}, and

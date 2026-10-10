@@ -10,8 +10,7 @@ extract_procedure(x, ...)
 \item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
 function, or a \code{nested_final_fit}.}
 
-\item{...}{Not used. It must be empty. Passing an argument here raises an
-error instead of leaving it silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
 A named list: \code{tuner}, the tuner's own arguments, the arguments

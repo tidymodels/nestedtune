@@ -11,15 +11,15 @@
 
 \item{id}{The \code{wflow_id} of the workflow to return, one of \code{x$wflow_id}.}
 
-\item{...}{Not used. It must be empty.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
-The workflow, untrained, as the set held it. An \code{id} naming no
-row of the set is refused with class \code{nestedtune_unknown_id}.
+The untrained workflow. An \code{id} that names no workflow in the set
+gives an error.
 }
 \description{
-Returns the workflow the set holds under one \code{wflow_id}, as it was given,
-with nothing fitted or finalized.
+\code{extract_workflow()} returns the workflow a set holds under one
+\code{wflow_id}, as it was given, with nothing fitted or finalized.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

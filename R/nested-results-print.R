@@ -19,32 +19,25 @@
 #' Print a nested cross-validation result
 #'
 #' @description
-#' Shows the object: its outer folds as the tibble rows they are, and the
-#' outer resampling scheme it came from. It also says how many folds did
-#' not complete, and points to [summary.nested_results()] for what the run
-#' means.
+#' Printing a `nested_results` shows its outer folds as tibble rows, the
+#' outer resampling scheme, and how many folds did not complete.
+#'
+#' @details
+#' When the completed folds scored different sets of candidates, the print
+#' adds each fold's candidate count. A `grid` given as a size is the usual
+#' cause, because each fold builds its own grid under its own seed. Folds
+#' that disagree then did not choose from the same candidates.
+#'
+#' [summary.nested_results()] shows the selections and the nested estimate.
+#' The nested estimate describes the tuning procedure, not a fitted model.
 #'
 #' @inheritParams collect_metrics.nested_results
-#' @param ... Not used. It must be empty, so `n` and `width` must be given by
-#'   name in full.
+#' @param ... Not used, and must be empty. Give `n` and `width` by name.
 #' @param n Number of fold rows to show, passed to tibble's printing. `NULL`,
-#'   the default, leaves the choice to tibble and its `print_max` and
-#'   `print_min` options. `Inf` shows every fold.
+#'   the default, leaves the choice to tibble. `Inf` shows every fold.
 #' @param width Width of the printed rows, passed to tibble's printing.
-#'   `NULL`, the default, uses the `width` option, and columns that do not fit
-#'   are named in the footer.
 #'
 #' @return `x`, invisibly.
-#'
-#' @section When the folds searched different candidates:
-#'
-#' Folds can score different candidate sets, the parameter settings each
-#' inner search tried. When two or more completed folds did, and only then,
-#' the print adds a line with each fold's candidate count. A grid given as
-#' a size is the usual cause. It is expanded once per fold, under that
-#' fold's own seed, so a continuous parameter leaves every fold with
-#' candidates of its own. It matters for reading the selections: folds that
-#' disagreed were not choosing from the same menu.
 #'
 #' @template example-setup
 #' @template example-run
@@ -120,67 +113,34 @@ print_failure_count <- function(x) {
 #' Summarize a nested cross-validation result
 #'
 #' @description
-#' Answers what the run means. It says how much of the requested outer
-#' design ran, and which outer folds failed at which stage. It also says
-#' what each fold's inner tuning selected, and the estimate across the
-#' folds that completed.
+#' `summary()` reports how much of the outer design ran, which folds failed
+#' and at which stage, what each fold selected, and the nested estimate.
 #'
-#' The selection lines are the part nothing else in the ecosystem shows.
-#' Outer folds that chose different parameters mean the tuning procedure,
-#' tune then select, is unstable on this data. Averaging the metrics hides
-#' that, so the summary marks it.
+#' @details
+#' Folds that selected different parameters show that the tuning procedure
+#' picks different values on different data. The averaged metrics hide
+#' this, so the summary marks it. The nested estimate describes the tuning
+#' procedure, not a fitted model. [nested_final_fit()] fits the model to
+#' deploy.
 #'
-#' @param object A `nested_results` from [nested_tune_grid()] or one of its
-#'   siblings.
+#' Under a rule other than `"best"`, a line such as
+#' `Selected by: one_std_err by num_comp` names the rule. A
+#' `Selecting metric:` line names the metric that chose each fold's
+#' candidate. It is absent under the `"desirability"` rule and on a
+#' [nested_fit_resamples()] run.
+#'
+#' A run with failed folds gives a warning and still returns its summary,
+#' even when no fold completed.
+#'
+#' @param object A `nested_results` from [nested_tune_grid()] or a related
+#'   function.
 #' @inheritParams collect_metrics.nested_results
 #' @return
-#' `summary()` returns an object of class `summary.nested_results`, a list
-#' holding:
-#'
-#' - the outer resampling scheme's label
-#' - the requested and completed fold counts
-#' - the failed folds, with the stage each failed at
-#' - what the completed folds selected
-#' - the rule the folds selected by, as [extract_procedure()] records it,
-#'   under the name `select`. It is `NULL` on a [nested_fit_resamples()]
-#'   run, which applies no rule.
-#' - the name of the first metric in the set, as [extract_procedure()]
-#'   records it, under the name `first_metric`. It is `NULL` on a
-#'   [nested_fit_resamples()] run, and on a run built before the name was
-#'   recorded.
-#' - the candidates, the parameter settings, each fold searched
-#' - the metric estimates averaged over them
-#'
-#' Printing it is what most callers want. The components are there for one
-#' that needs a number rather than a line of text.
-#'
-#' @section The selection rule:
-#'
-#' When the run selected by a rule other than the default, the print adds
-#' a line directly under the "Selected parameters" heading. It reads
-#' `Selected by:` and then the rule's name, orderings and limit, in the
-#' words the print of [selection_rule()] uses after its class tag, for
-#' example `Selected by: one_std_err by num_comp`. The line is absent under
-#' the default rule, so its presence is the signal. It prints whether or not
-#' any fold completed, because the rule describes the procedure the run
-#' asked for.
-#'
-#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-#' line names the metric that chose each fold's candidate. It reads
-#' `Selecting metric:` and then the `first_metric` component, for example
-#' `Selecting metric: rmse`. Under the default rule it is the first line
-#' under the heading. It is absent under the `"desirability"` rule, which
-#' chooses by its goals, on a [nested_fit_resamples()] run, and on a run
-#' whose record holds no `first_metric`. It also prints when no fold
-#' completed.
-#'
-#' @section A run that did not finish:
-#'
-#' Summarizing a partly completed run warns and still returns the summary: the
-#' folds that ran are described, and the warning says the design asked for
-#' more. A run in which every fold failed behaves the same way and describes a
-#' failed run rather than refusing to answer. That is where this differs from
-#' [collect_metrics()], which errors when no outer fold completed.
+#' `summary()` returns a `summary.nested_results`, a list. It holds the
+#' outer scheme's label, the requested and completed fold counts, the failed
+#' folds and the selections. It also holds the rule as `select`, the first
+#' metric's name as `first_metric`, each fold's candidates and the averaged
+#' estimates.
 #'
 #' @template example-setup
 #' @template example-run

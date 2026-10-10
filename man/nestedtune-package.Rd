@@ -6,30 +6,16 @@
 \alias{nestedtune-package}
 \title{nestedtune: Nested Cross-Validation for Tidymodels}
 \description{
-nestedtune runs nested cross-validation with tidymodels objects. The outer
-loop scores the whole procedure, tune, select and fit, on data that the
-procedure never saw. The inner tuning on each outer fold is done by tune
-and finetune.
-What this package adds is the loop, the seeds, and a result that keeps what
-every fold chose.
+nestedtune runs nested cross-validation with tidymodels objects. Each
+outer fold tunes with tune or finetune on its own inner resamples, and
+scores the result on rows it held out.
 }
 \details{
-\code{\link[=nested_resamples]{nested_resamples()}} builds the design, one outer fold per row with its own
-inner resamples, without copying the data per fold.
-
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}, \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, \code{\link[=nested_tune_race_anova]{nested_tune_race_anova()}},
-\code{\link[=nested_tune_race_win_loss]{nested_tune_race_win_loss()}} and \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}} run the outer
-loop with one of tune's or finetune's search methods inside.
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} scores a workflow with nothing to tune on the same
-design, and \code{\link[=nested_workflow_map]{nested_workflow_map()}} runs a whole workflow set through it.
-
-\code{\link[=collect_metrics]{collect_metrics()}} gives the estimate, \code{summary()} and
-\link[=autoplot.nested_results]{autoplot()} describe the run, and \code{\link[=agreement]{agreement()}},
-\code{\link[=collect_selections]{collect_selections()}} and \code{\link[=extract_procedure]{extract_procedure()}} say what the folds chose
-and how they were told to choose.
-
-\code{\link[=nested_final_fit]{nested_final_fit()}} runs the recorded procedure once more with the whole
-dataset in hand and returns the model to deploy.
+\code{\link[=nested_resamples]{nested_resamples()}} builds the design. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and the other
+nested tuning functions run the loop, and \code{\link[=nested_workflow_map]{nested_workflow_map()}} runs a
+workflow set through it. \code{\link[=collect_metrics]{collect_metrics()}} gives the estimate, and
+\code{\link[=agreement]{agreement()}} shows what the folds selected. \code{\link[=nested_final_fit]{nested_final_fit()}} fits
+the model to deploy on all the data.
 }
 \seealso{
 Useful links:

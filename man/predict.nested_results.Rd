@@ -18,12 +18,13 @@
 None. The call is an error.
 }
 \description{
-A nested run holds one model per outer fold, each fitted to estimate how
-the procedure performs, and none of them is the model to deploy.
-\code{predict()} on its results therefore refuses, with class
-\code{nestedtune_predict_results}, and points you to \code{\link[=nested_final_fit]{nested_final_fit()}},
-which fits that model on all the data. For a workflow set, the message
-names \code{nested_final_fit()}'s \code{id} argument, which picks the workflow.
+\code{predict()} on a nested run gives an error that points to
+\code{\link[=nested_final_fit]{nested_final_fit()}}. The outer folds' models serve the estimate, and none
+of them is the model to deploy.
+}
+\details{
+\code{\link[=nested_final_fit]{nested_final_fit()}} fits the model to deploy on all the data. For a
+workflow set, its \code{id} argument picks the workflow.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
