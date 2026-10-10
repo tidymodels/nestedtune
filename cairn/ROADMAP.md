@@ -1,16 +1,15 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-02 M141 archived, M138 row pruned, validate green._
+_Last hygiene check: 2026-10-10 M142 archived, M139 row pruned, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M142 | The grid help page, the main guide and the README read like tune's | review | — | normal | milestones/M142-tune-style-pilot.md |
 | M143 | The other loop pages, the final fit and the design page read like tune's | planned | M142 | normal | milestones/M143-tune-style-loop-pages.md |
 | M144 | The help pages for reading results read like tune's | planned | M142 | normal | milestones/M144-tune-style-reader-pages.md |
 | M145 | The other four guides read like the tidymodels.org articles | planned | M142, M144 | normal | milestones/M145-tune-style-guides.md |
+| M142 | The grid help page, the main guide and the README read like tune's | done | — | normal | milestones/archive/M142-tune-style-pilot.md |
 | M141 | Refuse a split index that is not a row number, and an empty assessment set | done | — | normal | milestones/archive/M141-index-shapes.md |
 | M140 | Inner-design gaps under the other functions | done | — | normal | milestones/archive/M140-inner-design-gaps.md |
-| M139 | Frame the inner splits on the analysis set under a repeated outer row | done | — | normal | milestones/archive/M139-repeated-row-inner-frame.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
