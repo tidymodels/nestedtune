@@ -745,94 +745,47 @@ new_tbl <- function(cols) {
 #' Collect the metrics from a nested resampling run
 #'
 #' @description
-#' Reports the nested cross-validation estimate from a [nested_tune_grid()]
-#' run or one of its siblings: what the tune-and-fit procedure achieves on
-#' data it never saw. For a procedure chosen before seeing this estimate, it
-#' is the number to report for the model you deploy.
-#' [nested_final_fit()] builds that model by running the procedure once more
-#' on all the data.
+#' `collect_metrics()` returns the nested estimate from [nested_tune_grid()]
+#' and the other nested functions. The nested estimate is each metric's mean
+#' over the outer folds' held-out scores.
 #'
-#' @param x A `nested_results` from [nested_tune_grid()] or one of its
-#'   siblings.
+#' @details
+#' The estimate describes the whole procedure (tune, select, fit), not one
+#' fitted model. [nested_final_fit()] runs that procedure on all the data to
+#' fit the model to deploy. For a procedure chosen before seeing this
+#' estimate, it is the number to report for that model, because the model
+#' comes from the same procedure.
+#'
+#' With `summarize = FALSE`, the function returns each outer fold's scores.
+#'
+#' Only the outer folds that completed are read. Failed folds are dropped
+#' with a warning, and `n` counts the folds behind each row. If no fold
+#' completed, the function gives an error.
+#'
+#' `std_err` is the standard error of the mean across the outer folds, as
+#' tune computes it. Do not build a confidence interval from it, because the
+#' outer folds share most of their training rows. `vignette("estimate")`
+#' covers how to read the standard error.
+#'
+#' A metric scored at several evaluation times gets one row per time, in a
+#' `.eval_time` column.
+#'
+#' @param x A `nested_results` from [nested_tune_grid()] or a related
+#'   function.
 #' @param summarize Whether to average the per-fold metrics (`TRUE`, the
-#'   default) or return them one row per outer fold (`FALSE`).
-#' @param type The table's shape: `"long"` (the default), one row per metric,
-#'   or `"wide"`, one column per metric. Both are described under What the
-#'   tables hold.
-#' @param ... Not used. It must be empty. An argument passed here is an error
-#'   rather than silently ignored.
+#'   default) or return one row per outer fold (`FALSE`).
+#' @param type `"long"` (the default), one row per metric, or `"wide"`, one
+#'   column per metric. The wide shape drops the estimator, `n`, `std_err`
+#'   and `.weight`. It gives an error for a metric with two estimators. It
+#'   also gives an error for a metric named like a key column, such as `id`
+#'   in the per-fold table.
+#' @param ... Not used, and must be empty.
 #'
-#' @return A tibble, described under What the tables hold.
-#'
-#' @section What the tables hold:
-#'
-#' Summarized, there is one row per metric, with the mean across outer folds,
-#' the number of folds `n` behind it, and the standard error of that mean.
-#' Unsummarized, there is one row per outer fold and metric. The first
-#' columns are the design's fold labels, each in its own column: `id`, and
-#' `id2` on a repeated design, as in tune's own table. A join on a repeated
-#' design's folds uses both columns. On a design
-#' weighted with [tune::add_resample_weights()] the unsummarized shape also
-#' carries each fold's weight in a `.weight` column.
-#'
-#' `type = "wide"` turns either shape into one column per metric, as tune's
-#' `collect_metrics()` does. The column holds the mean when summarized and
-#' each fold's estimate when not. Its other columns are the keys of those
-#' values: the outer fold's labels when unsummarized, and `.eval_time` where
-#' the long shape has it. The estimator, `n`, `std_err` and `.weight` are
-#' dropped. Two cases are refused with class `nestedtune_wide_collision`,
-#' because each puts two values in one place: a metric scored with two
-#' estimators, and a metric named like a key column. The long shape keeps
-#' both.
-#'
-#' A metric measured at several evaluation times (`eval_time` on
-#' [nested_tune_grid()]) gets a row per time in every table. It is never
-#' averaged across times. Every table carries a `.eval_time` column exactly
-#' when the run was scored by a dynamic or integrated survival metric, as
-#' tune's own `collect_metrics()` does. A static metric's row beside one
-#' holds `NA` there.
-#'
-#' @section Folds that failed:
-#'
-#' Only the outer folds that completed are read, and `n` counts the folds
-#' behind each row, so an estimate is never reported as though the whole design
-#' had run. Failed folds are dropped with a warning naming them.
-#'
-#' A run in which no fold completed is an error of class
-#' `nestedtune_no_completed_folds`, rather than a table of `NA`. It is the
-#' class named in the refusal that [autoplot()][autoplot.nested_results],
-#' [agreement()] and [nested_final_fit()] give such an object.
-#'
-#' @section Reading `std_err`:
-#'
-#' `std_err` is the standard error of the mean across outer folds: the standard
-#' deviation of the per-fold scores over the square root of how many there
-#' were. On a weighted design it is the weighted standard deviation over the
-#' square root of the effective sample size, as tune computes it. The
-#' section Weighting the outer folds on [nested_tune_grid()] states the
-#' rule for a fold that fails. It measures the
-#' precision of that mean, not the fold-to-fold spread, which is larger by
-#' the same square-root factor. It is not a confidence interval, and you
-#' must not build one from it.
-#'
-#' You cannot get a valid standard error from the fold scores. That limit
-#' is the statistics', not this implementation's. Outer fold scores are not
-#' independent, because any two folds share most of their training rows. A
-#' standard error computed as though they were can
-#' misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
-#' proved that no universally unbiased estimator of a k-fold estimate's
-#' variance exists to put in its place. Gauran, Ombao and Yu (2025)
-#' measured the cost inside a nested design. Several of their test
-#' statistics with a variance-based denominator rejected a true null far
-#' above the nominal 5% they ran at, 36% and 40% in their worst cells. They
-#' advise against such denominators.
-#'
-#' Both results concern quantities close to this column rather than this column
-#' exactly. Bengio and Grandvalet study a k-fold estimate built from
-#' per-observation losses, and Gauran and colleagues work inside ridge and
-#' LASSO designs. Neither gap rescues the column: no interval here is
-#' oracle-backed. It is reported because tune reports it, and no inferential
-#' claim is made with it.
+#' @return A tibble with `.metric` and `.estimator`. Summarized, it has one
+#'   row per metric, with `mean`, `n` and `std_err`. Unsummarized, it has one
+#'   row per outer fold and metric, with the design's fold labels first
+#'   (`id`, and `id2` on a repeated design) and `.estimate`. On a design weighted with
+#'   [tune::add_resample_weights()], it also has each fold's `.weight`.
 #'
 #' @template example-setup
 #' @template example-run
@@ -841,17 +794,8 @@ new_tbl <- function(cols) {
 #' collect_metrics(res)
 #' collect_metrics(res, summarize = FALSE)
 #'
-#' @references
-#' Bengio, Y., & Grandvalet, Y. (2004). No unbiased estimator of the variance of
-#' K-fold cross-validation. *Journal of Machine Learning Research*, 5,
-#' 1089–1105.
-#'
-#' Gauran, I. I., Ombao, H., & Yu, Z. (2025). Predictive performance test based
-#' on the exhaustive nested cross-validation for high-dimensional data.
-#' *arXiv:2408.03138*.
-#'
-#' @seealso [collect_metrics.nested_results_set()] for the same function on a
-#'   workflow-set run
+#' @seealso [collect_metrics.nested_results_set()] for a workflow-set run,
+#'   [compute_metrics.nested_results()], [nested_final_fit()]
 #' @export
 collect_metrics.nested_results <- function(
   x,
@@ -1285,12 +1229,14 @@ paste_labels <- function(tbl, cols) {
 
 #' Predicting from a nested run
 #'
-#' A nested run holds one model per outer fold, each fitted to estimate how
-#' the procedure performs, and none of them is the model to deploy.
-#' `predict()` on its results therefore refuses, with class
-#' `nestedtune_predict_results`, and points you to [nested_final_fit()],
-#' which fits that model on all the data. For a workflow set, the message
-#' names `nested_final_fit()`'s `id` argument, which picks the workflow.
+#' @description
+#' `predict()` on a nested run gives an error that points to
+#' [nested_final_fit()]. The outer folds' models produce the estimate, and
+#' none of them is the model to deploy.
+#'
+#' @details
+#' [nested_final_fit()] fits the model to deploy on all the data. For a
+#' workflow set, its `id` argument picks the workflow.
 #'
 #' @param object A `nested_results` or a `nested_results_set`.
 #' @param ... Not used.

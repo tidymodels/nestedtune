@@ -7,77 +7,45 @@
 \method{compute_metrics}{nested_results}(x, metrics, ..., summarize = TRUE, event_level = NULL)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings, run with \code{save_pred = TRUE} in its control.}
+\item{x}{A \code{nested_results} from a run with \code{save_pred = TRUE} in its
+control.}
 
 \item{metrics}{A \code{\link[yardstick:metric_set]{yardstick::metric_set()}}.}
 
-\item{...}{Not used. It must be empty.}
+\item{...}{Not used, and must be empty.}
 
 \item{summarize}{Whether to average the per-fold metrics (\code{TRUE}, the
-default) or return them one row per outer fold (\code{FALSE}).}
+default) or return one row per outer fold (\code{FALSE}).}
 
-\item{event_level}{For a two-class outcome, which level is the event:
-\code{"first"} or \code{"second"}. The default, \code{NULL}, takes the level the run
-recorded. tune's own method defaults to \code{"first"} instead.}
+\item{event_level}{For a two-class outcome, \code{"first"} or \code{"second"}. The
+default, \code{NULL}, takes the level the run used, where tune's method
+takes \code{"first"}.}
 }
 \value{
-A tibble, summarized or per fold as \code{\link[=collect_metrics]{collect_metrics()}} returns
-it in the long shape. Given
-the metric set and the event level the run used, it is identical to
-\code{collect_metrics(x, summarize = summarize)}. Per fold, the first
-columns are the design's fold labels, each in its own column: \code{id},
-and \code{id2} on a repeated design.
+A tibble in the long shape of \link[=collect_metrics.nested_results]{collect_metrics()}. With the run's
+own metric set and event level, it equals
+\code{collect_metrics(x, summarize = summarize)}.
 }
 \description{
-\code{compute_metrics()} scores the predictions a run kept under
-\code{save_pred = TRUE} with a metric set you give it. The table it returns
-has the shape and the averaging of \code{\link[=collect_metrics]{collect_metrics()}}. You get a metric
-the run did not compute without running the nested loop again.
+\code{compute_metrics()} scores the predictions a nested run saved with a new
+metric set, and returns a table shaped like \link[=collect_metrics.nested_results]{collect_metrics()}. The
+nested loop does not run again.
 }
-\section{What is scored again, and what is not}{
+\details{
+Each completed outer fold's saved predictions are scored on their own, and
+the per-fold scores are averaged as in \link[=collect_metrics.nested_results]{collect_metrics()}. Each repeat of
+a repeated design counts as its own fold. A fold that scores \code{NA} is left
+out of the mean.
 
+Each fold keeps the candidate it selected. To select with a metric, pass
+it in the \code{metrics} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} or the other nested
+function.
 
-Each outer fold kept the predictions its outer fit made on the fold's
-assessment rows. Those rows are scored again, fold by fold, and the
-per-fold scores are averaged as \code{\link[=collect_metrics]{collect_metrics()}} averages them. A
-fold that scores \code{NA} is left out of the mean, and \code{n} counts the folds
-behind each row.
-
-The inner selection is not run again. Every fold keeps the parameters it
-selected under the metrics of the run, and only the scoring of its outer
-fit changes. A metric that is to choose the parameters has to be given
-to the run itself.
-
-On a repeated design each repeat of a fold is scored as its own fold.
+The run needs \code{save_pred = TRUE} in its control, and a metric that reads a
+kind of prediction the run did not save is an error. So is an edited
+\code{.predictions} column whose \code{.row} values do not match the rows each fold
+held out.
 }
-
-\section{Refusals}{
-
-A run whose control did not set \code{save_pred = TRUE} is refused with class
-\code{nestedtune_column_not_saved}. A run in which no fold completed is
-refused with class \code{nestedtune_no_completed_folds}.
-
-
-A \code{metrics} that is not a metric set is refused with class
-\code{nestedtune_bad_metrics}. A metric that reads a kind of prediction the
-run did not save is refused with class
-\code{nestedtune_metric_type_not_saved}. An example is a class metric such as
-\code{accuracy} on a run whose metrics read only class probabilities.
-
-A completed fold whose saved predictions do not match the rows it held
-out is refused with class \code{nestedtune_compute_metrics_predictions},
-before any fold is scored. Its \code{.row} column must hold each of those
-rows once and no other row. Five shapes this refuses are a missing row,
-a repeated \code{.row}, an \code{NA} \code{.row}, a row the fold did not hold out, and
-no \code{.row} column. A \code{.row} that is not a whole number is refused too.
-The message names each fold that fails. \code{\link[=augment]{augment()}} refuses the same
-shapes.
-
-A run with some failed folds is scored over the rest, with a warning of
-class \code{nestedtune_partial_summary}.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

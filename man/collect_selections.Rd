@@ -6,7 +6,7 @@
 \alias{collect_inner_metrics}
 \alias{collect_inner_metrics.nested_results}
 \alias{collect_notes.nested_results}
-\title{Stack a per-fold column of a nested resampling run across the outer folds}
+\title{Collect each outer fold's selections, inner metrics or notes}
 \usage{
 collect_selections(x, ...)
 
@@ -19,76 +19,40 @@ collect_inner_metrics(x, ...)
 \method{collect_notes}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
-\item{...}{Not used. It must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
-A tibble whose first columns are the design's fold labels and whose
-remaining columns come from the stacked tables. See What the columns are.
+A tibble with the fold labels first (\code{id}, and \code{id2} on a
+repeated design), then the stacked columns. A fold that lacks a column
+holds \code{NA} there. \code{collect_notes()} gives tune's note columns, from
+\code{location} to \code{trace}.
 }
 \description{
-\code{collect_notes()}, \code{collect_selections()} and \code{collect_inner_metrics()}
-each give you one of a run's per-fold records as a single table. A
-\code{nested_results} keeps three such records as one table per outer fold,
-in list columns. They are what went wrong (\code{.notes}), what the fold's
-inner tuning selected (\code{.selected}), and everything that tuning scored
-(\code{.inner_metrics}). Each function stacks one column across the folds,
-the design's fold labels first, so every row says which fold it came
-from.
+\code{collect_selections()}, \code{collect_inner_metrics()} and \code{collect_notes()}
+return what each outer fold's inner tuning selected, scored or noted, in
+one table with the fold labels first.
+}
+\details{
 \itemize{
-\item \code{collect_notes()} stacks \code{.notes} over every outer fold, failed folds
-included. A completed fold can carry an error note too, from an \code{extract}
-that failed on it (see
-\code{\link[=collect_predictions.nested_results]{collect_extracts()}}).
-\item \code{collect_selections()} stacks \code{.selected}: one row per completed fold. A
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows, because no fold selected
-anything.
-\item \code{collect_inner_metrics()} stacks \code{.inner_metrics}: one row per
-candidate, a parameter setting, and metric that a completed fold's
-inner tuning scored, and per iteration where the tuner iterates.
-}
-}
-\section{What the columns are}{
-
-
-The first columns are the design's fold labels: \code{id} on a plain v-fold
-design, \code{id} and \code{id2} on a repeated one, read from the object's record
-rather than recognized by name.
-Then come the stacked tables' own columns, over the union of what any
-stacked fold carries. A fold lacking one holds \code{NA} there, exactly as a fold
-whose recorded value is \code{NA} does, so the two cannot be told apart.
-
-\code{collect_notes()} stacks tune's four note columns, from \code{location} to
-\code{trace}. A run that recorded no note gives no rows with those columns. A
-stacked table carrying a column named like a label column, say a
-parameter whose id is \code{id}, is refused with class
-\code{nestedtune_collect_name_collision}.
+\item \code{collect_selections()} gives the tuned parameter values and \code{.config}
+of the candidate each completed fold selected, one row per fold. A
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows.
+\item \code{collect_inner_metrics()} gives the columns of
+\code{\link[tune:collect_metrics]{tune::collect_metrics()}} for every candidate that each completed
+fold's inner tuning scored.
+\item \code{collect_notes()} gives the notes of every fold, the failed ones
+included.
 }
 
-\section{Which folds are read}{
+The first two read only the folds that completed, with a warning if some
+failed. If no fold completed, they give an error.
 
-
-\code{collect_selections()} and \code{collect_inner_metrics()} read the folds that
-completed, as \code{\link[=collect_metrics]{collect_metrics()}} and \code{\link[=agreement]{agreement()}} do. A run with some
-folds failed is stacked over the rest, with one warning of class
-\code{nestedtune_partial_summary} naming the missing folds. A run in which no
-fold completed is an error of class \code{nestedtune_no_completed_folds}.
-\code{collect_notes()} reads every fold and warns about none.
+A \code{.config} value labels a candidate inside one fold's tuning run, so it
+does not identify a candidate across folds.
 }
-
-\section{Reading \code{.config}}{
-
-
-The \code{.config} of a selection or an inner-metrics row is kept as the fold
-recorded it. It labels a candidate inside that one fold's tuning run. So
-a selected row's \code{.config} is found among the same fold's rows in
-\code{collect_inner_metrics()}. Because folds can search different candidates, it
-identifies nothing across them, which is why \code{\link[=agreement]{agreement()}} leaves it out.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
@@ -115,7 +79,7 @@ collect_notes(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
+\link[=collect_metrics.nested_results]{collect_metrics()}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
 \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same functions on a
 workflow-set run
 }

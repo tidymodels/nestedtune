@@ -70,6 +70,42 @@ At the M143 branch point (`5ca197ee`, 2026-10-10), the script reads the seven pa
 
 At the M143 head (`90ad5811`, 2026-10-10), the same script reads the seven pages at: `nested_tune_bayes` 746 prose words (29-word Description), `nested_tune_race` 765 (32), `nested_tune_sim_anneal` 713 (28), `nested_fit_resamples` 507 (31), `nested_workflow_map` 383 (21), `nested_final_fit` 498 (24) and `nested_resamples` 726 (35). The seven total 4,338, against 10,343 at the branch point.
 
+At the M144 branch point (`16fd160c`, 2026-10-10), the script reads the 24 pages M144 rewrites at 9,116 prose words together. Seventeen Descriptions are over 40 words, the largest `collect_predictions.nested_results` at 148. Beside their comparators:
+
+| Help page | prose | desc | sections | coined |
+|---|---|---|---|---|
+| `agreement` | 316 | 93 | 2 | 1 |
+| `augment.nested_results` | 668 | 55 | 3 | 10 |
+| `autoplot.nested_results` | 402 | 100 | 2 | 7 |
+| `collect_metrics.nested_results` | 727 | 57 | 3 | 4 |
+| `collect_metrics.nested_results_set` | 496 | 124 | 2 | 6 |
+| `collect_predictions.nested_results` | 861 | 148 | 3 | 8 |
+| `collect_selections` | 437 | 146 | 3 | 8 |
+| `compute_metrics.nested_results` | 466 | 43 | 2 | 10 |
+| `extract_procedure` | 525 | 47 | 1 | 11 |
+| `extract_scored_candidates` | 223 | 38 | 1 | 2 |
+| `extract_tune_results` | 169 | 32 | 1 | 4 |
+| `extract_workflow.nested_results_set` | 61 | 18 | 0 | 1 |
+| `extract-nested_final_fit` | 205 | 33 | 0 | 2 |
+| `nestedtune-package` | 170 | 56 | 0 | 1 |
+| `predict.nested_final_fit` | 313 | 31 | 2 | 3 |
+| `predict.nested_results` | 77 | 62 | 0 | 1 |
+| `print.nested_final_fit` | 362 | 105 | 2 | 2 |
+| `print.nested_results` | 206 | 38 | 1 | 1 |
+| `print.nested_results_set` | 66 | 44 | 0 | 1 |
+| `reexports` | 31 | 31 | 0 | 0 |
+| `selection_rule` | 616 | 67 | 3 | 14 |
+| `summary.nested_final_fit` | 508 | 145 | 2 | 4 |
+| `summary.nested_results` | 468 | 80 | 2 | 6 |
+| `summary.nested_results_set` | 743 | 48 | 5 | 8 |
+| `tune::collect_predictions` (holds `collect_metrics`) | 587 | 8 | 1 | 0 |
+| `tune::show_best` | 315 | 62 | 0 | 0 |
+| `tune::autoplot.tune_results` | 417 | 4 | 0 | 0 |
+| `tune::augment.tune_results` | 218 | 24 | 0 | 0 |
+| `tune::compute_metrics` | 243 | 64 | 0 | 0 |
+
+At the M144 implement head (`b906d8eb`, 2026-10-10), the same script reads the 24 pages at 4,008 prose words together, 44% of the branch point, with Descriptions of 15 to 35 words (corrected M144: an earlier line here gave 3,990 words and a 32-word largest Description, read before the last two edits). After the review's fixes (`b691fe58`), the 24 pages read 4,385 prose words, 48% of the branch point, with Descriptions of 15 to 37 words. No page has a `nestedtune_*` class name, `orchestrator` or `sibling`.
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune

@@ -10,65 +10,35 @@
 # accessors set (D-023, D-039): a default that refuses as a classed
 # condition, and one method.
 
-#' Stack a per-fold column of a nested resampling run across the outer folds
+#' Collect each outer fold's selections, inner metrics or notes
 #'
 #' @description
-#' `collect_notes()`, `collect_selections()` and `collect_inner_metrics()`
-#' each give you one of a run's per-fold records as a single table. A
-#' `nested_results` keeps three such records as one table per outer fold,
-#' in list columns. They are what went wrong (`.notes`), what the fold's
-#' inner tuning selected (`.selected`), and everything that tuning scored
-#' (`.inner_metrics`). Each function stacks one column across the folds,
-#' the design's fold labels first, so every row says which fold it came
-#' from.
+#' `collect_selections()`, `collect_inner_metrics()` and `collect_notes()`
+#' return what each outer fold's inner tuning selected, scored or noted, in
+#' one table with the fold labels first.
 #'
-#' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
-#'   included. A completed fold can carry an error note too, from an `extract`
-#'   that failed on it (see
-#'   [`collect_extracts()`][collect_predictions.nested_results]).
-#' * `collect_selections()` stacks `.selected`: one row per completed fold. A
-#'   [nested_fit_resamples()] result gives no rows, because no fold selected
-#'   anything.
-#' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per
-#'   candidate, a parameter setting, and metric that a completed fold's
-#'   inner tuning scored, and per iteration where the tuner iterates.
+#' @details
+#' * `collect_selections()` gives the tuned parameter values and `.config`
+#'   of the candidate each completed fold selected, one row per fold. A
+#'   [nested_fit_resamples()] result gives no rows.
+#' * `collect_inner_metrics()` gives the columns of
+#'   [tune::collect_metrics()] for every candidate that each completed
+#'   fold's inner tuning scored.
+#' * `collect_notes()` gives the notes of every fold, the failed ones
+#'   included.
+#'
+#' The first two read only the folds that completed, with a warning if some
+#' failed. If no fold completed, they give an error.
+#'
+#' A `.config` value labels a candidate inside one fold's tuning run, so it
+#' does not identify a candidate across folds.
 #'
 #' @inheritParams collect_metrics.nested_results
 #'
-#' @return A tibble whose first columns are the design's fold labels and whose
-#'   remaining columns come from the stacked tables. See What the columns are.
-#'
-#' @section What the columns are:
-#'
-#' The first columns are the design's fold labels: `id` on a plain v-fold
-#' design, `id` and `id2` on a repeated one, read from the object's record
-#' rather than recognized by name.
-#' Then come the stacked tables' own columns, over the union of what any
-#' stacked fold carries. A fold lacking one holds `NA` there, exactly as a fold
-#' whose recorded value is `NA` does, so the two cannot be told apart.
-#'
-#' `collect_notes()` stacks tune's four note columns, from `location` to
-#' `trace`. A run that recorded no note gives no rows with those columns. A
-#' stacked table carrying a column named like a label column, say a
-#' parameter whose id is `id`, is refused with class
-#' `nestedtune_collect_name_collision`.
-#'
-#' @section Which folds are read:
-#'
-#' `collect_selections()` and `collect_inner_metrics()` read the folds that
-#' completed, as [collect_metrics()] and [agreement()] do. A run with some
-#' folds failed is stacked over the rest, with one warning of class
-#' `nestedtune_partial_summary` naming the missing folds. A run in which no
-#' fold completed is an error of class `nestedtune_no_completed_folds`.
-#' `collect_notes()` reads every fold and warns about none.
-#'
-#' @section Reading `.config`:
-#'
-#' The `.config` of a selection or an inner-metrics row is kept as the fold
-#' recorded it. It labels a candidate inside that one fold's tuning run. So
-#' a selected row's `.config` is found among the same fold's rows in
-#' `collect_inner_metrics()`. Because folds can search different candidates, it
-#' identifies nothing across them, which is why [agreement()] leaves it out.
+#' @return A tibble with the fold labels first (`id`, and `id2` on a
+#'   repeated design), then the stacked columns. A fold that lacks a column
+#'   holds `NA` there. `collect_notes()` gives tune's note columns, from
+#'   `location` to `trace`.
 #'
 #' @template example-setup
 #' @template example-run
@@ -77,7 +47,7 @@
 #' collect_inner_metrics(res)
 #' collect_notes(res)
 #'
-#' @templateVar LINKS [collect_metrics()], [agreement()], [summary.nested_results()]
+#' @templateVar LINKS [collect_metrics()][collect_metrics.nested_results], [agreement()], [summary.nested_results()]
 #' @templateVar WHAT functions
 #' @template seealso-reader
 #' @name collect_selections
@@ -172,117 +142,61 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 # refused by name, so a caller learns which control slot to set rather than
 # reading an absent column as an empty one.
 
-#' Stack the outer fit's predictions or extracts across the outer folds
+#' Collect the predictions or extracts of a nested run's outer fits
 #'
 #' @description
-#' `collect_predictions()` and `collect_extracts()` give you the outer
-#' fit's predictions or extracts as one table across the folds. A run whose
-#' control asked for them keeps two more records per outer fold.
-#' `.predictions`, under `save_pred = TRUE`, holds the predictions the
-#' fold's finalized model made on its assessment rows. `.extracts` holds
-#' whatever the control's `extract` function returned for the fold's fitted
-#' workflow. These two methods on tune's generics stack one such column
-#' into a single table, the design's fold labels first.
+#' `collect_predictions()` and `collect_extracts()` return what each outer
+#' fold's fit saved, stacked across the folds with the fold labels first.
 #'
-#' * `collect_predictions()` gives one row per assessment row of every
-#'   completed fold, with the columns `tune::last_fit()` produced: the
-#'   outcome, the prediction columns, `.row` and `.config`. With
-#'   `summarize = TRUE` it gives one averaged row per data row instead. See
-#'   Averaging across the folds.
-#' * `collect_extracts()` gives one row per completed fold, the fold's value in
-#'   an `.extracts` list column. A completed fold whose extract function
-#'   errored holds `NULL` there, and its `.notes` say why.
+#' @details
+#' The run's control must ask for the column: `save_pred = TRUE` for
+#' predictions, or an `extract` function for extracts. Otherwise the
+#' function gives an error that names the setting.
 #'
-#' @param x A `nested_results` run with a control that asked for the column.
-#'   See [collect_metrics.nested_results()] for what the object is.
-#' @param ... Not used. It must be empty. tune's `parameters` argument is not
-#'   offered here, because each fold predicted with the parameters it
-#'   selected.
-#' @param summarize For `collect_predictions()`, whether to average the
-#'   predictions per data row (`TRUE`) or return them per fold (`FALSE`, the
-#'   default). See Averaging across the folds.
+#' The predictions are the outer fits' predictions on the rows each fold held
+#' out. The inner tuning runs' own predictions and extracts are not kept.
+#' Only the folds that completed are read, with a warning if some failed.
 #'
-#' @return A tibble: the design's fold labels (`id`, and `id2` on a repeated
-#'   design), then the stacked prediction columns, or the `.extracts` list
-#'   column. With `summarize = TRUE`, the columns of the per-fold table in
-#'   the same order, less the fold labels and `.config`, with one row per
-#'   `.row` in `.row` order.
-#'
-#' @section Folds that failed, and columns not saved:
-#'
-#' Both take the folds that completed, as [collect_selections()] does. They
-#' warn once with class `nestedtune_partial_summary` on a partial run and
-#' error with class `nestedtune_no_completed_folds` when no fold completed.
-#'
-#' An object whose recorded control did not ask for the column, or that no
-#' longer carries it, is refused with class `nestedtune_column_not_saved`.
-#' The message names the control slot to set. A prediction table carrying a
-#' column named like a fold label column is refused with class
-#' `nestedtune_collect_name_collision`.
-#'
-#' @section Which predictions these are:
-#'
-#' Will a row appear twice? On a v-fold outer design each row appears once
-#' per repeat. On a Monte Carlo design it appears as often as it was held
-#' out. These are the outer fit's predictions on the assessment rows.
-#' The inner tuning run's own predictions and extracts, which the same two
-#' control slots save inside tune, are not kept.
+#' `collect_extracts()` gives one row per completed fold, with the value in
+#' an `.extracts` list column. If the extract function failed on a fold, the
+#' value is `NULL` and the fold's `.notes` say why.
 #'
 #' @section Averaging across the folds:
 #'
-#' `summarize = TRUE` averages, for each data row, the predictions of every
-#' completed fold that held the row out. A row that no completed fold held
-#' out is left out, and a partial run warns once, as above. The rules are
-#' tune's for `summarize = TRUE`, except where a rule below says otherwise.
-#' The columns the run saved decide which rule applies.
+#' A repeated or Monte Carlo design can hold a data row out more than once.
+#' `summarize = TRUE` averages each row's predictions over the completed
+#' folds that held it out, by the rules of [tune::collect_predictions()].
+#' The saved columns decide which rule applies. A `.pred_class` saved beside
+#' class probabilities is recomputed from the averaged probabilities,
+#' whatever a postprocessor set. A `NULL` entry in a censored `.pred` is left
+#' out of its row's average. The rules differ from tune's in three ways:
 #'
-#' * A numeric prediction, such as a regression's `.pred`, is its mean with
-#'   missing values ignored.
-#' * Class probabilities are each averaged the same way, then divided by the
-#'   row's sum of those averages. A `.pred_class` saved beside them is
-#'   recomputed as the class with the largest averaged probability. It is
-#'   recomputed whatever a postprocessor set in the saved predictions. A row
-#'   whose averaged probabilities are missing gets a missing class, where
-#'   tune gives it the first level.
-#' * A `.pred_class` saved without probabilities is the most frequent class.
-#'   A missing vote counts as a class of its own, as in tune, so the class
-#'   is missing only when missing votes outnumber every level.
-#' * A censored run takes the median `.pred_time`, which is missing if any
-#'   fold's value is. The survival probabilities in `.pred` take, per
-#'   `.eval_time`, the mean `.pred_survival` and `.weight_censored` with
-#'   missing values ignored. A `NULL` entry in `.pred` is left out of its
-#'   row's average, and a row whose every entry is `NULL` holds `NULL`.
-#'
-#' A tie, between votes or between averaged probabilities, goes to the first
-#' of the tied levels in the factor's level order.
-#'
-#' tune's own average groups the rows by candidate. Here each fold selected
-#' its own candidate, so the average spans the candidates the folds
-#' selected, and the fold labels and `.config` are dropped. Quantile
-#' predictions are not averaged: a run whose saved predictions carry a
-#' `.pred_quantile` column is refused with class
-#' `nestedtune_summarize_quantile`.
+#' * Each fold selected its own candidate, so the average spans the selected
+#'   candidates, and the fold labels and `.config` are dropped.
+#' * A row whose averaged class probabilities are missing gets a missing
+#'   class, where tune gives it the first level.
+#' * Quantile predictions are not averaged, and they give an error.
 #'
 #' A metric computed on these averages describes an average of several
-#' fitted models, not the tuning procedure, so it is not the nested
-#' estimate. [collect_metrics()] gives that estimate.
+#' fitted models, so it is not the nested estimate.
+#' [collect_metrics()][collect_metrics.nested_results] gives that estimate.
 #'
-#' The average reads the saved predictions as the run returned them, and
-#' refuses two kinds of edited table. A completed fold whose `.row` column
-#' does not hold each row the fold held out exactly once, and no other row,
-#' is refused with class `nestedtune_collect_predictions_predictions`. The
-#' per-fold table, with `summarize = FALSE`, is not checked. Three shapes
-#' are refused with class `nestedtune_summarize_columns`:
+#' @param x A `nested_results` from a run with `save_pred = TRUE`, or with
+#'   an `extract` function for `collect_extracts()`.
+#' @param ... Not used, and must be empty. tune's `parameters` argument is
+#'   not offered, because each fold predicted with the parameters it
+#'   selected.
+#' @param summarize For `collect_predictions()`, whether to average the
+#'   predictions for each data row (`TRUE`) or return them per fold
+#'   (`FALSE`, the default).
 #'
-#' * Two or more factor outcome columns, where the average reads one.
-#' * A `.pred_class` column with no factor outcome column.
-#' * A censored `.pred` entry that is not `NULL` and has no `.eval_time`
-#'   column.
-#'
-#' An outcome column here is any column other than the prediction columns
-#' and the fold labels. The columns tune adds beside the predictions are not
-#' outcome columns either. Those are `.row`, `.config` and `.case_weights`.
-#' Nor are `.iter` and `.eval_time`.
+#' @return A tibble with the fold labels first (`id`, and `id2` on a
+#'   repeated design). For `collect_predictions()`, the columns
+#'   [tune::last_fit()] saved follow: the outcome, the predictions, `.row`
+#'   and `.config`. That `.config` labels the outer fit, not the selected
+#'   candidate. Averaged, the table has one row per data row that a
+#'   completed fold held out, in `.row` order. It has no fold labels and no
+#'   `.config`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -317,7 +231,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' )
 #' collect_predictions(res_rep, summarize = TRUE)
 #'
-#' @templateVar LINKS [collect_selections()], [collect_metrics()], [nested_tune_grid()]
+#' @templateVar LINKS [collect_selections()], [collect_metrics()][collect_metrics.nested_results], [nested_tune_grid()]
 #' @templateVar WHAT functions
 #' @template seealso-reader
 #' @name collect_predictions.nested_results
@@ -688,62 +602,37 @@ collect_extracts.nested_results <- function(x, ...) {
 #' Score the saved predictions of a nested run with a metric set
 #'
 #' @description
-#' `compute_metrics()` scores the predictions a run kept under
-#' `save_pred = TRUE` with a metric set you give it. The table it returns
-#' has the shape and the averaging of [collect_metrics()]. You get a metric
-#' the run did not compute without running the nested loop again.
+#' `compute_metrics()` scores the predictions a nested run saved with a new
+#' metric set, and returns a table shaped like [collect_metrics()][collect_metrics.nested_results]. The
+#' nested loop does not run again.
+#'
+#' @details
+#' Each completed outer fold's saved predictions are scored on their own, and
+#' the per-fold scores are averaged as in [collect_metrics()][collect_metrics.nested_results]. Each repeat of
+#' a repeated design counts as its own fold. A fold that scores `NA` is left
+#' out of the mean.
+#'
+#' Each fold keeps the candidate it selected. To select with a metric, pass
+#' it in the `metrics` argument of [nested_tune_grid()] or the other nested
+#' function.
+#'
+#' The run needs `save_pred = TRUE` in its control, and a metric that reads a
+#' kind of prediction the run did not save is an error. So is an edited
+#' `.predictions` column whose `.row` values do not match the rows each fold
+#' held out.
 #'
 #' @inheritParams collect_metrics.nested_results
-#' @param x A `nested_results` from [nested_tune_grid()] or one of its
-#'   siblings, run with `save_pred = TRUE` in its control.
+#' @param x A `nested_results` from a run with `save_pred = TRUE` in its
+#'   control.
 #' @param metrics A [yardstick::metric_set()].
-#' @param ... Not used. It must be empty.
-#' @param event_level For a two-class outcome, which level is the event:
-#'   `"first"` or `"second"`. The default, `NULL`, takes the level the run
-#'   recorded. tune's own method defaults to `"first"` instead.
+#' @param ... Not used, and must be empty.
+#' @param event_level For a two-class outcome, `"first"` or `"second"`. The
+#'   default, `NULL`, takes the level the run used, where tune's method
+#'   takes `"first"`.
 #'
-#' @return A tibble, summarized or per fold as [collect_metrics()] returns
-#'   it in the long shape. Given
-#'   the metric set and the event level the run used, it is identical to
-#'   `collect_metrics(x, summarize = summarize)`. Per fold, the first
-#'   columns are the design's fold labels, each in its own column: `id`,
-#'   and `id2` on a repeated design.
-#'
-#' @section What is scored again, and what is not:
-#'
-#' Each outer fold kept the predictions its outer fit made on the fold's
-#' assessment rows. Those rows are scored again, fold by fold, and the
-#' per-fold scores are averaged as [collect_metrics()] averages them. A
-#' fold that scores `NA` is left out of the mean, and `n` counts the folds
-#' behind each row.
-#'
-#' The inner selection is not run again. Every fold keeps the parameters it
-#' selected under the metrics of the run, and only the scoring of its outer
-#' fit changes. A metric that is to choose the parameters has to be given
-#' to the run itself.
-#'
-#' On a repeated design each repeat of a fold is scored as its own fold.
-#'
-#' @templateVar TITLE Refusals
-#' @template refusals-saved-run
-#' @section Refusals:
-#' A `metrics` that is not a metric set is refused with class
-#' `nestedtune_bad_metrics`. A metric that reads a kind of prediction the
-#' run did not save is refused with class
-#' `nestedtune_metric_type_not_saved`. An example is a class metric such as
-#' `accuracy` on a run whose metrics read only class probabilities.
-#'
-#' A completed fold whose saved predictions do not match the rows it held
-#' out is refused with class `nestedtune_compute_metrics_predictions`,
-#' before any fold is scored. Its `.row` column must hold each of those
-#' rows once and no other row. Five shapes this refuses are a missing row,
-#' a repeated `.row`, an `NA` `.row`, a row the fold did not hold out, and
-#' no `.row` column. A `.row` that is not a whole number is refused too.
-#' The message names each fold that fails. [augment()] refuses the same
-#' shapes.
-#'
-#' A run with some failed folds is scored over the rest, with a warning of
-#' class `nestedtune_partial_summary`.
+#' @return A tibble in the long shape of [collect_metrics()][collect_metrics.nested_results]. With the run's
+#'   own metric set and event level, it equals
+#'   `collect_metrics(x, summarize = summarize)`.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))
@@ -979,91 +868,37 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' Join the held-out predictions of a nested run onto its data
 #'
 #' @description
-#' `augment()` returns the data a nested run was given, one row per data
-#' row, with the predictions made for that row when an outer fold held it
-#' out. On a design that holds a row out more than once, those predictions
-#' are averaged. You can plot or inspect every row's out-of-fold prediction
-#' beside its predictors.
+#' `augment()` returns the data a nested run was given, with each row's
+#' predictions from the outer folds that held it out. A model that never saw
+#' the row made each prediction.
+#'
+#' @details
+#' These are the outer fits' predictions, not the final model's.
+#' [nested_final_fit()] fits that model on all the rows, and its own
+#' `augment()` method predicts new data.
+#'
+#' The outer design must hold out every data row at least once. A Monte
+#' Carlo design can miss rows, and a time-series design misses the rows
+#' before its first assessment set. For those, use [collect_predictions()].
+#'
+#' On a design that holds out some row more than once, every row gets the
+#' average that `collect_predictions(summarize = TRUE)` gives. So a
+#' `.pred_class` saved beside class probabilities is recomputed from the
+#' averaged probabilities, whatever a postprocessor set. A metric computed
+#' on averaged predictions is not the nested estimate.
+#'
+#' A row held out only by failed folds gets missing predictions, with a
+#' warning. The run needs `save_pred = TRUE` in its control.
 #'
 #' @inheritParams compute_metrics.nested_results
-#' @param ... Not used. It must be empty. tune's `parameters` argument is
-#'   not offered here, because each fold made its predictions with the
-#'   parameters it selected.
+#' @param ... Not used, and must be empty. tune's `parameters` argument is
+#'   not offered, because each fold predicted with the parameters it
+#'   selected.
 #'
-#' @return A tibble with the data's rows in the data's order. The outcome
-#'   column comes first, then the prediction columns, whose names start
-#'   with `.pred`, then the rest of the data's columns. A censored outcome
-#'   is saved under its `Surv()` call, which names no data column, so there
-#'   the prediction columns come first. The fold labels, `.row` and
-#'   `.config` are not joined, and no `.resid` column is added.
-#'
-#' @section Which predictions these are:
-#'
-#' The predictions come from the outer fits. Each outer fold tuned on its
-#' analysis rows, fitted the parameters it selected, and predicted its
-#' held-out assessment rows. So a row's prediction was made by a model
-#' that never saw that row.
-#'
-#' They are not predictions from the final model. That model is fitted
-#' on all the rows by [nested_final_fit()], and its own `augment()` method
-#' predicts new data with it.
-#'
-#' @section Designs accepted, and averaged predictions:
-#'
-#' The outer design must hold out every data row at least once.
-#'
-#' A v-fold or grouped v-fold design without repeats holds out each row
-#' once. There, each row joins the predictions that its one outer fold
-#' saved, as they are.
-#'
-#' A repeated v-fold design holds out each row once per repeat, and a
-#' Monte Carlo design can hold out a row several times. On a design that
-#' holds out some row more than once, every row joins its averaged
-#' prediction, the rows held out once included. The count of times a row
-#' is held out reads every outer fold, the failed ones included. The average is the one
-#' `collect_predictions(summarize = TRUE)` gives, and
-#' [collect_predictions.nested_results()] states its rules. For example, a
-#' `.pred_class` saved beside class probabilities is recomputed from the
-#' averaged probabilities, whatever class a postprocessor set.
-#'
-#' A metric computed on averaged predictions describes an average of several
-#' fitted models, not the tuning procedure, so it is not the nested
-#' estimate. [collect_metrics()] gives that estimate.
-#'
-#' @section Designs and folds refused:
-#'
-#' A design that leaves some data row out of every assessment set is
-#' refused with class `nestedtune_augment_rows`. The message names the
-#' first five of those rows, or all of them when there are five or fewer.
-#' A Monte Carlo design can leave rows out. A [rsample::rolling_origin()],
-#' [rsample::sliding_window()], [rsample::sliding_index()] or
-#' [rsample::sliding_period()] design leaves out at least the rows before
-#' its first assessment set. Read the predictions such a design has with
-#' [collect_predictions()].
-#'
-#' On a design that holds out some row more than once, saved quantile
-#' predictions are refused with class `nestedtune_summarize_quantile`,
-#' because `collect_predictions(summarize = TRUE)` does not average them.
-#' On such a design, the three edited shapes of saved predictions that the
-#' average refuses are refused here too, with class
-#' `nestedtune_summarize_columns`. [collect_predictions.nested_results()]
-#' lists them.
-#'
-#' @templateVar TITLE Designs and folds refused
-#' @template refusals-saved-run
-#' @section Designs and folds refused:
-#' A completed fold
-#' whose saved predictions do not match the rows it held out is refused
-#' with class `nestedtune_augment_predictions`. Its `.row` column must hold
-#' each of those rows once and no other row. On a run with some failed
-#' folds, a row that only failed folds held out holds a missing value in
-#' every prediction column, with a warning of class
-#' `nestedtune_partial_summary`. A row that a completed fold also held out
-#' takes the average over the completed folds. A missing value is `NA`, or
-#' `NULL` in a list column such as the `.pred` of a censored-regression run.
-#' A data column whose name is also a prediction column's name is refused
-#' with class `nestedtune_collect_name_collision`, before either refusal of
-#' the average.
+#' @return A tibble with the data's rows in the data's order: the outcome,
+#'   then the prediction columns, whose names start with `.pred`, then the
+#'   other data columns. For a censored outcome, the prediction columns come
+#'   first. Unlike tune's `augment()`, it adds no `.resid` column.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))

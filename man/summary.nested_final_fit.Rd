@@ -10,84 +10,45 @@
 \method{print}{summary.nested_final_fit}(x, ...)
 }
 \arguments{
-\item{object}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{object}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used. It must be empty. Passing an argument here raises an
-error instead of leaving it silently ignored.}
+\item{...}{Not used, and must be empty.}
 
 \item{x}{A \code{summary.nested_final_fit} object from
 \code{\link[=summary.nested_final_fit]{summary.nested_final_fit()}}.}
 }
 \value{
-\code{summary()} returns an object of class \code{summary.nested_final_fit}, a list
-with these components:
+\code{summary()} returns a \code{summary.nested_final_fit}, a list with these
+components:
 \itemize{
 \item \code{tuning_label}, the tuning run's resampling label
-\item \code{tuner}, the name of the tune or finetune function that ran, as
-\code{\link[=extract_procedure]{extract_procedure()}} records it
-\item \code{candidates}, the number of parameter settings that run scored
-\item \code{initial} and \code{initial_requested}, \code{iterations_completed} and
-\code{iterations_requested}, the iterating tuners' counts
-\item \code{selection}, the parameter values selection chose
-\item \code{select}, the \code{\link[=selection_rule]{selection_rule()}} the selection was made by, as
-\code{\link[=extract_procedure]{extract_procedure()}} records it
-\item \code{first_metric}, the name of the first metric in the set, as
-\code{\link[=extract_procedure]{extract_procedure()}} records it
+\item \code{tuner}, the tune or finetune function that ran
+\item \code{candidates}, the number of candidates the run scored
+\item \code{initial}, \code{initial_requested}, \code{iterations_completed} and
+\code{iterations_requested}, the counts of an iterating search
+\item \code{selection}, the selected parameter values
+\item \code{select} and \code{first_metric}, as \code{\link[=extract_procedure]{extract_procedure()}} records them
 \item \code{estimate}, always \code{NULL}
 }
-
-Printing it is what most callers want. The components are there for a
-caller that needs a value rather than a line of text.
 
 \code{print()} returns \code{x}, invisibly.
 }
 \description{
-\code{summary()} gives you the facts of the final fit as values rather than
-printed lines. Those are the full-data tuning run the selection came
-from, which search ran it and at what counts, how many parameter
-settings it scored, and which values it chose.
-
+\code{summary()} returns the facts of a final fit as values: the tuning run on
+all the data, the tuner and its counts, how many candidates it scored,
+and the selected values.
+}
+\details{
 The \code{estimate} component is always \code{NULL}, because the number to report
-for this model is not stored on it. That number is the nested estimate
-\code{\link[=collect_metrics]{collect_metrics()}} returns from the results object the fit was built
-from. For a fit built from a workflow set, it is that workflow's rows of
-\code{\link[=collect_metrics]{collect_metrics()}} on the set. The stored tuning run's metrics are
-selection-time quantities, so they do not fill the slot. See
-\code{\link[=nested_final_fit]{nested_final_fit()}} for the reason. The name is kept rather than left
-out, so the object states where that number is instead of leaving you to
-infer it from a missing name.
+is not stored on the fit. It is the nested estimate from
+\link[=collect_metrics.nested_results]{collect_metrics()} on the nested run the fit was built from. The nested
+estimate describes the procedure that produced this model, not the fitted
+model itself.
+
+The four iteration counts are \code{NULL} for a grid search or a race. On a fit
+with nothing to tune, \code{candidates} is 0, \code{selection} is empty, and the
+other components but \code{tuner} are \code{NULL}.
 }
-\section{The selection rule}{
-
-
-When \code{select} names a rule other than the default, the print adds a line
-directly under the "Selected parameters" heading. It reads \verb{Selected by:}
-and then the rule's name, orderings and limit, in the words the print of
-\code{\link[=selection_rule]{selection_rule()}} uses after its class tag. The line is absent
-under the default rule and on a fit that tuned nothing.
-
-Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
-line reads \verb{Selecting metric:} and then a name. The name is the
-\code{first_metric} component. Under the default rule it is the first line
-under the heading. It is absent under the \code{"desirability"} rule, on a
-fit that tuned nothing, and on a fit whose record holds no \code{first_metric}.
-}
-
-\section{Components that are absent}{
-
-
-The four counts are \code{NULL} on a grid or a racing fit, which iterate over
-nothing. They are carried rather than dropped, for the reason \code{estimate}
-is. The scored figures are counted from the tuning run's metrics table,
-and the requested ones are the counts the search was called with. A run
-whose metrics table cannot be read reports its scored figures as zero
-rather than failing to print.
-
-Where nothing was tuned there is no run to describe, so \code{tuning_label}
-is \code{NULL} and \code{candidates} is \code{0}. \code{selection} is empty, and \code{select}
-and \code{first_metric} are \code{NULL}, because no rule was applied.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

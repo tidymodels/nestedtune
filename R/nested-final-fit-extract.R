@@ -21,29 +21,22 @@
 # neither what was handed over nor what would have answered. tune reaches for
 # the same remedy on `show_best()` (M06).
 
-#' Extract the tuning run a final fit was selected from
+#' Extract the tuning run of a final fit
 #'
-#' Returns the tuning result that [nested_final_fit()] chose its parameters
-#' from. It is the record of what selection saw when the recorded procedure,
-#' tune, select and fit, was re-run on the complete dataset.
+#' @description
+#' `extract_tune_results()` returns the tuning run from which
+#' [nested_final_fit()] selected its parameters on all the data.
+#'
+#' @details
+#' Do not report this run's metrics. They were computed on the resamples
+#' that chose the parameters, so they are optimistic on average about the
+#' final model.
+#' Report the nested estimate, from [collect_metrics()][collect_metrics.nested_results] on the nested run.
 #'
 #' @inheritParams print.nested_final_fit
 #'
-#' @return The stored `tune_results` object, unchanged. It is tune's own
-#'   object, so tune's generics apply to it directly. A fit that ran no tuning
-#'   is refused with condition class `nestedtune_no_tuning_run`.
-#'
-#' @section What its numbers are, and are not:
-#'
-#' Do not report the metrics this object gives you. It answers
-#' `collect_metrics()` and hands its metrics over unqualified. Each of them
-#' was computed on the resamples that chose the
-#' parameter setting it describes. That makes it a selection-time quantity,
-#' optimistically biased as a claim about the model this final fit produced.
-#'
-#' The nested estimate is the honest one, and [nested_final_fit()] says why.
-#' This run is kept because it is the record of what selection saw, not
-#' because it describes the model.
+#' @return tune's own `tune_results` object, so tune's functions apply to it.
+#'   A final fit that ran no tuning gives an error.
 #'
 #' @template example-setup
 #' @template example-run
@@ -86,36 +79,23 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
   x$tuning
 }
 
-#' Extract the parameter settings a final fit actually scored
+#' Extract the candidates a final fit scored
 #'
-#' Returns the candidates, the parameter settings [nested_final_fit()]'s
-#' tuning run evaluated. It is the full-data counterpart of the candidate
-#' set each outer fold's `.inner_metrics` table describes. It is derived
-#' the same way, so the two can be compared directly.
+#' @description
+#' `extract_scored_candidates()` returns the parameter settings that the
+#' tuning run of [nested_final_fit()] scored, one row per candidate. Compare
+#' them with [collect_inner_metrics()] on the nested run.
+#'
+#' @details
+#' tune can reach fewer candidates than a `grid` size asks for. A candidate
+#' that failed on every resample scored nothing and is missing here.
+#' `tune::collect_notes(extract_tune_results(x))` shows why it failed.
 #'
 #' @inheritParams print.nested_final_fit
-#' @return A tibble with one row per candidate scored. Each row has one column
-#'   per tuned parameter plus tune's `.config` label, and `.iter` where the
-#'   search iterated. It is the distinct parameter rows of the run's
-#'   [tune::collect_metrics()] table, with everything tune wrote per metric
-#'   dropped. So a candidate has one row here however many evaluation times
-#'   it was scored at. The times and the scores are in
-#'   `collect_metrics(extract_tune_results(x))`. A fit that ran no tuning
-#'   scored no candidate and is refused with condition class
-#'   `nestedtune_no_tuning_run`.
-#'
-#' @section Scored, not asked for:
-#'
-#' A `grid` given as a size is expanded by tune, and the expansion sometimes
-#' reaches fewer candidates than the number requested. A candidate that failed
-#' everywhere scored nothing. The Value section of [nested_tune_grid()] says
-#' how `attr(x, "grid")` and `.inner_metrics` can differ, and it holds here
-#' too.
-#'
-#' A candidate that failed on every inner resample is missing from this
-#' table, and a `nested_final_fit` has no `.notes` column to record it in.
-#' Look inside the run itself:
-#' `tune::collect_notes(extract_tune_results(x))`.
+#' @return A tibble with one column per tuned parameter, then `.config`, and
+#'   `.iter` where the search iterated. A candidate scored at several
+#'   evaluation times has one row. A final fit that ran no tuning gives an
+#'   error.
 #'
 #' @template example-setup
 #' @template example-run

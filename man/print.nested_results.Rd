@@ -7,41 +7,32 @@
 \method{print}{nested_results}(x, ..., n = NULL, width = NULL)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
-\item{...}{Not used. It must be empty, so \code{n} and \code{width} must be given by
-name in full.}
+\item{...}{Not used, and must be empty. Give \code{n} and \code{width} by name.}
 
 \item{n}{Number of fold rows to show, passed to tibble's printing. \code{NULL},
-the default, leaves the choice to tibble and its \code{print_max} and
-\code{print_min} options. \code{Inf} shows every fold.}
+the default, leaves the choice to tibble. \code{Inf} shows every fold.}
 
-\item{width}{Width of the printed rows, passed to tibble's printing.
-\code{NULL}, the default, uses the \code{width} option, and columns that do not fit
-are named in the footer.}
+\item{width}{Width of the printed rows, passed to tibble's printing.}
 }
 \value{
 \code{x}, invisibly.
 }
 \description{
-Shows the object: its outer folds as the tibble rows they are, and the
-outer resampling scheme it came from. It also says how many folds did
-not complete, and points to \code{\link[=summary.nested_results]{summary.nested_results()}} for what the run
-means.
+Printing a \code{nested_results} shows its outer folds as tibble rows, the
+outer resampling scheme, and how many folds did not complete.
 }
-\section{When the folds searched different candidates}{
+\details{
+When the completed folds scored different sets of candidates, the print
+adds each fold's candidate count. A \code{grid} given as a size is the usual
+cause, because each fold builds its own grid under its own seed. Folds
+that disagree then did not choose from the same candidates.
 
-
-Folds can score different candidate sets, the parameter settings each
-inner search tried. When two or more completed folds did, and only then,
-the print adds a line with each fold's candidate count. A grid given as
-a size is the usual cause. It is expanded once per fold, under that
-fold's own seed, so a continuous parameter leaves every fold with
-candidates of its own. It matters for reading the selections: folds that
-disagreed were not choosing from the same menu.
+\code{\link[=summary.nested_results]{summary.nested_results()}} shows the selections and the nested estimate.
+The nested estimate describes the tuning procedure, not a fitted model.
 }
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
@@ -67,5 +58,5 @@ res
 }
 \seealso{
 \code{\link[=summary.nested_results]{summary.nested_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=collect_metrics]{collect_metrics()}}
+\link[=collect_metrics.nested_results]{collect_metrics()}
 }

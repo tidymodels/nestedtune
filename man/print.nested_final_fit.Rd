@@ -7,62 +7,33 @@
 \method{print}{nested_final_fit}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{x}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
-\item{...}{Not used. It must be empty. Passing an argument here raises an
-error instead of leaving it silently ignored.}
+\item{...}{Not used, and must be empty.}
 }
 \value{
 \code{x}, invisibly.
 }
 \description{
-Shows what the full-data search was, which parameters it selected, and
-which number to report for this model. It also names the accessors that
-reach what selection saw.
-
-The number to report is the nested estimate \code{\link[=collect_metrics]{collect_metrics()}} returns
-from the results object the fit was built from. For a fit built from a
-workflow set, it is that workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the
-set. The print says so. That estimate describes the procedure that
-produced this model. The stored tuning run has metrics, but selection
-consumed them. See \code{\link[=nested_final_fit]{nested_final_fit()}} for why those metrics are not the
-number to report and the nested estimate is.
+Printing a \code{nested_final_fit} shows the tuning run on all the data, the
+parameters it selected, and which number to report for this model.
 }
-\section{The procedure line}{
+\details{
+The number to report is the nested estimate from \link[=collect_metrics.nested_results]{collect_metrics()} on
+the nested run the fit was built from. For a workflow set, it is that
+workflow's rows. The nested estimate describes the procedure that
+produced this model, not the fitted model itself. The tuning run's own
+metrics were used to select, so they are optimistic on average.
 
+The line under the heading names the tuner and its counts: the candidates
+a grid search or a race scored, or the initial candidates and iterations
+of an iterating search. A fit with nothing to tune reads "no tuning".
 
-The line under the heading tells you what ran: the procedure, which is
-the tuner and its counts. A grid search or a race is named with the number of
-candidates, parameter settings, it scored. An iterating search is named
-with the initial candidates scored and requested and the iterations
-completed and requested. It can score fewer initial candidates than
-\code{initial} names and can stop short of \code{iter}.
-
-Where nothing was tuned the line reads "no tuning", the selection line
-reads "nothing to select", and the note says that \code{\link[=extract_tune_results]{extract_tune_results()}}
-and \code{\link[=extract_scored_candidates]{extract_scored_candidates()}} refuse the object.
+Under a rule other than \code{"best"}, a line such as
+\verb{Selected by: pct_loss by num_comp (limit = 5)} names the rule. A
+\verb{Selecting metric:} line names the metric that chose the candidate. It
+is absent under the \code{"desirability"} rule.
 }
-
-\section{The selection rule}{
-
-
-When the selection was made by a rule other than the default, a line
-follows the \verb{Selected:} line. It reads \verb{Selected by:} and then the rule's
-name, orderings and limit, in the words the print of \code{\link[=selection_rule]{selection_rule()}}
-uses after its class tag, for example
-\verb{Selected by: pct_loss by num_comp (limit = 5)}. The line is absent
-under the default rule and on a fit that tuned nothing. The summary's
-\code{select} component holds the rule as a value.
-
-Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules, one more
-line names the metric that chose the candidate. An example is
-\verb{Selecting metric: rmse}.
-Under the default rule it follows the \verb{Selected:} line, and otherwise the
-\verb{Selected by:} line. It is absent under the \code{"desirability"} rule, which
-chooses by its goals, on a fit that tuned nothing, and on a fit whose
-record holds no \code{first_metric}.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

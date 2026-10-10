@@ -7,106 +7,53 @@
 \method{collect_metrics}{nested_results}(x, ..., summarize = TRUE, type = c("long", "wide"))
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function.}
 
-\item{...}{Not used. It must be empty. An argument passed here is an error
-rather than silently ignored.}
+\item{...}{Not used, and must be empty.}
 
 \item{summarize}{Whether to average the per-fold metrics (\code{TRUE}, the
-default) or return them one row per outer fold (\code{FALSE}).}
+default) or return one row per outer fold (\code{FALSE}).}
 
-\item{type}{The table's shape: \code{"long"} (the default), one row per metric,
-or \code{"wide"}, one column per metric. Both are described under What the
-tables hold.}
+\item{type}{\code{"long"} (the default), one row per metric, or \code{"wide"}, one
+column per metric. The wide shape drops the estimator, \code{n}, \code{std_err}
+and \code{.weight}. It gives an error for a metric with two estimators. It
+also gives an error for a metric named like a key column, such as \code{id}
+in the per-fold table.}
 }
 \value{
-A tibble, described under What the tables hold.
+A tibble with \code{.metric} and \code{.estimator}. Summarized, it has one
+row per metric, with \code{mean}, \code{n} and \code{std_err}. Unsummarized, it has one
+row per outer fold and metric, with the design's fold labels first
+(\code{id}, and \code{id2} on a repeated design) and \code{.estimate}. On a design weighted with
+\code{\link[tune:add_resample_weights]{tune::add_resample_weights()}}, it also has each fold's \code{.weight}.
 }
 \description{
-Reports the nested cross-validation estimate from a \code{\link[=nested_tune_grid]{nested_tune_grid()}}
-run or one of its siblings: what the tune-and-fit procedure achieves on
-data it never saw. For a procedure chosen before seeing this estimate, it
-is the number to report for the model you deploy.
-\code{\link[=nested_final_fit]{nested_final_fit()}} builds that model by running the procedure once more
-on all the data.
+\code{collect_metrics()} returns the nested estimate from \code{\link[=nested_tune_grid]{nested_tune_grid()}}
+and the other nested functions. The nested estimate is each metric's mean
+over the outer folds' held-out scores.
 }
-\section{What the tables hold}{
+\details{
+The estimate describes the whole procedure (tune, select, fit), not one
+fitted model. \code{\link[=nested_final_fit]{nested_final_fit()}} runs that procedure on all the data to
+fit the model to deploy. For a procedure chosen before seeing this
+estimate, it is the number to report for that model, because the model
+comes from the same procedure.
 
+With \code{summarize = FALSE}, the function returns each outer fold's scores.
 
-Summarized, there is one row per metric, with the mean across outer folds,
-the number of folds \code{n} behind it, and the standard error of that mean.
-Unsummarized, there is one row per outer fold and metric. The first
-columns are the design's fold labels, each in its own column: \code{id}, and
-\code{id2} on a repeated design, as in tune's own table. A join on a repeated
-design's folds uses both columns. On a design
-weighted with \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}} the unsummarized shape also
-carries each fold's weight in a \code{.weight} column.
+Only the outer folds that completed are read. Failed folds are dropped
+with a warning, and \code{n} counts the folds behind each row. If no fold
+completed, the function gives an error.
 
-\code{type = "wide"} turns either shape into one column per metric, as tune's
-\code{collect_metrics()} does. The column holds the mean when summarized and
-each fold's estimate when not. Its other columns are the keys of those
-values: the outer fold's labels when unsummarized, and \code{.eval_time} where
-the long shape has it. The estimator, \code{n}, \code{std_err} and \code{.weight} are
-dropped. Two cases are refused with class \code{nestedtune_wide_collision},
-because each puts two values in one place: a metric scored with two
-estimators, and a metric named like a key column. The long shape keeps
-both.
+\code{std_err} is the standard error of the mean across the outer folds, as
+tune computes it. Do not build a confidence interval from it, because the
+outer folds share most of their training rows. \code{vignette("estimate")}
+covers how to read the standard error.
 
-A metric measured at several evaluation times (\code{eval_time} on
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}) gets a row per time in every table. It is never
-averaged across times. Every table carries a \code{.eval_time} column exactly
-when the run was scored by a dynamic or integrated survival metric, as
-tune's own \code{collect_metrics()} does. A static metric's row beside one
-holds \code{NA} there.
+A metric scored at several evaluation times gets one row per time, in a
+\code{.eval_time} column.
 }
-
-\section{Folds that failed}{
-
-
-Only the outer folds that completed are read, and \code{n} counts the folds
-behind each row, so an estimate is never reported as though the whole design
-had run. Failed folds are dropped with a warning naming them.
-
-A run in which no fold completed is an error of class
-\code{nestedtune_no_completed_folds}, rather than a table of \code{NA}. It is the
-class named in the refusal that \link[=autoplot.nested_results]{autoplot()},
-\code{\link[=agreement]{agreement()}} and \code{\link[=nested_final_fit]{nested_final_fit()}} give such an object.
-}
-
-\section{Reading \code{std_err}}{
-
-
-\code{std_err} is the standard error of the mean across outer folds: the standard
-deviation of the per-fold scores over the square root of how many there
-were. On a weighted design it is the weighted standard deviation over the
-square root of the effective sample size, as tune computes it. The
-section Weighting the outer folds on \code{\link[=nested_tune_grid]{nested_tune_grid()}} states the
-rule for a fold that fails. It measures the
-precision of that mean, not the fold-to-fold spread, which is larger by
-the same square-root factor. It is not a confidence interval, and you
-must not build one from it.
-
-You cannot get a valid standard error from the fold scores. That limit
-is the statistics', not this implementation's. Outer fold scores are not
-independent, because any two folds share most of their training rows. A
-standard error computed as though they were can
-misstate the uncertainty, usually downward. Bengio and Grandvalet (2004)
-proved that no universally unbiased estimator of a k-fold estimate's
-variance exists to put in its place. Gauran, Ombao and Yu (2025)
-measured the cost inside a nested design. Several of their test
-statistics with a variance-based denominator rejected a true null far
-above the nominal 5\% they ran at, 36\% and 40\% in their worst cells. They
-advise against such denominators.
-
-Both results concern quantities close to this column rather than this column
-exactly. Bengio and Grandvalet study a k-fold estimate built from
-per-observation losses, and Gauran and colleagues work inside ridge and
-LASSO designs. Neither gap rescues the column: no interval here is
-oracle-backed. It is reported because tune reports it, and no inferential
-claim is made with it.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
@@ -132,16 +79,7 @@ collect_metrics(res)
 collect_metrics(res, summarize = FALSE)
 \dontshow{\}) # examplesIf}
 }
-\references{
-Bengio, Y., & Grandvalet, Y. (2004). No unbiased estimator of the variance of
-K-fold cross-validation. \emph{Journal of Machine Learning Research}, 5,
-1089–1105.
-
-Gauran, I. I., Ombao, H., & Yu, Z. (2025). Predictive performance test based
-on the exhaustive nested cross-validation for high-dimensional data.
-\emph{arXiv:2408.03138}.
-}
 \seealso{
-\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same function on a
-workflow-set run
+\code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for a workflow-set run,
+\code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}, \code{\link[=nested_final_fit]{nested_final_fit()}}
 }

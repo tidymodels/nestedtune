@@ -20,53 +20,28 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' Print a final fit
 #'
 #' @description
-#' Shows what the full-data search was, which parameters it selected, and
-#' which number to report for this model. It also names the accessors that
-#' reach what selection saw.
+#' Printing a `nested_final_fit` shows the tuning run on all the data, the
+#' parameters it selected, and which number to report for this model.
 #'
-#' The number to report is the nested estimate [collect_metrics()] returns
-#' from the results object the fit was built from. For a fit built from a
-#' workflow set, it is that workflow's rows of [collect_metrics()] on the
-#' set. The print says so. That estimate describes the procedure that
-#' produced this model. The stored tuning run has metrics, but selection
-#' consumed them. See [nested_final_fit()] for why those metrics are not the
-#' number to report and the nested estimate is.
+#' @details
+#' The number to report is the nested estimate from [collect_metrics()][collect_metrics.nested_results] on
+#' the nested run the fit was built from. For a workflow set, it is that
+#' workflow's rows. The nested estimate describes the procedure that
+#' produced this model, not the fitted model itself. The tuning run's own
+#' metrics were used to select, so they are optimistic on average.
 #'
-#' @param x A `nested_final_fit` object from [nested_final_fit()].
-#' @param ... Not used. It must be empty. Passing an argument here raises an
-#'   error instead of leaving it silently ignored.
+#' The line under the heading names the tuner and its counts: the candidates
+#' a grid search or a race scored, or the initial candidates and iterations
+#' of an iterating search. A fit with nothing to tune reads "no tuning".
+#'
+#' Under a rule other than `"best"`, a line such as
+#' `Selected by: pct_loss by num_comp (limit = 5)` names the rule. A
+#' `Selecting metric:` line names the metric that chose the candidate. It
+#' is absent under the `"desirability"` rule.
+#'
+#' @param x A `nested_final_fit` from [nested_final_fit()].
+#' @param ... Not used, and must be empty.
 #' @return `x`, invisibly.
-#'
-#' @section The procedure line:
-#'
-#' The line under the heading tells you what ran: the procedure, which is
-#' the tuner and its counts. A grid search or a race is named with the number of
-#' candidates, parameter settings, it scored. An iterating search is named
-#' with the initial candidates scored and requested and the iterations
-#' completed and requested. It can score fewer initial candidates than
-#' `initial` names and can stop short of `iter`.
-#'
-#' Where nothing was tuned the line reads "no tuning", the selection line
-#' reads "nothing to select", and the note says that [extract_tune_results()]
-#' and [extract_scored_candidates()] refuse the object.
-#'
-#' @section The selection rule:
-#'
-#' When the selection was made by a rule other than the default, a line
-#' follows the `Selected:` line. It reads `Selected by:` and then the rule's
-#' name, orderings and limit, in the words the print of [selection_rule()]
-#' uses after its class tag, for example
-#' `Selected by: pct_loss by num_comp (limit = 5)`. The line is absent
-#' under the default rule and on a fit that tuned nothing. The summary's
-#' `select` component holds the rule as a value.
-#'
-#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-#' line names the metric that chose the candidate. An example is
-#' `Selecting metric: rmse`.
-#' Under the default rule it follows the `Selected:` line, and otherwise the
-#' `Selected by:` line. It is absent under the `"desirability"` rule, which
-#' chooses by its goals, on a fit that tuned nothing, and on a fit whose
-#' record holds no `first_metric`.
 #'
 #' @template example-setup
 #' @template example-run
@@ -124,70 +99,36 @@ print.nested_final_fit <- function(x, ...) {
 #' Summarize a final fit
 #'
 #' @description
-#' `summary()` gives you the facts of the final fit as values rather than
-#' printed lines. Those are the full-data tuning run the selection came
-#' from, which search ran it and at what counts, how many parameter
-#' settings it scored, and which values it chose.
+#' `summary()` returns the facts of a final fit as values: the tuning run on
+#' all the data, the tuner and its counts, how many candidates it scored,
+#' and the selected values.
 #'
+#' @details
 #' The `estimate` component is always `NULL`, because the number to report
-#' for this model is not stored on it. That number is the nested estimate
-#' [collect_metrics()] returns from the results object the fit was built
-#' from. For a fit built from a workflow set, it is that workflow's rows of
-#' [collect_metrics()] on the set. The stored tuning run's metrics are
-#' selection-time quantities, so they do not fill the slot. See
-#' [nested_final_fit()] for the reason. The name is kept rather than left
-#' out, so the object states where that number is instead of leaving you to
-#' infer it from a missing name.
+#' is not stored on the fit. It is the nested estimate from
+#' [collect_metrics()][collect_metrics.nested_results] on the nested run the fit was built from. The nested
+#' estimate describes the procedure that produced this model, not the fitted
+#' model itself.
 #'
-#' @param object A `nested_final_fit` object from [nested_final_fit()].
+#' The four iteration counts are `NULL` for a grid search or a race. On a fit
+#' with nothing to tune, `candidates` is 0, `selection` is empty, and the
+#' other components but `tuner` are `NULL`.
+#'
+#' @param object A `nested_final_fit` from [nested_final_fit()].
 #' @inheritParams print.nested_final_fit
 #'
 #' @return
-#' `summary()` returns an object of class `summary.nested_final_fit`, a list
-#' with these components:
+#' `summary()` returns a `summary.nested_final_fit`, a list with these
+#' components:
 #'
 #' - `tuning_label`, the tuning run's resampling label
-#' - `tuner`, the name of the tune or finetune function that ran, as
-#'   [extract_procedure()] records it
-#' - `candidates`, the number of parameter settings that run scored
-#' - `initial` and `initial_requested`, `iterations_completed` and
-#'   `iterations_requested`, the iterating tuners' counts
-#' - `selection`, the parameter values selection chose
-#' - `select`, the [selection_rule()] the selection was made by, as
-#'   [extract_procedure()] records it
-#' - `first_metric`, the name of the first metric in the set, as
-#'   [extract_procedure()] records it
+#' - `tuner`, the tune or finetune function that ran
+#' - `candidates`, the number of candidates the run scored
+#' - `initial`, `initial_requested`, `iterations_completed` and
+#'   `iterations_requested`, the counts of an iterating search
+#' - `selection`, the selected parameter values
+#' - `select` and `first_metric`, as [extract_procedure()] records them
 #' - `estimate`, always `NULL`
-#'
-#' Printing it is what most callers want. The components are there for a
-#' caller that needs a value rather than a line of text.
-#'
-#' @section The selection rule:
-#'
-#' When `select` names a rule other than the default, the print adds a line
-#' directly under the "Selected parameters" heading. It reads `Selected by:`
-#' and then the rule's name, orderings and limit, in the words the print of
-#' [selection_rule()] uses after its class tag. The line is absent
-#' under the default rule and on a fit that tuned nothing.
-#'
-#' Under the `"best"`, `"one_std_err"` and `"pct_loss"` rules, one more
-#' line reads `Selecting metric:` and then a name. The name is the
-#' `first_metric` component. Under the default rule it is the first line
-#' under the heading. It is absent under the `"desirability"` rule, on a
-#' fit that tuned nothing, and on a fit whose record holds no `first_metric`.
-#'
-#' @section Components that are absent:
-#'
-#' The four counts are `NULL` on a grid or a racing fit, which iterate over
-#' nothing. They are carried rather than dropped, for the reason `estimate`
-#' is. The scored figures are counted from the tuning run's metrics table,
-#' and the requested ones are the counts the search was called with. A run
-#' whose metrics table cannot be read reports its scored figures as zero
-#' rather than failing to print.
-#'
-#' Where nothing was tuned there is no run to describe, so `tuning_label`
-#' is `NULL` and `candidates` is `0`. `selection` is empty, and `select`
-#' and `first_metric` are `NULL`, because no rule was applied.
 #'
 #' @template example-setup
 #' @template example-run

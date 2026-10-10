@@ -10,59 +10,39 @@
 \method{augment}{nested_final_fit}(x, new_data, eval_time = NULL, ...)
 }
 \arguments{
-\item{object, x}{A \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{object, x}{A \code{nested_final_fit} from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
 
 \item{new_data}{A data frame of new observations to predict.}
 
 \item{type, opts}{Passed to \code{\link[workflows:predict.workflow]{workflows::predict.workflow()}} unchanged.
 \code{type} selects the prediction type, such as \code{"numeric"}, \code{"prob"} or
-\code{"survival"}, with the workflow's default when left unset.}
+\code{"survival"}. Left unset, it takes the workflow's default.}
 
-\item{...}{For \code{predict()}, further arguments for the model's predict
-method, passed on through the workflow. For \code{augment()}, not used. It
-must be empty.}
+\item{...}{For \code{predict()}, arguments for the model's predict method,
+such as \code{level} with \code{type = "conf_int"}. parsnip gives an error for a
+name outside its list of predict arguments. For \code{augment()}, not used,
+and must be empty.}
 
-\item{eval_time}{For censored regression, the time or times at which to
-evaluate survival probabilities, passed to the workflow's \code{augment()}
-method. Ignored otherwise.}
+\item{eval_time}{For censored regression, the times at which to evaluate
+survival probabilities in \code{augment()}. Ignored otherwise.}
 }
 \value{
-\code{predict()} returns the tibble of predictions the workflow's
-\code{predict()} method returns for \code{type}. \code{augment()} returns the workflow's
-prediction columns followed by the columns of \code{new_data}, with a \code{.resid}
-column where the outcome is present and the model is a regression.
+\code{predict()} returns the workflow's tibble of predictions.
+\code{augment()} returns the prediction columns, then the columns of
+\code{new_data}, with a \code{.resid} column for a regression model when the
+outcome is present.
 }
 \description{
-You can call \code{predict()} and \code{augment()} on a \code{nested_final_fit}
-directly: they are the trained workflow's own methods, reached without
-extracting it first. Each returns what the same call on
-\code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
+\code{predict()} and \code{augment()} on a \code{nested_final_fit} call the trained
+workflow's own methods. Each returns what the same call on the workflow
+from \code{\link[=extract_workflow]{extract_workflow()}} returns.
 }
-\section{What the dots accept}{
-
-
-\code{predict()} forwards them, for example \code{level} with \code{type = "conf_int"}
-for an interval. \code{eval_time} with \code{type = "survival"} is another. A name
-outside parsnip's own short list of predict arguments is refused by
-parsnip. A listed one the model cannot use for the \code{type} asked is passed
-on, and whether it has any effect is parsnip's business, not this method's.
-
-\code{augment()} refuses the dots instead, and that refusal is the only one
-there is: workflows' own \code{augment()} method passes an unread argument on
-to parsnip, which ignores it.
+\details{
+Residuals on the rows the model was fit on are in-sample, so they do not
+measure performance. Report the nested estimate from
+\link[=collect_metrics.nested_results]{collect_metrics()} on the nested run the
+fit was built from.
 }
-
-\section{Residuals on the training rows are not performance}{
-
-
-Augmenting the rows this model was fit on gives in-sample residuals. They
-say how the model fits data it has already seen, not how it does on data it
-has not. The number to report is \code{\link[=collect_metrics]{collect_metrics()}} on the results object
-the fit was built from, or, for a fit built from a workflow set, that
-workflow's rows of \code{\link[=collect_metrics]{collect_metrics()}} on the set. See \code{\link[=nested_final_fit]{nested_final_fit()}}
-for why that is the number to report for this model.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

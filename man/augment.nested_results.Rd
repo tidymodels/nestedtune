@@ -7,105 +7,42 @@
 \method{augment}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings, run with \code{save_pred = TRUE} in its control.}
+\item{x}{A \code{nested_results} from a run with \code{save_pred = TRUE} in its
+control.}
 
-\item{...}{Not used. It must be empty. tune's \code{parameters} argument is
-not offered here, because each fold made its predictions with the
-parameters it selected.}
+\item{...}{Not used, and must be empty. tune's \code{parameters} argument is
+not offered, because each fold predicted with the parameters it
+selected.}
 }
 \value{
-A tibble with the data's rows in the data's order. The outcome
-column comes first, then the prediction columns, whose names start
-with \code{.pred}, then the rest of the data's columns. A censored outcome
-is saved under its \code{Surv()} call, which names no data column, so there
-the prediction columns come first. The fold labels, \code{.row} and
-\code{.config} are not joined, and no \code{.resid} column is added.
+A tibble with the data's rows in the data's order: the outcome,
+then the prediction columns, whose names start with \code{.pred}, then the
+other data columns. For a censored outcome, the prediction columns come
+first. Unlike tune's \code{augment()}, it adds no \code{.resid} column.
 }
 \description{
-\code{augment()} returns the data a nested run was given, one row per data
-row, with the predictions made for that row when an outer fold held it
-out. On a design that holds a row out more than once, those predictions
-are averaged. You can plot or inspect every row's out-of-fold prediction
-beside its predictors.
+\code{augment()} returns the data a nested run was given, with each row's
+predictions from the outer folds that held it out. A model that never saw
+the row made each prediction.
 }
-\section{Which predictions these are}{
+\details{
+These are the outer fits' predictions, not the final model's.
+\code{\link[=nested_final_fit]{nested_final_fit()}} fits that model on all the rows, and its own
+\code{augment()} method predicts new data.
 
+The outer design must hold out every data row at least once. A Monte
+Carlo design can miss rows, and a time-series design misses the rows
+before its first assessment set. For those, use \code{\link[=collect_predictions]{collect_predictions()}}.
 
-The predictions come from the outer fits. Each outer fold tuned on its
-analysis rows, fitted the parameters it selected, and predicted its
-held-out assessment rows. So a row's prediction was made by a model
-that never saw that row.
-
-They are not predictions from the final model. That model is fitted
-on all the rows by \code{\link[=nested_final_fit]{nested_final_fit()}}, and its own \code{augment()} method
-predicts new data with it.
-}
-
-\section{Designs accepted, and averaged predictions}{
-
-
-The outer design must hold out every data row at least once.
-
-A v-fold or grouped v-fold design without repeats holds out each row
-once. There, each row joins the predictions that its one outer fold
-saved, as they are.
-
-A repeated v-fold design holds out each row once per repeat, and a
-Monte Carlo design can hold out a row several times. On a design that
-holds out some row more than once, every row joins its averaged
-prediction, the rows held out once included. The count of times a row
-is held out reads every outer fold, the failed ones included. The average is the one
-\code{collect_predictions(summarize = TRUE)} gives, and
-\code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}} states its rules. For example, a
+On a design that holds out some row more than once, every row gets the
+average that \code{collect_predictions(summarize = TRUE)} gives. So a
 \code{.pred_class} saved beside class probabilities is recomputed from the
-averaged probabilities, whatever class a postprocessor set.
+averaged probabilities, whatever a postprocessor set. A metric computed
+on averaged predictions is not the nested estimate.
 
-A metric computed on averaged predictions describes an average of several
-fitted models, not the tuning procedure, so it is not the nested
-estimate. \code{\link[=collect_metrics]{collect_metrics()}} gives that estimate.
+A row held out only by failed folds gets missing predictions, with a
+warning. The run needs \code{save_pred = TRUE} in its control.
 }
-
-\section{Designs and folds refused}{
-
-
-A design that leaves some data row out of every assessment set is
-refused with class \code{nestedtune_augment_rows}. The message names the
-first five of those rows, or all of them when there are five or fewer.
-A Monte Carlo design can leave rows out. A \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}},
-\code{\link[rsample:sliding_window]{rsample::sliding_window()}}, \code{\link[rsample:sliding_index]{rsample::sliding_index()}} or
-\code{\link[rsample:sliding_period]{rsample::sliding_period()}} design leaves out at least the rows before
-its first assessment set. Read the predictions such a design has with
-\code{\link[=collect_predictions]{collect_predictions()}}.
-
-On a design that holds out some row more than once, saved quantile
-predictions are refused with class \code{nestedtune_summarize_quantile},
-because \code{collect_predictions(summarize = TRUE)} does not average them.
-On such a design, the three edited shapes of saved predictions that the
-average refuses are refused here too, with class
-\code{nestedtune_summarize_columns}. \code{\link[=collect_predictions.nested_results]{collect_predictions.nested_results()}}
-lists them.
-
-
-A run whose control did not set \code{save_pred = TRUE} is refused with class
-\code{nestedtune_column_not_saved}. A run in which no fold completed is
-refused with class \code{nestedtune_no_completed_folds}.
-
-
-A completed fold
-whose saved predictions do not match the rows it held out is refused
-with class \code{nestedtune_augment_predictions}. Its \code{.row} column must hold
-each of those rows once and no other row. On a run with some failed
-folds, a row that only failed folds held out holds a missing value in
-every prediction column, with a warning of class
-\code{nestedtune_partial_summary}. A row that a completed fold also held out
-takes the average over the completed folds. A missing value is \code{NA}, or
-\code{NULL} in a list column such as the \code{.pred} of a censored-regression run.
-A data column whose name is also a prediction column's name is refused
-with class \code{nestedtune_collect_name_collision}, before either refusal of
-the average.
-}
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
