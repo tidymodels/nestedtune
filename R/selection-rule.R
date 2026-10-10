@@ -12,87 +12,52 @@
 # quosures, for the same reason: an expression carries no environment onto
 # the wire or into the cache.
 
-#' Choose the rule each fold selects its parameters by
+#' Choose how each fold selects its candidate
 #'
 #' @description
-#' Builds the object the `select` argument of [nested_tune_grid()] and its
-#' siblings takes. It names one of tune's three selectors, or desirability2's
-#' desirability selector, and carries what that selector needs.
+#' `selection_rule()` builds the `select` argument of [nested_tune_grid()]
+#' and the other nested tuning functions. It names one of tune's three
+#' selectors or desirability2's, with what that selector needs.
 #'
-#' Every outer fold applies the rule to its own inner tuning run. tune's three
-#' selectors rank on the first metric of that run. The result records the
-#' rule, so [nested_final_fit()] selects the same way on the full data.
+#' @details
+#' Each outer fold applies the rule to its own inner tuning run, and
+#' [nested_final_fit()] applies it to its run on all the data. tune's three
+#' selectors rank on the first metric.
 #'
-#' @param rule The selector: `"best"` (the default), `"one_std_err"`,
-#'   `"pct_loss"` or `"desirability"`. The section below says what each one
-#'   picks.
-#' @param ... For `"one_std_err"` and `"pct_loss"`, one or more bare
-#'   expressions ordering the candidates from simplest to most complex, as
-#'   tune's selectors take them. For `"desirability"`, one or more goals such
-#'   as `maximize(rsq)` or `minimize(num_comp)`, as
-#'   [desirability2::select_best_desirability()] takes them. At least one is
-#'   required for those three rules, and `"best"` accepts none.
-#' @param limit For `"pct_loss"` only, the acceptable loss against the best
-#'   candidate, in percent, as a single non-negative number. Left `NULL` it
-#'   takes tune's default of 2, and the other rules refuse it.
+#' * `"best"` takes the candidate with the best mean, as [tune::select_best()]
+#'   does.
+#' * `"one_std_err"` takes the simplest candidate within one standard error
+#'   of the best, as [tune::select_by_one_std_err()] does.
+#' * `"pct_loss"` takes the simplest candidate whose loss against the best
+#'   stays under `limit` percent, as [tune::select_by_pct_loss()] does.
+#' * `"desirability"` takes the candidate with the highest overall
+#'   desirability, as [desirability2::select_best_desirability()] does.
 #'
-#' @return A list of class `selection_rule` with elements `rule`, `order` and
-#'   `limit`. `order` holds the expressions in `...`, empty for `"best"`.
-#'   `limit` is `NULL` outside `"pct_loss"`. Printing shows the three on one
-#'   line: the rule, then `by` and the orderings as written, then the limit
-#'   in parentheses. That same label follows `Selected by:` in the printed
-#'   [summary.nested_results()], [summary.nested_results_set()],
-#'   [print.nested_final_fit()] and [summary.nested_final_fit()] when the
-#'   rule is not `"best"`.
+#' @section Desirability goals:
 #'
-#' @section The four rules:
+#' The `"desirability"` rule needs desirability2 0.2.0 or later. Write each
+#' goal without the `desirability2::` prefix, and name a metric or a tuned
+#' parameter first, as in `maximize(rsq)`. Put a variable's value in with
+#' `!!`, as in `maximize(rsq, low = !!lo)`.
 #'
-#' `"best"` takes the candidate with the best mean on the first metric, as
-#' [tune::select_best()] does. `"one_std_err"` takes the simplest candidate
-#' within one standard error of the best, as [tune::select_by_one_std_err()]
-#' does. `"pct_loss"` takes the simplest candidate whose loss against the best
-#' stays under `limit` percent, as [tune::select_by_pct_loss()] does.
-#' `"desirability"` takes the candidate with the highest overall desirability
-#' over the goals in `...`, as [desirability2::select_best_desirability()]
-#' does.
-#'
-#' @section Writing a desirability goal:
-#'
-#' The `"desirability"` rule needs the desirability2 package, version 0.2.0
-#' or later. Where it is not installed, the rule is refused when it is built,
-#' when an orchestrator starts, and when [nested_final_fit()] is given a
-#' result that recorded it.
-#'
-#' Each goal is a call to one of desirability2's goal functions, such as
-#' `maximize()`, `minimize()` or `target()`, written without the
-#' `desirability2::` prefix, which desirability2 refuses. Its first argument
-#' names a metric or a tuned parameter. Its other arguments must be values,
-#' and a goal that names anything there is refused when the rule is built.
-#' Write a variable's value into a goal with `!!`, as in
-#' `maximize(rsq, low = !!lo)`. When the rule is built, desirability2 checks
-#' that each goal calls one of its goal functions with an unnamed first
-#' argument and the other arguments named. It reads the values of those
-#' arguments only when it scores a tuning run. [nested_tune_grid()] and
-#' [nested_tune_bayes()] check at entry that every name in a goal's first
-#' argument is a metric in `metrics` or a parameter `object` tunes. With
-#' `metrics` left `NULL`, the metrics are the ones tune uses by default for
-#' the model's mode. desirability2 sets each limit a goal
-#' leaves out from the tuning run it scores, so each fold and the final fit
-#' scale those goals on their own inner run. A limit written into the goal
-#' holds everywhere. [nested_tune_race_anova()],
-#' [nested_tune_race_win_loss()] and [nested_tune_sim_anneal()] refuse the
-#' rule. [nested_tune_grid()] and [nested_tune_bayes()] refuse it on a
+#' A limit that a goal leaves out is set from the tuning run being scored,
+#' so each fold and the final fit scale the goal on their own run. The
+#' racing and annealing functions do not take this rule, and neither does a
 #' censored regression model.
 #'
-#' @section Writing an ordering:
+#' @param rule The selector: `"best"` (the default), `"one_std_err"`,
+#'   `"pct_loss"` or `"desirability"`.
+#' @param ... For `"one_std_err"` and `"pct_loss"`, the tuned parameters
+#'   that order the candidates from simplest to most complex, as bare names.
+#'   Wrap a name in [dplyr::desc()] when a larger value is simpler. For
+#'   `"desirability"`, one or more goals such as `maximize(rsq)` or
+#'   `minimize(num_comp)`. These three rules need at least one, and
+#'   `"best"` takes none.
+#' @param limit For `"pct_loss"` only, the acceptable loss against the best
+#'   candidate, in percent. `NULL` takes tune's default of 2.
 #'
-#' An ordering is a parameter name, wrapped in [dplyr::desc()] where a larger
-#' value is the simpler model. Each must be a bare name or a call, never a
-#' string or a number, which orders nothing. An ordering given a name is
-#' refused. That way a misspelled `limit` is refused instead of read as an
-#' ordering. Every name
-#' must be a parameter the workflow tunes, which the orchestrators check when
-#' the run starts.
+#' @return A `selection_rule`: a list with the elements `rule`, `order` and
+#'   `limit`.
 #'
 #' @examples
 #' selection_rule()
@@ -109,8 +74,8 @@
 #'   selection_rule("desirability", maximize(rsq), minimize(num_comp))
 #' }
 #'
-#' @seealso [nested_tune_grid()], [nested_final_fit()], [extract_procedure()],
-#'   which reaches the recorded rule as `$select`.
+#' @seealso [nested_tune_grid()], [nested_final_fit()], [extract_procedure()]
+#'   to read the rule a run used
 #' @export
 selection_rule <- function(
   rule = c("best", "one_std_err", "pct_loss", "desirability"),

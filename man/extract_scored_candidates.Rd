@@ -2,7 +2,7 @@
 % Please edit documentation in R/nested-final-fit-extract.R
 \name{extract_scored_candidates}
 \alias{extract_scored_candidates}
-\title{Extract the parameter settings a final fit actually scored}
+\title{Extract the candidates a final fit scored}
 \usage{
 extract_scored_candidates(x, ...)
 }
@@ -13,37 +13,21 @@ extract_scored_candidates(x, ...)
 error instead of leaving it silently ignored.}
 }
 \value{
-A tibble with one row per candidate scored. Each row has one column
-per tuned parameter plus tune's \code{.config} label, and \code{.iter} where the
-search iterated. It is the distinct parameter rows of the run's
-\code{\link[tune:collect_metrics]{tune::collect_metrics()}} table, with everything tune wrote per metric
-dropped. So a candidate has one row here however many evaluation times
-it was scored at. The times and the scores are in
-\code{collect_metrics(extract_tune_results(x))}. A fit that ran no tuning
-scored no candidate and is refused with condition class
-\code{nestedtune_no_tuning_run}.
+A tibble with one column per tuned parameter, then \code{.config}, and
+\code{.iter} where the search iterated. A candidate scored at several
+evaluation times has one row. A final fit that ran no tuning gives an
+error.
 }
 \description{
-Returns the candidates, the parameter settings \code{\link[=nested_final_fit]{nested_final_fit()}}'s
-tuning run evaluated. It is the full-data counterpart of the candidate
-set each outer fold's \code{.inner_metrics} table describes. It is derived
-the same way, so the two can be compared directly.
+\code{extract_scored_candidates()} returns the parameter settings that the
+tuning run of \code{\link[=nested_final_fit]{nested_final_fit()}} scored, one row per candidate. They
+compare with the candidates in each outer fold's \code{.inner_metrics}.
 }
-\section{Scored, not asked for}{
-
-
-A \code{grid} given as a size is expanded by tune, and the expansion sometimes
-reaches fewer candidates than the number requested. A candidate that failed
-everywhere scored nothing. The Value section of \code{\link[=nested_tune_grid]{nested_tune_grid()}} says
-how \code{attr(x, "grid")} and \code{.inner_metrics} can differ, and it holds here
-too.
-
-A candidate that failed on every inner resample is missing from this
-table, and a \code{nested_final_fit} has no \code{.notes} column to record it in.
-Look inside the run itself:
-\code{tune::collect_notes(extract_tune_results(x))}.
+\details{
+tune can reach fewer candidates than a \code{grid} size asks for. A candidate
+that failed on every resample scored nothing and is missing here.
+\code{tune::collect_notes(extract_tune_results(x))} shows why it failed.
 }
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

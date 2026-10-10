@@ -2,7 +2,7 @@
 % Please edit documentation in R/nested-final-fit-extract.R
 \name{extract_tune_results}
 \alias{extract_tune_results}
-\title{Extract the tuning run a final fit was selected from}
+\title{Extract the tuning run of a final fit}
 \usage{
 extract_tune_results(x, ...)
 }
@@ -13,29 +13,18 @@ extract_tune_results(x, ...)
 error instead of leaving it silently ignored.}
 }
 \value{
-The stored \code{tune_results} object, unchanged. It is tune's own
-object, so tune's generics apply to it directly. A fit that ran no tuning
-is refused with condition class \code{nestedtune_no_tuning_run}.
+tune's own \code{tune_results} object, so tune's functions apply to it.
+A final fit that ran no tuning gives an error.
 }
 \description{
-Returns the tuning result that \code{\link[=nested_final_fit]{nested_final_fit()}} chose its parameters
-from. It is the record of what selection saw when the recorded procedure,
-tune, select and fit, was re-run on the complete dataset.
+\code{extract_tune_results()} returns the tuning run from which
+\code{\link[=nested_final_fit]{nested_final_fit()}} selected its parameters on all the data.
 }
-\section{What its numbers are, and are not}{
-
-
-Do not report the metrics this object gives you. It answers
-\code{collect_metrics()} and hands its metrics over unqualified. Each of them
-was computed on the resamples that chose the
-parameter setting it describes. That makes it a selection-time quantity,
-optimistically biased as a claim about the model this final fit produced.
-
-The nested estimate is the honest one, and \code{\link[=nested_final_fit]{nested_final_fit()}} says why.
-This run is kept because it is the record of what selection saw, not
-because it describes the model.
+\details{
+Do not report this run's metrics. They were computed on the resamples
+that chose the parameters, so they are optimistic about the final model.
+Report the nested estimate, from \code{\link[=collect_metrics]{collect_metrics()}} on the nested run.
 }
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)

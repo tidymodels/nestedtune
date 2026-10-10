@@ -2,81 +2,48 @@
 % Please edit documentation in R/extract-procedure.R
 \name{extract_procedure}
 \alias{extract_procedure}
-\title{Extract the record of what ran}
+\title{Extract the procedure a nested run used}
 \usage{
 extract_procedure(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} object from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or one of its
-siblings, or a \code{nested_final_fit} object from \code{\link[=nested_final_fit]{nested_final_fit()}}.}
+\item{x}{A \code{nested_results} from \code{\link[=nested_tune_grid]{nested_tune_grid()}} or a related
+function, or a \code{nested_final_fit}.}
 
 \item{...}{Not used. It must be empty. Passing an argument here raises an
 error instead of leaving it silently ignored.}
 }
 \value{
-The stored record, unchanged: a named list with \code{tuner},
-that tuner's own arguments, the arguments every loop function shares,
-\code{control} as it took effect, and the \code{workflow} identity. The section
-below says what each holds.
+A named list: \code{tuner}, the tuner's own arguments, the arguments
+that every nested function shares, \code{control} and \code{workflow}.
 }
 \description{
-Returns the \code{procedure} record a nested result carries, the tune, select
-and fit steps as they were set. It says which tuner ran, that tuner's
-own arguments, the control as it took effect, and the workflow the run
-was given. A \code{\link[=nested_final_fit]{nested_final_fit()}} carries the record it re-ran.
+\code{extract_procedure()} returns what a nested run recorded about its
+procedure: the tuner and its arguments, the selection rule, the control
+and the workflow. \code{\link[=nested_final_fit]{nested_final_fit()}} runs this procedure again.
 }
 \details{
-Reading this record is how you see what a final fit will do before you
-ask for one. A final fit built from a results object re-runs exactly
-what the record describes.
-}
-\section{What the record holds}{
-
-
-\code{tuner} names the tune or finetune function that ran, with that tuner's
-own arguments beside it:
+\code{tuner} names the tune or finetune function that ran, with its own
+arguments beside it:
 \itemize{
 \item \code{"tune_grid"}, with \code{grid}
 \item \code{"tune_race_anova"} or \code{"tune_race_win_loss"}, also with \code{grid}
 \item \code{"tune_bayes"}, with \code{iter}, \code{initial} and \code{objective}
 \item \code{"tune_sim_anneal"}, with \code{iter} and \code{initial}
-\item \code{"fit_resamples"}, for a run with nothing to tune, with none
+\item \code{"fit_resamples"}, with none
 }
 
-\code{select} is the \code{\link[=selection_rule]{selection_rule()}} each fold selected by. \code{first_metric}
-is the name of the first metric in the set, as tune resolves it for the
-workflow. A run given no metric set names the first metric of tune's
-default set. Under the \code{"best"}, \code{"one_std_err"} and \code{"pct_loss"} rules,
-that metric chooses each fold's candidate. The Bayesian search, the two
-races and the annealing search steer on it under every rule. \code{param_info},
-\code{event_level} and \code{eval_time} are as they were given. \code{control} is the
-control object the run was given, or tune's default when none was, with
-the slots this package forces already applied. On a Bayesian result
-\code{seed} is left out. A \code{"fit_resamples"} record carries no \code{param_info},
-no \code{select} and no \code{first_metric}, because no parameter set was read and
-no rule applied.
-See "Differences from calling tune directly" on each loop function's
-help page for what those slots are.
+\code{select} is the \code{\link[=selection_rule]{selection_rule()}}, and \code{first_metric} is the first
+metric of the set, as tune resolves it. \code{param_info}, \code{event_level} and
+\code{eval_time} are as given. \code{control} is the control that took effect,
+with the settings this package forces applied. A \code{"fit_resamples"}
+record has no \code{param_info}, \code{select} or \code{first_metric}.
 
-\code{workflow} is the identity of the model specification and the
-preprocessor the run was given: the model's type, engine, mode and
-arguments, and the preprocessor, each in deparsed form. A formula or a
-variables selection is held as written. A recipe is held as its steps
-in order, with each step's selectors and settings, and its random step
-ids left out. A case-weights column is held as written. A tailor
-postprocessor is held as its adjustments in order, each by type and
-arguments. A workflow with neither holds no entry for them. The
-workflow object itself is not stored, and no data rows are. A model
-argument is held as written, so a name bound outside the workflow is
-held as that name and not as its value. \code{\link[=nested_final_fit]{nested_final_fit()}} compares
-the workflow it is handed against this entry and refuses one that
-differs, with class \code{nestedtune_workflow_mismatch}.
-
-On a \code{nested_results} the record travels as an attribute of the object.
-On a \code{nested_final_fit} it is the record the fit re-ran, which is the
-record of the results object it was built from.
+\code{workflow} describes the model and the preprocessor as text, so that
+\code{\link[=nested_final_fit]{nested_final_fit()}} can check that it gets the same workflow. A model
+argument is stored as written, so a variable's name is stored and not
+its value. The workflow object and the data are not stored.
 }
-
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}
 data(mtcars)
@@ -109,6 +76,7 @@ identical(extract_procedure(final)$tuner, procedure$tuner)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=extract_tune_results]{extract_tune_results()}},
-\code{\link[=nested_tune_grid]{nested_tune_grid()}}
+\code{\link[=nested_final_fit]{nested_final_fit()}}, \code{\link[=selection_rule]{selection_rule()}},
+\code{\link[=extract_tune_results]{extract_tune_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}} and the other loop
+functions for what the forced control settings are
 }

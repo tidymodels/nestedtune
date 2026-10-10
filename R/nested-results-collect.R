@@ -10,65 +10,34 @@
 # accessors set (D-023, D-039): a default that refuses as a classed
 # condition, and one method.
 
-#' Stack a per-fold column of a nested resampling run across the outer folds
+#' Collect each outer fold's selections, inner metrics or notes
 #'
 #' @description
-#' `collect_notes()`, `collect_selections()` and `collect_inner_metrics()`
-#' each give you one of a run's per-fold records as a single table. A
-#' `nested_results` keeps three such records as one table per outer fold,
-#' in list columns. They are what went wrong (`.notes`), what the fold's
-#' inner tuning selected (`.selected`), and everything that tuning scored
-#' (`.inner_metrics`). Each function stacks one column across the folds,
-#' the design's fold labels first, so every row says which fold it came
-#' from.
+#' `collect_selections()`, `collect_inner_metrics()` and `collect_notes()`
+#' stack one per-fold column of a nested run into a single table, with the
+#' fold labels first.
 #'
-#' * `collect_notes()` stacks `.notes` over every outer fold, failed folds
-#'   included. A completed fold can carry an error note too, from an `extract`
-#'   that failed on it (see
-#'   [`collect_extracts()`][collect_predictions.nested_results]).
-#' * `collect_selections()` stacks `.selected`: one row per completed fold. A
-#'   [nested_fit_resamples()] result gives no rows, because no fold selected
-#'   anything.
-#' * `collect_inner_metrics()` stacks `.inner_metrics`: one row per
-#'   candidate, a parameter setting, and metric that a completed fold's
-#'   inner tuning scored, and per iteration where the tuner iterates.
+#' @details
+#' * `collect_selections()` gives the candidate each completed fold's inner
+#'   tuning selected, one row per fold. A [nested_fit_resamples()] result
+#'   gives no rows.
+#' * `collect_inner_metrics()` gives every candidate and metric that each
+#'   completed fold's inner tuning scored.
+#' * `collect_notes()` gives the notes of every fold, the failed ones
+#'   included.
+#'
+#' The first two read only the folds that completed, with a warning if some
+#' failed. If no fold completed, they give an error.
+#'
+#' A `.config` value labels a candidate inside one fold's tuning run, so it
+#' does not identify a candidate across folds.
 #'
 #' @inheritParams collect_metrics.nested_results
 #'
-#' @return A tibble whose first columns are the design's fold labels and whose
-#'   remaining columns come from the stacked tables. See What the columns are.
-#'
-#' @section What the columns are:
-#'
-#' The first columns are the design's fold labels: `id` on a plain v-fold
-#' design, `id` and `id2` on a repeated one, read from the object's record
-#' rather than recognized by name.
-#' Then come the stacked tables' own columns, over the union of what any
-#' stacked fold carries. A fold lacking one holds `NA` there, exactly as a fold
-#' whose recorded value is `NA` does, so the two cannot be told apart.
-#'
-#' `collect_notes()` stacks tune's four note columns, from `location` to
-#' `trace`. A run that recorded no note gives no rows with those columns. A
-#' stacked table carrying a column named like a label column, say a
-#' parameter whose id is `id`, is refused with class
-#' `nestedtune_collect_name_collision`.
-#'
-#' @section Which folds are read:
-#'
-#' `collect_selections()` and `collect_inner_metrics()` read the folds that
-#' completed, as [collect_metrics()] and [agreement()] do. A run with some
-#' folds failed is stacked over the rest, with one warning of class
-#' `nestedtune_partial_summary` naming the missing folds. A run in which no
-#' fold completed is an error of class `nestedtune_no_completed_folds`.
-#' `collect_notes()` reads every fold and warns about none.
-#'
-#' @section Reading `.config`:
-#'
-#' The `.config` of a selection or an inner-metrics row is kept as the fold
-#' recorded it. It labels a candidate inside that one fold's tuning run. So
-#' a selected row's `.config` is found among the same fold's rows in
-#' `collect_inner_metrics()`. Because folds can search different candidates, it
-#' identifies nothing across them, which is why [agreement()] leaves it out.
+#' @return A tibble with the fold labels first (`id`, and `id2` on a
+#'   repeated design), then the stacked columns. A fold that lacks a column
+#'   holds `NA` there. `collect_notes()` gives tune's note columns, from
+#'   `location` to `trace`.
 #'
 #' @template example-setup
 #' @template example-run
