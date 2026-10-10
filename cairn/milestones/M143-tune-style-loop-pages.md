@@ -50,7 +50,7 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - [x] T2: Rewrite the bayes, race and sim-anneal pages, with the race and sim-anneal templates they alone use. Keep each tuner's own arguments and its Differences list. Point to `?nested_tune_grid` for what the loop pages share.
 - [x] T3: Rewrite `nested_fit_resamples` and `nested_final_fit`. On the final-fit page, keep what it fits, what it returns, and the IP3 sentence. Move the refusal list out, because the error messages carry it.
 - [x] T4: Rewrite `nested_workflow_map` and `nested_resamples`. On `nested_resamples`, keep the D-110 reasons and the D-085 claims in short lists.
-- [ ] T5: Rewrite the text-matching lines of any test that reads the old text, and keep the slot rules of `test-control-slots.R`.
+- [x] T5: Rewrite the text-matching lines of any test that reads the old text, and keep the slot rules of `test-control-slots.R`.
 - [ ] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the seven pages beside their tune and finetune counterparts. The gate triages every entry (D-061).
 
 ## Work log
@@ -62,3 +62,4 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - 2026-10-10: the full suite run after T2 passed except one `test-sweep-prose.R` span hit. It came from the map page, which T4 was editing during the run, and T4 fixed it.
 - 2026-10-10: T3: fit-resamples 507 and final-fit 498 prose words. The final-fit page drops its refusal list, the workflow-identity rules and the two citations. Its `inside` re-evaluation note moves into Details. It keeps what it fits, what it returns, the IP3 "What to report" section and the hand recipe. `test-tuner-registry.R` and `test-eval-time.R` (full suite) pass unedited.
 - 2026-10-10: T4: workflow-map 383 and nested_resamples 726 prose words. The seven pages total 4,338, under AC2's 5,171. The map page folds its six sections into five short Details paragraphs. `?nested_resamples` keeps the D-110 reasons as one list and the per-function time-series claims (D-085, D-115) as three items, under the two section titles the README cites.
+- 2026-10-10: T5: no test edit was needed. The rewritten pages keep every anchor `test-control-slots.R`, `test-help-structure.R`, `test-tuner-registry.R` and `test-eval-time.R` read, and no page, guide or error message points at a removed section.
