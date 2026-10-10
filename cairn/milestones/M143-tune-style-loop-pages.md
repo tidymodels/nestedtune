@@ -28,11 +28,11 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 
 ## Acceptance criteria
 
-- [ ] AC1: On each of the seven rendered pages, the Description is at most 40 words, as `Rscript benchmarks/doc-profile.R` reports at the merge head.
-- [ ] AC2: `Rscript benchmarks/doc-profile.R --tune` reports these at the merge head. Each of the seven pages has at most 1.1 times the prose of tune's `?tune_bayes`. The seven together have at most half their prose at this milestone's branch point.
-- [ ] AC3: `grep -n -E 'nestedtune_[a-z_]+|sample\.int|serializ|dplyr_reconstruct|vec_restore|orchestrator|sibling' man/<page>.Rd` prints nothing for each of the seven pages at the merge head.
-- [ ] AC4: `tests/testthat/test-control-slots.R` passes at the merge head, with its slot rules unchanged from the branch point. It reads the bayes, race, sim-anneal and fit-resamples pages. It takes the slot names from tune's `formals()`. It requires each slot under exactly one of the seven Differences headings (GP1).
-- [ ] AC5: On `?nested_final_fit`, at least one sentence says that the nested estimate describes the procedure and not this model, and what to report for this model (IP3). Review quotes it with its line.
+- [x] AC1: On each of the seven rendered pages, the Description is at most 40 words, as `Rscript benchmarks/doc-profile.R` reports at the merge head.
+- [x] AC2: `Rscript benchmarks/doc-profile.R --tune` reports these at the merge head. Each of the seven pages has at most 1.1 times the prose of tune's `?tune_bayes`. The seven together have at most half their prose at this milestone's branch point.
+- [x] AC3: `grep -n -E 'nestedtune_[a-z_]+|sample\.int|serializ|dplyr_reconstruct|vec_restore|orchestrator|sibling' man/<page>.Rd` prints nothing for each of the seven pages at the merge head.
+- [x] AC4: `tests/testthat/test-control-slots.R` passes at the merge head, with its slot rules unchanged from the branch point. It reads the bayes, race, sim-anneal and fit-resamples pages. It takes the slot names from tune's `formals()`. It requires each slot under exactly one of the seven Differences headings (GP1).
+- [x] AC5: On `?nested_final_fit`, at least one sentence says that the nested estimate describes the procedure and not this model, and what to report for this model (IP3). Review quotes it with its line.
 - [ ] AC6: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean.
 
 ## Coverage
@@ -67,3 +67,13 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - 2026-10-10: the full suite passed at `49fa840d` with no failure. claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. All six claimed more than the code does: map warnings, map subsetting, the control classes, the `event_level` conflict rule, the memory test, and the NEWS pointer claim. The seven pages now total 4,427 prose words. The reader's one re-read and `check()` are pending.
 - 2026-10-10: claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. The same reader re-read the six corrections once, and all six hold.
 - 2026-10-10: T6 done at `689e48c0`. `devtools::check()` gives 0 errors, 0 warnings and 0 notes, and it ran the tests on the corrected tree. `document()` leaves no diff, and the six gating sweeps and `air` are clean. Status set to review. The fresh reader beside tune's pages is review's step.
+
+## Review
+
+Evidence read at `20dcd6d2` (2026-10-10). `main` and `origin/main` are both `5ca197ee`, the branch point, so no merge was needed.
+
+- AC1: `Rscript benchmarks/doc-profile.R --tune` gives these Description word counts: bayes 29, race 32, sim-anneal 28, fit-resamples 31, workflow-map 21, final-fit 24, nested_resamples 35. All seven are at most 40.
+- AC2: the same run gives prose of bayes 761, race 780, sim-anneal 728, fit-resamples 522, workflow-map 402, final-fit 498 and nested_resamples 736. `tune::tune_bayes` is 1,559, so the per-page cap is 1,714.9, and every page is under it. The seven total 4,427. The branch-point copies (`git show 5ca197ee:man/<page>.Rd`, read with `--man`) total 10,343, so the cap is 5,171.5, and the total is under it.
+- AC3: the grep prints nothing on each of the seven `man/*.Rd` pages. A planted line holding `orchestrator` matches once, so the pattern can fail.
+- AC4: `test-control-slots.R` passes (148 expectations, read at `689e48c0`, whose package tree `git diff --quiet` shows equal to HEAD outside `cairn/`). `git diff main -- tests/testthat/test-control-slots.R` is empty, so the slot rules are unchanged. The file reads the bayes, race, sim-anneal and fit-resamples pages, takes the slots from tune's `formals()` and requires each slot under exactly one of the seven headings.
+- AC5: `R/nested-final-fit.R:63-65` (rendered at `man/nested_final_fit.Rd:62-64`) says: "The nested estimate describes the procedure that produced this model, not this model itself. Report [collect_metrics()] on `results` as the estimate for this model, because the model comes from the same procedure."
