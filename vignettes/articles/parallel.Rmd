@@ -131,7 +131,7 @@ mirai::status()$connections
 
 Each outer fold's seeds are drawn from the session state at entry, before
 anything is dispatched. A fold's seeds depend on its position in the
-design, as `vignette("nested-cv")` explains under Reproducibility. So a
+design, as the Reproducibility section of `?nested_tune_grid` explains. So a
 serial run under the same seed repeats the parallel run: the same
 procedure, the same tune-and-fit steps, on the same resamples.
 

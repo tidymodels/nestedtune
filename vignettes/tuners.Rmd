@@ -298,7 +298,7 @@ cat(sprintf(
 
 Seeding is the same on all five. Seed the session before the call. The same
 seed gives the same result serially and in parallel, as
-`vignette("nested-cv")` explains under Reproducibility.
+the Reproducibility section of `?nested_tune_grid` explains.
 
 ## A workflow with nothing to tune
 
