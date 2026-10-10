@@ -1,13 +1,13 @@
 # M142: The grid help page, the main guide and the README read like tune's
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1
 - **Resolves:** #91 partial
 - **Surface tier:** user-facing — the help page, guide and README every user reads first
-- **Branch/PR:** —
+- **Branch/PR:** m142-tune-style-pilot
 
 ## Goal
 
@@ -58,7 +58,7 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 
 ## Tasks
 
-- [ ] T1: Write `benchmarks/doc-profile.R`, with these definitions. Rd prose is the text of `\description`, `\details`, `\value`, every `\section`, `\seealso`, and each argument's text without its label. `\references` is not prose. A word is a whitespace token, and a `\code{}` or backtick span is one word. Rmd prose, paragraphs and sentences follow the `sweep-prose.R` reader, without tables and list items. A coined term matches `\b([Rr]ecord(s|ed|ing)?|[Rr]efus\w*|orchestrators?|siblings?)\b`. A "You" opener is a prose sentence whose first token is `You` or `Your`. With `--tune`, the script also reads the installed tune and finetune help. With `--pages`, it reads the named Rmd or md files. Show each measure on one planted page before you trust it.
+- [x] T1: Write `benchmarks/doc-profile.R`, with these definitions. Rd prose is the text of `\description`, `\details`, `\value`, every `\section`, `\seealso`, and each argument's text without its label. `\references` is not prose. A word is a whitespace token, and a `\code{}` or backtick span is one word. Rmd prose, paragraphs and sentences follow the `sweep-prose.R` reader, without tables and list items. A coined term matches `\b([Rr]ecord(s|ed|ing)?|[Rr]efus\w*|orchestrators?|siblings?)\b`. A "You" opener is a prose sentence whose first token is `You` or `Your`. With `--tune`, the script also reads the installed tune and finetune help. With `--pages`, it reads the named Rmd or md files. Show each measure on one planted page before you trust it.
 - [ ] T2: Fetch the comparator pages at a pinned commit into the gitignored `cairn/references/sources/` shelf: tidymodels.org `learn/work/nested-resampling`, `start/tuning`, `learn/work/tune-svm` and `learn/work/bayes-opt`, and tune's `vignettes/tune.Rmd`. Run the script on them and on this package at the branch point. Add the figures, the commit shas and the date to `cairn/references/tune-docs-comparison.md`.
 - [ ] T3: Rewrite the roxygen in `R/nested-tune-grid.R` to the target. Write the Description in one or two sentences and the arguments as noun phrases. Keep these in Details: the two loops, the nested designs D-085 claims (a short list), and reproducibility in two sentences (IP2). Add parallel use in a short paragraph and the IP3 sentence. Keep the seven Differences headings, each with one or two sentences. Put the result's columns in Value. Before you move text to another page, make sure that the page does not already say it.
 - [ ] T4: Rewrite the `man-roxygen/differences-*.R` templates to the short form and re-render the five sibling pages. Rewrite the text-matching lines of tests that read help text, and keep the slot rules of `test-control-slots.R`.
@@ -77,3 +77,4 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 - 2026-10-09: `procedure` left the coined-term list because it is the package's core concept (IP3) and the tidymodels.org nested-resampling article uses it too. Task text limits it to one gloss a page.
 - 2026-10-09: the four new rows took ROADMAP to 61 lines (cap 60), so the plan commit merged the two `sweep-prose.R` candidate rows and the two pkgdown-settings rows, with no content dropped.
 - 2026-10-09: question set: post the queue comment on #91 — declined, nothing written to GitHub. Help pages: tune shape. Guides: worked examples, no optimism demonstration. Voice: "we" with the plain-English sweep rules kept.
+- 2026-10-09: T1 done. `benchmarks/doc-profile.R` loads `rmd_paragraphs()`, `sentences()` and their helpers from `sweep-prose.R` by parsing it, and gained `--man <dir>` so a planted page can be read. `test-doc-profile.R` pins every column on two hand-counted fixtures. A planted mutation (dropping `\code` from the one-word tags) moved the coined count from 2 to 3, which the test fails on. The branch-point `nested_tune_grid` figure is 4,960 prose words.

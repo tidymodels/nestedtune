@@ -1,0 +1,18 @@
+---
+title: "A planted guide"
+---
+
+You read the first paragraph here. It has two sentences.
+
+| table | refused |
+|---|---|
+
+- a list item that refuses
+
+```{r}
+refused <- 1
+```
+
+Your second paragraph has `code` spans and records.
+
+We note the `r 1 + 1` inline value. Young trees grow.
