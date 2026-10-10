@@ -1,6 +1,6 @@
 # M142: The grid help page, the main guide and the README read like tune's
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -64,7 +64,7 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 - [x] T4: Rewrite the `man-roxygen/differences-*.R` templates to the short form and re-render the five sibling pages. Rewrite the text-matching lines of tests that read help text, and keep the slot rules of `test-control-slots.R`.
 - [x] T5: Rewrite `vignettes/nested-cv.Rmd`. Open with what nested resampling is, and narrate the worked example with "we". Drop the roadmap paragraph, the metric-order aside, the Reproducibility section and the refusal chunk. Keep the write-up short, and keep the link to `estimate.Rmd` for the background.
 - [x] T6: Rewrite the README opening into two or three sentences. Cut the prose under the tables to the definitions and pointers D-110 keeps. Re-knit.
-- [ ] T7: Run the verify slot and the gating sweeps. Record the `doc-profile.R` figures at the head in the comparison note, and add a NEWS bullet. At review, one fresh reader reads the three pages beside the `tune_grid` page and the tidymodels.org article. The reader reports what still reads unlike them, and the gate triages every entry (D-061).
+- [x] T7: Run the verify slot and the gating sweeps. Record the `doc-profile.R` figures at the head in the comparison note, and add a NEWS bullet. At review, one fresh reader reads the three pages beside the `tune_grid` page and the tidymodels.org article. The reader reports what still reads unlike them, and the gate triages every entry (D-061).
 
 ## Work log
 
@@ -84,3 +84,4 @@ Rewrite `?nested_tune_grid`, `vignettes/nested-cv.Rmd` and the README opening to
 - 2026-10-09: T6 done. The README opening is 63 prose words: what the package does, and the IP3 sentence. The Refused definition and the `?nested_resamples` pointer stay (D-110). The pointer to `?nested_tune_race` for the racers' inner apparent split was dropped, because the race page states it. The README has 2 coined terms (6 at the branch point). Both tables are unchanged, and the re-knit changed only prose lines in README.md.
 - 2026-10-09: claim audit: 133 claims read, 8 corrected — R/nested-tune-grid.R, R/nested-fit-resamples.R, vignettes/articles/parallel.Rmd, benchmarks/doc-profile.R. The fixes: the control reaches only the inner run, and the outer fit takes `event_level`, `save_pred` and `extract`. Integrated survival metrics read `eval_time` too. A design error can name the design rather than rows. The first metric selects only under the default rule. `.inner_metrics` holds candidates that scored. `doc-profile.R` no longer splits trailing punctuation off a `\code{}` mark, and the fixture plants that case. The broken pointers were fixed: the fit-resamples seed line now states the pinned kinds, and the parallel article no longer says the grid page lists what is sent.
 - 2026-10-09: full suite: 15,493 passed, 4 failed, all from two tests that pinned removed grid-page wording. In `test-dplyr-compat.R`, the passing control now reads "returns a plain tibble". In `test-id-columns.R`, the fold-label promise is now required of NEWS alone, and the help page is held to not carrying the narrowed claim. Both files pass (156 and 311).
+- 2026-10-09: T7 done. `devtools::check()` gives 0 errors, 0 warnings and 0 notes. `document()` leaves no diff, the six gating sweeps print clean, and `air` is clean. The fresh-reader report that T7 names runs at review. Status set to review.

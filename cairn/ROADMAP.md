@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-02 M141 archived, M138 row pruned, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M142 | The grid help page, the main guide and the README read like tune's | in-progress | — | normal | milestones/M142-tune-style-pilot.md |
+| M142 | The grid help page, the main guide and the README read like tune's | review | — | normal | milestones/M142-tune-style-pilot.md |
 | M143 | The other loop pages, the final fit and the design page read like tune's | planned | M142 | normal | milestones/M143-tune-style-loop-pages.md |
 | M144 | The help pages for reading results read like tune's | planned | M142 | normal | milestones/M144-tune-style-reader-pages.md |
 | M145 | The other four guides read like the tidymodels.org articles | planned | M142, M144 | normal | milestones/M145-tune-style-guides.md |
