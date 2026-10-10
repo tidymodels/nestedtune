@@ -67,6 +67,7 @@ Rewrite seven help pages to the target M142 sets: `nested_tune_bayes`, `nested_t
 - 2026-10-10: the full suite passed at `49fa840d` with no failure. claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. All six claimed more than the code does: map warnings, map subsetting, the control classes, the `event_level` conflict rule, the memory test, and the NEWS pointer claim. The seven pages now total 4,427 prose words. The reader's one re-read and `check()` are pending.
 - 2026-10-10: claim audit: 110 claims read, 6 corrected — R/nested-workflow-map.R, R/nested-fit-resamples.R, man-roxygen/differences-settable.R, R/nested-resamples.R, NEWS.md. The same reader re-read the six corrections once, and all six hold.
 - 2026-10-10: T6 done at `689e48c0`. `devtools::check()` gives 0 errors, 0 warnings and 0 notes, and it ran the tests on the corrected tree. `document()` leaves no diff, and the six gating sweeps and `air` are clean. Status set to review. The fresh reader beside tune's pages is review's step.
+- 2026-10-10: step-7 approval: m143-tune-style-loop-pages approved for merge. The user chose no comment on #91, so step 9 posts none.
 
 ## Review
 
