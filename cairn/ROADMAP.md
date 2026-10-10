@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-10 M144 archived, M141 row pruned, validate green._
+_Last hygiene check: 2026-10-10 M145 archived, M142 row pruned, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M145 | The other four guides read like the tidymodels.org articles | review | M142, M144 | normal | milestones/M145-tune-style-guides.md |
+| M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |
 | M144 | The help pages for reading results read like tune's | done | M142 | normal | milestones/archive/M144-tune-style-reader-pages.md |
 | M143 | The other loop pages, the final fit and the design page read like tune's | done | M142 | normal | milestones/archive/M143-tune-style-loop-pages.md |
-| M142 | The grid help page, the main guide and the README read like tune's | done | — | normal | milestones/archive/M142-tune-style-pilot.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
