@@ -94,12 +94,12 @@ scored no candidate and is refused with condition class
 
 <p>A <code>grid</code> given as a size is expanded by tune, and the expansion sometimes
 reaches fewer candidates than the number requested. A candidate that failed
-everywhere scored nothing. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> gives the full account of
-how the two records
-diverge under <code>.inner_metrics</code>, and it holds here too.</p>
-<p>One pointer there does not carry over. A candidate that failed on every
-inner resample is missing from this table, and a <code>nested_final_fit</code> has no
-<code>.notes</code> column to record it in. Look inside the run itself:
+everywhere scored nothing. The Value section of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> says
+how <code>attr(x, "grid")</code> and <code>.inner_metrics</code> can differ, and it holds here
+too.</p>
+<p>A candidate that failed on every inner resample is missing from this
+table, and a <code>nested_final_fit</code> has no <code>.notes</code> column to record it in.
+Look inside the run itself:
 <code>tune::collect_notes(extract_tune_results(x))</code>.</p>
     </div>
     <div class="section level2">

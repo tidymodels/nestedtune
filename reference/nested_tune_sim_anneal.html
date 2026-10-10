@@ -127,33 +127,23 @@ report for that model.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflows::workflow()</a></code> with at least one parameter marked
-for tuning with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>, or a parsnip model specification with
-such a parameter, given with <code>preprocessor</code>. A workflow with no marker is
-refused, and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> scores one on the same design.</p></dd>
+with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code>, or a parsnip model specification.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>On the generic, the arguments of the method that <code>object</code>
-selects. On a method, a control object from <code><a href="https://finetune.tidymodels.org/reference/control_sim_anneal.html" class="external-link">finetune::control_sim_anneal()</a></code>, as
-<code>control</code>, and nothing else. Every argument after <code>...</code> is matched by
-name. The section on differences from finetune says what becomes of
-each slot.</p></dd>
+<dd><p>On the generic, the arguments of the method. On a method, pass
+<code>control = finetune::control_sim_anneal()</code> here to set the control. Name every
+argument after <code>...</code>.</p></dd>
 
 
 <dt id="arg-preprocessor">preprocessor<a class="anchor" aria-label="anchor" href="#arg-preprocessor"></a></dt>
-<dd><p>A formula or a recipe, when <code>object</code> is a model
-specification. The two are combined as
-<code>workflows::workflow(preprocessor, object)</code>, and the call runs as it
-does on that workflow. Other preprocessors, such as
-<code><a href="https://workflows.tidymodels.org/reference/add_variables.html" class="external-link">workflows::workflow_variables()</a></code>, go through a workflow. A workflow
-already carries its preprocessor, so one given beside a workflow is
-refused.</p></dd>
+<dd><p>A formula or recipe, when <code>object</code> is a model
+specification.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>
 <dd><p>A nested resampling design from <code><a href="nested_resamples.html">nested_resamples()</a></code> or
-<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>, one row per outer fold. The section on nested
-designs says what the design must hold.</p></dd>
+<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>.</p></dd>
 
 
 <dt id="arg-iter">iter<a class="anchor" aria-label="anchor" href="#arg-iter"></a></dt>
@@ -169,22 +159,10 @@ be useful when parameter ranges need to be customized.</p></dd>
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
 <dd><p>A <code><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">yardstick::metric_set()</a></code>, or <code>NULL</code> for tune's default
-set. Under the <code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules of
-<code><a href="selection_rule.html">selection_rule()</a></code>, the first metric in the set chooses each fold's
-candidate. The <code>"desirability"</code> rule chooses by its goals instead.
-<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> accept that rule, and the
-racing and annealing tuners refuse it. <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and
-<code>nested_tune_sim_anneal()</code> also steer their inner search on the first
-metric. The outer loop scores every metric in the set, and
-<code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports each one.</p>
-<p>So the order of the set matters. If the first metric is not the one you
-read, the run chooses under one loss and assesses under another. For
-example, <code>metric_set(mae, rmse)</code> chooses by <code>mae</code> and also reports
-<code>rmse</code>. Stone (1974, p. 116) says that the two losses need not match.
-A set that tune cannot use for the model's mode, such as a
-classification metric on a regression model, is refused before any
-fold runs.</p></dd>
+set. Under every rule but <code>"desirability"</code>, the first metric selects
+each fold's candidate, so put the metric you report first. The Bayes,
+race and annealing searches also steer on it. Every metric is scored on
+the outer folds.</p></dd>
 
 
 <dt id="arg-initial">initial<a class="anchor" aria-label="anchor" href="#arg-initial"></a></dt>
@@ -201,15 +179,12 @@ level of a two-class outcome is the event. It applies to the inner tuning run an
 <dt id="arg-eval-time">eval_time<a class="anchor" aria-label="anchor" href="#arg-eval-time"></a></dt>
 <dd><p>A numeric vector of evaluation times for a censored
 regression model, or <code>NULL</code> (the default) to leave the choice to tune.
-The section on evaluation times says what this package refuses.</p></dd>
+Times that are not numeric, empty, missing, negative or not finite are an error. Zero, repeated and unordered times are passed on to tune.</p></dd>
 
 
 <dt id="arg-select">select<a class="anchor" aria-label="anchor" href="#arg-select"></a></dt>
-<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> naming the selector each outer fold
-picks its candidate with, on its own inner run. The default is
-<code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> on the first metric. <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code>nested_tune_sim_anneal()</code> refuse the
-<code>"desirability"</code> rule.</p></dd>
+<dd><p>A <code><a href="selection_rule.html">selection_rule()</a></code> that each outer fold uses to pick its
+candidate. The default is <code><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">tune::select_best()</a></code> on the first metric.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -263,41 +238,23 @@ before the first fold is sent, and warns where it cannot.</p>
 
 
 
-<p>Weights set on the design with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> reach the
-outer average. <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> and
-<code><a href="https://tune.tidymodels.org/reference/compute_metrics.html" class="external-link">compute_metrics()</a></code> then report the weighted mean of the folds'
-estimates. Their <code>std_err</code> is the weighted standard deviation over the
-square root of the effective sample size, as tune computes both. The
-per-fold table from <code>collect_metrics(summarize = FALSE)</code> carries each
-fold's weight in a <code>.weight</code> column. tune stores the weights scaled to
-sum to one, and stores none when they are equal, so equal weights give
-the unweighted average.</p>
-<p>A fold that fails, or that scores <code>NA</code> on a metric, is left out of that
-average and the remaining weights are scaled up to sum to one. <code>n</code> counts
-the folds that scored. The weights on a design's inner resamples are read
-by tune itself.</p>
+<p>Weights set on the design with <code><a href="https://tune.tidymodels.org/reference/add_resample_weights.html" class="external-link">tune::add_resample_weights()</a></code> give a
+weighted average of the outer folds' estimates, as tune computes it. A
+fold that fails or scores <code>NA</code> is left out, and the other weights are
+scaled to sum to one.</p>
     </div>
     <div class="section level2">
     <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>
 
 
 
-<p>Seed the session before the call, as elsewhere in tidymodels. There is no
-<code>seed</code> argument. On entry the function draws <code>2 * n</code> seeds in a single
-<code>sample.int(.Machine$integer.max, 2 * n)</code> call, where <code>n</code> is the number of
-outer folds. Fold <code>i</code> uses element <code>2 * i - 1</code> for its tuning step and
-element <code>2 * i</code> for its outer fit, each applied with the generator kind
-pinned. A fold's seed depends on its position, not on the order the folds
-run in. So the same seed gives the same result serially and in parallel,
-at any number of daemons. The two seeds are kept on the result as
-<code>.tuning_seed</code> and <code>.outer_fit_seed</code>, and <code><a href="nested_tune_grid.html">?nested_tune_grid</a></code> shows how to
-reproduce one fold by hand from them.</p>
-<p>The caller's RNG state and generator kind are restored on exit, including
-when the call errors, so a seeded script that draws afterwards is
-unaffected. One consequence: two consecutive calls with no <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>
-between them return identical results, exactly as repeated
-<code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> calls do.</p>
-<p>This binds randomness that flows through R's generator. Engines that
+<p>Call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> before the function, as elsewhere in tidymodels. Each
+fold takes its seeds from that one seed by its position, so the result is
+the same serially and in parallel. The seeds are kept as <code>.tuning_seed</code>
+and <code>.outer_fit_seed</code>. The function restores your random state on exit,
+even after an error. So two calls with no <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> between them give
+the same result, as repeated <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> calls do.</p>
+<p>This covers randomness that flows through R's generator. Engines that
 randomize outside it (kernlab's SVMs, the deep-learning engines) cannot be
 pinned by any R-side scheme, here or in tune.</p>
     </div>
@@ -315,9 +272,8 @@ overwritten. The result records that effective control as
 <code>extract_procedure(res)$control</code>. Every slot of <code>control_sim_anneal()</code>
 falls under one of seven headings.</p>
 
-<p><strong>Forced: <code>allow_par</code>.</strong> The inner search and the outer scoring fit both
-run at <code>allow_par = FALSE</code>, whatever the control carries, because
-parallelism belongs over the outer folds.</p>
+<p><strong>Forced: <code>allow_par</code>.</strong> The inner search and the outer fit run with
+<code>allow_par = FALSE</code>, because the outer folds carry the parallelism.</p>
 
 <p><strong>Settable as its own argument: <code>event_level</code>.</strong> The argument is the one
 place the level is set, as on the grid page. A control at finetune's
@@ -374,153 +330,40 @@ backend to reach at <code>allow_par = FALSE</code>.</p>
 
 
 
-<p><code>resamples</code> is a data frame with one row per outer fold. Its <code>splits</code>
-column holds that fold's <code>rsplit</code>, its <code>inner_resamples</code> column holds an
-<code>rset</code> with at least one row, and every other column labels the fold. A
-label column is named <code>id</code>, or <code>id</code> followed by a digit from 1 to 9, and
-holds character or factor values. Together the label columns give every
-outer fold a distinct label with no <code>NA</code>.</p>
-<p>Inside each inner <code>rset</code>, every element of <code>splits</code> is an <code>rsplit</code>. All
-of a fold's inner splits carry one data frame: either the outer split's
-own frame, as <code><a href="nested_resamples.html">nested_resamples()</a></code> builds, or that split's analysis set,
-as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds. An inner split carrying the outer frame
-must index only rows the outer split's <code>in_id</code> holds, in its <code>in_id</code> and
-in any <code>out_id</code> other than the logical <code>NA</code>. So no inner analysis or
-assessment set reaches a row the outer fold holds out. Every <code>in_id</code> and
-<code>out_id</code>, outer or inner, is a numeric vector with no <code>NA</code>. None holds a
-value outside integer range, and no <code>out_id</code> is <code>NULL</code> or empty. The one
-exception is an <code>out_id</code> that is the logical <code>NA</code>, which tells rsample to
-find the assessment set with <code><a href="https://rsample.tidymodels.org/reference/complement.html" class="external-link">rsample::complement()</a></code>.</p>
-<p>A design breaking any of this is refused before anything is fitted. So is
-a design using a bootstrap for the outer loop, or <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code>,
-<code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> for either loop. The
-error has condition class <code>nestedtune_bad_design</code>. It names every
-offending row, column, inner split, index or outer fold. A refusal of a
-bootstrap or of one of those three rsample functions names the function.
-The design is found from the class of its splits as well as its own
-class. So a row subset of such a design is refused, and so is a design
-rebuilt with <code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code> from its splits or holding one such
-split among valid ones. Bootstrap and permutation designs can add an
-apparent split with the id "Apparent", which tune leaves out of its
-estimates. So an apparent split beside bootstrap or permutation splits
-counts as part of that design only if its id is "Apparent". Under any
-other id, it counts as an <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> split. In the inner loop,
-tune leaves every split with the id "Apparent" out of its estimates,
-whatever the split's class. So any other inner split with that id is
-refused. Otherwise each outer fold that tunes on it uses fewer resamples
-than its design holds. An inner split whose <code>id</code> is missing is refused as
-well, because tune leaves it out of its estimates too. So is an inner
-design in which two splits carry the same values in every id column, such
-as <code>id</code> and <code>id2</code>, because tune then miscounts its resamples. In either
-loop, a split whose assessment set holds a row of its analysis set is
-refused, because it scores the model on rows it trained on. The rule
-reads the rows, so it also catches a split rebuilt with
-<code><a href="https://rsample.tidymodels.org/reference/make_splits.html" class="external-link">rsample::make_splits()</a></code>, which keeps no class that names its design. An
-index into an outer split's analysis set counts as the data row it
-copies. The apparent split of an inner bootstrap design is exempt from
-this rule under the id "Apparent", because tune leaves it out of its
-estimates. The checks
-exist because
-<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> builds a design whatever its <code>inside</code> argument
-returned, and because a design assembled by hand can index rows its outer
-fold never sees.</p>
-<p>Time-series designs are supported for an outer
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
-<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, and for the inner sliding designs named
-below. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> are tested on
-all four outer designs, and so is
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their results. <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and
-<code>nested_tune_sim_anneal()</code> are tested on the rolling-origin design, and
-so is <code><a href="nested_final_fit.html">nested_final_fit()</a></code> for their results, plus the sliding-window
-design for <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> results. <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is
-tested on the rolling-origin design. The outer design never reaches the
-tuner: each tuner is handed one outer fold's inner resamples at a time.
-An inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
-<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> design is tested with an outer
-<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> under <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, and so is
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for its results. These designs are also tested under
-<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code> and <code>nested_tune_sim_anneal()</code>, and so is
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> for the results of those four tuners.
-<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on these three designs with its default
-<code>fn</code>. With <code>fn</code> set to each of those four tuners, it is tested on the
-sliding-period design alone. <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept
-these designs. It checks the inner design but fits nothing on it. Any
-other inner design is not tested.
-Each of these tests leaves the <code>lag</code> of <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> at its
-default of 0. A <code>lag</code> above 0 is refused in either loop, as
-<code><a href="nested_resamples.html">nested_resamples()</a></code> explains.
-<code><a href="augment.nested_results.html">augment()</a></code> refuses these designs, because their
-assessment sets leave rows out. Its error names the rows left out. When
-there are more than five, it names the first five.</p>
-<p>An outer <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or
-<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> with an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
-<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> gives nine
-pairs, and each pair is tested under <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>. The pair of an
-outer and an inner <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code> is also tested under
-<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, <code><a href="nested_tune_race.html">nested_tune_race_anova()</a></code>,
-<code><a href="nested_tune_race.html">nested_tune_race_win_loss()</a></code>, <code>nested_tune_sim_anneal()</code> and
-<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> with its default <code>fn</code>. On that pair,
-<code><a href="nested_final_fit.html">nested_final_fit()</a></code> is tested for <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> results, and
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> is tested to accept the design. It checks the
-inner design but fits nothing on it. On the other eight pairs, no
-function but <code><a href="nested_resamples.html">nested_resamples()</a></code> and <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> is tested.</p>
+<p><code>resamples</code> has one row per outer fold: a <code>splits</code> column of outer splits,
+an <code>inner_resamples</code> column of inner rsets, and id columns. The function
+checks the design before it fits anything. An outer bootstrap is an
+error, and so are <code><a href="https://rsample.tidymodels.org/reference/loo_cv.html" class="external-link">rsample::loo_cv()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/apparent.html" class="external-link">rsample::apparent()</a></code> and
+<code><a href="https://rsample.tidymodels.org/reference/permutations.html" class="external-link">rsample::permutations()</a></code> in either loop. An inner split that reaches a
+row its outer fold holds out is an error too. Each error names the design,
+or the rows, splits or folds at fault.</p>
+<p>Time-series designs work as well. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> is tested with an
+outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>, <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_window()</a></code>,
+<code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> or <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code> design and an
+inner design of any of those four kinds. Leave the <code>lag</code> of
+<code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> at 0, because a larger <code>lag</code> is an error.
+<code><a href="nested_resamples.html">nested_resamples()</a></code> says which of these designs the other functions are
+tested on.</p>
     </div>
     <div class="section level2">
     <h2 id="finalizing-a-parameter-range">Finalizing a parameter range<a class="anchor" aria-label="anchor" href="#finalizing-a-parameter-range"></a></h2>
 
 
 
-<p><code>param_info</code> is passed unchanged to the inner tuning call on every outer
-fold, so a restricted range restricts what every fold searches. Some
-ranges are unknown until the data is seen: <code>mtry()</code>, or a <code>min_n()</code>
-finalized by row count. tune finalizes such a range on the outer fold's
-analysis rows, never on the rows that fold holds out. On a
-<code><a href="nested_resamples.html">nested_resamples()</a></code> design the inner call therefore receives the fold's
-inner resamples re-pointed at its analysis set, not the design's own
-<code>inner_resamples</code> element, which indexes the whole data. A design from
-<code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code> already carries the analysis set and is passed as
-it is. An outer split that repeats a row, an evaluated
-<code><a href="https://rsample.tidymodels.org/reference/manual_rset.html" class="external-link">rsample::manual_rset()</a></code>, gives an analysis set that holds each copy of
-the row. The re-pointing then sends the first mention of the row in an
-inner split to its first copy, the second mention to its second copy,
-and so on. A mention past the last copy, which an inner bootstrap can
-draw, starts again at the first copy. An inner assessment set that the
-design leaves as the complement holds each copy of every row that the
-inner split does not train on. <code><a href="nested_final_fit.html">nested_final_fit()</a></code> finalizes on the
-full data.</p>
+<p>A range that depends on the data, such as <code>mtry()</code>, is finalized on each
+outer fold's analysis set, never on the rows that fold holds out.
+<code><a href="nested_final_fit.html">nested_final_fit()</a></code> finalizes it on all the data. A range set in
+<code>param_info</code> applies to every fold.</p>
     </div>
     <div class="section level2">
     <h2 id="evaluation-times">Evaluation times<a class="anchor" aria-label="anchor" href="#evaluation-times"></a></h2>
 
 
 
-<p><code>eval_time</code> reaches every tune call whose answer depends on it. So a
-dynamic or integrated survival metric, <code>brier_survival()</code>,
-<code>roc_auc_survival()</code> and their relatives, is measured at the times you
-name. When the metric set has no metric that reads it, tune ignores it
-with a warning. tune keys that warning on the metrics, not on the
-model's mode.</p>
-<p>Refused here, ahead of tune: anything that is not numeric, an empty
-vector, and any element that is missing, negative or not finite. tune
-treats those unevenly, and only once a metric reads the
-times, so they are refused at entry, before a whole run is paid for.
-Zero, repeated times and times out of order are accepted and passed on
-untouched, because tune normalizes those itself. A repeated time draws
-tune's warning that 0 inappropriate evaluation time points were removed,
-once per tune call.</p>
-<p>The selection rule is applied without <code>eval_time</code>. Left unset, it
-selects at the first of the evaluation times the tuning run was built
-with, which are the ones named here. Passing them again changes no
-choice, and repeats tune's message about which time it took.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Stone, M. (1974). Cross-validatory choice and assessment of statistical
-predictions. <em>Journal of the Royal Statistical Society, Series B</em>, 36(2),
-111–147.</p>
+<p>The inner tuning and the outer scoring both use the times in <code>eval_time</code>.
+If the metric set has no dynamic or integrated survival metric, tune
+ignores the times with a warning. Each fold selects at the first of these
+times.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

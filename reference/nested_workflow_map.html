@@ -115,7 +115,8 @@ no <code>resamples</code>.</p>
 <code>"best"</code>, <code>"one_std_err"</code> and <code>"pct_loss"</code> rules of <code><a href="selection_rule.html">selection_rule()</a></code>,
 its first metric chooses each fold's candidate, and every metric in it
 is scored. The <code>metrics</code> entry of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> says what <code>NULL</code>
-means and how the <code>"desirability"</code> rule chooses instead. A set that
+means, and <code><a href="selection_rule.html">selection_rule()</a></code> says how the <code>"desirability"</code> rule chooses
+instead. A set that
 does not suit the model of any workflow the map runs is refused before
 any workflow runs, a workflow routed to <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
 included.</p></dd>

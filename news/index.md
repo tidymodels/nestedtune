@@ -2,6 +2,13 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
+  the nested cross-validation guide and the README opening are shorter
+  and follow the shape of tune’s help pages and the tidymodels.org
+  articles. The help page keeps what a user decides and what the result
+  holds. The guide is one worked example. The shared sections on the
+  other loop pages are shorter too.
+
 - The tuning results change for a design whose outer split repeats a row
   in its `in_id`. Each inner tuning call now gets its inner splits on
   the outer fold’s analysis set. It already did so for a design with no

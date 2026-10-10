@@ -53,9 +53,11 @@ nested_workflow_map(object, fn = "nested_tune_grid", ...)
   its first metric chooses each fold's candidate, and every metric in it
   is scored. The `metrics` entry of
   [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-  says what `NULL` means and how the `"desirability"` rule chooses
-  instead. A set that does not suit the model of any workflow the map
-  runs is refused before any workflow runs, a workflow routed to
+  says what `NULL` means, and
+  [`selection_rule()`](https://nestedtune.tidymodels.org/reference/selection_rule.md)
+  says how the `"desirability"` rule chooses instead. A set that does
+  not suit the model of any workflow the map runs is refused before any
+  workflow runs, a workflow routed to
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   included.
 

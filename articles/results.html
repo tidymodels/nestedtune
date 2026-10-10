@@ -231,8 +231,8 @@ section on a failed fold below shows a <code>FALSE</code>.</p>
 <span><span class="co">#&gt; [1] TRUE TRUE TRUE TRUE TRUE</span></span></code></pre></div>
 <p><code>.tuning_seed</code> and <code>.outer_fit_seed</code> are the
 two seeds each fold ran under, drawn at entry and fixed by the fold’s
-position in the design, as <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains
-under Reproducibility.</p>
+position in the design, as the Reproducibility section of
+<code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> explains.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">select</span><span class="op">(</span><span class="va">res</span>, <span class="va">.tuning_seed</span>, <span class="va">.outer_fit_seed</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>

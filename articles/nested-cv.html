@@ -80,36 +80,24 @@
 
     
     
-<p>When you tune a model with cross-validation, you try several settings
-and keep the one with the best score. That score is optimistic. You
-picked the winner because it scored well, so some of its score is luck,
-and the same number will not hold up on new data.
-<code><a href="../articles/estimate.html">vignette("estimate")</a></code> explains why in more detail.</p>
-<p>Nested cross-validation fixes this by scoring the whole tuning
-procedure rather than the winner alone. It splits the data into outer
-folds. Within each outer fold it tunes using only the analysis rows,
-fits the winning setting on those rows, and scores that fit on the
-assessment rows the tuning never saw. The average of those outer scores
-is an honest estimate of how well tune-then-fit works on new data.</p>
-<p>That average is what <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports, and it
-is the number to report for the model you deploy. That model is the same
-procedure run once more on all the data. No second score is computed on
-it, because every row it was trained on was already used to choose and
-fit it.</p>
-<p>This page walks from a design to a write-up. The other pages go
-deeper. <code><a href="../articles/results.html">vignette("results")</a></code> reads everything the results
-object holds. <code><a href="../articles/tuners.html">vignette("tuners")</a></code> swaps in the other inner
-searches and scores a workflow with nothing to tune. The <a href="https://nestedtune.tidymodels.org/articles/parallel.html">parallel
-article</a> runs the same call on a pool of workers.</p>
+<p>Nested resampling estimates how well a tuning procedure (tune,
+select, fit) performs on new data. It runs two loops. The inner loop
+tunes the model, and the outer loop scores the tuned model on rows that
+the tuning never saw.</p>
+<p>The best score from ordinary tuning is optimistic. The same resamples
+that score the candidates (the settings tried) also pick the winner, so
+part of its score is luck. <code><a href="../articles/estimate.html">vignette("estimate")</a></code> explains
+this in more detail.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-design">The design<a class="anchor" aria-label="anchor" href="#the-design"></a>
 </h2>
-<p><code><a href="../reference/nested_resamples.html">nested_resamples()</a></code> builds the two-level structure: an
-outer resampling, with an inner resampling attached to each outer
-fold.</p>
+<p>We start with the design. <code><a href="../reference/nested_resamples.html">nested_resamples()</a></code> builds an
+outer resampling and attaches an inner resampling to each outer fold.
+<code>mtcars</code> has 32 rows, too few for real nested resampling, but
+it keeps this example fast.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -132,9 +120,9 @@ fold.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold4 <span style="color: #949494;">&lt;vfold [5 × 2]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [26/6]&gt;</span> Fold5 <span style="color: #949494;">&lt;vfold [5 × 2]&gt;</span></span></span></code></pre></div>
 <p>Each row is one outer fold. <code>splits</code> holds the outer
-split, and <code>inner_resamples</code> holds an ordinary
-<code>rset</code> built from that fold’s analysis rows alone. That is
-all the tuning for that fold gets to see.</p>
+split. <code>inner_resamples</code> holds an ordinary rset built from
+that fold’s analysis set alone, so the tuning in that fold never sees
+the fold’s held-out rows.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">folds</span><span class="op">$</span><span class="va">inner_resamples</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; #  5-fold cross-validation </span></span>
@@ -146,17 +134,12 @@ all the tuning for that fold gets to see.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;split [20/5]&gt;</span> Fold3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [20/5]&gt;</span> Fold4</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [20/5]&gt;</span> Fold5</span></span></code></pre></div>
-<p><code>mtcars</code> has 32 rows, which keeps this page fast to build.
-This example is here because it builds in seconds, not because it needs
-nesting. <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says when nesting is worth
-its cost.</p>
 </div>
 <div class="section level2">
 <h2 id="the-model-and-the-grid">The model and the grid<a class="anchor" aria-label="anchor" href="#the-model-and-the-grid"></a>
 </h2>
-<p>Anything tune can tune, this can tune. Here it is a random forest
-with two parameters marked for tuning, and an explicit grid of
-candidates, the settings to try.</p>
+<p>We tune two parameters of a random forest over a grid of candidates,
+the settings to try.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, trees <span class="op">=</span> <span class="fl">500</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -173,35 +156,22 @@ candidates, the settings to try.</p>
 <span><span class="co">#&gt; 4    2    10</span></span>
 <span><span class="co">#&gt; 5    5    10</span></span>
 <span><span class="co">#&gt; 6    8    10</span></span></code></pre></div>
-<p>That is 6 candidates, each resampled inside every outer fold. The run
-below has 5 outer folds. Each outer fold tunes on 5 inner resamples, and
-each inner resample scores all 6 candidates. That multiplies out to 150
-models for tuning, plus one per outer fold for scoring. Nested
-cross-validation is expensive, and that product is where the cost
-lives.</p>
+<p>The grid has 6 candidates. Each of the 5 outer folds scores all of
+them on 5 inner resamples. That is 150 fits for tuning, plus one fit per
+outer fold for scoring.</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-loop">Running the loop<a class="anchor" aria-label="anchor" href="#running-the-loop"></a>
 </h2>
-<p><code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> drives the outer loop. For each outer
-fold it calls <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> on that fold’s inner
-resamples, the same call you make by hand, with parallelism off and the
-fold’s seed set. It then picks the best candidate by the first metric.
-It finalizes the workflow with that candidate, fits it on the fold’s
-analysis rows, and scores it on the assessment rows. To pick by another
-of tune’s selectors, pass a <code><a href="../reference/selection_rule.html">selection_rule()</a></code> naming it as
-the <code>select</code> argument. Every statistical step is tune’s. This
-package adds the loop, the seeding, and a result that keeps what each
-fold chose.</p>
-<p>The order of the <code>metrics</code> set matters. tune’s three
-selectors choose on the first metric in the set, and the outer loop
-scores every metric in it. If the first metric is not the one you read,
-the run chooses under one loss and assesses under another. For example,
-<code>metric_set(mae, rmse)</code> chooses by <code>mae</code> and also
-reports <code>rmse</code>. Stone (1974, p. 116) says that the two losses
-need not match. The run below passes no set, so it uses tune’s default
-for a regression, <code>metric_set(rmse, rsq)</code>, and chooses by
-<code>rmse</code>.</p>
+<p><code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> runs the outer loop. For each outer
+fold, it calls <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code> on the fold’s inner
+resamples and picks the best candidate. It then fits that candidate on
+the fold’s analysis set and scores it on the assessment set.</p>
+<p>We pass no metric set, so the run uses tune’s default for regression
+and selects by <code>rmse</code>. To select another way, pass a
+<code><a href="../reference/selection_rule.html">selection_rule()</a></code> as <code>select</code>. We call
+<code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> first, as elsewhere in tidymodels. The same seed
+gives the same result whether the folds run serially or in parallel.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -223,9 +193,7 @@ for a regression, <code>metric_set(rmse, rsq)</code>, and chooses by
 <span><span class="co">#&gt; <span style="color: #949494;">#   .outer_fit_seed &lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summary()` for what the run means: which folds failed, what</span></span>
 <span><span class="co">#&gt;   each one selected, and the estimate across them.</span></span></code></pre></div>
-<p>Printing shows the object: one row per outer fold, and the record
-each fold left behind. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> says what the run
-means.</p>
+<p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> describes the run in words.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -261,19 +229,20 @@ means.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> rsq     standard   0.842     5  0.029<span style="text-decoration: underline;">3</span></span></span>
 <span></span>
 <span><span class="va">rmse_row</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span></span></code></pre></div>
-<p>The RMSE of 2.49 is the mean of 5 scores, each measured on rows the
-procedure never touched. <code>std_err</code> is the standard error of
-that mean, not the spread of the folds and not a confidence interval.
-Two of these numbers from two workflows cannot be subtracted to compare
-them, and <code><a href="../articles/estimate.html">vignette("estimate")</a></code> says why.</p>
+<p>The RMSE of 2.49 is the mean of 5 outer scores. Each one was measured
+on rows that the tuning never saw. <code>std_err</code> is the standard
+error of that mean.</p>
+<p>This estimate describes the whole procedure (tune, select, fit) and
+not one fitted model. It is still the number to report for the model
+that <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> fits below, because that model
+comes from the same procedure.</p>
 </div>
 <div class="section level2">
 <h2 id="each-folds-selection">Each fold’s selection<a class="anchor" aria-label="anchor" href="#each-folds-selection"></a>
 </h2>
-<p>The summary above listed what each fold selected, and
-<code>.selected</code> is where those choices live: a list column of
-one-row tibbles, one per outer fold. <code><a href="../reference/collect_selections.html">collect_selections()</a></code>
-stacks them, with the fold each came from beside it.</p>
+<p>Each outer fold tunes on its own, so the folds can choose different
+settings. <code><a href="../reference/collect_selections.html">collect_selections()</a></code> lists what each fold
+chose.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">selected</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span></span>
@@ -289,22 +258,17 @@ stacks them, with the fold each came from beside it.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_mtry</span> <span class="op">&lt;-</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">selected</span><span class="op">$</span><span class="va">mtry</span><span class="op">)</span></span>
 <span><span class="va">n_min_n</span> <span class="op">&lt;-</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">selected</span><span class="op">$</span><span class="va">min_n</span><span class="op">)</span></span></code></pre></div>
-<p>Across 5 outer folds, <code>mtry</code> took 2 distinct selected
-values and <code>min_n</code> took 1. Most tools throw this away.
-nestedtune keeps the spread, because it is information about the
-procedure rather than noise in it.</p>
-<p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> draws those same selections, one panel per
-tuned parameter and one point per outer fold. A flat row means the folds
-agreed. Scatter means they did not.</p>
+<p>Across 5 outer folds, <code>mtry</code> took 2 distinct values and
+<code>min_n</code> took 1. When the folds disagree on a parameter, the
+data does not pin its value down, so read little into the value chosen.
+The nested estimate still holds, because it scores the whole
+procedure.</p>
+<p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> draws the selections, one point per outer
+fold. A flat row means that the folds agreed.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
 <p><img src="nested-cv_files/figure-html/autoplot-parameters-1.png" class="r-plt" alt="One panel per tuned parameter, with one point per outer fold at the value that fold's inner tuning selected." width="672"></p>
-<p>A parameter the folds agree on is one the data picks clearly. A
-parameter they split over is one whose value is largely arbitrary at
-this sample size. That is expected wherever the candidates perform about
-equally well, and <code><a href="../articles/estimate.html">vignette("estimate")</a></code> gives the
-mechanism.</p>
-<p>The per-fold scores are worth a look for the same reason:</p>
+<p>The per-fold scores show how much the folds differ.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">per_fold</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">res</span>, summarize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">per_fold</span></span>
@@ -329,28 +293,23 @@ mechanism.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">fold_rmse</span><span class="op">)</span>, std_err <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">fold_rmse</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fold_rmse</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        sd   std_err </span></span>
 <span><span class="co">#&gt; 1.0002719 0.4473352</span></span></code></pre></div>
-<p>The first number is how much the folds differ from each other. The
-second is the <code>std_err</code> that <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>
-reports, which is the precision of their mean. Quoting the second as
-though it described the folds understates their disagreement. The other
-<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> view draws that spread, with a dashed line at
-the nested estimate.</p>
+<p>The first number is the spread of the folds. The second is the
+<code>std_err</code> that <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> reports, which
+is the precision of their mean. Quoting the second as the spread
+understates how much the folds disagree.</p>
+<p>The other <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> view draws the per-fold scores,
+with a dashed line at the nested estimate.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"performance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="nested-cv_files/figure-html/autoplot-performance-1.png" class="r-plt" alt="One panel per metric, with one point per outer fold's score and a dashed line at the mean across folds." width="672"></p>
-<p>A tuned procedure is usually compared with something simpler, such as
-the same model with its parameters fixed.
-<code><a href="../articles/tuners.html">vignette("tuners")</a></code> scores such a workflow on these same
-folds with <code><a href="../reference/nested_fit_resamples.html">nested_fit_resamples()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="the-model-to-deploy">The model to deploy<a class="anchor" aria-label="anchor" href="#the-model-to-deploy"></a>
 </h2>
-<p>The estimate above is the number to report. The model to predict with
-comes next. It is built by running the same procedure once more with the
-whole dataset in hand. The procedure is read from <code>res</code> (the
-inner resampling specification, the grid, the metrics, the selection
-rule), so the model and the estimate come from one search.</p>
+<p>Now we build the model to deploy. <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>
+runs the same procedure once more on all the data. It takes the inner
+resampling, grid, metrics and selection rule from <code>res</code>, so
+the model and the estimate come from one search.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
@@ -376,11 +335,8 @@ rule), so the model and the estimate come from one search.</p>
 <span><span class="co">#&gt;   and `extract_scored_candidates()` the candidates it scored. Any</span></span>
 <span><span class="co">#&gt;   metric reachable through the first is a selection-time quantity,</span></span>
 <span><span class="co">#&gt;   optimistically biased as a claim about this model.</span></span></code></pre></div>
-<p>The outer folds play no part here. Their selections are not pooled or
-voted on. They belong to the estimate.</p>
-<p>The object predicts directly. <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and
-<code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> on it are the trained workflow’s own methods, and
-<code><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow()</a></code> returns the workflow itself.</p>
+<p>The outer folds play no part here. The object predicts directly, and
+<code><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow()</a></code> returns the fitted workflow to save.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final</span>, new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
@@ -389,106 +345,41 @@ voted on. They belong to the estimate.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  20.9</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  20.9</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  24.0</span></span></code></pre></div>
-<p><code><a href="../reference/extract_tune_results.html">extract_tune_results()</a></code> returns the tuning run this
-model’s parameters came from, an ordinary tune result, and
-<code>show_best()</code> on it gives the number most tempting to
-report:</p>
+<p><code><a href="../reference/extract_tune_results.html">extract_tune_results()</a></code> returns the tuning run behind
+this model, and <code>show_best()</code> gives its best inner score.
+That is the number that <code>tune_grid()</code> alone reports.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">best_selection</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_tune_results.html">extract_tune_results</a></span><span class="op">(</span><span class="va">final</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">best_inner</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_tune_results.html">extract_tune_results</a></span><span class="op">(</span><span class="va">final</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">show_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span>, n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">best_selection</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;    mtry min_n .metric .estimator  mean     n std_err .config        </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     2     2 rmse    standard    2.58     5   0.346 pre0_mod1_post0</span></span>
-<span></span>
 <span><span class="fu">tibble</span><span class="op">(</span></span>
-<span>  quantity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nested estimate (report this)"</span>, <span class="st">"best selection-time score"</span><span class="op">)</span>,</span>
-<span>  rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse_row</span><span class="op">$</span><span class="va">mean</span>, <span class="va">best_selection</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span>
+<span>  quantity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nested estimate (report this)"</span>, <span class="st">"best inner score"</span><span class="op">)</span>,</span>
+<span>  rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rmse_row</span><span class="op">$</span><span class="va">mean</span>, <span class="va">best_inner</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
 <span><span class="co">#&gt;   quantity                       rmse</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> nested estimate (report this)  2.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> best selection-time score      2.58</span></span></code></pre></div>
-<p>The selection-time score is not an estimate of performance on
-anything. Whether it lands above or below the nested estimate means
-nothing either. It stays on the object as a record of what selection
-saw.</p>
-<p><code>show_best()</code> handed it over above because it was given
-tune’s own object, which does not warn. Ask <code>res</code> or
-<code>final</code> and both refuse, as the two chunks below show. On the
-loop’s results, tune’s ranking functions have nothing to rank but outer
-folds, and the estimate is not a ranking of folds. On the final fit
-there is one model and nothing to rank.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `show_best()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No `show_best()` exists for this type of object.</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">select_best</span><span class="op">(</span><span class="va">final</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `select_best()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> No `select_best()` exists for this type of object.</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a>
-</h2>
-<p>Seed the session before the call, as elsewhere in tidymodels. Neither
-<code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> nor <code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code>
-takes a seed of its own. At entry, <code><a href="../reference/nested_tune_grid.html">nested_tune_grid()</a></code> draws
-two seeds per fold from the session state. One seeds that fold’s tuning
-and the other its outer fit. Both are stored on the result. A fold’s
-seeds depend on its position in the design, not on the order the folds
-happen to run in. So the same seed gives the same answer whether the
-folds run serially or on a pool of workers.
-<code><a href="../reference/nested_final_fit.html">nested_final_fit()</a></code> draws one pair the same way and carries
-it as <code>tuning_seed</code> and <code>fit_seed</code>. Both functions
-put your random state back as they found it.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">.tuning_seed</span></span>
-<span><span class="co">#&gt; [1]  794080207 1906307464 2010156236 1118907979 2046114256</span></span>
-<span><span class="va">final</span><span class="op">$</span><span class="va">tuning_seed</span></span>
-<span><span class="co">#&gt; [1] 721735354</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">before</span> <span class="op">&lt;-</span> <span class="va">.Random.seed</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/nested_final_fit.html">nested_final_fit</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">res</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">before</span>, <span class="va">.Random.seed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
-<p><code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> gives the recipe for reproducing one
-fold by hand, and <code><a href="../reference/nested_final_fit.html">?nested_final_fit</a></code> the one for redoing the
-final fit from its two seeds.</p>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> best inner score               2.58</span></span></code></pre></div>
+<p>The best inner score is not an estimate of performance on new data,
+because the same resamples chose the model. It is optimistic on average.
+On one small dataset, it can land on either side of the nested
+estimate.</p>
 </div>
 <div class="section level2">
 <h2 id="the-write-up">The write-up<a class="anchor" aria-label="anchor" href="#the-write-up"></a>
 </h2>
-<p>Everything a write-up needs is on the two objects. A minimal, honest
-report:</p>
+<p>Here is a short report of this run.</p>
 <blockquote>
 <p>Hyperparameters (<code>mtry</code>, <code>min_n</code>) were tuned
 over a 6-point grid by 5-fold cross-validation, nested inside a 5-fold
-outer cross-validation of the entire tune-and-fit procedure (n = 32).
-The outer folds give an estimated RMSE of 2.49 (SE 0.45) for the
-procedure. Across those 5 folds, selection took 2 distinct values of
-<code>mtry</code> and 1 of <code>min_n</code>. The deployed model was
-produced by applying the same procedure to the full dataset, which
+outer cross-validation (n = 32). The outer folds give an estimated RMSE
+of 2.49 (SE 0.45) for the tuning procedure. The folds selected 2
+distinct values of <code>mtry</code> and 1 of <code>min_n</code>. The
+deployed model applies the same procedure to the full dataset, which
 selected mtry = 2 and min_n = 2. That RMSE is the number reported for
-that model.</p>
+the deployed model, because the model comes from the same procedure.</p>
 </blockquote>
-<p>Three things make it honest. The estimate describes the procedure
-that built the deployed model, and it is the number reported for that
-model. The instability is reported rather than hidden. The deployed
-model is described as what it is: the same procedure applied to all the
-data, so there is no second number to compute for it.</p>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Stone, M. (1974). Cross-validatory choice and assessment of
-statistical predictions. <em>Journal of the Royal Statistical Society,
-Series B</em>, 36(2), 111–147.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

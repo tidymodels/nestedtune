@@ -89,8 +89,7 @@ after another. Nothing in the call changes between the two.</p>
 guide’s loop on it. It then shows that the result is identical to the
 same run made serially. Last, it says when a pool pays. The parallel
 section of <code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> says what the call checks
-before it dispatches, what it sends to each daemon, and what happens on
-an interrupt.</p>
+before it dispatches and what happens on an interrupt.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/nestedtune" class="external-link">nestedtune</a></span><span class="op">)</span></span></code></pre></div>
@@ -179,10 +178,10 @@ same call runs serially.</p>
 </h2>
 <p>Each outer fold’s seeds are drawn from the session state at entry,
 before anything is dispatched. A fold’s seeds depend on its position in
-the design, as <code><a href="../articles/nested-cv.html">vignette("nested-cv")</a></code> explains under
-Reproducibility. So a serial run under the same seed repeats the
-parallel run: the same procedure, the same tune-and-fit steps, on the
-same resamples.</p>
+the design, as the Reproducibility section of
+<code><a href="../reference/nested_tune_grid.html">?nested_tune_grid</a></code> explains. So a serial run under the same
+seed repeats the parallel run: the same procedure, the same tune-and-fit
+steps, on the same resamples.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>

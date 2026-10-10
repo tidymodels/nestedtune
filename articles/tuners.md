@@ -315,9 +315,10 @@ anneal$.inner_metrics[[1]]
 `.iter` runs from 0, the initial candidates, to 3.
 
 Seeding is the same on all five. Seed the session before the call. The
-same seed gives the same result serially and in parallel, as
-[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-explains under Reproducibility.
+same seed gives the same result serially and in parallel, as the
+Reproducibility section of
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+explains.
 
 ## A workflow with nothing to tune
 

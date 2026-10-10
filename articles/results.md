@@ -196,8 +196,9 @@ res$.completed
 
 `.tuning_seed` and `.outer_fit_seed` are the two seeds each fold ran
 under, drawn at entry and fixed by the fold’s position in the design, as
-[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-explains under Reproducibility.
+the Reproducibility section of
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+explains.
 
 ``` r
 

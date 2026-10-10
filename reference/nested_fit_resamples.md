@@ -63,30 +63,20 @@ nested_fit_resamples(
 
 - ...:
 
-  On the generic, the arguments of the method that `object` selects. On
-  a method, a control object from
-  [`tune::control_resamples()`](https://tune.tidymodels.org/reference/control_grid.html),
-  as `control`, and nothing else. Every argument after `...` is matched
-  by name. The section on differences from tune says what becomes of
-  each slot.
+  On the generic, the arguments of the method. On a method, pass
+  `control = tune::control_resamples()` here to set the control. Name
+  every argument after `...`.
 
 - preprocessor:
 
-  A formula or a recipe, when `object` is a model specification. The two
-  are combined as `workflows::workflow(preprocessor, object)`, and the
-  call runs as it does on that workflow. Other preprocessors, such as
-  [`workflows::workflow_variables()`](https://workflows.tidymodels.org/reference/add_variables.html),
-  go through a workflow. A workflow already carries its preprocessor, so
-  one given beside a workflow is refused.
+  A formula or recipe, when `object` is a model specification.
 
 - resamples:
 
   A nested resampling design from
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   or
-  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html),
-  one row per outer fold. The section on nested designs says what the
-  design must hold.
+  [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
 
 - metrics:
 
@@ -172,48 +162,23 @@ run.
 
 Weights set on the design with
 [`tune::add_resample_weights()`](https://tune.tidymodels.org/reference/add_resample_weights.html)
-reach the outer average.
-[`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
-[`summary()`](https://rdrr.io/r/base/summary.html),
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-and
-[`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
-then report the weighted mean of the folds' estimates. Their `std_err`
-is the weighted standard deviation over the square root of the effective
-sample size, as tune computes both. The per-fold table from
-`collect_metrics(summarize = FALSE)` carries each fold's weight in a
-`.weight` column. tune stores the weights scaled to sum to one, and
-stores none when they are equal, so equal weights give the unweighted
-average.
-
-A fold that fails, or that scores `NA` on a metric, is left out of that
-average and the remaining weights are scaled up to sum to one. `n`
-counts the folds that scored. The weights on a design's inner resamples
-are read by tune itself.
+give a weighted average of the outer folds' estimates, as tune computes
+it. A fold that fails or scores `NA` is left out, and the other weights
+are scaled to sum to one.
 
 ## Reproducibility
 
-Seed the session before the call, as elsewhere in tidymodels. There is
-no `seed` argument. On entry the function draws `2 * n` seeds in a
-single `sample.int(.Machine$integer.max, 2 * n)` call, where `n` is the
-number of outer folds. Fold `i` uses element `2 * i - 1` for its tuning
-step and element `2 * i` for its outer fit, each applied with the
-generator kind pinned. A fold's seed depends on its position, not on the
-order the folds run in. So the same seed gives the same result serially
-and in parallel, at any number of daemons. The two seeds are kept on the
-result as `.tuning_seed` and `.outer_fit_seed`, and
-[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-shows how to reproduce one fold by hand from them.
-
-The caller's RNG state and generator kind are restored on exit,
-including when the call errors, so a seeded script that draws afterwards
-is unaffected. One consequence: two consecutive calls with no
-[`set.seed()`](https://rdrr.io/r/base/Random.html) between them return
-identical results, exactly as repeated
+Call [`set.seed()`](https://rdrr.io/r/base/Random.html) before the
+function, as elsewhere in tidymodels. Each fold takes its seeds from
+that one seed by its position, so the result is the same serially and in
+parallel. The seeds are kept as `.tuning_seed` and `.outer_fit_seed`.
+The function restores your random state on exit, even after an error. So
+two calls with no [`set.seed()`](https://rdrr.io/r/base/Random.html)
+between them give the same result, as repeated
 [`tune::tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
 calls do.
 
-This binds randomness that flows through R's generator. Engines that
+This covers randomness that flows through R's generator. Engines that
 randomize outside it (kernlab's SVMs, the deep-learning engines) cannot
 be pinned by any R-side scheme, here or in tune.
 
@@ -227,8 +192,9 @@ recorded as drawn rather than as `NA`, so the two seed columns read the
 same on every result. Fold `i` is exactly
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
 of `object` on `resamples$splits[[i]]` under `res$.outer_fit_seed[[i]]`,
-with no tuning line before it. The seed is applied as the grid page
-shows.
+with no tuning line before it. The seed is set with the generator kind
+pinned:
+`set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")`.
 
 ## Differences from calling tune directly
 
@@ -256,9 +222,9 @@ place the level is set. A control at tune's default takes it. A control
 naming another level is refused at entry, and the refusal names both
 levels. `eval_time` is offered the same way, for the same reason.
 
-**Refused: none.** No slot is refused on its own. What is refused at
-entry is a control of another class, such as a `control_bayes()` that
-tune itself accepts here, and the `event_level` conflict above.
+**Refused: none.** No setting is refused on its own. A control of
+another class is an error, even a `control_bayes()` that tune itself
+accepts.
 
 **Passed through: none.** There is no inner tuning call for a slot to be
 passed through to.
@@ -286,163 +252,32 @@ reached through `extract`.
 
 ## Nested designs
 
-`resamples` is a data frame with one row per outer fold. Its `splits`
-column holds that fold's `rsplit`, its `inner_resamples` column holds an
-`rset` with at least one row, and every other column labels the fold. A
-label column is named `id`, or `id` followed by a digit from 1 to 9, and
-holds character or factor values. Together the label columns give every
-outer fold a distinct label with no `NA`.
-
-Inside each inner `rset`, every element of `splits` is an `rsplit`. All
-of a fold's inner splits carry one data frame: either the outer split's
-own frame, as
-[`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-builds, or that split's analysis set, as
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds. An inner split carrying the outer frame must index only rows the
-outer split's `in_id` holds, in its `in_id` and in any `out_id` other
-than the logical `NA`. So no inner analysis or assessment set reaches a
-row the outer fold holds out. Every `in_id` and `out_id`, outer or
-inner, is a numeric vector with no `NA`. None holds a value outside
-integer range, and no `out_id` is `NULL` or empty. The one exception is
-an `out_id` that is the logical `NA`, which tells rsample to find the
-assessment set with
-[`rsample::complement()`](https://rsample.tidymodels.org/reference/complement.html).
-
-A design breaking any of this is refused before anything is fitted. So
-is a design using a bootstrap for the outer loop, or
+`resamples` has one row per outer fold: a `splits` column of outer
+splits, an `inner_resamples` column of inner rsets, and id columns. The
+function checks the design before it fits anything. An outer bootstrap
+is an error, and so are
 [`rsample::loo_cv()`](https://rsample.tidymodels.org/reference/loo_cv.html),
 [`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-or
+and
 [`rsample::permutations()`](https://rsample.tidymodels.org/reference/permutations.html)
-for either loop. The error has condition class `nestedtune_bad_design`.
-It names every offending row, column, inner split, index or outer fold.
-A refusal of a bootstrap or of one of those three rsample functions
-names the function. The design is found from the class of its splits as
-well as its own class. So a row subset of such a design is refused, and
-so is a design rebuilt with
-[`rsample::manual_rset()`](https://rsample.tidymodels.org/reference/manual_rset.html)
-from its splits or holding one such split among valid ones. Bootstrap
-and permutation designs can add an apparent split with the id
-"Apparent", which tune leaves out of its estimates. So an apparent split
-beside bootstrap or permutation splits counts as part of that design
-only if its id is "Apparent". Under any other id, it counts as an
-[`rsample::apparent()`](https://rsample.tidymodels.org/reference/apparent.html)
-split. In the inner loop, tune leaves every split with the id "Apparent"
-out of its estimates, whatever the split's class. So any other inner
-split with that id is refused. Otherwise each outer fold that tunes on
-it uses fewer resamples than its design holds. An inner split whose `id`
-is missing is refused as well, because tune leaves it out of its
-estimates too. So is an inner design in which two splits carry the same
-values in every id column, such as `id` and `id2`, because tune then
-miscounts its resamples. In either loop, a split whose assessment set
-holds a row of its analysis set is refused, because it scores the model
-on rows it trained on. The rule reads the rows, so it also catches a
-split rebuilt with
-[`rsample::make_splits()`](https://rsample.tidymodels.org/reference/make_splits.html),
-which keeps no class that names its design. An index into an outer
-split's analysis set counts as the data row it copies. The apparent
-split of an inner bootstrap design is exempt from this rule under the id
-"Apparent", because tune leaves it out of its estimates. The checks
-exist because
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
-builds a design whatever its `inside` argument returned, and because a
-design assembled by hand can index rows its outer fold never sees.
+in either loop. An inner split that reaches a row its outer fold holds
+out is an error too. Each error names the design, or the rows, splits or
+folds at fault.
 
-Time-series designs are supported for an outer
+Time-series designs work as well.
+[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+is tested with an outer
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
 [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
 [`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
 or
 [`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-with an inner
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html),
-and for the inner sliding designs named below.
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-and `nested_fit_resamples()` are tested on all four outer designs, and
-so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for their results.
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-and
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-are tested on the rolling-origin design, and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for their results, plus the sliding-window design for
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
-results.
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-is tested on the rolling-origin design. The outer design never reaches
-the tuner: each tuner is handed one outer fold's inner resamples at a
-time. An inner
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-design is tested with an outer
+design and an inner design of any of those four kinds. Leave the `lag`
+of
 [`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-under
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md),
-and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for its results. These designs are also tested under
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-and
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
-and so is
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-for the results of those four tuners.
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-is tested on these three designs with its default `fn`. With `fn` set to
-each of those four tuners, it is tested on the sliding-period design
-alone. `nested_fit_resamples()` is tested to accept these designs. It
-checks the inner design but fits nothing on it. Any other inner design
-is not tested. Each of these tests leaves the `lag` of
-[`rsample::rolling_origin()`](https://rsample.tidymodels.org/reference/rolling_origin.html)
-at its default of 0. A `lag` above 0 is refused in either loop, as
+at 0, because a larger `lag` is an error.
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-explains.
-[`augment()`](https://nestedtune.tidymodels.org/reference/augment.nested_results.md)
-refuses these designs, because their assessment sets leave rows out. Its
-error names the rows left out. When there are more than five, it names
-the first five.
-
-An outer
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-with an inner
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
-[`rsample::sliding_index()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-or
-[`rsample::sliding_period()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-gives nine pairs, and each pair is tested under
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
-The pair of an outer and an inner
-[`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html)
-is also tested under
-[`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
-[`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
-[`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
-and
-[`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-with its default `fn`. On that pair,
-[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-is tested for
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-results, and `nested_fit_resamples()` is tested to accept the design. It
-checks the inner design but fits nothing on it. On the other eight
-pairs, no function but
-[`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-and
-[`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-is tested.
+says which of these designs the other functions are tested on.
 
 ## See also
 

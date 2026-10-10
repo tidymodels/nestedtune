@@ -14,8 +14,8 @@ guide’s loop on it. It then shows that the result is identical to the
 same run made serially. Last, it says when a pool pays. The parallel
 section of
 [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
-says what the call checks before it dispatches, what it sends to each
-daemon, and what happens on an interrupt.
+says what the call checks before it dispatches and what happens on an
+interrupt.
 
 ``` r
 
@@ -120,11 +120,10 @@ mirai::status()$connections
 
 Each outer fold’s seeds are drawn from the session state at entry,
 before anything is dispatched. A fold’s seeds depend on its position in
-the design, as
-[`vignette("nested-cv")`](https://nestedtune.tidymodels.org/articles/nested-cv.md)
-explains under Reproducibility. So a serial run under the same seed
-repeats the parallel run: the same procedure, the same tune-and-fit
-steps, on the same resamples.
+the design, as the Reproducibility section of
+[`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+explains. So a serial run under the same seed repeats the parallel run:
+the same procedure, the same tune-and-fit steps, on the same resamples.
 
 ``` r
 

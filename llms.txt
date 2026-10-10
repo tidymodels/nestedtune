@@ -1,20 +1,14 @@
 # nestedtune
 
-You tune a model with cross-validation, keep the setting with the best
-score, and then score that setting once on a held-out test set. That
-test score is one number from one split of the data, and nothing in it
-says whether the split is representative. nestedtune scores the whole
-tune-and-fit procedure on several outer splits instead. The outer scores
-give the mean across those splits and show how far the score moves from
-one split to the next. Each outer fold tunes on its own inner resamples
-with tune or finetune, so no outer score is the score that picked its
-fold’s winner. The score that picks a winner tends to be optimistic,
-because the winner was picked for scoring well. nestedtune keeps what
-every fold chose.
-
-The mean of the outer scores is the number to report for the model you
-deploy. That model is the same procedure run once more on all the data,
-so there is no second number to compute for it.
+The best score from ordinary tuning is optimistic, because the same
+resamples pick the winner. nestedtune runs nested cross-validation
+instead. Each outer fold tunes a workflow on its own inner resamples
+with tune or finetune, then fits the chosen settings and scores them on
+rows the tuning never saw. The mean of the outer scores estimates how
+well the whole procedure (tune, select, fit) performs on new data.
+Report it for the model that
+[`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+builds.
 
 ## Installation
 
@@ -99,19 +93,16 @@ with the arguments those tests use, and that every outer fold completes.
 The design in the other loop is a v-fold design, or a time-series design
 for the four time-series rows.
 
-Refused means that nestedtune stops with an error before any fold runs.
+Refused means that nestedtune stops with an error before any fold runs,
+whether
 [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-refuses such a design when it builds it, and each nestedtune function
-refuses one built another way, such as with
-[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-No means that the design cannot be built in that loop. The “Differences
-from rsample” section of
+or
+[`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html)
+built the design. No means that the design cannot be built in that loop.
+The “Differences from rsample” section of
 [`?nested_resamples`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
-gives the reason for each Refused and No cell. The same page also gives
-the rules that refuse a single split in either loop. The two racing
-functions also refuse an inner apparent split, as
-[`?nested_tune_race`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
-explains.
+gives the reason for each Refused and No cell, and the rules for a
+single split in either loop.
 
 ## Supported tuning functions
 
