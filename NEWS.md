@@ -1,5 +1,13 @@
 # nestedtune 0.0.0.9000
 
+* The other four guides are shorter and follow the shape of the
+  tidymodels.org articles: `vignette("estimate")`, `vignette("tuners")`,
+  `vignette("results")` and the parallel article. `vignette("estimate")`
+  now says where a held-out test set fits and how to choose the number of
+  folds. `vignette("tuners")` gives each search one short section.
+  `vignette("results")` reads one run from the estimate to the plots, and
+  the column tour, the failed-fold run and the dplyr rules left it.
+
 * The help pages for reading a nested run are shorter and follow the shape
   of tune's help pages. They cover the collect, compute and augment
   methods, `agreement()`, `autoplot()`, `selection_rule()`, the extractors,

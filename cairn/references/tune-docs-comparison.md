@@ -115,6 +115,8 @@ At the M145 branch point (`f1446754`, 2026-10-10), the script reads the four gui
 | `results.Rmd` | 1,395 | 31 | 45.0 | 5 | 2 |
 | `articles/parallel.Rmd` | 510 | 10 | 51.0 | 2 | 1 |
 
+At the M145 implement head (`3f5f68c5`, 2026-10-10), the same script reads the four guides at: `estimate.Rmd` 952 prose words in 27 paragraphs (mean 35.3), `tuners.Rmd` 533 in 17 (31.4), `results.Rmd` 322 in 14 (23.0) and `articles/parallel.Rmd` 183 in 7 (26.1). No page has a coined term or a "You" opener.
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune
