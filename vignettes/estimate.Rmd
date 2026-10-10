@@ -63,8 +63,9 @@ made it.
 
 ## Choosing the number of folds
 
-No fold count is best for every problem. Arlot and Celisse (2010) report
-that 5 to 10 folds is the usual advice when the goal is an estimate. More
+Arlot and Celisse (2010) report that 5 to 10 folds is the usual advice
+for model selection. They add that the best count depends on the problem.
+More
 outer folds give each model more training rows, and each outer fold adds a
 whole tuning run. For a grid, the tuning fits number the product of the
 two fold counts and the grid size.
@@ -100,8 +101,9 @@ selection that no outer loop scored.
 
 When the folds choose different values for a parameter, the data does not
 pin that value down. The estimate still holds, because it averages over
-that variation. As two candidates' predictions converge, which one wins a
-fold comes close to a coin flip (Bayle et al., 2026).
+that variation. As two candidates' predictions converge, the variance of
+their loss difference shrinks toward zero (Bayle et al., 2026). Which one
+wins a fold then says little.
 
 ## When nesting pays
 
@@ -115,7 +117,7 @@ Nesting adds little for tall data and a small grid. Wilimitis and Walsh
 (2023) found no gain on 41,121 visits, at a cost that grew with the square
 of the fold count.
 
-Small data is not safe either. Vabalas et al. (2019)
+More rows alone do not remove the bias. Vabalas et al. (2019)
 saw cross-validation without nesting report better than chance on pure
 noise at 1000 rows.
 

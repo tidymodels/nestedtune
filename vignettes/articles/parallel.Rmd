@@ -101,7 +101,7 @@ mirai::daemons(0)
 
 ## The same result
 
-The fold seeds are drawn before any fold is sent out, so one seed gives
+Each fold takes its seeds by its position in the design, so one seed gives
 one result serially and in parallel, as `?nested_tune_grid` explains.
 
 ```{r identity}
@@ -116,6 +116,6 @@ c(
 
 ## When a pool pays
 
-On `mtcars` each fold takes a fraction of a second, so starting two
-daemons costs more than it saves. A pool pays when the folds are
+On `mtcars` each fold takes under a second, so two daemons save little
+time. A pool pays when the folds are
 expensive: more data, a bigger grid, a slower engine or a costly recipe.

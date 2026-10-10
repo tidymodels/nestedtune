@@ -278,8 +278,8 @@ mapped
 ```
 
 The linear baseline has nothing to tune, so it ran through
-`nested_fit_resamples()`, and the print says so. The collect functions
-stack their tables under each workflow's id.
+`nested_fit_resamples()`, and the print marks it "no tuning". The collect
+functions stack their tables under each workflow's id.
 
 ```{r wset-metrics}
 collect_metrics(mapped)
