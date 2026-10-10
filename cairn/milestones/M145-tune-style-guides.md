@@ -51,7 +51,7 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 ## Tasks
 
 - [x] T1: Run `doc-profile.R` at the branch point and record the four pages' figures in the comparison note.
-- [ ] T2: Rewrite `estimate.Rmd`. Keep the meaning of the estimate, what to report, and the background with its citations, all shorter. Drop the statements about what the package does not offer, unless a reader needs one to act.
+- [x] T2: Rewrite `estimate.Rmd`. Keep the meaning of the estimate, what to report, and the background with its citations, all shorter. Drop the statements about what the package does not offer, unless a reader needs one to act.
 - [ ] T3: Rewrite `tuners.Rmd` as one short section for each tuner and one for the workflow set. Drop the column meanings such as `.iter` and `n`, which the help pages hold.
 - [ ] T4: Rewrite `results.Rmd` as one narrative. Drop the column tour, the failed-fold run, the dplyr class rules and the `event_level` note.
 - [ ] T5: Rewrite `parallel.Rmd` as a short how-to. Cut the seeding detail to one sentence and a link to `?nested_tune_grid`.
@@ -65,3 +65,4 @@ Rewrite `vignettes/estimate.Rmd`, `vignettes/tuners.Rmd`, `vignettes/results.Rmd
 - 2026-10-10: input from M144 T2. `?collect_metrics` no longer cites Bengio and Grandvalet (2004) or Gauran, Ombao and Yu (2025) on why the fold scores give no valid standard error, and points to `vignette("estimate")`. That vignette's standard error section cites neither. T2 decides whether they belong there.
 - 2026-10-10: implement started on branch `m145-tune-style-guides`, cut from `f1446754`.
 - 2026-10-10: T1 done. At `f1446754`, `doc-profile.R` reads estimate 1,392 prose words, tuners 1,350, results 1,395 and parallel 510; the caps are 974, 945, 976 and 357, a paragraph mean of 37.5 and 2 coined terms. Figures are in `references/tune-docs-comparison.md`.
+- 2026-10-10: T2 done. `estimate.Rmd` reads 952 prose words, 27 paragraphs (mean 35.3), 0 coined, 0 "You" openers; the gating sweeps print clean. It gains a test-set section (`initial_split()`, `training()`, `testing()`, as `last_fit()` does) and a fold-count section citing Arlot and Celisse (2010). Decided: Bengio and Grandvalet (2004) joins the standard error section, and Gauran, Ombao and Yu (2025) stays out, because its result holds for ridge and LASSO designs only.
