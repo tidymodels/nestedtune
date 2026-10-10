@@ -1,5 +1,12 @@
 # nestedtune 0.0.0.9000
 
+* The help pages for reading a nested run are shorter and follow the shape
+  of tune's help pages. They cover the collect, compute and augment
+  methods, `agreement()`, `autoplot()`, `selection_rule()`, the extractors,
+  and the print, summary and predict methods. The condition classes and
+  the lists of errors left these pages. `?collect_metrics` now states the
+  standard error in three sentences and points to `vignette("estimate")`.
+
 * Seven more help pages are shorter and follow the shape of tune's help
   pages: `nested_tune_bayes()`, the two racing functions,
   `nested_tune_sim_anneal()`, `nested_fit_resamples()`,

@@ -104,6 +104,8 @@ At the M144 branch point (`16fd160c`, 2026-10-10), the script reads the 24 pages
 | `tune::augment.tune_results` | 218 | 24 | 0 | 0 |
 | `tune::compute_metrics` | 243 | 64 | 0 | 0 |
 
+At the M144 T5 head (`a5e97d27`, 2026-10-10), the same script reads the 24 pages at 3,990 prose words together, 44% of the branch point. The Descriptions run 15 to 32 words, and the largest page is `collect_predictions.nested_results` at 359 prose words. No page has a `nestedtune_*` class name, `orchestrator` or `sibling`.
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune
