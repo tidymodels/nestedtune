@@ -15,7 +15,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 
 ## Scope
 
-**In:** the roxygen and the `man-roxygen/` templates behind the 24 other `man/*.Rd` pages. The eight pages left out are `nested_tune_grid`, `nested_tune_bayes`, `nested_tune_race`, `nested_tune_sim_anneal`, `nested_fit_resamples`, `nested_workflow_map`, `nested_final_fit` and `nested_resamples`. Tests that read the text of these pages, rewritten to the new pages. The figures in `cairn/references/tune-docs-comparison.md`.
+**In:** the roxygen and the `man-roxygen/` templates behind the 24 other `man/*.Rd` pages. The eight pages left out are `nested_tune_grid`, `nested_tune_bayes`, `nested_tune_race`, `nested_tune_sim_anneal`, `nested_fit_resamples`, `nested_workflow_map`, `nested_final_fit` and `nested_resamples`. Tests that read the text of these pages, rewritten to the new pages. The figures in `cairn/references/tune-docs-comparison.md`. A guide sentence that points to text these pages drop.
 
 **Out:**
 
@@ -47,7 +47,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - [x] T2: Rewrite the collect, compute and augment pages and their set methods. Cut the standard-error argument on `collect_metrics` to the one sentence a user needs. The literature stays on `estimate.Rmd`.
 - [x] T3: Rewrite `collect_selections`, `agreement`, `selection_rule`, `autoplot`, `extract_procedure`, `extract_scored_candidates` and `extract_tune_results`. Replace the in-prose pointers between sections with See Also links.
 - [x] T4: Rewrite the print, summary, predict and extract pages for `nested_results`, `nested_results_set` and `nested_final_fit`, and `nestedtune-package`. Keep the IP3 sentence on each print and summary page.
-- [ ] T5: Run the AC3 sweep over the 24 pages. Rewrite the text-matching lines of any test that reads the old text.
+- [x] T5: Run the AC3 sweep over the 24 pages. Rewrite the text-matching lines of any test that reads the old text.
 - [ ] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the pages beside tune's `collect_metrics`, `show_best` and `autoplot` pages. The gate triages every entry (D-061).
 
 ## Work log
@@ -60,3 +60,5 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-10: implement chose to run `devtools::test()` at T2 and again at T5 and T6, not after every roxygen-only task, because these tasks change no code and the suite takes 9 minutes.
 - 2026-10-10: T3: the seven pages went from 2,388 to 1,244 prose words, Descriptions 15 to 28 words. The in-prose pointers between sections and pages left. See Also carries them. `extract_procedure` no longer names a section title, which settles the M143 input above.
 - 2026-10-10: T4: the twelve print, summary, predict, extract and package pages went from 3,510 to 1,464 prose words. Each print and summary page has one sentence that the nested estimate describes the procedure, not a fitted model. The 24 pages total 3,990 prose words, 44% of the branch point.
+- 2026-10-10: T5: the AC3 grep prints nothing on the 24 pages. No test reads their text, so no test changed.
+- 2026-10-10: substantive amendment: Scope In gains "A guide sentence that points to text these pages drop." `vignettes/results.Rmd` said `?collect_selections` names the warning's class, which T3 removed, so T5 deleted that sentence. Page sweeps clean.
