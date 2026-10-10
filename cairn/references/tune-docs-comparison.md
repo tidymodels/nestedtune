@@ -106,6 +106,17 @@ At the M144 branch point (`16fd160c`, 2026-10-10), the script reads the 24 pages
 
 At the M144 implement head (`b906d8eb`, 2026-10-10), the same script reads the 24 pages at 4,008 prose words together, 44% of the branch point, with Descriptions of 15 to 35 words (corrected M144: an earlier line here gave 3,990 words and a 32-word largest Description, read before the last two edits). After the review's fixes (`b691fe58`), the 24 pages read 4,385 prose words, 48% of the branch point, with Descriptions of 15 to 37 words. No page has a `nestedtune_*` class name, `orchestrator` or `sibling`.
 
+At the M145 branch point (`f1446754`, 2026-10-10), the script reads the four guides M145 rewrites. Its caps are 70% of these prose figures (974, 945, 976 and 357 words), a paragraph mean of 37.5, and 2 coined terms.
+
+| Guide page | prose | paras | para_mean | coined | you |
+|---|---|---|---|---|---|
+| `estimate.Rmd` | 1,392 | 26 | 53.5 | 0 | 2 |
+| `tuners.Rmd` | 1,350 | 24 | 56.2 | 6 | 1 |
+| `results.Rmd` | 1,395 | 31 | 45.0 | 5 | 2 |
+| `articles/parallel.Rmd` | 510 | 10 | 51.0 | 2 | 1 |
+
+At the M145 implement head (`3f5f68c5`, 2026-10-10), the same script reads the four guides at: `estimate.Rmd` 952 prose words in 27 paragraphs (mean 35.3), `tuners.Rmd` 533 in 17 (31.4), `results.Rmd` 322 in 14 (23.0) and `articles/parallel.Rmd` 183 in 7 (26.1). No page has a coined term or a "You" opener. After the claim audit's and the review's fixes (`29293479`), the four read 973 prose words (mean 36.0), 589 (34.6), 358 (25.6) and 199 (28.4).
+
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
 ## Patterns found here and not in tune
