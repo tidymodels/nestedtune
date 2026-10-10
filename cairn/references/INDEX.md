@@ -8,6 +8,7 @@ cross-source analysis no single source owns. The source shelf
 _Entries are bullet lines — `- page.md — what it covers` — not table rows;
 `cairn_validate`'s references check only recognizes the bullet form._
 
+- tune-docs-comparison.md — synthesis; this package's help pages, guides and README against tune's, finetune's and tidymodels.org's in length, structure and voice, with the patterns found only here. The target M142 to M145 read.
 - tidymodels-nested-cv-gaps.md — synthesis; what rsample/tune do and don't provide for nested CV, 8-row gap ledger (G1–G8), CRAN name collision.
 - mori-backend-assessment.md — synthesis; mori leaves the seed contract and the mirai choice untouched and reaches 0 copies on the wire, but it is same-machine, so it makes M23's lean path conditional rather than obsolete. 10-row premise ledger (P1–P10).
 - outer-loop-object-requirements.md — synthesis; what a nested-resampling object must carry for a driver: 19 reads (R1–R19), 7 reconstructions (C1–C7), 11 class-boundary workarounds (W1–W11), and the two size axes measured — the in-process ratio grows with v, and a `nested_cv()` fold's own materialized frame is wire cost no dispatch-side leaning can remove.
