@@ -2,6 +2,20 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md),
+  [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md),
+  [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
+  and the parallel article are shorter and follow the shape of the
+  tidymodels.org articles.
+  [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md)
+  now says where a held-out test set fits and how to choose the number
+  of folds.
+  [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
+  gives each search one short section.
+  [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
+  reads one run from the estimate to the plots, and the column tour, the
+  failed-fold run and the dplyr rules left it.
+
 - The help pages for reading a nested run are shorter and follow the
   shape of tune’s help pages. They cover the collect, compute and
   augment methods,
@@ -798,7 +812,7 @@
   parallel article runs the guide’s loop on two mirai daemons and shows
   the result identical to the serial run;
   [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
-  reads every column and reader of the results object;
+  reads the results object;
   [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md)
   runs the Bayesian, racing and annealing searches on the guide’s
   design; and
