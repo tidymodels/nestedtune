@@ -1,6 +1,6 @@
 # M144: The help pages for reading results read like tune's
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M142
 - **Driving RR:** —
@@ -48,7 +48,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - [x] T3: Rewrite `collect_selections`, `agreement`, `selection_rule`, `autoplot`, `extract_procedure`, `extract_scored_candidates` and `extract_tune_results`. Replace the in-prose pointers between sections with See Also links.
 - [x] T4: Rewrite the print, summary, predict and extract pages for `nested_results`, `nested_results_set` and `nested_final_fit`, and `nestedtune-package`. Keep the IP3 sentence on each print and summary page.
 - [x] T5: Run the AC3 sweep over the 24 pages. Rewrite the text-matching lines of any test that reads the old text.
-- [ ] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the pages beside tune's `collect_metrics`, `show_best` and `autoplot` pages. The gate triages every entry (D-061).
+- [x] T6: Run the verify slot and the gating sweeps, record the head figures, and add a NEWS bullet. At review, one fresh reader reads the pages beside tune's `collect_metrics`, `show_best` and `autoplot` pages. The gate triages every entry (D-061).
 
 ## Work log
 
@@ -64,3 +64,4 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - 2026-10-10: substantive amendment: Scope In gains "A guide sentence that points to text these pages drop." `vignettes/results.Rmd` said `?collect_selections` names the warning's class, which T3 removed, so T5 deleted that sentence. Page sweeps clean.
 - 2026-10-10: T6: NEWS bullet added, and the head figures are in the comparison note.
 - 2026-10-10: claim audit: 170 claims read, 2 corrected — R/nested-results.R, R/nested-results-collect.R
+- 2026-10-10: T6: `devtools::test()` passes, `devtools::check()` gives 0 errors, 0 warnings and 0 notes, `document()` leaves no diff, and the six gating sweeps and air are clean. Implement done, status review.
