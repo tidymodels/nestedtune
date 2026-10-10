@@ -31,7 +31,7 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - [x] AC2: The 24 rendered pages together have at most 75% of their prose at this milestone's branch point. `doc-profile.R` reports both figures.
 - [x] AC3: `grep -l -E 'nestedtune_[a-z_]+|orchestrator|sibling' man/<page>.Rd` prints nothing for each of the 24 pages at the merge head.
 - [x] AC4: Six pages document print and summary methods: `print.nested_results`, `print.nested_results_set`, `print.nested_final_fit`, `summary.nested_results`, `summary.nested_results_set` and `summary.nested_final_fit`. On each, at least one sentence says that the nested estimate describes the procedure and not a fitted model (IP3). Review quotes each sentence with its line.
-- [ ] AC5: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean.
+- [x] AC5: The verify slot is clean. `devtools::document()` leaves no diff. `devtools::test()` passes, and `devtools::check()` gives 0 errors and 0 warnings. Every gating prose sweep prints clean, and `air format --check .` is clean.
 
 ## Coverage
 
@@ -134,3 +134,5 @@ Rewrite the 24 help pages that M142 and M143 leave to the target M142 sets.
 - reader #27: pages run longer per function than tune's — reject (AC2 is met, and the fixes above add only facts reviewers asked for).
 - reader #28: confirm the package URLs before release — reject (not in this diff, and the repository exists).
 - AC1-AC4 re-read after the fixes (2026-10-10, `b691fe58`). AC1: Descriptions 15 to 37 words, the largest `nestedtune-package` at 37, none over 40. AC2: 4,385 prose words against 9,116, 48.1%. AC3: the per-page grep prints nothing. AC4: the six sentences quoted above stand, now at `print.nested_results.Rd:34`, `print.nested_results_set.Rd:24-25`, `print.nested_final_fit.Rd:24-25`, `summary.nested_results.Rd:42-43`, `summary.nested_results_set.Rd:52-53` and `summary.nested_final_fit.Rd:44-46`.
+- AC5 (2026-10-10, `b691fe58`): `devtools::test()` with `stop_on_failure = TRUE` exits 0. `devtools::check()` gives 0 errors, 0 warnings and 0 notes. `devtools::document()` leaves no diff. The six commands `sweep-prose.R --list-gating` prints are clean, and `air format --check .` is clean.
+- Consistency gate (2026-10-10): `cairn_validate.py` passes with 18 advisory reference-staleness warnings. No principle changed, so `cairn_impact` was skipped. `pkgdown::check_pkgdown()` finds no problems. README is untouched. NEWS has the entry, with no milestone number. `check()` gives no NOTE about new top-level files.
