@@ -88,8 +88,8 @@ res
 ```
 
 Each row holds one outer fold's score in `.metrics`, the setting it chose
-in `.selected`, and every candidate its inner search scored in
-`.inner_metrics`. `?nested_tune_grid` describes each column.
+in `.selected`, and every candidate (setting tried) its inner search
+scored in `.inner_metrics`. `?nested_tune_grid` describes each column.
 
 `summary()` says in words how much of the design ran, what each fold
 chose, and the estimate.
@@ -101,8 +101,8 @@ summary(res)
 ## The estimate
 
 `collect_metrics()` averages the outer scores. Each mean is the estimate
-for the whole tuning procedure, and `std_err` is the standard error of
-that mean.
+for the whole procedure (tune, select, fit), and `std_err` is the
+standard error of that mean.
 
 ```{r collect-metrics}
 collect_metrics(res)
@@ -131,7 +131,8 @@ agreement(res)
 When the folds agree, the data points to one setting. When they split, we
 read little into any one choice. The model to deploy comes from
 `nested_final_fit()`, which tunes once more on all the data, so its choice
-can differ from every fold's.
+can differ from every fold's. The estimate above is still the number to
+report for that model, because the same procedure made it.
 
 `collect_inner_metrics()` stacks the inner scores of every candidate in
 every fold. Here is the first fold's RMSE for each candidate, best first.
@@ -145,8 +146,8 @@ collect_inner_metrics(res) |>
 ## The predictions
 
 `collect_predictions()` stacks each fold's predictions on its assessment
-rows, so every row of the data is predicted once by a model that did not
-see it.
+rows. On this design, every row of the data is predicted once by a model
+that did not see it.
 
 ```{r predictions, fig.width = 4.5, fig.height = 4.5, fig.alt = "Predicted against observed miles per gallon, one point per car, with a dashed line where the two are equal."}
 preds <- collect_predictions(res)
@@ -175,5 +176,6 @@ autoplot(res, type = "performance")
 ```
 
 A fold that fails does not stop the run, and the functions above answer
-over the folds that completed. `?nested_tune_grid` describes failed folds and the
-dplyr verbs that keep the class.
+over the folds that completed. `collect_notes()` lists what went wrong in
+any fold, one that completed included. `?nested_tune_grid` describes
+failed folds and the dplyr verbs that keep the class.

@@ -94,6 +94,8 @@ not compete for cores. The first call after starting a pool is slower,
 because each daemon loads the packages the workflow needs.
 
 `mirai::daemons(0)` stops the pool, and the same call then runs serially.
+The parallel section of `?nested_tune_grid` says what the daemons load,
+how to use them under `devtools::load_all()`, and what an interrupt does.
 
 ```{r daemons-stop}
 mirai::daemons(0)

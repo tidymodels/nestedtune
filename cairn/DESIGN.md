@@ -654,8 +654,10 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   Walsh 2023) says nesting buys little when the data is tall and the search is
   small, and M91's pass-2 and pass-3 readers both concluded they would report
   the tuned score there. Accepted at M91's hygiene: the package documents the
-  nested procedure, and advice for the un-nested case is outside it. Revisit on
-  a user asking what to report without nesting, or the next estimate.Rmd pass.
+  nested procedure, and advice for the un-nested case is outside it. Re-read
+  and kept at M145's rewrite of `estimate.Rmd`, whose shorter tall-data
+  paragraph still gives no such advice. Revisit on a user asking what to
+  report without nesting.
 
 - `benchmarks/sweep-prose.R` reads some prose wrongly. It sweeps a loose
   list's continuation paragraph, and a comment opened partway through a line

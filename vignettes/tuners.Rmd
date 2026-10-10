@@ -17,11 +17,13 @@ knitr::opts_chunk$set(
 The inner search of a nested run can use a fixed grid, a race, Bayesian
 optimization or simulated annealing. Each search has a nested function
 that takes the same design and workflow and returns the same kind of
-result.
+result. A race spends fewer fits when some candidates (settings tried) are
+clearly worse. The Bayesian and annealing searches propose candidates from
+ranges rather than a fixed grid.
 
 `vignette("nested-cv")` uses the grid. This page runs the other searches on
-the same example. Then it scores a workflow with nothing to tune, and a set of workflows, on
-the same folds.
+the same example. It then scores two more things on the same folds: a
+workflow with nothing to tune, and a set of workflows.
 
 ```{r deps, include = FALSE}
 needed <- c("tidymodels", "ranger")
@@ -90,8 +92,8 @@ wf <- workflow(mpg ~ ., rf)
 grid <- expand.grid(mtry = c(2L, 5L, 8L), min_n = c(2L, 10L))
 ```
 
-The Bayesian and annealing searches propose their own candidates (the
-settings to try) from a range for each parameter. `tune_bayes()` does not
+The Bayesian and annealing searches propose their own candidates from
+a range for each parameter. `tune_bayes()` does not
 accept a range that depends on the data, such as that of `mtry`, so we set
 it by hand. We also keep `min_n` within the grid's range, because its
 default range is larger than an inner analysis set here.
@@ -108,7 +110,7 @@ params <- update(
 
 `nested_tune_bayes()` runs `tune::tune_bayes()` in each outer fold. The
 search scores `initial` starting candidates, then proposes `iter` more,
-one at a time, from a model of the scores so far. We keep both small so
+one at a time, from a Gaussian process model of the scores so far. We keep both small so
 the page builds quickly.
 
 ```{r bayes}
@@ -177,7 +179,8 @@ collect_inner_metrics(race) |>
   summarise(fits = sum(n))
 ```
 
-The win/loss race is called the same way. Here are its fits per fold.
+On this small example the race dropped few candidates. The win/loss race
+is called the same way. Here are its fits per fold.
 
 ```{r race-win-loss, eval = has_race}
 set.seed(4)
@@ -214,7 +217,8 @@ anneal
 
 ## A workflow with nothing to tune
 
-A tuned model is often compared with the same model at fixed settings.
+A tuned model is often compared with the same model at fixed settings,
+here one of the grid's.
 `nested_fit_resamples()` scores such a workflow on the same nested design.
 Each outer fold fits the workflow on its analysis rows and scores it on its
 assessment rows.
@@ -244,8 +248,8 @@ collect_metrics(bayes, summarize = FALSE) |>
   )
 ```
 
-We read this table fold by fold. A difference between two nested estimates
-is not a test, as `vignette("estimate")` explains.
+Each row compares the two runs on one fold. A difference between their
+two nested estimates is not a test, as `vignette("estimate")` explains.
 
 ## A set of workflows
 
@@ -253,15 +257,16 @@ is not a test, as `vignette("estimate")` explains.
 one nested function on one design. Our set holds the random forest, a
 linear model with nothing to tune, and a linear model on a tuned number of
 principal components. The components workflow takes its own grid through
-`option_add()`.
+`option_add()`, which overrides the call's `grid` for that workflow alone.
 
 ```{r wset}
 pca <- recipe(mpg ~ ., data = mtcars) |>
+  step_normalize(all_predictors()) |>
   step_pca(all_predictors(), num_comp = tune())
 
 wset <- as_workflow_set(
   forest = wf,
-  baseline = workflow(mpg ~ ., linear_reg()),
+  linear = workflow(mpg ~ ., linear_reg()),
   components = workflow(pca, linear_reg())
 ) |>
   option_add(grid = tibble(num_comp = 1:4), id = "components")
@@ -277,7 +282,7 @@ mapped <- nested_workflow_map(
 mapped
 ```
 
-The linear baseline has nothing to tune, so it ran through
+The linear model has nothing to tune, so it ran through
 `nested_fit_resamples()`, and the print marks it "no tuning". The collect
 functions stack their tables under each workflow's id.
 

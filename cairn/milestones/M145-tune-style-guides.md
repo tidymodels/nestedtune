@@ -83,3 +83,48 @@ Head `8dac9123`, branch point `f1446754`. `doc-profile.R` read the branch-point 
 - AC3: coined terms at head: 0 on each of the four pages. Pass.
 - AC4: `doc-profile.R` counts 0 "You" openers on each page, and the `error = TRUE` grep prints nothing (exit 1). Pass.
 - AC5: `vignettes/estimate.Rmd:40`: "The estimate describes the procedure, not one fitted model, and we report it for the deployed model because `nested_final_fit()` runs that procedure on all the data." The page cites eight sources in prose (Arlot and Celisse, Bayle et al., Bengio and Grandvalet, Luo and Barber, Tibshirani and Tibshirani, Vabalas et al., Varma and Simon, Wilimitis and Walsh), and each has an entry at lines 130 to 156. Pass.
+
+spawned: diff-bug, blame-history, prior-review, and the plan's fresh reader beside the tidymodels.org articles (slug `reader`).
+
+No finding shows a criterion failing, and none is a defect in what a page does for its user that the fixes below leave open, so no return. The AC1 to AC5 lines above were read before the fixes, and the figures after them are re-read with AC6.
+
+- diff-bug #1: `?nested_final_fit` says `vignette("estimate")` gives the sizes from two studies, but the rewrite cut Wilimitis and Walsh's sizes. Fix now: the 1 to 2% AUROC and 5 to 9% AUPR sizes are back.
+- diff-bug #2: the test-set section gives a second number after the page says there is none, and does not say which to report. Fix now: the section says to report the test score for the fitted model and the nested estimate for the procedure.
+- diff-bug #3: the standard error reads as valid, and the "ships no inference" line is gone. Fix now: the page says `std_err` treats the folds as independent though they share rows, so it tends to understate the uncertainty, and that the package builds no interval from it.
+- diff-bug #4: the Bayle et al. fold-disagreement step does not follow from a shrinking variance alone. Fix now: the sentence says the comparison of two similar candidates is unstable.
+- diff-bug #5: the Varma and Simon null-data result does not show a training-size effect. Reject, false: the paper attributes the 4.2 points to training-set size (`references/varma2006.md:45`). The page now names that as the authors' reading.
+- diff-bug #6: `?nested_tune_grid` says a data-dependent range is finalized on each fold, which is false for `nested_tune_bayes()`. Follow-up: extends the `?nested_tune_grid` argument-text candidate row.
+- diff-bug #7: `README.Rmd:155` still says the results guide covers every column. Follow-up: a new candidate row, since the README is outside this milestone.
+- diff-bug #8: the DESIGN Known issues entry on what to report without nesting names this pass as its trigger, and nothing handles it. Fix now: the entry is re-read and kept, with its trigger narrowed to a user asking.
+- diff-bug #9: the fold-count section gives no inner-loop advice. Fix now: it says the 5-to-10 advice is for model selection, which is the inner loop's job.
+- diff-bug #10: AC6 is unticked while T6 is ticked. Reject, false: review ticks each criterion against its evidence, and AC6's evidence is recorded below.
+- diff-bug #11: the NEWS bullet's "other four guides" is unclear, and the parallel page is an article. Fix now: the bullet names the four pages.
+- diff-bug #12: "the tuning fits number the product" is hard to parse. Fix now: replaced by a pointer to the fit count in `vignette("nested-cv")`.
+- diff-bug #13: the Tibshirani paragraph lost its learner caveat. Fix now: it names nearest shrunken centroids and gives the SVM and tree figures.
+- diff-bug #14: four lines wrap unevenly. Reject, style. The fix edits reflowed most of them.
+- blame-history #1: the same dangling sizes pointer as diff-bug #1. Fix now, as there.
+- blame-history #2: the results page's first mention of the deployed model no longer names the number to report (M091). Fix now: the sentence says the estimate is still the number to report for that model, and why.
+- blame-history #3: the one-split-against-spread contrast M091's gate chose is gone. Fix now: the test-set section opens with it.
+- blame-history #4: `?nested_tune_grid` does not say that overwriting a column the run wrote sheds the class (D-031). Follow-up: extends the same `?nested_tune_grid` candidate row, since this milestone adds no help text.
+- blame-history #5: no guide says a fold can complete and still carry notes. Fix now: the results page names `collect_notes()` for every fold, one that completed included.
+- blame-history #6: the GP5 and IP3 statements that the package offers no test, no inference and no ranking are gone. Fix now: the estimate page says each, in one clause.
+- blame-history #7: the parallel article lost its pointer to the parallel section of `?nested_tune_grid`. Fix now: one sentence points there.
+- blame-history #8: "every row of the data is predicted once" is false for repeated designs. Fix now: the sentence says "On this design".
+- blame-history #9: the Bayesian consequence for counting selections is dropped. Reject, planned change: `?print.nested_results` holds it.
+- blame-history #10: the feature-selection leak sentence is thinner. Fix now: the page says a step run before the call is not repeated and no result shows it.
+- blame-history #11: the `eval_time` note and the `extract_procedure()` mention are gone. Reject, planned change: argument and column reference left the guides, and `?nested_tune_grid` and `?extract_procedure` hold both.
+- blame-history #12: the Known issues trigger fired (as diff-bug #8, fixed), and the "larger training set" scope fact is gone. Reject the second, planned change: "the error on this data set" keeps the point.
+- prior-review #1: the Tibshirani cell lost its learner caveat and remedy (M082). Fix now, as diff-bug #13, with the remedy kept.
+- prior-review #2: `candidate` and `procedure` are unglossed on the results page (M084). Fix now: both are glossed at first use, and `--terms` shows it.
+- prior-review #3: the number to report is missing at the deployed-model mention (M091). Fix now, as blame-history #2.
+- prior-review #4: the parallel pointer is gone. Fix now, as blame-history #7.
+- prior-review #5: an older NEWS bullet still says the results guide reads every column. Fix now: that clause now says it reads the results object.
+- prior-review #6: the fit-count arithmetic is restated off `nested-cv.Rmd`. Fix now on the estimate page. Reject the tuners sentence, planned change: it gives the race's comparison point, computed inline.
+- prior-review #7: the failed-fold claim on the results page has no executed chunk. Reject, false: M062 and M082 verified it against `R/` and the tests, and `?nested_tune_grid` covers failed folds.
+- prior-review #8: two timing claims on the parallel page are not executed. Reject, planned change: M063 chose no executed timings, and the claim audit's probe timed both.
+- prior-review #9: the `std_err` formula ignores weighted designs (M101). Fix now: the page defines it as the standard error of the mean, with no unweighted formula.
+- reader, estimate.Rmd. Fixed: the "(tune, select, fit)" wording now matches `nested-cv.Rmd`. "Fresh data" now reads "predicts new data", and the "k-fold test error" term is gone. The test-set section says which number to report. Luo and Barber are tied to "offers no such test". The cost grammar, the inner-loop advice, "null data", the unclear "it" in the Wilimitis sentence, and a reason for not adjusting are fixed. The interval question gets "builds no interval". "Loss difference" is gone, the Tibshirani units are one scale with the learner named, and "tall data" now reads "many rows". Rejected, planned change: the page runs no code and has no Introduction (the target's theory page), "how much data" and test-set code (no source, and the functions are named), defining "stable" and a remedy for picking the best (word cap, GP5), and the reference list (AC5). Rejected, false: "not a score of the parameter values" does not pull against "the number to report", which IP3 makes agree.
+- reader, tuners.Rmd. Fixed: the opening says when a race or a proposing search fits (no retitle, because the README links the title). The twice-read opening sentence, the Gaussian process, the race's few drops, the reason for the fixed settings, the fold-by-fold reading, the two "baseline" names (now `linear`), `step_normalize()` before `step_pca()`, and the `option_add()` override are fixed. Rejected, planned change: the inner set size and `finalize()`, the print's "!" line, `burn_in`, and the unrun chosen-in-advance fit, all held by help pages. Rejected, style: comparing against `bayes` rather than the grid run.
+- reader, results.Rmd. Rejected, planned change: whether `save_pred` saves inner predictions, the unexplained columns, reading the output's agreement split, the runner-up and inner-against-outer gap, the `.config` labels, and "which class", all reference material the help pages hold. Rejected, style: "how much of the design ran".
+- reader, parallel.Rmd. Fixed: how many daemons, and what reaches them, through the new pointer to the parallel section. Rejected, planned change: why one daemon does not count, inner parallelism and tune's own support (help pages), no timing shown (M063), and checking only two columns. Rejected, style: "which call". Rejected, planned change: `nested-cv.Rmd` not linking these pages (M142's page).
+- reader, all pages. Rejected, planned change: no Introduction, session info or data description (`nested-cv.Rmd` sets up the example), and the terse voice (the M142 target). Rejected, planned change: the per-page gloss of "candidates" (M084's rule).
