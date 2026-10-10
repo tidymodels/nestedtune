@@ -22,21 +22,25 @@ also gives an error for a metric named like a key column, such as \code{id}
 in the per-fold table.}
 }
 \value{
-A tibble. Summarized, it has one row per metric, with \code{mean}, \code{n}
-and \code{std_err}. Unsummarized, it has one row per outer fold and metric,
-with the design's fold labels first (\code{id}, and \code{id2} on a repeated
-design) and \code{.estimate}. On a design weighted with
+A tibble with \code{.metric} and \code{.estimator}. Summarized, it has one
+row per metric, with \code{mean}, \code{n} and \code{std_err}. Unsummarized, it has one
+row per outer fold and metric, with the design's fold labels first
+(\code{id}, and \code{id2} on a repeated design) and \code{.estimate}. On a design weighted with
 \code{\link[tune:add_resample_weights]{tune::add_resample_weights()}}, it also has each fold's \code{.weight}.
 }
 \description{
 \code{collect_metrics()} returns the nested estimate from \code{\link[=nested_tune_grid]{nested_tune_grid()}}
-and the other nested functions: each metric averaged over the outer folds,
-or each outer fold's score.
+and the other nested functions. The nested estimate is each metric's mean
+over the outer folds' held-out scores.
 }
 \details{
 The estimate describes the whole procedure (tune, select, fit), not one
 fitted model. \code{\link[=nested_final_fit]{nested_final_fit()}} runs that procedure on all the data to
-fit the model to deploy.
+fit the model to deploy. For a procedure chosen before seeing this
+estimate, it is the number to report for that model, because the model
+comes from the same procedure.
+
+With \code{summarize = FALSE}, the function returns each outer fold's scores.
 
 Only the outer folds that completed are read. Failed folds are dropped
 with a warning, and \code{n} counts the folds behind each row. If no fold
@@ -45,7 +49,7 @@ completed, the function gives an error.
 \code{std_err} is the standard error of the mean across the outer folds, as
 tune computes it. Do not build a confidence interval from it, because the
 outer folds share most of their training rows. \code{vignette("estimate")}
-says more.
+covers how to read the standard error.
 
 A metric scored at several evaluation times gets one row per time, in a
 \code{.eval_time} column.

@@ -375,16 +375,22 @@ extract_workflow.nested_final_fit <- function(x, ...) {
 #' Extract the parts of a final fit's workflow
 #'
 #' @description
-#' These methods return the fitted model, the preprocessor and the outcome
-#' names of the workflow that [nested_final_fit()] trained, as the same call
-#' on [extract_workflow()]'s output does.
+#' These methods return the fitted model, its specification, the
+#' preprocessor, the mold, the outcome names and the parameter set of the
+#' workflow that [nested_final_fit()] trained.
 #'
 #' @details
+#' Each one except `extract_parameter_set_dials()` returns what the same
+#' call on [extract_workflow()]'s output returns.
+#'
 #' `extract_parameter_set_dials()` reads the parameter set that tune stored
 #' for the final fit's tuning run, because the trained workflow holds no
-#' `tune()` placeholder. With a data-frame `grid`, the set can keep an
-#' unknown range, such as the upper bound of `mtry`. A fit from
-#' [nested_fit_resamples()] ran no tuning and gives an error.
+#' `tune()` placeholder. When tune built the candidates itself, as for a
+#' numeric `grid` or for [nested_tune_sim_anneal()], it finalized any
+#' unknown range on the predictors. With a data-frame `grid`, the set can
+#' keep an unknown range, such as the upper bound of `mtry`, so finalize it
+#' before use. A fit from [nested_fit_resamples()] ran no tuning and gives
+#' an error.
 #'
 #' @param x A `nested_final_fit` from [nested_final_fit()].
 #' @param ... Not used, and must be empty.

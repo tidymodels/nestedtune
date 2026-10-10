@@ -746,13 +746,17 @@ new_tbl <- function(cols) {
 #'
 #' @description
 #' `collect_metrics()` returns the nested estimate from [nested_tune_grid()]
-#' and the other nested functions: each metric averaged over the outer folds,
-#' or each outer fold's score.
+#' and the other nested functions. The nested estimate is each metric's mean
+#' over the outer folds' held-out scores.
 #'
 #' @details
 #' The estimate describes the whole procedure (tune, select, fit), not one
 #' fitted model. [nested_final_fit()] runs that procedure on all the data to
-#' fit the model to deploy.
+#' fit the model to deploy. For a procedure chosen before seeing this
+#' estimate, it is the number to report for that model, because the model
+#' comes from the same procedure.
+#'
+#' With `summarize = FALSE`, the function returns each outer fold's scores.
 #'
 #' Only the outer folds that completed are read. Failed folds are dropped
 #' with a warning, and `n` counts the folds behind each row. If no fold
@@ -761,7 +765,7 @@ new_tbl <- function(cols) {
 #' `std_err` is the standard error of the mean across the outer folds, as
 #' tune computes it. Do not build a confidence interval from it, because the
 #' outer folds share most of their training rows. `vignette("estimate")`
-#' says more.
+#' covers how to read the standard error.
 #'
 #' A metric scored at several evaluation times gets one row per time, in a
 #' `.eval_time` column.
@@ -777,10 +781,10 @@ new_tbl <- function(cols) {
 #'   in the per-fold table.
 #' @param ... Not used, and must be empty.
 #'
-#' @return A tibble. Summarized, it has one row per metric, with `mean`, `n`
-#'   and `std_err`. Unsummarized, it has one row per outer fold and metric,
-#'   with the design's fold labels first (`id`, and `id2` on a repeated
-#'   design) and `.estimate`. On a design weighted with
+#' @return A tibble with `.metric` and `.estimator`. Summarized, it has one
+#'   row per metric, with `mean`, `n` and `std_err`. Unsummarized, it has one
+#'   row per outer fold and metric, with the design's fold labels first
+#'   (`id`, and `id2` on a repeated design) and `.estimate`. On a design weighted with
 #'   [tune::add_resample_weights()], it also has each fold's `.weight`.
 #'
 #' @template example-setup
@@ -1227,8 +1231,8 @@ paste_labels <- function(tbl, cols) {
 #'
 #' @description
 #' `predict()` on a nested run gives an error that points to
-#' [nested_final_fit()]. The outer folds' models serve the estimate, and none
-#' of them is the model to deploy.
+#' [nested_final_fit()]. The outer folds' models produce the estimate, and
+#' none of them is the model to deploy.
 #'
 #' @details
 #' [nested_final_fit()] fits the model to deploy on all the data. For a

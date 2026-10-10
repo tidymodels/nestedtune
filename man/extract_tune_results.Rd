@@ -21,8 +21,9 @@ A final fit that ran no tuning gives an error.
 }
 \details{
 Do not report this run's metrics. They were computed on the resamples
-that chose the parameters, so they are optimistic about the final model.
-Report the nested estimate, from \code{\link[=collect_metrics]{collect_metrics()}} on the nested run.
+that chose the parameters, so they are optimistic on average about the
+final model.
+Report the nested estimate, from \link[=collect_metrics.nested_results]{collect_metrics()} on the nested run.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

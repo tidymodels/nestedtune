@@ -6,7 +6,7 @@
 # the set's workflows by their nested estimates is a selection the outer loop
 # did not nest (IP3; `vignette("estimate")`).
 
-#' Stack each workflow's table of a workflow-set run under its id
+#' Collect the results of a workflow-set run
 #'
 #' @description
 #' These methods read a `nested_results_set` from [nested_workflow_map()].
@@ -14,14 +14,14 @@
 #' and stacks the tables under a `wflow_id` column.
 #'
 #' @details
-#' Each function works as it does for one workflow, and its table follows
-#' `wflow_id`. A workflow in which no fold completed is left out with a
-#' warning. If no workflow completed a fold, the function gives an error.
+#' A workflow in which no fold completed is left out with a warning. If no
+#' workflow completed a fold, the function gives an error.
 #' `collect_notes()` reads every workflow, the failed ones included.
 #'
 #' Each workflow can have its own control, so one workflow can save
-#' predictions or extracts that another did not. A function that reads the
-#' column gives an error that names the workflow without it.
+#' predictions or extracts that another did not. A function that reads
+#' saved predictions or extracts gives an error that names a workflow with
+#' completed folds that did not save them.
 #'
 #' @param x A `nested_results_set` from [nested_workflow_map()].
 #' @param ... Not used, and must be empty.
@@ -241,14 +241,20 @@ stack_set <- function(
 #'
 #' @details
 #' `summary()` summarizes each workflow's run as [summary.nested_results()]
-#' does, and prints one section per workflow. Each nested estimate
-#' describes its workflow's tuning procedure, not a fitted model. A gap
-#' between two workflows' estimates does not show that one is better.
+#' does, and prints one section per workflow. A tuned workflow's section
+#' carries the `Selected by:` and `Selecting metric:` lines under the rules
+#' that print them. Each nested estimate describes its workflow's tuning
+#' procedure, not a fitted model. For a workflow chosen before seeing these
+#' estimates, its estimate is the number to report for the model that
+#' [nested_final_fit()] fits with that workflow's `id`. Choosing a workflow
+#' by these estimates is itself a selection that no outer loop scored.
 #'
 #' With `type = "performance"`, `autoplot()` puts the workflows along the x
 #' axis, one panel per metric, with a dashed line at each workflow's nested
 #' estimate. With `type = "parameters"`, it draws one panel per workflow and
-#' tuned parameter.
+#' tuned parameter. The subtitle counts the workflows that did not complete
+#' every fold, and those that averaged a metric over fewer folds than they
+#' completed.
 #'
 #' `agreement()` stacks each workflow's table under `wflow_id`. A
 #' parameter that a workflow does not tune is `NA` in its rows.

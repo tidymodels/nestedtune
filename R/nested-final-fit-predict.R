@@ -22,19 +22,20 @@
 #'
 #' @description
 #' `predict()` and `augment()` on a `nested_final_fit` call the trained
-#' workflow's own methods. Each returns what the same call on
-#' [extract_workflow()]`(x)` returns.
+#' workflow's own methods. Each returns what the same call on the workflow
+#' from [extract_workflow()] returns.
 #'
 #' @details
 #' Residuals on the rows the model was fit on are in-sample, so they do not
-#' measure performance. Report the nested estimate from [collect_metrics()]
-#' on the nested run the fit was built from.
+#' measure performance. Report the nested estimate from
+#' [collect_metrics()][collect_metrics.nested_results] on the nested run the
+#' fit was built from.
 #'
 #' @param object,x A `nested_final_fit` from [nested_final_fit()].
 #' @param new_data A data frame of new observations to predict.
 #' @param type,opts Passed to [workflows::predict.workflow()] unchanged.
 #'   `type` selects the prediction type, such as `"numeric"`, `"prob"` or
-#'   `"survival"`.
+#'   `"survival"`. Left unset, it takes the workflow's default.
 #' @param eval_time For censored regression, the times at which to evaluate
 #'   survival probabilities in `augment()`. Ignored otherwise.
 #' @param ... For `predict()`, arguments for the model's predict method,

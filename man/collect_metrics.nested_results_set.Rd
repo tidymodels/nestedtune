@@ -9,7 +9,7 @@
 \alias{collect_extracts.nested_results_set}
 \alias{compute_metrics.nested_results_set}
 \alias{augment.nested_results_set}
-\title{Stack each workflow's table of a workflow-set run under its id}
+\title{Collect the results of a workflow-set run}
 \usage{
 \method{collect_metrics}{nested_results_set}(x, ..., summarize = TRUE, type = c("long", "wide"))
 
@@ -53,14 +53,14 @@ Each one calls its method for one workflow on every workflow in the set,
 and stacks the tables under a \code{wflow_id} column.
 }
 \details{
-Each function works as it does for one workflow, and its table follows
-\code{wflow_id}. A workflow in which no fold completed is left out with a
-warning. If no workflow completed a fold, the function gives an error.
+A workflow in which no fold completed is left out with a warning. If no
+workflow completed a fold, the function gives an error.
 \code{collect_notes()} reads every workflow, the failed ones included.
 
 Each workflow can have its own control, so one workflow can save
-predictions or extracts that another did not. A function that reads the
-column gives an error that names the workflow without it.
+predictions or extracts that another did not. A function that reads
+saved predictions or extracts gives an error that names a workflow with
+completed folds that did not save them.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

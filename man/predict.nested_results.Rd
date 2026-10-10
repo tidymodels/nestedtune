@@ -19,8 +19,8 @@ None. The call is an error.
 }
 \description{
 \code{predict()} on a nested run gives an error that points to
-\code{\link[=nested_final_fit]{nested_final_fit()}}. The outer folds' models serve the estimate, and none
-of them is the model to deploy.
+\code{\link[=nested_final_fit]{nested_final_fit()}}. The outer folds' models produce the estimate, and
+none of them is the model to deploy.
 }
 \details{
 \code{\link[=nested_final_fit]{nested_final_fit()}} fits the model to deploy on all the data. For a

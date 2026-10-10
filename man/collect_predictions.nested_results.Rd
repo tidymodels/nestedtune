@@ -10,7 +10,8 @@
 \method{collect_extracts}{nested_results}(x, ...)
 }
 \arguments{
-\item{x}{A \code{nested_results} from a run whose control saved the column.}
+\item{x}{A \code{nested_results} from a run with \code{save_pred = TRUE}, or with
+an \code{extract} function for \code{collect_extracts()}.}
 
 \item{...}{Not used, and must be empty. tune's \code{parameters} argument is
 not offered, because each fold predicted with the parameters it
@@ -24,7 +25,8 @@ predictions for each data row (\code{TRUE}) or return them per fold
 A tibble with the fold labels first (\code{id}, and \code{id2} on a
 repeated design). For \code{collect_predictions()}, the columns
 \code{\link[tune:last_fit]{tune::last_fit()}} saved follow: the outcome, the predictions, \code{.row}
-and \code{.config}. Averaged, the table has one row per data row that a
+and \code{.config}. That \code{.config} labels the outer fit, not the selected
+candidate. Averaged, the table has one row per data row that a
 completed fold held out, in \code{.row} order. It has no fold labels and no
 \code{.config}.
 }
@@ -51,7 +53,10 @@ value is \code{NULL} and the fold's \code{.notes} say why.
 A repeated or Monte Carlo design can hold a data row out more than once.
 \code{summarize = TRUE} averages each row's predictions over the completed
 folds that held it out, by the rules of \code{\link[tune:collect_predictions]{tune::collect_predictions()}}.
-The rules differ from tune's in three ways:
+The saved columns decide which rule applies. A \code{.pred_class} saved beside
+class probabilities is recomputed from the averaged probabilities,
+whatever a postprocessor set. A \code{NULL} entry in a censored \code{.pred} is left
+out of its row's average. The rules differ from tune's in three ways:
 \itemize{
 \item Each fold selected its own candidate, so the average spans the selected
 candidates, and the fold labels and \code{.config} are dropped.
@@ -61,9 +66,8 @@ class, where tune gives it the first level.
 }
 
 A metric computed on these averages describes an average of several
-fitted models, so it is not the nested estimate. \code{\link[=collect_metrics]{collect_metrics()}}
-gives that estimate. The average also checks that each fold's \code{.row}
-column holds the rows that fold held out, once each.
+fitted models, so it is not the nested estimate.
+\link[=collect_metrics.nested_results]{collect_metrics()} gives that estimate.
 }
 
 \examples{
@@ -115,7 +119,7 @@ collect_predictions(res_rep, summarize = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_selections]{collect_selections()}}, \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
+\code{\link[=collect_selections]{collect_selections()}}, \link[=collect_metrics.nested_results]{collect_metrics()}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
 \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same functions on a
 workflow-set run
 }

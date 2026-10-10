@@ -16,7 +16,7 @@
 
 \item{type, opts}{Passed to \code{\link[workflows:predict.workflow]{workflows::predict.workflow()}} unchanged.
 \code{type} selects the prediction type, such as \code{"numeric"}, \code{"prob"} or
-\code{"survival"}.}
+\code{"survival"}. Left unset, it takes the workflow's default.}
 
 \item{...}{For \code{predict()}, arguments for the model's predict method,
 such as \code{level} with \code{type = "conf_int"}. parsnip gives an error for a
@@ -34,13 +34,14 @@ outcome is present.
 }
 \description{
 \code{predict()} and \code{augment()} on a \code{nested_final_fit} call the trained
-workflow's own methods. Each returns what the same call on
-\code{\link[=extract_workflow]{extract_workflow()}}\code{(x)} returns.
+workflow's own methods. Each returns what the same call on the workflow
+from \code{\link[=extract_workflow]{extract_workflow()}} returns.
 }
 \details{
 Residuals on the rows the model was fit on are in-sample, so they do not
-measure performance. Report the nested estimate from \code{\link[=collect_metrics]{collect_metrics()}}
-on the nested run the fit was built from.
+measure performance. Report the nested estimate from
+\link[=collect_metrics.nested_results]{collect_metrics()} on the nested run the
+fit was built from.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

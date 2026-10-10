@@ -41,7 +41,7 @@ and the selected values.
 \details{
 The \code{estimate} component is always \code{NULL}, because the number to report
 is not stored on the fit. It is the nested estimate from
-\code{\link[=collect_metrics]{collect_metrics()}} on the nested run the fit was built from. The nested
+\link[=collect_metrics.nested_results]{collect_metrics()} on the nested run the fit was built from. The nested
 estimate describes the procedure that produced this model, not the fitted
 model itself.
 

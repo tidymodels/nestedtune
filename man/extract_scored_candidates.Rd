@@ -19,8 +19,8 @@ error.
 }
 \description{
 \code{extract_scored_candidates()} returns the parameter settings that the
-tuning run of \code{\link[=nested_final_fit]{nested_final_fit()}} scored, one row per candidate. They
-compare with the candidates in each outer fold's \code{.inner_metrics}.
+tuning run of \code{\link[=nested_final_fit]{nested_final_fit()}} scored, one row per candidate. Compare
+them with \code{\link[=collect_inner_metrics]{collect_inner_metrics()}} on the nested run.
 }
 \details{
 tune can reach fewer candidates than a \code{grid} size asks for. A candidate

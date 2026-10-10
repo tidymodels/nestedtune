@@ -18,11 +18,12 @@ selection_rule(
 that order the candidates from simplest to most complex, as bare names.
 Wrap a name in \code{\link[dplyr:desc]{dplyr::desc()}} when a larger value is simpler. For
 \code{"desirability"}, one or more goals such as \code{maximize(rsq)} or
-\code{minimize(num_comp)}. These three rules need at least one, and
+\code{minimize(num_comp)}. Every rule but \code{"best"} needs at least one, and
 \code{"best"} takes none.}
 
 \item{limit}{For \code{"pct_loss"} only, the acceptable loss against the best
-candidate, in percent. \code{NULL} takes tune's default of 2.}
+candidate, as a single non-negative number in percent. \code{NULL} takes
+tune's default of 2. The other rules take no \code{limit}.}
 }
 \value{
 A \code{selection_rule}: a list with the elements \code{rule}, \code{order} and
@@ -36,7 +37,8 @@ selectors or desirability2's, with what that selector needs.
 \details{
 Each outer fold applies the rule to its own inner tuning run, and
 \code{\link[=nested_final_fit]{nested_final_fit()}} applies it to its run on all the data. tune's three
-selectors rank on the first metric.
+selectors rank on the first metric of the \code{metrics} argument of the nested
+function, so put the metric to rank on first.
 \itemize{
 \item \code{"best"} takes the candidate with the best mean, as \code{\link[tune:select_best]{tune::select_best()}}
 does.
@@ -56,8 +58,9 @@ goal without the \verb{desirability2::} prefix, and name a metric or a tuned
 parameter first, as in \code{maximize(rsq)}. Put a variable's value in with
 \verb{!!}, as in \code{maximize(rsq, low = !!lo)}.
 
-A limit that a goal leaves out is set from the tuning run being scored,
-so each fold and the final fit scale the goal on their own run. The
+A \code{low} or \code{high} bound that a goal leaves out is set from the tuning run
+being scored, so each fold and the final fit scale the goal on their own
+run. The
 racing and annealing functions do not take this rule, and neither does a
 censored regression model.
 }

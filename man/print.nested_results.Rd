@@ -58,5 +58,5 @@ res
 }
 \seealso{
 \code{\link[=summary.nested_results]{summary.nested_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=collect_metrics]{collect_metrics()}}
+\link[=collect_metrics.nested_results]{collect_metrics()}
 }

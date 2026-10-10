@@ -24,11 +24,11 @@ final_fit_estimate_msg <- "Report the nested estimate from \\
 #' parameters it selected, and which number to report for this model.
 #'
 #' @details
-#' The number to report is the nested estimate from [collect_metrics()] on
+#' The number to report is the nested estimate from [collect_metrics()][collect_metrics.nested_results] on
 #' the nested run the fit was built from. For a workflow set, it is that
 #' workflow's rows. The nested estimate describes the procedure that
 #' produced this model, not the fitted model itself. The tuning run's own
-#' metrics were used to select, so they are optimistic.
+#' metrics were used to select, so they are optimistic on average.
 #'
 #' The line under the heading names the tuner and its counts: the candidates
 #' a grid search or a race scored, or the initial candidates and iterations
@@ -106,7 +106,7 @@ print.nested_final_fit <- function(x, ...) {
 #' @details
 #' The `estimate` component is always `NULL`, because the number to report
 #' is not stored on the fit. It is the nested estimate from
-#' [collect_metrics()] on the nested run the fit was built from. The nested
+#' [collect_metrics()][collect_metrics.nested_results] on the nested run the fit was built from. The nested
 #' estimate describes the procedure that produced this model, not the fitted
 #' model itself.
 #'

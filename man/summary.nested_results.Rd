@@ -18,11 +18,17 @@ function.}
 \item{x}{A \code{summary.nested_results} object from \code{\link[=summary.nested_results]{summary.nested_results()}}.}
 }
 \value{
-\code{summary()} returns a \code{summary.nested_results}, a list. It holds the
-outer scheme's label, the requested and completed fold counts, the failed
-folds and the selections. It also holds the rule as \code{select}, the first
-metric's name as \code{first_metric}, each fold's candidates and the averaged
-estimates.
+\code{summary()} returns a \code{summary.nested_results}, a list with these
+components:
+\itemize{
+\item \code{outer_label}, the outer resampling scheme's label
+\item \code{requested} and \code{completed}, the fold counts
+\item \code{failures}, the failed folds and the stage each failed at
+\item \code{selection}, what the completed folds selected
+\item \code{select} and \code{first_metric}, as \code{\link[=extract_procedure]{extract_procedure()}} records them
+\item \code{grids}, the candidates each fold scored
+\item \code{estimate}, the averaged metrics, or \code{NULL} when no fold completed
+}
 
 \code{print()} returns \code{x}, invisibly.
 }
@@ -71,6 +77,6 @@ summary(res)
 }
 \seealso{
 \code{\link[=print.nested_results]{print.nested_results()}}, \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for a workflow-set
+\link[=collect_metrics.nested_results]{collect_metrics()}, \code{\link[=summary.nested_results_set]{summary.nested_results_set()}} for a workflow-set
 run
 }

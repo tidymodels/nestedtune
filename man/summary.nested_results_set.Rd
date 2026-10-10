@@ -47,14 +47,20 @@ they read one workflow's run, keyed by \code{wflow_id}.
 }
 \details{
 \code{summary()} summarizes each workflow's run as \code{\link[=summary.nested_results]{summary.nested_results()}}
-does, and prints one section per workflow. Each nested estimate
-describes its workflow's tuning procedure, not a fitted model. A gap
-between two workflows' estimates does not show that one is better.
+does, and prints one section per workflow. A tuned workflow's section
+carries the \verb{Selected by:} and \verb{Selecting metric:} lines under the rules
+that print them. Each nested estimate describes its workflow's tuning
+procedure, not a fitted model. For a workflow chosen before seeing these
+estimates, its estimate is the number to report for the model that
+\code{\link[=nested_final_fit]{nested_final_fit()}} fits with that workflow's \code{id}. Choosing a workflow
+by these estimates is itself a selection that no outer loop scored.
 
 With \code{type = "performance"}, \code{autoplot()} puts the workflows along the x
 axis, one panel per metric, with a dashed line at each workflow's nested
 estimate. With \code{type = "parameters"}, it draws one panel per workflow and
-tuned parameter.
+tuned parameter. The subtitle counts the workflows that did not complete
+every fold, and those that averaged a metric over fewer folds than they
+completed.
 
 \code{agreement()} stacks each workflow's table under \code{wflow_id}. A
 parameter that a workflow does not tune is \code{NA} in its rows.

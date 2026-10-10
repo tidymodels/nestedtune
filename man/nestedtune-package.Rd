@@ -7,13 +7,15 @@
 \title{nestedtune: Nested Cross-Validation for Tidymodels}
 \description{
 nestedtune runs nested cross-validation with tidymodels objects. Each
-outer fold tunes with tune or finetune on its own inner resamples, and
-scores the result on rows it held out.
+outer fold tunes with tune or finetune on its own inner resamples, or fits
+a workflow with nothing to tune, and scores the result on rows it held
+out.
 }
 \details{
 \code{\link[=nested_resamples]{nested_resamples()}} builds the design. \code{\link[=nested_tune_grid]{nested_tune_grid()}} and the other
 nested tuning functions run the loop, and \code{\link[=nested_workflow_map]{nested_workflow_map()}} runs a
-workflow set through it. \code{\link[=collect_metrics]{collect_metrics()}} gives the estimate, and
+workflow set through it.
+\link[=collect_metrics.nested_results]{collect_metrics()} gives the estimate, and
 \code{\link[=agreement]{agreement()}} shows what the folds selected. \code{\link[=nested_final_fit]{nested_final_fit()}} fits
 the model to deploy on all the data.
 }

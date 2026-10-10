@@ -32,16 +32,17 @@ holds \code{NA} there. \code{collect_notes()} gives tune's note columns, from
 }
 \description{
 \code{collect_selections()}, \code{collect_inner_metrics()} and \code{collect_notes()}
-stack one per-fold column of a nested run into a single table, with the
-fold labels first.
+return what each outer fold's inner tuning selected, scored or noted, in
+one table with the fold labels first.
 }
 \details{
 \itemize{
-\item \code{collect_selections()} gives the candidate each completed fold's inner
-tuning selected, one row per fold. A \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result
-gives no rows.
-\item \code{collect_inner_metrics()} gives every candidate and metric that each
-completed fold's inner tuning scored.
+\item \code{collect_selections()} gives the tuned parameter values and \code{.config}
+of the candidate each completed fold selected, one row per fold. A
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} result gives no rows.
+\item \code{collect_inner_metrics()} gives the columns of
+\code{\link[tune:collect_metrics]{tune::collect_metrics()}} for every candidate that each completed
+fold's inner tuning scored.
 \item \code{collect_notes()} gives the notes of every fold, the failed ones
 included.
 }
@@ -78,7 +79,7 @@ collect_notes(res)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
+\link[=collect_metrics.nested_results]{collect_metrics()}, \code{\link[=agreement]{agreement()}}, \code{\link[=summary.nested_results]{summary.nested_results()}},
 \code{\link[=collect_metrics.nested_results_set]{collect_metrics.nested_results_set()}} for the same functions on a
 workflow-set run
 }

@@ -13,8 +13,13 @@ function, or a \code{nested_final_fit}.}
 \item{...}{Not used, and must be empty.}
 }
 \value{
-A named list: \code{tuner}, the tuner's own arguments, the arguments
-that every nested function shares, \code{control} and \code{workflow}.
+A named list with these elements, in this order:
+\itemize{
+\item \code{tuner} and the tuner's own arguments
+\item \code{param_info}, \code{event_level} and \code{eval_time}
+\item \code{select} and \code{first_metric}
+\item \code{control} and \code{workflow}
+}
 }
 \description{
 \code{extract_procedure()} returns what a nested run recorded about its
@@ -33,15 +38,18 @@ arguments beside it:
 }
 
 \code{select} is the \code{\link[=selection_rule]{selection_rule()}}, and \code{first_metric} is the first
-metric of the set, as tune resolves it. \code{param_info}, \code{event_level} and
+metric of the set, as tune resolves it. A run given no metric set names
+the first metric of tune's default set. \code{param_info}, \code{event_level} and
 \code{eval_time} are as given. \code{control} is the control that took effect,
-with the settings this package forces applied. A \code{"fit_resamples"}
-record has no \code{param_info}, \code{select} or \code{first_metric}.
+with the settings this package forces applied. On a Bayesian run, its
+\code{seed} is left out. A \code{"fit_resamples"} record has no \code{param_info},
+\code{select} or \code{first_metric}.
 
-\code{workflow} describes the model and the preprocessor as text, so that
-\code{\link[=nested_final_fit]{nested_final_fit()}} can check that it gets the same workflow. A model
-argument is stored as written, so a variable's name is stored and not
-its value. The workflow object and the data are not stored.
+\code{workflow} describes the model, the preprocessor, and any case-weights
+column and tailor postprocessor as text. \code{\link[=nested_final_fit]{nested_final_fit()}} uses it to
+check that it gets the same workflow. A model argument is stored as
+written, so a variable's name is stored and not its value. The workflow
+object and the data are not stored.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

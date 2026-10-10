@@ -19,11 +19,11 @@ Printing a \code{nested_final_fit} shows the tuning run on all the data, the
 parameters it selected, and which number to report for this model.
 }
 \details{
-The number to report is the nested estimate from \code{\link[=collect_metrics]{collect_metrics()}} on
+The number to report is the nested estimate from \link[=collect_metrics.nested_results]{collect_metrics()} on
 the nested run the fit was built from. For a workflow set, it is that
 workflow's rows. The nested estimate describes the procedure that
 produced this model, not the fitted model itself. The tuning run's own
-metrics were used to select, so they are optimistic.
+metrics were used to select, so they are optimistic on average.
 
 The line under the heading names the tuner and its counts: the candidates
 a grid search or a race scored, or the initial candidates and iterations

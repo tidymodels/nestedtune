@@ -26,22 +26,29 @@
 #' - `"fit_resamples"`, with none
 #'
 #' `select` is the [selection_rule()], and `first_metric` is the first
-#' metric of the set, as tune resolves it. `param_info`, `event_level` and
+#' metric of the set, as tune resolves it. A run given no metric set names
+#' the first metric of tune's default set. `param_info`, `event_level` and
 #' `eval_time` are as given. `control` is the control that took effect,
-#' with the settings this package forces applied. A `"fit_resamples"`
-#' record has no `param_info`, `select` or `first_metric`.
+#' with the settings this package forces applied. On a Bayesian run, its
+#' `seed` is left out. A `"fit_resamples"` record has no `param_info`,
+#' `select` or `first_metric`.
 #'
-#' `workflow` describes the model and the preprocessor as text, so that
-#' [nested_final_fit()] can check that it gets the same workflow. A model
-#' argument is stored as written, so a variable's name is stored and not
-#' its value. The workflow object and the data are not stored.
+#' `workflow` describes the model, the preprocessor, and any case-weights
+#' column and tailor postprocessor as text. [nested_final_fit()] uses it to
+#' check that it gets the same workflow. A model argument is stored as
+#' written, so a variable's name is stored and not its value. The workflow
+#' object and the data are not stored.
 #'
 #' @param x A `nested_results` from [nested_tune_grid()] or a related
 #'   function, or a `nested_final_fit`.
 #' @inheritParams print.nested_final_fit
 #'
-#' @return A named list: `tuner`, the tuner's own arguments, the arguments
-#'   that every nested function shares, `control` and `workflow`.
+#' @return A named list with these elements, in this order:
+#'
+#'   - `tuner` and the tuner's own arguments
+#'   - `param_info`, `event_level` and `eval_time`
+#'   - `select` and `first_metric`
+#'   - `control` and `workflow`
 #'
 #' @template example-setup
 #' @template example-run

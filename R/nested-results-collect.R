@@ -14,15 +14,16 @@
 #'
 #' @description
 #' `collect_selections()`, `collect_inner_metrics()` and `collect_notes()`
-#' stack one per-fold column of a nested run into a single table, with the
-#' fold labels first.
+#' return what each outer fold's inner tuning selected, scored or noted, in
+#' one table with the fold labels first.
 #'
 #' @details
-#' * `collect_selections()` gives the candidate each completed fold's inner
-#'   tuning selected, one row per fold. A [nested_fit_resamples()] result
-#'   gives no rows.
-#' * `collect_inner_metrics()` gives every candidate and metric that each
-#'   completed fold's inner tuning scored.
+#' * `collect_selections()` gives the tuned parameter values and `.config`
+#'   of the candidate each completed fold selected, one row per fold. A
+#'   [nested_fit_resamples()] result gives no rows.
+#' * `collect_inner_metrics()` gives the columns of
+#'   [tune::collect_metrics()] for every candidate that each completed
+#'   fold's inner tuning scored.
 #' * `collect_notes()` gives the notes of every fold, the failed ones
 #'   included.
 #'
@@ -46,7 +47,7 @@
 #' collect_inner_metrics(res)
 #' collect_notes(res)
 #'
-#' @templateVar LINKS [collect_metrics()], [agreement()], [summary.nested_results()]
+#' @templateVar LINKS [collect_metrics()][collect_metrics.nested_results], [agreement()], [summary.nested_results()]
 #' @templateVar WHAT functions
 #' @template seealso-reader
 #' @name collect_selections
@@ -165,7 +166,10 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' A repeated or Monte Carlo design can hold a data row out more than once.
 #' `summarize = TRUE` averages each row's predictions over the completed
 #' folds that held it out, by the rules of [tune::collect_predictions()].
-#' The rules differ from tune's in three ways:
+#' The saved columns decide which rule applies. A `.pred_class` saved beside
+#' class probabilities is recomputed from the averaged probabilities,
+#' whatever a postprocessor set. A `NULL` entry in a censored `.pred` is left
+#' out of its row's average. The rules differ from tune's in three ways:
 #'
 #' * Each fold selected its own candidate, so the average spans the selected
 #'   candidates, and the fold labels and `.config` are dropped.
@@ -174,11 +178,11 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' * Quantile predictions are not averaged, and they give an error.
 #'
 #' A metric computed on these averages describes an average of several
-#' fitted models, so it is not the nested estimate. [collect_metrics()]
-#' gives that estimate. The average also checks that each fold's `.row`
-#' column holds the rows that fold held out, once each.
+#' fitted models, so it is not the nested estimate.
+#' [collect_metrics()][collect_metrics.nested_results] gives that estimate.
 #'
-#' @param x A `nested_results` from a run whose control saved the column.
+#' @param x A `nested_results` from a run with `save_pred = TRUE`, or with
+#'   an `extract` function for `collect_extracts()`.
 #' @param ... Not used, and must be empty. tune's `parameters` argument is
 #'   not offered, because each fold predicted with the parameters it
 #'   selected.
@@ -189,7 +193,8 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' @return A tibble with the fold labels first (`id`, and `id2` on a
 #'   repeated design). For `collect_predictions()`, the columns
 #'   [tune::last_fit()] saved follow: the outcome, the predictions, `.row`
-#'   and `.config`. Averaged, the table has one row per data row that a
+#'   and `.config`. That `.config` labels the outer fit, not the selected
+#'   candidate. Averaged, the table has one row per data row that a
 #'   completed fold held out, in `.row` order. It has no fold labels and no
 #'   `.config`.
 #'
@@ -226,7 +231,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
 #' )
 #' collect_predictions(res_rep, summarize = TRUE)
 #'
-#' @templateVar LINKS [collect_selections()], [collect_metrics()], [nested_tune_grid()]
+#' @templateVar LINKS [collect_selections()], [collect_metrics()][collect_metrics.nested_results], [nested_tune_grid()]
 #' @templateVar WHAT functions
 #' @template seealso-reader
 #' @name collect_predictions.nested_results
@@ -598,21 +603,23 @@ collect_extracts.nested_results <- function(x, ...) {
 #'
 #' @description
 #' `compute_metrics()` scores the predictions a nested run saved with a new
-#' metric set, and returns a table shaped like [collect_metrics()]. The
+#' metric set, and returns a table shaped like [collect_metrics()][collect_metrics.nested_results]. The
 #' nested loop does not run again.
 #'
 #' @details
 #' Each completed outer fold's saved predictions are scored on their own, and
-#' the per-fold scores are averaged as in [collect_metrics()]. Each repeat of
+#' the per-fold scores are averaged as in [collect_metrics()][collect_metrics.nested_results]. Each repeat of
 #' a repeated design counts as its own fold. A fold that scores `NA` is left
 #' out of the mean.
 #'
-#' Each fold keeps the candidate it selected. To select with a metric, give
-#' it to the nested run itself.
+#' Each fold keeps the candidate it selected. To select with a metric, pass
+#' it in the `metrics` argument of [nested_tune_grid()] or the other nested
+#' function.
 #'
 #' The run needs `save_pred = TRUE` in its control, and a metric that reads a
-#' kind of prediction the run did not save is an error. So is a fold whose
-#' `.row` column does not hold the rows that fold held out, once each.
+#' kind of prediction the run did not save is an error. So is an edited
+#' `.predictions` column whose `.row` values do not match the rows each fold
+#' held out.
 #'
 #' @inheritParams collect_metrics.nested_results
 #' @param x A `nested_results` from a run with `save_pred = TRUE` in its
@@ -623,7 +630,7 @@ collect_extracts.nested_results <- function(x, ...) {
 #'   default, `NULL`, takes the level the run used, where tune's method
 #'   takes `"first"`.
 #'
-#' @return A tibble in the long shape of [collect_metrics()]. With the run's
+#' @return A tibble in the long shape of [collect_metrics()][collect_metrics.nested_results]. With the run's
 #'   own metric set and event level, it equals
 #'   `collect_metrics(x, summarize = summarize)`.
 #'
@@ -875,10 +882,12 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' before its first assessment set. For those, use [collect_predictions()].
 #'
 #' On a design that holds out some row more than once, every row gets the
-#' average that `collect_predictions(summarize = TRUE)` gives. A metric
-#' computed on averaged predictions is not the nested estimate.
+#' average that `collect_predictions(summarize = TRUE)` gives. So a
+#' `.pred_class` saved beside class probabilities is recomputed from the
+#' averaged probabilities, whatever a postprocessor set. A metric computed
+#' on averaged predictions is not the nested estimate.
 #'
-#' A row that only failed folds held out gets missing predictions, with a
+#' A row held out only by failed folds gets missing predictions, with a
 #' warning. The run needs `save_pred = TRUE` in its control.
 #'
 #' @inheritParams compute_metrics.nested_results
@@ -889,7 +898,7 @@ score_fold <- function(preds, metrics, classes, event_level) {
 #' @return A tibble with the data's rows in the data's order: the outcome,
 #'   then the prediction columns, whose names start with `.pred`, then the
 #'   other data columns. For a censored outcome, the prediction columns come
-#'   first. No `.resid` column is added.
+#'   first. Unlike tune's `augment()`, it adds no `.resid` column.
 #'
 #' @template example-setup
 #' @examplesIf rlang::is_installed(c("recipes", "yardstick"))

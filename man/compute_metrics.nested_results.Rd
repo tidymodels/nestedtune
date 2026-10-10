@@ -22,27 +22,29 @@ default, \code{NULL}, takes the level the run used, where tune's method
 takes \code{"first"}.}
 }
 \value{
-A tibble in the long shape of \code{\link[=collect_metrics]{collect_metrics()}}. With the run's
+A tibble in the long shape of \link[=collect_metrics.nested_results]{collect_metrics()}. With the run's
 own metric set and event level, it equals
 \code{collect_metrics(x, summarize = summarize)}.
 }
 \description{
 \code{compute_metrics()} scores the predictions a nested run saved with a new
-metric set, and returns a table shaped like \code{\link[=collect_metrics]{collect_metrics()}}. The
+metric set, and returns a table shaped like \link[=collect_metrics.nested_results]{collect_metrics()}. The
 nested loop does not run again.
 }
 \details{
 Each completed outer fold's saved predictions are scored on their own, and
-the per-fold scores are averaged as in \code{\link[=collect_metrics]{collect_metrics()}}. Each repeat of
+the per-fold scores are averaged as in \link[=collect_metrics.nested_results]{collect_metrics()}. Each repeat of
 a repeated design counts as its own fold. A fold that scores \code{NA} is left
 out of the mean.
 
-Each fold keeps the candidate it selected. To select with a metric, give
-it to the nested run itself.
+Each fold keeps the candidate it selected. To select with a metric, pass
+it in the \code{metrics} argument of \code{\link[=nested_tune_grid]{nested_tune_grid()}} or the other nested
+function.
 
 The run needs \code{save_pred = TRUE} in its control, and a metric that reads a
-kind of prediction the run did not save is an error. So is a fold whose
-\code{.row} column does not hold the rows that fold held out, once each.
+kind of prediction the run did not save is an error. So is an edited
+\code{.predictions} column whose \code{.row} values do not match the rows each fold
+held out.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

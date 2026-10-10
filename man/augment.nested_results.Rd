@@ -18,7 +18,7 @@ selected.}
 A tibble with the data's rows in the data's order: the outcome,
 then the prediction columns, whose names start with \code{.pred}, then the
 other data columns. For a censored outcome, the prediction columns come
-first. No \code{.resid} column is added.
+first. Unlike tune's \code{augment()}, it adds no \code{.resid} column.
 }
 \description{
 \code{augment()} returns the data a nested run was given, with each row's
@@ -35,10 +35,12 @@ Carlo design can miss rows, and a time-series design misses the rows
 before its first assessment set. For those, use \code{\link[=collect_predictions]{collect_predictions()}}.
 
 On a design that holds out some row more than once, every row gets the
-average that \code{collect_predictions(summarize = TRUE)} gives. A metric
-computed on averaged predictions is not the nested estimate.
+average that \code{collect_predictions(summarize = TRUE)} gives. So a
+\code{.pred_class} saved beside class probabilities is recomputed from the
+averaged probabilities, whatever a postprocessor set. A metric computed
+on averaged predictions is not the nested estimate.
 
-A row that only failed folds held out gets missing predictions, with a
+A row held out only by failed folds gets missing predictions, with a
 warning. The run needs \code{save_pred = TRUE} in its control.
 }
 \examples{

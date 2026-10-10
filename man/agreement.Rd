@@ -30,7 +30,9 @@ data.
 
 Failed folds are left out, with a warning. If no fold completed, the
 function gives an error. A fold with no value for a parameter is counted
-under \code{NA}. A workflow with nothing to tune gives no rows.
+under \code{NA}, in the same row as a fold that selected \code{NA}.
+\code{\link[=summary.nested_results]{summary.nested_results()}} tells the two apart. A workflow with nothing
+to tune gives no rows.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

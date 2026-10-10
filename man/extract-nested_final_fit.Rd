@@ -42,16 +42,22 @@ What the same call returns for the trained workflow. For
 the tuning run stored.
 }
 \description{
-These methods return the fitted model, the preprocessor and the outcome
-names of the workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained, as the same call
-on \code{\link[=extract_workflow]{extract_workflow()}}'s output does.
+These methods return the fitted model, its specification, the
+preprocessor, the mold, the outcome names and the parameter set of the
+workflow that \code{\link[=nested_final_fit]{nested_final_fit()}} trained.
 }
 \details{
+Each one except \code{extract_parameter_set_dials()} returns what the same
+call on \code{\link[=extract_workflow]{extract_workflow()}}'s output returns.
+
 \code{extract_parameter_set_dials()} reads the parameter set that tune stored
 for the final fit's tuning run, because the trained workflow holds no
-\code{tune()} placeholder. With a data-frame \code{grid}, the set can keep an
-unknown range, such as the upper bound of \code{mtry}. A fit from
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and gives an error.
+\code{tune()} placeholder. When tune built the candidates itself, as for a
+numeric \code{grid} or for \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}, it finalized any
+unknown range on the predictors. With a data-frame \code{grid}, the set can
+keep an unknown range, such as the upper bound of \code{mtry}, so finalize it
+before use. A fit from \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} ran no tuning and gives
+an error.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("recipes", "yardstick"))) withAutoprint(\{ # examplesIf}

@@ -45,7 +45,7 @@
 #' res
 #'
 #' @seealso [summary.nested_results()], [nested_tune_grid()],
-#'   [collect_metrics()]
+#'   [collect_metrics()][collect_metrics.nested_results]
 #' @export
 print.nested_results <- function(x, ..., n = NULL, width = NULL) {
   # `n` and `width` sit after the fence so they match by full name only: a
@@ -136,11 +136,16 @@ print_failure_count <- function(x) {
 #'   function.
 #' @inheritParams collect_metrics.nested_results
 #' @return
-#' `summary()` returns a `summary.nested_results`, a list. It holds the
-#' outer scheme's label, the requested and completed fold counts, the failed
-#' folds and the selections. It also holds the rule as `select`, the first
-#' metric's name as `first_metric`, each fold's candidates and the averaged
-#' estimates.
+#' `summary()` returns a `summary.nested_results`, a list with these
+#' components:
+#'
+#' - `outer_label`, the outer resampling scheme's label
+#' - `requested` and `completed`, the fold counts
+#' - `failures`, the failed folds and the stage each failed at
+#' - `selection`, what the completed folds selected
+#' - `select` and `first_metric`, as [extract_procedure()] records them
+#' - `grids`, the candidates each fold scored
+#' - `estimate`, the averaged metrics, or `NULL` when no fold completed
 #'
 #' @template example-setup
 #' @template example-run
@@ -148,7 +153,7 @@ print_failure_count <- function(x) {
 #' summary(res)
 #'
 #' @seealso [print.nested_results()], [nested_tune_grid()],
-#'   [collect_metrics()], [summary.nested_results_set()] for a workflow-set
+#'   [collect_metrics()][collect_metrics.nested_results], [summary.nested_results_set()] for a workflow-set
 #'   run
 #' @export
 summary.nested_results <- function(object, ...) {

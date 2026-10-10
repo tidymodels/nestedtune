@@ -29,8 +29,9 @@
 #'
 #' @details
 #' Do not report this run's metrics. They were computed on the resamples
-#' that chose the parameters, so they are optimistic about the final model.
-#' Report the nested estimate, from [collect_metrics()] on the nested run.
+#' that chose the parameters, so they are optimistic on average about the
+#' final model.
+#' Report the nested estimate, from [collect_metrics()][collect_metrics.nested_results] on the nested run.
 #'
 #' @inheritParams print.nested_final_fit
 #'
@@ -82,8 +83,8 @@ extract_tune_results.nested_final_fit <- function(x, ...) {
 #'
 #' @description
 #' `extract_scored_candidates()` returns the parameter settings that the
-#' tuning run of [nested_final_fit()] scored, one row per candidate. They
-#' compare with the candidates in each outer fold's `.inner_metrics`.
+#' tuning run of [nested_final_fit()] scored, one row per candidate. Compare
+#' them with [collect_inner_metrics()] on the nested run.
 #'
 #' @details
 #' tune can reach fewer candidates than a `grid` size asks for. A candidate
