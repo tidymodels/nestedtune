@@ -48,7 +48,7 @@ At the M142 branch point (`54ac8f31`, 2026-10-09):
 | tidymodels.org `learn/work/bayes-opt` | 654 | 19 | 34.4 | 0 | 0 |
 | tune `vignettes/tune.Rmd` | 971 | 42 | 23.1 | 0 | 0 |
 
-At the M142 head (2026-10-09), the same script reads `nested_tune_grid` at 1,234 prose words with a 36-word Description. It reads `nested-cv.Rmd` at 652 prose words in 24 paragraphs (mean 27.2, 0 coined), and `README.Rmd` at 397 prose words (mean 44.1, 2 coined). The shared templates also cut the sibling pages: `nested_tune_bayes` 1,528, `nested_tune_race` 1,641, `nested_tune_sim_anneal` 1,543 and `nested_fit_resamples` 1,282.
+At the M142 head (2026-10-09), the same script reads `nested_tune_grid` at 1,208 prose words with a 36-word Description (after the claim audit's fixes and the script's punctuation fix). It reads `nested-cv.Rmd` at 652 prose words in 24 paragraphs (mean 27.2, 0 coined), and `README.Rmd` at 397 prose words (mean 44.1, 2 coined). The shared templates also cut the sibling pages: `nested_tune_bayes` 1,528, `nested_tune_race` 1,641, `nested_tune_sim_anneal` 1,543 and `nested_fit_resamples` 1,282 (1,245 after the fixes).
 
 The largest comparator paragraph mean is 37.5 (`start/tuning`). Without `procedure`, the coined list finds few hits on the guides: 3 on `nested-cv.Rmd` and 6 on the README.
 
