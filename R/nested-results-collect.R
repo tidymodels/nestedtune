@@ -35,8 +35,9 @@
 #'
 #' @inheritParams collect_metrics.nested_results
 #' @param type For `collect_inner_metrics()`, `"long"` (the default), one row
-#'   per candidate and metric, or `"wide"`, one column per metric that holds
-#'   its `mean`. The wide shape drops `.estimator`, `n` and `std_err`. It
+#'   per fold, candidate and metric, or `"wide"`, one column per metric that
+#'   holds its `mean`. The wide shape drops `.estimator`, `n` and `std_err`,
+#'   and a metric that a fold did not score is `NA` in its rows. It
 #'   gives an error for a metric named like another column, such as a tuning
 #'   parameter, and for a metric scored with two estimators.
 #'

@@ -25,8 +25,9 @@ function.}
 \item{...}{Not used, and must be empty.}
 
 \item{type}{For \code{collect_inner_metrics()}, \code{"long"} (the default), one row
-per candidate and metric, or \code{"wide"}, one column per metric that holds
-its \code{mean}. The wide shape drops \code{.estimator}, \code{n} and \code{std_err}. It
+per fold, candidate and metric, or \code{"wide"}, one column per metric that
+holds its \code{mean}. The wide shape drops \code{.estimator}, \code{n} and \code{std_err},
+and a metric that a fold did not score is \code{NA} in its rows. It
 gives an error for a metric named like another column, such as a tuning
 parameter, and for a metric scored with two estimators.}
 }

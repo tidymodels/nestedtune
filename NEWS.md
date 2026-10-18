@@ -2,7 +2,10 @@
 
 * Three arguments from tidymodels are new. `nested_workflow_map()` takes
   `verbose`, which writes a message as each workflow starts and finishes.
-  It sits before `...`, where `workflowsets::workflow_map()` has it.
+  It sits before `...`, where `workflowsets::workflow_map()` has it. So an
+  unnamed third argument is now read as `verbose`. A value that is not
+  `TRUE` or `FALSE` there gives an error of class `nestedtune_bad_verbose`,
+  where it was `nestedtune_bad_dots`.
   `collect_inner_metrics()` takes `type = "wide"`, which gives one column
   per metric, as `tune::collect_metrics()` does. `autoplot()` on a
   workflow-set run takes `id`, which draws the plot of one workflow.

@@ -2,7 +2,10 @@
 # own wide table on fold 1's inner run, rebuilt by hand from the documented
 # seed contract (`reference_nested_loop()`). The grid names every candidate
 # and no range depends on the data, so the rebuilt run can tune on
-# `inner_resamples[[1]]` itself (the M05 lesson).
+# `inner_resamples[[1]]` itself (the M05 lesson). An oracle file, so it
+# skips on CRAN as the others do (M118).
+
+skip_heavy_on_cran()
 
 grid_inner_run <- function(d, seed = 41) {
   wf <- det_workflow(d)
@@ -72,11 +75,13 @@ test_that("AC2: .iter stays a key column on a Bayesian run", {
   expect_false(any(
     c(".metric", ".estimator", "mean", "n", "std_err") %in% names(wide)
   ))
-  # One row per fold and candidate: the long table has two rows, one per metric, for each.
-  expect_identical(nrow(wide), nrow(long) %/% 2L)
+  # One row per fold and candidate: the long table has one row per metric
+  # for each.
+  metrics <- unique(long$.metric)
+  expect_identical(nrow(wide), nrow(long) %/% length(metrics))
   expect_identical(
     wide$.iter,
-    long$.iter[long$.metric == "rmse"]
+    long$.iter[long$.metric == metrics[[1L]]]
   )
 })
 
@@ -105,8 +110,20 @@ test_that("AC2: the set's wide table is keyed on wflow_id", {
   )
 })
 
-test_that("AC2: a metric named like a key column and a bad type are refused on both methods", {
-  skip_if_no_wset_fixture()
+expect_wide_refusals <- function(x) {
+  cnd <- expect_error(
+    collect_inner_metrics(x, type = "wide"),
+    class = "nestedtune_wide_collision"
+  )
+  expect_match(conditionMessage(cnd), "rmse", fixed = TRUE)
+  expect_error(
+    collect_inner_metrics(x, type = "tall"),
+    class = "nestedtune_bad_type"
+  )
+}
+
+test_that("AC2: a metric named like a key column and a bad type are refused on a run", {
+  skip_if_no_engines()
   d <- make_reg_data()
   folds <- det_nested(d)
   set.seed(41)
@@ -116,6 +133,13 @@ test_that("AC2: a metric named like a key column and a bad type are refused on b
     grid = data.frame(rmse = 1:3),
     metrics = reg_metrics()
   ))
+  expect_wide_refusals(res)
+})
+
+test_that("AC2: a metric named like a key column and a bad type are refused on a set", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  folds <- det_nested(d)
   set.seed(41)
   set <- memoised(nested_workflow_map(
     workflowsets::as_workflow_set(clash = clash_workflow(d)),
@@ -123,16 +147,5 @@ test_that("AC2: a metric named like a key column and a bad type are refused on b
     grid = data.frame(rmse = 1:3),
     metrics = reg_metrics()
   ))
-
-  for (x in list(res, set)) {
-    cnd <- expect_error(
-      collect_inner_metrics(x, type = "wide"),
-      class = "nestedtune_wide_collision"
-    )
-    expect_match(conditionMessage(cnd), "rmse", fixed = TRUE)
-    expect_error(
-      collect_inner_metrics(x, type = "tall"),
-      class = "nestedtune_bad_type"
-    )
-  }
+  expect_wide_refusals(set)
 })

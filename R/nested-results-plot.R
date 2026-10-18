@@ -581,14 +581,17 @@ autoplot.nested_results_set <- function(
 ) {
   rlang::check_dots_empty()
   # One workflow's plot (M149), as workflowsets' `id` draws one result: the
-  # single-run method on that row, with every argument it takes.
+  # single-run method on that row, with every argument it takes. Its
+  # conditions name the workflow and the user's call, as the set's readers'
+  # do (`for_workflow()`).
   if (!is.null(id)) {
-    i <- match_set_id(object, id, call = rlang::current_env())
-    return(autoplot(
-      object$result[[i]],
-      type = type,
-      metric = metric,
-      eval_time = eval_time
+    call <- rlang::current_env()
+    i <- match_set_id(object, id, call = call)
+    result <- object$result[[i]]
+    return(for_workflow(
+      object$wflow_id[[i]],
+      call,
+      autoplot(result, type = type, metric = metric, eval_time = eval_time)
     ))
   }
   type <- check_plot_type(type)

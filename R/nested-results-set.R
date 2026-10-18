@@ -29,8 +29,10 @@
 #'   `collect_predictions()` as on [collect_predictions.nested_results()].
 #' @param type For `collect_metrics()` and `collect_inner_metrics()`,
 #'   `"long"` (the default) or `"wide"`. The wide shape is keyed on
-#'   `wflow_id` too, and a metric that a workflow did not score is `NA` in
-#'   its rows.
+#'   `wflow_id` too. A column that a workflow lacks is `NA` in its rows,
+#'   such as a metric it did not score or a parameter it does not tune.
+#'   A workflow with no inner candidates, such as a fixed one, has no rows
+#'   in `collect_inner_metrics()`.
 #'
 #' @return A tibble with `wflow_id` first, then the columns that the method
 #'   for one workflow returns, bound in the set's order. A column that one
@@ -283,6 +285,7 @@ stack_set <- function(
 #' @param id For `autoplot()`, `NULL` (the default) to draw every workflow,
 #'   or one `wflow_id` to draw that workflow alone. One `wflow_id` gives the
 #'   plot that [autoplot.nested_results()] draws for that workflow's result.
+#'   That plot states a failed fold in its subtitle and gives no warning.
 #' @inheritParams collect_metrics.nested_results_set
 #'
 #' @return `summary()` returns a `summary.nested_results_set`, a list of

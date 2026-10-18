@@ -64,6 +64,8 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 
 ## Decisions
 
+- 2026-10-18 (review): `nested_workflow_map()` takes `verbose` by position, third, as `workflowsets::workflow_map()` does. This narrows M71's rule that every argument after `fn` is matched by name: now every argument after `fn` and `verbose` is. A third positional value that is not `TRUE` or `FALSE` is refused as `nestedtune_bad_verbose`, with a hint to name the rest. The plan gate chose this order over `verbose` after `...` (work log). It is milestone-local, since no D-entry made M71's rule.
+
 ## Review
 
 Pass 1, 2026-10-18, at `d7c747b5`. The default branch had not moved (0 commits behind `origin/main`).
@@ -72,3 +74,32 @@ Pass 1, 2026-10-18, at `d7c747b5`. The default branch had not moved (0 commits b
 - AC2 evidence: both methods' formals read `x, ..., type` with `type = c("long", "wide")`. `test-collect-inner-metrics-wide.R` passed 19 of 19: `"long"` is identical to the call without `type` on a run and on a set; fold 1's wide rows, less `id`, are identical to `tune::collect_metrics(type = "wide")` on the reference loop's fold 1 `tune_grid()` run; `.iter` stays a key on `bayes_results()` with `.metric`, `.estimator`, `mean`, `n` and `std_err` absent; the set's wide table opens with `wflow_id`; a parameter id `rmse` gives `nestedtune_wide_collision` and `type = "tall"` gives `nestedtune_bad_type` on both methods. `.weight` is dropped by `pivot_metrics_wide()` (R/nested-results.R), which both methods call. Implement's planted defect failed 4 of these assertions.
 - AC3 evidence: `formals(autoplot.nested_results_set)` reads `object, type, metric, eval_time, ..., id` with `id = NULL`. `test-nested-results-plot.R` passed 285 of 285 with vdiffr installed and no snapshot file changed (`git status` clean): the `ggplot_build()` data of `autoplot(set, id = "tuned")` equal the single run's under `"parameters"`, `"performance"` and `"performance"` with `metric = "rsq"`; the three set snapshots pass; `"nonesuch"`, `c("tuned", "fixed")`, `1` and `NA_character_` give `nestedtune_unknown_id`.
 - AC4 evidence: `Rscript benchmarks/export-surface.R` at the head printed an argument half identical to the run at `33d77fd6` that the page cites. For the three changed items it prints `seed` (workflow map), `eval_time`, `rank_metric`, `select_best`, `std_errs` and the shared order with `id` (set plot), `summarize` (run's inner metrics), and `type` and `summarize` (set's inner metrics); each has a row. The page has 3 `added` rows, 0 `proposed`, and defines `added` in its Scope paragraph. The default comparison over the `pairs` table printed 8 differing defaults, which the page's 7 rows cover (one row holds both `objective` methods), all `kept`.
+
+Consistency gate: `cairn_validate.py` passed every check. `devtools::document()` gave no diff. `pkgdown::check_pkgdown()` found no problems. All six gating prose sweeps clean. NEWS has the entry. No new top-level file. README not touched. No principle changed, so `cairn_impact` was skipped.
+
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: the `id` path gives no partial-run warning where the whole-set plot warns — fix now: the single-run plot states the shortfall in its subtitle, so `@param id` now says so, and a test asserts no warning and the subtitle.
+- diff-bug #2: errors on the `id` path do not name the workflow — fix now: the call goes through `for_workflow()`, so they gain `Workflow "<id>": ` and the user's call; a test asserts both.
+- diff-bug #3: the naming hint shows when `verbose` was given by name — fix now: the hint shows only when the call did not name `verbose`; a test asserts its absence.
+- diff-bug #4: the dots refusal and its comment still say everything after `fn` is matched by name — fix now: both now say after `fn` and `verbose`.
+- diff-bug #5: `verbose` is evaluated outside the RNG guard `capture_dots()` gives `...` — reject, not a defect: it is a flag, `fn` has the same exposure, and the guard covers the orchestrators' arguments.
+- diff-bug #6: on a 0-row inner table the wide shape has no metric columns — reject, not a defect: there is no metric to pivot, as `collect_metrics(type = "wide")` on the same table.
+- diff-bug #7: the set page's `type` text does not fit `collect_inner_metrics()` — fix now: it now says a missing column is `NA` and a workflow with no inner candidates has no rows.
+- diff-bug #8: the run page's `type` text says one row per candidate and metric — fix now: one row per fold, candidate and metric, and a metric a fold did not score is `NA`. `.weight` is left unnamed: the inner tables carry none.
+- diff-bug #9: the review page says workflowsets puts `id` third — fix now: fourth, third of the shared arguments.
+- diff-bug #10: the AC3 test compares only built data and passes no `eval_time` — fix now: it compares the labels too, and asserts that `eval_time` reaches the single view's refusal.
+- diff-bug #11: the Bayes test hard-codes two metrics — fix now: it counts the metrics.
+- diff-bug #12: the collision test's run half sits under the workflow-set skip — fix now: the run and the set are two blocks with their own skips.
+- blame-history #1: a positional third argument changes refusal class with no NEWS word — fix now: the NEWS entry says so.
+- blame-history #2: no record of the positional `verbose` beside M71's name-matching rule — fix now: a milestone-local decision records it; the plan gate line holds the alternative.
+- blame-history #3: stale rule text — fix now, as diff-bug #4.
+- blame-history #4: the `verbose` check runs before the dots check, so a positional design hides a dots typo — reject, not a defect: either order reports one mistake first, and this order names the one that caused the first failure.
+- blame-history #5: the `id` path's errors name the single-run call — fix now, as diff-bug #2.
+- prior-review #1: the new oracle file has no CRAN guard (M118) — fix now: `skip_heavy_on_cran()` at the top; the verbose file already skips on CRAN through `skip_if_no_wset_fixture()`.
+- prior-review #2: a 0-row table loses its metric columns in the wide shape (M049) — reject, as diff-bug #6.
+- prior-review #3: the run page's `type` text does not say a missing cell is `NA` (M065 F4) — fix now, as diff-bug #8.
+- prior-review #4: a `...` name that is a prefix of `verbose` is partly matched — reject, not a defect: no orchestrator argument starts with `v`, so such a name is refused either way.
+- prior-review #5: the verbose test uses the grid tuner alone (M120) — reject, not a defect: the log does not read the tuner, and both route words are drawn.
+- prior-review #6: the `id` test reads only built data (the M08 lesson) — fix now, as diff-bug #10.
+- prior-review #7: a 90-column test comment — reject, style; it is rewrapped with diff-bug #11's edit.

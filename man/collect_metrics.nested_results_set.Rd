@@ -37,8 +37,10 @@
 
 \item{type}{For \code{collect_metrics()} and \code{collect_inner_metrics()},
 \code{"long"} (the default) or \code{"wide"}. The wide shape is keyed on
-\code{wflow_id} too, and a metric that a workflow did not score is \code{NA} in
-its rows.}
+\code{wflow_id} too. A column that a workflow lacks is \code{NA} in its rows,
+such as a metric it did not score or a parameter it does not tune.
+A workflow with no inner candidates, such as a fixed one, has no rows
+in \code{collect_inner_metrics()}.}
 
 \item{metrics, event_level}{As on \code{\link[=compute_metrics.nested_results]{compute_metrics.nested_results()}}. The
 default \code{event_level} takes each workflow's recorded level.}

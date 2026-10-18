@@ -179,7 +179,7 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 | `autoplot()` | `rank_metric`, `select_best` | theirs only | kept | D-058: the set has no ranking or best-workflow view, because a ranking of nested estimates is the reading that IP3 forbids. |
 | `autoplot()` | `std_errs` | theirs only | kept | In workflowsets, `std_errs` sets how many standard errors the interval bars span. The set's plot here draws each fold's score as a point and the estimate as a flat rule, with no interval bars. |
 | `autoplot()` | `id` | both, since M149 | added | M149 added `id = NULL` after `...`. One `wflow_id` draws the plot that `autoplot()` draws for that workflow's `nested_results`. |
-| `autoplot()` | order of `id` | ours after `...`, theirs third | kept | The arguments before `...` keep the order of `autoplot.tune_results()`, so one call works on both classes, as the next row says. After `...`, `id` must be named, so adding it broke no call. |
+| `autoplot()` | order of `id` | ours after `...`, theirs fourth (third of the shared arguments) | kept | The arguments before `...` keep the order of `autoplot.tune_results()`, so one call works on both classes, as the next row says. After `...`, `id` must be named, so adding it broke no call. |
 | `autoplot()` | `eval_time` | ours only | kept | The method follows `autoplot.nested_results()` and `autoplot.tune_results()` in tune, which both take it. |
 | `autoplot()` | order of `type` and `metric` | both before `...` | kept | The order here is `object, type, metric`, as in `autoplot.tune_results()`, so one call works on both classes. The `type` in workflowsets is another setting with the same name: it picks how points are colored. |
 

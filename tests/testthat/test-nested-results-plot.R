@@ -1237,10 +1237,10 @@ test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
   res <- wset_three_results()
   one <- res$result[[match("tuned", res$wflow_id)]]
   same_build <- function(a, b) {
-    expect_identical(
-      ggplot2::ggplot_build(a)$data,
-      ggplot2::ggplot_build(b)$data
-    )
+    built_a <- ggplot2::ggplot_build(a)
+    built_b <- ggplot2::ggplot_build(b)
+    expect_identical(built_a$data, built_b$data)
+    expect_identical(built_a$plot$labels, built_b$plot$labels)
   }
   same_build(autoplot(res, id = "tuned"), autoplot(one))
   same_build(
@@ -1251,12 +1251,28 @@ test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
     autoplot(res, type = "performance", metric = "rsq", id = "tuned"),
     autoplot(one, type = "performance", metric = "rsq")
   )
-  # The single view's own refusal comes through: the fixed workflow has no
-  # tuned parameter to draw.
-  expect_error(
+  # The single view's own refusals come through, naming the workflow and the
+  # user's call: the fixed workflow has no tuned parameter to draw, and
+  # `eval_time` reaches the single view, which refuses a time this
+  # regression run did not score at.
+  cnd <- expect_error(
     autoplot(res, id = "fixed"),
     class = "nestedtune_no_tuned_parameters"
   )
+  expect_match(conditionMessage(cnd), "Workflow \"fixed\": ", fixed = TRUE)
+  expect_identical(rlang::call_name(conditionCall(cnd)), "autoplot")
+  cnd <- expect_error(
+    autoplot(res, type = "performance", eval_time = 1, id = "tuned"),
+    class = "nestedtune_bad_plot_filter"
+  )
+  expect_match(conditionMessage(cnd), "eval_time", fixed = TRUE)
+})
+
+test_that("AC3: one workflow's plot states a failed fold in its subtitle, with no warning", {
+  skip_if_no_wset_fixture()
+  broken <- wset_three_results(broken = 1L)
+  expect_no_warning(p <- autoplot(broken, type = "performance", id = "tuned"))
+  expect_match(p$labels$subtitle, "1 completed", fixed = TRUE)
 })
 
 test_that("AC3: an id that names no row of the set is refused", {

@@ -96,7 +96,7 @@ nested_workflow_map <- function(
   dots <- capture_dots(...)
   check_workflow_set(object)
   check_map_fn(fn)
-  check_map_verbose(verbose)
+  check_map_verbose(verbose, named = "verbose" %in% rlang::names2(sys.call()))
   check_map_dots(dots, fn)
   call <- rlang::current_env()
 

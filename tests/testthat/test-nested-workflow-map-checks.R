@@ -92,6 +92,9 @@ test_that("M149 AC1: verbose must be one TRUE or FALSE", {
       "nestedtune_bad_verbose"
     )
     expect_match(conditionMessage(cnd), "verbose", fixed = TRUE)
+    # Passed by name, `verbose` was not a stray positional argument, so the
+    # refusal gives no hint about naming the rest.
+    expect_no_match(conditionMessage(cnd), "must be named", fixed = TRUE)
   }
 })
 
