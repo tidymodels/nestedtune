@@ -252,3 +252,200 @@ for (item in domain) {
   }
 }
 cat("\n", n_diff, "pairs differ\n\n")
+
+# ---- Part 2: the result columns --------------------------------------------
+#
+# A deterministic fixture: a tunable PCA step ahead of an lm model, so every
+# tuner runs in seconds. Four inner folds give the racing tuners a burn-in.
+
+stopifnot(
+  requireNamespace("recipes", quietly = TRUE),
+  requireNamespace("rsample", quietly = TRUE),
+  requireNamespace("dials", quietly = TRUE)
+)
+
+set.seed(1)
+folds <- nested_resamples(
+  mtcars,
+  outside = rsample::vfold_cv(v = 3),
+  inside = rsample::vfold_cv(v = 4)
+)
+inner_1 <- folds$inner_resamples[[1]]
+
+rec <- recipes::step_pca(
+  recipes::recipe(mpg ~ ., data = mtcars),
+  recipes::all_predictors(),
+  num_comp = tune::tune()
+)
+wf <- workflows::workflow(rec, parsnip::linear_reg())
+param_info <- stats::update(
+  hardhat::extract_parameter_set_dials(wf),
+  num_comp = dials::num_comp(c(1L, 8L))
+)
+grid <- data.frame(num_comp = 1:4)
+fixed_wf <- workflows::workflow(mpg ~ cyl + wt, parsnip::linear_reg())
+n_predictors <- function(x) ncol(workflows::extract_mold(x)$predictors)
+
+controls <- list(
+  grid = tune::control_grid(save_pred = TRUE, extract = n_predictors),
+  bayes = tune::control_bayes(save_pred = TRUE, extract = n_predictors),
+  race = finetune::control_race(save_pred = TRUE, extract = n_predictors),
+  anneal = finetune::control_sim_anneal(
+    save_pred = TRUE,
+    extract = n_predictors,
+    verbose_iter = FALSE
+  ),
+  resamples = tune::control_resamples(save_pred = TRUE, extract = n_predictors)
+)
+
+# Each row: the nested call, the counterpart call on fold 1's inner
+# resamples, both under the same control.
+runs <- list(
+  nested_tune_grid = list(
+    ours = function() {
+      nested_tune_grid(wf, folds, grid = grid, control = controls$grid)
+    },
+    theirs = function() {
+      tune::tune_grid(wf, inner_1, grid = grid, control = controls$grid)
+    }
+  ),
+  nested_tune_bayes = list(
+    ours = function() {
+      nested_tune_bayes(
+        wf,
+        folds,
+        iter = 2,
+        initial = 2,
+        param_info = param_info,
+        control = controls$bayes
+      )
+    },
+    theirs = function() {
+      tune::tune_bayes(
+        wf,
+        inner_1,
+        iter = 2,
+        initial = 2,
+        param_info = param_info,
+        control = controls$bayes
+      )
+    }
+  ),
+  nested_tune_race_anova = list(
+    ours = function() {
+      nested_tune_race_anova(wf, folds, grid = grid, control = controls$race)
+    },
+    theirs = function() {
+      finetune::tune_race_anova(
+        wf,
+        inner_1,
+        grid = grid,
+        control = controls$race
+      )
+    }
+  ),
+  nested_tune_race_win_loss = list(
+    ours = function() {
+      nested_tune_race_win_loss(
+        wf,
+        folds,
+        grid = grid,
+        control = controls$race
+      )
+    },
+    theirs = function() {
+      finetune::tune_race_win_loss(
+        wf,
+        inner_1,
+        grid = grid,
+        control = controls$race
+      )
+    }
+  ),
+  nested_tune_sim_anneal = list(
+    ours = function() {
+      nested_tune_sim_anneal(
+        wf,
+        folds,
+        iter = 2,
+        initial = 1,
+        param_info = param_info,
+        control = controls$anneal
+      )
+    },
+    theirs = function() {
+      finetune::tune_sim_anneal(
+        wf,
+        inner_1,
+        iter = 2,
+        initial = 1,
+        param_info = param_info,
+        control = controls$anneal
+      )
+    }
+  ),
+  nested_fit_resamples = list(
+    ours = function() {
+      nested_fit_resamples(fixed_wf, folds, control = controls$resamples)
+    },
+    theirs = function() {
+      tune::fit_resamples(fixed_wf, inner_1, control = controls$resamples)
+    }
+  ),
+  nested_workflow_map = list(
+    ours = function() {
+      nested_workflow_map(
+        workflowsets::as_workflow_set(pca = wf),
+        "nested_tune_grid",
+        resamples = folds,
+        grid = grid,
+        control = controls$grid
+      )
+    },
+    theirs = function() {
+      workflowsets::workflow_map(
+        workflowsets::as_workflow_set(pca = wf),
+        "tune_grid",
+        resamples = inner_1,
+        grid = grid,
+        control = controls$grid
+      )
+    }
+  )
+)
+
+cat("== Part 2: result columns ==\n")
+for (name in names(runs)) {
+  set.seed(2)
+  ours <- suppressMessages(runs[[name]]$ours())
+  set.seed(2)
+  theirs <- suppressMessages(runs[[name]]$theirs())
+  a <- names(ours)
+  b <- names(theirs)
+  cat(sprintf(
+    "%-26s %s\n",
+    name,
+    paste(class(ours)[1], "vs", class(theirs)[1])
+  ))
+  cat("    ours:   ", toString(a), "\n")
+  cat("    theirs: ", toString(b), "\n")
+  if (length(setdiff(a, b))) {
+    cat("    only ours:   ", toString(setdiff(a, b)), "\n")
+  }
+  if (length(setdiff(b, a))) {
+    cat("    only theirs: ", toString(setdiff(b, a)), "\n")
+  }
+  # One level down for the set: the per-workflow results.
+  if (name == "nested_workflow_map") {
+    a1 <- names(ours$result[[1]])
+    b1 <- names(theirs$result[[1]])
+    cat("    result[[1]] ours:   ", toString(a1), "\n")
+    cat("    result[[1]] theirs: ", toString(b1), "\n")
+    if (length(setdiff(a1, b1))) {
+      cat("    result[[1]] only ours:   ", toString(setdiff(a1, b1)), "\n")
+    }
+    if (length(setdiff(b1, a1))) {
+      cat("    result[[1]] only theirs: ", toString(setdiff(b1, a1)), "\n")
+    }
+  }
+}
