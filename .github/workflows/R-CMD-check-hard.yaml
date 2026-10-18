@@ -2,10 +2,11 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 #
 # NOTE: This workflow only directly installs "hard" dependencies, i.e. Depends,
-# Imports, and LinkingTo dependencies. Notably, Suggests dependencies are never
-# installed, with the exception of testthat, knitr, and rmarkdown. The cache is
-# never used to avoid accidentally restoring a cache containing a suggested
-# dependency.
+# Imports, and LinkingTo dependencies. Its setup step names no Suggests
+# dependency but testthat, knitr, and rmarkdown. A Suggests package that a hard
+# dependency itself imports is still installed with it, and tune imports some,
+# such as recipes and dials. The cache is never used to avoid accidentally
+# restoring a cache containing a suggested dependency.
 #
 # The `paths-ignore` list is the same one every other workflow carrying the
 # filter declares, and meets the same test: a commit touching only
@@ -63,6 +64,8 @@ jobs:
       # `NESTEDTUNE_FULL_SUITE` is unset here, but `setup-r` sets
       # `NOT_CRAN: true` for every later step, so this job still runs the tests
       # `skip_heavy_on_cran()` keeps off CRAN (tests/testthat/helper-cran.R).
+      # `R-CMD-check-cran.yaml`'s `check-cran-no-suggests` copies this job's
+      # dependency setup and sets `NOT_CRAN` to false on its check step.
 
     steps:
       - uses: actions/checkout@v7
