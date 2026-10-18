@@ -56,3 +56,8 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 ## Decisions
 
 ## Review
+
+- Route (d): no PR, main unmoved since the cut (1e1cb499). Copilot round off. Each criterion ends in "its run on the milestone's PR passes", and the PR opens only at step 8 (D-138), so no box is ticked before the merge question. The static half of each criterion is recorded here, and the CI half is read at step 8, before the merge, from the PR's runs.
+- AC1 static (2026-10-18, `yaml::read_yaml` of the file at f5605df1): job `check-cran-suggests`; its `setup-r-dependencies` step has no `dependencies` key; its `check-r-package` step has `env: NOT_CRAN: false`, `args` `c("--no-manual","--as-cran")`, and `build_args` without `--no-build-vignettes`, `args` without `--ignore-vignettes`; no `NESTEDTUNE_FULL_SUITE:` line in the file. Local supporting run (T4): 52 skips with the smoke-layer reason. CI half pending.
+- AC2 static (same read): job `check-cran-no-suggests`; `dependencies: '"hard"'`, `extra-packages` exactly rcmdcheck, testthat, knitr, rmarkdown; `NOT_CRAN: false` on the check step, same `args`, no switch. Local supporting run (T4): status OK, 52 skips with the smoke-layer reason. CI half pending.
+- AC3 static (`git diff main..HEAD` over `R-CMD-check.yaml` and `R-CMD-check-hard.yaml`, filtered to added or removed lines not starting with `#`): no lines. CI half pending.
