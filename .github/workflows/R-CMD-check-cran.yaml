@@ -1,0 +1,89 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+#
+# Runs `R CMD check --as-cran` under the condition CRAN checks under:
+# `NOT_CRAN` is false and `NESTEDTUNE_FULL_SUITE` is unset, so every test that
+# calls `skip_heavy_on_cran()` skips and only the smoke layer runs
+# (tests/testthat/helper-cran.R). `r-lib/actions/setup-r` sets `NOT_CRAN: true`
+# for every later step, so the check step sets it back to false in its own
+# `env:`.
+#
+# These jobs live in their own file because `tests/testthat/test-ci-workflows.R`
+# pins the vignette leg and the `NESTEDTUNE_FULL_SUITE` line of
+# `R-CMD-check.yaml`.
+#
+# The `paths-ignore` list is the same one every other workflow carrying the
+# filter declares, and meets the same test: a commit touching only
+# `cairn/**`, `CLAUDE.md` or `.claude/**` changes nothing `R CMD check` sees.
+# It is spelled out under both triggers because GitHub Actions does not resolve
+# YAML anchors in workflow files; `.github/ci-usage.py` reads every copy back
+# separately and refuses to run once ANY trigger declares a list while another
+# carries none.
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+  pull_request:
+    paths-ignore:
+      - 'cairn/**'
+      - 'CLAUDE.md'
+      - '.claude/**'
+
+name: R-CMD-check-cran.yaml
+
+permissions: read-all
+
+jobs:
+  check-cran-suggests:
+    runs-on: ubuntu-latest
+    # A hang here would otherwise run to GitHub's 6-hour default. The cap is
+    # set from `R-CMD-check-hard.yaml`'s job, whose last measured green run
+    # took 12m09s end to end (job 100897115868 of run 33832117316,
+    # 2026-09-04) while running every test but the daemon tests. This job
+    # runs only the smoke layer, but it also installs the Suggests and builds
+    # the vignettes twice, once in `R CMD build` and once at check time, which
+    # took 145 s and 140 s on `R-CMD-check.yaml`'s ubuntu release leg (job
+    # 106991147696 of run 35801023421, 2026-09-23). 30 is the hard job's cap,
+    # about 2.5x its measured run.
+    timeout-minutes: 30
+
+    name: CRAN conditions, with Suggests
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      # See R-CMD-check.yaml: test files run in parallel, one worker per
+      # core, and ubuntu runners have 4 vCPUs. Unset, testthat would use 2.
+      TESTTHAT_CPUS: 4
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      # `dependencies` is left at its default, which installs the Suggests.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        env:
+          NOT_CRAN: false
+        with:
+          # Uploads the check directory on a passing run too, so the
+          # testthat output and its skip reasons can be read afterwards.
+          upload-results: true
+          upload-snapshots: true
+          artifact-name: cran-suggests-results
+          snapshot-artifact-name: cran-suggests-testthat-snapshots
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          args: 'c("--no-manual","--as-cran")'

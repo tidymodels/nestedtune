@@ -1,13 +1,13 @@
 # M147: CI runs the tests CRAN runs, with the Suggests and without them
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI jobs over this repository, which no user of the package relies on
-- **Branch/PR:** —
+- **Branch/PR:** m147-cran-subset-ci
 
 ## Goal
 
@@ -33,7 +33,7 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 
 ## Tasks
 
-- [ ] T1: Write the file and its first job. Copy the triggers and `paths-ignore` from `R-CMD-check-hard.yaml`. Set a job cap from the hard job's measured run and say how it was set, and use `upload-results` so the testthat output is readable on a passing run.
+- [x] T1: Write the file and its first job. Copy the triggers and `paths-ignore` from `R-CMD-check-hard.yaml`. Set a job cap from the hard job's measured run and say how it was set, and use `upload-results` so the testthat output is readable on a passing run.
 - [ ] T2: Add the second job, modeled on `R-CMD-check-hard.yaml`'s `check-no-suggests`, with `NOT_CRAN: false` on its check step.
 - [ ] T3: Correct the comments named in Scope: `tests/testthat/helper-cran.R` (the `NOT_CRAN` paragraph), the `env` comment and the header line of `R-CMD-check-hard.yaml`, and any such line in `R-CMD-check.yaml`. Confirm `test-ci-workflows.R` and `.github/ci-usage.py` still pass on the new file set.
 - [ ] T4: Before the first push, run `R CMD check --as-cran` locally with `NOT_CRAN=false` and no `NESTEDTUNE_FULL_SUITE`, once with the Suggests and once with a library holding only the hard dependencies. Note the result and the skip count in the work log.
@@ -46,6 +46,8 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 - 2026-10-17: criteria audit (reduced mode) returned three findings. AC2's "installs no Suggests beyond testthat, knitr and rmarkdown" named nothing that lists the installed set, and tune's own dependencies pull in dials, R6, recipes, survival, tailor, tibble and yardstick. AC2 now names the setup step's `dependencies` and `extra-packages` values. AC1 and AC3 needed "a new job", since AC3 forbids the skip in the existing jobs. Two jobs in `R-CMD-check.yaml` would break `test-ci-workflows.R:133-190`, so the jobs moved to a new file and AC3 became a no-change promise over the two existing files.
 - 2026-10-17: plan gate chose a new workflow file over new legs in `R-CMD-check.yaml`, because that file's tests and D-076 pin one vignette leg and one `NESTEDTUNE_FULL_SUITE` line; falsified by the new file's triggers drifting from the other check workflows unnoticed.
 - 2026-10-17: inbox sweep: 1 open issue (#91), no overlap with this milestone.
+- 2026-10-18: implement started; branch m147-cran-subset-ci cut from main at 1e1cb499.
+- 2026-10-18: T1 done. `R-CMD-check-cran.yaml` with job `check-cran-suggests`: ubuntu release, P3M binaries, default `dependencies`, step-level `NOT_CRAN: false`, explicit `--as-cran` args, vignettes built and checked, 30-minute cap from the hard job's run plus the measured vignette cost. Choices: own `artifact-name` and `snapshot-artifact-name`, because both jobs share matrix-free index 0 and the action's default names would collide; no `concurrency` block, matching `R-CMD-check-hard.yaml`. `ci-usage.py`'s reader accepts the new file's lists.
 
 ## Decisions
 
