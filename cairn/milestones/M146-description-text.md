@@ -95,4 +95,5 @@ Review pass 1, 2026-10-17, at `e15b7bc`.
 - blame-history #1: the new text drops "memory-lean" and "orchestrates", which carried D-005's and D-002's framing — reject (planned change): the user approved the text, and no D-entry pins DESCRIPTION wording.
 - blame-history #2: the removed "does not grow" clause was M01's goal wording, contradicted by M01's own measured slope — noted. It confirms the claim-audit correction.
 - blame-history #3 to #6: no decision covers the Title, the DOI matches the reference page, the Rd change is roxygen's, and the new wording matches DESIGN.md and IP3 — noted.
+- Verify after the fix: `devtools::test()` at `f07af2d` passed with no failures and no skips, `test-description.R` with 8 expectations.
 - prior-review #1: no prior finding is reintroduced. Its residual note, that "in place of a copy" may overstate, is rejected (false): `R/nested-resamples.R:92` says the object keeps only row indices pointing back at `data`.
