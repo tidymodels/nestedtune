@@ -1,5 +1,12 @@
 # nestedtune 0.0.0.9000
 
+* Three arguments from tidymodels are new. `nested_workflow_map()` takes
+  `verbose`, which writes a message as each workflow starts and finishes.
+  It sits before `...`, where `workflowsets::workflow_map()` has it.
+  `collect_inner_metrics()` takes `type = "wide"`, which gives one column
+  per metric, as `tune::collect_metrics()` does. `autoplot()` on a
+  workflow-set run takes `id`, which draws the plot of one workflow.
+
 * `nested_tune_bayes()` and `nested_tune_sim_anneal()` now list `eval_time`
   before `objective` and `initial`, in the order `tune::tune_bayes()` and
   `finetune::tune_sim_anneal()` use. These arguments come after `...`, so
