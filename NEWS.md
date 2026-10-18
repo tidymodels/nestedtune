@@ -1,5 +1,10 @@
 # nestedtune 0.0.0.9000
 
+* `?nested_tune_grid` no longer says that every loop function finalizes a
+  range that depends on the data, such as `mtry()`. `nested_tune_bayes()`
+  does not, because `tune::tune_bayes()` does not. Set the range in
+  `param_info`, or every fold fails.
+
 * `vignette("estimate")`, `vignette("tuners")`, `vignette("results")` and
   the parallel article are shorter and follow the shape of the
   tidymodels.org articles. `vignette("estimate")`

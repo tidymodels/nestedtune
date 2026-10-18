@@ -156,6 +156,8 @@ tested on.
 
 A range that depends on the data, such as \code{mtry()}, is finalized on each
 outer fold's analysis set, never on the rows that fold holds out.
+\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} is the exception: \code{\link[tune:tune_bayes]{tune::tune_bayes()}} does not
+finalize such a range, so set it in \code{param_info}, or every fold fails.
 \code{\link[=nested_final_fit]{nested_final_fit()}} finalizes it on all the data. A range set in
 \code{param_info} applies to every fold.
 }

@@ -98,6 +98,8 @@
 #'
 #' A range that depends on the data, such as `mtry()`, is finalized on each
 #' outer fold's analysis set, never on the rows that fold holds out.
+#' [nested_tune_bayes()] is the exception: [tune::tune_bayes()] does not
+#' finalize such a range, so set it in `param_info`, or every fold fails.
 #' [nested_final_fit()] finalizes it on all the data. A range set in
 #' `param_info` applies to every fold.
 #'
