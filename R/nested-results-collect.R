@@ -38,7 +38,7 @@
 #'   per candidate and metric, or `"wide"`, one column per metric that holds
 #'   its `mean`. The wide shape drops `.estimator`, `n` and `std_err`. It
 #'   gives an error for a metric named like another column, such as a tuning
-#'   parameter.
+#'   parameter, and for a metric scored with two estimators.
 #'
 #' @return A tibble with the fold labels first (`id`, and `id2` on a
 #'   repeated design), then the stacked columns. A fold that lacks a column

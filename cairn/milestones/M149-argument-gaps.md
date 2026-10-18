@@ -58,6 +58,7 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 - 2026-10-18: T2 code and tests in place: both methods read `type` with `check_metrics_type()` and pivot with `pivot_metrics_wide()`, the set once after stacking. The fold 1 oracle tunes on `inner_resamples[[1]]` directly, since `det_grid()` names every candidate and no range depends on the data. A planted defect (dropping `rsq` before the pivot) failed 4 assertions, the oracle among them. Full suite pending.
 - 2026-10-18: T3 code and tests in place: a non-`NULL` `id` goes through `match_set_id()` before the type check, and the single-run method then reads `type`, `metric` and `eval_time` and gives its own refusals. Tests compare `ggplot_build()` data under both views and a metric filter, and refuse four bad ids. The plot file passed with its three set snapshots unchanged. Full suite pending.
 - 2026-10-18: T4 done: the review page marks the three rows `added` and defines the verdict, gives rows to the two new differences the script prints at `33d77fd6` (`type` on the set's `collect_inner_metrics()`, the order of `id`), and gives 7 default verdicts, all `kept`. No `proposed` default, so no candidate row.
+- 2026-10-18: claim audit: 34 claims read, 2 corrected — tests/testthat/test-collect-inner-metrics-wide.R (a comment on the long table's rows), R/nested-results-collect.R and man/collect_selections.Rd (`type` now names the two-estimator refusal). The reader re-read both corrections and found them true.
 
 ## Decisions
 

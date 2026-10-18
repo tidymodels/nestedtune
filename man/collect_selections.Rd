@@ -28,7 +28,7 @@ function.}
 per candidate and metric, or \code{"wide"}, one column per metric that holds
 its \code{mean}. The wide shape drops \code{.estimator}, \code{n} and \code{std_err}. It
 gives an error for a metric named like another column, such as a tuning
-parameter.}
+parameter, and for a metric scored with two estimators.}
 }
 \value{
 A tibble with the fold labels first (\code{id}, and \code{id2} on a

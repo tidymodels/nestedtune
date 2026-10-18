@@ -72,7 +72,7 @@ test_that("AC2: .iter stays a key column on a Bayesian run", {
   expect_false(any(
     c(".metric", ".estimator", "mean", "n", "std_err") %in% names(wide)
   ))
-  # One row per fold and candidate: the long table has two metrics per row.
+  # One row per fold and candidate: the long table has two rows, one per metric, for each.
   expect_identical(nrow(wide), nrow(long) %/% 2L)
   expect_identical(
     wide$.iter,
