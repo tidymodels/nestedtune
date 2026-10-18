@@ -81,3 +81,16 @@ Review pass 1, 2026-10-17, at `e15b7bc`.
 
 - AC1: a script compared `DESCRIPTION`'s fields with this file's Scope text, whitespace-normalized and with `DOI` replaced by `cairn/references/varma2006.md`'s DOI. Title and Description both matched. A control copy with "row indices" changed to "row numbers" did not match.
 - AC2: `test-description.R` passed (7 expectations) on the head. Its checker, run on the 33 declared names (the package, 9 Imports and 23 Suggests), found no unquoted name in either field. The same checker on `main`'s fields found `Tidymodels` in Title and `tidymodels` in Description. The test also passed inside `R CMD check`, where it reads the installed `DESCRIPTION` (AC3's run).
+- spawned: diff-bug, blame-history, prior-review
+- diff-bug #1: `tune` inside `tune_grid()` and `rsample` inside `rsample::nested_cv()` count as bare names, since a word excludes `_` and `:` — follow-up, new candidate row "DESCRIPTION quoting test word rules". AC2's own word definition makes this the required behavior, and the current text has no such case.
+- diff-bug #2: Suggests names that are common words (`survival`, `censored`, `recipes`, `tailor`, `dials`) would demand wrong quotes in later prose — follow-up, same row. It is the plan gate's recorded falsifier.
+- diff-bug #3: a name after leading dots (`.tune`, `...tune`) is missed, since only trailing dots are dropped — fix now.
+- diff-bug #4: the quote check reads only the next character on each side (`x'tune'y` passes), and a name inside a DOI would be flagged — follow-up, same row.
+- diff-bug #5: curly quotes, double quotes and backticks count as unquoted — reject (false): CRAN asks for straight single quotes, so this is the intended behavior.
+- diff-bug #6: "An inner resampling loop tunes the model" does not fit fixed models, which the text also lists — reject (planned change): the user approved this wording at the plan gate.
+- diff-bug #7: AC3's evidence and the AC2 and AC3 ticks were pending when the reviewer read the file — noted. This pass's check supplies them.
+- diff-bug #8: D-024 forbids a CRAN submission — reject (false): D-025 lapsed that clause, and this milestone submits nothing.
+- blame-history #1: the new text drops "memory-lean" and "orchestrates", which carried D-005's and D-002's framing — reject (planned change): the user approved the text, and no D-entry pins DESCRIPTION wording.
+- blame-history #2: the removed "does not grow" clause was M01's goal wording, contradicted by M01's own measured slope — noted. It confirms the claim-audit correction.
+- blame-history #3 to #6: no decision covers the Title, the DOI matches the reference page, the Rd change is roxygen's, and the new wording matches DESIGN.md and IP3 — noted.
+- prior-review #1: no prior finding is reintroduced. Its residual note, that "in place of a copy" may overstate, is rejected (false): `R/nested-resamples.R:92` says the object keeps only row indices pointing back at `data`.
