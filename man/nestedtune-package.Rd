@@ -4,7 +4,7 @@
 \name{nestedtune-package}
 \alias{nestedtune}
 \alias{nestedtune-package}
-\title{nestedtune: Nested Cross-Validation for Tidymodels}
+\title{nestedtune: Nested Cross-Validation for 'tidymodels'}
 \description{
 nestedtune runs nested cross-validation with tidymodels objects. Each
 outer fold tunes with tune or finetune on its own inner resamples, or fits

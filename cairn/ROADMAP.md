@@ -4,12 +4,11 @@ _Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) b
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | planned | — | normal | milestones/M146-description-text.md |
+| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | review | — | normal | milestones/M146-description-text.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | planned | — | normal | milestones/M147-cran-subset-ci.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | planned | — | normal | milestones/M148-export-review.md |
 | M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |
 | M144 | The help pages for reading results read like tune's | done | M142 | normal | milestones/archive/M144-tune-style-reader-pages.md |
-| M143 | The other loop pages, the final fit and the design page read like tune's | done | M142 | normal | milestones/archive/M143-tune-style-loop-pages.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -46,6 +45,7 @@ _Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) b
 - Nested tuning of a tidyclust model through `tune_cluster()` — added 2026-09-21 at the M106-M109 plan gate. Nothing settles what a nested estimate of a clustering metric means, and no oracle exists (RB tripwire: no-oracle), so the next step is a `/milestone-brief` escalation on that question. Adding tidyclust to Suggests takes a D-entry. Promote when an RR answers the question
 - M126's review leftovers on averaged predictions, added 2026-09-28 at M126's review gate (`milestones/archive/M126-averaging-edge-cases.md`, findings 3, 4 and 8). (3) `benchmarks/averaging-speed.R` compares no even-group `.pred_time` median, no missing `.pred_time`, no NULL censored entry, and only one `.eval_time` set. (4) A censored row whose entries have 0 rows now averages to NULL, where M124 gave a 0-row tibble. The help names only NULL entries. (8) `collect_predictions(summarize = TRUE)` warns about a partial run before it refuses a bad shape, and `augment()` warns after. Promote on a user report of a 0-row entry, a median that disagrees with `stats::median()`, or the warning order misleading a reader
 - `README.Rmd:155` says `vignette("results")` covers "every column of the results object", which the page no longer holds. Added 2026-10-10 at M145's review (diff-bug #7), outside its scope. Promote with the next README edit
+- [low] DESCRIPTION quoting test word rules: `test-description.R` reads `tune_grid()` and `rsample::` as bare names, flags Suggests names that are common words (`survival`, `censored`), and checks only the next character on each side of a word. Added 2026-10-17 at M146's review (diff-bug #1, #2, #4). Promote when a Description edit trips one
 - [low] A CI job that runs the suite at the testthat floor in `DESCRIPTION`. Added 2026-09-29 at M130's plan gate, which chose one-time check runs at the floor over this job (3.3.0 since the re-plan, corrected 2026-09-29). The 3.0.0 floor went stale because tests adopted newer testthat functions and no job ran the floor. Promote on a test adopting a testthat function newer than the floor unnoticed
 - [low] Take macOS back off P3M once pkgdepends reads zstd. Added 2026-09-21, corrected the same day when PR [#119](https://github.com/tidymodels/nestedtune/pull/119) merged. #119 routes the macOS leg through P3M because the pak installs cannot extract CRAN's zstd macOS binaries (r-lib/pkgdepends#485). P3M binaries link OpenMP, which once broke `gower` on runners with no libomp. `.github/workflows/R-CMD-check.yaml` records both failure modes beside the line. Promote when pkgdepends ships zstd support, or when a P3M macOS binary breaks the way `gower` did
 - [low] `.github/CODEOWNERS`, the tidymodels convention M33 left behind. Promote once understudies are assigned here — added 2026-08-28 — D-025, D-026, split 2026-09-16
