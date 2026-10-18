@@ -72,6 +72,7 @@ Description:
 - 2026-10-17: claim audit: 19 claims read, 1 corrected — DESCRIPTION. The sentence "its size does not grow with the number of outer folds" was false: `test-nested-resamples-memory.R:100-120` records 1.2x to 10.0x the data for 2 to 50 outer folds, a slope of 0.18 per fold against rsample's 1.15. The old Description on main made the same claim.
 - 2026-10-17: substantive amendment: Scope's Description text, at the user's choice at a stop. The last sentence now reads "The nested resampling constructor makes the same splits as nested_cv() from 'rsample', but it stores row indices in place of a copy of the data for each outer fold." AC1's wording is unchanged, so no criterion re-audit is owed. DESCRIPTION carries the same sentence.
 - 2026-10-17: implement done, status set to review. AC3's remote check ran at `309142f`, before the amended sentence, so review re-runs it on the head.
+- 2026-10-17: step-7 approval: m146-description-text approved for merge
 
 ## Decisions
 
