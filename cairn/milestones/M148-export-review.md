@@ -1,13 +1,13 @@
 # M148: Each export and result column is set beside its tidymodels counterpart, with a verdict for each difference
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — the exported functions, their arguments and the result columns are what user code calls and reads
-- **Branch/PR:** —
+- **Branch/PR:** m148-export-review
 
 ## Goal
 
@@ -33,7 +33,7 @@ Before the first release, every package-owned export, every method of an exporte
 
 ## Tasks
 
-- [ ] T1: Write the first half of `benchmarks/export-surface.R`: read `export()` and `S3method()` lines from `NAMESPACE`, keep the domain AC1 names, pair each item with its counterpart through a table in the script, and print each pair's missing arguments and order differences among shared arguments.
+- [x] T1: Write the first half of `benchmarks/export-surface.R`: read `export()` and `S3method()` lines from `NAMESPACE`, keep the domain AC1 names, pair each item with its counterpart through a table in the script, and print each pair's missing arguments and order differences among shared arguments.
 - [ ] T2: Write the column half: the six workflow methods and `nested_workflow_map()` on a small fixture with `save_pred = TRUE` and an `extract` function, each counterpart on the inner resamples of outer fold 1 with the same control, and the column-name differences printed.
 - [ ] T3: Write the page. Read `DECISIONS.md` by its headings for each difference (D-030, D-038, D-040, D-042, D-046, D-056 and D-069 cover several), and give each difference its verdict. Add the `INDEX.md` line.
 - [ ] T4: Apply each changed verdict in `R/`, run `devtools::document()`, add the order tests AC3 names, and write one NEWS entry naming the functions whose argument order changed. With no changed verdict, this task writes nothing.
@@ -49,6 +49,10 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-17: criteria audit (full mode) returned seven findings. AC1's domain was what the script listed, so it is now defined by `NAMESPACE`'s lines. Methods of re-exported generics such as `collect_predictions.nested_results()` (which lacks tune's `parameters`) were outside it and are now in. "Position" was undefined and is now the order of shared arguments. There are six `nested_*` generics, and `nested_workflow_map()` is a plain function. AC2 named no fixture control, orchestrator list or counterpart resamples, and now names all three. AC3 checked only arguments and could pass by script output alone. It now needs a test per changed argument, and column changes are proposed only. No D-entry blocks a criterion.
 - 2026-10-17: plan gate chose safe changes only over applying every change, at the user's choice, because a rename breaks scripts written against the development version; falsified by a proposed rename the user would have taken here.
 - 2026-10-17: inbox sweep: 1 open issue (#91), no overlap with this milestone.
+- 2026-10-18: implement started; branch `m148-export-review` cut from main at 41929c7a.
+- 2026-10-18: choice: the script loads the source tree with `pkgload::load_all()` rather than an installed copy, so T4's reorder shows in its output; it stops when the pairing table and `NAMESPACE` name different items, so a new export cannot pass unpaired.
+- 2026-10-18: choice: pairings. `nested_final_fit()` pairs with `tune::fit_best.tune_results()` (both refit a chosen candidate on all the training data, D-041 names both as the non-nested routes). A `nested_results` method pairs with tune's `tune_results` method, a `nested_results_set` method with workflowsets' `workflow_set` method, a `nested_final_fit` extractor with tune's `tune_results` method or hardhat's generic where tune has none. `augment.nested_final_fit()`, `compute_metrics.nested_results_set()`, `augment.nested_results_set()`, `nested_resamples()` and the package-owned generics pair with none of the four packages.
+- 2026-10-18: T1 done: 16 functions and 59 methods read from `NAMESPACE`, 22 pairs differ (tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1, hardhat 1.4.3); `air format --check .` clean.
 
 ## Decisions
 
