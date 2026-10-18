@@ -21,8 +21,8 @@ Before the first release, every package-owned export, every method of an exporte
 
 ## Acceptance criteria
 
-- [ ] AC1: For each function named by an `export()` line of `NAMESPACE` whose definition is in this package's `R/` (not a re-export), and each method named by an `S3method()` line whose generic this package exports, `cairn/references/export-surface-review.md` names the tune, finetune, workflowsets or hardhat function or method it mirrors, or none. For each argument that one of the pair has and the other lacks, and for each pair of shared arguments whose order differs, the page gives a verdict of kept, changed or proposed. `benchmarks/export-surface.R` lists the functions and methods by reading `NAMESPACE`.
-- [ ] AC2: The workflow methods of the six `nested_*` generics and `nested_workflow_map()` each run on the script's fixture with `save_pred = TRUE` and an `extract` function in the control. Each counterpart runs with the same control on the inner resamples of outer fold 1. For each column name that one result has and the other lacks, the page gives a verdict of kept or proposed.
+- [x] AC1: For each function named by an `export()` line of `NAMESPACE` whose definition is in this package's `R/` (not a re-export), and each method named by an `S3method()` line whose generic this package exports, `cairn/references/export-surface-review.md` names the tune, finetune, workflowsets or hardhat function or method it mirrors, or none. For each argument that one of the pair has and the other lacks, and for each pair of shared arguments whose order differs, the page gives a verdict of kept, changed or proposed. `benchmarks/export-surface.R` lists the functions and methods by reading `NAMESPACE`.
+- [x] AC2: The workflow methods of the six `nested_*` generics and `nested_workflow_map()` each run on the script's fixture with `save_pred = TRUE` and an `extract` function in the control. Each counterpart runs with the same control on the inner resamples of outer fold 1. For each column name that one result has and the other lacks, the page gives a verdict of kept or proposed.
 - [ ] AC3: For each argument with a changed verdict, a testthat test asserts that its order among the arguments it shares with the counterpart matches the counterpart's order, and `devtools::test()` passes.
 
 ## Coverage
@@ -69,3 +69,8 @@ Before the first release, every package-owned export, every method of an exporte
 ## Decisions
 
 ## Review
+
+Pass 1 (2026-10-18) returned AC1: 56 of 75 items were named only through a grouping rule (review return 1, fixed by T7). Pass 2 evidence follows, at e94674f7.
+
+- AC1: `Rscript benchmarks/export-surface.R` exit 0. It reads 16 package-owned functions and 59 methods from `NAMESPACE`, and stops on a table that disagrees with it (claim audit, a deleted row). A check over its Part 1 output found each of the 75 items in its own page row with the printed counterpart or none (0 wrong), each of the 20 arguments one side lacks in a kept/changed/proposed row (0 missing), and the one shared-order difference left (`autoplot.nested_results_set()`, before `...`) in a kept row. The two pre-change order differences (`nested_tune_bayes()`, `nested_tune_sim_anneal()` methods) have changed rows.
+- AC2: the same run's Part 2 completes all seven runs (the six workflow methods and `nested_workflow_map()`) with `save_pred = TRUE` and an `extract` function, each counterpart on `folds$inner_resamples[[1]]` under the same control object. The 10 column names one side lacks (`.selected`, `.inner_metrics`, `.completed`, `.tuning_seed`, `.outer_fit_seed`, `.iter`, `.order`, `workflow`, `info`, `option`) each have a kept or proposed row (0 missing).
