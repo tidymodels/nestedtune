@@ -1,6 +1,6 @@
 # M149: Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -37,11 +37,11 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 
 ## Tasks
 
-- [ ] T1: `verbose` in `R/nested-workflow-map.R:86`, before `...`. Check it before the per-workflow checks, with class `nestedtune_bad_verbose`. Print with `cli::cli_inform()` at each start and each clean finish, inside the loop at the `run_orchestrator()` call. Tests go in `test-nested-workflow-map-checks.R` and `test-nested-workflow-map-readers.R`, under `skip_if_no_wset_fixture()` (the M101 lesson). Mask the time in the snapshot with `transform`. Update `@param verbose` and the `@details` order sentence.
-- [ ] T2: `type` on `collect_inner_metrics.nested_results()` (`R/nested-results-collect.R:100`) and the set method (`R/nested-results-set.R:86`). Read it with `check_metrics_type()` and pivot with `pivot_metrics_wide()` (`R/nested-results.R:836`); the set pivots once after `stack_set()`, as `collect_metrics()` does. Build the fold 1 oracle on `analysis_framed_inner()`'s output (the M05 lesson). Plant the key collision with a parameter id named like a metric. Write `@param type` text that names `collect_inner_metrics()` on both pages.
-- [ ] T3: `id` on `autoplot.nested_results_set()` (`R/nested-results-plot.R:574`). A non-`NULL` id goes through `match_set_id()` and then `autoplot()` on that row's result, with the same `type`, `metric` and `eval_time`. Tests go in `test-nested-results-plot.R` beside the set snapshots. Write `@param id`.
+- [x] T1: `verbose` in `R/nested-workflow-map.R:86`, before `...`. Check it before the per-workflow checks, with class `nestedtune_bad_verbose`. Print with `cli::cli_inform()` at each start and each clean finish, inside the loop at the `run_orchestrator()` call. Tests go in `test-nested-workflow-map-checks.R` and `test-nested-workflow-map-readers.R`, under `skip_if_no_wset_fixture()` (the M101 lesson). Mask the time in the snapshot with `transform`. Update `@param verbose` and the `@details` order sentence.
+- [x] T2: `type` on `collect_inner_metrics.nested_results()` (`R/nested-results-collect.R:100`) and the set method (`R/nested-results-set.R:86`). Read it with `check_metrics_type()` and pivot with `pivot_metrics_wide()` (`R/nested-results.R:836`); the set pivots once after `stack_set()`, as `collect_metrics()` does. Build the fold 1 oracle on `analysis_framed_inner()`'s output (the M05 lesson). Plant the key collision with a parameter id named like a metric. Write `@param type` text that names `collect_inner_metrics()` on both pages.
+- [x] T3: `id` on `autoplot.nested_results_set()` (`R/nested-results-plot.R:574`). A non-`NULL` id goes through `match_set_id()` and then `autoplot()` on that row's result, with the same `type`, `metric` and `eval_time`. Tests go in `test-nested-results-plot.R` beside the set snapshots. Write `@param id`.
 - [x] T4: Update the review page for AC4. Run `benchmarks/export-surface.R` at the head and give each new difference a row: `type` on the set's `collect_inner_metrics()` beside workflowsets' `collect_metrics()`, and the `id` default. Run the default comparison over the `pairs` table. Write each verdict, and name the procedure and its date in the page. Add a candidate row for any `proposed` default (search first).
-- [ ] T5: One NEWS entry for the three arguments. Run `devtools::document()`, the prose sweeps from the verify slot, `air format --check .`, `devtools::test()` and `devtools::check()`.
+- [x] T5: One NEWS entry for the three arguments. Run `devtools::document()`, the prose sweeps from the verify slot, `air format --check .`, `devtools::test()` and `devtools::check()`.
 
 ## Work log
 
@@ -59,6 +59,8 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 - 2026-10-18: T3 code and tests in place: a non-`NULL` `id` goes through `match_set_id()` before the type check, and the single-run method then reads `type`, `metric` and `eval_time` and gives its own refusals. Tests compare `ggplot_build()` data under both views and a metric filter, and refuse four bad ids. The plot file passed with its three set snapshots unchanged. Full suite pending.
 - 2026-10-18: T4 done: the review page marks the three rows `added` and defines the verdict, gives rows to the two new differences the script prints at `33d77fd6` (`type` on the set's `collect_inner_metrics()`, the order of `id`), and gives 7 default verdicts, all `kept`. No `proposed` default, so no candidate row.
 - 2026-10-18: claim audit: 34 claims read, 2 corrected — tests/testthat/test-collect-inner-metrics-wide.R (a comment on the long table's rows), R/nested-results-collect.R and man/collect_selections.Rd (`type` now names the two-estimator refusal). The reader re-read both corrections and found them true.
+- 2026-10-18: verify: `devtools::test()` at `33d77fd6` gave 15583 passes, 0 failures, 0 skips (later commits change docs, NEWS, a test comment and tracking only). `devtools::check()` at `832d8b17` in the main checkout gave 0 errors, 0 warnings, 0 notes; a first run in a git worktree gave one NOTE on the worktree's `.git` file, which a plain checkout lacks. `air format --check .` and both prose sweeps clean.
+- 2026-10-18: minor amendment: T1's tests went to a new `test-nested-workflow-map-verbose.R` in place of the readers file, and T1's `@details` order sentence needed no change, since the details name no argument order. T1 to T3 and T5 ticked; status set to `review`.
 
 ## Decisions
 

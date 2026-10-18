@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-18 M148 done. Archived M148, pruned M145's row, add
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M149 | Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot | in-progress | — | normal | milestones/M149-argument-gaps.md |
+| M149 | Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot | review | — | normal | milestones/M149-argument-gaps.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | done | — | normal | milestones/archive/M148-export-review.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | done | — | normal | milestones/archive/M147-cran-subset-ci.md |
 | M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | done | — | normal | milestones/archive/M146-description-text.md |
