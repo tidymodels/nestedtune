@@ -84,7 +84,7 @@ Review pass 1, 2026-10-17, at `e15b7bc`.
 - spawned: diff-bug, blame-history, prior-review
 - diff-bug #1: `tune` inside `tune_grid()` and `rsample` inside `rsample::nested_cv()` count as bare names, since a word excludes `_` and `:` — follow-up, new candidate row "DESCRIPTION quoting test word rules". AC2's own word definition makes this the required behavior, and the current text has no such case.
 - diff-bug #2: Suggests names that are common words (`survival`, `censored`, `recipes`, `tailor`, `dials`) would demand wrong quotes in later prose — follow-up, same row. It is the plan gate's recorded falsifier.
-- diff-bug #3: a name after leading dots (`.tune`, `...tune`) is missed, since only trailing dots are dropped — fix now.
+- diff-bug #3: a name after leading dots (`.tune`, `...tune`) is missed, since only trailing dots are dropped — fix now, fixed `67bc867`. The checker now drops leading dots too, and a planted "...tune" is caught; the old checker returned nothing for it.
 - diff-bug #4: the quote check reads only the next character on each side (`x'tune'y` passes), and a name inside a DOI would be flagged — follow-up, same row.
 - diff-bug #5: curly quotes, double quotes and backticks count as unquoted — reject (false): CRAN asks for straight single quotes, so this is the intended behavior.
 - diff-bug #6: "An inner resampling loop tunes the model" does not fit fixed models, which the text also lists — reject (planned change): the user approved this wording at the plan gate.
