@@ -2,8 +2,9 @@
 # in single quotes. The names checked are the package's own and every package
 # its Depends, Imports and Suggests fields declare, R excepted. A word is a
 # maximal run of letters, digits and dots, matched without regard to case.
-# Trailing dots are also dropped before matching, since a package name never
-# ends in one and a name that ends a sentence would otherwise be missed.
+# Leading and trailing dots are also dropped before matching, since a package
+# name never starts or ends with one, and a name that ends a sentence or
+# follows an ellipsis would otherwise be missed.
 #
 # The source tree's DESCRIPTION is read when the suite runs from it. Under
 # `R CMD check` the tests run from a copy with no DESCRIPTION above them, so
@@ -38,7 +39,7 @@ unquoted_names <- function(text, names) {
   before <- substring(text, hits - 1L, hits - 1L)
   after <- substring(text, ends + 1L, ends + 1L)
   key <- tolower(words)
-  stripped <- sub("[.]+$", "", key)
+  stripped <- gsub("^[.]+|[.]+$", "", key)
   named <- key %in% tolower(names) | stripped %in% tolower(names)
   quoted <- before == "'" & after == "'"
   words[named & !quoted]
@@ -48,6 +49,7 @@ test_that("the checker finds an unquoted name and passes a quoted one", {
   names <- c("nestedtune", "tune", "mirai")
   expect_identical(unquoted_names("Tunes with tune.", names), "tune.")
   expect_identical(unquoted_names("Runs on Mirai daemons", names), "Mirai")
+  expect_identical(unquoted_names("and so on ...tune", names), "...tune")
   expect_identical(
     unquoted_names("Runs with 'mirai' and 'tune'.", names),
     character()
