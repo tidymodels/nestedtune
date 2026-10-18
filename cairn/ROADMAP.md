@@ -9,7 +9,6 @@ _Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) b
 | M148 | Each export and result column is set beside its tidymodels counterpart | planned | — | normal | milestones/M148-export-review.md |
 | M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |
 | M144 | The help pages for reading results read like tune's | done | M142 | normal | milestones/archive/M144-tune-style-reader-pages.md |
-| M143 | The other loop pages, the final fit and the design page read like tune's | done | M142 | normal | milestones/archive/M143-tune-style-loop-pages.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
