@@ -12,8 +12,8 @@ Description: Estimates how well a model tuning procedure performs on new
     models from 'workflowsets'. A separate function runs the procedure on all
     the data to fit the final model. The outer folds can run in parallel with
     'mirai'. The nested resampling constructor makes the same splits as
-    nested_cv() from 'rsample', and its size does not grow with the number
-    of outer folds.
+    nested_cv() from 'rsample', but it stores row indices in place of a copy
+    of the data for each outer fold.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

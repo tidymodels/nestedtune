@@ -1,6 +1,6 @@
 # M146: DESCRIPTION's Title and Description say what the package does, in CRAN's form
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -32,8 +32,8 @@ Description:
     models from 'workflowsets'. A separate function runs the procedure on all
     the data to fit the final model. The outer folds can run in parallel with
     'mirai'. The nested resampling constructor makes the same splits as
-    nested_cv() from 'rsample', and its size does not grow with the number
-    of outer folds.
+    nested_cv() from 'rsample', but it stores row indices in place of a copy
+    of the data for each outer fold.
 
 `DOI` stands for the DOI that `cairn/references/varma2006.md` records on its citation line. It is not written out here because cairn's date check reads its last three parts as a malformed date.
 
@@ -69,6 +69,9 @@ Description:
 - 2026-10-17: checkpoint, T1 and T2 written and not yet ticked. `test-description.R` failed on the old fields (`Tidymodels` and `tidymodels` unquoted) and passes on the new ones. Its checker self-test plants unquoted names. Words with trailing dots are also matched with the dots dropped, which checks more than AC2 asks. `man/nestedtune-package.Rd` is regenerated for the new Title. The full suite and `devtools::check()` are running.
 - 2026-10-17: T1 and T2 done. `devtools::test()` passed with no failures and no skips. `devtools::check(manual = FALSE)` gave 0 errors, 0 warnings and 0 notes. `air format` reflowed one call in the new test.
 - 2026-10-17: T3 done at `309142f`. `devtools::check(remote = TRUE, manual = FALSE)` gave 0 errors, 0 warnings and 1 NOTE, the CRAN incoming feasibility NOTE. It names the maintainer, "New submission" and "Version contains large components (0.0.0.9000)", and no DOI, URL or misspelled word. The version line goes away at the release walk's version bump.
+- 2026-10-17: claim audit: 19 claims read, 1 corrected — DESCRIPTION. The sentence "its size does not grow with the number of outer folds" was false: `test-nested-resamples-memory.R:100-120` records 1.2x to 10.0x the data for 2 to 50 outer folds, a slope of 0.18 per fold against rsample's 1.15. The old Description on main made the same claim.
+- 2026-10-17: substantive amendment: Scope's Description text, at the user's choice at a stop. The last sentence now reads "The nested resampling constructor makes the same splits as nested_cv() from 'rsample', but it stores row indices in place of a copy of the data for each outer fold." AC1's wording is unchanged, so no criterion re-audit is owed. DESCRIPTION carries the same sentence.
+- 2026-10-17: implement done, status set to review. AC3's remote check ran at `309142f`, before the amended sentence, so review re-runs it on the head.
 
 ## Decisions
 
