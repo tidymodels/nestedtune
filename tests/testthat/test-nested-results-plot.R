@@ -1230,6 +1230,43 @@ test_that("the mixed censored set draws a character and a numeric parameter on d
   ))
 })
 
+# `id` on the set's plot (M149, AC3): one workflow's plot is the single-run
+# method's plot on that row, under both views, and a filter reaches it.
+test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  one <- res$result[[match("tuned", res$wflow_id)]]
+  same_build <- function(a, b) {
+    expect_identical(
+      ggplot2::ggplot_build(a)$data,
+      ggplot2::ggplot_build(b)$data
+    )
+  }
+  same_build(autoplot(res, id = "tuned"), autoplot(one))
+  same_build(
+    autoplot(res, type = "performance", id = "tuned"),
+    autoplot(one, type = "performance")
+  )
+  same_build(
+    autoplot(res, type = "performance", metric = "rsq", id = "tuned"),
+    autoplot(one, type = "performance", metric = "rsq")
+  )
+  # The single view's own refusal comes through: the fixed workflow has no
+  # tuned parameter to draw.
+  expect_error(
+    autoplot(res, id = "fixed"),
+    class = "nestedtune_no_tuned_parameters"
+  )
+})
+
+test_that("AC3: an id that names no row of the set is refused", {
+  skip_if_no_wset_fixture()
+  res <- wset_three_results()
+  for (bad in list("nonesuch", c("tuned", "fixed"), 1, NA_character_)) {
+    expect_error(autoplot(res, id = bad), class = "nestedtune_unknown_id")
+  }
+})
+
 # The pictures of the set views, on the three-workflow fixture: what a reader
 # meets -- the id-prefixed strips, the workflows along one axis under each
 # metric, the rules -- pinned after being rendered and read (M72).

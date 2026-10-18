@@ -280,6 +280,9 @@ stack_set <- function(
 #'   `"performance"`.
 #' @param metric,eval_time For `type = "performance"`, the metrics and the
 #'   evaluation times to draw, as on [autoplot.nested_results()].
+#' @param id For `autoplot()`, `NULL` (the default) to draw every workflow,
+#'   or one `wflow_id` to draw that workflow alone. One `wflow_id` gives the
+#'   plot that [autoplot.nested_results()] draws for that workflow's result.
 #' @inheritParams collect_metrics.nested_results_set
 #'
 #' @return `summary()` returns a `summary.nested_results_set`, a list of

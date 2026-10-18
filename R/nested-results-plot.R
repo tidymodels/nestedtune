@@ -576,9 +576,21 @@ autoplot.nested_results_set <- function(
   type = c("parameters", "performance"),
   metric = NULL,
   eval_time = NULL,
-  ...
+  ...,
+  id = NULL
 ) {
   rlang::check_dots_empty()
+  # One workflow's plot (M149), as workflowsets' `id` draws one result: the
+  # single-run method on that row, with every argument it takes.
+  if (!is.null(id)) {
+    i <- match_set_id(object, id, call = rlang::current_env())
+    return(autoplot(
+      object$result[[i]],
+      type = type,
+      metric = metric,
+      eval_time = eval_time
+    ))
+  }
   type <- check_plot_type(type)
   check_plot_filter(type, metric, eval_time)
   call <- rlang::current_env()
