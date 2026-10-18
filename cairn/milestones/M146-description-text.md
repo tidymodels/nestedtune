@@ -41,7 +41,7 @@ Description:
 
 ## Acceptance criteria
 
-- [ ] AC1: `DESCRIPTION`'s `Title` field reads `Nested Cross-Validation for 'tidymodels'`, and its `Description` field reads the text in this file's Scope word for word, with `DOI` replaced as Scope says, and with line breaks and indentation free.
+- [x] AC1: `DESCRIPTION`'s `Title` field reads `Nested Cross-Validation for 'tidymodels'`, and its `Description` field reads the text in this file's Scope word for word, with `DOI` replaced as Scope says, and with line breaks and indentation free.
 - [ ] AC2: In `DESCRIPTION`'s `Title` and `Description` fields, every word that equals, ignoring case, the package's own name or the name of a package in its `Depends`, `Imports` or `Suggests` field (R excepted) is enclosed in single quotes. A word is a maximal run of letters, digits and dots. `tests/testthat/test-description.R` checks this with `read.dcf()` on those fields.
 - [ ] AC3: `devtools::check(remote = TRUE, manual = FALSE)` on the branch head reports 0 errors and 0 warnings, and none of its NOTEs reports an invalid DOI or URL in `DESCRIPTION`.
 
@@ -76,3 +76,8 @@ Description:
 ## Decisions
 
 ## Review
+
+Review pass 1, 2026-10-17, at `e15b7bc`.
+
+- AC1: a script compared `DESCRIPTION`'s fields with this file's Scope text, whitespace-normalized and with `DOI` replaced by `cairn/references/varma2006.md`'s DOI. Title and Description both matched. A control copy with "row indices" changed to "row numbers" did not match.
+- AC2: `test-description.R` passed (7 expectations) on the head. Its checker, run on the 33 declared names (the package, 9 Imports and 23 Suggests), found no unquoted name in either field. The same checker on `main`'s fields found `Tidymodels` in Title and `tidymodels` in Description. The test also passed inside `R CMD check`, where it reads the installed `DESCRIPTION` (AC3's run).
