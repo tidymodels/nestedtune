@@ -110,10 +110,10 @@ nested_tune_bayes.model_spec <- function(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 5,
-  objective = tune::exp_improve(),
   event_level = "first",
   eval_time = NULL,
+  objective = tune::exp_improve(),
+  initial = 5,
   select = selection_rule()
 ) {
   check_preprocessor(preprocessor)
@@ -142,10 +142,10 @@ nested_tune_bayes.workflow <- function(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 5,
-  objective = tune::exp_improve(),
   event_level = "first",
   eval_time = NULL,
+  objective = tune::exp_improve(),
+  initial = 5,
   select = selection_rule()
 ) {
   dots <- capture_dots(...)

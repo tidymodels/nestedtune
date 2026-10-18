@@ -113,9 +113,9 @@ nested_tune_sim_anneal.model_spec <- function(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 ) {
   # finetune first, as the workflow method does.
@@ -145,9 +145,9 @@ nested_tune_sim_anneal.workflow <- function(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 ) {
   # finetune first, before anything is judged that could not run anyway

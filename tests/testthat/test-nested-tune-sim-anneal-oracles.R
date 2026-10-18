@@ -46,9 +46,9 @@ test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less 
       "iter",
       "param_info",
       "metrics",
-      "initial",
       "event_level",
       "eval_time",
+      "initial",
       "select"
     )
   )

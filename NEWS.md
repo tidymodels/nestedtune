@@ -1,5 +1,10 @@
 # nestedtune 0.0.0.9000
 
+* `nested_tune_bayes()` and `nested_tune_sim_anneal()` now list `eval_time`
+  before `objective` and `initial`, in the order `tune::tune_bayes()` and
+  `finetune::tune_sim_anneal()` use. These arguments come after `...`, so
+  you must name them, and no call changes.
+
 * `?nested_tune_grid` no longer says that every loop function finalizes a
   range that depends on the data, such as `mtry()`. `nested_tune_bayes()`
   does not, because `tune::tune_bayes()` does not. Set the range in

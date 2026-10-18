@@ -71,10 +71,10 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       "iter",
       "param_info",
       "metrics",
-      "initial",
-      "objective",
       "event_level",
       "eval_time",
+      "objective",
+      "initial",
       "select"
     )
   )
