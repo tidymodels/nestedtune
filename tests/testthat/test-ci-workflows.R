@@ -21,13 +21,6 @@ workflow_path <- function(name) {
 }
 
 # The `uses:` values of one job's steps, in the order the job runs them.
-#
-# Read by indentation rather than with a YAML parser, because `yaml` is not a
-# dependency of this package and adding one to assert a property of two lines
-# would cost more than the check is worth. The boundary is findable this way
-# only below `jobs:`, where job names are the sole keys at two-space indent
-# carrying no value -- above it, `on:`'s `push:` and `pull_request:` look
-# identical, which is why the search starts there and not at line one.
 job_uses <- function(path, job) {
   block <- job_lines(path, job)
   if (is.null(block)) {
@@ -39,6 +32,13 @@ job_uses <- function(path, job) {
 
 # The lines of one job, from its header to the line before the next job's, or
 # NULL when the file has no such job.
+#
+# Read by indentation rather than with a YAML parser, because `yaml` is not a
+# dependency of this package and adding one to assert a property of two lines
+# would cost more than the check is worth. The boundary is findable this way
+# only below `jobs:`, where job names are the sole keys at two-space indent
+# carrying no value -- above it, `on:`'s `push:` and `pull_request:` look
+# identical, which is why the search starts there and not at line one.
 job_lines <- function(path, job) {
   lines <- readLines(path, warn = FALSE)
 
@@ -231,4 +231,19 @@ test_that("R-CMD-check-cran.yaml checks with NOT_CRAN false in both jobs", {
       "'c(\"--no-manual\",\"--as-cran\")'"
     )
   }
+
+  # One job installs the Suggests, which is the setup step's default, and the
+  # other names the hard dependencies alone.
+  setup <- "uses: r-lib/actions/setup-r-dependencies@"
+  expect_null(
+    step_value(job_lines(path, "check-cran-suggests"), setup, "dependencies")
+  )
+  expect_identical(
+    step_value(
+      job_lines(path, "check-cran-no-suggests"),
+      setup,
+      "dependencies"
+    ),
+    "'\"hard\"'"
+  )
 })

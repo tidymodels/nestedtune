@@ -58,6 +58,8 @@ package holds no `.github/` folder.
 `devtools::test()` sets `NOT_CRAN=true`, so it runs every test. The same holds
 for every CI job, because `r-lib/actions/setup-r` sets `NOT_CRAN: true` for the
 steps after it. The `R-CMD-check.yaml` legs also set `NESTEDTUNE_FULL_SUITE: true`.
+Two jobs added after this measurement are the exception. The two jobs in
+`R-CMD-check-cran.yaml` set `NOT_CRAN` to false for their check step.
 
 | Tree | Blocks | Pass | Fail | Skip |
 |---|---:|---:|---:|---:|

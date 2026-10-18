@@ -64,7 +64,8 @@ jobs:
       # `NESTEDTUNE_FULL_SUITE` is unset here, but `setup-r` sets
       # `NOT_CRAN: true` for every later step, so this job still runs the tests
       # `skip_heavy_on_cran()` keeps off CRAN (tests/testthat/helper-cran.R).
-      # `R-CMD-check-cran.yaml` runs this job's setup with `NOT_CRAN` false.
+      # `R-CMD-check-cran.yaml`'s `check-cran-no-suggests` copies this job's
+      # dependency setup and sets `NOT_CRAN` to false on its check step.
 
     steps:
       - uses: actions/checkout@v7

@@ -2099,6 +2099,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** `?nested_tune_grid` states which outer and inner time-series designs `nested_tune_grid()` is tested on, that a `lag` above 0 is an error, and that `?nested_resamples` says which designs the other functions are tested on. `?nested_resamples` and `NEWS.md` keep the full per-function claims and what is not tested. Rejected: a short per-function list on both pages, because it repeats `?nested_resamples` on the page users read first.
 **Consequences:** a new time-series claim updates `?nested_resamples` and `NEWS.md`, and touches `?nested_tune_grid` only when it changes what `nested_tune_grid()` itself is tested on. Falsified by a user who reads only `?nested_tune_grid` and misses a supported design for another function. (Narrows the help-page clauses of the entries named in the heading.)
 
+### D-116 (2026-10-18): two CI jobs in `R-CMD-check-cran.yaml` run the CRAN test subset, and one of them runs the vignettes in full on ubuntu. Narrows M118's statement that every CI job runs the full suite, and corrects D-077's Decision and Consequences
+
+**Context:** M118 kept every CI job on the full suite, because `setup-r` sets `NOT_CRAN` to true, so no job ran the tests CRAN runs. D-077 says that off macOS only `pkgdown.yaml` runs the vignettes' code in full, and that a vignette failure under `R CMD check` is caught on macOS alone. M147 adds `R-CMD-check-cran.yaml`, whose two ubuntu jobs set `NOT_CRAN` to false on their check step. One installs the Suggests and builds and checks the vignettes.
+**Decision:** these two jobs run the CRAN subset, with the Suggests and with the hard dependencies only, on every pull request. Every other CI job that runs the tests keeps `NOT_CRAN` true and runs the full suite. The jobs live in their own file so `R-CMD-check.yaml` keeps one vignette leg and one `NESTEDTUNE_FULL_SUITE` line (D-076). Rejected: new legs in `R-CMD-check.yaml`, because `test-ci-workflows.R` and D-076 pin that file's vignette leg and switch line.
+**Consequences:** a test that fails only when `skip_heavy_on_cran()` skips its neighbours now fails on a pull request. A vignette failure under `R CMD check` with the Suggests is caught on ubuntu as well as macOS. Falsified by the new file's triggers drifting from the other check workflows unnoticed. (Narrows M118's every-job-full-suite statement, and corrects D-077's Decision and Consequences on where the vignettes run in full.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

@@ -61,3 +61,31 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 - AC1 static (2026-10-18, `yaml::read_yaml` of the file at f5605df1): job `check-cran-suggests`; its `setup-r-dependencies` step has no `dependencies` key; its `check-r-package` step has `env: NOT_CRAN: false`, `args` `c("--no-manual","--as-cran")`, and `build_args` without `--no-build-vignettes`, `args` without `--ignore-vignettes`; no `NESTEDTUNE_FULL_SUITE:` line in the file. Local supporting run (T4): 52 skips with the smoke-layer reason. CI half pending.
 - AC2 static (same read): job `check-cran-no-suggests`; `dependencies: '"hard"'`, `extra-packages` exactly rcmdcheck, testthat, knitr, rmarkdown; `NOT_CRAN: false` on the check step, same `args`, no switch. Local supporting run (T4): status OK, 52 skips with the smoke-layer reason. CI half pending.
 - AC3 static (`git diff main..HEAD` over `R-CMD-check.yaml` and `R-CMD-check-hard.yaml`, filtered to added or removed lines not starting with `#`): no lines. CI half pending.
+- Gate (at af5bf91d): `cairn_validate` all checks passed; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; six gating prose sweeps exit 0; README unchanged; no new top-level file; no NEWS entry owed (internal tier, no user-visible change). `devtools::check()` rerun after the fixes below.
+- spawned: diff-bug, blame-history, prior-review.
+- diff-bug #1: PROFILE.md's added sentence made "Its legs set `NESTEDTUNE_FULL_SUITE`" read as the CRAN file — fix now.
+- diff-bug #2: D-077 says only `pkgdown.yaml` runs the vignettes in full off macOS, now false, and no decision recorded — fix now (D-116).
+- diff-bug #3: `TESTTHAT_CPUS: 4` departs from CRAN's two cores while the header claims CRAN conditions — fix now (unset, testthat's default of 2, read from `testthat:::default_num_cpus`).
+- diff-bug #4: `R-CMD-check.yaml`'s vignette comment omits that the no-Suggests job also builds the vignettes — fix now.
+- diff-bug #5: `helper-cran.R` says "one without" Suggests and that other jobs run "the full suite" — fix now (hard job still installs what tune imports; reworded to "`NOT_CRAN` is true and this helper skips nothing").
+- diff-bug #6: the new test does not pin the setup step's `dependencies` — fix now (pins added, planted `'"hard"'` in the Suggests job reads wrong); flow-style `env:` or `GITHUB_ENV` writes going unseen — reject, false as a defect: the file's readers read block style by stated design; a quoted `'false'` failing the test — reject, style: it fails loudly, never silently.
+- diff-bug #7: `benchmarks/cran-check-timing.md` still says every CI job runs the full suite — fix now (one added sentence); LESSONS line 25 — planned change, corrected at this milestone's hygiene per Scope.
+- diff-bug #8: header says setup-r sets `NOT_CRAN` unconditionally, but it does so only when unset — fix now.
+- diff-bug #9: the indentation-reading comment stayed on `job_uses()` after the logic moved to `job_lines()` — fix now.
+- diff-bug #10: `use-public-rspm` set in one job only, and the hard file's "runs this job's setup" — rspm: reject, style (equivalent on ubuntu); wording: fix now (same as blame-history #4).
+- diff-bug #11: the Suggests job's cap has no measured run of its own — fix now (comment says the Suggests install is unmeasured and binary; step cap added, see prior-review #1); the job's first PR run is recorded at step 8.
+- diff-bug #12: CI half of AC1-AC3 unverified — noted, already recorded above.
+- blame-history #1: job-only cap on a job that installs the Suggests, against PROFILE's "the step bound is the guarantee" — fix now (20-minute step cap on both check steps).
+- blame-history #2: D-077 stale — fix now (D-116, same as diff-bug #2).
+- blame-history #3: M118's "every CI job runs the full suite" reversed without a decision; LESSONS line 25 stale — D-116 records it (fix now); LESSONS: planned change at hygiene.
+- blame-history #4: hard file's line saying the CRAN file runs its setup with `NOT_CRAN` false is wrong, setup runs with it true — fix now.
+- blame-history #5: hard header omits `any::rcmdcheck` from what the setup names — reject, false: the sentence names Suggests, and rcmdcheck is not one.
+- blame-history #6: `ci-usage-baseline.md` lists the old workflow set — reject, false: it is a dated record of the 2026-08-11 to 09-10 window.
+- prior-review #1: no step-level cap on the check steps (LESSONS M16, PROFILE) — fix now (20 minutes each).
+- prior-review #2: Suggests install unmeasured in the job cap — fix now (same as diff-bug #11).
+- prior-review #3: no `concurrency` block, against M011 — fix now (copied from `R-CMD-check.yaml`).
+- prior-review #4: hard file's `NOT_CRAN` wording — fix now (same as blame-history #4).
+- prior-review #5: D-077 stale — fix now (D-116).
+- prior-review #6: custom `artifact-name` values carry no comment saying what they buy (PR #30) — fix now.
+- prior-review #7: LESSONS M73 says `R_KEEP_PKG_SOURCE` is set by "both check workflows" — follow-up at this milestone's hygiene (LESSONS is corrected there).
+- prior-review #8: PROFILE's `TESTTHAT_CPUS` sentence does not name the new file — fix now (one sentence saying it sets none).
