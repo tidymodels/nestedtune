@@ -1,6 +1,6 @@
 # The export surface beside its tidymodels counterparts (M148)
 
-**Provenance.** Ingested 2026-10-18 by M148 from the output of `benchmarks/export-surface.R` and from `DECISIONS.md` read by its headings. The script ran on the source tree at `93c10377` against the installed tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1 and hardhat 1.4.3.
+**Provenance.** Ingested 2026-10-18 by M148 from the output of `benchmarks/export-surface.R` and from `DECISIONS.md` read by its headings. The script first ran on the source tree at `93c10377`. The pairing table and the verdicts read its output at `890190d2`, after the argument reorder. Both runs used the installed tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1 and hardhat 1.4.3.
 Pagination: —.
 Extraction: derived, a 2026-10-18 snapshot of this package's `NAMESPACE` and the four installed packages, which a new run of the script re-reads — observed 2026-10-18.
 
@@ -8,7 +8,7 @@ Extraction: derived, a 2026-10-18 snapshot of this package's `NAMESPACE` and the
 
 **Evidence snapshot.**
 
-- `NAMESPACE` and `R/` at `93c10377`: 16 package-owned functions, 59 methods of exported generics — observed 2026-10-18.
+- `NAMESPACE` and `R/` at `890190d2`: 16 package-owned functions, 59 methods of exported generics — observed 2026-10-18.
 - tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1 and hardhat 1.4.3, as installed — observed 2026-10-18.
 
 ## How the script reads the surface
@@ -25,7 +25,7 @@ A `nested_results` method pairs with tune's `tune_results` method. A `nested_res
 
 These items pair with none of the four packages:
 
-- `agreement()`, `collect_selections()`, `extract_procedure()`, `extract_scored_candidates()`, `extract_tune_results()`, `collect_inner_metrics()`, and the `default` method of each. Each is a generic this package owns (D-023, D-039, D-052), with the signature `(x, ...)`.
+- `agreement()`, `collect_selections()`, `extract_procedure()`, `extract_scored_candidates()`, `extract_tune_results()`, `collect_inner_metrics()`, and the `default` method of each. Each is a generic this package owns, with the signature `(x, ...)`. D-023 chose the two `extract_` generics for the final fit, D-039 chose `agreement()`, and D-052 chose the two `collect_` generics. `extract_procedure()` follows D-023's shape, and `DESIGN.md` records it (M67).
 - `nested_resamples(data, outside, inside, ...)`. Its counterpart is `rsample::nested_cv(data, outside, inside)`, outside the four packages. The three shared arguments are in the same order.
 - `selection_rule(rule, ..., limit)`. It builds the rule that an orchestrator's `select` takes (D-056). Its `limit` has the meaning of the `limit` of `tune::select_by_pct_loss()`.
 - `augment.nested_final_fit(x, new_data, eval_time, ...)`. No `augment()` method in tune has a `new_data` argument. The object holds a trained workflow, and `workflows::augment.workflow()` has the same four arguments in the same order.
@@ -132,8 +132,8 @@ These rows cover the `workflow` and `model_spec` methods of all six orchestrator
 | `control` | theirs only | kept | D-042: a control reaches the inner call through `...`. topepo reserves the `control` formal for a control of the outer work. |
 | `event_level` | ours only | kept | D-030 and D-042: it stays an argument beside the control. A control that names another level is an error. |
 | `select` | ours only, five tuners | kept | D-056: it is the rule that picks each fold's candidate. tune leaves that choice to a later `select_best()` call. `nested_fit_resamples()` tunes nothing and has no `select` (D-057). |
-| order of `eval_time`, `objective`, `initial` | `nested_tune_bayes()` | changed | The order was `metrics, initial, objective, event_level, eval_time`. It is now `metrics, event_level, eval_time, objective, initial`, so the shared arguments follow `tune_bayes()`. No decision chose the old order. |
-| order of `eval_time`, `initial` | `nested_tune_sim_anneal()` | changed | The order was `metrics, initial, event_level, eval_time`. It is now `metrics, event_level, eval_time, initial`, so the shared arguments follow `tune_sim_anneal()`. No decision chose the old order. |
+| order of `eval_time`, `objective`, `initial` | `nested_tune_bayes()` | changed | The order was `metrics, initial, objective, event_level, eval_time`. It is now `metrics, event_level, eval_time, objective, initial`, so the shared arguments follow `tune_bayes()`. No decision chose the old order. D-069 kept each function's formals at the change to generics, and D-117 narrows that clause for this order. |
+| order of `eval_time`, `initial` | `nested_tune_sim_anneal()` | changed | The order was `metrics, initial, event_level, eval_time`. It is now `metrics, event_level, eval_time, initial`, so the shared arguments follow `tune_sim_anneal()`. No decision chose the old order. D-117 narrows D-069 here too. |
 
 The grid, race and `nested_fit_resamples()` methods already had tune's order among the shared arguments.
 
@@ -160,7 +160,7 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 
 | Method | Argument | Side | Verdict | Reason |
 |---|---|---|---|---|
-| `augment()` | `parameters` | theirs only | kept | D-090: each fold predicted with the candidate it selected, so no single candidate exists to choose. |
+| `augment()` | `parameters` | theirs only | kept | D-092: `augment()` joins each row's saved prediction, or the D-090 average, and each fold predicted with the candidate it selected. So no single candidate exists to choose, as `?augment.nested_results` states. |
 | `collect_predictions()` | `parameters` | theirs only | kept | D-090, as above. |
 | `collect_inner_metrics()` against tune's `collect_metrics()` | `summarize` | theirs only | kept | D-043: `.inner_metrics` holds each fold's inner metrics in summarized form. There are no per-resample rows to return. |
 | `collect_inner_metrics()` against tune's `collect_metrics()` | `type` | theirs only | proposed | Add `type = c("long", "wide")`, as the method in tune has. No decision chose its absence. |
@@ -175,7 +175,8 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 | `collect_inner_metrics()` against workflowsets' `collect_metrics()` | `summarize` | theirs only | kept | D-043, as on `nested_results`. |
 | `collect_predictions()` | `parameters` | theirs only | kept | D-090, as on `nested_results`. |
 | `collect_predictions()` | `select_best`, `metric` | theirs only | kept | D-054: the outer predictions come from the candidate each fold selected. There are no other candidates to filter out. |
-| `autoplot()` | `rank_metric`, `select_best`, `std_errs` | theirs only | kept | D-058: the set has no ranking or best-workflow view, because a ranking of nested estimates is the reading that IP3 forbids. |
+| `autoplot()` | `rank_metric`, `select_best` | theirs only | kept | D-058: the set has no ranking or best-workflow view, because a ranking of nested estimates is the reading that IP3 forbids. |
+| `autoplot()` | `std_errs` | theirs only | kept | In workflowsets, `std_errs` sets how many standard errors the interval bars span. The set's plot here draws each fold's score as a point and the estimate as a flat rule, with no interval bars. |
 | `autoplot()` | `id` | theirs only | proposed | Add `id` to plot one workflow's `nested_results`, as `autoplot(x$result[[i]])` does today. No decision chose its absence. |
 | `autoplot()` | `eval_time` | ours only | kept | The method follows `autoplot.nested_results()` and `autoplot.tune_results()` in tune, which both take it. |
 | `autoplot()` | order of `type` and `metric` | both before `...` | kept | The order here is `object, type, metric`, as in `autoplot.tune_results()`, so one call works on both classes. The `type` in workflowsets is another setting with the same name: it picks how points are colored. |
@@ -190,7 +191,7 @@ Each orchestrator's result and its counterpart's result share `splits`, `id`, `.
 | `.inner_metrics` | ours only | kept | D-043: it holds each fold's summarized inner metrics. |
 | `.completed` | ours only | kept | D-031 and D-052: it marks whether a fold completed, and the readers read completed folds only. |
 | `.tuning_seed`, `.outer_fit_seed` | ours only | kept | D-011: these are the two seeds that reproduce each fold. |
-| `.iter` | theirs only, Bayes and annealing | kept | A row here is an outer fold, which has no search iteration. Each fold's `.inner_metrics` carries `.iter` for these two tuners (D-043). |
+| `.iter` | theirs only, Bayes and annealing | kept | A row here is an outer fold, which has no search iteration. Each fold's `.inner_metrics` carries `.iter` for these two tuners. D-043 states it for the Bayesian tuner, and `R/tuner.R` marks both tuners as iterating. |
 | `.order` | theirs only, both races | kept | A row here is an outer fold, and the outer folds are not raced. The race happens inside each fold. |
 | `workflow` | ours only, the set | kept | D-058: the set is a tibble of `wflow_id`, `workflow` and `result`. |
 | `info`, `option` | theirs only, the set | kept | D-058: the set does not carry the `workflow_set` class. At run time, each workflow's options are merged into its call. |
@@ -199,4 +200,6 @@ The `result` of each set row has the same columns as the result of a single run.
 
 ## What the proposed verdicts ask for
 
-Three changes are left for a later plan, and one ROADMAP candidate row holds them. They are a `verbose` argument on `nested_workflow_map()`, a `type` argument on `collect_inner_metrics()`, and an `id` argument on `autoplot()` for a `nested_results_set`. Each change can add its argument after `...`, and an argument there breaks no call.
+Three changes are left for a later plan, and the ROADMAP candidate row "Argument gaps beside tidymodels" holds them. They are a `verbose` argument on `nested_workflow_map()`, a `type` argument on `collect_inner_metrics()`, and an `id` argument on `autoplot()` for a `nested_results_set`. Each change can add its argument after `...`, and an argument there breaks no call.
+
+The script compares argument names and order, not defaults. The same row holds one default that differs: `autoplot()` on a `nested_results` defaults `type` to `"parameters"`, and `autoplot.tune_results()` defaults it to `"marginals"`.

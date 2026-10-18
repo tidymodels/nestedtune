@@ -65,6 +65,7 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: review return 1: AC1 fails as written. It asks the page to name each item's counterpart or none, and 56 of the script's 75 items (for example `extract_mold.nested_final_fit`, `nested_tune_grid.workflow`, `collect_notes.nested_results_set`) are named on the page only through a grouping rule, not one by one. Argument verdicts are complete (20 one-side arguments, each in a verdict row). Fix: a pairing table on the page with one row per item and its counterpart or none.
 - 2026-10-18: minor amendment: T7 added for review return 1, Coverage AC1 → T1, T3, T7.
 - 2026-10-18: T7 done: the page's "Every item and its counterpart" table, 75 rows built from the script's Part 1 output at 890190d2. A check of one row per item with the printed counterpart found 0 wrong or missing (56 missing before). No code changed, and the branch adds no lines outside `cairn/` since the claim audit. `cairn_validate` passes. Status → review.
+- 2026-10-18: review pass 2 settled 15 findings: 9 fix now, 1 follow-up, 5 rejected. D-117 written (narrows D-069). The candidate row is retitled "Argument gaps beside tidymodels" and holds the uncompared defaults. ROADMAP 23,931 bytes.
 
 ## Decisions
 
@@ -74,3 +75,22 @@ Pass 1 (2026-10-18) returned AC1: 56 of 75 items were named only through a group
 
 - AC1: `Rscript benchmarks/export-surface.R` exit 0. It reads 16 package-owned functions and 59 methods from `NAMESPACE`, and stops on a table that disagrees with it (claim audit, a deleted row). A check over its Part 1 output found each of the 75 items in its own page row with the printed counterpart or none (0 wrong), each of the 20 arguments one side lacks in a kept/changed/proposed row (0 missing), and the one shared-order difference left (`autoplot.nested_results_set()`, before `...`) in a kept row. The two pre-change order differences (`nested_tune_bayes()`, `nested_tune_sim_anneal()` methods) have changed rows.
 - AC2: the same run's Part 2 completes all seven runs (the six workflow methods and `nested_workflow_map()`) with `save_pred = TRUE` and an `extract` function, each counterpart on `folds$inner_resamples[[1]]` under the same control object. The 10 column names one side lacks (`.selected`, `.inner_metrics`, `.completed`, `.tuning_seed`, `.outer_fit_seed`, `.iter`, `.order`, `workflow`, `info`, `option`) each have a kept or proposed row (0 missing).
+
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: `test-argument-order.R` compares with installed tune and finetune formals with no CRAN skip, so an upstream reorder would fail the CRAN check — fix now: `skip_on_cran()` in both tests (8 pass with `NOT_CRAN` true, 2 skips with it false).
+- diff-bug #2: the page's `std_errs` reason (no ranking view) is wrong; workflowsets uses it for interval bars — fix now: own row, reason is that the set's plot draws no interval bars.
+- diff-bug #3: the changed rows say no decision chose the old order but omit D-069, whose `workflow` method keeps each function's formals — fix now: D-117 narrows D-069, and both changed rows cite it.
+- diff-bug #4: provenance and evidence snapshot name `93c10377`, but the table and verdicts read output at `890190d2` — fix now.
+- diff-bug #5: `extract_procedure()` is cited to D-023, D-039, D-052, none of which names it — fix now: each owned generic gets its own entry, `extract_procedure()` cites D-023's shape and `DESIGN.md` (M67).
+- diff-bug #6: the `.iter` row cites D-043 for annealing, which D-043 does not cover — fix now: D-043 for Bayes, `R/tuner.R`'s iterating flag for both.
+- diff-bug #7: `augment()`'s `parameters` row cites D-090, which covers `collect_predictions()` — fix now: cites D-092 and `?augment.nested_results`.
+- diff-bug #8: the script compares names and order, not defaults, and misses `autoplot()`'s `type` default (`"parameters"` here, `"marginals"` in tune) — follow-up: the M148 candidate row, retitled "Argument gaps beside tidymodels", now holds it, and the page says defaults were not compared.
+- diff-bug #9: the `model_spec` methods forward `initial`/`objective` in the old order, and the `SETTABLE_TAIL` prose lists `iter`, `initial`, `objective`, `eval_time` — reject, style: both pass or list by name, and neither claims an order.
+- diff-bug #10: the script needs the repo root as working directory and does not check it — reject, style: its header gives the command from the root, as the other benchmark scripts do.
+- blame-history #1: the `workflow` method reorder contradicts D-069 — fix now: D-117 (same fix as diff-bug #3).
+- blame-history #2: the page's "no decision chose the old order" omits D-069, and the tests pin the new order — fix now: the D-117 citation (same fix); the tests pin the order D-117 chose.
+- blame-history #3: the branch order matches tune, and D-069's `model_spec` claim was not met before — reject, false as a defect: it reports the change is correct.
+- blame-history #4: no comment or commit recorded a reason for the old order — reject, false as a defect: it supports the change.
+- blame-history #5: positional use cannot break, every moved formal is after `...` — reject, false as a defect: it confirms NEWS.
+- prior-review: no candidate finding; archived reviews on the touched files (M028, M045, M051, M057, M061) are not reintroduced, and the PR threads hold no human comments on these paths.
