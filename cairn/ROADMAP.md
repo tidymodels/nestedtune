@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) b
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | planned | — | normal | milestones/M146-description-text.md |
+| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | in-progress | — | normal | milestones/M146-description-text.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | planned | — | normal | milestones/M147-cran-subset-ci.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | planned | — | normal | milestones/M148-export-review.md |
 | M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |

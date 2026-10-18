@@ -1,13 +1,13 @@
 # M146: DESCRIPTION's Title and Description say what the package does, in CRAN's form
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3
 - **Resolves:** —
 - **Surface tier:** user-facing — CRAN and the package page show these two fields to users
-- **Branch/PR:** —
+- **Branch/PR:** m146-description-text
 
 ## Goal
 
@@ -66,6 +66,7 @@ Description:
 - 2026-10-17: plan gate chose a test over every declared dependency's name over a fixed list of the five names the text quotes, because a later edit that adds a package name is caught; falsified by a false positive on a common word that is also a package name.
 - 2026-10-17: no NEWS entry. The fields describe the package and change no behavior.
 - 2026-10-17: inbox sweep: 1 open issue (#91, the maintainers' pass over the guides), no overlap with this milestone.
+- 2026-10-17: checkpoint, T1 and T2 written and not yet ticked. `test-description.R` failed on the old fields (`Tidymodels` and `tidymodels` unquoted) and passes on the new ones. Its checker self-test plants unquoted names. Words with trailing dots are also matched with the dots dropped, which checks more than AC2 asks. `man/nestedtune-package.Rd` is regenerated for the new Title. The full suite and `devtools::check()` are running.
 
 ## Decisions
 

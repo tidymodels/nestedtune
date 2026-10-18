@@ -1,12 +1,19 @@
 Package: nestedtune
-Title: Nested Cross-Validation for Tidymodels
+Title: Nested Cross-Validation for 'tidymodels'
 Version: 0.0.0.9000
 Authors@R:
     person("Jeffrey", "Girard", , "jeffgirard@gmail.com", role = c("aut", "cre"))
-Description: Builds and orchestrates nested cross-validation designs for the
-    tidymodels ecosystem. Provides a memory-lean nested resampling
-    constructor whose object size does not grow with the outer fold count,
-    producing the same splits as 'rsample'.
+Description: Estimates how well a model tuning procedure performs on new
+    data, by nested cross-validation. An inner resampling loop tunes the
+    model with 'tune' or 'finetune'. An outer loop scores each tuned model on
+    rows that the tuning did not see, as in Varma and Simon (2006)
+    <doi:10.1186/1471-2105-7-91>. The package supports grid search, Bayesian
+    optimization, racing, simulated annealing, fixed models and sets of
+    models from 'workflowsets'. A separate function runs the procedure on all
+    the data to fit the final model. The outer folds can run in parallel with
+    'mirai'. The nested resampling constructor makes the same splits as
+    nested_cv() from 'rsample', and its size does not grow with the number
+    of outer folds.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
