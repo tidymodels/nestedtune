@@ -55,6 +55,7 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 - 2026-10-18: plan gate chose a one-time default comparison recorded in the page over a new section of `benchmarks/export-surface.R`, so the script's promise does not widen; falsified by a later review needing the default comparison again.
 
 - 2026-10-18: T1 code and tests in place: `check_map_verbose()` (class `nestedtune_bad_verbose`), start and finish lines through `cli::cli_inform()` with the text passed as a value. A design passed third by position now lands in `verbose`, so its refusal gains a hint that every argument of `fn` must be named, and the old unnamed-dots test moved to a fourth positional. Full suite pending.
+- 2026-10-18: T2 code and tests in place: both methods read `type` with `check_metrics_type()` and pivot with `pivot_metrics_wide()`, the set once after stacking. The fold 1 oracle tunes on `inner_resamples[[1]]` directly, since `det_grid()` names every candidate and no range depends on the data. A planted defect (dropping `rsq` before the pivot) failed 4 assertions, the oracle among them. Full suite pending.
 
 ## Decisions
 

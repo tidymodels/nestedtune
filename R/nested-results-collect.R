@@ -34,6 +34,11 @@
 #' does not identify a candidate across folds.
 #'
 #' @inheritParams collect_metrics.nested_results
+#' @param type For `collect_inner_metrics()`, `"long"` (the default), one row
+#'   per candidate and metric, or `"wide"`, one column per metric that holds
+#'   its `mean`. The wide shape drops `.estimator`, `n` and `std_err`. It
+#'   gives an error for a metric named like another column, such as a tuning
+#'   parameter.
 #'
 #' @return A tibble with the fold labels first (`id`, and `id2` on a
 #'   repeated design), then the stacked columns. A fold that lacks a column
@@ -97,16 +102,29 @@ collect_inner_metrics.default <- function(x, ...) {
 
 #' @rdname collect_selections
 #' @export
-collect_inner_metrics.nested_results <- function(x, ...) {
+collect_inner_metrics.nested_results <- function(
+  x,
+  ...,
+  type = c("long", "wide")
+) {
   rlang::check_dots_empty()
+  type <- check_metrics_type(type)
   check_any_completed(x, action = "collect")
   warn_partial_summary(x, noun = "table")
-  stack_fold_column(
+  out <- stack_fold_column(
     x,
     ".inner_metrics",
     completed_only = TRUE,
     call = rlang::current_env()
   )
+  # The wide shape is collect_metrics()'s (M149): the inner table holds
+  # tune's summarized columns, so the pivot keeps the fold labels, the
+  # parameters, `.config` and any `.iter` or `.eval_time` as keys, which on
+  # one fold's rows is the key set tune's own pivot uses (GP1).
+  if (identical(type, "wide")) {
+    out <- pivot_metrics_wide(out, call = rlang::current_env())
+  }
+  out
 }
 
 #' @rdname collect_selections

@@ -27,9 +27,10 @@
 #' @param ... Not used, and must be empty.
 #' @param summarize As on [collect_metrics.nested_results()], and for
 #'   `collect_predictions()` as on [collect_predictions.nested_results()].
-#' @param type For `collect_metrics()`, `"long"` (the default) or `"wide"`.
-#'   The wide shape is keyed on `wflow_id` too, and a metric that a workflow
-#'   did not score is `NA` in its rows.
+#' @param type For `collect_metrics()` and `collect_inner_metrics()`,
+#'   `"long"` (the default) or `"wide"`. The wide shape is keyed on
+#'   `wflow_id` too, and a metric that a workflow did not score is `NA` in
+#'   its rows.
 #'
 #' @return A tibble with `wflow_id` first, then the columns that the method
 #'   for one workflow returns, bound in the set's order. A column that one
@@ -83,9 +84,19 @@ collect_selections.nested_results_set <- function(x, ...) {
 
 #' @rdname collect_metrics.nested_results_set
 #' @export
-collect_inner_metrics.nested_results_set <- function(x, ...) {
+collect_inner_metrics.nested_results_set <- function(
+  x,
+  ...,
+  type = c("long", "wide")
+) {
   rlang::check_dots_empty()
-  stack_set(x, collect_inner_metrics, call = rlang::current_env())
+  type <- check_metrics_type(type)
+  # Stacked long and pivoted once, as collect_metrics() does on a set.
+  out <- stack_set(x, collect_inner_metrics, call = rlang::current_env())
+  if (identical(type, "wide")) {
+    out <- pivot_metrics_wide(out, call = rlang::current_env())
+  }
+  out
 }
 
 #' @rdname collect_metrics.nested_results_set
