@@ -48,7 +48,10 @@ test_that("the checker finds an unquoted name and passes a quoted one", {
   names <- c("nestedtune", "tune", "mirai")
   expect_identical(unquoted_names("Tunes with tune.", names), "tune.")
   expect_identical(unquoted_names("Runs on Mirai daemons", names), "Mirai")
-  expect_identical(unquoted_names("Runs with 'mirai' and 'tune'.", names), character())
+  expect_identical(
+    unquoted_names("Runs with 'mirai' and 'tune'.", names),
+    character()
+  )
   # A longer word that holds a name is not the name.
   expect_identical(unquoted_names("finetune tuned", names), character())
 })
