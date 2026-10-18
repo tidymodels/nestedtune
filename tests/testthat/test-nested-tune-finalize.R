@@ -201,6 +201,54 @@ test_that("AC1: every tuner finalizes on the outer fold's analysis rows", {
   expect_frames_are_analysis_rows(record, evaluated, "evaluated outer")
 })
 
+# The exception `?nested_tune_grid` names: tune_bayes() refuses a parameter
+# set with an unknown range rather than finalizing it, so each outer fold
+# fails on tune's own refusal, and no finalizer is ever called.
+test_that("nested_tune_bayes() finalizes no data-dependent range, so every fold fails", {
+  skip_if_no_engines(stochastic = TRUE)
+  skip_if_not_installed("dials")
+
+  d <- finalize_data()
+  nested <- finalize_nested(d)
+  wf <- stoch_workflow(d)
+  record <- new_frame_record()
+
+  set.seed(1)
+  res <- suppressWarnings(suppressMessages(nested_tune_bayes(
+    wf,
+    nested,
+    param_info = frac_param_info(wf, record),
+    iter = 1,
+    initial = 2,
+    metrics = reg_metrics()
+  )))
+
+  expect_false(any(res$.completed))
+  expect_length(record$frames, 0L)
+  notes <- collect_notes(res)
+  expect_setequal(notes$id, nested$id)
+  expect_true(all(notes$location == "inner tuning"))
+  expect_true(all(notes$type == "error"))
+  expect_true(all(grepl("min_n", notes$note, fixed = TRUE)))
+  expect_true(all(grepl("without unknowns", notes$note, fixed = TRUE)))
+
+  # The control: the same range set in `param_info` as a known range runs.
+  known <- update(
+    tune::extract_parameter_set_dials(wf),
+    min_n = dials::min_n(c(2L, 20L))
+  )
+  set.seed(1)
+  ok <- suppressMessages(nested_tune_bayes(
+    wf,
+    nested,
+    param_info = known,
+    iter = 1,
+    initial = 2,
+    metrics = reg_metrics()
+  ))
+  expect_true(all(ok$.completed))
+})
+
 test_that("AC2: every candidate a fold searched lies inside the range its analysis rows finalize", {
   skip_if_no_engines(stochastic = TRUE)
   skip_if_not_installed("dials")

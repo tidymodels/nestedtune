@@ -73,7 +73,10 @@ section_lists <- function(body) {
 # one the criteria name: `tools::Rd2txt_options()` picks it from the locale
 # when tools loads, and a non-UTF-8 runner renders lists with an asterisk.
 rendered_differences <- function(topic) {
-  title <- DIFFERENCES_TITLE[[topic]]
+  rendered_section(topic, DIFFERENCES_TITLE[[topic]])
+}
+
+rendered_section <- function(topic, title) {
   lines <- rlang::with_options(
     utils::capture.output(tools::Rd2txt(
       structure_rd(topic),
@@ -163,4 +166,18 @@ for (topic in names(SETTABLE_ANCHOR)) {
 
 test_that("the grid page's Differences section holds no list", {
   expect_length(section_lists(differences_body("nested_tune_grid")), 0L)
+})
+
+# The section is shared by every loop page, and tune_bayes() is the one tuner
+# that does not finalize a data-dependent range (test-nested-tune-finalize.R).
+test_that("the grid page's finalizing section names the Bayesian exception", {
+  section <- paste(
+    rendered_paragraphs(rendered_section(
+      "nested_tune_grid",
+      "Finalizing a parameter range"
+    )),
+    collapse = " "
+  )
+  expect_match(section, "'nested_tune_bayes()' is the exception", fixed = TRUE)
+  expect_match(section, "set it in 'param_info'", fixed = TRUE)
 })
