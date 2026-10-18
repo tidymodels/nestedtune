@@ -1,4 +1,4 @@
-# nestedtune: Nested Cross-Validation for Tidymodels
+# nestedtune: Nested Cross-Validation for 'tidymodels'
 
 nestedtune runs nested cross-validation with tidymodels objects. Each
 outer fold tunes with tune or finetune on its own inner resamples, or
