@@ -42,8 +42,8 @@ Description:
 ## Acceptance criteria
 
 - [x] AC1: `DESCRIPTION`'s `Title` field reads `Nested Cross-Validation for 'tidymodels'`, and its `Description` field reads the text in this file's Scope word for word, with `DOI` replaced as Scope says, and with line breaks and indentation free.
-- [ ] AC2: In `DESCRIPTION`'s `Title` and `Description` fields, every word that equals, ignoring case, the package's own name or the name of a package in its `Depends`, `Imports` or `Suggests` field (R excepted) is enclosed in single quotes. A word is a maximal run of letters, digits and dots. `tests/testthat/test-description.R` checks this with `read.dcf()` on those fields.
-- [ ] AC3: `devtools::check(remote = TRUE, manual = FALSE)` on the branch head reports 0 errors and 0 warnings, and none of its NOTEs reports an invalid DOI or URL in `DESCRIPTION`.
+- [x] AC2: In `DESCRIPTION`'s `Title` and `Description` fields, every word that equals, ignoring case, the package's own name or the name of a package in its `Depends`, `Imports` or `Suggests` field (R excepted) is enclosed in single quotes. A word is a maximal run of letters, digits and dots. `tests/testthat/test-description.R` checks this with `read.dcf()` on those fields.
+- [x] AC3: `devtools::check(remote = TRUE, manual = FALSE)` on the branch head reports 0 errors and 0 warnings, and none of its NOTEs reports an invalid DOI or URL in `DESCRIPTION`.
 
 ## Coverage
 
@@ -80,7 +80,9 @@ Description:
 Review pass 1, 2026-10-17, at `e15b7bc`.
 
 - AC1: a script compared `DESCRIPTION`'s fields with this file's Scope text, whitespace-normalized and with `DOI` replaced by `cairn/references/varma2006.md`'s DOI. Title and Description both matched. A control copy with "row indices" changed to "row numbers" did not match.
-- AC2: `test-description.R` passed (7 expectations) on the head. Its checker, run on the 33 declared names (the package, 9 Imports and 23 Suggests), found no unquoted name in either field. The same checker on `main`'s fields found `Tidymodels` in Title and `tidymodels` in Description. The test also passed inside `R CMD check`, where it reads the installed `DESCRIPTION` (AC3's run).
+- AC2: `test-description.R` passed (7 expectations) on the head. Its checker, run on the 33 declared names (the package, 9 Imports and 23 Suggests), found no unquoted name in either field. The same checker on `main`'s fields found `Tidymodels` in Title and `tidymodels` in Description. The test also passed inside `R CMD check`, where it reads the installed `DESCRIPTION` (AC3's run, whose tests step reported OK).
+- AC3: `devtools::check(remote = TRUE, manual = FALSE)` at `e15b7bc` gave 0 errors, 0 warnings and 1 NOTE, the CRAN incoming feasibility NOTE: the maintainer line, "New submission" and "Version contains large components (0.0.0.9000)". No NOTE named a DOI, a URL or a misspelled word. `DESCRIPTION` is unchanged from `e15b7bc` to the review head.
+- Consistency gate: `cairn_validate.py` passed. The same check run is the profile's full check (0 errors, 0 warnings, and the incoming NOTE, which the release's version bump and first submission account for). All six gating prose sweeps were clean. No new top-level file. No NEWS entry, by the plan's decision: the two fields describe the package and change no behavior.
 - spawned: diff-bug, blame-history, prior-review
 - diff-bug #1: `tune` inside `tune_grid()` and `rsample` inside `rsample::nested_cv()` count as bare names, since a word excludes `_` and `:` — follow-up, new candidate row "DESCRIPTION quoting test word rules". AC2's own word definition makes this the required behavior, and the current text has no such case.
 - diff-bug #2: Suggests names that are common words (`survival`, `censored`, `recipes`, `tailor`, `dials`) would demand wrong quotes in later prose — follow-up, same row. It is the plan gate's recorded falsifier.
