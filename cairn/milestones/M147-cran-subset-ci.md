@@ -52,6 +52,7 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 - 2026-10-18: T2 and T3 done. Full `devtools::test()` clean (no failures, no skips), `air format --check .` clean, `test-ci-workflows.R` and `ci-usage.py`'s reader pass on the final file set, and `git diff main` shows only comment lines changed in `R-CMD-check.yaml` and `R-CMD-check-hard.yaml`. The hard header's claim that tune imports Suggests was read from `packageDescription("tune")` (dials, recipes, tailor, tibble). `R-CMD-check.yaml`'s vignette paragraph now names the new Suggests job as a third place the vignettes run.
 - 2026-10-18: T4 done. Local `R CMD build` then `R CMD check --as-cran --no-manual` at cf3c02a6 with `NOT_CRAN=false` and no `NESTEDTUNE_FULL_SUITE`. With the Suggests: vignettes built and re-built, status 1 NOTE (CRAN incoming feasibility: new submission, dev version, a check CI turns off), testthat FAIL 0, SKIP 121, PASS 7704, 52 skips with the smoke-layer reason. Hard-only library (pak `dependencies = NA` into a separate library, plus R's own library, which also holds pkgload): the first run stopped at "Packages suggested but not available", because `check-r-package` sets `_R_CHECK_FORCE_SUGGESTS_` and `_R_CHECK_CRAN_INCOMING_` to false when unset and the local run did not. Rerun with both false: status OK, FAIL 0, SKIP 225, PASS 5206, 52 skips with the smoke-layer reason.
 - 2026-10-18: claim audit: not owed — internal tier.
+- 2026-10-18: step-7 approval: m147-cran-subset-ci approved for merge
 
 ## Decisions
 
