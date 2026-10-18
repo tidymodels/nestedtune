@@ -19,9 +19,9 @@ nested_tune_sim_anneal(object, ...)
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 )
 
@@ -32,9 +32,9 @@ nested_tune_sim_anneal(object, ...)
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 )
 }
@@ -66,16 +66,16 @@ each fold's candidate, so put the metric you report first. The Bayes,
 race and annealing searches also steer on it. Every metric is scored on
 the outer folds.}
 
-\item{initial}{The number of candidates each fold scores before the first
-iteration, a whole number of at least 1. A \code{tune_results} object is an
-error, because one tuning run cannot serve every outer fold.}
-
 \item{event_level}{\code{"first"} (the default) or \code{"second"}. It names which
 level of a two-class outcome is the event. It applies to the inner tuning run and the outer scoring fit alike.}
 
 \item{eval_time}{A numeric vector of evaluation times for a censored
 regression model, or \code{NULL} (the default) to leave the choice to tune.
 Times that are not numeric, empty, missing, negative or not finite are an error. Zero, repeated and unordered times are passed on to tune.}
+
+\item{initial}{The number of candidates each fold scores before the first
+iteration, a whole number of at least 1. A \code{tune_results} object is an
+error, because one tuning run cannot serve every outer fold.}
 
 \item{select}{A \code{\link[=selection_rule]{selection_rule()}} that each outer fold uses to pick its
 candidate. The default is \code{\link[tune:select_best]{tune::select_best()}} on the first metric.}

@@ -2105,6 +2105,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** these two jobs run the CRAN subset, with the Suggests and with the hard dependencies only, on every pull request. Every other CI job that runs the tests keeps `NOT_CRAN` true and runs the full suite. The jobs live in their own file so `R-CMD-check.yaml` keeps one vignette leg and one `NESTEDTUNE_FULL_SUITE` line (D-076). Rejected: new legs in `R-CMD-check.yaml`, because `test-ci-workflows.R` and D-076 pin that file's vignette leg and switch line.
 **Consequences:** a test that fails only when `skip_heavy_on_cran()` skips its neighbours now fails on a pull request. A vignette failure under `R CMD check` with the Suggests is caught on ubuntu as well as macOS. Falsified by the new file's triggers drifting from the other check workflows unnoticed. (Narrows M118's every-job-full-suite statement, and corrects D-077's Decision and Consequences on where the vignettes run in full.)
 
+### D-117 (2026-10-18): `nested_tune_bayes()` and `nested_tune_sim_anneal()` put `eval_time` before `objective` and `initial`, in tune's and finetune's order. Narrows D-069's clause that the `workflow` method keeps each function's current formals
+
+**Context:** M148 set each export's arguments beside its counterpart's. On these two functions, the arguments after `...` that tune or finetune also has were in another order, and no decision chose that order. D-069 kept each function's formals when the orchestrators became generics, so that no documented call broke.
+**Decision:** the `workflow` and `model_spec` methods order those shared arguments as `tune_bayes()` and `tune_sim_anneal()` do. `event_level` stays after `metrics`, as on the grid methods, and `select` stays last. Names and defaults do not change. Rejected: reordering the `model_spec` methods only, which leaves the two methods of one function in different orders where `test-dots-barrier.R` holds them equal apart from `preprocessor`.
+**Consequences:** no call changes, because R matches an argument after `...` by its full name only. D-069's argument names, defaults and argument set stand. A later change to the order in tune or finetune fails `test-argument-order.R`, which CRAN skips. Falsified by a caller or tool that reads these formals by position. (Narrows D-069.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
