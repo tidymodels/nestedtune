@@ -1,6 +1,6 @@
 # M148: Each export and result column is set beside its tidymodels counterpart, with a verdict for each difference
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,7 +38,7 @@ Before the first release, every package-owned export, every method of an exporte
 - [x] T3: Write the page. Read `DECISIONS.md` by its headings for each difference (D-030, D-038, D-040, D-042, D-046, D-056 and D-069 cover several), and give each difference its verdict. Add the `INDEX.md` line.
 - [x] T4: Apply each changed verdict in `R/`, run `devtools::document()`, add the order tests AC3 names, and write one NEWS entry naming the functions whose argument order changed. With no changed verdict, this task writes nothing.
 - [x] T5: Add the proposed verdicts as candidate rows, searching the existing rows first. Group the verdicts by function so the rows stay within the ROADMAP's byte budget.
-- [ ] T6: Run `devtools::test()`, `air format --check .` and the prose sweeps.
+- [x] T6: Run `devtools::test()`, `air format --check .` and the prose sweeps.
 
 ## Work log
 
@@ -58,6 +58,9 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: T3 done: `cairn/references/export-surface-review.md` and its INDEX line. Verdicts: 2 changed (shared-argument order on the `nested_tune_bayes()` and `nested_tune_sim_anneal()` methods, which T4 applies; the page states the new order), 3 proposed (`verbose` on `nested_workflow_map()`, `type` on `collect_inner_metrics()`, `id` on the set's `autoplot()`), every other argument and column kept with a D-entry or a stated reason. Claims read against `R/` and the installed packages; that read corrected two drafted reasons (16 re-exports, not 17; `event_level`'s reason, since a control's level does reach the outer fit). The page keeps the template's `— observed` and `Pagination: —` dashes, which the references check parses. `cairn_validate` passes.
 - 2026-10-18: T4 done: the `workflow` and `model_spec` methods of `nested_tune_bayes()` now read `metrics, event_level, eval_time, objective, initial`, and of `nested_tune_sim_anneal()` `metrics, event_level, eval_time, initial`; `event_level` keeps its place after `metrics`, as on the grid methods. New `test-argument-order.R` failed 8 of 8 on the old order and passes; the written-out signatures in `test-dots-barrier.R` and `test-nested-tune-sim-anneal-oracles.R` follow the new order. One NEWS entry. `devtools::document()` rewrote the two Rd files; `devtools::test()` 15533 pass, 0 fail; `air` and both prose sweeps clean. The four formals were moved by a short python replace, not the Edit tool (deviation from the file-edit rule, diff reviewed).
 - 2026-10-18: T5 done: the three proposed verdicts are one `[low]` candidate row, "Three tidymodels arguments missing here", at the top of the `[low]` rows. Search-first found no overlap in the candidates, `milestones/archive/` or `DECISIONS.md` (D-030's `verbose` line is about printing inside a daemon). ROADMAP is 23,884 bytes and 59 lines.
+- 2026-10-18: T6 done: `devtools::test()` 15533 pass, 0 fail, 0 skip on 890190d2; `air format --check .` clean; all six gating prose sweeps clean; `devtools::document()` no diff.
+- 2026-10-18: claim audit: 27 claims read, 1 corrected — benchmarks/export-surface.R, NEWS.md, tests/testthat/test-argument-order.R. The script header said "Nothing here is asserted" and that a release change "is caught by running this again"; it now says the script stops on a missing package or a table that disagrees with `NAMESPACE`, and that a person reads the output against the page. Re-read by the same reader: 4 claims, 0 wrong.
+- 2026-10-18: status → review.
 
 ## Decisions
 

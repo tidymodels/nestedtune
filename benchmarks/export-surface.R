@@ -19,9 +19,12 @@
 # inner resamples of outer fold 1, and prints the column names one result has
 # and the other lacks.
 #
-# Nothing here is asserted. The verdict on each difference is in
-# cairn/references/export-surface-review.md. A package or upstream release
-# that changes an answer is caught by running this again.
+# The script stops on a missing package, and when the pairing table and
+# `NAMESPACE` name different items. It asserts nothing about the differences
+# it prints. The verdict on each difference is in
+# cairn/references/export-surface-review.md. After a package or upstream
+# release, run this again and read its output against that page; nothing
+# compares the two automatically.
 
 stopifnot(
   requireNamespace("pkgload", quietly = TRUE),
