@@ -225,6 +225,8 @@ tested on.</p>
 
 <p>A range that depends on the data, such as <code>mtry()</code>, is finalized on each
 outer fold's analysis set, never on the rows that fold holds out.
+<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> is the exception: <code><a href="https://tune.tidymodels.org/reference/tune_bayes.html" class="external-link">tune::tune_bayes()</a></code> does not
+finalize such a range, so set it in <code>param_info</code>, or every fold fails.
 <code><a href="nested_final_fit.html">nested_final_fit()</a></code> finalizes it on all the data. A range set in
 <code>param_info</code> applies to every fold.</p>
     </div>

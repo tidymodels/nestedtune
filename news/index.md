@@ -2,6 +2,14 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  no longer says that every loop function finalizes a range that depends
+  on the data, such as `mtry()`.
+  [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  does not, because
+  [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
+  does not. Set the range in `param_info`, or every fold fails.
+
 - [`vignette("estimate")`](https://nestedtune.tidymodels.org/articles/estimate.md),
   [`vignette("tuners")`](https://nestedtune.tidymodels.org/articles/tuners.md),
   [`vignette("results")`](https://nestedtune.tidymodels.org/articles/results.md)
