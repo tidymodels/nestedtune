@@ -55,7 +55,7 @@ Description:
 
 - [x] T1: Write `tests/testthat/test-description.R`. It reads the source tree's `DESCRIPTION` when one is there and the installed package's otherwise, builds the name set from `Depends`, `Imports`, `Suggests` and `Package`, and fails on any unquoted word in that set. Confirm it fails on today's text (`tidymodels` unquoted), and on a copy with one planted unquoted name in each field.
 - [x] T2: Replace the two fields with the Scope text. Run the new test, `devtools::test()` and `devtools::check()`.
-- [ ] T3: Run `devtools::check(remote = TRUE, manual = FALSE)` and note each `DESCRIPTION` NOTE in the work log, the possibly misspelled words included.
+- [x] T3: Run `devtools::check(remote = TRUE, manual = FALSE)` and note each `DESCRIPTION` NOTE in the work log, the possibly misspelled words included.
 
 ## Work log
 
@@ -68,6 +68,7 @@ Description:
 - 2026-10-17: inbox sweep: 1 open issue (#91, the maintainers' pass over the guides), no overlap with this milestone.
 - 2026-10-17: checkpoint, T1 and T2 written and not yet ticked. `test-description.R` failed on the old fields (`Tidymodels` and `tidymodels` unquoted) and passes on the new ones. Its checker self-test plants unquoted names. Words with trailing dots are also matched with the dots dropped, which checks more than AC2 asks. `man/nestedtune-package.Rd` is regenerated for the new Title. The full suite and `devtools::check()` are running.
 - 2026-10-17: T1 and T2 done. `devtools::test()` passed with no failures and no skips. `devtools::check(manual = FALSE)` gave 0 errors, 0 warnings and 0 notes. `air format` reflowed one call in the new test.
+- 2026-10-17: T3 done at `309142f`. `devtools::check(remote = TRUE, manual = FALSE)` gave 0 errors, 0 warnings and 1 NOTE, the CRAN incoming feasibility NOTE. It names the maintainer, "New submission" and "Version contains large components (0.0.0.9000)", and no DOI, URL or misspelled word. The version line goes away at the release walk's version bump.
 
 ## Decisions
 
