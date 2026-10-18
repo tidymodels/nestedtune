@@ -66,6 +66,7 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: minor amendment: T7 added for review return 1, Coverage AC1 → T1, T3, T7.
 - 2026-10-18: T7 done: the page's "Every item and its counterpart" table, 75 rows built from the script's Part 1 output at 890190d2. A check of one row per item with the printed counterpart found 0 wrong or missing (56 missing before). No code changed, and the branch adds no lines outside `cairn/` since the claim audit. `cairn_validate` passes. Status → review.
 - 2026-10-18: review pass 2 settled 15 findings: 9 fix now, 1 follow-up, 5 rejected. D-117 written (narrows D-069). The candidate row is retitled "Argument gaps beside tidymodels" and holds the uncompared defaults. ROADMAP 23,931 bytes.
+- 2026-10-18: step-7 approval: m148-export-review approved for merge
 
 ## Decisions
 
