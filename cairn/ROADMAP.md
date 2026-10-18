@@ -1,12 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) by ownership (D-061) and 2026-09-10 (M78) by planner test (pkgdown.yaml comment). Merged 2026-09-03 (M57) into 2026-07-27 (M14). Compressed nine (M04, M05/M54, M12, M16, M33, M42, M50, M51, M81). No decision entry. Validate green._
+_Last hygiene check: 2026-10-17 M146 done. Archived M146, pruned M143's row, added the "DESCRIPTION quoting test word rules" row. No lesson added or retired. Validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | review | — | normal | milestones/M146-description-text.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | planned | — | normal | milestones/M147-cran-subset-ci.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | planned | — | normal | milestones/M148-export-review.md |
+| M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | done | — | normal | milestones/archive/M146-description-text.md |
 | M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |
 | M144 | The help pages for reading results read like tune's | done | M142 | normal | milestones/archive/M144-tune-style-reader-pages.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
