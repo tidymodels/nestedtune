@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-18 M147 done. Archived M147, pruned M144's row, cor
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M148 | Each export and result column is set beside its tidymodels counterpart | review | — | normal | milestones/M148-export-review.md |
+| M148 | Each export and result column is set beside its tidymodels counterpart | in-progress | — | normal | milestones/M148-export-review.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | done | — | normal | milestones/archive/M147-cran-subset-ci.md |
 | M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | done | — | normal | milestones/archive/M146-description-text.md |
 | M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |

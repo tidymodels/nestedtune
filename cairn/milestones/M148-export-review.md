@@ -1,6 +1,6 @@
 # M148: Each export and result column is set beside its tidymodels counterpart, with a verdict for each difference
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -61,6 +61,7 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: T6 done: `devtools::test()` 15533 pass, 0 fail, 0 skip on 890190d2; `air format --check .` clean; all six gating prose sweeps clean; `devtools::document()` no diff.
 - 2026-10-18: claim audit: 27 claims read, 1 corrected — benchmarks/export-surface.R, NEWS.md, tests/testthat/test-argument-order.R. The script header said "Nothing here is asserted" and that a release change "is caught by running this again"; it now says the script stops on a missing package or a table that disagrees with `NAMESPACE`, and that a person reads the output against the page. Re-read by the same reader: 4 claims, 0 wrong.
 - 2026-10-18: status → review.
+- 2026-10-18: review return 1: AC1 fails as written. It asks the page to name each item's counterpart or none, and 56 of the script's 75 items (for example `extract_mold.nested_final_fit`, `nested_tune_grid.workflow`, `collect_notes.nested_results_set`) are named on the page only through a grouping rule, not one by one. Argument verdicts are complete (20 one-side arguments, each in a verdict row). Fix: a pairing table on the page with one row per item and its counterpart or none.
 
 ## Decisions
 
