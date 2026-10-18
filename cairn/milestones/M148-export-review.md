@@ -35,7 +35,7 @@ Before the first release, every package-owned export, every method of an exporte
 
 - [x] T1: Write the first half of `benchmarks/export-surface.R`: read `export()` and `S3method()` lines from `NAMESPACE`, keep the domain AC1 names, pair each item with its counterpart through a table in the script, and print each pair's missing arguments and order differences among shared arguments.
 - [x] T2: Write the column half: the six workflow methods and `nested_workflow_map()` on a small fixture with `save_pred = TRUE` and an `extract` function, each counterpart on the inner resamples of outer fold 1 with the same control, and the column-name differences printed.
-- [ ] T3: Write the page. Read `DECISIONS.md` by its headings for each difference (D-030, D-038, D-040, D-042, D-046, D-056 and D-069 cover several), and give each difference its verdict. Add the `INDEX.md` line.
+- [x] T3: Write the page. Read `DECISIONS.md` by its headings for each difference (D-030, D-038, D-040, D-042, D-046, D-056 and D-069 cover several), and give each difference its verdict. Add the `INDEX.md` line.
 - [ ] T4: Apply each changed verdict in `R/`, run `devtools::document()`, add the order tests AC3 names, and write one NEWS entry naming the functions whose argument order changed. With no changed verdict, this task writes nothing.
 - [ ] T5: Add the proposed verdicts as candidate rows, searching the existing rows first. Group the verdicts by function so the rows stay within the ROADMAP's byte budget.
 - [ ] T6: Run `devtools::test()`, `air format --check .` and the prose sweeps.
@@ -55,6 +55,7 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: T1 done: 16 functions and 59 methods read from `NAMESPACE`, 22 pairs differ (tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1, hardhat 1.4.3); `air format --check .` clean.
 - 2026-10-18: choice: the column fixture is mtcars with a tuned `step_pca()` ahead of `linear_reg()` (deterministic, 15 s for the whole script), 3 outer and 4 inner folds so the races have a burn-in, `num_comp` in 1 to 8 so the Bayesian search has candidates left; `nested_fit_resamples()` takes an untuned two-predictor workflow; the set comparison also reads `result[[1]]`.
 - 2026-10-18: T2 done: all seven runs complete; each nested result adds `.selected`, `.inner_metrics`, `.completed`, `.tuning_seed`, `.outer_fit_seed`, and lacks `.iter` (Bayes, annealing) or `.order` (races); the set adds `workflow` and lacks `info`, `option`.
+- 2026-10-18: T3 done: `cairn/references/export-surface-review.md` and its INDEX line. Verdicts: 2 changed (shared-argument order on the `nested_tune_bayes()` and `nested_tune_sim_anneal()` methods, which T4 applies; the page states the new order), 3 proposed (`verbose` on `nested_workflow_map()`, `type` on `collect_inner_metrics()`, `id` on the set's `autoplot()`), every other argument and column kept with a D-entry or a stated reason. Claims read against `R/` and the installed packages; that read corrected two drafted reasons (16 re-exports, not 17; `event_level`'s reason, since a control's level does reach the outer fit). The page keeps the template's `— observed` and `Pagination: —` dashes, which the references check parses. `cairn_validate` passes.
 
 ## Decisions
 
