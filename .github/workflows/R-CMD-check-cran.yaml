@@ -87,3 +87,53 @@ jobs:
           snapshot-artifact-name: cran-suggests-testthat-snapshots
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
           args: 'c("--no-manual","--as-cran")'
+
+  # Modeled on `R-CMD-check-hard.yaml`'s `check-no-suggests`, as CRAN's
+  # noSuggests check is on its main check: the setup step names only the
+  # hard dependencies and rcmdcheck, testthat, knitr and rmarkdown, and the
+  # cache is never used, so no cached Suggests can be restored. Packages that
+  # the hard dependencies themselves import are still installed.
+  check-cran-no-suggests:
+    runs-on: ubuntu-latest
+    # Set as in `R-CMD-check-hard.yaml`: that job's last measured green run
+    # took 12m09s end to end (job 100897115868 of run 33832117316,
+    # 2026-09-04) with the same setup and more tests, so 30 is about 2.5x it.
+    timeout-minutes: 30
+
+    name: CRAN conditions, without Suggests
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      TESTTHAT_CPUS: 4
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          cache: false
+          extra-packages: |
+            any::rcmdcheck
+            any::testthat
+            any::knitr
+            any::rmarkdown
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        env:
+          NOT_CRAN: false
+        with:
+          upload-results: true
+          upload-snapshots: true
+          artifact-name: cran-no-suggests-results
+          snapshot-artifact-name: cran-no-suggests-testthat-snapshots
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          args: 'c("--no-manual","--as-cran")'

@@ -48,6 +48,7 @@ Two CI jobs run `R CMD check --as-cran` with `NOT_CRAN` false, so the test subse
 - 2026-10-17: inbox sweep: 1 open issue (#91), no overlap with this milestone.
 - 2026-10-18: implement started; branch m147-cran-subset-ci cut from main at 1e1cb499.
 - 2026-10-18: T1 done. `R-CMD-check-cran.yaml` with job `check-cran-suggests`: ubuntu release, P3M binaries, default `dependencies`, step-level `NOT_CRAN: false`, explicit `--as-cran` args, vignettes built and checked, 30-minute cap from the hard job's run plus the measured vignette cost. Choices: own `artifact-name` and `snapshot-artifact-name`, because both jobs share matrix-free index 0 and the action's default names would collide; no `concurrency` block, matching `R-CMD-check-hard.yaml`. `ci-usage.py`'s reader accepts the new file's lists.
+- 2026-10-18: checkpoint, T2 and T3 not yet ticked. T2's job `check-cran-no-suggests` is written, and `test-ci-workflows.R` gains `job_lines()` and a test that both CRAN jobs set no `NESTEDTUNE_FULL_SUITE` and set `NOT_CRAN: false` and `--as-cran` on their check step (planted `true`, a removed line and an added switch each read wrong). T3's comment edits are written in `helper-cran.R`, both existing workflows and PROFILE.md. The full `devtools::test()` run is still going.
 
 ## Decisions
 

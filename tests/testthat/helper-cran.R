@@ -8,8 +8,11 @@
 # milestone record lists it file by file.
 #
 # `NOT_CRAN` set to true runs every test. `devtools::test()` sets it, and so
-# does `r-lib/actions/setup-r` in every CI job, so both run the full suite.
-# `NESTEDTUNE_FULL_SUITE=true` runs these tests with `NOT_CRAN` unset, for
+# does `r-lib/actions/setup-r` in every CI job. The two jobs in
+# `.github/workflows/R-CMD-check-cran.yaml` set it back to false for their
+# check step, so they run the smoke layer alone, one with the Suggests
+# installed and one without. The other CI jobs that run the tests run the full
+# suite. `NESTEDTUNE_FULL_SUITE=true` runs these tests with `NOT_CRAN` unset, for
 # example in a hand-run `R CMD check` that should still skip the tests
 # `skip_on_cran()` guards. Either variable counts when `as.logical()` reads it
 # as TRUE, so "true", "TRUE" and "T" all work.

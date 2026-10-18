@@ -29,6 +29,17 @@ workflow_path <- function(name) {
 # carrying no value -- above it, `on:`'s `push:` and `pull_request:` look
 # identical, which is why the search starts there and not at line one.
 job_uses <- function(path, job) {
+  block <- job_lines(path, job)
+  if (is.null(block)) {
+    return(NULL)
+  }
+  hits <- grep("^\\s*(- )?uses:\\s*\\S+", block, value = TRUE)
+  trimws(sub("^\\s*(- )?uses:\\s*", "", hits))
+}
+
+# The lines of one job, from its header to the line before the next job's, or
+# NULL when the file has no such job.
+job_lines <- function(path, job) {
   lines <- readLines(path, warn = FALSE)
 
   jobs_at <- grep("^jobs:\\s*$", lines)
@@ -43,9 +54,7 @@ job_uses <- function(path, job) {
   later <- headers[headers > start]
   end <- if (length(later)) later[[1]] - 1L else length(lines)
 
-  block <- lines[start:end]
-  hits <- grep("^\\s*(- )?uses:\\s*\\S+", block, value = TRUE)
-  trimws(sub("^\\s*(- )?uses:\\s*", "", hits))
+  lines[start:end]
 }
 
 test_that("the pkgdown deploy job checks out before it deploys", {
@@ -197,4 +206,29 @@ test_that("full_suite_lines() reads setting lines and not comments", {
   )
   expect_identical(full_suite_lines(lines), "      NESTEDTUNE_FULL_SUITE: true")
   expect_length(full_suite_lines(lines[-3]), 0L)
+})
+
+# The two CRAN-condition jobs run only the smoke layer: neither sets the
+# switch, and each check step sets `NOT_CRAN` back to false after `setup-r`
+# set it to true. `args` is written out so `--as-cran` stays even if the
+# action's default changes.
+test_that("R-CMD-check-cran.yaml checks with NOT_CRAN false in both jobs", {
+  path <- workflow_path("R-CMD-check-cran.yaml")
+  skip_if_not(
+    file.exists(path),
+    "workflow sources are not in the built package"
+  )
+
+  expect_length(full_suite_lines(readLines(path, warn = FALSE)), 0L)
+
+  anchor <- "uses: r-lib/actions/check-r-package@"
+  for (job in c("check-cran-suggests", "check-cran-no-suggests")) {
+    block <- job_lines(path, job)
+    expect_false(is.null(block))
+    expect_identical(step_value(block, anchor, "NOT_CRAN"), "false")
+    expect_identical(
+      step_value(block, anchor, "args"),
+      "'c(\"--no-manual\",\"--as-cran\")'"
+    )
+  }
 })
