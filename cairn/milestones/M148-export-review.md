@@ -1,6 +1,6 @@
 # M148: Each export and result column is set beside its tidymodels counterpart, with a verdict for each difference
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -27,7 +27,7 @@ Before the first release, every package-owned export, every method of an exporte
 
 ## Coverage
 
-- AC1 → T1, T3
+- AC1 → T1, T3, T7
 - AC2 → T2, T3
 - AC3 → T4, T6
 
@@ -39,6 +39,7 @@ Before the first release, every package-owned export, every method of an exporte
 - [x] T4: Apply each changed verdict in `R/`, run `devtools::document()`, add the order tests AC3 names, and write one NEWS entry naming the functions whose argument order changed. With no changed verdict, this task writes nothing.
 - [x] T5: Add the proposed verdicts as candidate rows, searching the existing rows first. Group the verdicts by function so the rows stay within the ROADMAP's byte budget.
 - [x] T6: Run `devtools::test()`, `air format --check .` and the prose sweeps.
+- [x] T7: Add a pairing table to the page, one row per item the script reads, naming its counterpart or none (review return 1).
 
 ## Work log
 
@@ -62,6 +63,8 @@ Before the first release, every package-owned export, every method of an exporte
 - 2026-10-18: claim audit: 27 claims read, 1 corrected — benchmarks/export-surface.R, NEWS.md, tests/testthat/test-argument-order.R. The script header said "Nothing here is asserted" and that a release change "is caught by running this again"; it now says the script stops on a missing package or a table that disagrees with `NAMESPACE`, and that a person reads the output against the page. Re-read by the same reader: 4 claims, 0 wrong.
 - 2026-10-18: status → review.
 - 2026-10-18: review return 1: AC1 fails as written. It asks the page to name each item's counterpart or none, and 56 of the script's 75 items (for example `extract_mold.nested_final_fit`, `nested_tune_grid.workflow`, `collect_notes.nested_results_set`) are named on the page only through a grouping rule, not one by one. Argument verdicts are complete (20 one-side arguments, each in a verdict row). Fix: a pairing table on the page with one row per item and its counterpart or none.
+- 2026-10-18: minor amendment: T7 added for review return 1, Coverage AC1 → T1, T3, T7.
+- 2026-10-18: T7 done: the page's "Every item and its counterpart" table, 75 rows built from the script's Part 1 output at 890190d2. A check of one row per item with the printed counterpart found 0 wrong or missing (56 missing before). No code changed, and the branch adds no lines outside `cairn/` since the claim audit. `cairn_validate` passes. Status → review.
 
 ## Decisions
 

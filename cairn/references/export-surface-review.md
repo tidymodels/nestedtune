@@ -39,6 +39,88 @@ These pairs have the same arguments in the same order:
 - `extract_workflow()` on `nested_final_fit` and on `nested_results_set`,
 - the seven other `nested_final_fit` extractors, and `outcome_names()`.
 
+### Every item and its counterpart
+
+The table has one row for each of the 75 items the script reads, in the order it prints them. It names the counterpart, or none.
+
+| Item | Counterpart | Arguments |
+|---|---|---|
+| `agreement()` | none | no pair |
+| `collect_inner_metrics()` | none | no pair |
+| `collect_selections()` | none | no pair |
+| `extract_procedure()` | none | no pair |
+| `extract_scored_candidates()` | none | no pair |
+| `extract_tune_results()` | none | no pair |
+| `nested_final_fit()` | `tune::fit_best.tune_results()` | differ, see below |
+| `nested_fit_resamples()` | `tune::fit_resamples()` | same |
+| `nested_resamples()` | none | no pair |
+| `nested_tune_bayes()` | `tune::tune_bayes()` | same |
+| `nested_tune_grid()` | `tune::tune_grid()` | same |
+| `nested_tune_race_anova()` | `finetune::tune_race_anova()` | same |
+| `nested_tune_race_win_loss()` | `finetune::tune_race_win_loss()` | same |
+| `nested_tune_sim_anneal()` | `finetune::tune_sim_anneal()` | same |
+| `nested_workflow_map()` | `workflowsets::workflow_map()` | differ, see below |
+| `selection_rule()` | none | no pair |
+| `agreement.default()` | none | no pair |
+| `agreement.nested_results()` | none | no pair |
+| `agreement.nested_results_set()` | none | no pair |
+| `augment.nested_final_fit()` | none | no pair |
+| `augment.nested_results()` | `tune::augment.tune_results()` | differ, see below |
+| `augment.nested_results_set()` | none | no pair |
+| `autoplot.nested_results()` | `tune::autoplot.tune_results()` | differ, see below |
+| `autoplot.nested_results_set()` | `workflowsets::autoplot.workflow_set()` | differ, see below |
+| `collect_extracts.nested_results()` | `tune::collect_extracts.tune_results()` | same |
+| `collect_extracts.nested_results_set()` | `workflowsets::collect_extracts.workflow_set()` | same |
+| `collect_inner_metrics.default()` | none | no pair |
+| `collect_inner_metrics.nested_results()` | `tune::collect_metrics.tune_results()` | differ, see below |
+| `collect_inner_metrics.nested_results_set()` | `workflowsets::collect_metrics.workflow_set()` | differ, see below |
+| `collect_metrics.nested_results()` | `tune::collect_metrics.tune_results()` | same |
+| `collect_metrics.nested_results_set()` | `workflowsets::collect_metrics.workflow_set()` | differ, see below |
+| `collect_notes.nested_results()` | `tune::collect_notes.tune_results()` | same |
+| `collect_notes.nested_results_set()` | `workflowsets::collect_notes.workflow_set()` | same |
+| `collect_predictions.nested_results()` | `tune::collect_predictions.tune_results()` | differ, see below |
+| `collect_predictions.nested_results_set()` | `workflowsets::collect_predictions.workflow_set()` | differ, see below |
+| `collect_selections.default()` | none | no pair |
+| `collect_selections.nested_results()` | none | no pair |
+| `collect_selections.nested_results_set()` | none | no pair |
+| `compute_metrics.nested_results()` | `tune::compute_metrics.tune_results()` | same |
+| `compute_metrics.nested_results_set()` | none | no pair |
+| `extract_fit_engine.nested_final_fit()` | `tune::extract_fit_engine.tune_results()` | same |
+| `extract_fit_parsnip.nested_final_fit()` | `tune::extract_fit_parsnip.tune_results()` | same |
+| `extract_mold.nested_final_fit()` | `tune::extract_mold.tune_results()` | same |
+| `extract_parameter_set_dials.nested_final_fit()` | `hardhat::extract_parameter_set_dials()` | same |
+| `extract_preprocessor.nested_final_fit()` | `tune::extract_preprocessor.tune_results()` | same |
+| `extract_procedure.default()` | none | no pair |
+| `extract_procedure.nested_final_fit()` | none | no pair |
+| `extract_procedure.nested_results()` | none | no pair |
+| `extract_recipe.nested_final_fit()` | `tune::extract_recipe.tune_results()` | same |
+| `extract_scored_candidates.default()` | none | no pair |
+| `extract_scored_candidates.nested_final_fit()` | none | no pair |
+| `extract_spec_parsnip.nested_final_fit()` | `tune::extract_spec_parsnip.tune_results()` | same |
+| `extract_tune_results.default()` | none | no pair |
+| `extract_tune_results.nested_final_fit()` | none | no pair |
+| `extract_workflow.nested_final_fit()` | `tune::extract_workflow.tune_results()` | same |
+| `extract_workflow.nested_results_set()` | `workflowsets::extract_workflow.workflow_set()` | same |
+| `nested_fit_resamples.default()` | `tune::fit_resamples.default()` | same |
+| `nested_fit_resamples.model_spec()` | `tune::fit_resamples.model_spec()` | differ, see below |
+| `nested_fit_resamples.workflow()` | `tune::fit_resamples.workflow()` | differ, see below |
+| `nested_tune_bayes.default()` | `tune::tune_bayes.default()` | same |
+| `nested_tune_bayes.model_spec()` | `tune::tune_bayes.model_spec()` | differ, see below |
+| `nested_tune_bayes.workflow()` | `tune::tune_bayes.workflow()` | differ, see below |
+| `nested_tune_grid.default()` | `tune::tune_grid.default()` | same |
+| `nested_tune_grid.model_spec()` | `tune::tune_grid.model_spec()` | differ, see below |
+| `nested_tune_grid.workflow()` | `tune::tune_grid.workflow()` | differ, see below |
+| `nested_tune_race_anova.default()` | `finetune::tune_race_anova.default()` | same |
+| `nested_tune_race_anova.model_spec()` | `finetune::tune_race_anova.model_spec()` | differ, see below |
+| `nested_tune_race_anova.workflow()` | `finetune::tune_race_anova.workflow()` | differ, see below |
+| `nested_tune_race_win_loss.default()` | `finetune::tune_race_win_loss.default()` | same |
+| `nested_tune_race_win_loss.model_spec()` | `finetune::tune_race_win_loss.model_spec()` | differ, see below |
+| `nested_tune_race_win_loss.workflow()` | `finetune::tune_race_win_loss.workflow()` | differ, see below |
+| `nested_tune_sim_anneal.default()` | `finetune::tune_sim_anneal.default()` | same |
+| `nested_tune_sim_anneal.model_spec()` | `finetune::tune_sim_anneal.model_spec()` | differ, see below |
+| `nested_tune_sim_anneal.workflow()` | `finetune::tune_sim_anneal.workflow()` | differ, see below |
+| `outcome_names.nested_final_fit()` | `tune::outcome_names.tune_results()` | same |
+
 ## Argument verdicts
 
 ### The orchestrators
