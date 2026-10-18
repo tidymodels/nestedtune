@@ -2,6 +2,16 @@
 
 ## nestedtune 0.0.0.9000
 
+- [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
+  and
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  now list `eval_time` before `objective` and `initial`, in the order
+  [`tune::tune_bayes()`](https://tune.tidymodels.org/reference/tune_bayes.html)
+  and
+  [`finetune::tune_sim_anneal()`](https://finetune.tidymodels.org/reference/tune_sim_anneal.html)
+  use. These arguments come after `...`, so you must name them, and no
+  call changes.
+
 - [`?nested_tune_grid`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
   no longer says that every loop function finalizes a range that depends
   on the data, such as `mtry()`.

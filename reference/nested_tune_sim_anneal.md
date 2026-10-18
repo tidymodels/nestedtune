@@ -23,9 +23,9 @@ nested_tune_sim_anneal(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 )
 
@@ -37,9 +37,9 @@ nested_tune_sim_anneal(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 1,
   event_level = "first",
   eval_time = NULL,
+  initial = 1,
   select = selection_rule()
 )
 ```
@@ -94,12 +94,6 @@ nested_tune_sim_anneal(
   put the metric you report first. The Bayes, race and annealing
   searches also steer on it. Every metric is scored on the outer folds.
 
-- initial:
-
-  The number of candidates each fold scores before the first iteration,
-  a whole number of at least 1. A `tune_results` object is an error,
-  because one tuning run cannot serve every outer fold.
-
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
@@ -112,6 +106,12 @@ nested_tune_sim_anneal(
   or `NULL` (the default) to leave the choice to tune. Times that are
   not numeric, empty, missing, negative or not finite are an error.
   Zero, repeated and unordered times are passed on to tune.
+
+- initial:
+
+  The number of candidates each fold scores before the first iteration,
+  a whole number of at least 1. A `tune_results` object is an error,
+  because one tuning run cannot serve every outer fold.
 
 - select:
 

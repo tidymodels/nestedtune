@@ -23,10 +23,10 @@ nested_tune_bayes(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 5,
-  objective = tune::exp_improve(),
   event_level = "first",
   eval_time = NULL,
+  objective = tune::exp_improve(),
+  initial = 5,
   select = selection_rule()
 )
 
@@ -38,10 +38,10 @@ nested_tune_bayes(
   iter = 10,
   param_info = NULL,
   metrics = NULL,
-  initial = 5,
-  objective = tune::exp_improve(),
   event_level = "first",
   eval_time = NULL,
+  objective = tune::exp_improve(),
+  initial = 5,
   select = selection_rule()
 )
 ```
@@ -94,22 +94,6 @@ nested_tune_bayes(
   put the metric you report first. The Bayes, race and annealing
   searches also steer on it. Every metric is scored on the outer folds.
 
-- initial:
-
-  The number of candidates each fold scores before the first iteration,
-  a whole number of at least 2. A `tune_results` object is an error,
-  because one tuning run cannot serve every outer fold.
-
-- objective:
-
-  An acquisition function from tune. It decides which candidate the
-  Gaussian process proposes next:
-  [`tune::exp_improve()`](https://tune.tidymodels.org/reference/prob_improve.html)
-  (the default),
-  [`tune::prob_improve()`](https://tune.tidymodels.org/reference/prob_improve.html)
-  or
-  [`tune::conf_bound()`](https://tune.tidymodels.org/reference/prob_improve.html).
-
 - event_level:
 
   `"first"` (the default) or `"second"`. It names which level of a
@@ -122,6 +106,22 @@ nested_tune_bayes(
   or `NULL` (the default) to leave the choice to tune. Times that are
   not numeric, empty, missing, negative or not finite are an error.
   Zero, repeated and unordered times are passed on to tune.
+
+- objective:
+
+  An acquisition function from tune. It decides which candidate the
+  Gaussian process proposes next:
+  [`tune::exp_improve()`](https://tune.tidymodels.org/reference/prob_improve.html)
+  (the default),
+  [`tune::prob_improve()`](https://tune.tidymodels.org/reference/prob_improve.html)
+  or
+  [`tune::conf_bound()`](https://tune.tidymodels.org/reference/prob_improve.html).
+
+- initial:
+
+  The number of candidates each fold scores before the first iteration,
+  a whole number of at least 2. A `tune_results` object is an error,
+  because one tuning run cannot serve every outer fold.
 
 - select:
 
