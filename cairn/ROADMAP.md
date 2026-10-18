@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-18 M147 done. Archived M147, pruned M144's row, corrected two LESSONS lines (NOT_CRAN, R_KEEP_PKG_SOURCE). No candidate row added. Validate green._
+_Last hygiene check: 2026-10-18 M148 done. Archived M148, pruned M145's row, added "Argument gaps beside tidymodels". No lesson changed. Validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M148 | Each export and result column is set beside its tidymodels counterpart | review | — | normal | milestones/M148-export-review.md |
+| M148 | Each export and result column is set beside its tidymodels counterpart | done | — | normal | milestones/archive/M148-export-review.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | done | — | normal | milestones/archive/M147-cran-subset-ci.md |
 | M146 | DESCRIPTION's Title and Description say what the package does, in CRAN's form | done | — | normal | milestones/archive/M146-description-text.md |
-| M145 | The other four guides read like the tidymodels.org articles | done | M142, M144 | normal | milestones/archive/M145-tune-style-guides.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
