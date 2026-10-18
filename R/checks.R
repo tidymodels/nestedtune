@@ -2951,6 +2951,27 @@ check_map_fn <- function(fn, call = rlang::caller_env()) {
   )
 }
 
+# The map's `verbose` (M149): one `TRUE` or `FALSE`, as workflowsets'
+# `check_bool()` reads it, refused before any workflow runs. It sits in
+# `workflow_map()`'s place, before `...`, so a third argument passed by
+# position lands here; the hint says the rest are matched by name, which
+# the dots check said before `verbose` took the place.
+check_map_verbose <- function(verbose, call = rlang::caller_env()) {
+  if (rlang::is_bool(verbose)) {
+    return(invisible(verbose))
+  }
+  cli::cli_abort(
+    c(
+      "{.arg verbose} must be {.code TRUE} or {.code FALSE}.",
+      x = "Got {.obj_type_friendly {verbose}}.",
+      i = "Every argument of {.arg fn} must be named, such as \\
+           {.code resamples = }."
+    ),
+    class = "nestedtune_bad_verbose",
+    call = call
+  )
+}
+
 # What an orchestrator accepts beyond the workflow: its formals other than
 # `object` (so `resamples` and everything behind the dots), and the `control`
 # every one of the six takes through `...` (D-042). Read off the function

@@ -75,6 +75,26 @@ test_that("AC5: fn must name one of the six orchestrators", {
   )
 })
 
+test_that("M149 AC1: verbose must be one TRUE or FALSE", {
+  skip_if_no_wset_fixture()
+  d <- make_reg_data()
+  wset <- wset_two(d)
+  folds <- det_nested(d)
+
+  for (bad in list(NA, c(TRUE, TRUE), 1)) {
+    cnd <- expect_map_refusal(
+      nested_workflow_map(
+        wset,
+        verbose = bad,
+        resamples = folds,
+        grid = det_grid()
+      ),
+      "nestedtune_bad_verbose"
+    )
+    expect_match(conditionMessage(cnd), "verbose", fixed = TRUE)
+  }
+})
+
 test_that("AC5: a name in `...` the named orchestrator does not take is refused", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
@@ -110,9 +130,21 @@ test_that("AC5: a name in `...` the named orchestrator does not take is refused"
     "does not take: `nonesuch`.",
     fixed = TRUE
   )
-  # Everything after `fn` is matched by name.
+  # Everything after `fn` and `verbose` is matched by name. A design passed
+  # third lands in `verbose` (M149), whose refusal says so.
   cnd <- expect_map_refusal(
     nested_workflow_map(wset, "nested_tune_grid", folds, grid = det_grid()),
+    "nestedtune_bad_verbose"
+  )
+  expect_match(conditionMessage(cnd), "must be named", fixed = TRUE)
+  cnd <- expect_map_refusal(
+    nested_workflow_map(
+      wset,
+      "nested_tune_grid",
+      FALSE,
+      folds,
+      grid = det_grid()
+    ),
     "nestedtune_bad_dots"
   )
   expect_match(conditionMessage(cnd), "unnamed", fixed = TRUE)

@@ -56,6 +56,10 @@
 #'   `"nested_tune_race_anova"`, `"nested_tune_race_win_loss"` and
 #'   `"nested_tune_sim_anneal"`. With `"nested_fit_resamples"`, no workflow
 #'   can have a parameter to tune.
+#' @param verbose Whether `nested_workflow_map()` writes a message as each
+#'   workflow starts and as it finishes. The default is `FALSE`. The finish
+#'   message gives the time the workflow took. A workflow that gives an
+#'   error has no finish message.
 #' @param ... The arguments of `fn`, each one named. `resamples`, the nested
 #'   design, is required, and a `control` goes here as well. A name that `fn`
 #'   does not take is an error. A `metrics` set reaches every workflow, and
@@ -83,10 +87,16 @@
 #'   [collect_metrics.nested_results_set()], [nested_final_fit()],
 #'   [workflowsets::workflow_map()]
 #' @export
-nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
+nested_workflow_map <- function(
+  object,
+  fn = "nested_tune_grid",
+  verbose = FALSE,
+  ...
+) {
   dots <- capture_dots(...)
   check_workflow_set(object)
   check_map_fn(fn)
+  check_map_verbose(verbose)
   check_map_dots(dots, fn)
   call <- rlang::current_env()
 
@@ -141,11 +151,13 @@ nested_workflow_map <- function(object, fn = "nested_tune_grid", ...) {
   for (i in seq_along(ids)) {
     assign(".Random.seed", entry_seed, envir = globalenv())
     args <- map_args(dots, object$option[[i]], routes[[i]], fn)
+    started <- log_map_start(verbose, i, ids, routes[[i]])
     results[[i]] <- for_workflow(
       ids[[i]],
       call,
       run_orchestrator(routes[[i]], workflows[[i]], args)
     )
+    log_map_end(verbose, i, ids, routes[[i]], started)
   }
   new_nested_results_set(ids, workflows, results, fn)
 }
@@ -169,6 +181,40 @@ map_args <- function(dots, option, route, fn) {
     args[[nm]] <- option[[nm]]
   }
   args[intersect(names(args), orchestrator_args(route))]
+}
+
+# The `verbose` log (M149), in workflowsets' `log_progress()` form: a line as
+# each workflow starts and one, with the time it took, as it finishes. A
+# workflow that errors gets no end line, because the error stops the map
+# and `for_workflow()` already names the workflow in it. The clock is read
+# whether or not the log is on, and reading it draws no random number.
+log_map_start <- function(verbose, i, ids, route) {
+  if (verbose) {
+    msg <- map_log_text(i, ids, route)
+    cli::cli_inform(c(i = "{msg}"))
+  }
+  proc.time()[["elapsed"]]
+}
+
+log_map_end <- function(verbose, i, ids, route, started) {
+  if (!verbose) {
+    return(invisible(NULL))
+  }
+  took <- proc.time()[["elapsed"]] - started
+  time <- paste0(format(round(took, 1L), nsmall = 1L), "s")
+  msg <- paste0(map_log_text(i, ids, route), " (", time, ")")
+  cli::cli_inform(c(v = "{msg}"))
+}
+
+map_log_text <- function(i, ids, route) {
+  event <- if (identical(route, "nested_fit_resamples")) {
+    "resampling"
+  } else {
+    "tuning"
+  }
+  # Pasted, not interpolated, and handed to cli as a value, so a brace in
+  # an id is not read as cli markup (the M83 lesson).
+  paste0(i, " of ", length(ids), " ", event, ": ", ids[[i]])
 }
 
 # One orchestrator call, built as a call in an environment that binds the

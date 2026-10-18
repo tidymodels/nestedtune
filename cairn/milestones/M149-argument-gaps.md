@@ -1,13 +1,13 @@
 # M149: Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — three new arguments on exported functions
-- **Branch/PR:** —
+- **Branch/PR:** m149-argument-gaps
 
 ## Goal
 
@@ -53,6 +53,8 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 - 2026-10-18: plan gate chose `id = NULL` over workflowsets' `id = "workflow_set"`, because a workflow could carry that id and `nested_final_fit()` reads ids with no sentinel; falsified by a user report that a copied workflowsets call breaks.
 - 2026-10-18: plan gate chose no failure line under `verbose` over workflowsets' "failed with" line, because the error stops the run and already names the workflow; falsified by `nested_workflow_map()` coming to keep running after a workflow fails.
 - 2026-10-18: plan gate chose a one-time default comparison recorded in the page over a new section of `benchmarks/export-surface.R`, so the script's promise does not widen; falsified by a later review needing the default comparison again.
+
+- 2026-10-18: T1 code and tests in place: `check_map_verbose()` (class `nestedtune_bad_verbose`), start and finish lines through `cli::cli_inform()` with the text passed as a value. A design passed third by position now lands in `verbose`, so its refusal gains a hint that every argument of `fn` must be named, and the old unnamed-dots test moved to a fourth positional. Full suite pending.
 
 ## Decisions
 
