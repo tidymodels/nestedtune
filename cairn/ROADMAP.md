@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-10 M145 archived, M142 row pruned, validate green._
+_Last hygiene check: 2026-10-17 lessons pass. Dropped lessons 2026-09-11 (M84) by ownership (D-061) and 2026-09-10 (M78) by planner test (pkgdown.yaml comment). Merged 2026-09-03 (M57) into 2026-07-27 (M14). Compressed nine (M04, M05/M54, M12, M16, M33, M42, M50, M51, M81). No decision entry. Validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
