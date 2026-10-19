@@ -279,7 +279,7 @@
 </tr>
 </tbody>
 </table>
-<p>Yes means that nestedtune exports a nested counterpart that does the row’s job on a nested design. The test suite runs it with <code>vfold_cv()</code> in both loops, and every outer fold completes. <code><a href="reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> and <code><a href="reference/nested_workflow_map.html">nested_workflow_map()</a></code> run no search of their own. The first scores a workflow with nothing to tune, and the second runs each workflow of a set through one of the other six functions. No means that no nestedtune function does the row’s job. For <code>tune_cluster()</code>, nothing yet settles what a nested estimate of a clustering metric means.</p>
+<p>Yes means that nestedtune exports a nested counterpart that does the row’s job on a nested design. The test suite runs it with <code>vfold_cv()</code> in both loops, and every outer fold completes. <code><a href="reference/nested_fit_resamples.html">nested_fit_resamples()</a></code> and <code><a href="reference/nested_workflow_map.html">nested_workflow_map()</a></code> run no search of their own. The first scores a workflow with nothing to tune, and the second runs each workflow of a set through one of the other six functions. No means that no nestedtune function does the row’s job. For <code>tune_cluster()</code>, <code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">tune::last_fit()</a></code> does not accept a clustering workflow, so no nestedtune function can score the outer fold. Selecting on a sum-of-squares metric also tends to pick the largest number of clusters in the grid, so the estimate would describe the grid and not the data.</p>
 <p>The resampling table’s Yes cells were tested through <code><a href="reference/nested_tune_grid.html">nested_tune_grid()</a></code>. The “Time-series designs” section of <code><a href="reference/nested_resamples.html">?nested_resamples</a></code> says which time-series designs the other six functions are tested on. <a href="https://nestedtune.tidymodels.org/articles/tuners.html">Choosing the inner tuner</a> runs the Bayesian search, the two racing searches and simulated annealing on one example.</p>
 <p>Learn more:</p>
 <ul>
@@ -290,7 +290,7 @@
 <li>
 <a href="https://nestedtune.tidymodels.org/articles/tuners.html">Choosing the inner tuner</a>, the Bayesian search, the two racing searches, simulated annealing and a set of workflows on one design.</li>
 <li>
-<a href="https://nestedtune.tidymodels.org/articles/results.html">Reading the results</a>, every column of the results object and every function that reads it.</li>
+<a href="https://nestedtune.tidymodels.org/articles/results.html">Reading the results</a>, one run read from start to finish: the estimate, the selections, the predictions and the plots.</li>
 <li>
 <a href="https://nestedtune.tidymodels.org/articles/parallel.html">Running the outer loop in parallel</a>, the same call on a pool of mirai daemons.</li>
 </ul>

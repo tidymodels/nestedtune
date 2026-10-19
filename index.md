@@ -130,8 +130,12 @@ and
 run no search of their own. The first scores a workflow with nothing to
 tune, and the second runs each workflow of a set through one of the
 other six functions. No means that no nestedtune function does the row’s
-job. For `tune_cluster()`, nothing yet settles what a nested estimate of
-a clustering metric means.
+job. For `tune_cluster()`,
+[`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
+does not accept a clustering workflow, so no nestedtune function can
+score the outer fold. Selecting on a sum-of-squares metric also tends to
+pick the largest number of clusters in the grid, so the estimate would
+describe the grid and not the data.
 
 The resampling table’s Yes cells were tested through
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
@@ -156,8 +160,9 @@ Learn more:
   Bayesian search, the two racing searches, simulated annealing and a
   set of workflows on one design.
 - [Reading the
-  results](https://nestedtune.tidymodels.org/articles/results.html),
-  every column of the results object and every function that reads it.
+  results](https://nestedtune.tidymodels.org/articles/results.html), one
+  run read from start to finish: the estimate, the selections, the
+  predictions and the plots.
 - [Running the outer loop in
   parallel](https://nestedtune.tidymodels.org/articles/parallel.html),
   the same call on a pool of mirai daemons.
