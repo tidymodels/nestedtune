@@ -61,6 +61,7 @@ The three argument gaps that M148's review proposed are closed in the tidymodels
 - 2026-10-18: claim audit: 34 claims read, 2 corrected — tests/testthat/test-collect-inner-metrics-wide.R (a comment on the long table's rows), R/nested-results-collect.R and man/collect_selections.Rd (`type` now names the two-estimator refusal). The reader re-read both corrections and found them true.
 - 2026-10-18: verify: `devtools::test()` at `33d77fd6` gave 15583 passes, 0 failures, 0 skips (later commits change docs, NEWS, a test comment and tracking only). `devtools::check()` at `832d8b17` in the main checkout gave 0 errors, 0 warnings, 0 notes; a first run in a git worktree gave one NOTE on the worktree's `.git` file, which a plain checkout lacks. `air format --check .` and both prose sweeps clean.
 - 2026-10-18: minor amendment: T1's tests went to a new `test-nested-workflow-map-verbose.R` in place of the readers file, and T1's `@details` order sentence needed no change, since the details name no argument order. T1 to T3 and T5 ticked; status set to `review`.
+- 2026-10-18: step-7 approval: m149-argument-gaps approved for merge
 
 ## Decisions
 
