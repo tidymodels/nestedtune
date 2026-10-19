@@ -16,7 +16,7 @@ collect_selections(x, ...)
 collect_inner_metrics(x, ...)
 
 # S3 method for class 'nested_results'
-collect_inner_metrics(x, ...)
+collect_inner_metrics(x, ..., type = c("long", "wide"))
 
 # S3 method for class 'nested_results'
 collect_notes(x, ...)
@@ -33,6 +33,15 @@ collect_notes(x, ...)
 - ...:
 
   Not used, and must be empty.
+
+- type:
+
+  For `collect_inner_metrics()`, `"long"` (the default), one row per
+  fold, candidate and metric, or `"wide"`, one column per metric that
+  holds its `mean`. The wide shape drops `.estimator`, `n` and
+  `std_err`, and a metric that a fold did not score is `NA` in its rows.
+  It gives an error for a metric named like another column, such as a
+  tuning parameter, and for a metric scored with two estimators.
 
 ## Value
 

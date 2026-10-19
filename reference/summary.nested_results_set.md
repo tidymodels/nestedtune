@@ -16,7 +16,8 @@ autoplot(
   type = c("parameters", "performance"),
   metric = NULL,
   eval_time = NULL,
-  ...
+  ...,
+  id = NULL
 )
 
 # S3 method for class 'nested_results_set'
@@ -48,6 +49,16 @@ print(x, ...)
   For `type = "performance"`, the metrics and the evaluation times to
   draw, as on
   [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md).
+
+- id:
+
+  For
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html),
+  `NULL` (the default) to draw every workflow, or one `wflow_id` to draw
+  that workflow alone. One `wflow_id` gives the plot that
+  [`autoplot.nested_results()`](https://nestedtune.tidymodels.org/reference/autoplot.nested_results.md)
+  draws for that workflow's result. That plot states a failed fold in
+  its subtitle and gives no warning.
 
 ## Value
 

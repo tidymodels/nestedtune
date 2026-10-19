@@ -64,7 +64,7 @@ one table with the fold labels first.</p>
 <span><span class="fu">collect_inner_metrics</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results'</span></span>
-<span><span class="fu">collect_inner_metrics</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">collect_inner_metrics</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"wide"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results'</span></span>
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -81,6 +81,15 @@ function.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Not used, and must be empty.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>For <code>collect_inner_metrics()</code>, <code>"long"</code> (the default), one row
+per fold, candidate and metric, or <code>"wide"</code>, one column per metric that
+holds its <code>mean</code>. The wide shape drops <code>.estimator</code>, <code>n</code> and <code>std_err</code>,
+and a metric that a fold did not score is <code>NA</code> in its rows. It
+gives an error for a metric named like another column, such as a tuning
+parameter, and for a metric scored with two estimators.</p></dd>
 
 </dl></div>
     <div class="section level2">

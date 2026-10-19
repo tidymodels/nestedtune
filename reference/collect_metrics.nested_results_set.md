@@ -15,7 +15,7 @@ collect_metrics(x, ..., summarize = TRUE, type = c("long", "wide"))
 collect_selections(x, ...)
 
 # S3 method for class 'nested_results_set'
-collect_inner_metrics(x, ...)
+collect_inner_metrics(x, ..., type = c("long", "wide"))
 
 # S3 method for class 'nested_results_set'
 collect_notes(x, ...)
@@ -56,10 +56,14 @@ augment(x, ...)
 - type:
 
   For
-  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html),
+  [`collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  and
+  [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md),
   `"long"` (the default) or `"wide"`. The wide shape is keyed on
-  `wflow_id` too, and a metric that a workflow did not score is `NA` in
-  its rows.
+  `wflow_id` too. A column that a workflow lacks is `NA` in its rows,
+  such as a metric it did not score or a parameter it does not tune. A
+  workflow with no inner candidates, such as a fixed one, has no rows in
+  [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md).
 
 - metrics, event_level:
 

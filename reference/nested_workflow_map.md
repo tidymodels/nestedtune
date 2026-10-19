@@ -8,7 +8,7 @@ folds.
 ## Usage
 
 ``` r
-nested_workflow_map(object, fn = "nested_tune_grid", ...)
+nested_workflow_map(object, fn = "nested_tune_grid", verbose = FALSE, ...)
 ```
 
 ## Arguments
@@ -24,6 +24,13 @@ nested_workflow_map(object, fn = "nested_tune_grid", ...)
   `"nested_tune_race_anova"`, `"nested_tune_race_win_loss"` and
   `"nested_tune_sim_anneal"`. With `"nested_fit_resamples"`, no workflow
   can have a parameter to tune.
+
+- verbose:
+
+  Whether `nested_workflow_map()` writes a message as each workflow
+  starts and as it finishes. The default is `FALSE`. The finish message
+  gives the time the workflow took. A workflow that gives an error has
+  no finish message.
 
 - ...:
 

@@ -63,7 +63,7 @@ and stacks the tables under a <code>wflow_id</code> column.</p>
 <span><span class="fu"><a href="collect_selections.html">collect_selections</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results_set'</span></span>
-<span><span class="fu"><a href="collect_selections.html">collect_inner_metrics</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="collect_selections.html">collect_inner_metrics</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"wide"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'nested_results_set'</span></span>
 <span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_notes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -99,9 +99,12 @@ and stacks the tables under a <code>wflow_id</code> column.</p>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>For <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code>, <code>"long"</code> (the default) or <code>"wide"</code>.
-The wide shape is keyed on <code>wflow_id</code> too, and a metric that a workflow
-did not score is <code>NA</code> in its rows.</p></dd>
+<dd><p>For <code><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics()</a></code> and <code><a href="collect_selections.html">collect_inner_metrics()</a></code>,
+<code>"long"</code> (the default) or <code>"wide"</code>. The wide shape is keyed on
+<code>wflow_id</code> too. A column that a workflow lacks is <code>NA</code> in its rows,
+such as a metric it did not score or a parameter it does not tune.
+A workflow with no inner candidates, such as a fixed one, has no rows
+in <code><a href="collect_selections.html">collect_inner_metrics()</a></code>.</p></dd>
 
 
 <dt id="arg-metrics-event-level">metrics, event_level<a class="anchor" aria-label="anchor" href="#arg-metrics-event-level"></a></dt>

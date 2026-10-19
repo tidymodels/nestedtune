@@ -2,6 +2,22 @@
 
 ## nestedtune 0.0.0.9000
 
+- Three arguments from tidymodels are new.
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  takes `verbose`, which writes a message as each workflow starts and
+  finishes. It sits before `...`, where
+  [`workflowsets::workflow_map()`](https://workflowsets.tidymodels.org/reference/workflow_map.html)
+  has it. So an unnamed third argument is now read as `verbose`. A value
+  that is not `TRUE` or `FALSE` there gives an error of class
+  `nestedtune_bad_verbose`, where it was `nestedtune_bad_dots`.
+  [`collect_inner_metrics()`](https://nestedtune.tidymodels.org/reference/collect_selections.md)
+  takes `type = "wide"`, which gives one column per metric, as
+  [`tune::collect_metrics()`](https://tune.tidymodels.org/reference/collect_predictions.html)
+  does.
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  on a workflow-set run takes `id`, which draws the plot of one
+  workflow.
+
 - [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md)
   and
   [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
