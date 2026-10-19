@@ -15,7 +15,8 @@
   type = c("parameters", "performance"),
   metric = NULL,
   eval_time = NULL,
-  ...
+  ...,
+  id = NULL
 )
 
 \method{summary}{nested_results_set}(object, ...)
@@ -34,6 +35,11 @@ returns.}
 
 \item{metric, eval_time}{For \code{type = "performance"}, the metrics and the
 evaluation times to draw, as on \code{\link[=autoplot.nested_results]{autoplot.nested_results()}}.}
+
+\item{id}{For \code{autoplot()}, \code{NULL} (the default) to draw every workflow,
+or one \code{wflow_id} to draw that workflow alone. One \code{wflow_id} gives the
+plot that \code{\link[=autoplot.nested_results]{autoplot.nested_results()}} draws for that workflow's result.
+That plot states a failed fold in its subtitle and gives no warning.}
 }
 \value{
 \code{summary()} returns a \code{summary.nested_results_set}, a list of

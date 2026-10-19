@@ -2951,6 +2951,37 @@ check_map_fn <- function(fn, call = rlang::caller_env()) {
   )
 }
 
+# The map's `verbose` (M149): one `TRUE` or `FALSE`, as workflowsets'
+# `check_bool()` reads it, refused before any workflow runs. It sits in
+# `workflow_map()`'s place, before `...`, so a third argument passed by
+# position lands here. When the caller did not name `verbose`, the hint
+# says the rest are matched by name, which the dots check said before
+# `verbose` took the place.
+check_map_verbose <- function(
+  verbose,
+  named = TRUE,
+  call = rlang::caller_env()
+) {
+  if (rlang::is_bool(verbose)) {
+    return(invisible(verbose))
+  }
+  hint <- if (!named) {
+    c(
+      i = "Every argument of {.arg fn} must be named, such as \\
+           {.code resamples = }."
+    )
+  }
+  cli::cli_abort(
+    c(
+      "{.arg verbose} must be {.code TRUE} or {.code FALSE}.",
+      x = "Got {.obj_type_friendly {verbose}}.",
+      hint
+    ),
+    class = "nestedtune_bad_verbose",
+    call = call
+  )
+}
+
 # What an orchestrator accepts beyond the workflow: its formals other than
 # `object` (so `resamples` and everything behind the dots), and the `control`
 # every one of the six takes through `...` (D-042). Read off the function
@@ -2967,7 +2998,7 @@ orchestrator_args <- function(fn) {
 # The map's `...` (M71): every name must be one the orchestrator `fn` names
 # accepts, so a typo is refused rather than narrowed away for every
 # workflow; `object` is the set's to bind, never the caller's; everything
-# after `fn` is matched by name; and the design is the one argument every
+# after `fn` and `verbose` is matched by name; and the design is the one argument every
 # route needs, so its absence is refused here rather than as a missing
 # argument two frames down. `dots` is the list `capture_dots()` returns.
 check_map_dots <- function(dots, fn, call = rlang::caller_env()) {
@@ -2978,7 +3009,7 @@ check_map_dots <- function(dots, fn, call = rlang::caller_env()) {
       c(
         "Every argument in {.arg ...} must be named.",
         x = "Got {n_unnamed} unnamed argument{?s}; everything after \\
-             {.arg fn} is matched by name."
+             {.arg fn} and {.arg verbose} is matched by name."
       ),
       class = "nestedtune_bad_dots",
       call = call

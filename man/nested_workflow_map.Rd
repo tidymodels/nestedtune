@@ -4,7 +4,7 @@
 \alias{nested_workflow_map}
 \title{Run every workflow of a workflow set through one nested design}
 \usage{
-nested_workflow_map(object, fn = "nested_tune_grid", ...)
+nested_workflow_map(object, fn = "nested_tune_grid", verbose = FALSE, ...)
 }
 \arguments{
 \item{object}{A workflow set.}
@@ -14,6 +14,11 @@ default is \code{"nested_tune_grid"}. The others are \code{"nested_tune_bayes"},
 \code{"nested_tune_race_anova"}, \code{"nested_tune_race_win_loss"} and
 \code{"nested_tune_sim_anneal"}. With \code{"nested_fit_resamples"}, no workflow
 can have a parameter to tune.}
+
+\item{verbose}{Whether \code{nested_workflow_map()} writes a message as each
+workflow starts and as it finishes. The default is \code{FALSE}. The finish
+message gives the time the workflow took. A workflow that gives an
+error has no finish message.}
 
 \item{...}{The arguments of \code{fn}, each one named. \code{resamples}, the nested
 design, is required, and a \code{control} goes here as well. A name that \code{fn}

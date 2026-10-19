@@ -1,10 +1,10 @@
 # The export surface beside its tidymodels counterparts (M148)
 
-**Provenance.** Ingested 2026-10-18 by M148 from the output of `benchmarks/export-surface.R` and from `DECISIONS.md` read by its headings. The script first ran on the source tree at `93c10377`. The pairing table and the verdicts read its output at `890190d2`, after the argument reorder. Both runs used the installed tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1 and hardhat 1.4.3.
+**Provenance.** Ingested 2026-10-18 by M148 from the output of `benchmarks/export-surface.R` and from `DECISIONS.md` read by its headings. The script first ran on the source tree at `93c10377`. The pairing table and the verdicts read its output at `890190d2`, after the argument reorder. Both runs used the installed tune 2.1.0, finetune 1.3.0, workflowsets 1.1.1 and hardhat 1.4.3. M149 added the three arguments that the proposed verdicts asked for. It re-ran the script at `33d77fd6` under the same four versions and added the default verdicts.
 Pagination: —.
 Extraction: derived, a 2026-10-18 snapshot of this package's `NAMESPACE` and the four installed packages, which a new run of the script re-reads — observed 2026-10-18.
 
-**Scope.** This page pairs each package-owned export, each method of an exported generic, and each result column with its tidymodels counterpart. It gives one verdict for each difference. A kept verdict cites the decision or reason that chose the difference. A changed verdict moves an argument after `...`, which breaks no call. A proposed verdict is any other change, left for a later plan. This page is not a style review of the help pages, which `tune-docs-comparison.md` owns. It is a reference, not an authority: status lives in `ROADMAP.md`, decisions in `DECISIONS.md`, and architecture in `DESIGN.md`.
+**Scope.** This page pairs each package-owned export, each method of an exported generic, and each result column with its tidymodels counterpart. It gives one verdict for each difference. A kept verdict cites the decision or reason that chose the difference. A changed verdict moves an argument after `...`, which breaks no call. A proposed verdict is any other change, left for a later plan. An added verdict marks a proposed argument that a later milestone added, and its row names that milestone. This page is not a style review of the help pages, which `tune-docs-comparison.md` owns. It is a reference, not an authority: status lives in `ROADMAP.md`, decisions in `DECISIONS.md`, and architecture in `DESIGN.md`.
 
 **Evidence snapshot.**
 
@@ -154,7 +154,7 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 | Argument | Side | Verdict | Reason |
 |---|---|---|---|
 | `seed` | theirs only | kept | D-011 and D-058: the caller calls `set.seed()` first. The generator state is put back before each workflow, so every workflow runs under the same per-fold seeds. `workflow_map()` gets the same pairing by seeding each workflow with `seed`. |
-| `verbose` | theirs only | proposed | Add `verbose` to log each workflow as it starts and ends. No decision chose its absence. |
+| `verbose` | both, since M149 | added | M149 added `verbose = FALSE` between `fn` and `...`, where `workflow_map()` has it. It logs each workflow as it starts and as it finishes without error. |
 
 ### The readers on `nested_results`
 
@@ -163,7 +163,7 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 | `augment()` | `parameters` | theirs only | kept | D-092: `augment()` joins each row's saved prediction, or the D-090 average, and each fold predicted with the candidate it selected. So no single candidate exists to choose, as `?augment.nested_results` states. |
 | `collect_predictions()` | `parameters` | theirs only | kept | D-090, as above. |
 | `collect_inner_metrics()` against tune's `collect_metrics()` | `summarize` | theirs only | kept | D-043: `.inner_metrics` holds each fold's inner metrics in summarized form. There are no per-resample rows to return. |
-| `collect_inner_metrics()` against tune's `collect_metrics()` | `type` | theirs only | proposed | Add `type = c("long", "wide")`, as the method in tune has. No decision chose its absence. |
+| `collect_inner_metrics()` against tune's `collect_metrics()` | `type` | both, since M149 | added | M149 added `type = c("long", "wide")` after `...`, as the method in tune has it. |
 | `autoplot()` | `width` | theirs only | kept | In tune, `width` sets the width of the confidence interval bars. The `"performance"` view here plots each outer fold's score as a point and draws no interval bars. |
 | `autoplot()` | `call` | theirs only | kept | tune passes its error-reporting frame through `call`, with `rlang::current_env()` as the default. It is plumbing for the helpers in tune, not a setting for the plot. |
 
@@ -173,11 +173,13 @@ The grid, race and `nested_fit_resamples()` methods already had tune's order amo
 |---|---|---|---|---|
 | `collect_metrics()` | `type` | ours only | kept | The method follows the `tune_results` method in tune and the `nested_results` method here, which both take `type`. |
 | `collect_inner_metrics()` against workflowsets' `collect_metrics()` | `summarize` | theirs only | kept | D-043, as on `nested_results`. |
+| `collect_inner_metrics()` against workflowsets' `collect_metrics()` | `type` | ours only, since M149 | kept | The method follows the `nested_results` method and `collect_metrics()` on the set here, which both take `type`, as `collect_metrics()` in tune does. |
 | `collect_predictions()` | `parameters` | theirs only | kept | D-090, as on `nested_results`. |
 | `collect_predictions()` | `select_best`, `metric` | theirs only | kept | D-054: the outer predictions come from the candidate each fold selected. There are no other candidates to filter out. |
 | `autoplot()` | `rank_metric`, `select_best` | theirs only | kept | D-058: the set has no ranking or best-workflow view, because a ranking of nested estimates is the reading that IP3 forbids. |
 | `autoplot()` | `std_errs` | theirs only | kept | In workflowsets, `std_errs` sets how many standard errors the interval bars span. The set's plot here draws each fold's score as a point and the estimate as a flat rule, with no interval bars. |
-| `autoplot()` | `id` | theirs only | proposed | Add `id` to plot one workflow's `nested_results`, as `autoplot(x$result[[i]])` does today. No decision chose its absence. |
+| `autoplot()` | `id` | both, since M149 | added | M149 added `id = NULL` after `...`. One `wflow_id` draws the plot that `autoplot()` draws for that workflow's `nested_results`. |
+| `autoplot()` | order of `id` | ours after `...`, theirs fourth (third of the shared arguments) | kept | The arguments before `...` keep the order of `autoplot.tune_results()`, so one call works on both classes, as the next row says. After `...`, `id` must be named, so adding it broke no call. |
 | `autoplot()` | `eval_time` | ours only | kept | The method follows `autoplot.nested_results()` and `autoplot.tune_results()` in tune, which both take it. |
 | `autoplot()` | order of `type` and `metric` | both before `...` | kept | The order here is `object, type, metric`, as in `autoplot.tune_results()`, so one call works on both classes. The `type` in workflowsets is another setting with the same name: it picks how points are colored. |
 
@@ -198,8 +200,20 @@ Each orchestrator's result and its counterpart's result share `splits`, `id`, `.
 
 The `result` of each set row has the same columns as the result of a single run.
 
-## What the proposed verdicts ask for
+## What the proposed verdicts asked for
 
-Three changes are left for a later plan, and the ROADMAP candidate row "Argument gaps beside tidymodels" holds them. They are a `verbose` argument on `nested_workflow_map()`, a `type` argument on `collect_inner_metrics()`, and an `id` argument on `autoplot()` for a `nested_results_set`. Each change can add its argument after `...`, and an argument there breaks no call.
+M148 left three changes for a later plan, and M149 added them. They are `verbose` on `nested_workflow_map()`, `type` on `collect_inner_metrics()`, and `id` on `autoplot()` for a `nested_results_set`. `type` and `id` come after `...`. `verbose` comes before `...`, in the place `workflow_map()` gives it. Every argument in `...` must be named, so this broke no call. A third argument passed by position now lands in `verbose`, and its refusal says that every argument of `fn` must be named.
 
-The script compares argument names and order, not defaults. The same row holds one default that differs: `autoplot()` on a `nested_results` defaults `type` to `"parameters"`, and `autoplot.tune_results()` defaults it to `"marginals"`.
+## Default verdicts
+
+The script compares argument names and order, not defaults. M149 compared the defaults once, on 2026-10-18 at `33d77fd6`. For every pair in the script's `pairs` table, it compared the deparsed default of each argument that both sides share, other than `...`. These are the defaults that differ.
+
+| Item | Argument | Ours | Theirs | Verdict | Reason |
+|---|---|---|---|---|---|
+| `nested_workflow_map()` | `fn` | `"nested_tune_grid"` | `"tune_grid"` | kept | Each default names the grid search of its own package. |
+| `nested_tune_bayes()`, `workflow` and `model_spec` methods | `objective` | `tune::exp_improve()` | `exp_improve()` | kept | The same call. Only the namespace prefix differs. |
+| `autoplot.nested_results()` | `type` | `"parameters"` first | `"marginals"` first | kept | D-019 made the view of what each outer fold selected the default. There is no `"marginals"` view, because the outer folds score one candidate each. |
+| `autoplot.nested_results_set()` | `type` | `"parameters"` first | `"class"` | kept | The `type` in workflowsets is another setting, as the order row above says. |
+| `autoplot.nested_results_set()` | `id` | `NULL` | `"workflow_set"` | kept | M149's plan gate chose `NULL`, because a workflow can have the id `"workflow_set"`, and `nested_final_fit()` reads an id with no such word. |
+| `collect_predictions.nested_results_set()` | `summarize` | `FALSE` | `TRUE` | kept | The default follows the `nested_results` method here and the `tune_results` method in tune, which both default to `FALSE`. So one call reads the same rows from a run and from a set. D-090 makes the average an explicit request. |
+| `compute_metrics.nested_results()` | `event_level` | `NULL` | `"first"` | kept | `NULL` takes the level the run recorded, and `"first"` for a run that recorded none, as `?compute_metrics.nested_results` says. |
