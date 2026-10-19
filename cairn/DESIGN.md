@@ -666,8 +666,9 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   chunk early. The parse fixture's plant assertions are all negative, so a
   parser dropping too much is ruled out only indirectly. Neither the sweep nor
   M096's duplicate-line command reads a roxygen `@templateVar` body, so the
-  tail sentences in `FORCED_TAIL` and `SETTABLE_TAIL` sit outside both
-  checks. M089's Review section and M097's archive state each in full.
+  tail sentences in `SETTABLE_TAIL` sit outside both checks (corrected
+  2026-10-18: `FORCED_TAIL` left the code at PR #158). M089's Review
+  section and M097's archive state each in full.
   Accepted at the 2026-09-28 triage pass, because the row carried findings
   from two reviews and none of them has cost a page its sweep. Revisit on one
   costing a real page its sweep, or on the next milestone touching
@@ -695,3 +696,20 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   The design is refused either way, so only the named function is wrong.
   Accepted at M131's review gate, 2026-09-29 (finding P3). Revisit on a user
   report of the naming misleading them.
+
+- The derived fixture-key test does not carry some fixture-family and
+  closure-binding coverage. Its per-formal axis test keys no real fixture
+  family pairwise and no two recipe-based workflows apart, nothing exercises
+  its attribute and environment clauses, and the depth guard covers only the
+  sorted arguments, so `canonical_form(fn)` and the bindings are hashed
+  unguarded. A helper closure is keyed on its environment, which holds the
+  growing cache, so a repeated request for a reference loop rebuilds
+  (observed 2026-09-21, M109), and so does a racing run requested twice in
+  one time-series file (M110 review F3). M113 cached the repeats it could
+  reach. Accepted at the 2026-10-18 triage pass, because the row carried
+  findings from two reviews and none has caused a key collision or a priced
+  suite-time cost. Revisit on a fixture-key collision between two real
+  fixtures, on a suite-time cost from such rebuilds, or when a family's
+  sorted-argument depth approaches the cut (30 of 40 at 2026-09-01). Routed
+  from candidates 2026-10-18; added 2026-09-01 — M42 review O4/S1/S2/S3/R3
+  and O5/R2.
