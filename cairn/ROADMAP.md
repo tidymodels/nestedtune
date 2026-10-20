@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-20 triage pass. Short titles now meet the 5-word, 4
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M150 | macOS CI takes CRAN binaries again | in-progress | — | normal | milestones/M150-macos-cran-binaries.md |
+| M150 | macOS CI takes CRAN binaries again | review | — | normal | milestones/M150-macos-cran-binaries.md |
 | M149 | Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot | done | — | normal | milestones/archive/M149-argument-gaps.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | done | — | normal | milestones/archive/M148-export-review.md |
 | M147 | CI runs the tests CRAN runs, with the Suggests and without them | done | — | normal | milestones/archive/M147-cran-subset-ci.md |

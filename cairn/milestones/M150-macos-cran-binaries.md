@@ -1,6 +1,6 @@
 # M150: macOS CI takes CRAN binaries again
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -15,7 +15,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 
 ## Scope
 
-**In:** `.github/workflows/R-CMD-check.yaml`: the macOS leg takes CRAN binaries (`use-public-rspm: ${{ matrix.config.os != 'macos-latest' }}`, the form tidymodels/tune uses), the `gower?source` build and its comment go, and the setup-r comment is rewritten. `.github/workflows/stress-daemon-tests.yaml`, the one other workflow that can run on macOS (found by `git grep use-public-rspm`), gets the same split. One manual stress run on the branch checks its install step. A D-entry records the choice.
+**In:** `.github/workflows/R-CMD-check.yaml`: the macOS leg takes CRAN binaries (`use-public-rspm: ${{ matrix.config.os != 'macos-latest' }}`, the form tidymodels/tune uses), the `gower?source` build and its comment go, and the setup-r comment is rewritten. `.github/workflows/stress-daemon-tests.yaml`, the one other workflow that can run on macOS (found by `git grep use-public-rspm`), gets the same split. One manual stress run on the branch checks its install step. A D-entry records the choice. One README sentence (`README.Rmd` and `README.md`) loses the modal that keeps `prose-sweep.yaml` and `test-sweep-prose.R` red on main since 60be3479, since this PR cannot merge with that check red.
 
 **Out:** the Linux and Windows legs, `pkgdown.yaml`, `pr-commands.yaml` and `R-CMD-check-cran.yaml`, which run off macOS and keep P3M. pak reading zstd archives is upstream work (r-lib/pkgdepends#485). A test pinning the repository choice in `test-ci-workflows.R` is not added, because the CI run on the PR is the check. No NEWS entry, because nothing a user sees changes.
 
@@ -35,16 +35,17 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - AC3 → T1, T2
 - AC4 → T3, T5
 - AC5 → T2, T3
-- AC6 → T4
+- AC6 → T4, T7
 
 ## Tasks
 
 - [x] T1: Re-run the zstd probe. Take the recursive Depends/Imports/LinkingTo closure of `DESCRIPTION`'s Depends, Imports and Suggests plus `rcmdcheck`, from CRAN's `bin/macosx/sonoma-arm64/contrib/4.6/PACKAGES`. Read the first four bytes of each binary with a range request. Log the counts per format in one work-log line. If any file starts `28b52ffd` (zstd), set the milestone `blocked`, naming the package, and stop.
 - [x] T2: In `R-CMD-check.yaml`, set `use-public-rspm` to `${{ matrix.config.os != 'macos-latest' }}`, set `extra-packages` to `any::rcmdcheck`, and delete the `gower?source` comment block. Rewrite the setup-r comment from T1's output and same-session reads, not from this plan: P3M's macOS binaries link OpenMP and the runners ship no libomp (job 99324307884 of run 33336519275); r-lib/actions#1110 made P3M the macOS default on 2026-09-21, so `false` there is a departure; pak still cannot read zstd (r-lib/pkgdepends#485), so a zstd binary on CRAN breaks this leg as on PR #118. Pin the T1 result with its date and procedure.
 - [x] T3: In `stress-daemon-tests.yaml`, set `use-public-rspm` to `${{ inputs.os != 'macos-latest' }}` with a short comment that states the split and points at `R-CMD-check.yaml`'s comment.
-- [ ] T4: Run the verify slot: `Rscript -e 'devtools::test()'`. `test-ci-workflows.R` parses `R-CMD-check.yaml`.
+- [x] T4: Run the verify slot: `Rscript -e 'devtools::test()'`. `test-ci-workflows.R` parses `R-CMD-check.yaml`.
 - [x] T5: Push the branch, which starts no check workflow (their `push` filter is the default branch), and dispatch `gh workflow run stress-daemon-tests.yaml --ref <branch> -f os=macos-latest -f iterations=1`. Log the run id, the install step's result, and the `packagemanager.posit.co` count in its job log.
 - [x] T6: Append a D-entry: the macOS CI jobs take CRAN binaries, departing from setup-r's default since r-lib/actions#1110. Rejected: staying on P3M with `gower?source`. Falsified by a zstd binary in the macOS install closure, or a CRAN binary failing to load on the runner.
+- [x] T7: Rewrite the `README.Rmd:138` sentence that `sweep-prose.R --plain` flags as a modal, and the same sentence in `README.md`.
 
 ## Work log
 
@@ -65,3 +66,8 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: T3: `stress-daemon-tests.yaml` sets `use-public-rspm` to `${{ inputs.os != 'macos-latest' }}`, with a two-line comment pointing at `R-CMD-check.yaml`'s.
 - 2026-10-20: T6: D-118 appended (macOS CI jobs take CRAN binaries; rejected staying on P3M with `gower?source`).
 - 2026-10-20: T5: branch pushed at b24238e5; dispatched stress-daemon-tests run 39378513433 (job 118481968962, macos-latest, 1 iteration) passed, its `setup-r-dependencies` step included. Its job log has 0 `packagemanager.posit.co` lines; packages came from `cran.rstudio.com/bin/macosx/sonoma-arm64/contrib/4.6/`, `gower` 1.0.2 among them (`Got gower 1.0.2 (aarch64-apple-darwin23)`).
+- 2026-10-20: T4: full `devtools::test()` at 28a102a6: one failure, `test-sweep-prose.R:302-303`, the plain sweep flagging a modal at `README.Rmd:138`. That line came from 60be3479 on main, where `prose-sweep.yaml` is red since (runs on 60be3479 and 31dc1e84). `test-ci-workflows.R` passed.
+- 2026-10-20: substantive amendment: Scope In adds the README sentence fix (T7), because `prose-sweep.yaml` runs on this PR and a red check blocks the merge. No criterion changes; AC6 now maps to T4 and T7.
+- 2026-10-20: T7: the sentence now reads "Selecting on a sum-of-squares metric also tends to pick the largest number of clusters in the grid. An estimate from that selection describes the grid and not the data." in both READMEs, edited by hand since a re-knit is not needed for one prose line (the two texts compared equal). `sweep-prose.R --plain` prints clean; `test-sweep-prose.R` and `test-ci-workflows.R` pass.
+- 2026-10-20: claim audit: not owed — internal tier.
+- 2026-10-20: all tasks checked; status review.
