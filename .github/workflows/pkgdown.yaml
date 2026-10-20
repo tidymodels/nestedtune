@@ -266,7 +266,7 @@ jobs:
       # so the checkout and the built site never contend for the same paths.
       - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: pkgdown-site
           path: docs
