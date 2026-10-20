@@ -77,6 +77,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: resume: PR #167 open, AC3 read from run 39425745143; the macOS check step took 29m50s of its 30-minute cap.
 - 2026-10-20: step-7 approval: m150-macos-cran-binaries approved for merge after one rerun of the macOS job; merge if its check step lands near the P3M runs' 22 minutes, stop if near 30 again (user choice at the re-posed chip). Rerun started as attempt 2, job 118855128571.
 - 2026-10-20: the rerun watch hit the 590 s ceiling at 20:12Z with the macOS check step 9 minutes in (started 20:04:03Z); every other check passed, `test-devel-vctrs` included. Watcher stopped; no merge marker written.
+- 2026-10-20: resume at 20:13Z: rerun still running; the second watch hit the 590 s ceiling at 20:23Z with the macOS check step 19m25s in and no result. Watcher stopped; no merge marker written.
 
 ## Review
 
