@@ -26,7 +26,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - [ ] AC3: On the milestone PR's CI run, the `macos-latest (release)` job of `R-CMD-check.yaml` passes, and its `setup-r-dependencies` step installs packages from CRAN, not from P3M (`packagemanager.posit.co`).
 - [x] AC4: A `workflow_dispatch` run of `stress-daemon-tests.yaml` on the milestone branch with `os: macos-latest` and `iterations: 1` completes its `setup-r-dependencies` step, installing packages from CRAN, not from P3M.
 - [x] AC5: In `R-CMD-check.yaml`, the comment above `use-public-rspm` states that macOS takes CRAN binaries and the other legs take P3M binaries, and the comment block above `setup-r-dependencies` that explains `gower?source` is removed. In `stress-daemon-tests.yaml`, a comment above `use-public-rspm` states the same split.
-- [ ] AC6: The profile's `verify` slot is clean: `devtools::test()` passes, `test-ci-workflows.R` included.
+- [x] AC6: The profile's `verify` slot is clean: `devtools::test()` passes, `test-ci-workflows.R` included.
 
 ## Coverage
 
@@ -80,15 +80,18 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - AC4: run 39378513433 (job 118481968962, dispatched on the branch at b24238e5 with `os: macos-latest`, `iterations: 1`; both workflow files are unchanged since) concluded success, its `setup-r-dependencies` step success. Its job log holds 0 `packagemanager.posit.co` lines, and packages came from `https://cran.rstudio.com/bin/macosx/sonoma-arm64/contrib/4.6/`, `gower` 1.0.2 among them. Pass.
 - AC5: `R-CMD-check.yaml:174-175` opens "The macOS leg takes CRAN's binaries and the other four legs take P3M's"; the `setup-r-dependencies` step has no comment block above it, and the one remaining `gower?source` mention (line 197) is the fallback instruction. `stress-daemon-tests.yaml:58-59` states "macOS takes CRAN's binaries and ubuntu and windows take P3M's". Pass.
 - spawned: diff-bug, blame-history, prior-review, ripple
-- diff-bug #1: the comment said `true` put macOS on P3M "since r-lib/actions#1110", but job 99324307884 (2026-08-30) already ran macOS on P3M through setup-r's default — fix now: the comment now says that job ran with it and #1110 made it the default for every repository.
-- diff-bug #2: "Commit ab1faf53's version of the file" as the way back would revert the later vignette split and CRAN jobs and break `test-ci-workflows.R` — fix now: the comment and D-118 name the two lines to change and say not to restore that version whole.
-- diff-bug #3: "the other four legs take P3M's" binaries is not true for devel, which builds from source — fix now: the comment says the four legs take their packages from P3M and that devel gets source packages there.
+- diff-bug #1: the comment said `true` put macOS on P3M "since r-lib/actions#1110", but job 99324307884 (2026-08-30) already ran macOS on P3M through setup-r's default — fix now: the comment now says that job ran with it and #1110 made it the default for every repository., fixed 771b30fb
+- diff-bug #2: "Commit ab1faf53's version of the file" as the way back would revert the later vignette split and CRAN jobs and break `test-ci-workflows.R` — fix now: the comment and D-118 name the two lines to change and say not to restore that version whole., fixed 771b30fb
+- diff-bug #3: "the other four legs take P3M's" binaries is not true for devel, which builds from source — fix now: the comment says the four legs take their packages from P3M and that devel gets source packages there., fixed 771b30fb
 - diff-bug #4: the candidate row "macOS off P3M after zstd support" still describes the old setup — reject (planned change): step 9's hygiene deletes the row this milestone graduates.
-- diff-bug #5: "CRAN once shipped" reads broader than the closure probe — fix now: "CRAN shipped", plus a sentence that the probe covers this closure on that date, not CRAN as a whole.
+- diff-bug #5: "CRAN once shipped" reads broader than the closure probe — fix now: "CRAN shipped", plus a sentence that the probe covers this closure on that date, not CRAN as a whole., fixed 771b30fb
 - diff-bug #6: no run has yet loaded CRAN's `gower` on the macOS runner — reject (planned change): the plan accepted this risk and AC3, read before the merge, is the run that loads it.
 - blame-history #1: same as diff-bug #6 — reject (planned change), as above.
 - blame-history #2: the branch reverts on a probe snapshot, not on pkgdepends reading zstd as ab1faf53's comment said, and the ROADMAP row is stale — reject (planned change): the user chose this at the plan gate, D-118 records it, and step 9 deletes the row.
 - blame-history #3: the probe's closure may miss `gower`, reached through Suggests — reject (false): `closure.txt` lists `gower_1.0.2.tgz`, which `recipes` imports.
-- blame-history #4: the README sentence lost its hedge ("would describe" became "describes") although the sentence before says "tends to" — fix now: it reads "When it does, the estimate describes the grid and not the data." in both READMEs; plain and default sweeps clean.
-- prior-review #1: same README hedge point, with M082 and M127 as the prior lessons — fix now, as blame-history #4.
+- blame-history #4: the README sentence lost its hedge ("would describe" became "describes") although the sentence before says "tends to" — fix now: it reads "When it does, the estimate describes the grid and not the data." in both READMEs; plain and default sweeps clean., fixed 771b30fb
+- prior-review #1: same README hedge point, with M082 and M127 as the prior lessons — fix now, as blame-history #4, fixed 771b30fb.
 - ripple #1: the candidate row "macOS off P3M after zstd support" now disagrees with the workflow — reject (planned change): step 9 deletes it.
+- AC6: `devtools::check()` on the branch (tests run with `NOT_CRAN` true, vignettes rebuilt): Status OK, 0 errors, 0 warnings, 0 notes, 10m15s. After the review fixes, `devtools::test(filter = "sweep-prose|ci-workflows")` at 771b30fb passes with no failure. Pass.
+- gate: `cairn_validate.py` all checks passed, coverage complete; no principle changed, so no `cairn_impact`. `devtools::document()` changed only `Config/roxygen2/version` (8.1.0 to the local 8.1.1), reverted, so no man/NAMESPACE drift. `pkgdown::check_pkgdown()` no problems. All six gating sweeps from `sweep-prose.R --list-gating` print clean. README.md matches README.Rmd on the edited sentence (hand-edited, compared). No NEWS entry: CI and one README wording change, nothing a user calls behaves differently. No new top-level files.
+- AC3: pending; read from the PR's CI run at step 8, before the merge command.
