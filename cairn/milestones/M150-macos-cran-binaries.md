@@ -21,11 +21,11 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 
 ## Acceptance criteria
 
-- [ ] AC1: In `.github/workflows/R-CMD-check.yaml`, the `setup-r` step's `use-public-rspm` expression evaluates to `false` for the `macos-latest` matrix entry and to `true` for each of the other four entries, and the `setup-r-dependencies` step's `extra-packages` expression evaluates to `any::rcmdcheck` for all five.
-- [ ] AC2: In `.github/workflows/stress-daemon-tests.yaml`, the `setup-r` step's `use-public-rspm` expression evaluates to `false` when `inputs.os` is `macos-latest` and to `true` when it is `ubuntu-latest` or `windows-latest`.
+- [x] AC1: In `.github/workflows/R-CMD-check.yaml`, the `setup-r` step's `use-public-rspm` expression evaluates to `false` for the `macos-latest` matrix entry and to `true` for each of the other four entries, and the `setup-r-dependencies` step's `extra-packages` expression evaluates to `any::rcmdcheck` for all five.
+- [x] AC2: In `.github/workflows/stress-daemon-tests.yaml`, the `setup-r` step's `use-public-rspm` expression evaluates to `false` when `inputs.os` is `macos-latest` and to `true` when it is `ubuntu-latest` or `windows-latest`.
 - [ ] AC3: On the milestone PR's CI run, the `macos-latest (release)` job of `R-CMD-check.yaml` passes, and its `setup-r-dependencies` step installs packages from CRAN, not from P3M (`packagemanager.posit.co`).
-- [ ] AC4: A `workflow_dispatch` run of `stress-daemon-tests.yaml` on the milestone branch with `os: macos-latest` and `iterations: 1` completes its `setup-r-dependencies` step, installing packages from CRAN, not from P3M.
-- [ ] AC5: In `R-CMD-check.yaml`, the comment above `use-public-rspm` states that macOS takes CRAN binaries and the other legs take P3M binaries, and the comment block above `setup-r-dependencies` that explains `gower?source` is removed. In `stress-daemon-tests.yaml`, a comment above `use-public-rspm` states the same split.
+- [x] AC4: A `workflow_dispatch` run of `stress-daemon-tests.yaml` on the milestone branch with `os: macos-latest` and `iterations: 1` completes its `setup-r-dependencies` step, installing packages from CRAN, not from P3M.
+- [x] AC5: In `R-CMD-check.yaml`, the comment above `use-public-rspm` states that macOS takes CRAN binaries and the other legs take P3M binaries, and the comment block above `setup-r-dependencies` that explains `gower?source` is removed. In `stress-daemon-tests.yaml`, a comment above `use-public-rspm` states the same split.
 - [ ] AC6: The profile's `verify` slot is clean: `devtools::test()` passes, `test-ci-workflows.R` included.
 
 ## Coverage
@@ -71,3 +71,11 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: T7: the sentence now reads "Selecting on a sum-of-squares metric also tends to pick the largest number of clusters in the grid. An estimate from that selection describes the grid and not the data." in both READMEs, edited by hand since a re-knit is not needed for one prose line (the two texts compared equal). `sweep-prose.R --plain` prints clean; `test-sweep-prose.R` and `test-ci-workflows.R` pass.
 - 2026-10-20: claim audit: not owed — internal tier.
 - 2026-10-20: all tasks checked; status review.
+- 2026-10-20: review started at e2b461ba; main had not moved (0 commits ahead of the branch point), no PR, Copilot round off.
+
+## Review
+
+- AC1: `yaml::read_yaml()` of `R-CMD-check.yaml` at e2b461ba, each matrix entry's `use-public-rspm` and `extra-packages` evaluated: macos-latest release `FALSE`; windows-latest release, ubuntu devel, ubuntu release, ubuntu oldrel-1 `TRUE`; `extra-packages` `any::rcmdcheck` on all five. Pass.
+- AC2: the same read of `stress-daemon-tests.yaml` over the `os` input's three options: macos-latest `FALSE`, ubuntu-latest `TRUE`, windows-latest `TRUE`. Pass.
+- AC4: run 39378513433 (job 118481968962, dispatched on the branch at b24238e5 with `os: macos-latest`, `iterations: 1`; both workflow files are unchanged since) concluded success, its `setup-r-dependencies` step success. Its job log holds 0 `packagemanager.posit.co` lines, and packages came from `https://cran.rstudio.com/bin/macosx/sonoma-arm64/contrib/4.6/`, `gower` 1.0.2 among them. Pass.
+- AC5: `R-CMD-check.yaml:174-175` opens "The macOS leg takes CRAN's binaries and the other four legs take P3M's"; the `setup-r-dependencies` step has no comment block above it, and the one remaining `gower?source` mention (line 197) is the fallback instruction. `stress-daemon-tests.yaml:58-59` states "macOS takes CRAN's binaries and ubuntu and windows take P3M's". Pass.
