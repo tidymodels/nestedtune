@@ -172,18 +172,20 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           # The macOS leg takes CRAN's binaries and the other four legs take
-          # P3M's, the split tidymodels/tune's workflow uses. Two failure
-          # modes pull in opposite directions here.
+          # their packages from P3M, the split tidymodels/tune's workflow
+          # uses. (The devel leg gets source packages there, as the job cap's
+          # comment above says.) Two failure modes pull in opposite
+          # directions here.
           #
           # P3M's macOS binaries are built with OpenMP enabled and the runner
           # image ships no libomp. P3M's arm64 `gower` binary links the
           # OpenMP symbol `___kmpc_barrier`, so it failed to load with
           # `symbol not found in flat namespace` (job 99324307884 of run
-          # 33336519275). A plain `true` here would put macOS on P3M: setup-r
-          # has done that for every repository since r-lib/actions#1110
-          # (2026-09-21).
+          # 33336519275). A plain `true` here puts macOS on P3M: that job
+          # already ran with it, and r-lib/actions#1110 (2026-09-21) made it
+          # setup-r's macOS default for every repository.
           #
-          # CRAN's side of the risk is zstd. CRAN once shipped macOS binaries
+          # CRAN's side of the risk is zstd. CRAN shipped macOS binaries
           # compressed with zstd under the `.tgz` name, and the pak that
           # `setup-r-dependencies` installs could not extract them: `Cannot
           # extract ... censored_0.3.5.tgz, unknown archive type`, on PR
@@ -192,11 +194,13 @@ jobs:
           # bytes of each CRAN arm64 binary in this package's install closure
           # (`bin/macosx/sonoma-arm64/contrib/4.6`: the Depends, Imports and
           # Suggests, `rcmdcheck`, and their recursive hard dependencies)
-          # read 152 gzip, 13 xz and no zstd, over 165 files. If this leg
-          # fails with `unknown archive type` again, set this line to `true`
-          # and give the macOS leg `gower?source` in `extra-packages` below,
-          # which builds that one package on the runner. Commit ab1faf53
-          # holds that version of this file.
+          # read 152 gzip, 13 xz and no zstd, over 165 files. That covers
+          # this closure on that date, not CRAN as a whole. If this leg fails
+          # with `unknown archive type` again, change two lines: set this one
+          # to `true`, and make `extra-packages` below give the macOS leg
+          # `gower?source`, which builds that one package on the runner.
+          # Commit ab1faf53 shows both lines; the rest of the file has
+          # changed since, so do not restore that version whole.
           use-public-rspm: ${{ matrix.config.os != 'macos-latest' }}
 
       - uses: r-lib/actions/setup-r-dependencies@v2

@@ -2115,7 +2115,7 @@ upstream, either of which would let the file return to a shared blob.
 
 **Context:** PR #119 put the macOS leg of `R-CMD-check.yaml` on P3M, because pak could not extract the zstd-compressed binaries CRAN then shipped (r-lib/pkgdepends#485, still open). P3M's macOS binaries link OpenMP, which the runners lack, so that leg also built `gower` from source. Since r-lib/actions#1110, `use-public-rspm: true` puts macOS on P3M for every repository. M150 found no zstd binary in the package's install closure on CRAN.
 **Decision:** `R-CMD-check.yaml` and `stress-daemon-tests.yaml` set `use-public-rspm` to false on macOS and true elsewhere, the split tidymodels/tune uses, and the macOS leg no longer builds `gower` from source. Rejected: staying on P3M with `gower?source`, because any other package whose P3M binary links OpenMP can fail to load the same way.
-**Consequences:** the macOS leg breaks again if CRAN ships a zstd binary in the closure before pak reads zstd. The workflow comment names the way back: commit ab1faf53's version of the file. Falsified by a zstd binary in the macOS install closure, or a CRAN binary that fails to load on the runner.
+**Consequences:** the macOS leg breaks again if CRAN ships a zstd binary in the closure before pak reads zstd. The workflow comment names the way back: the two lines that commit ab1faf53 shows, not that whole version of the file. Falsified by a zstd binary in the macOS install closure, or a CRAN binary that fails to load on the runner.
 
 <!-- Template:
 
