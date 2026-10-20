@@ -44,7 +44,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - [x] T3: In `stress-daemon-tests.yaml`, set `use-public-rspm` to `${{ inputs.os != 'macos-latest' }}` with a short comment that states the split and points at `R-CMD-check.yaml`'s comment.
 - [ ] T4: Run the verify slot: `Rscript -e 'devtools::test()'`. `test-ci-workflows.R` parses `R-CMD-check.yaml`.
 - [ ] T5: Push the branch, which starts no check workflow (their `push` filter is the default branch), and dispatch `gh workflow run stress-daemon-tests.yaml --ref <branch> -f os=macos-latest -f iterations=1`. Log the run id, the install step's result, and the `packagemanager.posit.co` count in its job log.
-- [ ] T6: Append a D-entry: the macOS CI jobs take CRAN binaries, departing from setup-r's default since r-lib/actions#1110. Rejected: staying on P3M with `gower?source`. Falsified by a zstd binary in the macOS install closure, or a CRAN binary failing to load on the runner.
+- [x] T6: Append a D-entry: the macOS CI jobs take CRAN binaries, departing from setup-r's default since r-lib/actions#1110. Rejected: staying on P3M with `gower?source`. Falsified by a zstd binary in the macOS install closure, or a CRAN binary failing to load on the runner.
 
 ## Work log
 
@@ -63,3 +63,4 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: T1: probe re-run against CRAN's `sonoma-arm64/contrib/4.6/PACKAGES`: 165 binaries in the closure, 152 gzip (`1f8b0800`), 13 xz (`fd377a58`), 0 zstd. No stop.
 - 2026-10-20: T2: `R-CMD-check.yaml` sets `use-public-rspm` to `${{ matrix.config.os != 'macos-latest' }}` and `extra-packages` to `any::rcmdcheck`; the `gower?source` block is gone and the setup-r comment is rewritten from T1's output, PR #118, ab1faf53 and r-lib/actions#1110 (each read this session). Both files parse with `yaml::read_yaml()`. The comment does not claim CRAN's `gower` loads on the runner, since no run observed that; AC3 will.
 - 2026-10-20: T3: `stress-daemon-tests.yaml` sets `use-public-rspm` to `${{ inputs.os != 'macos-latest' }}`, with a two-line comment pointing at `R-CMD-check.yaml`'s.
+- 2026-10-20: T6: D-118 appended (macOS CI jobs take CRAN binaries; rejected staying on P3M with `gower?source`).

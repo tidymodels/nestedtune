@@ -2111,6 +2111,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** the `workflow` and `model_spec` methods order those shared arguments as `tune_bayes()` and `tune_sim_anneal()` do. `event_level` stays after `metrics`, as on the grid methods, and `select` stays last. Names and defaults do not change. Rejected: reordering the `model_spec` methods only, which leaves the two methods of one function in different orders where `test-dots-barrier.R` holds them equal apart from `preprocessor`.
 **Consequences:** no call changes, because R matches an argument after `...` by its full name only. D-069's argument names, defaults and argument set stand. A later change to the order in tune or finetune fails `test-argument-order.R`, which CRAN skips. Falsified by a caller or tool that reads these formals by position. (Narrows D-069.)
 
+### D-118 (2026-10-20): the macOS CI jobs take CRAN's binaries and the other legs take P3M's, which departs from setup-r's default on macOS. First D-entry on where CI installs packages from
+
+**Context:** PR #119 put the macOS leg of `R-CMD-check.yaml` on P3M, because pak could not extract the zstd-compressed binaries CRAN then shipped (r-lib/pkgdepends#485, still open). P3M's macOS binaries link OpenMP, which the runners lack, so that leg also built `gower` from source. Since r-lib/actions#1110, `use-public-rspm: true` puts macOS on P3M for every repository. M150 found no zstd binary in the package's install closure on CRAN.
+**Decision:** `R-CMD-check.yaml` and `stress-daemon-tests.yaml` set `use-public-rspm` to false on macOS and true elsewhere, the split tidymodels/tune uses, and the macOS leg no longer builds `gower` from source. Rejected: staying on P3M with `gower?source`, because any other package whose P3M binary links OpenMP can fail to load the same way.
+**Consequences:** the macOS leg breaks again if CRAN ships a zstd binary in the closure before pak reads zstd. The workflow comment names the way back: commit ab1faf53's version of the file. Falsified by a zstd binary in the macOS install closure, or a CRAN binary that fails to load on the runner.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title
