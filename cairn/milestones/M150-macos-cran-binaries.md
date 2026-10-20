@@ -7,7 +7,7 @@
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI configuration, which no user of the package relies on
-- **Branch/PR:** m150-macos-cran-binaries
+- **Branch/PR:** m150-macos-cran-binaries, https://github.com/tidymodels/nestedtune/pull/167
 
 ## Goal
 
