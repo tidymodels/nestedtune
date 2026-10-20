@@ -72,6 +72,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: claim audit: not owed — internal tier.
 - 2026-10-20: all tasks checked; status review.
 - 2026-10-20: review started at e2b461ba; main had not moved (0 commits ahead of the branch point), no PR, Copilot round off.
+- 2026-10-20: step-7 approval: m150-macos-cran-binaries approved for merge
 
 ## Review
 
