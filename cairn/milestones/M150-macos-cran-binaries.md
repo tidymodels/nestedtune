@@ -74,6 +74,8 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: review started at e2b461ba; main had not moved (0 commits ahead of the branch point), no PR, Copilot round off.
 - 2026-10-20: step-7 approval: m150-macos-cran-binaries approved for merge
 - 2026-10-20: PR #167 opened; the CI watch hit the 590 s ceiling with 7 checks passed and 7 pending (macos-latest in `check-r-package`, its `setup-r-dependencies` passed). Watcher stopped; no merge marker written; resume with `/milestone-review M150`.
+- 2026-10-20: resume: PR #167 open, AC3 read from run 39425745143; the macOS check step took 29m50s of its 30-minute cap.
+- 2026-10-20: step-7 approval: m150-macos-cran-binaries approved for merge after one rerun of the macOS job; merge if its check step lands near the P3M runs' 22 minutes, stop if near 30 again (user choice at the re-posed chip). Rerun started as attempt 2, job 118855128571.
 
 ## Review
 
