@@ -1,13 +1,13 @@
 # M150: macOS CI takes CRAN binaries again
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — CI configuration, which no user of the package relies on
-- **Branch/PR:** —
+- **Branch/PR:** m150-macos-cran-binaries
 
 ## Goal
 
@@ -39,7 +39,7 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 
 ## Tasks
 
-- [ ] T1: Re-run the zstd probe. Take the recursive Depends/Imports/LinkingTo closure of `DESCRIPTION`'s Depends, Imports and Suggests plus `rcmdcheck`, from CRAN's `bin/macosx/sonoma-arm64/contrib/4.6/PACKAGES`. Read the first four bytes of each binary with a range request. Log the counts per format in one work-log line. If any file starts `28b52ffd` (zstd), set the milestone `blocked`, naming the package, and stop.
+- [x] T1: Re-run the zstd probe. Take the recursive Depends/Imports/LinkingTo closure of `DESCRIPTION`'s Depends, Imports and Suggests plus `rcmdcheck`, from CRAN's `bin/macosx/sonoma-arm64/contrib/4.6/PACKAGES`. Read the first four bytes of each binary with a range request. Log the counts per format in one work-log line. If any file starts `28b52ffd` (zstd), set the milestone `blocked`, naming the package, and stop.
 - [ ] T2: In `R-CMD-check.yaml`, set `use-public-rspm` to `${{ matrix.config.os != 'macos-latest' }}`, set `extra-packages` to `any::rcmdcheck`, and delete the `gower?source` comment block. Rewrite the setup-r comment from T1's output and same-session reads, not from this plan: P3M's macOS binaries link OpenMP and the runners ship no libomp (job 99324307884 of run 33336519275); r-lib/actions#1110 made P3M the macOS default on 2026-09-21, so `false` there is a departure; pak still cannot read zstd (r-lib/pkgdepends#485), so a zstd binary on CRAN breaks this leg as on PR #118. Pin the T1 result with its date and procedure.
 - [ ] T3: In `stress-daemon-tests.yaml`, set `use-public-rspm` to `${{ inputs.os != 'macos-latest' }}` with a short comment that states the split and points at `R-CMD-check.yaml`'s comment.
 - [ ] T4: Run the verify slot: `Rscript -e 'devtools::test()'`. `test-ci-workflows.R` parses `R-CMD-check.yaml`.
@@ -59,3 +59,5 @@ The macOS CI jobs install their R packages from CRAN's binaries instead of P3M's
 - 2026-10-20: plan chose to include `stress-daemon-tests.yaml`, the other macOS site `git grep use-public-rspm` finds. No test added to `test-ci-workflows.R`, so the CI-file checker is not extended. No NEWS entry.
 - 2026-10-20: criteria audit (reduced mode, fresh Opus reader) returned 3 findings, all fixed: AC3 and AC4 bound a log grep and run ids (instrument), reworded to the install source; AC5 swept a recalled keyword list (bounded promise), narrowed to two named comment sites.
 - 2026-10-20: lessons harvested: push restarts the PR matrix, so keep docs-only commits local while the PR waits (M50); name a CI run by id (M51).
+- 2026-10-20: implement started on m150-macos-cran-binaries, cut from main at 21835c1c.
+- 2026-10-20: T1: probe re-run against CRAN's `sonoma-arm64/contrib/4.6/PACKAGES`: 165 binaries in the closure, 152 gzip (`1f8b0800`), 13 xz (`fd377a58`), 0 zstd. No stop.
