@@ -134,8 +134,8 @@ job. For `tune_cluster()`,
 [`tune::last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
 does not accept a clustering workflow, so no nestedtune function can
 score the outer fold. Selecting on a sum-of-squares metric also tends to
-pick the largest number of clusters in the grid, so the estimate would
-describe the grid and not the data.
+pick the largest number of clusters in the grid. When it does, the
+estimate describes the grid and not the data.
 
 The resampling table’s Yes cells were tested through
 [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md).
