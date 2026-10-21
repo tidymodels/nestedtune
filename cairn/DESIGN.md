@@ -713,3 +713,15 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   sorted-argument depth approaches the cut (30 of 40 at 2026-09-01). Routed
   from candidates 2026-10-18; added 2026-09-01 — M42 review O4/S1/S2/S3/R3
   and O5/R2.
+
+- The test suite and tooling lack eight items that the M34, M37, M51 and
+  M52 reviews found, which the M56 and M57 archive files name: a
+  duplicate-description counter, a shared fixture cache, a finetune floor
+  bump, two re-templatings, a top-level `param_info`, a source-scan
+  hardening, and a fixture-cache report under parallel files. Accepted at
+  the 2026-10-20 triage pass, because the row carried findings from four
+  reviews and none of its triggers has fired. Revisit on a hang the trace
+  misattributes, the next finetune re-pin, a cast reached with the wrong id
+  columns, or `param_info` needed off the results object. Routed from
+  candidates 2026-10-20; added 2026-09-03 — M56/M57's plan gate, extended
+  once by choice at the 2026-09-20 hygiene pass.
