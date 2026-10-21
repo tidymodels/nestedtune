@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-20 M150 dropped (macOS CI stays on P3M); its candidate row retitled "Move macOS CI off P3M binaries" with the CRAN timings, a README-modal row added, the M147 row pruned to its archive. Validate green._
+_Last hygiene check: 2026-10-20 audit after a3513d8c fixed the README modal and deleted its row; no new inbox, merge, or linked-item activity. Validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
