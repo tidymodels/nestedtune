@@ -88,25 +88,30 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - AC4 evidence (2026-10-22): `git diff origin/main...HEAD -- cairn/DECISIONS.md` adds one `### D-` heading, D-119, whose heading and closing parenthesis name D-116's every-other-job-full-suite clause as the clause it narrows. Pass.
 - gate (pass 1): `cairn_validate.py` FAIL `weight caps`: `cairn/PROFILE.md` 121 lines (cap <120), from T1's added sentence. Gate failure; review return 1.
 - spawned: diff-bug, blame-history, prior-review, ripple
-- diff-bug #1: the `concurrency` group (workflow and ref) is shared by whole-suite and three-file runs, so a pending scheduled run on main is replaced by a newer push run, and on a branch a push cancels a running full dispatch; D-119 says a break outside the three files shows on the next weekly or full run — fix now (key the group on the full/subset switch too; record in header and D-119).
-- diff-bug #2: header lines 19-21 and PROFILE.md call the three files the ones that exercise vctrs, but `test-nested-tune-bayes-oracles.R:387-388` calls `vctrs::vec_cbind_frame_ptype()` and 12 test files call `vctrs::`; D-119 names only dplyr and tibble as the other route — fix now (reword to the three vctrs compatibility files; add the direct-call route to D-119). Adding a file to the filter is rejected: planned change (Scope In fixes the three files, AC1 names them).
-- diff-bug #3: PROFILE.md line 60 "the four workflows that run the whole suite" now fits devel-vctrs only on schedule and full dispatch — fix now. Its `R-CMD-check-cran.yaml:11-12` echo — reject, false: devel-vctrs still runs the whole suite on its schedule and sets `TESTTHAT_CPUS` on every trigger.
-- diff-bug #4: D-119's list of jobs keeping D-116 ("five check legs, coverage job, CRAN-condition jobs") omits `R-CMD-check-hard.yaml` — fix now in D-119 (every other job). Scope Out's same wording is plan-owned; no change.
-- diff-bug #5: header lines 9-11 "the break surfaces on the next push or pull request" now holds only for breaks the three files catch — fix now.
-- diff-bug #6: the timeout comment sizes the cap on the whole-suite measurement without saying a push run is about 2 minutes — fix now (one clause).
-- diff-bug #7: line 132 "The suite's verdict" — fix now ("The run's verdict"); "with `test-` and `.R` removed" narrower than testthat's pattern — reject, false: it is exact for this repo's file names.
+- diff-bug #1: the `concurrency` group (workflow and ref) is shared by whole-suite and three-file runs, so a pending scheduled run on main is replaced by a newer push run, and on a branch a push cancels a running full dispatch; D-119 says a break outside the three files shows on the next weekly or full run — fix now (key the group on the full/subset switch too; record in header and D-119), fixed 813d3a66.
+- diff-bug #2: header lines 19-21 and PROFILE.md call the three files the ones that exercise vctrs, but `test-nested-tune-bayes-oracles.R:387-388` calls `vctrs::vec_cbind_frame_ptype()` and 12 test files call `vctrs::`; D-119 names only dplyr and tibble as the other route — fix now (reword to the three vctrs compatibility files; add the direct-call route to D-119), fixed 813d3a66. Adding a file to the filter is rejected: planned change (Scope In fixes the three files, AC1 names them).
+- diff-bug #3: PROFILE.md line 60 "the four workflows that run the whole suite" now fits devel-vctrs only on schedule and full dispatch — fix now, fixed 813d3a66. Its `R-CMD-check-cran.yaml:11-12` echo — reject, false: devel-vctrs still runs the whole suite on its schedule and sets `TESTTHAT_CPUS` on every trigger.
+- diff-bug #4: D-119's list of jobs keeping D-116 ("five check legs, coverage job, CRAN-condition jobs") omits `R-CMD-check-hard.yaml` — fix now in D-119 (every other job), fixed 813d3a66. Scope Out's same wording is plan-owned; no change.
+- diff-bug #5: header lines 9-11 "the break surfaces on the next push or pull request" now holds only for breaks the three files catch — fix now, fixed 813d3a66.
+- diff-bug #6: the timeout comment sizes the cap on the whole-suite measurement without saying a push run is about 2 minutes — fix now (one clause), fixed 813d3a66.
+- diff-bug #7: line 132 "The suite's verdict" — fix now ("The run's verdict"), fixed 813d3a66; "with `test-` and `.R` removed" narrower than testthat's pattern — reject, false: it is exact for this repo's file names.
 - diff-bug #8: any `FULL_SUITE` value other than "true" falls back to the subset silently — reject, false: the expression renders only "true" or "false" on the four triggers (diff-bug Q1), and a new trigger is a future planned change.
 - diff-bug #9: AC3's push and pull_request branches rest on reading, not a run — reject, false: AC3 is a claim about the head workflow's logic, read at lines 145-157 with both dispatch values observed; the PR's own `pull_request` run adds an observed case.
-- blame-history #1: the three files are not the only ones exercising vctrs (same as diff-bug #2) — fix now.
-- blame-history #2: PROFILE.md line 60 (same as diff-bug #3) — fix now.
-- blame-history #3: header lines 9-11 (same as diff-bug #5) — fix now.
+- blame-history #1: the three files are not the only ones exercising vctrs (same as diff-bug #2) — fix now, fixed 813d3a66.
+- blame-history #2: PROFILE.md line 60 (same as diff-bug #3) — fix now, fixed 813d3a66.
+- blame-history #3: header lines 9-11 (same as diff-bug #5) — fix now, fixed 813d3a66.
 - blame-history #4: timeout comment's 2.5x against a 37m36s full run — reject, false: the ratio is stated against its own dated 35m24s measurement, which holds; diff-bug #6's clause covers the push path.
-- blame-history #5: the concurrency block lets runs on one branch cancel each other — fix now under diff-bug #1.
-- prior-review #1: header lines 9-10 repeat the M080-fixed overstatement of when a break surfaces (same as diff-bug #5) — fix now.
-- prior-review #2: PROFILE.md line 60 whole-suite sentence, which M080's review also fixed (same as diff-bug #3) — fix now.
-- ripple #1: PROFILE.md line 60 (same as diff-bug #3) — fix now.
+- blame-history #5: the concurrency block lets runs on one branch cancel each other — fix now under diff-bug #1, fixed 813d3a66.
+- prior-review #1: header lines 9-10 repeat the M080-fixed overstatement of when a break surfaces (same as diff-bug #5) — fix now, fixed 813d3a66.
+- prior-review #2: PROFILE.md line 60 whole-suite sentence, which M080's review also fixed (same as diff-bug #3) — fix now, fixed 813d3a66.
+- ripple #1: PROFILE.md line 60 (same as diff-bug #3) — fix now, fixed 813d3a66.
 - ripple #2: `R-CMD-check-cran.yaml:11-12` "unlike in the workflows that run the whole suite" — reject, false: see diff-bug #3.
 - ripple #3: PROFILE.md line 50 "every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN" — reject, false: the sentence is about `NOT_CRAN`, which devel-vctrs keeps true on every trigger.
 - ripple #4: ROADMAP title omits the dispatch default — reject, false: nothing in the title contradicts the diff.
 - ripple #5: DESIGN.md Known issues entry on dispatched runs does not separate three-file runs — reject, false: its point (runs fired from no commit are unattributed) holds for both.
 - ripple #6: `helper-cran.R:14-17` and the `FULL_SUITE` name beside `NESTEDTUNE_FULL_SUITE` — reject, false: the helper's claim holds (`NOT_CRAN` true), and the step-local name is read by no other code.
+- pass 2 (after review return 1), head f9565afb; workflow unchanged since 813d3a66 (`git diff --stat 813d3a66 HEAD -- .github R tests` empty).
+- AC1 evidence (pass 2): run 39867888167, `workflow_dispatch` with `full=false` on 813d3a66, success. Log: `FULL_SUITE: false`, `Whole suite: FALSE`; result table lists dplyr-compat (247), nested-results-set-compat (212), vctrs-compat (529) and no other context; FAIL 0, PASS 988. Pass.
+- AC2 evidence (pass 2): run 39867891668, `workflow_dispatch` with `full=true` on 813d3a66, success. Log: `FULL_SUITE: true`, `Whole suite: TRUE`; its 105 reported contexts diff empty against the 105 `test-*.R` names in `git ls-tree 813d3a66 tests/testthat/`; FAIL 0, PASS 13367. Pass.
+- AC3 evidence (pass 2): head `devel-vctrs.yaml` line 153 sets `FULL_SUITE` to `github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full)`, and lines 154-163 run the filter unless that value is `true`. `push` and `pull_request` make both terms false (filter); `schedule` makes the first true (whole suite); a dispatch follows `full`, observed as `false` and `true` in the two pass-2 runs. Pass.
+- AC4 evidence (pass 2): `git diff origin/main...HEAD -- cairn/DECISIONS.md` adds one `### D-` heading, D-119, naming D-116's every-other-job-full-suite clause as the clause it narrows. Pass.
