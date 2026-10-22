@@ -75,8 +75,8 @@ Below, the sliding designs are \code{\link[rsample:sliding_window]{rsample::slid
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, and the four
 other tuners are \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, the two racing functions and
 \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each pair of designs below is tested to give
-the same splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. A final fit is tested on the results of
-the functions named with it.
+the same splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. Each bullet names the final fits
+that are tested.
 \itemize{
 \item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or a sliding design, with an inner
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}},

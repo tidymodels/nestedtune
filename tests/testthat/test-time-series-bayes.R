@@ -9,8 +9,8 @@
 #   reference_nested_bayes_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver, run here on the rolling-origin
 #   design alone (M113): the outer design never reaches tuner code, and
-#   test-time-series-designs.R runs the grid and fit_resamples paths on every
-#   design in TS_DESIGNS. Pinned by the
+#   test-time-series-designs.R runs the grid reference loop and the
+#   fit_resamples paths on every design in TS_DESIGNS. Pinned by the
 #   "nested_tune_bayes() matches its reference loop on a ... design" test.
 #   Satisfies M110 AC1 for this tuner.
 #

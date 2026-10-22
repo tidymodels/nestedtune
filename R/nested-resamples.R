@@ -60,8 +60,8 @@
 #' [rsample::sliding_index()] and [rsample::sliding_period()], and the four
 #' other tuners are [nested_tune_bayes()], the two racing functions and
 #' [nested_tune_sim_anneal()]. Each pair of designs below is tested to give
-#' the same splits as [rsample::nested_cv()]. A final fit is tested on the results of
-#' the functions named with it.
+#' the same splits as [rsample::nested_cv()]. Each bullet names the final fits
+#' that are tested.
 #'
 #' - Outer [rsample::rolling_origin()] or a sliding design, with an inner
 #'   [rsample::rolling_origin()]. [nested_tune_grid()],
