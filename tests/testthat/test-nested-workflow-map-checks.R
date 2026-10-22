@@ -1,19 +1,15 @@
 # Entry checks on nested_workflow_map() (M71, AC5). Each refusal is asserted
 # by its condition class, named for the user's call, and shown to fire before
-# any fold runs: the orchestrators draw their seeds only once every check has
-# passed, so an untouched `.Random.seed` and an empty dispatch record are
-# the evidence that nothing ran (the M03 discipline, as
-# test-nested-fit-resamples-checks.R applies it).
+# any fold runs: an empty dispatch record is the evidence that nothing ran.
+# An untouched `.Random.seed` is not, because the map restores the caller's
+# stream on every exit.
 
-# The refusal, with the stream and the dispatch record asserted untouched.
+# The refusal, with the dispatch record asserted untouched.
 expect_map_refusal <- function(expr, class) {
   reset_dispatch_record()
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(expr)
   expect_s3_class(cnd, class)
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_workflow_map")
-  expect_identical(.Random.seed, before)
   expect_null(last_dispatch())
   invisible(cnd)
 }

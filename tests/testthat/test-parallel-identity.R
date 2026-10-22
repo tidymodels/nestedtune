@@ -495,8 +495,8 @@ test_that("BC6, BC11, BC15: param_info, control and select reach the folds on tw
 })
 
 # BC12 (M50, AC4), on the ANOVA racer: the two racers share one body,
-# `nested_tune_race()`, and the win/loss racer's daemon packages are tested in
-# test-parallel-required-pkgs.R. The stochastic fixture, so the race's
+# `nested_tune_race()`, and differ only in their registry entry. The
+# stochastic fixture, so the race's
 # resample shuffle and the ranger fits both draw; and the daemons' library
 # holds finetune, which the loop attaches in every daemon before the first
 # fold is sent. The serial race's one caller is the two-daemon block; the

@@ -49,7 +49,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 ## Tasks
 
 - [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background.
-- [ ] T2: Do (a). Plant the three mutations of AC4 in a scratch copy of `R/parallel.R`, and record which expectation fails for each.
+- [x] T2: Do (a). Plant the three mutations of AC4 in a scratch copy of `R/parallel.R`, and record which expectation fails for each.
 - [ ] T3: Do (b) and (c).
 - [ ] T4: Do (d) for the driver, RNG, final-fit and model-spec files.
 - [ ] T5: Do (d) for the reader, compat, parallel and misc files, then (e) and (f).
@@ -65,6 +65,12 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - 2026-10-21: plan gate chose keeping the plot file's `ggplot_build()` value checks over removing them under the profile's vdiffr-only clause, because they test documented claims a snapshot cannot state; falsified by such a check that asserts only cosmetic output.
 - 2026-10-21: criteria audit (reduced, fresh Opus reader): two findings, both fixed. AC1 now states a property of the suite, with the ledger moved to T7; AC4 is narrowed to three formals, since `dispatch_folds()` builds two `.args` lists and the tuner blocks cannot merge into one run. AC5's bar went from 150 s to 100 s on the re-estimate that followed.
 - 2026-10-21: collision: D-079 keeps the two-versus-three daemon blocks (Out). The parked "Fix the M079 review leftovers" row names suite time being priced again as a promotion condition; it is left for triage, not absorbed.
+- 2026-10-22: branch cut from 5feebda2 (the branch point). T1's block and coverage runs started on a detached worktree of it in the scratchpad; the timing run waits for T7, so both trees are timed side by side.
+- 2026-10-22: minor amendment: each task updates the `helper-time-budget.R` rows of the lines it moves, since the hygiene test fails otherwise; T6 keeps the final ledger check and `start-first`.
+- 2026-10-22: T2: BC6's `param_info` block, BC11 and BC15 merged into one `nested_tune_bayes()` run that sets all three. The rule is `pct_loss` on `df1, df2` at limit 20: BC15's old rule picked the default's candidates on this run, and its select mutation failed nothing. AC4 mutations, on scratch copies of `R/parallel.R` with both `.args` lists set to the default: each of `param_info`, `control` and `select` fails the merged block at :492 (per column) and :494 (whole object). BC12 runs the ANOVA racer, and its ledger row drops `times = 2`.
+- 2026-10-22: T2 verify: full suite at d1949e23, 0 failures, 0 errors; `air format --check .` clean.
+- 2026-10-22: T3: (b) the race oracles, RNG, checks and design-support files run the ANOVA racer. The deterministic oracle, the model-package block and the final-fit package block keep both racers, since they read each racer's registry entry. `test-parallel-required-pkgs.R:80` already ran the ANOVA racer alone, so it is unchanged. (c) grid-checks :186, :262 and :623, bayes :305, race :462, anneal :403, the AC5 seed lines and `expect_map_refusal()`'s seed lines are gone. Grid-checks :467 stays: it starts with no seed, which `restore_rng()` leaves alone, so it can fail. Hygiene :312 and its constant are gone.
+- 2026-10-22: T3 also took the (d) blocks of the same files: the race error-path RNG block, and in the bayes, anneal and race checks files the structure blocks and the per-driver malformed-design, dots, control-class, control event-level and select blocks, whose checks the file's table fires and the grid checks file tests in full.
 
 ## Decisions
 

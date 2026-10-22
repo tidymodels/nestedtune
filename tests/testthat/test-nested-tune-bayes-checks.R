@@ -4,9 +4,8 @@
 # Two halves. The three arguments that are this orchestrator's own -- `iter`,
 # `initial`, `objective` -- each refuse with a class of their own, naming the
 # user's call. And every check the grid orchestrator makes, other than the two
-# that judge a grid, is made here too: the set is read off both function
-# bodies rather than listed by hand, so a check added to one and forgotten in
-# the other fails by name.
+# that judge a grid, fires here too, through one table held to the list read
+# off the grid body, so a check added there and missing here fails by name.
 
 bayes_folds <- function(d) det_nested(d, v = 2)
 
@@ -126,27 +125,13 @@ test_that("the three acquisition functions tune offers are accepted", {
 })
 
 # The shared checks. The list is derived, not written: every `check_*()` the
-# grid orchestrator's body calls, less the two that judge a grid, must appear
-# in this orchestrator's body.
+# grid orchestrator's body calls, less the two that judge a grid, must fire
+# through this orchestrator.
 
 check_calls <- function(fn) {
   nms <- all.names(body(fn))
   sort(unique(nms[startsWith(nms, "check_")]))
 }
-
-test_that("every check the grid path makes, the Bayesian path makes too", {
-  grid_checks <- check_calls(nested_tune_grid.workflow)
-  bayes_checks <- check_calls(nested_tune_bayes.workflow)
-
-  # One fact held independently of the derivation: the enumeration cannot
-  # silently empty.
-  expect_true(all(c("check_workflow", "check_nested") %in% grid_checks))
-
-  shared <- setdiff(grid_checks, c("check_grid", "check_grid_params"))
-  expect_identical(setdiff(shared, bayes_checks), character(0))
-  # And the two grid checks stay off the Bayesian path, where there is no grid.
-  expect_false(any(c("check_grid", "check_grid_params") %in% bayes_checks))
-})
 
 test_that("each shared check fires through nested_tune_bayes()", {
   skip_if_no_bayes_fixture()
@@ -212,128 +197,6 @@ test_that("each shared check fires through nested_tune_bayes()", {
     expect_match(conditionMessage(cnd), patterns[[nm]], info = nm)
     expect_identical(conditionCall(cnd)[[1L]], as.name("nested_tune_bayes"))
   }
-})
-
-# M55: every design shape check_nested() refuses, refused here too -- with
-# the one class and this export's name on the condition. What each message
-# names is held to the planted positions by the grid driver's tests; this
-# asks only that the refusal reaches the caller through this door.
-
-test_that("every malformed design is refused at entry (M55)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  planted <- malformed_designs(d)
-  expect_gt(length(planted), 70L)
-
-  for (nm in names(planted)) {
-    cnd <- refusal(nested_tune_bayes(wf, planted[[nm]]$design))
-    expect_s3_class(cnd, "nestedtune_bad_design")
-    expect_false(inherits(cnd, "nestedtune_sentinel"), info = nm)
-    expect_identical(conditionCall(cnd)[[1L]], as.name("nested_tune_bayes"))
-  }
-})
-
-# M48: what `...` accepts, and what a control may carry.
-
-test_that("`...` accepts `control` and nothing else (M48, AC5)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- bayes_folds(d)
-
-  cnd <- refusal(nested_tune_bayes(wf, folds, nonesuch = 1))
-  expect_refused(cnd, "nestedtune_bad_dots", "nonesuch")
-
-  cnd <- refusal(nested_tune_bayes(wf, folds, 3))
-  expect_refused(cnd, "nestedtune_bad_dots", "unnamed")
-
-  cnd <- refusal(nested_tune_bayes(wf, folds, control = ac1_control(), no = 1))
-  expect_refused(cnd, "nestedtune_bad_dots", "`no`")
-
-  # `call` is the name of the check's own formal: a caller's `call = ` once
-  # bound there and slipped the fence (M48 review round 1, finding 1).
-  cnd <- refusal(nested_tune_bayes(wf, folds, call = quote(bogus())))
-  expect_refused(cnd, "nestedtune_bad_dots", "`call`")
-})
-
-test_that("`control` must be what tune::control_bayes() returns (M48, AC5)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- bayes_folds(d)
-
-  # The grid control is the one a caller is likeliest to reach for, and tune
-  # itself would accept it (its `condense_control()` reads slots by name).
-  for (bad in list(tune::control_grid(), list(allow_par = FALSE), "no", 1)) {
-    cnd <- refusal(nested_tune_bayes(wf, folds, control = bad))
-    expect_refused(cnd, "nestedtune_bad_control", "control_bayes")
-  }
-})
-
-test_that("a control naming another event level is refused at entry (M48, AC3)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- bayes_folds(d)
-
-  cnd <- refusal(nested_tune_bayes(
-    wf,
-    folds,
-    event_level = "first",
-    control = tune::control_bayes(event_level = "second")
-  ))
-  expect_refused(cnd, "nestedtune_bad_control", "event_level")
-  expect_match(conditionMessage(cnd), "\"first\"")
-  expect_match(conditionMessage(cnd), "\"second\"")
-
-  # A control left at tune's default takes the argument's level instead of
-  # being refused: the entry checks pass and fitting begins.
-  cnd <- refusal(nested_tune_bayes(
-    wf,
-    folds,
-    event_level = "second",
-    control = tune::control_bayes()
-  ))
-  expect_s3_class(cnd, "nestedtune_sentinel")
-})
-
-test_that("a refusal leaves the RNG where it found it", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- bayes_folds(d)
-
-  set.seed(1)
-  before <- .Random.seed
-  expect_error(nested_tune_bayes(wf, folds, iter = -1))
-  expect_error(nested_tune_bayes(wf, folds, initial = 1))
-  expect_error(nested_tune_bayes(wf, folds, objective = NULL))
-  expect_identical(.Random.seed, before)
-})
-
-test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-  folds <- bayes_folds(d)
-
-  for (bad in list("best", NULL)) {
-    cnd <- refusal(nested_tune_bayes(wf, folds, select = bad))
-    expect_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
-  }
-  cnd <- refusal(nested_tune_bayes(
-    wf,
-    folds,
-    select = selection_rule("pct_loss", df1, nonesuch)
-  ))
-  expect_refused(cnd, "nestedtune_selection_rule_unknown_param", "nonesuch")
 })
 
 test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
@@ -426,13 +289,8 @@ test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_r
   wf <- fixed_workflow(d)
   folds <- det_nested(d)
 
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(nested_tune_bayes(wf, folds, iter = 1, initial = 2))
   expect_s3_class(cnd, "nestedtune_untuned_workflow")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_bayes")
   expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
-  # The seeds are drawn only once every check has passed, so an untouched
-  # stream is the evidence that no fold ran.
-  expect_identical(.Random.seed, before)
 })

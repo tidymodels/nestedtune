@@ -954,10 +954,6 @@ time_budget_totals <- function(ledger = time_budget_ledger()) {
 # two pool starts, and identity is the subject of its own candidate row.
 CLASSIFY_BUDGET_CEILING_S <- 480
 
-# What the same ledger totalled before M16 cut anything, so the reduction is a
-# measured figure rather than a remembered one.
-CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
-
 # The ceiling on the file M20 added, set at the file's one pool start plus a
 # margin. M16 capped only the file its stall was localized to and recorded the
 # other three without a ceiling; a new file is cheaper to hold to a bound from
