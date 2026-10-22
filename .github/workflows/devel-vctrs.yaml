@@ -6,15 +6,23 @@
 # that generic is renamed, removed or given different semantics upstream, a
 # `vec_cbind()` on a results object silently stops restoring the class, and
 # nothing in a released-vctrs matrix would notice until the change reached CRAN.
-# This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
-# against it, so the break surfaces on the next push or pull request here
-# rather than at the upstream release. It also runs once a week (the
-# `schedule:` below, Monday 06:17 UTC -- off the hour, the slot GitHub
-# documents as the most delayed under load), so a quiet week here still asks
-# the question of that week's upstream commits, and on demand
-# (`workflow_dispatch:`), so an upstream change can be checked without a push.
-# GitHub disables a `schedule:` after 60 days with no repository activity, so
-# a long dormancy still needs the dispatch.
+# This leg installs vctrs from `r-lib/vctrs@main` and runs tests against it,
+# so the break surfaces on the next push or pull request here rather than at
+# the upstream release. It also runs once a week (the `schedule:` below,
+# Monday 06:17 UTC -- off the hour, the slot GitHub documents as the most
+# delayed under load), so a quiet week here still asks the question of that
+# week's upstream commits, and on demand (`workflow_dispatch:`), so an
+# upstream change can be checked without a push. GitHub disables a
+# `schedule:` after 60 days with no repository activity, so a long dormancy
+# still needs the dispatch.
+#
+# What a run tests depends on its trigger. A push or pull request runs only
+# the three test files that exercise vctrs (`test-vctrs-compat.R`,
+# `test-dplyr-compat.R`, `test-nested-results-set-compat.R`; the `filter` in
+# the last step). The weekly schedule runs the whole suite, because dplyr and
+# tibble build on vctrs too, so a development-vctrs break can reach files
+# outside the three. A dispatch runs the whole suite unless its `full` input
+# is set to false.
 #
 # The `cache-version: devel-vctrs` on the dependency step keys this leg's
 # library cache apart from every other workflow's. The action saves its cache
@@ -52,6 +60,11 @@ on:
   schedule:
     - cron: '17 6 * * 1'
   workflow_dispatch:
+    inputs:
+      full:
+        description: 'Run the whole suite (false runs the three vctrs test files)'
+        type: boolean
+        default: true
 
 name: devel-vctrs.yaml
 
@@ -127,8 +140,19 @@ jobs:
           }
         shell: Rscript {0}
 
-      - name: Run the test suite against it
+      # testthat matches `filter` against each file name with `test-` and `.R`
+      # removed. A NULL filter runs every file.
+      - name: Run the tests against it
+        env:
+          FULL_SUITE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
         run: |
+          full <- identical(Sys.getenv("FULL_SUITE"), "true")
+          cat("Whole suite: ", full, "\n", sep = "")
+          filter <- if (full) {
+            NULL
+          } else {
+            "^(vctrs-compat|dplyr-compat|nested-results-set-compat)$"
+          }
           pkgload::load_all(".", quiet = TRUE)
-          testthat::test_local(stop_on_failure = TRUE)
+          testthat::test_local(filter = filter, stop_on_failure = TRUE)
         shell: Rscript {0}

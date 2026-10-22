@@ -1,13 +1,13 @@
 # M153: The devel-vctrs job runs the vctrs test files on each push and the whole suite each week
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a CI job that gates nothing
-- **Branch/PR:** —
+- **Branch/PR:** m153-devel-vctrs-subset
 
 ## Goal
 
@@ -45,7 +45,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 
 ## Tasks
 
-- [ ] T1: Edit `devel-vctrs.yaml`: add the `full` input, and make the test step choose between the filter and the whole suite.
+- [x] T1: Edit `devel-vctrs.yaml`: add the `full` input, and make the test step choose between the filter and the whole suite.
 - [ ] T2: Run the `verify` slot.
 - [ ] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
 - [ ] T4: Write the D-entry.
@@ -59,6 +59,8 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-21: question set: may implement start two `workflow_dispatch` runs on the branch — yes, both.
 - 2026-10-21: plan gate chose the subset on each push over weekly-only runs, because a push still checks the watched generic at once; falsified by a development-vctrs break that the subset misses and only the weekly run catches.
 - 2026-10-21: criteria audit (reduced, fresh Opus reader): four findings, all fixed. The filter is now a regex on file names without `test-` and `.R`; AC2's domain is the head's `test-*.R` files; AC3 covers all four events; the `ci-usage.py` clause was dropped, since its exit status depends on `gh` and the network. A D-entry task was added, because the change narrows D-116.
+- 2026-10-22: status in-progress; branch m153-devel-vctrs-subset cut from origin/main at 1d3d2fe5.
+- 2026-10-22: T1 done. The step reads a `FULL_SUITE` env value, true on `schedule` or on a dispatch with `full` true, and passes the filter to `test_local()` otherwise; it prints `Whole suite: <TRUE|FALSE>` so the log shows the path. The filter, read against testthat 3.3.2's `filter_test_scripts()`, picks the three files out of 105 locally. PROFILE.md's devel-vctrs sentence now states the split.
 
 ## Decisions
 
