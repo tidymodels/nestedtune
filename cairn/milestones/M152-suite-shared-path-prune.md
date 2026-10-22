@@ -89,6 +89,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - 2026-10-22: T8: the verify slot is the full suite at 7040fc68 (0 failures, 0 errors) and `air format --check .` clean at the head; nothing outside `cairn/` and `benchmarks/` changed after 7040fc68.
 - 2026-10-22: claim audit: not owed — internal tier.
 - 2026-10-22: status review; handed to /milestone-review.
+- 2026-10-22: step-7 approval: m152-suite-shared-path-prune approved for merge
 
 ## Decisions
 
