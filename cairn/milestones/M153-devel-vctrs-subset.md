@@ -1,6 +1,6 @@
 # M153: The devel-vctrs job runs the vctrs test files on each push and the whole suite each week
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -66,6 +66,8 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: T3 run 39861993834 (`full=false`, head 6d52f81f) green: the step printed `Whole suite: FALSE` and reported dplyr-compat, nested-results-set-compat and vctrs-compat and no other file (988 passes, 16.9 s); the job took 2m03s. Full run 39862460114 started.
 - 2026-10-22: T2 done. `devtools::test()` at 6d52f81f: FAIL 0, PASS 13367. No `.R`, roxygen, vignette or README file changed, so `air`, `document()` and the prose sweeps are not owed.
 - 2026-10-22: T3 done. Run 39862460114 (`full=true`, head 6d52f81f) green: the step printed `Whole suite: TRUE`, and its reported contexts match the 105 `tests/testthat/test-*.R` files in `git ls-tree 6d52f81f` exactly (FAIL 0, PASS 13367, 2133.9 s); the job took 37m36s.
+- 2026-10-22: claim audit: not owed — internal tier
+- 2026-10-22: status review; all tasks checked, verify clean at ba523f66 (later commits are tracking-only).
 
 ## Decisions
 
