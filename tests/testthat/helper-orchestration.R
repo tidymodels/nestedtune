@@ -701,8 +701,7 @@ make_ts_weekday_data <- function() {
 # (M120). Across the three outer folds, sliding-window has four, six and
 # eight inner resamples, sliding-index seven, nine and eleven, and
 # sliding-period four, five and seven. These counts come from
-# `sapply(x$inner_resamples, nrow)` on each fixture, run 2026-09-27. The
-# racers at `burn_in = 2` need at least three in every fold. On the weekday
+# `sapply(x$inner_resamples, nrow)` on each fixture, run 2026-09-27. On the weekday
 # dates a 39-day `lookback` covers 28 rows, so the sliding-index splits differ
 # from the sliding-window ones in every fold. `sliding_period()`
 # takes analysis sets of the current week and the five weeks before it, and

@@ -290,7 +290,9 @@
   `rsample::sliding_index()` or `rsample::sliding_period()` design with
   an inner `rsample::rolling_origin()` design. `nested_tune_grid()` and
   `nested_fit_resamples()` are tested on all four, and so is
-  `nested_final_fit()` for their results. `nested_tune_bayes()`,
+  `nested_final_fit()` for `nested_fit_resamples()` results.
+  `nested_final_fit()` for `nested_tune_grid()` results is tested on the
+  rolling-origin design. `nested_tune_bayes()`,
   `nested_tune_race_anova()`, `nested_tune_race_win_loss()` and
   `nested_tune_sim_anneal()` are tested on the rolling-origin design, and
   so is `nested_final_fit()` for their results, plus the sliding-window
@@ -304,15 +306,13 @@
   `rsample::sliding_period()` design is tested under `nested_tune_grid()`,
   and so is `nested_final_fit()` for its results. `nested_resamples()`
   builds these three designs with the same splits as
-  `rsample::nested_cv()`. These designs are also tested under
+  `rsample::nested_cv()`. `nested_workflow_map()` is tested on these three
+  designs with its default `fn`. `nested_fit_resamples()` is tested to
+  accept these designs. It checks the inner design but fits nothing on it.
   `nested_tune_bayes()`, `nested_tune_race_anova()`,
-  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()`, and so is
-  `nested_final_fit()` for the results of those four tuners.
-  `nested_workflow_map()` is tested on these three designs with its default
-  `fn`. With `fn` set to each of those four tuners, it is tested on the
-  sliding-period design alone. `nested_fit_resamples()` is tested to accept
-  these designs. It checks the inner design but fits nothing on it. Any
-  other inner design is not tested.
+  `nested_tune_race_win_loss()` and `nested_tune_sim_anneal()` are not
+  tested on these designs. They are tested with an inner sliding design on
+  the sliding-window pair below. Any other inner design is not tested.
 
 * An outer `rsample::sliding_window()`, `rsample::sliding_index()` or
   `rsample::sliding_period()` design with an inner design of one of these

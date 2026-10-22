@@ -75,21 +75,23 @@ Below, the sliding designs are \code{\link[rsample:sliding_window]{rsample::slid
 \code{\link[rsample:sliding_index]{rsample::sliding_index()}} and \code{\link[rsample:sliding_period]{rsample::sliding_period()}}, and the four
 other tuners are \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}, the two racing functions and
 \code{\link[=nested_tune_sim_anneal]{nested_tune_sim_anneal()}}. Each pair of designs below is tested to give
-the same splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. A final fit is tested on the results of
-the functions named with it.
+the same splits as \code{\link[rsample:nested_cv]{rsample::nested_cv()}}. Each bullet names the final fits
+that are tested.
 \itemize{
 \item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} or a sliding design, with an inner
 \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}}. \code{\link[=nested_tune_grid]{nested_tune_grid()}},
-\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} and their final fits are tested on all four.
-The four other tuners, their final fits and \code{\link[=nested_workflow_map]{nested_workflow_map()}} are
-tested on the rolling-origin outer design. The final fit of
-\code{\link[=nested_tune_bayes]{nested_tune_bayes()}} is also tested on the sliding-window outer design.
-\item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an inner sliding design. All five
-tuners and their final fits are tested on all three.
-\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on all three with its default \code{fn},
-and with each of the four other tuners on sliding-period alone.
+\code{\link[=nested_fit_resamples]{nested_fit_resamples()}} and the final fit of \code{\link[=nested_fit_resamples]{nested_fit_resamples()}}
+are tested on all four. The final fit of \code{\link[=nested_tune_grid]{nested_tune_grid()}}, the four
+other tuners, their final fits and \code{\link[=nested_workflow_map]{nested_workflow_map()}} are tested on
+the rolling-origin outer design. The final fit of \code{\link[=nested_tune_bayes]{nested_tune_bayes()}}
+is also tested on the sliding-window outer design.
+\item Outer \code{\link[rsample:rolling_origin]{rsample::rolling_origin()}} with an inner sliding design.
+\code{\link[=nested_tune_grid]{nested_tune_grid()}} and its final fit are tested on all three.
+\code{\link[=nested_workflow_map]{nested_workflow_map()}} is tested on all three with its default \code{fn}.
 \code{\link[=nested_fit_resamples]{nested_fit_resamples()}} accepts these designs. It checks the inner
-design but fits nothing on it.
+design but fits nothing on it. The four other tuners are not tested on
+these designs. They are tested with an inner sliding design on the
+sliding-window pair below.
 \item A sliding design in both loops, which gives nine pairs.
 \code{\link[=nested_tune_grid]{nested_tune_grid()}} is tested on all nine. On the sliding-window pair,
 the four other tuners, \code{\link[=nested_workflow_map]{nested_workflow_map()}} with its default \code{fn},

@@ -9,8 +9,8 @@
 #   seed contract rather than from the driver, run here for each racer on
 #   the rolling-origin design alone (M113): the outer design never reaches
 #   tuner code, every fixture's inner call is the same `rolling_origin()`,
-#   and test-time-series-designs.R runs the grid and fit_resamples paths on
-#   every design in TS_DESIGNS. Pinned by the "<racer> matches its reference
+#   and test-time-series-designs.R runs the grid reference loop and the
+#   fit_resamples paths on every design in TS_DESIGNS. Pinned by the "<racer> matches its reference
 #   loop on a rolling-origin design" tests. Satisfies M110 AC1 for these
 #   tuners.
 #
