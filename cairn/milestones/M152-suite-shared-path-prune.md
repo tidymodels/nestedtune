@@ -1,6 +1,6 @@
 # M152: The suite drops tests that repeat a shared path, cannot fail, or test a dependency
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -34,7 +34,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - [ ] AC2: `benchmarks/coverage-lines.R` gives each line of `R/` the same hit-or-miss status at the branch point and at the head, compared on `file` and `pos`.
 - [ ] AC3: `git diff --stat <branch point>..HEAD -- R man NEWS.md README.Rmd README.md vignettes` is empty.
 - [ ] AC4: Take each of `param_info`, `control` and `select` in turn. A mutation makes `dispatch_folds()` pass that formal's default in both of its `.args` lists. With each mutation, the merged identity run of (a) fails.
-- [ ] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head. The head's suite total is at least 100 s lower.
+- [ ] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower.
 - [ ] AC6: The profile's `verify` slot is clean at the head.
 
 ## Coverage
@@ -48,14 +48,14 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 
 ## Tasks
 
-- [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background.
+- [x] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background.
 - [x] T2: Do (a). Plant the three mutations of AC4 in a scratch copy of `R/parallel.R`, and record which expectation fails for each.
 - [x] T3: Do (b) and (c).
 - [x] T4: Do (d) for the driver, RNG, final-fit and model-spec files.
 - [x] T5: Do (d) for the reader, compat, parallel and misc files, then (e) and (f).
 - [x] T6: Update the `helper-time-budget.R` rows of each deleted or merged wait, and `Config/testthat/start-first`.
-- [ ] T7: Run the three scripts at the head and compare. Write a prune ledger to the Review section. It has one row per removed or changed block, with its category and the head block that covers it. Add the coverage and timing results.
-- [ ] T8: Run the `verify` slot.
+- [x] T7: Run the three scripts at the head and compare. Write a prune ledger to the Review section. It has one row per removed or changed block, with its category and the head block that covers it. Add the coverage and timing results.
+- [x] T8: Run the `verify` slot.
 
 ## Work log
 
@@ -84,6 +84,11 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - 2026-10-22: minor amendment: the prune ledger is committed as `benchmarks/prune-ledger-5feebda2-7040fc68.csv` beside the block and coverage tables, not in the Review section, which review alone writes.
 - 2026-10-22: T7: block tables 5feebda2 1245 blocks / 15309 expectations, 7040fc68 1150 / 13269; 102 blocks gone and 44 counts changed, all 146 classified in the ledger (a 3, b 17, c 17, d 85, e 12, f 12), each with its covering head block. Both tables fail the one interrupt block "an interrupted run leaves no fold executing" with 3 expectations; it passes when its file runs alone at the head, so the failure is the concurrent runs', at both trees. AC2: 6352 lines at both trees, 128 uncovered at both, 0 lines change status on `file` and `pos`.
 - 2026-10-22: T7 timing: `profile-tests.R 1` at both trees side by side on AC power: 5feebda2 893.4 s, 7040fc68 821.7 s, 71.7 s lower, short of AC5's 100 s. The remaining in-scope candidates are small (the final-fit race file 5.2 s, selection-metric 8.3 s); the larger files left are kept for stated reasons (the interrupt file 63 s, the design-support loops 20 s as the only tests of README "Yes" cells). Stop for the user on AC5.
+- 2026-10-22: substantive amendment: AC5's bar lowered from 100 s to 60 s, and the runs made side by side, at the user's choice at the AC5 stop over keeping 100 s with more cuts or dropping AC5. The amended text: "Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower."
+- 2026-10-22: re-audit: AC5 (reduced) — nothing; the reader notes that side-by-side totals are contention figures and that 11.7 s of margin on one run per tree can fall to noise at review, where `profile-tests.R 3` would steady the comparison.
+- 2026-10-22: T8: the verify slot is the full suite at 7040fc68 (0 failures, 0 errors) and `air format --check .` clean at the head; nothing outside `cairn/` and `benchmarks/` changed after 7040fc68.
+- 2026-10-22: claim audit: not owed — internal tier.
+- 2026-10-22: status review; handed to /milestone-review.
 
 ## Decisions
 
