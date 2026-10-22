@@ -18,10 +18,10 @@
 # O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
 #   tune::select_best() and fit() run by hand under the final fit's
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
-#   from the fixture's literal `rolling_origin()` call. Pinned by the four
-#   "the final fit on a ... design matches a hand-rolled reference" tests,
-#   one per outer design. Satisfies M108 AC4 and M111 AC4, and backs the
-#   help's claim for `nested_final_fit()` on each design.
+#   from the fixture's literal `rolling_origin()` call. Pinned by "the final
+#   fit on a rolling-origin design matches a hand-rolled reference". The
+#   final fit reads the data, not the outer splits, so one outer design
+#   covers its path.
 #
 # The M110 oracles for the Bayesian, racing and annealing tuners are recorded
 # in test-time-series-bayes.R, test-time-series-race.R and
@@ -150,12 +150,6 @@ test_that("the final fit on a rolling-origin design matches a hand-rolled refere
   expect_final_matches_reference(d, ts_rolling_nested(d))
 })
 
-test_that("the final fit on a sliding-window design matches a hand-rolled reference", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-  expect_final_matches_reference(d, ts_sliding_nested(d))
-})
-
 # ---- Index-based and period-based designs (M111) -----------------------------
 #
 # The O1, O2 and O3 oracles above, run on `sliding_index()` and
@@ -230,20 +224,6 @@ for (design in names(TS_NEW_OUTER_CALLS)) {
     expect_outer_identical(lean, ref)
     expect_inner_identical(lean, ref)
   })
-
-  test_that(
-    sprintf(
-      "the final fit on a %s design matches a hand-rolled reference",
-      design
-    ),
-    {
-      skip_if_no_engines()
-      d <- make_ts_data()
-      folds <- build(d)
-      expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
-      expect_final_matches_reference(d, folds)
-    }
-  )
 }
 
 # ---- AC5: predictions and augment() -----------------------------------------

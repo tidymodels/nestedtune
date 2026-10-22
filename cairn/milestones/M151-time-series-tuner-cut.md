@@ -50,7 +50,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 ## Tasks
 
 - [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background, with outputs in the scratchpad.
-- [ ] T2: Delete the files and blocks that Scope In names. If no other file calls a fixture helper, delete it. Update `DESCRIPTION` start-first. Check `helper-time-budget.R` for rows on the deleted files.
+- [x] T2: Delete the files and blocks that Scope In names. If no other file calls a fixture helper, delete it. Update `DESCRIPTION` start-first. Check `helper-time-budget.R` for rows on the deleted files.
 - [ ] T3: Rewrite the help section and sentences, and run `devtools::document()`. Rewrite the `NEWS.md` bullets. Write each claim against a head test block.
 - [ ] T4: Write the D-entry, and widen the inner-designs candidate row.
 - [ ] T5: Run the three scripts at the head and compare. Write the block comparison, a claim ledger with one row per help or `NEWS.md` sentence, the timing and the coverage results to the Review section.
@@ -68,6 +68,8 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-21: split: the four requested pieces became M151 to M155; the ledger re-key and the comment cleanup were split into M154 and M155, because one goal needed "and".
 - 2026-10-21: inbox sweep: one open issue (#91, docs pass), no overlap; no open PRs.
 - 2026-10-21: lessons harvested: M51 (a CI leg's time moves with the runner, so the timing criteria use local serial runs on one machine).
+- 2026-10-21: T1 started: branch point 3af50898 checked out as a detached worktree in the scratchpad; test-blocks and coverage-lines run there in the background; the branch-point profile runs alone after them, so its timing has no contention.
+- 2026-10-21: T2 done: deleted the two inner tuner files, the four map-with-tuner blocks and the three sliding outer final fits; no helper became unused (each is called from another test file); start-first drops the two files; the ledger has no rows on them; the O2 and O3 oracle headers no longer name the deleted tests. The edited files and the start-first guard pass.
 
 ## Decisions
 
