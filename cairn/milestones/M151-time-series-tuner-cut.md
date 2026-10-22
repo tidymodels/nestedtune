@@ -86,6 +86,9 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-22: T6 verify: the full suite passed earlier at 3e0db968 (1245 blocks, 0 failures); since then only comments changed, and `test-time-series-designs.R` passes (22 blocks). `air format --check .` clean; the six gating prose sweeps clean; `devtools::document()` gives no diff except raising `Config/roxygen2/version` to the local roxygen2 8.1.1, which was put back. Status set to review.
 - 2026-10-21: T4 done: D-118 written; the "Inner designs M140 leaves out" row now names the combinations D-118 leaves untested.
 
+- 2026-10-22: correction to the T2 line: `wset_map_args()` lost its last caller in a test file; `wset_results()` in `helper-orchestration.R` still calls it, so no helper became unused.
+- 2026-10-22: D-118 was reworded at review (ab9fc8bd) before reaching the default branch: heading, Context, falsifiers and supersession note, per the review lines below.
+
 ## Decisions
 
 ## Review
@@ -97,3 +100,30 @@ Reviewed 2026-10-22 at 6fd4eea9 on m151-time-series-tuner-cut; the default branc
 - AC3: `cairn/DECISIONS.md` gains one entry on the branch (`git diff 3af50898 HEAD` adds one `### D-` heading), D-118 at line 2114. Its supersession note names clauses of D-085, D-112, D-113 and D-080, and its Decision says the Bayesian final fit on the sliding-window outer design stays "because it is the test that D-075 rests on". Pass.
 - AC4: recomputed from the `[hang-trace]` marker times of `<file> :: <test>` lines in run 39525408946 (commit a3513d8c; `git diff a3513d8c 3af50898 -- tests R DESCRIPTION` empty). All 31 blocks the head lacks are found on each leg. Their share of summed block time: macOS 557 of 3384 s (16.4%), ubuntu devel 842 of 5432 s (15.5%), oldrel-1 821 of 5302 s (15.5%), release 841 of 5486 s (15.3%), windows 938 of 6056 s (15.5%); each is at least 12%. Pass.
 - AC5: `benchmarks/coverage-lines.R` at 3af50898 (branch-point worktree) and on the branch tree after T4 (3e0db968; `R/` unchanged since, and the later test edits are comments only): 6352 tallied lines in each, joined on `file` and `pos` with 0 unmatched; 0 lines change hit-or-miss status; 128 uncovered in each. Pass.
+
+Consistency gate: `cairn_validate` all checks passed; `pkgdown::check_pkgdown()` no problems; README.Rmd and README.md untouched; the branch adds no top-level file; `NEWS.md` carries the narrowed time-series bullets; the six gating prose sweeps clean; `air format --check .` clean; `devtools::document()` gives no diff except raising `Config/roxygen2/version` to the local 8.1.1, put back each time.
+
+spawned: diff-bug, blame-history, prior-review, ripple
+- diff-bug #1: the section's lead sentence "A final fit is tested on the results of the functions named with it" says the four tuners' final fits are tested on the sliding-window pair, which they are not — fix now, fixed ab9fc8bd (it now says each bullet names the final fits that are tested).
+- diff-bug #2: D-118's heading says grid results' final fit is tested on the rolling-origin outer design alone, though its Decision keeps it on the sliding-window pair and the inner designs — fix now, fixed ab9fc8bd.
+- diff-bug #3: D-118's two falsifiers name combinations it leaves untested, so neither can fire (the fault D-113 corrected in D-112) — fix now, fixed ab9fc8bd (the falsifiers now name tuner-specific inner-split code, a final fit that reads the split indices, or a user report on an untested combination).
+- diff-bug #4: D-118's Context says the re-pointing stays tested on the nine pairs, but only the sliding-window pair's finalized-range grid test catches a skipped re-pointing — fix now, fixed ab9fc8bd.
+- diff-bug #5: D-118's supersession note leaves unclear whether D-085's clause on the four tuners' sliding-period final fits is included — fix now, fixed ab9fc8bd.
+- diff-bug #6: D-118 does not say it narrows D-071, whose tested set held the grid final fit on the sliding-window outer design — fix now, fixed ab9fc8bd.
+- diff-bug #7: `helper-orchestration.R`'s TS_INNER_DESIGNS comment says the racers need three inner resamples per fold, but no racer runs on those fixtures after the cut — fix now, fixed ab9fc8bd.
+- diff-bug #8: the bayes, race and anneal file headers say the designs file runs the grid paths on every design, but the grid final fit now runs on rolling-origin alone — fix now, fixed ab9fc8bd (they now say the grid reference loop).
+- diff-bug #9: the "Inner designs M140 leaves out" row now also holds an outer-design gap, so its title no longer fits — reject (style): the row's detail names the gap, and `/cairn-triage`'s retitle disposition owns titles.
+- diff-bug #10: the edited O2 and O3 comments keep oracle-type labels and a milestone citation — reject (planned change): M155 cleans every test comment, and this diff added no label.
+- diff-bug #11: the work log's "2026-10-21: T4 done" line sits after 2026-10-22 lines — reject (style): the lines were inserted above an anchor; dates stay absolute, and the work log is not reordered.
+- diff-bug #12: the T2 line says each helper is called from another test file, but `wset_map_args()` is now called only from `wset_results()` in a helper — fix now: a correcting work-log line records it; the helper is still used.
+- diff-bug #13: AC6 is unchecked while status reads review — reject (false): review ticks it below on fresh evidence.
+- blame-history #1: NEWS bullet 1 opens "Every orchestrator and `nested_final_fit()` support" the four outer designs, while the grid final fit is now tested on rolling-origin alone — reject (false): `nested_final_fit()` stays tested on all four outer designs for `nested_fit_resamples()` results, and the support sentence for the other orchestrators already rested on the shared loop (D-079).
+- blame-history #2: D-118's falsifiers cannot fire — same as diff-bug #3, fixed ab9fc8bd.
+- blame-history #3: the kept pair tests do not compare `procedure$tuner`, so a racer that ran grid on an inner sliding design would pass — reject (false): the tuner is chosen by `run_tuner()` with no design input, and routing stays tested on every `fn` in `test-nested-workflow-map-oracles.R` and on the racers in `test-nested-tune-race-oracles.R`.
+- blame-history #4: D-118's Context overstates the re-pointing coverage — same as diff-bug #4, fixed ab9fc8bd.
+- blame-history #5: D-075's falsifier is now guarded by the Bayesian sliding-window final fit and the fit_resamples final fits only — reject (false): the reviewer reports no defect, and `split_data()` reads only `splits[[1]]$data`.
+- blame-history #6: the O3 header still says "Satisfies M108 AC4 and M111 AC4" — reject (false): the head's O3 header no longer carries that sentence.
+- prior-review #1: the cut reverses the inner-design tuner coverage that M120 and M140 added — reject (planned change): Scope In and D-118.
+- prior-review #2: no grid final fit runs on a sliding-index or sliding-period outer design — reject (planned change): Scope In and D-118.
+- prior-review #3: the rewritten O3 comment argues by inference that one outer design covers the final fit — reject (false): the claim matches `R/nested-final-fit.R:205` and `split_data()`, and the Bayesian sliding-window final fit that D-080 names stays.
+- ripple: no ripple evidence.
