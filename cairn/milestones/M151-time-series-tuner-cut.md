@@ -53,7 +53,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - [x] T2: Delete the files and blocks that Scope In names. If no other file calls a fixture helper, delete it. Update `DESCRIPTION` start-first. Check `helper-time-budget.R` for rows on the deleted files.
 - [x] T3: Rewrite the help section and sentences, and run `devtools::document()`. Rewrite the `NEWS.md` bullets. Write each claim against a head test block.
 - [x] T4: Write the D-entry, and widen the inner-designs candidate row.
-- [ ] T5: Run the three scripts at the head and compare. Write the block comparison, a claim ledger with one row per help or `NEWS.md` sentence, the timing and the coverage results to the Review section.
+- [ ] T5: Run the three scripts at the head and compare. Record the block comparison, the claim check of each help and `NEWS.md` sentence, the timing and the coverage results in the work log, for review to verify in its Review section.
 - [ ] T6: Run the `verify` slot.
 
 ## Work log
@@ -73,6 +73,10 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-21: T3 done: `?nested_resamples` and the two `NEWS.md` bullets now name the grid final fit on the rolling-origin outer design alone, and say that the four other tuners are not tested under an outer rolling-origin with an inner sliding design; `?nested_tune_grid` needed no change, since it names only grid. `document()` raised `Config/roxygen2/version` to the local 8.1.1, and that line was put back to 8.1.0. All six gating prose sweeps clean.
 - 2026-10-21: verify: the full suite passed on the branch, 1245 blocks, 0 failures, 0 errors, 0 skips.
 - 2026-10-21: claim audit: 21 claims read, 3 corrected — tests/testthat/test-time-series-designs.R (the final fit takes its data from the first outer split and never reads the split indices; the sliding-index and sliding-period loop no longer runs O3 or the other tuners). Every help and NEWS sentence held.
+- 2026-10-21: minor amendment: T5 records its evidence in the work log, since the Review section belongs to review.
+- 2026-10-21: T5 blocks: `test-blocks.R` gives 1276 blocks at 3af50898 and 1245 at b3bcd82e; the 31 the head lacks are the 24 of the two deleted files, the 4 map-with-tuner blocks and the 3 sliding outer final fits; no block is new, and the 1245 kept blocks have the same expectation counts; 0 failed, errored or skipped.
+- 2026-10-21: T5 coverage: `coverage-lines.R` gives 6352 lines at both trees, joined on file and pos with none unmatched; no line changes hit-or-miss status, and 128 are uncovered at each.
+- 2026-10-21: T5 claims: the claim audit read each sentence of the `Time-series designs` section and the three NEWS bullets against the head tests; each "tested" sentence names a head block that runs it, and each "not tested" sentence names a combination no `test-time-series-*.R` block runs. `?nested_tune_grid` names only grid, whose 16 design combinations all keep a test.
 - 2026-10-21: T4 done: D-118 written; the "Inner designs M140 leaves out" row now names the combinations D-118 leaves untested.
 
 ## Decisions
