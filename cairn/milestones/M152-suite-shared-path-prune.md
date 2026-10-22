@@ -34,7 +34,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - [x] AC2: `benchmarks/coverage-lines.R` gives each line of `R/` the same hit-or-miss status at the branch point and at the head, compared on `file` and `pos`.
 - [x] AC3: `git diff --stat <branch point>..HEAD -- R man NEWS.md README.Rmd README.md vignettes` is empty.
 - [x] AC4: Take each of `param_info`, `control` and `select` in turn. A mutation makes `dispatch_folds()` pass that formal's default in both of its `.args` lists. With each mutation, the merged identity run of (a) fails.
-- [ ] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower.
+- [x] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower.
 - [x] AC6: The profile's `verify` slot is clean at the head.
 
 ## Coverage
@@ -151,3 +151,4 @@ Evidence (fresh, at 4f13334f unless named):
 - AC6: verify slot at 4f13334f: `devtools::test()` gives 0 failures and 0 errors, and `air format --check .` is clean. No roxygen, `R/`, vignette or README change, so `document()` and the prose sweeps are not owed by the slot; both are run in the gate below.
 
 Consistency gate: `cairn_validate.py` all checks passed, with 18 advisory reference-staleness warnings, none for this milestone. `devtools::document()` changes no file in `man/` or NAMESPACE. It rewrites only DESCRIPTION's `Config/roxygen2/version` from 8.1.0 to 8.1.1, from the local roxygen and the same on main; the stamp was reverted. All six gating prose sweeps (`--list-gating`) are clean. `pkgdown::check_pkgdown()` finds no problems. README.Rmd and README.md are untouched. No changelog entry is owed: internal tier, no user-visible change. There is no new top-level file. `devtools::check()` at 4f13334f gives 0 errors, 0 warnings and 1 note, "hidden files: .git": the check ran in a git worktree, whose `.git` is a pointer file, which R's build does not drop the way it drops a `.git` directory. No principle changed, so `cairn_impact` is not run.
+- AC5: `benchmarks/profile-tests.R 1` at 5feebda2 and 4f13334f side by side on AC power: suite totals 1094.2 s and 1007.5 s, 86.7 s lower, against the amended bar of 60 s. Both totals ran higher than T7's (893.4 s and 821.7 s) because another session's full test run in a different repo shared the machine; both passes ran under it.
