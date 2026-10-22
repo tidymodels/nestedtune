@@ -33,7 +33,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - [x] AC2: Start a `workflow_dispatch` run of the branch's workflow with `full=true`. Its test step's log reports results for every `tests/testthat/test-*.R` file at the head commit.
 - [x] AC3: In the head workflow, if the event is `push` or `pull_request`, or `workflow_dispatch` with `full` false, the test step runs the filter. If the event is `schedule`, or `workflow_dispatch` with `full` true, the test step runs the whole suite.
 - [x] AC4: `cairn/DECISIONS.md` holds one new entry that names the D-116 clause it narrows.
-- [ ] AC5: The profile's `verify` slot is clean at the head.
+- [x] AC5: The profile's `verify` slot is clean at the head.
 
 ## Coverage
 
@@ -141,3 +141,5 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - ripple #3: DESIGN.md Known issues entry on dispatched runs — reject, false: it holds for full=false dispatches too.
 - ripple #4: ROADMAP title omits pull_request and the dispatch input — reject, false: nothing in it contradicts the diff.
 - ripple #5: PROFILE.md lines 43-44 (same as diff-bug #7) — fix now, fixed a220d1dd.
+- gate (pass 2): `devtools::check()` at b8f71578 Status OK, 0 errors, 0 warnings, 0 notes, tests and vignette rebuild OK; later commits touch only `.github/` comments and `cairn/`, both build-ignored. `devtools::document()` changed only DESCRIPTION's `Config/roxygen2/version` from 8.1.0 to 8.1.1 (local roxygen2 8.1.1), with no NAMESPACE or `man/` change; the same stamp change would follow on main, so it is local tool drift, reverted and not carried by this milestone.
+- AC5 evidence (pass 2): verify slot at head 40f5bedd. `devtools::test()` inside `devtools::check()` OK at b8f71578, and `git diff --stat b8f71578 HEAD -- R tests DESCRIPTION NAMESPACE man vignettes` is empty; no `.R`, roxygen, vignette or README change on the branch, so `air`, `document()` and the prose sweeps are not owed by verify, and the gating sweeps ran clean anyway. Pass.
