@@ -52,7 +52,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background, with outputs in the scratchpad.
 - [x] T2: Delete the files and blocks that Scope In names. If no other file calls a fixture helper, delete it. Update `DESCRIPTION` start-first. Check `helper-time-budget.R` for rows on the deleted files.
 - [x] T3: Rewrite the help section and sentences, and run `devtools::document()`. Rewrite the `NEWS.md` bullets. Write each claim against a head test block.
-- [ ] T4: Write the D-entry, and widen the inner-designs candidate row.
+- [x] T4: Write the D-entry, and widen the inner-designs candidate row.
 - [ ] T5: Run the three scripts at the head and compare. Write the block comparison, a claim ledger with one row per help or `NEWS.md` sentence, the timing and the coverage results to the Review section.
 - [ ] T6: Run the `verify` slot.
 
@@ -71,6 +71,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-21: T1 started: branch point 3af50898 checked out as a detached worktree in the scratchpad; test-blocks and coverage-lines run there in the background; the branch-point profile runs alone after them, so its timing has no contention.
 - 2026-10-21: T2 done: deleted the two inner tuner files, the four map-with-tuner blocks and the three sliding outer final fits; no helper became unused (each is called from another test file); start-first drops the two files; the ledger has no rows on them; the O2 and O3 oracle headers no longer name the deleted tests. The edited files and the start-first guard pass.
 - 2026-10-21: T3 done: `?nested_resamples` and the two `NEWS.md` bullets now name the grid final fit on the rolling-origin outer design alone, and say that the four other tuners are not tested under an outer rolling-origin with an inner sliding design; `?nested_tune_grid` needed no change, since it names only grid. `document()` raised `Config/roxygen2/version` to the local 8.1.1, and that line was put back to 8.1.0. All six gating prose sweeps clean.
+- 2026-10-21: T4 done: D-118 written; the "Inner designs M140 leaves out" row now names the combinations D-118 leaves untested.
 
 ## Decisions
 
