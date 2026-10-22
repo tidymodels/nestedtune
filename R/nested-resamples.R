@@ -65,16 +65,18 @@
 #'
 #' - Outer [rsample::rolling_origin()] or a sliding design, with an inner
 #'   [rsample::rolling_origin()]. [nested_tune_grid()],
-#'   [nested_fit_resamples()] and their final fits are tested on all four.
-#'   The four other tuners, their final fits and [nested_workflow_map()] are
-#'   tested on the rolling-origin outer design. The final fit of
-#'   [nested_tune_bayes()] is also tested on the sliding-window outer design.
-#' - Outer [rsample::rolling_origin()] with an inner sliding design. All five
-#'   tuners and their final fits are tested on all three.
-#'   [nested_workflow_map()] is tested on all three with its default `fn`,
-#'   and with each of the four other tuners on sliding-period alone.
+#'   [nested_fit_resamples()] and the final fit of [nested_fit_resamples()]
+#'   are tested on all four. The final fit of [nested_tune_grid()], the four
+#'   other tuners, their final fits and [nested_workflow_map()] are tested on
+#'   the rolling-origin outer design. The final fit of [nested_tune_bayes()]
+#'   is also tested on the sliding-window outer design.
+#' - Outer [rsample::rolling_origin()] with an inner sliding design.
+#'   [nested_tune_grid()] and its final fit are tested on all three.
+#'   [nested_workflow_map()] is tested on all three with its default `fn`.
 #'   [nested_fit_resamples()] accepts these designs. It checks the inner
-#'   design but fits nothing on it.
+#'   design but fits nothing on it. The four other tuners are not tested on
+#'   these designs. They are tested with an inner sliding design on the
+#'   sliding-window pair below.
 #' - A sliding design in both loops, which gives nine pairs.
 #'   [nested_tune_grid()] is tested on all nine. On the sliding-window pair,
 #'   the four other tuners, [nested_workflow_map()] with its default `fn`,
