@@ -51,9 +51,9 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background.
 - [x] T2: Do (a). Plant the three mutations of AC4 in a scratch copy of `R/parallel.R`, and record which expectation fails for each.
 - [x] T3: Do (b) and (c).
-- [ ] T4: Do (d) for the driver, RNG, final-fit and model-spec files.
-- [ ] T5: Do (d) for the reader, compat, parallel and misc files, then (e) and (f).
-- [ ] T6: Update the `helper-time-budget.R` rows of each deleted or merged wait, and `Config/testthat/start-first`.
+- [x] T4: Do (d) for the driver, RNG, final-fit and model-spec files.
+- [x] T5: Do (d) for the reader, compat, parallel and misc files, then (e) and (f).
+- [x] T6: Update the `helper-time-budget.R` rows of each deleted or merged wait, and `Config/testthat/start-first`.
 - [ ] T7: Run the three scripts at the head and compare. Write a prune ledger to the Review section. It has one row per removed or changed block, with its category and the head block that covers it. Add the coverage and timing results.
 - [ ] T8: Run the `verify` slot.
 
@@ -80,6 +80,10 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - 2026-10-22: from the driver survey: (d) bayes-results' row-reorder procedure block (dplyr-compat and vctrs-compat assert the procedure at every door) and the selection-rule print block with its snapshot file (the label block asserts `format()` exactly); (e) the quosure checks after exact identicals and guard lines implied by the exact checks beside them in grid-oracles, grid-failures, grid-results and bayes-results; (f) grid-results' tune-selector and default-metrics blocks. Kept on the survey's reading: the Bayesian desirability blocks in selection-rule-installed and bayes-oracles, each the only test of a NEWS claim.
 - 2026-10-22: from the compat, reader and print survey: (d) dplyr-compat's slice, `[` and bind_rows single-form blocks and the id-prefixed column block (the verb table holds them), the kept-tibble loop and the no-scheme print loop trimmed to one form per door; vctrs' vec_rbind block; extract-procedure's dots block, print's two summary dots blocks, collect-readers' and map-readers' dots blocks (the dots-barrier probe calls every registered method); eval-time's scalar AC8 block; resamples-specs' stratified-inner, groups-whole and single-row blocks; print's design-summary block and its M116 rule loop trimmed to one rule; plot's no-tuned-parameters block, the set type-refusal lines and the bad-id loop trimmed to one id. (e) two lines in collect-readers and map-readers. (f) resamples-specs' character-and-factor block and map-readers' rank_results/fit_best block. Kept: design-support's two SUPPORTED loops, since each case is the only test of a README "Yes" cell.
 - 2026-10-22: T6: no test file was removed, so `Config/testthat/start-first` names only real files; the ledger was kept in step task by task, hygiene green.
+- 2026-10-22: T5 verify: full suite at 7040fc68, 0 failures, 0 errors. AC3: `git diff --stat 5feebda2..7040fc68` over R, man, NEWS.md, README and vignettes is empty.
+- 2026-10-22: minor amendment: the prune ledger is committed as `benchmarks/prune-ledger-5feebda2-7040fc68.csv` beside the block and coverage tables, not in the Review section, which review alone writes.
+- 2026-10-22: T7: block tables 5feebda2 1245 blocks / 15309 expectations, 7040fc68 1150 / 13269; 102 blocks gone and 44 counts changed, all 146 classified in the ledger (a 3, b 17, c 17, d 85, e 12, f 12), each with its covering head block. Both tables fail the one interrupt block "an interrupted run leaves no fold executing" with 3 expectations; it passes when its file runs alone at the head, so the failure is the concurrent runs', at both trees. AC2: 6352 lines at both trees, 128 uncovered at both, 0 lines change status on `file` and `pos`.
+- 2026-10-22: T7 timing: `profile-tests.R 1` at both trees side by side on AC power: 5feebda2 893.4 s, 7040fc68 821.7 s, 71.7 s lower, short of AC5's 100 s. The remaining in-scope candidates are small (the final-fit race file 5.2 s, selection-metric 8.3 s); the larger files left are kept for stated reasons (the interrupt file 63 s, the design-support loops 20 s as the only tests of README "Yes" cells). Stop for the user on AC5.
 
 ## Decisions
 
