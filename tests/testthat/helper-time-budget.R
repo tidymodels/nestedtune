@@ -55,10 +55,9 @@
 # review F9).
 
 # One site's worst case: what it waits for, times the number of times the
-# surrounding code runs it. `times` is 1 unless a loop says otherwise -- the
-# shared_daemons() call in test-parallel-identity.R's BC12 sits inside
-# `for (fn in RACERS)` and is therefore paid twice (its three-daemon twin
-# went at M113). It is the ledger's only row carrying a `times` above 1;
+# surrounding code runs it. `times` is 1 unless a loop says otherwise. No row
+# sets it now: BC12 in test-parallel-identity.R, the last row with a `times`
+# of 2, runs one racer since M152.
 # `grep -n 'times = [0-9]' tests/testthat/helper-time-budget.R` lists every row
 # that sets the argument, `tb_row()`'s own default included, so a row added at
 # any other count shows up there rather than going unread.
@@ -724,83 +723,67 @@ time_budget_ledger <- function() {
       312L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the identity holds with param_info supplied"
-    ),
-    tb_row(
-      "test-parallel-identity.R",
-      363L,
-      "shared_daemons",
-      DAEMON_SNAPSHOT_BOUND_S,
       "the identity holds with a two-class fixture at event_level second"
     ),
     tb_row(
       "test-parallel-identity.R",
-      408L,
+      357L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the identity holds with a censored fixture at a named eval_time"
     ),
     tb_row(
       "test-parallel-identity.R",
-      466L,
+      415L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the Bayesian path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      511L,
+      468L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the control reaches every fold on the parallel path as on the serial one"
+      "param_info, control and select reach the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
-      572L,
+      532L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "both racing paths match serial at two daemons",
-      times = 2L,
-      note = "inside for (fn in RACERS)"
+      "the racing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      633L,
+      592L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      696L,
+      655L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      746L,
-      "shared_daemons",
-      DAEMON_SNAPSHOT_BOUND_S,
-      "BC15: the selection rule reaches the folds on two daemons as serially"
-    ),
-    tb_row(
-      "test-parallel-identity.R",
-      784L,
+      694L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC16: the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      827L,
+      737L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC17: the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      858L,
+      768L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC9: a fold is immune to whatever a daemon ran before it",
@@ -808,28 +791,28 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      894L,
+      804L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      895L,
+      805L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      908L,
+      818L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC1: parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      972L,
+      882L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "BC3: a daemon killed mid-run yields a recorded failure, not an abort",

@@ -281,57 +281,6 @@ test_that("BC6: a failed fold matches serially in every field but its traces", {
   expect_false(serial$.completed[[2L]])
 })
 
-test_that("BC6: the identity holds with param_info supplied (M34, AC4)", {
-  skip_if_no_daemons()
-  skip_if_not_installed("ranger")
-  skip_if_not_installed("dials")
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- stoch_workflow(data)
-
-  # An integer grid, so `param_info` is what the candidates are generated from.
-  # With `stoch_grid()` the candidates travel in the grid itself and
-  # `param_info` would ride along inert -- an identity that held whether or not
-  # the argument reached a daemon at all.
-  narrow <- update(
-    tune::extract_parameter_set_dials(wf),
-    min_n = dials::min_n(c(2L, 8L))
-  )
-
-  set.seed(2026L)
-  serial <- serial_run(nested_tune_grid(
-    wf,
-    nested,
-    param_info = narrow,
-    grid = 3,
-    metrics = reg_metrics()
-  ))
-  expect_identical(last_dispatch(), "serial")
-
-  shared_daemons(2)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(
-    nested_tune_grid(
-      wf,
-      nested,
-      param_info = narrow,
-      grid = 3,
-      metrics = reg_metrics()
-    )
-  )
-
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(parallel, serial)
-
-  # The restriction really is the one being carried across the boundary: a
-  # `param_info` the daemons never saw would leave them generating candidates
-  # from the default range, which reaches 40.
-  expect_true(all(
-    vapply(parallel$.selected, function(x) x$min_n, integer(1)) <= 8L
-  ))
-})
-
 # AC5 (M35). The event level is the first setting the identity has to carry
 # that changes a *reported metric value* rather than the candidate chosen:
 # `.metrics` is fed by the `control_last_fit()` the outer scoring fit now
@@ -480,18 +429,25 @@ test_that("BC10: the Bayesian path matches serial at two daemons (M45, AC4)", {
   expect_identical(parallel, serial)
 })
 
-test_that("BC11: the control reaches every fold on the parallel path as on the serial one (M48, AC2)", {
+# BC6, BC11 and BC15 (M34, M48, M69): `param_info`, the control and the
+# selection rule are three formals of `dispatch_folds()` that ride in `.args`,
+# so one run sets all three. Each is set so that a daemon left on its default
+# would differ: `param_info` widens `deg_free` past its default range, the
+# control's `no_improve = 2` stops folds short of `initial + iter`, and the
+# percent-loss rule with a non-default limit and a two-term ordering picks a
+# candidate the default rule does not in two of the three folds. The
+# deterministic fixture, as the M48 AC1 oracle.
+
+test_that("BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially", {
   skip_if_no_daemons()
   skip_if_not_installed("dials")
 
-  # The AC1 run: a control whose `no_improve = 2` stops folds short of `iter`,
-  # so a daemon that ran under tune's default would record more candidates
-  # than the serial fold did. The deterministic fixture, as the AC1 oracle.
   data <- make_reg_data()
   nested <- det_nested(data)
   wf <- bayes_workflow(data)
   p <- bayes_param_info(wf)
   ctrl <- ac1_control()
+  rule <- selection_rule("pct_loss", df1, df2, limit = 20)
 
   set.seed(2026L)
   serial <- serial_run(nested_tune_bayes(
@@ -501,7 +457,8 @@ test_that("BC11: the control reaches every fold on the parallel path as on the s
     initial = 3,
     param_info = p,
     metrics = reg_metrics(),
-    control = ctrl
+    control = ctrl,
+    select = rule
   ))
   expect_identical(last_dispatch(), "serial")
   expect_true(all(serial$.completed))
@@ -518,7 +475,8 @@ test_that("BC11: the control reaches every fold on the parallel path as on the s
       initial = 3,
       param_info = p,
       metrics = reg_metrics(),
-      control = ctrl
+      control = ctrl,
+      select = rule
     )
   )
   expect_identical(last_dispatch(), "parallel")
@@ -536,7 +494,9 @@ test_that("BC11: the control reaches every fold on the parallel path as on the s
   expect_identical(parallel, serial)
 })
 
-# BC12 (M50, AC4), for both racers: the stochastic fixture, so the race's
+# BC12 (M50, AC4), on the ANOVA racer: the two racers share one body,
+# `nested_tune_race()`, and the win/loss racer's daemon packages are tested in
+# test-parallel-required-pkgs.R. The stochastic fixture, so the race's
 # resample shuffle and the ranger fits both draw; and the daemons' library
 # holds finetune, which the loop attaches in every daemon before the first
 # fold is sent. The serial race's one caller is the two-daemon block; the
@@ -556,9 +516,10 @@ race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
   serial
 }
 
-test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
+test_that("BC12: the racing path matches serial at two daemons (M50, AC4)", {
+  fn <- "tune_race_anova"
   skip_if_no_daemons()
-  skip_if_no_race_fixture(stochastic = TRUE)
+  skip_if_no_race_fixture(fn, stochastic = TRUE)
 
   data <- make_reg_data()
   nested <- det_nested(data)
@@ -566,31 +527,29 @@ test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
   ms <- reg_metrics()
   ctrl <- race_control()
 
-  for (fn in RACERS) {
-    serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
+  serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
 
-    shared_daemons(2)
-    set.seed(2026L)
-    parallel <- without_pkgload_warning(race_call_by_name(
-      fn,
-      wf,
-      nested,
-      grid = stoch_grid(),
-      metrics = ms,
-      control = ctrl
-    ))
-    expect_identical(last_dispatch(), "parallel")
-    for (col in c(
-      ".metrics",
-      ".selected",
-      ".inner_metrics",
-      ".tuning_seed",
-      ".outer_fit_seed"
-    )) {
-      expect_identical(parallel[[col]], serial[[col]], info = paste(fn, col))
-    }
-    expect_identical(parallel, serial)
+  shared_daemons(2)
+  set.seed(2026L)
+  parallel <- without_pkgload_warning(race_call_by_name(
+    fn,
+    wf,
+    nested,
+    grid = stoch_grid(),
+    metrics = ms,
+    control = ctrl
+  ))
+  expect_identical(last_dispatch(), "parallel")
+  for (col in c(
+    ".metrics",
+    ".selected",
+    ".inner_metrics",
+    ".tuning_seed",
+    ".outer_fit_seed"
+  )) {
+    expect_identical(parallel[[col]], serial[[col]], info = col)
   }
+  expect_identical(parallel, serial)
 })
 
 # BC13 (M51, AC4): the stochastic fixture, so the search's initial design and
@@ -710,55 +669,6 @@ test_that("BC14: the outer fit's predictions and extracts match serially and on 
   expect_identical(parallel, serial)
 })
 
-
-# BC15 (M69, AC5): the selection rule reaches every fold on the parallel path
-# as on the serial one. The percent-loss rule with a non-default limit and a
-# two-term ordering with desc(), on the two-parameter fixture, so the rule has
-# something to order and the wire carries orderings and a limit rather than
-# the default object; on this fixture the rule picks a candidate the default
-# does not in a fold (test-nested-tune-grid-oracles.R, O5), so a daemon that
-# fell back to the default rule would differ.
-
-test_that("BC15: the selection rule reaches the folds on two daemons as serially (M69, AC5)", {
-  skip_if_no_daemons()
-  skip_if_not_installed("dials")
-
-  data <- make_reg_data()
-  nested <- det_nested(data)
-  wf <- bayes_workflow(data)
-  p <- bayes_param_info(wf)
-  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
-  rule <- selection_rule("pct_loss", desc(df1), df2, limit = 5)
-
-  set.seed(2026L)
-  serial <- serial_run(nested_tune_grid(
-    wf,
-    nested,
-    grid = g,
-    metrics = reg_metrics(),
-    param_info = p,
-    select = rule
-  ))
-  expect_identical(last_dispatch(), "serial")
-  expect_true(all(serial$.completed))
-  expect_identical(extract_procedure(serial)$select, rule)
-
-  shared_daemons(2)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(nested_tune_grid(
-    wf,
-    nested,
-    grid = g,
-    metrics = reg_metrics(),
-    param_info = p,
-    select = rule
-  ))
-
-  expect_identical(last_dispatch(), "parallel")
-  expect_true(all(parallel$.completed))
-  expect_identical(parallel$.selected, serial$.selected)
-  expect_identical(parallel, serial)
-})
 
 # BC16 (M70, AC6): the plain resampling path matches serial on two daemons.
 # ranger with every parameter fixed, so the outer fit draws from the stream
