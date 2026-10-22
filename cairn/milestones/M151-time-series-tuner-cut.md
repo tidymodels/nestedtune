@@ -1,6 +1,6 @@
 # M151: The four other tuners are tested on one inner sliding design, and the help claims only what the tests run
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -34,7 +34,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - [ ] AC1: Join the `benchmarks/test-blocks.R` tables of the branch point and the head on file and test name. Every block that the head lacks is in the two deleted files or has a name that Scope In lists. Every other block is at the head with the same expectation count.
 - [ ] AC2: Read each sentence that names a function and a time-series design. Such sentences are in the `Time-series designs` section of `?nested_resamples`, the time-series paragraph of `?nested_tune_grid`, and the time-series bullets of `NEWS.md`. A sentence that calls a combination tested names one that a head block runs. A sentence that calls a combination untested names one that no head block in `test-time-series-*.R` runs.
 - [ ] AC3: `cairn/DECISIONS.md` holds one new entry. It names the clauses of D-080, D-085, D-112 and D-113 that it supersedes, and it says that the test D-075 rests on stays.
-- [ ] AC4: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head. The head's suite total is at least 450 s lower.
+- [ ] AC4: In `R-CMD-check.yaml` run 39525408946 on the default branch (commit a3513d8c, whose `tests/`, `R/` and `DESCRIPTION` match the branch point's), read the `[hang-trace]` lines whose target has the form `<file> :: <test>`. A block's time is its `end` timestamp minus its `start` timestamp. On each of the run's five check legs, the blocks that the head lacks under AC1's join take at least 12% of the summed time of that leg's blocks.
 - [ ] AC5: `benchmarks/coverage-lines.R` gives each line of `R/` the same hit-or-miss status at the branch point and at the head, compared on `file` and `pos`.
 - [ ] AC6: The profile's `verify` slot is clean at the head.
 
@@ -43,18 +43,18 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - AC1 → T1, T2, T5
 - AC2 → T3, T5
 - AC3 → T4
-- AC4 → T1, T5
+- AC4 → T5
 - AC5 → T1, T5
 - AC6 → T6
 
 ## Tasks
 
-- [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background, with outputs in the scratchpad.
+- [x] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background, with outputs in the scratchpad.
 - [x] T2: Delete the files and blocks that Scope In names. If no other file calls a fixture helper, delete it. Update `DESCRIPTION` start-first. Check `helper-time-budget.R` for rows on the deleted files.
 - [x] T3: Rewrite the help section and sentences, and run `devtools::document()`. Rewrite the `NEWS.md` bullets. Write each claim against a head test block.
 - [x] T4: Write the D-entry, and widen the inner-designs candidate row.
-- [ ] T5: Run the three scripts at the head and compare. Record the block comparison, the claim check of each help and `NEWS.md` sentence, the timing and the coverage results in the work log, for review to verify in its Review section.
-- [ ] T6: Run the `verify` slot.
+- [x] T5: Run the three scripts at the head and compare. Record the block comparison, the claim check of each help and `NEWS.md` sentence, the timing and the coverage results in the work log, for review to verify in its Review section.
+- [x] T6: Run the `verify` slot.
 
 ## Work log
 
@@ -77,6 +77,13 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-21: T5 blocks: `test-blocks.R` gives 1276 blocks at 3af50898 and 1245 at b3bcd82e; the 31 the head lacks are the 24 of the two deleted files, the 4 map-with-tuner blocks and the 3 sliding outer final fits; no block is new, and the 1245 kept blocks have the same expectation counts; 0 failed, errored or skipped.
 - 2026-10-21: T5 coverage: `coverage-lines.R` gives 6352 lines at both trees, joined on file and pos with none unmatched; no line changes hit-or-miss status, and 128 are uncovered at each.
 - 2026-10-21: T5 claims: the claim audit read each sentence of the `Time-series designs` section and the three NEWS bullets against the head tests; each "tested" sentence names a head block that runs it, and each "not tested" sentence names a combination no `test-time-series-*.R` block runs. `?nested_tune_grid` names only grid, whose 16 design combinations all keep a test.
+- 2026-10-22: T5 timing: `profile-tests.R 1` gave 917.1 s at 3af50898 and 1058.3 s at b3bcd82e, run back to back on one machine; unchanged files ran up to 2.7 times slower in the second run, so the local single-run comparison measures machine state, not the cut. The 2026-10-21 run behind the plan's 521 s figure was about twice as slow overall; at 3af50898 the two deleted files took 119 s of 917 s.
+- 2026-10-22: T5 CI share: in the hang trace of `R-CMD-check.yaml` run 39525408946 the 31 blocks the head lacks take 557 s of 3384 s on macOS (16.4%), 842 of 5432 on devel (15.5%), 821 of 5302 on oldrel-1 (15.5%), 841 of 5486 on release (15.3%) and 938 of 6056 on windows (15.5%).
+- 2026-10-22: question at stop: AC4's 450 s local target cannot pass, and the cut saves about 15% of each CI leg's test time, not the planned 31%; how to go on — keep the cut and reword AC4 to the measured CI share (user's choice).
+- 2026-10-22: substantive amendment: AC4 now reads the deleted blocks' share of block time in the hang trace of main's run 39525408946, at least 12% on each of the five legs, in place of a 450 s drop between two local serial runs; Coverage AC4 → T5. The lessons line above, which names local serial runs for the timing criteria, is superseded by this entry.
+- 2026-10-22: re-audit: AC4 (full) — satisfiable at 15.3% to 16.4% per leg; three gaps fixed in the wording: name the run's commit and that its tests match the branch point, count only `<file> :: <test>` lines, and drop T1 from Coverage. It also noted that a `memoised()` cache entry built by a deleted block and reused by a kept one would move cost onto the kept block; the deleted blocks run inner sliding fixtures that no kept block requests, so this is recorded and not checked.
+- 2026-10-22: re-audit: AC4 (full) — holds as written; one reading recorded: a block's timestamp is the clock time the `[hang-trace]` marker prints, not the runner's line prefix, which is the same for every line because the log is dumped at the end. Review should read the run before GitHub's log retention ends.
+- 2026-10-22: T6 verify: the full suite passed earlier at 3e0db968 (1245 blocks, 0 failures); since then only comments changed, and `test-time-series-designs.R` passes (22 blocks). `air format --check .` clean; the six gating prose sweeps clean; `devtools::document()` gives no diff except raising `Config/roxygen2/version` to the local roxygen2 8.1.1, which was put back. Status set to review.
 - 2026-10-21: T4 done: D-118 written; the "Inner designs M140 leaves out" row now names the combinations D-118 leaves untested.
 
 ## Decisions
