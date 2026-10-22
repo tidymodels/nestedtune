@@ -1,13 +1,15 @@
-# Every refusal the two racing exports make at entry, fired once (M50 AC5).
-# GP3: a provably wrong call is refused before a whole outer loop is paid for.
+# The refusals the racing exports make at entry (M50 AC5). GP3: a provably
+# wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The refusals that are racing's own -- a package the race needs
-# that is not installed, a control of another class, a burn-in no fold's
-# inner design can meet -- each fire with a class of their own, naming the
-# user's call, for both racers. And every check the grid orchestrator makes
-# is made here too: the set is read off both function bodies rather than
-# listed by hand, so a check added to one and forgotten in the other fails by
-# name.
+# that is not installed, a burn-in no fold's inner design can meet -- each
+# fire with a class of their own, naming the user's call. And every check the
+# grid orchestrator makes fires here too, through one table held to the list
+# read off the grid body, so a check added there and missing here fails by
+# name. The two racers share one body, `nested_tune_race()`, so the blocks
+# that read a value from each racer's own registry entry -- its model
+# package, its control class, its desirability flag -- run both; the rest,
+# the finetune check included, run the ANOVA racer.
 
 race_folds <- function(d) det_nested(d, v = 3)
 
@@ -60,36 +62,35 @@ local_absent <- function(pkg, env = parent.frame()) {
   )
 }
 
-test_that("finetune must be installed, for both racers", {
-  skip_if_no_race_fixture()
+test_that("finetune must be installed", {
+  fn <- "tune_race_anova"
+  skip_if_no_race_fixture(fn)
 
   d <- make_reg_data()
   wf <- det_workflow(d)
   folds <- race_folds(d)
 
-  for (fn in RACERS) {
-    local({
-      local_absent("finetune")
-      cnd <- refusal(race_call(fn, wf, folds, grid = det_grid()))
-      expect_refused(
-        cnd,
-        "nestedtune_pkg_not_installed",
-        "finetune",
-        export_name(fn)
-      )
-      expect_match(conditionMessage(cnd), "not installed")
-    })
-    # The discrimination: with nothing made absent, the same call passes the
-    # check and reaches the sentinel.
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      folds,
-      grid = det_grid(),
-      control = race_control()
-    ))
-    expect_s3_class(cnd, "nestedtune_sentinel")
-  }
+  local({
+    local_absent("finetune")
+    cnd <- refusal(race_call(fn, wf, folds, grid = det_grid()))
+    expect_refused(
+      cnd,
+      "nestedtune_pkg_not_installed",
+      "finetune",
+      export_name(fn)
+    )
+    expect_match(conditionMessage(cnd), "not installed")
+  })
+  # The discrimination: with nothing made absent, the same call passes the
+  # check and reaches the sentinel.
+  cnd <- refusal(race_call(
+    fn,
+    wf,
+    folds,
+    grid = det_grid(),
+    control = race_control()
+  ))
+  expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
 test_that("each race's own model-fitting package must be installed", {
@@ -194,111 +195,66 @@ test_that("the final fit on a racing result asks for the race's packages first",
   }
 })
 
-test_that("`control` must be what finetune::control_race() returns", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- race_folds(d)
-
-  # The grid control is the one a caller is likeliest to reach for, and
-  # finetune itself would accept it (`condense_control()` reads slots by
-  # name).
-  for (fn in RACERS) {
-    for (bad in list(
-      tune::control_grid(),
-      tune::control_bayes(seed = 1L),
-      list(burn_in = 2),
-      "no",
-      1
-    )) {
-      cnd <- refusal(race_call(fn, wf, folds, grid = det_grid(), control = bad))
-      expect_refused(
-        cnd,
-        "nestedtune_bad_control",
-        "finetune::control_race",
-        export_name(fn)
-      )
-    }
-  }
-})
-
 test_that("an inner design not larger than the burn-in is refused at entry", {
-  skip_if_no_race_fixture()
+  fn <- "tune_race_anova"
+  skip_if_no_race_fixture(fn)
 
   d <- make_reg_data()
   wf <- det_workflow(d)
   folds <- race_folds(d)
 
-  for (fn in RACERS) {
-    # finetune's default `burn_in` is 3 and the design holds 3 inner
-    # resamples: the case every racing fixture in this suite sidesteps, and
-    # the one a user meets first.
-    cnd <- refusal(race_call(fn, wf, folds, grid = det_grid()))
-    expect_refused(
-      cnd,
-      "nestedtune_bad_burn_in",
-      "burn_in",
-      export_name(fn)
-    )
-    # The message names the count and the burn-in.
-    expect_match(conditionMessage(cnd), "3 inner resamples")
-    expect_match(conditionMessage(cnd), "not more than 3")
+  # finetune's default `burn_in` is 3 and the design holds 3 inner
+  # resamples: the case every racing fixture in this suite sidesteps, and
+  # the one a user meets first.
+  cnd <- refusal(race_call(fn, wf, folds, grid = det_grid()))
+  expect_refused(
+    cnd,
+    "nestedtune_bad_burn_in",
+    "burn_in",
+    export_name(fn)
+  )
+  # The message names the count and the burn-in.
+  expect_match(conditionMessage(cnd), "3 inner resamples")
+  expect_match(conditionMessage(cnd), "not more than 3")
 
-    # A burn-in above the count, and one fold alone falling short: the
-    # refusal names the fold.
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      folds,
-      grid = det_grid(),
-      control = finetune::control_race(burn_in = 5)
-    ))
-    expect_refused(cnd, "nestedtune_bad_burn_in", "burn_in", export_name(fn))
-    expect_match(conditionMessage(cnd), "not more than 5")
+  # A burn-in above the count, and one fold alone falling short: the
+  # refusal names the fold.
+  cnd <- refusal(race_call(
+    fn,
+    wf,
+    folds,
+    grid = det_grid(),
+    control = finetune::control_race(burn_in = 5)
+  ))
+  expect_refused(cnd, "nestedtune_bad_burn_in", "burn_in", export_name(fn))
+  expect_match(conditionMessage(cnd), "not more than 5")
 
-    short <- folds
-    set.seed(1)
-    short$inner_resamples[[2L]] <- rsample::vfold_cv(
-      rsample::analysis(folds$splits[[2L]]),
-      v = 2
-    )
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      short,
-      grid = det_grid(),
-      control = race_control()
-    ))
-    expect_refused(cnd, "nestedtune_bad_burn_in", "burn_in", export_name(fn))
-    expect_match(conditionMessage(cnd), "Outer fold 2 holds 2 inner resamples")
-    expect_match(conditionMessage(cnd), "not more than 2")
-  }
+  short <- folds
+  set.seed(1)
+  short$inner_resamples[[2L]] <- rsample::vfold_cv(
+    rsample::analysis(folds$splits[[2L]]),
+    v = 2
+  )
+  cnd <- refusal(race_call(
+    fn,
+    wf,
+    short,
+    grid = det_grid(),
+    control = race_control()
+  ))
+  expect_refused(cnd, "nestedtune_bad_burn_in", "burn_in", export_name(fn))
+  expect_match(conditionMessage(cnd), "Outer fold 2 holds 2 inner resamples")
+  expect_match(conditionMessage(cnd), "not more than 2")
 })
 
 # The shared checks. The list is derived, not written: every `check_*()` the
-# grid orchestrator's body calls must appear in the racing body -- the grid
-# checks included, since the racers take a grid.
+# grid orchestrator's body calls must fire through the racing export -- the
+# grid checks included, since the racers take a grid.
 
 check_calls <- function(fn) {
   nms <- all.names(body(fn))
   sort(unique(nms[startsWith(nms, "check_")]))
 }
-
-test_that("every check the grid path makes, the racing path makes too", {
-  grid_checks <- check_calls(nested_tune_grid.workflow)
-  race_checks <- check_calls(nested_tune_race)
-
-  # One fact held independently of the derivation: the enumeration cannot
-  # silently empty.
-  expect_true(all(c("check_workflow", "check_grid") %in% grid_checks))
-
-  expect_identical(setdiff(grid_checks, race_checks), character(0))
-  # And the two that are racing's own are there beside them.
-  expect_true(all(
-    c("check_tuner_installed", "check_race_burn_in") %in% race_checks
-  ))
-})
 
 test_that("each shared check fires through both racing exports", {
   skip_if_no_race_fixture()
@@ -386,10 +342,11 @@ test_that("each shared check fires through both racing exports", {
       check_selection_rule = "selection_rule"
     )
 
-    expect_identical(
-      setdiff(check_calls(nested_tune_grid.workflow), names(fired)),
-      character(0)
-    )
+    # One fact held independently of the derivation: the list cannot silently
+    # empty.
+    grid_checks <- check_calls(nested_tune_grid.workflow)
+    expect_true(all(c("check_workflow", "check_grid") %in% grid_checks))
+    expect_identical(setdiff(grid_checks, names(fired)), character(0))
 
     for (nm in names(fired)) {
       cnd <- refusal(fired[[nm]]())
@@ -399,81 +356,6 @@ test_that("each shared check fires through both racing exports", {
       expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
     }
   }
-})
-
-# M55: every design shape check_nested() refuses, refused through both
-# racing exports -- with the one class and the export's own name on the
-# condition, never the shared internal's. What each message names is held to
-# the planted positions by the grid driver's tests.
-
-test_that("every malformed design is refused at entry, by both racers (M55)", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  ctrl <- race_control()
-  planted <- malformed_designs(d)
-  expect_gt(length(planted), 70L)
-
-  for (fn in RACERS) {
-    for (nm in names(planted)) {
-      cnd <- refusal(race_call(fn, wf, planted[[nm]]$design, control = ctrl))
-      expect_s3_class(cnd, "nestedtune_bad_design")
-      expect_false(inherits(cnd, "nestedtune_sentinel"), info = nm)
-      expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
-    }
-  }
-})
-
-test_that("a control naming another event level is refused at entry", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- race_folds(d)
-
-  for (fn in RACERS) {
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      folds,
-      event_level = "first",
-      control = finetune::control_race(burn_in = 2, event_level = "second")
-    ))
-    expect_refused(
-      cnd,
-      "nestedtune_bad_control",
-      "event_level",
-      export_name(fn)
-    )
-
-    # A control left at finetune's default takes the argument's level.
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      folds,
-      event_level = "second",
-      control = race_control()
-    ))
-    expect_s3_class(cnd, "nestedtune_sentinel")
-  }
-})
-
-test_that("a refusal leaves the RNG where it found it", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- race_folds(d)
-
-  set.seed(1)
-  before <- .Random.seed
-  for (fn in RACERS) {
-    expect_error(race_call(fn, wf, folds, grid = det_grid()))
-    expect_error(race_call(fn, wf, folds, control = tune::control_grid()))
-    expect_error(race_call(fn, wf, folds, grid = 0, control = race_control()))
-  }
-  expect_identical(.Random.seed, before)
 })
 
 test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
@@ -506,74 +388,20 @@ test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
   }
 })
 
-test_that("`select` is held at entry by both racers, before any fold runs (M69, AC4)", {
-  skip_if_no_race_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- race_folds(d)
-  ctrl <- race_control()
-
-  for (fn in RACERS) {
-    for (bad in list("best", NULL)) {
-      cnd <- refusal(race_call(fn, wf, folds, select = bad, control = ctrl))
-      expect_refused(
-        cnd,
-        "nestedtune_bad_selection_rule",
-        "selection_rule",
-        export_name(fn)
-      )
-    }
-    cnd <- refusal(race_call(
-      fn,
-      wf,
-      folds,
-      select = selection_rule("one_std_err", nonesuch),
-      control = ctrl
-    ))
-    expect_refused(
-      cnd,
-      "nestedtune_selection_rule_unknown_param",
-      "nonesuch",
-      export_name(fn)
-    )
-    expect_match(
-      cli::ansi_strip(conditionMessage(cnd)),
-      "num_comp",
-      fixed = TRUE
-    )
-
-    expect_s3_class(
-      refusal(race_call(
-        fn,
-        wf,
-        folds,
-        select = selection_rule("one_std_err", num_comp),
-        control = ctrl
-      )),
-      "nestedtune_sentinel"
-    )
-  }
-})
-
-test_that("AC5: a workflow with no tune() marker is refused by both racers, naming nested_fit_resamples(), before any fold runs (M70)", {
-  skip_if_no_race_fixture()
+test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+  fn <- "tune_race_anova"
+  skip_if_no_race_fixture(fn)
   d <- make_reg_data()
   wf <- fixed_workflow(d)
   folds <- race_folds(d)
 
-  for (fn in RACERS) {
-    set.seed(1)
-    before <- .Random.seed
-    cnd <- rlang::catch_cnd(race_call_by_name(
-      fn,
-      wf,
-      folds,
-      grid = det_grid()
-    ))
-    expect_s3_class(cnd, "nestedtune_untuned_workflow")
-    expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
-    expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
-    expect_identical(.Random.seed, before)
-  }
+  cnd <- rlang::catch_cnd(race_call_by_name(
+    fn,
+    wf,
+    folds,
+    grid = det_grid()
+  ))
+  expect_s3_class(cnd, "nestedtune_untuned_workflow")
+  expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
+  expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
 })

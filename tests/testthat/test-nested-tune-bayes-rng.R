@@ -1,13 +1,13 @@
 # The "the caller's RNG state and kind survive the call untouched" and "a
 # session with no RNG state is left with a valid one" blocks were pinned here
-# until M113. The success-path RNG restore is one shared site in
-# `nested_loop()`, so test-nested-tune-grid-rng.R covers it (D-079).
+# until M113, and the fold-order, ambient-RNG and error-restore blocks until
+# M152. The RNG restore and the fold seeding are one shared site in
+# `nested_loop()` / `nested_fold_fit()`, so test-nested-tune-grid-rng.R covers
+# them (D-079).
 #
-# IP2 for the Bayesian path (M45 AC4). Five of the eight properties
-# test-nested-tune-grid-rng.R holds the grid path to are asserted here on
-# nested_tune_bayes(); the caller's-RNG-survives, folds-fail restore and
-# no-RNG-state properties are covered once, in test-nested-tune-grid-rng.R
-# (D-079). Plus the one rule
+# IP2 for the Bayesian path (M45 AC4). Two of the eight properties
+# test-nested-tune-grid-rng.R holds the grid path to, same seed and different
+# seed, are asserted here on nested_tune_bayes(). Plus the one rule
 # that is this path's own: the Gaussian-process seed is the fold's tuning
 # seed, and the control carrying it is built inside that seed's scope. Every
 # test that could pass vacuously under a deterministic engine uses ranger,
@@ -103,108 +103,6 @@ test_that("a different seed produces different numbers", {
   expect_false(identical(first$.metrics, other$.metrics))
 })
 
-test_that("fold results do not depend on the order folds are run in", {
-  skip_if_no_bayes_fixture(stochastic = TRUE)
-
-  d <- make_reg_data()
-  wf <- stoch_workflow(d)
-  p <- bayes_stoch_param_info(wf)
-  ms <- reg_metrics()
-
-  set.seed(4)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 3)
-  )
-
-  set.seed(88)
-  res <- nested_tune_bayes(
-    wf,
-    folds,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms
-  )
-
-  # Drive the same per-fold worker directly, last fold first. A scheduler is
-  # free to do exactly this; the results must not notice.
-  reversed <- rev(seq_len(nrow(res)))
-  out <- lapply(reversed, function(i) {
-    nested_fold_fit(
-      split = folds$splits[[i]],
-      inner = folds$inner_resamples[[i]],
-      seeds = c(res$.tuning_seed[[i]], res$.outer_fit_seed[[i]]),
-      object = wf,
-      tuner = bayes_tuner(),
-      metrics = ms,
-      param_info = p
-    )
-  })
-  names(out) <- as.character(reversed)
-
-  for (i in seq_len(nrow(res))) {
-    expect_identical(out[[as.character(i)]]$metrics, res$.metrics[[i]])
-    expect_identical(out[[as.character(i)]]$selected, res$.selected[[i]])
-    expect_identical(
-      out[[as.character(i)]]$inner_metrics,
-      res$.inner_metrics[[i]]
-    )
-  }
-})
-
-test_that("fold results do not depend on the ambient RNG state or kind", {
-  skip_if_no_bayes_fixture(stochastic = TRUE)
-
-  d <- make_reg_data()
-  wf <- stoch_workflow(d)
-  p <- bayes_stoch_param_info(wf)
-  ms <- reg_metrics()
-
-  set.seed(5)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-  seeds <- c(101L, 202L)
-  entry_kind <- RNGkind()
-  on.exit(
-    RNGkind(entry_kind[[1]], entry_kind[[2]], entry_kind[[3]]),
-    add = TRUE
-  )
-
-  run_one <- function() {
-    nested_fold_fit(
-      split = folds$splits[[1]],
-      inner = folds$inner_resamples[[1]],
-      seeds = seeds,
-      object = wf,
-      tuner = bayes_tuner(),
-      metrics = ms,
-      param_info = p
-    )
-  }
-
-  set.seed(1)
-  from_default <- run_one()
-
-  # A fresh parallel worker would not be on the caller's generator. Pinning the
-  # kind inside the fold is what makes these agree.
-  RNGkind("L'Ecuyer-CMRG")
-  set.seed(9999)
-  from_lecuyer <- run_one()
-
-  RNGkind(entry_kind[[1]], entry_kind[[2]], entry_kind[[3]])
-  set.seed(31337)
-  invisible(runif(17))
-  from_midstream <- run_one()
-
-  expect_identical(from_lecuyer, from_default)
-  expect_identical(from_midstream, from_default)
-})
-
 test_that("the Gaussian-process seed is the fold's tuning seed, set inside its scope", {
   skip_if_no_bayes_fixture()
 
@@ -252,43 +150,4 @@ test_that("the Gaussian-process seed is the fold's tuning seed, set inside its s
   # the control sits inside the seed's scope rather than after some of it.
   set_fold_seed(seeds[[1L]])
   expect_identical(seen$state, get(".Random.seed", envir = globalenv()))
-})
-
-test_that("the RNG state is restored when the call itself errors", {
-  skip_if_no_bayes_fixture()
-
-  d <- make_reg_data()
-  wf <- bayes_workflow(d)
-
-  set.seed(7)
-  folds <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 2),
-    inside = rsample::vfold_cv(v = 3)
-  )
-
-  # The worker is stubbed to throw, so the error escapes the loop rather than
-  # being recorded -- the only remaining way out of the call after the seeds
-  # have been drawn, and the case on.exit() exists for.
-  testthat::local_mocked_bindings(
-    nested_fold_fit = function(...) stop("engineered worker failure")
-  )
-
-  set.seed(505)
-  before_seed <- .Random.seed
-  before_kind <- RNGkind()
-
-  expect_error(
-    nested_tune_bayes(
-      wf,
-      folds,
-      iter = 1,
-      initial = 3,
-      metrics = reg_metrics()
-    ),
-    "engineered worker failure"
-  )
-
-  expect_identical(.Random.seed, before_seed)
-  expect_identical(RNGkind(), before_kind)
 })

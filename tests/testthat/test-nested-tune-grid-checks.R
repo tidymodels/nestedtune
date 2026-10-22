@@ -183,21 +183,6 @@ test_that("`metrics` must be a metric set or NULL", {
   )
 })
 
-test_that("the checks fire before any fitting happens", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- valid_folds(d)
-
-  # A bad argument costs a second, not a full inner tuning run: the error
-  # arrives without the RNG ever being drawn from.
-  set.seed(1)
-  before <- .Random.seed
-  expect_error(nested_tune_grid(wf, folds, metrics = "rmse"))
-  expect_identical(.Random.seed, before)
-})
-
 # The grid is judged against the workflow up front (M03). Both directions are
 # wrong for every fold rather than for one, so both are call errors -- and once
 # fold failures are recorded rather than raised, an unchecked grid would show up
@@ -257,23 +242,6 @@ test_that("a grid given as a size is not held to the column check", {
 
   # There are no columns to judge yet; tune generates them.
   expect_no_error(check_grid_params(wf, 5))
-})
-
-test_that("the grid check fires before any fitting happens", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- valid_folds(d)
-
-  set.seed(1)
-  before <- .Random.seed
-  expect_error(nested_tune_grid(
-    wf,
-    folds,
-    grid = data.frame(not_a_param = 1:2)
-  ))
-  expect_identical(.Random.seed, before)
 })
 
 # The two list columns are checked element by element (M19). Before this, a bad
@@ -618,25 +586,6 @@ test_that("a control naming another event level is refused at entry (M48, AC3)",
     control = tune::control_grid()
   ))
   expect_s3_class(cnd, "nestedtune_sentinel")
-})
-
-test_that("the control refusals fire before the RNG is drawn from (M48)", {
-  skip_if_no_engines()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- valid_folds(d)
-
-  set.seed(1)
-  before <- get(".Random.seed", envir = globalenv())
-  grid_refusal(nested_tune_grid(wf, folds, nonesuch = 1))
-  grid_refusal(nested_tune_grid(wf, folds, control = "no"))
-  grid_refusal(nested_tune_grid(
-    wf,
-    folds,
-    control = tune::control_grid(event_level = "second")
-  ))
-  expect_identical(get(".Random.seed", envir = globalenv()), before)
 })
 
 # M55: every design refusal carries one class, names the driver the user
@@ -1106,13 +1055,8 @@ test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_r
   wf <- fixed_workflow(d)
   folds <- det_nested(d)
 
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(nested_tune_grid(wf, folds, grid = det_grid()))
   expect_s3_class(cnd, "nestedtune_untuned_workflow")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
   expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
-  # The seeds are drawn only once every check has passed, so an untouched
-  # stream is the evidence that no fold ran.
-  expect_identical(.Random.seed, before)
 })

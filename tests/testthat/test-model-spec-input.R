@@ -181,11 +181,13 @@ test_that("the racers and the annealer refuse a missing finetune before judging 
   }
 })
 
-# The forwarding itself: each spec method hands every argument to the
-# workflow method as given. The workflow method is replaced by one that
-# returns what it received, and every argument carries a sentinel no default
-# equals, so a dropped or renamed argument shows as a default or a missing
-# name. `control` stands for what the dots carry.
+# The forwarding itself: each spec method wraps the specification and the
+# preprocessor in `workflows::workflow(preprocessor, object)` and hands every
+# argument to the workflow method as given. The workflow method is replaced
+# by one that returns what it received, and every argument carries a
+# sentinel no default equals, so a dropped or renamed argument shows as a
+# default or a missing name. `control` stands for what the dots carry. With
+# this, one run per route below stands for every orchestrator.
 test_that("each spec method passes every argument on to the workflow method", {
   for (fn in ORCHESTRATORS) {
     if (!tuner_ready(fn)) {
@@ -212,7 +214,7 @@ test_that("each spec method passes every argument on to the workflow method", {
       control = "sentinel-control",
       !!!sentinels
     )
-    expect_s3_class(got$object, "workflow")
+    expect_identical(got$object, workflows::workflow(y ~ x, bare_spec()))
     expect_identical(got$resamples, "sentinel-resamples")
     expect_identical(
       got$args[order(names(got$args))],
@@ -268,7 +270,7 @@ spec_routes <- function(fn, spec, preprocessor, folds, ...) {
   list(spec = via_spec, workflow = via_workflow)
 }
 
-expect_same_run <- function(routes, selections = TRUE) {
+expect_same_run <- function(routes) {
   # Both routes completing is what keeps the identity from holding between
   # two all-failed runs.
   expect_true(all(routes$spec$.completed))
@@ -276,12 +278,10 @@ expect_same_run <- function(routes, selections = TRUE) {
     collect_metrics(routes$spec, summarize = FALSE),
     collect_metrics(routes$workflow, summarize = FALSE)
   )
-  if (selections) {
-    expect_identical(
-      collect_selections(routes$spec),
-      collect_selections(routes$workflow)
-    )
-  }
+  expect_identical(
+    collect_selections(routes$spec),
+    collect_selections(routes$workflow)
+  )
   expect_identical(
     extract_procedure(routes$spec)$workflow,
     extract_procedure(routes$workflow)$workflow
@@ -292,17 +292,6 @@ stoch_spec <- function() {
   parsnip::set_mode(
     parsnip::set_engine(
       parsnip::rand_forest(min_n = tune::tune(), trees = 25),
-      "ranger",
-      num.threads = 1
-    ),
-    "regression"
-  )
-}
-
-fixed_stoch_spec <- function() {
-  parsnip::set_mode(
-    parsnip::set_engine(
-      parsnip::rand_forest(min_n = 10L, trees = 25),
       "ranger",
       num.threads = 1
     ),
@@ -327,94 +316,6 @@ test_that("AC1: nested_tune_grid() on a spec and a formula is the workflow run",
     metrics = ms
   )
   expect_same_run(routes)
-})
-
-test_that("AC1: nested_tune_bayes() on a spec and a formula is the workflow run", {
-  skip_if_no_bayes_fixture(stochastic = TRUE)
-  d <- make_reg_data()
-  folds <- det_nested(d)
-  f <- reg_formula()
-  spec <- stoch_spec()
-  p <- bayes_stoch_param_info(workflows::workflow(f, spec))
-  ms <- reg_metrics()
-  routes <- spec_routes(
-    "nested_tune_bayes",
-    spec,
-    f,
-    folds,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms
-  )
-  expect_same_run(routes)
-})
-
-# One block per racer, so a skip for one leaves the other's test standing.
-for (fn in c("nested_tune_race_anova", "nested_tune_race_win_loss")) {
-  test_that(
-    paste0("AC1: ", fn, "() on a spec and a formula is the workflow run"),
-    {
-      skip_if_no_race_fixture(sub("^nested_", "", fn), stochastic = TRUE)
-      d <- make_reg_data()
-      folds <- det_nested(d)
-      f <- reg_formula()
-      ms <- reg_metrics()
-      ctrl <- race_control()
-      routes <- spec_routes(
-        fn,
-        stoch_spec(),
-        f,
-        folds,
-        grid = stoch_grid(),
-        metrics = ms,
-        control = ctrl
-      )
-      expect_same_run(routes)
-    }
-  )
-}
-
-test_that("AC1: nested_tune_sim_anneal() on a spec and a formula is the workflow run", {
-  skip_if_no_anneal_fixture(stochastic = TRUE)
-  skip_if_not_installed("dials")
-  d <- make_reg_data()
-  folds <- det_nested(d)
-  f <- reg_formula()
-  spec <- stoch_spec()
-  p <- bayes_stoch_param_info(workflows::workflow(f, spec))
-  ms <- reg_metrics()
-  routes <- spec_routes(
-    "nested_tune_sim_anneal",
-    spec,
-    f,
-    folds,
-    iter = 2,
-    initial = 3,
-    param_info = p,
-    metrics = ms
-  )
-  expect_same_run(routes)
-})
-
-test_that("AC1: nested_fit_resamples() on a spec and a formula is the workflow run", {
-  skip_if_no_engines(stochastic = TRUE)
-  d <- make_reg_data()
-  folds <- det_nested(d)
-  f <- reg_formula()
-  ms <- reg_metrics()
-  routes <- spec_routes(
-    "nested_fit_resamples",
-    fixed_stoch_spec(),
-    f,
-    folds,
-    metrics = ms
-  )
-  expect_same_run(routes, selections = FALSE)
-  expect_identical(
-    collect_metrics(routes$spec),
-    collect_metrics(routes$workflow)
-  )
 })
 
 # The recipe cases (AC2). The step id is written out, and the recipe is
@@ -460,19 +361,13 @@ test_that("AC2: nested_tune_grid() on a spec and a recipe is the workflow run", 
 # finalized on `workflow(preprocessor, spec)`, the workflow the spec route
 # recorded. The identity check refuses a workflow that differs from the
 # recorded one with `nestedtune_workflow_mismatch`, so a fit that returns at
-# all has passed it; the class is asserted absent too, and the control shows
-# the same check refusing a workflow with another recipe.
+# all has passed it, and the control shows the same check refusing a
+# workflow with another recipe.
 test_that("AC3: a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
   skip_if_no_engines()
   run <- recipe_grid_routes()
   wf <- workflows::workflow(run$recipe, bare_spec())
 
-  set.seed(3)
-  from_spec <- rlang::catch_cnd(
-    nested_final_fit(wf, run$routes$spec),
-    classes = "nestedtune_workflow_mismatch"
-  )
-  expect_null(from_spec)
   set.seed(3)
   from_spec <- nested_final_fit(wf, run$routes$spec)
   set.seed(3)
@@ -495,25 +390,5 @@ test_that("AC3: a spec route's result takes its final fit on the wrapped workflo
   expect_error(
     nested_final_fit(other, run$routes$spec),
     class = "nestedtune_workflow_mismatch"
-  )
-})
-
-test_that("AC2: nested_fit_resamples() on a spec and a recipe is the workflow run", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-  folds <- det_nested(d)
-  rec <- pca_recipe(d, num_comp = 2L)
-  ms <- reg_metrics()
-  routes <- spec_routes(
-    "nested_fit_resamples",
-    bare_spec(),
-    rec,
-    folds,
-    metrics = ms
-  )
-  expect_same_run(routes, selections = FALSE)
-  expect_identical(
-    collect_metrics(routes$spec),
-    collect_metrics(routes$workflow)
   )
 })

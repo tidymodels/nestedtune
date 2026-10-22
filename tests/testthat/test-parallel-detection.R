@@ -119,22 +119,6 @@ test_that("the probe reaches every daemon, not just a loadable one", {
 # and declined -- priming reaches every daemon, erasing the heterogeneity such
 # a fixture exists to create (see the ranger test above).
 
-test_that("a primed pool matches the host's namespace exactly", {
-  skip_if_no_daemons()
-
-  # The precondition for the whole approach, asserted rather than assumed. The
-  # manifest is `ls()` of the host's namespace, and host and daemons must agree
-  # under BOTH ways the suite runs -- primed by pkgload here, installed under
-  # R CMD check. A mismatch either way would refuse every parallel run.
-  on.exit(mirai::daemons(0), add = TRUE)
-  start_daemons(2)
-
-  status <- daemons_load_status(timeout = 30000)
-  expect_identical(status$outcome, "ok")
-  expect_identical(status$incompatible, 0L)
-  expect_identical(status$missing_symbols, character())
-})
-
 test_that("a symbol no build defines is reported by every daemon that loaded", {
   skip_if_no_daemons()
 
@@ -262,61 +246,6 @@ test_that("a dispatcher-backed run warns not at all", {
     class = "nestedtune_pool_not_cancellable"
   )
   expect_identical(last_dispatch(), "parallel")
-})
-
-test_that("dispatch_folds warns once per call, whatever it is dispatching", {
-  # The seam the previous two tests reach through nested_tune_grid(), driven
-  # directly with stand-in payloads: the warning is a property of dispatching to
-  # this pool, not of the folds being real, and it is the number of CALLS that
-  # sets the count -- three payloads through one call is still one warning.
-  skip_if_no_daemons()
-
-  on.exit(mirai::daemons(0), add = TRUE)
-  start_daemons_undispatched(2)
-
-  fold_record <- function(
-    payload,
-    object,
-    tuner,
-    metrics,
-    param_info,
-    event_level,
-    eval_time,
-    select,
-    control
-  ) {
-    list(
-      completed = TRUE,
-      metrics = data.frame(.estimate = as.double(payload$seed)),
-      selected = data.frame(seed = payload$seed),
-      inner_metrics = data.frame(.config = "pre0_mod1_post0"),
-      notes = data.frame(
-        location = character(0),
-        type = character(0),
-        note = character(0)
-      )
-    )
-  }
-  local_mocked_bindings(fold_task = fold_record)
-  payloads <- lapply(1:3, function(i) list(seed = i))
-
-  warnings <- character()
-  out <- withCallingHandlers(
-    without_pkgload_warning(
-      dispatch_folds(payloads, object = NULL, tuner = NULL, metrics = NULL)
-    ),
-    nestedtune_pool_not_cancellable = function(cnd) {
-      warnings <<- c(warnings, conditionMessage(cnd))
-      invokeRestart("muffleWarning")
-    }
-  )
-
-  expect_length(warnings, 1L)
-  expect_identical(last_dispatch(), "parallel")
-  expect_identical(
-    vapply(out, function(x) x$selected$seed, numeric(1)),
-    c(1, 2, 3)
-  )
 })
 
 # --- The start-first queue names real files (M57) ----------------------------

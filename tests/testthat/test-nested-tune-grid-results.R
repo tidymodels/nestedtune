@@ -141,25 +141,18 @@ test_that("a metric that is NA in every fold summarizes to NA with n = 0", {
   expect_true(is.na(rmse$std_err))
 })
 
-test_that("the results object is not a tune_results, so tune's selectors refuse it", {
+# D-010: the results object is not a `tune_results`, and the package
+# registers no method on it for tune's selectors, so they refuse it rather
+# than rank outer folds. What tune's refusal says is tune's, and not asserted.
+test_that("the results object is not a tune_results, and tune's selectors have no method for it", {
   skip_if_no_engines()
 
-  res <- example_results()
-
-  expect_false(inherits(res, "tune_results"))
-  # show_best()/select_best() on outer folds would rank folds against each
-  # other and return something authoritative-looking and meaningless (D-010).
-  expect_error(tune::select_best(res))
-  expect_error(tune::show_best(res))
-})
-
-test_that("metrics = NULL falls back to tune's defaults", {
-  skip_if_no_engines()
-
-  res <- example_results(metrics = NULL)
-  summarized <- collect_metrics(res)
-
-  expect_setequal(summarized$.metric, c("rmse", "rsq"))
+  expect_false(inherits(example_results(), "tune_results"))
+  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
+  on_results <- reg[reg[, 2L] == "nested_results", 1L]
+  expect_false(any(c("show_best", "select_best") %in% on_results))
+  # The registry read has a domain: the class does carry methods of ours.
+  expect_true("collect_metrics" %in% on_results)
 })
 
 test_that("the object carries the grid and metrics it was asked to run", {
@@ -263,7 +256,6 @@ test_that("the evaluated-candidate record travels with the rows it describes", {
   res <- example_results()
 
   subset <- res[2:3, ]
-  expect_length(subset$.inner_metrics, 2L)
   expect_identical(subset$.inner_metrics, res$.inner_metrics[2:3])
 })
 
@@ -365,8 +357,6 @@ test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical t
   d <- make_reg_data()
   res <- saved_results(d)
 
-  expect_true(".predictions" %in% names(res))
-  expect_type(res$.predictions, "list")
   expect_true(all(res$.completed))
   for (i in seq_len(nrow(res))) {
     ref <- reference_last_fit(res, i, d)
@@ -442,8 +432,6 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
   d <- make_reg_data()
   res <- extracted_results(d)
 
-  expect_true(".extracts" %in% names(res))
-  expect_type(res$.extracts, "list")
   expect_true(all(res$.completed))
   for (i in seq_len(nrow(res))) {
     ref <- reference_last_fit(res, i, d)

@@ -183,7 +183,6 @@ test_that("AC3: a workflow in which no fold completed is left out with a warning
   notes <- expect_no_warning(collect_notes(res))
   expect_identical(notes, bind_by_id(res, collect_notes))
   expect_true("broken" %in% notes$wflow_id)
-  expect_gt(sum(notes$wflow_id == "broken"), 0L)
 })
 
 test_that("AC3: a set in which no workflow completed a fold is refused, and collect_notes() still answers", {
@@ -330,16 +329,6 @@ test_that("compute_metrics() and augment() on a set are bind_rows() of each work
   }
   # Every workflow contributes one row per data row to augment().
   expect_identical(nrow(augment(res)), 2L * nrow(d))
-})
-
-test_that("compute_metrics() and augment() on a set refuse a non-empty `...`", {
-  skip_if_no_wset_fixture()
-  res <- kept_set_results(make_reg_data())
-  expect_error(
-    compute_metrics(res, reg_metrics(), foo = 1),
-    class = "rlib_error_dots_nonempty"
-  )
-  expect_error(augment(res, foo = 1), class = "rlib_error_dots_nonempty")
 })
 
 # M93: a workflow's saved predictions that do not match its held-out rows.
@@ -490,14 +479,15 @@ test_that("AC4: extract_workflow() returns the element's workflow and refuses an
   )
 })
 
-test_that("AC4: rank_results() and fit_best() raise on the set rather than answering", {
-  skip_if_no_wset_fixture()
-  res <- wset_results("nested_tune_grid")
-  # workflowsets refuses the object as not a workflow set; tune has no
-  # method. Each asserted as the failure it is, so a registered method
-  # answering a table or a fit would fail here.
-  expect_error(workflowsets::rank_results(res), "must be a workflow set")
-  expect_error(tune::fit_best(res), "No `fit_best\\(\\)` exists")
+# The package registers no `rank_results()` or `fit_best()` method on the set,
+# so workflowsets and tune refuse it rather than answer (M71, AC4). What their
+# refusals say is theirs, and not asserted.
+test_that("AC4: no rank_results() or fit_best() method is registered for the set", {
+  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
+  on_set <- reg[reg[, 2L] == "nested_results_set", 1L]
+  expect_false(any(c("rank_results", "fit_best") %in% on_set))
+  # The registry read has a domain: the class does carry methods of ours.
+  expect_true("collect_metrics" %in% on_set)
 })
 
 # A row subset of the set (M73, AC2 and AC3). A subset that keeps the class

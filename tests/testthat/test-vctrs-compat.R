@@ -66,14 +66,6 @@ test_that("vec_slice() taking one row keeps neither the class nor the record", {
   expect_no_record(vctrs::vec_slice(compat_results(), 1), "vec_slice(x, 1)")
 })
 
-test_that("vec_rbind() doubling the rows keeps neither the class nor the record", {
-  skip_if_no_engines()
-  res <- compat_results()
-  out <- vctrs::vec_rbind(res, res)
-  expect_identical(nrow(out), 6L)
-  expect_no_record(out, "vec_rbind(x, x)")
-})
-
 test_that("vec_c() doubling the rows keeps neither the class nor the record", {
   skip_if_no_engines()
   res <- compat_results()

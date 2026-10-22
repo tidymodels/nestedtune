@@ -471,31 +471,24 @@ expect_scoring_refused <- function(x, labels, calls) {
   invisible(cnd)
 }
 
-for (case in row_mismatch_cases) {
-  test_that(
-    paste0(
-      "the `",
-      case,
-      "` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored"
-    ),
-    {
-      skip_if_no_engines()
-      res <- saved_reg_run()
-      expect_true(all(res$.completed))
-      for (i in c(1L, 3L)) {
-        cnd <- expect_scoring_refused(
-          plant_row_mismatch(res, i, case),
-          res$id[[i]],
-          counting_metric_set()
-        )
-        # Only the edited fold is named.
-        for (other in setdiff(res$id, res$id[[i]])) {
-          expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
-        }
-      }
+# One case: the check is `check_predictions_rows()`, which `augment()` also
+# calls, and test-augment.R plants all five.
+test_that("the `repeated` mismatch on the first and a later fold is refused with nestedtune_compute_metrics_predictions before any fold is scored", {
+  skip_if_no_engines()
+  res <- saved_reg_run()
+  expect_true(all(res$.completed))
+  for (i in c(1L, 3L)) {
+    cnd <- expect_scoring_refused(
+      plant_row_mismatch(res, i, "repeated"),
+      res$id[[i]],
+      counting_metric_set()
+    )
+    # Only the edited fold is named.
+    for (other in setdiff(res$id, res$id[[i]])) {
+      expect_no_match(conditionMessage(cnd), other, fixed = TRUE)
     }
-  )
-}
+  }
+})
 
 test_that("on a run with a failed fold, a mismatch is refused before the partial-run warning", {
   skip_if_no_engines()

@@ -507,28 +507,24 @@ test_that("AC3: a rebuilt workflow is accepted and gives the same fit", {
       case$assembled
     )
 
+    # One fit from a rebuild; the assembled one is held to the identity
+    # check above alone.
     set.seed(7)
     from_orig <- nested_final_fit(case$orig, case$res)
     set.seed(7)
     from_rebuilt <- nested_final_fit(case$rebuilt, case$res)
-    set.seed(7)
-    from_assembled <- nested_final_fit(case$assembled, case$res)
     frame <- d[1:10, ]
     expect_identical(
       predict(from_rebuilt, new_data = frame),
       predict(from_orig, new_data = frame)
     )
-    expect_identical(
-      predict(from_assembled, new_data = frame),
-      predict(from_orig, new_data = frame)
-    )
     expect_identical(coefs(from_rebuilt), coefs(from_orig))
-    expect_identical(coefs(from_assembled), coefs(from_orig))
   }
 })
 
 # AC4: a record from before the entry existed is refused as one from an
-# earlier version, and the set path still fits.
+# earlier version. That the set path still fits, and records the row's
+# workflow, is asserted in test-nested-final-fit-set.R.
 
 test_that("AC4: a record with no workflow entry is refused before the identity check", {
   skip_if_no_engines()
@@ -559,18 +555,6 @@ test_that("AC4: a record with no workflow entry is refused before the identity c
     "no selection rule and record of the workflow to re-run"
   )
   expect_match(conditionMessage(cnd), "were recorded")
-})
-
-test_that("AC4: the final fit on a set with an id still fits", {
-  skip_if_no_wset_fixture("nested_fit_resamples")
-  set <- wset_results("nested_fit_resamples")
-  set.seed(3)
-  fit <- nested_final_fit(set, id = "baseline")
-  expect_s3_class(fit, "nested_final_fit")
-  expect_identical(
-    extract_procedure(fit)$workflow,
-    workflow_identity(extract_workflow(set, "baseline"))
-  )
 })
 
 # M103: the case-weights column and the tailor postprocessor join the

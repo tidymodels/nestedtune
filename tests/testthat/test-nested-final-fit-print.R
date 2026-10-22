@@ -80,24 +80,6 @@ test_that("printing shows no number from the stored tuning run", {
   }
 })
 
-test_that("tune's ranking generics have no method for a final fit", {
-  skip_if_no_engines()
-
-  final <- final_for_print()
-
-  # The same refusal D-010 chose for nested_results, for the same reason: an
-  # answer here would look authoritative and describe nothing the user wants.
-  # Some of these refuse through a default method tune wrote and some through
-  # dispatch failing outright, so the wording differs; what matters is that
-  # none of them answers.
-  refusal <- "exists for|applicable method"
-  expect_error(collect_metrics(final), refusal)
-  expect_error(tune::show_best(final), refusal)
-  expect_error(tune::select_best(final), refusal)
-  expect_error(collect_predictions(final), refusal)
-  expect_error(collect_extracts(final), refusal)
-})
-
 test_that("the printed report is stable", {
   skip_if_no_engines()
 

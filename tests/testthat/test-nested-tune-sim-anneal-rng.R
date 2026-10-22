@@ -1,15 +1,15 @@
 # The "fold results do not depend on the order folds are run in", "fold
 # results do not depend on the ambient RNG state or kind", "the caller's RNG
 # state and kind survive the call untouched", and "a session with no RNG
-# state is left with a valid one" blocks were pinned here until M113. The
-# success-path RNG restore and the fold seeding are one shared site in
+# state is left with a valid one" blocks were pinned here until M113, and
+# "the RNG state is restored when the call itself errors" until M152. The
+# RNG restore on both exits and the fold seeding are one shared site in
 # `nested_loop()` / `set_fold_seed()`, so test-nested-tune-grid-rng.R covers
 # them (D-079).
 # IP2 for the annealing path (M51 AC4). Of the properties
-# test-nested-tune-grid-rng.R holds the grid path to, the same-seed,
-# different-seed, and error-restore properties are asserted here on
-# nested_tune_sim_anneal(); the rest are covered once, in
-# test-nested-tune-grid-rng.R (D-079). Every test that could pass vacuously
+# test-nested-tune-grid-rng.R holds the grid path to, the same-seed and
+# different-seed properties are asserted here on nested_tune_sim_anneal().
+# Every test that could pass vacuously
 # under a deterministic engine uses ranger, whose fits draw from R's RNG; the
 # search itself draws too -- the initial design and every perturbation come
 # from the stream the fold's tuning seed started -- which is why even the
@@ -102,32 +102,4 @@ test_that("a different seed produces different inner tables", {
   expect_false(identical(first$.tuning_seed, other$.tuning_seed))
   expect_false(identical(first$.inner_metrics, other$.inner_metrics))
   expect_false(identical(first$.metrics, other$.metrics))
-})
-
-test_that("the RNG state is restored when the call itself errors", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- det_nested(d)
-  ctrl <- anneal_control()
-
-  # The worker is stubbed to throw, so the error escapes the loop rather than
-  # being recorded -- the only remaining way out of the call after the seeds
-  # have been drawn, and the case on.exit() exists for.
-  testthat::local_mocked_bindings(
-    nested_fold_fit = function(...) stop("engineered worker failure")
-  )
-
-  set.seed(505)
-  before_seed <- .Random.seed
-  before_kind <- RNGkind()
-
-  expect_error(
-    nested_tune_sim_anneal(wf, folds, iter = 2, initial = 3, control = ctrl),
-    "engineered worker failure"
-  )
-
-  expect_identical(.Random.seed, before_seed)
-  expect_identical(RNGkind(), before_kind)
 })

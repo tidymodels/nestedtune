@@ -10,8 +10,10 @@
 #   2i-1 with the kind pinned and `control_race(burn_in = 2, allow_par =
 #   FALSE)`, fitting under element 2i -- and never from the driver's output.
 #   Pinned by "per-fold metrics, selections and inner tables match a
-#   hand-rolled racing reference loop" on the deterministic and the
-#   metric-separating fixtures, for each racer. Satisfies AC1.
+#   hand-rolled racing reference loop" on the deterministic fixture for each
+#   racer, and on the metric-separating fixture for the ANOVA racer. The two
+#   racers share one body, `nested_tune_race()`, so every other block here
+#   that runs a race runs the ANOVA racer alone. Satisfies AC1.
 #
 # O2 -- type "invariant". Source: no external one; the agreement between two
 #   independent internal routes is the oracle. A candidate a race scored on
@@ -125,31 +127,30 @@ test_that("the racing reference loop also matches on the metric-separating fixtu
   folds <- sep_nested(d)
   ms <- sep_metrics()
   ctrl <- race_control()
+  fn <- "tune_race_anova"
 
-  for (fn in RACERS) {
-    set.seed(23)
-    res <- race_call_by_name(
-      fn,
-      wf,
-      folds,
-      grid = sep_grid(),
-      metrics = ms,
-      control = ctrl
-    )
-    ref <- memoised(reference_nested_race_loop(
-      fn,
-      wf,
-      folds,
-      grid = sep_grid(),
-      metrics = ms,
-      seed = 23,
-      metric_name = "mae",
-      control = ctrl
-    ))
-    expect_matches_reference(res, ref, "mae")
-    # The metric set reached the race: the outer metrics are the set's.
-    expect_setequal(res$.metrics[[1L]]$.metric, c("mae", "rmse"))
-  }
+  set.seed(23)
+  res <- race_call_by_name(
+    fn,
+    wf,
+    folds,
+    grid = sep_grid(),
+    metrics = ms,
+    control = ctrl
+  )
+  ref <- memoised(reference_nested_race_loop(
+    fn,
+    wf,
+    folds,
+    grid = sep_grid(),
+    metrics = ms,
+    seed = 23,
+    metric_name = "mae",
+    control = ctrl
+  ))
+  expect_matches_reference(res, ref, "mae")
+  # The metric set reached the race: the outer metrics are the set's.
+  expect_setequal(res$.metrics[[1L]]$.metric, c("mae", "rmse"))
 })
 
 test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
@@ -167,30 +168,29 @@ test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
   grid <- memoised(nested_tune_grid(wf, folds, grid = g, metrics = ms))
   expect_true(all(grid$.completed))
 
-  for (fn in RACERS) {
-    res <- race_results(fn)
-    expect_identical(res$.tuning_seed, grid$.tuning_seed)
+  res <- race_results("tune_race_anova")
+  expect_identical(res$.tuning_seed, grid$.tuning_seed)
 
-    for (i in seq_len(nrow(res))) {
-      raced <- res$.inner_metrics[[i]]
-      full <- raced[raced$n == 3L, ]
-      # At least one candidate in every fold was scored on all 3 inner
-      # resamples; without this the identity below could hold vacuously.
-      expect_gt(nrow(full), 0L)
-      by_grid <- grid$.inner_metrics[[i]]
-      for (r in seq_len(nrow(full))) {
-        match <- by_grid$num_comp == full$num_comp[[r]] &
-          by_grid$.metric == full$.metric[[r]]
-        expect_identical(sum(match), 1L)
-        expect_identical(full$mean[[r]], by_grid$mean[[which(match)]])
-        expect_identical(by_grid$n[[which(match)]], 3L)
-      }
+  for (i in seq_len(nrow(res))) {
+    raced <- res$.inner_metrics[[i]]
+    full <- raced[raced$n == 3L, ]
+    # At least one candidate in every fold was scored on all 3 inner
+    # resamples; without this the identity below could hold vacuously.
+    expect_gt(nrow(full), 0L)
+    by_grid <- grid$.inner_metrics[[i]]
+    for (r in seq_len(nrow(full))) {
+      match <- by_grid$num_comp == full$num_comp[[r]] &
+        by_grid$.metric == full$.metric[[r]]
+      expect_identical(sum(match), 1L)
+      expect_identical(full$mean[[r]], by_grid$mean[[which(match)]])
+      expect_identical(by_grid$n[[which(match)]], 3L)
     }
   }
 })
 
 test_that("the fold record is every candidate the race scored, and the selection a survivor (AC3)", {
-  skip_if_no_race_fixture(stochastic = TRUE)
+  fn <- "tune_race_anova"
+  skip_if_no_race_fixture(fn, stochastic = TRUE)
 
   d <- make_reg_data()
   wf <- stoch_workflow(d)
@@ -198,58 +198,56 @@ test_that("the fold record is every candidate the race scored, and the selection
   ms <- reg_metrics()
   ctrl <- race_control()
 
-  for (fn in RACERS) {
-    set.seed(24)
-    res <- race_call_by_name(
-      fn,
-      wf,
-      folds,
-      grid = stoch_grid(),
-      metrics = ms,
-      control = ctrl
+  set.seed(24)
+  res <- race_call_by_name(
+    fn,
+    wf,
+    folds,
+    grid = stoch_grid(),
+    metrics = ms,
+    control = ctrl
+  )
+  ref <- memoised(reference_nested_race_loop(
+    fn,
+    wf,
+    folds,
+    grid = stoch_grid(),
+    metrics = ms,
+    seed = 24,
+    metric_name = "rmse",
+    control = ctrl
+  ))
+  expect_matches_reference(res, ref, "rmse")
+
+  eliminated <- 0L
+  for (i in seq_len(nrow(res))) {
+    raced <- ref[[i]]$tuned
+    expect_s3_class(raced, "tune_race")
+    # The record: every candidate scored, not finetune's survivors alone.
+    expect_identical(
+      res$.inner_metrics[[i]],
+      tune::collect_metrics(raced, all_configs = TRUE)
     )
-    ref <- memoised(reference_nested_race_loop(
-      fn,
-      wf,
-      folds,
-      grid = stoch_grid(),
-      metrics = ms,
-      seed = 24,
-      metric_name = "rmse",
-      control = ctrl
-    ))
-    expect_matches_reference(res, ref, "rmse")
+    expect_identical(
+      res$.selected[[i]],
+      tune::select_best(raced, metric = "rmse")
+    )
 
-    eliminated <- 0L
-    for (i in seq_len(nrow(res))) {
-      raced <- ref[[i]]$tuned
-      expect_s3_class(raced, "tune_race")
-      # The record: every candidate scored, not finetune's survivors alone.
-      expect_identical(
-        res$.inner_metrics[[i]],
-        tune::collect_metrics(raced, all_configs = TRUE)
-      )
-      expect_identical(
-        res$.selected[[i]],
-        tune::select_best(raced, metric = "rmse")
-      )
-
-      tbl <- res$.inner_metrics[[i]]
-      # A race does not iterate: no `.iter` on its record, so none on the
-      # zero-row table a failed fold takes from a completed one.
-      expect_false(".iter" %in% names(tbl))
-      n_max <- nrow(folds$inner_resamples[[i]])
-      eliminated <- eliminated + sum(tbl$n < n_max)
-      # The selection is a candidate raced to the end.
-      sel <- tbl[tbl$.config == res$.selected[[i]]$.config, ]
-      expect_gt(nrow(sel), 0L)
-      expect_true(all(sel$n == n_max))
-    }
-    # Some candidate was eliminated somewhere: the record holds a row with
-    # `n` below the resample count, which the survivors-only default would
-    # have dropped.
-    expect_gt(eliminated, 0L)
+    tbl <- res$.inner_metrics[[i]]
+    # A race does not iterate: no `.iter` on its record, so none on the
+    # zero-row table a failed fold takes from a completed one.
+    expect_false(".iter" %in% names(tbl))
+    n_max <- nrow(folds$inner_resamples[[i]])
+    eliminated <- eliminated + sum(tbl$n < n_max)
+    # The selection is a candidate raced to the end.
+    sel <- tbl[tbl$.config == res$.selected[[i]]$.config, ]
+    expect_gt(nrow(sel), 0L)
+    expect_true(all(sel$n == n_max))
   }
+  # Some candidate was eliminated somewhere: the record holds a row with
+  # `n` below the resample count, which the survivors-only default would
+  # have dropped.
+  expect_gt(eliminated, 0L)
 })
 
 test_that("a race fold that scored nothing carries a zero-row table with no .iter", {
@@ -261,32 +259,31 @@ test_that("a race fold that scored nothing carries a zero-row table with no .ite
   d <- make_reg_data()
   wf <- det_workflow(d)
   nested <- break_fold(det_nested(d), fold = 2L, stage = "inner tuning")
+  fn <- "tune_race_anova"
 
-  for (fn in RACERS) {
-    set.seed(20)
-    res <- suppressWarnings(race_call_by_name(
-      fn,
-      wf,
-      nested,
-      grid = det_grid(),
-      metrics = reg_metrics(),
-      control = race_control()
-    ))
+  set.seed(20)
+  res <- suppressWarnings(race_call_by_name(
+    fn,
+    wf,
+    nested,
+    grid = det_grid(),
+    metrics = reg_metrics(),
+    control = race_control()
+  ))
 
-    expect_false(res$.completed[[2L]])
-    expect_true(res$.completed[[1L]])
-    none <- res$.inner_metrics[[2L]]
-    done <- res$.inner_metrics[[1L]]
-    expect_identical(nrow(none), 0L)
-    # A race does not iterate, so the zero-row table it takes from a
-    # completed fold's columns carries no `.iter` either.
-    expect_false(".iter" %in% names(none))
-    expect_identical(names(none), names(done))
-    expect_identical(
-      vapply(none, function(col) class(col)[[1L]], character(1)),
-      vapply(done, function(col) class(col)[[1L]], character(1))
-    )
-  }
+  expect_false(res$.completed[[2L]])
+  expect_true(res$.completed[[1L]])
+  none <- res$.inner_metrics[[2L]]
+  done <- res$.inner_metrics[[1L]]
+  expect_identical(nrow(none), 0L)
+  # A race does not iterate, so the zero-row table it takes from a
+  # completed fold's columns carries no `.iter` either.
+  expect_false(".iter" %in% names(none))
+  expect_identical(names(none), names(done))
+  expect_identical(
+    vapply(none, function(col) class(col)[[1L]], character(1)),
+    vapply(done, function(col) class(col)[[1L]], character(1))
+  )
 })
 
 test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
@@ -299,50 +296,50 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
   object <- det_workflow(d)
   resamples <- det_nested(d)
   metrics <- reg_metrics()
+  fn <- "tune_race_anova"
 
-  for (fn in RACERS) {
-    res <- race_results(fn)
-    racer <- getExportedValue("finetune", fn)
-    grid <- attr(res, "procedure")$grid
-    param_info <- attr(res, "procedure")$param_info
-    eval_time <- attr(res, "procedure")$eval_time
-    i <- 2L
+  res <- race_results(fn)
+  racer <- getExportedValue("finetune", fn)
+  grid <- attr(res, "procedure")$grid
+  param_info <- attr(res, "procedure")$param_info
+  eval_time <- attr(res, "procedure")$eval_time
+  i <- 2L
 
-    set.seed(
-      res$.tuning_seed[[i]],
-      kind = "Mersenne-Twister",
-      normal.kind = "Inversion",
-      sample.kind = "Rejection"
-    )
-    control <- attr(res, "procedure")$control
-    raced <- racer(
-      object,
-      resamples$inner_resamples[[i]],
-      grid = grid,
-      param_info = param_info,
-      metrics = metrics,
-      eval_time = eval_time,
-      control = control
-    )
-    expect_identical(
-      res$.inner_metrics[[i]],
-      tune::collect_metrics(raced, all_configs = TRUE)
-    )
-    expect_identical(
-      res$.selected[[i]],
-      tune::select_best(raced, metric = "rmse")
-    )
-  }
+  set.seed(
+    res$.tuning_seed[[i]],
+    kind = "Mersenne-Twister",
+    normal.kind = "Inversion",
+    sample.kind = "Rejection"
+  )
+  control <- attr(res, "procedure")$control
+  raced <- racer(
+    object,
+    resamples$inner_resamples[[i]],
+    grid = grid,
+    param_info = param_info,
+    metrics = metrics,
+    eval_time = eval_time,
+    control = control
+  )
+  expect_identical(
+    res$.inner_metrics[[i]],
+    tune::collect_metrics(raced, all_configs = TRUE)
+  )
+  expect_identical(
+    res$.selected[[i]],
+    tune::select_best(raced, metric = "rmse")
+  )
 })
 
-# The selection rule on the racing path (M69, AC1), for both racers: the
+# The selection rule on the racing path (M69, AC1), on the ANOVA racer: the
 # reference loop's selection is tune's selector called by name on the hand
 # race (reference_select(), helper-orchestration.R). Measured 2026-09-06 on
 # race_results()'s fixture under seed 20, either racer: best picks 3, 3, 3;
 # one_std_err by num_comp 2, 3, 2; pct_loss by num_comp at limit 5 2, 3, 2.
 
-test_that("AC1: each selection rule picks what tune's selector picks on the fold's race, for both racers (M69)", {
-  skip_if_no_race_fixture()
+test_that("AC1: each selection rule picks what tune's selector picks on the fold's race (M69)", {
+  fn <- "tune_race_anova"
+  skip_if_no_race_fixture(fn)
 
   d <- make_reg_data()
   wf <- det_workflow(d)
@@ -355,46 +352,44 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     one_std_err = selection_rule("one_std_err", num_comp),
     pct_loss = selection_rule("pct_loss", num_comp, limit = 5)
   )
-  for (fn in RACERS) {
-    # One reference race per racer for the configuration -- the one the
-    # deterministic oracle above built, served from the cache -- and each rule
-    # applied to it through reference_with_rule() (M74).
-    set.seed(20)
-    ref_best <- memoised(reference_nested_race_loop(
-      fn,
-      wf,
-      folds,
-      grid = det_grid(),
-      metrics = ms,
-      seed = 20,
-      metric_name = "rmse",
-      control = ctrl
-    ))
-    picked <- list()
-    for (nm in names(rules)) {
-      if (nm == "best") {
-        # The default rule is `best`, so race_results(fn), which seeds
-        # itself, is this run, served from the cache; the `select` assertion
-        # below checks the record equals the rule written out (M113).
-        res <- race_results(fn)
-      } else {
-        set.seed(20)
-        res <- race_fn(fn)(
-          wf,
-          folds,
-          grid = det_grid(),
-          metrics = ms,
-          control = ctrl,
-          select = rules[[nm]]
-        )
-      }
-      ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
-      expect_matches_reference(res, ref, "rmse")
-      expect_identical(extract_procedure(res)$select, rules[[nm]])
-      picked[[nm]] <- res$.selected
+  # One reference race for the configuration -- the one the
+  # deterministic oracle above built, served from the cache -- and each rule
+  # applied to it through reference_with_rule() (M74).
+  set.seed(20)
+  ref_best <- memoised(reference_nested_race_loop(
+    fn,
+    wf,
+    folds,
+    grid = det_grid(),
+    metrics = ms,
+    seed = 20,
+    metric_name = "rmse",
+    control = ctrl
+  ))
+  picked <- list()
+  for (nm in names(rules)) {
+    if (nm == "best") {
+      # The default rule is `best`, so race_results(fn), which seeds
+      # itself, is this run, served from the cache; the `select` assertion
+      # below checks the record equals the rule written out (M113).
+      res <- race_results(fn)
+    } else {
+      set.seed(20)
+      res <- race_fn(fn)(
+        wf,
+        folds,
+        grid = det_grid(),
+        metrics = ms,
+        control = ctrl,
+        select = rules[[nm]]
+      )
     }
-    # The rule reached the selection (see the note above).
-    expect_false(identical(picked$one_std_err, picked$best), info = fn)
-    expect_false(identical(picked$pct_loss, picked$best), info = fn)
+    ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
+    expect_matches_reference(res, ref, "rmse")
+    expect_identical(extract_procedure(res)$select, rules[[nm]])
+    picked[[nm]] <- res$.selected
   }
+  # The rule reached the selection (see the note above).
+  expect_false(identical(picked$one_std_err, picked$best))
+  expect_false(identical(picked$pct_loss, picked$best))
 })

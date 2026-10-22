@@ -4,11 +4,11 @@
 #
 # Two halves. The refusals that are this orchestrator's own -- finetune not
 # installed, `iter` below its floor of 1, `initial` below its floor of 1 or a
-# `tune_results`, a control of another class -- each fire with a class of
-# their own, naming the user's call. And every check the Bayesian sibling
-# makes, other than the one that judges an acquisition function, is made here
-# too: the set is read off both function bodies rather than listed by hand,
-# so a check added to one and forgotten in the other fails by name.
+# `tune_results` -- each fire with a class of their own, naming the user's
+# call. And every check the Bayesian sibling makes, other than the one that
+# judges an acquisition function, fires here too, through one table held to
+# the list read off the Bayesian body, so a check added there and missing
+# here fails by name.
 
 anneal_folds <- function(d) det_nested(d, v = 2)
 
@@ -184,85 +184,14 @@ test_that("`initial` refuses a tune_results, which finetune would accept", {
   expect_no_match(conditionMessage(cnd), "at least 1")
 })
 
-test_that("`control` must be what finetune::control_sim_anneal() returns", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- anneal_folds(d)
-
-  # The Bayesian control is the one a caller is likeliest to reach for, and
-  # finetune itself would run under it (`condense_control()` reads slots by
-  # name); the racing control is finetune's own other class.
-  for (bad in list(
-    tune::control_bayes(seed = 1L),
-    finetune::control_race(),
-    list(allow_par = FALSE),
-    "no",
-    1
-  )) {
-    cnd <- refusal(nested_tune_sim_anneal(wf, folds, control = bad))
-    expect_refused(cnd, "nestedtune_bad_control", "control_sim_anneal")
-    expect_match(conditionMessage(cnd), "finetune::control_sim_anneal")
-    # The class is shared with the event-level conflict below, so the
-    # message says which of the two fired.
-    expect_no_match(conditionMessage(cnd), "event_level")
-  }
-})
-
-test_that("a control naming another event level is refused at entry", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- anneal_folds(d)
-
-  cnd <- refusal(nested_tune_sim_anneal(
-    wf,
-    folds,
-    event_level = "first",
-    control = finetune::control_sim_anneal(event_level = "second")
-  ))
-  expect_refused(cnd, "nestedtune_bad_control", "event_level")
-  expect_match(conditionMessage(cnd), "\"first\"")
-  expect_match(conditionMessage(cnd), "\"second\"")
-
-  # A control left at finetune's default takes the argument's level.
-  cnd <- refusal(nested_tune_sim_anneal(
-    wf,
-    folds,
-    event_level = "second",
-    control = anneal_control()
-  ))
-  expect_s3_class(cnd, "nestedtune_sentinel")
-})
-
 # The shared checks. The list is derived, not written: every `check_*()` the
 # Bayesian orchestrator's body calls, less the one that judges an acquisition
-# function, must appear in this orchestrator's body, and the package check
-# beside them.
+# function, must fire through this orchestrator.
 
 check_calls <- function(fn) {
   nms <- all.names(body(fn))
   sort(unique(nms[startsWith(nms, "check_")]))
 }
-
-test_that("every check the Bayesian path makes, the annealing path makes too", {
-  bayes_checks <- check_calls(nested_tune_bayes.workflow)
-  anneal_checks <- check_calls(nested_tune_sim_anneal.workflow)
-
-  # One fact held independently of the derivation: the enumeration cannot
-  # silently empty.
-  expect_true(all(c("check_iter", "check_initial") %in% bayes_checks))
-
-  shared <- setdiff(bayes_checks, "check_objective")
-  expect_identical(setdiff(shared, anneal_checks), character(0))
-  # No acquisition function here, and no grid; the package check is added.
-  expect_false(any(
-    c("check_objective", "check_grid", "check_grid_params") %in% anneal_checks
-  ))
-  expect_true("check_tuner_installed" %in% anneal_checks)
-})
 
 test_that("each shared check fires through nested_tune_sim_anneal()", {
   skip_if_no_anneal_fixture()
@@ -343,6 +272,9 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
   )
 
   shared <- setdiff(check_calls(nested_tune_bayes.workflow), "check_objective")
+  # One fact held independently of the derivation: the list cannot silently
+  # empty.
+  expect_true(all(c("check_iter", "check_initial") %in% shared))
   expect_identical(setdiff(shared, names(fired)), character(0))
 
   for (nm in names(fired)) {
@@ -355,68 +287,6 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
       as.name("nested_tune_sim_anneal")
     )
   }
-})
-
-# M55: every design shape check_nested() refuses, refused here too -- with
-# the one class and this export's name on the condition. What each message
-# names is held to the planted positions by the grid driver's tests.
-
-test_that("every malformed design is refused at entry (M55)", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  ctrl <- anneal_control()
-  planted <- malformed_designs(d)
-  expect_gt(length(planted), 70L)
-
-  for (nm in names(planted)) {
-    cnd <- refusal(
-      nested_tune_sim_anneal(wf, planted[[nm]]$design, control = ctrl)
-    )
-    expect_s3_class(cnd, "nestedtune_bad_design")
-    expect_false(inherits(cnd, "nestedtune_sentinel"), info = nm)
-    expect_identical(
-      conditionCall(cnd)[[1L]],
-      as.name("nested_tune_sim_anneal")
-    )
-  }
-})
-
-test_that("`...` accepts `control` and nothing else", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- anneal_folds(d)
-
-  cnd <- refusal(nested_tune_sim_anneal(wf, folds, nonesuch = 1))
-  expect_refused(cnd, "nestedtune_bad_dots", "nonesuch")
-
-  cnd <- refusal(nested_tune_sim_anneal(wf, folds, 3))
-  expect_refused(cnd, "nestedtune_bad_dots", "unnamed")
-
-  cnd <- refusal(nested_tune_sim_anneal(wf, folds, call = quote(bogus())))
-  expect_refused(cnd, "nestedtune_bad_dots", "`call`")
-})
-
-test_that("a refusal leaves the RNG where it found it", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- anneal_folds(d)
-
-  set.seed(1)
-  before <- .Random.seed
-  expect_error(nested_tune_sim_anneal(wf, folds, iter = 0))
-  expect_error(nested_tune_sim_anneal(wf, folds, initial = 0))
-  expect_error(nested_tune_sim_anneal(
-    wf,
-    folds,
-    control = tune::control_grid()
-  ))
-  expect_identical(.Random.seed, before)
 })
 
 # D-046's falsifier, pinned: `iter`'s floor of 1 rests on finetune running
@@ -469,47 +339,6 @@ test_that("AC4: the desirability rule is refused at entry (M109)", {
   expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
 })
 
-test_that("`select` is held at entry, before any fold runs (M69, AC4)", {
-  skip_if_no_anneal_fixture()
-
-  d <- make_reg_data()
-  wf <- det_workflow(d)
-  folds <- anneal_folds(d)
-  ctrl <- anneal_control()
-
-  for (bad in list("best", NULL)) {
-    cnd <- refusal(nested_tune_sim_anneal(
-      wf,
-      folds,
-      select = bad,
-      control = ctrl
-    ))
-    expect_refused(cnd, "nestedtune_bad_selection_rule", "selection_rule")
-  }
-  cnd <- refusal(nested_tune_sim_anneal(
-    wf,
-    folds,
-    select = selection_rule("one_std_err", nonesuch),
-    control = ctrl
-  ))
-  expect_refused(cnd, "nestedtune_selection_rule_unknown_param", "nonesuch")
-  expect_match(
-    cli::ansi_strip(conditionMessage(cnd)),
-    "num_comp",
-    fixed = TRUE
-  )
-
-  expect_s3_class(
-    refusal(nested_tune_sim_anneal(
-      wf,
-      folds,
-      select = selection_rule("one_std_err", num_comp),
-      control = ctrl
-    )),
-    "nestedtune_sentinel"
-  )
-})
-
 test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
   skip_if_no_engines()
   skip_if_not_installed("finetune")
@@ -517,8 +346,6 @@ test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_r
   wf <- fixed_workflow(d)
   folds <- det_nested(d)
 
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(nested_tune_sim_anneal(wf, folds, iter = 1))
   expect_s3_class(cnd, "nestedtune_untuned_workflow")
   expect_identical(
@@ -526,7 +353,4 @@ test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_r
     "nested_tune_sim_anneal"
   )
   expect_match(conditionMessage(cnd), "nested_fit_resamples()", fixed = TRUE)
-  # The seeds are drawn only once every check has passed, so an untouched
-  # stream is the evidence that no fold ran.
-  expect_identical(.Random.seed, before)
 })

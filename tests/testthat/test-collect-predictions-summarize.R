@@ -695,39 +695,32 @@ flat_message <- function(cnd) {
 
 # ---- M126 AC1: saved rows must match the rows each fold held out ----------
 
-for (case in row_mismatch_cases) {
-  test_that(
-    paste0(
-      "M126 AC1: the `",
-      case,
-      "` mismatch is refused under summarize = TRUE, naming the fold"
-    ),
-    {
-      skip_if_no_engines()
-      res <- reg_pair()$res
-      planted <- plant_row_mismatch(res, 2L, case)
-      cnd <- rlang::catch_cnd(
-        collect_predictions(planted, summarize = TRUE),
-        "error"
-      )
-      expect_s3_class(cnd, "nestedtune_collect_predictions_predictions")
-      expect_identical(
-        conditionCall(cnd)[[1L]],
-        as.name("collect_predictions")
-      )
-      labels <- fold_ids(res)
-      expect_match(flat_message(cnd), labels[[2L]], fixed = TRUE)
-      for (other in labels[-2L]) {
-        expect_no_match(flat_message(cnd), other, fixed = TRUE)
-      }
-      # The message points to the per-fold table the check leaves alone.
-      expect_match(flat_message(cnd), "summarize = FALSE", fixed = TRUE)
-      # The per-fold table reads the same run without a condition.
-      expect_no_condition(per_fold <- collect_predictions(planted))
-      expect_s3_class(per_fold, "tbl_df")
-    }
+# One case: the check is `check_predictions_rows()`, which `augment()` also
+# calls, and test-augment.R plants all five.
+test_that("M126 AC1: the `repeated` mismatch is refused under summarize = TRUE, naming the fold", {
+  skip_if_no_engines()
+  res <- reg_pair()$res
+  planted <- plant_row_mismatch(res, 2L, "repeated")
+  cnd <- rlang::catch_cnd(
+    collect_predictions(planted, summarize = TRUE),
+    "error"
   )
-}
+  expect_s3_class(cnd, "nestedtune_collect_predictions_predictions")
+  expect_identical(
+    conditionCall(cnd)[[1L]],
+    as.name("collect_predictions")
+  )
+  labels <- fold_ids(res)
+  expect_match(flat_message(cnd), labels[[2L]], fixed = TRUE)
+  for (other in labels[-2L]) {
+    expect_no_match(flat_message(cnd), other, fixed = TRUE)
+  }
+  # The message points to the per-fold table the check leaves alone.
+  expect_match(flat_message(cnd), "summarize = FALSE", fixed = TRUE)
+  # The per-fold table reads the same run without a condition.
+  expect_no_condition(per_fold <- collect_predictions(planted))
+  expect_s3_class(per_fold, "tbl_df")
+})
 
 test_that("M126 AC1: a mismatch in one workflow of a set is refused", {
   skip_if_no_wset_fixture("nested_fit_resamples")

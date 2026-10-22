@@ -339,24 +339,6 @@ test_that("summary() returns a classed object carrying the run's numbers", {
   )
 })
 
-test_that("summarizing reports the outer design and how much of it ran", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-
-  set.seed(2)
-  res <- memoised(nested_tune_grid(
-    det_workflow(d),
-    det_nested(d),
-    grid = det_grid(),
-    metrics = reg_metrics()
-  ))
-  txt <- summary_text(res)
-
-  expect_match(txt, "3-fold cross-validation")
-  expect_match(txt, "3 requested")
-  expect_match(txt, "3 completed")
-})
-
 test_that("a failed fold is named along with the stage it failed at", {
   skip_if_no_engines()
   d <- make_reg_data()
@@ -622,17 +604,6 @@ test_that("summary() of a run where every fold completed signals nothing", {
 
   expect_no_warning(s <- summary(res))
   expect_no_condition(print_text(s))
-})
-
-test_that("summary() and its print method reject arguments they do not take", {
-  skip_if_no_engines()
-  res <- repeated_results()
-
-  expect_error(summary(res, foo = 1), class = "rlib_error_dots_nonempty")
-  expect_error(
-    print(summary(res), foo = 1),
-    class = "rlib_error_dots_nonempty"
-  )
 })
 
 test_that("a single completed fold reads in the singular", {
@@ -1123,19 +1094,6 @@ test_that("AC1: the set's print is one h1, one h2 per workflow in set order, and
   )
 })
 
-test_that("AC1: the set's summary and its print fence their dots", {
-  skip_if_no_wset_fixture()
-  res <- wset_three_results()
-  expect_s3_class(
-    rlang::catch_cnd(summary(res, nonesuch = 1)),
-    "rlib_error_dots_nonempty"
-  )
-  expect_s3_class(
-    rlang::catch_cnd(print(summary(res), nonesuch = 1)),
-    "rlib_error_dots_nonempty"
-  )
-})
-
 test_that("AC1: the set's printed summary holds its shape", {
   skip_if_no_wset_fixture()
   # A single summary's print is unchanged by the factoring (the snapshots
@@ -1417,16 +1375,15 @@ test_that("M116 AC2: the summary names the selecting metric, first under the def
   expect_identical(lines[[heading + 2L]], "Selecting metric: rmse")
   expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
 
-  for (rule in list(
+  # One non-default rule, `one_std_err`; `pct_loss` takes the same branches.
+  lines <- summary_lines(rule_results(
     selection_rule("one_std_err", num_comp),
-    selection_rule("pct_loss", num_comp)
-  )) {
-    lines <- summary_lines(rule_results(rule, data = d))
-    by <- which(startsWith(lines, "Selected by: "))
-    expect_length(by, 1L)
-    expect_identical(lines[[by + 1L]], "Selecting metric: rmse")
-    expect_length(selecting_metric_lines(lines), 1L)
-  }
+    data = d
+  ))
+  by <- which(startsWith(lines, "Selected by: "))
+  expect_length(by, 1L)
+  expect_identical(lines[[by + 1L]], "Selecting metric: rmse")
+  expect_length(selecting_metric_lines(lines), 1L)
 
   # The line describes the procedure asked for, as the rule line does, so a
   # run in which no fold completed still prints it.

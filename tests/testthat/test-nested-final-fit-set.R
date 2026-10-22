@@ -7,6 +7,7 @@ test_that("AC4: a fit by id is the fit of the extracted workflow with its own re
   d <- make_reg_data()
   res <- wset_results("nested_tune_grid")
 
+  fits <- list()
   for (i in seq_len(nrow(res))) {
     id <- res$wflow_id[[i]]
     set.seed(41)
@@ -26,12 +27,15 @@ test_that("AC4: a fit by id is the fit of the extracted workflow with its own re
       extract_procedure(by_id)$tuner,
       extract_procedure(res$result[[i]])$tuner
     )
+    expect_identical(
+      extract_procedure(by_id)$workflow,
+      workflow_identity(extract_workflow(res, id))
+    )
+    fits[[id]] <- by_id
   }
   # The two rows really are two procedures: one selected, one did not.
-  set.seed(41)
-  expect_identical(nrow(nested_final_fit(res, id = "tuned")$selected), 1L)
-  set.seed(41)
-  expect_identical(nrow(nested_final_fit(res, id = "fixed")$selected), 0L)
+  expect_identical(nrow(fits$tuned$selected), 1L)
+  expect_identical(nrow(fits$fixed$selected), 0L)
 })
 
 test_that("AC4: an id naming no row is refused", {

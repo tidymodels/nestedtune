@@ -41,7 +41,7 @@
 # because an unstated exemption is how the first version of this comment came to
 # overclaim. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (classify:723 sets it, :729 spends it); and a wait that
+# and spent at another (classify:691 sets it, :697 spends it); and a wait that
 # is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
@@ -98,7 +98,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      212L,
+      200L,
       "setTimeLimit",
       0,
       "a connected daemon that cannot answer in time is bounded",
@@ -106,7 +106,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      213L,
+      201L,
       "setTimeLimit",
       0,
       "a connected daemon that cannot answer in time is bounded",
@@ -114,7 +114,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      230L,
+      218L,
       "daemons_load_status",
       1,
       "a connected daemon that cannot answer in time is bounded",
@@ -122,7 +122,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      268L,
+      256L,
       "setTimeLimit",
       0,
       "a pool with no daemon at all is a non-response, not a load failure",
@@ -130,7 +130,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      269L,
+      257L,
       "setTimeLimit",
       0,
       "a pool with no daemon at all is a non-response, not a load failure",
@@ -138,7 +138,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      271L,
+      259L,
       "daemons_load_status",
       2,
       "a pool with no daemon at all is a non-response, not a load failure",
@@ -146,7 +146,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      276L,
+      264L,
       "check_daemons_can_load",
       0,
       "a pool with no daemon at all is a non-response, not a load failure",
@@ -154,7 +154,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      294L,
+      282L,
       "check_daemons_can_load",
       0,
       "a pool where every daemon loaded passes",
@@ -162,7 +162,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      306L,
+      294L,
       "check_daemons_can_load",
       0,
       "one loadable daemon no longer passes the check for the whole pool",
@@ -170,7 +170,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      313L,
+      301L,
       "check_daemons_can_load",
       0,
       "a load failure keeps the install and prime remedies",
@@ -178,7 +178,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      331L,
+      319L,
       "check_daemons_can_load",
       0,
       "a timeout is not reported as a package that cannot be loaded",
@@ -186,7 +186,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      343L,
+      331L,
       "check_daemons_can_load",
       0,
       "the timeout message points at the option that raises the bound",
@@ -194,7 +194,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      354L,
+      342L,
       "check_daemons_can_load",
       0,
       "a raised bound is reported as a number, not in scientific notation",
@@ -202,7 +202,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      373L,
+      361L,
       "check_daemons_can_load",
       0,
       "a pool failing both ways names both facts",
@@ -210,7 +210,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      399L,
+      387L,
       "check_daemons_can_load",
       0,
       "a pool that cannot load AND holds an old build names both fixes",
@@ -218,7 +218,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      413L,
+      401L,
       "check_daemons_can_load",
       0,
       "a pool that cannot load AND holds an old build names both fixes",
@@ -226,7 +226,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      428L,
+      416L,
       "check_daemons_can_load",
       0,
       "the both-fault bullet counts and pluralises on the affected daemons",
@@ -234,7 +234,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      443L,
+      431L,
       "check_daemons_can_load",
       0,
       "both causes answer to one shared class",
@@ -242,7 +242,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      575L,
+      543L,
       "check_daemons_can_load",
       0,
       "the incompatible abort names the symbols, the count, and the restart",
@@ -250,7 +250,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      605L,
+      573L,
       "check_daemons_can_load",
       0,
       "the incompatible abort renders at one, two, five, and a mixed pool",
@@ -258,7 +258,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      613L,
+      581L,
       "check_daemons_can_load",
       0,
       "the incompatible abort renders at one, two, five, and a mixed pool",
@@ -266,7 +266,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      622L,
+      590L,
       "check_daemons_can_load",
       0,
       "the incompatible abort renders at one, two, five, and a mixed pool",
@@ -274,7 +274,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      630L,
+      598L,
       "check_daemons_can_load",
       0,
       "the incompatible abort renders at one, two, five, and a mixed pool",
@@ -282,7 +282,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      644L,
+      612L,
       "check_daemons_can_load",
       0,
       "an incompatible pool answers to the shared unusable class",
@@ -290,7 +290,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      658L,
+      626L,
       "check_daemons_can_load",
       0,
       "an incompatible pool still reports daemons that said nothing",
@@ -298,14 +298,14 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      721L,
+      689L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the probe reads its bound from the option, not from the constant"
     ),
     tb_row(
       "test-parallel-classify.R",
-      726L,
+      694L,
       "setTimeLimit",
       0,
       "the probe reads its bound from the option, not from the constant",
@@ -313,7 +313,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      727L,
+      695L,
       "setTimeLimit",
       0,
       "the probe reads its bound from the option, not from the constant",
@@ -321,7 +321,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      729L,
+      697L,
       "daemons_load_status",
       45.678,
       "the probe reads its bound from the option, not from the constant",
@@ -329,7 +329,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      746L,
+      714L,
       "daemons_load_status",
       0,
       "a bad bound is refused before any daemon is asked",
@@ -337,7 +337,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      760L,
+      728L,
       "check_daemons_can_load",
       0,
       "a probe that reached no daemon at all is not a pass",
@@ -345,34 +345,11 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      770L,
+      738L,
       "check_daemons_can_load",
       0,
       "the abort names the package actually probed",
       note = "fabricated status"
-    ),
-    tb_row(
-      "test-parallel-classify.R",
-      900L,
-      "start_daemons",
-      START_DAEMONS_BOUND_S(),
-      "dispatch accepts daemons primed with the package"
-    ),
-    tb_row(
-      "test-parallel-classify.R",
-      907L,
-      "daemons_load_status",
-      60,
-      "dispatch accepts daemons primed with the package",
-      note = "explicit timeout = 60000; was the option's 300 s before M16"
-    ),
-    tb_row(
-      "test-parallel-classify.R",
-      908L,
-      "check_daemons_can_load",
-      0,
-      "dispatch accepts daemons primed with the package",
-      note = "status already in hand"
     ),
 
     # --- test-parallel-classify.R, the package rung (M58) --------------------
@@ -382,7 +359,7 @@ time_budget_ledger <- function() {
     # daemons_load_status() calls carry an explicit bound.
     tb_row(
       "test-parallel-classify.R",
-      996L,
+      933L,
       "check_daemons_can_load",
       0,
       "the missing-package abort names the count, the packages, and the install-then-restart remedy",
@@ -390,7 +367,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1021L,
+      958L,
       "check_daemons_can_load",
       0,
       "a missing package beside a daemon that cannot load is named by the load abort",
@@ -398,7 +375,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1031L,
+      968L,
       "check_daemons_can_load",
       0,
       "a missing package beside a daemon that cannot load is named by the load abort",
@@ -406,7 +383,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1050L,
+      987L,
       "check_daemons_can_load",
       0,
       "a missing package beside an incompatible build is named by the package abort",
@@ -414,7 +391,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1066L,
+      1003L,
       "check_daemons_can_load",
       0,
       "a missing package beside a silent daemon is named by the package abort",
@@ -422,7 +399,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1079L,
+      1016L,
       "check_daemons_can_load",
       0,
       "the package abort pluralises on the daemon count and the package count separately",
@@ -430,7 +407,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-classify.R",
-      1089L,
+      1026L,
       "check_daemons_can_load",
       0,
       "the package abort pluralises on the daemon count and the package count separately",
@@ -439,14 +416,14 @@ time_budget_ledger <- function() {
     # --- test-parallel-detection.R, the package rung (M58) ------------------
     tb_row(
       "test-parallel-detection.R",
-      403L,
+      332L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the probe sends the package list, and a daemon that has them all reports none"
     ),
     tb_row(
       "test-parallel-detection.R",
-      405L,
+      334L,
       "daemons_load_status",
       30,
       "the probe sends the package list, and a daemon that has them all reports none",
@@ -454,7 +431,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      411L,
+      340L,
       "daemons_load_status",
       30,
       "the probe sends the package list, and a daemon that has them all reports none",
@@ -462,7 +439,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      434L,
+      363L,
       "setTimeLimit",
       0,
       "a heterogeneous pool names the daemon that lacks a needed package",
@@ -470,7 +447,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      435L,
+      364L,
       "setTimeLimit",
       0,
       "a heterogeneous pool names the daemon that lacks a needed package",
@@ -478,7 +455,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      438L,
+      367L,
       "start_mixed_daemons",
       60,
       "a heterogeneous pool names the daemon that lacks a needed package",
@@ -486,7 +463,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      441L,
+      370L,
       "daemons_load_status",
       30,
       "a heterogeneous pool names the daemon that lacks a needed package",
@@ -494,7 +471,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      457L,
+      386L,
       "check_daemons_can_load",
       0,
       "a heterogeneous pool names the daemon that lacks a needed package",
@@ -534,50 +511,28 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      275L,
-      "start_daemons_undispatched",
-      START_DAEMONS_BOUND_S(),
-      "dispatch_folds warns once per call, whatever it is dispatching"
-    ),
-    tb_row(
-      "test-parallel-detection.R",
-      219L,
+      203L,
       "start_daemons_undispatched",
       START_DAEMONS_BOUND_S(),
       "a run on an uncancellable pool warns exactly once"
     ),
     tb_row(
       "test-parallel-detection.R",
-      248L,
+      232L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "a dispatcher-backed run warns not at all"
     ),
     tb_row(
       "test-parallel-detection.R",
-      130L,
-      "start_daemons",
-      START_DAEMONS_BOUND_S(),
-      "a primed pool matches the host's namespace exactly"
-    ),
-    tb_row(
-      "test-parallel-detection.R",
-      132L,
-      "daemons_load_status",
-      30,
-      "a primed pool matches the host's namespace exactly",
-      note = "explicit timeout = 30000"
-    ),
-    tb_row(
-      "test-parallel-detection.R",
-      142L,
+      126L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "a symbol no build defines is reported by every daemon that loaded"
     ),
     tb_row(
       "test-parallel-detection.R",
-      145L,
+      129L,
       "daemons_load_status",
       30,
       "a symbol no build defines is reported by every daemon that loaded",
@@ -585,7 +540,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      160L,
+      144L,
       "check_daemons_can_load",
       0,
       "a symbol no build defines is reported by every daemon that loaded",
@@ -613,7 +568,7 @@ time_budget_ledger <- function() {
     # start_daemons() would buy nothing and charge this file two more prime and
     # warm bounds. `daemons` is not among BUDGETED_WAIT_CALLS, so the guard
     # cannot see the two pool starts below, nor the three `daemons(0)` calls
-    # beside them (:180 on.exit teardown, :182 and :187 resets between kinds);
+    # beside them (:165 on.exit teardown, :167 and :172 resets between kinds);
     # the starts are rowed here so the file's account is complete rather than
     # complete-looking, which is the same disclosure the test-parallel-metrics.R
     # block below makes for its own `daemons(0)` calls.
@@ -624,7 +579,7 @@ time_budget_ledger <- function() {
     # reading 2. None waits on a mirai result, so none has a bound to declare.
     tb_row(
       "test-parallel-detection.R",
-      184L,
+      168L,
       "daemons",
       0,
       "the two pool kinds are distinguishable, and the count cannot do it",
@@ -632,7 +587,7 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-detection.R",
-      189L,
+      173L,
       "daemons",
       0,
       "the two pool kinds are distinguishable, and the count cannot do it",
@@ -724,39 +679,32 @@ time_budget_ledger <- function() {
       312L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the identity holds with param_info supplied"
-    ),
-    tb_row(
-      "test-parallel-identity.R",
-      363L,
-      "shared_daemons",
-      DAEMON_SNAPSHOT_BOUND_S,
       "the identity holds with a two-class fixture at event_level second"
     ),
     tb_row(
       "test-parallel-identity.R",
-      408L,
+      357L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the identity holds with a censored fixture at a named eval_time"
     ),
     tb_row(
       "test-parallel-identity.R",
-      466L,
+      415L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the Bayesian path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      511L,
+      480L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the control reaches every fold on the parallel path as on the serial one"
+      "param_info, control and select reach the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
-      572L,
+      544L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "both racing paths match serial at two daemons",
@@ -765,42 +713,35 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      633L,
+      605L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      696L,
+      668L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      746L,
-      "shared_daemons",
-      DAEMON_SNAPSHOT_BOUND_S,
-      "BC15: the selection rule reaches the folds on two daemons as serially"
-    ),
-    tb_row(
-      "test-parallel-identity.R",
-      784L,
+      707L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC16: the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      827L,
+      750L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC17: the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      858L,
+      781L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC9: a fold is immune to whatever a daemon ran before it",
@@ -808,28 +749,28 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      894L,
+      817L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      895L,
+      818L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      908L,
+      831L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC1: parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      972L,
+      895L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "BC3: a daemon killed mid-run yields a recorded failure, not an abort",
@@ -972,7 +913,8 @@ time_budget_totals <- function(ledger = time_budget_ledger()) {
 CLASSIFY_BUDGET_CEILING_S <- 480
 
 # What the same ledger totalled before M16 cut anything, so the reduction is a
-# measured figure rather than a remembered one.
+# measured figure rather than a remembered one. benchmarks/test-time-budget.R
+# prints it beside the current total.
 CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
 
 # The ceiling on the file M20 added, set at the file's one pool start plus a

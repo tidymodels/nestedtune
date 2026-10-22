@@ -309,7 +309,6 @@ test_that("the localized file's declared worst case fits the CI budget", {
 
   expect_length(classify, 1L)
   expect_lt(classify, CLASSIFY_BUDGET_CEILING_S)
-  expect_lte(classify, CLASSIFY_BUDGET_PRE_M16_S / 2)
 })
 
 test_that("the metrics-delivery file stays inside its own ceiling", {

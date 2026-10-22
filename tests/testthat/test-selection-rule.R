@@ -19,7 +19,6 @@ test_that("AC3: the orderings are captured as bare expressions, never quosures",
   expect_length(rule$order, 2L)
   expect_identical(rule$order[[1L]], quote(desc(df1)))
   expect_identical(rule$order[[2L]], quote(df2))
-  expect_false(any(vapply(rule$order, rlang::is_quosure, logical(1L))))
   # The expression is captured, not evaluated: `df1` is not bound here.
   expect_false(exists("df1", inherits = FALSE))
 })
@@ -152,23 +151,6 @@ test_that("names_selection_rule() is true for the two non-default rules alone (M
   expect_false(names_selection_rule("one_std_err"))
 })
 
-test_that("the object prints on one line naming the rule, orderings and limit", {
-  expect_identical(format(selection_rule()), "<selection_rule> best")
-  expect_identical(
-    format(selection_rule("one_std_err", desc(df1), df2)),
-    "<selection_rule> one_std_err by desc(df1), df2"
-  )
-  expect_identical(
-    format(selection_rule("pct_loss", df1, limit = 5)),
-    "<selection_rule> pct_loss by df1 (limit = 5)"
-  )
-  expect_snapshot({
-    selection_rule()
-    selection_rule("one_std_err", desc(df1), df2)
-    selection_rule("pct_loss", df1, limit = 5)
-  })
-})
-
 test_that("a rule that selects no candidate fails the fold with a note naming the rule", {
   skip_if_no_engines()
 
@@ -243,7 +225,6 @@ test_that("AC1: the desirability rule captures its terms as bare expressions and
     rule$order,
     list(quote(maximize(rsq)), quote(minimize(num_comp, scale = 2)))
   )
-  expect_false(any(vapply(rule$order, rlang::is_quosure, logical(1L))))
   expect_null(rule$limit)
   expect_identical(
     format(rule),

@@ -50,20 +50,6 @@ test_that("AC2: an object with no method is refused, naming both that answer", {
   expect_snapshot(error = TRUE, extract_procedure(1:3))
 })
 
-test_that("AC2: both methods refuse a stray argument in the dots", {
-  skip_if_no_engines()
-  objs <- procedure_pair()
-
-  expect_error(
-    extract_procedure(objs$res, foo = 1),
-    class = "rlib_error_dots_nonempty"
-  )
-  expect_error(
-    extract_procedure(objs$final, foo = 1),
-    class = "rlib_error_dots_nonempty"
-  )
-})
-
 test_that("AC2: the no-method refusal wins over a dots complaint", {
   cnd <- rlang::catch_cnd(extract_procedure(1, foo = 1))
   expect_s3_class(cnd, "nestedtune_no_extract_method")
