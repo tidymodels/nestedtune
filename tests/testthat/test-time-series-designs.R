@@ -20,8 +20,8 @@
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
 #   from the fixture's literal `rolling_origin()` call. Pinned by "the final
 #   fit on a rolling-origin design matches a hand-rolled reference". The
-#   final fit reads the data, not the outer splits, so one outer design
-#   covers its path.
+#   final fit takes the data from the first outer split and never reads the
+#   outer split indices, so one outer design covers its path.
 #
 # The M110 oracles for the Bayesian, racing and annealing tuners are recorded
 # in test-time-series-bayes.R, test-time-series-race.R and
@@ -152,10 +152,9 @@ test_that("the final fit on a rolling-origin design matches a hand-rolled refere
 
 # ---- Index-based and period-based designs (M111) -----------------------------
 #
-# The O1, O2 and O3 oracles above, run on `sliding_index()` and
-# `sliding_period()` outer designs over `make_ts_data()`. The Bayesian,
-# racing, annealing and fit_resamples reference-loop tests, and the
-# fit_resamples final-fit test, reach these designs through TS_DESIGNS.
+# The O1 and O2 oracles above, run on `sliding_index()` and
+# `sliding_period()` outer designs over `make_ts_data()`. The fit_resamples
+# reference-loop and final-fit tests reach these designs through TS_DESIGNS.
 
 TS_NEW_OUTER_CALLS <- list(
   "sliding-index" = function(d) {

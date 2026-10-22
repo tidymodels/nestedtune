@@ -71,6 +71,8 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-21: T1 started: branch point 3af50898 checked out as a detached worktree in the scratchpad; test-blocks and coverage-lines run there in the background; the branch-point profile runs alone after them, so its timing has no contention.
 - 2026-10-21: T2 done: deleted the two inner tuner files, the four map-with-tuner blocks and the three sliding outer final fits; no helper became unused (each is called from another test file); start-first drops the two files; the ledger has no rows on them; the O2 and O3 oracle headers no longer name the deleted tests. The edited files and the start-first guard pass.
 - 2026-10-21: T3 done: `?nested_resamples` and the two `NEWS.md` bullets now name the grid final fit on the rolling-origin outer design alone, and say that the four other tuners are not tested under an outer rolling-origin with an inner sliding design; `?nested_tune_grid` needed no change, since it names only grid. `document()` raised `Config/roxygen2/version` to the local 8.1.1, and that line was put back to 8.1.0. All six gating prose sweeps clean.
+- 2026-10-21: verify: the full suite passed on the branch, 1245 blocks, 0 failures, 0 errors, 0 skips.
+- 2026-10-21: claim audit: 21 claims read, 3 corrected — tests/testthat/test-time-series-designs.R (the final fit takes its data from the first outer split and never reads the split indices; the sliding-index and sliding-period loop no longer runs O3 or the other tuners). Every help and NEWS sentence held.
 - 2026-10-21: T4 done: D-118 written; the "Inner designs M140 leaves out" row now names the combinations D-118 leaves untested.
 
 ## Decisions
