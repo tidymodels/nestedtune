@@ -46,7 +46,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 ## Tasks
 
 - [x] T1: Edit `devel-vctrs.yaml`: add the `full` input, and make the test step choose between the filter and the whole suite.
-- [ ] T2: Run the `verify` slot.
+- [x] T2: Run the `verify` slot.
 - [ ] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
 - [x] T4: Write the D-entry.
 
@@ -64,6 +64,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: T3 started. Branch pushed. The two dispatches started together, and the workflow's `concurrency` block (keyed on workflow and ref, cancelling on a non-default ref) cancelled the `full=false` run 39861928720 when the `full=true` run 39861932693 started. Cancelled 39861932693 too; the runs go one at a time, `full=false` first (39861993834).
 - 2026-10-22: T4 done (out of order, while T3's runs wait): D-119 narrows D-116's every-other-job-full-suite clause for this job.
 - 2026-10-22: T3 run 39861993834 (`full=false`, head 6d52f81f) green: the step printed `Whole suite: FALSE` and reported dplyr-compat, nested-results-set-compat and vctrs-compat and no other file (988 passes, 16.9 s); the job took 2m03s. Full run 39862460114 started.
+- 2026-10-22: T2 done. `devtools::test()` at 6d52f81f: FAIL 0, PASS 13367. No `.R`, roxygen, vignette or README file changed, so `air`, `document()` and the prose sweeps are not owed.
 
 ## Decisions
 
