@@ -118,12 +118,12 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - gate (pass 2): `cairn_validate.py` all checks pass (18 references-staleness advisories, pre-existing); the six gating prose sweeps exit 0; `pkgdown::check_pkgdown()` no problems; no user-visible change, so no NEWS entry owed; no new top-level file.
 - spawned: diff-bug, blame-history, prior-review, ripple
 - diff-bug #1: D-119's falsifier names the outcome its Consequences accept — reject, false: the falsifier is the plan gate's, naming the evidence that would show the subset too narrow; accepting a risk and naming its occurrence as the falsifier agree.
-- diff-bug #2: PROFILE.md line 50 "every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN" is false for a three-file devel-vctrs run — fix now (supersedes pass-1 ripple #3's reject, which read the sentence as about `NOT_CRAN` only).
-- diff-bug #3: the timeout comment's 2m03s comes from the pre-T5 workflow (run 39861993834) — fix now (cite job 120134601264 of run 39867888167 on 813d3a66).
-- diff-bug #4: PROFILE.md line 60's parenthetical reads as if `TESTTHAT_CPUS` were set only on schedule and full dispatch — fix now.
+- diff-bug #2: PROFILE.md line 50 "every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN" is false for a three-file devel-vctrs run — fix now (supersedes pass-1 ripple #3's reject, which read the sentence as about `NOT_CRAN` only), fixed a220d1dd.
+- diff-bug #3: the timeout comment's 2m03s comes from the pre-T5 workflow (run 39861993834) — fix now (cite job 120134601264 of run 39867888167 on 813d3a66), fixed a220d1dd.
+- diff-bug #4: PROFILE.md line 60's parenthetical reads as if `TESTTHAT_CPUS` were set only on schedule and full dispatch — fix now, fixed a220d1dd.
 - diff-bug #5: header "off the hour, the slot GitHub documents as the most delayed" reads as if 06:17 is the delayed slot — reject, false: "the slot" refers to "the hour", and the wording predates M153 unchanged.
-- diff-bug #6: D-119 says a three-file run never "replaces" a running whole-suite run, but running runs are cancelled — fix now ("cancels or replaces").
-- diff-bug #7: PROFILE.md lines 43-44's concurrency sentence does not say devel-vctrs keys on its switch — fix now.
+- diff-bug #6: D-119 says a three-file run never "replaces" a running whole-suite run, but running runs are cancelled — fix now ("cancels or replaces"), fixed a220d1dd.
+- diff-bug #7: PROFILE.md lines 43-44's concurrency sentence does not say devel-vctrs keys on its switch — fix now, fixed a220d1dd.
 - diff-bug #8: header line 11 not reflowed (about 113 characters) — reject, style.
 - diff-bug #9: AC5 unchecked at status review — reject, false: review ticks AC5 against its own fresh evidence, which this pass records.
 - diff-bug #10: Scope's "29 to 45 minutes" has no run ids — reject, false: tracking records are exempt from the derived-figures rule, and Scope is plan-owned.
@@ -131,13 +131,13 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - blame-history #2: the filtered path was never shown to go red — reject, false: the step's failure path (`stop_on_failure = TRUE`, unchanged) is the one M80's planted-break run showed red, and the filter's domain is non-empty (988 expectations).
 - blame-history #3: renaming one of the three files silently drops it from the push run — follow-up, row "Guard the devel-vctrs filter from drift".
 - blame-history #4: the concurrency group repeats the `FULL_SUITE` expression with nothing checking they agree — follow-up, row "Guard the devel-vctrs filter from drift".
-- blame-history #5: PROFILE.md lines 43-44 concurrency sentence (same as diff-bug #7) — fix now.
+- blame-history #5: PROFILE.md lines 43-44 concurrency sentence (same as diff-bug #7) — fix now, fixed a220d1dd.
 - blame-history #6: wrap widths in header lines 9-11 and PROFILE.md lines 60, 66 — reject, style.
-- prior-review #1: the timeout comment cites a run without its job, which M088's review fixed elsewhere — fix now (with diff-bug #3).
+- prior-review #1: the timeout comment cites a run without its job, which M088's review fixed elsewhere — fix now (with diff-bug #3), fixed a220d1dd.
 - prior-review #2: header line 11 wrap (same as diff-bug #8) — reject, style.
 - prior-review #3: `ci-usage-baseline.md` does not describe three-file runs — reject, false: the baseline is a dated record, and DESIGN.md's Known issues entry already covers dispatched-run accounting.
-- ripple #1: concurrency comment "See the matching block in R-CMD-check.yaml" no longer matches (third key) — fix now.
+- ripple #1: concurrency comment "See the matching block in R-CMD-check.yaml" no longer matches (third key) — fix now, fixed a220d1dd.
 - ripple #2: `R-CMD-check-cran.yaml:11-12` whole-suite contrast — reject, false (pass-1 diff-bug #3 reason).
 - ripple #3: DESIGN.md Known issues entry on dispatched runs — reject, false: it holds for full=false dispatches too.
 - ripple #4: ROADMAP title omits pull_request and the dispatch input — reject, false: nothing in it contradicts the diff.
-- ripple #5: PROFILE.md lines 43-44 (same as diff-bug #7) — fix now.
+- ripple #5: PROFILE.md lines 43-44 (same as diff-bug #7) — fix now, fixed a220d1dd.
