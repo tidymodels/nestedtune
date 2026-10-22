@@ -4,6 +4,11 @@ _Last hygiene check: 2026-10-20 triage pass over 41 candidates and 20 Known issu
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M151 | The four other tuners are tested on one inner sliding design, and the help claims only what the tests run | planned | — | high | milestones/M151-time-series-tuner-cut.md |
+| M152 | The suite drops tests that repeat a shared path, cannot fail, or test a dependency | planned | — | normal | milestones/M152-suite-shared-path-prune.md |
+| M153 | The devel-vctrs job runs the vctrs test files on each push and the whole suite each week | planned | — | normal | milestones/M153-devel-vctrs-subset.md |
+| M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | planned | M152 | normal | milestones/M154-wait-ledger-rekey.md |
+| M155 | Test comments and test names state only what the code cannot show | planned | M151, M152, M154 | normal | milestones/M155-test-comment-cleanup.md |
 | M150 | macOS CI takes CRAN binaries again | dropped | — | normal | milestones/archive/M150-macos-cran-binaries.md |
 | M149 | Three arguments from tidymodels: verbose on the map, a wide inner table, one workflow's plot | done | — | normal | milestones/archive/M149-argument-gaps.md |
 | M148 | Each export and result column is set beside its tidymodels counterpart | done | — | normal | milestones/archive/M148-export-review.md |
