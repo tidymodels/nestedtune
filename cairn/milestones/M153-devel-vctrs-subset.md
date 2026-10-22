@@ -1,6 +1,6 @@
 # M153: The devel-vctrs job runs the vctrs test files on each push and the whole suite each week
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -49,7 +49,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - [x] T2: Run the `verify` slot.
 - [x] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
 - [x] T4: Write the D-entry.
-- [ ] T5: Review return 1: bring `cairn/PROFILE.md` under its 120-line cap, fix the pass-1 fix-now findings (concurrency group keyed on the switch, header and PROFILE wording, D-119), run `verify`, and rerun both `workflow_dispatch` runs on the new head.
+- [x] T5: Review return 1: bring `cairn/PROFILE.md` under its 120-line cap, fix the pass-1 fix-now findings (concurrency group keyed on the switch, header and PROFILE wording, D-119), run `verify`, and rerun both `workflow_dispatch` runs on the new head.
 
 ## Work log
 
@@ -74,6 +74,9 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: T5 edits: PROFILE.md reflowed to 119 lines, its worker-count sentence now says devel-vctrs runs the whole suite only on schedule and full dispatch; workflow concurrency group keyed on the `FULL_SUITE` expression (GitHub docs read this session: a newly queued run cancels the pending one in its group, `cancel-in-progress` touches only running ones); header and timeout comments reworded per pass-1 findings. D-119 corrected in place, not superseded, because it exists only on this unmerged branch.
 - 2026-10-22: T5 run 39867888167 (`full=false`, head 813d3a66) green: `FULL_SUITE: false`, `Whole suite: FALSE`, result table lists dplyr-compat, nested-results-set-compat and vctrs-compat only (988 passes); job 2m38s. It ran at the same time as full run 39867891668 and neither cancelled the other.
 - 2026-10-22: T5 verify: `devtools::test()` at a247b519 FAIL 0, PASS 13367; no `R/`, `tests/`, DESCRIPTION or NAMESPACE change since (`git diff --stat a247b519 HEAD` empty on those paths), and no `.R` file changed, so `air` is not owed.
+- 2026-10-22: T5 done. Run 39867891668 (`full=true`, head 813d3a66) green: `FULL_SUITE: true`, `Whole suite: TRUE`; its reported contexts match the 105 `test-*.R` files in `git ls-tree 813d3a66` exactly (FAIL 0, PASS 13367, 2090.0 s); job 36m43s.
+- 2026-10-22: claim audit: not owed — internal tier
+- 2026-10-22: status review; T5 checked, verify clean, validator weight caps PASS.
 
 ## Decisions
 
