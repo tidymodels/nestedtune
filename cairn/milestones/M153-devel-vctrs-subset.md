@@ -72,6 +72,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: review return 1: `cairn_validate.py` weight caps FAIL, `cairn/PROFILE.md` at 121 lines (cap <120). The pass-1 fix-now findings (Review section: diff-bug #1-#7) ride the same return, since #1 changes the workflow and AC1 and AC2 then need fresh dispatch runs.
 - 2026-10-22: minor amendment: T5 added for review return 1; Coverage lines gain T5.
 - 2026-10-22: T5 edits: PROFILE.md reflowed to 119 lines, its worker-count sentence now says devel-vctrs runs the whole suite only on schedule and full dispatch; workflow concurrency group keyed on the `FULL_SUITE` expression (GitHub docs read this session: a newly queued run cancels the pending one in its group, `cancel-in-progress` touches only running ones); header and timeout comments reworded per pass-1 findings. D-119 corrected in place, not superseded, because it exists only on this unmerged branch.
+- 2026-10-22: T5 run 39867888167 (`full=false`, head 813d3a66) green: `FULL_SUITE: false`, `Whole suite: FALSE`, result table lists dplyr-compat, nested-results-set-compat and vctrs-compat only (988 passes); job 2m38s. It ran at the same time as full run 39867891668 and neither cancelled the other.
 
 ## Decisions
 
