@@ -48,7 +48,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - [x] T1: Edit `devel-vctrs.yaml`: add the `full` input, and make the test step choose between the filter and the whole suite.
 - [ ] T2: Run the `verify` slot.
 - [ ] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
-- [ ] T4: Write the D-entry.
+- [x] T4: Write the D-entry.
 
 ## Work log
 
@@ -61,6 +61,8 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-21: criteria audit (reduced, fresh Opus reader): four findings, all fixed. The filter is now a regex on file names without `test-` and `.R`; AC2's domain is the head's `test-*.R` files; AC3 covers all four events; the `ci-usage.py` clause was dropped, since its exit status depends on `gh` and the network. A D-entry task was added, because the change narrows D-116.
 - 2026-10-22: status in-progress; branch m153-devel-vctrs-subset cut from origin/main at 1d3d2fe5.
 - 2026-10-22: T1 done. The step reads a `FULL_SUITE` env value, true on `schedule` or on a dispatch with `full` true, and passes the filter to `test_local()` otherwise; it prints `Whole suite: <TRUE|FALSE>` so the log shows the path. The filter, read against testthat 3.3.2's `filter_test_scripts()`, picks the three files out of 105 locally. PROFILE.md's devel-vctrs sentence now states the split.
+- 2026-10-22: T3 started. Branch pushed. The two dispatches started together, and the workflow's `concurrency` block (keyed on workflow and ref, cancelling on a non-default ref) cancelled the `full=false` run 39861928720 when the `full=true` run 39861932693 started. Cancelled 39861932693 too; the runs go one at a time, `full=false` first (39861993834).
+- 2026-10-22: T4 done (out of order, while T3's runs wait): D-119 narrows D-116's every-other-job-full-suite clause for this job.
 
 ## Decisions
 
