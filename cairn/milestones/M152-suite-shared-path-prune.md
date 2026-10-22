@@ -35,7 +35,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - [x] AC3: `git diff --stat <branch point>..HEAD -- R man NEWS.md README.Rmd README.md vignettes` is empty.
 - [x] AC4: Take each of `param_info`, `control` and `select` in turn. A mutation makes `dispatch_folds()` pass that formal's default in both of its `.args` lists. With each mutation, the merged identity run of (a) fails.
 - [ ] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower.
-- [ ] AC6: The profile's `verify` slot is clean at the head.
+- [x] AC6: The profile's `verify` slot is clean at the head.
 
 ## Coverage
 
@@ -148,3 +148,6 @@ Evidence (fresh, at 4f13334f unless named):
 - AC2: `benchmarks/coverage-lines.R` gives 6352 lines at 5feebda2 and at 4f13334f, joined on `file` and `pos` with none unmatched. 128 are uncovered at both, and no line changes hit-or-miss status. The tables are `benchmarks/coverage-lines-5feebda2.csv` and `-4f13334f.csv`.
 - AC3: `git diff --stat 5feebda2..19fc9eeb -- R man NEWS.md README.Rmd README.md vignettes` prints nothing.
 - AC4: three scratch copies of 4f13334f each set one formal to its default in both `.args` lists of `dispatch_folds()`. With `param_info` set to NULL, the merged block "BC6, BC11, BC15" fails at :504 (per column, 3 columns) and :506 (whole object). With `control` set to NULL it fails the same way. With `select` set to `selection_rule()` it fails at :504 (2 columns) and :506.
+- AC6: verify slot at 4f13334f: `devtools::test()` gives 0 failures and 0 errors, and `air format --check .` is clean. No roxygen, `R/`, vignette or README change, so `document()` and the prose sweeps are not owed by the slot; both are run in the gate below.
+
+Consistency gate: `cairn_validate.py` all checks passed, with 18 advisory reference-staleness warnings, none for this milestone. `devtools::document()` changes no file in `man/` or NAMESPACE. It rewrites only DESCRIPTION's `Config/roxygen2/version` from 8.1.0 to 8.1.1, from the local roxygen and the same on main; the stamp was reverted. All six gating prose sweeps (`--list-gating`) are clean. `pkgdown::check_pkgdown()` finds no problems. README.Rmd and README.md are untouched. No changelog entry is owed: internal tier, no user-visible change. There is no new top-level file. `devtools::check()` at 4f13334f gives 0 errors, 0 warnings and 1 note, "hidden files: .git": the check ran in a git worktree, whose `.git` is a pointer file, which R's build does not drop the way it drops a `.git` directory. No principle changed, so `cairn_impact` is not run.
