@@ -13,7 +13,7 @@
 #   hand-rolled racing reference loop" on the deterministic fixture for each
 #   racer, and on the metric-separating fixture for the ANOVA racer. The two
 #   racers share one body, `nested_tune_race()`, so every other block here
-#   runs the ANOVA racer alone. Satisfies AC1.
+#   that runs a race runs the ANOVA racer alone. Satisfies AC1.
 #
 # O2 -- type "invariant". Source: no external one; the agreement between two
 #   independent internal routes is the oracle. A candidate a race scored on

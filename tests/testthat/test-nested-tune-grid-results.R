@@ -141,6 +141,20 @@ test_that("a metric that is NA in every fold summarizes to NA with n = 0", {
   expect_true(is.na(rmse$std_err))
 })
 
+# D-010: the results object is not a `tune_results`, and the package
+# registers no method on it for tune's selectors, so they refuse it rather
+# than rank outer folds. What tune's refusal says is tune's, and not asserted.
+test_that("the results object is not a tune_results, and tune's selectors have no method for it", {
+  skip_if_no_engines()
+
+  expect_false(inherits(example_results(), "tune_results"))
+  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
+  on_results <- reg[reg[, 2L] == "nested_results", 1L]
+  expect_false(any(c("show_best", "select_best") %in% on_results))
+  # The registry read has a domain: the class does carry methods of ours.
+  expect_true("collect_metrics" %in% on_results)
+})
+
 test_that("the object carries the grid and metrics it was asked to run", {
   skip_if_no_engines()
 

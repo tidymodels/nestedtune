@@ -464,6 +464,18 @@ test_that("BC6, BC11, BC15: param_info, control and select reach the folds on tw
   expect_true(all(serial$.completed))
   # The control is in force: some fold stopped early.
   expect_true(any(vapply(candidate_sets(serial), nrow, integer(1)) < 7L))
+  # `param_info` is in force: a candidate past `deg_free()`'s default upper
+  # bound of 5 was scored.
+  expect_true(any(
+    vapply(
+      candidate_sets(serial),
+      function(g) max(g$df1, g$df2),
+      numeric(1)
+    ) >
+      5
+  ))
+  # The rule is the one recorded.
+  expect_identical(extract_procedure(serial)$select, rule)
 
   shared_daemons(2)
   set.seed(2026L)
@@ -494,9 +506,9 @@ test_that("BC6, BC11, BC15: param_info, control and select reach the folds on tw
   expect_identical(parallel, serial)
 })
 
-# BC12 (M50, AC4), on the ANOVA racer: the two racers share one body,
-# `nested_tune_race()`, and differ only in their registry entry. The
-# stochastic fixture, so the race's
+# BC12 (M50, AC4), for both racers: D-079 keeps IP2 evidenced for every
+# tuner at two daemons, and the win/loss racer's registry entry sends its own
+# package to the daemons. The stochastic fixture, so the race's
 # resample shuffle and the ranger fits both draw; and the daemons' library
 # holds finetune, which the loop attaches in every daemon before the first
 # fold is sent. The serial race's one caller is the two-daemon block; the
@@ -516,10 +528,9 @@ race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
   serial
 }
 
-test_that("BC12: the racing path matches serial at two daemons (M50, AC4)", {
-  fn <- "tune_race_anova"
+test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
   skip_if_no_daemons()
-  skip_if_no_race_fixture(fn, stochastic = TRUE)
+  skip_if_no_race_fixture(stochastic = TRUE)
 
   data <- make_reg_data()
   nested <- det_nested(data)
@@ -527,29 +538,31 @@ test_that("BC12: the racing path matches serial at two daemons (M50, AC4)", {
   ms <- reg_metrics()
   ctrl <- race_control()
 
-  serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
+  for (fn in RACERS) {
+    serial <- race_serial_reference(fn, wf, nested, ms, ctrl)
 
-  shared_daemons(2)
-  set.seed(2026L)
-  parallel <- without_pkgload_warning(race_call_by_name(
-    fn,
-    wf,
-    nested,
-    grid = stoch_grid(),
-    metrics = ms,
-    control = ctrl
-  ))
-  expect_identical(last_dispatch(), "parallel")
-  for (col in c(
-    ".metrics",
-    ".selected",
-    ".inner_metrics",
-    ".tuning_seed",
-    ".outer_fit_seed"
-  )) {
-    expect_identical(parallel[[col]], serial[[col]], info = col)
+    shared_daemons(2)
+    set.seed(2026L)
+    parallel <- without_pkgload_warning(race_call_by_name(
+      fn,
+      wf,
+      nested,
+      grid = stoch_grid(),
+      metrics = ms,
+      control = ctrl
+    ))
+    expect_identical(last_dispatch(), "parallel")
+    for (col in c(
+      ".metrics",
+      ".selected",
+      ".inner_metrics",
+      ".tuning_seed",
+      ".outer_fit_seed"
+    )) {
+      expect_identical(parallel[[col]], serial[[col]], info = paste(fn, col))
+    }
+    expect_identical(parallel, serial)
   }
-  expect_identical(parallel, serial)
 })
 
 # BC13 (M51, AC4): the stochastic fixture, so the search's initial design and

@@ -41,7 +41,7 @@
 # because an unstated exemption is how the first version of this comment came to
 # overclaim. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (classify:723 sets it, :729 spends it); and a wait that
+# and spent at another (classify:691 sets it, :697 spends it); and a wait that
 # is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
@@ -55,9 +55,10 @@
 # review F9).
 
 # One site's worst case: what it waits for, times the number of times the
-# surrounding code runs it. `times` is 1 unless a loop says otherwise. No row
-# sets it now: BC12 in test-parallel-identity.R, the last row with a `times`
-# of 2, runs one racer since M152.
+# surrounding code runs it. `times` is 1 unless a loop says otherwise -- the
+# shared_daemons() call in test-parallel-identity.R's BC12 sits inside
+# `for (fn in RACERS)` and is therefore paid twice (its three-daemon twin
+# went at M113). It is the ledger's only row carrying a `times` above 1;
 # `grep -n 'times = [0-9]' tests/testthat/helper-time-budget.R` lists every row
 # that sets the argument, `tb_row()`'s own default included, so a row added at
 # any other count shows up there rather than going unread.
@@ -567,7 +568,7 @@ time_budget_ledger <- function() {
     # start_daemons() would buy nothing and charge this file two more prime and
     # warm bounds. `daemons` is not among BUDGETED_WAIT_CALLS, so the guard
     # cannot see the two pool starts below, nor the three `daemons(0)` calls
-    # beside them (:180 on.exit teardown, :182 and :187 resets between kinds);
+    # beside them (:165 on.exit teardown, :167 and :172 resets between kinds);
     # the starts are rowed here so the file's account is complete rather than
     # complete-looking, which is the same disclosure the test-parallel-metrics.R
     # block below makes for its own `daemons(0)` calls.
@@ -696,49 +697,51 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      468L,
+      480L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "param_info, control and select reach the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
-      532L,
+      544L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the racing path matches serial at two daemons"
+      "both racing paths match serial at two daemons",
+      times = 2L,
+      note = "inside for (fn in RACERS)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      592L,
+      605L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      655L,
+      668L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      694L,
+      707L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC16: the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      737L,
+      750L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC17: the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      768L,
+      781L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC9: a fold is immune to whatever a daemon ran before it",
@@ -746,28 +749,28 @@ time_budget_ledger <- function() {
     ),
     tb_row(
       "test-parallel-identity.R",
-      804L,
+      817L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      805L,
+      818L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "the shared 3-daemon pool starts primed (M74)"
     ),
     tb_row(
       "test-parallel-identity.R",
-      818L,
+      831L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
       "BC1: parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
-      882L,
+      895L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
       "BC3: a daemon killed mid-run yields a recorded failure, not an abort",
@@ -908,6 +911,11 @@ time_budget_totals <- function(ledger = time_budget_ledger()) {
 # The other three are recorded without one: detection is small, interrupt is
 # two pool starts, and identity is the subject of its own candidate row.
 CLASSIFY_BUDGET_CEILING_S <- 480
+
+# What the same ledger totalled before M16 cut anything, so the reduction is a
+# measured figure rather than a remembered one. benchmarks/test-time-budget.R
+# prints it beside the current total.
+CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
 
 # The ceiling on the file M20 added, set at the file's one pool start plus a
 # margin. M16 capped only the file its stall was localized to and recorded the

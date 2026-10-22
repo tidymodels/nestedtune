@@ -1,4 +1,4 @@
-# `predict()` and `augment()` on a `nested_final_fit` (AC1-AC4).
+# `predict()` and `augment()` on a `nested_final_fit` (AC1-AC4, AC6).
 #
 # Oracle provenance: none is claimed here and none is owed. Both methods
 # delegate to the trained workflow the object carries, so the reference for
@@ -144,6 +144,22 @@ test_that("AC3: augment() refuses an argument it does not know", {
     augment(extract_workflow(final), new_data = d, nonesuch = 1),
     classes = "error"
   ))
+})
+
+# AC6 -------------------------------------------------------------------
+#
+# D-014: tune's ranking and collecting generics get no method on the final
+# fit, so they refuse it. The registry is the package's part; what tune's
+# refusal says is tune's, and not asserted.
+
+test_that("AC6: no method of tune's ranking and collecting generics is registered for the final fit", {
+  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
+  on_final <- reg[reg[, 2L] == "nested_final_fit", 1L]
+  expect_false(any(
+    c("collect_metrics", "show_best", "select_best") %in% on_final
+  ))
+  # The registry read has a domain: the class does carry methods of ours.
+  expect_true("extract_workflow" %in% on_final)
 })
 
 # AC4 -------------------------------------------------------------------

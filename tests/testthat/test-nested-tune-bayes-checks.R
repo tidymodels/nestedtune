@@ -188,6 +188,9 @@ test_that("each shared check fires through nested_tune_bayes()", {
     check_calls(nested_tune_grid.workflow),
     c("check_grid", "check_grid_params")
   )
+  # One fact held independently of the derivation: the list cannot silently
+  # empty.
+  expect_true(all(c("check_workflow", "check_nested") %in% shared))
   expect_identical(setdiff(shared, names(fired)), character(0))
 
   for (nm in names(fired)) {

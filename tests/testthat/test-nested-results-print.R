@@ -1375,7 +1375,7 @@ test_that("M116 AC2: the summary names the selecting metric, first under the def
   expect_identical(lines[[heading + 2L]], "Selecting metric: rmse")
   expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
 
-  # One non-default rule: `pct_loss` takes the same branches.
+  # One non-default rule, `one_std_err`; `pct_loss` takes the same branches.
   lines <- summary_lines(rule_results(
     selection_rule("one_std_err", num_comp),
     data = d

@@ -1,8 +1,9 @@
 # Entry checks on nested_workflow_map() (M71, AC5). Each refusal is asserted
 # by its condition class, named for the user's call, and shown to fire before
 # any fold runs: an empty dispatch record is the evidence that nothing ran.
-# An untouched `.Random.seed` is not, because the map restores the caller's
-# stream on every exit.
+# An untouched `.Random.seed` is not: the entry checks run before the map's
+# first draw, and every draw after that point is undone on exit, so the
+# stream reads the same whether or not a fold ran.
 
 # The refusal, with the dispatch record asserted untouched.
 expect_map_refusal <- function(expr, class) {

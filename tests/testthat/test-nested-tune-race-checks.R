@@ -1,14 +1,15 @@
-# Every refusal the two racing exports make at entry, fired once (M50 AC5).
-# GP3: a provably wrong call is refused before a whole outer loop is paid for.
+# The refusals the racing exports make at entry (M50 AC5). GP3: a provably
+# wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The refusals that are racing's own -- a package the race needs
 # that is not installed, a burn-in no fold's inner design can meet -- each
 # fire with a class of their own, naming the user's call. And every check the
 # grid orchestrator makes fires here too, through one table held to the list
 # read off the grid body, so a check added there and missing here fails by
-# name. The two racers share one body, `nested_tune_race()`, so only the
-# package checks, which read each racer's registry entry, run both; the rest
-# run the ANOVA racer.
+# name. The two racers share one body, `nested_tune_race()`, so the blocks
+# that read a value from each racer's own registry entry -- its model
+# package, its control class, its desirability flag -- run both; the rest,
+# the finetune check included, run the ANOVA racer.
 
 race_folds <- function(d) det_nested(d, v = 3)
 
@@ -255,109 +256,110 @@ check_calls <- function(fn) {
   sort(unique(nms[startsWith(nms, "check_")]))
 }
 
-test_that("each shared check fires through the racing export", {
-  fn <- "tune_race_anova"
-  skip_if_no_race_fixture(fn)
+test_that("each shared check fires through both racing exports", {
+  skip_if_no_race_fixture()
 
   d <- make_reg_data()
   wf <- det_workflow(d)
   folds <- race_folds(d)
   ctrl <- race_control()
 
-  fired <- list(
-    check_dots_control = function() {
-      race_call(fn, wf, folds, 3, control = ctrl)
-    },
-    check_control = function() race_call(fn, wf, folds, control = "no"),
-    check_required = function() race_call(fn, wf),
-    check_no_preprocessor = function() {
-      race_call(
-        fn,
-        wf,
-        preprocessor = y ~ x1,
-        resamples = folds,
-        control = ctrl
-      )
-    },
-    # An empty workflow, since a bare spec takes the model-spec route
-    # (M107).
-    check_workflow = function() {
-      race_call(fn, workflows::workflow(), folds, control = ctrl)
-    },
-    check_untuned_workflow = function() {
-      race_call(fn, fixed_workflow(d), folds, control = ctrl)
-    },
-    check_nested = function() {
-      race_call(fn, wf, rsample::vfold_cv(d, v = 2), control = ctrl)
-    },
-    check_grid = function() {
-      race_call(fn, wf, folds, grid = 0, control = ctrl)
-    },
-    check_grid_params = function() {
-      race_call(
-        fn,
-        wf,
-        folds,
-        grid = data.frame(nonesuch = 1:3),
-        control = ctrl
-      )
-    },
-    check_metrics = function() {
-      race_call(fn, wf, folds, metrics = "rmse", control = ctrl)
-    },
-    check_param_info = function() {
-      race_call(
-        fn,
-        wf,
-        folds,
-        param_info = data.frame(num_comp = 1:3),
-        control = ctrl
-      )
-    },
-    check_event_level = function() {
-      race_call(fn, wf, folds, event_level = "third", control = ctrl)
-    },
-    check_eval_time = function() {
-      race_call(fn, wf, folds, eval_time = -1, control = ctrl)
-    },
-    check_selection_rule = function() {
-      race_call(fn, wf, folds, select = "best", control = ctrl)
+  for (fn in RACERS) {
+    fired <- list(
+      check_dots_control = function() {
+        race_call(fn, wf, folds, 3, control = ctrl)
+      },
+      check_control = function() race_call(fn, wf, folds, control = "no"),
+      check_required = function() race_call(fn, wf),
+      check_no_preprocessor = function() {
+        race_call(
+          fn,
+          wf,
+          preprocessor = y ~ x1,
+          resamples = folds,
+          control = ctrl
+        )
+      },
+      # An empty workflow, since a bare spec takes the model-spec route
+      # (M107).
+      check_workflow = function() {
+        race_call(fn, workflows::workflow(), folds, control = ctrl)
+      },
+      check_untuned_workflow = function() {
+        race_call(fn, fixed_workflow(d), folds, control = ctrl)
+      },
+      check_nested = function() {
+        race_call(fn, wf, rsample::vfold_cv(d, v = 2), control = ctrl)
+      },
+      check_grid = function() {
+        race_call(fn, wf, folds, grid = 0, control = ctrl)
+      },
+      check_grid_params = function() {
+        race_call(
+          fn,
+          wf,
+          folds,
+          grid = data.frame(nonesuch = 1:3),
+          control = ctrl
+        )
+      },
+      check_metrics = function() {
+        race_call(fn, wf, folds, metrics = "rmse", control = ctrl)
+      },
+      check_param_info = function() {
+        race_call(
+          fn,
+          wf,
+          folds,
+          param_info = data.frame(num_comp = 1:3),
+          control = ctrl
+        )
+      },
+      check_event_level = function() {
+        race_call(fn, wf, folds, event_level = "third", control = ctrl)
+      },
+      check_eval_time = function() {
+        race_call(fn, wf, folds, eval_time = -1, control = ctrl)
+      },
+      check_selection_rule = function() {
+        race_call(fn, wf, folds, select = "best", control = ctrl)
+      }
+    )
+    patterns <- c(
+      check_dots_control = "accepts `control`",
+      check_control = "control_race",
+      check_no_preprocessor = "carries its own preprocessor",
+      check_required = "`resamples` is absent",
+      check_workflow = "no model specification",
+      check_untuned_workflow = "no parameter marked for tuning",
+      check_nested = "nested resampling design",
+      check_grid = "grid",
+      check_grid_params = "not marked for tuning",
+      check_metrics = "metric_set",
+      check_param_info = "parameters",
+      check_event_level = "event_level",
+      check_eval_time = "eval_time",
+      check_selection_rule = "selection_rule"
+    )
+
+    # One fact held independently of the derivation: the list cannot silently
+    # empty.
+    grid_checks <- check_calls(nested_tune_grid.workflow)
+    expect_true(all(c("check_workflow", "check_grid") %in% grid_checks))
+    expect_identical(setdiff(grid_checks, names(fired)), character(0))
+
+    for (nm in names(fired)) {
+      cnd <- refusal(fired[[nm]]())
+      expect_s3_class(cnd, "error")
+      expect_false(inherits(cnd, "nestedtune_sentinel"))
+      expect_match(conditionMessage(cnd), patterns[[nm]], info = nm)
+      expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
     }
-  )
-  patterns <- c(
-    check_dots_control = "accepts `control`",
-    check_control = "control_race",
-    check_no_preprocessor = "carries its own preprocessor",
-    check_required = "`resamples` is absent",
-    check_workflow = "no model specification",
-    check_untuned_workflow = "no parameter marked for tuning",
-    check_nested = "nested resampling design",
-    check_grid = "grid",
-    check_grid_params = "not marked for tuning",
-    check_metrics = "metric_set",
-    check_param_info = "parameters",
-    check_event_level = "event_level",
-    check_eval_time = "eval_time",
-    check_selection_rule = "selection_rule"
-  )
-
-  expect_identical(
-    setdiff(check_calls(nested_tune_grid.workflow), names(fired)),
-    character(0)
-  )
-
-  for (nm in names(fired)) {
-    cnd <- refusal(fired[[nm]]())
-    expect_s3_class(cnd, "error")
-    expect_false(inherits(cnd, "nestedtune_sentinel"))
-    expect_match(conditionMessage(cnd), patterns[[nm]], info = nm)
-    expect_identical(conditionCall(cnd)[[1L]], as.name(export_name(fn)))
   }
 })
 
-test_that("AC4: the racer refuses the desirability rule at entry (M109)", {
-  fn <- "tune_race_anova"
-  skip_if_no_race_fixture(fn)
+test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
+  skip_if_no_race_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   d <- make_reg_data()
@@ -365,23 +367,25 @@ test_that("AC4: the racer refuses the desirability rule at entry (M109)", {
   folds <- race_folds(d)
   ctrl <- race_control()
 
-  cnd <- refusal(race_call(
-    fn,
-    wf,
-    folds,
-    select = selection_rule("desirability", maximize(rsq)),
-    control = ctrl
-  ))
-  expect_refused(
-    cnd,
-    "nestedtune_selection_rule_unsupported",
-    fn,
-    export_name(fn)
-  )
-  # The message names the orchestrators the user calls (review finding 4).
-  msg <- cli::ansi_strip(conditionMessage(cnd))
-  expect_match(msg, paste0("under `nested_", fn, "()`"), fixed = TRUE)
-  expect_match(msg, "`nested_tune_grid()`", fixed = TRUE)
+  for (fn in RACERS) {
+    cnd <- refusal(race_call(
+      fn,
+      wf,
+      folds,
+      select = selection_rule("desirability", maximize(rsq)),
+      control = ctrl
+    ))
+    expect_refused(
+      cnd,
+      "nestedtune_selection_rule_unsupported",
+      fn,
+      export_name(fn)
+    )
+    # The message names the orchestrators the user calls (review finding 4).
+    msg <- cli::ansi_strip(conditionMessage(cnd))
+    expect_match(msg, paste0("under `nested_", fn, "()`"), fixed = TRUE)
+    expect_match(msg, "`nested_tune_grid()`", fixed = TRUE)
+  }
 })
 
 test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {

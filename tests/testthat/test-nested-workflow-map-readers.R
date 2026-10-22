@@ -479,6 +479,17 @@ test_that("AC4: extract_workflow() returns the element's workflow and refuses an
   )
 })
 
+# The package registers no `rank_results()` or `fit_best()` method on the set,
+# so workflowsets and tune refuse it rather than answer (M71, AC4). What their
+# refusals say is theirs, and not asserted.
+test_that("AC4: no rank_results() or fit_best() method is registered for the set", {
+  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
+  on_set <- reg[reg[, 2L] == "nested_results_set", 1L]
+  expect_false(any(c("rank_results", "fit_best") %in% on_set))
+  # The registry read has a domain: the class does carry methods of ours.
+  expect_true("collect_metrics" %in% on_set)
+})
+
 # A row subset of the set (M73, AC2 and AC3). A subset that keeps the class
 # answers for the workflows it holds, so every reader on it gives what the
 # whole set's reader gives for those workflows, in the subset's order; the
