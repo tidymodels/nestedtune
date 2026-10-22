@@ -57,15 +57,13 @@ rules in tracking-rules:
   (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover; corrected M110: save one file far longer than the rest, which ran late and alone until split and queued;
   `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
   `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
-  the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
+  the four workflows that run the whole suite (`devel-vctrs.yaml` only on its schedule and a full dispatch) and left at testthat's default of 2 locally; the stress workflow below
   sets none, running one file per process. `R-CMD-check-cran.yaml` sets none, so testthat uses 2 workers there (M147). **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`)
   hunts the hang on demand under a job cap far above the rest, invisible to `ci-usage.py` for carrying neither trigger.
-  **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs tests against `r-lib/vctrs@main` for the experimental
-  `vec_cbind_frame_ptype()` method in `R/nested-results.R`; non-gating and not a required check, so upstream cannot
-  freeze a merge. Triggers: `push`, `pull_request`, `schedule` (Mondays 06:17 UTC), `workflow_dispatch` (M102). A push
-  or pull request runs the three vctrs-facing test files. The schedule runs the whole suite, and so does a dispatch
-  unless its `full` input is false (M153).
-  `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
+  **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) tests against `r-lib/vctrs@main` for the experimental `vec_cbind_frame_ptype()`
+  method in `R/nested-results.R`, non-gating and not a required check, so upstream cannot freeze a merge. Triggers: `push` and
+  `pull_request` (the three vctrs compatibility test files), `schedule` (Mondays 06:17 UTC, the whole suite) and `workflow_dispatch`
+  (M102, the whole suite unless `full` is false, M153). `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
   workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33):
   no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air format .`.
 - Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`) writes

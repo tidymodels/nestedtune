@@ -37,11 +37,11 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 
 ## Coverage
 
-- AC1 → T1, T3
-- AC2 → T1, T3
-- AC3 → T1
-- AC4 → T4
-- AC5 → T2
+- AC1 → T1, T3, T5
+- AC2 → T1, T3, T5
+- AC3 → T1, T5
+- AC4 → T4, T5
+- AC5 → T2, T5
 
 ## Tasks
 
@@ -49,6 +49,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - [x] T2: Run the `verify` slot.
 - [x] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
 - [x] T4: Write the D-entry.
+- [ ] T5: Review return 1: bring `cairn/PROFILE.md` under its 120-line cap, fix the pass-1 fix-now findings (concurrency group keyed on the switch, header and PROFILE wording, D-119), run `verify`, and rerun both `workflow_dispatch` runs on the new head.
 
 ## Work log
 
@@ -69,6 +70,8 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: claim audit: not owed — internal tier
 - 2026-10-22: status review; all tasks checked, verify clean at ba523f66 (later commits are tracking-only).
 - 2026-10-22: review return 1: `cairn_validate.py` weight caps FAIL, `cairn/PROFILE.md` at 121 lines (cap <120). The pass-1 fix-now findings (Review section: diff-bug #1-#7) ride the same return, since #1 changes the workflow and AC1 and AC2 then need fresh dispatch runs.
+- 2026-10-22: minor amendment: T5 added for review return 1; Coverage lines gain T5.
+- 2026-10-22: T5 edits: PROFILE.md reflowed to 119 lines, its worker-count sentence now says devel-vctrs runs the whole suite only on schedule and full dispatch; workflow concurrency group keyed on the `FULL_SUITE` expression (GitHub docs read this session: a newly queued run cancels the pending one in its group, `cancel-in-progress` touches only running ones); header and timeout comments reworded per pass-1 findings. D-119 corrected in place, not superseded, because it exists only on this unmerged branch.
 
 ## Decisions
 
