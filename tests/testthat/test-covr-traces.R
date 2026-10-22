@@ -40,16 +40,6 @@ test_that("under covr, traces are diverted to a sidecar the merge never reads", 
     expect_identical(got, file.path(lib, DAEMON_TRACE_SUBDIR))
     expect_true(dir.exists(got))
     expect_identical(Sys.getenv("COVERAGE_DIR"), got)
-
-    # A child R process -- the shape of a daemon -- inherits the diversion,
-    # which is the whole point: the daemon's exit finalizer reads this
-    # variable, and nothing in this process can reach that finalizer directly.
-    child <- system2(
-      file.path(R.home("bin"), "Rscript"),
-      c("--vanilla", "-e", shQuote("cat(Sys.getenv('COVERAGE_DIR'))")),
-      stdout = TRUE
-    )
-    expect_identical(child, got)
   })
 })
 

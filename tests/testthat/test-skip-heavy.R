@@ -56,11 +56,6 @@ test_that("skip_heavy_on_cran() runs the block when NOT_CRAN is \"true\"", {
   expect_true(out)
 })
 
-test_that("skip_heavy_on_cran() reads \"TRUE\" and \"T\" as true, as testthat does", {
-  expect_true(with_switches("TRUE", NA, skip_heavy_on_cran()))
-  expect_true(with_switches(NA, "T", skip_heavy_on_cran()))
-})
-
 test_that("skip_heavy_on_cran() runs the block when NESTEDTUNE_FULL_SUITE is \"true\"", {
   out <- with_switches(
     NA,

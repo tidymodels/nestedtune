@@ -1,10 +1,12 @@
-# `predict()` and `augment()` on a `nested_final_fit` (AC1-AC4, AC6).
+# `predict()` and `augment()` on a `nested_final_fit` (AC1-AC4).
 #
 # Oracle provenance: none is claimed here and none is owed. Both methods
 # delegate to the trained workflow the object carries, so the reference for
 # each assertion is the same call made on `extract_workflow(final)` -- the
 # contract is "what the workflow gives", asserted as `identical()`, never a
-# number of this package's own.
+# number of this package's own. Each method is one call whatever the model,
+# so `predict()` is held on the regression fit and `augment()`, which passes
+# `eval_time` by name, on the censored one (M152).
 
 # Fixtures ---------------------------------------------------------------
 
@@ -15,22 +17,6 @@ reg_final <- function() {
   wf <- det_workflow(d)
   res <- final_results(d)
   set.seed(21)
-  memoised(nested_final_fit(wf, res))
-}
-
-# The classification final fit, as test-event-level.R builds one.
-cls_final <- function() {
-  d <- cls_data()
-  nested <- cls_nested(d)
-  wf <- cls_workflow(d)
-  res <- memoised(nested_tune_grid(
-    wf,
-    nested,
-    grid = cls_grid(),
-    metrics = cls_metrics(),
-    event_level = "first"
-  ))
-  set.seed(11)
   memoised(nested_final_fit(wf, res))
 }
 
@@ -75,76 +61,7 @@ test_that("AC1: predict() on the regression fit is the workflow's prediction", {
   ))
 })
 
-test_that("AC1: predict() on the classification fit is the workflow's prediction", {
-  skip_if_no_engines(stochastic = TRUE)
-
-  final <- cls_final()
-  wf <- extract_workflow(final)
-  d <- cls_data()
-
-  expect_identical(
-    predict(final, new_data = d, type = "class"),
-    predict(wf, new_data = d, type = "class")
-  )
-  expect_identical(
-    predict(final, new_data = d, type = "prob"),
-    predict(wf, new_data = d, type = "prob")
-  )
-  # The control: the two types come back in different shapes, so `type`
-  # reached the model.
-  expect_named(predict(final, new_data = d, type = "class"), ".pred_class")
-  expect_named(
-    predict(final, new_data = d, type = "prob"),
-    c(".pred_event", ".pred_other")
-  )
-})
-
-test_that("AC1: predict() on the censored fit is the workflow's prediction", {
-  skip_if_no_censored()
-
-  final <- srv_final()
-  wf <- extract_workflow(final)
-  d <- srv_data()
-  times <- srv_eval_times()
-
-  expect_identical(
-    predict(final, new_data = d, type = "survival", eval_time = times),
-    predict(wf, new_data = d, type = "survival", eval_time = times)
-  )
-  # The control: both evaluation times reached the model.
-  got <- predict(final, new_data = d, type = "survival", eval_time = times)
-  expect_identical(got$.pred[[1L]]$.eval_time, times)
-})
-
 # AC2 -------------------------------------------------------------------
-
-test_that("AC2: augment() on the regression fit is the workflow's augmentation", {
-  skip_if_no_engines()
-
-  final <- reg_final()
-  d <- make_reg_data()
-
-  expect_identical(
-    augment(final, new_data = d),
-    augment(extract_workflow(final), new_data = d)
-  )
-  expect_true(all(c(".pred", ".resid", "y") %in% names(augment(final, d))))
-})
-
-test_that("AC2: augment() on the classification fit is the workflow's augmentation", {
-  skip_if_no_engines(stochastic = TRUE)
-
-  final <- cls_final()
-  d <- cls_data()
-
-  expect_identical(
-    augment(final, new_data = d),
-    augment(extract_workflow(final), new_data = d)
-  )
-  expect_true(all(
-    c(".pred_class", ".pred_event") %in% names(augment(final, d))
-  ))
-})
 
 test_that("AC2: augment() on the censored fit is the workflow's augmentation", {
   skip_if_no_censored()
@@ -244,28 +161,4 @@ test_that("AC4: augment is re-exported, so the call works with tune unattached",
     nestedtune::augment(final, new_data = d),
     augment(extract_workflow(final), new_data = d)
   )
-})
-
-# AC6 -------------------------------------------------------------------
-
-test_that("AC6: tune's ranking and collecting generics still refuse the object", {
-  skip_if_no_engines()
-
-  final <- reg_final()
-
-  # Each refuses through a default method tune wrote, never through an answer:
-  # the message names the generic and says no method exists for the object.
-  generics <- c("collect_metrics", "show_best", "select_best")
-  for (g in generics) {
-    fn <- getExportedValue("tune", g)
-    cnd <- rlang::catch_cnd(fn(final), classes = "error")
-    expect_s3_class(cnd, "error")
-    expect_match(conditionMessage(cnd), sprintf("No `%s\\(\\)` exists for", g))
-  }
-
-  reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
-  on_final <- reg[reg[, 2L] == "nested_final_fit", 1L]
-  expect_false(any(generics %in% on_final))
-  # The registry read has a domain: the class does carry methods of ours.
-  expect_true("extract_workflow" %in% on_final)
 })

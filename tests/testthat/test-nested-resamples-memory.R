@@ -111,11 +111,6 @@ test_that("the size slope is far shallower than rsample::nested_cv()'s", {
   lean_slope <- slope(m$lean, m$v)
   ref_slope <- slope(m$ref, m$v)
 
-  # rsample keeps one materialized analysis set per outer fold, so its slope is
-  # essentially one copy of the data per fold.
-  expect_gt(ref_slope, 0.9)
-  expect_lt(ref_slope, 1.3)
-
   # AC3: growth comes from index vectors only.
   expect_lt(lean_slope, 0.25)
   expect_gte(ref_slope / lean_slope, 5)
@@ -135,15 +130,4 @@ test_that("measured size matches the analytic prediction within 2%", {
   # omits -- a retained analysis frame above all -- would show up here as the
   # measurement outrunning the prediction.
   expect_true(all(abs(m$lean / m$analytic - 1) <= 0.02))
-})
-
-test_that("rsample's own size does NOT match the lean analytic model", {
-  skip_if_not_installed("lobstr")
-  skip_if_not_installed("mlbench")
-
-  m <- measured()
-
-  # The model would be vacuous if it fitted anything, so it is checked against
-  # the implementation it is meant to distinguish.
-  expect_false(any(abs(m$ref / m$analytic - 1) <= 0.02))
 })

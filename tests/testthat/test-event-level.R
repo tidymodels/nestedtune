@@ -15,10 +15,8 @@
 #   kind-pinned, with the inner rset built inside that seed's scope. Pinned by
 #   "AC4: nested_final_fit() tunes under the caller's event level".
 #
-# O3 -- type "invariant". Source: two internal routes that must agree -- on a
-#   two-class outcome, sensitivity at one event level is specificity at the
-#   other, so the same run at the two settings has to exchange them. Pinned by
-#   "AC3: the two levels exchange sensitivity and specificity".
+# The O3 record and its AC3 block, that the two levels exchange sensitivity
+# and specificity, went at M152: the exchange is yardstick's arithmetic.
 #
 # The factor level a caller can name as the event (M35).
 #
@@ -200,36 +198,6 @@ test_that("AC2: the sensitivity each outer fold reports is the one yardstick com
       cls_estimate(runs$first, i, "sens"),
       cls_estimate(runs$second, i, "sens")
     )))
-  }
-})
-
-# AC3 -- O3 -------------------------------------------------------------
-
-test_that("AC3: the two levels exchange sensitivity and specificity", {
-  skip_if_no_engines(stochastic = TRUE)
-
-  d <- cls_data()
-  nested <- cls_nested(d)
-  runs <- cls_runs(nested, cls_workflow(d))
-
-  expect_true(all(runs$first$.completed))
-  expect_true(all(runs$second$.completed))
-
-  # Selection has to be level-invariant for the exchange to be an identity
-  # rather than a comparison of two different models. Asserted rather than
-  # assumed: if a future tune scored roc_auc differently at the two levels
-  # this would fail here, and not as an event_level regression below.
-  expect_identical(runs$first$.selected, runs$second$.selected)
-
-  for (i in seq_len(nrow(nested))) {
-    expect_equal(
-      cls_estimate(runs$second, i, "sens"),
-      cls_estimate(runs$first, i, "spec")
-    )
-    expect_equal(
-      cls_estimate(runs$second, i, "spec"),
-      cls_estimate(runs$first, i, "sens")
-    )
   }
 })
 

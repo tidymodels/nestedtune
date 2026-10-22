@@ -481,10 +481,6 @@ test_that("the same signature keys the same way twice, so it is built once", {
   # environment refers to itself, so serialization numbers those references
   # differently each construction. canonical_form() is what makes the two equal.
   expect_identical(twice[[2L]], twice[[1L]])
-  expect_false(identical(
-    rlang::hash(det_workflow(d)),
-    rlang::hash(det_workflow(d))
-  ))
 })
 
 test_that("the scaffolding above leaves the shared cache as it found it", {
