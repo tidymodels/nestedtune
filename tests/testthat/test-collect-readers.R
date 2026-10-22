@@ -521,8 +521,6 @@ test_that("collect_predictions() stacks each completed fold's predictions under 
     preds,
     suppressWarnings(hand_stacked(res, ".predictions", which(res$.completed)))
   )
-  # The failed fold contributes no row.
-  expect_false(any(preds$id == res$id[[3L]] & preds$id2 == res$id2[[3L]]))
 })
 
 test_that("collect_extracts() is one row per completed fold, the value in a list column, NULL kept", {
@@ -641,19 +639,6 @@ test_that("a column added by hand to a run that never saved one is refused, the 
   attr(res, "procedure") <- NULL
   expect_no_error(collect_predictions(res))
   expect_no_error(collect_extracts(res))
-})
-
-test_that("both readers refuse a non-empty `...`", {
-  skip_if_not_installed("tibble")
-  res <- kept_results()
-  expect_error(
-    collect_predictions(res, foo = 1),
-    class = "rlib_error_dots_nonempty"
-  )
-  expect_error(
-    collect_extracts(res, summarize = TRUE),
-    class = "rlib_error_dots_nonempty"
-  )
 })
 
 test_that("on a fitted run, collect_predictions() is the hand stack of what the folds kept", {

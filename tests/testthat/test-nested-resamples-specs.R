@@ -1,26 +1,8 @@
 # AC5 -- stratified and grouped specifications. Transient materialization hands
 # the inner specification the real analysis frame, so the columns it references
 # are present and these need no special handling; that is what these tests
-# check, rather than assuming it.
-
-test_that("a stratified inner spec matches rsample::nested_cv()", {
-  d <- make_test_data()
-
-  set.seed(1)
-  ref <- rsample::nested_cv(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 4, strata = strat)
-  )
-  set.seed(1)
-  lean <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 4, strata = strat)
-  )
-
-  expect_inner_identical(lean, ref)
-})
+# check, rather than assuming it. A grouped inner spec stands for every inner
+# spec that references a column (a stratified one takes the same path).
 
 test_that("a grouped inner spec matches rsample::nested_cv()", {
   d <- make_test_data()
@@ -39,27 +21,6 @@ test_that("a grouped inner spec matches rsample::nested_cv()", {
   )
 
   expect_inner_identical(lean, ref)
-})
-
-test_that("a grouped inner spec keeps groups whole within each inner split", {
-  d <- make_test_data()
-
-  set.seed(1)
-  lean <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::group_vfold_cv(group = grp, v = 4)
-  )
-
-  for (i in seq_len(nrow(lean))) {
-    for (split in lean$inner_resamples[[i]]$splits) {
-      in_groups <- unique(d$grp[as.integer(split$in_id)])
-      out_groups <- unique(d$grp[as.integer(rsample::complement(split))])
-      # The remapping is index arithmetic, so a group leaking across the inner
-      # boundary is the failure it could plausibly produce.
-      expect_length(intersect(in_groups, out_groups), 0)
-    }
-  }
 })
 
 test_that("stratified and grouped outer specs match rsample::nested_cv()", {
@@ -94,29 +55,6 @@ test_that("stratified and grouped outer specs match rsample::nested_cv()", {
   )
   expect_outer_identical(lean, ref)
   expect_inner_identical(lean, ref)
-})
-
-test_that("character and factor stratification behave the same", {
-  d <- make_test_data()
-  d$strat_chr <- as.character(d$strat)
-
-  set.seed(1)
-  by_factor <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 4, strata = strat)
-  )
-  set.seed(1)
-  by_character <- nested_resamples(
-    d,
-    outside = rsample::vfold_cv(v = 3),
-    inside = rsample::vfold_cv(v = 4, strata = strat_chr)
-  )
-
-  expect_identical(
-    by_factor$inner_resamples[[1]]$splits[[1]]$in_id,
-    by_character$inner_resamples[[1]]$splits[[1]]$in_id
-  )
 })
 
 test_that("rows carrying NA are resampled, not dropped", {
@@ -304,19 +242,6 @@ test_that("a zero-row data frame is refused by the underlying spec", {
   expect_error(
     nested_resamples(
       empty,
-      outside = rsample::vfold_cv(v = 2),
-      inside = rsample::vfold_cv(v = 2)
-    ),
-    "number of rows is less than"
-  )
-})
-
-test_that("a single-row data frame is refused by the underlying spec", {
-  one <- make_test_data()[1, , drop = FALSE]
-
-  expect_error(
-    nested_resamples(
-      one,
       outside = rsample::vfold_cv(v = 2),
       inside = rsample::vfold_cv(v = 2)
     ),

@@ -690,39 +690,6 @@ test_that("AC8: a multi-element `eval_time` is summarized per evaluation time", 
   expect_no_match(txt, "from [0-9]+ fold")
 })
 
-test_that("AC8: a scalar `eval_time` still reports one row per metric", {
-  skip_if_no_censored()
-
-  data <- srv_data()
-  nested <- srv_nested(data)
-  times <- srv_eval_times()
-
-  set.seed(9)
-  scalar <- memoised(nested_tune_grid(
-    srv_workflow(data),
-    nested,
-    grid = srv_grid(),
-    metrics = srv_metrics(),
-    eval_time = times[[1L]]
-  ))
-
-  summarized <- collect_metrics(scalar)
-  expect_identical(
-    names(summarized),
-    c(".metric", ".estimator", ".eval_time", "mean", "n", "std_err")
-  )
-  expect_identical(nrow(summarized), 1L)
-  expect_identical(summarized$.eval_time, times[[1L]])
-  expect_identical(summarized$n, sum(scalar$.completed))
-
-  txt <- print_text(summary(scalar))
-  expect_match(
-    txt,
-    paste0("brier_survival (standard) at time ", format(times[[1L]]), ":"),
-    fixed = TRUE
-  )
-})
-
 test_that("AC8: a run with no evaluation time keeps the shape it had", {
   skip_if_no_engines()
   d <- make_reg_data()

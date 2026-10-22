@@ -542,27 +542,6 @@ test_that("a run where no fold completed is refused, in plotting's own words", {
   }
 })
 
-test_that("a design with no tuned parameters points at the other view", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-
-  set.seed(2)
-  res <- memoised(nested_tune_grid(
-    det_workflow(d),
-    det_nested(d),
-    grid = det_grid(),
-    metrics = reg_metrics()
-  ))
-  for (i in seq_len(nrow(res))) {
-    res$.selected[[i]] <- res$.selected[[i]][, ".config", drop = FALSE]
-  }
-
-  expect_error(autoplot(res), "no tuned parameters")
-  expect_error(autoplot(res), "type = \"performance\"", fixed = TRUE)
-  # The scores are still there, so the view it points at must actually work.
-  expect_s3_class(autoplot(res, type = "performance"), "ggplot")
-})
-
 test_that("an unrecognized type is refused by name", {
   skip_if_no_engines()
   d <- make_reg_data()
@@ -915,15 +894,10 @@ test_that("AC4: an all-failed workflow contributes no point to either view, and 
 test_that("AC4: the set's autoplot() refuses a type outside the two, and fences its dots first", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
+  # The type refusal is `check_plot_type()`, held on the single results
+  # object above, and the fence alone is held by test-dots-barrier.R. What
+  # is the set's own is the order: the fence before the type check.
   expect_error(autoplot(res, type = "parameter"), "must be one of")
-  expect_error(autoplot(res, type = "parameter"), "performance")
-  expect_error(autoplot(res, type = 1), "must be one of")
-  expect_error(autoplot(res, type = NA_character_), "must be one of")
-  expect_s3_class(
-    rlang::catch_cnd(autoplot(res, nonesuch = 1)),
-    "rlib_error_dots_nonempty"
-  )
-  # The fence before the type check.
   expect_s3_class(
     rlang::catch_cnd(autoplot(res, type = "parameter", nonesuch = 1)),
     "rlib_error_dots_nonempty"
@@ -1278,9 +1252,9 @@ test_that("AC3: one workflow's plot states a failed fold in its subtitle, with n
 test_that("AC3: an id that names no row of the set is refused", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
-  for (bad in list("nonesuch", c("tuned", "fixed"), 1, NA_character_)) {
-    expect_error(autoplot(res, id = bad), class = "nestedtune_unknown_id")
-  }
+  # The other shapes of a bad id meet `match_set_id()` through the set
+  # readers (test-nested-workflow-map-readers.R).
+  expect_error(autoplot(res, id = "nonesuch"), class = "nestedtune_unknown_id")
 })
 
 # The pictures of the set views, on the three-workflow fixture: what a reader

@@ -191,54 +191,20 @@ test_that("every dplyr verb lands in the branch the invariants assign it", {
   }
 })
 
-# The five verbs dplyr hands `dplyr_reconstruct()` a bare data frame for, named
-# literally so a regression says which one lost its tibble classes rather than
-# only that the table entry failed.
+# A verb that keeps the class returns a tibble, not a bare data frame: the
+# table above asserts `tbl_df` on each kept verb. What the missing tibble
+# classes would cost a caller: `[.data.frame` drops to a vector where
+# `[.tbl_df` returns a one-column tibble.
 test_that("a verb that keeps the class returns a tibble, not a bare data frame", {
   skip_if_no_engines()
   res <- compat_results()
-
-  forms <- list(
-    filter = dplyr::filter(res, .completed),
-    mutate = dplyr::mutate(res, extra = 1),
-    arrange = dplyr::arrange(res, dplyr::desc(id)),
-    bind_cols = dplyr::bind_cols(res, data.frame(extra = seq_len(nrow(res)))),
-    left_join = dplyr::left_join(
-      res,
-      data.frame(id = res$id, extra = seq_len(nrow(res))),
-      by = "id"
-    )
-  )
-
-  for (nm in names(forms)) {
-    expect_s3_class(forms[[nm]], "nested_results")
-    expect_s3_class(forms[[nm]], "tbl_df")
-  }
-
-  # What the missing tibble classes cost a caller: `[.data.frame` drops to a
-  # vector where `[.tbl_df` returns a one-column tibble.
   expect_s3_class(dplyr::mutate(res, extra = 1)[, "id"], "tbl_df")
 })
 
-# An added column is the caller's, whatever it is named. `id_extra` and `ideal`
-# both matched the bare `^id` grep the record's own id columns were once found
-# with, and `id2` matched the anchored pattern that replaced it. None of them
-# reaches the constructor's record, which is what decides now (M38); the `id2`
-# case has its own block below.
-test_that("an id-prefixed column added by the caller keeps the class", {
-  skip_if_no_engines()
-  res <- compat_results()
-
-  for (nm in c("id_extra", "ideal", "extra")) {
-    out <- dplyr::mutate(res, !!nm := 1)
-    expect_kept(out, res)
-    expect_true(nm %in% names(out))
-  }
-})
-
-# The row-changing forms, one assertion apiece rather than a loop, so a failure
-# names the form it was in. `filter(.completed)` is the one form that needs a
-# run with a failed fold to remove anything at all.
+# Two row-changing forms the table above does not hold. `filter(.completed)`
+# is the one form that needs a run with a failed fold to remove anything at
+# all; the other single-form blocks went at M152, the table holding slice,
+# `[` and bind_rows().
 test_that("filter() dropping a failed fold returns a bare tibble", {
   skip_if_no_engines()
   res <- partial_results()
@@ -246,40 +212,9 @@ test_that("filter() dropping a failed fold returns a bare tibble", {
   expect_bare(dplyr::filter(res, .completed))
 })
 
-test_that("slice() taking one row returns a bare tibble", {
-  skip_if_no_engines()
-  expect_bare(dplyr::slice(compat_results(), 1))
-})
-
-test_that("slice() dropping one row returns a bare tibble", {
-  skip_if_no_engines()
-  expect_bare(dplyr::slice(compat_results(), -1))
-})
-
 test_that("head() taking one row returns a bare tibble", {
   skip_if_no_engines()
   expect_bare(head(compat_results(), 1))
-})
-
-test_that("[ with a row index returns a bare tibble", {
-  skip_if_no_engines()
-  expect_bare(compat_results()[1, ])
-})
-
-test_that("[ with a logical row mask returns a bare tibble", {
-  skip_if_no_engines()
-  expect_bare(compat_results()[c(TRUE, FALSE, FALSE), ])
-})
-
-test_that("[ with a negative row index returns a bare tibble", {
-  skip_if_no_engines()
-  expect_bare(compat_results()[-1, ])
-})
-
-test_that("bind_rows() doubling the rows returns a bare tibble", {
-  skip_if_no_engines()
-  res <- compat_results()
-  expect_bare(dplyr::bind_rows(res, res))
 })
 
 # Everything an object puts on the screen, whichever way it gets there.
@@ -300,21 +235,16 @@ printed_all <- function(x) {
 test_that("no row-changing result prints the outer resampling scheme", {
   skip_if_no_engines()
   res <- compat_results()
-  partial <- partial_results()
 
   # The passing control: the same helper, on the object that does say it.
   expect_identical(attr(res, "outer_label"), "3-fold cross-validation")
   expect_match(printed_all(res), "Outer resamples: 3-fold cross-validation")
 
+  # One form per door: dplyr's `dplyr_reconstruct()` and `[`. Both end in
+  # `bare_results()`.
   forms <- list(
-    dplyr::filter(partial, .completed),
     dplyr::slice(res, 1),
-    dplyr::slice(res, -1),
-    head(res, 1),
-    res[1, ],
-    res[c(TRUE, FALSE, FALSE), ],
-    res[-1, ],
-    dplyr::bind_rows(res, res)
+    res[1, ]
   )
 
   for (out in forms) {

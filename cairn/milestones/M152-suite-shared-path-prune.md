@@ -50,7 +50,7 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 
 - [ ] T1: Record the branch point. Run `benchmarks/test-blocks.R`, `benchmarks/coverage-lines.R` and `benchmarks/profile-tests.R 1` on it in the background.
 - [x] T2: Do (a). Plant the three mutations of AC4 in a scratch copy of `R/parallel.R`, and record which expectation fails for each.
-- [ ] T3: Do (b) and (c).
+- [x] T3: Do (b) and (c).
 - [ ] T4: Do (d) for the driver, RNG, final-fit and model-spec files.
 - [ ] T5: Do (d) for the reader, compat, parallel and misc files, then (e) and (f).
 - [ ] T6: Update the `helper-time-budget.R` rows of each deleted or merged wait, and `Config/testthat/start-first`.
@@ -78,6 +78,8 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 - 2026-10-22: verify at bf2449d4: full suite 0 failures, 0 errors.
 - 2026-10-22: from the parallel survey: detection's "a primed pool matches the host's namespace exactly" (covered by :396, whose "ok" implies no incompatible daemon) and "dispatch_folds warns once per call" (covered by the grid run on the same pool), and classify's primed-pool dispatch, ambiguous-teardown, non-report-answer and every-outcome blocks; classify's driver loop keeps one answer set per driver. The interrupt file's normal-finish block stays: with the detection block gone it is the one run of the stand-in branch to a normal finish. Their ledger rows went and the rest were re-pointed by a line-map script over the two files' diff; hygiene green.
 - 2026-10-22: from the driver survey: (d) bayes-results' row-reorder procedure block (dplyr-compat and vctrs-compat assert the procedure at every door) and the selection-rule print block with its snapshot file (the label block asserts `format()` exactly); (e) the quosure checks after exact identicals and guard lines implied by the exact checks beside them in grid-oracles, grid-failures, grid-results and bayes-results; (f) grid-results' tune-selector and default-metrics blocks. Kept on the survey's reading: the Bayesian desirability blocks in selection-rule-installed and bayes-oracles, each the only test of a NEWS claim.
+- 2026-10-22: from the compat, reader and print survey: (d) dplyr-compat's slice, `[` and bind_rows single-form blocks and the id-prefixed column block (the verb table holds them), the kept-tibble loop and the no-scheme print loop trimmed to one form per door; vctrs' vec_rbind block; extract-procedure's dots block, print's two summary dots blocks, collect-readers' and map-readers' dots blocks (the dots-barrier probe calls every registered method); eval-time's scalar AC8 block; resamples-specs' stratified-inner, groups-whole and single-row blocks; print's design-summary block and its M116 rule loop trimmed to one rule; plot's no-tuned-parameters block, the set type-refusal lines and the bad-id loop trimmed to one id. (e) two lines in collect-readers and map-readers. (f) resamples-specs' character-and-factor block and map-readers' rank_results/fit_best block. Kept: design-support's two SUPPORTED loops, since each case is the only test of a README "Yes" cell.
+- 2026-10-22: T6: no test file was removed, so `Config/testthat/start-first` names only real files; the ledger was kept in step task by task, hygiene green.
 
 ## Decisions
 
