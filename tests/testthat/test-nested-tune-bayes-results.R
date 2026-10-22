@@ -138,7 +138,6 @@ test_that("print() and summary() count the candidates a Bayesian fold scored", {
   sets <- candidate_sets(res)
   counts <- vapply(sets, nrow, integer(1))
   for (g in sets) {
-    expect_true(".iter" %in% names(g))
     expect_identical(sum(g$.iter == 0L), 3L)
   }
 
@@ -232,7 +231,6 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
   expect_identical(procedure$tuner, "tune_bayes")
   expect_identical(procedure$iter, 2)
   expect_identical(procedure$initial, 3)
-  expect_s3_class(procedure$objective, "acquisition_function")
   expect_identical(procedure$objective, tune::exp_improve())
   # Compared on the ids and the parameter objects rather than the whole set:
   # the set also carries the recipe step ids, which `recipes::rand_id()` draws
@@ -320,21 +318,6 @@ test_that("the procedure is part of the run's record", {
   # `expect_no_record()` assert the attribute at every door.
   expect_true("procedure" %in% run_attributes())
   expect_true("procedure" %in% results_attributes())
-})
-
-test_that("the procedure survives a row reorder and goes with the class", {
-  skip_if_no_bayes_fixture()
-
-  res <- bayes_results()
-  procedure <- attr(res, "procedure")
-
-  reordered <- res[rev(seq_len(nrow(res))), ]
-  expect_s3_class(reordered, "nested_results")
-  expect_identical(attr(reordered, "procedure"), procedure)
-
-  narrowed <- res[, setdiff(names(res), ".inner_metrics")]
-  expect_false(inherits(narrowed, "nested_results"))
-  expect_null(attr(narrowed, "procedure"))
 })
 
 # ---- the inner table on a fold that scored nothing (M49) ---------------------

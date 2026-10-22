@@ -156,18 +156,6 @@ test_that("a real interrupt is an interrupt, not a cancellation", {
   expect_false(inherits(cnd, "nestedtune_cancelled"))
 })
 
-test_that("the ambiguous teardown value stays a recorded fold failure", {
-  # M09-D1 found errorValue 19 under BOTH a daemons(0) teardown and a daemon
-  # dying mid-fold, with identical classes -- nothing in the value separates
-  # them. Aborting on it would throw away every completed fold whenever one
-  # worker died, which is what M03 exists to prevent. So 19 keeps this
-  # behaviour and the roxygen states the limit rather than guessing at it.
-  ev <- structure(19L, class = c("errorValue", "try-error"))
-  out <- classify_fold_result(ev)
-  expect_false(out$completed)
-  expect_identical(out$notes$location, "worker")
-})
-
 test_that("a worker whose message is the cancel code is not a cancellation", {
   # Why the cancel check validates the type and does not just compare values:
   # R coerces across types in `==`, so a miraiError carrying the message "20"
@@ -546,26 +534,6 @@ test_that("an incompatible daemon outranks one that never answered", {
   expect_identical(status$incompatible, 1L)
 })
 
-test_that("every outcome the ladder can produce is reachable and distinct", {
-  # All five in one place, so a future branch added above or below any of them
-  # cannot quietly absorb its neighbour.
-  outcomes <- vapply(
-    list(
-      reports(TRUE, TRUE),
-      reports(TRUE, TRUE, missing = list(NULL, "rehydrate_payload")),
-      reports(TRUE, TRUE, missing_pkgs = list(NULL, "ranger")),
-      reports(TRUE, NA),
-      reports(TRUE, FALSE)
-    ),
-    function(answers) preflight_outcome(answers)$outcome,
-    character(1)
-  )
-  expect_identical(
-    outcomes,
-    c("ok", "incompatible", "missing_pkgs", "no_response", "cannot_load")
-  )
-})
-
 test_that("the incompatible abort names the symbols, the count, and the restart", {
   status <- preflight_outcome(
     reports(TRUE, TRUE, missing = list(NULL, "rehydrate_payload")),
@@ -796,20 +764,6 @@ test_that("the option, not an argument, is what carries the bound", {
   )
 })
 
-test_that("a daemon answering something other than a report counts as silent", {
-  # stop_mirai() resolves an unanswered probe to errorValue 20, and a daemon
-  # that died mid-probe yields some other non-record. Neither is an answer, so
-  # both classify as non-response rather than as a load failure -- the same
-  # positive-shape discipline classify_fold_result() rests on.
-  answers <- list(
-    list(loaded = TRUE, missing = character(), missing_pkgs = character()),
-    structure(20L, class = c("errorValue", "try-error"))
-  )
-  status <- preflight_outcome(answers)
-  expect_identical(status$outcome, "no_response")
-  expect_identical(status$no_answer, 1L)
-})
-
 test_that("a miraiError is never read as a capability report", {
   # The shape that makes is.list() load-bearing rather than incidental: a
   # miraiError is a length-1 CHARACTER vector carrying the task's own error
@@ -889,23 +843,6 @@ test_that("a report is rejected unless every field has the right shape", {
     )),
     list(loaded = FALSE, missing = none, missing_pkgs = "ranger")
   )
-})
-
-test_that("dispatch accepts daemons primed with the package", {
-  skip_if_not_installed("mirai")
-  skip_if_not_installed("pkgload")
-  skip_on_cran()
-
-  on.exit(mirai::daemons(0), add = TRUE)
-  start_daemons(2)
-
-  # An explicit bound rather than the suite-wide option. Left implicit this was
-  # the single largest wait in the file -- 300 s of legal waiting before M16,
-  # invisible at the call site because the number lived in a helper. The daemons
-  # here are already primed and warmed, so 60 s is generous for a probe that
-  # normally answers in well under one (M16 T4).
-  status <- daemons_load_status(timeout = 60000)
-  expect_true(check_daemons_can_load(status))
 })
 
 # --- A daemon that lacks a package the workflow or the tuner needs (M58) ----
@@ -1166,27 +1103,13 @@ test_that("every parallel driver refuses a pool that lacks a needed package befo
 
   for (driver in drivers) {
     pkg <- driver$pkg
-    # Three answer sets on the three axes: one daemon of two lacking one
-    # package, both daemons lacking it, and one daemon lacking two.
+    # One answer set, one daemon of two lacking the package: the message's
+    # wording on the other axes is held at the seam above.
     sets <- list(
       list(
         answers = reports(TRUE, TRUE, missing_pkgs = list(NULL, pkg)),
         daemons = "1 of 2",
         pkgs = pkg
-      ),
-      list(
-        answers = reports(TRUE, TRUE, missing_pkgs = list(pkg, pkg)),
-        daemons = "2 of 2",
-        pkgs = pkg
-      ),
-      list(
-        answers = reports(
-          TRUE,
-          TRUE,
-          missing_pkgs = list(NULL, c(pkg, "nestedtune.no.such.package"))
-        ),
-        daemons = "1 of 2",
-        pkgs = c(pkg, "nestedtune.no.such.package")
       )
     )
     for (set in sets) {

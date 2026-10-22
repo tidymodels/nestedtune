@@ -279,7 +279,6 @@ test_that("a fold that completed on a truncated inner design keeps tune's notes"
   )
 
   expect_true(res$.completed[[2L]])
-  expect_true(nrow(res$.notes[[2L]]) > 0L)
   expect_true(any(grepl(
     "a dimension is zero",
     res$.notes[[2L]]$note
@@ -495,7 +494,6 @@ test_that("a fold that scored nothing records an empty table, never NULL", {
 
   none <- res$.inner_metrics[[2L]]
   expect_false(res$.completed[[2L]])
-  expect_false(is.null(none))
   expect_true(is.data.frame(none))
   expect_identical(nrow(none), 0L)
 

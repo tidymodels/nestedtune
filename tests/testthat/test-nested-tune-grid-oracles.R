@@ -295,7 +295,6 @@ test_that("a grid size larger than the reachable candidates records what ran", {
 
   expect_identical(attr(res, "grid"), 20L)
   for (g in candidate_sets(res)) {
-    expect_true(nrow(g) < 20L)
     expect_identical(nrow(g), 4L)
   }
 })
