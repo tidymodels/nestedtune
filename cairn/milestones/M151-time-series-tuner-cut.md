@@ -1,13 +1,13 @@
 # M151: The four other tuners are tested on one inner sliding design, and the help claims only what the tests run
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — the help of `nested_resamples()` and `nested_tune_grid()` and `NEWS.md` state a narrower tested set
-- **Branch/PR:** —
+- **Branch/PR:** m151-time-series-tuner-cut
 
 ## Goal
 
