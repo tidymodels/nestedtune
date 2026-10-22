@@ -88,6 +88,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 
 - 2026-10-22: correction to the T2 line: `wset_map_args()` lost its last caller in a test file; `wset_results()` in `helper-orchestration.R` still calls it, so no helper became unused.
 - 2026-10-22: D-118 was reworded at review (ab9fc8bd) before reaching the default branch: heading, Context, falsifiers and supersession note, per the review lines below.
+- 2026-10-22: review resumed in a new session at cce312cc: no PR yet, the default branch still at 3af50898, the evidence and dispositions recorded at 67bc5dba stand (later commits touch only this file); no snapshot file changed; open-PR feature cap read 0 open.
 
 ## Decisions
 
@@ -116,7 +117,7 @@ spawned: diff-bug, blame-history, prior-review, ripple
 - diff-bug #9: the "Inner designs M140 leaves out" row now also holds an outer-design gap, so its title no longer fits — reject (style): the row's detail names the gap, and `/cairn-triage`'s retitle disposition owns titles.
 - diff-bug #10: the edited O2 and O3 comments keep oracle-type labels and a milestone citation — reject (planned change): M155 cleans every test comment, and this diff added no label.
 - diff-bug #11: the work log's "2026-10-21: T4 done" line sits after 2026-10-22 lines — reject (style): the lines were inserted above an anchor; dates stay absolute, and the work log is not reordered.
-- diff-bug #12: the T2 line says each helper is called from another test file, but `wset_map_args()` is now called only from `wset_results()` in a helper — fix now: a correcting work-log line records it; the helper is still used.
+- diff-bug #12: the T2 line says each helper is called from another test file, but `wset_map_args()` is now called only from `wset_results()` in a helper — fix now: a correcting work-log line records it; the helper is still used, fixed 67bc5dba.
 - diff-bug #13: AC6 is unchecked while status reads review — reject (false): review ticks it below on fresh evidence.
 - blame-history #1: NEWS bullet 1 opens "Every orchestrator and `nested_final_fit()` support" the four outer designs, while the grid final fit is now tested on rolling-origin alone — reject (false): `nested_final_fit()` stays tested on all four outer designs for `nested_fit_resamples()` results, and the support sentence for the other orchestrators already rested on the shared loop (D-079).
 - blame-history #2: D-118's falsifiers cannot fire — same as diff-bug #3, fixed ab9fc8bd.
