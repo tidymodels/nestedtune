@@ -93,3 +93,51 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 ## Decisions
 
 ## Review
+
+Review pass 1, 2026-10-22, on the branch at 35ca73f8, fixes at 4f13334f. Route (d): no PR, main not moved since the cut; Copilot round off.
+
+spawned: diff-bug, blame-history, prior-review, ripple
+
+- diff-bug #1: NEWS's claim that tune's generics refuse a final fit lost both tests; AC6 also asserted the package's own S3 registry, which is package behavior, not a dependency's — fix now, fixed 4f13334f (registry-only AC6 block restored)
+- diff-bug #2: BC12 on the ANOVA racer alone contradicts D-079's "IP2 stays evidenced for every tuner at two daemons" — fix now, fixed 4f13334f (both racers, ledger row `times = 2` restored)
+- diff-bug #3: `benchmarks/test-time-budget.R` reads the removed `CLASSIFY_BUDGET_PRE_M16_S` and halts — fix now, fixed 4f13334f (constant restored)
+- diff-bug #4: `?nested_workflow_map` says `rank_results()` and `fit_best()` do not accept the set, and its test went — fix now, fixed 4f13334f (registry check)
+- diff-bug #5: D-010's class choice (not a `tune_results`) no longer asserted — fix now, fixed 4f13334f
+- diff-bug #6: the map-checks header said the map restores the stream on every exit, but the entry checks run before its restore point — fix now, fixed 4f13334f; the further claim that scope (c)'s premise fails for entry refusals is rejected — false: before the restore point no check draws, after it every draw is undone, so the seed lines cannot show that no fold ran
+- diff-bug #7: scope (c) left the same seed lines in fit-resamples-checks and map-checks :219-230 — follow-up, row "Clear two leftovers of the test prune"
+- diff-bug #8: the print block's comment named the rule it does not run — fix now, fixed 4f13334f
+- diff-bug #9: the race-oracles header overstated which blocks run one racer — fix now, fixed 4f13334f
+- diff-bug #10: the race-checks header miscounted the blocks that run both racers — fix now, fixed 4f13334f
+- diff-bug #11: two line references in `helper-time-budget.R` comments went stale (classify :723/:729, detection :180/:182/:187) — fix now, fixed 4f13334f
+- diff-bug #12: the deleted structure blocks took the guard that keeps each table's derived check list from emptying — fix now, fixed 4f13334f (one guard line per table)
+- diff-bug #13: the profile asks for factor/character and length-one cases, and the diff removed two for `nested_resamples()` — reject, planned change: scope (d) and (f) name them, the profile's edge-case floor binds new exports, and the zero-row case stays
+- diff-bug #14: the merged identity block did not show `param_info` and the rule in force — fix now, fixed 4f13334f (two expectations: a candidate past `deg_free()`'s default bound of 5 scored, and the recorded rule)
+- blame-history #1: grid-results' tune_results block guarded D-010 — fix now, fixed 4f13334f (as diff-bug #5)
+- blame-history #2: the final-fit generic refusals guarded D-014 — fix now, fixed 4f13334f (as diff-bug #1)
+- blame-history #3: BC12, the racing selection-rule oracle and the desirability refusal went to one racer against D-079 — fix now for BC12, the desirability refusal and the shared-check table (both read each racer's registry entry), fixed 4f13334f; reject for the selection-rule oracle — false: D-079 keeps the racing selection-rule oracle, which stays on the ANOVA racer
+- blame-history #4: the merged block moved BC6 and BC15 from grid to Bayes, and the mutations change both `.args` lists together — reject, false: `dispatch_folds()` forwards the formals the same way for every tuner, and real fold payloads always take the leaning branch; the other list serves stand-in payloads only
+- blame-history #5: map-readers' rank_results/fit_best block — fix now, fixed 4f13334f (as diff-bug #4)
+- blame-history #6: classify's teardown and non-report blocks and detection's warn-once block — reject, false: classify :93 holds the same errorValue 19, :322 the same answer list, and detection's grid run on the uncancellable pool asserts one warning over three folds
+- blame-history #7: the grid "fires before any fitting" property is no longer tested — reject, false: the removed seed lines could not show it, and the refusals stay tested by the metrics and grid-column blocks
+- blame-history #8: vec_rbind's cover is not the dplyr table — reject, false: the ledger's cover is the vctrs block that runs `expect_no_record(vctrs::vec_rbind(res, res))`
+- blame-history #9: the set final fit's workflow check is only partly covered — reject, false: the set file's loop asserts each row's workflow entry
+- blame-history #10: event-level AC3 also separated the level's plumbing — reject, planned change ((f)); AC2's closed-form oracle checks sensitivity at both levels
+- blame-history #11: the Bayesian final-fit and fit-resamples RNG blocks — reject, planned change ((d))
+- blame-history #12: the selection-rule print is no longer snapshotted — reject, false: the label block asserts `format()` exactly and `print()` is `cat(format())`, asserted by the long-goal block
+- blame-history #13: no inner-stratified oracle is left — reject, planned change ((d)); the grouped inner oracle takes the same path
+- blame-history #14: the scalar eval_time block — reject, planned change ((d))
+- blame-history #15: skip-heavy's "TRUE"/"T" block — reject, planned change ((f))
+- blame-history note: the plan's Out cites D-079 for the two-versus-three daemon blocks — reject, false: D-079 keeps grid's IP2 "at two counts", the two- and three-daemon BC1 blocks
+- prior-review #1: M132 F2 wanted each racer its own block — reject, planned change ((b))
+- prior-review #2: M107 kept separate racer route blocks — reject, planned change ((d)); the forwarding block now asserts each method's wrapped workflow, shown to fail on a planted defect
+- prior-review #3: M48's control and dots blocks — reject, false: grid-checks keeps them, and each driver's table fires `check_dots_control` and `check_control`
+- prior-review #4: fixture-cache's comment premise is no longer pinned — reject, planned change ((f)): the line asserted rlang's hashing
+- prior-review #5: eval-time's scalar AC8 block — reject, planned change ((d))
+- prior-review #6: detection's warn-once block — reject, false (as blame-history #6)
+- prior-review #7: racer coverage halved — fix now in part (as blame-history #3), fixed 4f13334f; the rest planned change ((b))
+- ripple #1: `R/parallel.R` near :618 cites test-parallel-detection.R for stand-in payloads — follow-up, row "Clear two leftovers of the test prune" (an `R/` edit is outside AC3)
+- ripple #2: race-checks line 1 overstated its coverage — fix now, fixed 4f13334f
+- ripple #3: pre-existing ledger labels that match no test — follow-up, the same row's item (3)
+- ripple #4: the race-oracles header exception — fix now, fixed 4f13334f (as diff-bug #9)
+- ripple #5: pre-existing: eval-time :545 cites a layout note dplyr-compat does not hold — follow-up, M155's test-comment scope
+- snapshot: tests/testthat/_snaps/selection-rule.md — deleted with its block, which scope (d) names; follow-up none
