@@ -77,6 +77,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: T5 done. Run 39867891668 (`full=true`, head 813d3a66) green: `FULL_SUITE: true`, `Whole suite: TRUE`; its reported contexts match the 105 `test-*.R` files in `git ls-tree 813d3a66` exactly (FAIL 0, PASS 13367, 2090.0 s); job 36m43s.
 - 2026-10-22: claim audit: not owed — internal tier
 - 2026-10-22: status review; T5 checked, verify clean, validator weight caps PASS.
+- 2026-10-22: step-7 approval: m153-devel-vctrs-subset approved for merge
 
 ## Decisions
 
