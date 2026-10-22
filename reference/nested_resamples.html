@@ -132,19 +132,21 @@ not numeric, or holds a value outside integer range. So is an empty
 <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_index()</a></code> and <code><a href="https://rsample.tidymodels.org/reference/slide-resampling.html" class="external-link">rsample::sliding_period()</a></code>, and the four
 other tuners are <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>, the two racing functions and
 <code><a href="nested_tune_sim_anneal.html">nested_tune_sim_anneal()</a></code>. Each pair of designs below is tested to give
-the same splits as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. A final fit is tested on the results of
-the functions named with it.</p><ul><li><p>Outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or a sliding design, with an inner
+the same splits as <code><a href="https://rsample.tidymodels.org/reference/nested_cv.html" class="external-link">rsample::nested_cv()</a></code>. Each bullet names the final fits
+that are tested.</p><ul><li><p>Outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> or a sliding design, with an inner
 <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code>. <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>,
-<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> and their final fits are tested on all four.
-The four other tuners, their final fits and <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> are
-tested on the rolling-origin outer design. The final fit of
-<code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code> is also tested on the sliding-window outer design.</p></li>
-<li><p>Outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> with an inner sliding design. All five
-tuners and their final fits are tested on all three.
-<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on all three with its default <code>fn</code>,
-and with each of the four other tuners on sliding-period alone.
+<code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> and the final fit of <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code>
+are tested on all four. The final fit of <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code>, the four
+other tuners, their final fits and <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> are tested on
+the rolling-origin outer design. The final fit of <code><a href="nested_tune_bayes.html">nested_tune_bayes()</a></code>
+is also tested on the sliding-window outer design.</p></li>
+<li><p>Outer <code><a href="https://rsample.tidymodels.org/reference/rolling_origin.html" class="external-link">rsample::rolling_origin()</a></code> with an inner sliding design.
+<code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> and its final fit are tested on all three.
+<code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> is tested on all three with its default <code>fn</code>.
 <code><a href="nested_fit_resamples.html">nested_fit_resamples()</a></code> accepts these designs. It checks the inner
-design but fits nothing on it.</p></li>
+design but fits nothing on it. The four other tuners are not tested on
+these designs. They are tested with an inner sliding design on the
+sliding-window pair below.</p></li>
 <li><p>A sliding design in both loops, which gives nine pairs.
 <code><a href="nested_tune_grid.html">nested_tune_grid()</a></code> is tested on all nine. On the sliding-window pair,
 the four other tuners, <code><a href="nested_workflow_map.html">nested_workflow_map()</a></code> with its default <code>fn</code>,

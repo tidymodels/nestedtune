@@ -398,7 +398,13 @@
   [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
   are tested on all four, and so is
   [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-  for their results.
+  for
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  results.
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  for
+  [`nested_tune_grid()`](https://nestedtune.tidymodels.org/reference/nested_tune_grid.md)
+  results is tested on the rolling-origin design.
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
   [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
   [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
@@ -430,22 +436,19 @@
   [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
   builds these three designs with the same splits as
   [`rsample::nested_cv()`](https://rsample.tidymodels.org/reference/nested_cv.html).
-  These designs are also tested under
+  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
+  is tested on these three designs with its default `fn`.
+  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+  is tested to accept these designs. It checks the inner design but fits
+  nothing on it.
   [`nested_tune_bayes()`](https://nestedtune.tidymodels.org/reference/nested_tune_bayes.md),
   [`nested_tune_race_anova()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md),
   [`nested_tune_race_win_loss()`](https://nestedtune.tidymodels.org/reference/nested_tune_race.md)
   and
-  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md),
-  and so is
-  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
-  for the results of those four tuners.
-  [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
-  is tested on these three designs with its default `fn`. With `fn` set
-  to each of those four tuners, it is tested on the sliding-period
-  design alone.
-  [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
-  is tested to accept these designs. It checks the inner design but fits
-  nothing on it. Any other inner design is not tested.
+  [`nested_tune_sim_anneal()`](https://nestedtune.tidymodels.org/reference/nested_tune_sim_anneal.md)
+  are not tested on these designs. They are tested with an inner sliding
+  design on the sliding-window pair below. Any other inner design is not
+  tested.
 
 - An outer
   [`rsample::sliding_window()`](https://rsample.tidymodels.org/reference/slide-resampling.html),
