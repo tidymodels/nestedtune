@@ -79,7 +79,7 @@ name: devel-vctrs.yaml
 permissions:
   contents: read
 
-# See the matching block in R-CMD-check.yaml. Keyed on the workflow as well as
+# Extends the block in R-CMD-check.yaml. Keyed on the workflow as well as
 # the ref, so cancelling a superseded run of this leg never touches a check run.
 # Also keyed on the test step's `FULL_SUITE` switch (the same expression), so a
 # three-file run never cancels or replaces a pending or running whole-suite
@@ -100,8 +100,9 @@ jobs:
     # runs under its own harness there. 90 is about 2.5x the measurement, the
     # ratio R-CMD-check.yaml and R-CMD-check-hard.yaml both use. It is a hang
     # guard, not headroom: a run approaching it is a suite to make faster. The
-    # cap is sized for the whole-suite runs; a three-file run took 2m03s end to
-    # end (run 39861993834, 2026-10-22).
+    # cap is sized for the whole-suite runs; a three-file run took 2m38s end to
+    # end, 20s of it in the test step (job 120134601264 of run 39867888167,
+    # 2026-10-22).
     timeout-minutes: 90
 
     env:
