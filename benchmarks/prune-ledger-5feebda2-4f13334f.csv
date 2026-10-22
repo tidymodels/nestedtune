@@ -23,7 +23,7 @@ test-dplyr-compat.R,no row-changing result prints the outer resampling scheme,18
 test-dplyr-compat.R,slice() dropping one row returns a bare tibble,2,0,d,test-dplyr-compat.R: every dplyr verb lands in the branch the invariants assign it
 test-dplyr-compat.R,slice() taking one row returns a bare tibble,2,0,d,test-dplyr-compat.R: every dplyr verb lands in the branch the invariants assign it
 test-eval-time.R,AC8: a scalar `eval_time` still reports one row per metric,5,0,d,test-eval-time.R: AC8: a multi-element `eval_time` is summarized per evaluation time
-test-event-level.R,AC3: the two levels exchange sensitivity and specificity,9,0,f,removed block asserts yardstick's sensitivity-specificity exchange
+test-event-level.R,AC3: the two levels exchange sensitivity and specificity,9,0,f,removed block asserts yardstick's sensitivity-specificity exchange; AC2 checks sensitivity at both levels
 test-extract-procedure.R,AC2: both methods refuse a stray argument in the dots,2,0,d,test-dots-barrier.R: AC5: every registered method whose `...` is unused fences it
 test-fixture-cache.R,"the same signature keys the same way twice, so it is built once",2,1,f,"removed lines assert that rlang::hash() differs on two builds, which is rlang and recipes"
 test-model-spec-input.R,AC1: nested_fit_resamples() on a spec and a formula is the workflow run,4,0,d,test-model-spec-input.R: each spec method passes every argument on to the workflow method (wrapped workflow asserted); AC1: nested_tune_grid() on a spec and a formula is the workflow run
@@ -39,8 +39,8 @@ test-nested-final-fit-predict.R,AC1: predict() on the censored fit is the workfl
 test-nested-final-fit-predict.R,AC1: predict() on the classification fit is the workflow's prediction,4,0,d,test-nested-final-fit-predict.R: AC1: predict() on the regression fit is the workflow's prediction
 test-nested-final-fit-predict.R,AC2: augment() on the classification fit is the workflow's augmentation,2,0,d,test-nested-final-fit-predict.R: AC2: augment() on the censored fit is the workflow's augmentation
 test-nested-final-fit-predict.R,AC2: augment() on the regression fit is the workflow's augmentation,2,0,d,test-nested-final-fit-predict.R: AC2: augment() on the censored fit is the workflow's augmentation
-test-nested-final-fit-predict.R,AC6: tune's ranking and collecting generics still refuse the object,8,0,f,removed block asserts tune's default methods refusing the object
-test-nested-final-fit-print.R,tune's ranking generics have no method for a final fit,5,0,f,removed block asserts tune's default methods refusing the object
+test-nested-final-fit-predict.R,AC6: tune's ranking and collecting generics still refuse the object,8,0,f,tune's refusals went; the package's part is test-nested-final-fit-predict.R: AC6: no method of tune's ranking and collecting generics is registered for the final fit
+test-nested-final-fit-print.R,tune's ranking generics have no method for a final fit,5,0,f,tune's refusals went; the package's part is test-nested-final-fit-predict.R: AC6: no method of tune's ranking and collecting generics is registered for the final fit
 test-nested-final-fit-rng.R,a session with no RNG state is left with a valid one by a Bayesian final fit,3,0,d,test-nested-final-fit-rng.R: the grid blocks of the same five properties (one seeding and restore site for every tuner)
 test-nested-final-fit-rng.R,the Bayesian fit does not depend on the ambient RNG state or kind,5,0,d,test-nested-final-fit-rng.R: the grid blocks of the same five properties (one seeding and restore site for every tuner)
 test-nested-final-fit-rng.R,the RNG state and kind are restored when a Bayesian final fit errors,6,0,d,test-nested-final-fit-rng.R: the grid blocks of the same five properties (one seeding and restore site for every tuner)
@@ -68,7 +68,8 @@ test-nested-tune-bayes-checks.R,"`control` must be what tune::control_bayes() re
 test-nested-tune-bayes-checks.R,"`select` is held at entry, before any fold runs (M69, AC4)",12,0,d,test-nested-tune-bayes-checks.R: each shared check fires through nested_tune_bayes(); the grid checks file tests the same check in full
 test-nested-tune-bayes-checks.R,"a control naming another event level is refused at entry (M48, AC3)",7,0,d,test-nested-tune-bayes-checks.R: each shared check fires through nested_tune_bayes(); the grid checks file tests the same check in full
 test-nested-tune-bayes-checks.R,a refusal leaves the RNG where it found it,4,0,c,cannot fail: nested_loop() restores the seed in on.exit()
-test-nested-tune-bayes-checks.R,"every check the grid path makes, the Bayesian path makes too",3,0,d,test-nested-tune-bayes-checks.R: each shared check fires through nested_tune_bayes()
+test-nested-tune-bayes-checks.R,each shared check fires through nested_tune_bayes(),49,50,d,same block: gains the structure block's drift guard
+test-nested-tune-bayes-checks.R,"every check the grid path makes, the Bayesian path makes too",3,0,d,test-nested-tune-bayes-checks.R: each shared check fires through nested_tune_bayes() (now with the drift guard)
 test-nested-tune-bayes-checks.R,every malformed design is refused at entry (M55),250,0,d,test-nested-tune-bayes-checks.R: each shared check fires through nested_tune_bayes(); the grid checks file tests the same check in full
 test-nested-tune-bayes-results.R,a Bayesian run records its procedure and carries no grid attribute,15,14,e,same block: the exact check beside the removed line
 test-nested-tune-bayes-results.R,print() and summary() count the candidates a Bayesian fold scored,10,7,e,same block: the exact check beside the removed line
@@ -87,17 +88,16 @@ test-nested-tune-grid-results.R,"extract = f keeps f() of each fold's outer-fit 
 test-nested-tune-grid-results.R,metrics = NULL falls back to tune's defaults,1,0,f,removed block asserts tune's default metric set
 test-nested-tune-grid-results.R,"save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)",12,10,e,same block: the per-element identical that follows
 test-nested-tune-grid-results.R,the evaluated-candidate record travels with the rows it describes,2,1,e,same block: the per-element identical that follows
-test-nested-tune-grid-results.R,"the results object is not a tune_results, so tune's selectors refuse it",3,0,f,removed block asserts tune's selectors refusing the object
-test-nested-tune-race-checks.R,AC4: both racers refuse the desirability rule at entry (M109),12,0,b,test-nested-tune-race-checks.R: AC4: the racer refuses the desirability rule at entry (M109)
+test-nested-tune-grid-results.R,"the results object is not a tune_results, so tune's selectors refuse it",3,0,f,"tune's refusals went; the package's part is test-nested-tune-grid-results.R: the results object is not a tune_results, and tune's selectors have no method for it"
 test-nested-tune-race-checks.R,"AC5: a workflow with no tune() marker is refused by both racers, naming nested_fit_resamples(), before any fold runs (M70)",8,0,b,"test-nested-tune-race-checks.R: AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)"
-test-nested-tune-race-checks.R,`control` must be what finetune::control_race() returns,40,0,d,test-nested-tune-race-checks.R: each shared check fires through the racing export; test-nested-tune-grid-checks.R control blocks
-test-nested-tune-race-checks.R,"`select` is held at entry by both racers, before any fold runs (M69, AC4)",28,0,d,test-nested-tune-race-checks.R: each shared check fires through the racing export; test-nested-tune-grid-checks.R select blocks
-test-nested-tune-race-checks.R,a control naming another event level is refused at entry,10,0,d,test-nested-tune-race-checks.R: each shared check fires through the racing export; test-nested-tune-grid-checks.R event-level control block
+test-nested-tune-race-checks.R,`control` must be what finetune::control_race() returns,40,0,d,test-nested-tune-race-checks.R: each shared check fires through both racing exports; test-nested-tune-grid-checks.R control blocks
+test-nested-tune-race-checks.R,"`select` is held at entry by both racers, before any fold runs (M69, AC4)",28,0,d,test-nested-tune-race-checks.R: each shared check fires through both racing exports; test-nested-tune-grid-checks.R select blocks
+test-nested-tune-race-checks.R,a control naming another event level is refused at entry,10,0,d,test-nested-tune-race-checks.R: each shared check fires through both racing exports; test-nested-tune-grid-checks.R event-level control block
 test-nested-tune-race-checks.R,a refusal leaves the RNG where it found it,7,0,c,cannot fail: nested_loop() restores the seed in on.exit()
 test-nested-tune-race-checks.R,an inner design not larger than the burn-in is refused at entry,34,17,b,same block on the ANOVA racer
-test-nested-tune-race-checks.R,each shared check fires through both racing exports,114,0,b,test-nested-tune-race-checks.R: each shared check fires through the racing export
-test-nested-tune-race-checks.R,"every check the grid path makes, the racing path makes too",3,0,d,test-nested-tune-race-checks.R: each shared check fires through the racing export
-test-nested-tune-race-checks.R,"every malformed design is refused at entry, by both racers (M55)",499,0,d,test-nested-tune-race-checks.R: each shared check fires through the racing export; test-nested-tune-grid-checks.R M55 blocks
+test-nested-tune-race-checks.R,each shared check fires through both racing exports,114,116,d,"same block: gains the structure block's drift guard, once per racer"
+test-nested-tune-race-checks.R,"every check the grid path makes, the racing path makes too",3,0,d,test-nested-tune-race-checks.R: each shared check fires through both racing exports (now with the drift guard)
+test-nested-tune-race-checks.R,"every malformed design is refused at entry, by both racers (M55)",499,0,d,test-nested-tune-race-checks.R: each shared check fires through both racing exports; test-nested-tune-grid-checks.R M55 blocks
 test-nested-tune-race-checks.R,"finetune must be installed, for both racers",12,0,b,test-nested-tune-race-checks.R: finetune must be installed
 test-nested-tune-race-oracles.R,"AC1: each selection rule picks what tune's selector picks on the fold's race, for both racers (M69)",82,0,b,test-nested-tune-race-oracles.R: AC1: each selection rule picks what tune's selector picks on the fold's race (M69)
 test-nested-tune-race-oracles.R,a candidate raced to the end carries the grid path's mean (AC2),81,41,b,same block on the ANOVA racer; the deterministic oracle keeps both racers
@@ -114,18 +114,19 @@ test-nested-tune-sim-anneal-checks.R,`control` must be what finetune::control_si
 test-nested-tune-sim-anneal-checks.R,"`select` is held at entry, before any fold runs (M69, AC4)",14,0,d,test-nested-tune-sim-anneal-checks.R: each shared check fires through nested_tune_sim_anneal(); the grid checks file tests the same check in full
 test-nested-tune-sim-anneal-checks.R,a control naming another event level is refused at entry,7,0,d,test-nested-tune-sim-anneal-checks.R: each shared check fires through nested_tune_sim_anneal(); the grid checks file tests the same check in full
 test-nested-tune-sim-anneal-checks.R,a refusal leaves the RNG where it found it,4,0,c,cannot fail: nested_loop() restores the seed in on.exit()
-test-nested-tune-sim-anneal-checks.R,"every check the Bayesian path makes, the annealing path makes too",4,0,d,test-nested-tune-sim-anneal-checks.R: each shared check fires through nested_tune_sim_anneal()
+test-nested-tune-sim-anneal-checks.R,each shared check fires through nested_tune_sim_anneal(),57,58,d,same block: gains the structure block's drift guard
+test-nested-tune-sim-anneal-checks.R,"every check the Bayesian path makes, the annealing path makes too",4,0,d,test-nested-tune-sim-anneal-checks.R: each shared check fires through nested_tune_sim_anneal() (now with the drift guard)
 test-nested-tune-sim-anneal-checks.R,every malformed design is refused at entry (M55),250,0,d,test-nested-tune-sim-anneal-checks.R: each shared check fires through nested_tune_sim_anneal(); the grid checks file tests the same check in full
 test-nested-tune-sim-anneal-rng.R,the RNG state is restored when the call itself errors,3,0,d,test-nested-tune-grid-rng.R: the RNG state is restored when the call itself errors
-test-nested-workflow-map-checks.R,AC5: a marked workflow under the plain resampling orchestrator is refused naming its wflow_id,6,5,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,AC5: a name in `...` the named orchestrator does not take is refused,31,25,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,AC5: an object that is not a workflow_set is refused,10,8,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,"AC5: an option entry the routed orchestrator does not take is refused, naming the workflow",22,18,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,AC5: every workflow's packages are checked at entry,6,5,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,AC5: fn must name one of the six orchestrators,19,16,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
-test-nested-workflow-map-checks.R,M149 AC1: verbose must be one TRUE or FALSE,18,15,c,same block: expect_map_refusal()'s seed lines cannot fail (the map restores the stream); the empty dispatch record stays
+test-nested-workflow-map-checks.R,AC5: a marked workflow under the plain resampling orchestrator is refused naming its wflow_id,6,5,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,AC5: a name in `...` the named orchestrator does not take is refused,31,25,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,AC5: an object that is not a workflow_set is refused,10,8,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,"AC5: an option entry the routed orchestrator does not take is refused, naming the workflow",22,18,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,AC5: every workflow's packages are checked at entry,6,5,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,AC5: fn must name one of the six orchestrators,19,16,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
+test-nested-workflow-map-checks.R,M149 AC1: verbose must be one TRUE or FALSE,18,15,c,same block: expect_map_refusal()'s seed lines cannot show that no fold ran; the empty dispatch record stays
 test-nested-workflow-map-readers.R,"AC3: a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it",31,30,e,"same block: expect_true(""broken"" %in% notes$wflow_id)"
-test-nested-workflow-map-readers.R,AC4: rank_results() and fit_best() raise on the set rather than answering,2,0,f,removed block asserts workflowsets and tune refusing the object
+test-nested-workflow-map-readers.R,AC4: rank_results() and fit_best() raise on the set rather than answering,2,0,f,workflowsets' and tune's refusals went; the package's part is test-nested-workflow-map-readers.R: AC4: no rank_results() or fit_best() method is registered for the set
 test-nested-workflow-map-readers.R,compute_metrics() and augment() on a set refuse a non-empty `...`,2,0,d,test-dots-barrier.R: AC5: every registered method whose `...` is unused fences it
 test-parallel-classify.R,a daemon answering something other than a report counts as silent,2,0,d,test-parallel-classify.R: a timeout is not reported as a package that cannot be loaded
 test-parallel-classify.R,dispatch accepts daemons primed with the package,1,0,d,test-parallel-identity.R: BC1: parallel matches serial at two daemons
@@ -135,7 +136,6 @@ test-parallel-classify.R,the ambiguous teardown value stays a recorded fold fail
 test-parallel-detection.R,a primed pool matches the host's namespace exactly,3,0,d,"test-parallel-detection.R: the probe sends the package list, and a daemon that has them all reports none"
 test-parallel-detection.R,"dispatch_folds warns once per call, whatever it is dispatching",3,0,d,test-parallel-detection.R: a run on an uncancellable pool warns exactly once
 test-parallel-identity.R,"BC11: the control reaches every fold on the parallel path as on the serial one (M48, AC2)",23,0,a,"test-parallel-identity.R: BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially"
-test-parallel-identity.R,"BC12: both racing paths match serial at two daemons (M50, AC4)",44,0,b,"test-parallel-identity.R: BC12: the racing path matches serial at two daemons (M50, AC4)"
 test-parallel-identity.R,"BC15: the selection rule reaches the folds on two daemons as serially (M69, AC5)",20,0,a,"test-parallel-identity.R: BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially"
 test-parallel-identity.R,"BC6: the identity holds with param_info supplied (M34, AC4)",17,0,a,"test-parallel-identity.R: BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially"
 test-selection-rule.R,AC1: the desirability rule captures its terms as bare expressions and prints them,7,6,e,same block: the identical on rule$order

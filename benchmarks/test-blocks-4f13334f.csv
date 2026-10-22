@@ -409,6 +409,7 @@
 "test-nested-final-fit-predict.R","AC3: predict() forwards an unknown argument to parsnip's refusal",3,0,FALSE,FALSE
 "test-nested-final-fit-predict.R","AC3: predict() without `new_data` raises the workflow's own error",4,0,FALSE,FALSE
 "test-nested-final-fit-predict.R","AC4: augment is re-exported, so the call works with tune unattached",2,0,FALSE,FALSE
+"test-nested-final-fit-predict.R","AC6: no method of tune's ranking and collecting generics is registered for the final fit",2,0,FALSE,FALSE
 "test-nested-final-fit-print.R","a grid final fit carries the Bayesian counts as NULL and names its search",11,0,FALSE,FALSE
 "test-nested-final-fit-print.R","a summary with nothing to report drops the lines it cannot fill",4,0,FALSE,FALSE
 "test-nested-final-fit-print.R","AC2: summary() returns a classed object naming what was selected",12,0,FALSE,FALSE
@@ -626,7 +627,7 @@
 "test-nested-tune-bayes-checks.R","`objective` must be an acquisition function",21,0,FALSE,FALSE
 "test-nested-tune-bayes-checks.R","AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)",12,0,FALSE,FALSE
 "test-nested-tune-bayes-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",3,0,FALSE,FALSE
-"test-nested-tune-bayes-checks.R","each shared check fires through nested_tune_bayes()",49,0,FALSE,FALSE
+"test-nested-tune-bayes-checks.R","each shared check fires through nested_tune_bayes()",50,0,FALSE,FALSE
 "test-nested-tune-bayes-checks.R","the desirability rule is refused at entry on a censored regression model (M109)",5,0,FALSE,FALSE
 "test-nested-tune-bayes-checks.R","the three acquisition functions tune offers are accepted",3,0,FALSE,FALSE
 "test-nested-tune-bayes-oracles.R","a control passed through `...` reaches every fold (M48, AC1)",18,0,FALSE,FALSE
@@ -751,6 +752,7 @@
 "test-nested-tune-grid-results.R","the evaluated-candidate record travels with the rows it describes",1,0,FALSE,FALSE
 "test-nested-tune-grid-results.R","the object carries the grid and metrics it was asked to run",9,0,FALSE,FALSE
 "test-nested-tune-grid-results.R","the object records the design's inner specification (M46)",7,0,FALSE,FALSE
+"test-nested-tune-grid-results.R","the results object is not a tune_results, and tune's selectors have no method for it",3,0,FALSE,FALSE
 "test-nested-tune-grid-results.R","the results object retains one row per outer fold with its selection",14,0,FALSE,FALSE
 "test-nested-tune-grid-rng.R","a different seed produces different numbers",2,0,FALSE,FALSE
 "test-nested-tune-grid-rng.R","a session with no RNG state is left with a valid one",3,0,FALSE,FALSE
@@ -760,11 +762,11 @@
 "test-nested-tune-grid-rng.R","the RNG state is restored when folds fail but the run completes",3,0,FALSE,FALSE
 "test-nested-tune-grid-rng.R","the RNG state is restored when the call itself errors",3,0,FALSE,FALSE
 "test-nested-tune-grid-rng.R","the same seed produces the same result",3,0,FALSE,FALSE
-"test-nested-tune-race-checks.R","AC4: the racer refuses the desirability rule at entry (M109)",6,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","AC4: both racers refuse the desirability rule at entry (M109)",12,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",3,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","an inner design not larger than the burn-in is refused at entry",17,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","each race's own model-fitting package must be installed",10,0,FALSE,FALSE
-"test-nested-tune-race-checks.R","each shared check fires through the racing export",57,0,FALSE,FALSE
+"test-nested-tune-race-checks.R","each shared check fires through both racing exports",116,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","finetune must be installed",6,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","the final fit on a racing result asks for the race's packages first",12,0,FALSE,FALSE
 "test-nested-tune-race-checks.R","the install hint is one pasteable call, for one package or several",6,0,FALSE,FALSE
@@ -783,7 +785,7 @@
 "test-nested-tune-sim-anneal-checks.R","`iter` must be a single whole number of at least 1",52,0,FALSE,FALSE
 "test-nested-tune-sim-anneal-checks.R","AC4: the desirability rule is refused at entry (M109)",6,0,FALSE,FALSE
 "test-nested-tune-sim-anneal-checks.R","AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)",3,0,FALSE,FALSE
-"test-nested-tune-sim-anneal-checks.R","each shared check fires through nested_tune_sim_anneal()",57,0,FALSE,FALSE
+"test-nested-tune-sim-anneal-checks.R","each shared check fires through nested_tune_sim_anneal()",58,0,FALSE,FALSE
 "test-nested-tune-sim-anneal-checks.R","finetune must be installed",7,0,FALSE,FALSE
 "test-nested-tune-sim-anneal-checks.R","finetune still iterates at iter = 0, the fact iter's floor of 1 rests on",1,0,FALSE,FALSE
 "test-nested-tune-sim-anneal-oracles.R","a fold that scored nothing carries .iter on its zero-row table (AC1)",6,0,FALSE,FALSE
@@ -829,6 +831,7 @@
 "test-nested-workflow-map-readers.R","AC3: every reader's table is bind_rows() of the elements' tables under wflow_id, in set order",27,0,FALSE,FALSE
 "test-nested-workflow-map-readers.R","AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged",13,0,FALSE,FALSE
 "test-nested-workflow-map-readers.R","AC4: extract_workflow() returns the element's workflow and refuses an unknown id",10,0,FALSE,FALSE
+"test-nested-workflow-map-readers.R","AC4: no rank_results() or fit_best() method is registered for the set",2,0,FALSE,FALSE
 "test-nested-workflow-map-readers.R","AC4: print names the orchestrator, the workflow count and each workflow's fold counts",9,0,FALSE,FALSE
 "test-nested-workflow-map-readers.R","augment() on a set keeps nestedtune_augment_predictions for a workflow whose saved predictions miss a held-out row, naming it",5,0,FALSE,FALSE
 "test-nested-workflow-map-readers.R","compute_metrics() and augment() on a set are bind_rows() of each workflow's call under wflow_id",11,0,FALSE,FALSE
@@ -912,7 +915,7 @@
 "test-parallel-identity.R","BC1: parallel matches serial at two daemons",16,0,FALSE,FALSE
 "test-parallel-identity.R","BC1: the caller's RNG state and kind survive a parallel run",15,0,FALSE,FALSE
 "test-parallel-identity.R","BC10: the Bayesian path matches serial at two daemons (M45, AC4)",17,0,FALSE,FALSE
-"test-parallel-identity.R","BC12: the racing path matches serial at two daemons (M50, AC4)",22,0,FALSE,FALSE
+"test-parallel-identity.R","BC12: both racing paths match serial at two daemons (M50, AC4)",44,0,FALSE,FALSE
 "test-parallel-identity.R","BC13: the annealing path matches serial at two daemons (M51, AC4)",23,0,FALSE,FALSE
 "test-parallel-identity.R","BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)",22,0,FALSE,FALSE
 "test-parallel-identity.R","BC16: the plain resampling path matches serial on two daemons (M70, AC6)",21,0,FALSE,FALSE
@@ -920,7 +923,7 @@
 "test-parallel-identity.R","BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer",17,0,FALSE,FALSE
 "test-parallel-identity.R","BC3: a daemon killed mid-run yields a recorded failure, not an abort",12,0,FALSE,FALSE
 "test-parallel-identity.R","BC4: an aborted parallel run still restores the caller's RNG state",3,0,FALSE,FALSE
-"test-parallel-identity.R","BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially",23,0,FALSE,FALSE
+"test-parallel-identity.R","BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially",25,0,FALSE,FALSE
 "test-parallel-identity.R","BC6: a failed fold matches serially in every field but its traces",31,0,FALSE,FALSE
 "test-parallel-identity.R","BC7: the identity holds with a two-class fixture at event_level = ""second"" (M35, AC5)",18,0,FALSE,FALSE
 "test-parallel-identity.R","BC8: the identity holds with a censored fixture at a named eval_time (M41, AC5)",21,0,FALSE,FALSE

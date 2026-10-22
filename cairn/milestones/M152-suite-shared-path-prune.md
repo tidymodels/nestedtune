@@ -30,10 +30,10 @@ Remove the test blocks and expectation lines that the "What gets a test" floor c
 
 ## Acceptance criteria
 
-- [ ] AC1: Join the `benchmarks/test-blocks.R` tables of the branch point and the head on file and test name. Each block that the head lacks, or whose expectation count changed, falls in a category, (a) to (f). For each one, a head block runs the same package path, or the block calls no package function.
-- [ ] AC2: `benchmarks/coverage-lines.R` gives each line of `R/` the same hit-or-miss status at the branch point and at the head, compared on `file` and `pos`.
-- [ ] AC3: `git diff --stat <branch point>..HEAD -- R man NEWS.md README.Rmd README.md vignettes` is empty.
-- [ ] AC4: Take each of `param_info`, `control` and `select` in turn. A mutation makes `dispatch_folds()` pass that formal's default in both of its `.args` lists. With each mutation, the merged identity run of (a) fails.
+- [x] AC1: Join the `benchmarks/test-blocks.R` tables of the branch point and the head on file and test name. Each block that the head lacks, or whose expectation count changed, falls in a category, (a) to (f). For each one, a head block runs the same package path, or the block calls no package function.
+- [x] AC2: `benchmarks/coverage-lines.R` gives each line of `R/` the same hit-or-miss status at the branch point and at the head, compared on `file` and `pos`.
+- [x] AC3: `git diff --stat <branch point>..HEAD -- R man NEWS.md README.Rmd README.md vignettes` is empty.
+- [x] AC4: Take each of `param_info`, `control` and `select` in turn. A mutation makes `dispatch_folds()` pass that formal's default in both of its `.args` lists. With each mutation, the merged identity run of (a) fails.
 - [ ] AC5: Run `benchmarks/profile-tests.R 1` on one machine at the branch point and at the head, side by side. The head's suite total is at least 60 s lower.
 - [ ] AC6: The profile's `verify` slot is clean at the head.
 
@@ -141,3 +141,10 @@ spawned: diff-bug, blame-history, prior-review, ripple
 - ripple #4: the race-oracles header exception — fix now, fixed 4f13334f (as diff-bug #9)
 - ripple #5: pre-existing: eval-time :545 cites a layout note dplyr-compat does not hold — follow-up, M155's test-comment scope
 - snapshot: tests/testthat/_snaps/selection-rule.md — deleted with its block, which scope (d) names; follow-up none
+
+Evidence (fresh, at 4f13334f unless named):
+
+- AC1: `benchmarks/test-blocks.R` at 5feebda2 gives 1245 blocks and 15309 expectations, at 4f13334f 1153 and 13367. Joined on file and test, 99 blocks are gone and 47 changed count. All 146 fall in a category (a 3, b 14, c 17, d 88, e 12, f 12). Each row names its covering head block, or the reason its removed lines call no package function of their own, in `benchmarks/prune-ledger-5feebda2-4f13334f.csv`. AC2's equal line coverage shows that every `R/` line those blocks ran still runs. Both tables fail the one block "an interrupted run leaves no fold executing", with 3 expectations each. It passes when its file runs alone, so the failure comes from running beside other suites, at both trees.
+- AC2: `benchmarks/coverage-lines.R` gives 6352 lines at 5feebda2 and at 4f13334f, joined on `file` and `pos` with none unmatched. 128 are uncovered at both, and no line changes hit-or-miss status. The tables are `benchmarks/coverage-lines-5feebda2.csv` and `-4f13334f.csv`.
+- AC3: `git diff --stat 5feebda2..19fc9eeb -- R man NEWS.md README.Rmd README.md vignettes` prints nothing.
+- AC4: three scratch copies of 4f13334f each set one formal to its default in both `.args` lists of `dispatch_folds()`. With `param_info` set to NULL, the merged block "BC6, BC11, BC15" fails at :504 (per column, 3 columns) and :506 (whole object). With `control` set to NULL it fails the same way. With `select` set to `selection_rule()` it fails at :504 (2 columns) and :506.
