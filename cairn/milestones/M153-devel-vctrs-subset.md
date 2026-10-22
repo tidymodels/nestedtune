@@ -29,10 +29,10 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 
 ## Acceptance criteria
 
-- [ ] AC1: Start a `workflow_dispatch` run of the branch's workflow with `full=false`. Its test step's log reports results for the three files in Scope In and for no other test file.
-- [ ] AC2: Start a `workflow_dispatch` run of the branch's workflow with `full=true`. Its test step's log reports results for every `tests/testthat/test-*.R` file at the head commit.
-- [ ] AC3: In the head workflow, if the event is `push` or `pull_request`, or `workflow_dispatch` with `full` false, the test step runs the filter. If the event is `schedule`, or `workflow_dispatch` with `full` true, the test step runs the whole suite.
-- [ ] AC4: `cairn/DECISIONS.md` holds one new entry that names the D-116 clause it narrows.
+- [x] AC1: Start a `workflow_dispatch` run of the branch's workflow with `full=false`. Its test step's log reports results for the three files in Scope In and for no other test file.
+- [x] AC2: Start a `workflow_dispatch` run of the branch's workflow with `full=true`. Its test step's log reports results for every `tests/testthat/test-*.R` file at the head commit.
+- [x] AC3: In the head workflow, if the event is `push` or `pull_request`, or `workflow_dispatch` with `full` false, the test step runs the filter. If the event is `schedule`, or `workflow_dispatch` with `full` true, the test step runs the whole suite.
+- [x] AC4: `cairn/DECISIONS.md` holds one new entry that names the D-116 clause it narrows.
 - [ ] AC5: The profile's `verify` slot is clean at the head.
 
 ## Coverage
@@ -72,3 +72,8 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 ## Decisions
 
 ## Review
+
+- AC1 evidence (2026-10-22): run 39861993834, `workflow_dispatch` with `full=false` on head 6d52f81f (no `.github`, `tests` or `R` change since, `git diff --stat 6d52f81f HEAD`), success. Re-read log: the step printed `Whole suite: FALSE` and its result table lists dplyr-compat (247), nested-results-set-compat (212) and vctrs-compat (529) and no other context; FAIL 0, PASS 988. Pass.
+- AC2 evidence (2026-10-22): run 39862460114, `workflow_dispatch` with `full=true` on head 6d52f81f, success. Re-read log: `Whole suite: TRUE`; the 105 contexts in its result table diff empty against the 105 `test-*.R` names from `git ls-tree HEAD tests/testthat/`; FAIL 0, PASS 13367. Pass.
+- AC3 evidence (2026-10-22): head `devel-vctrs.yaml` lines 145-157: `FULL_SUITE` is `github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full)`; the R step sets `full` only when that value is the string `true`, and passes the three-file filter otherwise, `NULL` (every file) when full. So `push` and `pull_request` (both terms false) take the filter, `schedule` the whole suite, and a dispatch follows `full`. The two dispatch logs show the rendered value: `FULL_SUITE: false` in 39861993834, `FULL_SUITE: true` in 39862460114. Pass.
+- AC4 evidence (2026-10-22): `git diff origin/main...HEAD -- cairn/DECISIONS.md` adds one `### D-` heading, D-119, whose heading and closing parenthesis name D-116's every-other-job-full-suite clause as the clause it narrows. Pass.
