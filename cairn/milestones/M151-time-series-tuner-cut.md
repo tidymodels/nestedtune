@@ -89,6 +89,7 @@ Cut the suite time that the inner-design tuner matrix costs. The help and `NEWS.
 - 2026-10-22: correction to the T2 line: `wset_map_args()` lost its last caller in a test file; `wset_results()` in `helper-orchestration.R` still calls it, so no helper became unused.
 - 2026-10-22: D-118 was reworded at review (ab9fc8bd) before reaching the default branch: heading, Context, falsifiers and supersession note, per the review lines below.
 - 2026-10-22: review resumed in a new session at cce312cc: no PR yet, the default branch still at 3af50898, the evidence and dispositions recorded at 67bc5dba stand (later commits touch only this file); no snapshot file changed; open-PR feature cap read 0 open.
+- 2026-10-22: step-7 approval: m151-time-series-tuner-cut approved for merge
 
 ## Decisions
 
