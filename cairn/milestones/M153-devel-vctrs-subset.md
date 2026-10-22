@@ -47,7 +47,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 
 - [x] T1: Edit `devel-vctrs.yaml`: add the `full` input, and make the test step choose between the filter and the whole suite.
 - [x] T2: Run the `verify` slot.
-- [ ] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
+- [x] T3: Push the branch, and start both `workflow_dispatch` runs with `gh workflow run devel-vctrs.yaml --ref <branch> -f full=<value>`. Record each run id and the test files its log reports.
 - [x] T4: Write the D-entry.
 
 ## Work log
@@ -65,6 +65,7 @@ On a push or pull request, the `devel-vctrs.yaml` job runs only the test files t
 - 2026-10-22: T4 done (out of order, while T3's runs wait): D-119 narrows D-116's every-other-job-full-suite clause for this job.
 - 2026-10-22: T3 run 39861993834 (`full=false`, head 6d52f81f) green: the step printed `Whole suite: FALSE` and reported dplyr-compat, nested-results-set-compat and vctrs-compat and no other file (988 passes, 16.9 s); the job took 2m03s. Full run 39862460114 started.
 - 2026-10-22: T2 done. `devtools::test()` at 6d52f81f: FAIL 0, PASS 13367. No `.R`, roxygen, vignette or README file changed, so `air`, `document()` and the prose sweeps are not owed.
+- 2026-10-22: T3 done. Run 39862460114 (`full=true`, head 6d52f81f) green: the step printed `Whole suite: TRUE`, and its reported contexts match the 105 `tests/testthat/test-*.R` files in `git ls-tree 6d52f81f` exactly (FAIL 0, PASS 13367, 2133.9 s); the job took 37m36s.
 
 ## Decisions
 
