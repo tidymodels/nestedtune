@@ -1,13 +1,13 @@
 # M152: The suite drops tests that repeat a shared path, cannot fail, or test a dependency
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP2
 - **Resolves:** —
 - **Surface tier:** internal — test files only, and no help, NEWS or package code changes
-- **Branch/PR:** —
+- **Branch/PR:** m152-suite-shared-path-prune
 
 ## Goal
 
