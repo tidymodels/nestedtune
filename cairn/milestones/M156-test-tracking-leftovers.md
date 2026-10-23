@@ -33,10 +33,10 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 
 ## Acceptance criteria
 
-- [ ] AC1: ``grep -nE '#.*([A-Za-z_`]|[ (]):[0-9]{2,}' tests/testthat/*.R R/*.R`` and `grep -n 'helper-parallel.R:' benchmarks/probe-mori-dispatch.R` print nothing.
-- [ ] AC2: `grep -nwE '[A-Za-z_]*_M[0-9]{2,3}[A-Za-z0-9_]*|ac[0-9]+_[a-z_]+' tests/testthat/*.R benchmarks/*.R` prints nothing.
-- [ ] AC3: `grep -niwE 'criteri(on|a)' tests/testthat/*.R` and `grep -nE 'test_that\("[^"]*(branch point|pre-milestone|used to emit)' tests/testthat/*.R` print nothing.
-- [ ] AC4: In `R/parallel.R`, the comment above `workflow_pkgs()` names `test-parallel-interrupt.R` and `test-parallel-payload.R` and not `test-parallel-detection.R`, and the `.args` comment in `dispatch_folds()` states either no byte figure or only figures that appear verbatim in `test-parallel-payload.R` (`grep -F`).
+- [x] AC1: ``grep -nE '#.*([A-Za-z_`]|[ (]):[0-9]{2,}' tests/testthat/*.R R/*.R`` and `grep -n 'helper-parallel.R:' benchmarks/probe-mori-dispatch.R` print nothing.
+- [x] AC2: `grep -nwE '[A-Za-z_]*_M[0-9]{2,3}[A-Za-z0-9_]*|ac[0-9]+_[a-z_]+' tests/testthat/*.R benchmarks/*.R` prints nothing.
+- [x] AC3: `grep -niwE 'criteri(on|a)' tests/testthat/*.R` and `grep -nE 'test_that\("[^"]*(branch point|pre-milestone|used to emit)' tests/testthat/*.R` print nothing.
+- [x] AC4: In `R/parallel.R`, the comment above `workflow_pkgs()` names `test-parallel-interrupt.R` and `test-parallel-payload.R` and not `test-parallel-detection.R`, and the `.args` comment in `dispatch_folds()` states either no byte figure or only figures that appear verbatim in `test-parallel-payload.R` (`grep -F`).
 - [ ] AC5: `grep -n 'Random\.seed' tests/testthat/test-nested-fit-resamples-checks.R` and `grep -n 'before <- \.Random\.seed' tests/testthat/test-nested-workflow-map-checks.R` print nothing, and the block "the refusals fire before the RNG is drawn from" either passes `class =` to each of its three `expect_error()` calls or is removed with the work log naming the test that asserts each class.
 - [ ] AC6: The `verify` slot is clean: `devtools::test()` with 0 failures, `air format --check .`, and `Rscript benchmarks/sweep-prose.R --plain`; `Rscript benchmarks/sweep-test-comments.R` and `Rscript benchmarks/test-time-budget.R` exit 0.
 
@@ -82,3 +82,12 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: T6 done: `devtools::test()` at 49a5768c, run alone, 1152 blocks, 0 failed, 0 errors, 0 skipped (one block fewer than M155's 1153, the T5 removal); `air format --check .`, `sweep-prose.R --plain` clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted; every AC grep prints nothing.
 - 2026-10-23: claim audit: not owed — internal tier.
 - 2026-10-23: status review; handed to /milestone-review.
+
+## Review
+
+Pass 1 (2026-10-23), evidence at 76ed9d9a, branch level with main (0 commits behind).
+- AC1: both greps run at 76ed9d9a print 0 lines.
+- AC2: the grep run at 76ed9d9a prints 0 lines.
+- AC3: both greps run at 76ed9d9a print 0 lines.
+- AC4: the comment above `workflow_pkgs()` (`R/parallel.R`, function at line 620) names test-parallel-interrupt.R and test-parallel-payload.R, and no line of that comment names test-parallel-detection.R; the `.args` comment in `dispatch_folds()` matches no byte figure (`grep -nE '[0-9],[0-9]{3}| B\b'` on its lines, exit 1).
+- AC5: FAILS as written. Both greps print 0 lines and the block is removed, but the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, and that block asserts the metrics refusal (`metrics = "rmse"`, class `rlang_error`) by its "metric_set" message only, with no `class =`; not ticked.
