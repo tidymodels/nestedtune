@@ -1,4 +1,4 @@
-# The map's `verbose` log (M149, AC1). One set holds a tuned and a fixed
+# The map's `verbose` log. One set holds a tuned and a fixed
 # workflow, so both route words are drawn. The time each workflow took is
 # masked in the snapshot, since it varies from run to run.
 
@@ -6,7 +6,7 @@ mask_map_time <- function(lines) {
   gsub("\\([0-9]+\\.[0-9]s\\)", "(<time>)", lines)
 }
 
-test_that("AC1: verbose = TRUE logs each workflow's start and finish, and the result does not change", {
+test_that("verbose = TRUE logs each workflow's start and finish, and the result does not change", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- wset_two(d)

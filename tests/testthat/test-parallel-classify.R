@@ -1,6 +1,6 @@
-# Classifying what a worker hands back (BC3, BC4; M07-D2).
+# Classifying what a worker hands back.
 #
-# The trap RR03 found by execution: neither of mirai's two failure shapes
+# The trap found by execution: neither of mirai's two failure shapes
 # inherits "condition", which is the idiom nested_fold_fit() uses internally,
 # and conditionMessage() *errors* on the errorValue a dead daemon produces. So
 # classification is positive validation of the fold-record shape -- anything
@@ -11,7 +11,7 @@ fake_fold_record <- function(completed = TRUE) {
     completed = completed,
     metrics = data.frame(.metric = "rmse", .estimate = 1),
     selected = data.frame(mtry = 2),
-    # The inner run's metrics (M49; the evaluated-candidate record since M21).
+    # The inner run's metrics: the evaluated-candidate record.
     # Part of the shape a fold record is RECOGNISED by, not decoration: a
     # worker returning an older shape is a worker whose package disagrees with
     # this one, and classifying it as a completed fold would put an object
@@ -42,17 +42,17 @@ test_that("a well-formed fold record passes through untouched", {
 })
 
 test_that("a fold record missing the evaluated-candidate set is not a fold record", {
-  # M21, and the reason this is asserted per element rather than on the whole
+  # The reason this is asserted per element rather than on the whole
   # shape at once: the required set is what classification RECOGNISES, so a
   # requirement nothing pins can be dropped from it with every test still green
-  # (verified by mutation at M21 T4 -- removing the candidate element left the
-  # file passing until this test existed).
+  # (verified by mutation: without this test, removing the candidate element
+  # left the file passing).
   #
   # What the missing element means in practice is a worker running a different
   # version of this package. Accepting it would put a fold with no candidate
-  # record into the `.inner_metrics` column, which new_nested_results() would fill with
-  # a NULL -- an object claiming to record what it searched while recording
-  # nothing, which is the IP4 failure the column exists to prevent.
+  # record into the `.inner_metrics` column, which new_nested_results() would
+  # fill with a NULL -- an object claiming to record what it searched while
+  # recording nothing, which is the failure the column exists to prevent.
   for (element in c("metrics", "selected", "inner_metrics", "notes")) {
     rec <- fake_fold_record()
     rec[[element]] <- NULL
@@ -76,7 +76,7 @@ test_that("a miraiError becomes a recorded worker failure, not an abort", {
   # under test needs no package in the daemon at all. That also made it the one
   # unbounded wait left in the suite: a bare `[` collect on a daemon that never
   # comes up waits forever, and it is the first daemon test to run in this file,
-  # so it inherits whatever pool state the files before it left (M14 T2).
+  # so it inherits whatever pool state the files before it left.
   err <- collect_bounded(mirai::mirai(stop("boom")))
 
   # The precondition that makes this test worth having: the idiom used
@@ -113,12 +113,12 @@ test_that("anything else that is not a fold record is recorded as a worker failu
 })
 
 test_that("a cancelled task aborts instead of being recorded as a failed fold", {
-  # M09-D1: stop_mirai() resolves every task in the map to errorValue 20 --
+  # stop_mirai() resolves every task in the map to errorValue 20 --
   # the one in flight and the ones still queued alike -- and carries no
   # miraiInterrupt class, so the branch above never sees it. Recording these as
   # failed folds reports an estimate over folds that were never given a chance
-  # to run, which is the same IP4 inversion BC4 exists to prevent, on a path
-  # BC4 does not reach.
+  # to run, which is the same inversion the interrupt test below exists to
+  # prevent, on a path that test does not reach.
   cancelled <- structure(20L, class = c("errorValue", "try-error"))
   expect_false(inherits(cancelled, "miraiInterrupt"))
   expect_error(classify_fold_result(cancelled), class = "nestedtune_cancelled")
@@ -136,9 +136,9 @@ test_that("a cancelled run is caught by a handler for any stopped run", {
 })
 
 test_that("a real interrupt is an interrupt, not a cancellation", {
-  # BC4: a cancelled run is not a run that had failures. Recording an
+  # A cancelled run is not a run that had failures. Recording an
   # interrupt as a failed fold would let a run the user stopped masquerade as
-  # a completed design with some folds missing -- an IP4 inversion. mirai
+  # a completed design with some folds missing. mirai
   # resolves a real interrupt to an EMPTY CHARACTER STRING carrying these
   # classes, not an integer (an earlier fixture used 20L; classification is
   # inherits()-based so it passed either way, but a fixture that does not
@@ -184,30 +184,30 @@ test_that("a connected daemon that cannot answer in time is bounded", {
   # everywhere() queues behind the task occupying it and genuinely cannot
   # answer inside the bound -- which is what a loaded machine looks like.
   #
-  # M07's version of this test pointed the pool at a URL nothing would dial
-  # into, which reports zero connections. That case is real and covered
-  # separately below -- but everywhere() queues a task for the daemon that never
-  # arrives rather than returning empty, so it exercises the deadline against an
-  # empty pool. This test is the one that exercises it against a daemon that is
-  # genuinely there and genuinely cannot answer, which is the case users hit.
+  # A pool pointed at a URL nothing would dial into reports zero connections.
+  # That case is real and covered separately below -- but everywhere() queues a
+  # task for the daemon that never arrives rather than returning empty, so it
+  # exercises the deadline against an empty pool. This test is the one that
+  # exercises it against a daemon that is genuinely there and genuinely cannot
+  # answer, which is the case users hit.
   mirai::daemons(0)
   mirai::daemons(1)
   on.exit(mirai::daemons(0), add = TRUE)
 
   # setTimeLimit, not system.time: the latter measures only after the call
   # returns, so it flags a slow probe and can never fail on a hung one -- which
-  # is the only failure this test exists to catch (M09's lesson).
+  # is the only failure this test exists to catch.
   setTimeLimit(elapsed = 60, transient = TRUE)
   on.exit(setTimeLimit(), add = TRUE, after = FALSE)
 
   busy <- mirai::mirai(Sys.sleep(20))
-  # The backstop, registered before anything can abort (M16 T6). testthat 3e
+  # The backstop, registered before anything can abort. testthat 3e
   # unwinds the block on a failed expectation, so a stop_mirai() written only at
   # the end is skipped exactly when a racy timing assertion fails -- leaving a
   # live 20-second task while the on.exit stack tears the pool down around it,
-  # which is how this file leaked the orphan R process a CI cleanup reported.
-  # Firing unconditionally is safe: on a task that has already resolved
-  # stop_mirai() is inert, verified by execution at M15.
+  # which leaves an orphan R process behind. Firing unconditionally is safe: on
+  # a task that has already resolved stop_mirai() is inert, verified by
+  # execution.
   #
   # after = FALSE puts it ahead of the daemons(0) registered above, so the task
   # is cancelled before the pool it runs on is taken away.
@@ -241,14 +241,13 @@ test_that("a pool with no daemon at all is a non-response, not a load failure", 
   # must not be dressed up as a library problem -- there is no daemon to have a
   # library.
   #
-  # Port 0, not a hardcoded 45997 (M16 T5). What the test needs is a port nothing
-  # dials into, and asking the OS for a free one gives that without competing for
-  # a fixed number with a concurrent job or a socket still in TIME_WAIT on a
-  # reused runner. That collision was a suspect for the 2026-07-27 stall until
-  # execution ruled it out -- an occupied port makes daemons() raise
-  # "10 | Address in use" in 0.03 s, so it fails loudly rather than hanging. Not
-  # the hang, then, but a real way for this test to fail for a reason that has
-  # nothing to do with what it asserts.
+  # Port 0, not a hardcoded 45997. What the test needs is a port nothing
+  # dials into, and asking the OS for a free one gives that without competing
+  # for a fixed number with a concurrent job or a socket still in TIME_WAIT on
+  # a reused runner. An occupied port makes daemons() raise "10 | Address in
+  # use" in 0.03 s, so it fails loudly rather than hanging. That is a real way
+  # for this test to fail for a reason that has nothing to do with what it
+  # asserts.
   mirai::daemons(0)
   mirai::daemons(url = "tcp://127.0.0.1:0")
   on.exit(mirai::daemons(0), add = TRUE)
@@ -266,9 +265,9 @@ test_that("a pool with no daemon at all is a non-response, not a load failure", 
   )
 })
 
-# --- Per-daemon coverage and the two failure causes (M10) --------------------
+# --- Per-daemon coverage and the two failure causes --------------------------
 #
-# The M07 defect these pin: the probe submitted a single mirai() task, which one
+# The defect these pin: the probe submitted a single mirai() task, which one
 # daemon takes. In a heterogeneous pool -- a respawned daemon, differing library
 # paths -- one loadable daemon therefore passed the check for every other, and
 # the rest came back as opaque per-fold worker failures. The outcome is now
@@ -283,8 +282,8 @@ test_that("a pool where every daemon loaded passes", {
 })
 
 test_that("one loadable daemon no longer passes the check for the whole pool", {
-  # The regression proper. Under M07's single-task probe this pool answered
-  # TRUE and dispatched; every fold landing on daemon 2 then failed opaquely.
+  # The regression proper. A single-task probe answers TRUE for this pool and
+  # dispatches; every fold landing on daemon 2 then fails opaquely.
   status <- preflight_outcome(reports(TRUE, FALSE, TRUE))
   expect_identical(status$outcome, "cannot_load")
   expect_identical(status$cannot_load, 1L)
@@ -308,7 +307,7 @@ test_that("a load failure keeps the install and prime remedies", {
 })
 
 test_that("a timeout is not reported as a package that cannot be loaded", {
-  # The second M07 defect: one message covered both outcomes, so a daemon that
+  # The second defect: one message covered both outcomes, so a daemon that
   # was merely slow was reported with install-and-prime remedies -- telling a
   # user to install what they already have.
   status <- preflight_outcome(reports(TRUE, NA), timeout = 1500)
@@ -349,7 +348,7 @@ test_that("a raised bound is reported as a number, not in scientific notation", 
 })
 
 test_that("a pool failing both ways names both facts", {
-  # M10-D1: installing is the actionable fix, so the load failure carries the
+  # Installing is the actionable fix, so the load failure carries the
   # class -- but staying silent on the non-answer would only make the user
   # rediscover it on the next run.
   status <- preflight_outcome(reports(TRUE, FALSE, NA), timeout = 2000)
@@ -367,7 +366,7 @@ test_that("a pool failing both ways names both facts", {
 })
 
 test_that("a pool that cannot load AND holds an old build names both fixes", {
-  # The same M10-D1 rule as above, applied to the outcome M24 added. The two
+  # The same rule as above, applied to the incompatible outcome. The two
   # faults take DIFFERENT remedies -- install for one, restart for the other --
   # so a message naming only the class-carrying fault sends the user to install,
   # restart the pool, and meet the second fault on the next pre-flight.
@@ -389,7 +388,7 @@ test_that("a pool that cannot load AND holds an old build names both fixes", {
   )
   msg <- conditionMessage(err)
   expect_match(msg, "cannot load")
-  # The second fault, its symbols, and the remedy the install bullet does not give.
+  # The second fault, its symbols, and the remedy the install bullet omits.
   expect_match(msg, "different build")
   expect_match(msg, "nested_fold_fit")
   expect_match(msg, "rehydrate_payload")
@@ -405,7 +404,7 @@ test_that("a pool that cannot load AND holds an old build names both fixes", {
 })
 
 test_that("the both-fault bullet counts and pluralises on the affected daemons", {
-  # The F2 trap, in the branch it was not fixed in: cli takes every plural's
+  # The plural trap: cli takes every plural's
   # quantity from the LAST interpolation, and `{.pkg {package}}` sits between
   # the count and the verb here.
   status <- preflight_outcome(
@@ -421,7 +420,7 @@ test_that("the both-fault bullet counts and pluralises on the affected daemons",
 })
 
 test_that("both causes answer to one shared class", {
-  # M10-D1: a handler that only cares that the startup check failed catches
+  # A handler that only cares that the startup check failed catches
   # either, without having to list both names.
   for (status in list(
     preflight_outcome(reports(FALSE)),
@@ -434,14 +433,14 @@ test_that("both causes answer to one shared class", {
   }
 })
 
-# --- A daemon that loads the package but cannot run the fold (M24) ----------
+# --- A daemon that loads the package but cannot run the fold ----------------
 #
 # `requireNamespace()` answers a weaker question than dispatch asks. A daemon
 # holding an older install loads the package and reports TRUE, then dies on
-# every fold at `ns$rehydrate_payload` -- the symbol M23 added and no pre-flight
-# noticed. The probe now carries the host's namespace manifest and each daemon
-# reports what it lacks, so the gap is classified rather than discovered a fold
-# at a time.
+# every fold at `ns$rehydrate_payload` -- a symbol a newer build adds, which no
+# pre-flight noticed. The probe now carries the host's namespace manifest and
+# each daemon reports what it lacks, so the gap is classified rather than
+# discovered a fold at a time.
 
 test_that("the probe expression asks the daemon for nothing but base R", {
   # The contract, and the one this suite got wrong: whatever `everywhere()` is
@@ -450,11 +449,11 @@ test_that("the probe expression asks the daemon for nothing but base R", {
   # resolve, and a daemon that cannot raises -- returning a miraiError that
   # daemon_report() refuses, so a pool that answered is classified as silent.
   #
-  # This is what caught M24's first cut only after CI: the probe was written as
-  # live source, so `covr` rewrote its braces and sent `covr:::count()` calls to
-  # daemons whose library has no covr (review F15). Under the coverage job this
-  # test is now the thing that fails, at the exact allowlist below, rather than a
-  # heterogeneous-pool test failing four assertions down with no cause named.
+  # A probe written as live source gets its braces rewritten by `covr`, which
+  # sends `covr:::count()` calls to daemons whose library has no covr. Under the
+  # coverage job this test is the thing that fails, at the exact allowlist
+  # below, rather than a heterogeneous-pool test failing four assertions down
+  # with no cause named.
   names_called <- function(x) {
     if (is.call(x)) {
       c(deparse(x[[1L]]), unlist(lapply(as.list(x)[-1L], names_called)))
@@ -487,7 +486,6 @@ test_that("a package this session has no copy of yields no symbol expectation", 
   # The manifest asks what THIS build contains, so with no build here there is
   # nothing to compare a daemon against and the probe falls back to the load
   # question -- which is exactly what the `package` argument exists to ask.
-  # Before this it raised an unclassified error from asNamespace() (review F6).
   absent <- "nestedtune.no.such.package"
   expect_false(requireNamespace(absent, quietly = TRUE))
   expect_identical(daemon_symbol_manifest(absent), character())
@@ -559,16 +557,14 @@ test_that("the incompatible abort renders at one symbol, two, five, and a mixed 
   # presentational: a daemon holding a genuinely old build is missing most of
   # the namespace, and the untruncated bullet listed all 106 names at the user.
   # Pluralisation is snapshotted with it -- the daemon count and the symbol
-  # count are different quantities and an earlier draft pluralised on the wrong
-  # one, printing "The daemons" for a single daemon.
+  # count are different quantities, so each must pluralise on its own, or a
+  # single daemon prints "The daemons".
   #
   # Four configurations, not two, because a snapshot only guards what it
-  # renders. The first draft pinned one symbol and five, which are exactly the
-  # two counts that came out right, and shipped both defects the review found
-  # (M24 review F1, F2, F11a). The two added here are where the wording
-  # actually changes: cli joins a pair with `vec-sep2` rather than `vec-last`,
-  # and a pool that is only PARTLY incompatible is the only one whose verb
-  # quantity differs from its daemon count.
+  # renders. One symbol and five do not reach the wording that changes. The two
+  # added here are where it actually changes: cli joins a pair with `vec-sep2`
+  # rather than `vec-last`, and a pool that is only PARTLY incompatible is the
+  # only one whose verb quantity differs from its daemon count.
   expect_snapshot(error = TRUE, {
     check_daemons_can_load(
       preflight_outcome(
@@ -577,7 +573,7 @@ test_that("the incompatible abort renders at one symbol, two, five, and a mixed 
       )
     )
     # The headline case: exactly the two names the worker resolves through the
-    # daemon's own namespace, which is what a pre-M23 daemon is short of.
+    # daemon's own namespace, which is what an older daemon is short of.
     check_daemons_can_load(
       preflight_outcome(
         reports(
@@ -615,7 +611,7 @@ test_that("an incompatible pool answers to the shared unusable class", {
 })
 
 test_that("an incompatible pool still reports daemons that said nothing", {
-  # Same reasoning as M10-D1's both-ways message: staying silent on the
+  # Same reasoning as the both-ways message: staying silent on the
   # non-answer only makes the user rediscover it on the next run.
   status <- preflight_outcome(
     reports(NA, TRUE, missing = list(NULL, "rehydrate_payload")),
@@ -630,7 +626,7 @@ test_that("an incompatible pool still reports daemons that said nothing", {
   expect_match(msg, "did not answer")
 })
 
-# --- The bound is an option, not an argument (D-020, M10-D2) ----------------
+# --- The bound is an option, not an argument --------------------------------
 
 test_that("an unset option yields the documented 30 seconds", {
   old <- options(nestedtune.preflight_timeout = NULL)
@@ -668,10 +664,10 @@ test_that("a bound that is not a single positive finite number is refused", {
 })
 
 test_that("an infinite bound is refused, because it is not a bound", {
-  # M10-D2: Inf is numeric and positive, so it slips past every check above --
-  # and honouring it would hand back the unbreakable hang the bound exists to
-  # convert into an error (M07's 39-minute `R CMD check`). A user who needs
-  # longer sets a large finite value.
+  # Inf is numeric and positive, so it slips past every check above -- and
+  # honouring it would hand back the unbreakable hang the bound exists to
+  # convert into an error. A
+  # user who needs longer sets a large finite value.
   old <- options(nestedtune.preflight_timeout = Inf)
   on.exit(options(old), add = TRUE)
   expect_error(preflight_timeout(), class = "nestedtune_bad_preflight_timeout")
@@ -740,14 +736,14 @@ test_that("the abort names the package actually probed", {
 })
 
 test_that("the option, not an argument, is what carries the bound", {
-  # D-018 settled that parallelism is enabled solely by mirai::daemons(n) and
-  # that nested_tune_grid() gains no argument for it; D-020 narrowed that to
-  # signature knobs specifically, which is why the timeout became an option.
-  # Recorded literally so growing the signature fails here rather than in
-  # review. M34 added the `...` barrier and `param_info`, M35 `event_level` and
-  # M41 `eval_time` and M69 `select`, none of which carries a bound: the literal moves when the signature does,
-  # and the assertion this test exists to make is that nothing here names a
-  # daemon count or a timeout.
+  # Parallelism is enabled solely by mirai::daemons(n), and nested_tune_grid()
+  # gains no argument for it. The rule covers signature knobs specifically,
+  # which is why the timeout became an option. The formals are recorded
+  # literally so growing the signature fails here rather than in review. The
+  # `...` barrier and the `param_info`, `event_level`, `eval_time` and `select`
+  # arguments carry no bound: the literal moves when the signature does, and the
+  # assertion this test exists to make is that nothing here names a daemon count
+  # or a timeout.
   expect_identical(
     names(formals(nested_tune_grid.workflow)),
     c(
@@ -814,7 +810,7 @@ test_that("a report is rejected unless every field has the right shape", {
     missing = none,
     missing_pkgs = none
   )))
-  # The package field is held to the same shape (M58): a report whose
+  # The package field is held to the same shape: a report whose
   # `missing_pkgs` is not a character vector, or carries an NA, is malformed,
   # not a daemon that lacks nothing.
   expect_null(daemon_report(list(
@@ -845,7 +841,7 @@ test_that("a report is rejected unless every field has the right shape", {
   )
 })
 
-# --- A daemon that lacks a package the workflow or the tuner needs (M58) ----
+# --- A daemon that lacks a package the workflow or the tuner needs ----------
 #
 # The attach step warned about a package that would not attach and let the
 # run go on to fail every fold that touched it. The probe now asks each daemon
@@ -855,7 +851,7 @@ test_that("a report is rejected unless every field has the right shape", {
 # install-then-restart remedy.
 
 test_that("the ladder orders every outcome, and the package rung sits between load and build", {
-  # AC3, one assertion per rung: each pair of adjacent outcomes fabricated
+  # One assertion per rung: each pair of adjacent outcomes fabricated
   # together resolves to the higher one. `cannot_load` > `missing_pkgs` >
   # `incompatible` > `no_response` > `ok`.
   both <- function(...) preflight_outcome(reports(...))$outcome
@@ -947,9 +943,10 @@ test_that("the missing-package abort names the count, the packages, and the inst
 })
 
 test_that("a missing package beside a daemon that cannot load is named by the load abort", {
-  # AC3, pair one: the load failure keeps the class, and the abort still
-  # names the package the other daemon lacks -- the M10-D1 rule, so the user
-  # does not install, restart, and meet the second fault on the next run.
+  # A load failure beside a missing package: the failure keeps the class, and
+  # the abort still names the package the other daemon lacks. Both facts are
+  # named, so the user does not install, restart, and meet the second fault on
+  # the next run.
   status <- preflight_outcome(
     reports(FALSE, TRUE, missing_pkgs = list(NULL, "ranger")),
     timeout = 2000
@@ -972,8 +969,8 @@ test_that("a missing package beside a daemon that cannot load is named by the lo
 })
 
 test_that("a missing package beside an incompatible build is named by the package abort", {
-  # AC3, pair two: the package rung outranks the build rung, and the abort
-  # names the old build and its symbols beside the packages.
+  # The package rung outranks the build rung, and the abort names the
+  # incompatible build and its symbols beside the packages.
   status <- preflight_outcome(
     reports(
       TRUE,
@@ -994,7 +991,6 @@ test_that("a missing package beside an incompatible build is named by the packag
 })
 
 test_that("a missing package beside a silent daemon is named by the package abort", {
-  # AC3, pair three.
   status <- preflight_outcome(
     reports(TRUE, NA, missing_pkgs = list("ranger", NULL)),
     timeout = 1500
@@ -1010,8 +1006,8 @@ test_that("a missing package beside a silent daemon is named by the package abor
 })
 
 test_that("the package abort pluralises on the daemon count and the package count separately", {
-  # Two quantities in one sentence, as the incompatible abort has (M24 review
-  # F2): two daemons lacking one package, and one daemon lacking two.
+  # Two quantities in one sentence, as the incompatible abort has: two daemons
+  # lacking one package, and one daemon lacking two.
   two_daemons <- conditionMessage(expect_error(
     check_daemons_can_load(preflight_outcome(
       reports(TRUE, TRUE, missing_pkgs = list("ranger", "ranger")),
@@ -1033,7 +1029,7 @@ test_that("the package abort pluralises on the daemon count and the package coun
   expect_match(two_pkgs, "Install them")
 })
 
-# --- Every parallel driver refuses before dispatch (M58, AC1) ---------------
+# --- Every parallel driver refuses before dispatch --------------------------
 #
 # The pre-flight answer is fabricated, as the cannot-load refusal's is in
 # test-parallel-identity.R, and the pool is fabricated with it: mirai_workers()
@@ -1154,9 +1150,9 @@ test_that("the list the probe is sent is the workflow's packages and the tuner's
     c("finetune", "lme4") %in%
       needed_pkgs(wf, tuner_race("tune_race_anova", det_grid()))
   ))
-  # The desirability rule adds desirability2, and no other rule adds it
-  # (M109). The rule is built by hand, since the constructor would ask for
-  # the package this list is about.
+  # The desirability rule adds desirability2, and no other rule adds it. The
+  # rule is built by hand, since the constructor would ask for the package this
+  # list is about.
   des <- new_selection_rule("desirability", list(quote(maximize(rsq))), NULL)
   expect_true(
     "desirability2" %in% needed_pkgs(wf, tuner_grid(det_grid()), des)
@@ -1168,7 +1164,7 @@ test_that("the list the probe is sent is the workflow's packages and the tuner's
 })
 
 test_that("the dispatch hands the probe the list the helper builds", {
-  # F1 of the M58 review: the wiring in dispatch_folds() is the feature, and
+  # The wiring in dispatch_folds() is the feature, and
   # the refusal test above discards the probe's arguments. The mock captures
   # them and the abort it returns keeps any fold from being sent.
   skip_if_no_engines()

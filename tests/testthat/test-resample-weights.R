@@ -1,31 +1,29 @@
-# The outer average under tune's resample weights (M101).
+# The outer average under tune's resample weights.
 #
 # The door is `tune::add_resample_weights()` on the design. tune normalizes
 # the weights to sum one and stores them as the rset's `.resample_weights`
 # attribute; equal weights are stored as no attribute at all
-# (`tune:::.validate_resample_weights`, tune 2.1.0, read 2026-09-16).
+# (`tune:::.validate_resample_weights`, tune 2.1.0).
 #
-# Oracle provenance (GP2, two independent types for AC1):
+# Oracle provenance:
 #
-# O1 -- type "analytic by-hand". Source: tune's own weighted formulas,
-#   written out below in `weighted_summary()` from
-#   `deparse(tune:::estimate_tune_results)` lines 51-54 (`weighted.mean`,
-#   `.effective_sample_size` over the non-NA folds' weights, `.weighted_sd`
-#   over `sqrt(pmax(effective_n, 1))`), `deparse(tune:::.weighted_sd)` lines
-#   12-15 (`stats::cov.wt(..., cor = FALSE)$cov[1, 1]`, square-rooted) and
-#   `deparse(tune:::.effective_sample_size)` lines 7-12
-#   (`sum(w)^2 / sum(w^2)`), tune 2.1.0, read 2026-09-16 (the M28 lesson).
-#   The per-fold estimates it averages are read off the UNWEIGHTED run of
-#   the same fixture, never off the weighted run under test. On a failed
-#   fold the formulas are applied to the folds that scored, the divergence
-#   from tune the plan chose: tune's weighted branch takes no `na.rm`, so
-#   a fold scoring NA errors inside `cov.wt()`, and a failed fold makes it
-#   ignore the weights with a warning (run 2026-09-16, tune#1197).
+# Source: tune's own weighted formulas, written out below in
+# `weighted_summary()` from `deparse(tune:::estimate_tune_results)` lines 51-54
+# (`weighted.mean`, `.effective_sample_size` over the non-NA folds' weights,
+# `.weighted_sd` over `sqrt(pmax(effective_n, 1))`),
+# `deparse(tune:::.weighted_sd)` lines 12-15
+# (`stats::cov.wt(..., cor = FALSE)$cov[1, 1]`, square-rooted) and
+# `deparse(tune:::.effective_sample_size)` lines 7-12
+# (`sum(w)^2 / sum(w^2)`), tune 2.1.0. The per-fold estimates it averages are
+# read off the UNWEIGHTED run of the same fixture, never off the weighted run
+# under test. On a failed fold the formulas are applied to the folds that
+# scored, a deliberate divergence from tune: tune's weighted branch takes
+# no `na.rm`, so a fold scoring NA errors inside `cov.wt()`, and a failed fold
+# makes it ignore the weights with a warning (tune#1197).
 #
-# O2 -- type "live" (reference implementation). Source: `tune::fit_resamples()`
-#   on the same outer `vfold_cv()` splits under the same weights, whose
-#   `collect_metrics()` is tune's weighted branch itself. Every-fold case
-#   only, where tune and this package agree.
+# Source: `tune::fit_resamples()` on the same outer `vfold_cv()` splits under
+# the same weights, whose `collect_metrics()` is tune's weighted branch itself.
+# Every-fold case only, where tune and this package agree.
 
 skip_heavy_on_cran()
 
@@ -33,7 +31,7 @@ weighted_design <- function(data, weights = c(1, 2, 3)) {
   tune::add_resample_weights(det_nested(data), weights)
 }
 
-# O1, written from tune's code and never from the package's.
+# Written from tune's code and never from the package's.
 weighted_summary <- function(estimates, weights) {
   keep <- !is.na(estimates)
   x <- estimates[keep]
@@ -99,7 +97,7 @@ unweighted_grid_run <- function(d) {
   ))
 }
 
-test_that("AC1: nested_fit_resamples() on a weighted design reports tune's weighted mean and standard error (O1)", {
+test_that("nested_fit_resamples() on a weighted design reports tune's weighted mean and standard error", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -124,7 +122,7 @@ test_that("AC1: nested_fit_resamples() on a weighted design reports tune's weigh
   expect_false(isTRUE(all.equal(got$mean, collect_metrics(plain)$mean)))
 })
 
-test_that("AC1: nested_fit_resamples() on a weighted design matches tune::fit_resamples() under the same weights (O2)", {
+test_that("nested_fit_resamples() on a weighted design matches tune::fit_resamples() under the same weights", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)
@@ -153,7 +151,7 @@ test_that("AC1: nested_fit_resamples() on a weighted design matches tune::fit_re
   expect_equal(got$std_err, ref$std_err, tolerance = 1e-12)
 })
 
-test_that("AC1: nested_tune_grid() on a weighted design reports tune's weighted mean and standard error", {
+test_that("nested_tune_grid() on a weighted design reports tune's weighted mean and standard error", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -171,7 +169,7 @@ test_that("AC1: nested_tune_grid() on a weighted design reports tune's weighted 
   expect_false(isTRUE(all.equal(got$mean, collect_metrics(plain)$mean)))
 })
 
-test_that("AC1: with one fold failed, the weighted average covers the folds that scored", {
+test_that("with one fold failed, the weighted average covers the folds that scored", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- break_fold(weighted_design(d), 2L, "inner tuning")
@@ -203,7 +201,7 @@ test_that("AC1: with one fold failed, the weighted average covers the folds that
   )
 })
 
-test_that("AC1: with a fold scoring NA, the weights are renormalized over the folds that scored", {
+test_that("with a fold scoring NA, the weights are renormalized over the folds that scored", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -232,7 +230,7 @@ test_that("AC1: with a fold scoring NA, the weights are renormalized over the fo
   expect_identical(got$n[got$.metric == "rmse"], 3L)
 })
 
-test_that("AC2: equal weights are no weights, and the numbers are the unweighted run's", {
+test_that("equal weights are no weights, and the numbers are the unweighted run's", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- tune::add_resample_weights(det_nested(d), c(2, 2, 2))
@@ -247,7 +245,7 @@ test_that("AC2: equal weights are no weights, and the numbers are the unweighted
   expect_null(attr(res, "resample_weights"))
 })
 
-test_that("AC3: collect_metrics(summarize = FALSE) carries each fold's weight, by fold label", {
+test_that("collect_metrics(summarize = FALSE) carries each fold's weight, by fold label", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -276,7 +274,7 @@ test_that("AC3: collect_metrics(summarize = FALSE) carries each fold's weight, b
   )
 })
 
-test_that("AC3: compute_metrics() with the run's metric set is collect_metrics() on a weighted run", {
+test_that("compute_metrics() with the run's metric set is collect_metrics() on a weighted run", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -296,7 +294,7 @@ test_that("AC3: compute_metrics() with the run's metric set is collect_metrics()
   )
 })
 
-test_that("AC3: the set readers stack each workflow's weighted rows", {
+test_that("the set readers stack each workflow's weighted rows", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   d <- make_reg_data()
   design <- tune::add_resample_weights(final_nested(d), c(1, 3))
@@ -329,7 +327,7 @@ test_that("AC3: the set readers stack each workflow's weighted rows", {
   expect_identical(compute_metrics(res, reg_metrics()), collect_metrics(res))
 })
 
-test_that("AC1: summary(), print and autoplot read the weighted estimate", {
+test_that("summary(), print and autoplot read the weighted estimate", {
   skip_if_no_engines()
   d <- make_reg_data()
   design <- weighted_design(d)
@@ -348,7 +346,7 @@ test_that("AC1: summary(), print and autoplot read the weighted estimate", {
   expect_equal(sort(rules), sort(weighted$mean))
 })
 
-test_that("AC1: folds that scored carrying zero weight between them read NA, not an error", {
+test_that("folds that scored carrying zero weight between them read NA, not an error", {
   skip_if_no_engines()
   d <- make_reg_data()
   # tune admits a zero weight; the dropped fold held all the weight.
@@ -365,7 +363,7 @@ test_that("AC1: folds that scored carrying zero weight between them read NA, not
   expect_identical(got$n, c(2L, 2L))
 })
 
-test_that("AC3: a bare result sheds the weights with the class (IP4)", {
+test_that("a bare result sheds the weights with the class", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- weighted_grid_run(d, weighted_design(d))

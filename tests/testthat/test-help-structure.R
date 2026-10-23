@@ -1,6 +1,6 @@
 # The Differences sections of the four tuner pages render each run-in
 # heading's paragraph whole. The bayes, race and sim-anneal sections hold one
-# list each, and the grid section holds none (M97, AC1 to AC3).
+# list each, and the grid section holds none.
 #
 # A rendering is what `tools::Rd2txt()` prints for the page under the
 # options below. A paragraph is a run of consecutive non-blank lines, joined

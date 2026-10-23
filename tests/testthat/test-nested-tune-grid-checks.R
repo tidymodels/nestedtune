@@ -1,5 +1,5 @@
 # Every cli_abort() branch in the orchestrator's argument checks, fired once.
-# GP3: a provably invalid design is refused rather than warned about.
+# A provably invalid design is refused rather than warned about.
 
 valid_folds <- function(d, v = 2) {
   set.seed(1)
@@ -16,7 +16,7 @@ test_that("`object` must be an unfitted workflow", {
   d <- make_reg_data()
   folds <- valid_folds(d)
 
-  # A bare spec is an accepted `object` since M107, and a design in the
+  # A bare spec is an accepted `object`, and a design in the
   # preprocessor's place is what the spec route refuses.
   expect_error(
     nested_tune_grid(parsnip::linear_reg(), folds),
@@ -32,10 +32,10 @@ test_that("`object` must be an unfitted workflow", {
   expect_error(nested_tune_grid(fitted, folds), "already be fitted")
 })
 
-# A preprocessor-only workflow used to fail from inside
-# workflows::extract_spec_parsnip(), which check_workflow() calls -- so the
-# message was workflows' and conditionCall() named an internal call the user
-# never wrote, where every other bad-`object` shape names theirs.
+# A preprocessor-only workflow would fail inside
+# workflows::extract_spec_parsnip(), which check_workflow() calls. The message
+# would then be workflows', and conditionCall() would name an internal call the
+# user never wrote, where every other bad-`object` shape names theirs.
 
 test_that("a workflow carrying no model spec is refused by nestedtune", {
   skip_if_no_engines()
@@ -71,8 +71,8 @@ test_that("a workflow carrying no model spec is refused by nestedtune", {
 
   cnd <- tryCatch(nested_tune_grid(prep_only, folds), error = function(e) e)
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_tune_grid"))
-  # The remedy, not just a bullet: GP3 refuses, and every other check says how
-  # to stop being refused.
+  # The remedy, not just a bullet: the design is refused, and every other check
+  # says how to stop being refused.
   expect_match(conditionMessage(cnd), "add_model")
 })
 
@@ -138,7 +138,7 @@ test_that("an outer bootstrap is refused, not warned about", {
   wf <- det_workflow(d)
 
   # rsample only warns here, so this design is reachable and has to be caught
-  # on the way in (GP3). nested_resamples() refuses it at construction.
+  # on the way in. nested_resamples() refuses it at construction.
   suppressWarnings(
     boot_folds <- rsample::nested_cv(
       d,
@@ -183,7 +183,7 @@ test_that("`metrics` must be a metric set or NULL", {
   )
 })
 
-# The grid is judged against the workflow up front (M03). Both directions are
+# The grid is judged against the workflow up front. Both directions are
 # wrong for every fold rather than for one, so both are call errors -- and once
 # fold failures are recorded rather than raised, an unchecked grid would show up
 # as an entire design failing instead.
@@ -244,11 +244,11 @@ test_that("a grid given as a size is not held to the column check", {
   expect_no_error(check_grid_params(wf, 5))
 })
 
-# The two list columns are checked element by element (M19). Before this, a bad
-# element was not a call error at all: tune raised it once per fold, so the run
-# cost a full pass and came back as an all-folds-failed object carrying tune's
-# message rather than ours -- the shape check_grid_params() already prevents for
-# a malformed grid.
+# The two list columns are checked element by element. Unchecked, a bad
+# element would not be a call error at all: tune would raise it once per fold,
+# so the run would cost a full pass and come back as an all-folds-failed object
+# carrying tune's message rather than ours -- the shape check_grid_params()
+# already prevents for a malformed grid.
 
 test_that("a non-rset element of inner_resamples is refused", {
   skip_if_no_engines()
@@ -295,7 +295,7 @@ test_that("a non-rsplit element of splits is refused", {
 
 # The reachable route to such a design is not hand-editing: rsample's own
 # constructor admits an `inside` that produces no rset, where nested_resamples()
-# refuses it at construction (M18).
+# refuses it at construction.
 
 test_that("an rsample design whose inside produced no rset is refused", {
   skip_if_no_engines()
@@ -334,7 +334,7 @@ test_that("the loop still accepts a design with no inner specification", {
   # And the result records no specification either: an attribute cannot hold
   # NULL, so this object is indistinguishable from one built before the
   # specification was recorded at all, which is why `nested_final_fit()`'s
-  # refusal of it names both origins (M46, RR05 B1).
+  # refusal of it names both origins.
   expect_null(attr(res, "inside"))
   expect_false("inside" %in% names(attributes(res)))
 })
@@ -394,7 +394,7 @@ test_that("case weights are not mistaken for a preprocessor", {
   # reads is names(object$pre$actions), and that is what is staged here -- with
   # the weakness that comes with it: if workflows ever renamed the slot, this
   # test would keep passing while the real hole reopened. The end-to-end shape
-  # was verified against a genuine add_case_weights() workflow at M19 review.
+  # was verified against a genuine add_case_weights() workflow.
   weights_only <- workflows::add_model(workflows::workflow(), spec)
   weights_only$pre$actions$case_weights <- TRUE
 
@@ -482,7 +482,7 @@ test_that("the new refusals fire before the RNG is drawn from", {
   }
 })
 
-# M48: what `...` accepts, and what a control may carry. Fitting is replaced
+# What `...` accepts, and what a control may carry. Fitting is replaced
 # by a sentinel so a refusal is shown to fire at entry rather than after the
 # loop began, as test-nested-tune-bayes-checks.R does for its sibling.
 
@@ -505,7 +505,7 @@ expect_grid_refused <- function(cnd, class, pattern) {
   invisible(cnd)
 }
 
-test_that("`...` accepts `control` and nothing else (M48, AC5)", {
+test_that("`...` accepts `control` and nothing else", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -527,12 +527,12 @@ test_that("`...` accepts `control` and nothing else (M48, AC5)", {
   expect_grid_refused(cnd, "nestedtune_bad_dots", "`no`")
 
   # `call` is the name of the check's own formal: a caller's `call = ` once
-  # bound there and slipped the fence (M48 review round 1, finding 1).
+  # bound there and slipped the fence.
   cnd <- grid_refusal(nested_tune_grid(wf, folds, call = quote(bogus())))
   expect_grid_refused(cnd, "nestedtune_bad_dots", "`call`")
 })
 
-test_that("`control` must be what tune::control_grid() returns (M48, AC5)", {
+test_that("`control` must be what tune::control_grid() returns", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -555,14 +555,14 @@ test_that("`control` must be what tune::control_grid() returns (M48, AC5)", {
   # The other side of that contract: tune 2.1.0 gives `control_resamples()`
   # and `control_last_fit()` the `control_grid` class, so each is what
   # `control_grid()` returns and passes the fence -- the entry checks pass and
-  # fitting begins (M48 review round 1, finding 5).
+  # fitting begins.
   for (ok in list(tune::control_resamples(), tune::control_last_fit())) {
     cnd <- grid_refusal(nested_tune_grid(wf, folds, control = ok))
     expect_s3_class(cnd, "nestedtune_sentinel")
   }
 })
 
-test_that("a control naming another event level is refused at entry (M48, AC3)", {
+test_that("a control naming another event level is refused at entry", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -588,7 +588,7 @@ test_that("a control naming another event level is refused at entry (M48, AC3)",
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-# M55: every design refusal carries one class, names the driver the user
+# Every design refusal carries one class, names the driver the user
 # called, and names every offending position or column -- not the first one
 # found. The shapes are built by malformed_designs(); each record says what
 # the message must name.
@@ -610,7 +610,7 @@ refusal <- function(expr) {
 # independently of the check, cli only the spelling.
 joined <- function(x) cli::format_inline("{x}")
 
-test_that("every planted design is refused, naming every offender (M55, AC1-AC4)", {
+test_that("every planted design is refused, naming every offender", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -632,15 +632,15 @@ test_that("every planted design is refused, naming every offender (M55, AC1-AC4)
     for (column in record$columns) {
       expect_match(msg, paste0("\\b", column, "\\b"), info = nm)
     }
-    # An inner-split defect names its fold and split together, as one phrase
-    # (M59); "fold 2" and "split 1" found apart could be two other bullets.
+    # An inner-split defect names its fold and split together, as one phrase.
+    # "fold 2" and "split 1" found apart could be two other bullets.
     for (fragment in record$fragments) {
       expect_match(msg, fragment, fixed = TRUE, info = nm)
     }
   }
 })
 
-test_that("each refusal says which defect it found (M55, AC1-AC3)", {
+test_that("each refusal says which defect it found", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -673,7 +673,7 @@ test_that("each refusal says which defect it found (M55, AC1-AC3)", {
   expect_match(said("two_columns"), "weights")
   expect_match(said("two_columns"), "extra")
 
-  # M59: the three inner-split rules, each in its own words -- and each
+  # The three inner-split rules, each in its own words -- and each
   # message names the fold as "Outer fold", never the frame it looked at.
   expect_match(said("inner_not_rsplit_string_first_first"), "not an? <rsplit>")
   expect_match(said("inner_not_rsplit_list_last_last"), "not an? <rsplit>")
@@ -722,7 +722,7 @@ test_that("each refusal says which defect it found (M55, AC1-AC3)", {
   }
 })
 
-test_that("the whole-object refusals carry the class too (M55, AC4)", {
+test_that("the whole-object refusals carry the class too", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -753,7 +753,7 @@ test_that("the whole-object refusals carry the class too (M55, AC4)", {
   }
 })
 
-test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
+test_that("a well-formed design passes the entry check unchanged", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -780,7 +780,7 @@ test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
   factor_labels <- det_nested(d)
   factor_labels$id <- factor(factor_labels$id)
 
-  # M59's controls: rsample's own inner splits carry the outer analysis set
+  # Controls: rsample's own inner splits carry the outer analysis set
   # as their frame, on a data.frame and on a tibble, and an outer split that
   # repeats a row (an evaluated `manual_rset()`) gives an analysis set with a
   # repeated row, which the inner splits then carry.
@@ -804,7 +804,7 @@ test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
   # The inner folds group on `x1`, whose values are all distinct, so both
   # copies of the repeated row land on one side of every inner split under
   # any seed: a copy on each side would share a row, which the design
-  # refuses (M134).
+  # refuses.
   expect_false(anyDuplicated(d$x1) > 0L)
   set.seed(1)
   manual_repeat <- rsample::nested_cv(
@@ -837,7 +837,7 @@ test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-test_that("an outer in_id past the frame is left to last_fit(), not judged against an analysis set that cannot be built (M59)", {
+test_that("an outer in_id past the frame is left to last_fit(), not judged against an analysis set that cannot be built", {
   skip_if_no_engines()
 
   # A `nested_cv()` design's inner splits carry the outer analysis set. With
@@ -860,7 +860,7 @@ test_that("an outer in_id past the frame is left to last_fit(), not judged again
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() design (M59, AC4)", {
+test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() design", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -887,10 +887,10 @@ test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() de
   }
 })
 
-# M69: what `select` accepts, refused at entry with the sentinel in place so
+# What `select` accepts, refused at entry with the sentinel in place so
 # the refusal is shown to fire before any fold runs.
 
-test_that("`select` must be a selection_rule(), refused before any fold runs (M69, AC4)", {
+test_that("`select` must be a selection_rule(), refused before any fold runs", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -927,7 +927,7 @@ test_that("`select` must be a selection_rule(), refused before any fold runs (M6
   )
 })
 
-test_that("an ordering naming a parameter the workflow does not tune is refused, naming both (M69, AC4)", {
+test_that("an ordering naming a parameter the workflow does not tune is refused, naming both", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -951,7 +951,7 @@ test_that("an ordering naming a parameter the workflow does not tune is refused,
   expect_no_match(msg, "\"desc\"")
 })
 
-test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+test_that("a desirability term naming neither a metric nor a tuned parameter is refused at entry", {
   skip_if_no_engines()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -1011,7 +1011,7 @@ test_that("AC1: a desirability term naming neither a metric nor a tuned paramete
   )
 })
 
-test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+test_that("the desirability rule is refused at entry on a censored regression model", {
   skip_if_no_censored()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -1020,7 +1020,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   folds <- srv_nested(d)
 
   # desirability2 ranks one row per candidate per evaluation time there, where
-  # tune's selectors use the first time (review finding 2).
+  # tune's selectors use the first time.
   cnd <- grid_refusal(nested_tune_grid(
     wf,
     folds,
@@ -1049,7 +1049,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   )
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)

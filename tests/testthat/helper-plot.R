@@ -30,7 +30,7 @@ plot_rules <- function(p) {
   )
 }
 
-# The horizontal rules of the set's performance view (M72): one zero-height
+# The horizontal rules of the set's performance view: one zero-height
 # errorbar per workflow and panel, keyed by the workflow label its x position
 # stands for.
 plot_segments <- function(p) {
@@ -67,9 +67,9 @@ layer_with <- function(b, column, without = NULL) {
 # which is how a test distinguishes "no point drawn" from "not on the axis at
 # all".
 #
-# `panel` exists because reading only the first one is what hid M08's F3: a
-# continuous parameter in one panel silently reverted every *other* panel's
-# breaks, and a helper that could not look past panel 1 could not see it.
+# `panel` exists because a defect can live past the first panel: a continuous
+# parameter in one panel can revert every *other* panel's breaks, and a helper
+# that could not look past panel 1 could not see it.
 axis_labels <- function(p, axis = "x", panel = 1L) {
   b <- if (inherits(p, "ggplot_built")) p else ggplot2::ggplot_build(p)
   as.character(b$layout$panel_params[[panel]][[axis]]$get_labels())
@@ -114,7 +114,7 @@ plot_label <- function(p, which) {
 }
 
 # A results object whose second fold completed but carries no value for the
-# parameter -- the false-instability case M04 pins for printing, reused here
+# parameter -- the false-instability case the print tests pin, reused here
 # because the plot must not impute a point for it either.
 drop_selection <- function(res, fold = 2L) {
   res$.selected[[fold]] <- res$.selected[[fold]][, ".config", drop = FALSE]

@@ -1,11 +1,11 @@
-# collect_predictions(summarize = TRUE) on a nested run (M124).
+# collect_predictions(summarize = TRUE) on a nested run.
 #
-# Oracle provenance. AC1's oracle is tune itself:
+# Oracle provenance. The first oracle is tune itself:
 # `tune::collect_predictions(summarize = TRUE)` on `tune::fit_resamples()`
 # over the same outer splits. Every fold of a `nested_fit_resamples()` run
 # fits the one workflow, so the two averages must agree. The engines are
 # deterministic (lm, glm, survreg), because a stochastic engine's per-fold
-# predictions differ between the two runs. AC2's oracle is `hand_average()`
+# predictions differ between the two runs. The second is `hand_average()`
 # below, base R written from the rules the help page states and read off
 # `collect_predictions(res)`, never off the method's output.
 
@@ -117,8 +117,8 @@ srv_pair <- function() {
   )
 }
 
-# The grid runs AC2 reads. Seeds 21 and 25 were picked because the repeats
-# select two different candidates under them. The regression and
+# The grid runs the tests below read. Seeds 21 and 25 were picked because the
+# repeats select two different candidates under them. The regression and
 # probability tests assert this.
 grid_reg_run <- function() {
   d <- make_reg_data()
@@ -190,7 +190,7 @@ mc_run <- function() {
 
 by_row <- function(x) x[order(x$.row), ]
 
-# The AC2 rules, written from the help page in base R over the stacked
+# The rules, written from the help page in base R over the stacked
 # per-fold predictions. One entry per `.row`, in `.row` order.
 hand_average <- function(p, outcome) {
   rows <- sort(unique(p$.row))
@@ -261,7 +261,7 @@ expect_matches_hand <- function(avg, hand, outcome) {
   }
 }
 
-# ---- AC1: equal to tune's own average on the same outer splits -------------
+# ---- equal to tune's own average on the same outer splits ------------------
 
 expect_matches_tune <- function(pair) {
   avg <- by_row(collect_predictions(pair$res, summarize = TRUE))
@@ -275,7 +275,7 @@ expect_matches_tune <- function(pair) {
   expect_true(all(pred_cols %in% names(avg)))
 }
 
-test_that("AC1: summarize defaults to FALSE, the per-fold table", {
+test_that("summarize defaults to FALSE, the per-fold table", {
   skip_if_no_engines()
   res <- reg_pair()$res
   expect_identical(
@@ -287,12 +287,12 @@ test_that("AC1: summarize defaults to FALSE, the per-fold table", {
   ))
 })
 
-test_that("AC1: a regression average equals tune's on the same outer splits", {
+test_that("a regression average equals tune's on the same outer splits", {
   skip_if_no_engines()
   expect_matches_tune(reg_pair())
 })
 
-test_that("AC1: a probability classification average equals tune's", {
+test_that("a probability classification average equals tune's", {
   skip_if_no_engines()
   pair <- prob_pair()
   expect_true(all(
@@ -302,14 +302,14 @@ test_that("AC1: a probability classification average equals tune's", {
   expect_matches_tune(pair)
 })
 
-test_that("AC1: a class-only classification average equals tune's", {
+test_that("a class-only classification average equals tune's", {
   skip_if_no_engines()
   pair <- class_pair()
   expect_false(".pred_event" %in% names(collect_predictions(pair$res)))
   expect_matches_tune(pair)
 })
 
-test_that("AC1: a censored regression average equals tune's", {
+test_that("a censored regression average equals tune's", {
   skip_if_no_engines()
   skip_if_no_censored()
   pair <- srv_pair()
@@ -319,7 +319,7 @@ test_that("AC1: a censored regression average equals tune's", {
   expect_matches_tune(pair)
 })
 
-# ---- AC2: across the candidates the folds selected ------------------------
+# ---- across the candidates the folds selected -----------------------------
 
 # One missing value planted in fold 1's first saved row, so the rule that
 # ignores missing values is exercised. The regression and probability runs'
@@ -336,7 +336,7 @@ plant_missing <- function(x, column) {
   })
 }
 
-test_that("AC2: a regression average spans the candidates the repeats selected", {
+test_that("a regression average spans the candidates the repeats selected", {
   skip_if_no_engines()
   res <- grid_reg_run()
   expect_gte(length(unique(collect_selections(res)$num_comp)), 2L)
@@ -346,7 +346,7 @@ test_that("AC2: a regression average spans the candidates the repeats selected",
   expect_matches_hand(avg, hand_average(collect_predictions(res), "y"), "y")
 })
 
-test_that("AC2: a probability average is renormalized and names its class", {
+test_that("a probability average is renormalized and names its class", {
   skip_if_no_engines()
   res <- grid_prob_run()
   expect_gte(length(unique(collect_selections(res)$num_comp)), 2L)
@@ -356,7 +356,7 @@ test_that("AC2: a probability average is renormalized and names its class", {
   expect_matches_hand(avg, hand_average(collect_predictions(res), "y"), "y")
 })
 
-test_that("AC2: a censored average takes the median time and the mean survival", {
+test_that("a censored average takes the median time and the mean survival", {
   skip_if_no_engines()
   skip_if_no_censored()
   res <- grid_srv_run()
@@ -374,7 +374,7 @@ test_that("AC2: a censored average takes the median time and the mean survival",
   expect_matches_hand(avg, hand_average(p, outcome), outcome)
 })
 
-test_that("AC2: a missing .pred_time makes the row's median missing", {
+test_that("a missing .pred_time makes the row's median missing", {
   skip_if_no_engines()
   skip_if_no_censored()
   res <- grid_srv_run()
@@ -389,7 +389,7 @@ test_that("AC2: a missing .pred_time makes the row's median missing", {
   expect_false(anyNA(avg$.pred_time[avg$.row != target]))
 })
 
-# ---- AC3: ties go to the first level ---------------------------------------
+# ---- ties go to the first level --------------------------------------------
 
 # The folds holding `row` out, in fold order.
 holders <- function(x, row) {
@@ -423,7 +423,7 @@ avg_class <- function(x, row) {
   avg$.pred_class[avg$.row == row]
 }
 
-test_that("AC3: a two-class vote tie goes to the first level, in either order", {
+test_that("a two-class vote tie goes to the first level, in either order", {
   skip_if_no_engines()
   res <- class_pair()$res
   row <- res$.predictions[[1L]]$.row[[1L]]
@@ -447,11 +447,11 @@ test_that("AC3: a two-class vote tie goes to the first level, in either order", 
   )
 })
 
-test_that("AC3: a missing vote counts as a class of its own, as tune counts it", {
+test_that("a missing vote counts as a class of its own, as tune counts it", {
   skip_if_no_engines()
   # Three votes on one row. A repeated design holds a row out once per
   # repeat, so the vote is put to the helper directly. tune 2.1.0's
-  # `class_summarize()` returns NA for (NA, NA, "a"), read 2026-09-28.
+  # `class_summarize()` returns NA for (NA, NA, "a").
   lv <- c("a", "b")
   vote <- function(v) {
     class_by_vote(factor(v, levels = lv), factor(rep(1L, length(v))))
@@ -463,7 +463,7 @@ test_that("AC3: a missing vote counts as a class of its own, as tune counts it",
   expect_identical(levels(vote(c(NA, "b"))), lv)
 })
 
-test_that("AC3: a tie that excludes the first level goes to the earlier tied level", {
+test_that("a tie that excludes the first level goes to the earlier tied level", {
   skip_if_no_engines()
   res <- relevel_class(class_pair()$res, c("event", "other", "third"))
   row <- res$.predictions[[1L]]$.row[[1L]]
@@ -486,7 +486,7 @@ test_that("a row whose averaged probabilities are missing gets a missing class",
   expect_false(anyNA(avg$.pred_class[avg$.row != row]))
 })
 
-test_that("AC3: a tie between averaged probabilities goes to the first level", {
+test_that("a tie between averaged probabilities goes to the first level", {
   skip_if_no_engines()
   res <- prob_pair()$res
   row <- res$.predictions[[1L]]$.row[[1L]]
@@ -523,7 +523,7 @@ test_that("an ordered outcome gives an ordered class, whatever the saved class i
   expect_identical(levels(avg$.pred_class), levels(avg$y))
 })
 
-# ---- AC4: the table's rows and columns ------------------------------------
+# ---- the table's rows and columns -----------------------------------------
 
 held_out_rows <- function(x) {
   sort(unique(unlist(lapply(x$splits[x$.completed], rsample::complement))))
@@ -540,14 +540,14 @@ expect_averaged_shape <- function(x, labels) {
   expect_s3_class(avg, "tbl_df")
 }
 
-test_that("AC4: one row per held-out row, the labels and .config dropped", {
+test_that("one row per held-out row, the labels and .config dropped", {
   skip_if_no_engines()
   res <- grid_reg_run()
   expect_gte(length(unique(collect_selections(res)$num_comp)), 2L)
   expect_averaged_shape(res, c("id", "id2"))
 })
 
-test_that("AC4: a Monte Carlo run averages over the union of assessment rows", {
+test_that("a Monte Carlo run averages over the union of assessment rows", {
   skip_if_no_engines()
   res <- mc_run()
   # Some row must be held out more than once and some never, or the union
@@ -558,7 +558,7 @@ test_that("AC4: a Monte Carlo run averages over the union of assessment rows", {
   expect_averaged_shape(res, "id")
 })
 
-# ---- AC5: a run with failed folds ------------------------------------------
+# ---- a run with failed folds -----------------------------------------------
 
 # Fold 1 and the repeat-2 fold holding fold 1's first held-out row, both
 # broken at the outer fit. The rows both held out were held out by failed
@@ -605,7 +605,7 @@ all_warnings <- function(expr) {
   list(value = value, warnings = warnings)
 }
 
-test_that("AC5: failed folds are left out of the average, with one warning", {
+test_that("failed folds are left out of the average, with one warning", {
   skip_if_no_engines()
   broken <- partial_design()$broken
   res <- partial_run()
@@ -636,7 +636,7 @@ test_that("AC5: failed folds are left out of the average, with one warning", {
   expect_identical(avg$.pred[avg$.row == r], kept$.pred[kept$.row == r])
 })
 
-# ---- AC6: a workflow set ---------------------------------------------------
+# ---- a workflow set --------------------------------------------------------
 
 set_run <- function() {
   d <- make_reg_data()
@@ -653,7 +653,7 @@ set_run <- function() {
   ))
 }
 
-test_that("AC6: a set's average is each workflow's own, bound under wflow_id", {
+test_that("a set's average is each workflow's own, bound under wflow_id", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   res <- set_run()
   expect_identical(res$wflow_id, c("fixed", "baseline"))
@@ -667,9 +667,9 @@ test_that("AC6: a set's average is each workflow's own, bound under wflow_id", {
   expect_true("id2" %in% names(collect_predictions(res)))
 })
 
-# ---- AC7: quantile predictions are refused ---------------------------------
+# ---- quantile predictions are refused --------------------------------------
 
-test_that("AC7: summarize = TRUE refuses saved quantile predictions", {
+test_that("summarize = TRUE refuses saved quantile predictions", {
   skip_if_no_engines()
   res <- reg_pair()$res
   # The refusal reads the column's name, so a plain column stands in for
@@ -684,20 +684,18 @@ test_that("AC7: summarize = TRUE refuses saved quantile predictions", {
   )
 })
 
-# ---- M126: the edge cases of the average -----------------------------------
-#
-# The tests below are labelled with M126's criteria, not M124's above.
+# ---- the edge cases of the average -----------------------------------------
 
 # The message as one line, cli's wrapping and styling removed.
 flat_message <- function(cnd) {
   gsub("\\s+", " ", cli::ansi_strip(conditionMessage(cnd)))
 }
 
-# ---- M126 AC1: saved rows must match the rows each fold held out ----------
+# ---- saved rows must match the rows each fold held out --------------------
 
 # One case: the check is `check_predictions_rows()`, which `augment()` also
 # calls, and test-augment.R plants all five.
-test_that("M126 AC1: the `repeated` mismatch is refused under summarize = TRUE, naming the fold", {
+test_that("the `repeated` mismatch is refused under summarize = TRUE, naming the fold", {
   skip_if_no_engines()
   res <- reg_pair()$res
   planted <- plant_row_mismatch(res, 2L, "repeated")
@@ -722,7 +720,7 @@ test_that("M126 AC1: the `repeated` mismatch is refused under summarize = TRUE, 
   expect_s3_class(per_fold, "tbl_df")
 })
 
-test_that("M126 AC1: a mismatch in one workflow of a set is refused", {
+test_that("a mismatch in one workflow of a set is refused", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   res <- set_run()
   res$result[[1L]] <- plant_row_mismatch(res$result[[1L]], 2L, "repeated")
@@ -733,7 +731,7 @@ test_that("M126 AC1: a mismatch in one workflow of a set is refused", {
   expect_no_condition(collect_predictions(res))
 })
 
-# ---- M126 AC2: shapes the average misreads are refused ---------------------
+# ---- shapes the average misreads are refused -------------------------------
 
 # Every fold's saved predictions edited by `edit()`.
 edit_all_folds <- function(x, edit) {
@@ -761,7 +759,7 @@ expect_shape_refused <- function(x) {
   }
 }
 
-test_that("M126 AC2: two factor outcome columns are refused", {
+test_that("two factor outcome columns are refused", {
   skip_if_no_engines()
   res <- edit_all_folds(prob_pair()$res, function(p) {
     p$also <- p$y
@@ -770,7 +768,7 @@ test_that("M126 AC2: two factor outcome columns are refused", {
   expect_shape_refused(res)
 })
 
-test_that("M126 AC2: a saved class beside no factor outcome column is refused", {
+test_that("a saved class beside no factor outcome column is refused", {
   skip_if_no_engines()
   res <- prob_pair()$res
   # The outcome removed, and the outcome kept as text.
@@ -781,7 +779,7 @@ test_that("M126 AC2: a saved class beside no factor outcome column is refused", 
   }))
 })
 
-test_that("M126 AC2: a censored .pred entry without .eval_time is refused", {
+test_that("a censored .pred entry without .eval_time is refused", {
   skip_if_no_engines()
   skip_if_no_censored()
   res <- edit_fold_predictions(srv_pair()$res, 1L, function(p) {
@@ -791,7 +789,7 @@ test_that("M126 AC2: a censored .pred entry without .eval_time is refused", {
   expect_shape_refused(res)
 })
 
-# ---- M126 AC3: NULL entries in a censored .pred ---------------------------
+# ---- NULL entries in a censored .pred -------------------------------------
 
 # One row's survival average by base R: per `.eval_time`, the mean of the
 # row's non-NULL entries with missing values ignored.
@@ -826,7 +824,7 @@ row_entries <- function(x, row) {
   })
 }
 
-test_that("M126 AC3: a NULL entry is left out of its row's average", {
+test_that("a NULL entry is left out of its row's average", {
   skip_if_no_engines()
   skip_if_no_censored()
   res <- srv_pair()$res
@@ -844,7 +842,7 @@ test_that("M126 AC3: a NULL entry is left out of its row's average", {
   )
 })
 
-test_that("M126 AC3: a row whose every entry is NULL holds NULL", {
+test_that("a row whose every entry is NULL holds NULL", {
   skip_if_no_engines()
   skip_if_no_censored()
   res <- srv_pair()$res
@@ -863,7 +861,7 @@ test_that("M126 AC3: a row whose every entry is NULL holds NULL", {
   expect_true(all(vapply(others, is.data.frame, logical(1))))
 })
 
-test_that("M126 AC3: a table whose every entry is NULL averages to NULL entries", {
+test_that("a table whose every entry is NULL averages to NULL entries", {
   skip_if_no_engines()
   skip_if_no_censored()
   planted <- edit_all_folds(srv_pair()$res, function(p) {
@@ -875,9 +873,9 @@ test_that("M126 AC3: a table whose every entry is NULL averages to NULL entries"
   expect_true(all(vapply(avg$.pred, is.null, logical(1))))
 })
 
-# ---- M126 AC5: paths the M124 and M125 reviews found untested --------------
+# ---- further edge cases ----------------------------------------------------
 
-test_that("M126 AC5: a set refuses saved quantile predictions in both readers", {
+test_that("a set refuses saved quantile predictions in both readers", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   res <- set_run()
   res$result[[1L]] <- edit_fold_predictions(res$result[[1L]], 2L, function(p) {
@@ -891,7 +889,7 @@ test_that("M126 AC5: a set refuses saved quantile predictions in both readers", 
   expect_error(augment(res), class = "nestedtune_summarize_quantile")
 })
 
-test_that("M126 AC5: a .pred_linear_pred column averages to its per-row mean", {
+test_that("a .pred_linear_pred column averages to its per-row mean", {
   skip_if_no_engines()
   res <- edit_all_folds(reg_pair()$res, function(p) {
     p$.pred_linear_pred <- 2 * p$.pred + p$.row
@@ -906,7 +904,7 @@ test_that("M126 AC5: a .pred_linear_pred column averages to its per-row mean", {
   expect_false(anyNA(avg$.pred_linear_pred))
 })
 
-test_that("M126 AC5: a probability tie with one missing probability goes to the first level", {
+test_that("a probability tie with one missing probability goes to the first level", {
   skip_if_no_engines()
   res <- prob_pair()$res
   row <- res$.predictions[[1L]]$.row[[1L]]
@@ -922,7 +920,7 @@ test_that("M126 AC5: a probability tie with one missing probability goes to the 
   }
 })
 
-test_that("M126: a probability tie whose plain sums round apart goes to the first level", {
+test_that("a probability tie whose plain sums round apart goes to the first level", {
   skip_if_no_engines()
   res <- prob_pair()$res
   row <- res$.predictions[[1L]]$.row[[1L]]

@@ -1,14 +1,14 @@
-# The `...` barrier on the exported surface (M34).
+# The `...` barrier on the exported surface.
 #
-# Four exports and every registered method now take `...` and refuse anything
+# Four exports and every registered method take `...` and refuse anything
 # that lands in it. What the tests below have to distinguish is a fence from an
 # accident: a method handed `nonesuch = 1` and a stand-in object errors either
 # way, so every probe asserts the *class* of the condition -- rlang's
 # `rlib_error_dots_nonempty`, or this package's `nestedtune_bad_dots` on the
-# two orchestrators, whose `...` admits `control` and nothing else (M48) --
+# two orchestrators, whose `...` admits `control` and nothing else --
 # and never merely that something went wrong.
 
-# The six orchestrators, generics on `object` since M107.
+# The six orchestrators, generics on `object`.
 ORCHESTRATORS <- c(
   "nested_tune_grid",
   "nested_tune_bayes",
@@ -18,14 +18,14 @@ ORCHESTRATORS <- c(
   "nested_fit_resamples"
 )
 
-# AC1 -------------------------------------------------------------------
+# Entry points ----------------------------------------------------------
 
-test_that("AC1: the four entry points carry `...` after their required arguments", {
+test_that("the four entry points carry `...` after their required arguments", {
   # Written out rather than derived, so a signature that drifts has to be
   # re-agreed here. For nested_tune_grid(), `param_info`, `grid`, `metrics` and
   # `event_level` all sit behind the barrier and therefore match by name only,
-  # as do `eval_time` (M41) and `select` (M69).
-  # Since M107 the export is a generic on `object` alone, and the signature
+  # as do `eval_time` and `select`.
+  # The export is a generic on `object` alone, and the signature
   # below is its `workflow` method's. The model-spec method puts
   # `preprocessor` second, in tune's order, and carries the rest unchanged,
   # defaults included.
@@ -60,7 +60,7 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       label = fn
     )
   }
-  # Its sibling (M45) puts its own three arguments behind the same barrier.
+  # Its sibling puts its own three arguments behind the same barrier.
   expect_identical(names(formals(nested_tune_bayes)), c("object", "..."))
   expect_identical(
     names(formals(nested_tune_bayes.workflow)),
@@ -78,11 +78,10 @@ test_that("AC1: the four entry points carry `...` after their required arguments
       "select"
     )
   )
-  # nested_final_fit() takes only `object` and `results` now (M46): the
-  # procedure that once sat behind its barrier -- `param_info`, `grid`,
-  # `metrics`, `event_level`, `eval_time` -- is read off `results` instead.
-  # `id` (M71) names a workflow of a `nested_results_set` and sits behind
-  # the barrier too.
+  # nested_final_fit() takes only `object` and `results`: the procedure --
+  # `param_info`, `grid`, `metrics`, `event_level`, `eval_time` -- is read off
+  # `results` instead. `id` names a workflow of a `nested_results_set` and sits
+  # behind the barrier too.
   expect_identical(
     names(formals(nested_final_fit)),
     c("object", "results", "...", "id")
@@ -95,22 +94,22 @@ test_that("AC1: the four entry points carry `...` after their required arguments
   )
 })
 
-# AC2 -------------------------------------------------------------------
+# Refusals at entry -----------------------------------------------------
 
 # The entry points are checked one at a time rather than in a loop: a loop
 # over four names would report "one of them" on a failure, and the point of
 # the criterion is that each names its own call.
 #
-# The two orchestrators no longer fence with `rlang::check_dots_empty()`: their
-# `...` admits `control` (M48, AC7), so the refusal is this package's own,
+# The two orchestrators do not fence with `rlang::check_dots_empty()`: their
+# `...` admits `control`, so the refusal is this package's own,
 # still at entry and still naming the call. `control` itself passes the fence
 # and is judged by `check_control()` instead -- test-nested-tune-grid-checks.R
 # and its Bayesian sibling hold that contract.
 
-# An empty workflow reaches the `workflow` method (M107), whose dots are
+# An empty workflow reaches the `workflow` method, whose dots are
 # fenced before the workflow itself is judged; a bare number would stop at
 # the default method's refusal first.
-test_that("AC2: nested_tune_grid() refuses an argument it does not know", {
+test_that("nested_tune_grid() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(
     nested_tune_grid(workflows::workflow(), 2, nonesuch = 1)
   )
@@ -119,7 +118,7 @@ test_that("AC2: nested_tune_grid() refuses an argument it does not know", {
   expect_match(conditionMessage(cnd), "nonesuch")
 })
 
-test_that("AC2: nested_tune_bayes() refuses an argument it does not know", {
+test_that("nested_tune_bayes() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(
     nested_tune_bayes(workflows::workflow(), 2, nonesuch = 1)
   )
@@ -128,19 +127,19 @@ test_that("AC2: nested_tune_bayes() refuses an argument it does not know", {
   expect_match(conditionMessage(cnd), "nonesuch")
 })
 
-test_that("AC2: nested_final_fit() refuses an argument it does not know", {
+test_that("nested_final_fit() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(nested_final_fit(1, 2, nonesuch = 1))
   expect_s3_class(cnd, "rlib_error_dots_nonempty")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
 })
 
-test_that("AC2: nested_resamples() refuses an argument it does not know", {
+test_that("nested_resamples() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(nested_resamples(1, 2, 3, nonesuch = 1))
   expect_s3_class(cnd, "rlib_error_dots_nonempty")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
 })
 
-# AC5 -------------------------------------------------------------------
+# Registered methods ----------------------------------------------------
 
 ORCHESTRATOR_METHODS <- as.vector(outer(
   ORCHESTRATORS,
@@ -154,19 +153,20 @@ ORCHESTRATOR_METHODS <- as.vector(outer(
 # registered, and the only way out is to name it as an exemption below.
 DOTS_EXEMPT_METHODS <- c(
   "[.nested_results",
-  # Its `...` is forwarded to the trained workflow on purpose (M47): parsnip's
+  # Its `...` is forwarded to the trained workflow on purpose: parsnip's
   # `check_pred_type_dots()` refuses any name outside its own short list of
   # predict arguments, so an unknown argument is an error downstream rather
   # than a silent no-op (a listed name the model cannot use is parsnip's to
-  # ignore, not this package's to fence). `augment.nested_final_fit` stays probed -- workflows' own
-  # method swallows its dots, so the fence there is this package's.
+  # ignore, not this package's to fence). `augment.nested_final_fit` stays
+  # probed -- workflows' own method swallows its dots, so the fence there is
+  # this package's.
   "predict.nested_final_fit",
-  # The two refusals M106 registers. Their whole body is an error naming
+  # The two refusals this package registers. Their whole body is an error naming
   # nested_final_fit(), and a caller's `new_data` arrives through `...`, so a
   # fence would answer that call with a dots error instead of the guidance.
   "predict.nested_results",
   "predict.nested_results_set",
-  # The compatibility methods M37 registers. Their `...` is not this package's
+  # The compatibility methods registered here. Their `...` is not this package's
   # to fence: vctrs passes `x_arg`, `y_arg` and `call` through the `...` of a
   # `vec_ptype2()` or `vec_cast()` method, base `rbind()`'s `...` IS the data
   # being combined, and a fence in any of them would abort a call the generic
@@ -187,23 +187,23 @@ DOTS_EXEMPT_METHODS <- c(
   "vec_cbind_frame_ptype.nested_results",
   "rbind.nested_results",
   "names<-.nested_results",
-  # The set's four doors of the same kinds (M73), exempt for the same
+  # The set's four doors of the same kinds, exempt for the same
   # reasons: `vec_restore()` and `rbind()` take the generic's own `...`,
   # `[` forwards its dots to tibble's method, and `names<-` has none.
   "[.nested_results_set",
   "vec_restore.nested_results_set",
   "rbind.nested_results_set",
   "names<-.nested_results_set",
-  # The orchestrators' methods (M107). The `workflow` method's `...` carries
+  # The orchestrators' methods. The `workflow` method's `...` carries
   # `control` and is fenced by this package's `nestedtune_bad_dots`, probed
-  # by the AC2 blocks above for grid and Bayes and by each sibling's
+  # by the refusal tests above for grid and Bayes and by each sibling's
   # checks test for the rest. The `model_spec` method passes its dots on to
   # the `workflow` method, and the default refuses the object whatever rides
   # in its dots.
   ORCHESTRATOR_METHODS
 )
 
-# Default methods that refuse the object ahead of the dots (M56).
+# Default methods that refuse the object ahead of the dots.
 NO_METHOD_DEFAULTS <- c(
   "extract_tune_results.default",
   "extract_scored_candidates.default",
@@ -217,7 +217,7 @@ registered_s3_methods <- function() {
   sort(paste0(reg[, 1L], ".", reg[, 2L]))
 }
 
-# Methods the probe must reach, named (M57). The domain above is read from the
+# Methods the probe must reach, named. The domain above is read from the
 # registry so a new method is probed unasked, and that is also its weakness: a
 # registry that lost a method -- a directive dropped from NAMESPACE, a
 # generic renamed -- would shrink the probe without a failure. These are the
@@ -235,7 +235,7 @@ DOTS_PROBED_METHODS <- c(
   "extract_procedure.nested_final_fit",
   "collect_predictions.nested_results",
   "collect_extracts.nested_results",
-  # The workflow-set surface (M71): the readers, the print and the
+  # The workflow-set surface: the readers, the print and the
   # extractor, whose `id` sits ahead of its dots and is never reached by
   # the probe.
   "collect_metrics.nested_results_set",
@@ -246,14 +246,14 @@ DOTS_PROBED_METHODS <- c(
   "collect_extracts.nested_results_set",
   "print.nested_results_set",
   "extract_workflow.nested_results_set",
-  # The set readers (M72).
+  # The set readers.
   "agreement.nested_results_set",
   "summary.nested_results_set",
   "print.summary.nested_results_set",
   "autoplot.nested_results_set"
 )
 
-test_that("AC5: every registered method whose `...` is unused fences it", {
+test_that("every registered method whose `...` is unused fences it", {
   methods <- registered_s3_methods()
 
   # The exemption has to still exist for the subtraction to mean anything --
@@ -294,7 +294,7 @@ test_that("AC5: every registered method whose `...` is unused fences it", {
     }
     # The two `extract_` defaults refuse the object before anything else: a
     # caller holding the wrong object is told so whatever rides in `...`
-    # (M56), so the stand-in list is refused as having no method, and the
+    # so the stand-in list is refused as having no method, and the
     # stray argument never reaches a fence. Still a refusal, asserted by its
     # own class; the methods on `nested_final_fit` fence their dots and are
     # probed by test-nested-final-fit-extract.R.
@@ -306,22 +306,21 @@ test_that("AC5: every registered method whose `...` is unused fences it", {
   }
 })
 
-# AC6 -------------------------------------------------------------------
+# Signature -------------------------------------------------------------
 #
-# The signature alone. M34 also scanned every in-repo `collect_metrics(` call
-# for a positional `summarize`; M57 removed the scan, since a positional
-# argument past `...` already errors at the call (the runtime block below
-# holds that), and a text scan over the repo's own files was a second checker
-# for the same fact.
+# A positional argument past `...` already errors at the call (the runtime
+# block below holds that), so a text scan of the repo's own `collect_metrics(`
+# calls for a positional `summarize` would be a second checker for the same
+# fact.
 
-test_that("AC6: collect_metrics() puts `summarize` behind the barrier", {
+test_that("collect_metrics() puts `summarize` behind the barrier", {
   expect_identical(
     names(formals(getS3method("collect_metrics", "nested_results"))),
     c("x", "...", "summarize", "type")
   )
 })
 
-test_that("AC6: a positional `summarize` is refused at the call, a named one is not", {
+test_that("a positional `summarize` is refused at the call, a named one is not", {
   skip_if_no_engines()
   # Seeded as test-vctrs-compat.R's `compat_results()` seeds it, so the
   # request keys to the run that file already built rather than a second fit.

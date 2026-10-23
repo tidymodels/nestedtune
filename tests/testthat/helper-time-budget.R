@@ -1,17 +1,15 @@
-# What the daemon tests are allowed to wait for, declared (M16 T2, AC2).
+# What the daemon tests are allowed to wait for, declared.
 #
 # The problem this exists to make visible. `test-parallel-classify.R` typically
-# runs in 12.0 s (benchmarks/test-timing-baseline.md), but before M16 its
-# declared waits permitted 1008.7 s. On 2026-07-27 a CI job sat in that file for
-# ~17 minutes and was killed by the 20-minute cap, and the surviving log said
-# only that it had started the file (PR #13, run 30303761053). A wedge and a
-# file running its own worst case are indistinguishable from the outside -- so
-# the worst case is written down here, and kept smaller than the cap.
+# runs in 12.0 s (benchmarks/test-timing-baseline.md), while its declared waits
+# can permit far more. A wedge and a file running its own worst case are
+# indistinguishable from the outside -- so the worst case is written down
+# here, and kept smaller than the CI cap.
 #
-# THE SUMMING CONVENTION, which is a decision and not an accident (M16 plan
-# gate): each wait contributes ITS OWN declared seconds. An enclosing
-# `setTimeLimit()` never caps that contribution, because M14 established by
-# execution that `setTimeLimit()` does not interrupt a blocked mirai wait -- it
+# THE SUMMING CONVENTION, which is a decision and not an accident: each wait
+# contributes ITS OWN declared seconds. An enclosing `setTimeLimit()` never
+# caps that contribution, because `setTimeLimit()` does not interrupt a
+# blocked mirai wait (established by execution) -- it
 # is not a bound on the path that actually stalls, and crediting it would
 # flatter every total here exactly where the flattery is unsafe. Those calls get
 # rows carrying 0 seconds so the guard can see they were classified, never
@@ -24,8 +22,7 @@
 # call is accounted for -- a new one cannot land silently by looking like the
 # many harmless ones.
 #
-# HOW A ROW'S SECONDS ARE KEPT HONEST, which is two different mechanisms and was
-# once described here as one (M16 review F3, scored 85).
+# HOW A ROW'S SECONDS ARE KEPT HONEST, which is two different mechanisms.
 #
 # Rows whose bound lives in helper-parallel.R read the constant itself --
 # COLLECT_BOUNDED_DEFAULT_S, START_DAEMONS_BOUND_S(), MIXED_DAEMONS_BOUND_S --
@@ -37,28 +34,25 @@
 # green and the printed total unchanged. So `test-suite-hygiene.R` re-reads each
 # such argument from the source and fails when the row disagrees.
 #
-# What that cross-check cannot reach is declared here rather than left implicit,
-# because an unstated exemption is how the first version of this comment came to
-# overclaim. Three kinds escape it: a bound read from a named constant, which
+# What that cross-check cannot reach is declared here rather than left
+# implicit. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (classify:691 sets it, :697 spends it); and a wait that
+# and spent at another (classify:687 sets it, :693 spends it); and a wait that
 # is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
 #
-# Those exemptions are now DECLARED and asserted, not merely described here.
+# Those exemptions are DECLARED and asserted, not merely described here.
 # `test-suite-hygiene.R` keeps the list as DECLARED_UNCHECKABLE_BOUNDS and fails
 # when the set of rows it could not re-read differs from it -- so a fourth
 # exemption has to be argued for rather than acquired by writing a call the
-# regex cannot parse. Prose alone was not enough: this paragraph said the gap was
-# on the record while a row wrapped across two lines sat in it unnoticed (M24
-# review F9).
+# regex cannot parse.
 
 # One site's worst case: what it waits for, times the number of times the
 # surrounding code runs it. `times` is 1 unless a loop says otherwise -- the
-# shared_daemons() call in test-parallel-identity.R's BC12 sits inside
-# `for (fn in RACERS)` and is therefore paid twice (its three-daemon twin
-# went at M113). It is the ledger's only row carrying a `times` above 1;
+# shared_daemons() call in test-parallel-identity.R's "both racing paths match
+# serial at two daemons" sits inside `for (fn in RACERS)` and is therefore paid
+# twice. It is the ledger's only row carrying a `times` above 1;
 # `grep -n 'times = [0-9]' tests/testthat/helper-time-budget.R` lists every row
 # that sets the argument, `tb_row()`'s own default included, so a row added at
 # any other count shows up there rather than going unread.
@@ -83,15 +77,15 @@ tb_row <- function(file, at, call, seconds, payer, times = 1L, note = "") {
 }
 
 # start_daemons() waits twice over: once priming the daemons and once warming
-# them. Neither is visible at the call site, which is what made 600 s of
-# test-parallel-classify.R's old worst case invisible to a reader of that file.
+# them. Neither is visible at the call site, so a reader of a test file cannot
+# see either wait there.
 START_DAEMONS_BOUND_S <- function() PRIME_DAEMONS_BOUND_S + WARM_DAEMONS_BOUND_S
 
 # The suite-wide option (PREFLIGHT_TEST_TIMEOUT_MS) is charged to no file below,
-# because after M16 every probe in these files passes an explicit `timeout` or
-# sets the option itself. It remains as the backstop a future call would inherit
-# -- which is precisely how the largest wait in test-parallel-classify.R came to
-# be invisible, so a new call relying on it should be charged here.
+# because every probe in these files passes an explicit `timeout` or sets the
+# option itself. It remains as the backstop a future call would inherit, which
+# hides that call's wait from its file, so a new call relying on it must be
+# charged here.
 
 time_budget_ledger <- function() {
   rbind(
@@ -109,7 +103,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "a connected daemon that cannot answer in time is bounded",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-classify.R",
@@ -133,7 +127,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "a pool with no daemon at all is a non-response, not a load failure",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-classify.R",
@@ -316,7 +310,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "the probe reads its bound from the option, not from the constant",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-classify.R",
@@ -359,7 +353,7 @@ time_budget_ledger <- function() {
       note = "fabricated status"
     ),
 
-    # --- test-parallel-classify.R, the package rung (M58) --------------------
+    # --- test-parallel-classify.R, the package rung --------------------------
     #
     # Every check_daemons_can_load() below classifies a fabricated
     # preflight_outcome() already in hand and dispatches nothing; the two
@@ -420,7 +414,7 @@ time_budget_ledger <- function() {
       "the package abort pluralises on the daemon count and the package count separately",
       note = "status already in hand"
     ),
-    # --- test-parallel-detection.R, the package rung (M58) ------------------
+    # --- test-parallel-detection.R, the package rung ------------------------
     tb_row(
       "test-parallel-detection.R",
       1L,
@@ -450,7 +444,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "a heterogeneous pool names the daemon that lacks a needed package",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-detection.R",
@@ -491,7 +485,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "the probe reaches every daemon, not just a loadable one",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-detection.R",
@@ -580,7 +574,7 @@ time_budget_ledger <- function() {
     # complete-looking, which is the same disclosure the test-parallel-metrics.R
     # block below makes for its own `daemons(0)` calls.
     #
-    # 0 seconds, and measured rather than assumed (2026-07-31, mirai 2.7.2):
+    # 0 seconds, and measured rather than assumed (mirai 2.7.2):
     # `daemons(2)` returned in 0.635 s, `daemons(2, dispatcher = FALSE)` in
     # 0.224 s, `daemons(0)` in 0.205 s, with `status()$connections` already
     # reading 2. None waits on a mirai result, so none has a bound to declare.
@@ -602,54 +596,54 @@ time_budget_ledger <- function() {
     ),
 
     # --- test-parallel-identity.R -------------------------------------------
-    # Three pool starts per run (M74; 26 before it): the shared 2-daemon pool,
-    # the shared 3-daemon pool, and BC3's private one. Every other block but
-    # BC4, whose worker count is fabricated since M113,
-    # reuses a shared pool through `shared_daemons()`, whose one wait is the
-    # snapshot round trip it compares against the start (DAEMON_SNAPSHOT_BOUND_S,
-    # read from the constant); `share_daemons()` takes the start snapshot on
-    # the same bound, and BC2's `daemon_rng_kinds()` is one more round trip.
+    # Three pool starts per run: the shared 2-daemon pool, the shared 3-daemon
+    # pool, and a private one for the block that kills a daemon. Every other
+    # block but the one whose worker count is fabricated reuses a shared pool
+    # through `shared_daemons()`, whose one wait is the snapshot round trip it
+    # compares against the start (DAEMON_SNAPSHOT_BOUND_S, read from the
+    # constant); `share_daemons()` takes the start snapshot on the same bound,
+    # and the RNG-kind block's `daemon_rng_kinds()` is one more round trip.
     tb_row(
       "test-parallel-identity.R",
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "the shared 2-daemon pool starts primed (M74)"
+      "the shared 2-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the shared 2-daemon pool starts primed (M74)"
+      "the shared 2-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: parallel matches serial at two daemons"
+      "parallel matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer"
+      "identity holds under a caller kind that is neither MT nor L'Ecuyer"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "daemon_rng_kinds",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer"
+      "identity holds under a caller kind that is neither MT nor L'Ecuyer"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: the caller's RNG state and kind survive a parallel run"
+      "the caller's RNG state and kind survive a parallel run"
     ),
     tb_row(
       "test-parallel-identity.R",
@@ -664,7 +658,7 @@ time_budget_ledger <- function() {
       "setTimeLimit",
       0,
       "a cancelled parallel run returns nothing and restores the RNG state",
-      note = "not a bound on a blocked mirai wait (M14)"
+      note = "not a bound on a blocked mirai wait"
     ),
     tb_row(
       "test-parallel-identity.R",
@@ -679,42 +673,42 @@ time_budget_ledger <- function() {
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC6: a failed fold matches serially in every field but its traces"
+      "a failed fold matches serially in every field but its traces"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC7: the identity holds with a two-class fixture at event_level = \"second\" (M35, AC5)"
+      "the identity holds with a two-class fixture at event_level = \"second\""
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC8: the identity holds with a censored fixture at a named eval_time (M41, AC5)"
+      "the identity holds with a censored fixture at a named eval_time"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC10: the Bayesian path matches serial at two daemons (M45, AC4)"
+      "the Bayesian path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially"
+      "param_info, control and select reach the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC12: both racing paths match serial at two daemons (M50, AC4)",
+      "both racing paths match serial at two daemons",
       times = 2L,
       note = "inside for (fn in RACERS)"
     ),
@@ -723,35 +717,35 @@ time_budget_ledger <- function() {
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC13: the annealing path matches serial at two daemons (M51, AC4)"
+      "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)"
+      "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC16: the plain resampling path matches serial on two daemons (M70, AC6)"
+      "the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC17: the workflow-set map matches serial on two daemons (M71, AC2)"
+      "the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC9: a fold is immune to whatever a daemon ran before it",
+      "a fold is immune to whatever a daemon ran before it",
       note = "pollutes the shared pool in place; last block on it"
     ),
     tb_row(
@@ -759,36 +753,36 @@ time_budget_ledger <- function() {
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "the shared 3-daemon pool starts primed (M74)"
+      "the shared 3-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the shared 3-daemon pool starts primed (M74)"
+      "the shared 3-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: parallel matches serial at three daemons"
+      "parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "BC3: a daemon killed mid-run yields a recorded failure, not an abort",
+      "a daemon killed mid-run yields a recorded failure, not an abort",
       note = "a private pool: the block kills one of its daemons"
     ),
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two
-    # `mirai::daemons(0)` calls beside it (:50 teardown, :53 reset before the
-    # serial reference) are not among BUDGETED_WAIT_CALLS and get no row: M16
-    # measured `daemons(0)` returning in ~0.2 s with a live task outstanding --
+    # `mirai::daemons(0)` calls beside it (:51 teardown, :54 reset before the
+    # serial reference) are not among BUDGETED_WAIT_CALLS and get no row:
+    # `daemons(0)` measured returning in ~0.2 s with a live task outstanding --
     # it orphans rather than blocks -- so there is no bound to declare. They are
     # named here because the guard cannot see them, which is the same
     # disclosure the option/deadline-poll gap above makes.
@@ -841,7 +835,7 @@ time_budget_ledger <- function() {
       "collect_bounded",
       30,
       "a racing run attaches finetune and the race's model package in every daemon",
-      note = "explicit seconds = 30; one site, called twice (M50)"
+      note = "explicit seconds = 30; one site, called twice"
     ),
 
     # --- test-parallel-interrupt.R ------------------------------------------
@@ -914,19 +908,17 @@ time_budget_totals <- function(ledger = time_budget_ledger()) {
   totals[order(-totals$seconds), , drop = FALSE]
 }
 
-# The ceiling AC4 sets, on the one file the 2026-07-27 stall was localized to.
-# The other three are recorded without one: detection is small, interrupt is
-# two pool starts, and identity is the subject of its own candidate row.
+# The ceiling on test-parallel-classify.R, the one file a CI stall has been
+# traced to. The other three daemon files are recorded without one.
 CLASSIFY_BUDGET_CEILING_S <- 480
 
-# What the same ledger totalled before M16 cut anything, so the reduction is a
-# measured figure rather than a remembered one. benchmarks/test-time-budget.R
-# prints it beside the current total.
+# What the same ledger totalled before its waits were first cut, so the
+# reduction is a measured figure rather than a remembered one.
+# benchmarks/test-time-budget.R prints it beside the current total.
 CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
 
-# The ceiling on the file M20 added, set at the file's one pool start plus a
-# margin. M16 capped only the file its stall was localized to and recorded the
-# other three without a ceiling; a new file is cheaper to hold to a bound from
-# the start than to cut back later, and 30 s of headroom is one more bounded
+# The ceiling on test-parallel-metrics.R, set at the file's one pool start plus
+# a margin. A new file is cheaper to hold to a bound from the start than to cut
+# back later, and 30 s of headroom is one more bounded
 # wait before the guard asks whether it belongs.
 METRICS_BUDGET_CEILING_S <- 150

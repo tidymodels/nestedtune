@@ -1,54 +1,50 @@
 # The functions other than nested_tune_grid() on the "sliding-window /
-# sliding-window" pair of TS_SLIDING_PAIRS (M140). The other eight pairs are
-# tested under nested_resamples() and nested_tune_grid() alone, in
-# test-time-series-pairs-{window,index,period}.R (M121). DESIGN Conventions:
-# oracles are recorded in the test file that asserts them.
+# sliding-window" pair of TS_SLIDING_PAIRS. The other eight pairs are tested
+# under nested_resamples() and nested_tune_grid() alone, in
+# test-time-series-pairs-{window,index,period}.R. DESIGN Conventions: oracles
+# are recorded in the test file that asserts them.
 #
-# O1 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_nested_bayes_loop(), reference_nested_race_loop() and
 #   reference_nested_anneal_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver. Pinned by "<tuner> on the
 #   sliding-window / sliding-window pair matches its reference loop".
-#   Satisfies M140 AC3 for the four tuners.
 #
-# O2 -- type "live" (reference implementation). Source: tune::fit_resamples()
+# Source: tune::fit_resamples()
 #   run by hand on the pair's outer `sliding_window()` design, built on its
 #   own from the same call. Pinned by "nested_fit_resamples() on the ... pair
-#   matches fit_resamples()". Satisfies M140 AC3 for nested_fit_resamples().
-#   It shows only that the design is accepted, because nested_fit_resamples()
-#   checks the inner design but fits nothing on it.
+#   matches fit_resamples()". It shows only that the design is accepted,
+#   because nested_fit_resamples() checks the inner design but fits nothing on
+#   it.
 #
-# O3 -- type "live" (reference implementation). Source: hand_call() in
+# Source: hand_call() in
 #   helper-orchestration.R, which runs each workflow of the set through its
 #   own orchestrator by hand under the same seed. Pinned by "a workflow set on
-#   the ... pair matches the hand calls". Satisfies M140 AC3 for
-#   nested_workflow_map().
+#   the ... pair matches the hand calls".
 #
-# O4 -- type "live" (reference implementation). Source: reference_final_fit()
+# Source: reference_final_fit()
 #   in helper-orchestration.R, handed TS_INNER_DESIGNS' sliding-window inner
 #   call as `inner_design`. Its arguments match the pair's `inside` call.
 #   Pinned by "the grid final fit on the ... pair matches its reference".
-#   Satisfies M140 AC3 for nested_final_fit().
 #
-# O1 to O4 check that the functions give what tune and finetune give when run
-# by hand. The estimate itself adds nothing new for this pair, so no second
-# oracle type is asked of them here.
+# These four check that the functions give what tune and finetune give when run
+# by hand.
 #
 # One test on this pair reaches the step that re-points each fold's inner
 # splits at its outer analysis frame, which the tests above cannot see: a
 # fixed grid scores the same rows on either frame. Its `min_n` range is
 # finalized from the frame's row count, so it differs between the frames.
 # Pinned by "a range finalized from the data on the ... pair is finalized on
-# each fold's analysis rows". Satisfies M140 AC4 with two oracle types:
+# each fold's analysis rows".
 #
-# O5 -- type "analytic" (closed form). Source: dials::get_n_frac_range(), whose
+# Source: dials::get_n_frac_range(), whose
 #   finalized range is `floor(nrow(x) * frac)` of the frame it is handed (the
-#   O1 record in test-nested-tune-finalize.R). Every candidate a fold searched
-#   lies inside `floor(n * FINALIZE_FRAC)`, `n` being the row count of that
-#   fold's outer analysis set: 6 to 30 on its 60 rows, where the 90-row frame
-#   gives 9 to 45.
+#   reference record in test-nested-tune-finalize.R). Every candidate a fold
+#   searched lies inside `floor(n * FINALIZE_FRAC)`, `n` being the row count of
+#   that fold's outer analysis set: 6 to 30 on its 60 rows, where the 90-row
+#   frame gives 9 to 45.
 #
-# O6 -- type "live" (reference implementation). Source: rsample::nested_cv()
+# Source: rsample::nested_cv()
 #   on the pair's own call, rebuilt by ts_pair_reference(). Its inner splits
 #   carry each outer fold's analysis set as their frame, so tune finalizes on
 #   it by construction.
@@ -297,10 +293,10 @@ test_that(
     ms <- ts_metrics()
     lean <- pair_folds(d)
     ref <- ts_pair_reference(pair_spec, d)
-    # The precondition for O6: the two designs hold the same inner rows.
+    # Precondition: the two designs hold the same inner rows.
     expect_inner_identical(lean, ref)
 
-    # Two direct calls, never memoised() (the M42 lesson).
+    # Two direct calls, never memoised().
     set.seed(3)
     lean_res <- suppressMessages(nested_tune_grid(
       wf,
@@ -319,7 +315,6 @@ test_that(
     ))
     expect_true(all(lean_res$.completed))
 
-    # O5.
     full_upper <- floor(nrow(d) * FINALIZE_FRAC[[2L]])
     for (i in seq_len(nrow(lean))) {
       n <- nrow(rsample::analysis(lean$splits[[i]]))
@@ -344,7 +339,6 @@ test_that(
       )
     }
 
-    # O6.
     expect_identical(lean_res$.inner_metrics, ref_res$.inner_metrics)
     expect_identical(lean_res$.metrics, ref_res$.metrics)
     expect_identical(lean_res$.selected, ref_res$.selected)

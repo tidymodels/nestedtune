@@ -1,8 +1,7 @@
 # Oracle records for the two racing exports (DESIGN Conventions: oracles are
-# recorded in the test file that asserts them). The numbering is this file's
-# own.
+# recorded in the test file that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels and
+# Source: the tidymodels and
 #   finetune pipeline itself, recomputed at test time by
 #   reference_nested_race_loop() in helper-orchestration.R, written from the
 #   documented seed contract -- `set.seed(s)`, one
@@ -13,41 +12,37 @@
 #   hand-rolled racing reference loop" on the deterministic fixture for each
 #   racer, and on the metric-separating fixture for the ANOVA racer. The two
 #   racers share one body, `nested_tune_race()`, so every other block here
-#   that runs a race runs the ANOVA racer alone. Satisfies AC1.
+#   that runs a race runs the ANOVA racer alone.
 #
-# O2 -- type "invariant". Source: no external one; the agreement between two
-#   independent internal routes is the oracle. A candidate a race scored on
-#   every inner resample was scored on exactly the resamples `tune_grid()`
-#   scores it on, so its `mean` must equal the grid orchestrator's for the
-#   same candidate under the same seed and the same explicit grid; the race
-#   shuffles the resample order, and the means agreed to the last bit on
-#   every fold of the fixture under two seeds (measured 2026-09-02, finetune
-#   1.3.0). Pinned by "a candidate raced to the end carries the grid path's
-#   mean". Satisfies AC2.
+# No external source. The agreement between two independent internal routes
+#   is the oracle. A candidate a race scored on every inner resample was scored
+#   on exactly the resamples `tune_grid()` scores it on, so its `mean` must
+#   equal the grid orchestrator's for the same candidate under the same seed
+#   and the same explicit grid; the race shuffles the resample order, and the
+#   means agreed to the last bit on every fold of the fixture under two seeds
+#   (measured on finetune 1.3.0). Pinned by "a candidate raced to the end
+#   carries the grid path's mean".
 #
-# O3 -- type "live", on the record's derivation (D-043, IP4): a fold's
-#   `.inner_metrics` is `collect_metrics(<the race>, all_configs = TRUE)`,
-#   eliminated candidates included, and `.selected` is `select_best()` on the
-#   race; on the stochastic fixture a race eliminates at least one candidate,
-#   so a table with a candidate at `n` below the resample count is shown, and
-#   the selection is a candidate raced to the end. Pinned by "the fold record
-#   is every candidate the race scored, and the selection a survivor".
-#   Satisfies AC3.
+# On the record's derivation: a fold's `.inner_metrics` is
+#   `collect_metrics(<the race>, all_configs = TRUE)`, eliminated candidates
+#   included, and `.selected` is `select_best()` on the race; on the stochastic
+#   fixture a race eliminates at least one candidate, so a table with a
+#   candidate at `n` below the resample count is shown, and the selection is a
+#   candidate raced to the end. Pinned by "the fold record is every candidate
+#   the race scored, and the selection a survivor".
 #
-# O4 -- type "invariant" (mode independence), pinned in
-#   test-parallel-identity.R as BC12: the same seed gives an identical result
-#   serially and at two daemons (the three-daemon repeat went at M113,
-#   D-079). Recorded here for the audit.
+# Mode independence, pinned in test-parallel-identity.R: the same seed gives an
+#   identical result serially and at two daemons. Recorded here for the audit.
 #
-# O1 and O2 are the >=2 independent oracle types GP2 asks of the package's own
-# contribution -- the call, the seed, the record, the loop. The elimination
-# itself is finetune's, inside D-002's boundary, and no independent oracle for
-# it exists here.
+# The package's own contribution -- the call, the seed, the record, the loop --
+# has at least two independent oracles, as the package requires. The
+# elimination itself is finetune's, inside the boundary that delegates inner
+# tuning to tune, so no independent oracle for it exists here.
 
 skip_heavy_on_cran()
 
-test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order (AC1)", {
-  # Method by method since M107, each export being a generic on `object`.
+test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order", {
+  # Method by method, each export being a generic on `object`.
   for (cls in c("workflow", "model_spec")) {
     grid_formals <- formals(get(paste0("nested_tune_grid.", cls)))
     expect_identical(
@@ -94,7 +89,7 @@ expect_matches_reference <- function(res, ref, metric_name) {
   invisible(res)
 }
 
-test_that("per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (AC1, deterministic)", {
+test_that("per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (deterministic)", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()
@@ -119,7 +114,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled rac
   }
 })
 
-test_that("the racing reference loop also matches on the metric-separating fixture (AC1)", {
+test_that("the racing reference loop also matches on the metric-separating fixture", {
   skip_if_no_race_fixture()
 
   d <- sep_data()
@@ -153,7 +148,7 @@ test_that("the racing reference loop also matches on the metric-separating fixtu
   expect_setequal(res$.metrics[[1L]]$.metric, c("mae", "rmse"))
 })
 
-test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
+test_that("a candidate raced to the end carries the grid path's mean", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()
@@ -188,7 +183,7 @@ test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
   }
 })
 
-test_that("the fold record is every candidate the race scored, and the selection a survivor (AC3)", {
+test_that("the fold record is every candidate the race scored, and the selection a survivor", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn, stochastic = TRUE)
 
@@ -286,7 +281,7 @@ test_that("a race fold that scored nothing carries a zero-row table with no .ite
   )
 })
 
-test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
+test_that("the help page's by-hand recipe reproduces a fold's inner table and selection", {
   skip_if_no_race_fixture()
 
   # Written from the Reproducibility section of ?nested_tune_race, line for
@@ -331,13 +326,13 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
   )
 })
 
-# The selection rule on the racing path (M69, AC1), on the ANOVA racer: the
+# The selection rule on the racing path, on the ANOVA racer: the
 # reference loop's selection is tune's selector called by name on the hand
-# race (reference_select(), helper-orchestration.R). Measured 2026-09-06 on
+# race (reference_select(), helper-orchestration.R). Measured on
 # race_results()'s fixture under seed 20, either racer: best picks 3, 3, 3;
 # one_std_err by num_comp 2, 3, 2; pct_loss by num_comp at limit 5 2, 3, 2.
 
-test_that("AC1: each selection rule picks what tune's selector picks on the fold's race (M69)", {
+test_that("each selection rule picks what tune's selector picks on the fold's race", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn)
 
@@ -354,7 +349,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
   )
   # One reference race for the configuration -- the one the
   # deterministic oracle above built, served from the cache -- and each rule
-  # applied to it through reference_with_rule() (M74).
+  # applied to it through reference_with_rule().
   set.seed(20)
   ref_best <- memoised(reference_nested_race_loop(
     fn,
@@ -371,7 +366,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
     if (nm == "best") {
       # The default rule is `best`, so race_results(fn), which seeds
       # itself, is this run, served from the cache; the `select` assertion
-      # below checks the record equals the rule written out (M113).
+      # below checks the record equals the rule written out.
       res <- race_results(fn)
     } else {
       set.seed(20)

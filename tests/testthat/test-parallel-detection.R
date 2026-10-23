@@ -1,9 +1,8 @@
 # Detection of the parallel dispatch branch.
 #
-# The threshold is tune's, not ours (D-018): tune goes parallel only at two or
-# more connected daemons, so "parallel" means the same thing in both packages.
-# RR03 B1 read that from tune:::choose_framework and flagged the test-design
-# consequence these tests exist to serve -- a suite that starts ONE daemon and
+# The threshold is tune's, not ours: tune goes parallel only at two or more
+# connected daemons, so "parallel" means the same thing in both packages.
+# tune:::choose_framework holds that rule. A suite that starts ONE daemon and
 # believes it exercised the parallel path is comparing serial to serial.
 
 test_that("the dispatch threshold is two daemons, matching tune's", {
@@ -38,10 +37,11 @@ test_that("mirai_workers() counts connected daemons", {
 })
 
 test_that("the branch a run took is recorded out-of-band, not on the result", {
-  # BC1 needs a test to prove the parallel branch ran, but the same criterion
+  # A test has to prove the parallel branch ran, but the same requirement
   # demands the parallel result be identical() to the serial one -- so the
   # evidence cannot live on the returned object. It lives in an internal
-  # environment instead, which is what makes both halves of BC1 satisfiable.
+  # environment instead, which is what makes both halves of that requirement
+  # satisfiable.
   reset_dispatch_record()
   expect_null(last_dispatch())
 
@@ -53,9 +53,9 @@ test_that("the branch a run took is recorded out-of-band, not on the result", {
 })
 
 test_that("the probe reaches every daemon, not just a loadable one", {
-  # AC1's second layer: the seam tests in test-parallel-classify.R fabricate the
-  # per-daemon answers, so this is the one place a genuinely heterogeneous pool
-  # is built and probed for real.
+  # The seam tests in test-parallel-classify.R fabricate the per-daemon answers,
+  # so this is the one place a genuinely heterogeneous pool is built and probed
+  # for real.
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
   skip_on_os("windows")
@@ -64,8 +64,8 @@ test_that("the probe reaches every daemon, not just a loadable one", {
   skip_if(is.null(lean), "could not build a scratch library (no symlinks?)")
 
   # Bounded twice over: setTimeLimit turns a hang into an error (system.time
-  # could only ever flag a slow run after it returned -- M09's lesson), and the
-  # elapsed assertion below states the bound AC4 asks for.
+  # could only ever flag a slow run after it returned), and the elapsed
+  # assertion below states the bound.
   on.exit(mirai::daemons(0), add = TRUE)
   setTimeLimit(elapsed = 180, transient = TRUE)
   on.exit(setTimeLimit(), add = TRUE, after = FALSE)
@@ -89,9 +89,9 @@ test_that("the probe reaches every daemon, not just a loadable one", {
   status <- daemons_load_status(package = "ranger", timeout = 30000)
   elapsed <- as.numeric(Sys.time() - started, units = "secs")
 
-  # The M07 defect, in its natural habitat: one mirai() task lands on one
-  # daemon, so this pool answered TRUE and dispatched, and every fold routed to
-  # the lean daemon came back as an opaque worker failure.
+  # A single-task probe, in its natural habitat: one mirai() task lands on one
+  # daemon, so this pool would answer TRUE and dispatch, and every fold routed
+  # to the lean daemon would come back as an opaque worker failure.
   expect_identical(status$total, 2L)
   expect_identical(status$cannot_load, 1L)
   expect_identical(status$no_answer, 0L)
@@ -104,20 +104,20 @@ test_that("the probe reaches every daemon, not just a loadable one", {
   expect_lt(elapsed, 150)
 })
 
-# --- A daemon that loads the package but cannot run the fold (M24) ----------
+# --- A daemon that loads the package but cannot run the fold ----------------
 #
-# The failure M23 made reachable: dispatch resolves `rehydrate_payload` through
-# the daemon's own namespace, so a daemon holding a build from before that
-# symbol existed loads the package, answers the old pre-flight TRUE, and then
-# raises "attempt to apply non-function" on every fold. A version comparison
-# cannot see it -- DESCRIPTION has read 0.0.0.9000 since M01, so the stale
-# daemon reports this session's own string.
+# The failure this symbol makes reachable: dispatch resolves `rehydrate_payload`
+# through the daemon's own namespace, so a daemon holding a build from before
+# that symbol existed loads the package, passes a load check, and then raises
+# "attempt to apply non-function" on every fold. A version comparison cannot see
+# it -- DESCRIPTION still reads 0.0.0.9000, so the stale daemon reports this
+# session's own string.
 #
 # Proved here against a real pool rather than a stubbed install: asking for a
 # name no build defines produces exactly the shape a stale build produces, and
-# needs no second library. The stub-install route was weighed at the plan gate
-# and declined -- priming reaches every daemon, erasing the heterogeneity such
-# a fixture exists to create (see the ranger test above).
+# needs no second library. The stub-install route was declined -- priming
+# reaches every daemon, erasing the heterogeneity such a fixture exists to
+# create (see the ranger test above).
 
 test_that("a symbol no build defines is reported by every daemon that loaded", {
   skip_if_no_daemons()
@@ -147,18 +147,18 @@ test_that("a symbol no build defines is reported by every daemon that loaded", {
   expect_match(conditionMessage(err), absent)
 })
 
-# --- A pool that cannot be stopped says so (M24) ----------------------------
+# --- A pool that cannot be stopped says so ----------------------------------
 #
-# M15 verified that `stop_mirai()` cancels nothing on a pool started with
-# `dispatcher = FALSE`: it returns FALSE per element and the tasks run to
-# completion. dispatch_folds()'s unconditional cancelling on.exit() is therefore
-# inert there, and an interrupted run leaves every outstanding fold computing.
-# M15 scoped the roxygen to say so; M24 says it where the user is, because a
+# `stop_mirai()` cancels nothing on a pool started with `dispatcher = FALSE`:
+# it returns FALSE per element and the tasks run to completion. The
+# unconditional cancelling on.exit() in dispatch_folds() is therefore inert
+# there, and an interrupted run leaves every outstanding fold computing. The
+# roxygen documents this, and the warning says it where the user is, because a
 # caveat in the docs is met only by someone already looking for it.
 #
-# A warning and not a refusal: the pool computes correct results, so GP3's
-# refuse-provably-invalid line does not reach a configuration that is merely
-# degraded.
+# A warning and not a refusal: the pool computes correct results, so the rule
+# that refuses provably invalid designs does not reach a configuration that is
+# merely degraded.
 
 test_that("the two pool kinds are distinguishable, and the count cannot do it", {
   skip_if_no_daemons()
@@ -248,10 +248,10 @@ test_that("a dispatcher-backed run warns not at all", {
   expect_identical(last_dispatch(), "parallel")
 })
 
-# --- The start-first queue names real files (M57) ----------------------------
+# --- The start-first queue names real files ----------------------------------
 #
 # `Config/testthat/start-first` in DESCRIPTION queues the slowest files first
-# under parallel test files (M52). testthat matches each name against the
+# under parallel test files. testthat matches each name against the
 # files it found and says nothing about a name that matches none, so a file
 # renamed or removed leaves a stale entry that quietly stops ordering
 # anything. The check reads the field the way testthat does -- names split on
@@ -280,7 +280,7 @@ test_that("every Config/testthat/start-first name resolves to a test file", {
 
   names <- start_first_names(description)
   # The check is empty if the field is, and an empty field would be its own
-  # regression: M52 put eleven names there.
+  # regression.
   expect_gt(length(names), 0L)
 
   expect_identical(
@@ -315,7 +315,7 @@ test_that("the start-first check reports a planted unknown name", {
   )
 })
 
-# --- The probe carries the package list (M58) --------------------------------
+# --- The probe carries the package list --------------------------------------
 #
 # The seam tests in test-parallel-classify.R fabricate per-daemon answers; the
 # two tests here send the list to a real pool. The first is the case the new
@@ -347,7 +347,7 @@ test_that("the probe sends the package list, and a daemon that has them all repo
 })
 
 test_that("a heterogeneous pool names the daemon that lacks a needed package", {
-  # AC2: the same two-daemon pool the cannot-load test above builds, asked a
+  # The same two-daemon pool the cannot-load test above builds, asked a
   # question both daemons can answer. `package = "mirai"` is the loadable
   # stand-in -- under devtools::test() neither daemon holds nestedtune, and
   # the cannot-load rung would take the class -- and ranger is what the

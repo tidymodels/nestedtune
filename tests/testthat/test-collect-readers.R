@@ -1,5 +1,5 @@
 # The three readers that stack a per-fold list column with the fold labels
-# beside it (M65, D-052): collect_notes(), collect_selections() and
+# beside it: collect_notes(), collect_selections() and
 # collect_inner_metrics().
 #
 # Oracle provenance: every stacked table is compared against the same column
@@ -11,7 +11,7 @@
 # A results object over hand-written fold records, for the shapes no fitted
 # fixture reaches: folds whose selections or inner tables carry different
 # columns, and a repeated design's two label columns. Built through the
-# constructor, so the record is the code's and not the fixture's (M38).
+# constructor, so the record is the code's and not the fixture's.
 stub_results <- function(
   design,
   folds,
@@ -70,7 +70,7 @@ hand_stacked <- function(x, column, which = seq_len(nrow(x))) {
     tbl
   })
   # dplyr's stack rather than the reader's vctrs::vec_rbind(), so the two
-  # agree only where both are right (review round 1, M65).
+  # agree only where both are right.
   dplyr::bind_rows(!!!rows)
 }
 
@@ -120,7 +120,7 @@ times_warned <- function(expr, class) {
   n
 }
 
-# ---- collect_notes() (AC1) --------------------------------------------------
+# ---- collect_notes() --------------------------------------------------------
 
 test_that("collect_notes() stacks every fold's notes under its label", {
   skip_if_no_engines()
@@ -169,7 +169,7 @@ test_that("collect_notes() reads every fold, warning about none", {
   expect_error(collect_notes(res, foo = 1), class = "rlib_error_dots_nonempty")
 })
 
-# ---- collect_selections() (AC2) ----------------------------------------------
+# ---- collect_selections() ----------------------------------------------------
 
 test_that("collect_selections() is one labelled row per completed fold", {
   skip_if_no_engines()
@@ -241,7 +241,7 @@ test_that("collect_selections() stacks over the union of columns, NA where a fol
   expect_equal(sel, hand_stacked(res, ".selected"))
 })
 
-# ---- collect_inner_metrics() (AC3) -------------------------------------------
+# ---- collect_inner_metrics() -------------------------------------------------
 
 test_that("collect_inner_metrics() stacks each completed fold's inner table under its label", {
   skip_if_no_engines()
@@ -330,7 +330,7 @@ test_that("collect_inner_metrics() stacks over the union of columns, NA where a 
   expect_equal(inner, hand_stacked(res, ".inner_metrics"))
 })
 
-# ---- the label columns come from the record (AC4) ---------------------------
+# ---- the label columns come from the record ---------------------------------
 
 test_that("every reader carries the recorded label columns, id and id2 on a repeated design", {
   skip_if_no_engines()
@@ -381,7 +381,7 @@ test_that("every reader carries the recorded label columns, id and id2 on a repe
   }
 })
 
-# ---- the generics and their defaults (AC5) -----------------------------------
+# ---- the generics and their defaults -----------------------------------------
 
 test_that("collect_selections() and collect_inner_metrics() refuse other objects, naming both", {
   for (obj in list(data.frame(a = 1), list(a = 1), 1:3)) {
@@ -443,7 +443,7 @@ test_that("collect_notes() is tune's generic, re-exported", {
   expect_identical(collect_notes, tune::collect_notes)
 })
 
-# ---- collect_predictions() and collect_extracts() (M68, AC3) ------------------
+# ---- collect_predictions() and collect_extracts() -----------------------------
 #
 # Oracle provenance, as above: the stacked predictions are compared against
 # hand_stacked() over `.predictions`, and the extracts table against a table

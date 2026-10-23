@@ -1,4 +1,4 @@
-# The `metrics` argument reaches folds running on a worker (M20).
+# The `metrics` argument reaches folds running on a worker.
 #
 # Oracle note (DESIGN "Oracle records"): this file records none. It asserts
 # argument delivery, not a numeric result -- the values it compares are whatever
@@ -6,7 +6,7 @@
 # be. test-nested-tune-grid-oracles.R holds the contract-derived oracle.
 #
 # WHAT THIS FILE EXISTS FOR. `R/parallel.R` hands `metrics` to mirai through
-# `mirai_map(.args = ...)`, and until M20 no test reached that delivery site.
+# `mirai_map(.args = ...)`, a delivery site the other parallel tests cannot see.
 # Every parallel test passes `reg_metrics()`, which IS tune's regression
 # default (`metric_set(rmse, rsq)`), so replacing the argument with `NULL` at
 # the `.args` call produced a byte-identical run and the whole suite stayed
@@ -14,24 +14,25 @@
 # parallel side diverges from the serial reference and test-parallel-identity.R
 # catches it. `metrics` is the one argument whose loss is invisible there.
 #
-# The instrument is M18's sep_* fixture (helper-orchestration.R), built so the
+# The instrument is the sep_* fixture (helper-orchestration.R), built so the
 # caller's metric set and tune's default disagree about both the metric NAMES
 # and the SELECTED candidate in all three outer folds. Losing `metrics` on the
 # way to a worker therefore changes what comes back.
 #
 # WHAT THE SERIAL COMPARISON BELOW IS AND IS NOT. It pins argument plumbing. It
-# is NOT a mode-independence (IP2) assertion, and must not be read as one: the
+# is NOT a mode-independence assertion, and must not be read as one: the
 # sep_* path is step_pca() + linear_reg(), which draws nothing, and
-# test-parallel-identity.R:11-13 records that identity comparisons on an
-# RNG-free workflow pass vacuously. IP2 is asserted in that file, on ranger.
+# test-parallel-identity.R:12-13 records that identity comparisons on an
+# RNG-free workflow pass vacuously. Mode independence is asserted in that file,
+# on ranger.
 #
 # TWO RNG FACTS THAT LOOK LIKE A TRAP AND ARE NOT. mirai starts every daemon on
-# its own L'Ecuyer-CMRG stream (M07), and the sep_* fixture's all-three-folds
-# separation collapses to 0 of 3 folds under exactly that kind (M18 review).
-# They do not meet: sep_data() and sep_nested() pin the full generator triple
-# host-side and hand the daemons a finished data frame and design, and
-# set_fold_seed() pins all three components again inside the worker. The
-# separation is a property of the host-built fixture, not of where a fold runs.
+# its own L'Ecuyer-CMRG stream, and the sep_* fixture's all-three-folds
+# separation collapses to 0 of 3 folds under exactly that kind. They do not
+# meet: sep_data() and sep_nested() pin the full generator triple host-side and
+# hand the daemons a finished data frame and design, and set_fold_seed() pins
+# all three components again inside the worker. The separation is a property of
+# the host-built fixture, not of where a fold runs.
 #
 # WHY NOTHING HERE IS memoised(). fixture_key() hashes the call, its arguments
 # and the RNG state -- and nothing about daemon state (helper-orchestration.R).

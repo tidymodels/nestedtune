@@ -1,4 +1,4 @@
-# The suite-level fixture cache (M12).
+# The suite-level fixture cache.
 #
 # The cache exists to stop the suite rebuilding the same tuning run dozens of
 # times, and it is only safe if a served result is indistinguishable from a
@@ -15,7 +15,7 @@
 skip_heavy_on_cran()
 
 # A stand-in for the orchestrator: cheap, and net-zero on the RNG exactly as
-# `nested_tune_grid()` and `nested_final_fit()` are (D-011). Nothing here fits a
+# `nested_tune_grid()` and `nested_final_fit()` are. Nothing here fits a
 # model -- what is under test is the cache, not the loop.
 #
 # The build counter lives in the global environment rather than in this file's,
@@ -256,7 +256,7 @@ test_that("the key separates every formal argument of both orchestrators", {
 
   # A base request naming every formal at its default, so that a variant can
   # differ from it in exactly one argument and nothing else. The two
-  # orchestrators no longer share a signature past `object` -- nested_final_fit()
+  # orchestrators do not share a signature past `object` -- nested_final_fit()
   # takes a `results` object where nested_tune_grid() takes `resamples` and the
   # rest of the procedure -- so the request is built per function.
   base_request <- function(fn_name) {
@@ -285,7 +285,7 @@ test_that("the key separates every formal argument of both orchestrators", {
       list(
         object = function() stoch_workflow(d),
         results = function() final_fit_results(det_nested(d, v = 4)),
-        # `id` (M71) names a workflow of a `nested_results_set`; the base
+        # `id` names a workflow of a `nested_results_set`; the base
         # request leaves it at its `NULL` default, and any string differs.
         id = function() "tuned"
       )
@@ -309,7 +309,7 @@ test_that("the key separates every formal argument of both orchestrators", {
   }
 
   orchestrators <- list(
-    # The export is a generic `(object, ...)` since M107; the arguments a
+    # The export is a generic `(object, ...)`; the arguments a
     # request varies are the `workflow` method's.
     nested_tune_grid = nested_tune_grid.workflow,
     nested_final_fit = nested_final_fit
@@ -409,8 +409,7 @@ test_that("a request nested past the depth cut is refused, naming the argument",
   # everything past the cut, so the request is refused instead. Past 40 levels
   # of a bare list the only thing under test is the cut itself; the sorted
   # argument list the guard forms reaches 30 levels for the deepest fixture
-  # family (measured 2026-09-01 at M42, `helper-orchestration.R` carries the
-  # same figure).
+  # family (`helper-orchestration.R` carries the same figure).
   nest <- function(n) {
     x <- 1L
     for (i in seq_len(n)) {

@@ -1,4 +1,4 @@
-# What the final fit hands back (AC1): its object, the workflow's predictions,
+# What the final fit hands back: its object, the workflow's predictions,
 # and the rows it was trained on, all read off one cached fit.
 
 skip_heavy_on_cran()
@@ -49,7 +49,7 @@ test_that("the final fit returns a trained workflow inside its own object", {
   expect_identical(nrow(mould$predictors), nrow(d))
 })
 
-# The recorded selection rule reaches the final fit (M69, AC2): under each of
+# The recorded selection rule reaches the final fit: under each of
 # the three rules the full-data selection is what tune's own selector, called
 # by name here with the recorded orderings and limit, picks on the final fit's
 # own tuning run. The oracle is tune's selector on `$tuning`, never the
@@ -75,7 +75,7 @@ final_fit_selector <- function(final, rule) {
   )
 }
 
-test_that("AC2: the final fit selects by the recorded rule, and records it (M69)", {
+test_that("the final fit selects by the recorded rule, and records it", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -116,7 +116,7 @@ test_that("AC2: the final fit selects by the recorded rule, and records it (M69)
   }
 
   # The three rules do not all agree on this run, so a final fit that ignored
-  # the record could not match all three selectors (measured 2026-09-06 on
+  # the record could not match all three selectors (measured on
   # the full-data run: best picks (2, 2), one_std_err and pct_loss (5, 2)).
   expect_false(
     identical(picked$best, picked$one_std_err) &&
@@ -124,16 +124,16 @@ test_that("AC2: the final fit selects by the recorded rule, and records it (M69)
   )
 })
 
-# The desirability rule reaches the final fit (M109, AC3): the oracle is
+# The desirability rule reaches the final fit: the oracle is
 # desirability2::select_best_desirability(), called by name with the terms
-# written out, on the run `extract_tune_results()` returns. Measured
-# 2026-09-21 on this full-data run (tune 2.1.0, desirability2 0.2.0): best by
+# written out, on the run `extract_tune_results()` returns. Measured on this
+# full-data run (tune 2.1.0, desirability2 0.2.0): best by
 # rmse picks (2,2), which is also the smallest candidate, so a term favoring
 # simple models cannot move the pick. `target(df1, target = 5)` picks (5,2),
 # which is what lets the last expectation tell a final fit that applied the
 # rule from one that ignored it.
 
-test_that("AC3: the final fit selects by a recorded desirability rule (M109)", {
+test_that("the final fit selects by a recorded desirability rule", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

@@ -1,5 +1,4 @@
-# Printing a final fit, and the generics it deliberately does not answer
-# (AC4, AC10).
+# Printing a final fit, and the generics it deliberately does not answer.
 
 skip_heavy_on_cran()
 
@@ -34,7 +33,7 @@ test_that("printing names the selection and where the estimate lives", {
   expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
   expect_match(out, set_rows_wording)
-  # RR02 B3: the moment of deployment is when selection instability matters.
+  # The moment of deployment is when selection instability matters.
   expect_match(out, "\\.selected")
 })
 
@@ -64,7 +63,7 @@ test_that("printing shows no number from the stored tuning run", {
   # Every metric the stored run could offer, checked against the output rather
   # than assumed absent. A print method that grew a "resampled RMSE" line would
   # be showing a selection-time number as though it described this model, which
-  # is exactly the misreading IP3 forbids (AC10).
+  # is exactly the misreading the design forbids.
   tuning_metrics <- tune::collect_metrics(final$tuning)
   values <- c(tuning_metrics$mean, tuning_metrics$std_err)
   values <- values[!is.na(values)]
@@ -87,11 +86,10 @@ test_that("the printed report is stable", {
 })
 
 
-# Summarizing a final fit (M40) ------------------------------------------
+# Summarizing a final fit ------------------------------------------------
 
 # What `print.nested_final_fit()` emits for a grid final fit, under testthat's
-# reproducible output settings: first captured at M40 from the method as it
-# stood at d6ff85f, and re-agreed at M46 (below).
+# reproducible output settings.
 #
 # Written out here rather than left to the snapshot below it. The snapshot is
 # exactly the artifact a change to the print method would re-record, so a
@@ -99,12 +97,12 @@ test_that("the printed report is stable", {
 # the new snapshot would satisfy the pin and falsify the promise at the same
 # time. These bytes have to be re-agreed by hand instead.
 #
-# M46 added a "Procedure:" line -- what search ran, grid or Bayesian, and at
-# what counts -- and pointed the estimate sentence at the results object
-# rather than naming `nested_tune_grid()`, since the record it reads from can
-# equally be a `nested_tune_bayes()` result. That is a change to what this
-# constant pins, re-agreed by hand rather than accepted from the snapshot for
-# the same reason the original was.
+# The "Procedure:" line says what search ran, grid or Bayesian, and at what
+# counts. The estimate sentence points at the results object rather than
+# naming `nested_tune_grid()`, since the record it reads from can equally be a
+# `nested_tune_bayes()` result. A change to what this constant pins is
+# re-agreed by hand rather than accepted from the snapshot, for the same reason
+# as above.
 PRINT_AS_AGREED_M46 <- paste(
   c(
     "",
@@ -139,7 +137,7 @@ test_that("printing a grid final fit is the hand-agreed text, not the snapshot",
   expect_identical(txt, PRINT_AS_AGREED_M46)
 })
 
-test_that("AC2: summary() returns a classed object naming what was selected", {
+test_that("summary() returns a classed object naming what was selected", {
   skip_if_no_engines()
 
   final <- final_for_print()
@@ -163,7 +161,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
     )
   )
   # The absence is carried as a component rather than left out, so a caller
-  # meets a recorded fact instead of a missing name (M40 Decisions).
+  # meets a recorded fact instead of a missing name.
   expect_true("estimate" %in% names(s))
   expect_null(s$estimate)
 
@@ -181,7 +179,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
   expect_match(out, set_rows_wording)
 })
 
-test_that("AC3: the summary shows no number from the stored tuning run", {
+test_that("the summary shows no number from the stored tuning run", {
   skip_if_no_engines()
 
   final <- final_for_print()
@@ -190,7 +188,8 @@ test_that("AC3: the summary shows no number from the stored tuning run", {
   # The same scan the print method gets above, run on the method that has an
   # Estimate heading and therefore the better opportunity to grow a number
   # under it. A "resampled RMSE" line here would be a selection-time quantity
-  # dressed as this model's performance, which is the misreading IP3 forbids.
+  # dressed as this model's performance, which is the misreading the design
+  # forbids.
   tuning_metrics <- tune::collect_metrics(final$tuning)
   values <- c(tuning_metrics$mean, tuning_metrics$std_err)
   values <- values[!is.na(values)]
@@ -244,7 +243,7 @@ test_that("the stored selection keeps the value's own precision", {
   # summary stores `as.character()`, and comparing the two selections is what
   # the component is for, so a rounded string here would report two equal
   # selections as different ones -- and would change answer with the session's
-  # `digits` option (M40 review F1).
+  # `digits` option.
   penalty <- 0.0031622776601683794
   final <- structure(
     list(
@@ -279,7 +278,7 @@ test_that("the stored selection keeps the value's own precision", {
 })
 
 
-# The procedure line and the Bayesian counts (M46 T5, AC5) -------------------
+# The procedure line and the Bayesian counts ---------------------------------
 
 bayes_final_for_print <- function() {
   d <- make_reg_data()
@@ -289,7 +288,7 @@ bayes_final_for_print <- function() {
   memoised(nested_final_fit(wf, res))
 }
 
-test_that("AC5: a Bayesian final fit names its procedure with the counts that ran", {
+test_that("a Bayesian final fit names its procedure with the counts that ran", {
   skip_if_no_bayes_fixture()
 
   final <- bayes_final_for_print()
@@ -302,7 +301,7 @@ test_that("AC5: a Bayesian final fit names its procedure with the counts that ra
   expect_identical(cand, scored_candidates(final$tuning))
   initial <- sum(cand$.iter == 0L)
   completed <- max(cand$.iter)
-  # AC5: the iterations completed are the tuning run's largest `.iter`.
+  # The iterations completed are the tuning run's largest `.iter`.
   expect_identical(completed, max(final$tuning$.iter))
   expect_gte(initial, 1L)
 
@@ -330,8 +329,8 @@ test_that("AC5: a Bayesian final fit names its procedure with the counts that ra
 test_that("the counts read what ran, not what was asked for", {
   # Built by hand, so the scored counts can differ from the requested ones
   # without an engine: a metrics table holding two initial candidates where
-  # three were requested, stopping at iteration 1 of 4 (IP4, RR05 Q2). The
-  # run is a stand-in whose `collect_metrics()` is that table (M49).
+  # three were requested, stopping at iteration 1 of 4. The run is a stand-in
+  # whose `collect_metrics()` is that table.
   row <- function(config, value, iter = NULL) {
     out <- data.frame(
       df1 = value,
@@ -433,7 +432,7 @@ test_that("the Bayesian printed reports are stable", {
 })
 
 
-# The selection-rule line (M98, AC2, AC3) --------------------------------------
+# The selection-rule line ------------------------------------------------------
 
 # A final fit built from a run under the rule given: the deterministic
 # workflow on `final_nested()`, as `final_for_print()` builds the default
@@ -515,7 +514,7 @@ expect_selected_by_on_both <- function(final, label) {
   expect_identical(selected_by_lines(lines), line)
 }
 
-test_that("AC3: both prints name a non-default rule, after `Selected:` and under the heading", {
+test_that("both prints name a non-default rule, after `Selected:` and under the heading", {
   skip_if_no_engines()
 
   expect_selected_by_on_both(
@@ -524,7 +523,7 @@ test_that("AC3: both prints name a non-default rule, after `Selected:` and under
   )
 })
 
-test_that("AC3: a rule ordering by two names is rendered with both on both prints", {
+test_that("a rule ordering by two names is rendered with both on both prints", {
   skip_if_no_bayes_fixture()
 
   expect_selected_by_on_both(
@@ -533,7 +532,7 @@ test_that("AC3: a rule ordering by two names is rendered with both on both print
   )
 })
 
-test_that("AC3: the default rule and a fit that tuned nothing print no `Selected by:` line", {
+test_that("the default rule and a fit that tuned nothing print no `Selected by:` line", {
   skip_if_no_engines()
 
   best <- final_for_print()
@@ -547,7 +546,7 @@ test_that("AC3: the default rule and a fit that tuned nothing print no `Selected
   expect_length(selected_by_lines(print_lines(summary(untuned))), 0L)
 })
 
-test_that("AC2: the summary's `select` component is the procedure record's rule", {
+test_that("the summary's `select` component is the procedure record's rule", {
   skip_if_no_engines()
 
   rule <- selection_rule("pct_loss", num_comp, limit = 5)
@@ -569,7 +568,7 @@ test_that("AC2: the summary's `select` component is the procedure record's rule"
   expect_null(s[["select"]])
 })
 
-test_that("AC3: the selection-rule line holds its shape on both prints", {
+test_that("the selection-rule line holds its shape on both prints", {
   skip_if_no_engines()
 
   pct_loss_5 <- rule_final(selection_rule("pct_loss", num_comp, limit = 5))
@@ -584,7 +583,7 @@ test_that("AC3: the selection-rule line holds its shape on both prints", {
   expect_snapshot(print(summary(untuned)))
 })
 
-test_that("AC3: the two-ordering line holds its shape on both prints", {
+test_that("the two-ordering line holds its shape on both prints", {
   skip_if_no_bayes_fixture()
 
   two <- two_param_rule_final(selection_rule("one_std_err", desc(df1), df2))
@@ -592,13 +591,13 @@ test_that("AC3: the two-ordering line holds its shape on both prints", {
   expect_snapshot(print(summary(two)))
 })
 
-# The selecting-metric line (M116) ---------------------------------------------
+# The selecting-metric line ----------------------------------------------------
 
 selecting_metric_lines <- function(lines) {
   lines[startsWith(lines, "Selecting metric: ")]
 }
 
-test_that("M116 AC2: both prints name the selecting metric under the default rule", {
+test_that("both prints name the selecting metric under the default rule", {
   skip_if_no_engines()
 
   best <- final_for_print()
@@ -613,7 +612,7 @@ test_that("M116 AC2: both prints name the selecting metric under the default rul
   expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
 })
 
-test_that("M116 AC2: both prints name the selecting metric after the rule line", {
+test_that("both prints name the selecting metric after the rule line", {
   skip_if_no_engines()
 
   for (rule in list(
@@ -630,7 +629,7 @@ test_that("M116 AC2: both prints name the selecting metric after the rule line",
   }
 })
 
-test_that("M116 AC2: no selecting-metric line on a fit that tuned nothing, on a record without the entry, or under desirability", {
+test_that("no selecting-metric line on a fit that tuned nothing, on a record without the entry, or under desirability", {
   skip_if_no_engines()
 
   untuned <- untuned_final()
@@ -649,7 +648,7 @@ test_that("M116 AC2: no selecting-metric line on a fit that tuned nothing, on a 
   expect_length(selecting_metric_lines(print_lines(summary(des))), 0L)
 })
 
-test_that("M116 AC3: the final fit summary's `first_metric` component is the record's entry, or NULL", {
+test_that("the final fit summary's `first_metric` component is the record's entry, or NULL", {
   skip_if_no_engines()
 
   best <- final_for_print()

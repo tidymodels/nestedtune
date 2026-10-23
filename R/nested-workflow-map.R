@@ -137,7 +137,7 @@ nested_workflow_map <- function(
   # workflow would start from it. So the state is fixed here: initialized
   # when there is none, reinstated before every workflow, and on exit put
   # back or, where there was none, removed with the kind restored, as
-  # `capture_dots()` leaves such a session (AC2). The `RNGkind()` query
+  # `capture_dots()` leaves such a session. The `RNGkind()` query
   # draws nothing and initializes nothing (measured 2026-09-06).
   had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
   old_kind <- RNGkind()
@@ -289,7 +289,7 @@ resignal_for_workflow <- function(cnd, id, call) {
 # where there was one; where there was none, the kind is restored first --
 # setting a kind writes a state, so the removal comes after it -- and the
 # state the map created is removed, so a session that never drew is left
-# with none (AC2).
+# with none.
 restore_map_rng <- function(had_seed, kind, seed) {
   if (had_seed) {
     assign(".Random.seed", seed, envir = globalenv())

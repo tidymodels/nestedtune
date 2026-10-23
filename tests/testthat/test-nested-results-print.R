@@ -1,4 +1,4 @@
-# Printing a nested_results object, and summarizing one (M04, split in M39).
+# Printing a nested_results object, and summarizing one.
 #
 # The two methods answer different questions and the blocks below are grouped by
 # which one they hold to account. print() describes the OBJECT -- the rows, the
@@ -15,7 +15,7 @@
 skip_heavy_on_cran()
 
 # The summary's rendered text, for the assertions below. Wrapped because a
-# partial run warns by design (AC3) and the warning is asserted where it is the
+# partial run warns by design and the warning is asserted where it is the
 # subject, not in every block that reads the text.
 summary_text <- function(x, width = 200) {
   print_text(suppressWarnings(summary(x)), width = width)
@@ -69,11 +69,11 @@ test_that("an outer scheme the object does not name is left unprinted", {
   ))
   txt <- print_text(as_fold_subset(res, 1:2))
 
-  # Since M36 `[` sheds the class outright on a row subset, so this object is
-  # built by the helper rather than by `[` and the test no longer exercises
-  # subsetting -- the title says so. What it does assert is unchanged and still
-  # worth asserting: a results object carrying no scheme label prints without
-  # one rather than reaching for the design it came from (IP4).
+  # `[` sheds the class outright on a row subset, so this object is built by
+  # the helper rather than by `[`, and the test does not exercise subsetting --
+  # the title says so. What it does assert is worth asserting: a results object
+  # carrying no scheme label prints without one rather than reaching for the
+  # design it came from.
   expect_no_match(txt, "3-fold cross-validation")
   expect_no_match(txt, "Outer resamples")
   expect_match(txt, "A tibble: 2")
@@ -180,7 +180,7 @@ test_that("print returns its input invisibly and is registered for S3 dispatch",
 
 # The rendered text of `print(x, ...)`, at a console width of the test's
 # choosing. Distinct from print_text() because the tibble `width` argument and
-# the console width are two different things and the M43 tests need both.
+# the console width are two different things and the width tests need both.
 print_text_at <- function(x, console, ...) {
   op <- options(width = console, cli.width = console)
   on.exit(options(op), add = TRUE)
@@ -208,7 +208,7 @@ test_that("print() takes `n` and hands it to the row rendering", {
   # times, through the constructor over stand-in records. Stacking the
   # three-fold fixture with rbind() cannot reach this shape -- the stamp rule
   # refuses a row count that differs from the run's, and hands back a bare
-  # tibble (M36).
+  # tibble.
   wide <- repeated_results(v = 3, repeats = 7)
   expect_s3_class(wide, "nested_results")
   expect_identical(nrow(wide), 21L)
@@ -269,7 +269,7 @@ test_that("print() still fences `...`, so a partial spelling is refused", {
   ))
 
   # Written as the real calls a user would make -- `print(res, ...)` through
-  # dispatch -- rather than by calling the method directly (M42 lesson). The
+  # dispatch -- rather than by calling the method directly. The
   # third is the case the fence exists for: `w` is a prefix of `width`, and
   # because `width` sits after `...` it does not partially match and lands in
   # the dots instead of being taken as `width`.
@@ -516,8 +516,8 @@ test_that("the failure advice names the results object's `.notes` column, never 
   d <- make_reg_data()
 
   # `x` inside the summary's print method is the summary bundle, which has no
-  # `.notes`; before M43 the advice read `x$.notes` and named nothing a reader
-  # could evaluate. Asserted on both failed fixtures -- one fold down and every
+  # `.notes`, so the advice must not name `x$.notes`: a reader cannot evaluate
+  # that. Asserted on both failed fixtures -- one fold down and every
   # fold down -- since the block is reached by each and the line closes both.
   set.seed(2)
   partial <- suppressWarnings(memoised(nested_tune_grid(
@@ -692,7 +692,7 @@ test_that("a list-valued selection prints instead of aborting", {
   expect_match(summary_text(listy), "1, 2", fixed = TRUE)
 })
 
-# ---- the fold-label record, when it cannot label the rows (AC4) -------------
+# ---- the fold-label record, when it cannot label the rows -------------------
 
 test_that("an unusable label record names failed folds by row position", {
   skip_if_no_engines()
@@ -706,9 +706,10 @@ test_that("an unusable label record names failed folds by row position", {
     metrics = reg_metrics()
   )))
 
-  # The three forms the record takes when it cannot label the rows. Before M39
-  # the first two made an indexing caller raise and the third pasted what
-  # survived into the truncated label "Fold1, " -- wrong, and silently so.
+  # The three forms the record takes when it cannot label the rows. Left
+  # unhandled, the first two would make an indexing caller raise, and the third
+  # would paste what survives into the truncated label "Fold1, " -- wrong, and
+  # silently so.
   forms <- list(
     empty = character(0),
     absent = "not_a_column",
@@ -734,7 +735,7 @@ test_that("an unusable label record names failed folds by row position", {
   expect_no_match(summary_text(res), "row 2")
 })
 
-# ---- the candidate-set line, which stays in print() (AC1) -------------------
+# ---- the candidate-set line, which stays in print() -------------------------
 
 test_that("folds that searched different candidate sets are said to have", {
   skip_if_no_engines()
@@ -807,7 +808,7 @@ test_that("the candidate-set comparison ignores order and tune's config labels",
   expect_false(same_candidates(list(a, d1)))
 })
 
-test_that("printing survives a list-valued parameter column (M21 review F1)", {
+test_that("printing survives a list-valued parameter column", {
   # Regression. `candidate_key()` normalised row order with
   # `do.call(order, values)`, and order() RAISES on a list column
   # ("unimplemented type 'list' in 'orderVector1'") -- so a candidate set carrying one
@@ -844,8 +845,8 @@ test_that("printing survives a list-valued parameter column (M21 review F1)", {
 # its column-type row, cell text and `# i <k> more variables` footer have all
 # changed wording across pillar releases. The four print snapshots keep the
 # `# A tibble: <n> x <k>` header and every cli line, and stand one marker in
-# for the body -- everything between the header and the first cli bullet
-# (M43). The rows themselves are asserted in words above (n, width, Fold1).
+# for the body -- everything between the header and the first cli bullet.
+# The rows themselves are asserted in words above (n, width, Fold1).
 scrub_tibble_body <- function(lines) {
   header <- grep("^\\s*# A tibble: ", lines)
   if (length(header) != 1L) {
@@ -948,7 +949,7 @@ test_that("printed output holds its shape", {
     metrics = reg_metrics()
   )))
 
-  # The candidate-set line's own shape, snapshot beside the rest (M21). Built
+  # The candidate-set line's own shape, snapshot beside the rest. Built
   # from a grid SIZE rather than a frame, which is the only way folds come to
   # search different candidates.
   set.seed(11)
@@ -977,9 +978,9 @@ test_that("printed output holds its shape", {
   expect_snapshot(print(suppressWarnings(summary(nothing))))
 })
 
-# ---- summary() on a set (M72, AC1) -------------------------------------------
+# ---- summary() on a set ------------------------------------------------------
 
-test_that("AC1: summary() on a set is one element summary per workflow, named and in set order", {
+test_that("summary() on a set is one element summary per workflow, named and in set order", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
 
@@ -1000,7 +1001,7 @@ test_that("AC1: summary() on a set is one element summary per workflow, named an
   expect_named(s$threshold$selection, "threshold")
 })
 
-test_that("AC1: summary() on a set warns once per workflow with a failed fold, the id in front, and never aborts", {
+test_that("summary() on a set warns once per workflow with a failed fold, the id in front, and never aborts", {
   skip_if_no_wset_fixture()
   partial <- wset_three_results(broken = 1L)
   warnings <- partial_warnings(s <- summary(partial))
@@ -1041,7 +1042,7 @@ test_that("AC1: summary() on a set warns once per workflow with a failed fold, t
   expect_named(s, c("broken", "also_broken"))
 })
 
-test_that("AC1: the set's print is one h1, one h2 per workflow in set order, and the note once", {
+test_that("the set's print is one h1, one h2 per workflow in set order, and the note once", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   s <- summary(res)
@@ -1094,7 +1095,7 @@ test_that("AC1: the set's print is one h1, one h2 per workflow in set order, and
   )
 })
 
-test_that("AC1: the set's printed summary holds its shape", {
+test_that("the set's printed summary holds its shape", {
   skip_if_no_wset_fixture()
   # A single summary's print is unchanged by the factoring (the snapshots
   # above hold it); these pin the set's, complete and with one fold broken.
@@ -1104,7 +1105,7 @@ test_that("AC1: the set's printed summary holds its shape", {
   )))))
 })
 
-# ---- the selection-rule line (M98, AC1, AC2, AC4) ---------------------------
+# ---- the selection-rule line ------------------------------------------------
 
 # A run under the rule given, on the deterministic workflow and
 # `det_nested()`, whose three inner resamples give tune's one-standard-error
@@ -1191,7 +1192,7 @@ expect_selected_by_under_heading <- function(x, label) {
   expect_identical(selected_by_lines(lines), paste0("Selected by: ", label))
 }
 
-test_that("AC1: the summary names a non-default rule directly under the selected-parameters heading", {
+test_that("the summary names a non-default rule directly under the selected-parameters heading", {
   skip_if_no_engines()
 
   expect_selected_by_under_heading(
@@ -1219,14 +1220,14 @@ test_that("AC1: the summary names a non-default rule directly under the selected
   expect_match(summary_text(nothing), "No outer fold completed", fixed = TRUE)
 })
 
-test_that("AC1: a rule ordering by two names is rendered with both, as written", {
+test_that("a rule ordering by two names is rendered with both, as written", {
   skip_if_no_bayes_fixture()
 
   res <- two_param_rule_results(selection_rule("one_std_err", desc(df1), df2))
   expect_selected_by_under_heading(res, "one_std_err by desc(df1), df2")
 })
 
-test_that("AC1: a desirability goal too long for `rlang::as_label()` is named in full", {
+test_that("a desirability goal too long for `rlang::as_label()` is named in full", {
   skip_if_no_engines()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -1247,7 +1248,7 @@ test_that("AC1: a desirability goal too long for `rlang::as_label()` is named in
   )
 })
 
-test_that("AC1: the default rule and a run that applied none print no `Selected by:` line", {
+test_that("the default rule and a run that applied none print no `Selected by:` line", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1260,7 +1261,7 @@ test_that("AC1: the default rule and a run that applied none print no `Selected 
   expect_length(selected_by_lines(summary_lines(fixed)), 0L)
 })
 
-test_that("AC2: the summary's `select` component is the procedure record's rule", {
+test_that("the summary's `select` component is the procedure record's rule", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1283,7 +1284,7 @@ test_that("AC2: the summary's `select` component is the procedure record's rule"
   expect_null(s[["select"]])
 })
 
-test_that("AC4: a set names the rule inside each tuned workflow's section and not the fixed one's", {
+test_that("a set names the rule inside each tuned workflow's section and not the fixed one's", {
   skip_if_no_wset_fixture()
 
   under_rule <- rule_set_results(selection_rule("one_std_err", num_comp))
@@ -1314,7 +1315,7 @@ test_that("AC4: a set names the rule inside each tuned workflow's section and no
 # above builds its own: a fixture served from the cache replays the
 # conditions its build raised, and a broken run's build prints tune's
 # console lines, which are not the print under test.
-test_that("AC1: the selection-rule line holds its shape", {
+test_that("the selection-rule line holds its shape", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1343,14 +1344,14 @@ test_that("AC1: the selection-rule line holds its shape", {
   expect_snapshot(print(summary(fixed)))
 })
 
-test_that("AC1: the two-ordering line holds its shape", {
+test_that("the two-ordering line holds its shape", {
   skip_if_no_bayes_fixture()
 
   two <- two_param_rule_results(selection_rule("one_std_err", desc(df1), df2))
   expect_snapshot(print(summary(two)))
 })
 
-test_that("AC4: the set's selection-rule line holds its shape", {
+test_that("the set's selection-rule line holds its shape", {
   skip_if_no_wset_fixture()
 
   under_rule <- rule_set_results(selection_rule("one_std_err", num_comp))
@@ -1359,13 +1360,13 @@ test_that("AC4: the set's selection-rule line holds its shape", {
   expect_snapshot(print(summary(under_default)))
 })
 
-# The selecting-metric line (M116) ---------------------------------------------
+# The selecting-metric line ----------------------------------------------------
 
 selecting_metric_lines <- function(lines) {
   lines[startsWith(lines, "Selecting metric: ")]
 }
 
-test_that("M116 AC2: the summary names the selecting metric, first under the default rule and after the rule line otherwise", {
+test_that("the summary names the selecting metric, first under the default rule and after the rule line otherwise", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1399,7 +1400,7 @@ test_that("M116 AC2: the summary names the selecting metric, first under the def
   )
 })
 
-test_that("M116 AC2: no selecting-metric line under desirability, on a run that selects nothing, or on a record without the entry", {
+test_that("no selecting-metric line under desirability, on a run that selects nothing, or on a record without the entry", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1418,7 +1419,7 @@ test_that("M116 AC2: no selecting-metric line under desirability, on a run that 
   expect_length(selecting_metric_lines(summary_lines(des)), 0L)
 })
 
-test_that("M116 AC3: the summary's `first_metric` component is the record's entry, or NULL", {
+test_that("the summary's `first_metric` component is the record's entry, or NULL", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -1432,7 +1433,7 @@ test_that("M116 AC3: the summary's `first_metric` component is the record's entr
   expect_null(s[["first_metric"]])
 })
 
-test_that("M116 AC2: a set names the selecting metric in the tuned workflow's section alone", {
+test_that("a set names the selecting metric in the tuned workflow's section alone", {
   skip_if_no_wset_fixture()
 
   for (rule in list(
@@ -1466,7 +1467,7 @@ test_that("M116 AC2: a set names the selecting metric in the tuned workflow's se
   expect_length(selecting_metric_lines(lines), 0L)
 })
 
-test_that("M116 AC2: a set in which every fold failed still names the selecting metric", {
+test_that("a set in which every fold failed still names the selecting metric", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)

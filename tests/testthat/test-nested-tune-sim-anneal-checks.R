@@ -1,6 +1,5 @@
-# Every refusal `nested_tune_sim_anneal()` makes at entry, fired once (M51
-# AC3). GP3: a provably wrong call is refused before a whole outer loop is
-# paid for.
+# Every refusal `nested_tune_sim_anneal()` makes at entry, fired once. A
+# provably wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The refusals that are this orchestrator's own -- finetune not
 # installed, `iter` below its floor of 1, `initial` below its floor of 1 or a
@@ -217,7 +216,7 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
         control = ctrl
       )
     },
-    # An empty workflow, since a bare spec takes the model-spec route (M107).
+    # An empty workflow, since a bare spec takes the model-spec route.
     check_workflow = function() {
       nested_tune_sim_anneal(workflows::workflow(), folds, control = ctrl)
     },
@@ -289,10 +288,11 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
   }
 })
 
-# D-046's falsifier, pinned: `iter`'s floor of 1 rests on finetune running
-# iterations at `iter = 0` (its loop is `(existing_iter + 1):iter`, which at
-# 0 is `1:0`). A finetune whose loop runs none at 0 turns this red, which is
-# the signal to reopen accepting 0 as the Bayesian sibling does.
+# What would show the floor wrong, pinned: `iter`'s floor of 1 rests on
+# finetune running iterations at `iter = 0` (its loop is
+# `(existing_iter + 1):iter`, which at 0 is `1:0`). A finetune whose loop runs
+# none at 0 turns this red, which is the signal to reopen accepting 0 as the
+# Bayesian sibling does.
 test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests on", {
   skip_if_no_anneal_fixture()
 
@@ -316,7 +316,7 @@ test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests
   expect_gt(sum(iterated), 0L)
 })
 
-test_that("AC4: the desirability rule is refused at entry (M109)", {
+test_that("the desirability rule is refused at entry", {
   skip_if_no_anneal_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -333,13 +333,13 @@ test_that("AC4: the desirability rule is refused at entry (M109)", {
     "nestedtune_selection_rule_unsupported",
     "tune_sim_anneal"
   )
-  # The message names the orchestrators the user calls (review finding 4).
+  # The message names the orchestrators the user calls.
   msg <- cli::ansi_strip(conditionMessage(cnd))
   expect_match(msg, "under `nested_tune_sim_anneal()`", fixed = TRUE)
   expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   skip_if_not_installed("finetune")
   d <- make_reg_data()

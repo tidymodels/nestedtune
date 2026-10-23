@@ -1,14 +1,14 @@
-# The canonical workflow identity (M83 T1): what two workflows built from
+# The canonical workflow identity: what two workflows built from
 # the same code share, what a workflow built on more rows leaves out, and
 # what a workflow built from different code does not share.
 #
 # The identity is what `nested_final_fit()` compares (test-nested-final-fit-
 # identity.R exercises that door). These tests pin the function itself, on
 # the properties the door's acceptance rests on: a rebuilt fixture reads as
-# the same workflow even though its step ids and quosure frames differ (AC3),
-# and no data rows enter the record (AC5).
+# the same workflow even though its step ids and quosure frames differ, and no
+# data rows enter the record.
 
-test_that("AC3: a workflow rebuilt from the same code has the same identity", {
+test_that("a workflow rebuilt from the same code has the same identity", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -32,7 +32,7 @@ test_that("AC3: a workflow rebuilt from the same code has the same identity", {
   )
 })
 
-test_that("AC3: arguments given through set_args() and set_engine() read as those given in the constructor", {
+test_that("arguments given through set_args() and set_engine() read as those given in the constructor", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -71,9 +71,8 @@ test_that("AC3: arguments given through set_args() and set_engine() read as thos
 })
 
 test_that("engine arguments given in another order read as the same", {
-  # parsnip holds engine arguments in call order, so the two orders below
-  # are different lists and were refused as such (review return, F3); the
-  # identity sorts them by name.
+  # parsnip holds engine arguments in call order, so the two orders below are
+  # different lists. The identity sorts them by name, so they read as one.
   a <- parsnip::set_engine(
     parsnip::rand_forest(),
     "ranger",
@@ -94,7 +93,7 @@ test_that("engine arguments given in another order read as the same", {
 test_that("a difference the walk cannot place is named as such", {
   # Two identities that `identical()` tells apart on an attribute the walk
   # does not read (names NULL against names character(0) on an empty list)
-  # gave a sentence with empty slots (review return, F4).
+  # would otherwise give a sentence with empty slots.
   recorded <- list(
     model = list(class = "linear_reg", eng_args = list()),
     preprocessor = list(kind = "formula", formula = "y ~ x")
@@ -113,7 +112,7 @@ test_that("a difference the walk cannot place is named as such", {
 test_that("a parts difference in neither optional part is named as such", {
   # The top-level names differ, but not by a case-weights or postprocessor
   # part on one side only: the walk stops at the names, and the sentence
-  # says it cannot name the part (M103 review, finding 1).
+  # says it cannot name the part.
   recorded <- list(
     model = list(class = "linear_reg", eng_args = list()),
     preprocessor = list(kind = "formula", formula = "y ~ x")
@@ -129,7 +128,7 @@ test_that("a parts difference in neither optional part is named as such", {
   )
 })
 
-test_that("AC5: the identity carries no data rows", {
+test_that("the identity carries no data rows", {
   skip_if_no_engines()
 
   small <- workflow_identity(det_workflow(make_reg_data(n = 90)))
@@ -221,16 +220,16 @@ test_that("a model argument is recorded as written, and a recipe setting as the 
   ))
 })
 
-# M103: the two parts the identity gained after M83, a case-weights column
-# and a tailor postprocessor, each present only when the workflow carries
-# it, so a workflow with neither keeps the identity a record saved before
-# them holds (AC2).
+# Two optional parts of the identity, a case-weights column and a tailor
+# postprocessor, are present only when the workflow carries them, so a workflow
+# with neither keeps the identity a record saved before them holds.
 
-test_that("AC2: a workflow with neither part has the identity it had at the branch point", {
+test_that("a workflow with neither part has the identity it had at the branch point", {
   skip_if_no_engines()
   d <- make_reg_data()
 
-  # The record saved before this milestone, under the workflow it ran under
+  # A record saved before the identity read case weights or a postprocessor,
+  # under the workflow it ran under
   # (fixtures/make-branch-point-results.R names the commit and the seeds).
   saved <- readRDS(test_path("fixtures", "branch-point-results.rds"))
   recorded <- extract_procedure(saved)$workflow
@@ -239,7 +238,7 @@ test_that("AC2: a workflow with neither part has the identity it had at the bran
   expect_named(workflow_identity(det_workflow(d)), c("model", "preprocessor"))
 })
 
-test_that("AC1: the case-weights column is a part of the identity, recorded as written", {
+test_that("the case-weights column is a part of the identity, recorded as written", {
   skip_if_no_engines()
   d <- make_reg_data()
   d$w1 <- parsnip::importance_weights(rep(1, nrow(d)))
@@ -261,7 +260,7 @@ test_that("AC1: the case-weights column is a part of the identity, recorded as w
   expect_identical(id[c("model", "preprocessor")], workflow_identity(plain))
 })
 
-test_that("AC1: a tailor is a part of the identity, as its adjustments in order", {
+test_that("a tailor is a part of the identity, as its adjustments in order", {
   skip_if_no_engines()
   skip_if_not_installed("tailor")
   d <- make_reg_data()

@@ -129,9 +129,11 @@ naming convention.
   estimate is self-consistent and will pass its own unit tests.
 - **Oracle records: provenance headers in the asserting test file.** Each oracle
   is recorded at the top of the `tests/testthat/test-*.R` file that asserts it,
-  by ID, type, source, and which test pins it — the asserting test is the single
-  source of truth, never a restated value. This is the declared location every
-  ≥2-types audit reads off. _(added 2026-07-25, M01.)_
+  by source and which test pins it — the asserting test is the single source of
+  truth, never a restated value. The headers carry no oracle ID or type, since
+  the test-comment rule forbids them there, so no committed record holds the
+  types that a ≥2-types audit reads; the candidate row "Keep an oracle registry
+  outside tests" owns that gap. _(added 2026-07-25, M01; corrected M155.)_
 - **`air` is the formatter, and a committed tree is clean under it.** `air.toml`
   at the root declares the settings (the tidymodels shape: `[format]` with
   `skip = ["tribble"]`), `air format .` is expected to change nothing on a

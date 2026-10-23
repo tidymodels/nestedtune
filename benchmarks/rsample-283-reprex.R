@@ -104,8 +104,8 @@ rsample_size <- function(data_bytes, n, v, inner_v) {
 }
 
 # For contrast, the model already committed for nestedtune's lean constructor
-# (test-nested-resamples-memory.R:43). Its data term does not scale with v --
-# that difference, (v-1) copies of the data, IS the issue.
+# (`analytic_size()` in test-nested-resamples-memory.R). Its data term does
+# not scale with v -- that difference, (v-1) copies of the data, IS the issue.
 lean_size <- function(data_bytes, n, v, inner_v) {
   data_bytes + 4 * n * (v - 1) * (inner_v + 1)
 }

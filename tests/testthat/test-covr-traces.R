@@ -1,5 +1,5 @@
-# The coverage job once failed after every test passed: a daemon killed while
-# writing its covr trace left a truncated file for covr's merge to choke on.
+# A daemon killed while writing its covr trace leaves a truncated file for
+# covr's merge to choke on, which fails the coverage job after all tests pass.
 # helper-covr.R diverts those traces to a sidecar directory under covr and
 # leaves everything alone otherwise; these tests pin that contract.
 

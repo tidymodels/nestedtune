@@ -1,6 +1,6 @@
-# AC2 -- the reference-implementation oracle (GP2, "live" type in the validation
-# doctrine): rsample::nested_cv() is recomputed at test time and every inner
-# analysis and assessment set must match it row for row under one seed.
+# The reference implementation is rsample::nested_cv(), recomputed at test
+# time: every inner analysis and assessment set must match it row for row
+# under one seed.
 
 test_that("inner splits match rsample::nested_cv() for a v-fold/v-fold scheme", {
   d <- make_test_data()
@@ -100,7 +100,7 @@ test_that("the object is a drop-in: class and spec attributes match rsample's", 
     inside = rsample::vfold_cv(v = 4)
   )
 
-  # D-008: nestedtune's own class first, then rsample's whole class vector.
+  # nestedtune's own class first, then rsample's whole class vector.
   expect_s3_class(lean, "nested_resamples")
   expect_identical(class(lean)[-1], class(ref))
   expect_identical(attr(lean, "outside"), attr(ref, "outside"))

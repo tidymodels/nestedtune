@@ -52,11 +52,11 @@ pool_is_cancellable <- function() {
 
 # Which branch the last dispatch took.
 #
-# This is deliberately NOT stored on the results object. BC1 requires both that
-# a parallel result be identical() to its serial counterpart and that a test be
-# able to prove the parallel branch actually ran; an attribute on the result
-# would satisfy the second by breaking the first. An internal record satisfies
-# both, and keeps the public surface unchanged.
+# This is deliberately NOT stored on the results object. The parallel tests
+# require both that a parallel result be identical() to its serial counterpart
+# and that a test be able to prove the parallel branch actually ran; an
+# attribute on the result would satisfy the second by breaking the first. An
+# internal record satisfies both, and keeps the public surface unchanged.
 the <- new.env(parent = emptyenv())
 
 record_dispatch <- function(branch) {
@@ -834,8 +834,9 @@ preflight_outcome <- function(
 # without breaking a library path. Doing that for real also stops the daemon
 # loading *mirai*, which kills it at startup and hangs the very probe under test
 # -- found the hard way when it hung `R CMD check` for 39 minutes. The
-# heterogeneous pool AC1 asks for is built in test-parallel-detection.R, where
-# the scratch library keeps mirai and drops only the probed package.
+# heterogeneous pool the probe tests need is built in
+# test-parallel-detection.R, where the scratch library keeps mirai and drops
+# only the probed package.
 check_daemons_can_load <- function(
   status = daemons_load_status(call = call),
   call = rlang::caller_env()

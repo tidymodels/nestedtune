@@ -1,10 +1,10 @@
-# The named accessors onto what selection saw (AC1, AC2, AC3).
+# The named accessors onto what selection saw.
 #
 # Oracle provenance: none is claimed here and none is owed. These accessors
 # produce no numeric result of their own -- one returns a stored object
-# untouched, the other delegates to `scored_candidates()`, whose derivation M21
-# oracle-verified against a hand-run `tune_grid()` (O3) and a data-frame
-# invariant (O4). What is asserted below is the contract, not the arithmetic.
+# untouched, the other delegates to `scored_candidates()`, whose derivation
+# was checked against a hand-run `tune_grid()` and a data-frame invariant. What
+# is asserted below is the contract, not the arithmetic.
 
 final_for_extract <- function() {
   d <- make_reg_data()
@@ -46,7 +46,7 @@ test_that("the candidate accessor reports the candidates that scored", {
   expect_identical(nrow(cand), nrow(det_grid()))
   expect_setequal(cand$num_comp, det_grid()$num_comp)
 
-  # D-023: the same shape a fold's candidate set derived from `.inner_metrics`
+  # The same shape a fold's candidate set derived from `.inner_metrics`
   # carries, `.config` included, so the
   # two records of one thing can be compared without translating between them.
   expect_true(".config" %in% names(cand))
@@ -103,11 +103,10 @@ test_that("what the accessors return agrees with what the loop records", {
   expect_identical(names(from_fit), names(from_loop))
 
   # Names alone cannot fail here: both sides come from `scored_candidates()`
-  # over the same deterministic grid, so they agree by construction. The plan
-  # gate's recorded falsifier for this milestone's shape choice was "the
-  # accessor and the fold's candidate set disagreeing on a run where both are
-  # defined", and disagreement in VALUES is what that names -- so the values
-  # are what has to be compared.
+  # over the same deterministic grid, so they agree by construction. What
+  # would show the accessor wrong is the accessor and the fold's candidate set
+  # disagreeing in VALUES on a run where both are defined -- so the values are
+  # what has to be compared.
   expect_setequal(from_fit$num_comp, from_loop$num_comp)
   expect_setequal(from_fit$.config, from_loop$.config)
 })
@@ -118,7 +117,7 @@ test_that("a survival fit's candidates carry no evaluation-time column", {
   # A dynamic survival metric is scored once per evaluation time, so the
   # run's own table has `.eval_time` and as many rows per candidate as there
   # are times. The accessor reports candidates, one row each, with the
-  # per-metric columns -- `.eval_time` among them -- dropped (AC6).
+  # per-metric columns -- `.eval_time` among them -- dropped.
   #
   # Two evaluation times draw tune's notice that the first is the one
   # selection uses -- once per fold and once at the final fit, the
@@ -183,10 +182,9 @@ test_that("both accessors refuse an object they cannot answer for", {
   )
 })
 
-# The refusal names the object before anything in the dots. Before M56 the
-# defaults checked their dots first, so `extract_tune_results(1, foo = 1)`
-# complained of `foo` and said nothing of `1` (an `rlib_error_dots_nonempty`,
-# measured 2026-09-03).
+# The refusal names the object before anything in the dots, so
+# `extract_tune_results(1, foo = 1)` is not reported as a dots error about
+# `foo`.
 test_that("an object with no method is refused as such whatever rides in the dots", {
   for (fn in list(extract_tune_results, extract_scored_candidates)) {
     cnd <- rlang::catch_cnd(fn(1, foo = 1))
@@ -217,8 +215,8 @@ test_that("the refusals read the same for both accessors", {
   })
 })
 
-# M106 AC1: the final fit answers tune's and hardhat's extractors as the
-# workflow it holds does. Each method hands its call to that workflow, so the
+# The final fit answers tune's and hardhat's extractors as the workflow it
+# holds does. Each method hands its call to that workflow, so the
 # reference is the same call made on `extract_workflow()` by hand.
 test_that("the final fit answers the extractors as its workflow does", {
   skip_if_no_engines()

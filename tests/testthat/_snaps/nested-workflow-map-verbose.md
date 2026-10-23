@@ -1,4 +1,4 @@
-# AC1: verbose = TRUE logs each workflow's start and finish, and the result does not change
+# verbose = TRUE logs each workflow's start and finish, and the result does not change
 
     Code
       loud <- nested_workflow_map(wset, verbose = TRUE, resamples = folds, grid = det_grid())

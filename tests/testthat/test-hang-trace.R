@@ -1,12 +1,11 @@
-# The trace reporter says which test, not just which file (M16 T1, AC1).
+# The trace reporter says which test, not just which file.
 #
-# M14 shipped file-level markers on the recorded belief that testthat exposes no
-# per-test hook. PR #13's hang then named `test-parallel-classify.R` and left 30
+# File-level markers name only the file a hang is in, and one file can hold 30
 # blocks to choose between, which is the cost this file exists to remove. So the
 # assertion that matters is not that lines appear -- it is that a per-TEST start
 # and end appear, carrying the block's own description.
 
-# The directory is removed when the CALLER's frame exits (M57): the fixture
+# The directory is removed when the CALLER's frame exits: the fixture
 # hands its path back, so it cannot clean up on its own exit, and every caller
 # is a `test_that()` block whose frame is the right lifetime.
 fixture_two_blocks <- function(frame = parent.frame()) {
@@ -58,7 +57,7 @@ test_that("every test_that() block gets a paired, named start and end line", {
   }
 })
 
-test_that("the per-file lines M14 ships still bracket the per-test ones", {
+test_that("the per-file lines still bracket the per-test ones", {
   out <- trace_lines(fixture_two_blocks())
 
   # The file marker is the bare filename with no ` :: `; the test markers carry
@@ -81,7 +80,7 @@ test_that("a block that never ends leaves an unmatched start", {
   #
   # Subclassed rather than patched: R6 members are locked, so assigning over
   # `end_test` on a stock instance raises "cannot change value of locked
-  # binding" (D-021 established this for `start_file`).
+  # binding", and the same holds for `start_file`.
   WedgedReporter <- R6::R6Class(
     "WedgedReporter",
     inherit = HangTraceReporter,
@@ -96,9 +95,9 @@ test_that("a block that never ends leaves an unmatched start", {
 })
 
 test_that("a file's end forgets its unended blocks as well as its ended ones", {
-  # M52's review: `end_file()` cleared `seen` and left `open` alone, so a
-  # block whose `end` never came stayed open after its file was over. The
-  # same wedged reporter as above, inspected rather than read off its lines.
+  # `end_file()` clears `open` as well as `seen`, so a block whose `end` never
+  # came does not stay open after its file is over. The same wedged reporter as
+  # above, inspected rather than read off its lines.
   WedgedReporter <- R6::R6Class(
     "WedgedReporter",
     inherit = HangTraceReporter,
@@ -121,7 +120,7 @@ test_that("a file's end forgets its unended blocks as well as its ended ones", {
   expect_identical(own(reporter$seen), character())
 })
 
-# --- Parallel test files (M52) ----------------------------------------------
+# --- Parallel test files ----------------------------------------------------
 #
 # With `Config/testthat/parallel: true` the reporter runs in the parent and
 # testthat forwards each worker's events to it. Which way it forwards them is
@@ -223,7 +222,7 @@ test_that("under parallel files every file and block gets exactly one live pair"
     trace_lines_parallel(dir = dir),
     value = TRUE
   )
-  # The fixture directory is the helper's to remove (M57), asserted on this
+  # The fixture directory is the helper's to remove, asserted on this
   # run rather than on a second one.
   expect_false(dir.exists(dir))
 
@@ -254,14 +253,14 @@ test_that("under parallel files every file and block gets exactly one live pair"
   )
 })
 
-# --- Duplicate descriptions (M57) --------------------------------------------
+# --- Duplicate descriptions --------------------------------------------------
 #
 # The trace keys a block by `<file> :: <description>`, so two blocks in one file
 # sharing a description share one key: the second never prints a `start`, and
 # the first `end` closes both. A hang in the second block would then be read
-# as a hang in the first. M52's review weighed an occurrence counter in the
-# reporter and chose this instead: the suite simply has no such pair, and the
-# scan below is what keeps it so.
+# as a hang in the first. The reporter keeps no occurrence counter to tell the
+# two apart, so the suite must have no such pair, and the scan below keeps it
+# so.
 
 # Every `<file> :: <description>` that a second block in the same file repeats.
 duplicated_descriptions <- function(dir) {

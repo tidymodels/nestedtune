@@ -141,7 +141,7 @@ test_that("a metric that is NA in every fold summarizes to NA with n = 0", {
   expect_true(is.na(rmse$std_err))
 })
 
-# D-010: the results object is not a `tune_results`, and the package
+# The results object is not a `tune_results`, and the package
 # registers no method on it for tune's selectors, so they refuse it rather
 # than rank outer folds. What tune's refusal says is tune's, and not asserted.
 test_that("the results object is not a tune_results, and tune's selectors have no method for it", {
@@ -158,10 +158,9 @@ test_that("the results object is not a tune_results, and tune's selectors have n
 test_that("the object carries the grid and metrics it was asked to run", {
   skip_if_no_engines()
 
-  # IP4: the object records what was asked for, positively, rather than leaving
-  # it to be inferred. Until M20 both attributes were written by
-  # new_nested_results() and read by nothing, so either could be dropped
-  # without a test noticing.
+  # The object records what was asked for, positively, rather than leaving it
+  # to be inferred. Both attributes must be asserted, or either could be
+  # dropped without a test noticing.
   #
   # The metric set is bound ONCE and compared to that binding. Two
   # metric_set() calls are never identical() -- the closure environment refers
@@ -193,11 +192,11 @@ test_that("the object carries the grid and metrics it was asked to run", {
   expect_identical(attr(reordered, "metrics"), metrics)
   expect_identical(reordered$id, rev(res$id))
 
-  # Dropping the two seed columns used to keep the class, on the ground that
-  # has_results_columns() does not name them. M36 widened the set an operation
-  # must leave alone to every column the constructor writes, so it no longer
-  # does -- and the call's record goes with the class rather than staying
-  # readable on the tibble that comes back.
+  # Dropping the two seed columns sheds the class, though has_results_columns()
+  # does not name them: the set an operation must leave alone is every column
+  # the constructor writes (`record_columns()`), these two included. The call's
+  # record goes with the class rather than staying readable on the tibble that
+  # comes back.
   cols <- setdiff(names(res), c(".tuning_seed", ".outer_fit_seed"))
   narrowed <- res[, cols]
   expect_false(inherits(narrowed, "nested_results"))
@@ -208,10 +207,10 @@ test_that("the object carries the grid and metrics it was asked to run", {
 test_that("each fold records the candidates its inner tuning actually scored", {
   skip_if_no_engines()
 
-  # IP4 asks for "the grid actually evaluated", which the `grid` attribute
-  # cannot supply: it holds the request, so a size request records a number and
+  # The record must be the grid actually evaluated. The `grid` attribute cannot
+  # supply that: it holds the request, so a size request records a number and
   # never the candidates. This column is the record, per fold because folds can
-  # genuinely disagree (measured at M21's plan gate: integer-grid expansion is
+  # genuinely disagree (measured on tune 2.1.0: integer-grid expansion is
   # stochastic for a continuous parameter, and each fold tunes under its own
   # seed).
   grid <- det_grid()
@@ -222,8 +221,7 @@ test_that("each fold records the candidates its inner tuning actually scored", {
   expect_length(res$.inner_metrics, 3L)
 
   # Each fold's table is tune's summary of its inner run -- one row per
-  # candidate and metric -- and the candidate set is its distinct parameter
-  # rows (M49).
+  # candidate and metric. The candidate set is its distinct parameter rows.
   for (m in res$.inner_metrics) {
     expect_true(is.data.frame(m))
     expect_identical(nrow(m), nrow(grid) * 2L)
@@ -239,7 +237,7 @@ test_that("each fold records the candidates its inner tuning actually scored", {
     # Compared by the shared parameter column, NEVER by .config. tune renumbers
     # .config into ascending parameter order, so a request frame given in any
     # other order fails a .config-ordered comparison on a set that is identical
-    # (measured at M21's criteria audit, tune 2.1.0). Sorting the parameter
+    # (measured on tune 2.1.0). Sorting the parameter
     # values is the comparison that holds for any request order.
     expect_identical(sort(g$num_comp), sort(grid$num_comp))
   }
@@ -250,19 +248,19 @@ test_that("the evaluated-candidate record travels with the rows it describes", {
 
   # Unlike the `grid` attribute, this record describes the rows rather than the
   # call -- so it is a column, and a row subset carries each fold's own record
-  # rather than the parent's. An attribute could not do this: M20 measured that
-  # arbitrary attributes survive a row subset untouched, which is exactly the
-  # stale-parent claim IP4 forbids.
+  # rather than the parent's. An attribute could not do this: arbitrary
+  # attributes survive a row subset untouched, which is exactly the stale-parent
+  # claim that must not be made.
   res <- example_results()
 
   subset <- res[2:3, ]
   expect_identical(subset$.inner_metrics, res$.inner_metrics[2:3])
 })
 
-test_that("the object records the design's inner specification (M46)", {
+test_that("the object records the design's inner specification", {
   skip_if_no_engines()
 
-  # The final fit re-runs the procedure from the results object alone (D-041),
+  # The final fit re-runs the procedure from the results object alone,
   # so the design's stored `inside` call travels onto the result as the same
   # unevaluated call, and it describes the call rather than the rows: kept
   # through an operation the invariants allow, shed with the class.
@@ -303,7 +301,7 @@ test_that("a run given no metric set carries no metrics attribute", {
   expect_null(attr(res, "metrics"))
 })
 
-# ---- .predictions and .extracts (M68) ----------------------------------------
+# ---- .predictions and .extracts ----------------------------------------------
 #
 # Oracle provenance. A fold's `.predictions` element is compared against the
 # `.predictions[[1]]` of `tune::last_fit()` called by hand on that fold's
@@ -351,7 +349,7 @@ reference_last_fit <- function(res, i, d, event_level = "first") {
   )
 }
 
-test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)", {
+test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -374,7 +372,7 @@ test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical t
   }
 })
 
-test_that("the default control and save_pred = FALSE leave no .predictions column (AC1)", {
+test_that("the default control and save_pred = FALSE leave no .predictions column", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -396,7 +394,7 @@ test_that("the default control and save_pred = FALSE leave no .predictions colum
   expect_true(".predictions" %in% names(saved_results(d)))
 })
 
-test_that("a failed fold's .predictions element is NULL (AC1)", {
+test_that("a failed fold's .predictions element is NULL", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -426,7 +424,7 @@ extracted_results <- function(
   ))
 }
 
-test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s (AC2)", {
+test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -450,13 +448,13 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
   expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
 })
 
-test_that("an extract that errors leaves the fold completed, its element NULL, and one note (AC2)", {
+test_that("an extract that errors leaves the fold completed, its element NULL, and one note", {
   skip_if_no_engines()
 
   d <- make_reg_data()
   set.seed(2)
   # No warning: the fold completed, and a reporting failure is not a fold
-  # failure (IP4).
+  # failure.
   expect_no_warning(
     res <- memoised(nested_tune_grid(
       det_workflow(d),
@@ -475,8 +473,8 @@ test_that("an extract that errors leaves the fold completed, its element NULL, a
   for (i in seq_len(nrow(res))) {
     expect_null(res$.extracts[[i]])
     # tune applies the same function inside the inner run and files each of
-    # those errors as a note of its own, which the fold keeps (GP1); this
-    # package's row is the one at its own stage.
+    # those errors as a note of its own, which the fold keeps; this package's
+    # row is the one at its own stage.
     notes <- res$.notes[[i]]
     ours <- notes[notes$location == "outer extract", ]
     expect_identical(nrow(ours), 1L)
@@ -494,7 +492,7 @@ test_that("an extract that errors leaves the fold completed, its element NULL, a
   }
 })
 
-test_that("extract = NULL leaves no .extracts column (AC2)", {
+test_that("extract = NULL leaves no .extracts column", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -516,7 +514,7 @@ test_that("extract = NULL leaves no .extracts column (AC2)", {
   expect_true(".extracts" %in% names(extracted_results(d)))
 })
 
-test_that("a failed fold's .extracts element is NULL, with no extract note (AC2)", {
+test_that("a failed fold's .extracts element is NULL, with no extract note", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -533,9 +531,9 @@ test_that("a failed fold's .extracts element is NULL, with no extract note (AC2)
 })
 
 
-# ---- the two columns are record columns (M68, AC5) ---------------------------
+# ---- the two columns are record columns --------------------------------------
 #
-# The five doors D-031 and D-032 fixed, on an object carrying both columns:
+# Five ways of changing the columns, on an object carrying both columns:
 # a replaced or dropped record column sheds the class, a move keeps it. And
 # one control, a run carrying neither column, which keeps its class through
 # the same verbs -- so what sheds is the record, not the verb.
@@ -546,7 +544,7 @@ expect_bare <- function(out) {
   invisible(out)
 }
 
-test_that(".predictions and .extracts are record columns through the five doors (AC5)", {
+test_that(".predictions and .extracts are record columns through the five doors", {
   skip_if_no_engines()
   skip_if_not_installed("tibble")
 
@@ -577,7 +575,7 @@ test_that(".predictions and .extracts are record columns through the five doors 
   )
 })
 
-test_that("a run carrying neither column keeps its class through the same verbs (AC5)", {
+test_that("a run carrying neither column keeps its class through the same verbs", {
   skip_if_no_engines()
   skip_if_not_installed("tibble")
 

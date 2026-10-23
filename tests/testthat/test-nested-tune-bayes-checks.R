@@ -1,5 +1,5 @@
-# Every refusal `nested_tune_bayes()` makes at entry, fired once (M45 AC6).
-# GP3: a provably wrong call is refused before a whole outer loop is paid for.
+# Every refusal `nested_tune_bayes()` makes at entry, fired once.
+# A provably wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The three arguments that are this orchestrator's own -- `iter`,
 # `initial`, `objective` -- each refuse with a class of their own, naming the
@@ -149,7 +149,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
       nested_tune_bayes(wf, preprocessor = y ~ x1, resamples = folds)
     },
     check_required = function() nested_tune_bayes(wf),
-    # An empty workflow, since a bare spec takes the model-spec route (M107).
+    # An empty workflow, since a bare spec takes the model-spec route.
     check_workflow = function() nested_tune_bayes(workflows::workflow(), folds),
     check_untuned_workflow = function() {
       nested_tune_bayes(fixed_workflow(d), folds)
@@ -202,7 +202,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
   }
 })
 
-test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+test_that("a desirability term naming neither a metric nor a tuned parameter is refused at entry", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -253,7 +253,7 @@ test_that("AC1: a desirability term naming neither a metric nor a tuned paramete
   )
 })
 
-test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+test_that("the desirability rule is refused at entry on a censored regression model", {
   skip_if_no_censored()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -285,7 +285,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   )
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
   d <- make_reg_data()

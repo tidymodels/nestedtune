@@ -1,12 +1,12 @@
-# The final fit on a racing result (M50 AC6, T5): `nested_final_fit()` races
+# The final fit on a racing result: `nested_final_fit()` races
 # the recorded grid again on the full data, and everything it reports about
 # that race reads through the same derivation the fold record uses.
 #
-# O5 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_race_final_fit() in helper-orchestration.R, written from the
 #   documented contract -- its own `set.seed(s)` and
 #   `sample.int(.Machine$integer.max, 2)`, the inner rset built under the
-#   first seed (D-016), the race under `control_race(burn_in = 2, allow_par =
+#   first seed, the race under `control_race(burn_in = 2, allow_par =
 #   FALSE)`, `select_best()`, `finalize_workflow()`, `fit()` under the second
 #   -- and never from the object. Pinned by "the racing final fit matches a
 #   hand-rolled reference pipeline", for each racer, on the stochastic
@@ -38,7 +38,7 @@ race_final_and_reference <- function(fn) {
 
 in_ids <- function(tuned) lapply(tuned$splits, function(s) s$in_id)
 
-test_that("the racing final fit matches a hand-rolled reference pipeline (AC6)", {
+test_that("the racing final fit matches a hand-rolled reference pipeline", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
   for (fn in RACERS) {
@@ -49,7 +49,7 @@ test_that("the racing final fit matches a hand-rolled reference pipeline (AC6)",
     # The seed layout, derived independently from the documented contract.
     expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
     expect_identical(final$selected, ref$selected)
-    # The resamples the race saw (D-016's ordering).
+    # The resamples the race saw, in order.
     expect_identical(in_ids(final$tuning), in_ids(ref$tuned))
     expect_identical(
       predict(extract_workflow(final), new_data = b$d),
@@ -64,7 +64,7 @@ test_that("the racing final fit matches a hand-rolled reference pipeline (AC6)",
   }
 })
 
-test_that("the final fit's candidates are every candidate its race scored (AC6, D-043)", {
+test_that("the final fit's candidates are every candidate its race scored", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
   for (fn in RACERS) {
@@ -91,7 +91,7 @@ test_that("the final fit's candidates are every candidate its race scored (AC6, 
   }
 })
 
-test_that("print() and summary() name the racing method with the count scored (AC6)", {
+test_that("print() and summary() name the racing method with the count scored", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()

@@ -1,8 +1,8 @@
-# The record a Bayesian run leaves (M45 T2, AC5; M49): each fold's
-# `.inner_metrics` carries the search iteration its candidates were scored in,
-# the readers deriving a candidate set from it treat that column as bookkeeping
-# rather than as a parameter, and every result of either orchestrator records
-# the procedure that produced it.
+# The record a Bayesian run leaves: each fold's `.inner_metrics` carries the
+# search iteration its candidates were scored in, the readers deriving a
+# candidate set from it treat that column as bookkeeping rather than as a
+# parameter, and every result of either orchestrator records the procedure that
+# produced it.
 
 skip_heavy_on_cran()
 
@@ -243,14 +243,14 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
   expect_identical(procedure$event_level, "first")
   expect_null(procedure$eval_time)
 
-  # The design's inner specification rides beside the procedure (M46).
+  # The design's inner specification rides beside the procedure.
   expect_identical(
     attr(res, "inside"),
     attr(det_nested(make_reg_data()), "inside")
   )
 })
 
-test_that("forced slots win, and a control built inline draws nothing the caller can see (M48, AC3)", {
+test_that("forced slots win, and a control built inline draws nothing the caller can see", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -262,14 +262,14 @@ test_that("forced slots win, and a control built inline draws nothing the caller
   # The default run, served from the cache under entry seed 20.
   plain <- bayes_results()
 
-  # One run carries both claims (M74). `allow_par` and `seed` are the two
+  # One run carries both claims. `allow_par` and `seed` are the two
   # slots the package overwrites: the control below sets `allow_par` and
   # leaves `seed` to `tune::control_bayes()`'s default, which draws it from
   # the stream when the control is built -- and an inline control is built
   # when `...` is forced, inside the call. The draw is discarded and the
   # slot overwritten, so the stream must be put back: the run equals the
   # no-control run, and the caller's state after the call is the state on
-  # entry (M48 review round 1, finding 2).
+  # entry.
   set.seed(20)
   before <- .Random.seed
   inline <- nested_tune_bayes(
@@ -295,7 +295,7 @@ test_that("forced slots win, and a control built inline draws nothing the caller
   # The inline run leaves `seed` at the default, so it says nothing about a
   # seed the caller SET: a control whose `seed` is a number the package would
   # never draw is the case that shows the overwrite, and it is asserted
-  # nowhere else in the suite (M79). `effective_control()` drops the slot from
+  # nowhere else in the suite. `effective_control()` drops the slot from
   # the record and `tuner_control()` puts the fold's tuning seed back at the
   # call, so 999 reaches neither the proposals nor the `procedure` attribute
   # and the whole object still equals the no-control run.
@@ -320,13 +320,13 @@ test_that("the procedure is part of the run's record", {
   expect_true("procedure" %in% results_attributes())
 })
 
-# ---- the inner table on a fold that scored nothing (M49) ---------------------
+# ---- the inner table on a fold that scored nothing ---------------------------
 
 test_that("a Bayesian fold that scored nothing carries a zero-row table with .iter", {
   skip_if_no_bayes_fixture()
 
   # A fold whose inner tuning fails outright scores nothing, and its table is
-  # a zero-row stand-in under the completed folds' columns (AC1). On the
+  # a zero-row stand-in under the completed folds' columns. On the
   # Bayesian path those columns include `.iter`, so a reader drawing the
   # search trajectory across folds meets the same columns on every one.
   d <- make_reg_data()

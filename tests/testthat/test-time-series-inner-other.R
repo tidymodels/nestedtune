@@ -1,21 +1,19 @@
 # nested_fit_resamples() and nested_workflow_map() on the three inner sliding
-# designs under an outer `rolling_origin()` (M120). The fixtures are
-# TS_INNER_DESIGNS in helper-orchestration.R. DESIGN Conventions: oracles are
-# recorded in the test file that asserts them.
+# designs under an outer `rolling_origin()`. The fixtures are TS_INNER_DESIGNS
+# in helper-orchestration.R. DESIGN Conventions: oracles are recorded in the
+# test file that asserts them.
 #
-# O1 -- type "live" (reference implementation). Source: tune::fit_resamples()
-#   run by hand on the fixture's outer `rolling_origin()` design, built on
-#   its own from the same call. Pinned by the
-#   "nested_fit_resamples() matches fit_resamples() on an inner ... design"
-#   tests. Satisfies M120 AC3 for nested_fit_resamples(). It shows only that
-#   the design is accepted, because nested_fit_resamples() checks the inner
-#   design but fits nothing on it.
+# Source: tune::fit_resamples() run by hand on the
+#   fixture's outer `rolling_origin()` design, built on its own from the same
+#   call. Pinned by the "nested_fit_resamples() matches fit_resamples() on an
+#   inner ... design" tests. It shows only that the design is accepted,
+#   because nested_fit_resamples() checks the inner design but fits nothing on
+#   it.
 #
-# O2 -- type "live" (reference implementation). Source: hand_call() in
+# Source: hand_call() in
 #   helper-orchestration.R, which runs each workflow of the set through its
 #   own orchestrator by hand under the same seed. Pinned by the "a workflow
-#   set on an inner ... design matches the hand calls" tests. Satisfies M120
-#   AC3 for nested_workflow_map().
+#   set on an inner ... design matches the hand calls" tests.
 
 skip_heavy_on_cran()
 

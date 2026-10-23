@@ -1,7 +1,7 @@
 # Every slot of tune's two control objects is classified on the help page of
-# the orchestrator it reaches (M48, AC6): under exactly one of seven headings --
+# the orchestrator it reaches, under exactly one of seven headings --
 # forced, settable as its own argument, refused, passed through, kept from the
-# outer fit (M68), not returned, inert.
+# outer fit, not returned, inert.
 #
 # The classification is read off the rendered help rather than off a list kept
 # here, and the slot names come from `formals()` of tune's own functions, so a
@@ -23,7 +23,7 @@ CONTROL_HEADINGS <- c(
   "Inert"
 )
 
-# What the outer fit keeps (M68, AC6): the two slots under their heading on
+# What the outer fit keeps: the two slots under their heading on
 # every page, with the sentence saying the inner run's are still discarded.
 KEPT_SLOTS <- c("save_pred", "extract")
 
@@ -56,7 +56,7 @@ rd_text <- function(x) {
 }
 
 # The section is titled for the package the page's tuner lives in: tune on
-# the grid and Bayesian pages, finetune on the racing page (M50).
+# the grid and Bayesian pages, finetune on the racing page.
 DIFFERENCES_TITLES <- c(
   "Differences from calling tune directly",
   "Differences from calling finetune directly"
@@ -154,7 +154,7 @@ test_that("every control_bayes() slot sits under one heading on nested_tune_baye
   expect_identical(buckets[["Not returned"]], "save_workflow")
 })
 
-test_that("every control_resamples() slot sits under one heading on nested_fit_resamples()'s page (M70, AC7)", {
+test_that("every control_resamples() slot sits under one heading on nested_fit_resamples()'s page", {
   buckets <- expect_classified("nested_fit_resamples", tune::control_resamples)
   expect_identical(buckets[["Forced"]], "allow_par")
   expect_identical(buckets[["Settable as its own argument"]], "event_level")
@@ -176,7 +176,7 @@ test_that("every control_resamples() slot sits under one heading on nested_fit_r
   )
 })
 
-test_that("every control_race() slot sits under one heading on the racing page (M50, AC7)", {
+test_that("every control_race() slot sits under one heading on the racing page", {
   skip_if_not_installed("finetune")
   buckets <- expect_classified("nested_tune_race", finetune::control_race)
   expect_identical(buckets[["Forced"]], "allow_par")
@@ -192,7 +192,7 @@ test_that("every control_race() slot sits under one heading on the racing page (
   expect_identical(buckets[["Inert"]], "backend_options")
 })
 
-test_that("every control_sim_anneal() slot sits under one heading on nested_tune_sim_anneal()'s page (M51, AC6)", {
+test_that("every control_sim_anneal() slot sits under one heading on nested_tune_sim_anneal()'s page", {
   skip_if_not_installed("finetune")
   buckets <- expect_classified(
     "nested_tune_sim_anneal",
@@ -223,7 +223,7 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
   expect_identical(buckets[["Inert"]], "backend_options")
 
   # The two caveats the criterion asks the page to carry: the wall-clock
-  # stop's IP2 caveat, and the log `verbose_iter` prints from every fold.
+  # stop's caveat, and the log `verbose_iter` prints from every fold.
   txt <- gsub("\\s+", " ", rd_text(help_rd("nested_tune_sim_anneal")))
   expect_match(
     txt,
@@ -233,7 +233,7 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
   expect_match(txt, "from every fold of a serial run", fixed = TRUE)
 })
 
-test_that("the racing page says what the recorded grid is, and what `n` is (AC7)", {
+test_that("the racing page says what the recorded grid is, and what `n` is", {
   # Whitespace collapsed: the Rd wraps its lines, and the installed database
   # under `R CMD check` wraps them where the source file did not.
   txt <- gsub("\\s+", " ", rd_text(help_rd("nested_tune_race")))

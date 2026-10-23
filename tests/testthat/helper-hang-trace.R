@@ -1,26 +1,20 @@
 # Where a hang stopped -- to the test, not just to the file.
 #
 # The check reporter buffers its output, so a job killed inside test_check()
-# leaves a testthat.Rout naming no test file at all. That is not hypothetical:
-# on 2026-07-27 two CI jobs hung inside that call for 52 and 40 minutes and a
-# third was killed at the 20-minute cap, and the surviving log from the third
-# held the R banner, the call, and nothing else that located it.
+# leaves a testthat.Rout naming no test file at all.
 #
 # stderr() is unbuffered and lands in testthat.Rout under R CMD check -- it is
-# how the fold-failure notes emitted by the code under test survived that same
-# kill when the reporter's own output did not. So the marker goes there, and is
+# how the fold-failure notes emitted by the code under test survive a kill
+# that the reporter's own output does not. So the marker goes there, and is
 # flushed besides.
 #
-# M14 traced files only, on the recorded belief that testthat exposes no
-# per-test hook a reporter can use. It does: `start_test(context, test)` and
-# `end_test(context, test)` fire once per `test_that()` block carrying the
-# block's description, verified by execution at M16's plan gate. The file-level
-# localization that belief cost is what M16 removes -- PR #13's log named
-# test-parallel-classify.R and left 30 blocks to choose between.
+# testthat has a per-test hook a reporter can use: `start_test(context, test)`
+# and `end_test(context, test)` fire once per `test_that()` block carrying the
+# block's description. So the marker names the block, not only the file.
 #
 # This lives in a helper rather than in tests/testthat.R because a test cannot
 # see what testthat.R defines: testthat sources helpers, never the runner. The
-# runner sources this file so both paths have the class (M16 T1).
+# runner sources this file so both paths have the class.
 #
 # Scope, stated because the absence is easy to misread: testthat calls
 # start_file() for test files only. Helper, setup and teardown files get no
@@ -54,10 +48,10 @@ hang_trace_target <- function(file, test) {
   paste0(file, " :: ", test)
 }
 
-# Under parallel test files (M52) the reporter runs in the PARENT process:
-# each worker forwards its events over a pipe, and testthat replays them into
+# Under parallel test files the reporter runs in the PARENT process: each
+# worker forwards its events over a pipe, and testthat replays them into
 # whatever reporter `tests/testthat.R` passed. Two consequences, both verified
-# by execution at M52's gate rather than read off the docs.
+# by execution rather than read off the docs.
 #
 # First, the parent has two replay modes, chosen by the reporter's
 # `parallel_updates` capability. Without it testthat holds a file's events
@@ -78,7 +72,7 @@ hang_trace_target <- function(file, test) {
 # When the file ends both records drop the file's targets -- `seen` so a
 # same-named block in a later file starts afresh, and `open` so a block that
 # never ended (the killed-job case, or a reporter that never saw its `end`)
-# does not stay open into the files that follow (M57). In serial mode every
+# does not stay open into the files that follow. In serial mode every
 # event arrives exactly once and the bookkeeping is inert.
 HangTraceReporter <- R6::R6Class(
   "HangTraceReporter",

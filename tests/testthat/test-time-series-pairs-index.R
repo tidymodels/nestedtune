@@ -1,20 +1,20 @@
 # The three pairs of an outer `sliding_index()` design and an inner sliding
-# design (M121). The fixtures are TS_SLIDING_PAIRS in helper-orchestration.R,
+# design. The fixtures are TS_SLIDING_PAIRS in helper-orchestration.R,
 # and the tests for the other two outer designs sit in
 # test-time-series-pairs-window.R and test-time-series-pairs-period.R. DESIGN
 # Conventions: oracles are recorded in the test file that asserts them.
 #
-# O1 -- type "live" (reference implementation). Source: rsample::nested_cv(),
+# Source: rsample::nested_cv(),
 #   recomputed at test time on the pair's own arguments by
 #   ts_pair_reference(). Every outer and inner analysis and assessment set
 #   `nested_resamples()` builds must match it row for row. Pinned by the
-#   "... splits match rsample::nested_cv()" tests. Satisfies M121 AC1.
+#   "... splits match rsample::nested_cv()" tests.
 #
-# O2 -- type "live" (reference implementation). Source: the tidymodels
+# Source: the tidymodels
 #   pipeline itself, recomputed at test time by reference_nested_loop() in
 #   helper-orchestration.R, written from the documented seed contract rather
 #   than from the driver. Pinned by the "nested_tune_grid() on the ... pair
-#   matches a hand-rolled reference loop" tests. Satisfies M121 AC2.
+#   matches a hand-rolled reference loop" tests.
 
 skip_heavy_on_cran()
 

@@ -1,8 +1,8 @@
-# Plotting a nested_results object (M08).
+# Plotting a nested_results object.
 #
 # No oracle is recorded here, deliberately. The plot produces no numeric result
 # of its own: every number it draws was computed and oracle-verified upstream
-# (M02's estimate, M04's selections), and what these tests pin is that the plot
+# (the estimate and the selections), and what these tests pin is that the plot
 # reproduces those numbers without distorting or inventing them -- an internal
 # consistency check, not a claim about the world. The one equality that could be
 # mistaken for an oracle, the marked estimate against collect_metrics(), is
@@ -50,7 +50,7 @@ test_that("folds that disagree are drawn at their own values, keyed by fold", {
   ))
   pts <- plot_points(autoplot(res))
 
-  # The fixture's folds land on 4, 4, 4, 3 (the same disagreement M04's print
+  # The fixture's folds land on 4, 4, 4, 3 (the same disagreement the print
   # tests read). Position identifies the fold, so the values are asserted in
   # fold order -- a plot that drew the right four values in the wrong order
   # would pass a set comparison and fail this.
@@ -71,7 +71,7 @@ test_that("a failed fold keeps its place on the axis and draws no point", {
   )))
   p <- autoplot(res)
 
-  # IP4: the fold that did not run is on the axis, so the shortfall is visible
+  # The fold that did not run is on the axis, so the shortfall is visible
   # in the figure itself and not only in the count -- but it contributes no
   # point, so nothing is imputed for it.
   expect_identical(axis_labels(p), c("Fold1", "Fold2", "Fold3"))
@@ -117,8 +117,7 @@ test_that("the parameters view states how much of the design ran", {
   )))
 
   # A design fact, true of the whole figure however its panels differ: the
-  # subtitle claims nothing about per-panel contribution, which is what it got
-  # wrong before (F1/F2).
+  # subtitle claims nothing about per-panel contribution.
   expect_match(
     plot_label(autoplot(whole), "subtitle"),
     "3 outer folds requested, 3 completed"
@@ -152,14 +151,14 @@ test_that("a panel says so when fewer folds contributed to it than completed", {
   # A completed fold that recorded no value for the parameter. Two folds chose,
   # and they agree -- so the flat row must not be readable as three agreeing.
   # print says "all 2 folds that chose it agree; 1 recorded no value"; the panel
-  # is where the plot can say the same thing (F2).
+  # is where the plot can say the same thing.
   expect_identical(
     strip_labels(autoplot(drop_selection(res))),
     "num_comp (2 of 3 chose)"
   )
 
   # A fold that completed but scored NA on one metric only. print puts
-  # "(from 2 folds)" on that metric's own line; so does the panel (F1).
+  # "(from 2 folds)" on that metric's own line; so does the panel.
   one_na <- res
   rmse_row <- one_na$.metrics[[2L]]$.metric == "rmse"
   one_na$.metrics[[2L]]$.estimate[rmse_row] <- NA_real_
@@ -182,8 +181,8 @@ test_that("each panel decides its own breaks", {
   ))
   # A whole-number parameter beside a continuous one, which is what glmnet,
   # xgboost and svm_rbf all look like. Deciding over the pooled column put the
-  # integer panel back on 2.950/2.975/3.000 -- the defect the single-parameter
-  # fix claimed to have closed (F3).
+  # integer panel back on 2.950/2.975/3.000, the defect this test guards
+  # against.
   mixed <- res
   for (i in seq_len(nrow(mixed))) {
     mixed$.selected[[i]]$penalty <- c(0.001, 0.02, 0.3)[[i]]
@@ -225,7 +224,7 @@ test_that("a metric no fold could score keeps its panel", {
 
   # roc_auc on a one-class assessment set reaches this routinely. The metric was
   # requested, so it keeps its panel as a failed fold keeps its axis slot --
-  # dropping it left no trace that it had been asked for (F4).
+  # dropping it would leave no trace that it had been asked for.
   none <- res
   for (i in seq_len(nrow(none))) {
     rmse_row <- none$.metrics[[i]]$.metric == "rmse"
@@ -236,16 +235,16 @@ test_that("a metric no fold could score keeps its panel", {
   expect_identical(strip_labels(p), c("rmse (from 0 folds)", "rsq"))
   expect_identical(plot_points(p)$panel, rep("rsq", 3L))
 
-  # And with nothing scored anywhere, the figure builds AND draws: it used to
-  # return a ggplot that errored from inside ggplot2 when printed, which is
-  # neither our own condition nor near the call that caused it.
+  # And with nothing scored anywhere, the figure builds AND draws. A ggplot
+  # that errors from inside ggplot2 when printed is neither our own condition
+  # nor near the call that caused it, so the figure must not be one.
   nothing <- res
   for (i in seq_len(nrow(nothing))) {
     nothing$.metrics[[i]]$.estimate <- NA_real_
   }
   empty <- autoplot(nothing, type = "performance")
   expect_s3_class(empty, "ggplot")
-  # Laying the figure out is where it used to fail, so the assertion has to go
+  # Laying the figure out is where it can fail, so the assertion has to go
   # that far -- onto a null device, since letting one open by default writes an
   # Rplots.pdf at the package root and R CMD check NOTEs it.
   expect_no_error(on_null_device(ggplot2::ggplot_gtable(ggplot2::ggplot_build(
@@ -296,12 +295,12 @@ test_that("a metric measured at several evaluation times gets a panel per time",
     metrics = reg_metrics()
   ))
   # The shape tune's last_fit() records for a metric set mixing a dynamic
-  # survival metric with a static one (measured on tune 2.1.0, 2026-09-01): a
+  # survival metric with a static one (measured on tune 2.1.0): a
   # `.eval_time` column, NA on the static metric's row. Hand-built on the
-  # regression fixture so the case costs no censored fit. Before the panel
-  # carried the time, two rows for one metric read as one ambiguous metric,
-  # both panels got the same label, and the level factor aborted on the
-  # duplicate (M41 review F1).
+  # regression fixture so the case costs no censored fit. Without the panel
+  # carrying the time, two rows for one metric would read as one ambiguous
+  # metric, both panels would get the same label, and the level factor would
+  # abort on the duplicate.
   for (i in seq_len(nrow(res))) {
     res$.metrics[[i]] <- new_tbl(list(
       .metric = c("brier_survival", "brier_survival", "concordance_survival"),
@@ -438,7 +437,7 @@ test_that("the performance view names the estimate as the final fit's number to 
   ))
   p <- autoplot(res, type = "performance")
 
-  # IP3, in the subtitle rather than only in the help page: ggplot2 renders a
+  # In the subtitle rather than only in the help page: ggplot2 renders a
   # subtitle into the image, so the sentence travels with a figure that has
   # been exported out of the session that produced it.
   subtitle <- plot_label(p, "subtitle")
@@ -473,7 +472,7 @@ test_that("a failed fold keeps its slot and contributes no score", {
     "3 outer folds requested, 2 completed"
   )
   # The rule averages the folds that ran, which is what the summary reports for
-  # the same object -- neither claims the design that was requested (IP4).
+  # the same object -- neither claims the design that was requested.
   expect_identical(
     rules$yintercept,
     suppressWarnings(collect_metrics(res))$mean
@@ -523,7 +522,7 @@ test_that("a run where no fold completed is refused, in plotting's own words", {
     metrics = reg_metrics()
   )))
 
-  # Printing describes such an object without complaint (M04); plotting is a
+  # Printing describes such an object without complaint; plotting is a
   # request for a figure of a design that did not run, so it refuses as
   # collect_metrics() does -- and says "plot", not "summarize", about the same
   # object.
@@ -659,14 +658,14 @@ test_that("a non-numeric selection is drawn on a discrete axis", {
   expect_identical(axis_labels(p, "y"), "c3")
 })
 
-# ---- the set views (M72) ------------------------------------------------------
+# ---- the set views ------------------------------------------------------------
 #
 # Asserted on the built plot as above, against the set readers: the points
 # are `collect_metrics(x, summarize = FALSE)`'s scored rows and the rules
 # are `collect_metrics(x)`'s means, so the figure and the tables cannot
 # disagree about a number.
 
-test_that("AC2: the set's performance view puts the workflows on x inside one panel per metric", {
+test_that("the set's performance view puts the workflows on x inside one panel per metric", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   p <- expect_no_warning(autoplot(res, type = "performance"))
@@ -710,7 +709,7 @@ test_that("AC2: the set's performance view puts the workflows on x inside one pa
   expect_identical(plot_label(p, "x"), "Workflow")
 })
 
-test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
+test_that("an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
   skip_if_no_wset_fixture()
   beside <- broken_set_results()
   warnings <- partial_warnings(p <- autoplot(beside, type = "performance"))
@@ -743,7 +742,7 @@ test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and th
   )
 })
 
-test_that("AC3: the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
+test_that("the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   p <- expect_no_warning(autoplot(res))
@@ -793,7 +792,7 @@ test_that("AC3: the set's parameters view is one panel per workflow and tuned pa
   expect_identical(plot_points(autoplot(mixed))$fold, pts$fold)
 })
 
-test_that("AC3: a set in which no workflow tuned a parameter is refused, pointing at the other view", {
+test_that("a set in which no workflow tuned a parameter is refused, pointing at the other view", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   res <- wset_results("nested_fit_resamples")
   cnd <- rlang::catch_cnd(autoplot(res), "error")
@@ -807,7 +806,7 @@ test_that("AC3: a set in which no workflow tuned a parameter is refused, pointin
   expect_identical(axis_labels(p, "x"), res$wflow_id)
 })
 
-test_that("AC4: both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
+test_that("both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
   skip_if_no_wset_fixture()
   partial <- wset_three_results(broken = 1L)
   for (type in c("parameters", "performance")) {
@@ -847,7 +846,7 @@ test_that("AC4: both set views warn once per workflow with a failed fold, naming
   )
 })
 
-test_that("AC4: an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
+test_that("an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
   skip_if_no_wset_fixture()
   beside <- broken_set_results()
   for (type in c("parameters", "performance")) {
@@ -891,7 +890,7 @@ test_that("AC4: an all-failed workflow contributes no point to either view, and 
   }
 })
 
-test_that("AC4: the set's autoplot() refuses a type outside the two, and fences its dots first", {
+test_that("the set's autoplot() refuses a type outside the two, and fences its dots first", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   # The type refusal is `check_plot_type()`, held on the single results
@@ -904,13 +903,13 @@ test_that("AC4: the set's autoplot() refuses a type outside the two, and fences 
   )
 })
 
-# The set's short-average sentence (M77). A workflow can complete every outer
+# The set's short-average sentence. A workflow can complete every outer
 # fold and still rest a metric's average on fewer of them, because a completed
 # fold can score `NA` on one metric while scoring the others. The single view
 # says so on the panel itself; a set has no per-workflow-and-metric label slot,
-# and one figure-level count asserting a per-panel truth is the defect M08
-# review F1 found, so the set counts workflows in the subtitle and sends the
-# reader to `summary()` for which metric and how many folds.
+# and one figure-level count asserting a per-panel truth is a defect, so the
+# set counts workflows in the subtitle and sends the reader to `summary()` for
+# which metric and how many folds.
 #
 # The score is planted where `per_fold_metrics()` reads it, on the results
 # object's `.metrics`, so the fold state is untouched and only the average
@@ -1042,7 +1041,7 @@ test_that("a set every completed fold of which scored carries neither shortfall 
   )
 })
 
-# The set views over the shapes the regression fixture cannot make (M77).
+# The set views over the shapes the regression fixture cannot make.
 #
 # `wset_three()` runs two metrics, neither of them measured at an evaluation
 # time, and every workflow it holds tunes a number. So two things the set views
@@ -1204,9 +1203,9 @@ test_that("the mixed censored set draws a character and a numeric parameter on d
   ))
 })
 
-# `id` on the set's plot (M149, AC3): one workflow's plot is the single-run
+# `id` on the set's plot: one workflow's plot is the single-run
 # method's plot on that row, under both views, and a filter reaches it.
-test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
+test_that("a set's autoplot() with an id draws that workflow's own plot", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   one <- res$result[[match("tuned", res$wflow_id)]]
@@ -1242,14 +1241,14 @@ test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
   expect_match(conditionMessage(cnd), "eval_time", fixed = TRUE)
 })
 
-test_that("AC3: one workflow's plot states a failed fold in its subtitle, with no warning", {
+test_that("one workflow's plot states a failed fold in its subtitle, with no warning", {
   skip_if_no_wset_fixture()
   broken <- wset_three_results(broken = 1L)
   expect_no_warning(p <- autoplot(broken, type = "performance", id = "tuned"))
   expect_match(p$labels$subtitle, "1 completed", fixed = TRUE)
 })
 
-test_that("AC3: an id that names no row of the set is refused", {
+test_that("an id that names no row of the set is refused", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   # The other shapes of a bad id meet `match_set_id()` through the set
@@ -1259,7 +1258,7 @@ test_that("AC3: an id that names no row of the set is refused", {
 
 # The pictures of the set views, on the three-workflow fixture: what a reader
 # meets -- the id-prefixed strips, the workflows along one axis under each
-# metric, the rules -- pinned after being rendered and read (M72).
+# metric, the rules -- pinned after being rendered and read.
 test_that("both set views look the way they read", {
   skip_if_not_installed("vdiffr")
   skip_if_no_wset_fixture()
@@ -1271,9 +1270,9 @@ test_that("both set views look the way they read", {
   )
 
   # The four-line subtitle, which no other snapshot carries: a set holding
-  # both a failed fold and a short average. Rendered and read at 7 inches
-  # before this was approved -- `ggplot_build()` cannot see a clipped
-  # subtitle, and this is the tallest one the view can draw (M08).
+  # both a failed fold and a short average. Rendered and read at 7 inches --
+  # `ggplot_build()` cannot see a clipped subtitle, and this is the tallest one
+  # the view can draw.
   both <- plant_metric_na(wset_three_results(broken = 1L), 1L, 2L, "rmse")
   warnings <- partial_warnings(p <- autoplot(both, type = "performance"))
   expect_length(warnings, 3L)

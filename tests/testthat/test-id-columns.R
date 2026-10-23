@@ -1,13 +1,12 @@
 # Which columns are the design's own fold labels, and where that answer comes
-# from (M38).
+# from.
 #
-# It used to be a name pattern matched against whatever names the object carried
-# at the time, and every review round of M36 bought exactly one more spelling: a
-# bare `^id` prefix caught `ideal` and `id_extra`, and anchoring it to
-# `^id[0-9]*$` still caught `id2` -- a name rsample gives a repeated design and a
-# caller may perfectly well add to a plain one. Those two cases are spelled
-# identically, so no pattern separates them. The constructor asks the design once
-# and records the answer; every reader asks the record.
+# A name pattern cannot answer this. A bare `^id` prefix catches `ideal` and
+# `id_extra`, and anchoring it to `^id[0-9]*$` still catches `id2`. That is a
+# name rsample gives a repeated design, but a caller may perfectly well add it
+# to a plain one. Those two cases are spelled identically, so no pattern
+# separates them. The constructor asks the design once and records the answer;
+# every reader asks the record.
 
 test_that("the constructor records the columns it took from the design", {
   skip_if_no_engines()
@@ -62,15 +61,15 @@ test_that("the record travels with the class and is shed with it", {
   expect_null(attr(shed, "id_columns"))
 })
 
-# The sweep AC4 asks for: at every method that routes a caller's column through
-# the rule, the answer may not depend on what the caller called the column.
+# The sweep: at every method that routes a caller's column through the rule,
+# the answer may not depend on what the caller called the column.
 #
 # `extra` is the reference in every cell -- a name no derivation this class has
-# ever used could match -- and the five names under test are the ones that did.
-# `ideal` and `id_extra` fell to the bare `^id` grep M36 started with; `id2`,
-# `id0` and `id9` fall to the `^id[0-9]*$` that replaced it, and `id2` is the one
-# a caller is actually likely to reach for, since rsample gives a repeated design
-# a column of that name.
+# ever used could match -- and the five names under test are the ones a name
+# pattern gets wrong: `ideal` and `id_extra` match a bare `^id` grep, and `id2`,
+# `id0` and `id9` match `^id[0-9]*$`. `id2` is the one a caller is actually
+# likely to reach for, since rsample gives a repeated design a column of that
+# name.
 
 # The column is added at the vector level rather than through `mutate()`, so a
 # door's cell reports that door and not one a caller passed through on the way
@@ -201,11 +200,8 @@ test_that("no method's answer depends on what the caller named the column", {
 })
 
 # The prose half. The behavior above is what a reader of `NEWS.md` and the help
-# page is being promised, and M36 shipped a sentence narrowing that promise to
-# the pattern this milestone removed -- "unless you name it `id` or `id`
-# followed by digits". A claim left standing after the code stopped making it is
-# the fault this block exists to catch (M36 review O1 asked the same of the
-# subsetting paragraph).
+# page is being promised. A claim left standing after the code stopped making it
+# is the fault this block exists to catch.
 #
 # `test_path("..", "..", ...)` resolves outside the source tree under
 # `R CMD check`, so this skips there and fires where the documentation is
@@ -234,7 +230,7 @@ test_that("the changelog and the help page promise what the code now does", {
     expect_match(text, promise, fixed = TRUE)
   }
 
-  # The narrowed claim M36 left in the changelog, gone.
+  # The narrowed claim, gone from the changelog.
   expect_no_match(
     flat(paths$news),
     "unless you name it `id` or `id` followed by digits",
@@ -242,15 +238,15 @@ test_that("the changelog and the help page promise what the code now does", {
   )
 })
 
-# When the record cannot label the rows (M39 T3, from M38 review O8).
+# When the record cannot label the rows.
 #
-# Three forms, and before this fix each answered differently and none answered
-# usefully: an empty record gave `character(0)`, a record naming a column the
-# object no longer carries gave `NULL` -- both of which make an indexing caller
-# raise -- and a record naming several columns of which some are absent pasted
-# the survivors and gave the truncated label `"Fold1, "`, which raises nothing
-# and is wrong silently. All three now fall back to row positions, because a
-# record that cannot label the rows is not a record to guess from.
+# Three forms, each one a trap for a naive reader: an empty record would give
+# `character(0)`, and a record naming a column the object no longer carries
+# would give `NULL`. Both make an indexing caller raise. A record naming
+# several columns, some of them absent, would paste the survivors into the
+# truncated label `"Fold1, "`, which raises nothing and is wrong silently. All
+# three fall back to row positions, because a record that cannot label the
+# rows is not a record to guess from.
 test_that("an unusable label record falls back to row positions", {
   skip_if_no_engines()
   res <- repeated_results()
@@ -265,7 +261,7 @@ test_that("an unusable label record falls back to row positions", {
   attr(missing_one, "id_columns") <- "not_a_column"
   expect_identical(fold_ids(missing_one), positions)
 
-  # The form fold_ids() answered wrongly rather than raising.
+  # The form that would give a wrong label rather than raising.
   partly_missing <- res
   attr(partly_missing, "id_columns") <- c("id", "not_a_column")
   expect_identical(fold_ids(partly_missing), positions)

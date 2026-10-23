@@ -1,10 +1,10 @@
-# `selection_rule()` (M69): the object the orchestrators' `select` argument
+# `selection_rule()`: the object the orchestrators' `select` argument
 # takes, holding the rule name, the parameter orderings as bare expressions and
 # the percent-loss limit. It travels to every daemon and into the fixture cache
 # as part of the call, so the orderings are captured as expressions and never as
 # quosures: nothing here may carry an environment.
 
-test_that("AC3: the default rule is best-by-metric with no ordering and no limit", {
+test_that("the default rule is best-by-metric with no ordering and no limit", {
   rule <- selection_rule()
   expect_s3_class(rule, "selection_rule")
   expect_identical(rule$rule, "best")
@@ -13,7 +13,7 @@ test_that("AC3: the default rule is best-by-metric with no ordering and no limit
   expect_identical(selection_rule("best"), rule)
 })
 
-test_that("AC3: the orderings are captured as bare expressions, never quosures", {
+test_that("the orderings are captured as bare expressions, never quosures", {
   rule <- selection_rule("one_std_err", desc(df1), df2)
   expect_identical(rule$rule, "one_std_err")
   expect_length(rule$order, 2L)
@@ -23,7 +23,7 @@ test_that("AC3: the orderings are captured as bare expressions, never quosures",
   expect_false(exists("df1", inherits = FALSE))
 })
 
-test_that("AC3: `limit` defaults to tune's 2 for the percent-loss rule only", {
+test_that("`limit` defaults to tune's 2 for the percent-loss rule only", {
   expect_identical(selection_rule("pct_loss", df1)$limit, 2)
   expect_identical(selection_rule("pct_loss", df1, limit = 5)$limit, 5)
   expect_identical(selection_rule("pct_loss", df1, limit = 0)$limit, 0)
@@ -32,13 +32,13 @@ test_that("AC3: `limit` defaults to tune's 2 for the percent-loss rule only", {
   expect_null(selection_rule("best")$limit)
 })
 
-test_that("AC3: a rule outside tune's three is refused by arg_match()", {
+test_that("a rule outside tune's three is refused by arg_match()", {
   expect_error(selection_rule("worst"), class = "rlang_error")
   expect_error(selection_rule("best", rule = "one_std"), class = "rlang_error")
   expect_error(selection_rule(1), class = "rlang_error")
 })
 
-test_that("AC3: one_std_err and pct_loss need at least one ordering", {
+test_that("one_std_err and pct_loss need at least one ordering", {
   for (rule in c("one_std_err", "pct_loss")) {
     cnd <- rlang::catch_cnd(selection_rule(rule))
     expect_s3_class(cnd, "nestedtune_selection_rule_no_order")
@@ -88,7 +88,7 @@ test_that("an ordering given with best is refused, as tune::select_best() refuse
   expect_match(cli::ansi_strip(conditionMessage(cnd)), "best", fixed = TRUE)
 })
 
-test_that("AC3: a limit is refused with best and with one_std_err", {
+test_that("a limit is refused with best and with one_std_err", {
   cnd <- rlang::catch_cnd(selection_rule("best", limit = 2))
   expect_s3_class(cnd, "nestedtune_selection_rule_limit")
   expect_match(cli::ansi_strip(conditionMessage(cnd)), "pct_loss", fixed = TRUE)
@@ -98,7 +98,7 @@ test_that("AC3: a limit is refused with best and with one_std_err", {
   )
 })
 
-test_that("AC3: each malformed limit is refused with the percent-loss rule", {
+test_that("each malformed limit is refused with the percent-loss rule", {
   bad <- list(-1, NA_real_, c(1, 2), "2")
   for (limit in bad) {
     cnd <- rlang::catch_cnd(selection_rule("pct_loss", df1, limit = limit))
@@ -111,7 +111,7 @@ test_that("AC3: each malformed limit is refused with the percent-loss rule", {
   )
 })
 
-test_that("selection_rule_label() renders the four label shapes the summaries share (M98)", {
+test_that("selection_rule_label() renders the four label shapes the summaries share", {
   # No ordering, one, two, and one with a limit: the label is the rule name,
   # then ` by ` and the orderings as written, then the limit.
   expect_identical(selection_rule_label(selection_rule()), "best")
@@ -141,7 +141,7 @@ test_that("selection_rule_label() renders the four label shapes the summaries sh
   )
 })
 
-test_that("names_selection_rule() is true for the two non-default rules alone (M98)", {
+test_that("names_selection_rule() is true for the two non-default rules alone", {
   expect_false(names_selection_rule(selection_rule()))
   expect_false(names_selection_rule(selection_rule("best")))
   expect_true(names_selection_rule(selection_rule("one_std_err", num_comp)))
@@ -188,7 +188,7 @@ test_that("an empty selection under another rule names that rule and not the sta
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   # No real run under these rules is known to select nothing, so the
-  # selector is mocked to return no row (review finding 5).
+  # selector is mocked to return no row.
   empty <- function(...) {
     data.frame(num_comp = integer(0), .config = character(0))
   }
@@ -208,10 +208,10 @@ test_that("an empty selection under another rule names that rule and not the sta
   expect_no_match(msg, "standard error", fixed = TRUE)
 })
 
-# The desirability rule (M109): desirability2's goal terms, captured as the
+# The desirability rule: desirability2's goal terms, captured as the
 # orderings are and judged by desirability2 itself when the rule is built.
 
-test_that("AC1: the desirability rule captures its terms as bare expressions and prints them", {
+test_that("the desirability rule captures its terms as bare expressions and prints them", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   rule <- selection_rule(
@@ -233,7 +233,7 @@ test_that("AC1: the desirability rule captures its terms as bare expressions and
   expect_true(names_selection_rule(rule))
 })
 
-test_that("AC1: a goal too long for `rlang::as_label()` prints in full", {
+test_that("a goal too long for `rlang::as_label()` prints in full", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   goal <- quote(target(
@@ -294,7 +294,7 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   # A variable of the caller's: desirability2 would read it only when it
-  # scores each fold's run, after all the tuning (review finding 1).
+  # scores each fold's run, after all the tuning.
   lo <- 0.2
   cnd <- rlang::catch_cnd(selection_rule(
     "desirability",
@@ -306,8 +306,7 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   expect_match(msg, "maximize(rsq, low = lo)", fixed = TRUE)
   expect_match(msg, "low = !!lo", fixed = TRUE)
 
-  # The hint injects the whole argument, not its first name (review pass 2,
-  # finding 3).
+  # The hint injects the whole argument, not its first name.
   hint_of <- function(cnd) cli::ansi_strip(conditionMessage(cnd))
   cnd <- rlang::catch_cnd(selection_rule(
     "desirability",
@@ -321,8 +320,8 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   ))
   expect_match(hint_of(cnd), "high = !!(lo * 2)", fixed = TRUE)
 
-  # A metric named in a later argument, which the entry check does not read
-  # (review finding 4), and a name inside a call there.
+  # A metric named in a later argument, which the entry check does not read,
+  # and a name inside a call there.
   expect_error(
     selection_rule("desirability", maximize(rsq, low = rmse)),
     class = "nestedtune_selection_rule_term_arg"

@@ -4,7 +4,7 @@
 # added or removed, rows may be reordered, columns may be added and reordered.
 # An operation that stays inside it gets the class back with the run's record
 # intact; anything else gets a bare tibble, because an object that no longer
-# holds the rows the run produced cannot answer for the run (IP4).
+# holds the rows the run produced cannot answer for the run.
 #
 # The whole point is the second branch, so the table below states an expected
 # branch per entry rather than accepting either. Every verb the criteria name
@@ -50,7 +50,7 @@ partial_results <- function() {
 # `tbl_df` is asserted in both branches because dplyr hands
 # `dplyr_reconstruct()` a bare data frame for several verbs, so a rule that
 # only adds the class back returns a `nested_results` that is not a tibble --
-# and the class is documented as a tibble subclass (M36 review F1).
+# and the class is documented as a tibble subclass.
 expect_kept <- function(out, src) {
   testthat::expect_s3_class(out, "nested_results")
   testthat::expect_s3_class(out, "tbl_df")
@@ -68,7 +68,7 @@ expect_kept <- function(out, src) {
 # which is not a downgrade the caller asked for.
 # `name` is carried because the compat table calls this from a loop, where
 # every entry shares one source line: without it a failure says only that some
-# entry in the table went wrong (M36 review O7).
+# entry in the table went wrong.
 expect_bare <- function(out, name = NULL) {
   what <- if (is.null(name)) "the result" else name
   testthat::expect_false(
@@ -98,11 +98,11 @@ dplyr_compat_table <- function() {
     list(name = "mutate (column added)", branch = "kept", f = function(x) {
       dplyr::mutate(x, extra = 1)
     }),
-    # An id-prefixed name is what a caller joins in to label folds with, and
-    # the record's own id columns were once found by matching a name pattern,
-    # so an added one landed in the same set. `id_columns()` reads the
-    # constructor's record instead, which no name can join. "Columns may be
-    # added" has to hold for this one either way (M36 review F2, M38).
+    # An id-prefixed name is what a caller joins in to label folds with. A
+    # record that found its id columns by name pattern would take such a
+    # column in, so `id_columns()` reads the constructor's record instead,
+    # which no name can join. "Columns may be added" has to hold for this one
+    # either way.
     list(
       name = "mutate (id-prefixed column added)",
       branch = "kept",
@@ -130,9 +130,9 @@ dplyr_compat_table <- function() {
     # `rename()` is the one verb in the set that never asks. dplyr implements it
     # as `set_names()`, so it reaches the class through `names<-` and vctrs
     # rather than through `dplyr_reconstruct()`, and this package registers no
-    # vctrs methods (M36 Out; tune ships them, which is why the same call on a
-    # `tune_results` sheds the class -- measured 2026-08-31). What comes back is
-    # still self-consistent -- same rows, same counts, same scheme -- so it is a
+    # vctrs methods (tune ships them, which is why the same call on a
+    # `tune_results` sheds the class). What comes back is still
+    # self-consistent -- same rows, same counts, same scheme -- so it is a
     # legitimate first branch rather than the stale claim this file exists to
     # stop, and the criterion is asserted as the disjunction it is written as.
     list(name = "rename", branch = "either", f = function(x) {
@@ -183,9 +183,9 @@ test_that("every dplyr verb lands in the branch the invariants assign it", {
       testthat::expect_s3_class(out, "nested_results")
       expect_kept(out, res)
     } else {
-      # The same assertion the standalone AC3 blocks make, `tbl_df` included:
+      # The same assertion the standalone blocks make, `tbl_df` included:
       # asserting only the class absence here would let a table-only bare verb
-      # lose its tibble classes silently (M36 review O7).
+      # lose its tibble classes silently.
       expect_bare(out, case$name)
     }
   }
@@ -203,8 +203,8 @@ test_that("a verb that keeps the class returns a tibble, not a bare data frame",
 
 # Two row-changing forms the table above does not hold. `filter(.completed)`
 # is the one form that needs a run with a failed fold to remove anything at
-# all; the other single-form blocks went at M152, the table holding slice,
-# `[` and bind_rows().
+# all. The other single-form blocks live in the table above, which holds
+# slice, `[` and bind_rows().
 test_that("filter() dropping a failed fold returns a bare tibble", {
   skip_if_no_engines()
   res <- partial_results()
@@ -254,15 +254,13 @@ test_that("no row-changing result prints the outer resampling scheme", {
   }
 })
 
-# The help page may not still promise the behavior this rule replaced (M36
-# review O1).
+# The help page may not still promise the behavior this rule replaced.
 #
 # The behavioral half is already covered: test-nested-tune-grid-failures.R
-# asserts that a row subset comes back with all five attributes NULL. What was
-# missing is a guard on the prose, which went on promising the opposite in a
-# `@details` paragraph that AC1's own grep was scoped away from. Both the
-# roxygen source and the generated `.Rd` are read, because the sentence has to
-# leave both.
+# asserts that a row subset comes back with all five attributes NULL. This
+# block guards the prose: a `@details` paragraph promising the opposite would
+# otherwise go unseen. Both the roxygen source and the generated `.Rd` are
+# read, because the sentence has to stay out of both.
 #
 # `test_path("..", "..", ...)` resolves outside the source tree under
 # `R CMD check`, so this skips there and fires where the documentation is
@@ -309,24 +307,23 @@ test_that("the help page makes no promise about what subsetting rows keeps", {
 # How the object tells its own fold-label columns from ones a caller added.
 #
 # rsample names them `id`, and `id2`, `id3`... for a repeated design, which is
-# exactly what the constructor takes off the rset -- and, since M38, records.
+# exactly what the constructor takes off the rset -- and records.
 # Matching a name pattern instead also caught `ideal` and `id_extra` -- names a
-# caller can perfectly well add -- and the three tests below are what that cost
-# (M36 review O2, O3, O5).
+# caller can perfectly well add -- and the three tests below are what that cost.
 
 # dplyr calls `dplyr_reconstruct()` a second time with the modified frame as
 # the template, so an added column matching the id pattern joins the id columns
 # and becomes a key in the `order()` call that puts both sides in id order
 # before their values are compared. A list column is not orderable: the call
-# died with `unimplemented type 'list' in 'listgreater'`, raised from inside the
-# rule and naming no function the caller had heard of (M36 review O2). Reading
-# the constructor's record closes it for any name at all, this one included: the
-# added column is not in the record, so it is never a key (M38).
+# would die with `unimplemented type 'list' in 'listgreater'`, raised from
+# inside the rule and naming no function the caller had heard of. Reading the
+# constructor's record closes it for any name at all, this one included: the
+# added column is not in the record, so it is never a key.
 #
 # The key is only reached where it is actually compared -- `id` has to tie, and
 # the added column has to sort ahead of `id2` -- and that second condition is a
-# question about collation rather than about the data. `id_junk`, the name the
-# review measured it with, sorts before `id2` under this machine's locale and
+# question about collation rather than about the data. `id_junk`, for example,
+# sorts before `id2` under this machine's locale and
 # after it under the C collation `R CMD check` runs in, so the test would have
 # been green on CI for a reason having nothing to do with the fix. `id0_junk`
 # sorts ahead of `id2` in both, which is the point: whether a caller's column
@@ -385,8 +382,7 @@ test_that("a template with no id column of its own cannot be reconstructed onto"
 
 # The fold labels are found the same way, so an added `id_extra` was pasted
 # into every one of them: `collect_metrics(summarize = FALSE)` reported the
-# folds as "Fold1, x" and so on. This one predates the milestone -- reproduced
-# on the default branch -- and goes with the same helper.
+# folds as "Fold1, x" and so on. Reading the record fixes this one too.
 test_that("a column the caller added is not pasted into the fold labels", {
   skip_if_no_engines()
   res <- compat_results()
@@ -399,18 +395,18 @@ test_that("a column the caller added is not pasted into the fold labels", {
   expect_identical(collect_metrics(out, summarize = FALSE)$id, labels)
 })
 
-# The four forms that survived M36, all of them the same fault: the design's own
-# label columns were found by matching `^id[0-9]*$` against whatever names the
-# object happened to carry, so a caller's column landed in the set whenever its
-# name fell inside the pattern -- and a design column the caller replaced fell
-# out of it. Since M38 the constructor records the names it took off the rset
-# and every reader asks that record, so no name decides anything.
+# The four forms below share one fault: the design's own label columns were
+# found by matching `^id[0-9]*$` against whatever names the object happened to
+# carry, so a caller's column landed in the set whenever its name fell inside
+# the pattern -- and a design column the caller replaced fell out of it. The
+# constructor records the names it took off the rset and every reader asks that
+# record, so no name decides anything.
 
 # `id2` is what rsample calls the second label column of a REPEATED design, so
 # on a plain three-fold run it is a name a caller may use and the pattern caught
-# it anyway. Measured on the default branch 2026-08-31:
+# it anyway, which would paste it into the labels:
 # `unique(collect_metrics(dplyr::mutate(res, id2 = "x"), summarize = FALSE)$id)`
-# was `c("Fold1, x", "Fold2, x", "Fold3, x")`.
+# would give `c("Fold1, x", "Fold2, x", "Fold3, x")`.
 test_that("a column named `id2` on a plain design is not pasted into the fold labels", {
   skip_if_no_engines()
   res <- compat_results()
@@ -429,9 +425,8 @@ test_that("a column named `id2` on a plain design is not pasted into the fold la
 })
 
 # "Columns may be added" implies the caller may take one away again, and the
-# answer cannot depend on the spelling. Measured on the default branch
-# 2026-08-31: `dplyr::select(dplyr::mutate(res, id2 = 1), -id2)` was a `tbl_df`
-# where the same round trip on `extra` was a `nested_results`.
+# answer cannot depend on the spelling: dropping `id2` has to give back the same
+# object as dropping `extra`.
 test_that("a column named `id2` on a plain design can be removed again", {
   skip_if_no_engines()
   res <- compat_results()
@@ -446,10 +441,10 @@ test_that("a column named `id2` on a plain design can be removed again", {
 
 # A caller's list column becomes an ordering key only where the rule mistakes it
 # for one of the design's own. It takes a repeated design to reach: `id` ties
-# across a repeat, so the second key is actually compared. Measured on the
-# default branch 2026-08-31:
-# `dplyr::mutate(rep_res, id0 = as.list(seq_len(nrow(rep_res))))` aborted with
-# `unimplemented type 'list' in 'listgreater'`, raised from inside the rule.
+# across a repeat, so the second key is actually compared. Without the guard,
+# `dplyr::mutate(rep_res, id0 = as.list(seq_len(nrow(rep_res))))` would abort
+# with `unimplemented type 'list' in 'listgreater'`, raised from inside the
+# rule.
 test_that("a list column named `id0` survives a verb on a repeated design", {
   skip_if_no_engines()
   rep_res <- repeated_results()
@@ -468,10 +463,9 @@ test_that("a list column named `id0` survives a verb on a repeated design", {
 # The other direction: a label column the design DID name, replaced by something
 # `order()` cannot take. The record no longer matches, so the honest answer is a
 # bare tibble -- and the rule has to reach that answer rather than die on the
-# way to it. Measured on the default branch 2026-08-31:
-# `dplyr::mutate(res, id = list(c(1, 2), 3, 4))` aborted with
-# `unimplemented type 'list' in 'orderVector1'`, naming no function the caller
-# had heard of.
+# way to it. Without the guard, `dplyr::mutate(res, id = list(c(1, 2), 3, 4))`
+# would abort with `unimplemented type 'list' in 'orderVector1'`, naming no
+# function the caller had heard of.
 test_that("replacing a fold-label column with an unorderable value returns a bare tibble", {
   skip_if_no_engines()
   res <- compat_results()
@@ -481,12 +475,12 @@ test_that("replacing a fold-label column with an unorderable value returns a bar
 })
 
 # The same answer for a label column `order()` takes but cannot compare under.
-# A matrix is atomic, so `is.atomic()` alone let it through; `order()` then reads
-# it column by column and hands back a permutation twice the object's length,
-# which indexes both sides out to the same NA padding and made identical() vouch
-# for a record it never compared. Measured before the guard learned about `dim`:
-# `dplyr::mutate(m, extra = 1)` on a results object whose `id` is a 3x2 matrix
-# returned a `nested_results` (2026-08-31, M38 review O4).
+# A matrix is atomic, so `is.atomic()` alone lets it through; `order()` then
+# reads it column by column and hands back a permutation twice the object's
+# length, which indexes both sides out to the same NA padding and would make
+# identical() vouch for a record it never compared. So a results object whose
+# `id` is a 3x2 matrix must not come back as a `nested_results` from
+# `dplyr::mutate(res, extra = 1)`.
 test_that("a fold-label column with a dim is refused rather than compared", {
   skip_if_no_engines()
   res <- compat_results()
@@ -497,7 +491,7 @@ test_that("a fold-label column with a dim is refused rather than compared", {
   expect_bare(out)
 })
 
-# M49, AC5: `.inner_metrics` is part of the record the rule checks. A frame
+# `.inner_metrics` is part of the record the rule checks. A frame
 # lacking it, or carrying one fold's table changed, is refused against the
 # original as template -- through `dplyr_reconstruct()` here, and through `[`
 # and `select()` for the removal, which is the only change those doors can

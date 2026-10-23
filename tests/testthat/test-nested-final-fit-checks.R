@@ -1,10 +1,9 @@
-# Every cli_abort() branch on the final-fit path, fired once (M05 AC5, AC11;
-# re-cut at M46 AC1 for the `(object, results)` signature, D-041).
+# Every cli_abort() branch on the final-fit path, fired once.
 #
 # The workflow check is exercised through nested_final_fit() rather than
 # assumed from the orchestrators' suites: a check that is not wired into this
 # function passes its own tests and refuses nothing here. The design checks
-# no longer apply -- the final fit takes a results object, and what it asks of
+# do not apply -- the final fit takes a results object, and what it asks of
 # that object is `check_results_record()`'s three refusals below.
 
 test_that("the workflow checks are wired into the final fit", {
@@ -54,7 +53,7 @@ test_that("the former procedure arguments are refused as unknown", {
   res <- final_results(d)
   wf <- det_workflow(d)
 
-  # Each of the five formals D-041 removed. They come from `results` now, so
+  # Each of the five formals the signature lacks. They come from `results`, so
   # passing one is the dots error rather than a silent positional match.
   former <- list(
     grid = det_grid(),
@@ -76,8 +75,8 @@ test_that("the former procedure arguments are refused as unknown", {
   }
 })
 
-# The results-record refusals (AC1, RR05 Q3): one class, a message per
-# origin, the user's call named, and nothing fitted or drawn first.
+# The results-record refusals: one class, a message per origin, the user's
+# call named, and nothing fitted or drawn first.
 
 expect_bad_results <- function(expr, pattern) {
   cnd <- tryCatch(expr, error = function(e) e)
@@ -167,7 +166,7 @@ test_that("a results object carrying no procedure is refused", {
   )
 })
 
-test_that("a results object whose record holds no selection rule is refused (M69, AC2)", {
+test_that("a results object whose record holds no selection rule is refused", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -205,7 +204,7 @@ test_that("a results object with the record and no rows is refused", {
   res <- final_results(d)
 
   # Reachable only by surgery: `res[0, ]` and `vctrs::vec_ptype(res)` both
-  # hand back a bare tibble (measured 2026-09-02), so a classed zero-row
+  # hand back a bare tibble, so a classed zero-row
   # object wearing the record is a prototype, built here as the private
   # branch of `vec_restore()` would stamp one.
   empty <- res[0L, ]
@@ -237,7 +236,7 @@ test_that("the record refusals fire before anything is drawn", {
 
 # The all-failed refusal: a run in which no outer fold completed has no
 # estimate, so a model fitted from it would be reported with a number that
-# does not exist (IP3). It is refused after the three record refusals and
+# does not exist. It is refused after the three record refusals and
 # before the tuner, grid and seed steps, with its own class -- the one
 # collect_metrics(), autoplot() and agreement() raise on the same object.
 
@@ -320,7 +319,7 @@ test_that("a run with one failed fold and one completed is fitted", {
 
   # Built inline rather than from `final_results()`, which hardcodes its
   # design; on `final_nested()` because `det_nested()`'s inner specification
-  # cannot be re-evaluated by the final fit (M05).
+  # cannot be re-evaluated by the final fit.
   set.seed(22)
   res <- suppressWarnings(memoised(nested_tune_grid(
     wf,
@@ -337,7 +336,7 @@ test_that("a run with one failed fold and one completed is fitted", {
 
 # The specification is re-run in the caller's frame, so a design built with a
 # variable that is gone by now fails there -- two frames below the user's call
-# -- and the abort still names that call (M05, RR02 B1).
+# -- and the abort still names that call.
 
 test_that("an inner specification that cannot be re-evaluated names itself and the call", {
   skip_if_no_engines()
@@ -389,8 +388,7 @@ test_that("a run that recorded no metric set re-runs under tune's defaults", {
   skip_if_no_engines()
 
   # `attr(x, "metrics")` is absent rather than NULL for such a run; the
-  # rebuilt procedure passes NULL on and tune picks, exactly as the loop did
-  # (RR05 B4). Not a refusal case.
+  # rebuilt procedure passes NULL on and tune picks. Not a refusal case.
   d <- make_reg_data()
   wf <- det_workflow(d)
   res <- final_results(d, metrics = NULL)
@@ -427,8 +425,8 @@ test_that("a missing engine package is refused by the final fit", {
 })
 
 # The final fit rebuilds its inner design from the recorded `inside`, which
-# no entry check reads, so it applies the two "Apparent" rules itself (M132,
-# D-100). Each result here has its `inside` replaced, standing in for a
+# no entry check reads, so it applies the two "Apparent" rules itself. Each
+# result here has its `inside` replaced, standing in for a
 # record made before the rules or an `inside` that labels the whole data
 # differently.
 test_that("the final fit refuses an inner split relabelled Apparent", {
@@ -459,7 +457,7 @@ test_that("the final fit refuses an inner split relabelled Apparent", {
 
 # The rebuilt design also gets the entry check's design refusals and its two
 # id rules, in the entry check's order: the refused designs first, then the
-# id rules, then the "Apparent" rules (M133, D-102). The messages never name
+# id rules, then the "Apparent" rules. The messages never name
 # an outer fold.
 # The builders `inside` calls, at file level: the final fit evaluates
 # `inside` in the frame that calls it, which is expect_final_refused()'s.
@@ -494,7 +492,7 @@ vfold_apparent <- function(data) {
   )
 }
 # Every split of a bootstrap with its apparent split, rebuilt with
-# make_splits(), so no split keeps its class (M134, D-103).
+# make_splits(), so no split keeps its class.
 rebuilt_boots_apparent <- function(data) {
   boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
   splits <- lapply(boots$splits, function(split) {
@@ -570,7 +568,7 @@ FINAL_REFUSED <- list(
     )
   ),
   # An apparent split beside v-fold splits alone, which the entry check
-  # refuses as apparent(). Before M133 the final fit told it to rename.
+  # refuses as apparent().
   "apparent split beside v-fold splits" = list(
     inside = quote(vfold_apparent()),
     reason = "`rsample::apparent()` scores its one fold on the rows it trained on."
@@ -606,7 +604,7 @@ for (name in names(FINAL_REFUSED)) {
 }
 
 # tune keeps a split whose factor id has NA as a level, so the final fit
-# tunes on such a design (D-105).
+# tunes on such a design.
 na_level_vfold <- function(data) {
   folds <- rsample::vfold_cv(data, v = 3)
   ids <- as.character(folds$id)

@@ -1,4 +1,4 @@
-# Leaving dispatch_folds() without returning stops the folds it dispatched (M15).
+# Leaving dispatch_folds() without returning stops the folds it dispatched.
 #
 # The defect: dispatch_folds() sends a mirai_map and then blocks in
 # collect_mirai(). Interrupting there unwinds the host, but says nothing to the
@@ -10,7 +10,7 @@
 # The folds here are stand-ins that mark themselves started and then sleep. A
 # real fit would make the window the interrupt has to land in depend on how
 # fast the machine fits, and what is under test is the fate of dispatched work,
-# not fitting (M12). The stand-in is installed by mocking the package's own
+# not fitting. The stand-in is installed by mocking the package's own
 # `fold_task`, which dispatch_folds() looks up by name -- so everything from
 # `mirai_map()` to the return is the production path.
 
@@ -45,7 +45,7 @@ test_that("an interrupted run leaves no fold executing", {
   skip_if_no_daemons()
   # A genuine console interrupt is the contract under test, and a POSIX signal
   # is the only way to raise one without a console. setTimeLimit() is not a
-  # substitute -- it does not fire inside a blocked collect_mirai() (M14).
+  # substitute -- it does not fire inside a blocked collect_mirai().
   skip_on_os("windows")
   skip_if(!nzchar(Sys.which("sh")), "no POSIX shell to signal from")
 
@@ -85,7 +85,7 @@ test_that("an interrupted run leaves no fold executing", {
   # pre-flight check aborting is the realistic way -- this test has already
   # failed on its own error, and a signal fired anyway would land in whichever
   # test was running twenty seconds later, aborting the run under `R CMD check`
-  # with nothing to connect it to its cause (M15 review F3).
+  # with nothing to connect it to its cause.
   script <- sprintf(
     'i=0; while [ $i -lt 200 ]; do [ -f "%s" ] && [ -f "%s" ] && break; sleep 0.1; i=$((i+1)); done; if [ -f "%s" ] && [ -f "%s" ]; then sleep 0.5; kill -INT %d; fi',
     markers[[1]],
@@ -125,8 +125,8 @@ test_that("an interrupted run leaves no fold executing", {
 test_that("a run that finished normally is unharmed by the cancel on the way out", {
   skip_if_no_daemons()
 
-  # The other half of AC2. The cancel is unconditional -- no flag decides
-  # whether the run was abandoned -- so the normal exit path calls
+  # The normal-exit half of the cancel. The cancel is unconditional -- no flag
+  # decides whether the run was abandoned -- so the normal exit path calls
   # stop_mirai() too, on a map whose every element has already resolved.
   # Verified harmless by execution (it returns FALSE per element and touches
   # nothing), and pinned here so a change that made it destructive would be

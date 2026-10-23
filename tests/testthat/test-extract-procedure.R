@@ -13,7 +13,7 @@ procedure_pair <- function() {
   list(res = res, final = final)
 }
 
-test_that("AC1: the accessor returns the record the results object carries", {
+test_that("the accessor returns the record the results object carries", {
   skip_if_no_engines()
   objs <- procedure_pair()
 
@@ -25,18 +25,18 @@ test_that("AC1: the accessor returns the record the results object carries", {
   expect_s3_class(got$control, "control_grid")
 })
 
-test_that("AC1: the accessor returns the record the final fit carries", {
+test_that("the accessor returns the record the final fit carries", {
   skip_if_no_engines()
   objs <- procedure_pair()
 
   got <- extract_procedure(objs$final)
   expect_identical(got, objs$final$procedure)
-  # The final fit re-runs the procedure the results object recorded (D-041),
+  # The final fit re-runs the procedure the results object recorded,
   # so the two doors open onto records that agree on the tuner.
   expect_identical(got$tuner, extract_procedure(objs$res)$tuner)
 })
 
-test_that("AC2: an object with no method is refused, naming both that answer", {
+test_that("an object with no method is refused, naming both that answer", {
   cnd <- rlang::catch_cnd(extract_procedure(1:3))
   expect_s3_class(cnd, "nestedtune_no_extract_method")
   msg <- cli::ansi_strip(conditionMessage(cnd))
@@ -50,13 +50,13 @@ test_that("AC2: an object with no method is refused, naming both that answer", {
   expect_snapshot(error = TRUE, extract_procedure(1:3))
 })
 
-test_that("AC2: the no-method refusal wins over a dots complaint", {
+test_that("the no-method refusal wins over a dots complaint", {
   cnd <- rlang::catch_cnd(extract_procedure(1, foo = 1))
   expect_s3_class(cnd, "nestedtune_no_extract_method")
   expect_false(inherits(cnd, "rlib_error_dots_nonempty"))
 })
 
-test_that("the record's `select` is the selection_rule() the call was given, on both objects (M69, AC2)", {
+test_that("the record's `select` is the selection_rule() the call was given, on both objects", {
   skip_if_no_engines()
 
   d <- make_reg_data()

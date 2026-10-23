@@ -1,26 +1,24 @@
 # Oracle records for inner `sliding_window()`, `sliding_index()` and
-# `sliding_period()` designs under an outer `rolling_origin()` (M119).
+# `sliding_period()` designs under an outer `rolling_origin()`.
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 # The fixtures are TS_INNER_DESIGNS in helper-orchestration.R.
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
+# Source: the tidymodels pipeline
 #   itself, recomputed at test time by reference_nested_loop() in
 #   helper-orchestration.R, written from the documented seed contract rather
 #   than from the driver. Pinned by the three "nested_tune_grid() on an inner
-#   ... design matches a hand-rolled reference loop" tests. Satisfies M119
-#   AC1.
+#   ... design matches a hand-rolled reference loop" tests.
 #
-# O2 -- type "live" (reference implementation). Source: rsample::nested_cv(),
+# Source: rsample::nested_cv(),
 #   recomputed at test time. Every outer and inner analysis and assessment set
 #   `nested_resamples()` builds must match it row for row. Pinned by the three
-#   "inner ... splits match rsample::nested_cv()" tests. Satisfies M119 AC2.
+#   "inner ... splits match rsample::nested_cv()" tests.
 #
-# O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
+# Source: tune::tune_grid(),
 #   tune::select_best() and fit() run by hand under the final fit's
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
 #   from the fixture's literal inner call. Pinned by the three "the final fit
-#   on an inner ... design matches a hand-rolled reference" tests. Satisfies
-#   M119 AC3.
+#   on an inner ... design matches a hand-rolled reference" tests.
 
 skip_heavy_on_cran()
 
@@ -127,9 +125,9 @@ for (design in names(TS_INNER_DESIGNS)) {
   )
 }
 
-# M120 AC4: the sliding-index fixture runs on dates with weekend gaps, so its
-# tests reach splits the sliding-window fixture does not build. Both share the
-# outer rolling-origin splits, which index rows and not dates.
+# The sliding-index fixture runs on dates with weekend gaps, so its tests reach
+# splits the sliding-window fixture does not build. Both share the outer
+# rolling-origin splits, which index rows and not dates.
 test_that("the inner sliding-index fixture builds splits sliding-window does not", {
   window <- TS_INNER_DESIGNS[["sliding-window"]]
   index <- TS_INNER_DESIGNS[["sliding-index"]]

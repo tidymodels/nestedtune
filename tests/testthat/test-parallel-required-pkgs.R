@@ -72,7 +72,7 @@ test_that("a recipe selector the caller left unqualified resolves on a daemon", 
   expect_true(all(attached()))
 })
 
-# The tuner's package rides beside the workflow's (M50, T4): a racing run
+# The tuner's package rides beside the workflow's: a racing run
 # attaches finetune in every daemon before the first fold is sent, by the same
 # mechanism, and the two search-path probes pin that it was this package's
 # doing.

@@ -3,14 +3,14 @@
 # Daemons are separate R processes and load nestedtune from an installed
 # library. Under devtools/pkgload there may be no installed copy at all -- and
 # worse, there may be a *stale* one, in which case daemons quietly run old code
-# while the host runs the code under test (RR03 Q5). Priming the daemons with
+# while the host runs the code under test. Priming the daemons with
 # pkgload closes both holes; under R CMD check the package is installed and the
 # daemons inherit the library through the environment, so priming is a no-op.
 
 # The suite's wait bounds, named rather than scattered as literals.
 #
 # `helper-time-budget.R` reads these to total each file's declared worst case,
-# so a bound cut here moves the ledger with it and the two cannot drift (M16 T2).
+# so a bound cut here moves the ledger with it and the two cannot drift.
 # Every one of them is a worst case, not an expectation: the daemon files
 # typically finish in seconds and only a degraded runner approaches these.
 COLLECT_BOUNDED_DEFAULT_S <- 60
@@ -23,7 +23,7 @@ DAEMON_SNAPSHOT_BOUND_S <- 30
 # Collect a mirai, or a whole mirai_map, with a deadline -- never open-endedly.
 #
 # A bare `[` collect blocks until every element resolves, so one wedged daemon
-# hangs the suite -- the failure AC4 exists to make impossible. Polling to a
+# hangs the suite. Polling to a
 # deadline and then reading `$data` (which yields `unresolvedValue` rather than
 # waiting) cannot block at all. Same shape as the production probe in
 # R/parallel.R, for the same reason.
@@ -31,7 +31,7 @@ DAEMON_SNAPSHOT_BOUND_S <- 30
 # It takes both shapes because the suite has both, and one bounded idiom is
 # what `test-suite-hygiene.R` can check for mechanically: a single mirai reads
 # its own `$data`, a map reads one element at a time. `unresolved()` and
-# `stop_mirai()` accept either, so only the read differs (M14 T2).
+# `stop_mirai()` accept either, so only the read differs.
 collect_bounded <- function(map, seconds = COLLECT_BOUNDED_DEFAULT_S) {
   deadline <- Sys.time() + seconds
   while (mirai::unresolved(map) && Sys.time() < deadline) {
@@ -57,8 +57,7 @@ prime_daemons <- function() {
   # Collected, not fired and forgotten. load_all() in a cold daemon is slow, and
   # returning before it finishes leaves the daemons still priming: the pre-flight
   # probe then queues behind it on every daemon and can ride out its whole bound.
-  # M07's probe hid this by asking a single daemon, so whichever one was free
-  # answered; asking all of them is what surfaced it.
+  # A probe of a single daemon hides this, since whichever one is free answers.
   collect_bounded(
     mirai::everywhere(
       pkgload::load_all(path, quiet = TRUE),
@@ -73,10 +72,9 @@ prime_daemons <- function() {
 #
 # Under `R CMD check` the package is installed rather than primed, so the first
 # pre-flight probe is what pays to load nestedtune and its whole dependency
-# stack on every daemon at once -- tune alone measured 6.5 s cold (RR03). M07's
-# probe never saw that bill because a single task went to whichever daemon was
-# free; asking every daemon means the slowest cold load sets the time, and on a
-# loaded check machine that exceeded the 30 s default.
+# stack on every daemon at once -- tune alone measured 6.5 s cold. Asking every
+# daemon means the slowest cold load sets the time, and on a loaded check
+# machine that exceeded the 30 s default.
 #
 # That is a real property of the fix, documented in the roxygen and settable
 # through the option. Warming here keeps tests about dispatch from failing over
@@ -114,7 +112,7 @@ start_daemons <- function(n) {
 # Daemon probe answers, as preflight_outcome() receives them.
 #
 # The probe returns one record per daemon, so a test asserting the ladder builds
-# records rather than the bare logicals the pre-M24 probe returned. TRUE is a
+# records rather than bare logicals. TRUE is a
 # daemon that loaded the package with nothing missing, FALSE one that could not
 # load it, NA a daemon that never answered -- a non-record, which is what a
 # stopped or dead daemon actually yields.
@@ -124,7 +122,7 @@ start_daemons <- function(n) {
 # NULL)) is a load failure beside a healthy daemon.
 #
 # `missing_pkgs =` names the workflow's or the tuner's packages a daemon
-# cannot load, keyed by position the same way (M58); a daemon that cannot
+# cannot load, keyed by position the same way. A daemon that cannot
 # load the package still answers it, as the real probe does.
 reports <- function(..., missing = NULL, missing_pkgs = NULL) {
   loaded <- c(...)
@@ -142,7 +140,7 @@ reports <- function(..., missing = NULL, missing_pkgs = NULL) {
   })
 }
 
-# The same pool, minus the dispatcher that makes cancellation possible (M24).
+# The same pool, minus the dispatcher that makes cancellation possible.
 #
 # `mirai::daemons(n)` starts a dispatcher; `daemons(n, dispatcher = FALSE)` does
 # not, and use_parallel() admits both because it counts connections, which read
@@ -161,37 +159,37 @@ start_daemons_undispatched <- function(n) {
   invisible(n)
 }
 
-# A pool shared across the blocks of one file (M74).
+# A pool shared across the blocks of one file.
 #
-# test-parallel-identity.R once restarted its pool in every block -- 26 starts,
-# each priming and warming every daemon -- where all but two blocks need only
-# a primed pool of a given size. A pool is now started once per section by a
-# visible `start_daemons(n)` call (so the time-budget ledger counts the start
-# where it happens) and registered here with `share_daemons(n)`, which takes
-# the snapshot below; every block that reuses it opens with
-# `shared_daemons(n)`, which asks the pool for the same snapshot and compares
-# it with the one taken at the start (see `shared_daemons()` for which
-# fields are compared exactly and which as supersets). What a fold could
+# All but two blocks of test-parallel-identity.R need only a primed pool of a
+# given size, and each pool start primes and warms every daemon. So a pool is
+# started once per section by a visible `start_daemons(n)` call (so the
+# time-budget ledger counts the start where it happens) and registered here
+# with `share_daemons(n)`, which takes the snapshot below; every block that
+# reuses it opens with `shared_daemons(n)`, which asks the pool for the same
+# snapshot and compares it with the one taken at the start (see
+# `shared_daemons()` for which fields are compared exactly and which as
+# supersets). What a fold could
 # observe of a daemon's state and the package reads -- the loaded namespaces,
 # the one option the package consults, `search()`, the library variables and
 # `.libPaths()` -- has therefore not moved between blocks except by the
-# package's own attach step, which is the evidence M12 asked for before
-# sharing a pool. What the snapshot does not
+# package's own attach step, which is what makes sharing a pool safe. What the
+# snapshot does not
 # hold is deliberate: a daemon's RNG kind changes on its first fold, since the
 # pin sets Mersenne-Twister there and the worker does not restore it, so it
 # cannot be an equality field; `daemon_rng_kinds()` reads it for the one
-# block that needs it (BC2, the M07 lesson).
+# block that needs it.
 #
-# A private pool -- BC3, which kills a daemon -- is started with
-# `start_daemons()` as before, and replaces the shared pool: mirai holds one
+# A private pool, such as the one for the block that kills a daemon, is
+# started with `start_daemons()` and replaces the shared pool: mirai holds one
 # pool at a time, so the file orders its blocks by pool and the last shared
-# block of a section is the one that may leave its daemons dirty (BC9).
+# block of a section is the one that may leave its daemons dirty.
 shared_pool <- new.env(parent = emptyenv())
 
 # What each daemon is asked for. Built from text, for the reason
 # `daemon_probe_expr()` in R/parallel.R gives: `everywhere()` serializes the
 # host's copy of a live expression, and under covr that copy carries
-# `covr:::count()` calls the daemons cannot evaluate (the M10 lesson).
+# `covr:::count()` calls the daemons cannot evaluate.
 daemon_snapshot_expr <- function() {
   str2lang(paste0(
     "list(",
@@ -228,7 +226,7 @@ daemon_state_snapshot <- function() {
 # Today that padding lands the NA exactly where `order()` put it and the names
 # come out right anyway -- three unrelated defaults cancelling. Were
 # `order()`'s `na.last` ever `FALSE`, the same pair would hang the sorted pids
-# on the records one slot along and leave the last record unnamed (M79).
+# on the records one slot along and leave the last record unnamed.
 name_by_pid <- function(answers) {
   pids <- vapply(
     answers,
@@ -273,7 +271,7 @@ share_daemons <- function(n) {
 # The last two grow on a daemon's first fold and keep growing through a
 # section, by the package's own attach step (`attach_daemon_pkgs()`, which
 # attaches the workflow's and the tuner's packages in every daemon) and by
-# what those packages load lazily: measured 2026-09-07 on a 2-daemon pool,
+# what those packages load lazily: measured on a 2-daemon pool,
 # one grid run on the ranger fixture attached workflows, ranger and parsnip
 # and loaded tailor, sparsevctrs and eleven more, and a race added lme4,
 # Matrix, finetune and tune to the search path. That is the package doing on
@@ -310,9 +308,9 @@ unshare_daemons <- function() {
   invisible(NULL)
 }
 
-# A serial run while a pool is up (M74). The orchestrator takes the serial
-# branch when it counts fewer than two connected daemons (`use_parallel()`,
-# D-018); with a shared pool live for the whole section, a block builds its
+# A serial run while a pool is up. The orchestrator takes the serial
+# branch when it counts fewer than two connected daemons (`use_parallel()`).
+# With a shared pool live for the whole section, a block builds its
 # serial reference by having that count read zero, exactly as
 # test-parallel-classify.R fabricates a pool by having it read two. Nothing on
 # the serial path consults the pool, so the branch runs as it would with no
@@ -328,11 +326,10 @@ skip_if_no_daemons <- function() {
 
 # A library a daemon can start from but cannot load much out of.
 #
-# The trap RR03 named and M07 paid for: strip a daemon's library outright and it
-# cannot load *mirai* either, so it dies at startup, is still counted as a
-# connection, and hangs the very probe under test -- 39 minutes of `R CMD
-# check`. So the scratch library keeps mirai and nanonext, and drops everything
-# else.
+# Strip a daemon's library outright and it cannot load *mirai* either, so it
+# dies at startup, is still counted as a connection, and hangs the very probe
+# under test. So the scratch library keeps mirai and nanonext, and drops
+# everything else.
 lean_library <- function(keep = c("mirai", "nanonext")) {
   lib <- tempfile("nestedtune-lean-")
   dir.create(lib, recursive = TRUE, showWarnings = FALSE)
@@ -347,13 +344,12 @@ lean_library <- function(keep = c("mirai", "nanonext")) {
   if (!all(linked)) NULL else lib
 }
 
-# Two daemons that genuinely differ in what they can load (M10 T5, AC1).
+# Two daemons that genuinely differ in what they can load.
 #
-# RR03 Q5 recorded the mechanism as `R_LIBS`; M10 T1 verified that insufficient
-# wherever packages live in the SITE library, because R_LIBS only prepends --
-# the target stayed reachable and both daemons answered TRUE. Setting
-# R_LIBS_SITE *and* R_LIBS_USER does restrict it, leaving `.libPaths()` at the
-# scratch library plus base R's own.
+# Setting `R_LIBS` alone does not restrict a daemon wherever packages live in
+# the SITE library, because R_LIBS only prepends -- the target stays reachable
+# and both daemons answer TRUE. Setting R_LIBS_SITE *and* R_LIBS_USER does
+# restrict it, leaving `.libPaths()` at the scratch library plus base R's own.
 #
 # The daemons are spawned by hand against a host URL rather than by daemons(n),
 # because the environment has to differ per daemon and daemons(n) launches them

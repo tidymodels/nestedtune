@@ -1,11 +1,11 @@
-# IP1 -- no leakage across the outer boundary. The property is checked, not
-# asserted: the rows the driver actually hands to inner tuning and to the outer
-# fit are compared against the rows that fold holds out.
+# No leakage across the outer boundary. The property is checked, not asserted:
+# the rows the driver actually hands to inner tuning and to the outer fit are
+# compared against the rows that fold holds out.
 #
 # The orchestrator's own failure mode is pairing: handing fold i's split to
 # fold j's inner resamples would leak while every individual object stayed
 # valid, and no inspection of the result would show it. So the handoff is
-# instrumented, not just the structure M01 built.
+# instrumented, not just the structure the package builds.
 
 record_handoffs <- function(wf, folds, grid, metrics) {
   seen <- list()

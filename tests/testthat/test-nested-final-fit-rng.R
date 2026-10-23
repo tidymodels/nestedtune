@@ -1,4 +1,4 @@
-# IP2 for the final-fit path (AC3, AC12).
+# Seeds and the caller's RNG state on the final-fit path.
 #
 # The path draws twice: once to build the inner rset and tune, once to fit.
 # What is checkable is that everything downstream of the two seeds depends on
@@ -66,8 +66,8 @@ test_that("the fit does not depend on the ambient RNG state or kind", {
   # caller's stream, and that draw is itself kind-dependent -- set.seed(77)
   # then sample.int() gives different integers under Mersenne-Twister and
   # under L'Ecuyer-CMRG. What the kind pin buys is everything downstream of
-  # the seeds, which is what this asserts. (M05's recorded deviation from
-  # RR02's BC6; the same idiom test-nested-tune-grid-rng.R uses.)
+  # the seeds, which is what this asserts. The same idiom appears in
+  # test-nested-tune-grid-rng.R.
   seeds <- c(101L, 202L)
   inside <- attr(res, "inside")
   entry_kind <- RNGkind()
@@ -147,8 +147,8 @@ test_that("the RNG state is restored when the call errors after the snapshot", {
 
   # The failure has to land inside the guarded region to test anything: the
   # argument checks all fire before the snapshot, so an error from one of them
-  # would leave the caller's state untouched no matter what on.exit() did
-  # (AC12). This design re-evaluates its inner specification after the tuning
+  # would leave the caller's state untouched no matter what on.exit() did.
+  # This design re-evaluates its inner specification after the tuning
   # seed has already been set, so a specification that cannot be re-evaluated
   # fails exactly there -- past the snapshot, past a set.seed(). The loop
   # accepts such a design; only the final fit re-evaluates the stored call, so
@@ -239,11 +239,10 @@ test_that("a session with no RNG state is left with a valid one", {
   expect_no_error(runif(1))
 })
 
-# The Bayesian path's RNG properties (M46 AC4) were pinned here until M152. The
-# final fit seeds, snapshots and restores in one place for every tuner, so the
-# grid strand above covers them.
+# The final fit seeds, snapshots and restores in one place for every tuner, so
+# the grid strand above covers the Bayesian path's RNG properties as well.
 
-test_that("AC4: the final fit reads nothing from the fold rows but splits and .completed", {
+test_that("the final fit reads nothing from the fold rows but splits and .completed", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()

@@ -178,7 +178,7 @@
         chosen before seeing this estimate, it is the number to report for the model
         `nested_final_fit()` builds.
 
-# AC1: the set's printed summary holds its shape
+# the set's printed summary holds its shape
 
     Code
       print(summary(wset_three_results()))
@@ -288,7 +288,7 @@
         workflow chosen before seeing these estimates, its estimate is the number to
         report for the model `nested_final_fit()` builds with that workflow's `id`.
 
-# AC1: the selection-rule line holds its shape
+# the selection-rule line holds its shape
 
     Code
       print(summary(one_std_err))
@@ -438,7 +438,7 @@
         chosen before seeing this estimate, it is the number to report for the model
         `nested_final_fit()` builds.
 
-# AC1: the two-ordering line holds its shape
+# the two-ordering line holds its shape
 
     Code
       print(summary(two))
@@ -464,7 +464,7 @@
         chosen before seeing this estimate, it is the number to report for the model
         `nested_final_fit()` builds.
 
-# AC4: the set's selection-rule line holds its shape
+# the set's selection-rule line holds its shape
 
     Code
       print(summary(under_rule))

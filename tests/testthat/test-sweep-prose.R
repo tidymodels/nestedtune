@@ -171,7 +171,7 @@ test_that("an unclosed comment and a dropped item-shaped line take no prose", {
   )
 })
 
-# A pipe table on a page is not prose (M127), as it is not in a roxygen body.
+# A pipe table on a page is not prose, as it is not in a roxygen body.
 # The table here joins to more than 30 words and names more than four
 # backtick spans, so the sentence mode and `--spans` would each report it if
 # it were read; the over-cap sentence after it shows the page is still read.

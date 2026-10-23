@@ -1,13 +1,12 @@
-# The seed envelope of nested_workflow_map() (M71, AC2; IP2, D-011). The
-# map reinstates one entry state before every workflow and leaves the
-# caller's state as it found it, including a session that had never drawn.
-# Every identity is between direct calls, never through `memoised()` (the
-# M42 lesson), and every fixture is built before the state is read: a recipe
-# draws its step id from the stream.
+# The seed envelope of nested_workflow_map(). The map reinstates one entry
+# state before every workflow and leaves the caller's state as it found it,
+# including a session that had never drawn. Every identity is between direct
+# calls, never through `memoised()`, and every fixture is built before the
+# state is read: a recipe draws its step id from the stream.
 
 skip_heavy_on_cran()
 
-test_that("AC2: the caller's RNG state and kind survive the call untouched", {
+test_that("the caller's RNG state and kind survive the call untouched", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -33,7 +32,7 @@ test_that("AC2: the caller's RNG state and kind survive the call untouched", {
   expect_identical(RNGkind()[[1L]], "Wichmann-Hill")
 })
 
-test_that("AC2: a session that never drew is left with no RNG state", {
+test_that("a session that never drew is left with no RNG state", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -54,8 +53,8 @@ test_that("AC2: a session that never drew is left with no RNG state", {
     metrics = ms
   )
   # Unlike an orchestrator on its own, which keeps the state it created,
-  # the map removes it: the session is as it was found (AC2). The kind is
-  # as it was found too, and the next draw works.
+  # the map removes it: the session is as it was found. The kind is as it
+  # was found too, and the next draw works.
   expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
   expect_identical(RNGkind(), entry_kind)
   expect_no_error(runif(1))
@@ -68,7 +67,7 @@ test_that("AC2: a session that never drew is left with no RNG state", {
   )
 })
 
-test_that("AC2: the same seed gives identical sets across two direct calls, and a different seed does not", {
+test_that("the same seed gives identical sets across two direct calls, and a different seed does not", {
   skip_if_no_wset_fixture(stochastic = TRUE)
   d <- make_reg_data()
   # ranger on both rows, so the outer fits draw from the stream.
@@ -114,7 +113,7 @@ test_that("AC2: the same seed gives identical sets across two direct calls, and 
   ))
 })
 
-test_that("AC2: an error partway through the set still restores the caller's state", {
+test_that("an error partway through the set still restores the caller's state", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)

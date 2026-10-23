@@ -1,5 +1,5 @@
 # A parsnip model specification with a formula or a recipe as the
-# orchestrators' input (M107, D-069). Each export is a generic on `object`:
+# orchestrators' input. Each export is a generic on `object`:
 # the `model_spec` method takes `(object, preprocessor, resamples, ...)` in
 # tune's order, wraps the two in `workflows::workflow(preprocessor, object)`,
 # and calls the generic again, so the run is the workflow path's own.
@@ -32,7 +32,7 @@ call_by_name <- function(fn, ...) {
 # refuse a missing finetune first on both routes, so where it is absent their
 # preprocessor refusals are unreachable and those three are passed over.
 
-test_that("AC4: a model specification with no preprocessor is refused by class", {
+test_that("a model specification with no preprocessor is refused by class", {
   for (fn in ORCHESTRATORS) {
     if (!tuner_ready(fn)) {
       next
@@ -45,7 +45,7 @@ test_that("AC4: a model specification with no preprocessor is refused by class",
   }
 })
 
-test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused by class", {
+test_that("a preprocessor that is neither a formula nor a recipe is refused by class", {
   # A number, a design handed where the preprocessor goes, and variables,
   # which tune's own method refuses and which only a workflow takes.
   wrong <- list(
@@ -79,7 +79,7 @@ test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused
   }
 })
 
-test_that("AC4: a preprocessor beside a workflow is refused by class, by name or by position", {
+test_that("a preprocessor beside a workflow is refused by class, by name or by position", {
   wf <- workflows::workflow(y ~ x, bare_spec())
   for (fn in ORCHESTRATORS) {
     if (!tuner_ready(fn)) {
@@ -238,7 +238,7 @@ test_that("an object that is neither a workflow nor a model specification is ref
   }
 })
 
-test_that("AC4: nested_final_fit() given a bare model specification names workflows::workflow()", {
+test_that("nested_final_fit() given a bare model specification names workflows::workflow()", {
   cnd <- rlang::catch_cnd(nested_final_fit(bare_spec(), 1))
   expect_s3_class(cnd, "rlang_error")
   expect_match(conditionMessage(cnd), "must be a <workflow>")
@@ -301,7 +301,7 @@ stoch_spec <- function() {
 
 reg_formula <- function() y ~ x1 + x2 + x3 + x4
 
-test_that("AC1: nested_tune_grid() on a spec and a formula is the workflow run", {
+test_that("nested_tune_grid() on a spec and a formula is the workflow run", {
   skip_if_no_engines(stochastic = TRUE)
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -318,10 +318,11 @@ test_that("AC1: nested_tune_grid() on a spec and a formula is the workflow run",
   expect_same_run(routes)
 })
 
-# The recipe cases (AC2). The step id is written out, and the recipe is
+# The recipe cases. The step id is written out, and the recipe is
 # built once, so both routes carry the same one. The grid case runs on
 # `final_nested()`, whose literal inner specification survives the final
-# fit's re-run, so AC3 below builds its final fits from these two results.
+# fit's re-run, so the final-fit cases below build their fits from these
+# two results.
 
 pca_recipe <- function(data, num_comp = tune::tune()) {
   recipes::step_pca(
@@ -351,19 +352,19 @@ recipe_grid_routes <- function() {
   )
 }
 
-test_that("AC2: nested_tune_grid() on a spec and a recipe is the workflow run", {
+test_that("nested_tune_grid() on a spec and a recipe is the workflow run", {
   skip_if_no_engines()
   run <- recipe_grid_routes()
   expect_same_run(run$routes)
 })
 
-# The final fit takes a workflow (D-041), so a result built from a spec is
+# The final fit takes a workflow, so a result built from a spec is
 # finalized on `workflow(preprocessor, spec)`, the workflow the spec route
 # recorded. The identity check refuses a workflow that differs from the
 # recorded one with `nestedtune_workflow_mismatch`, so a fit that returns at
 # all has passed it, and the control shows the same check refusing a
 # workflow with another recipe.
-test_that("AC3: a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
+test_that("a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
   skip_if_no_engines()
   run <- recipe_grid_routes()
   wf <- workflows::workflow(run$recipe, bare_spec())

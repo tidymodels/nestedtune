@@ -1,30 +1,26 @@
-# The two racing tuners on the rolling-origin time-series design (M110, cut
-# to one design at M113 under D-079), and their final fits on the same
-# design. DESIGN Conventions: oracles are recorded in the test file that
-# asserts them. The M110 tests sit in four files, test-time-series-*.R, so
-# no one file runs alone for long under parallel test files.
+# The two racing tuners on the rolling-origin time-series design, and their
+# final fits on the same design. DESIGN Conventions: oracles are recorded in
+# the test file that asserts them. The time-series tests are split across the
+# test-time-series-*.R files, so no one file runs alone for long under
+# parallel test files.
 #
-# O1 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_nested_race_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver, run here for each racer on
-#   the rolling-origin design alone (M113): the outer design never reaches
-#   tuner code, every fixture's inner call is the same `rolling_origin()`,
-#   and test-time-series-designs.R runs the grid reference loop and the
-#   fit_resamples paths on every design in TS_DESIGNS. Pinned by the "<racer> matches its reference
-#   loop on a rolling-origin design" tests. Satisfies M110 AC1 for these
-#   tuners.
+#   the rolling-origin design alone: the outer design never reaches tuner
+#   code, every fixture's inner call is the same `rolling_origin()`, and
+#   test-time-series-designs.R runs the grid reference loop and the
+#   fit_resamples paths on every design in TS_DESIGNS. Pinned by the
+#   "<racer> matches its reference loop on a rolling-origin design" tests.
 #
-# O2 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_race_final_fit() in helper-orchestration.R, handed the
 #   fixtures' literal inner `rolling_origin()` call as `inner_design`, so the
 #   reference builds the inner design on the full data from its own spelling
 #   of the call and selects with `select_best()` itself. Pinned by "the
 #   <racer> final fit on a rolling-origin result matches its reference".
-#   Satisfies M110 AC3 for these tuners.
 #
-# O1 and O2 check that the orchestrators give what finetune gives when run by
-# hand. The estimate itself adds nothing new for these designs, so no second
-# oracle type is asked of them here.
+# Both check that the orchestrators give what finetune gives when run by hand.
 
 skip_heavy_on_cran()
 

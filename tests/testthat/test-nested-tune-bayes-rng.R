@@ -1,13 +1,11 @@
-# The "the caller's RNG state and kind survive the call untouched" and "a
-# session with no RNG state is left with a valid one" blocks were pinned here
-# until M113, and the fold-order, ambient-RNG and error-restore blocks until
-# M152. The RNG restore and the fold seeding are one shared site in
-# `nested_loop()` / `nested_fold_fit()`, so test-nested-tune-grid-rng.R covers
-# them (D-079).
+# The caller's-RNG-state, no-RNG-state, fold-order, ambient-RNG and
+# error-restore blocks are covered by test-nested-tune-grid-rng.R: the RNG
+# restore and the fold seeding are one shared site in `nested_loop()` /
+# `nested_fold_fit()`.
 #
-# IP2 for the Bayesian path (M45 AC4). Two of the eight properties
-# test-nested-tune-grid-rng.R holds the grid path to, same seed and different
-# seed, are asserted here on nested_tune_bayes(). Plus the one rule
+# Two of the eight properties test-nested-tune-grid-rng.R holds the grid path
+# to, same seed and different seed, are asserted here on nested_tune_bayes().
+# Plus the one rule
 # that is this path's own: the Gaussian-process seed is the fold's tuning
 # seed, and the control carrying it is built inside that seed's scope. Every
 # test that could pass vacuously under a deterministic engine uses ranger,
@@ -20,9 +18,8 @@ skip_heavy_on_cran()
 bayes_tuner <- function() tuner_bayes(2, 3, tune::exp_improve())
 
 # The seed-77 run is built once and read back by the different-seed test
-# below (M74). The identity here is still between two executions: `first`
-# is the build, `second` a direct call, never two reads of one cache entry
-# (the M42 lesson).
+# below. The identity here is still between two executions: `first` is the
+# build, `second` a direct call, never two reads of one cache entry.
 test_that("the same seed produces the same result", {
   skip_if_no_bayes_fixture(stochastic = TRUE)
 

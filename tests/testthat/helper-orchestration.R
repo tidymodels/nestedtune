@@ -16,8 +16,8 @@ make_reg_data <- function(n = 90, seed = 4242) {
 }
 
 # The deterministic engine: a tunable recipe step ahead of an lm model. Nothing
-# on this path touches the RNG, which is what lets AC3's fit_resamples()
-# invariant be an exact equality rather than a seed-contingent one (D-013).
+# on this path touches the RNG, which is what lets the fit_resamples()
+# invariant be an exact equality rather than a seed-contingent one.
 det_workflow <- function(data) {
   rec <- recipes::step_pca(
     recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
@@ -29,8 +29,8 @@ det_workflow <- function(data) {
 
 det_grid <- function() data.frame(num_comp = 1:3)
 
-# A continuous tunable, for the cases where an integer grid has to be expanded
-# (M21). `num_comp` reaches only as many values as there are predictors, so its
+# A continuous tunable, for the cases where an integer grid has to be expanded.
+# `num_comp` reaches only as many values as there are predictors, so its
 # expansion is a small fixed set and any two runs agree trivially; `threshold`
 # is continuous, which is where tune's space-filling expansion has choices to
 # make -- and where two runs under different seeds were measured to disagree.
@@ -45,7 +45,7 @@ cont_workflow <- function(data) {
 
 # The stochastic engine. ranger draws its seed from R's RNG and runs
 # single-threaded here, so a fold's fit is reproducible iff our seeding is
-# (RR01 Q8: with a deterministic engine every RNG test passes vacuously).
+# (with a deterministic engine every RNG test passes vacuously).
 stoch_workflow <- function(data) {
   spec <- parsnip::set_mode(
     parsnip::set_engine(
@@ -66,7 +66,7 @@ FINALIZE_FRAC <- c(1 / 10, 5 / 10)
 # dials::get_n_frac_range() over FINALIZE_FRAC. With `record` an environment,
 # the finalizer first appends what it was handed -- the row count and the
 # sorted first predictor -- so a test can say which rows tune read. Shared by
-# test-nested-tune-finalize.R and test-time-series-pairs-other.R (M140).
+# test-nested-tune-finalize.R and test-time-series-pairs-other.R.
 frac_min_n <- function(record = NULL) {
   finalizer <- function(object, x, ...) {
     if (!is.null(record)) {
@@ -93,14 +93,14 @@ frac_param_info <- function(wf, record = NULL) {
   )
 }
 
-# The two fixed workflows `nested_fit_resamples()` runs (M70): nothing marked
+# The two fixed workflows `nested_fit_resamples()` runs: nothing marked
 # with `tune()`, so the five tuning orchestrators refuse them at entry and
 # the new one scores them on the outer folds alone. `fixed_workflow()` is
-# `det_workflow()` finalized at `num_comp = 2L`, the deterministic path AC1's
+# `det_workflow()` finalized at `num_comp = 2L`, the deterministic path the
 # value oracles need; `fixed_stoch_workflow()` is `stoch_workflow()` with
-# `min_n` fixed, ranger single-threaded, for the seed identities (AC6).
+# `min_n` fixed, ranger single-threaded, for the seed identities.
 
-# The step id is written out rather than drawn (M79). `recipes::step_pca()`
+# The step id is written out rather than drawn. `recipes::step_pca()`
 # draws its id from the stream, so the same call at two stream positions
 # builds two workflows that differ in nothing that reaches a fit -- and
 # `fixture_key()` reads the workflow, so the two key two cache entries for one
@@ -110,7 +110,7 @@ frac_param_info <- function(wf, record = NULL) {
 # written out, `wset_two()` and `wset_fixed()` being the two sets that call
 # this and build it at different positions. A written-out id also means the
 # "seeded before the workflow is built" step in `fit_resamples_results()` and
-# `wset_results()` no longer has a draw to protect against.
+# `wset_results()` has no draw to protect against.
 fixed_workflow <- function(data) {
   rec <- recipes::step_pca(
     recipes::recipe(y ~ x1 + x2 + x3 + x4, data = data),
@@ -133,12 +133,12 @@ fixed_stoch_workflow <- function(data) {
   workflows::workflow(y ~ x1 + x2 + x3 + x4, spec)
 }
 
-# The suite's `nested_fit_resamples()` run (M70), served from the cache: the
+# The suite's `nested_fit_resamples()` run, served from the cache: the
 # fixed deterministic workflow on `det_nested()`, under entry seed 30, the
 # seed the value oracles in test-nested-fit-resamples-oracles.R use directly.
 # Seeded before the workflow is built as well as before the run, as
 # `bayes_control_final_results()` is. That second seed is the one doing work
-# here: since M79 wrote `fixed_workflow()`'s step id out, nothing between the
+# here: `fixed_workflow()`'s step id is written out, so nothing between the
 # two `set.seed()` calls draws -- the id is a literal, `det_nested()` seeds
 # itself, `reg_metrics()` draws nothing -- so the pre-build seed is kept for
 # the shape it shares with the other fixture builders, not for an effect.
@@ -155,7 +155,7 @@ reg_metrics <- function() {
   yardstick::metric_set(yardstick::rmse, yardstick::rsq)
 }
 
-# The hand-rolled reference loop (AC2/AC16). Deliberately written from the
+# The hand-rolled reference loop. Deliberately written from the
 # documented seed contract -- `set.seed(s)` then one
 # `sample.int(.Machine$integer.max, 2 * n_folds)`, fold i taking elements
 # 2i-1 and 2i -- and never from the driver's output, so a driver that
@@ -216,12 +216,12 @@ reference_nested_loop <- function(
   })
 }
 
-# The selection each reference loop makes (M69, AC1): tune's own selector
+# The selection each reference loop makes: tune's own selector
 # called by name, the orderings spliced from the rule the test built, so the
 # loop is written from the documented contract of `selection_rule()` and never
-# from the package's `apply_selection_rule()`. `NULL` is the loop as it stood
-# before M69, `tune::select_best()` on the first metric, which is also what
-# the default rule promises.
+# from the package's `apply_selection_rule()`. `NULL` selects with
+# `tune::select_best()` on the first metric, which is also what the default
+# rule promises.
 reference_select <- function(tuned, select, metric_name) {
   if (is.null(select) || identical(select$rule, "best")) {
     return(tune::select_best(tuned, metric = metric_name))
@@ -245,7 +245,7 @@ reference_select <- function(tuned, select, metric_name) {
 }
 
 # A reference loop's answer under another selection rule, from the tuning
-# stage it already ran (M74). Each fold's hand-run tuning result is kept in
+# stage it already ran. Each fold's hand-run tuning result is kept in
 # the loop's `tuned` field, and the rule only changes what is selected from
 # it and the outer fit that follows: the selection is `reference_select()`
 # on that result, the outer fit is `tune::last_fit()` under the fold's
@@ -276,7 +276,7 @@ reference_with_rule <- function(ref, wf, nested, metrics, select, metric_name) {
 }
 
 # The control a fold's `tune_grid()` runs under, written from the documented
-# contract (M48, D-042): the caller's control -- or tune's default when none
+# contract: the caller's control -- or tune's default when none
 # was passed -- with `allow_par` forced off and `event_level` set from the
 # argument.
 forced_grid_control <- function(control, event_level = "first") {
@@ -288,12 +288,11 @@ forced_grid_control <- function(control, event_level = "first") {
   control
 }
 
-# The hand-rolled reference loop for the Bayesian path (M45 AC2), written
+# The hand-rolled reference loop for the Bayesian path, written
 # from the same seed contract and never from the driver's output. What it adds
 # to the grid reference is the one rule that is the Bayesian path's own: the
 # Gaussian process is seeded from the fold's tuning seed through
-# `control_bayes(seed = )`, built after `set.seed()` on that same number
-# (D-040).
+# `control_bayes(seed = )`, built after `set.seed()` on that same number.
 reference_nested_bayes_loop <- function(
   wf,
   nested,
@@ -357,7 +356,7 @@ reference_nested_bayes_loop <- function(
 }
 
 # The control a fold's `tune_bayes()` runs under, written from the documented
-# contract (M48, D-042): the caller's control -- or tune's default when none
+# contract: the caller's control -- or tune's default when none
 # was passed -- with `allow_par` forced off, `event_level` set from the
 # argument and the fold's tuning seed as the Gaussian process's `seed`.
 # `save_workflow` is the reference's own addition where a strand needs
@@ -380,7 +379,7 @@ forced_bayes_control <- function(
   control
 }
 
-# The hand-rolled reference final fit (AC2/AC9).
+# The hand-rolled reference final fit.
 #
 # Written from the documented contract, never from the object: its own
 # `set.seed(s)` and its own `sample.int(.Machine$integer.max, 2)`, its own inner
@@ -389,11 +388,10 @@ forced_bayes_control <- function(
 # nested_final_fit() returned, so a function that misassigns its seeds *and*
 # reports the assignment consistently still fails.
 #
-# The rset is built after the tuning seed is set, which is the ordering D-016
-# fixed: building an rset draws from the RNG, so a reference that built it
-# earlier would disagree with a correct implementation. `inner_design` is a
-# function of the data that makes the design's `inside` call, read by
-# reference_inner() (M140).
+# The rset is built after the tuning seed is set. Building an rset draws from
+# the RNG, so a reference that built it earlier would disagree with a correct
+# implementation. `inner_design` is a function of the data that makes the
+# design's `inside` call, read by reference_inner().
 reference_final_fit <- function(
   wf,
   data,
@@ -435,13 +433,13 @@ reference_final_fit <- function(
   list(seeds = seeds, selected = best, workflow = fitted, tuned = tuned)
 }
 
-# The hand-rolled reference final fit for the Bayesian path (M46 AC2). What
-# it adds to the grid reference is the rule that is the Bayesian path's own
-# (D-040): `control_bayes(seed = <the tuning seed>)`, built after `set.seed()`
-# on that same number, with the initial set drawn inside `tune_bayes()` from
-# the same stream. The rset is built after the tuning seed is set (D-016).
-# `save_workflow = TRUE` is set on the test's own tuner call alone, so the O5
-# strand can run `tune::fit_best()` on this run (RR02 Q5, RR05 Q1).
+# The hand-rolled reference final fit for the Bayesian path. What it adds to
+# the grid reference is the rule that is the Bayesian path's own:
+# `control_bayes(seed = <the tuning seed>)`, built after `set.seed()` on that
+# same number, with the initial set drawn inside `tune_bayes()` from the same
+# stream. The rset is built after the tuning seed is set. `save_workflow`
+# is set to TRUE on the test's own tuner call alone, so the strand can run
+# `tune::fit_best()` on this run.
 reference_bayes_final_fit <- function(
   wf,
   data,
@@ -492,7 +490,7 @@ reference_bayes_final_fit <- function(
 
 # The inner design a reference final fit builds on the full data, under the
 # tuning seed already set. `inner_design` is a function of the data, spelled
-# out by the test as the design's own `inside` call (M110), and the default is
+# out by the test as the design's own `inside` call, and the default is
 # the `vfold_cv(v = v)` the suite's other designs use.
 reference_inner <- function(data, v, inner_design = NULL) {
   if (is.null(inner_design)) {
@@ -505,11 +503,11 @@ ref_field <- function(ref, field) {
   vapply(ref, function(x) x[[field]], integer(1))
 }
 
-# One outer fold engineered to fail, at a stage of our choosing (M03).
+# One outer fold engineered to fail, at a stage of our choosing.
 #
 # The failure is injected into the *design*, not the workflow, and inside the
-# design's own frame: since M59 the entry check refuses an inner split built
-# on any other frame, so the vehicle is the indices. Keyed to fold position
+# design's own frame: the entry check refuses an inner split built on any
+# other frame, so the vehicle is the indices. Keyed to fold position
 # rather than to a counter, so it stays deterministic however the loop is
 # scheduled.
 #
@@ -520,7 +518,7 @@ ref_field <- function(ref, field) {
 # index still maps, so tuning completes and `last_fit()` refuses the split
 # (the appended case test-nested-tune-grid-failures.R also asserts). Both
 # pass the entry check: an empty `in_id` lies inside the outer split's, and
-# the outer split's own range is `last_fit()`'s to refuse (M54).
+# the outer split's own range is `last_fit()`'s to refuse.
 foreign_frame <- function(n = 30, seed = 909) {
   set.seed(seed)
   data.frame(z = rnorm(n), w = rnorm(n))
@@ -567,11 +565,11 @@ det_nested <- function(data, v = 3, seed = 11) {
 }
 
 # A design whose inner specification is written with literal arguments, so it
-# survives re-evaluation when the final fit re-runs it (M05).
+# survives re-evaluation when the final fit re-runs it.
 #
 # det_nested() above deliberately does not: its `v` is a parameter of the helper
 # and is gone by the time nested_final_fit() evaluates the stored call. That is
-# the hazard RR02 named as B1 and test-nested-final-fit-checks.R pins, and it is
+# the hazard that test-nested-final-fit-checks.R pins, and it is
 # why the documentation asks for literals -- a design built inside any function
 # that parameterizes its resampling has the same problem.
 final_nested <- function(data, seed = 11) {
@@ -583,7 +581,7 @@ final_nested <- function(data, seed = 11) {
   )
 }
 
-# The two time-series designs (M108), built with rsample::nested_cv() itself.
+# The two time-series designs, built with rsample::nested_cv() itself.
 # Both take three outer slices of `make_reg_data()`'s 90 rows, each holding out
 # one row (`assess = 1`), so no row is held out twice. The inner design is a
 # literal `rolling_origin()` call, so the final fit can re-run it on the full
@@ -609,7 +607,7 @@ ts_sliding_nested <- function(data) {
   )
 }
 
-# The index-based and period-based designs (M111) need a date column, so they
+# The index-based and period-based designs need a date column, so they
 # run on `make_ts_data()`: `make_reg_data()` plus 90 consecutive days. The
 # workflows' recipes name `x1` to `x4`, so `date` is never a predictor.
 # `sliding_index()` mirrors the sliding-window design: three outer slices,
@@ -657,9 +655,9 @@ ts_metrics <- function() {
 
 # The four time-series designs by name, the outer split class each builds,
 # so a test looping over them shows it ran on the design its name claims, and
-# the data each is built on (M110, M111). The tests sit in four files,
-# test-time-series-*.R, so no one file runs alone for long under parallel
-# test files.
+# the data each is built on. The tests are split across the
+# test-time-series-*.R files, so no one file runs alone for long under
+# parallel test files.
 TS_DESIGNS <- list(
   "rolling-origin" = ts_rolling_nested,
   "sliding-window" = ts_sliding_nested,
@@ -682,7 +680,7 @@ TS_DATA <- list(
 )
 
 # `make_reg_data()` with a `date` column of weekdays only, starting on
-# Wednesday 2020-01-01, so the dates have a two-day gap every weekend (M120).
+# 1 January 2020, a Wednesday, so the dates have a two-day gap every weekend.
 # The inner sliding-index fixture runs on it for this reason. On the gap-free
 # dates of `make_ts_data()`, a 39-day `lookback` covers 40 rows, the same as
 # `lookback = 39` in the sliding-window design. There the sliding-index design
@@ -695,18 +693,18 @@ make_ts_weekday_data <- function() {
   d
 }
 
-# The three inner sliding designs (M119), each under the rolling-origin outer
-# design. The sliding-window and sliding-period designs are built on
-# `make_ts_data()`, and the sliding-index design on `make_ts_weekday_data()`
-# (M120). Across the three outer folds, sliding-window has four, six and
-# eight inner resamples, sliding-index seven, nine and eleven, and
-# sliding-period four, five and seven. These counts come from
-# `sapply(x$inner_resamples, nrow)` on each fixture, run 2026-09-27. On the weekday
-# dates a 39-day `lookback` covers 28 rows, so the sliding-index splits differ
-# from the sliding-window ones in every fold. `sliding_period()`
-# takes analysis sets of the current week and the five weeks before it, and
-# holds out the next week. A fold's first analysis set is shorter, because
-# the data starts on a Wednesday, and its last held-out week can be partial.
+# The three inner sliding designs, each under the rolling-origin outer design.
+# The sliding-window and sliding-period designs are built on `make_ts_data()`,
+# and the sliding-index design on `make_ts_weekday_data()`. Across the three
+# outer folds, sliding-window has four, six and eight inner resamples,
+# sliding-index seven, nine and eleven, and sliding-period four, five and
+# seven. These counts come from `sapply(x$inner_resamples, nrow)` on each
+# fixture. On the weekday dates a 39-day `lookback` covers 28 rows, so the
+# sliding-index splits differ from the sliding-window ones in every fold.
+# `sliding_period()` takes analysis sets of the current week and the five weeks
+# before it, and holds out the next week. A fold's first analysis set is
+# shorter, because the data starts on a Wednesday, and its last held-out week
+# can be partial.
 ts_inner_window_nested <- function(data) {
   rsample::nested_cv(
     data,
@@ -742,7 +740,7 @@ ts_inner_period_nested <- function(data) {
 
 # The inner sliding designs by name: the nested builder, the inner split
 # class it builds, its literal inner call for a reference final fit to build
-# on the full data (M119), and the data builder it runs on (M120).
+# on the full data, and the data builder it runs on.
 TS_INNER_DESIGNS <- list(
   "sliding-window" = list(
     build = ts_inner_window_nested,
@@ -776,17 +774,17 @@ TS_INNER_DESIGNS <- list(
   )
 )
 
-# The nine pairs of a sliding outer design and an inner sliding design
-# (M121), named "<outer> / <inner>", each with its outer and inner split class
-# and its literal `nested_resamples()` call. All nine run on
-# `make_ts_weekday_data()`, so the index designs differ from the window ones.
+# The nine pairs of a sliding outer design and an inner sliding design, named
+# "<outer> / <inner>", each with its outer and inner split class and its
+# literal `nested_resamples()` call. All nine run on `make_ts_weekday_data()`,
+# so the index designs differ from the window ones.
 # The outer sliding-window design takes 60-row windows. The outer
 # sliding-index design takes a 69-day lookback, so each window spans 70 days
 # and holds 50 rows on the weekday dates. It builds four outer folds to
 # sliding-window's three.
 # The outer sliding-period design takes twelve-week windows, every second
 # week. The inner calls are those of TS_INNER_DESIGNS. Counted with
-# `sapply(x$inner_resamples, nrow)` on each pair's call, run 2026-09-27:
+# `sapply(x$inner_resamples, nrow)` on each pair's call:
 #
 #   outer \ inner    window    index      period
 #   window           4 4 4     7 7 7      7 7 7
@@ -979,7 +977,7 @@ TS_SLIDING_PAIRS <- list(
 )
 
 # A pair's call with `rsample::nested_cv()` in place of `nested_resamples()`,
-# so the reference design takes the pair's arguments as written (M121). It
+# so the reference design takes the pair's arguments as written. It
 # stops on a body that is not one `nested_resamples()` call, so a changed
 # fixture cannot swap out some other function or drop a statement.
 ts_pair_reference <- function(pair, d) {
@@ -998,19 +996,19 @@ ts_pair_reference <- function(pair, d) {
 }
 
 # The pairs sit in three files, one per outer design, so no one file runs
-# alone for long under parallel test files (M121).
+# alone for long under parallel test files.
 ts_pairs_with_outer <- function(outer) {
   TS_SLIDING_PAIRS[startsWith(names(TS_SLIDING_PAIRS), paste0(outer, " / "))]
 }
 
 # The fixtures' inner call, spelled out for a reference final fit to build on
-# the full data (M110).
+# the full data.
 ts_inner <- function(data) {
   rsample::rolling_origin(data, initial = 40, assess = 1, skip = 4)
 }
 
 # A nested run against its reference loop: the two seed columns first, then
-# each fold's metrics and selection (M108, M110).
+# each fold's metrics and selection.
 expect_ts_matches_reference <- function(res, ref) {
   expect_true(all(res$.completed))
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
@@ -1022,9 +1020,9 @@ expect_ts_matches_reference <- function(res, ref) {
 }
 
 # A final fit against a reference final fit built over the fixture's literal
-# inner call (M110), comparing the inner `in_id` and `out_id` values (M120).
+# inner call, comparing the inner `in_id` and `out_id` values.
 # `split_class` is the class the fixture's literal inner call builds, so the
-# reference and the final fit are both shown to run on that design (M120).
+# reference and the final fit are both shown to run on that design.
 expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
   expect_identical(
@@ -1036,7 +1034,7 @@ expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
     lapply(ref$tuned$splits, function(s) s$out_id)
   )
   # The same positions on another frame are other rows, so the frames are
-  # compared as well (M140).
+  # compared as well.
   expect_identical(
     lapply(final$tuning$splits, function(s) s$data),
     lapply(ref$tuned$splits, function(s) s$data)
@@ -1051,11 +1049,10 @@ expect_ts_final_matches <- function(final, ref, d, split_class = "rof_split") {
   )
 }
 
-# A grid final fit on a time-series design against one run by hand (M108,
-# M111). `inner` is the fixture's literal inner call as a function of the
-# data, and its default is `ts_inner()`, the `rolling_origin()` call of the
-# outer-design fixtures (M119). Returns the final fit, so a caller can assert
-# more of it.
+# A grid final fit on a time-series design against one run by hand. `inner`
+# is the fixture's literal inner call as a function of the data, and its
+# default is `ts_inner()`, the `rolling_origin()` call of the outer-design
+# fixtures. Returns the final fit, so a caller can assert more of it.
 expect_final_matches_reference <- function(d, folds, inner = ts_inner) {
   wf <- det_workflow(d)
   ms <- ts_metrics()
@@ -1097,7 +1094,7 @@ expect_final_matches_reference <- function(d, folds, inner = ts_inner) {
     lapply(inner_rs$splits, function(s) s$in_id)
   )
   # A sliding design's assessment set is not the complement of its analysis
-  # set, so the held-out rows are compared as well (M119 review).
+  # set, so the held-out rows are compared as well.
   expect_identical(
     lapply(final$tuning$splits, function(s) s$out_id),
     lapply(inner_rs$splits, function(s) s$out_id)
@@ -1110,7 +1107,7 @@ expect_final_matches_reference <- function(d, folds, inner = ts_inner) {
   invisible(final)
 }
 
-# The results objects a final fit is built from (M46, D-041): one nested run
+# The results objects a final fit is built from: one nested run
 # on `final_nested()`, served from the cache, carrying the procedure the final
 # fit re-runs. The deterministic one is the default; the stochastic sibling
 # runs ranger over `stoch_grid()`. `seed` is the run's entry seed, set here
@@ -1139,7 +1136,7 @@ stoch_final_results <- function(data, seed = 23) {
   )
 }
 
-# A design whose outer folds genuinely disagree about the best candidate (M04).
+# A design whose outer folds genuinely disagree about the best candidate.
 #
 # The disagreement is earned rather than staged: y depends on x1 alone and the
 # other five predictors are noise, so how many principal components help is a
@@ -1164,7 +1161,7 @@ unstable_workflow <- function(data) {
 
 unstable_grid <- function() data.frame(num_comp = 1:4)
 
-# A fixture on which the caller's metric set and tune's default disagree (M18).
+# A fixture on which the caller's metric set and tune's default disagree.
 #
 # reg_metrics() is `metric_set(rmse, rsq)`, which IS tune's regression default,
 # so every test passing it asserts nothing about `metrics` reaching tune: drop
@@ -1187,8 +1184,8 @@ unstable_grid <- function() data.frame(num_comp = 1:4)
 #
 # The model path is RNG-free (PCA and lm), but the fixture itself is not: the
 # all-three-folds separation is a property of one seed pair under one generator
-# triple, and a bare set.seed() pins only the uniform generator. Measured at
-# M18 review: under `normal.kind = "Box-Muller"` separation falls to 1 of 3
+# triple, and a bare set.seed() pins only the uniform generator. Measured under
+# `normal.kind = "Box-Muller"`, separation falls to 1 of 3
 # folds, and under `RNGkind("L'Ecuyer-CMRG")` or `sample.kind = "Rounding"` to
 # 0 of 3 -- so an ambient kind left set by another file would make the metric
 # tests fail for a reason that has nothing to do with `metrics`. Both helpers
@@ -1261,13 +1258,13 @@ print_text <- function(x, width = 200) {
 
 # A results object narrowed to some of its folds, still carrying the class.
 #
-# `[` used to build this and no longer does: since M36 a row subset returns a
-# bare tibble, which is the whole point of that milestone. The tests that need
-# such an object are about something else -- how print() words one fold versus
-# several, what collect_metrics() does when no fold in hand completed -- and
-# still need a way to reach the shape. This stamps the record the constructor
-# would have written for a run of exactly those folds, and deliberately leaves
-# `outer_label` off, since the folds kept are not the design that names.
+# `[` returns a bare tibble for a row subset, which is the intended behavior.
+# The tests that need such an object are about something else -- how print()
+# words one fold versus several, what collect_metrics() does when no fold in
+# hand completed -- and still need a way to reach the shape. This stamps the
+# record the constructor would have written for a run of exactly those folds,
+# and deliberately leaves `outer_label` off, since the folds kept are not the
+# design that names.
 as_fold_subset <- function(x, i) {
   out <- x[i, ]
   attr(out, "grid") <- attr(x, "grid")
@@ -1282,11 +1279,10 @@ as_fold_subset <- function(x, i) {
 #
 # rsample gives a repeated v-fold design `id` and `id2`, and the second column
 # is what makes the ordering key in `can_reconstruct_results()` get compared at
-# all -- `id` ties across a repeat. test-dplyr-compat.R used to reach the shape
-# by overwriting a fitted three-fold run's label columns, which cannot carry
-# what the constructor recorded about the design; this builds the real design
-# and puts it through the constructor, so the record is the code's and not the
-# fixture's (M38).
+# all -- `id` ties across a repeat. Overwriting the label columns of a fitted
+# three-fold run cannot carry what the constructor recorded about the design.
+# This builds the real design and puts it through the constructor, so the
+# record is the code's and not the fixture's.
 #
 # Nothing here fits a model. Every test that asks for this shape asks about the
 # label columns and never about what a fold scored, so the per-fold records are
@@ -1340,7 +1336,7 @@ repeated_results <- function(v = 3, repeats = 2, seed = 11) {
   results_from(repeated_design(v = v, repeats = repeats, seed = seed))
 }
 
-# The two-class fixture (M35).
+# The two-class fixture.
 #
 # `event_level` names a factor level, so nothing in the regression fixtures
 # above can exercise it. Three things this one has to get right.
@@ -1349,7 +1345,7 @@ repeated_results <- function(v = 3, repeats = 2, seed = 11) {
 # the FIRST level -- so `event_level = "first"` is the interesting case rather
 # than a formality, and so sensitivity and specificity separate. At a 50/50
 # outcome a symmetric classifier scores them close together and the difference
-# clauses AC2 and AC4 rest on would be measuring noise.
+# tests rest on would be measuring noise.
 #
 # Both the outer and the inner splits are stratified on the outcome. With 32
 # events across three folds each assessment set holds ten or eleven of them, so
@@ -1361,8 +1357,8 @@ repeated_results <- function(v = 3, repeats = 2, seed = 11) {
 # The metric set leads with `roc_auc`. `select_best()` resolves its metric from
 # the tuned object's first metric name, and `roc_auc` returns byte-identical
 # values at the two event levels -- so selection is level-invariant and the two
-# runs score the same candidate, which is what makes AC3's swap an identity
-# rather than a comparison of two different models.
+# runs score the same candidate, which is what makes swapping the event level
+# an identity rather than a comparison of two different models.
 cls_data <- function(n = 120, seed = 3535) {
   old <- RNGkind()
   on.exit(RNGkind(old[[1L]], old[[2L]], old[[3L]]), add = TRUE)
@@ -1388,8 +1384,8 @@ cls_data <- function(n = 120, seed = 3535) {
 }
 
 # ranger, not a deterministic engine: the outer fit has to be reproducible from
-# its recorded seed for AC2 to refit it, and with a deterministic engine that
-# would pass whatever the seeding did (RR01 Q8).
+# its recorded seed, so a refit from that seed can be checked. A deterministic
+# engine would pass whatever the seeding did.
 cls_workflow <- function(data) {
   spec <- parsnip::set_mode(
     parsnip::set_engine(
@@ -1449,7 +1445,7 @@ cls_design_rsets <- function(nested) {
   c(list(nested), as.list(nested$inner_resamples))
 }
 
-# The censored-regression fixture (M41), which exists so `eval_time` can be
+# The censored-regression fixture, which exists so `eval_time` can be
 # shown to change an answer rather than merely to arrive.
 #
 # The failure times are a mixture on purpose. A fraction `p_early` fail almost
@@ -1457,7 +1453,7 @@ cls_design_rsets <- function(nested) {
 # since a log-normal's density goes to zero as t goes to zero -- and the rest
 # come from a long-tailed log-normal that no exponential can match late. So the
 # grid's three distributions are ranked differently at an early evaluation time
-# than at a late one, which is the property AC3 and AC4 rest on: at
+# than at a late one, which is the property the tests rest on: at
 # `srv_eval_times()[[1]]` the log-normal is the best of the three and at
 # `srv_eval_times()[[2]]` it is the worst. Censoring is uniform and starts after
 # the early time, so both times keep observations at risk and events on either
@@ -1547,7 +1543,7 @@ srv_risk_profile <- function(data, t) {
   )
 }
 
-# The censored set fixtures (M77). Source: `srv_data()` above, whose seed 51
+# The censored set fixtures. Source: `srv_data()` above, whose seed 51
 # draws the frame; generators: `srv_set_results(seed = 77)` and
 # `srv_mixed_results(seed = 78)` below, each rebuilding its workflow set and
 # its design from that frame under its own seed. The seed is what
@@ -1630,7 +1626,7 @@ srv_mixed_wset <- function(data) {
 
 # The two map runs the set-view tests read, on `srv_nested()`'s three-by-three
 # design at both evaluation times. Every default is forced before the seed, for
-# the reason `wset_results()` gives (M71).
+# the reason `wset_results()` gives.
 srv_set_results <- function(data = srv_data(), seed = 77) {
   force(data)
   set.seed(seed)
@@ -1668,7 +1664,7 @@ skip_if_no_engines <- function(stochastic = FALSE) {
   if (stochastic) testthat::skip_if_not_installed("ranger")
 }
 
-# The Bayesian fixtures (M45).
+# The Bayesian fixtures.
 #
 # Two integer-valued tunables on the deterministic path, and both of them
 # matter. Two rather than one: `dials::grid_space_filling()` draws a
@@ -1676,7 +1672,7 @@ skip_if_no_engines <- function(stochastic = FALSE) {
 # four seeds gave four different sets, and over `deg_free(c(1L, 12L))` at size
 # 4 one set in two row orders -- while a two-parameter design comes from sfd's
 # precomputed tables: the same rows in the same order under every seed, and no
-# draw at all (measured 2026-09-01, dials 1.4.x). That is what lets AC3 hand
+# draw at all (measured on dials 1.4.x). That is what lets a test hand
 # `nested_tune_grid()` one `grid_space_filling(p, size = k)` and expect every
 # fold's Bayesian run at `iter = 0` to have scored exactly it. Ten levels
 # apiece rather than `num_comp`'s four: tune's search stops early, with an
@@ -1685,15 +1681,14 @@ skip_if_no_engines <- function(stochastic = FALSE) {
 # gets near that (measured on the 4-level `num_comp` at `initial = 2`).
 #
 # The stochastic sibling is `stoch_workflow()` as it stands: `min_n` is
-# integer-valued over 39 levels, and the reference loop fixes what AC2 asserts
-# about it, seed by seed, so it needs no seed-independent design.
+# integer-valued over 39 levels, and the reference loop fixes what the tests
+# assert about it, seed by seed, so it needs no seed-independent design.
 #
 # The spline columns are named by string, not bare name. tune reads a step's
 # tuning arguments through recipes' `find_tune_id()`, which evaluates a bare
 # name, fails, and formats an error message it then discards. One
 # `tune_args()` call cost 7.40 ms on `step_ns(x1)` and 0.60 ms on
-# `step_ns("x1")` (`benchmarks/recipes-tune-args-cost.R`, recipes 1.4.0,
-# measured 2026-09-23).
+# `step_ns("x1")` (`benchmarks/recipes-tune-args-cost.R`, recipes 1.4.0).
 bayes_workflow <- function(data) {
   rec <- recipes::step_ns(
     recipes::step_ns(
@@ -1707,7 +1702,7 @@ bayes_workflow <- function(data) {
   workflows::workflow(rec, parsnip::linear_reg())
 }
 
-# Finalized and integer-only, the property AC3 rests on. `update()` on the
+# Finalized and integer-only, the property the tests rest on. `update()` on the
 # extracted set rather than a fresh `parameters()`, so the ids are the
 # workflow's own.
 bayes_param_info <- function(wf) {
@@ -1719,7 +1714,7 @@ bayes_param_info <- function(wf) {
 }
 
 # The suite's Bayesian run, spelled once so every file that asks for it is
-# served from the cache (M12): the same data, workflow, design, arguments and
+# served from the cache: the same data, workflow, design, arguments and
 # entry seed, in the same order, so the key agrees wherever it is requested.
 # Built from `make_reg_data()` outward, which seeds the generator itself, so
 # the recipe step ids the workflow draws are the same on every request too.
@@ -1748,11 +1743,11 @@ bayes_results <- function() {
 # inner analysis sets hold 40 rows, a candidate at `min_n = 40` predicts a
 # constant, yardstick warns that R-squared is undefined, and tune files the
 # warning as a note carrying a backtrace -- which the host and a daemon render
-# differently (`?nested_tune_grid`, "Parallel execution"), so BC10's
+# differently (`?nested_tune_grid`, "Parallel execution"), so the
 # whole-object identity would fail on the trace and on nothing else, and the
 # whole-record identities in test-nested-tune-bayes-rng.R with it. 25 is the
 # largest value `stoch_grid()` has always scored without a note.
-# The control AC1 of M48 names, built under a fixed seed: `control_bayes()`
+# The early-stopping control, built under a fixed seed: `control_bayes()`
 # draws its `seed` slot when it is built, and a fixture keyed on a control
 # holding a fresh draw would miss the cache on every request. The draw is
 # overwritten by every fold's tuning seed, so its value never reaches a run.
@@ -1761,7 +1756,7 @@ ac1_control <- function() {
   tune::control_bayes(no_improve = 2, uncertain = 2)
 }
 
-# The suite's Bayesian run under that control (M48): four iterations, so a
+# The suite's Bayesian run under that control: four iterations, so a
 # fold that `no_improve = 2` stops early is visible against `initial + iter`.
 # The control is built before `set.seed(20)`, so the run's entry state is the
 # seed's own and a reference loop started from `seed = 20` reproduces it.
@@ -1784,7 +1779,7 @@ bayes_control_results <- function() {
   ))
 }
 
-# The results object a control-carrying final fit is built from (M48, AC4).
+# The results object a control-carrying final fit is built from.
 # Seeded before the workflow is built as well as before the run: the recipe
 # step ids are drawn from the stream, and a workflow built under whatever
 # state the requesting test left would key a fresh build on every request.
@@ -1814,7 +1809,7 @@ bayes_stoch_param_info <- function(wf) {
   )
 }
 
-# The Bayesian results objects a final fit is built from (M46): the suite's
+# The Bayesian results objects a final fit is built from: the suite's
 # Bayesian arguments (`iter = 2`, `initial = 3`) on `final_nested()`, whose
 # inner specification is literal and so survives the re-run. The
 # deterministic one carries `bayes_workflow()`'s integer-only parameter set;
@@ -1856,7 +1851,7 @@ skip_if_no_bayes_fixture <- function(stochastic = FALSE) {
   testthat::skip_if_not_installed("dials")
 }
 
-# The censored-regression fixture's engines and metric (M41). `censored`
+# The censored-regression fixture's engines and metric. `censored`
 # registers the `survival_reg()` engines parsnip declares but does not carry;
 # `survival` supplies `Surv()`, which the formula names; `yardstick` supplies
 # the dynamic metric that reads `eval_time`. All three are Suggests, so
@@ -1867,14 +1862,14 @@ skip_if_no_censored <- function() {
   testthat::skip_if_not_installed("yardstick")
 }
 
-# The suite-level fixture cache (M12).
+# The suite-level fixture cache.
 #
 # Most of this suite's runtime went on building the same tuning run over and
 # over -- one file alone asked for a byte-identical `nested_tune_grid()` result
 # seventeen times. `memoised()` wraps such a call so the run is built once per
 # worker process and every later request for the same run in that process is
 # served from the cache. The cache is an environment in the process that built
-# it: under parallel test files (M52) each worker holds its own, so a fixture
+# it: under parallel test files each worker holds its own, so a fixture
 # two files share is built once in each worker that runs one of them, and a
 # serial run builds it once. Nothing about what a test asserts changes; only
 # how many times the fit happens.
@@ -1913,7 +1908,7 @@ skip_if_no_censored <- function() {
 # differing only in that argument key differently. The attribute and
 # environment clauses above are not what that test exercises -- its variants
 # differ from the base request in class or top-level value -- so a change to
-# either clause leaves it green (measured 2026-09-01 at M42).
+# either clause leaves it green.
 canonical_form <- function(x, depth = 0L, seen = list()) {
   if (depth > 40L) {
     return("<depth>")
@@ -2035,8 +2030,8 @@ replay_condition <- function(cnd) {
 # A name bound nowhere is recorded as unbound rather than skipped, so a request
 # from a frame that supplies it never shares a key with one that does not.
 inside_spec_bindings <- function(args, env) {
-  # The design for an orchestrator, the results object for the final fit
-  # (D-041): both carry the specification under the same attribute name.
+  # The design for an orchestrator, the results object for the final fit:
+  # both carry the specification under the same attribute name.
   design <- if (is.null(args$results)) args$resamples else args$results
   inside <- if (is.null(design)) NULL else attr(design, "inside")
   if (!is.call(inside)) {
@@ -2072,8 +2067,8 @@ inside_spec_bindings <- function(args, env) {
 # arguments differing only below it would share a key and one test would be
 # served the other's fixture. Every fixture family this suite builds sits well
 # inside the cut (the sorted argument list the guard forms reaches 30 levels
-# for the `det`, `sep` and `unstable` requests, against a cut of 40, measured
-# 2026-09-01 at M42), so a hit means a new fixture shape, and the remedy is
+# for the `det`, `sep` and `unstable` requests, against a cut of 40), so a
+# hit means a new fixture shape, and the remedy is
 # raising the cut rather than hashing a truncated form. The refusal names each
 # deep argument by name, or by its position in the request when it has none:
 # `memoised()` names every argument `match.call()` matches, so a bare position
@@ -2189,7 +2184,7 @@ memoised <- function(expr) {
 # What survives is the question actually worth asking: did the suite pay for the
 # same fit twice? Two entries whose values share a canonical form are two fits
 # that produced the same thing, whatever they were called or how they were
-# spelled, and that is a `builds` above 1 -- the number AC4 reads.
+# spelled, and that is a `builds` above 1 in this report.
 fixture_cache_report <- function() {
   keys <- ls(fixture_cache, all.names = TRUE)
   if (length(keys) == 0L) {
@@ -2273,7 +2268,7 @@ print_fixture_cache_report <- function(
 }
 
 # A stand-in for a tuning run whose `collect_metrics()` is a table given by
-# hand (M49). The candidate derivation reads a run only through
+# hand. The candidate derivation reads a run only through
 # `tune::collect_metrics()`, so a test that wants a record with known counts
 # and no engine supplies the table and nothing else. The class is this
 # suite's own; registering its method against tune's generic is what lets
@@ -2313,15 +2308,14 @@ unregister_fake_tuning <- function() {
   }
 }
 
-# The racing fixtures (M50).
+# The racing fixtures.
 #
 # finetune's two racers take the grid orchestrator's arguments, so the suite's
 # existing fixtures serve them; what racing adds is the control. The suite's
 # designs hold 3 inner resamples and `control_race()` defaults `burn_in` to 3,
 # which a race refuses (it needs more resamples than its burn-in), so every
-# racing fixture passes `control_race(burn_in = 2)` -- the control the
-# criteria name -- and the refusal's own test is the one place the default
-# control reaches a run.
+# racing fixture passes `control_race(burn_in = 2)`, and the refusal's own
+# test is the one place the default control reaches a run.
 race_control <- function() finetune::control_race(burn_in = 2)
 
 # The racing export for a registry key, so a test can loop over both racers.
@@ -2366,7 +2360,7 @@ race_results <- function(fn) {
   )
 }
 
-# The racing results objects a final fit is built from (M50, AC6), on
+# The racing results objects a final fit is built from, on
 # `final_nested()`, whose inner specification is literal and so survives the
 # re-run. The stochastic sibling runs ranger over `stoch_grid()`.
 race_final_results <- function(fn, data, seed = 27) {
@@ -2440,8 +2434,8 @@ skip_if_no_race_fixture <- function(fn = RACERS, stochastic = FALSE) {
   }
 }
 
-# The control a fold's race runs under, written from the documented contract
-# (D-042): the caller's control -- or finetune's default when none was
+# The control a fold's race runs under, written from the documented contract:
+# the caller's control -- or finetune's default when none was
 # passed -- with `allow_par` forced off and `event_level` set from the
 # argument. `control_race()` has no seed slot. `save_workflow` is the
 # reference's own addition where a strand needs `fit_best()`.
@@ -2461,7 +2455,7 @@ forced_race_control <- function(
   control
 }
 
-# The hand-rolled reference loop for the racing path (M50 AC1), written from
+# The hand-rolled reference loop for the racing path, written from
 # the same seed contract as the grid reference and never from the driver's
 # output: `set.seed(s)`, one `sample.int(.Machine$integer.max, 2 * n)`, fold
 # i racing under element 2i-1 with the kind pinned -- the race's resample
@@ -2527,11 +2521,10 @@ reference_nested_race_loop <- function(
   })
 }
 
-# The hand-rolled reference final fit for the racing path (M50 AC6): the
-# grid reference with the race in place of `tune_grid()`, under the same two
-# seeds and D-016's ordering (the rset built after the tuning seed is set).
-# `save_workflow = TRUE` on the test's own race alone, so a strand can run
-# `tune::fit_best()` on this run.
+# The hand-rolled reference final fit for the racing path: the grid reference
+# with the race in place of `tune_grid()`, under the same two seeds, and with
+# the rset built after the tuning seed is set. `save_workflow = TRUE` on the
+# test's own race alone, so a strand can run `tune::fit_best()` on this run.
 reference_race_final_fit <- function(
   fn,
   wf,
@@ -2588,7 +2581,7 @@ race_call_by_name <- function(fn, ...) {
   eval(rlang::call2(name, !!!rlang::enexprs(...)), parent.frame())
 }
 
-# The annealing fixtures (M51).
+# The annealing fixtures.
 #
 # `tune_sim_anneal()` takes the Bayesian sibling's two counts and no
 # acquisition function, so the suite's deterministic fixtures serve it as
@@ -2603,7 +2596,7 @@ anneal_control <- function() finetune::control_sim_anneal(verbose_iter = FALSE)
 # cache: the same data, workflow, design, counts, metrics and control under
 # entry seed 20, so a reference loop started from `seed = 20` reproduces it,
 # and `nested_tune_grid(grid = 3)` under the same seed scores the same
-# initial design (AC2).
+# initial design.
 anneal_results <- function() {
   d <- make_reg_data()
   wf <- det_workflow(d)
@@ -2621,7 +2614,7 @@ anneal_results <- function() {
   ))
 }
 
-# The annealing results objects a final fit is built from (M51, AC5), on
+# The annealing results objects a final fit is built from, on
 # `final_nested()`, whose inner specification is literal and so survives the
 # re-run. Seeded before the workflow is built as well as before the run, for
 # the reason `race_final_results()` gives. The stochastic sibling runs ranger
@@ -2673,7 +2666,7 @@ skip_if_no_anneal_fixture <- function(stochastic = FALSE) {
 }
 
 # The control a fold's annealing runs under, written from the documented
-# contract (D-042): the caller's control -- or finetune's default when none
+# contract: the caller's control -- or finetune's default when none
 # was passed -- with `allow_par` forced off and `event_level` set from the
 # argument. `control_sim_anneal()` has no seed slot, so nothing else is
 # touched. `save_workflow` is the reference's own addition where a strand
@@ -2694,7 +2687,7 @@ forced_anneal_control <- function(
   control
 }
 
-# The hand-rolled reference loop for the annealing path (M51 AC1), written
+# The hand-rolled reference loop for the annealing path, written
 # from the same seed contract as the grid reference and never from the
 # driver's output: `set.seed(s)`, one `sample.int(.Machine$integer.max, 2 *
 # n)`, fold i annealing under element 2i-1 with the kind pinned -- the
@@ -2760,10 +2753,10 @@ reference_nested_anneal_loop <- function(
   })
 }
 
-# The hand-rolled reference final fit for the annealing path (M51 AC5): the
-# grid reference with `tune_sim_anneal()` in place of `tune_grid()`, under
-# the same two seeds and D-016's ordering (the rset built after the tuning
-# seed is set). `save_workflow = TRUE` on the test's own run alone.
+# The hand-rolled reference final fit for the annealing path: the grid
+# reference with `tune_sim_anneal()` in place of `tune_grid()`, under the same
+# two seeds, with the rset built after the tuning seed is set.
+# `save_workflow = TRUE` on the test's own run alone.
 reference_anneal_final_fit <- function(
   wf,
   data,
@@ -2810,8 +2803,8 @@ reference_anneal_final_fit <- function(
   list(seeds = seeds, selected = best, workflow = fitted, tuned = tuned)
 }
 
-# Every design shape check_nested() refuses beyond its two element-class rules
-# (M55, M59), each planted into det_nested(data)'s three outer rows. One record
+# Every design shape check_nested() refuses beyond its two element-class rules,
+# each planted into det_nested(data)'s three outer rows. One record
 # per planting: the design, the rows the refusal must name (`rows`, for a
 # row-wise defect), the columns it must name (`columns`), or the exact phrases
 # it must carry (`fragments`, for a defect inside one fold's inner splits, where
@@ -2902,8 +2895,8 @@ malformed_designs <- function(data) {
     )
   }
 
-  # M59: the three rules over a fold's inner splits. The foreign frame is the
-  # one the M03 fixtures used to be built on; the same-shape frame is `data`
+  # The three rules over a fold's inner splits. The foreign frame is one built
+  # by `foreign_frame()`; the same-shape frame is `data`
   # with one value changed, the case a row-count-and-names check would admit
   # and the parallel fat path exists for. Every planting names its fold and,
   # where the rule names splits, its split, in `fragments`; the fold
@@ -2976,7 +2969,7 @@ malformed_designs <- function(data) {
     for (f in at) {
       # `index_of` may give two indexes: the first goes to `in_id` and the
       # last to `out_id`. One held-out row in both slots of a split would
-      # meet the rule on shared rows first (M134), which is not under test.
+      # meet the rule on shared rows first, which is not under test.
       i <- index_of(f)
       s <- x$inner_resamples[[f]]$splits[[n_inner]]
       if (slot %in% c("in_id", "both")) {
@@ -3100,12 +3093,12 @@ malformed_designs <- function(data) {
   )
 }
 
-# The extract the outer-fit criteria name (M68): the engine fit's coefficient
+# The extract the outer-fit tests use: the engine fit's coefficient
 # vector. Built over the base environment rather than this file's: a fixture
 # key hashes a function with its enclosing environment, and this file's
 # environment holds the fixture cache, so a closure over it would key
-# differently on every request as the cache filled (measured 2026-09-06: two
-# builds of one run). Over `baseenv()` the function hashes by its body, and
+# differently on every request as the cache filled. Measured, that gave two
+# builds of one run. Over `baseenv()` the function hashes by its body, and
 # travels to a daemon by its body alone.
 coef_extract <- rlang::new_function(
   rlang::pairlist2(x = ),
@@ -3113,17 +3106,18 @@ coef_extract <- rlang::new_function(
   env = baseenv()
 )
 
-# The workflow sets `nested_workflow_map()` runs (M71, D-058), built with
+# The workflow sets `nested_workflow_map()` runs, built with
 # `workflowsets::as_workflow_set()` over the fixtures above, so each id is
 # the name given here and each element is the fixture workflow itself.
 # `wset_two()` holds one tuned workflow and one fixed, the mixed set the
 # routing rule exists for. No set's order is its `wflow_id` sort order, so
-# a map that sorted its rows would fail the order assertion (AC3). `wset_fixed()` holds two fixed workflows, the only
-# set the plain resampling orchestrator accepts (it refuses a marked one at
-# entry, D-057). `wset_three()` adds a second tuned workflow whose parameter
-# `det_grid()` does not name, carrying its own `grid` as a per-workflow
-# option -- the override AC1's third oracle reads, and one the map must
-# honour or the element fails at `check_grid_params()`.
+# a map that sorted its rows would fail the order assertion. `wset_fixed()`
+# holds two fixed workflows, the only set the plain resampling orchestrator
+# accepts (it refuses a marked one at entry). `wset_three()` adds a second
+# tuned workflow whose parameter `det_grid()` does not name, carrying its own
+# `grid` as a per-workflow option -- the override "a per-workflow grid option
+# overrides the grid in `...` for that workflow alone" reads, and
+# one the map must honour or the element fails at `check_grid_params()`.
 wset_two <- function(data) {
   workflowsets::as_workflow_set(
     tuned = det_workflow(data),
@@ -3132,7 +3126,7 @@ wset_two <- function(data) {
 }
 
 # The second fixed workflow: the formula preprocessor and lm, nothing to tune
-# and no recipe at all. Since M79 wrote `fixed_workflow()`'s id out, having no
+# and no recipe at all. `fixed_workflow()`'s id is written out, so having no
 # recipe is what separates the two, not where their ids come from.
 plain_workflow <- function(data) {
   workflows::workflow(y ~ x1 + x2 + x3 + x4, parsnip::linear_reg())
@@ -3170,9 +3164,8 @@ MAP_FNS <- c(
 )
 
 # The hand call for one workflow of a set: the routed orchestrator, its
-# arguments spelled by name, under the entry seed. Moved here from
-# test-nested-workflow-map-oracles.R at M110, so the time-series tests can use
-# it too.
+# arguments spelled by name, under the entry seed. The time-series tests use it
+# too.
 #
 # The hand call's arguments are written out here from the documented
 # contract, never read off `orchestrator_args()`: for a tuned workflow the
@@ -3186,7 +3179,7 @@ hand_call <- function(fn, workflow, folds, ms, seed) {
   if (!tuned) {
     # The fixed workflow's hand call is the same run whichever `fn` the block
     # is for, so it is served from the fixture cache after the first block
-    # builds it (M74).
+    # builds it.
     return(memoised(nested_fit_resamples(workflow, folds, metrics = ms)))
   }
   switch(
@@ -3258,7 +3251,7 @@ wset_map_args <- function(fn) {
 # well as before the run, for the reason `race_final_results()` gives: a
 # recipe step id is drawn from the stream. That reason reaches `wset_two()`,
 # whose `det_workflow()` still draws; `wset_fixed()`'s two members write their
-# id out or carry no recipe (M79), so for `fn == "nested_fit_resamples"` the
+# id out or carry no recipe, so for `fn == "nested_fit_resamples"` the
 # pre-build seed has nothing to protect. The call is spliced into
 # `memoised()` with the arguments named, so the cache key reads them as the
 # orchestrator would match them.
@@ -3283,7 +3276,7 @@ wset_results <- function(fn, data = make_reg_data(), seed = 31) {
   )))
 }
 
-# The three-workflow map run the set readers read (M72): `wset_three()` --
+# The three-workflow map run the set readers read: `wset_three()` --
 # a tuned workflow on the call's grid, a fixed one with nothing to tune, and
 # a second tuned one on its own `grid` option -- through the grid
 # orchestrator on `final_nested()` under entry seed 31, the run
@@ -3318,8 +3311,8 @@ wset_three_results <- function(
 
 # A fixed workflow that fails on every outer fold: the formula names a
 # column the data does not hold, so `last_fit()` refuses each split and the
-# fold is recorded as failed at the outer fit. Shared by the M71 reader
-# tests and the M72 set readers.
+# fold is recorded as failed at the outer fit. Shared by the reader tests
+# and the set readers.
 broken_workflow <- function(data) {
   workflows::workflow(y ~ nonesuch, parsnip::linear_reg())
 }
@@ -3363,7 +3356,7 @@ broken_set_results <- function(
 }
 
 # The partial-run warnings a call raises, muffled, in order: what a set
-# reader says about each workflow with a failed fold (M72).
+# reader says about each workflow with a failed fold.
 partial_warnings <- function(expr) {
   warnings <- list()
   withCallingHandlers(
@@ -3379,7 +3372,7 @@ partial_warnings <- function(expr) {
 # Whether the packages an orchestrator's tuner needs are installed, read off
 # the package's registry. On a workflow, the racers and the annealer refuse a
 # missing finetune before anything else, so a check that runs after that one
-# is only reachable where these are present. Shared since M128 by
+# is only reachable where these are present. Shared by
 # test-model-spec-input.R and test-design-support.R.
 tuner_ready <- function(fn) {
   key <- sub("^nested_", "", fn)
@@ -3404,7 +3397,7 @@ skip_if_no_wset_fixture <- function(
   }
 }
 
-# The absent-package fixture (M58), shared since M71 by test-workflow-pkgs.R
+# The absent-package fixture, shared by test-workflow-pkgs.R
 # and test-nested-workflow-map-checks.R: a step with no prep or bake of its
 # own whose `required_pkgs()` names a package this library lacks, so the
 # entry check refuses before anything fits. The method is registered on the
@@ -3433,7 +3426,7 @@ absent_step_workflow <- function(data) {
   workflows::workflow(rec, parsnip::linear_reg())
 }
 
-# A tailor shifting the numeric prediction by `offset` (M103), for the
+# A tailor shifting the numeric prediction by `offset`, for the
 # identity tests: `adjust_predictions_custom()` and
 # `adjust_probability_threshold()` are the two adjustments tailor computes
 # itself; the rest need the probably package, which is not asked for.
