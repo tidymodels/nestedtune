@@ -243,7 +243,7 @@ test_that("a session with no RNG state is left with a valid one", {
 # final fit seeds, snapshots and restores in one place for every tuner, so the
 # grid strand above covers them.
 
-test_that("AC4: the final fit reads nothing from the fold rows but splits and .completed", {
+test_that("the final fit reads nothing from the fold rows but splits and .completed", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()

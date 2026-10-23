@@ -259,7 +259,7 @@ test_that("the evaluated-candidate record travels with the rows it describes", {
   expect_identical(subset$.inner_metrics, res$.inner_metrics[2:3])
 })
 
-test_that("the object records the design's inner specification (M46)", {
+test_that("the object records the design's inner specification", {
   skip_if_no_engines()
 
   # The final fit re-runs the procedure from the results object alone (D-041),
@@ -351,7 +351,7 @@ reference_last_fit <- function(res, i, d, event_level = "first") {
   )
 }
 
-test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s (AC1)", {
+test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -374,7 +374,7 @@ test_that("save_pred = TRUE keeps each fold's outer-fit predictions, identical t
   }
 })
 
-test_that("the default control and save_pred = FALSE leave no .predictions column (AC1)", {
+test_that("the default control and save_pred = FALSE leave no .predictions column", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -396,7 +396,7 @@ test_that("the default control and save_pred = FALSE leave no .predictions colum
   expect_true(".predictions" %in% names(saved_results(d)))
 })
 
-test_that("a failed fold's .predictions element is NULL (AC1)", {
+test_that("a failed fold's .predictions element is NULL", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -426,7 +426,7 @@ extracted_results <- function(
   ))
 }
 
-test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s (AC2)", {
+test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to f() on last_fit()'s", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -450,7 +450,7 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
   expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
 })
 
-test_that("an extract that errors leaves the fold completed, its element NULL, and one note (AC2)", {
+test_that("an extract that errors leaves the fold completed, its element NULL, and one note", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -494,7 +494,7 @@ test_that("an extract that errors leaves the fold completed, its element NULL, a
   }
 })
 
-test_that("extract = NULL leaves no .extracts column (AC2)", {
+test_that("extract = NULL leaves no .extracts column", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -516,7 +516,7 @@ test_that("extract = NULL leaves no .extracts column (AC2)", {
   expect_true(".extracts" %in% names(extracted_results(d)))
 })
 
-test_that("a failed fold's .extracts element is NULL, with no extract note (AC2)", {
+test_that("a failed fold's .extracts element is NULL, with no extract note", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -546,7 +546,7 @@ expect_bare <- function(out) {
   invisible(out)
 }
 
-test_that(".predictions and .extracts are record columns through the five doors (AC5)", {
+test_that(".predictions and .extracts are record columns through the five doors", {
   skip_if_no_engines()
   skip_if_not_installed("tibble")
 
@@ -577,7 +577,7 @@ test_that(".predictions and .extracts are record columns through the five doors 
   )
 })
 
-test_that("a run carrying neither column keeps its class through the same verbs (AC5)", {
+test_that("a run carrying neither column keeps its class through the same verbs", {
   skip_if_no_engines()
   skip_if_not_installed("tibble")
 

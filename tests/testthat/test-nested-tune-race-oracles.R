@@ -46,7 +46,7 @@
 
 skip_heavy_on_cran()
 
-test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order (AC1)", {
+test_that("the racing exports carry nested_tune_grid()'s formals, defaults and order", {
   # Method by method since M107, each export being a generic on `object`.
   for (cls in c("workflow", "model_spec")) {
     grid_formals <- formals(get(paste0("nested_tune_grid.", cls)))
@@ -94,7 +94,7 @@ expect_matches_reference <- function(res, ref, metric_name) {
   invisible(res)
 }
 
-test_that("per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (AC1, deterministic)", {
+test_that("per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (deterministic)", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()
@@ -119,7 +119,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled rac
   }
 })
 
-test_that("the racing reference loop also matches on the metric-separating fixture (AC1)", {
+test_that("the racing reference loop also matches on the metric-separating fixture", {
   skip_if_no_race_fixture()
 
   d <- sep_data()
@@ -153,7 +153,7 @@ test_that("the racing reference loop also matches on the metric-separating fixtu
   expect_setequal(res$.metrics[[1L]]$.metric, c("mae", "rmse"))
 })
 
-test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
+test_that("a candidate raced to the end carries the grid path's mean", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()
@@ -188,7 +188,7 @@ test_that("a candidate raced to the end carries the grid path's mean (AC2)", {
   }
 })
 
-test_that("the fold record is every candidate the race scored, and the selection a survivor (AC3)", {
+test_that("the fold record is every candidate the race scored, and the selection a survivor", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn, stochastic = TRUE)
 
@@ -286,7 +286,7 @@ test_that("a race fold that scored nothing carries a zero-row table with no .ite
   )
 })
 
-test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
+test_that("the help page's by-hand recipe reproduces a fold's inner table and selection", {
   skip_if_no_race_fixture()
 
   # Written from the Reproducibility section of ?nested_tune_race, line for
@@ -337,7 +337,7 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
 # race_results()'s fixture under seed 20, either racer: best picks 3, 3, 3;
 # one_std_err by num_comp 2, 3, 2; pct_loss by num_comp at limit 5 2, 3, 2.
 
-test_that("AC1: each selection rule picks what tune's selector picks on the fold's race (M69)", {
+test_that("each selection rule picks what tune's selector picks on the fold's race", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn)
 

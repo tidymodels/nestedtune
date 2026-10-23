@@ -58,7 +58,7 @@ test_that("every test_that() block gets a paired, named start and end line", {
   }
 })
 
-test_that("the per-file lines M14 ships still bracket the per-test ones", {
+test_that("the per-file lines still bracket the per-test ones", {
   out <- trace_lines(fixture_two_blocks())
 
   # The file marker is the bare filename with no ` :: `; the test markers carry

@@ -139,7 +139,7 @@ test_that("printing a grid final fit is the hand-agreed text, not the snapshot",
   expect_identical(txt, PRINT_AS_AGREED_M46)
 })
 
-test_that("AC2: summary() returns a classed object naming what was selected", {
+test_that("summary() returns a classed object naming what was selected", {
   skip_if_no_engines()
 
   final <- final_for_print()
@@ -181,7 +181,7 @@ test_that("AC2: summary() returns a classed object naming what was selected", {
   expect_match(out, set_rows_wording)
 })
 
-test_that("AC3: the summary shows no number from the stored tuning run", {
+test_that("the summary shows no number from the stored tuning run", {
   skip_if_no_engines()
 
   final <- final_for_print()
@@ -289,7 +289,7 @@ bayes_final_for_print <- function() {
   memoised(nested_final_fit(wf, res))
 }
 
-test_that("AC5: a Bayesian final fit names its procedure with the counts that ran", {
+test_that("a Bayesian final fit names its procedure with the counts that ran", {
   skip_if_no_bayes_fixture()
 
   final <- bayes_final_for_print()
@@ -515,7 +515,7 @@ expect_selected_by_on_both <- function(final, label) {
   expect_identical(selected_by_lines(lines), line)
 }
 
-test_that("AC3: both prints name a non-default rule, after `Selected:` and under the heading", {
+test_that("both prints name a non-default rule, after `Selected:` and under the heading", {
   skip_if_no_engines()
 
   expect_selected_by_on_both(
@@ -524,7 +524,7 @@ test_that("AC3: both prints name a non-default rule, after `Selected:` and under
   )
 })
 
-test_that("AC3: a rule ordering by two names is rendered with both on both prints", {
+test_that("a rule ordering by two names is rendered with both on both prints", {
   skip_if_no_bayes_fixture()
 
   expect_selected_by_on_both(
@@ -533,7 +533,7 @@ test_that("AC3: a rule ordering by two names is rendered with both on both print
   )
 })
 
-test_that("AC3: the default rule and a fit that tuned nothing print no `Selected by:` line", {
+test_that("the default rule and a fit that tuned nothing print no `Selected by:` line", {
   skip_if_no_engines()
 
   best <- final_for_print()
@@ -547,7 +547,7 @@ test_that("AC3: the default rule and a fit that tuned nothing print no `Selected
   expect_length(selected_by_lines(print_lines(summary(untuned))), 0L)
 })
 
-test_that("AC2: the summary's `select` component is the procedure record's rule", {
+test_that("the summary's `select` component is the procedure record's rule", {
   skip_if_no_engines()
 
   rule <- selection_rule("pct_loss", num_comp, limit = 5)
@@ -569,7 +569,7 @@ test_that("AC2: the summary's `select` component is the procedure record's rule"
   expect_null(s[["select"]])
 })
 
-test_that("AC3: the selection-rule line holds its shape on both prints", {
+test_that("the selection-rule line holds its shape on both prints", {
   skip_if_no_engines()
 
   pct_loss_5 <- rule_final(selection_rule("pct_loss", num_comp, limit = 5))
@@ -584,7 +584,7 @@ test_that("AC3: the selection-rule line holds its shape on both prints", {
   expect_snapshot(print(summary(untuned)))
 })
 
-test_that("AC3: the two-ordering line holds its shape on both prints", {
+test_that("the two-ordering line holds its shape on both prints", {
   skip_if_no_bayes_fixture()
 
   two <- two_param_rule_final(selection_rule("one_std_err", desc(df1), df2))
@@ -598,7 +598,7 @@ selecting_metric_lines <- function(lines) {
   lines[startsWith(lines, "Selecting metric: ")]
 }
 
-test_that("M116 AC2: both prints name the selecting metric under the default rule", {
+test_that("both prints name the selecting metric under the default rule", {
   skip_if_no_engines()
 
   best <- final_for_print()
@@ -613,7 +613,7 @@ test_that("M116 AC2: both prints name the selecting metric under the default rul
   expect_identical(selecting_metric_lines(lines), "Selecting metric: rmse")
 })
 
-test_that("M116 AC2: both prints name the selecting metric after the rule line", {
+test_that("both prints name the selecting metric after the rule line", {
   skip_if_no_engines()
 
   for (rule in list(
@@ -630,7 +630,7 @@ test_that("M116 AC2: both prints name the selecting metric after the rule line",
   }
 })
 
-test_that("M116 AC2: no selecting-metric line on a fit that tuned nothing, on a record without the entry, or under desirability", {
+test_that("no selecting-metric line on a fit that tuned nothing, on a record without the entry, or under desirability", {
   skip_if_no_engines()
 
   untuned <- untuned_final()
@@ -649,7 +649,7 @@ test_that("M116 AC2: no selecting-metric line on a fit that tuned nothing, on a 
   expect_length(selecting_metric_lines(print_lines(summary(des))), 0L)
 })
 
-test_that("M116 AC3: the final fit summary's `first_metric` component is the record's entry, or NULL", {
+test_that("the final fit summary's `first_metric` component is the record's entry, or NULL", {
   skip_if_no_engines()
 
   best <- final_for_print()

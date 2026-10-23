@@ -167,7 +167,7 @@ test_that("a results object carrying no procedure is refused", {
   )
 })
 
-test_that("a results object whose record holds no selection rule is refused (M69, AC2)", {
+test_that("a results object whose record holds no selection rule is refused", {
   skip_if_no_engines()
 
   d <- make_reg_data()

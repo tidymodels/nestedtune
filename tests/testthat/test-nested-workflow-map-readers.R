@@ -45,7 +45,7 @@ kept_set_results <- function(data, seed = 32) {
   ))
 }
 
-test_that("AC3: every reader's table is bind_rows() of the elements' tables under wflow_id, in set order", {
+test_that("every reader's table is bind_rows() of the elements' tables under wflow_id, in set order", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   res <- kept_set_results(d)
@@ -85,7 +85,7 @@ test_that("AC3: every reader's table is bind_rows() of the elements' tables unde
   expect_identical(unique(collect_inner_metrics(res)$wflow_id), "tuned")
 })
 
-test_that("AC3: a workflow that only partly completed raises the reader's partial warning once, naming it", {
+test_that("a workflow that only partly completed raises the reader's partial warning once, naming it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(32)
@@ -148,7 +148,7 @@ test_that("AC3: a workflow that only partly completed raises the reader's partia
   expect_identical(notes, bind_by_id(res, collect_notes))
 })
 
-test_that("AC3: a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it", {
+test_that("a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The tuned-plus-broken set under seed 32, served from the cache (M113).
@@ -185,7 +185,7 @@ test_that("AC3: a workflow in which no fold completed is left out with a warning
   expect_true("broken" %in% notes$wflow_id)
 })
 
-test_that("AC3: a set in which no workflow completed a fold is refused, and collect_notes() still answers", {
+test_that("a set in which no workflow completed a fold is refused, and collect_notes() still answers", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The all-broken set under seed 32, served from the cache (M113).
@@ -210,7 +210,7 @@ test_that("AC3: a set in which no workflow completed a fold is refused, and coll
   expect_identical(unique(notes$wflow_id), c("broken", "also_broken"))
 })
 
-test_that("AC3: a workflow that would contribute rows but did not keep the column is refused naming it, after the all-failed refusal", {
+test_that("a workflow that would contribute rows but did not keep the column is refused naming it, after the all-failed refusal", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The call's control is the grid orchestrator's and does not reach the
@@ -283,7 +283,7 @@ test_that("AC3: a workflow that would contribute rows but did not keep the colum
   }
 })
 
-test_that("AC3: an element's table carrying a wflow_id column is refused", {
+test_that("an element's table carrying a wflow_id column is refused", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   res <- wset_results("nested_tune_grid")
@@ -413,7 +413,7 @@ test_that("compute_metrics() on a set scores each workflow at the event_level pa
 
 # AC4 -------------------------------------------------------------------
 
-test_that("AC4: print names the orchestrator, the workflow count and each workflow's fold counts", {
+test_that("print names the orchestrator, the workflow count and each workflow's fold counts", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   res <- wset_results("nested_tune_grid")
@@ -449,7 +449,7 @@ test_that("AC4: print names the orchestrator, the workflow count and each workfl
   expect_invisible(print(res))
 })
 
-test_that("AC4: extract_workflow() returns the element's workflow and refuses an unknown id", {
+test_that("extract_workflow() returns the element's workflow and refuses an unknown id", {
   skip_if_no_wset_fixture()
   res <- wset_results("nested_tune_grid")
   expect_identical(extract_workflow(res, "fixed"), res$workflow[[2L]])
@@ -482,7 +482,7 @@ test_that("AC4: extract_workflow() returns the element's workflow and refuses an
 # The package registers no `rank_results()` or `fit_best()` method on the set,
 # so workflowsets and tune refuse it rather than answer (M71, AC4). What their
 # refusals say is theirs, and not asserted.
-test_that("AC4: no rank_results() or fit_best() method is registered for the set", {
+test_that("no rank_results() or fit_best() method is registered for the set", {
   reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
   on_set <- reg[reg[, 2L] == "nested_results_set", 1L]
   expect_false(any(c("rank_results", "fit_best") %in% on_set))
@@ -538,7 +538,7 @@ SUBSET_READERS <- list(
   list(name = "agreement", f = agreement, own = TRUE)
 )
 
-test_that("AC2: every reader on a row subset gives the whole set's rows for the workflows kept, in the subset's order", {
+test_that("every reader on a row subset gives the whole set's rows for the workflows kept, in the subset's order", {
   skip_if_no_wset_fixture()
   whole <- wset_three_results()
   expect_identical(whole$wflow_id, c("tuned", "fixed", "threshold"))
@@ -586,7 +586,7 @@ test_that("AC2: every reader on a row subset gives the whole set's rows for the 
   expect_identical(nrow(agreement(whole[2, ])), 0L)
 })
 
-test_that("AC2: the two column readers answer on a subset of the set that kept their columns", {
+test_that("the two column readers answer on a subset of the set that kept their columns", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   whole <- kept_set_results(d)
@@ -614,7 +614,7 @@ test_that("AC2: the two column readers answer on a subset of the set that kept t
   )
 })
 
-test_that("AC2: summary() of a row subset is the whole set's summary restricted to its ids, fn kept", {
+test_that("summary() of a row subset is the whole set's summary restricted to its ids, fn kept", {
   skip_if_no_wset_fixture()
   whole <- wset_three_results()
   all <- summary(whole)
@@ -634,7 +634,7 @@ test_that("AC2: summary() of a row subset is the whole set's summary restricted 
   }
 })
 
-test_that("AC2: extract_workflow() and nested_final_fit() answer for a kept id and refuse a dropped one", {
+test_that("extract_workflow() and nested_final_fit() answer for a kept id and refuse a dropped one", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   whole <- wset_three_results()
@@ -670,7 +670,7 @@ test_that("AC2: extract_workflow() and nested_final_fit() answer for a kept id a
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
 })
 
-test_that("AC2: a subset dropping the failed workflow reads the completed one as the whole set does, warning of nothing", {
+test_that("a subset dropping the failed workflow reads the completed one as the whole set does, warning of nothing", {
   skip_if_no_wset_fixture()
   whole <- broken_set_results()
   expect_identical(whole$wflow_id, c("tuned", "broken"))
@@ -701,7 +701,7 @@ test_that("AC2: a subset dropping the failed workflow reads the completed one as
   )
 })
 
-test_that("AC2: a subset holding only workflows in which no fold completed is refused as the whole set is", {
+test_that("a subset holding only workflows in which no fold completed is refused as the whole set is", {
   skip_if_no_wset_fixture()
   whole <- broken_set_results()
   sub <- whole[2, ]
@@ -727,7 +727,7 @@ test_that("AC2: a subset holding only workflows in which no fold completed is re
   expect_identical(notes, rows_for(collect_notes(whole), "broken"))
 })
 
-test_that("AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged", {
+test_that("print of a row subset names the rows in hand alone, the orchestrator line unchanged", {
   skip_if_no_wset_fixture()
   whole <- wset_three_results()
   one <- whole[2, ]

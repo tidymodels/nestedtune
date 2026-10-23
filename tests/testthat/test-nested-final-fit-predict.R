@@ -38,7 +38,7 @@ srv_final <- function() {
 
 # AC1 -------------------------------------------------------------------
 
-test_that("AC1: predict() on the regression fit is the workflow's prediction", {
+test_that("predict() on the regression fit is the workflow's prediction", {
   skip_if_no_engines()
 
   final <- reg_final()
@@ -63,7 +63,7 @@ test_that("AC1: predict() on the regression fit is the workflow's prediction", {
 
 # AC2 -------------------------------------------------------------------
 
-test_that("AC2: augment() on the censored fit is the workflow's augmentation", {
+test_that("augment() on the censored fit is the workflow's augmentation", {
   skip_if_no_censored()
 
   final <- srv_final()
@@ -81,7 +81,7 @@ test_that("AC2: augment() on the censored fit is the workflow's augmentation", {
 
 # AC3 -------------------------------------------------------------------
 
-test_that("AC3: predict() forwards an unknown argument to parsnip's refusal", {
+test_that("predict() forwards an unknown argument to parsnip's refusal", {
   skip_if_no_engines()
 
   final <- reg_final()
@@ -111,7 +111,7 @@ test_that("AC3: predict() forwards an unknown argument to parsnip's refusal", {
   expect_identical(conditionMessage(cnd), conditionMessage(theirs))
 })
 
-test_that("AC3: predict() without `new_data` raises the workflow's own error", {
+test_that("predict() without `new_data` raises the workflow's own error", {
   skip_if_no_engines()
 
   final <- reg_final()
@@ -127,7 +127,7 @@ test_that("AC3: predict() without `new_data` raises the workflow's own error", {
   expect_match(conditionMessage(ours), "new_data")
 })
 
-test_that("AC3: augment() refuses an argument it does not know", {
+test_that("augment() refuses an argument it does not know", {
   skip_if_no_engines()
 
   final <- reg_final()
@@ -152,7 +152,7 @@ test_that("AC3: augment() refuses an argument it does not know", {
 # fit, so they refuse it. The registry is the package's part; what tune's
 # refusal says is tune's, and not asserted.
 
-test_that("AC6: no method of tune's ranking and collecting generics is registered for the final fit", {
+test_that("no method of tune's ranking and collecting generics is registered for the final fit", {
   reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
   on_final <- reg[reg[, 2L] == "nested_final_fit", 1L]
   expect_false(any(
@@ -164,7 +164,7 @@ test_that("AC6: no method of tune's ranking and collecting generics is registere
 
 # AC4 -------------------------------------------------------------------
 
-test_that("AC4: augment is re-exported, so the call works with tune unattached", {
+test_that("augment is re-exported, so the call works with tune unattached", {
   skip_if_no_engines()
 
   # A precondition of the session, not a claim about the package.

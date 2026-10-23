@@ -75,7 +75,7 @@ final_fit_selector <- function(final, rule) {
   )
 }
 
-test_that("AC2: the final fit selects by the recorded rule, and records it (M69)", {
+test_that("the final fit selects by the recorded rule, and records it", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -133,7 +133,7 @@ test_that("AC2: the final fit selects by the recorded rule, and records it (M69)
 # which is what lets the last expectation tell a final fit that applied the
 # rule from one that ignored it.
 
-test_that("AC3: the final fit selects by a recorded desirability rule (M109)", {
+test_that("the final fit selects by a recorded desirability rule", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

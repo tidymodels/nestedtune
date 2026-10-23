@@ -666,7 +666,7 @@ test_that("a non-numeric selection is drawn on a discrete axis", {
 # are `collect_metrics(x)`'s means, so the figure and the tables cannot
 # disagree about a number.
 
-test_that("AC2: the set's performance view puts the workflows on x inside one panel per metric", {
+test_that("the set's performance view puts the workflows on x inside one panel per metric", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   p <- expect_no_warning(autoplot(res, type = "performance"))
@@ -710,7 +710,7 @@ test_that("AC2: the set's performance view puts the workflows on x inside one pa
   expect_identical(plot_label(p, "x"), "Workflow")
 })
 
-test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
+test_that("an all-failed workflow keeps an empty slot on the x axis, and the subtitle counts it", {
   skip_if_no_wset_fixture()
   beside <- broken_set_results()
   warnings <- partial_warnings(p <- autoplot(beside, type = "performance"))
@@ -743,7 +743,7 @@ test_that("AC2: an all-failed workflow keeps an empty slot on the x axis, and th
   )
 })
 
-test_that("AC3: the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
+test_that("the set's parameters view is one panel per workflow and tuned parameter, each the single view's points", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   p <- expect_no_warning(autoplot(res))
@@ -793,7 +793,7 @@ test_that("AC3: the set's parameters view is one panel per workflow and tuned pa
   expect_identical(plot_points(autoplot(mixed))$fold, pts$fold)
 })
 
-test_that("AC3: a set in which no workflow tuned a parameter is refused, pointing at the other view", {
+test_that("a set in which no workflow tuned a parameter is refused, pointing at the other view", {
   skip_if_no_wset_fixture("nested_fit_resamples")
   res <- wset_results("nested_fit_resamples")
   cnd <- rlang::catch_cnd(autoplot(res), "error")
@@ -807,7 +807,7 @@ test_that("AC3: a set in which no workflow tuned a parameter is refused, pointin
   expect_identical(axis_labels(p, "x"), res$wflow_id)
 })
 
-test_that("AC4: both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
+test_that("both set views warn once per workflow with a failed fold, naming it, and keep the fold's slot", {
   skip_if_no_wset_fixture()
   partial <- wset_three_results(broken = 1L)
   for (type in c("parameters", "performance")) {
@@ -847,7 +847,7 @@ test_that("AC4: both set views warn once per workflow with a failed fold, naming
   )
 })
 
-test_that("AC4: an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
+test_that("an all-failed workflow contributes no point to either view, and a set with none completed is refused", {
   skip_if_no_wset_fixture()
   beside <- broken_set_results()
   for (type in c("parameters", "performance")) {
@@ -891,7 +891,7 @@ test_that("AC4: an all-failed workflow contributes no point to either view, and 
   }
 })
 
-test_that("AC4: the set's autoplot() refuses a type outside the two, and fences its dots first", {
+test_that("the set's autoplot() refuses a type outside the two, and fences its dots first", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   # The type refusal is `check_plot_type()`, held on the single results
@@ -1206,7 +1206,7 @@ test_that("the mixed censored set draws a character and a numeric parameter on d
 
 # `id` on the set's plot (M149, AC3): one workflow's plot is the single-run
 # method's plot on that row, under both views, and a filter reaches it.
-test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
+test_that("a set's autoplot() with an id draws that workflow's own plot", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   one <- res$result[[match("tuned", res$wflow_id)]]
@@ -1242,14 +1242,14 @@ test_that("AC3: a set's autoplot() with an id draws that workflow's own plot", {
   expect_match(conditionMessage(cnd), "eval_time", fixed = TRUE)
 })
 
-test_that("AC3: one workflow's plot states a failed fold in its subtitle, with no warning", {
+test_that("one workflow's plot states a failed fold in its subtitle, with no warning", {
   skip_if_no_wset_fixture()
   broken <- wset_three_results(broken = 1L)
   expect_no_warning(p <- autoplot(broken, type = "performance", id = "tuned"))
   expect_match(p$labels$subtitle, "1 completed", fixed = TRUE)
 })
 
-test_that("AC3: an id that names no row of the set is refused", {
+test_that("an id that names no row of the set is refused", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   # The other shapes of a bad id meet `match_set_id()` through the set

@@ -202,7 +202,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
   }
 })
 
-test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+test_that("a desirability term naming neither a metric nor a tuned parameter is refused at entry", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -253,7 +253,7 @@ test_that("AC1: a desirability term naming neither a metric nor a tuned paramete
   )
 })
 
-test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+test_that("the desirability rule is refused at entry on a censored regression model", {
   skip_if_no_censored()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -285,7 +285,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   )
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
   d <- make_reg_data()

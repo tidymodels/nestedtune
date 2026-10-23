@@ -6,7 +6,7 @@ mask_map_time <- function(lines) {
   gsub("\\([0-9]+\\.[0-9]s\\)", "(<time>)", lines)
 }
 
-test_that("AC1: verbose = TRUE logs each workflow's start and finish, and the result does not change", {
+test_that("verbose = TRUE logs each workflow's start and finish, and the result does not change", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- wset_two(d)

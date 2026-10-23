@@ -13,7 +13,7 @@ skip_heavy_on_cran()
 # AC1: every tuner the registry enumerates records the identity, and so
 # does each row of a set and the final fit's own record.
 
-test_that("AC1: every orchestrator's result records the workflow it ran under", {
+test_that("every orchestrator's result records the workflow it ran under", {
   skip_if_no_race_fixture()
   skip_if_no_anneal_fixture()
   skip_if_no_bayes_fixture()
@@ -48,7 +48,7 @@ test_that("AC1: every orchestrator's result records the workflow it ran under", 
   }
 })
 
-test_that("AC1: each row of a nested_results_set records its own workflow", {
+test_that("each row of a nested_results_set records its own workflow", {
   skip_if_no_wset_fixture()
 
   set <- wset_results("nested_tune_grid")
@@ -67,7 +67,7 @@ test_that("AC1: each row of a nested_results_set records its own workflow", {
   ))
 })
 
-test_that("AC1: the final fit's record carries the same entry, and the fit runs", {
+test_that("the final fit's record carries the same entry, and the fit runs", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -193,7 +193,7 @@ null_results <- function(d, seed = 34) {
   memoised(nested_fit_resamples(wf, folds, metrics = ms))
 }
 
-test_that("AC2: the model axes are refused on the three records", {
+test_that("the model axes are refused on the three records", {
   skip_if_no_bayes_fixture()
   d <- make_reg_data()
   fr <- fit_resamples_results(d)
@@ -270,7 +270,7 @@ test_that("AC2: the model axes are refused on the three records", {
   )
 })
 
-test_that("AC2: the preprocessor axes are refused on the three records", {
+test_that("the preprocessor axes are refused on the three records", {
   skip_if_no_bayes_fixture()
   d <- make_reg_data()
   fr <- fit_resamples_results(d)
@@ -378,7 +378,7 @@ test_that("AC2: the preprocessor axes are refused on the three records", {
   )
 })
 
-test_that("AC2: the identity check runs after the record, grid and marker checks", {
+test_that("the identity check runs after the record, grid and marker checks", {
   skip_if_no_engines()
   d <- make_reg_data()
   fr <- fit_resamples_results(d)
@@ -408,7 +408,7 @@ test_that("AC2: the identity check runs after the record, grid and marker checks
   )
 })
 
-test_that("AC2: a setting written with braces is refused with the mismatch class", {
+test_that("a setting written with braces is refused with the mismatch class", {
   # The difference sentence is built by cli and then handed to
   # `cli_abort()`, which interpolates its message once more: a deparsed
   # value holding a brace was read as a cli expression and the refusal
@@ -438,7 +438,7 @@ test_that("AC2: a setting written with braces is refused with the mismatch class
 
 # AC3: a workflow rebuilt from the same code passes, and fits the same.
 
-test_that("AC3: a rebuilt workflow is accepted and gives the same fit", {
+test_that("a rebuilt workflow is accepted and gives the same fit", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -526,7 +526,7 @@ test_that("AC3: a rebuilt workflow is accepted and gives the same fit", {
 # earlier version. That the set path still fits, and records the row's
 # workflow, is asserted in test-nested-final-fit-set.R.
 
-test_that("AC4: a record with no workflow entry is refused before the identity check", {
+test_that("a record with no workflow entry is refused before the identity check", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)
@@ -562,7 +562,7 @@ test_that("AC4: a record with no workflow entry is refused before the identity c
 # workflow differing there, and a record saved before the two parts existed
 # is still accepted under the workflow it ran under.
 
-test_that("AC2: a record saved before the two parts existed is accepted under its workflow", {
+test_that("a record saved before the two parts existed is accepted under its workflow", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -581,7 +581,7 @@ test_that("AC2: a record saved before the two parts existed is accepted under it
   )
 })
 
-test_that("AC1: a record built with case weights refuses another column, or none", {
+test_that("a record built with case weights refuses another column, or none", {
   skip_if_no_engines()
   d <- make_reg_data()
   set.seed(4242)
@@ -638,7 +638,7 @@ test_that("AC1: a record built with case weights refuses another column, or none
   )
 })
 
-test_that("AC1: a record built with a tailor refuses one differing in presence, type, argument or order", {
+test_that("a record built with a tailor refuses one differing in presence, type, argument or order", {
   skip_if_no_engines()
   skip_if_not_installed("tailor")
   d <- make_reg_data()

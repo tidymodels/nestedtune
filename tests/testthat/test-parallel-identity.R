@@ -30,7 +30,7 @@ serial_reference <- function(wf, nested, grid, metrics, seed = 2026L) {
   out
 }
 
-test_that("the shared 2-daemon pool starts primed (M74)", {
+test_that("the shared 2-daemon pool starts primed", {
   skip_if_no_daemons()
   start_daemons(2)
   share_daemons(2)
@@ -41,7 +41,7 @@ test_that("the shared 2-daemon pool starts primed (M74)", {
 # would be serial vs serial -- the vacuity RR03 flagged as B1. The two counts
 # are two blocks, one per shared pool (M74); the three-daemon one is below.
 
-test_that("BC1: parallel matches serial at two daemons", {
+test_that("parallel matches serial at two daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -63,7 +63,7 @@ test_that("BC1: parallel matches serial at two daemons", {
   expect_identical(parallel, serial)
 })
 
-test_that("BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer", {
+test_that("identity holds under a caller kind that is neither MT nor L'Ecuyer", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -97,7 +97,7 @@ test_that("BC2: identity holds under a caller kind that is neither MT nor L'Ecuy
   expect_identical(parallel, serial)
 })
 
-test_that("BC1: the caller's RNG state and kind survive a parallel run", {
+test_that("the caller's RNG state and kind survive a parallel run", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -117,7 +117,7 @@ test_that("BC1: the caller's RNG state and kind survive a parallel run", {
   expect_identical(RNGkind(), before_kind)
 })
 
-test_that("BC4: an aborted parallel run still restores the caller's RNG state", {
+test_that("an aborted parallel run still restores the caller's RNG state", {
   skip_if_no_daemons()
 
   # An interrupt unwinds through the same on.exit() the pre-flight abort does,
@@ -210,7 +210,7 @@ test_that("a cancelled parallel run returns nothing and restores the RNG state",
   expect_identical(RNGkind(), before_kind)
 })
 
-test_that("BC6: a failed fold matches serially in every field but its traces", {
+test_that("a failed fold matches serially in every field but its traces", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -290,7 +290,7 @@ test_that("BC6: a failed fold matches serially in every field but its traces", {
 # preserves the identity exactly, and test-event-level.R is the anchor for
 # that.
 
-test_that("BC7: the identity holds with a two-class fixture at event_level = \"second\" (M35, AC5)", {
+test_that("the identity holds with a two-class fixture at event_level = \"second\"", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
   skip_if_no_engines(stochastic = TRUE)
@@ -335,7 +335,7 @@ test_that("BC7: the identity holds with a two-class fixture at event_level = \"s
 # `event_level`, so a run whose wrapper dropped it would still complete and
 # would still return a number, just tune's default one.
 
-test_that("BC8: the identity holds with a censored fixture at a named eval_time (M41, AC5)", {
+test_that("the identity holds with a censored fixture at a named eval_time", {
   skip_if_no_daemons()
   skip_if_no_censored()
 
@@ -400,7 +400,7 @@ bayes_serial_reference <- function(wf, nested, p) {
   serial
 }
 
-test_that("BC10: the Bayesian path matches serial at two daemons (M45, AC4)", {
+test_that("the Bayesian path matches serial at two daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
   skip_if_not_installed("dials")
@@ -438,7 +438,7 @@ test_that("BC10: the Bayesian path matches serial at two daemons (M45, AC4)", {
 # candidate the default rule does not in two of the three folds. The
 # deterministic fixture, as the M48 AC1 oracle.
 
-test_that("BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially", {
+test_that("param_info, control and select reach the folds on two daemons as serially", {
   skip_if_no_daemons()
   skip_if_not_installed("dials")
 
@@ -528,7 +528,7 @@ race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
   serial
 }
 
-test_that("BC12: both racing paths match serial at two daemons (M50, AC4)", {
+test_that("both racing paths match serial at two daemons", {
   skip_if_no_daemons()
   skip_if_no_race_fixture(stochastic = TRUE)
 
@@ -589,7 +589,7 @@ anneal_serial_reference <- function(wf, nested, p, ms, ctrl) {
   serial
 }
 
-test_that("BC13: the annealing path matches serial at two daemons (M51, AC4)", {
+test_that("the annealing path matches serial at two daemons", {
   skip_if_no_daemons()
   skip_if_no_anneal_fixture(stochastic = TRUE)
 
@@ -636,7 +636,7 @@ test_that("BC13: the annealing path matches serial at two daemons (M51, AC4)", {
 # on NULL", tune 2.1.0, measured 2026-09-06), so every fold would fail before
 # the outer fit.
 
-test_that("BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)", {
+test_that("the outer fit's predictions and extracts match serially and on two daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -689,7 +689,7 @@ test_that("BC14: the outer fit's predictions and extracts match serially and on 
 # at all, would differ; the tuner needs no package beyond tune, which every
 # daemon already holds through the namespace load.
 
-test_that("BC16: the plain resampling path matches serial on two daemons (M70, AC6)", {
+test_that("the plain resampling path matches serial on two daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -724,7 +724,7 @@ test_that("BC16: the plain resampling path matches serial on two daemons (M70, A
 # another seed, or the map handing the second workflow a state the first
 # had advanced, would differ.
 
-test_that("BC17: the workflow-set map matches serial on two daemons (M71, AC2)", {
+test_that("the workflow-set map matches serial on two daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("workflowsets")
   skip_if_no_engines()
@@ -770,7 +770,7 @@ test_that("BC17: the workflow-set map matches serial on two daemons (M71, AC2)",
 # daemon on purpose, and the pool is replaced by the 3-daemon one below
 # before any other block runs.
 
-test_that("BC9: a fold is immune to whatever a daemon ran before it", {
+test_that("a fold is immune to whatever a daemon ran before it", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -812,13 +812,13 @@ test_that("BC9: a fold is immune to whatever a daemon ran before it", {
 # reads the worker count, every tuner keeps its two-daemon block above, and
 # grid keeps both counts (D-079).
 
-test_that("the shared 3-daemon pool starts primed (M74)", {
+test_that("the shared 3-daemon pool starts primed", {
   skip_if_no_daemons()
   start_daemons(3)
   share_daemons(3)
 })
 
-test_that("BC1: parallel matches serial at three daemons", {
+test_that("parallel matches serial at three daemons", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
@@ -838,7 +838,7 @@ test_that("BC1: parallel matches serial at three daemons", {
   expect_identical(parallel, serial)
 })
 
-test_that("no shared pool outlives its section (M74)", {
+test_that("no shared pool outlives its section", {
   skip_if_no_daemons()
   unshare_daemons()
   expect_identical(mirai::status()$connections, 0L)
@@ -847,7 +847,7 @@ test_that("no shared pool outlives its section (M74)", {
 # BC3 starts its own pool: it kills one of the daemons, so nothing may share
 # them (M74).
 
-test_that("BC3: a daemon killed mid-run yields a recorded failure, not an abort", {
+test_that("a daemon killed mid-run yields a recorded failure, not an abort", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 

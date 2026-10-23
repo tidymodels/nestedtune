@@ -369,7 +369,7 @@ set_block <- function(stacked, id, element_tbl) {
   nestedtune:::new_tbl(cols)
 }
 
-test_that("AC5: agreement() on a set stacks each element's table under wflow_id, parameters before the counts", {
+test_that("agreement() on a set stacks each element's table under wflow_id, parameters before the counts", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
   tab <- agreement(res)
@@ -397,7 +397,7 @@ test_that("AC5: agreement() on a set stacks each element's table under wflow_id,
   expect_gt(nrow(tab[tab$wflow_id == "tuned", ]), 1L)
 })
 
-test_that("AC5: a set's partial and all-failed workflows are warned and refused as the readers warn and refuse", {
+test_that("a set's partial and all-failed workflows are warned and refused as the readers warn and refuse", {
   skip_if_no_wset_fixture()
   partial <- wset_three_results(broken = 1L)
   warnings <- list()
@@ -437,7 +437,7 @@ test_that("AC5: a set's partial and all-failed workflows are warned and refused 
   expect_identical(rlang::call_name(conditionCall(cnd)), "agreement")
 })
 
-test_that("AC5: a parameter whose id is wflow_id, n or prop is refused naming the workflow", {
+test_that("a parameter whose id is wflow_id, n or prop is refused naming the workflow", {
   skip_if_no_wset_fixture()
   res <- wset_three_results()
 

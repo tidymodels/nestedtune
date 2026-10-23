@@ -36,7 +36,7 @@
 
 skip_heavy_on_cran()
 
-test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1 (AC1)", {
+test_that("nested_tune_sim_anneal() carries the Bayesian sibling's formals less objective, with initial at 1", {
   expect_identical(
     names(formals(nested_tune_sim_anneal.workflow)),
     c(
@@ -113,7 +113,7 @@ expect_iter_column <- function(tbl, initial) {
   expect_identical(length(unique(tbl$.config[first])), initial)
 }
 
-test_that("per-fold metrics, selections and inner tables match a hand-rolled annealing reference loop (AC1, deterministic)", {
+test_that("per-fold metrics, selections and inner tables match a hand-rolled annealing reference loop (deterministic)", {
   skip_if_no_anneal_fixture()
 
   d <- make_reg_data()
@@ -150,7 +150,7 @@ test_that("per-fold metrics, selections and inner tables match a hand-rolled ann
   )))
 })
 
-test_that("the annealing reference loop also matches on the metric-separating fixture (AC1)", {
+test_that("the annealing reference loop also matches on the metric-separating fixture", {
   skip_if_no_anneal_fixture()
 
   d <- sep_data()
@@ -193,7 +193,7 @@ test_that("the annealing reference loop also matches on the metric-separating fi
   )))
 })
 
-test_that("the initial candidates are the grid path's under the same seed (AC2)", {
+test_that("the initial candidates are the grid path's under the same seed", {
   skip_if_no_anneal_fixture()
 
   d <- make_reg_data()
@@ -227,7 +227,7 @@ test_that("the initial candidates are the grid path's under the same seed (AC2)"
   }
 })
 
-test_that("a fold that scored nothing carries .iter on its zero-row table (AC1)", {
+test_that("a fold that scored nothing carries .iter on its zero-row table", {
   skip_if_no_anneal_fixture()
 
   d <- make_reg_data()
@@ -257,7 +257,7 @@ test_that("a fold that scored nothing carries .iter on its zero-row table (AC1)"
   )
 })
 
-test_that("the help page's by-hand recipe reproduces a fold's inner table and selection (AC4)", {
+test_that("the help page's by-hand recipe reproduces a fold's inner table and selection", {
   skip_if_no_anneal_fixture()
 
   # Written from the Reproducibility section of ?nested_tune_sim_anneal, line

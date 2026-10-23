@@ -20,7 +20,7 @@ ORCHESTRATORS <- c(
 
 # AC1 -------------------------------------------------------------------
 
-test_that("AC1: the four entry points carry `...` after their required arguments", {
+test_that("the four entry points carry `...` after their required arguments", {
   # Written out rather than derived, so a signature that drifts has to be
   # re-agreed here. For nested_tune_grid(), `param_info`, `grid`, `metrics` and
   # `event_level` all sit behind the barrier and therefore match by name only,
@@ -110,7 +110,7 @@ test_that("AC1: the four entry points carry `...` after their required arguments
 # An empty workflow reaches the `workflow` method (M107), whose dots are
 # fenced before the workflow itself is judged; a bare number would stop at
 # the default method's refusal first.
-test_that("AC2: nested_tune_grid() refuses an argument it does not know", {
+test_that("nested_tune_grid() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(
     nested_tune_grid(workflows::workflow(), 2, nonesuch = 1)
   )
@@ -119,7 +119,7 @@ test_that("AC2: nested_tune_grid() refuses an argument it does not know", {
   expect_match(conditionMessage(cnd), "nonesuch")
 })
 
-test_that("AC2: nested_tune_bayes() refuses an argument it does not know", {
+test_that("nested_tune_bayes() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(
     nested_tune_bayes(workflows::workflow(), 2, nonesuch = 1)
   )
@@ -128,13 +128,13 @@ test_that("AC2: nested_tune_bayes() refuses an argument it does not know", {
   expect_match(conditionMessage(cnd), "nonesuch")
 })
 
-test_that("AC2: nested_final_fit() refuses an argument it does not know", {
+test_that("nested_final_fit() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(nested_final_fit(1, 2, nonesuch = 1))
   expect_s3_class(cnd, "rlib_error_dots_nonempty")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
 })
 
-test_that("AC2: nested_resamples() refuses an argument it does not know", {
+test_that("nested_resamples() refuses an argument it does not know", {
   cnd <- rlang::catch_cnd(nested_resamples(1, 2, 3, nonesuch = 1))
   expect_s3_class(cnd, "rlib_error_dots_nonempty")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_resamples")
@@ -253,7 +253,7 @@ DOTS_PROBED_METHODS <- c(
   "autoplot.nested_results_set"
 )
 
-test_that("AC5: every registered method whose `...` is unused fences it", {
+test_that("every registered method whose `...` is unused fences it", {
   methods <- registered_s3_methods()
 
   # The exemption has to still exist for the subtraction to mean anything --
@@ -314,14 +314,14 @@ test_that("AC5: every registered method whose `...` is unused fences it", {
 # holds that), and a text scan over the repo's own files was a second checker
 # for the same fact.
 
-test_that("AC6: collect_metrics() puts `summarize` behind the barrier", {
+test_that("collect_metrics() puts `summarize` behind the barrier", {
   expect_identical(
     names(formals(getS3method("collect_metrics", "nested_results"))),
     c("x", "...", "summarize", "type")
   )
 })
 
-test_that("AC6: a positional `summarize` is refused at the call, a named one is not", {
+test_that("a positional `summarize` is refused at the call, a named one is not", {
   skip_if_no_engines()
   # Seeded as test-vctrs-compat.R's `compat_results()` seeds it, so the
   # request keys to the run that file already built rather than a second fit.

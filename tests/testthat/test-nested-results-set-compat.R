@@ -216,7 +216,7 @@ set_compat_table <- function() {
   )
 }
 
-test_that("AC1: every door keeps the class exactly when every row is one of the run's own", {
+test_that("every door keeps the class exactly when every row is one of the run's own", {
   skip_if_no_wset_fixture()
   src <- compat_set()
   expect_s3_class(src, "nested_results_set")
@@ -232,7 +232,7 @@ test_that("AC1: every door keeps the class exactly when every row is one of the 
   }
 })
 
-test_that("AC1: a kept subset carries the operation's own rows, columns and order", {
+test_that("a kept subset carries the operation's own rows, columns and order", {
   skip_if_no_wset_fixture()
   src <- compat_set()
 
@@ -250,7 +250,7 @@ test_that("AC1: a kept subset carries the operation's own rows, columns and orde
   expect_identical(names(src[, 3:1]), c("result", "workflow", "wflow_id"))
 })
 
-test_that("AC1: a bare result sheds the record with the class", {
+test_that("a bare result sheds the record with the class", {
   skip_if_no_wset_fixture()
   src <- compat_set()
   out <- src[0, ]

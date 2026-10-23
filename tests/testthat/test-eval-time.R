@@ -131,7 +131,7 @@ unusable_eval_times <- function() {
   list(-1, NA_real_, "1", Inf, numeric(0), c(1, NA_real_))
 }
 
-test_that("AC1: an unusable `eval_time` is refused, naming the function the user called", {
+test_that("an unusable `eval_time` is refused, naming the function the user called", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -161,7 +161,7 @@ test_that("AC1: an unusable `eval_time` is refused, naming the function the user
   expect_match(conditionMessage(cnd), "2 and 4")
 })
 
-test_that("AC1: the refusal fires before any fitting begins", {
+test_that("the refusal fires before any fitting begins", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -202,7 +202,7 @@ test_that("AC1: the refusal fires before any fitting begins", {
   }
 })
 
-test_that("AC1: an accepted `eval_time` reaches the outer loop untouched", {
+test_that("an accepted `eval_time` reaches the outer loop untouched", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -231,7 +231,7 @@ test_that("AC1: an accepted `eval_time` reaches the outer loop untouched", {
   }
 })
 
-test_that("AC1: the recorded `eval_time` reaches the final fit untouched", {
+test_that("the recorded `eval_time` reaches the final fit untouched", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -336,7 +336,7 @@ brier_from_definition <- function(res, nested, workflow, i, t) {
   )
 }
 
-test_that("AC2: the metric each outer fold reports at the named evaluation time is the IPCW Brier score", {
+test_that("the metric each outer fold reports at the named evaluation time is the IPCW Brier score", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -395,7 +395,7 @@ fold_reference <- function(res, nested, workflow, i, eval_time) {
   list(selected = selected, metrics = tune::collect_metrics(fitted))
 }
 
-test_that("AC3: two runs differing only in `eval_time` report different metrics, each the one tune produces", {
+test_that("two runs differing only in `eval_time` report different metrics, each the one tune produces", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -433,7 +433,7 @@ test_that("AC3: two runs differing only in `eval_time` report different metrics,
   }
 })
 
-test_that("AC3: a multi-element `eval_time` reports what its first element names", {
+test_that("a multi-element `eval_time` reports what its first element names", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -479,7 +479,7 @@ test_that("AC3: a multi-element `eval_time` reports what its first element names
 
 # AC4 -- O2 -------------------------------------------------------------
 
-test_that("AC4: nested_final_fit() tunes and selects under the caller's evaluation time", {
+test_that("nested_final_fit() tunes and selects under the caller's evaluation time", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -552,7 +552,7 @@ rd_text <- function(name) {
   gsub("\\s+", " ", paste(readLines(path, warn = FALSE), collapse = " "))
 }
 
-test_that("AC6: both help pages document `eval_time` and what this package refuses", {
+test_that("both help pages document `eval_time` and what this package refuses", {
   pages <- list(
     nested_tune_grid = rd_text("nested_tune_grid.Rd"),
     nested_final_fit = rd_text("nested_final_fit.Rd")
@@ -625,7 +625,7 @@ test_that("AC6: both help pages document `eval_time` and what this package refus
 # exactly when tune recorded it, which is what tune's own collect_metrics()
 # does (implement gate, 2026-09-01).
 
-test_that("AC8: a multi-element `eval_time` is summarized per evaluation time", {
+test_that("a multi-element `eval_time` is summarized per evaluation time", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -690,7 +690,7 @@ test_that("AC8: a multi-element `eval_time` is summarized per evaluation time", 
   expect_no_match(txt, "from [0-9]+ fold")
 })
 
-test_that("AC8: a run with no evaluation time keeps the shape it had", {
+test_that("a run with no evaluation time keeps the shape it had", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -719,7 +719,7 @@ test_that("AC8: a run with no evaluation time keeps the shape it had", {
   expect_no_match(print_text(summary(res)), "at time")
 })
 
-test_that("AC8: a failed fold contributes no rows and keeps the time column", {
+test_that("a failed fold contributes no rows and keeps the time column", {
   skip_if_no_censored()
 
   data <- srv_data()
@@ -749,7 +749,7 @@ test_that("AC8: a failed fold contributes no rows and keeps the time column", {
   expect_identical(summarized$n, rep(2L, length(times)))
 })
 
-test_that("AC8: a static metric beside a dynamic one keeps one row, with no time", {
+test_that("a static metric beside a dynamic one keeps one row, with no time", {
   # Direct on the summarizer, on the shape a `last_fit()` on tune 2.1.0 records
   # for a metric set mixing `brier_survival()` with `concordance_survival()`:
   # the static metric's row carries NA in `.eval_time` (measured 2026-09-01).

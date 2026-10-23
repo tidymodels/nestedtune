@@ -2,7 +2,7 @@
 # record's shape, the record check, the fit with no tuning run, its print,
 # and the two accessors that have nothing to return.
 
-test_that("AC4: the procedure record names the tuner and carries no grid, param_info or select", {
+test_that("the procedure record names the tuner and carries no grid, param_info or select", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- fit_resamples_results(d)
@@ -27,7 +27,7 @@ test_that("AC4: the procedure record names the tuner and carries no grid, param_
   expect_identical(check_results_record(res), res)
 })
 
-test_that("AC4: the final fit fits the workflow on every row with no tuning run", {
+test_that("the final fit fits the workflow on every row with no tuning run", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)
@@ -55,7 +55,7 @@ test_that("AC4: the final fit fits the workflow on every row with no tuning run"
   )
 })
 
-test_that("AC4: the print names the procedure as no tuning and the selection as nothing", {
+test_that("the print names the procedure as no tuning and the selection as nothing", {
   skip_if_no_engines()
   d <- make_reg_data()
   set.seed(31)
@@ -81,7 +81,7 @@ test_that("AC4: the print names the procedure as no tuning and the selection as 
   expect_no_match(summary_text, "Candidates scored", fixed = TRUE)
 })
 
-test_that("AC4: the two extractors refuse a fit that ran no tuning", {
+test_that("the two extractors refuse a fit that ran no tuning", {
   skip_if_no_engines()
   d <- make_reg_data()
   set.seed(31)

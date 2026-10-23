@@ -148,7 +148,7 @@ expect_frames_are_analysis_rows <- function(record, nested, label) {
   expect_setequal(matched, seq_along(nested$splits))
 }
 
-test_that("AC1: every tuner finalizes on the outer fold's analysis rows", {
+test_that("every tuner finalizes on the outer fold's analysis rows", {
   skip_if_no_engines(stochastic = TRUE)
   skip_if_not_installed("dials")
 
@@ -249,7 +249,7 @@ test_that("nested_tune_bayes() finalizes no data-dependent range, so every fold 
   expect_true(all(ok$.completed))
 })
 
-test_that("AC2: every candidate a fold searched lies inside the range its analysis rows finalize", {
+test_that("every candidate a fold searched lies inside the range its analysis rows finalize", {
   skip_if_no_engines(stochastic = TRUE)
   skip_if_not_installed("dials")
 
@@ -292,7 +292,7 @@ test_that("AC2: every candidate a fold searched lies inside the range its analys
   }
 })
 
-test_that("AC3: a nested_resamples() design and the nested_cv() design it matches tune identically", {
+test_that("a nested_resamples() design and the nested_cv() design it matches tune identically", {
   skip_if_no_engines(stochastic = TRUE)
   skip_if_not_installed("dials")
 
@@ -350,7 +350,7 @@ record_run_tuner_resamples <- function(expr) {
   seen
 }
 
-test_that("AC4: an inner rset the rebuild does not apply to reaches run_tuner() untouched", {
+test_that("an inner rset the rebuild does not apply to reaches run_tuner() untouched", {
   skip_if_no_engines()
 
   d <- make_reg_data()

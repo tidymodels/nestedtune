@@ -154,7 +154,7 @@ test_that("every control_bayes() slot sits under one heading on nested_tune_baye
   expect_identical(buckets[["Not returned"]], "save_workflow")
 })
 
-test_that("every control_resamples() slot sits under one heading on nested_fit_resamples()'s page (M70, AC7)", {
+test_that("every control_resamples() slot sits under one heading on nested_fit_resamples()'s page", {
   buckets <- expect_classified("nested_fit_resamples", tune::control_resamples)
   expect_identical(buckets[["Forced"]], "allow_par")
   expect_identical(buckets[["Settable as its own argument"]], "event_level")
@@ -176,7 +176,7 @@ test_that("every control_resamples() slot sits under one heading on nested_fit_r
   )
 })
 
-test_that("every control_race() slot sits under one heading on the racing page (M50, AC7)", {
+test_that("every control_race() slot sits under one heading on the racing page", {
   skip_if_not_installed("finetune")
   buckets <- expect_classified("nested_tune_race", finetune::control_race)
   expect_identical(buckets[["Forced"]], "allow_par")
@@ -192,7 +192,7 @@ test_that("every control_race() slot sits under one heading on the racing page (
   expect_identical(buckets[["Inert"]], "backend_options")
 })
 
-test_that("every control_sim_anneal() slot sits under one heading on nested_tune_sim_anneal()'s page (M51, AC6)", {
+test_that("every control_sim_anneal() slot sits under one heading on nested_tune_sim_anneal()'s page", {
   skip_if_not_installed("finetune")
   buckets <- expect_classified(
     "nested_tune_sim_anneal",
@@ -233,7 +233,7 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
   expect_match(txt, "from every fold of a serial run", fixed = TRUE)
 })
 
-test_that("the racing page says what the recorded grid is, and what `n` is (AC7)", {
+test_that("the racing page says what the recorded grid is, and what `n` is", {
   # Whitespace collapsed: the Rd wraps its lines, and the installed database
   # under `R CMD check` wraps them where the source file did not.
   txt <- gsub("\\s+", " ", rd_text(help_rd("nested_tune_race")))

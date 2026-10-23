@@ -3,7 +3,7 @@
 # read, the ones that read the inner stage return zero rows, and the one
 # view with nothing to draw refuses by name.
 
-test_that("AC3: the readers over the outer fits answer without a condition", {
+test_that("the readers over the outer fits answer without a condition", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- fit_resamples_results(d)
@@ -31,7 +31,7 @@ test_that("AC3: the readers over the outer fits answer without a condition", {
   expect_true(all(c("id", "location", "type", "note") %in% names(notes)))
 })
 
-test_that("AC3: the readers over the inner stage return zero rows", {
+test_that("the readers over the inner stage return zero rows", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- fit_resamples_results(d)
@@ -54,7 +54,7 @@ test_that("AC3: the readers over the inner stage return zero rows", {
   expect_identical(names(agree), c("n", "prop"))
 })
 
-test_that("AC3: the outer fit's predictions and extracts stack when they were kept", {
+test_that("the outer fit's predictions and extracts stack when they were kept", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -87,7 +87,7 @@ test_that("AC3: the outer fit's predictions and extracts stack when they were ke
   expect_error(collect_extracts(plain), class = "nestedtune_column_not_saved")
 })
 
-test_that("AC3: the performance view draws and the parameters view refuses by name", {
+test_that("the performance view draws and the parameters view refuses by name", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- fit_resamples_results(d)

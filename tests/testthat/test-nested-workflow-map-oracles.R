@@ -17,7 +17,7 @@ skip_heavy_on_cran()
 
 for (fn in MAP_FNS) {
   test_that(
-    paste0("AC1: each element is identical to the hand call (fn = ", fn, ")"),
+    paste0("each element is identical to the hand call (fn = ", fn, ")"),
     {
       skip_if_no_wset_fixture(fn)
       d <- make_reg_data()
@@ -70,7 +70,7 @@ for (fn in MAP_FNS) {
   )
 }
 
-test_that("AC1: a per-workflow grid option overrides the grid in `...` for that workflow alone", {
+test_that("a per-workflow grid option overrides the grid in `...` for that workflow alone", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -118,7 +118,7 @@ test_that("AC1: a per-workflow grid option overrides the grid in `...` for that 
   expect_identical(res$result[[3L]], third)
 })
 
-test_that("AC1: a control in `...` reaches the tuned workflows and an option control reaches the fixed one", {
+test_that("a control in `...` reaches the tuned workflows and an option control reaches the fixed one", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -162,7 +162,7 @@ test_that("AC1: a control in `...` reaches the tuned workflows and an option con
   expect_identical(res$result[[2L]], second)
 })
 
-test_that("AC1: a warning raised inside one workflow names it and keeps its class", {
+test_that("a warning raised inside one workflow names it and keeps its class", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -204,7 +204,7 @@ test_that("AC1: a warning raised inside one workflow names it and keeps its clas
   )
 })
 
-test_that("AC1: an error one workflow's orchestrator raises names the workflow", {
+test_that("an error one workflow's orchestrator raises names the workflow", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)

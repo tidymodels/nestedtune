@@ -208,7 +208,7 @@ test_that("collect_metrics() aborts when no fold completed", {
   }
 })
 
-test_that("failure capture leaves a clean run exactly as M02 left it", {
+test_that("failure capture leaves a clean run complete and silent", {
   skip_if_no_engines()
   d <- make_reg_data()
   nested <- det_nested(d)
@@ -232,7 +232,7 @@ test_that("failure capture leaves a clean run exactly as M02 left it", {
   expect_true(all(collect_metrics(res)$n == 3L))
 })
 
-test_that("a fold's seeds do not move when an earlier fold fails (IP2)", {
+test_that("a fold's seeds do not move when an earlier fold fails", {
   skip_if_no_engines()
   d <- make_reg_data()
 

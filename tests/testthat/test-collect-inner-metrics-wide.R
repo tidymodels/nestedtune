@@ -26,7 +26,7 @@ clash_workflow <- function(data) {
   workflows::workflow(rec, parsnip::linear_reg())
 }
 
-test_that("AC2: type = \"long\" returns the table the call without type returns", {
+test_that("type = \"long\" returns the table the call without type returns", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- grid_inner_run(d)
@@ -36,7 +36,7 @@ test_that("AC2: type = \"long\" returns the table the call without type returns"
   )
 })
 
-test_that("AC2: fold 1's wide rows equal tune's wide table on fold 1's inner run", {
+test_that("fold 1's wide rows equal tune's wide table on fold 1's inner run", {
   skip_if_no_engines()
   d <- make_reg_data()
   # Built first, from the stream state make_reg_data() leaves, so the
@@ -66,7 +66,7 @@ test_that("AC2: fold 1's wide rows equal tune's wide table on fold 1's inner run
   expect_identical(wide$rsq[[4L]], long$mean[at])
 })
 
-test_that("AC2: .iter stays a key column on a Bayesian run", {
+test_that(".iter stays a key column on a Bayesian run", {
   skip_if_no_bayes_fixture()
   res <- bayes_results()
   long <- collect_inner_metrics(res)
@@ -85,7 +85,7 @@ test_that("AC2: .iter stays a key column on a Bayesian run", {
   )
 })
 
-test_that("AC2: the set's wide table is keyed on wflow_id", {
+test_that("the set's wide table is keyed on wflow_id", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(41)
@@ -122,7 +122,7 @@ expect_wide_refusals <- function(x) {
   )
 }
 
-test_that("AC2: a metric named like a key column and a bad type are refused on a run", {
+test_that("a metric named like a key column and a bad type are refused on a run", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -136,7 +136,7 @@ test_that("AC2: a metric named like a key column and a bad type are refused on a
   expect_wide_refusals(res)
 })
 
-test_that("AC2: a metric named like a key column and a bad type are refused on a set", {
+test_that("a metric named like a key column and a bad type are refused on a set", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)

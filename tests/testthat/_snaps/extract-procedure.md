@@ -1,4 +1,4 @@
-# AC2: an object with no method is refused, naming both that answer
+# an object with no method is refused, naming both that answer
 
     Code
       extract_procedure(1:3)

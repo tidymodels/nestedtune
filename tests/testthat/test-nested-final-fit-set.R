@@ -2,7 +2,7 @@
 # reads the workflow and its record off one row, and what it fits is what
 # the hand pairing fits, seed for seed.
 
-test_that("AC4: a fit by id is the fit of the extracted workflow with its own results", {
+test_that("a fit by id is the fit of the extracted workflow with its own results", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   res <- wset_results("nested_tune_grid")
@@ -38,7 +38,7 @@ test_that("AC4: a fit by id is the fit of the extracted workflow with its own re
   expect_identical(nrow(fits$fixed$selected), 0L)
 })
 
-test_that("AC4: an id naming no row is refused", {
+test_that("an id naming no row is refused", {
   skip_if_no_wset_fixture()
   res <- wset_results("nested_tune_grid")
   set.seed(1)
@@ -50,7 +50,7 @@ test_that("AC4: an id naming no row is refused", {
   expect_identical(.Random.seed, before)
 })
 
-test_that("AC4: a set with results, a set with no id, and a workflow with an id are refused", {
+test_that("a set with results, a set with no id, and a workflow with an id are refused", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   res <- wset_results("nested_tune_grid")

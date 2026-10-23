@@ -505,7 +505,7 @@ expect_grid_refused <- function(cnd, class, pattern) {
   invisible(cnd)
 }
 
-test_that("`...` accepts `control` and nothing else (M48, AC5)", {
+test_that("`...` accepts `control` and nothing else", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -532,7 +532,7 @@ test_that("`...` accepts `control` and nothing else (M48, AC5)", {
   expect_grid_refused(cnd, "nestedtune_bad_dots", "`call`")
 })
 
-test_that("`control` must be what tune::control_grid() returns (M48, AC5)", {
+test_that("`control` must be what tune::control_grid() returns", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -562,7 +562,7 @@ test_that("`control` must be what tune::control_grid() returns (M48, AC5)", {
   }
 })
 
-test_that("a control naming another event level is refused at entry (M48, AC3)", {
+test_that("a control naming another event level is refused at entry", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -610,7 +610,7 @@ refusal <- function(expr) {
 # independently of the check, cli only the spelling.
 joined <- function(x) cli::format_inline("{x}")
 
-test_that("every planted design is refused, naming every offender (M55, AC1-AC4)", {
+test_that("every planted design is refused, naming every offender", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -640,7 +640,7 @@ test_that("every planted design is refused, naming every offender (M55, AC1-AC4)
   }
 })
 
-test_that("each refusal says which defect it found (M55, AC1-AC3)", {
+test_that("each refusal says which defect it found", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -722,7 +722,7 @@ test_that("each refusal says which defect it found (M55, AC1-AC3)", {
   }
 })
 
-test_that("the whole-object refusals carry the class too (M55, AC4)", {
+test_that("the whole-object refusals carry the class too", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -753,7 +753,7 @@ test_that("the whole-object refusals carry the class too (M55, AC4)", {
   }
 })
 
-test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
+test_that("a well-formed design passes the entry check unchanged", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -837,7 +837,7 @@ test_that("a well-formed design passes the entry check unchanged (M55, AC5)", {
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-test_that("an outer in_id past the frame is left to last_fit(), not judged against an analysis set that cannot be built (M59)", {
+test_that("an outer in_id past the frame is left to last_fit(), not judged against an analysis set that cannot be built", {
   skip_if_no_engines()
 
   # A `nested_cv()` design's inner splits carry the outer analysis set. With
@@ -860,7 +860,7 @@ test_that("an outer in_id past the frame is left to last_fit(), not judged again
   expect_s3_class(cnd, "nestedtune_sentinel")
 })
 
-test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() design (M59, AC4)", {
+test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() design", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -890,7 +890,7 @@ test_that("nested_tune_grid() completes every fold of an rsample::nested_cv() de
 # M69: what `select` accepts, refused at entry with the sentinel in place so
 # the refusal is shown to fire before any fold runs.
 
-test_that("`select` must be a selection_rule(), refused before any fold runs (M69, AC4)", {
+test_that("`select` must be a selection_rule(), refused before any fold runs", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -927,7 +927,7 @@ test_that("`select` must be a selection_rule(), refused before any fold runs (M6
   )
 })
 
-test_that("an ordering naming a parameter the workflow does not tune is refused, naming both (M69, AC4)", {
+test_that("an ordering naming a parameter the workflow does not tune is refused, naming both", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -951,7 +951,7 @@ test_that("an ordering naming a parameter the workflow does not tune is refused,
   expect_no_match(msg, "\"desc\"")
 })
 
-test_that("AC1: a desirability term naming neither a metric nor a tuned parameter is refused at entry (M109)", {
+test_that("a desirability term naming neither a metric nor a tuned parameter is refused at entry", {
   skip_if_no_engines()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -1011,7 +1011,7 @@ test_that("AC1: a desirability term naming neither a metric nor a tuned paramete
   )
 })
 
-test_that("the desirability rule is refused at entry on a censored regression model (M109)", {
+test_that("the desirability rule is refused at entry on a censored regression model", {
   skip_if_no_censored()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -1049,7 +1049,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   )
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)

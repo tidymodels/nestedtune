@@ -358,7 +358,7 @@ test_that("each shared check fires through both racing exports", {
   }
 })
 
-test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
+test_that("both racers refuse the desirability rule at entry", {
   skip_if_no_race_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -388,7 +388,7 @@ test_that("AC4: both racers refuse the desirability rule at entry (M109)", {
   }
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn)
   d <- make_reg_data()

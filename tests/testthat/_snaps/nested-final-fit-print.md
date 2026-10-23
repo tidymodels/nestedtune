@@ -103,7 +103,7 @@
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.
 
-# AC3: the selection-rule line holds its shape on both prints
+# the selection-rule line holds its shape on both prints
 
     Code
       print(pct_loss_5)
@@ -250,7 +250,7 @@
         `extract_tune_results()` reaches them, and every one is a selection-time
         quantity, optimistically biased as a claim about this model.
 
-# AC3: the two-ordering line holds its shape on both prints
+# the two-ordering line holds its shape on both prints
 
     Code
       print(two)

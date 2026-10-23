@@ -12,7 +12,7 @@ expect_first_metric <- function(res, final) {
   expect_identical(extract_procedure(final)$first_metric, want)
 }
 
-test_that("a grid run records the first metric of the set it was given, in either order (M116 AC1)", {
+test_that("a grid run records the first metric of the set it was given, in either order", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- det_workflow(d)
@@ -32,7 +32,7 @@ test_that("a grid run records the first metric of the set it was given, in eithe
   }
 })
 
-test_that("a grid run given no metric set records the first metric of tune's default (M116 AC1)", {
+test_that("a grid run given no metric set records the first metric of tune's default", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- make_reg_data()
@@ -54,7 +54,7 @@ test_that("a grid run given no metric set records the first metric of tune's def
   expect_false(identical(extract_procedure(res)$first_metric, "rmse"))
 })
 
-test_that("the Bayesian, racing and annealing runs record the first metric (M116 AC1)", {
+test_that("the Bayesian, racing and annealing runs record the first metric", {
   skip_if_no_bayes_fixture()
   skip_if_no_race_fixture()
   skip_if_no_anneal_fixture()
@@ -79,7 +79,7 @@ test_that("the Bayesian, racing and annealing runs record the first metric (M116
   expect_first_metric(res, final)
 })
 
-test_that("the entry reaches no tuner, and a run that selects nothing records none (M116 AC1)", {
+test_that("the entry reaches no tuner, and a run that selects nothing records none", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- make_reg_data()
@@ -95,7 +95,7 @@ test_that("the entry reaches no tuner, and a run that selects nothing records no
 # A metric set tune cannot resolve for the workflow's mode is refused before
 # any fold runs, since the entry cannot be recorded for it (M116 review). Each
 # fold's run would fail on the same set.
-test_that("a metric set that does not suit the model's mode is refused at entry (M116)", {
+test_that("a metric set that does not suit the model's mode is refused at entry", {
   skip_if_no_engines()
   d <- make_reg_data()
   wrong <- yardstick::metric_set(yardstick::accuracy)
@@ -133,7 +133,7 @@ expect_metrics_mode_refusal <- function(expr, fn) {
   invisible(cnd)
 }
 
-test_that("nested_fit_resamples() refuses a metric set that does not suit the model's mode (M117 AC1)", {
+test_that("nested_fit_resamples() refuses a metric set that does not suit the model's mode", {
   skip_if_no_engines()
   d <- make_reg_data()
   wrong <- yardstick::metric_set(yardstick::accuracy)
@@ -153,7 +153,7 @@ test_that("nested_fit_resamples() refuses a metric set that does not suit the mo
   )
 })
 
-test_that("a workflow set with an unsuitable metric set is refused before any workflow runs (M116)", {
+test_that("a workflow set with an unsuitable metric set is refused before any workflow runs", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The workflow with nothing to tune comes first and takes a suitable set
@@ -189,7 +189,7 @@ test_that("a workflow set with an unsuitable metric set is refused before any wo
 # pre-check too (M117, D-082), whether `fn` names that function or a tuner. The refused workflow
 # comes second and takes its set from its own `option` entry, since a shared
 # set in `...` would refuse the first. No orchestrator call may start.
-test_that("a workflow the map routes to nested_fit_resamples() is refused before any workflow runs (M117 AC2)", {
+test_that("a workflow the map routes to nested_fit_resamples() is refused before any workflow runs", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- workflowsets::as_workflow_set(

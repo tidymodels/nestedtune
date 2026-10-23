@@ -131,7 +131,7 @@ test_that("the reference loop also matches with a stochastic engine", {
   }
 })
 
-test_that("a control passed through `...` reaches the inner tune_grid() (M48)", {
+test_that("a control passed through `...` reaches the inner tune_grid()", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- make_reg_data()
@@ -312,7 +312,7 @@ test_that("a grid size larger than the reachable candidates records what ran", {
 #   a fold, which is what lets the test tell a driver that applied the rule
 #   from one that ignored it.
 
-test_that("AC1: each selection rule picks what tune's selector picks on the fold's inner run (M69)", {
+test_that("each selection rule picks what tune's selector picks on the fold's inner run", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -374,7 +374,7 @@ test_that("AC1: each selection rule picks what tune's selector picks on the fold
 #   pick (2,2), (2,2), (2,2). The third fold differs, which is what lets the
 #   test tell a driver that applied the rule from one that ignored it.
 
-test_that("AC2: the desirability rule picks what desirability2 picks on the fold's inner run (M109)", {
+test_that("the desirability rule picks what desirability2 picks on the fold's inner run", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

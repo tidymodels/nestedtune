@@ -22,7 +22,7 @@ selected_thresholds <- function(res) {
   vapply(res$.selected[res$.completed], function(x) x$threshold, numeric(1))
 }
 
-test_that("AC3: param_info restricts what every outer fold selects", {
+test_that("param_info restricts what every outer fold selects", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
 
@@ -67,7 +67,7 @@ test_that("AC3: param_info restricts what every outer fold selects", {
   expect_true(any(unrestricted_values > NARROW_THRESHOLD[[2L]]))
 })
 
-test_that("AC3: param_info restricts what the final fit selects", {
+test_that("param_info restricts what the final fit selects", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
 

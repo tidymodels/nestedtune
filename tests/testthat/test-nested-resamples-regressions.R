@@ -1,7 +1,7 @@
 # Regressions found by the M01 review fan-out. Each test fails against the
 # implementation as it stood when the review ran.
 
-test_that("a prebuilt `outside` rset built on other data is refused (IP1)", {
+test_that("a prebuilt `outside` rset built on other data is refused", {
   d1 <- data.frame(x = 1:40, tag = paste0("A", 1:40))
   set.seed(9)
   d2 <- d1[sample(40), ]
@@ -35,7 +35,7 @@ test_that("a prebuilt `outside` rset built on other data is refused (IP1)", {
   )
 })
 
-test_that("no inner analysis row ever comes from the outer assessment set (IP1)", {
+test_that("no inner analysis row ever comes from the outer assessment set", {
   d <- make_test_data()
   d$tag <- paste0("row", seq_len(nrow(d)))
 

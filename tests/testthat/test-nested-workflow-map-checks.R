@@ -15,7 +15,7 @@ expect_map_refusal <- function(expr, class) {
   invisible(cnd)
 }
 
-test_that("AC5: an object that is not a workflow_set is refused", {
+test_that("an object that is not a workflow_set is refused", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -42,7 +42,7 @@ test_that("AC5: an object that is not a workflow_set is refused", {
   expect_match(conditionMessage(cnd), "info", fixed = TRUE)
 })
 
-test_that("AC5: fn must name one of the six orchestrators", {
+test_that("fn must name one of the six orchestrators", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- wset_two(d)
@@ -72,7 +72,7 @@ test_that("AC5: fn must name one of the six orchestrators", {
   )
 })
 
-test_that("M149 AC1: verbose must be one TRUE or FALSE", {
+test_that("verbose must be one TRUE or FALSE", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- wset_two(d)
@@ -95,7 +95,7 @@ test_that("M149 AC1: verbose must be one TRUE or FALSE", {
   }
 })
 
-test_that("AC5: a name in `...` the named orchestrator does not take is refused", {
+test_that("a name in `...` the named orchestrator does not take is refused", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   wset <- wset_two(d)
@@ -156,7 +156,7 @@ test_that("AC5: a name in `...` the named orchestrator does not take is refused"
   expect_match(conditionMessage(cnd), "resamples", fixed = TRUE)
 })
 
-test_that("AC5: an option entry the routed orchestrator does not take is refused, naming the workflow", {
+test_that("an option entry the routed orchestrator does not take is refused, naming the workflow", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -203,7 +203,7 @@ test_that("AC5: an option entry the routed orchestrator does not take is refused
   )
 })
 
-test_that("AC5: a workflow check_workflow() refuses is refused naming its wflow_id", {
+test_that("a workflow check_workflow() refuses is refused naming its wflow_id", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -233,7 +233,7 @@ test_that("AC5: a workflow check_workflow() refuses is refused naming its wflow_
   expect_null(last_dispatch())
 })
 
-test_that("AC5: a marked workflow under the plain resampling orchestrator is refused naming its wflow_id", {
+test_that("a marked workflow under the plain resampling orchestrator is refused naming its wflow_id", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -250,7 +250,7 @@ test_that("AC5: a marked workflow under the plain resampling orchestrator is ref
   expect_match(conditionMessage(cnd), "num_comp", fixed = TRUE)
 })
 
-test_that("AC5: every workflow's packages are checked at entry", {
+test_that("every workflow's packages are checked at entry", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -353,7 +353,7 @@ RESIGNAL_FORMS <- list(
 # an error it signals. Everything else must come through unchanged.
 RESIGNAL_OWN_FIELDS <- c("message", "call", "trace")
 
-test_that("AC4: a re-signalled condition keeps the original's class, parent, body, footer, format flag and data fields", {
+test_that("a re-signalled condition keeps the original's class, parent, body, footer, format flag and data fields", {
   call <- quote(the_reader(x))
   for (form in RESIGNAL_FORMS) {
     original <- planted_cnd(form$f())
@@ -438,7 +438,7 @@ test_that("a re-signalled condition with no message text gets the prefix as its 
   expect_identical(conditionMessage(absent), 'Workflow "tuned": ')
 })
 
-test_that("AC4: a re-signalled warning is muffled at the source and a warning of another class passes untouched", {
+test_that("a re-signalled warning is muffled at the source and a warning of another class passes untouched", {
   call <- quote(the_reader(x))
   # One warning reaches the caller, the prefixed one; the original does not
   # reach it a second time.

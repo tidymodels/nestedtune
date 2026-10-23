@@ -38,7 +38,7 @@ anneal_final_and_reference <- function() {
 
 in_ids <- function(tuned) lapply(tuned$splits, function(s) s$in_id)
 
-test_that("the annealing final fit matches a hand-rolled reference pipeline (AC5)", {
+test_that("the annealing final fit matches a hand-rolled reference pipeline", {
   skip_if_no_anneal_fixture(stochastic = TRUE)
 
   b <- anneal_final_and_reference()
@@ -66,7 +66,7 @@ test_that("the annealing final fit matches a hand-rolled reference pipeline (AC5
   expect_true(any(final$tuning$.iter > 0L))
 })
 
-test_that("the final fit's candidates carry the iteration each came from (AC5, D-043)", {
+test_that("the final fit's candidates carry the iteration each came from", {
   skip_if_no_anneal_fixture(stochastic = TRUE)
 
   b <- anneal_final_and_reference()
@@ -83,7 +83,7 @@ test_that("the final fit's candidates carry the iteration each came from (AC5, D
   expect_lte(initial, 3L)
 })
 
-test_that("print() and summary() name simulated annealing with the counts that ran (AC5)", {
+test_that("print() and summary() name simulated annealing with the counts that ran", {
   skip_if_no_anneal_fixture()
 
   d <- make_reg_data()

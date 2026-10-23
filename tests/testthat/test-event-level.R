@@ -120,7 +120,7 @@ test_that("the fixture keeps both classes in every split, and separates the two 
 
 # AC1 -------------------------------------------------------------------
 
-test_that("AC1: a value that names no level is refused, by both orchestrators", {
+test_that("a value that names no level is refused, by both orchestrators", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -155,7 +155,7 @@ test_that("AC1: a value that names no level is refused, by both orchestrators", 
   expect_match(conditionMessage(cnd), "third", fixed = TRUE)
 })
 
-test_that("AC1: the refusal fires before anything is fitted", {
+test_that("the refusal fires before anything is fitted", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -172,7 +172,7 @@ test_that("AC1: the refusal fires before anything is fitted", {
 
 # AC2 -- O1 -------------------------------------------------------------
 
-test_that("AC2: the sensitivity each outer fold reports is the one yardstick computes at that event level", {
+test_that("the sensitivity each outer fold reports is the one yardstick computes at that event level", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- cls_data()
@@ -203,7 +203,7 @@ test_that("AC2: the sensitivity each outer fold reports is the one yardstick com
 
 # AC4 -- O2 -------------------------------------------------------------
 
-test_that("AC4: nested_final_fit() tunes under the caller's event level", {
+test_that("nested_final_fit() tunes under the caller's event level", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- cls_data()

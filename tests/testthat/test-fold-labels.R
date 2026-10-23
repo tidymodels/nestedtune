@@ -79,7 +79,7 @@ expect_no_pasted_label <- function(tbl, folds) {
   }
 }
 
-test_that("AC1: a repeated design's per-fold tables carry id and id2 from the design, long and wide", {
+test_that("a repeated design's per-fold tables carry id and id2 from the design, long and wide", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- repeated_label_design(d)
@@ -112,7 +112,7 @@ test_that("AC1: a repeated design's per-fold tables carry id and id2 from the de
   expect_no_pasted_label(scored, folds)
 })
 
-test_that("AC1: a single-column design keeps its one id column, and the summaries match the repeated design's names", {
+test_that("a single-column design keeps its one id column, and the summaries match the repeated design's names", {
   skip_if_no_engines()
   d <- make_reg_data()
   single_folds <- single_label_design(d)
@@ -149,7 +149,7 @@ test_that("AC1: a single-column design keeps its one id column, and the summarie
   )
 })
 
-test_that("AC2: a set over a repeated design carries wflow_id, id and id2 as separate columns", {
+test_that("a set over a repeated design carries wflow_id, id and id2 as separate columns", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   folds <- repeated_label_design(d)
@@ -180,7 +180,7 @@ test_that("AC2: a set over a repeated design carries wflow_id, id and id2 as sep
   expect_no_pasted_label(scored, folds)
 })
 
-test_that("AC3: the performance plot's fold axis pastes the design's labels and draws each non-missing estimate", {
+test_that("the performance plot's fold axis pastes the design's labels and draws each non-missing estimate", {
   skip_if_no_engines()
   skip_if_not_installed("ggplot2")
   d <- make_reg_data()
@@ -266,7 +266,7 @@ test_that("a record that cannot label the rows gives one id of row positions", {
   )
 })
 
-test_that("AC3: a set's performance plot builds on a repeated design", {
+test_that("a set's performance plot builds on a repeated design", {
   skip_if_no_wset_fixture()
   skip_if_not_installed("ggplot2")
   d <- make_reg_data()

@@ -104,7 +104,7 @@ test_that("per-fold metrics and selections match a hand-rolled Bayesian referenc
   expect_true(any(proposed))
 })
 
-test_that("a control passed through `...` reaches every fold (M48, AC1)", {
+test_that("a control passed through `...` reaches every fold", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -443,7 +443,7 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
 # terms, which add `minimize(df2)`, pick what best picks on all three folds
 # of this run.
 
-test_that("AC2: the desirability rule picks what desirability2 picks on the fold's Bayesian run (M109)", {
+test_that("the desirability rule picks what desirability2 picks on the fold's Bayesian run", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

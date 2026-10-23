@@ -614,42 +614,42 @@ time_budget_ledger <- function() {
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "the shared 2-daemon pool starts primed (M74)"
+      "the shared 2-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the shared 2-daemon pool starts primed (M74)"
+      "the shared 2-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: parallel matches serial at two daemons"
+      "parallel matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer"
+      "identity holds under a caller kind that is neither MT nor L'Ecuyer"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "daemon_rng_kinds",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC2: identity holds under a caller kind that is neither MT nor L'Ecuyer"
+      "identity holds under a caller kind that is neither MT nor L'Ecuyer"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: the caller's RNG state and kind survive a parallel run"
+      "the caller's RNG state and kind survive a parallel run"
     ),
     tb_row(
       "test-parallel-identity.R",
@@ -679,42 +679,42 @@ time_budget_ledger <- function() {
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC6: a failed fold matches serially in every field but its traces"
+      "a failed fold matches serially in every field but its traces"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC7: the identity holds with a two-class fixture at event_level = \"second\" (M35, AC5)"
+      "the identity holds with a two-class fixture at event_level = \"second\""
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC8: the identity holds with a censored fixture at a named eval_time (M41, AC5)"
+      "the identity holds with a censored fixture at a named eval_time"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC10: the Bayesian path matches serial at two daemons (M45, AC4)"
+      "the Bayesian path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC6, BC11, BC15: param_info, control and select reach the folds on two daemons as serially"
+      "param_info, control and select reach the folds on two daemons as serially"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC12: both racing paths match serial at two daemons (M50, AC4)",
+      "both racing paths match serial at two daemons",
       times = 2L,
       note = "inside for (fn in RACERS)"
     ),
@@ -723,35 +723,35 @@ time_budget_ledger <- function() {
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC13: the annealing path matches serial at two daemons (M51, AC4)"
+      "the annealing path matches serial at two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC14: the outer fit's predictions and extracts match serially and on two daemons (M68, AC4)"
+      "the outer fit's predictions and extracts match serially and on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC16: the plain resampling path matches serial on two daemons (M70, AC6)"
+      "the plain resampling path matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC17: the workflow-set map matches serial on two daemons (M71, AC2)"
+      "the workflow-set map matches serial on two daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC9: a fold is immune to whatever a daemon ran before it",
+      "a fold is immune to whatever a daemon ran before it",
       note = "pollutes the shared pool in place; last block on it"
     ),
     tb_row(
@@ -759,28 +759,28 @@ time_budget_ledger <- function() {
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "the shared 3-daemon pool starts primed (M74)"
+      "the shared 3-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       2L,
       "share_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "the shared 3-daemon pool starts primed (M74)"
+      "the shared 3-daemon pool starts primed"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "shared_daemons",
       DAEMON_SNAPSHOT_BOUND_S,
-      "BC1: parallel matches serial at three daemons"
+      "parallel matches serial at three daemons"
     ),
     tb_row(
       "test-parallel-identity.R",
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
-      "BC3: a daemon killed mid-run yields a recorded failure, not an abort",
+      "a daemon killed mid-run yields a recorded failure, not an abort",
       note = "a private pool: the block kills one of its daemons"
     ),
 

@@ -250,7 +250,7 @@ test_that("a Bayesian run records its procedure and carries no grid attribute", 
   )
 })
 
-test_that("forced slots win, and a control built inline draws nothing the caller can see (M48, AC3)", {
+test_that("forced slots win, and a control built inline draws nothing the caller can see", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()

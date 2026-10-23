@@ -65,6 +65,7 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - 2026-10-22: implement started; branch m155-test-comment-cleanup cut from 576c3d19.
 - 2026-10-22: choice: the sweep pattern also matches principle ids (`IP`/`GP`) and single-letter review, oracle, task and question ids (`B F O P Q R S T` and digits, less `S3`, `S4`, `S7`, `R6`), since each is cairn vocabulary a test reader cannot resolve; a `--names` mode checks a `test-blocks.R` table for AC2.
 - 2026-10-22: T1 done: `benchmarks/sweep-test-comments.R` at the branch point, `--counts`: 1200 matching lines in 111 of 119 files (7399 comments, 66 ledger notes); largest helper-orchestration.R 122, test-parallel-classify.R 53, test-parallel-identity.R 52, helper-time-budget.R 31, test-nested-tune-grid-oracles.R 31; planted cases shown red by editing them in a copy.
+- 2026-10-22: minor amendment: the test names are renamed in one scripted pass across all files at the start of T3, since a name also lives in its snapshot header and the ledger's `payer`; the subagents of T3 and T4 then clean comments only. Rule: drop a leading id prefix (`AC1: `, `M126 AC4: `) and an id-only parenthetical; six names fixed by hand. 354 names renamed (348 literal, six built by `paste0()` over `MAP_FNS`), 10 snapshot headers, 21 ledger `payer` strings; map in `benchmarks/test-renames-576c3d19.csv`; suite-hygiene passes.
 
 ## Decisions
 

@@ -140,7 +140,7 @@ test_that("on a censored-regression run, whose outcome names no data column, the
 
 # ---- AC5: refusals and failed folds --------------------------------------
 
-test_that("AC2: a Monte Carlo design that leaves rows out of every assessment set is refused, naming the first five", {
+test_that("a Monte Carlo design that leaves rows out of every assessment set is refused, naming the first five", {
   skip_if_no_engines()
   d <- make_reg_data()
   set.seed(35)
@@ -164,7 +164,7 @@ test_that("AC2: a Monte Carlo design that leaves rows out of every assessment se
   expect_no_match(msg, "time-series", fixed = TRUE)
 })
 
-test_that("AC2: a design leaving five or fewer rows out names all of them", {
+test_that("a design leaving five or fewer rows out names all of them", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- augment_run(d, det_nested(d))
@@ -234,7 +234,7 @@ repeated_folds <- function(data, seed, stratify = FALSE) {
   )
 }
 
-test_that("AC1: on a repeated v-fold regression, each row joins its averaged prediction", {
+test_that("on a repeated v-fold regression, each row joins its averaged prediction", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- augment_run(d, repeated_folds(d, 34))
@@ -242,7 +242,7 @@ test_that("AC1: on a repeated v-fold regression, each row joins its averaged pre
   expect_false(anyNA(aug$.pred))
 })
 
-test_that("AC1: on a repeated v-fold probability classification, each row joins its averaged probabilities and class", {
+test_that("on a repeated v-fold probability classification, each row joins its averaged probabilities and class", {
   skip_if_no_engines(stochastic = TRUE)
   d <- cls_data()
   res <- memoised(nested_tune_grid(
@@ -262,7 +262,7 @@ test_that("AC1: on a repeated v-fold probability classification, each row joins 
   expect_equal(aug$.pred_event + aug$.pred_other, rep(1, nrow(d)))
 })
 
-test_that("AC1: on a repeated v-fold censored regression, each row joins its averaged survival and time", {
+test_that("on a repeated v-fold censored regression, each row joins its averaged survival and time", {
   skip_if_no_censored()
   d <- srv_data()
   res <- suppressWarnings(memoised(nested_tune_grid(
@@ -279,7 +279,7 @@ test_that("AC1: on a repeated v-fold censored regression, each row joins its ave
   expect_true(".pred_time" %in% names(aug))
 })
 
-test_that("AC1: on a Monte Carlo design that holds every row out, each row joins its averaged prediction", {
+test_that("on a Monte Carlo design that holds every row out, each row joins its averaged prediction", {
   skip_if_no_engines()
   d <- make_reg_data()
   set.seed(38)
@@ -300,7 +300,7 @@ test_that("AC1: on a Monte Carlo design that holds every row out, each row joins
   expect_false(anyNA(aug$.pred))
 })
 
-test_that("AC3: a row that only failed folds held out holds NA, with one nestedtune_partial_summary warning", {
+test_that("a row that only failed folds held out holds NA, with one nestedtune_partial_summary warning", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- repeated_folds(d, 39)
@@ -585,7 +585,7 @@ test_that("a data column named like a prediction column is refused, not renamed"
 
 # ---- M126: the name collision before the averaging refusals ----------------
 
-test_that("M126 AC4: on a repeated design, a name collision is refused before the quantile refusal", {
+test_that("on a repeated design, a name collision is refused before the quantile refusal", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- augment_run(d, repeated_folds(d, 34))
@@ -597,7 +597,7 @@ test_that("M126 AC4: on a repeated design, a name collision is refused before th
   expect_error(augment(planted), class = "nestedtune_collect_name_collision")
 })
 
-test_that("M126 AC4: on a repeated design, a name collision is refused before a shape the average misreads", {
+test_that("on a repeated design, a name collision is refused before a shape the average misreads", {
   skip_if_no_engines()
   d <- make_reg_data()
   res <- augment_run(d, repeated_folds(d, 34))
@@ -619,7 +619,7 @@ test_that("M126 AC4: on a repeated design, a name collision is refused before a 
 
 # ---- M126 AC5: the censored NULL row on the averaged path ------------------
 
-test_that("M126 AC5: on a repeated censored design, a row only failed folds held out holds NULL in .pred", {
+test_that("on a repeated censored design, a row only failed folds held out holds NULL in .pred", {
   skip_if_no_censored()
   d <- srv_data()
   folds <- repeated_folds(d, 37)

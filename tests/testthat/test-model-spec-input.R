@@ -32,7 +32,7 @@ call_by_name <- function(fn, ...) {
 # refuse a missing finetune first on both routes, so where it is absent their
 # preprocessor refusals are unreachable and those three are passed over.
 
-test_that("AC4: a model specification with no preprocessor is refused by class", {
+test_that("a model specification with no preprocessor is refused by class", {
   for (fn in ORCHESTRATORS) {
     if (!tuner_ready(fn)) {
       next
@@ -45,7 +45,7 @@ test_that("AC4: a model specification with no preprocessor is refused by class",
   }
 })
 
-test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused by class", {
+test_that("a preprocessor that is neither a formula nor a recipe is refused by class", {
   # A number, a design handed where the preprocessor goes, and variables,
   # which tune's own method refuses and which only a workflow takes.
   wrong <- list(
@@ -79,7 +79,7 @@ test_that("AC4: a preprocessor that is neither a formula nor a recipe is refused
   }
 })
 
-test_that("AC4: a preprocessor beside a workflow is refused by class, by name or by position", {
+test_that("a preprocessor beside a workflow is refused by class, by name or by position", {
   wf <- workflows::workflow(y ~ x, bare_spec())
   for (fn in ORCHESTRATORS) {
     if (!tuner_ready(fn)) {
@@ -238,7 +238,7 @@ test_that("an object that is neither a workflow nor a model specification is ref
   }
 })
 
-test_that("AC4: nested_final_fit() given a bare model specification names workflows::workflow()", {
+test_that("nested_final_fit() given a bare model specification names workflows::workflow()", {
   cnd <- rlang::catch_cnd(nested_final_fit(bare_spec(), 1))
   expect_s3_class(cnd, "rlang_error")
   expect_match(conditionMessage(cnd), "must be a <workflow>")
@@ -301,7 +301,7 @@ stoch_spec <- function() {
 
 reg_formula <- function() y ~ x1 + x2 + x3 + x4
 
-test_that("AC1: nested_tune_grid() on a spec and a formula is the workflow run", {
+test_that("nested_tune_grid() on a spec and a formula is the workflow run", {
   skip_if_no_engines(stochastic = TRUE)
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -351,7 +351,7 @@ recipe_grid_routes <- function() {
   )
 }
 
-test_that("AC2: nested_tune_grid() on a spec and a recipe is the workflow run", {
+test_that("nested_tune_grid() on a spec and a recipe is the workflow run", {
   skip_if_no_engines()
   run <- recipe_grid_routes()
   expect_same_run(run$routes)
@@ -363,7 +363,7 @@ test_that("AC2: nested_tune_grid() on a spec and a recipe is the workflow run", 
 # recorded one with `nestedtune_workflow_mismatch`, so a fit that returns at
 # all has passed it, and the control shows the same check refusing a
 # workflow with another recipe.
-test_that("AC3: a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
+test_that("a spec route's result takes its final fit on the wrapped workflow, as the workflow route's does", {
   skip_if_no_engines()
   run <- recipe_grid_routes()
   wf <- workflows::workflow(run$recipe, bare_spec())

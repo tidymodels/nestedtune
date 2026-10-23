@@ -1,4 +1,4 @@
-# AC4: print names the orchestrator, the workflow count and each workflow's fold counts
+# print names the orchestrator, the workflow count and each workflow's fold counts
 
     Code
       print(res)
@@ -26,7 +26,7 @@
       i Use `collect_metrics()` for every workflow's estimate under its id, and
         `x$result[[i]]` for one workflow's run.
 
-# AC3: print of a row subset names the rows in hand alone, the orchestrator line unchanged
+# print of a row subset names the rows in hand alone, the orchestrator line unchanged
 
     Code
       print(one)

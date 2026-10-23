@@ -38,7 +38,7 @@ race_final_and_reference <- function(fn) {
 
 in_ids <- function(tuned) lapply(tuned$splits, function(s) s$in_id)
 
-test_that("the racing final fit matches a hand-rolled reference pipeline (AC6)", {
+test_that("the racing final fit matches a hand-rolled reference pipeline", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
   for (fn in RACERS) {
@@ -64,7 +64,7 @@ test_that("the racing final fit matches a hand-rolled reference pipeline (AC6)",
   }
 })
 
-test_that("the final fit's candidates are every candidate its race scored (AC6, D-043)", {
+test_that("the final fit's candidates are every candidate its race scored", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
   for (fn in RACERS) {
@@ -91,7 +91,7 @@ test_that("the final fit's candidates are every candidate its race scored (AC6, 
   }
 })
 
-test_that("print() and summary() name the racing method with the count scored (AC6)", {
+test_that("print() and summary() name the racing method with the count scored", {
   skip_if_no_race_fixture()
 
   d <- make_reg_data()

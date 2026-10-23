@@ -320,7 +320,7 @@ test_that("the Bayesian final fit matches tune::fit_best() on the reference run"
 #   O4). Pinned by "the final fit re-runs under the recorded control". Satisfies
 #   M48 AC4.
 
-test_that("the procedure records the effective control on both tuners (M48, AC4)", {
+test_that("the procedure records the effective control on both tuners", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()
@@ -376,7 +376,7 @@ test_that("the procedure records the effective control on both tuners (M48, AC4)
   )
 })
 
-test_that("the final fit re-runs under the recorded control (M48, AC4)", {
+test_that("the final fit re-runs under the recorded control", {
   skip_if_no_bayes_fixture()
 
   d <- make_reg_data()

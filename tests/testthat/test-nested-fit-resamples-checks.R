@@ -2,7 +2,7 @@
 # orchestrator's own -- a workflow with something to tune -- and the shared
 # checks it inherits, each fired before any fold runs.
 
-test_that("AC5: a workflow with a tune() marker is refused, naming the tuning orchestrators, before any fold runs", {
+test_that("a workflow with a tune() marker is refused, naming the tuning orchestrators, before any fold runs", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- det_nested(d)
@@ -30,7 +30,7 @@ test_that("AC5: a workflow with a tune() marker is refused, naming the tuning or
   }
 })
 
-test_that("AC5: a workflow tuning two parameters is refused naming both", {
+test_that("a workflow tuning two parameters is refused naming both", {
   skip_if_no_engines()
   skip_if_not_installed("dials")
   d <- make_reg_data()

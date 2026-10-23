@@ -9,7 +9,7 @@
 
 skip_heavy_on_cran()
 
-test_that("AC6: the same seed gives identical results across two direct calls", {
+test_that("the same seed gives identical results across two direct calls", {
   skip_if_no_engines(stochastic = TRUE)
 
   d <- make_reg_data()

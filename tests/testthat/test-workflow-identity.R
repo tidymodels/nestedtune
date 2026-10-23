@@ -8,7 +8,7 @@
 # the same workflow even though its step ids and quosure frames differ (AC3),
 # and no data rows enter the record (AC5).
 
-test_that("AC3: a workflow rebuilt from the same code has the same identity", {
+test_that("a workflow rebuilt from the same code has the same identity", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -32,7 +32,7 @@ test_that("AC3: a workflow rebuilt from the same code has the same identity", {
   )
 })
 
-test_that("AC3: arguments given through set_args() and set_engine() read as those given in the constructor", {
+test_that("arguments given through set_args() and set_engine() read as those given in the constructor", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -129,7 +129,7 @@ test_that("a parts difference in neither optional part is named as such", {
   )
 })
 
-test_that("AC5: the identity carries no data rows", {
+test_that("the identity carries no data rows", {
   skip_if_no_engines()
 
   small <- workflow_identity(det_workflow(make_reg_data(n = 90)))
@@ -226,7 +226,7 @@ test_that("a model argument is recorded as written, and a recipe setting as the 
 # it, so a workflow with neither keeps the identity a record saved before
 # them holds (AC2).
 
-test_that("AC2: a workflow with neither part has the identity it had at the branch point", {
+test_that("a workflow with neither part has the identity it had at the branch point", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -239,7 +239,7 @@ test_that("AC2: a workflow with neither part has the identity it had at the bran
   expect_named(workflow_identity(det_workflow(d)), c("model", "preprocessor"))
 })
 
-test_that("AC1: the case-weights column is a part of the identity, recorded as written", {
+test_that("the case-weights column is a part of the identity, recorded as written", {
   skip_if_no_engines()
   d <- make_reg_data()
   d$w1 <- parsnip::importance_weights(rep(1, nrow(d)))
@@ -261,7 +261,7 @@ test_that("AC1: the case-weights column is a part of the identity, recorded as w
   expect_identical(id[c("model", "preprocessor")], workflow_identity(plain))
 })
 
-test_that("AC1: a tailor is a part of the identity, as its adjustments in order", {
+test_that("a tailor is a part of the identity, as its adjustments in order", {
   skip_if_no_engines()
   skip_if_not_installed("tailor")
   d <- make_reg_data()

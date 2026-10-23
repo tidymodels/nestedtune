@@ -25,7 +25,7 @@ expect_desirability2_refusal <- function(cnd, fn) {
   invisible(cnd)
 }
 
-test_that("AC5: selection_rule() refuses the desirability rule without desirability2", {
+test_that("selection_rule() refuses the desirability rule without desirability2", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   # The passing control: the same call builds the rule with the package.
@@ -40,7 +40,7 @@ test_that("AC5: selection_rule() refuses the desirability rule without desirabil
   expect_s3_class(selection_rule("one_std_err", num_comp), "selection_rule")
 })
 
-test_that("AC5: nested_tune_grid() refuses a desirability rule at entry without desirability2", {
+test_that("nested_tune_grid() refuses a desirability rule at entry without desirability2", {
   skip_if_no_engines()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -100,7 +100,7 @@ test_that("nested_tune_bayes() refuses a desirability rule at entry without desi
   expect_desirability2_refusal(cnd, "nested_tune_bayes")
 })
 
-test_that("AC5: nested_final_fit() refuses a result that recorded the desirability rule without desirability2", {
+test_that("nested_final_fit() refuses a result that recorded the desirability rule without desirability2", {
   skip_if_no_bayes_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 

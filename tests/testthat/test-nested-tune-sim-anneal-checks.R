@@ -316,7 +316,7 @@ test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests
   expect_gt(sum(iterated), 0L)
 })
 
-test_that("AC4: the desirability rule is refused at entry (M109)", {
+test_that("the desirability rule is refused at entry", {
   skip_if_no_anneal_fixture()
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
@@ -339,7 +339,7 @@ test_that("AC4: the desirability rule is refused at entry (M109)", {
   expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
 })
 
-test_that("AC5: a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs (M70)", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
   skip_if_no_engines()
   skip_if_not_installed("finetune")
   d <- make_reg_data()

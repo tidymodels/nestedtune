@@ -50,7 +50,7 @@
 
 skip_heavy_on_cran()
 
-test_that("AC1: every fold's metrics are identical to fit_resamples() on the same outer splits", {
+test_that("every fold's metrics are identical to fit_resamples() on the same outer splits", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -98,7 +98,7 @@ test_that("AC1: every fold's metrics are identical to fit_resamples() on the sam
   }
 })
 
-test_that("AC1: every fold's metrics are identical to a by-hand fit, predict and score", {
+test_that("every fold's metrics are identical to a by-hand fit, predict and score", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -128,7 +128,7 @@ test_that("AC1: every fold's metrics are identical to a by-hand fit, predict and
   }
 })
 
-test_that("O3: the outer estimate's mean squared error for the majority rule is nachum2026's closed form", {
+test_that("the outer estimate's mean squared error for the majority rule is nachum2026's closed form", {
   skip_if_no_engines()
 
   n <- 6L
@@ -195,7 +195,7 @@ test_that("O3: the outer estimate's mean squared error for the majority rule is 
   expect_equal(sum(weight * (0.5 - accuracy)^2), expected, tolerance = 1e-12)
 })
 
-test_that("AC2: the record has the five orchestrators' columns, with nothing selected and no inner rows", {
+test_that("the record has the five orchestrators' columns, with nothing selected and no inner rows", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -239,7 +239,7 @@ test_that("AC2: the record has the five orchestrators' columns, with nothing sel
   expect_false(".extracts" %in% names(res))
 })
 
-test_that("AC2: the two seeds are the documented draw, shared with a tuned run under the same session seed", {
+test_that("the two seeds are the documented draw, shared with a tuned run under the same session seed", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -272,7 +272,7 @@ test_that("AC2: the two seeds are the documented draw, shared with a tuned run u
   expect_identical(res$.tuning_seed, tuned$.tuning_seed)
 })
 
-test_that("AC2: `.predictions` and `.extracts` are present exactly when the control asked", {
+test_that("`.predictions` and `.extracts` are present exactly when the control asked", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -320,7 +320,7 @@ test_that("AC2: `.predictions` and `.extracts` are present exactly when the cont
   expect_false(".extracts" %in% names(preds_only))
 })
 
-test_that("AC2: a fold whose fit raises is recorded as failed with a note at the outer fit", {
+test_that("a fold whose fit raises is recorded as failed with a note at the outer fit", {
   skip_if_no_engines()
 
   d <- make_reg_data()
