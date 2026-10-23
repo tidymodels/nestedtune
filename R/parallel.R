@@ -243,9 +243,9 @@ dispatch_folds <- function(
   # travels in that fold's own payload (see lean_payload()).
   #
   # `.args` is charged per fold, not per run -- mirai::mirai_map() serializes it
-  # once per task -- so this is one copy per fold rather than one per run, which
-  # is still the difference between 25,714,635 B and 4,701,505 B on the fixture
-  # in test-parallel-payload.R.
+  # once per task -- so this is one copy per fold rather than one per run. With
+  # that charge counted, a leaned run still puts under a quarter of the
+  # unleaned bytes on the wire, which test-parallel-payload.R asserts.
   #
   # Leaning is skipped entirely unless every payload IS a fold payload.
   # dispatch_folds() is also driven directly with stand-in payloads carrying
@@ -616,7 +616,7 @@ daemon_attach_expr <- function() {
 # list, the check as it stood before M58, rather than to nothing; and an
 # object that is not a workflow answers with nothing, because
 # `dispatch_folds()` is also driven with stand-in payloads and no workflow at
-# all (test-parallel-detection.R).
+# all (test-parallel-interrupt.R and test-parallel-payload.R).
 workflow_pkgs <- function(object) {
   if (!inherits(object, "workflow")) {
     return(character())

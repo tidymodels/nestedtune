@@ -52,7 +52,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 ## Tasks
 
 - [x] T1: Rewrite the line citations Scope In lists to name the call, block or test; run AC1's greps.
-- [ ] T2: Fix the two `R/parallel.R` comments (stand-in payload files; `.args` byte figures, read against `test-parallel-payload.R`'s assertions); run `air format --check .` and the prose sweep.
+- [x] T2: Fix the two `R/parallel.R` comments (stand-in payload files; `.args` byte figures, read against `test-parallel-payload.R`'s assertions); run `air format --check .` and the prose sweep.
 - [ ] T3: Rename `PRINT_AS_AGREED_M46`, `ac1_control()` and `CLASSIFY_BUDGET_PRE_M16_S` at every site the AC2 grep lists; run AC2's grep.
 - [ ] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
 - [ ] T5: Remove the seed-identity assertions, their `before` lines and the comment that vouches for them; give "the refusals fire before the RNG is drawn from" its condition classes, or remove it where other tests assert the same classes (name them in the work log); drop the unchecked "before ..." clause from the two test names, grepping `_snaps/` and `helper-time-budget.R` for the old names first; run AC5's greps.
@@ -74,3 +74,4 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: started on branch m156-test-tracking-leftovers, cut from main at defc7c02.
 - 2026-10-23: implement decision: comment-only tasks (T1, T2, T4's comments) are checked off on a parse check, `air format --check .` and the prose sweep; files whose code changes (T3, T4's names, T5) run their own test files; the full `devtools::test()` runs once at T6 before review.
 - 2026-10-23: T1 done: 10 citations now name the call, block or test (the ledger notes describe the `daemons(0)` calls by role, since their line numbers had drifted; required-pkgs now has two teardowns); AC1's greps print nothing; air, parse and prose sweep clean.
+- 2026-10-23: T2 done: the `workflow_pkgs()` comment names test-parallel-interrupt.R and test-parallel-payload.R (both call `dispatch_folds()` with `object = NULL`); the `.args` comment states the under-a-quarter ratio that test-parallel-payload.R asserts, with no byte figure; air, parse and prose sweep clean.
