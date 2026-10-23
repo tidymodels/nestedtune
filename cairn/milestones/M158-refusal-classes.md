@@ -45,10 +45,10 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 
 ## Acceptance criteria
 
-- [ ] AC1: Each of the 26 refusals in the Scope table, when triggered, raises a condition that inherits from the class its table row assigns. A test triggers each of the 26 and asserts that class and a fragment of the refusal's headline (its first message element) that no other refusal raised under the same class contains.
-- [ ] AC2: A parse walk with `getParseData()` over every file in `R/` finds no `cli::cli_abort()` call without a `class` argument.
-- [ ] AC3: For every file in `R/`, the branch's code parsed with `parse(keep.source = FALSE)`, with the `class` argument removed from the 26 calls, is identical to the parsed code at `git merge-base main HEAD`. So no message text and no other code changes.
-- [ ] AC4: `NEWS.md` has one new bullet under its development heading that names the seven new classes and says which refusals now carry `nestedtune_bad_design`, `nestedtune_bad_type` and `nestedtune_bad_metrics`.
+- [x] AC1: Each of the 26 refusals in the Scope table, when triggered, raises a condition that inherits from the class its table row assigns. A test triggers each of the 26 and asserts that class and a fragment of the refusal's headline (its first message element) that no other refusal raised under the same class contains.
+- [x] AC2: A parse walk with `getParseData()` over every file in `R/` finds no `cli::cli_abort()` call without a `class` argument.
+- [x] AC3: For every file in `R/`, the branch's code parsed with `parse(keep.source = FALSE)`, with the `class` argument removed from the 26 calls, is identical to the parsed code at `git merge-base main HEAD`. So no message text and no other code changes.
+- [x] AC4: `NEWS.md` has one new bullet under its development heading that names the seven new classes and says which refusals now carry `nestedtune_bad_design`, `nestedtune_bad_type` and `nestedtune_bad_metrics`.
 - [ ] AC5: The profile's `verify` slot is clean, and `devtools::check()` reports 0 errors, 0 warnings, and no NOTE that `devtools::check()` at `git merge-base main HEAD` does not also report.
 
 ## Coverage
@@ -83,3 +83,14 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - 2026-10-23: claim audit: 21 claims read, 2 corrected — NEWS.md (the `param_info`/`eval_time`/`event_level` sentence implied every refusal of those arguments carries the new classes, where `autoplot()` uses `nestedtune_bad_plot_filter` and `nested_fit_resamples()` and `compute_metrics()` also raise them; the grid sentence omitted "neither a data frame"). The re-read confirmed both, adding `nested_fit_resamples()`.
 - 2026-10-23: implement complete; status review.
 - 2026-10-23: plan chose the review-time parse walk over a committed test that parses `R/`, because such a test reads source text rather than behavior and AC1's tests pin each class; falsified by a new unclassed `cli_abort()` reaching main.
+
+## Decisions
+
+## Review
+
+Evidence at 493c5357 (branch head; main unmoved at 67aa0b3a), 2026-10-23.
+
+- AC1: mutation run, branch tests over the merge base's `R/` (scratchpad copy): 40 expectations red across 10 test files, covering 23 of the 26 refusals; the other 3 (the whole-number grid refusal and the two recorded-grid refusals) sit behind an earlier error in their blocks, so a second copy of HEAD's `R/` with only those three `class` lines removed turned exactly those 3 red. Fragment check: each of the 27 test fragments matches exactly one of the 136 classed headlines read from `R/` under its own class (the `eval_spec()` fragment checked by grep, 1 site); the 3 `nestedtune_bad_design` headlines built at run time hold none of the fragments, which grep finds nowhere else in `R/`.
+- AC2: parse walk over all 25 files in `R/`: 0 `cli_abort()` calls without `class` (26 before, at the merge base).
+- AC3: parse-tree walk against `git merge-base main HEAD` (67aa0b3a): 25 files, code identical after removing the 26 added `class` arguments, every class the merge base had unchanged.
+- AC4: `git diff main -- NEWS.md` adds one bullet, the first under `# nestedtune 0.0.0.9000`. It names each of the seven new classes with the refusals that carry it, and says which refusals now carry `nestedtune_bad_design`, `nestedtune_bad_type` and `nestedtune_bad_metrics` (read in place; lines reflowed at review with no word changed).
