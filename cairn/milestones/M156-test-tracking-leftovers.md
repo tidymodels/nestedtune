@@ -131,3 +131,24 @@ Pass 1 (2026-10-23), evidence at 76ed9d9a, branch level with main (0 commits beh
 Pass 2 (2026-10-23), evidence at 0a3d89f1, branch level with main.
 - AC1-AC4: every grep run at 0a3d89f1 prints 0 lines; the `workflow_pkgs()` comment (function at line 622) names test-parallel-interrupt.R and test-parallel-payload.R and not test-parallel-detection.R; the `.args` comment matches no byte figure.
 - AC5: both greps print 0 lines; the block "the refusals fire before the RNG is drawn from" is gone, and the work log's T7 line names "the shared entry checks fire, in the shared shapes", which asserts the design refusal with `class = "nestedtune_bad_design"`, the dots refusal with `class = "nestedtune_bad_dots"`, and the metrics refusal with `class = "rlang_error"` beside "metric_set".
+- Gate at 0a3d89f1: `devtools::test()` 1152 blocks, 0 failed, 0 errors, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes.
+- spawned: diff-bug, blame-history, prior-review, ripple (on the T7 commit 0a3d89f1 and the branch diff)
+- diff-bug #1: test-dplyr-compat.R F8's "the one table entry" is false: the partial fixture serves the standalone block below the table — fix now (F14).
+- diff-bug #2: R/parallel.R `.args` comment states the under-a-quarter ratio generally, but test-parallel-payload.R asserts it on its default fixture only — fix now (F15).
+- diff-bug #3: test-help-structure.R F4 wording is wrong for UTF-8 Windows sessions (codepage 65001 gets an asterisk) — fix now (F13).
+- diff-bug #4: AC5's removal branch is met; `rlang_error` with "metric_set" is the only class the refusal has — noted, requests nothing.
+- diff-bug #5: benchmarks/test-time-budget.R printed line has two "it"s with different referents — fix now (F16).
+- diff-bug #6: test-workflow-identity.R F9 name uses "older", a relative-time word — fix now (F17).
+- diff-bug #7: lines of 90 and 91 characters — reject, style.
+- diff-bug #8: "before any fold runs" names and "the new refusals" remain in other check files — duplicate of pass-1 follow-ups.
+- blame-history #1: `check_metrics()`'s refusal carries no package class, unlike the refusals beside it and DESIGN's classed-condition convention; pre-existing since 39d2f689 — follow-up, row "Fix the leftovers of M156's review".
+- blame-history #2: duplicate of diff-bug #3.
+- blame-history #3: the deleted annealing comment named why two slots are listed — reject, planned change (F11).
+- blame-history #4: the old test name stays in dated `benchmarks/test-blocks-*.csv` tables — reject, history record.
+- blame-history #5: "M14 established" removed — reject, planned change.
+- prior-review #1: test-help-structure.R comment names the wrong mechanism; the explicit `itemBullet` pins the glyph — duplicate of diff-bug #3.
+- prior-review #2: `rlang_error` does not pin the refusal's own class, `nestedtune_metrics_mode` — reject, false: `rlang::catch_cnd()` shows the `metrics = "rmse"` refusal's classes are `rlang_error`, `error`, `condition`; `nestedtune_metrics_mode` belongs to `check_metrics_mode()`, a different refusal.
+- ripple #1: a parked ROADMAP row says `dispatch_folds()` resolves a symbol by name, while the comment names the task wrapper and `fold_task()` — reject, false: `dispatch_folds()` resolves `fold_task` by name, so both hold.
+- ripple #2: test-workflow-identity.R comment above the renamed test keeps its own phrasing — reject, style (same fact).
+- ripple #3: test-dplyr-compat.R:205 "the one form" beside line 30's wording — reject, style (different referent, both true).
+- Gate at the fix head: cairn_validate passes (18 advisory WARNs on references staleness); `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted, no other diff; `pkgdown::check_pkgdown()` no problems; the six gating prose sweeps `--list-gating` prints are clean; README untouched; no changelog entry, since the milestone changes no user-visible behavior; no principle changed, so `cairn_impact` skipped.
