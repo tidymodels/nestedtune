@@ -66,7 +66,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
      Coverage lines together. -->
 
 - [x] T1: Rewrite the two final-fit blocks of AC1. Save the caller's `.Random.seed` and restore it at block end, as the grid block does. Remove it before the call and assert that it does not exist after. Delete the comment that says a reordering advances the caller's stream. Make the AC1 move by hand, see both blocks fail, and revert it.
-- [ ] T2: Rename the four blocks of AC2. Rename the grid block of AC3, fix its comment, and assert each refusal by class or message. Read each refusal's class by running it before writing the assertion.
+- [x] T2: Rename the four blocks of AC2. Rename the grid block of AC3, fix its comment, and assert each refusal by class or message. Read each refusal's class by running it before writing the assertion.
 - [ ] T3: Move the comment of AC4.
 - [ ] T4: Edit the inventory provenance. Run a shell loop over the table's `F` rows against `601cff7e`.
 - [ ] T5: Run the verify slot and the test-comment sweep.
@@ -98,6 +98,8 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - 2026-10-23: correction to the ROADMAP caps line above: the plan cut nine repeated old titles from parked rows, not ten. The two others went in the Posit and CODEOWNERS merge.
 - 2026-10-23: /milestone-implement started on branch m157-m156-review-leftovers, cut from main at d6ec5a7b.
 - 2026-10-23: T1 done. Both final-fit blocks now remove the seed and assert it does not exist after the refusal, following the pattern in test-nested-final-fit-rng.R. Mutation by hand: with the snapshot, `on.exit()` and draw moved above `check_workflow(object)`, each block failed once, on its `exists()` expectation, with 0 other failures in the file. Reverted with `git checkout`, and the file passed 31 blocks, 0 failed.
+- 2026-10-23: T2 done. The four untuned-workflow blocks lost ", before any fold runs". The grid block is now "a malformed design or a workflow with no preprocessor is refused before the RNG is drawn from". Probed by running each refusal: both design refusals carry `nestedtune_bad_design`, and the no-preprocessor refusal carries only `rlang_error`. Each design refusal is asserted by class and its own message, since the two share a class, and the no-preprocessor one by message. Three planted mismatches (the splits message on the inner refusal, the design class on the no-preprocessor refusal, "malformed" on the no-preprocessor refusal) each failed. The four check files passed, 0 failed.
+- 2026-10-23: implementation choice: each task runs its changed test files, and the full `devtools::test()` runs once at T5 over T1-T3, because the three tasks change only tests. The verify slot asks for the full suite before each task is checked off. This is a deviation, and T5's run is the evidence for all three.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
