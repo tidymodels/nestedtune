@@ -73,6 +73,7 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - 2026-10-22: T6 done: `devtools::test()` at beb6320b, 1153 blocks, 0 failed, 0 errored, 0 skipped, no snapshot file written; `air format --check .` clean; no `R/`, `vignettes/`, `README.Rmd` or roxygen change, so the prose sweeps and `document()` are not owed. Head table kept as `benchmarks/test-blocks-beb6320b.csv`.
 - 2026-10-22: claim audit: not owed — internal tier.
 - 2026-10-22: implement done; status review.
+- 2026-10-23: step-7 approval: m155-test-comment-cleanup approved for merge
 
 ## Decisions
 
