@@ -1,13 +1,13 @@
 # M155: Test comments and test names state only what the code cannot show
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M151, M152, M154
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — comments and test names in the repo's own test files
-- **Branch/PR:** —
+- **Branch/PR:** m155-test-comment-cleanup
 
 ## Goal
 
@@ -47,7 +47,7 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 
 ## Tasks
 
-- [ ] T1: Write `benchmarks/sweep-test-comments.R`, with its planted cases. Run it on the branch point, and record the match count per file.
+- [x] T1: Write `benchmarks/sweep-test-comments.R`, with its planted cases. Run it on the branch point, and record the match count per file.
 - [ ] T2: Clean the helper and teardown files.
 - [ ] T3: Clean the driver, results, final-fit and readers test files, through Haiku subagents with a full spec, one file group each.
 - [ ] T4: Clean the parallel, time-series and remaining test files the same way. Read every subagent diff before it is committed.
@@ -62,6 +62,9 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - 2026-10-21: question set: should the cleanup reach test names — yes, comments and test names, with the snapshots re-recorded under the new names.
 - 2026-10-21: depends on M151, M152 and M154, so that no deleted test is cleaned first, and the renamed blocks meet M154's new ledger key.
 - 2026-10-21: criteria audit (reduced, fresh Opus reader, two passes): first pass, two findings fixed (the sweep reads `COMMENT` tokens, and its planted cases include a silent issue number). Second pass, after the gate added test names: four findings fixed. The file list must equal the glob; names are checked on `test-blocks.R`'s realized `test` column, since twelve are built with `sprintf()` or `paste0()`; AC3 counts rows instead of binding the map; AC4 runs both ways and covers the `.svg` files. The ledger's `note` strings joined the scope.
+- 2026-10-22: implement started; branch m155-test-comment-cleanup cut from 576c3d19.
+- 2026-10-22: choice: the sweep pattern also matches principle ids (`IP`/`GP`) and single-letter review, oracle, task and question ids (`B F O P Q R S T` and digits, less `S3`, `S4`, `S7`, `R6`), since each is cairn vocabulary a test reader cannot resolve; a `--names` mode checks a `test-blocks.R` table for AC2.
+- 2026-10-22: T1 done: `benchmarks/sweep-test-comments.R` at the branch point, `--counts`: 1200 matching lines in 111 of 119 files (7399 comments, 66 ledger notes); largest helper-orchestration.R 122, test-parallel-classify.R 53, test-parallel-identity.R 52, helper-time-budget.R 31, test-nested-tune-grid-oracles.R 31; planted cases shown red by editing them in a copy.
 
 ## Decisions
 
