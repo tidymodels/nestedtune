@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M157: Test checks and names that M156's review flagged say only what they check
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -69,7 +69,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - [x] T2: Rename the four blocks of AC2. Rename the grid block of AC3, fix its comment, and assert each refusal by class or message. Read each refusal's class by running it before writing the assertion.
 - [x] T3: Move the comment of AC4.
 - [x] T4: Edit the inventory provenance. Run a shell loop over the table's `F` rows against `601cff7e`.
-- [ ] T5: Run the verify slot and the test-comment sweep.
+- [x] T5: Run the verify slot and the test-comment sweep.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates.
@@ -102,6 +102,9 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - 2026-10-23: implementation choice: each task runs its changed test files, and the full `devtools::test()` runs once at T5 over T1-T3, because the three tasks change only tests. The verify slot asks for the full suite before each task is checked off. This is a deviation, and T5's run is the evidence for all three.
 - 2026-10-23: T3 done. The ten-line `min_n` comment moved, unchanged, from above `early_stop_control()` to directly above `bayes_stoch_param_info()`. `air format --check` is clean on the helper.
 - 2026-10-23: T4 done. The inventory's provenance gains a "Line numbers" line naming `601cff7e`, marked "corrected M157". The row loop read 106 `F` rows with 0 misses. The line says the prose's own line citations were not re-read, since AC5's loop covers the table only.
+- 2026-10-23: T5 done at 4e88e2e2. `devtools::test()` gave 1152 blocks, 0 failed, 0 errors, 0 skipped. The `step_pca()` error lines in its log are tune notes that fixtures print. `air format --check .` is clean at air 0.12.0, the latest release. `Rscript benchmarks/sweep-test-comments.R` exited 0 with no hits.
+- 2026-10-23: claim audit: not owed — internal tier.
+- 2026-10-23: all tasks done. Status set to review, and handed to /milestone-review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote

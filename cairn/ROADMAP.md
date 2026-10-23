@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-23 after M156 (PR #173): archived, M153 row pruned,
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M157 | Test checks and names that M156's review flagged say only what they check | in-progress | — | normal | milestones/M157-m156-review-leftovers.md |
+| M157 | Test checks and names that M156's review flagged say only what they check | review | — | normal | milestones/M157-m156-review-leftovers.md |
 | M156 | Test code cites no line numbers and names no tracking records | done | — | normal | milestones/archive/M156-test-tracking-leftovers.md |
 | M155 | Test comments and test names state only what the code cannot show | done | M151, M152, M154 | normal | milestones/archive/M155-test-comment-cleanup.md |
 | M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | done | M152 | normal | milestones/archive/M154-wait-ledger-rekey.md |
