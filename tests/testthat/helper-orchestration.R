@@ -1737,16 +1737,6 @@ bayes_results <- function() {
   ))
 }
 
-# The stochastic sibling's parameter set: ranger's `min_n`, integer-valued,
-# over 2..25 rather than dials' default 2..40. `stoch_workflow()` is the
-# sibling; this narrows the space it searches, for one reason. The fixture's
-# inner analysis sets hold 40 rows, a candidate at `min_n = 40` predicts a
-# constant, yardstick warns that R-squared is undefined, and tune files the
-# warning as a note carrying a backtrace -- which the host and a daemon render
-# differently (`?nested_tune_grid`, "Parallel execution"), so the
-# whole-object identity would fail on the trace and on nothing else, and the
-# whole-record identities in test-nested-tune-bayes-rng.R with it. 25 is the
-# largest value `stoch_grid()` has always scored without a note.
 # The early-stopping control, built under a fixed seed: `control_bayes()`
 # draws its `seed` slot when it is built, and a fixture keyed on a control
 # holding a fresh draw would miss the cache on every request. The draw is
@@ -1802,6 +1792,16 @@ bayes_control_final_results <- function(data, seed = 26) {
   ))
 }
 
+# The stochastic sibling's parameter set: ranger's `min_n`, integer-valued,
+# over 2..25 rather than dials' default 2..40. `stoch_workflow()` is the
+# sibling; this narrows the space it searches, for one reason. The fixture's
+# inner analysis sets hold 40 rows, a candidate at `min_n = 40` predicts a
+# constant, yardstick warns that R-squared is undefined, and tune files the
+# warning as a note carrying a backtrace -- which the host and a daemon render
+# differently (`?nested_tune_grid`, "Parallel execution"), so the
+# whole-object identity would fail on the trace and on nothing else, and the
+# whole-record identities in test-nested-tune-bayes-rng.R with it. 25 is the
+# largest value `stoch_grid()` has always scored without a note.
 bayes_stoch_param_info <- function(wf) {
   update(
     tune::extract_parameter_set_dials(wf),
