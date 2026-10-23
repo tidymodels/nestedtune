@@ -72,6 +72,7 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: four reviewers returned 20 findings (5 duplicates); 10 fixed on the branch in 7a7ae282, 3 to a new candidate row, 6 rejected, none a return. The earlier AC5 suite run was stopped because it predated the fixes; a fresh run on 7a7ae282 is under way.
 - 2026-10-22: correction to the line above: of the 20 findings, 12 were settled fix now (7 unique fixes plus 5 duplicates of them), 3 follow-up and 5 rejected, as the Review section lists. AC5 verified on 7a7ae282; `devtools::check()` running.
 - 2026-10-22: the correction above miscounted: the 12 fix-now findings are 8 unique fixes (diff-bug #1-#7, ripple #2) plus 4 duplicates (blame-history #1, prior-review #1 and #2, ripple #1). `devtools::check()` at 7a7ae282 gave 0 errors, 0 warnings, 0 notes.
+- 2026-10-22: step-7 approval: m154-wait-ledger-rekey approved for merge
 
 ## Decisions
 
