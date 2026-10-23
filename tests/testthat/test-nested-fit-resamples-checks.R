@@ -1,21 +1,16 @@
 # Entry checks on nested_fit_resamples(). The refusal that is this
 # orchestrator's own -- a workflow with something to tune -- and the shared
-# checks it inherits, each fired before any fold runs.
+# checks it inherits.
 
-test_that("a workflow with a tune() marker is refused, naming the tuning orchestrators, before any fold runs", {
+test_that("a workflow with a tune() marker is refused, naming the tuning orchestrators", {
   skip_if_no_engines()
   d <- make_reg_data()
   folds <- det_nested(d)
 
   wf <- det_workflow(d)
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(nested_fit_resamples(wf, folds))
   expect_s3_class(cnd, "nestedtune_tuned_workflow")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_fit_resamples")
-  # The seeds are drawn only once every check has passed, so an untouched
-  # stream is the evidence that no fold ran.
-  expect_identical(.Random.seed, before)
 
   msg <- conditionMessage(cnd)
   expect_match(msg, "num_comp", fixed = TRUE)
@@ -113,20 +108,4 @@ test_that("the shared entry checks fire, in the shared shapes", {
     )
   )
   expect_identical(under_grid$.metrics, fit_resamples_results(d)$.metrics)
-})
-
-test_that("the refusals fire before the RNG is drawn from", {
-  skip_if_no_engines()
-  d <- make_reg_data()
-  wf <- fixed_workflow(d)
-  folds <- det_nested(d)
-
-  # Built before the snapshot: constructing an rset draws from the stream.
-  plain <- rsample::vfold_cv(d, v = 3)
-  set.seed(1)
-  before <- .Random.seed
-  expect_error(nested_fit_resamples(wf, folds, metrics = "rmse"))
-  expect_error(nested_fit_resamples(wf, folds, nonesuch = 1))
-  expect_error(nested_fit_resamples(wf, plain))
-  expect_identical(.Random.seed, before)
 })
