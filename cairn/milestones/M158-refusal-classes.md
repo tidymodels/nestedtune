@@ -49,7 +49,7 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - [x] AC2: A parse walk with `getParseData()` over every file in `R/` finds no `cli::cli_abort()` call without a `class` argument.
 - [x] AC3: For every file in `R/`, the branch's code parsed with `parse(keep.source = FALSE)`, with the `class` argument removed from the 26 calls, is identical to the parsed code at `git merge-base main HEAD`. So no message text and no other code changes.
 - [x] AC4: `NEWS.md` has one new bullet under its development heading that names the seven new classes and says which refusals now carry `nestedtune_bad_design`, `nestedtune_bad_type` and `nestedtune_bad_metrics`.
-- [ ] AC5: The profile's `verify` slot is clean, and `devtools::check()` reports 0 errors, 0 warnings, and no NOTE that `devtools::check()` at `git merge-base main HEAD` does not also report.
+- [x] AC5: The profile's `verify` slot is clean, and `devtools::check()` reports 0 errors, 0 warnings, and no NOTE that `devtools::check()` at `git merge-base main HEAD` does not also report.
 
 ## Coverage
 
@@ -122,3 +122,5 @@ Independent review at ab3d2dc1. spawned: diff-bug, blame-history, prior-review, 
 - ripple #3: NEWS "does not match the recorded grid" reads like the identity mismatch — fix now: "tunes other parameters than the recorded grid holds".
 - gate: `devtools::document()` changed only `Config/roxygen2/version` 8.1.0 to 8.1.1, from the local roxygen2 8.1.1; reverted, no `man/` or `NAMESPACE` change.
 - gate: the full suite run at ab3d2dc1 overlapped the mutation runs and two other R sessions, and up to 17 parallel-daemon blocks failed; rerun alone on the final head below.
+- AC5 (at 24ce0fe5, run alone): `devtools::test()` 1153 blocks, 0 failed, 0 skipped; `air format --check .` clean; `sweep-prose.R --plain` clean; `devtools::check()` 0 errors, 0 warnings, 0 notes (7m 0s), so no NOTE to compare with the merge base.
+- gate: `cairn_validate.py` all checks passed (18 advisories, reference-page staleness only); `devtools::document()` no `man/` or `NAMESPACE` diff; `pkgdown::check_pkgdown()` no problems; all six gating prose sweeps clean (at ab3d2dc1; the later commit changes tests and NEWS only); README untouched; no new top-level file; NEWS.md entry present. Snapshots: no `_snaps` file in `git diff --name-only main...HEAD`. Open-PR read: 0 open PRs by the operator, under the feature cap of 1.
