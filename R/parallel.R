@@ -462,7 +462,7 @@ preflight_timeout <- function(call = rlang::caller_env()) {
 # one under pkgload and would report every daemon as incompatible.
 #
 # The whole namespace rather than the two symbols dispatch_folds() actually
-# resolves by name (`rehydrate_payload` at :232, `nested_fold_fit` at :585).
+# resolves by name, `rehydrate_payload` and `nested_fold_fit`.
 # A hand-maintained list of those two is the defect this check exists to
 # catch -- M23 added the second and nothing made the pre-flight notice -- so the
 # manifest is derived, never written down. It costs 2,627 B serialized for 106

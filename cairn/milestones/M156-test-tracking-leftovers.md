@@ -1,13 +1,13 @@
 # M156: Test code cites no line numbers and names no tracking records
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — test comments, test identifiers and names, two `R/` code comments and one benchmark comment; no exported behavior, help page or NEWS changes
-- **Branch/PR:** —
+- **Branch/PR:** m156-test-tracking-leftovers
 
 ## Goal
 
@@ -51,7 +51,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 
 ## Tasks
 
-- [ ] T1: Rewrite the line citations Scope In lists to name the call, block or test; run AC1's greps.
+- [x] T1: Rewrite the line citations Scope In lists to name the call, block or test; run AC1's greps.
 - [ ] T2: Fix the two `R/parallel.R` comments (stand-in payload files; `.args` byte figures, read against `test-parallel-payload.R`'s assertions); run `air format --check .` and the prose sweep.
 - [ ] T3: Rename `PRINT_AS_AGREED_M46`, `ac1_control()` and `CLASSIFY_BUDGET_PRE_M16_S` at every site the AC2 grep lists; run AC2's grep.
 - [ ] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
@@ -71,3 +71,6 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: lessons harvested: M33 (resolve each citation to the symbol it names, never repair blind), M154 (renaming a test means editing its ledger rows; none of the three renamed tests has one), M152 (`test-parallel-interrupt.R` fails beside other suites, so run `devtools::test()` alone).
 - 2026-10-23: checkpoint: plan committed locally while the reduced criteria audit runs; its result follows in the next line.
 - 2026-10-23: criteria audit (reduced mode, fresh Opus reader): AC1 left a universal Scope claim unchecked over `R/*.R` and missed `R/parallel.R:465` and the `classify:687` form, fixed with one comment grep over both trees and the site added; AC3 left "criteria" at 3 sites, added; AC4 "hold" undefined, now verbatim per `grep -F`; AC5 missed the vouching comment and `before` lines and its bare-`expect_error()` clause named no procedure, now two greps and the one named block, and the two test names promising "before" lose that clause; AC6 now exit status; AC2 no finding.
+- 2026-10-23: started on branch m156-test-tracking-leftovers, cut from main at defc7c02.
+- 2026-10-23: implement decision: comment-only tasks (T1, T2, T4's comments) are checked off on a parse check, `air format --check .` and the prose sweep; files whose code changes (T3, T4's names, T5) run their own test files; the full `devtools::test()` runs once at T6 before review.
+- 2026-10-23: T1 done: 10 citations now name the call, block or test (the ledger notes describe the `daemons(0)` calls by role, since their line numbers had drifted; required-pkgs now has two teardowns); AC1's greps print nothing; air, parse and prose sweep clean.

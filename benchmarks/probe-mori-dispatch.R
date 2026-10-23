@@ -109,7 +109,7 @@ if (!identical(install_status, 0L)) {
 }
 
 # Daemons are separate R processes that load nestedtune from THEIR library, and
-# `prime_daemons()` deliberately no-ops off a dev package (helper-parallel.R:52),
+# `prime_daemons()` deliberately no-ops off a dev package (helper-parallel.R),
 # so nothing would put the temp library in front of them. R_LIBS prepends, which
 # is the right verb here -- the daemons still need mirai and the whole tidymodels
 # stack from the real library, and only nestedtune is being redirected.
