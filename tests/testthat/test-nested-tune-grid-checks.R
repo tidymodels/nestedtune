@@ -426,7 +426,7 @@ test_that("case weights are not mistaken for a preprocessor", {
 })
 
 # Each refusal below fires before the entry sample.int() draw. Seed
-# *identity* cannot show this: both drivers install their restoring on.exit()
+# *identity* cannot show this: the loop installs its restoring on.exit()
 # before drawing, so .Random.seed is put back on every exit path including one
 # that already drew and re-seeded. What discriminates is existence -- a session
 # that has never drawn has no .Random.seed, and restore_rng() deliberately
@@ -439,7 +439,8 @@ test_that("a malformed design or a workflow with no preprocessor is refused befo
   wf <- det_workflow(d)
   folds <- valid_folds(d)
 
-  # The no-preprocessor refusal has no package class, so its message names it.
+  # The no-preprocessor refusal has no package class, so its assertion pairs
+  # rlang's class with the refusal's message.
   refused <- list(
     list(
       class = "nestedtune_bad_design",
@@ -460,7 +461,7 @@ test_that("a malformed design or a workflow with no preprocessor is refused befo
       }
     ),
     list(
-      class = NULL,
+      class = "rlang_error",
       regexp = "has no preprocessor",
       refuse = function() {
         no_pre <- workflows::add_model(
