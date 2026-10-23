@@ -28,10 +28,10 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 
 ## Acceptance criteria
 
-- [ ] AC1: In a scratch copy of the head tree, insert one blank line at the top of each file that the ledger names. `testthat::test_file()` on `test-suite-hygiene.R` then passes.
-- [ ] AC2: In a scratch copy, delete one ledger row whose `call` is in `BUDGETED_WAIT_CALLS`. Do it once for each such row, by a script that loops over them. Each run of `test-suite-hygiene.R` fails, and the failing expectation names that row's call site.
-- [ ] AC3: Take the ledger rows whose `call` is `daemons_load_status` or `collect_bounded`, whose `seconds` is above 0, and that `DECLARED_UNCHECKABLE_BOUNDS` does not list. This set, computed from the ledger, has the same size at the branch point and at the head. In a scratch copy, double the explicit bound argument of one such call. A script does this once for each row of the set. Each run fails on the bound check for that row.
-- [ ] AC4: `time_budget_totals()` returns the same file, seconds and count for every file at the branch point and at the head.
+- [x] AC1: In a scratch copy of the head tree, insert one blank line at the top of each file that the ledger names. `testthat::test_file()` on `test-suite-hygiene.R` then passes.
+- [x] AC2: In a scratch copy, delete one ledger row whose `call` is in `BUDGETED_WAIT_CALLS`. Do it once for each such row, by a script that loops over them. Each run of `test-suite-hygiene.R` fails, and the failing expectation names that row's call site.
+- [x] AC3: Take the ledger rows whose `call` is `daemons_load_status` or `collect_bounded`, whose `seconds` is above 0, and that `DECLARED_UNCHECKABLE_BOUNDS` does not list. This set, computed from the ledger, has the same size at the branch point and at the head. In a scratch copy, double the explicit bound argument of one such call. A script does this once for each row of the set. Each run fails on the bound check for that row.
+- [x] AC4: `time_budget_totals()` returns the same file, seconds and count for every file at the branch point and at the head.
 - [ ] AC5: The profile's `verify` slot is clean at the head.
 
 ## Coverage
@@ -68,7 +68,15 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: T5 done. The `verify` slot ran on the tree that 8fd3a459 commits: `devtools::test()` clean, `air format --check .` clean (air 0.12.0). No roxygen, `R/`, vignette or README change, so `document()` and the prose sweep do not apply. T4 changed no code.
 - 2026-10-22: claim audit: not owed — internal tier
 - 2026-10-22: all tasks done; status review, handed to /milestone-review.
+- 2026-10-22: review checkpoint (in progress): AC1-AC4 evidence recorded and ticked; `cairn_validate` passed; `document()` changed only the roxygen2 version stamp in DESCRIPTION (local 8.1.1), reverted as not this milestone's; six gating prose sweeps exit 0. Waiting on the AC5 suite run, `devtools::check()`, and four reviewers.
 
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-10-22 on a `git archive` copy of 41e04c07 (code identical to 8fd3a459), by the scratchpad script `probes.R`, which loads the package once from the copy and runs `test-suite-hygiene.R` from it through `testthat::test_file()` after each planted change.
+
+- AC1: a blank line inserted at the top of all 8 files the ledger names (the 7 `test-parallel-*.R` files and `helper-parallel.R`); `test-suite-hygiene.R` ran 29 expectations with 0 failures.
+- AC2: the script loops over the 95 ledger rows whose `call` is in `BUDGETED_WAIT_CALLS`, replacing one `tb_row()` call with `NULL` per run. All 95 runs failed, and in each the failure message held the deleted row's key (file, test name, call position and call).
+- AC3: the set, computed from each ledger with that commit's own `DECLARED_UNCHECKABLE_BOUNDS`, holds 10 rows at 5bae6873 (ledger loaded from a `git archive` copy) and 10 at the head. The script doubled the `seconds` or `timeout` literal of each of the 10 calls, one per run; all 10 runs failed with an expectation message that opens with that row's key and "declares".
+- AC4: `time_budget_totals()` from the 5bae6873 copy and from the head copy is identical in file and seconds for all 8 files (classify 228.678, detection 780, identity 960, interrupt 255, required-pkgs 300, metrics 120, payload 120, helper-parallel 0), and the per-file row counts are identical too (98 rows in all).
