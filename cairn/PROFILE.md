@@ -41,13 +41,13 @@ rules in tracking-rules:
   merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
   `.Rbuildignore`d.
 - Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80, M88). **A `concurrency` block** cancels a
-  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. **A
+  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. `devel-vctrs.yaml` also keys its group on its full/subset switch, so a three-file run never cancels a whole-suite run (M153). **A
   `paths-ignore` filter** on both triggers of `R-CMD-check-cran.yaml`, `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
   `pkgdown.yaml`, `prose-sweep.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
   check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
   `pull_request` against the whole PR diff. **Hang caps** turn a hang into a failed job with a timestamp; every figure
   stays in the workflow declaring it. `R-CMD-check.yaml` bounds its job and its `check-r-package` step separately, the
-  step higher on windows. Only its macos-latest leg builds and checks the vignettes, which `R-CMD-check-hard.yaml` also checks without their Suggests and `pkgdown.yaml` knits in full (M112, D-077). Its legs set `NESTEDTUNE_FULL_SUITE: true`, but `setup-r` already sets `NOT_CRAN: true` in every job, so every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN (M118), except two. The two jobs of `R-CMD-check-cran.yaml` set `NOT_CRAN: false` on their check step and run the CRAN subset. One installs the Suggests. One installs the hard dependencies only. Both build and check the vignettes, so the vignettes also run in full on ubuntu (corrected M147, D-116).
+  step higher on windows. Only its macos-latest leg builds and checks the vignettes, which `R-CMD-check-hard.yaml` also checks without their Suggests and `pkgdown.yaml` knits in full (M112, D-077). Its legs set `NESTEDTUNE_FULL_SUITE: true`, but `setup-r` already sets `NOT_CRAN: true` in every job, so every CI job runs the tests `skip_heavy_on_cran()` keeps off CRAN (M118, `devel-vctrs.yaml` in its whole-suite runs only), except two. The two jobs of `R-CMD-check-cran.yaml` set `NOT_CRAN: false` on their check step and run the CRAN subset. One installs the Suggests. One installs the hard dependencies only. Both build and check the vignettes, so the vignettes also run in full on ubuntu (corrected M147, D-116).
   `test-coverage.yaml`, `R-CMD-check-hard.yaml` (M57), `R-CMD-check-cran.yaml` (each of its two jobs, M147), `devel-vctrs.yaml` and `prose-sweep.yaml` (M88, its `push` with no `branches` filter, the yaml saying why) each bound one job; `pkgdown.yaml` bounds `build` and `deploy` apart. Each yaml comment holds its own measurements and rationale.
   The step bound is the guarantee, both pre-M14 hangs having sat in `test_check("nestedtune")` (52 minutes under `R
   CMD check`, 40 under `covr`), which is why each workflow carries its own; the job bound covers the devel leg's
@@ -57,13 +57,13 @@ rules in tracking-rules:
   (corrected M76: the run is *not* bounded by its largest file and re-ordering has nothing to recover; corrected M110: save one file far longer than the rest, which ran late and alone until split and queued;
   `benchmarks/test-timing-parallel.md` owns the measurements). The worker count is `TESTTHAT_CPUS` (testthat reads
   `getOption("Ncpus")` first when set; no `.Rprofile` here sets it), set at one per runner core in the job `env:` of
-  the four workflows that run the whole suite and left at testthat's default of 2 locally; the stress workflow below
+  the four workflows that run the whole suite (`devel-vctrs.yaml` sets it on every trigger but runs the whole suite only on its schedule and a full dispatch) and left at testthat's default of 2 locally; the stress workflow below
   sets none, running one file per process. `R-CMD-check-cran.yaml` sets none, so testthat uses 2 workers there (M147). **A `workflow_dispatch`-only stress workflow** (`stress-daemon-tests.yaml`)
   hunts the hang on demand under a job cap far above the rest, invisible to `ci-usage.py` for carrying neither trigger.
-  **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) runs the suite against `r-lib/vctrs@main` for the experimental
-  `vec_cbind_frame_ptype()` method in `R/nested-results.R`; non-gating and not a required check, so upstream cannot
-  freeze a merge. Triggers: `push`, `pull_request`, `schedule` (Mondays 06:17 UTC), `workflow_dispatch` (M102);
-  `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
+  **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) tests against `r-lib/vctrs@main` for the experimental `vec_cbind_frame_ptype()`
+  method in `R/nested-results.R`, non-gating and not a required check, so upstream cannot freeze a merge. Triggers: `push` and
+  `pull_request` (the three vctrs compatibility test files), `schedule` (Mondays 06:17 UTC, the whole suite) and `workflow_dispatch`
+  (M102, the whole suite unless `full` is false, M153). `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
   workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33):
   no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air format .`.
 - Locating a hang, since the cap only ends one: `HangTraceReporter` (`tests/testthat/helper-hang-trace.R`) writes

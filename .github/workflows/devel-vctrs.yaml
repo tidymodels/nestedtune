@@ -6,15 +6,24 @@
 # that generic is renamed, removed or given different semantics upstream, a
 # `vec_cbind()` on a results object silently stops restoring the class, and
 # nothing in a released-vctrs matrix would notice until the change reached CRAN.
-# This leg installs vctrs from `r-lib/vctrs@main` and runs the test suite
-# against it, so the break surfaces on the next push or pull request here
-# rather than at the upstream release. It also runs once a week (the
-# `schedule:` below, Monday 06:17 UTC -- off the hour, the slot GitHub
-# documents as the most delayed under load), so a quiet week here still asks
-# the question of that week's upstream commits, and on demand
-# (`workflow_dispatch:`), so an upstream change can be checked without a push.
-# GitHub disables a `schedule:` after 60 days with no repository activity, so
-# a long dormancy still needs the dispatch.
+# This leg installs vctrs from `r-lib/vctrs@main` and runs tests against it,
+# so a break that the vctrs compatibility tests catch surfaces on the next
+# push or pull request here rather than at the upstream release. It also runs once a week (the `schedule:` below,
+# Monday 06:17 UTC -- off the hour, the slot GitHub documents as the most
+# delayed under load), so a quiet week here still asks the question of that
+# week's upstream commits, and on demand (`workflow_dispatch:`), so an
+# upstream change can be checked without a push. GitHub disables a
+# `schedule:` after 60 days with no repository activity, so a long dormancy
+# still needs the dispatch.
+#
+# What a run tests depends on its trigger. A push or pull request runs only
+# the three vctrs compatibility test files (`test-vctrs-compat.R`,
+# `test-dplyr-compat.R`, `test-nested-results-set-compat.R`; the `filter` in
+# the last step). The weekly schedule runs the whole suite, because a
+# development-vctrs break can reach files outside the three: other test files
+# call vctrs functions too (`test-nested-tune-bayes-oracles.R` calls
+# `vec_cbind_frame_ptype()`), and dplyr and tibble build on vctrs. A dispatch
+# runs the whole suite unless its `full` input is set to false.
 #
 # The `cache-version: devel-vctrs` on the dependency step keys this leg's
 # library cache apart from every other workflow's. The action saves its cache
@@ -52,6 +61,11 @@ on:
   schedule:
     - cron: '17 6 * * 1'
   workflow_dispatch:
+    inputs:
+      full:
+        description: 'Run the whole suite (false runs the three vctrs test files)'
+        type: boolean
+        default: true
 
 name: devel-vctrs.yaml
 
@@ -65,10 +79,13 @@ name: devel-vctrs.yaml
 permissions:
   contents: read
 
-# See the matching block in R-CMD-check.yaml. Keyed on the workflow as well as
+# Extends the block in R-CMD-check.yaml. Keyed on the workflow as well as
 # the ref, so cancelling a superseded run of this leg never touches a check run.
+# Also keyed on the test step's `FULL_SUITE` switch (the same expression), so a
+# three-file run never cancels or replaces a pending or running whole-suite
+# run: GitHub keeps one pending run per group and cancels the older one.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
   cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 jobs:
@@ -82,7 +99,10 @@ jobs:
     # 23m42s job on the same day, the suite paying here for what `R CMD check`
     # runs under its own harness there. 90 is about 2.5x the measurement, the
     # ratio R-CMD-check.yaml and R-CMD-check-hard.yaml both use. It is a hang
-    # guard, not headroom: a run approaching it is a suite to make faster.
+    # guard, not headroom: a run approaching it is a suite to make faster. The
+    # cap is sized for the whole-suite runs; a three-file run took 2m38s end to
+    # end, 20s of it in the test step (job 120134601264 of run 39867888167,
+    # 2026-10-22).
     timeout-minutes: 90
 
     env:
@@ -116,7 +136,7 @@ jobs:
         run: pak::pak("r-lib/vctrs@main")
         shell: Rscript {0}
 
-      # The suite's verdict is about whichever upstream commit this run got, so
+      # The run's verdict is about whichever upstream commit this run got, so
       # the run's own log has to name it -- a red run read months later is
       # unreadable without it.
       - name: Record which vctrs this run tested against
@@ -127,8 +147,19 @@ jobs:
           }
         shell: Rscript {0}
 
-      - name: Run the test suite against it
+      # testthat matches `filter` against each file name with `test-` and `.R`
+      # removed. A NULL filter runs every file.
+      - name: Run the tests against it
+        env:
+          FULL_SUITE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
         run: |
+          full <- identical(Sys.getenv("FULL_SUITE"), "true")
+          cat("Whole suite: ", full, "\n", sep = "")
+          filter <- if (full) {
+            NULL
+          } else {
+            "^(vctrs-compat|dplyr-compat|nested-results-set-compat)$"
+          }
           pkgload::load_all(".", quiet = TRUE)
-          testthat::test_local(stop_on_failure = TRUE)
+          testthat::test_local(filter = filter, stop_on_failure = TRUE)
         shell: Rscript {0}
