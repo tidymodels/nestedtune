@@ -105,6 +105,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - 2026-10-23: T5 done at 4e88e2e2. `devtools::test()` gave 1152 blocks, 0 failed, 0 errors, 0 skipped. The `step_pca()` error lines in its log are tune notes that fixtures print. `air format --check .` is clean at air 0.12.0, the latest release. `Rscript benchmarks/sweep-test-comments.R` exited 0 with no hits.
 - 2026-10-23: claim audit: not owed — internal tier.
 - 2026-10-23: all tasks done. Status set to review, and handed to /milestone-review.
+- 2026-10-23: review pass 1: four lenses, 22 findings. 3 fixed on the branch at 8af67613, 3 to the new row "Fix seed checks in four refusal tests", 16 rejected. No defect return. The new row is written at post-merge hygiene, after the absorbed row graduates, because the ROADMAP holds 59 of its 60 lines now.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
@@ -130,8 +131,8 @@ Review pass 1, 2026-10-23, at 4622dfbb. main had not moved since the cut (d6ec5a
 - spawned: diff-bug, blame-history, prior-review, ripple
 - diff-bug #1: four other refusal blocks back an ordering claim with `expect_identical(.Random.seed, before)` (`test-event-level.R` "the refusal fires before anything is fitted", which also uses a bare `expect_error()`, `test-nested-final-fit-resamples.R`, `test-nested-final-fit-identity.R`, `test-nested-final-fit-set.R`) — follow-up, new row "Fix seed checks in four refusal tests"
 - diff-bug #2: the absorbed candidate row still lists the fixed items — reject (planned change): post-merge hygiene graduates the row
-- diff-bug #3: the grid comment's "both drivers install their restoring on.exit()" names no driver, and the block calls one — fix now
-- diff-bug #4: the grid comment "its message names it" has no clear referent — fix now
+- diff-bug #3: the grid comment's "both drivers install their restoring on.exit()" names no driver, and the block calls one — fix now, fixed 8af67613
+- diff-bug #4: the grid comment "its message names it" has no clear referent — fix now, fixed 8af67613
 - diff-bug #5: "the record refusals fire before anything is drawn" names a plural, but the block triggers one record refusal — follow-up, row "Fix seed checks in four refusal tests". AC1 quotes the name, so a rename here would change a criterion.
 - diff-bug #6: `saved` is the fixture's seed, not the state on entry to the block — reject (false): the block restores the session state at its own exit, as `test-nested-final-fit-rng.R` does, and both fixtures seed first
 - diff-bug #7: `R/nested-final-fit.R`'s comment says a refusal before the draw "leaves the caller's generator state untouched", which `restore_rng()` makes true wherever the refusal fires — follow-up, row "Fix seed checks in four refusal tests" (an unmodified line)
@@ -140,7 +141,7 @@ Review pass 1, 2026-10-23, at 4622dfbb. main had not moved since the cut (d6ec5a
 - blame-history #2: clearing `.Random.seed` first loses detection of a refusal that advances an existing seed — reject (false): any draw creates the absent seed, so existence catches every draw that identity caught, and `restore_rng()` puts back an existing seed on every exit
 - blame-history #3: `saved <- .Random.seed` has no existence guard — reject (false): both fixtures call `set.seed()` before it, so the seed always exists there
 - blame-history #4: the provenance names two commits — reject (false): the Extraction line dates the extraction, and the new line dates the line numbers. The lens's loop found 106 of 106 rows at `601cff7e` and 68 misses at `89d8418`, which backs the correction.
-- prior-review #1: the no-preprocessor refusal is asserted by message only, the defect M156's review returned on — fix now: assert `class = "rlang_error"` with the message
+- prior-review #1: the no-preprocessor refusal is asserted by message only, the defect M156's review returned on — fix now: assert `class = "rlang_error"` with the message, fixed 8af67613
 - prior-review #2: the unguarded `saved <- .Random.seed` — reject (false), as blame-history #3
 - prior-review #3: the inventory header still names `89d8418`, the prose citations were not re-read, and milestone ids appear on the page — reject (false): `89d8418` is the true extraction commit, the prose gap is disclosed, and milestone ids are allowed in `cairn/` records
 - prior-review #4: the grid block "`select` must be a selection_rule(), refused before any fold runs" keeps the phrase — reject (false): `grid_refusal()` mocks `dispatch_folds()` with a sentinel, and the block shows the accepting side reaching it
