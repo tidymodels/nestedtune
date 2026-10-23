@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M157: Test checks and names that M156's review flagged say only what they check
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** internal — test files, a test helper comment and a tracking reference page, with no change to exported behavior, help pages or NEWS   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m157-m156-review-leftovers   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -65,7 +65,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
      cites; an insertion, removal, or reorder renumbers the labels and the
      Coverage lines together. -->
 
-- [ ] T1: Rewrite the two final-fit blocks of AC1. Save the caller's `.Random.seed` and restore it at block end, as the grid block does. Remove it before the call and assert that it does not exist after. Delete the comment that says a reordering advances the caller's stream. Make the AC1 move by hand, see both blocks fail, and revert it.
+- [x] T1: Rewrite the two final-fit blocks of AC1. Save the caller's `.Random.seed` and restore it at block end, as the grid block does. Remove it before the call and assert that it does not exist after. Delete the comment that says a reordering advances the caller's stream. Make the AC1 move by hand, see both blocks fail, and revert it.
 - [ ] T2: Rename the four blocks of AC2. Rename the grid block of AC3, fix its comment, and assert each refusal by class or message. Read each refusal's class by running it before writing the assertion.
 - [ ] T3: Move the comment of AC4.
 - [ ] T4: Edit the inventory provenance. Run a shell loop over the table's `F` rows against `601cff7e`.
@@ -95,6 +95,9 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - 2026-10-23: plan gate chose fixing the inventory's provenance over editing its two cited rows, because every `F` row matches `601cff7e`. Falsified by a row loop miss at `601cff7e`.
 - 2026-10-23: ROADMAP caps: the M157 row and the new candidate row took it to 60 lines and about 24,200 bytes. The plan merged the Posit and CODEOWNERS rows into "Settle two tidymodels org conventions" and cut ten repeated old titles from parked rows' detail, leaving 59 lines and 23,875 bytes.
 - 2026-10-23: question set: run mode — plan, build and review in one session. Item 2 — build neither check. Item 4 — new candidate row "Give the unclassed refusals a class".
+- 2026-10-23: correction to the ROADMAP caps line above: the plan cut nine repeated old titles from parked rows, not ten. The two others went in the Posit and CODEOWNERS merge.
+- 2026-10-23: /milestone-implement started on branch m157-m156-review-leftovers, cut from main at d6ec5a7b.
+- 2026-10-23: T1 done. Both final-fit blocks now remove the seed and assert it does not exist after the refusal, following the pattern in test-nested-final-fit-rng.R. Mutation by hand: with the snapshot, `on.exit()` and draw moved above `check_workflow(object)`, each block failed once, on its `exists()` expectation, with 0 other failures in the file. Reverted with `git checkout`, and the file passed 31 blocks, 0 failed.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
