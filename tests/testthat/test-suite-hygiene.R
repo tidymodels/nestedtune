@@ -82,23 +82,102 @@ BUDGETED_FILES <- c(
   "helper-parallel.R"
 )
 
-wait_call_sites <- function(path) {
+# The key a ledger row and a wait call meet on: the file, the unit the call
+# sits in, and the call's place among the wait calls of that unit, counted in
+# source order. No line number enters it, so a line added above a call changes
+# no key. Swapping two different wait calls inside one unit does, and fails
+# the guards; adding or removing one renumbers the calls after it.
+wait_call_key <- function(file, payer, at, call) {
+  paste0(file, " :: ", payer, " :: #", at, " ", call)
+}
+
+# The unit is the description of the innermost `test_that()` around the call,
+# called bare with a string literal first. Outside any test it is the name of
+# the outermost function assigned with `<-` that holds the call, as for the
+# helper-parallel.R rows, and "(top level)" when there is none.
+enclosing_unit <- function(data, id) {
+  unit <- "(top level)"
+  repeat {
+    parent <- data$parent[data$id == id]
+    if (!length(parent) || parent <= 0) {
+      return(unit)
+    }
+    kids <- data[data$parent == parent, , drop = FALSE]
+    kids <- kids[order(kids$line1, kids$col1), , drop = FALSE]
+    exprs <- kids$id[kids$token == "expr"]
+    head <- data[data$parent %in% exprs[1], , drop = FALSE]
+    if (
+      length(exprs) >= 2L &&
+        nrow(head) == 1L &&
+        head$token == "SYMBOL_FUNCTION_CALL" &&
+        head$text == "test_that"
+    ) {
+      desc <- data[
+        data$parent == exprs[[2]] & data$token == "STR_CONST",
+        ,
+        drop = FALSE
+      ]
+      if (nrow(desc) == 1L) {
+        return(str2lang(desc$text))
+      }
+      return(utils::getParseText(data, exprs[[2]]))
+    }
+    is_function <- length(exprs) == 2L &&
+      any(kids$token == "LEFT_ASSIGN") &&
+      any(data$parent == exprs[[2]] & data$token == "FUNCTION")
+    if (is_function) {
+      name <- data$text[data$parent == exprs[[1]] & data$token == "SYMBOL"]
+      if (length(name) == 1L) {
+        unit <- paste0(name, "()")
+      }
+    }
+    id <- parent
+  }
+}
+
+# Every wait call in a file, with its key and the source text of the whole call.
+wait_calls <- function(path) {
   data <- utils::getParseData(parse(path, keep.source = TRUE))
-  data <- data[
+  calls <- data[
     data$token == "SYMBOL_FUNCTION_CALL" &
       data$text %in% BUDGETED_WAIT_CALLS,
     ,
     drop = FALSE
   ]
-  if (!nrow(data)) {
-    return(character(0))
+  calls <- calls[order(calls$line1, calls$col1), , drop = FALSE]
+  if (!nrow(calls)) {
+    return(data.frame(key = character(0), text = character(0)))
   }
-  paste0(basename(path), ":", data$line1)
+  payer <- vapply(calls$id, function(id) enclosing_unit(data, id), character(1))
+  at <- stats::ave(seq_along(payer), payer, FUN = seq_along)
+  # The name token sits inside an `expr` holding the function position, whose
+  # own parent is the call, so the call is the grandparent.
+  text <- vapply(
+    calls$id,
+    function(id) {
+      fn <- data$parent[data$id == id]
+      utils::getParseText(data, data$parent[data$id == fn])
+    },
+    character(1)
+  )
+  data.frame(
+    key = wait_call_key(basename(path), payer, at, calls$text),
+    text = text,
+    stringsAsFactors = FALSE
+  )
+}
+
+wait_call_sites <- function(path) {
+  wait_calls(path)$key
+}
+
+ledger_keys <- function(ledger) {
+  wait_call_key(ledger$file, ledger$payer, ledger$at, ledger$call)
 }
 
 test_that("every wait-shaped call in the daemon files carries a budget row", {
   ledger <- time_budget_ledger()
-  budgeted <- paste0(ledger$file, ":", ledger$line)
+  budgeted <- ledger_keys(ledger)
 
   found <- unlist(
     lapply(BUDGETED_FILES, function(f) {
@@ -126,16 +205,15 @@ test_that("every wait-shaped call in the daemon files carries a budget row", {
 })
 
 test_that("the budget ledger has no rows for calls that are gone", {
-  # The other direction, which keeps the ledger honest as lines move: a row
-  # pointing at a `file:line` that no longer holds a wait call is stale, and a
-  # stale row silently excuses the live call that took its place.
+  # The other direction: a row whose key no longer names a wait call is stale,
+  # and a stale row adds seconds to the totals for a call that is gone.
   ledger <- time_budget_ledger()
   # Scoped to rows describing an actual call. The ledger may also carry a wait
   # that is not a function call at all -- the `while (... && Sys.time() <
   # deadline)` poll in test-parallel-interrupt.R -- which is real budget but has
   # no token to match, so it is exempt from this direction only.
   ledger <- ledger[ledger$call %in% BUDGETED_WAIT_CALLS, , drop = FALSE]
-  budgeted <- paste0(ledger$file, ":", ledger$line)
+  budgeted <- ledger_keys(ledger)
 
   found <- unlist(
     lapply(BUDGETED_FILES, function(f) {
@@ -149,7 +227,7 @@ test_that("the budget ledger has no rows for calls that are gone", {
     stale,
     character(0),
     info = paste0(
-      "budget row pointing at no wait call (line moved or call removed?): ",
+      "budget row naming no wait call (call removed, renamed or reordered?): ",
       paste(stale, collapse = ", ")
     )
   )
@@ -168,42 +246,19 @@ test_that("the budget ledger has no rows for calls that are gone", {
 # rows those are is declared below rather than left to whatever the regex
 # happens to miss.
 #
-# Read from the whole CALL, not from the row's one line. A ledger row points at
-# the line holding the function name, which is where both accounting guards
-# expect it; but an argument list wrapped across lines puts the bound on a
-# different line, and reading one line then found nothing and skipped the row in
-# silence. That is how the single new row claiming a copied bound went
-# uncross-checked for a whole milestone (M24 review F9) -- a blind spot in the
-# guard, so it is closed here rather than worked around by reflowing the call to
-# suit it.
-call_site_expr <- function(path, line) {
-  data <- utils::getParseData(parse(path, keep.source = TRUE))
-  token <- data[
-    data$token == "SYMBOL_FUNCTION_CALL" & data$line1 == line,
-    ,
-    drop = FALSE
-  ]
-  if (!nrow(token)) {
-    return("")
-  }
-  # The token sits inside an `expr` holding the function position, whose own
-  # parent is the call -- so the call is the grandparent.
-  fn <- data[data$id == token$parent[[1]], , drop = FALSE]
-  call <- data[data$id == fn$parent[[1]], , drop = FALSE]
-  if (!nrow(call)) {
-    return("")
-  }
-  txt <- readLines(path, warn = FALSE)
-  paste(txt[seq(call$line1[[1]], call$line2[[1]])], collapse = " ")
-}
-
-# The keyword is chosen by the call rather than tried in turn, because widening
-# the read from one line to a whole call brings any nested call's arguments into
-# view with it -- `collect_bounded(mirai::everywhere(...), seconds = 30)` is the
-# shape already in the suite. Each call has exactly one bound argument, so
-# asking for that one can never read a neighbour's.
-call_site_bound_s <- function(path, line, call) {
-  txt <- call_site_expr(path, line)
+# Read from the whole CALL, which `wait_calls()` gives as parsed text. An
+# argument list wrapped across lines puts the bound on a later line than the
+# function name, and a read of one line once found nothing there and skipped
+# the row in silence (M24 review F9).
+#
+# The keyword is chosen by the call rather than tried in turn, because the
+# whole call brings any nested call's arguments into view with it --
+# `collect_bounded(mirai::everywhere(...), seconds = 30)` is the shape already
+# in the suite. Each call has exactly one bound argument, and the first match
+# in the call's text is read. So the read goes wrong only where that text puts
+# another `seconds =` or `timeout =` first: a wait call of the same kind nested
+# in the arguments, or a comment inside the call. The suite has neither.
+call_site_bound_s <- function(txt, call) {
   keyword <- if (identical(call, "collect_bounded")) "seconds" else "timeout"
   hit <- regmatches(
     txt,
@@ -217,19 +272,22 @@ call_site_bound_s <- function(path, line, call) {
 }
 
 # The rows whose bound this cross-check cannot re-read, named so a new one
-# cannot join them in silence -- which is the failure F9 found. Keyed on the
-# paying test rather than on a line number, so moving a test does not require
-# editing this list and a stale entry cannot quietly excuse a different row.
+# cannot join them in silence -- which is the failure F9 found. Keyed as the
+# ledger rows are, so a stale entry cannot quietly excuse a different row.
 DECLARED_UNCHECKABLE_BOUNDS <- c(
   # Bound comes from COLLECT_BOUNDED_DEFAULT_S, which the row reads directly.
-  paste0(
-    "test-parallel-classify.R :: ",
-    "a miraiError becomes a recorded worker failure, not an abort"
+  wait_call_key(
+    "test-parallel-classify.R",
+    "a miraiError becomes a recorded worker failure, not an abort",
+    1L,
+    "collect_bounded"
   ),
   # Bound is set through the option at one line and spent at another.
-  paste0(
-    "test-parallel-classify.R :: ",
-    "the probe reads its bound from the option, not from the constant"
+  wait_call_key(
+    "test-parallel-classify.R",
+    "the probe reads its bound from the option, not from the constant",
+    4L,
+    "daemons_load_status"
   )
 )
 
@@ -247,19 +305,23 @@ test_that("a copied bound still matches the argument it was copied from", {
     drop = FALSE
   ]
 
+  sites <- do.call(
+    rbind,
+    lapply(BUDGETED_FILES, function(f) wait_calls(test_path(f)))
+  )
+  keys <- ledger_keys(ledger)
+
   checked <- 0L
   unreadable <- character(0)
   for (i in seq_len(nrow(ledger))) {
-    at <- call_site_bound_s(
-      test_path(ledger$file[[i]]),
-      ledger$line[[i]],
-      ledger$call[[i]]
-    )
+    txt <- sites$text[sites$key == keys[[i]]]
+    at <- if (length(txt) == 1L) {
+      call_site_bound_s(txt, ledger$call[[i]])
+    } else {
+      NA_real_
+    }
     if (is.na(at)) {
-      unreadable <- c(
-        unreadable,
-        paste0(ledger$file[[i]], " :: ", ledger$payer[[i]])
-      )
+      unreadable <- c(unreadable, keys[[i]])
       next
     }
     checked <- checked + 1L
@@ -267,9 +329,7 @@ test_that("a copied bound still matches the argument it was copied from", {
       ledger$seconds[[i]],
       at * ledger$times[[i]],
       info = paste0(
-        ledger$file[[i]],
-        ":",
-        ledger$line[[i]],
+        keys[[i]],
         " declares ",
         ledger$seconds[[i]],
         " s but the call site says ",
