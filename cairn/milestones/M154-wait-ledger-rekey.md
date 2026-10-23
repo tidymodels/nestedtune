@@ -69,6 +69,7 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: claim audit: not owed — internal tier
 - 2026-10-22: all tasks done; status review, handed to /milestone-review.
 - 2026-10-22: review checkpoint (in progress): AC1-AC4 evidence recorded and ticked; `cairn_validate` passed; `document()` changed only the roxygen2 version stamp in DESCRIPTION (local 8.1.1), reverted as not this milestone's; six gating prose sweeps exit 0. Waiting on the AC5 suite run, `devtools::check()`, and four reviewers.
+- 2026-10-22: four reviewers returned 20 findings (5 duplicates); 10 fixed on the branch in 7a7ae282, 3 to a new candidate row, 6 rejected, none a return. The earlier AC5 suite run was stopped because it predated the fixes; a fresh run on 7a7ae282 is under way.
 
 ## Decisions
 
@@ -80,3 +81,25 @@ Evidence gathered 2026-10-22 on a `git archive` copy of 41e04c07 (code identical
 - AC2: the script loops over the 95 ledger rows whose `call` is in `BUDGETED_WAIT_CALLS`, replacing one `tb_row()` call with `NULL` per run. All 95 runs failed, and in each the failure message held the deleted row's key (file, test name, call position and call).
 - AC3: the set, computed from each ledger with that commit's own `DECLARED_UNCHECKABLE_BOUNDS`, holds 10 rows at 5bae6873 (ledger loaded from a `git archive` copy) and 10 at the head. The script doubled the `seconds` or `timeout` literal of each of the 10 calls, one per run; all 10 runs failed with an expectation message that opens with that row's key and "declares".
 - AC4: `time_budget_totals()` from the 5bae6873 copy and from the head copy is identical in file and seconds for all 8 files (classify 228.678, detection 780, identity 960, interrupt 255, required-pkgs 300, metrics 120, payload 120, helper-parallel 0), and the per-file row counts are identical too (98 rows in all).
+
+Consistency gate: `cairn_validate.py` exit 0 (18 `references staleness` advisories, none on this milestone's files). `devtools::document()` changed nothing in `man/` or `NAMESPACE`; its one diff was the `Config/roxygen2/version` stamp (local roxygen2 8.1.1 against the recorded 8.1.0), reverted as not this milestone's. The six gating `sweep-prose.R` runs exit 0. No README, pkgdown, `_pkgdown.yml` or new top-level file change; no changelog entry, since the diff changes only tests and a benchmark script, which users do not see. No DESIGN principle changed, so `cairn_impact` was skipped.
+
+spawned: diff-bug, blame-history, prior-review, ripple
+
+- diff-bug #1: `cairn/DESIGN.md:140-143` still says the ledger holds `file:line` positions that a formatting pass must re-point — fix now, fixed 7a7ae282 (same finding: ripple #1, prior-review #2).
+- diff-bug #2: `wait_calls()` errors ("arguments imply differing number of rows: 1, 0") on a budgeted file with no wait calls, because the diff dropped the old zero-row return — fix now, fixed 7a7ae282 (same finding: blame-history #1, prior-review #1).
+- diff-bug #3: the stale-row comment says a stale row "silently excuses the live call that took its place", which exact key matching rules out — fix now, fixed 7a7ae282 (the comment now says a stale row adds seconds for a call that is gone).
+- diff-bug #4: the key comment says swapping two wait calls in a unit fails the guards, false for two calls of the same name — fix now, fixed 7a7ae282 (comment narrowed to two different calls).
+- diff-bug #5: `enclosing_unit()` gives `(top level)` for `testthat::test_that()`, `=` and `->` assignment, takes the code text for a `test_that(code =, desc =)` call, and shares one count between two blocks of the same name; the comment named none of this — fix now for the comment, fixed 7a7ae282 (it now states the bare-literal `test_that()` and `<-` rules and the `(top level)` fallback). The shapes themselves stay: the suite uses none, and each gives the same key on the ledger side and the source side, so the guards still decide correctly.
+- diff-bug #6: the comment kept by the diff says the bound read "can never read a neighbour's", false for a same-kind wait call nested in the arguments or a bound written in a comment inside the call — fix now, fixed 7a7ae282 (comment states both cases; the suite has neither).
+- diff-bug #7: the 45.678 s row's note says the option is set "at :760"; it is set at classify :691 — fix now, fixed 7a7ae282 (note names no line). The other line citations in the helper are accurate today and go to the follow-up below.
+- diff-bug #8: the two `daemons` rows share one key (`#NA daemons`), told apart only by `note` — reject, planned change: the plan dropped the line field, and these rows sit outside every guard by design.
+- diff-bug #9: the benchmark's "further call(s) classified as no-wait" line keeps its old indent — reject, style.
+- diff-bug #10: AC5 unticked while T5 is recorded done — reject, false: review ticks AC5 against its own fresh run, below.
+- blame-history #2: `DECLARED_UNCHECKABLE_BOUNDS` no longer survives a wait call added before a declared call in its block — reject, planned change: the plan keyed the list on position, and the plan gate recorded reordering as the accepted cost; the failure is loud.
+- blame-history #3: line references remain in helper comments (:44, :335, :789, :815) — follow-up, row "Drop line numbers from test comments" (:335 fixed under diff-bug #7).
+- blame-history #4: no DECISIONS.md entry for the keying change — reject, false: the choice is local to the suite and recorded in this file's plan-gate work-log line, where the rulebook puts milestone-local decisions.
+- prior-review #3: `test-suite-hygiene.R` cites `R/parallel.R:91` for the production `collect_mirai()`, which sits near :367; stale before this branch — follow-up, row "Drop line numbers from test comments".
+- prior-review #4: the remaining line-anchored helper comments will drift now that no key holds lines — follow-up, row "Drop line numbers from test comments".
+- ripple #2: `test-parallel-required-pkgs.R:52-53` says the bound is re-read "from this line" — fix now, fixed 7a7ae282 ("from this call").
+- LESSONS.md:29 said the ledger is the one test-enforced `file:line` citation set (raised by prior-review #2) — fixed in place, marked corrected M154, 7a7ae282.
