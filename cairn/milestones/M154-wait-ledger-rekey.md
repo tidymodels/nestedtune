@@ -71,6 +71,7 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: review checkpoint (in progress): AC1-AC4 evidence recorded and ticked; `cairn_validate` passed; `document()` changed only the roxygen2 version stamp in DESCRIPTION (local 8.1.1), reverted as not this milestone's; six gating prose sweeps exit 0. Waiting on the AC5 suite run, `devtools::check()`, and four reviewers.
 - 2026-10-22: four reviewers returned 20 findings (5 duplicates); 10 fixed on the branch in 7a7ae282, 3 to a new candidate row, 6 rejected, none a return. The earlier AC5 suite run was stopped because it predated the fixes; a fresh run on 7a7ae282 is under way.
 - 2026-10-22: correction to the line above: of the 20 findings, 12 were settled fix now (7 unique fixes plus 5 duplicates of them), 3 follow-up and 5 rejected, as the Review section lists. AC5 verified on 7a7ae282; `devtools::check()` running.
+- 2026-10-22: the correction above miscounted: the 12 fix-now findings are 8 unique fixes (diff-bug #1-#7, ripple #2) plus 4 duplicates (blame-history #1, prior-review #1 and #2, ripple #1). `devtools::check()` at 7a7ae282 gave 0 errors, 0 warnings, 0 notes.
 
 ## Decisions
 
@@ -84,7 +85,7 @@ Evidence gathered 2026-10-22 on a `git archive` copy of 41e04c07 (code identical
 - AC4: `time_budget_totals()` from the 5bae6873 copy and from the head copy is identical in file and seconds for all 8 files (classify 228.678, detection 780, identity 960, interrupt 255, required-pkgs 300, metrics 120, payload 120, helper-parallel 0), and the per-file row counts are identical too (98 rows in all).
 - AC5: the `verify` slot at 7a7ae282 (the head after the review fixes; later commits touch `cairn/` only): `air format --check .` exit 0 with air 0.12.0, and `devtools::test()` exit 0 with no Failed, Warnings or Skipped section in its summary. No roxygen, `R/`, vignette or README change, so `document()` and the prose sweep lines of the slot do not apply beyond the gate runs below.
 
-Consistency gate: `cairn_validate.py` exit 0 (18 `references staleness` advisories, none on this milestone's files). `devtools::document()` changed nothing in `man/` or `NAMESPACE`; its one diff was the `Config/roxygen2/version` stamp (local roxygen2 8.1.1 against the recorded 8.1.0), reverted as not this milestone's. The six gating `sweep-prose.R` runs exit 0. No README, pkgdown, `_pkgdown.yml` or new top-level file change; no changelog entry, since the diff changes only tests and a benchmark script, which users do not see. No DESIGN principle changed, so `cairn_impact` was skipped.
+Consistency gate: `cairn_validate.py` exit 0 (18 `references staleness` advisories, none on this milestone's files). `devtools::document()` changed nothing in `man/` or `NAMESPACE`; its one diff was the `Config/roxygen2/version` stamp (local roxygen2 8.1.1 against the recorded 8.1.0), reverted as not this milestone's. The six gating `sweep-prose.R` runs exit 0. No README, pkgdown, `_pkgdown.yml` or new top-level file change; no changelog entry, since the diff changes only tests and a benchmark script, which users do not see. No DESIGN principle changed, so `cairn_impact` was skipped. `devtools::check()` at 7a7ae282: 0 errors, 0 warnings, 0 notes.
 
 spawned: diff-bug, blame-history, prior-review, ripple
 
