@@ -63,7 +63,7 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 
 - [x] T1: Tests first, then code, for the 19 calls in `R/checks.R`. For each refusal, add or tighten an `expect_error(..., class = , regexp = )` in the `*-checks.R` or topic test file that already covers it (new tests go in the file of the public function that reaches the check). See each new test fail, then add the `class` argument from the Scope table.
 - [x] T2: The same for the 6 calls in `R/nested-resamples.R` (tests in `test-nested-resamples-specs.R` or the file that already covers the refusal) and the 1 in `R/tuner.R` (tighten `test-tuner-registry.R`'s "Unknown tuner" expectations).
-- [ ] T3: Add the NEWS bullet. Run the parse walk over `R/`, and a walk that compares each `R/` file's parse tree with the merge base's after removing `class` from the calls that had none there. Run `verify` and `devtools::check()` from the main checkout, and `check()` at the merge base if the branch reports a NOTE.
+- [x] T3: Add the NEWS bullet. Run the parse walk over `R/`, and a walk that compares each `R/` file's parse tree with the merge base's after removing `class` from the calls that had none there. Run `verify` and `devtools::check()` from the main checkout, and `check()` at the merge base if the branch reports a NOTE.
 
 ## Work log
 
@@ -79,4 +79,5 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - 2026-10-23: T1 verified: `devtools::test()` 1152 blocks, 0 failed; `air format --check .` and `sweep-prose.R --plain` clean.
 - 2026-10-23: T2: 7 `class` arguments in `R/nested-resamples.R` and `R/tuner.R`; seven blocks in three test files red before, green after (20 blocks, 0 red). Four `cli_abort(c(...))` calls there took the file's existing multi-line form to carry `class`.
 - 2026-10-23: T3 in progress: NEWS bullet added. The AC3 walk (scratchpad script comparing each `R/` file's parse tree with the merge base after removing `class` from `cli_abort()` calls) first failed on `R/nested-resamples.R`: re-indenting two calls had shifted the continuation whitespace inside four string literals, which cli trims but the parse tree keeps. Restored; the walk then reported 25 files, 26 classes added, no other change and no existing class altered.
+- 2026-10-23: T3 verified at 3453ac96: `sweep-prose.R --plain` clean; `devtools::test()` 1152 blocks, 0 failed; `devtools::check()` 0 errors, 0 warnings, 0 notes (10m 38s). Claim audit spawned.
 - 2026-10-23: plan chose the review-time parse walk over a committed test that parses `R/`, because such a test reads source text rather than behavior and AC1's tests pin each class; falsified by a new unclassed `cli_abort()` reaching main.
