@@ -85,14 +85,16 @@ BUDGETED_FILES <- c(
 # The key a ledger row and a wait call meet on: the file, the unit the call
 # sits in, and the call's place among the wait calls of that unit, counted in
 # source order. No line number enters it, so a line added above a call changes
-# no key. Swapping two wait calls inside one unit does, and fails the guards.
+# no key. Swapping two different wait calls inside one unit does, and fails
+# the guards; adding or removing one renumbers the calls after it.
 wait_call_key <- function(file, payer, at, call) {
   paste0(file, " :: ", payer, " :: #", at, " ", call)
 }
 
-# The unit is the description of the innermost `test_that()` around the call.
-# Outside any test it is the name of the top-level function holding the call,
-# as for the helper-parallel.R rows.
+# The unit is the description of the innermost `test_that()` around the call,
+# called bare with a string literal first. Outside any test it is the name of
+# the outermost function assigned with `<-` that holds the call, as for the
+# helper-parallel.R rows, and "(top level)" when there is none.
 enclosing_unit <- function(data, id) {
   unit <- "(top level)"
   repeat {
@@ -143,6 +145,9 @@ wait_calls <- function(path) {
     drop = FALSE
   ]
   calls <- calls[order(calls$line1, calls$col1), , drop = FALSE]
+  if (!nrow(calls)) {
+    return(data.frame(key = character(0), text = character(0)))
+  }
   payer <- vapply(calls$id, function(id) enclosing_unit(data, id), character(1))
   at <- stats::ave(seq_along(payer), payer, FUN = seq_along)
   # The name token sits inside an `expr` holding the function position, whose
@@ -201,7 +206,7 @@ test_that("every wait-shaped call in the daemon files carries a budget row", {
 
 test_that("the budget ledger has no rows for calls that are gone", {
   # The other direction: a row whose key no longer names a wait call is stale,
-  # and a stale row silently excuses the live call that took its place.
+  # and a stale row adds seconds to the totals for a call that is gone.
   ledger <- time_budget_ledger()
   # Scoped to rows describing an actual call. The ledger may also carry a wait
   # that is not a function call at all -- the `while (... && Sys.time() <
@@ -249,8 +254,10 @@ test_that("the budget ledger has no rows for calls that are gone", {
 # The keyword is chosen by the call rather than tried in turn, because the
 # whole call brings any nested call's arguments into view with it --
 # `collect_bounded(mirai::everywhere(...), seconds = 30)` is the shape already
-# in the suite. Each call has exactly one bound argument, so asking for that
-# one can never read a neighbour's.
+# in the suite. Each call has exactly one bound argument, and the first match
+# in the call's text is read. So the read goes wrong only where that text puts
+# another `seconds =` or `timeout =` first: a wait call of the same kind nested
+# in the arguments, or a comment inside the call. The suite has neither.
 call_site_bound_s <- function(txt, call) {
   keyword <- if (identical(call, "collect_bounded")) "seconds" else "timeout"
   hit <- regmatches(

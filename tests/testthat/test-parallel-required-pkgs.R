@@ -50,7 +50,7 @@ test_that("a recipe selector the caller left unqualified resolves on a daemon", 
 
   attached <- function() {
     # An explicit bound rather than the default constant, so the ledger's
-    # seconds can be re-read from this line (test-suite-hygiene.R). The pool is
+    # seconds can be re-read from this call (test-suite-hygiene.R). The pool is
     # warm by now and this probe reads `search()`, so 30 s is a worst case with
     # nothing cold in it.
     answers <- collect_bounded(

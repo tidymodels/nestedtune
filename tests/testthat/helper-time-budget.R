@@ -332,7 +332,7 @@ time_budget_ledger <- function() {
       "daemons_load_status",
       45.678,
       "the probe reads its bound from the option, not from the constant",
-      note = "the test sets the option to 45678 ms at :760"
+      note = "the test sets the option to 45678 ms before the call"
     ),
     tb_row(
       "test-parallel-classify.R",

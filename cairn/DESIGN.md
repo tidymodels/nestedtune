@@ -136,12 +136,14 @@ naming convention.
   at the root declares the settings (the tidymodels shape: `[format]` with
   `skip = ["tribble"]`), `air format .` is expected to change nothing on a
   committed tree, and `.github/workflows/format-suggest.yaml` posts any
-  difference on a pull request as a review suggestion. One consequence to know
-  before reformatting: `tests/testthat/helper-time-budget.R` holds a budget
-  ledger of `file:line` positions in the daemon test files and
-  `test-suite-hygiene.R` fails when a row points at a moved line, so a
-  formatting pass re-points that ledger in the same commit. _(added 2026-08-30,
-  M33 — the first code-style convention recorded here.)_
+  difference on a pull request as a review suggestion. A formatting pass leaves
+  the budget ledger in `tests/testthat/helper-time-budget.R` alone: each row
+  names its call by file, enclosing `test_that()` description and position
+  among that block's wait calls, not by line (corrected M154). Renaming a test
+  in a budgeted daemon file, or adding, removing or reordering a wait call in
+  it, means editing its rows, and `test-suite-hygiene.R` fails naming the row
+  until that is done. _(added 2026-08-30, M33 — the first code-style convention
+  recorded here.)_
 - **Pure R — no compiled code.** No `src/`, no `LinkingTo`, no C/C++/Fortran
   toolchain. Adding compiled code later is additive and would be a design
   decision recorded as a D-entry.
