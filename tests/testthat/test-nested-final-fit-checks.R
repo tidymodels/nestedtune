@@ -226,12 +226,15 @@ test_that("the record refusals fire before anything is drawn", {
   res <- final_results(d)
   attr(res, "inside") <- NULL
 
-  # The seed draw sits after the check block; a reordering that moved the
-  # check below it would leave the caller's stream advanced by a refusal.
-  set.seed(1)
-  before <- .Random.seed
+  # Existence, not identity: the restore is registered before the draw, so
+  # the caller's state comes back either way. A session with no state keeps
+  # the one a draw creates, so a refusal after the draw leaves one behind.
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
+
   expect_error(nested_final_fit(wf, res), class = "nestedtune_bad_results")
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
 
 # The all-failed refusal: a run in which no outer fold completed has no
@@ -278,13 +281,15 @@ test_that("the all-failed refusal fires before anything is drawn", {
   wf <- det_workflow(d)
   res <- all_failed_results(d, wf, "inner tuning")
 
-  set.seed(1)
-  before <- .Random.seed
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
+
   expect_error(
     nested_final_fit(wf, res),
     class = "nestedtune_no_completed_folds"
   )
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
 
 test_that("the record refusals fire before the all-failed one", {

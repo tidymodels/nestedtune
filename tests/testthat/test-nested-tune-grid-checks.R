@@ -425,38 +425,52 @@ test_that("case weights are not mistaken for a preprocessor", {
   ))
 })
 
-# Every refusal added here fires before the entry sample.int() draw. Seed
-# *identity* cannot show this: both drivers install their restoring on.exit()
+# Each refusal below fires before the entry sample.int() draw. Seed
+# *identity* cannot show this: the loop installs its restoring on.exit()
 # before drawing, so .Random.seed is put back on every exit path including one
 # that already drew and re-seeded. What discriminates is existence -- a session
 # that has never drawn has no .Random.seed, and restore_rng() deliberately
 # leaves in place any state it created.
 
-test_that("the new refusals fire before the RNG is drawn from", {
+test_that("a malformed design or a workflow with no preprocessor is refused before the RNG is drawn from", {
   skip_if_no_engines()
 
   d <- make_reg_data()
   wf <- det_workflow(d)
   folds <- valid_folds(d)
 
+  # The no-preprocessor refusal has no package class, so its assertion pairs
+  # rlang's class with the refusal's message.
   refused <- list(
-    function() {
-      bad <- folds
-      bad$inner_resamples[[2]] <- "not an rset"
-      nested_tune_grid(wf, bad, grid = det_grid())
-    },
-    function() {
-      bad <- folds
-      bad$splits[[1]] <- "not an rsplit"
-      nested_tune_grid(wf, bad, grid = det_grid())
-    },
-    function() {
-      no_pre <- workflows::add_model(
-        workflows::workflow(),
-        parsnip::linear_reg()
-      )
-      nested_tune_grid(no_pre, folds, grid = det_grid())
-    }
+    list(
+      class = "nestedtune_bad_design",
+      regexp = "malformed inner_resamples column",
+      refuse = function() {
+        bad <- folds
+        bad$inner_resamples[[2]] <- "not an rset"
+        nested_tune_grid(wf, bad, grid = det_grid())
+      }
+    ),
+    list(
+      class = "nestedtune_bad_design",
+      regexp = "malformed splits column",
+      refuse = function() {
+        bad <- folds
+        bad$splits[[1]] <- "not an rsplit"
+        nested_tune_grid(wf, bad, grid = det_grid())
+      }
+    ),
+    list(
+      class = "rlang_error",
+      regexp = "has no preprocessor",
+      refuse = function() {
+        no_pre <- workflows::add_model(
+          workflows::workflow(),
+          parsnip::linear_reg()
+        )
+        nested_tune_grid(no_pre, folds, grid = det_grid())
+      }
+    )
   )
 
   # Restored with on.exit() rather than withr::defer(): test_that() evaluates
@@ -473,11 +487,11 @@ test_that("the new refusals fire before the RNG is drawn from", {
     add = TRUE
   )
 
-  for (refuse in refused) {
+  for (r in refused) {
     if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
       rm(".Random.seed", envir = globalenv())
     }
-    expect_error(refuse())
+    expect_error(r$refuse(), r$regexp, class = r$class)
     expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
   }
 })
@@ -1049,7 +1063,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   )
 })
 
-test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples()", {
   skip_if_no_engines()
   d <- make_reg_data()
   wf <- fixed_workflow(d)

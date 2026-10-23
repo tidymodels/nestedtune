@@ -339,7 +339,7 @@ test_that("the desirability rule is refused at entry", {
   expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)
 })
 
-test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples()", {
   skip_if_no_engines()
   skip_if_not_installed("finetune")
   d <- make_reg_data()

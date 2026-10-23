@@ -387,7 +387,7 @@ test_that("both racers refuse the desirability rule at entry", {
   }
 })
 
-test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples(), before any fold runs", {
+test_that("a workflow with no tune() marker is refused, naming nested_fit_resamples()", {
   fn <- "tune_race_anova"
   skip_if_no_race_fixture(fn)
   d <- make_reg_data()
