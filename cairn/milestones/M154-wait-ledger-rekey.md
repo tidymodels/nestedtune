@@ -45,8 +45,8 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 ## Tasks
 
 - [x] T1: Record the branch point and save `time_budget_totals()` there.
-- [ ] T2: Change `tb_row()`, the rows and `wait_call_sites()` to the new key. Change both accounting guards in `test-suite-hygiene.R`.
-- [ ] T3: Change the bound re-read and `DECLARED_UNCHECKABLE_BOUNDS` to the new key.
+- [x] T2: Change `tb_row()`, the rows and `wait_call_sites()` to the new key. Change both accounting guards in `test-suite-hygiene.R`.
+- [x] T3: Change the bound re-read and `DECLARED_UNCHECKABLE_BOUNDS` to the new key.
 - [ ] T4: Write the three probe scripts in the scratchpad and run them. Compare `time_budget_totals()`, and write the results to the Review section.
 - [ ] T5: Run the `verify` slot.
 
@@ -61,6 +61,8 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: implement started; branch m154-wait-ledger-rekey cut from main at 5bae6873, the branch point.
 - 2026-10-22: T1 done. Saved `time_budget_totals()` and the ledger at 5bae6873 to the scratchpad. The ledger has 98 rows, not the plan's 106, because M152 removed rows after the plan counted them; 95 of them name a call in `BUDGETED_WAIT_CALLS`.
 - 2026-10-22: found that `payer` is a hand-written paraphrase of the test name, and wrong in 8 rows (6 detection rows name a neighbouring test, 2 required-pkgs rows sit in a local `attached()` function). Decided: `payer` becomes the exact `test_that()` description, read from the parse tree, or the top-level function name in `helper-parallel.R`; the key is file, payer, and the call's position among the wait calls of that unit.
+- 2026-10-22: T2 and T3 done in one commit, because the bound re-read looks calls up by the row key and cannot keep line numbers once the rows drop them. `tb_row()` takes `at` in place of `line`; the 98 rows were rewritten from the parse tree by a scratchpad script, and the three rows whose call no guard sees (two bare `daemons`, the deadline poll) carry `at = NA`. New helpers in `test-suite-hygiene.R`: `wait_call_key()`, `enclosing_unit()`, `wait_calls()`, `ledger_keys()`. The bound re-read reads the call's parsed text, not whole source lines. `benchmarks/test-time-budget.R` prints `#at` and the payer in place of the line. The full suite passed and `air format --check .` was clean.
+- 2026-10-22: note for M155: test names are now part of the ledger key, so renaming a `test_that()` block in the eight budgeted files means editing its ledger rows' `payer` too; the guards fail and name the row if that is missed.
 
 ## Decisions
 

@@ -37,12 +37,12 @@ for (i in seq_len(nrow(totals))) {
   cat(sprintf("%-32s %8.1f s\n", file, totals$seconds[[i]]))
   for (j in seq_len(nrow(rows))) {
     cat(sprintf(
-      "    %5s:%-4d %-24s %7.1f s%s\n",
-      "",
-      rows$line[[j]],
+      "    #%-3s %-24s %7.1f s%s  %s\n",
+      if (is.na(rows$at[[j]])) "-" else rows$at[[j]],
       rows$call[[j]],
       rows$seconds[[j]],
-      if (rows$times[[j]] > 1L) sprintf("  (x%d)", rows$times[[j]]) else ""
+      if (rows$times[[j]] > 1L) sprintf("  (x%d)", rows$times[[j]]) else "",
+      rows$payer[[j]]
     ))
   }
   zero <- sum(ledger$file == file & ledger$seconds == 0)
