@@ -106,6 +106,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - 2026-10-23: claim audit: not owed — internal tier.
 - 2026-10-23: all tasks done. Status set to review, and handed to /milestone-review.
 - 2026-10-23: review pass 1: four lenses, 22 findings. 3 fixed on the branch at 8af67613, 3 to the new row "Fix seed checks in four refusal tests", 16 rejected. No defect return. The new row is written at post-merge hygiene, after the absorbed row graduates, because the ROADMAP holds 59 of its 60 lines now.
+- 2026-10-23: step-7 approval: m157-m156-review-leftovers approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local; promote
