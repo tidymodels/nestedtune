@@ -163,7 +163,6 @@ test_that("an unusable `eval_time` is refused, naming the function the user call
   expect_match(conditionMessage(cnd), "must be finite, non-missing")
   expect_match(conditionMessage(cnd), "2 and 4")
 
-  # The other refusal under the same class: a value that is not numeric.
   expect_error(
     nested_tune_grid(wf, folds, grid = det_grid(), eval_time = "1"),
     class = "nestedtune_bad_eval_time",

@@ -377,6 +377,7 @@ test_that("an `event_level` naming no level is refused", {
     compute_metrics(res, reg_metrics(), event_level = "third"),
     "error"
   )
+  expect_s3_class(cnd, "nestedtune_bad_event_level")
   expect_match(conditionMessage(cnd), "event_level", fixed = TRUE)
   expect_identical(conditionCall(cnd)[[1L]], as.name("compute_metrics"))
 })

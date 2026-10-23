@@ -94,3 +94,31 @@ Evidence at 493c5357 (branch head; main unmoved at 67aa0b3a), 2026-10-23.
 - AC2: parse walk over all 25 files in `R/`: 0 `cli_abort()` calls without `class` (26 before, at the merge base).
 - AC3: parse-tree walk against `git merge-base main HEAD` (67aa0b3a): 25 files, code identical after removing the 26 added `class` arguments, every class the merge base had unchanged.
 - AC4: `git diff main -- NEWS.md` adds one bullet, the first under `# nestedtune 0.0.0.9000`. It names each of the seven new classes with the refusals that carry it, and says which refusals now carry `nestedtune_bad_design`, `nestedtune_bad_type` and `nestedtune_bad_metrics` (read in place; lines reflowed at review with no word changed).
+
+Independent review at ab3d2dc1. spawned: diff-bug, blame-history, prior-review, ripple.
+
+- diff-bug #1: the two final-fit refusals that name `object` carry `nestedtune_bad_grid`, so a caller catching `nestedtune_workflow_mismatch` misses them, and the NEWS line leads with a `grid` argument `nested_final_fit()` lacks — reject (planned change: the plan chose `bad_grid` over `workflow_mismatch`, work log); the NEWS wording is fixed with ripple #3.
+- diff-bug #2: `eval_spec()` and `eval_inside_spec()` rethrow any evaluation error, rsample's zero-row refusal included, as `nestedtune_bad_design` — reject (planned change: the Scope table assigns `bad_design` to both; the cause stays in the condition's `parent`).
+- diff-bug #3: a bad workflow-set element raises `nestedtune_bad_workflow`, not `nestedtune_bad_workflow_set`, and NEWS does not name that path — reject (planned change: `check_workflow()` gets `bad_workflow` wherever it runs, and the set's own refusals keep their class).
+- diff-bug #4: `nestedtune_unknown_tuner` gives an internal error a public-looking class — reject (planned change: the user chose all 26 at the question set); the NEWS wording is fixed with blame-history #1.
+- diff-bug #5: NEWS says `nested_fit_resamples()` and `compute_metrics()` raise the new classes, and no test asserts it — fix now: `test-nested-fit-resamples-checks.R` and `test-compute-metrics.R` assert the classes.
+- diff-bug #6: the `eval_spec()` class assertion sat inside the message-size block — fix now: its own block in `test-nested-resamples-specs.R`.
+- diff-bug #7: two added test comments narrate what the code shows — fix now for `test-eval-time.R` (comment removed); reject for `test-nested-final-fit-checks.R` (false: it states the recorded grid's columns, which the block does not show).
+- diff-bug #8: the text-only `grid = -1`, `2.5`, `c(1, 2)` and plot `type` expectations repeat the new exact one — reject (false: each input reaches a different clause of the refusal's condition, `R/checks.R` `check_grid()` and the plot type's `x` bullet).
+- diff-bug #9: the NEWS sub-list uses `-` where older nested lists use `*` — reject (style).
+- blame-history #1: an unknown tuner name in a hand-altered record reaches `tuner_entry()`, and NEWS called the class a bug report — fix now: NEWS says "an internal error for a tuner name that nestedtune does not know"; the reachability predates this diff and DESIGN.md Known issues covers hand-altered records.
+- blame-history #2: `test-nested-fit-resamples-checks.R` still asserted `rlang_error` for the metrics refusal and message only for event_level and eval_time — fix now (as diff-bug #5).
+- blame-history #3: no past decision explains why these refusals were unclassed — reject (false as a defect: nothing to reverse).
+- blame-history #4: M157 chose `rlang_error` for the no-preprocessor block a day earlier — reject (planned change: that refusal now has a class).
+- blame-history #5: the recorded-grid refusals take `bad_grid`, not `workflow_mismatch` — reject (planned change, as diff-bug #1).
+- blame-history #6: the `outside` "not an rset" and `inside` "must be an expression" refusals are argument-shape checks under `bad_design` — reject (planned change: Scope table).
+- prior-review #1: M157's archive says it fixed "the no-preprocessor class" while main had none — reject (false: that line records the test's `rlang_error` assertion; archives are history).
+- prior-review #2: the candidate row "Fix seed checks in four refusal tests" names a `test-event-level.R` block this diff leaves alone — reject (false as a regression: the row stays open).
+- prior-review #3: DESIGN.md lines on unclassed errors — reject (false: they describe raw base R and vctrs errors on paths this diff does not touch).
+- prior-review #4: the M053 Known issues entry on `.completed` errors still stands — reject (false: path untouched).
+- prior-review #5: names match the `nestedtune_bad_<arg>` pattern — noted, requests nothing.
+- ripple #1: the candidate row "Give the unclassed refusals a class" goes stale at merge — reject (planned change: post-merge hygiene graduates it).
+- ripple #2: `test-nested-fit-resamples-checks.R:71` asserts `rlang_error` — fix now (as diff-bug #5).
+- ripple #3: NEWS "does not match the recorded grid" reads like the identity mismatch — fix now: "tunes other parameters than the recorded grid holds".
+- gate: `devtools::document()` changed only `Config/roxygen2/version` 8.1.0 to 8.1.1, from the local roxygen2 8.1.1; reverted, no `man/` or `NAMESPACE` change.
+- gate: the full suite run at ab3d2dc1 overlapped the mutation runs and two other R sessions, and up to 17 parallel-daemon blocks failed; rerun alone on the final head below.

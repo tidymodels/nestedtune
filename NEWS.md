@@ -7,8 +7,8 @@
     fitted, or has no model or no preprocessor.
   - `nestedtune_bad_grid`: `grid` has no rows, is neither a data frame
     nor a positive whole number, or does not match the tuned parameters.
-    When the workflow does not match the recorded grid,
-    `nested_final_fit()` uses it too.
+    When the workflow tunes other parameters than the recorded grid
+    holds, `nested_final_fit()` uses it too.
   - `nestedtune_bad_data`: `data` in `nested_resamples()` is not a data
     frame.
   - `nestedtune_bad_param_info`, `nestedtune_bad_eval_time` and
@@ -17,8 +17,8 @@
     `compute_metrics()` also uses `nestedtune_bad_event_level`.
     `autoplot()` still refuses an `eval_time` with
     `nestedtune_bad_plot_filter`.
-  - `nestedtune_unknown_tuner`: an internal error that a bug in nestedtune
-    raises.
+  - `nestedtune_unknown_tuner`: an internal error for a tuner name that
+    nestedtune does not know.
 
   Three classes cover more errors. `nestedtune_bad_design` now also covers
   the `nested_resamples()` errors for `outside` and `inside`. It also

@@ -239,10 +239,12 @@ test_that("a failing spec reports a message that does not carry the data", {
     expect_identical(small_msg, msg(large, which))
     expect_lt(nchar(small_msg), 500L)
   }
+})
 
+test_that("a spec that fails to evaluate is refused as a bad design", {
   expect_error(
     nested_resamples(
-      small,
+      make_test_data(),
       outside = nrow(),
       inside = rsample::vfold_cv(v = 2)
     ),
