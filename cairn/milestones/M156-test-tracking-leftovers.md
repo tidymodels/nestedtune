@@ -1,6 +1,6 @@
 # M156: Test code cites no line numbers and names no tracking records
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -82,6 +82,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: T6 done: `devtools::test()` at 49a5768c, run alone, 1152 blocks, 0 failed, 0 errors, 0 skipped (one block fewer than M155's 1153, the T5 removal); `air format --check .`, `sweep-prose.R --plain` clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted; every AC grep prints nothing.
 - 2026-10-23: claim audit: not owed — internal tier.
 - 2026-10-23: status review; handed to /milestone-review.
+- 2026-10-23: review return 1: AC5 fails as written (the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, but it asserts the metrics refusal by message only); with it go the fix-now findings F1-F12 the Review section lists (diff-bug #1, #2, #5-#13, prior-review #2).
 
 ## Review
 
@@ -91,3 +92,34 @@ Pass 1 (2026-10-23), evidence at 76ed9d9a, branch level with main (0 commits beh
 - AC3: both greps run at 76ed9d9a print 0 lines.
 - AC4: the comment above `workflow_pkgs()` (`R/parallel.R`, function at line 620) names test-parallel-interrupt.R and test-parallel-payload.R, and no line of that comment names test-parallel-detection.R; the `.args` comment in `dispatch_folds()` matches no byte figure (`grep -nE '[0-9],[0-9]{3}| B\b'` on its lines, exit 1).
 - AC5: FAILS as written. Both greps print 0 lines and the block is removed, but the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, and that block asserts the metrics refusal (`metrics = "rmse"`, class `rlang_error`) by its "metric_set" message only, with no `class =`; not ticked.
+- Gate at 76ed9d9a: `devtools::test()` 1152 blocks, 0 failed, 0 errors, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes, no tree change; AC6 is re-run on the next pass.
+- spawned: diff-bug, blame-history, prior-review, ripple
+- diff-bug #1: the `workflow_pkgs()` comment calls test-parallel-payload.R's payloads stand-ins, but they are real `fat_payload()` fold payloads; both files share only `object = NULL` — fix now (F1).
+- diff-bug #2: AC5 removal branch unmet, the metrics refusal asserted by message only — fix now (F2: assert its `rlang_error` class beside the message).
+- diff-bug #3: nothing in test-nested-fit-resamples-checks.R shows a refusal fires before any fold — reject, planned change (plan gate chose removal); the existence-check gap goes to the follow-up row.
+- diff-bug #4: test-nested-final-fit-checks.R keeps the same seed-identity pattern with comments vouching for it — follow-up, row "Fix the leftovers of M156's review".
+- diff-bug #5: test-parallel-identity.R "Each fold record, one by one" overclaims five columns and has no verb — fix now (F3).
+- diff-bug #6: test-help-structure.R glyph sentence: `tools` sets the bullet in its load hook wherever the locale can encode it (some Windows codepages too), so "a non-UTF-8 runner renders an asterisk" is not exact — fix now (F4).
+- diff-bug #7: test-event-level.R "redo-the-fit example" is in the Reproducibility section, not `@examples` — fix now (F5).
+- diff-bug #8: R/parallel.R says `dispatch_folds()` resolves both symbols, but `rehydrate_payload` is resolved in the task wrapper and `nested_fold_fit` in `fold_task()`; verbless — fix now (F6).
+- diff-bug #9: test-nested-results-print.R "did NOT come across" keeps the history framing the rename removed — fix now (F7).
+- diff-bug #10: test-dplyr-compat.R "the one form" lost its noun — fix now (F8).
+- diff-bug #11: test-workflow-identity.R new name's "them" has no antecedent — fix now (F9).
+- diff-bug #12: benchmarks/test-time-budget.R prints "the cut" with no referent — fix now (F10).
+- diff-bug #13: test-control-slots.R "The racing/annealing slots pass through" restate the assertion — fix now (F11: delete).
+- diff-bug #14: ragged comment wraps, a 90-character line — reject, style.
+- blame-history #1: removing the fit_resamples seed assertions loses a check that refusals fire before the draw — reject, false: `nested_loop()` registers `restore_rng()` before `sample.int()`, so identity holds whether or not the refusal follows the draw, as the comment above "the new refusals fire before the RNG is drawn from" in test-nested-tune-grid-checks.R states; the missing existence check goes to the follow-up row.
+- blame-history #2: the same for the map refusal — reject, false for the same reason; follow-up row as above.
+- blame-history #3: four other test names keep an unchecked "before any fold runs" (bayes, race, sim-anneal and grid check files) — follow-up, row "Fix the leftovers of M156's review".
+- blame-history #4: the archive of M46 names `PRINT_AS_AGREED_M46`, and "the cut" has no referent — reject the first, history record; the second is diff-bug #12.
+- blame-history #5: duplicate of diff-bug #7.
+- blame-history #6: "the caveats the page carries" lost the requirement that motivates it — reject, planned change (the tracking word was the scope).
+- blame-history #7: duplicate of diff-bug #5.
+- prior-review #1: duplicate of diff-bug #2.
+- prior-review #2: benchmarks/test-time-budget.R keeps "(M16 T2, AC2)" and "M14 established" in comments of a file this branch edits — fix now (F12).
+- prior-review #3: ids left in `R/` comments and line citations in `probe-mori-dispatch.R` — reject, planned change (Scope Out).
+- ripple #1: cairn/references/code-inventory.md:255 cites `R/parallel.R:585`, stale — follow-up, row "Fix the leftovers of M156's review".
+- ripple #2: code-inventory.md:212 cites `print_estimate()` at a stale line — follow-up, same row.
+- ripple #3: test-nested-tune-grid-checks.R "the new refusals fire before the RNG is drawn from" keeps the history word "new" — follow-up, same row.
+- ripple #4: no other file asserts the stream for the two removed refusals — reject, planned change.
+- Also: an orphaned comment above `early_stop_control()` in helper-orchestration.R (diff-bug, not ranked) — follow-up, same row.
