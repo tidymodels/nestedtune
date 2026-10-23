@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-23 after M153 (PR #170): archived, M150 row pruned,
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | in-progress | M152 | normal | milestones/M154-wait-ledger-rekey.md |
+| M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | review | M152 | normal | milestones/M154-wait-ledger-rekey.md |
 | M155 | Test comments and test names state only what the code cannot show | planned | M151, M152, M154 | normal | milestones/M155-test-comment-cleanup.md |
 | M153 | The devel-vctrs job runs the vctrs test files on each push and the whole suite each week | done | — | normal | milestones/archive/M153-devel-vctrs-subset.md |
 | M152 | The suite drops tests that repeat a shared path, cannot fail, or test a dependency | done | — | normal | milestones/archive/M152-suite-shared-path-prune.md |

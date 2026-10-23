@@ -1,6 +1,6 @@
 # M154: The wait ledger finds each call by its test block, so moving a line breaks no test
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M152
 - **Driving RR:** —
@@ -66,6 +66,8 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: minor amendment: T4 wrote its results to the Review section, which the rulebook gives to review alone; it writes them here instead.
 - 2026-10-22: T4 done. One scratchpad script (`probes.R`) runs all three probes on a `git archive` copy of 8fd3a459, loading the package once and running `test-suite-hygiene.R` through `testthat::test_file()` after each planted change. AC1: a blank line atop the 8 files gave 0 failures of 29 expectations at the head, and 4 failures (both accounting guards and both bound checks) at 5bae6873. AC2: 95 rows deleted one at a time, 95 runs failed with the deleted row's key in the message. AC3: set size 10 at 5bae6873 and at the head; 10 bounds doubled one at a time, 10 runs failed on that row's bound check. AC4: `time_budget_totals()` plus the per-file row count is identical to the 5bae6873 copy.
 - 2026-10-22: T5 done. The `verify` slot ran on the tree that 8fd3a459 commits: `devtools::test()` clean, `air format --check .` clean (air 0.12.0). No roxygen, `R/`, vignette or README change, so `document()` and the prose sweep do not apply. T4 changed no code.
+- 2026-10-22: claim audit: not owed — internal tier
+- 2026-10-22: all tasks done; status review, handed to /milestone-review.
 
 ## Decisions
 
