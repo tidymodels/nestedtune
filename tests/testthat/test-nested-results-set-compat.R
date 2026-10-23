@@ -1,5 +1,4 @@
-# What an operation may and may not do to a `nested_results_set` (M73,
-# D-059).
+# What an operation may and may not do to a `nested_results_set`.
 #
 # The set's record is per row: each row's `nested_results` describes its own
 # run whole, so a row dropped or reordered leaves every row still true of
@@ -10,7 +9,7 @@
 # bare tibble.
 #
 # As in test-dplyr-compat.R, every entry names the branch it must take, and
-# every door AC1 names appears by its own literal name.
+# every door the check must cover appears by its own literal name.
 
 # The suite's two-workflow grid run, served from the cache: `tuned` then
 # `fixed`, two outer folds each.
@@ -142,7 +141,7 @@ set_compat_table <- function() {
       dplyr::bind_rows(x, tibble::tibble(other = 1))
     }),
     # The template is the first argument, and the second row is not one of
-    # its rows: two subsets are not rejoined into a set (D-059).
+    # its rows: two subsets are not rejoined into a set.
     list(name = "bind_rows (two subsets)", branch = "bare", f = function(x) {
       dplyr::bind_rows(x[1, ], x[2, ])
     }),
@@ -208,8 +207,8 @@ set_compat_table <- function() {
       vctrs::vec_rbind(x, tibble::tibble(other = 1))
     }),
     # No `vec_ptype2()` lattice is registered, so a direct column bind
-    # finalizes to a bare tibble before the rule is asked (D-059, documented
-    # on the help page).
+    # finalizes to a bare tibble before the rule is asked (documented on the
+    # help page).
     list(name = "vec_cbind (set first)", branch = "bare", f = function(x) {
       vctrs::vec_cbind(x, tibble::tibble(extra = 1:2))
     })

@@ -1,12 +1,13 @@
-# The designs the README's resampling table marks, one role at a time (M127).
+# The designs the README's resampling table marks, one role at a time.
 #
 # A `Yes` cell is a design that runs through nested_tune_grid() with a v-fold
 # partner in the other role and completes every outer fold. A `Refused` cell
 # is a refusal nestedtune writes: the bootstrap refusal, and the refusals of
-# `loo_cv()`, `apparent()` and `permutations()` in either role (M128). The one
+# `loo_cv()`, `apparent()` and `permutations()` in either role. The one
 # `No` cell, an inner `validation_set()`, is pinned by the behavior
-# ?nested_resamples gives as its reason. Cells whose backing test lives elsewhere (v-fold, the
-# outer bootstrap, the time-series designs) are not repeated here.
+# ?nested_resamples gives as its reason. Cells whose backing test lives
+# elsewhere (v-fold, the outer bootstrap, the time-series designs) are not
+# repeated here.
 
 skip_heavy_on_cran()
 
@@ -103,7 +104,7 @@ test_that("an outer group bootstrap is refused, as a call and as an object", {
   )
 })
 
-# The three designs refused in either role (M128). Each name is the class
+# The three designs refused in either role. Each name is the class
 # the design's rset carries and the function the refusal must name.
 REFUSED <- list(
   loo_cv = quote(rsample::loo_cv()),
@@ -157,7 +158,7 @@ for (design in names(REFUSED)) {
 }
 
 # The entry check refuses the same six designs in a design built elsewhere,
-# since rsample::nested_cv() builds all six (M128). A stand-in for the fold
+# since rsample::nested_cv() builds all six. A stand-in for the fold
 # dispatch makes a design that got past the check fail with its own class,
 # so a passing test shows the refusal fired before any fold ran.
 entry_refusal <- function(expr) {
@@ -290,7 +291,7 @@ test_that("a validation_set() call cannot be built in either role", {
 })
 
 # A row subset or a manual_rset() rebuild of a refused design loses the class
-# its rset carries, but each split keeps its own (M129). The entry check
+# its rset carries, but each split keeps its own. The entry check
 # reads the split classes, so these designs are refused as the plain ones are.
 REFUSED_OUTER <- list(
   loo_cv = quote(rsample::loo_cv()),
@@ -558,7 +559,7 @@ test_that("an inner element that is not a data frame is still malformed", {
 })
 
 # nested_resamples() reads the split classes of the rset it is handed as
-# `outside`, and of each inner rset its `inside` call returns (M129).
+# `outside`, and of each inner rset its `inside` call returns.
 test_that("nested_resamples() refuses an outside rebuilt from refused splits", {
   d <- support_data(n = 30)
   outer <- c(REFUSED_OUTER, apparent = quote(rsample::apparent()))
@@ -645,7 +646,7 @@ test_that("the plain outer bootstrap refusals name the function", {
     expect_names_design(cnd, design)
     # The entry check serves seven functions, so its hint names none.
     expect_match(conditionMessage(cnd), "nestedtune refuses", fixed = TRUE)
-    # rsample builds a group_bootstraps() call with no warning (M136).
+    # rsample builds a group_bootstraps() call with no warning.
     expect_match(conditionMessage(cnd), "with a warning at most", fixed = TRUE)
     expect_no_match(conditionMessage(cnd), "nested_tune_grid()", fixed = TRUE)
   }
@@ -704,8 +705,8 @@ test_that("nested_resamples() names the outer fold whose inner splits it refuses
 
 # An apparent split beside bootstrap splits joins the bootstrap only under
 # the id "Apparent", the one split tune leaves out of its estimates. Any other
-# id is scored on the rows the split trained on, so it counts as apparent()
-# (M131, D-099). Each design is built with manual_rset() directly, because
+# id is scored on the rows the split trained on, so it counts as apparent().
+# Each design is built with manual_rset() directly, because
 # rebuilt() keeps the ids a design already has.
 APPARENT_HINT <- paste(
   'tune leaves out an apparent split whose id is "Apparent", so a bootstrap',
@@ -1003,7 +1004,7 @@ test_that("an outer apparent split under another id is named as apparent()", {
 
 # tune leaves every split whose id is "Apparent" out of its estimates, so any
 # split but a bootstrap's own apparent split would drop out of inner tuning
-# with nothing said (M132, D-100). The ids are relabelled in place, which
+# with nothing said. The ids are relabelled in place, which
 # keeps the rset class.
 relabel_first <- function(build, factor_id = FALSE) {
   function(data) {
@@ -1069,8 +1070,8 @@ test_that("a bootstrap's own apparent split still reaches the folds", {
 })
 
 # tune drops a split whose id is NA from its estimate and adds an empty metric
-# row, and it miscounts the resamples of a design whose ids repeat (M133,
-# D-102). The ids are edited in place, which keeps the rset class.
+# row, and it miscounts the resamples of a design whose ids repeat. The ids are
+# edited in place, which keeps the rset class.
 edit_ids <- function(build, edit) {
   function(data) edit(build(data))
 }
@@ -1093,7 +1094,7 @@ MISSING_ID <- list(
 )
 
 # A factor whose NA is a level: is.na() does not see it, tune's comparison
-# with "Apparent" gives TRUE, and tune keeps the split (D-105).
+# with "Apparent" gives TRUE, and tune keeps the split.
 na_level_ids <- function(rows) {
   function(rset) {
     ids <- as.character(rset$id)
@@ -1197,9 +1198,9 @@ test_that("repeated v-fold ids and a missing id2 still reach the folds", {
 })
 
 # finetune's race eliminates candidates on unsummarized metrics, which keep
-# a bootstrap's apparent split, so the two racers refuse that split (M132,
-# D-100). The other tuners read tune's summarized estimate, which leaves it
-# out, and keep accepting it.
+# a bootstrap's apparent split, so the two racers refuse that split. The other
+# tuners read tune's summarized estimate, which leaves it out, and keep
+# accepting it.
 RACE_APPARENT_REASON <- c(
   "eliminates candidates on the score",
   "rows the model trained on"
@@ -1316,8 +1317,8 @@ test_that("the map under nested_tune_race_anova refuses a bootstrap's apparent s
 
 # A split whose assessment set holds a row of its analysis set scores the
 # model on rows it trained on. Both loops refuse it by its rows, so a split
-# rebuilt with make_splits() cannot hide it (M134, D-103). The one exception
-# is a bootstrap's own apparent split under the id "Apparent" (D-104).
+# rebuilt with make_splits() cannot hide it. The one exception is a bootstrap's
+# own apparent split under the id "Apparent".
 OVERLAP_REASON <- "scores the model on rows it trained on"
 
 # Three v-fold splits of `d`, with one split that shares rows added or edited.
@@ -1405,11 +1406,11 @@ test_that("an outer manual_rset() of apparent() splits keeps the apparent() refu
   expect_no_match(flat_message(cnd), OVERLAP_REASON, fixed = TRUE)
 })
 
-# The inner loop refuses the same splits (M134, D-103). A bootstraps() design
+# The inner loop refuses the same splits. A bootstraps() design
 # whose every split is rebuilt with make_splits() loses every split class, so
-# its apparent split is caught by its rows, whatever id it carries. Before
-# this rule, the id "Apparent" got the advice to rename the split, which
-# would then have been scored.
+# its apparent split is caught by its rows, whatever id it carries. The id
+# "Apparent" gets no advice to rename the split, since a renamed split would be
+# scored.
 rebuilt_boots_apparent <- function(apparent_id) {
   function(data) {
     boots <- rsample::bootstraps(data, times = 3, apparent = TRUE)
@@ -1520,7 +1521,7 @@ test_that("an inner v-fold split rebuilt to share one row is refused", {
   )
 
   # nested_fit_resamples() shares the check and tunes nothing, so the reason
-  # does not say that the fold tunes (M132 F1, M134 R3).
+  # does not say that the fold tunes.
   cnd <- entry_refusal(nested_fit_resamples(fixed_workflow(d), folds))
   expect_inner_overlap(
     cnd,
@@ -1587,8 +1588,7 @@ test_that("an inner split that shares a row the outer split repeats is refused",
 })
 
 # An NA in an outer `in_id` names no data row, so the constructor refuses
-# the design before the inner row rule reads it through that `in_id`
-# (M134 review, S1; M138, D-111).
+# the design before the inner row rule reads it through that `in_id`.
 test_that("an NA in an outer in_id is refused before the inner row rule", {
   d <- support_data(n = 30)
   set.seed(1)
@@ -1608,7 +1608,7 @@ test_that("an NA in an outer in_id is refused before the inner row rule", {
 })
 
 # The bootstrap's own apparent split shares every row too, and tune leaves it
-# out of its estimates, so it is exempt and the design runs (D-104).
+# out of its estimates, so it is exempt and the design runs.
 test_that("an inner bootstrap with its apparent split completes every fold", {
   skip_if_no_engines()
   run <- support_run(
@@ -1625,7 +1625,7 @@ test_that("an inner bootstrap with its apparent split completes every fold", {
 
 # rolling_origin() with `lag` above 0 puts the last `lag` analysis rows in
 # each assessment set, and tune scores them, so the rule refuses it in either
-# loop. The message then says how to keep the lagged predictors (M134, R1).
+# loop. The message then says how to keep the lagged predictors.
 LAG_HINT <- paste(
   "A `rsample::rolling_origin()` design with `lag` above 0 puts the last",
   "`lag` analysis rows of each split in its assessment set. Use `lag = 0`,",
@@ -1746,7 +1746,7 @@ test_that("a shared row that no lag put there gets no lag hint", {
 })
 
 # A lagged design cut to fewer rows drops its `lag` attribute, so it is still
-# refused, but with no hint (M134 review, S5).
+# refused, but with no hint.
 test_that("a lagged design cut to fewer rows is refused with no lag hint", {
   skip_if_no_engines()
   d <- support_data(n = 30)

@@ -1,5 +1,5 @@
 # A parsnip model specification with a formula or a recipe as the
-# orchestrators' input (M107, D-069). Each export is a generic on `object`:
+# orchestrators' input. Each export is a generic on `object`:
 # the `model_spec` method takes `(object, preprocessor, resamples, ...)` in
 # tune's order, wraps the two in `workflows::workflow(preprocessor, object)`,
 # and calls the generic again, so the run is the workflow path's own.
@@ -318,10 +318,11 @@ test_that("nested_tune_grid() on a spec and a formula is the workflow run", {
   expect_same_run(routes)
 })
 
-# The recipe cases (AC2). The step id is written out, and the recipe is
+# The recipe cases. The step id is written out, and the recipe is
 # built once, so both routes carry the same one. The grid case runs on
 # `final_nested()`, whose literal inner specification survives the final
-# fit's re-run, so AC3 below builds its final fits from these two results.
+# fit's re-run, so the final-fit cases below build their fits from these
+# two results.
 
 pca_recipe <- function(data, num_comp = tune::tune()) {
   recipes::step_pca(
@@ -357,7 +358,7 @@ test_that("nested_tune_grid() on a spec and a recipe is the workflow run", {
   expect_same_run(run$routes)
 })
 
-# The final fit takes a workflow (D-041), so a result built from a spec is
+# The final fit takes a workflow, so a result built from a spec is
 # finalized on `workflow(preprocessor, spec)`, the workflow the spec route
 # recorded. The identity check refuses a workflow that differs from the
 # recorded one with `nestedtune_workflow_mismatch`, so a fit that returns at

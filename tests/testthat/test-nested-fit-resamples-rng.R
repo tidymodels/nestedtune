@@ -1,11 +1,10 @@
-# The seed contract on the plain resampling path (M70, AC6; IP2), on the
-# stochastic fixture: ranger draws its own seed from R's stream, so a fold's
-# fit is reproducible exactly when the outer-fit seed is applied as the
-# contract says. The identity is between two direct calls, never through
-# `memoised()` (the M42 lesson). The ambient-RNG and caller's-RNG blocks were
-# pinned here until M152: the fold seeding and the restore are one shared
-# site in `nested_fold_fit()` / `nested_loop()`, so
-# test-nested-tune-grid-rng.R covers them (D-079).
+# The seed contract on the plain resampling path, on the stochastic fixture:
+# ranger draws its own seed from R's stream, so a fold's fit is reproducible
+# exactly when the outer-fit seed is applied as the contract says. The identity
+# is between two direct calls, never through `memoised()`. The ambient-RNG and
+# caller's-RNG blocks live in test-nested-tune-grid-rng.R: the fold seeding and
+# the restore are one shared site in `nested_fold_fit()` / `nested_loop()`, so
+# that file covers them.
 
 skip_heavy_on_cran()
 

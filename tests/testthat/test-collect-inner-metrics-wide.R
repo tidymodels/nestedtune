@@ -1,9 +1,8 @@
-# `collect_inner_metrics(type = "wide")` (M149, AC2). The oracle is tune's
-# own wide table on fold 1's inner run, rebuilt by hand from the documented
-# seed contract (`reference_nested_loop()`). The grid names every candidate
-# and no range depends on the data, so the rebuilt run can tune on
-# `inner_resamples[[1]]` itself (the M05 lesson). An oracle file, so it
-# skips on CRAN as the others do (M118).
+# `collect_inner_metrics(type = "wide")`. The oracle is tune's own wide table
+# on fold 1's inner run, rebuilt by hand from the documented seed contract
+# (`reference_nested_loop()`). The grid names every candidate and no range
+# depends on the data, so the rebuilt run can tune on `inner_resamples[[1]]`
+# itself. An oracle file, so it skips on CRAN as the others do.
 
 skip_heavy_on_cran()
 

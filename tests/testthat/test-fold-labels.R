@@ -1,4 +1,4 @@
-# The fold label columns of the per-fold metrics tables (M122).
+# The fold label columns of the per-fold metrics tables.
 #
 # Oracle provenance. The expected labels are read from the rsample design
 # object the run was given, row by row, and repeated once per metric in the

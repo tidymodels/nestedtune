@@ -1,6 +1,5 @@
-# Every refusal `nested_tune_sim_anneal()` makes at entry, fired once (M51
-# AC3). GP3: a provably wrong call is refused before a whole outer loop is
-# paid for.
+# Every refusal `nested_tune_sim_anneal()` makes at entry, fired once. A
+# provably wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The refusals that are this orchestrator's own -- finetune not
 # installed, `iter` below its floor of 1, `initial` below its floor of 1 or a
@@ -217,7 +216,7 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
         control = ctrl
       )
     },
-    # An empty workflow, since a bare spec takes the model-spec route (M107).
+    # An empty workflow, since a bare spec takes the model-spec route.
     check_workflow = function() {
       nested_tune_sim_anneal(workflows::workflow(), folds, control = ctrl)
     },
@@ -289,7 +288,7 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
   }
 })
 
-# D-046's falsifier, pinned: `iter`'s floor of 1 rests on finetune running
+# The falsifier, pinned: `iter`'s floor of 1 rests on finetune running
 # iterations at `iter = 0` (its loop is `(existing_iter + 1):iter`, which at
 # 0 is `1:0`). A finetune whose loop runs none at 0 turns this red, which is
 # the signal to reopen accepting 0 as the Bayesian sibling does.
@@ -333,7 +332,7 @@ test_that("the desirability rule is refused at entry", {
     "nestedtune_selection_rule_unsupported",
     "tune_sim_anneal"
   )
-  # The message names the orchestrators the user calls (review finding 4).
+  # The message names the orchestrators the user calls.
   msg <- cli::ansi_strip(conditionMessage(cnd))
   expect_match(msg, "under `nested_tune_sim_anneal()`", fixed = TRUE)
   expect_match(msg, "`nested_tune_bayes()`", fixed = TRUE)

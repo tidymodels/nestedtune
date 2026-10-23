@@ -1,4 +1,4 @@
-# The suite's own files, parsed (M57).
+# The suite's own files, parsed.
 #
 # Two tests read the test files as source rather than running them: the
 # duplicate-description check in test-hang-trace.R, and the `tibble` skip

@@ -1,4 +1,4 @@
-# `selection_rule()` (M69): the object the orchestrators' `select` argument
+# `selection_rule()`: the object the orchestrators' `select` argument
 # takes, holding the rule name, the parameter orderings as bare expressions and
 # the percent-loss limit. It travels to every daemon and into the fixture cache
 # as part of the call, so the orderings are captured as expressions and never as
@@ -208,7 +208,7 @@ test_that("an empty selection under another rule names that rule and not the sta
   expect_no_match(msg, "standard error", fixed = TRUE)
 })
 
-# The desirability rule (M109): desirability2's goal terms, captured as the
+# The desirability rule: desirability2's goal terms, captured as the
 # orderings are and judged by desirability2 itself when the rule is built.
 
 test_that("the desirability rule captures its terms as bare expressions and prints them", {

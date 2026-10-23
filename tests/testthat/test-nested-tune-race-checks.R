@@ -1,5 +1,5 @@
-# The refusals the racing exports make at entry (M50 AC5). GP3: a provably
-# wrong call is refused before a whole outer loop is paid for.
+# The refusals the racing exports make at entry. A provably wrong call is
+# refused before a whole outer loop is paid for.
 #
 # Two halves. The refusals that are racing's own -- a package the race needs
 # that is not installed, a burn-in no fold's inner design can meet -- each
@@ -280,8 +280,7 @@ test_that("each shared check fires through both racing exports", {
           control = ctrl
         )
       },
-      # An empty workflow, since a bare spec takes the model-spec route
-      # (M107).
+      # An empty workflow, since a bare spec takes the model-spec route.
       check_workflow = function() {
         race_call(fn, workflows::workflow(), folds, control = ctrl)
       },
@@ -381,7 +380,7 @@ test_that("both racers refuse the desirability rule at entry", {
       fn,
       export_name(fn)
     )
-    # The message names the orchestrators the user calls (review finding 4).
+    # The message names the orchestrators the user calls.
     msg <- cli::ansi_strip(conditionMessage(cnd))
     expect_match(msg, paste0("under `nested_", fn, "()`"), fixed = TRUE)
     expect_match(msg, "`nested_tune_grid()`", fixed = TRUE)

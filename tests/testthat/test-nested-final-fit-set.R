@@ -1,4 +1,4 @@
-# nested_final_fit() on a nested_results_set (M71, AC4): the set branch
+# nested_final_fit() on a nested_results_set: the set branch
 # reads the workflow and its record off one row, and what it fits is what
 # the hand pairing fits, seed for seed.
 

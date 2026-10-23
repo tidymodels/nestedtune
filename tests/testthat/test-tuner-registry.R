@@ -1,5 +1,5 @@
-# The tuner registry (M50, T1): one entry per inner tuner, read by every site
-# that once switched on the tuner's name. Each entry is held to its own
+# The tuner registry: one entry per inner tuner, read by every site
+# that switches on the tuner's name. Each entry is held to its own
 # package: the function it names lives there, and its default control carries
 # the class a caller's control is held to.
 
@@ -56,16 +56,16 @@ test_that("the racers take a grid and do not iterate; the Bayesian and annealing
 
   # `tuner_iterates()` is total: a name the registry does not hold, or no
   # name at all, does not iterate rather than aborting, so a final fit built
-  # by hand prints its count alone (M51).
+  # by hand prints its count alone.
   expect_true(tuner_iterates("tune_bayes"))
   expect_true(tuner_iterates("tune_sim_anneal"))
   expect_false(tuner_iterates("tune_grid"))
   expect_false(tuner_iterates("tune_nonesuch"))
   expect_false(tuner_iterates(NULL))
 
-  # `tuner_selects()` is total the other way round (M70): only the
-  # registry's own word waives the selection rule, so an unknown name or
-  # none at all still selects, and a hand-built record is held to M69's rule.
+  # `tuner_selects()` is total the other way round: only the registry's own
+  # word waives the selection rule, so an unknown name or none at all still
+  # selects, and a hand-built record must carry a `selection_rule()`.
   expect_false(tuner_selects("fit_resamples"))
   expect_false(tuner_registry$fit_resamples$takes_grid)
   expect_false(tuner_registry$fit_resamples$iterates)
@@ -90,7 +90,7 @@ test_that("the racers take a grid and do not iterate; the Bayesian and annealing
 
 # The `?nested_final_fit` reproducibility recipe carries a branch for every
 # tuner the registry names: each tuning function appears as a call inside
-# the recipe's code block (M56 AC5). Read from the source tree where `man/`
+# the recipe's code block. Read from the source tree where `man/`
 # is on disk and from the installed help database under `R CMD check`.
 test_that("the final-fit reproducibility recipe calls every registry tuner", {
   src <- test_path("..", "..", "man", "nested_final_fit.Rd")
@@ -130,7 +130,7 @@ test_that("the final-fit reproducibility recipe calls every registry tuner", {
   recipe <- rd_text(blocks[[1L]])
   expect_true(grepl("set.seed(", recipe, fixed = TRUE))
 
-  # Every tuner that selects: the plain resampling fit (M70) re-runs no
+  # Every tuner that selects: the plain resampling fit re-runs no
   # tuning call, and the recipe says so in prose beside the block.
   for (nm in Filter(tuner_selects, names(tuner_registry))) {
     expect_true(

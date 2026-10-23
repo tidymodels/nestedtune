@@ -1,6 +1,6 @@
 # Nothing the suite started may outlive it.
 #
-# M14 T4 / AC4. Every daemon-using test pairs its pool with
+# Every daemon-using test pairs its pool with
 # `on.exit(mirai::daemons(0), add = TRUE)`, so in a green run this finds
 # nothing -- which is the point. It is a backstop against the runs that are not
 # green: `test-parallel-classify.R`'s busy-pool test asserts an elapsed bound,
@@ -18,7 +18,7 @@
 # Two honest limits, stated so a green suite is not over-read. The failure
 # arrives as a bare error after testthat's summary rather than as a reported
 # test failure -- teardown files have no reporter. And it cannot fire at all in
-# the case M14 exists for: a test file that hangs never reaches teardown. This
+# the worst case: a test file that hangs never reaches teardown. This
 # catches what a finished-but-messy run leaves behind, not what a wedged one
 # does.
 
@@ -28,7 +28,7 @@ if (requireNamespace("mirai", quietly = TRUE)) {
   # it: after `daemons(n = 0, url = ...)` -- exactly what `start_mixed_daemons()`
   # raises before its daemons connect -- connections is 0 while a dispatcher and
   # host listener are live. `daemons_set()` is what sees that one, and a test
-  # erroring inside that window is a real way to reach it (M14 review F6).
+  # erroring inside that window is a real way to reach it.
   set <- isTRUE(mirai::daemons_set())
   if ((!is.null(connections) && connections > 0L) || set) {
     mirai::daemons(0)

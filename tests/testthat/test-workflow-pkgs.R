@@ -1,11 +1,11 @@
-# The host's entry check reads the workflow's whole package list (M58, AC4).
+# The host's entry check reads the workflow's whole package list.
 #
-# Before M58 the check asked `parsnip::required_pkgs()` of the engine alone,
-# so a recipe step whose `required_pkgs()` names a package this library lacks
-# reached the first fold and failed there, one fit later than the engine's
-# refusal. The check now asks `tune::required_pkgs()` of the workflow -- the
-# list the daemon pre-flight and the attach step read -- and refuses under the
-# class the tuner refusal carries, with an install call the user can paste.
+# The check asks `tune::required_pkgs()` of the workflow -- the list the daemon
+# pre-flight and the attach step read -- and refuses under the class the tuner
+# refusal carries, with an install call the user can paste. An engine-only
+# check would let a recipe step whose `required_pkgs()` names a package this
+# library lacks reach the first fold and fail there, one fit later than the
+# engine's refusal.
 #
 # The fixture is a step with no prep or bake of its own: nothing here fits,
 # because the refusal fires at entry, and `required_pkgs()` is the only method
@@ -69,8 +69,8 @@ test_that("a workflow needing a package the host lacks is refused at every entry
 })
 
 test_that("the engine's package is still refused, under the same class", {
-  # What the check did before M58, kept: the engine's list is part of the
-  # workflow's, so the older refusal fires through the widened check.
+  # The engine's list is part of the workflow's, so the refusal fires through
+  # the widened check.
   skip_if_no_engines()
   skip_if(rlang::is_installed("kknn"))
 

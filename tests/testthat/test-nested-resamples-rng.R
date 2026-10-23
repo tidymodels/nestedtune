@@ -1,8 +1,8 @@
-# IP2 -- reproducible results. M01 ships no parallelism, so the parallel half of
-# IP2 has nothing to bind yet; what is checkable here is that the seed fully
-# determines the object, that it genuinely determines it (a constructor that
-# ignored the seed would pass a same-seed test trivially), and that fidelity to
-# rsample extends to how much randomness is consumed.
+# Reproducible results. nested_resamples() runs nothing in parallel, so what
+# is checkable here is that the seed fully determines the object, that it
+# genuinely determines it (a constructor that ignored the seed would pass a
+# same-seed test trivially), and that fidelity to rsample extends to how much
+# randomness is consumed.
 
 skip_heavy_on_cran()
 
@@ -107,7 +107,7 @@ test_that("indices land on the original data, not on a per-fold renumbering", {
     for (split in lean$inner_resamples[[i]]$splits) {
       inner_idx <- as.integer(split$in_id)
       # Every inner index is a row of the original data, and specifically one
-      # the outer fold put in its analysis set -- which is IP1 at this layer.
+      # the outer fold put in its analysis set.
       expect_true(all(inner_idx >= 1L & inner_idx <= nrow(d)))
       expect_true(all(inner_idx %in% outer_idx))
       expect_true(all(as.integer(rsample::complement(split)) %in% outer_idx))

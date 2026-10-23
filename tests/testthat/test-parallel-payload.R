@@ -1,4 +1,4 @@
-# What crosses to a worker (M23).
+# What crosses to a worker.
 #
 # The defect these pin: an rsplit carries the whole data frame, and R's
 # serializer does not preserve the sharing that makes the in-memory design lean.
@@ -10,8 +10,8 @@
 # Oracle records (validation doctrine; DESIGN.md Conventions declares that they
 # live beside the asserting test):
 #
-#   O1  type      closed-form -- a storage model recomputed with explicit
-#                 arithmetic, independent of the implementation under test
+#   A storage model recomputed with explicit arithmetic, independent of the
+#   implementation under test
 #       source    `predicted_lean_bytes()` in helper-payload-size.R, derived
 #                 from n / v / inner_v alone and never from lengths read off the
 #                 payload, so a lost inner split cannot shrink measurement and
@@ -19,8 +19,8 @@
 #       asserts   the leaned payload's serialized size, in `a leaned payload
 #                 weighs what the index vectors alone predict` below
 #
-#   O2  type      invariant -- a direct count of the property claimed, sharing
-#                 no arithmetic with O1
+#   A direct count of the property claimed, sharing no arithmetic with the
+#   storage model
 #       source    `count_data_copies()` in helper-payload-size.R, searching the
 #                 serialized stream for the big-endian wire bytes of a data
 #                 column
@@ -28,21 +28,19 @@
 #                 fold's dispatch carries the data exactly once` and in the
 #                 rsample-design test below
 #
-# O1 and O2 are the two independent types GP2 requires for the size claim, and
-# together they are what the roxygen claim on `nested_tune_grid()` rests on.
+# Together the two records are what the roxygen claim on `nested_tune_grid()`
+# rests on.
 #
 # The baseline every ratio here is measured against is RECOMPUTED, never frozen:
-# each test builds the pre-milestone fat payload beside the lean one and
+# each test builds the unleaned payload beside the leaned one and
 # compares. A frozen byte count would drift the first time rsample changed its
 # split representation, and would then fail for a reason that has nothing to do
 # with this package.
 
-# `fixture_design()` moved to helper-payload-size.R at M26, so a benchmark can
-# source it. It lived here, in a test file nothing outside testthat can source,
-# which is why benchmarks/probe-mori-dispatch.R re-typed the design by hand and
-# then attributed its figures to a definition it had never called.
+# `fixture_design()` lives in helper-payload-size.R, not here, so that a
+# benchmark can source it. A test file cannot be sourced outside testthat.
 
-# The payload shape M23 replaced: split and inner rset passed whole.
+# The unleaned payload shape: split and inner rset passed whole.
 fat_payload <- function(design, i) {
   list(
     split = design$splits[[i]],
@@ -68,7 +66,7 @@ test_that("a leaned payload weighs what the index vectors alone predict", {
 })
 
 test_that("the dispatch gate recognises the payloads it must lean", {
-  # The gate decides whether ANY of this milestone happens: `dispatch_folds()`
+  # The gate decides whether ANY leaning happens: `dispatch_folds()`
   # leans only when every payload passes `is_fold_payload()`. Nothing else here
   # goes through that decision -- the byte oracles call `lean_payload()`
   # directly, and a run that never leans is indistinguishable from one that
@@ -114,11 +112,10 @@ test_that("the dispatch gate recognises the payloads it must lean", {
 test_that("an inner rset whose splits hold different frames is refused leaning", {
   # The invariant lean_payload() rests on: one frame per fold's inner splits,
   # taken off the first and written back onto all. check_nested() enforces it
-  # at the driver's call since M59 (check_inner_splits()), so this gate is
-  # defence in depth for a payload that reaches dispatch_folds() another way
-  # -- otherwise a split is silently tuned on another split's rows in parallel
-  # and its own serially (IP2), and on rows the outer assessment set may hold
-  # (IP1).
+  # at the driver's call (check_inner_splits()), so this gate is defence in
+  # depth for a payload that reaches dispatch_folds() another way -- otherwise a
+  # split is silently tuned on another split's rows in parallel and its own
+  # serially, and on rows the outer assessment set may hold.
   d <- payload_fixture_data(n = 200, p = 3)
   outer <- rsample::make_splits(list(analysis = 1:150, assessment = 151:200), d)
   heterogeneous <- rsample::manual_rset(
@@ -183,7 +180,7 @@ test_that("rehydrating a leaned payload returns the serial path's own objects", 
 test_that("a leaned run puts under a quarter of the pre-milestone bytes on the wire", {
   fx <- fixture_design()
   shared <- fx$data
-  # The control rides in `.args` since M48, so it is charged per fold here
+  # The control rides in `.args`, so it is charged per fold here
   # as on the wire; tune's default with the forced slots applied weighs the
   # same on both sides of the ratio.
   control <- effective_control("tune_grid", NULL, "first")
@@ -206,7 +203,7 @@ test_that("a leaned run puts under a quarter of the pre-milestone bytes on the w
 
   # `.args` grows by one copy of the data on the leaned path, and it is charged
   # per fold because mirai serializes `.args` once per task -- counting it once
-  # per run would flatter this ratio by exactly the term the milestone added.
+  # per run would flatter this ratio by exactly the term the leaned path adds.
   lean_args_bytes <- payload_bytes(
     list(
       object = payload_fixture_workflow(),
@@ -304,7 +301,7 @@ test_that("a daemon receives the payload the serial branch would have passed", {
   start_daemons(2)
 
   # The mock runs inside a daemon and AFTER rehydration -- the worker is passed
-  # to the task by value, so a mocked binding reaches it (M07) and receives what
+  # to the task by value, so a mocked binding reaches it and receives what
   # the real one would. A mock that had to rehydrate itself would be reproducing
   # the code path it exists to cover.
   local_mocked_bindings(

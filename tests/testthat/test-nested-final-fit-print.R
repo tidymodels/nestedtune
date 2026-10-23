@@ -1,5 +1,4 @@
-# Printing a final fit, and the generics it deliberately does not answer
-# (AC4, AC10).
+# Printing a final fit, and the generics it deliberately does not answer.
 
 skip_heavy_on_cran()
 
@@ -34,7 +33,7 @@ test_that("printing names the selection and where the estimate lives", {
   expect_match(out, "describes\\s+the\\s+procedure\\s+that\\s+produced")
   expect_match(out, "results object this fit was built from")
   expect_match(out, set_rows_wording)
-  # RR02 B3: the moment of deployment is when selection instability matters.
+  # The moment of deployment is when selection instability matters.
   expect_match(out, "\\.selected")
 })
 
@@ -64,7 +63,7 @@ test_that("printing shows no number from the stored tuning run", {
   # Every metric the stored run could offer, checked against the output rather
   # than assumed absent. A print method that grew a "resampled RMSE" line would
   # be showing a selection-time number as though it described this model, which
-  # is exactly the misreading IP3 forbids (AC10).
+  # is exactly the misreading the design forbids.
   tuning_metrics <- tune::collect_metrics(final$tuning)
   values <- c(tuning_metrics$mean, tuning_metrics$std_err)
   values <- values[!is.na(values)]
@@ -87,11 +86,10 @@ test_that("the printed report is stable", {
 })
 
 
-# Summarizing a final fit (M40) ------------------------------------------
+# Summarizing a final fit ------------------------------------------------
 
 # What `print.nested_final_fit()` emits for a grid final fit, under testthat's
-# reproducible output settings: first captured at M40 from the method as it
-# stood at d6ff85f, and re-agreed at M46 (below).
+# reproducible output settings.
 #
 # Written out here rather than left to the snapshot below it. The snapshot is
 # exactly the artifact a change to the print method would re-record, so a
@@ -99,12 +97,12 @@ test_that("the printed report is stable", {
 # the new snapshot would satisfy the pin and falsify the promise at the same
 # time. These bytes have to be re-agreed by hand instead.
 #
-# M46 added a "Procedure:" line -- what search ran, grid or Bayesian, and at
-# what counts -- and pointed the estimate sentence at the results object
-# rather than naming `nested_tune_grid()`, since the record it reads from can
-# equally be a `nested_tune_bayes()` result. That is a change to what this
-# constant pins, re-agreed by hand rather than accepted from the snapshot for
-# the same reason the original was.
+# The "Procedure:" line says what search ran, grid or Bayesian, and at what
+# counts. The estimate sentence points at the results object rather than
+# naming `nested_tune_grid()`, since the record it reads from can equally be a
+# `nested_tune_bayes()` result. A change to what this constant pins is
+# re-agreed by hand rather than accepted from the snapshot, for the same reason
+# as above.
 PRINT_AS_AGREED_M46 <- paste(
   c(
     "",
@@ -163,7 +161,7 @@ test_that("summary() returns a classed object naming what was selected", {
     )
   )
   # The absence is carried as a component rather than left out, so a caller
-  # meets a recorded fact instead of a missing name (M40 Decisions).
+  # meets a recorded fact instead of a missing name.
   expect_true("estimate" %in% names(s))
   expect_null(s$estimate)
 
@@ -190,7 +188,8 @@ test_that("the summary shows no number from the stored tuning run", {
   # The same scan the print method gets above, run on the method that has an
   # Estimate heading and therefore the better opportunity to grow a number
   # under it. A "resampled RMSE" line here would be a selection-time quantity
-  # dressed as this model's performance, which is the misreading IP3 forbids.
+  # dressed as this model's performance, which is the misreading the design
+  # forbids.
   tuning_metrics <- tune::collect_metrics(final$tuning)
   values <- c(tuning_metrics$mean, tuning_metrics$std_err)
   values <- values[!is.na(values)]
@@ -244,7 +243,7 @@ test_that("the stored selection keeps the value's own precision", {
   # summary stores `as.character()`, and comparing the two selections is what
   # the component is for, so a rounded string here would report two equal
   # selections as different ones -- and would change answer with the session's
-  # `digits` option (M40 review F1).
+  # `digits` option.
   penalty <- 0.0031622776601683794
   final <- structure(
     list(
@@ -279,7 +278,7 @@ test_that("the stored selection keeps the value's own precision", {
 })
 
 
-# The procedure line and the Bayesian counts (M46 T5, AC5) -------------------
+# The procedure line and the Bayesian counts ---------------------------------
 
 bayes_final_for_print <- function() {
   d <- make_reg_data()
@@ -302,7 +301,7 @@ test_that("a Bayesian final fit names its procedure with the counts that ran", {
   expect_identical(cand, scored_candidates(final$tuning))
   initial <- sum(cand$.iter == 0L)
   completed <- max(cand$.iter)
-  # AC5: the iterations completed are the tuning run's largest `.iter`.
+  # The iterations completed are the tuning run's largest `.iter`.
   expect_identical(completed, max(final$tuning$.iter))
   expect_gte(initial, 1L)
 
@@ -330,8 +329,8 @@ test_that("a Bayesian final fit names its procedure with the counts that ran", {
 test_that("the counts read what ran, not what was asked for", {
   # Built by hand, so the scored counts can differ from the requested ones
   # without an engine: a metrics table holding two initial candidates where
-  # three were requested, stopping at iteration 1 of 4 (IP4, RR05 Q2). The
-  # run is a stand-in whose `collect_metrics()` is that table (M49).
+  # three were requested, stopping at iteration 1 of 4. The run is a stand-in
+  # whose `collect_metrics()` is that table.
   row <- function(config, value, iter = NULL) {
     out <- data.frame(
       df1 = value,
@@ -433,7 +432,7 @@ test_that("the Bayesian printed reports are stable", {
 })
 
 
-# The selection-rule line (M98, AC2, AC3) --------------------------------------
+# The selection-rule line ------------------------------------------------------
 
 # A final fit built from a run under the rule given: the deterministic
 # workflow on `final_nested()`, as `final_for_print()` builds the default
@@ -592,7 +591,7 @@ test_that("the two-ordering line holds its shape on both prints", {
   expect_snapshot(print(summary(two)))
 })
 
-# The selecting-metric line (M116) ---------------------------------------------
+# The selecting-metric line ----------------------------------------------------
 
 selecting_metric_lines <- function(lines) {
   lines[startsWith(lines, "Selecting metric: ")]

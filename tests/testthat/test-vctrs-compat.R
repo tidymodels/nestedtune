@@ -1,13 +1,13 @@
 # What a vctrs verb, and base `rbind()`, may and may not do to a
 # `nested_results` (#32).
 #
-# The invariants are the ones M36 wrote for dplyr, and they are the same
+# The invariants are the ones written for dplyr, and they are the same
 # invariants: rows may be reordered but never added or removed, columns may be
 # added and reordered. What is different here is the door. `vec_slice()`,
 # `vec_rbind()`, `vec_c()`, `vec_cbind()`, `vec_ptype()` and `vec_cast()` all
 # reach `vec_restore()` and never `dplyr_reconstruct()`; `rbind()` and
 # `rename()` reach neither generic and need methods of their own (measured
-# 2026-08-31, on a tibble subclass carrying each method set in turn).
+# on a tibble subclass carrying each method set in turn).
 #
 # A caller cannot see which door a verb uses, so the answer has to be the same
 # through all of them, and the assertions below are written per form rather
@@ -29,7 +29,7 @@ compat_results <- function() {
 
 # Shedding the class sheds the run's record with it. Asserting only the class
 # would leave `outer_label` readable on the returned object, which is the
-# stale claim one layer down (M36's `bare_results()`). The two private
+# stale claim one layer down (`bare_results()`). The two private
 # carriers a prototype rides on are asserted gone with the rest: a bare table
 # still wearing them would be read as a template by the next `vec_restore()`.
 expect_no_record <- function(out, name) {
@@ -59,7 +59,7 @@ expect_record_kept <- function(out, src) {
   invisible(out)
 }
 
-# AC1. Each form one block apiece.
+# Each form gets one block.
 
 test_that("vec_slice() taking one row keeps neither the class nor the record", {
   skip_if_no_engines()
@@ -78,9 +78,9 @@ test_that("rbind() doubling the rows keeps neither the class nor the record", {
   skip_if_no_engines()
   res <- compat_results()
   out <- rbind(res, res)
-  # The gap this milestone closes: six rows still reporting three folds
-  # attempted is the untrue record IP4 forbids, and it is what rsample and tune
-  # both return here (measured 2026-08-31 on an `rset`).
+  # The gap this closes: six rows still reporting three folds
+  # attempted is an untrue record, the kind rsample and tune both return here
+  # (measured on an `rset`).
   expect_identical(nrow(out), 6L)
   expect_no_record(out, "rbind(x, x)")
 })
@@ -131,7 +131,7 @@ test_that("names<- sheds the record for every record column and keeps it for a c
   expect_no_record(clash, "names<- duplicating splits")
 })
 
-# AC2. Reordering rows is inside the invariants: the folds are a set, and an
+# Reordering rows is inside the invariants: the folds are a set, and an
 # object holding all of them still answers for the run whatever order they sit
 # in.
 
@@ -148,7 +148,7 @@ test_that("vec_slice() reordering the rows keeps the class and the record", {
   expect_false(identical(res$id[c(2, 1, 3)], res$id))
 })
 
-# AC3. The same operation through either door.
+# The same operation through either door.
 
 test_that("vec_cbind() and bind_cols() adding a column answer the same way", {
   skip_if_not_installed("tibble")
@@ -166,10 +166,11 @@ test_that("vec_cbind() and bind_cols() adding a column answer the same way", {
   expect_true("extra" %in% names(through_dplyr))
 })
 
-# The type token vctrs assembles a column-add into. It wears the class, so IP4
-# governs what it says about a run: it describes the run it came from and
-# claims no rows of its own. The generic is vctrs' own internal-marked surface
-# -- calling it directly is the only way to hold the token at all (RR04 Q4).
+# The type token vctrs assembles a column-add into. It wears the class, so
+# what it says about a run has to be true of that run: it describes the run it
+# came from and claims no rows of its own. The generic is vctrs' own
+# internal-marked surface -- calling it directly is the only way to hold the
+# token at all.
 
 test_that("the frame prototype carries the run's description and no fold counts", {
   skip_if_no_engines()
@@ -187,8 +188,7 @@ test_that("the frame prototype carries the run's description and no fold counts"
 
 # Printing the token says only what it holds. The outer-label line would
 # describe a run the token has no rows of, and the fold-count line reads a
-# column it does not carry: before M56, `print()` wrote the label and then
-# errored on the missing `.completed` (measured 2026-09-03).
+# column it does not carry.
 test_that("printing the frame prototype emits neither the outer label nor a fold count", {
   skip_if_no_engines()
   res <- compat_results()
@@ -200,7 +200,7 @@ test_that("printing the frame prototype emits neither the outer label nor a fold
   # Everything written is the banner and the rows: after the blank line
   # `cli_h1()` opens with, the banner, then the tibble header and nothing
   # after it (a columnless tibble prints no body), so a fold-count line has
-  # nowhere to hide. Measured on the fixture 2026-09-03: three lines.
+  # nowhere to hide. Measured on the fixture: three lines.
   body <- lines[nzchar(lines)]
   expect_length(body, 2L)
   expect_true(grepl(
@@ -218,7 +218,7 @@ test_that("printing the frame prototype emits neither the outer label nor a fold
   expect_true(any(grepl("Outer resamples", full, fixed = TRUE)))
 })
 
-# AC4. A results object casts down to a table; a table does not cast up to a
+# A results object casts down to a table; a table does not cast up to a
 # results object. The refusal is asserted by the condition class vctrs assigns
 # it, not by its message, and `vctrs_error_cast_lossy` is excluded so the
 # refusal is distinguished from an ordinary lossy cast.
@@ -244,10 +244,10 @@ test_that("a tibble does not cast to a nested_results", {
   expect_false(inherits(cnd, "vctrs_error_cast_lossy"))
 })
 
-# AC5. `vec_ptype2()` answers rather than aborting, on every ordered pair of
+# `vec_ptype2()` answers rather than aborting, on every ordered pair of
 # the three types a caller can combine here. The common type is asserted only
-# as "a prototype" -- what the class of that prototype should be is settled by
-# AC3's behavior, not restated here.
+# as "a prototype" -- what that prototype's class should be is settled by
+# the column-add test above, not restated here.
 
 test_that("vec_ptype2() returns a prototype for every pair of the three types", {
   skip_if_not_installed("tibble")
@@ -271,7 +271,7 @@ test_that("vec_ptype2() returns a prototype for every pair of the three types", 
   }
 })
 
-# AC6. The three verbs this milestone deliberately leaves alone. Each returns
+# The three verbs left alone on purpose. Each returns
 # an object that no longer claims to be a results object, and the run's
 # recorded attributes stay readable on it -- which is what the help page says,
 # and what rsample does with its own.
@@ -310,7 +310,7 @@ test_that("group_by(), rowwise() and as_tibble() leave the recorded attributes r
 # The review's two returns. Neither is an acceptance criterion -- both are
 # defects the review found in the methods above -- so each is asserted against
 # behavior that already existed somewhere else: what `main` did before these
-# methods were registered (T6), and what `dplyr::bind_cols()` does today (T7).
+# methods were registered, and what `dplyr::bind_cols()` does today.
 
 test_that("combining with a table whose columns differ answers rather than raising", {
   skip_if_not_installed("tibble")
@@ -364,9 +364,9 @@ test_that("vec_cbind() sheds the class when name repair moves a record column", 
 
 # The same clash with the repair switched off: both `splits` columns keep the
 # name, every record name is still present, and `$splits` answers with the
-# first. Before M56 the class survived and `attr(out, "folds_completed")` was
-# stamped on a table whose record can no longer be found by name (measured
-# 2026-09-03).
+# first. The object must shed the class here: a table keeping it would carry
+# `attr(out, "folds_completed")` on a record that can no longer be found by
+# name.
 test_that("vec_cbind() sheds the class when minimal name repair duplicates a record column", {
   skip_if_not_installed("tibble")
   skip_if_no_engines()
@@ -395,9 +395,7 @@ test_that("vec_cbind() sheds the class when minimal name repair duplicates a rec
 # The duplicate rule is the record's, not every name's: two caller-added
 # columns coming to share a name touch nothing the record is read from, so
 # the object keeps its class and attributes through the column-add doors and
-# through `names<-` alike. Before M56's return, all three doors counted
-# duplicates over every name and shed the record here (measured 2026-09-03;
-# M56 review F1).
+# through `names<-` alike.
 test_that("a name shared by two columns outside the record keeps the object through every door", {
   skip_if_not_installed("tibble")
   skip_if_no_engines()
@@ -442,8 +440,8 @@ test_that("a column add answers the same through either door with the results ob
   expect_identical(names(through_vctrs), names(through_dplyr))
 
   # The passing control: the results object leading is the case that keeps the
-  # class (AC3), so the shedding above is a property of the position and not of
-  # the verb refusing every column add.
+  # class, so the shedding above is a property of the position and not of the
+  # verb refusing every column add.
   expect_s3_class(vctrs::vec_cbind(res, extra), "nested_results")
 })
 
@@ -451,7 +449,7 @@ test_that("a column add answers the same through either door with the results ob
 # paragraph on it cannot drift: `vec_rbind()` and `vec_c()` ask for the common
 # type before they ask the rule anything, and the common type of one results
 # object is a plain table, so a single-argument call sheds where
-# `dplyr::bind_rows()` keeps. Recorded as R2 of M37's review.
+# `dplyr::bind_rows()` keeps.
 test_that("vec_rbind() and vec_c() shed on one argument where bind_rows() keeps", {
   skip_if_no_engines()
   res <- compat_results()
@@ -471,7 +469,7 @@ test_that("vec_rbind() and vec_c() shed on one argument where bind_rows() keeps"
   expect_no_record(dplyr::bind_rows(res, res), "bind_rows() on two")
 })
 
-# M49, AC5: `.inner_metrics` through the vctrs doors. `vec_restore()` takes
+# `.inner_metrics` through the vctrs doors. `vec_restore()` takes
 # the original as template and refuses a frame lacking the column or carrying
 # one fold's table changed; `rbind()` takes its first argument as template, so
 # what it can refuse is the removal -- an object whose column was dropped
@@ -516,7 +514,7 @@ test_that(".inner_metrics is in the record vec_restore() and rbind() check", {
   expect_record_kept(rbind(res), res)
 })
 
-# --- tibble is a Suggest (M57) ----------------------------------------------
+# --- tibble is a Suggest ----------------------------------------------------
 #
 # `tibble` is in Suggests, so a block that builds a `tibble::` value skips
 # without it, as every other Suggests use in the suite does. (The no-Suggests

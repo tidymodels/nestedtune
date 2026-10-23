@@ -1,17 +1,17 @@
 # The workflow identity on the record, and the final fit's refusal of any
-# other workflow (M83).
+# other workflow.
 #
 # Every orchestrator records `workflow_identity()` of the workflow it was
-# given as the `workflow` entry of its procedure record (AC1), and
+# given as the `workflow` entry of its procedure record, and
 # `nested_final_fit()` compares the workflow it is handed against that entry
 # after the record checks, the grid-column check and the tune() marker
-# check, and before any seed is drawn (AC2). test-workflow-identity.R pins
+# check, and before any seed is drawn. test-workflow-identity.R pins
 # the identity function itself.
 
 skip_heavy_on_cran()
 
-# AC1: every tuner the registry enumerates records the identity, and so
-# does each row of a set and the final fit's own record.
+# Every tuner the registry enumerates records the identity, and so does each
+# row of a set and the final fit's own record.
 
 test_that("every orchestrator's result records the workflow it ran under", {
   skip_if_no_race_fixture()
@@ -90,7 +90,7 @@ test_that("the final fit's record carries the same entry, and the fit runs", {
   )
 })
 
-# AC2: the refusal, one probe per axis, on a fit_resamples, a tune_grid and
+# The refusal, one probe per axis, on a fit_resamples, a tune_grid and
 # a tune_bayes record, and a formula record for the axes a recipe record
 # cannot carry (the preprocessor's formula, the model's mode).
 #
@@ -412,7 +412,7 @@ test_that("a setting written with braces is refused with the mismatch class", {
   # The difference sentence is built by cli and then handed to
   # `cli_abort()`, which interpolates its message once more: a deparsed
   # value holding a brace was read as a cli expression and the refusal
-  # raised cli's own error in place of the mismatch (review return, F2).
+  # raised cli's own error in place of the mismatch.
   skip_if_no_engines()
   d <- make_reg_data()
   brace_workflow <- function(k) {
@@ -436,14 +436,14 @@ test_that("a setting written with braces is refused with the mismatch class", {
   expect_match(conditionMessage(cnd), "x1 * 3", fixed = TRUE)
 })
 
-# AC3: a workflow rebuilt from the same code passes, and fits the same.
+# A workflow rebuilt from the same code passes, and fits the same.
 
 test_that("a rebuilt workflow is accepted and gives the same fit", {
   skip_if_no_engines()
   d <- make_reg_data()
 
   # A model with a constructor argument (lm ignores `penalty`; the record
-  # holds it all the same) built the two ways AC3 names.
+  # holds it all the same) built the two ways set out below.
   in_call <- function() parsnip::linear_reg(engine = "lm", penalty = 1)
   assembled <- function() {
     parsnip::set_args(
@@ -522,7 +522,7 @@ test_that("a rebuilt workflow is accepted and gives the same fit", {
   }
 })
 
-# AC4: a record from before the entry existed is refused as one from an
+# A record from before the entry existed is refused as one from an
 # earlier version. That the set path still fits, and records the row's
 # workflow, is asserted in test-nested-final-fit-set.R.
 
@@ -557,7 +557,7 @@ test_that("a record with no workflow entry is refused before the identity check"
   expect_match(conditionMessage(cnd), "were recorded")
 })
 
-# M103: the case-weights column and the tailor postprocessor join the
+# The case-weights column and the tailor postprocessor join the
 # identity, so a record built from a workflow carrying one refuses a
 # workflow differing there, and a record saved before the two parts existed
 # is still accepted under the workflow it ran under.

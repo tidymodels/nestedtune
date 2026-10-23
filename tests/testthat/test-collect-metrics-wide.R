@@ -1,4 +1,4 @@
-# M106 AC2: collect_metrics(type = "wide").
+# collect_metrics(type = "wide").
 #
 # Oracle provenance: the reference is a second pivot written with base R's
 # `stats::reshape()`, which shares no code with the package's. It puts each
@@ -155,8 +155,8 @@ test_that("an unknown type is refused on a set", {
   )
 })
 
-# M106 review F6: a weighted run's `.weight` column is a field of the fold,
-# not a key, so the wide table drops it rather than keying rows on it.
+# A weighted run's `.weight` column is a field of the fold, not a key, so the
+# wide table drops it rather than keying rows on it.
 test_that("the wide type drops a weighted run's fold weights", {
   skip_if_no_engines()
 
@@ -176,9 +176,9 @@ test_that("the wide type drops a weighted run's fold weights", {
   expect_identical(nrow(per_fold), nrow(res))
 })
 
-# M106 review F2 and F4: the pivot refuses to lose a value. The long tables
-# are written here, because no fixture scores one metric under two
-# estimators or names a metric like a key column.
+# The pivot refuses to lose a value. The long tables are written here,
+# because no fixture scores one metric under two estimators or names a metric
+# like a key column.
 test_that("the wide type refuses a cell with two values", {
   long <- tibble::tibble(
     id = c("Fold1", "Fold1"),

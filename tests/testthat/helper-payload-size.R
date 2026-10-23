@@ -1,13 +1,10 @@
-# The two oracles for what a fold's dispatch puts on the wire (M23).
+# The two oracles for what a fold's dispatch puts on the wire.
 #
 # Defined once and shared: `benchmarks/dispatch-payload-size.R` sources this
 # file rather than keeping its own copy, so the number a benchmark run reports
-# and the number the suite asserts cannot drift apart. M16's ledger lesson is
-# the same shape -- a value copied from its definition into a second place needs
-# something re-reading the definition, or the two diverge in silence.
+# and the number the suite asserts cannot drift apart.
 #
-# The two oracles share no arithmetic, which is the point (GP2 asks for two
-# independent types for a numeric claim):
+# The two oracles share no arithmetic, which is the point:
 #
 #   closed form  predicts serialized bytes from n / v / inner_v alone
 #   copy count   counts occurrences of the data's own wire bytes in the stream
@@ -54,8 +51,7 @@ predicted_lean_bytes <- function(n, v, inner_v) {
   4 * (outer_analysis + inner_v * outer_analysis)
 }
 
-# The fixture M23's criteria name, built the same way in the suite and in the
-# benchmark.
+# The payload fixture, built the same way in the suite and in the benchmark.
 payload_fixture_data <- function(n = 5000, p = 20, seed = 1) {
   set.seed(seed)
   d <- data.frame(y = stats::rnorm(n), matrix(stats::rnorm(n * p), n, p))
@@ -63,16 +59,11 @@ payload_fixture_data <- function(n = 5000, p = 20, seed = 1) {
   d
 }
 
-# The design M23's criteria name, built once for every consumer.
+# The payload design, built once for every consumer.
 #
-# It lived in test-parallel-payload.R until M26. A test file is sourced by
-# testthat and by nothing else, so `benchmarks/probe-mori-dispatch.R` could not
-# call it and re-typed the same five lines by hand -- while its header claimed
-# the fixture was "defined once, in the test helpers, and sourced here rather
-# than copied" and the assessment note attributed the published figures to
-# `fixture_design()` by name. The two copies agreed when M26 checked, and
-# nothing would have said so had they stopped agreeing; a mislabelled fixture is
-# what failed M26's first review pass. Here, both consumers call one definition.
+# It lives in a helper because a test file is sourced by testthat and by
+# nothing else, and `benchmarks/probe-mori-dispatch.R` calls it too. Both
+# consumers call this one definition.
 fixture_design <- function(
   constructor = nested_resamples,
   v = 5,

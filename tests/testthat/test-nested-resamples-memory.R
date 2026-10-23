@@ -1,26 +1,19 @@
-# AC3 and AC4 -- the memory oracles. These are the two independent oracle types
-# GP2 requires for the size claim; AC2's identity tests are the third.
+# Two independent recomputations check the size claim, so neither depends on
+# the implementation under test. The records sit beside the asserting test, as
+# DESIGN.md Conventions declares.
 #
-# Oracle records (validation doctrine; DESIGN.md Conventions declares that they
-# live beside the asserting test):
+# Source: rsample::nested_cv(), recomputed here rather than frozen. The
+#   per-outer-fold size slope must be far shallower than rsample's, as asserted
+#   in `the size slope is far shallower ...` below.
 #
-#   O1  type      live -- an independent implementation recomputed at test time
-#       source    rsample::nested_cv(), recomputed here rather than frozen
-#       asserts   that the per-outer-fold size slope is far shallower than
-#                 rsample's, in `the size slope is far shallower ...` below
-#
-#   O2  type      closed-form -- a storage model recomputed with explicit
-#                 arithmetic, independent of the implementation under test
-#       source    derived in `analytic_size()` below from what the structure
-#                 must hold: one shared copy of the data, the outer splits'
-#                 index vectors, and the inner splits' index vectors. The
-#                 inner term charges both an analysis and an assessment index
-#                 because splits indexing the whole data cannot derive the
-#                 complement -- rsample's inner splits can leave `out_id = NA`
-#                 only because they index a frame that already *is* the
-#                 analysis set.
-#       asserts   the measured size at every v, in `measured size matches the
-#                 analytic prediction` below
+# Source: a storage model recomputed with explicit arithmetic,
+#   `analytic_size()` below, derived from what the structure must hold: one
+#   shared copy of the data, the outer splits' index vectors, and the inner
+#   splits' index vectors. The inner term charges both an analysis and an
+#   assessment index because splits indexing the whole data cannot derive the
+#   complement -- rsample's inner splits can leave `out_id = NA` only because
+#   they index a frame that already *is* the analysis set. It is asserted by
+#   `measured size matches the analytic prediction` below.
 #
 # Fixture provenance: mlbench::LetterRecognition, the dataset rsample#283's own
 # measurements use. It is not committed -- it is loaded from the Suggests
@@ -79,7 +72,7 @@ slope <- function(size, v) {
 
 V_VALUES <- c(2, 5, 10, 50)
 
-# The three blocks read one measurement, taken on the first request (M113).
+# The three blocks read one measurement, taken on the first request.
 # It is taken inside a block, after the skips, so a missing package skips
 # rather than errors at file load.
 measured <- local({
@@ -111,7 +104,7 @@ test_that("the size slope is far shallower than rsample::nested_cv()'s", {
   lean_slope <- slope(m$lean, m$v)
   ref_slope <- slope(m$ref, m$v)
 
-  # AC3: growth comes from index vectors only.
+  # Growth comes from index vectors only.
   expect_lt(lean_slope, 0.25)
   expect_gte(ref_slope / lean_slope, 5)
 

@@ -1,7 +1,7 @@
 # Every reader of a `nested_results` answers on a `nested_fit_resamples()`
-# result (M70, AC3): the ones that read the outer fits return what they
-# read, the ones that read the inner stage return zero rows, and the one
-# view with nothing to draw refuses by name.
+# result: the ones that read the outer fits return what they read, the ones
+# that read the inner stage return zero rows, and the one view with nothing to
+# draw refuses by name.
 
 test_that("the readers over the outer fits answer without a condition", {
   skip_if_no_engines()
@@ -47,8 +47,8 @@ test_that("the readers over the inner stage return zero rows", {
     c("id", ".metric", ".estimator", "mean", "n", "std_err", ".config")
   )
 
-  # `agreement()` on a run that selected nothing is D-039's zero rows: the
-  # two count columns and nothing to key them by.
+  # On a run that selected nothing, `agreement()` returns zero rows: the two
+  # count columns and nothing to key them by.
   expect_no_condition(agree <- agreement(res))
   expect_identical(nrow(agree), 0L)
   expect_identical(names(agree), c("n", "prop"))

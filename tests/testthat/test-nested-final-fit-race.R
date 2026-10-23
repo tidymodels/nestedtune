@@ -1,12 +1,12 @@
-# The final fit on a racing result (M50 AC6, T5): `nested_final_fit()` races
+# The final fit on a racing result: `nested_final_fit()` races
 # the recorded grid again on the full data, and everything it reports about
 # that race reads through the same derivation the fold record uses.
 #
-# O5 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_race_final_fit() in helper-orchestration.R, written from the
 #   documented contract -- its own `set.seed(s)` and
 #   `sample.int(.Machine$integer.max, 2)`, the inner rset built under the
-#   first seed (D-016), the race under `control_race(burn_in = 2, allow_par =
+#   first seed, the race under `control_race(burn_in = 2, allow_par =
 #   FALSE)`, `select_best()`, `finalize_workflow()`, `fit()` under the second
 #   -- and never from the object. Pinned by "the racing final fit matches a
 #   hand-rolled reference pipeline", for each racer, on the stochastic
@@ -49,7 +49,7 @@ test_that("the racing final fit matches a hand-rolled reference pipeline", {
     # The seed layout, derived independently from the documented contract.
     expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
     expect_identical(final$selected, ref$selected)
-    # The resamples the race saw (D-016's ordering).
+    # The resamples the race saw, in order.
     expect_identical(in_ids(final$tuning), in_ids(ref$tuned))
     expect_identical(
       predict(extract_workflow(final), new_data = b$d),

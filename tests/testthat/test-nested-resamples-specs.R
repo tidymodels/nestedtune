@@ -1,4 +1,4 @@
-# AC5 -- stratified and grouped specifications. Transient materialization hands
+# Stratified and grouped specifications. Transient materialization hands
 # the inner specification the real analysis frame, so the columns it references
 # are present and these need no special handling; that is what these tests
 # check, rather than assuming it. A grouped inner spec stands for every inner
@@ -192,10 +192,11 @@ test_that("the refusal names the user's call, not an internal one", {
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_resamples"))
 })
 
-# The data used to be inlined into the calls being evaluated, so any condition
-# raised from one deparsed the whole frame into its message -- 1,194 characters
-# on a 30x2 frame, and growing with the data. Binding it to a name instead makes
-# the message a property of the specification alone.
+# The data is bound to a name rather than inlined into the calls being
+# evaluated. Inlined, any condition raised from one would deparse the whole
+# frame into its message -- 1,194 characters on a 30x2 frame, and growing with
+# the data. Bound to a name, the message is a property of the specification
+# alone.
 #
 # Both halves of the assertion are load-bearing. Equality alone passes today at
 # larger sizes, because R truncates a condition message at 8,190 bytes and two

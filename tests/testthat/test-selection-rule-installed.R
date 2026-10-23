@@ -1,4 +1,4 @@
-# The desirability rule where desirability2 is absent (M109, AC5, D-072): the
+# The desirability rule where desirability2 is absent: the
 # constructor, an orchestrator given a rule built while the package was
 # installed, and the final fit on a result that recorded the rule each refuse
 # with the class the racing tuners' absent-package refusal carries. The

@@ -3,32 +3,32 @@
 # are asserted rather than assumed because every comparison below is vacuous
 # without them.
 #
-# O1 -- type "closed-form". Source: the definition of the IPCW Brier score --
+# Source: the definition of the IPCW Brier score --
 #   the mean over the held-out rows of w_i * (1{T_i > t} - S_hat(t | x_i))^2,
 #   with Graf's inverse-probability-of-censoring weights built here from a
 #   reverse Kaplan-Meier of the censoring distribution fitted on the fold's own
 #   analysis rows (`survival::survfit(Surv(time, 1 - event) ~ 1)`), evaluated at
 #   `min(T_i, t)` and zero for a row censored before `t`. Nothing from `tune`
 #   or `yardstick` computes it; `yardstick::brier_survival()` is read beside it
-#   as a second reading of the same predictions. Pinned by "AC2: the metric each
+#   as a second reading of the same predictions. Pinned by "the metric each
 #   outer fold reports at the named evaluation time is the IPCW Brier score".
 #
-# O2 -- type "live" (independent implementation). Source: a `tune::tune_grid()`
+# Source: a `tune::tune_grid()`
 #   plus `tune::last_fit()` the test runs itself from the fold's own
 #   `inner_resamples` and split, seeded by the recipe `nested_fold_fit()`
 #   follows -- the fold's recorded `.tuning_seed` then its `.outer_fit_seed`,
-#   both kind-pinned -- at the same evaluation time. Pinned by "AC3: each run's
+#   both kind-pinned -- at the same evaluation time. Pinned by "each run's
 #   per-fold metrics are the ones tune produces at that evaluation time", and in
-#   its final-fit form by "AC4: nested_final_fit() tunes and selects under the
+#   its final-fit form by "nested_final_fit() tunes and selects under the
 #   caller's evaluation time".
 #
-# O3 -- type "invariant". Source: two internal routes that must agree -- a run
+# Source: two internal routes that must agree -- a run
 #   at a multi-element `eval_time` and a run at that vector's first element have
 #   to select the same candidate and report the same number at that element,
 #   because `tune:::first_eval_time()` takes element one either way. Pinned by
-#   "AC3: a multi-element evaluation time reports what its first element names".
+#   "a multi-element evaluation time reports what its first element names".
 
-# The evaluation times a censored-regression metric is measured at (M41).
+# The evaluation times a censored-regression metric is measured at.
 #
 # Everything here runs on the srv_* fixture (helper-orchestration.R), built so
 # `eval_time` has something to move: a mixture of early failures no log-normal
@@ -104,7 +104,7 @@ test_that("the fixture's grid is ranked differently at the two evaluation times"
   expect_identical(late$dist[[nrow(late)]], "lognormal")
   expect_false(identical(early$dist, late$dist))
 
-  # And the winner is not a tie broken by rounding. Measured 2026-09-01 on
+  # And the winner is not a tie broken by rounding. Measured on
   # tune 2.1.0 / censored 0.3.4: 1.0% at the early time, 3.5% at the late one.
   for (scored in ranked) {
     expect_gt(
@@ -114,7 +114,7 @@ test_that("the fixture's grid is ranked differently at the two evaluation times"
   }
 })
 
-# AC1 -------------------------------------------------------------------
+# Entry check -----------------------------------------------------------
 #
 # These run on the regression fixture rather than the censored one: what they
 # assert is the entry check and its position, neither of which consults the
@@ -192,7 +192,7 @@ test_that("the refusal fires before any fitting begins", {
   }
 
   # The accepting side, including the values tune normalizes rather than
-  # refuses: zero, a repeat, and times out of order (D-038).
+  # refuses: zero, a repeat, and times out of order.
   accepted <- list(NULL, 0, c(0.5, 10), c(10, 0.5, 10))
   for (value in accepted) {
     expect_error(
@@ -246,7 +246,7 @@ test_that("the recorded `eval_time` reaches the final fit untouched", {
     }
   )
 
-  # The eval_time argument is no longer taken by nested_final_fit() directly --
+  # The eval_time argument is not taken by nested_final_fit() directly --
   # it is read off the results object's recorded procedure. So the value under
   # test is carried through nested_tune_grid() first, and what is checked is
   # that the final fit forwards the record untouched.
@@ -266,7 +266,7 @@ test_that("the recorded `eval_time` reaches the final fit untouched", {
   }
 })
 
-# AC2 -- O1 -------------------------------------------------------------
+# Brier score -----------------------------------------------------------
 
 # The generator kind `nested_fold_fit()` pins, so a reference run draws the same
 # stream the recorded seed drew.
@@ -366,7 +366,7 @@ test_that("the metric each outer fold reports at the named evaluation time is th
   }
 })
 
-# AC3 -- O2, O3 ---------------------------------------------------------
+# Per-fold metrics ------------------------------------------------------
 
 # One outer fold, rebuilt by hand: the recipe `nested_fold_fit()` follows, run
 # from the fold's own inner resamples and split under the seeds the fold
@@ -477,7 +477,7 @@ test_that("a multi-element `eval_time` reports what its first element names", {
   }
 })
 
-# AC4 -- O2 -------------------------------------------------------------
+# Final fit -------------------------------------------------------------
 
 test_that("nested_final_fit() tunes and selects under the caller's evaluation time", {
   skip_if_no_censored()
@@ -536,7 +536,7 @@ test_that("nested_final_fit() tunes and selects under the caller's evaluation ti
   expect_false(identical(fits[[1L]]$selected$dist, fits[[2L]]$selected$dist))
 })
 
-# AC6 -------------------------------------------------------------------
+# Help pages ------------------------------------------------------------
 #
 # Read from the generated `.Rd` rather than from the roxygen, because what a
 # user opens is the rendered page and a `@param` on the wrong `@rdname` reaches
@@ -569,7 +569,7 @@ test_that("both help pages document `eval_time` and what this package refuses", 
     expect_gt(nchar(text), 1000L)
 
     if (identical(nm, "nested_final_fit")) {
-      # nested_final_fit() no longer takes `eval_time` as a formal -- it reads
+      # nested_final_fit() takes no `eval_time` formal -- it reads
       # it from the results object's recorded procedure -- so what the page
       # owes a reader is that the `results` argument's documentation says so,
       # not a matching `\item{eval_time}` of its own.
@@ -604,8 +604,8 @@ test_that("both help pages document `eval_time` and what this package refuses", 
   expect_match(differences, heading, fixed = TRUE)
   # Inside that heading's own paragraph, not merely somewhere after it -- the
   # "Not passed on" paragraph names the argument too, and a match anywhere
-  # below the heading would stay green if it appeared only there (M41 review
-  # R5). Since M48 the section is six bold headings, each followed by its
+  # below the heading would stay green if it appeared only there. The section is
+  # six bold headings, each followed by its
   # paragraph, so the paragraph runs from this heading to the next `\strong`.
   # `rd_text()` has already collapsed the page onto one line.
   start <- regexpr(heading, differences, fixed = TRUE)
@@ -615,15 +615,14 @@ test_that("both help pages document `eval_time` and what this package refuses", 
   expect_match(paragraph, "\\code{eval_time}", fixed = TRUE)
 })
 
-# AC8 -- per-time summaries ----------------------------------------------------
+# Per-time summaries -----------------------------------------------------------
 #
 # What a multi-element `eval_time` does to the summary. Once a dynamic survival
 # metric is in the set, every per-fold metric tibble tune records carries a
 # `.eval_time` column, so an average that ignored it would pool the estimates
-# at the early time with those at the late one and count fold x time in `n`
-# (M41 review R1). The column travels into collect_metrics() and summary()
-# exactly when tune recorded it, which is what tune's own collect_metrics()
-# does (implement gate, 2026-09-01).
+# at the early time with those at the late one and count fold x time in `n`.
+# The column travels into collect_metrics() and summary() exactly when tune
+# recorded it, which is what tune's own collect_metrics() does.
 
 test_that("a multi-element `eval_time` is summarized per evaluation time", {
   skip_if_no_censored()
@@ -752,7 +751,7 @@ test_that("a failed fold contributes no rows and keeps the time column", {
 test_that("a static metric beside a dynamic one keeps one row, with no time", {
   # Direct on the summarizer, on the shape a `last_fit()` on tune 2.1.0 records
   # for a metric set mixing `brier_survival()` with `concordance_survival()`:
-  # the static metric's row carries NA in `.eval_time` (measured 2026-09-01).
+  # the static metric's row carries NA in `.eval_time`.
   # Hand-built rather than fitted, so the case costs no model.
   per_fold <- new_tbl(list(
     id = rep(c("Fold1", "Fold2"), each = 3L),

@@ -1,4 +1,4 @@
-# augment() on a nested run (M92).
+# augment() on a nested run.
 #
 # Oracle provenance. The expected table is built from the data and from
 # `collect_predictions()` by matching `.row`, never from the method: each data
@@ -52,7 +52,7 @@ expect_augmented <- function(x) {
   invisible(aug)
 }
 
-# ---- AC4: one row per data row -------------------------------------------
+# ---- one row per data row ------------------------------------------------
 
 test_that("on a v-fold design from nested_resamples(), augment() joins each row's held-out prediction", {
   skip_if_no_engines()
@@ -138,7 +138,7 @@ test_that("on a censored-regression run, whose outcome names no data column, the
   expect_identical(aug$.pred, preds$.pred[match(seq_len(nrow(d)), preds$.row)])
 })
 
-# ---- AC5: refusals and failed folds --------------------------------------
+# ---- refusals and failed folds -------------------------------------------
 
 test_that("a Monte Carlo design that leaves rows out of every assessment set is refused, naming the first five", {
   skip_if_no_engines()
@@ -180,9 +180,9 @@ test_that("a design leaving five or fewer rows out names all of them", {
   expect_names_never_held(res, moved[[1L]])
 })
 
-# ---- M125: designs that hold a row out more than once ----------------------
+# ---- designs that hold a row out more than once ----------------------------
 #
-# Oracle: `collect_predictions(summarize = TRUE)`, whose averages M124 checked
+# Oracle: `collect_predictions(summarize = TRUE)`, whose averages are checked
 # against tune's own and against a base R one. Each data row's prediction
 # columns must be that row's entry in the averaged table.
 
@@ -196,7 +196,7 @@ hold_counts <- function(x) {
 
 expect_averaged_augment <- function(x, outcome = "y") {
   counts <- hold_counts(x)
-  # The precondition AC1 names: every row held out, some more than once.
+  # The precondition: every row held out, some more than once.
   expect_true(all(counts >= 1L))
   expect_true(any(counts > 1L))
   aug <- augment(x)
@@ -480,9 +480,9 @@ test_that("non-empty `...` is refused", {
   expect_error(augment(res, parameters = 1), class = "rlib_error_dots_nonempty")
 })
 
-# ---- M93: saved predictions that do not match the held-out rows ----------
+# ---- saved predictions that do not match the held-out rows ---------------
 # `edit_fold_predictions()` and `plant_row_mismatch()` are in
-# `helper-predictions.R`, shared with the `compute_metrics()` tests (M100).
+# `helper-predictions.R`, shared with the `compute_metrics()` tests.
 
 expect_predictions_refused <- function(x, labels) {
   cnd <- rlang::catch_cnd(augment(x), "error")
@@ -583,7 +583,7 @@ test_that("a data column named like a prediction column is refused, not renamed"
   expect_match(conditionMessage(cnd), ".pred", fixed = TRUE)
 })
 
-# ---- M126: the name collision before the averaging refusals ----------------
+# ---- the name collision before the averaging refusals ----------------------
 
 test_that("on a repeated design, a name collision is refused before the quantile refusal", {
   skip_if_no_engines()
@@ -617,7 +617,7 @@ test_that("on a repeated design, a name collision is refused before a shape the 
   expect_error(augment(planted), class = "nestedtune_collect_name_collision")
 })
 
-# ---- M126 AC5: the censored NULL row on the averaged path ------------------
+# ---- the censored NULL row on the averaged path ----------------------------
 
 test_that("on a repeated censored design, a row only failed folds held out holds NULL in .pred", {
   skip_if_no_censored()

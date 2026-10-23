@@ -1,7 +1,6 @@
 # The split checks read each split as the list rsample builds. An element
 # that carries the rsplit class but is not a list is refused as malformed,
-# at entry and at construction, rather than crashing the checks that read it
-# (M135).
+# at entry and at construction, rather than crashing the checks that read it.
 
 shape_data <- function() {
   set.seed(1)
@@ -182,7 +181,7 @@ test_that("nested_resamples() refuses a split that is not an rsplit", {
 
 # rsample::complement() dispatches to a method in the global environment, as
 # it does to a registered one, so the overlap rule reads the rows that
-# method returns (M135). The method lasts for the calling test only.
+# method returns. The method lasts for the calling test only.
 local_global_complement <- function(class, method, env = parent.frame()) {
   name <- paste0("complement.", class)
   assign(name, method, envir = globalenv())
@@ -265,8 +264,7 @@ test_that("a complement() method in an attached environment is not read", {
 # An inner split on the outer split's frame that puts a row the outer split
 # holds out in both of its sets leaks that row into the tuning. The
 # containment rule names that leak, so the shared-rows rule leaves such a row
-# to it (M135, D-109). A shared row the outer split holds is still refused as
-# shared.
+# to it. A shared row the outer split holds is still refused as shared.
 CONTAINED <- paste(
   "`resamples` has an inner split indexing rows its outer fold does not",
   "hold."
@@ -313,7 +311,7 @@ test_that("a held-out row in both sets of an inner split is refused as a leak", 
 
 # An index outside the frame is not a row the outer split holds, whichever
 # side of the frame it falls on. An NA index, and an index beyond integer
-# range, is refused before this rule reads it (M138, M141).
+# range, is refused before this rule reads it.
 test_that("an inner index outside the frame is refused as a leak", {
   n <- nrow(shape_data())
   plants <- list(in_id = c(0L, -1L, n + 1L), out_id = c(0L, -1L, n + 1L))
@@ -376,8 +374,8 @@ test_that("a held row in both sets of an inner split is still refused as shared"
 # An NA in a split's row indices names no data row. rsample reads it as
 # rows of NAs, or fails when it builds the assessment set. Both loops refuse it,
 # except an `out_id` that is the logical NA, which rsample reads as the
-# complement (M138, D-111). The same refusal covers a slot that is not numeric,
-# a value outside integer range, and an empty `out_id` (M141, D-114).
+# complement. The same refusal covers a slot that is not numeric, a value
+# outside integer range, and an empty `out_id`.
 INDEX_REFUSED <- paste(
   "`resamples` has a split whose row indices are not valid row numbers."
 )
@@ -506,9 +504,8 @@ test_that("the NA refusal names every position and slot that holds one", {
   expect_index_refused(design, na_where(2L, 1L, c("in_id", "out_id")))
 })
 
-# Before M138, an NA in an outer `in_id` and in an inner `in_id` of the same
-# fold passed the containment rule, because %in% matches the two NAs (M137
-# review B2, B3).
+# An NA in an outer `in_id` and in an inner `in_id` of the same fold would
+# pass the containment rule, because %in% matches the two NAs.
 test_that("an NA in the outer and an inner in_id of one fold is refused", {
   design <- edit_split(whole_design(), 1L, NULL, function(split) {
     split$in_id <- c(split$in_id, NA)
@@ -574,7 +571,7 @@ test_that("check_nested() accepts the logical NA out_id of both constructors", {
 # Each plant gives a slot's new value from its old one, and names the shape
 # the refusal reports. A value outside integer range coerces to NA with a
 # warning. A non-numeric slot fails the fold in vctrs or rsample. An empty
-# `out_id` leaves the split no assessment set (M141, D-114).
+# `out_id` leaves the split no assessment set.
 INDEX_PLANTS <- list(
   list(label = "3e9", shape = "range", value = function(x) c(x, 3e9)),
   list(label = "-3e9", shape = "range", value = function(x) c(x, -3e9)),
@@ -731,7 +728,7 @@ test_that("the index refusal joins two bad slots of one split in one line", {
 })
 
 # as.integer() reads 3e9 as NA in both slots, and %in% matches the two NAs,
-# so without the rule the containment rule passed this fold (M138's review).
+# so without the rule the containment rule would pass this fold.
 test_that("3e9 in the outer and an inner in_id of one fold is refused", {
   design <- edit_split(whole_design(), 2L, NULL, function(split) {
     split$in_id <- c(split$in_id, 3e9)
@@ -814,7 +811,7 @@ test_that("check_nested() accepts row indices stored as doubles", {
 })
 
 # nested_resamples() runs the outer half of the rule on `outside`, so it does
-# not build a design every driver refuses (M138, D-111).
+# not build a design every driver refuses.
 test_that("nested_resamples() refuses an NA in an outside split", {
   d <- shape_data()
   for (plant in NA_PLANTS) {
@@ -878,8 +875,7 @@ expect_outside_refused <- function(outside, where, info = NULL) {
   invisible(cnd)
 }
 
-# nested_resamples() runs the rest of the rule on `outside` too (M141,
-# D-114).
+# nested_resamples() runs the rest of the rule on `outside` too.
 test_that("nested_resamples() refuses each index shape in an outside split", {
   labels <- c("3e9", "character", "list", "NULL", "integer(0)")
   plants <- Filter(function(plant) plant$label %in% labels, INDEX_PLANTS)

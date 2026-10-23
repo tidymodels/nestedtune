@@ -1,4 +1,4 @@
-# Entry checks on nested_fit_resamples() (M70). The refusal that is this
+# Entry checks on nested_fit_resamples(). The refusal that is this
 # orchestrator's own -- a workflow with something to tune -- and the shared
 # checks it inherits, each fired before any fold runs.
 
@@ -14,7 +14,7 @@ test_that("a workflow with a tune() marker is refused, naming the tuning orchest
   expect_s3_class(cnd, "nestedtune_tuned_workflow")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_fit_resamples")
   # The seeds are drawn only once every check has passed, so an untouched
-  # stream is the evidence that no fold ran (the M03 discipline).
+  # stream is the evidence that no fold ran.
   expect_identical(.Random.seed, before)
 
   msg <- conditionMessage(cnd)
@@ -80,7 +80,7 @@ test_that("the shared entry checks fire, in the shared shapes", {
     "Element 2"
   )
 
-  # The dots (D-042): `control` and nothing else, of the tuner's class, and
+  # The dots: `control` and nothing else, of the tuner's class, and
   # not naming a level the argument does not.
   expect_error(
     nested_fit_resamples(wf, folds, nonesuch = 1),

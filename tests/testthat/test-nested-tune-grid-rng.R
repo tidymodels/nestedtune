@@ -1,11 +1,11 @@
-# IP2 -- reproducible results. M02 ships no parallelism, so there is no backend
-# to exercise the "regardless of workers" half of IP2. What is checkable
-# serially is that a fold's result depends on its position and its seeds and on
-# nothing else: not on the order folds run in, not on the RNG state or
-# generator kind that happens to be active when a fold starts. Those are the
-# conditions a fresh worker process presents, simulated in one session (RR01
-# Q8). Every test that could pass vacuously under a deterministic engine uses
-# ranger instead, whose fits draw from R's RNG.
+# Reproducible results, on the serial path. The "regardless of workers" half
+# of the property is tested in test-parallel-identity.R. What is checkable
+# serially is that a fold's result depends on its position and its
+# seeds and on nothing else: not on the order folds run in, not on the RNG state
+# or generator kind that happens to be active when a fold starts. Those are the
+# conditions a fresh worker process presents, simulated in one session. Every
+# test that could pass vacuously under a deterministic engine uses ranger
+# instead, whose fits draw from R's RNG.
 
 skip_heavy_on_cran()
 
@@ -25,8 +25,7 @@ test_that("the same seed produces the same result", {
 
   # `first` is served from the cache on a repeat, built directly on the first
   # request, and `second` is always direct, so the identity below compares a
-  # direct build with a direct call, never a cached object with itself (M42
-  # lesson, M113).
+  # direct build with a direct call, never a cached object with itself.
   set.seed(77)
   first <- memoised(nested_tune_grid(
     wf,
@@ -56,7 +55,7 @@ test_that("a different seed produces different numbers", {
     inside = rsample::vfold_cv(v = 3)
   )
 
-  # The seed-77 run the block above built, served from the cache (M113).
+  # The seed-77 run the block above built, served from the cache.
   set.seed(77)
   first <- memoised(nested_tune_grid(
     wf,
@@ -195,10 +194,9 @@ test_that("the caller's RNG state and kind survive the call untouched", {
   expect_identical(with_call, without_call)
 })
 
-# Two properties, not one. Before M03 a failing fold aborted the call, so a
-# single test covered both the failure and the error exit. Now a fold failure
-# is recorded and the call returns, which leaves the error path needing its
-# own vehicle -- and the on.exit() restore has to hold on both.
+# Two properties, not one. A fold failure is recorded and the call returns,
+# which leaves the error path needing its own vehicle -- and the on.exit()
+# restore has to hold on both.
 
 test_that("the RNG state is restored when folds fail but the run completes", {
   skip_if_no_engines()

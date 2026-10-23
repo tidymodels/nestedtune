@@ -1,5 +1,5 @@
-# Edits to a run's saved predictions, shared by the `augment()` tests (M93)
-# and the `compute_metrics()` tests (M100).
+# Edits to a run's saved predictions, shared by the `augment()` tests and the
+# `compute_metrics()` tests.
 
 # The run with fold `i`'s saved predictions replaced by `edit()` of them, the
 # way a user editing the object would leave it.
@@ -44,7 +44,7 @@ never_held_rows <- function(x) {
 }
 
 # `augment()`'s refusal of a design that leaves rows out of every
-# assessment set (M125). When more than five rows are left out, it counts
+# assessment set. When more than five rows are left out, it counts
 # them and names the first five. Otherwise it names all of them. `never`
 # comes from never_held_rows().
 expect_names_never_held <- function(x, never) {

@@ -1,35 +1,30 @@
-# nested_tune_bayes() on the rolling-origin time-series design (M110, cut to
-# one design at M113 under D-079), and its final fit on the rolling-origin
-# and sliding-window designs.
+# nested_tune_bayes() on the rolling-origin time-series design, and its final
+# fit on the rolling-origin and sliding-window designs.
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
-# The M110 tests sit in four files, test-time-series-*.R, so no one file runs
-# alone for long under parallel test files.
+# The time-series tests are split across the test-time-series-*.R files, so no
+# one file runs alone for long under parallel test files.
 #
-# O1 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_nested_bayes_loop() in helper-orchestration.R, written from the
 #   seed contract rather than from the driver, run here on the rolling-origin
-#   design alone (M113): the outer design never reaches tuner code, and
+#   design alone: the outer design never reaches tuner code, and
 #   test-time-series-designs.R runs the grid reference loop and the
 #   fit_resamples paths on every design in TS_DESIGNS. Pinned by the
 #   "nested_tune_bayes() matches its reference loop on a ... design" test.
-#   Satisfies M110 AC1 for this tuner.
 #
-# O2 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_bayes_final_fit() in helper-orchestration.R, handed the
 #   fixtures' literal inner `rolling_origin()` call as `inner_design`, so the
 #   reference builds the inner design on the full data from its own spelling
 #   of the call and selects with `select_best()` itself. Pinned by "the
-#   Bayesian final fit on a ... result matches its reference". Satisfies M110
-#   AC3 for this tuner.
+#   Bayesian final fit on a ... result matches its reference".
 #
 # Both fixtures share the data, the inner call and the tuner's arguments, and
 # the final fit never reads the outer split indices, so a sliding-window
 # result gives the same final fit as a rolling-origin one. The sliding-window
 # final-fit test checks it once, against the same reference.
 #
-# O1 and O2 check that the orchestrator gives what tune gives when run by
-# hand. The estimate itself adds nothing new for these designs, so no second
-# oracle type is asked of them here.
+# Both check that the orchestrator gives what tune gives when run by hand.
 
 skip_heavy_on_cran()
 
@@ -48,7 +43,7 @@ ts_bayes_run <- function(wf, folds, p, ms) {
 for (design in c("rolling-origin", "sliding-window")) {
   build <- TS_DESIGNS[[design]]
 
-  # The reference loop runs on the rolling-origin design alone (M113); the
+  # The reference loop runs on the rolling-origin design alone; the
   # sliding-window run below serves only its final-fit test.
   if (design == "rolling-origin") {
     test_that(
@@ -83,10 +78,10 @@ for (design in c("rolling-origin", "sliding-window")) {
     )
   }
 
-  # The final fit reads the data and the recorded procedure, never the
-  # outer split indices, so the two M110 designs stand for the M111 ones and
-  # the suite does not pay for two more final fits (M111). The sliding-window
-  # test is what evidences that claim (D-075), so it stays under M113.
+  # The final fit reads the data and the recorded procedure, never the outer
+  # split indices, so the two designs here stand for the sliding-index and
+  # sliding-period designs, and the suite does not pay for two more final fits.
+  # The sliding-window test is what evidences that claim.
   test_that(
     sprintf(
       "the Bayesian final fit on a %s result matches its reference",

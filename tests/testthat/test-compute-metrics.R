@@ -1,9 +1,9 @@
-# compute_metrics() on a nested run (M92).
+# compute_metrics() on a nested run.
 #
-# Oracle provenance. AC1's oracle is `collect_metrics()` on the same run,
+# Oracle provenance. The first oracle is `collect_metrics()` on the same run,
 # which reads the `.metrics` tune::last_fit() wrote for each outer fold, so
 # a rescoring that differs from tune's own scoring in any number, metric
-# order or column fails it. AC2's oracle is yardstick called metric by
+# order or column fails it. The second is yardstick called metric by
 # metric on each fold's rows of `collect_predictions()`, and the summary
 # computed by hand from those per-fold numbers, never from the method.
 
@@ -49,7 +49,7 @@ saved_srv_run <- function() {
   )))
 }
 
-# The repeated designs AC2 reads: v = 3 repeated twice, six outer folds.
+# The repeated designs used below: v = 3 repeated twice, six outer folds.
 repeated_reg_run <- function() {
   d <- make_reg_data()
   set.seed(12)
@@ -88,7 +88,7 @@ repeated_cls_run <- function() {
 
 # Fold 4's prediction columns emptied to NA. yardstick drops missing values
 # before scoring, so every metric on that fold has no rows to score and
-# returns NaN, which is.na() counts as missing: the NA fold AC2 asks for,
+# returns NaN, which is.na() counts as missing: the NA fold the test asks for,
 # reached through yardstick's own path.
 with_na_fold <- function(x, fold = 4L) {
   preds <- x$.predictions[[fold]]
@@ -132,7 +132,7 @@ hand_summary <- function(per_fold, metric) {
   )
 }
 
-# ---- AC1: the run's own metric set gives collect_metrics() back ------------
+# ---- the run's own metric set gives collect_metrics() back -----------------
 
 test_that("with the run's metric set, compute_metrics() is collect_metrics() on a regression run", {
   skip_if_no_engines()
@@ -202,7 +202,7 @@ test_that("with the run's metric set, compute_metrics() is collect_metrics() on 
   }
 })
 
-# ---- AC2: a new metric set, scored by hand with yardstick ------------------
+# ---- a new metric set, scored by hand with yardstick -----------------------
 
 test_that("a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary", {
   skip_if_no_engines()
@@ -297,7 +297,7 @@ test_that("a new class-probability metric set is scored at the event_level given
   expect_false(identical(first$.estimate[loss], second$.estimate[loss]))
 })
 
-# ---- AC3: refusals ---------------------------------------------------------
+# ---- refusals --------------------------------------------------------------
 
 test_that("a run without saved predictions is refused with nestedtune_column_not_saved", {
   skip_if_no_engines()
@@ -422,9 +422,9 @@ test_that("a run with no completed fold is refused with nestedtune_no_completed_
   expect_s3_class(cnd, "nestedtune_no_completed_folds")
 })
 
-# ---- M100: saved predictions that do not match the held-out rows ---------
+# ---- saved predictions that do not match the held-out rows ---------------
 # The mismatches are planted with `plant_row_mismatch()` from
-# `helper-predictions.R`, the same five `augment()` refuses (M93).
+# `helper-predictions.R`, the same five `augment()` refuses.
 
 # A metric set holding one metric that counts its calls. yardstick calls
 # each metric of a set once per scored fold, so the count reads how many

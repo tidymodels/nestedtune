@@ -1,31 +1,29 @@
-# The outer average under tune's resample weights (M101).
+# The outer average under tune's resample weights.
 #
 # The door is `tune::add_resample_weights()` on the design. tune normalizes
 # the weights to sum one and stores them as the rset's `.resample_weights`
 # attribute; equal weights are stored as no attribute at all
-# (`tune:::.validate_resample_weights`, tune 2.1.0, read 2026-09-16).
+# (`tune:::.validate_resample_weights`, tune 2.1.0).
 #
-# Oracle provenance (GP2, two independent types for AC1):
+# Oracle provenance:
 #
-# O1 -- type "analytic by-hand". Source: tune's own weighted formulas,
-#   written out below in `weighted_summary()` from
-#   `deparse(tune:::estimate_tune_results)` lines 51-54 (`weighted.mean`,
-#   `.effective_sample_size` over the non-NA folds' weights, `.weighted_sd`
-#   over `sqrt(pmax(effective_n, 1))`), `deparse(tune:::.weighted_sd)` lines
-#   12-15 (`stats::cov.wt(..., cor = FALSE)$cov[1, 1]`, square-rooted) and
-#   `deparse(tune:::.effective_sample_size)` lines 7-12
-#   (`sum(w)^2 / sum(w^2)`), tune 2.1.0, read 2026-09-16 (the M28 lesson).
-#   The per-fold estimates it averages are read off the UNWEIGHTED run of
-#   the same fixture, never off the weighted run under test. On a failed
-#   fold the formulas are applied to the folds that scored, the divergence
-#   from tune the plan chose: tune's weighted branch takes no `na.rm`, so
-#   a fold scoring NA errors inside `cov.wt()`, and a failed fold makes it
-#   ignore the weights with a warning (run 2026-09-16, tune#1197).
+# Source: tune's own weighted formulas, written out below in
+# `weighted_summary()` from `deparse(tune:::estimate_tune_results)` lines 51-54
+# (`weighted.mean`, `.effective_sample_size` over the non-NA folds' weights,
+# `.weighted_sd` over `sqrt(pmax(effective_n, 1))`),
+# `deparse(tune:::.weighted_sd)` lines 12-15
+# (`stats::cov.wt(..., cor = FALSE)$cov[1, 1]`, square-rooted) and
+# `deparse(tune:::.effective_sample_size)` lines 7-12
+# (`sum(w)^2 / sum(w^2)`), tune 2.1.0. The per-fold estimates it averages are
+# read off the UNWEIGHTED run of the same fixture, never off the weighted run
+# under test. On a failed fold the formulas are applied to the folds that
+# scored, a deliberate divergence from tune: tune's weighted branch takes
+# no `na.rm`, so a fold scoring NA errors inside `cov.wt()`, and a failed fold
+# makes it ignore the weights with a warning (tune#1197).
 #
-# O2 -- type "live" (reference implementation). Source: `tune::fit_resamples()`
-#   on the same outer `vfold_cv()` splits under the same weights, whose
-#   `collect_metrics()` is tune's weighted branch itself. Every-fold case
-#   only, where tune and this package agree.
+# Source: `tune::fit_resamples()` on the same outer `vfold_cv()` splits under
+# the same weights, whose `collect_metrics()` is tune's weighted branch itself.
+# Every-fold case only, where tune and this package agree.
 
 skip_heavy_on_cran()
 
@@ -33,7 +31,7 @@ weighted_design <- function(data, weights = c(1, 2, 3)) {
   tune::add_resample_weights(det_nested(data), weights)
 }
 
-# O1, written from tune's code and never from the package's.
+# Written from tune's code and never from the package's.
 weighted_summary <- function(estimates, weights) {
   keep <- !is.na(estimates)
   x <- estimates[keep]

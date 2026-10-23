@@ -1,4 +1,4 @@
-# M106 AC4: predict() on a results object refuses and names the final fit.
+# predict() on a results object refuses and names the final fit.
 #
 # A nested run holds one fitted model per outer fold and none for new data.
 # Without a method, R answers "no applicable method", which does not say

@@ -1,18 +1,12 @@
-# The "fold results do not depend on the order folds are run in", "fold
-# results do not depend on the ambient RNG state or kind", "the caller's RNG
-# state and kind survive the call untouched", and "a session with no RNG
-# state is left with a valid one" blocks were pinned here until M113, and
-# "the RNG state is restored when the call itself errors" until M152. The
-# RNG restore on both exits and the fold seeding are one shared site in
-# `nested_loop()` / `set_fold_seed()`, so test-nested-tune-grid-rng.R covers
-# them (D-079).
-# IP2 for the racing path (M50 AC4). Of the properties
-# test-nested-tune-grid-rng.R holds the grid path to, the same-seed and
-# different-seed properties are asserted here on the ANOVA racer, since the
-# two racing exports share one body, `nested_tune_race()`. Both tests use
-# ranger, whose fits draw from R's RNG; the race itself draws too,
-# shuffling the inner resamples before the burn-in, which is why even the
-# deterministic fixture's record depends on the seed.
+# The fold-order, ambient-RNG, caller's-RNG, no-RNG-state and error-restore
+# blocks are covered by test-nested-tune-grid-rng.R: the RNG restore on both
+# exits and the fold seeding are one shared site in `nested_loop()` /
+# `set_fold_seed()`. The same-seed and different-seed properties that
+# test-nested-tune-grid-rng.R holds the grid path to are asserted here on the
+# ANOVA racer, since the two racing exports share one body,
+# `nested_tune_race()`. Both tests use ranger, whose fits draw from R's RNG;
+# the race itself draws too, shuffling the inner resamples before the burn-in,
+# which is why even the deterministic fixture's record depends on the seed.
 
 skip_heavy_on_cran()
 
@@ -28,10 +22,10 @@ race_run <- function(fn, wf, folds, ms, ctrl = race_control()) {
 }
 
 # The same run served from the fixture cache, keyed on the package call
-# itself (M74): the seed-77 run is built once by the same-seed test and read
+# itself: the seed-77 run is built once by the same-seed test and read
 # back by the different-seed test. `first` in the same-seed test is the
 # build and `second` a direct call, so that identity is between two
-# executions, never two reads of one cache entry (the M42 lesson).
+# executions, never two reads of one cache entry.
 race_run_cached <- function(wf, folds, ms, ctrl = race_control()) {
   g <- stoch_grid()
   memoised(nested_tune_race_anova(

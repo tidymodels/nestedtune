@@ -1,7 +1,7 @@
-# Oracle records for nested_workflow_map() (M71, AC1; DESIGN Conventions:
+# Oracle records for nested_workflow_map() (DESIGN Conventions:
 # oracles are recorded in the test file that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: the orchestrator
+# Source: the orchestrator
 #   each workflow routes to, called by hand on that workflow with the same
 #   arguments after `set.seed()` of the same value. The map adds nothing
 #   statistical: each element must be `identical()` to that hand call, seeds,
@@ -11,7 +11,7 @@
 #   route that drifts names its orchestrator.
 #
 # The hand call is `hand_call()` in helper-orchestration.R, which
-# test-time-series-designs.R also uses (M110).
+# test-time-series-designs.R also uses.
 
 skip_heavy_on_cran()
 

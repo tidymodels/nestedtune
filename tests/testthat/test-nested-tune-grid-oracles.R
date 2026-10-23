@@ -1,46 +1,39 @@
 # Oracle records for nested_tune_grid() (DESIGN Conventions: oracles are
 # recorded in the test file that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
-#   itself, recomputed at test time by reference_nested_loop() in
-#   helper-orchestration.R, which is written from the documented seed contract
-#   rather than from the driver. Pinned by "per-fold metrics and selections
-#   match a hand-rolled reference loop" (deterministic and stochastic variants).
-#   Satisfies AC2/AC16.
+# Source: the tidymodels pipeline itself, recomputed at test
+#   time by reference_nested_loop() in helper-orchestration.R, which is written
+#   from the documented seed contract rather than from the driver. Pinned by
+#   "per-fold metrics and selections match a hand-rolled reference loop"
+#   (deterministic and stochastic variants).
 #
-# O2 -- type "invariant". Source: no external one; the agreement between two
-#   independent internal routes is the oracle. With a single-candidate grid
-#   there is nothing to select, so nested CV must degenerate to ordinary CV and
-#   per-fold metrics must equal tune::fit_resamples() on the same outer rset.
-#   Pinned by "a single-candidate grid degenerates to fit_resamples()".
-#   Satisfies AC3/AC17. Deterministic engine only, per RR01 B2: matching
-#   fit_resamples() with a stochastic engine would require replicating tune's
-#   internal substream derivation.
+# No external source; the agreement between two independent internal
+#   routes is the check. With a single-candidate grid there is nothing to
+#   select, so nested CV must degenerate to ordinary CV and per-fold metrics
+#   must equal tune::fit_resamples() on the same outer rset. Pinned by "a
+#   single-candidate grid degenerates to fit_resamples()". Deterministic engine
+#   only: matching fit_resamples() with a stochastic engine would require
+#   replicating tune's internal substream derivation.
 #
-# O1 and O2 are the >=2 independent oracle types GP2 requires for the nested
-# estimate.
+# The evaluated-candidate record, rather than the estimate, is checked against
+#   tune::tune_grid() itself, re-run by hand on a fold's own inner resamples
+#   under that fold's `.tuning_seed` with the generator kind pinned, exactly as
+#   the roxygen's by-hand reproduction recipe prescribes. Pinned by "an integer
+#   grid records the candidates that fold actually expanded". A tune_results
+#   carries no record of its own expansion -- attributes are `parameters`,
+#   `metrics`, `outcomes`, `rset_info` and nothing else (measured on tune 2.1.0)
+#   -- so re-running is the only route to an independent answer.
 #
-# O3 -- type "live" (reference implementation), for the evaluated-candidate
-#   record rather than for the estimate (M21). Source: tune::tune_grid() itself,
-#   re-run by hand on a fold's own inner resamples under that fold's
-#   `.tuning_seed` with the generator kind pinned, exactly as the roxygen's
-#   by-hand reproduction recipe prescribes. Pinned by "an integer grid records
-#   the candidates that fold actually expanded". A tune_results carries no
-#   record of its own expansion -- attributes are `parameters`, `metrics`,
-#   `outcomes`, `rset_info` and nothing else (measured at M21's plan gate,
-#   tune 2.1.0) -- so re-running is the only route to an independent answer.
-#
-# O4 -- type "invariant", the companion to O3 on the branch O3 cannot reach: a
-#   data-frame grid must come back as itself, since nothing expands. Pinned in
+# The companion check covers the branch that re-run cannot reach: a data-frame
+#   grid must come back as itself, since nothing expands. Pinned in
 #   test-nested-tune-grid-results.R ("each fold records the candidates its inner
-#   tuning actually scored"). O3 and O4 are the two independent types covering
-#   the record.
+#   tuning actually scored").
 #
-# OBSERVED, NOT ASSERTED (M21). On tune 2.1.0, integer-grid expansion is
+# Observed, not asserted. On tune 2.1.0, integer-grid expansion is
 # stochastic for a continuous parameter, so folds tuning under their own seeds
-# search different candidate sets. Measured on the fixture the O3 test below
-# builds -- cont_workflow(), grid = 5, seeds 11 and 20 -- the three outer folds
-# expanded thresholds:
+# search different candidate sets. Measured on the fixture the integer-grid
+# test below builds -- cont_workflow(), grid = 5, seeds 11 and 20 -- the three
+# outer folds expanded thresholds:
 #
 #   fold 1: 0.00059 0.24510 0.50336 0.74564 0.98373
 #   fold 2: 0.03347 0.25516 0.49639 0.75686 0.99656
@@ -48,10 +41,10 @@
 #
 # This is why the record is a column and not one attribute: no single value
 # describes what this run searched. It is recorded rather than asserted because
-# it is a property of tune's expansion, which IP2 declines to guarantee across
-# tune versions -- asserting it would turn a correct package red on an upstream
-# change. The O3 test below asserts the part that IS this package's contract:
-# each fold's record matches what that fold ran.
+# it is a property of tune's expansion, which the package declines to guarantee
+# across tune versions -- asserting it would turn a correct package red on an
+# upstream change. The integer-grid test below asserts the part that IS this
+# package's contract: each fold's record matches what that fold ran.
 
 skip_heavy_on_cran()
 
@@ -85,7 +78,7 @@ test_that("per-fold metrics and selections match a hand-rolled reference loop", 
   # The seeds the driver reports must be the ones the documented contract
   # derives -- checked before the metrics, because a driver that both
   # misassigns and misreports could otherwise agree with a loop fed its own
-  # numbers (AC16).
+  # numbers.
   expect_identical(res$.tuning_seed, ref_field(ref, "tuning_seed"))
   expect_identical(res$.outer_fit_seed, ref_field(ref, "outer_fit_seed"))
 
@@ -149,9 +142,9 @@ test_that("a control passed through `...` reaches the inner tune_grid()", {
   # `parallel_over = "everything"` changes the seed each model fit starts
   # from even at `allow_par = FALSE`, so a stochastic engine's numbers differ
   # from the default run's: on this fixture fold 2's outer metrics and
-  # selection differ and folds 1 and 3 agree (measured 2026-09-02, tune
-  # 2.1.0). The run under the control matches the reference loop run under
-  # the same control, fold by fold.
+  # selection differ and folds 1 and 3 agree (measured on tune 2.1.0). The run
+  # under the control matches the reference loop run under the same control,
+  # fold by fold.
   ctrl <- tune::control_grid(parallel_over = "everything")
   set.seed(21)
   res <- nested_tune_grid(wf, folds, grid = grid, metrics = ms, control = ctrl)
@@ -173,7 +166,7 @@ test_that("a control passed through `...` reaches the inner tune_grid()", {
 
   # The discrimination: the same run without the control is not this one, so
   # the match above is not the default run agreeing with itself. The plain
-  # run is the stochastic oracle's, served from the cache (M113).
+  # run is the stochastic oracle's, served from the cache.
   set.seed(21)
   plain <- memoised(nested_tune_grid(wf, folds, grid = grid, metrics = ms))
   expect_false(identical(plain$.metrics, res$.metrics))
@@ -225,10 +218,10 @@ test_that("a single-candidate grid degenerates to fit_resamples()", {
 test_that("an integer grid records the candidates that fold actually expanded", {
   skip_if_no_engines()
 
-  # O3. The record cannot be checked against the `grid` argument here -- that is
-  # the number 5 -- so the oracle is tune itself, re-run by hand on the fold's
-  # own inner resamples under the fold's own seed, the same reproduction recipe
-  # the roxygen hands users.
+  # The record cannot be checked against the `grid` argument here -- that is
+  # the number 5 -- so the reference is tune itself, re-run by hand on the
+  # fold's own inner resamples under the fold's own seed, the same reproduction
+  # recipe the roxygen hands users.
   d <- make_reg_data()
   wf <- cont_workflow(d)
   ms <- reg_metrics()
@@ -261,7 +254,7 @@ test_that("an integer grid records the candidates that fold actually expanded", 
     reference <- sort(unique(tune::collect_metrics(tuned)$threshold))
     expect_identical(sort(unique(res$.inner_metrics[[i]]$threshold)), reference)
 
-    # The table itself (M49, AC1): the fold's `.inner_metrics` is what tune
+    # The table itself: the fold's `.inner_metrics` is what tune
     # summarizes for the same hand run -- identical, not merely the same
     # candidates -- so a reader computing the best candidate from it computes
     # it from the inner run's own numbers.
@@ -272,10 +265,9 @@ test_that("an integer grid records the candidates that fold actually expanded", 
 test_that("a grid size larger than the reachable candidates records what ran", {
   skip_if_no_engines()
 
-  # IP4's "a truncated grid", which is the case the `grid` attribute cannot
-  # describe at all: num_comp reaches at most one candidate per predictor, so a
-  # request for 20 is met by however many exist and the request stands
-  # unchanged beside it.
+  # A truncated grid is the case the `grid` attribute cannot describe at all:
+  # num_comp reaches at most one candidate per predictor, so a request for 20 is
+  # met by however many exist and the request stands unchanged beside it.
   d <- make_reg_data()
 
   set.seed(11)
@@ -299,14 +291,14 @@ test_that("a grid size larger than the reachable candidates records what ran", {
   }
 })
 
-# O5 -- type "live" (reference implementation), for the selection rule (M69,
-#   AC1). Source: tune's own selectors, called by name on the fold's hand-run
-#   tuning result inside reference_nested_loop() (reference_select() in
-#   helper-orchestration.R), with the orderings the test built spliced in.
-#   Pinned by the test below. The two-parameter fixture is bayes_workflow()
-#   (df1, df2), on a 3-by-3 grid, so a two-term ordering with desc() has
-#   something to order; the default rule is O1's existing test, unchanged.
-#   Measured 2026-09-06 on this fixture under seed 20: best picks (2,2),
+# Selection rules are checked against tune's own selectors, called by name on
+#   the fold's hand-run tuning result inside reference_nested_loop()
+#   (reference_select() in helper-orchestration.R), with the orderings the test
+#   built spliced in. Pinned by the test below. The two-parameter fixture is
+#   bayes_workflow() (df1, df2), on a 3-by-3 grid, so a two-term ordering with
+#   desc() has something to order; the default rule is covered by "per-fold
+#   metrics and selections match a hand-rolled reference loop".
+#   Measured on this fixture under seed 20: best picks (2,2),
 #   (2,2), (2,5); one_std_err (2,2), (8,2), (2,5); pct_loss at limit 5
 #   (2,2), (5,2), (2,5). The two non-default rules each differ from best in
 #   a fold, which is what lets the test tell a driver that applied the rule
@@ -328,7 +320,7 @@ test_that("each selection rule picks what tune's selector picks on the fold's in
     pct_loss = selection_rule("pct_loss", desc(df1), df2, limit = 5)
   )
   # One reference tuning stage for the configuration, served from the cache;
-  # each rule is applied to it through reference_with_rule() (M74).
+  # each rule is applied to it through reference_with_rule().
   set.seed(20)
   ref_best <- memoised(reference_nested_loop(
     wf,
@@ -359,17 +351,17 @@ test_that("each selection rule picks what tune's selector picks on the fold's in
     picked[[nm]] <- res$.selected
   }
 
-  # The rule reached the selection (see O5 above).
+  # The rule reached the selection (see the selection-rule note above).
   expect_false(identical(picked$one_std_err, picked$best))
   expect_false(identical(picked$pct_loss, picked$best))
 })
 
-# O6 -- type "live" (reference implementation), for the desirability rule
-#   (M109, AC2). Source: desirability2::select_best_desirability(), called by
-#   name with the terms written out here, on each fold's hand-run tuning
-#   result from reference_nested_loop() under the default rule, the same
-#   cached run O5 reads. Only the parameter columns and `.config` are
-#   compared. Measured 2026-09-21 on this fixture under seed 20 (tune 2.1.0,
+# The desirability rule is checked against
+#   desirability2::select_best_desirability(), called by name with the terms
+#   written out here, on each fold's hand-run tuning result from
+#   reference_nested_loop() under the default rule, the same cached run the
+#   selection-rule note above reads. Only the parameter columns and `.config`
+#   are compared. Measured on this fixture under seed 20 (tune 2.1.0,
 #   desirability2 0.2.0): best picks (2,2), (2,2), (2,5), and the terms below
 #   pick (2,2), (2,2), (2,2). The third fold differs, which is what lets the
 #   test tell a driver that applied the rule from one that ignored it.
@@ -428,7 +420,7 @@ test_that("the desirability rule picks what desirability2 picks on the fold's in
     )
   }
 
-  # The rule reached the selection (see O6 above).
+  # The rule reached the selection (see the desirability note above).
   best <- lapply(ref_best, function(fold) fold$selected[cols])
   expect_false(identical(lapply(res$.selected, `[`, cols), best))
 })

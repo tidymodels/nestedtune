@@ -1,25 +1,25 @@
-# IP2 across workers: the identity that makes parallel dispatch legitimate.
+# Results match across workers: the identity that makes parallel dispatch
+# legitimate.
 #
 # Oracle note (DESIGN "Oracle records"): these tests are *mode-independence*
 # assertions, not absolute-correctness ones. A defect present identically in the
 # serial and parallel paths preserves every identity here while breaking the
-# documented contract, which is why RR03 (BC7) requires the contract-derived
-# reference-loop oracle in test-nested-tune-grid-oracles.R to stay green
-# alongside them. Neither replaces the other: that one anchors what the numbers
-# are, these anchor that the numbers do not depend on how the loop was run.
+# documented contract, which is why a contract-derived reference-loop oracle in
+# test-nested-tune-grid-oracles.R has to stay green alongside them. Neither
+# replaces the other: that one anchors what the numbers are, these anchor that
+# the numbers do not depend on how the loop was run.
 #
 # Every test uses the ranger workflow. With a deterministic engine these pass
-# vacuously -- RR03 re-confirmed M02's lesson by executing a wrong dispatcher
-# against the PCA/lm workflow and watching it pass.
+# vacuously: a wrong dispatcher run against the PCA/lm workflow passes too.
 #
-# Pools (M74). mirai holds one pool at a time, so the file is ordered by pool:
+# Pools. mirai holds one pool at a time, so the file is ordered by pool:
 # one shared 2-daemon pool serves every block that only needs a primed pool,
 # started once below and probed before each reuse by `shared_daemons(2)`
-# (helper-parallel.R); BC1, which also compares at three daemons, follows
-# on one shared 3-daemon pool; BC9, which pollutes its daemons, is the last
-# block on the 2-daemon pool; BC3, which kills a daemon, starts a private
-# pool at the end. A block's serial reference is built while the pool is up
-# through `serial_run()`, which has the orchestrator count zero daemons.
+# (helper-parallel.R); a block that also compares at three daemons follows on
+# one shared 3-daemon pool; a block that pollutes its daemons is the last block
+# on the 2-daemon pool; a block that kills a daemon starts a private pool at the
+# end. A block's serial reference is built while the pool is up through
+# `serial_run()`, which has the orchestrator count zero daemons.
 
 serial_reference <- function(wf, nested, grid, metrics, seed = 2026L) {
   set.seed(seed)
@@ -36,10 +36,10 @@ test_that("the shared 2-daemon pool starts primed", {
   share_daemons(2)
 })
 
-# Both daemon counts BC1 compares at are >= 2, the threshold D-018 inherited
-# from tune. A one-daemon run would take the serial branch and the "identity"
-# would be serial vs serial -- the vacuity RR03 flagged as B1. The two counts
-# are two blocks, one per shared pool (M74); the three-daemon one is below.
+# Both daemon counts compared here are >= 2, the threshold inherited from tune.
+# A one-daemon run would take the serial branch and the "identity" would be
+# serial vs serial -- the vacuity a review flagged. The two counts are two
+# blocks, one per shared pool; the three-daemon one is below.
 
 test_that("parallel matches serial at two daemons", {
   skip_if_no_daemons()
@@ -57,7 +57,7 @@ test_that("parallel matches serial at two daemons", {
     nested_tune_grid(wf, nested, grid = stoch_grid(), metrics = reg_metrics())
   )
 
-  # BC1's second half: prove the parallel branch actually ran. The evidence is
+  # Prove the parallel branch actually ran. The evidence is
   # out-of-band precisely so that asserting it cannot disturb the identity.
   expect_identical(last_dispatch(), "parallel")
   expect_identical(parallel, serial)
@@ -70,8 +70,8 @@ test_that("identity holds under a caller kind that is neither MT nor L'Ecuyer", 
   # Why Wichmann-Hill and not the obvious L'Ecuyer-CMRG: mirai starts its
   # daemons on L'Ecuyer-CMRG. A caller who has selected that same kind therefore
   # matches the daemons' ambient generator exactly, and an implementation with
-  # NO kind pin at all reproduces serial results perfectly -- RR03 verified this
-  # by execution. L'Ecuyer-CMRG is the one non-default kind with zero detection
+  # NO kind pin at all reproduces serial results perfectly -- verified by
+  # execution. L'Ecuyer-CMRG is the one non-default kind with zero detection
   # power here, so the test that exists to catch a missing pin must avoid it.
   old_kind <- RNGkind()
   on.exit(RNGkind(old_kind[[1L]], old_kind[[2L]], old_kind[[3L]]), add = TRUE)
@@ -87,7 +87,7 @@ test_that("identity holds under a caller kind that is neither MT nor L'Ecuyer", 
   # The detection power rests on the daemons NOT being on the host's kind: a
   # shared pool's daemons are on mirai's L'Ecuyer-CMRG until their first fold
   # and on the pin's Mersenne-Twister after it, and neither is Wichmann-Hill,
-  # so a missing pin would still fail here (M74, the M07 lesson).
+  # so a missing pin would still fail here.
   expect_false("Wichmann-Hill" %in% daemon_rng_kinds())
   set.seed(2026L)
   parallel <- without_pkgload_warning(
@@ -121,12 +121,13 @@ test_that("an aborted parallel run still restores the caller's RNG state", {
   skip_if_no_daemons()
 
   # An interrupt unwinds through the same on.exit() the pre-flight abort does,
-  # so this pins the exit contract BC4 depends on. The interrupt value itself is
-  # classified in test-parallel-classify.R, where it can be constructed exactly.
-  # The abort is induced by mocking the probe, not by breaking the library path:
-  # real daemons with no library cannot load mirai either, so they die at
-  # startup and the probe hangs (M07-D6). The pool itself is never reached, so
-  # the worker count is fabricated rather than probed off the shared pool (M113).
+  # so this pins the exit contract the interrupt handling depends on. The
+  # interrupt value itself is classified in test-parallel-classify.R, where it
+  # can be constructed exactly. The abort is induced by mocking the probe, not
+  # by breaking the library path: real daemons with no library cannot load
+  # mirai either, so they die at startup and the probe hangs. The pool itself is
+  # never reached, so the worker count is fabricated rather than probed off the
+  # shared pool.
   local_mocked_bindings(daemons_load_status = function(...) {
     preflight_outcome(reports(FALSE))
   })
@@ -153,10 +154,10 @@ test_that("a cancelled parallel run returns nothing and restores the RNG state",
   # Cancellation needs an actor outside the host, because the host is blocked
   # in collect_mirai() for the whole window in which it can happen. What is
   # substituted here is only that actor: the map is really dispatched to real
-  # daemons and really stopped, and everything the milestone is about --
+  # daemons and really stopped, and everything under test --
   # collect_mirai() resolving to errorValue 20, classify_fold_result() seeing
   # it, the abort, the on.exit() unwind -- is the production path, unmocked.
-  # Hand-rolling the collect instead would pin nothing (M07).
+  # Hand-rolling the collect instead would pin nothing.
   real_map <- mirai::mirai_map
   local_mocked_bindings(
     mirai_map = function(...) {
@@ -178,17 +179,16 @@ test_that("a cancelled parallel run returns nothing and restores the RNG state",
 
   # A real bound, not a measurement after the fact: a stopped map resolves at
   # once, so if this call ever blocks, the run must end as an error rather than
-  # wedge `R CMD check` the way M07-D6 records. It rests on the collect being
+  # wedge `R CMD check`. It rests on the collect being
   # interruptible, which is the same property a user's Ctrl-C rests on.
   setTimeLimit(elapsed = 60, transient = TRUE)
   on.exit(setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE), add = TRUE)
 
   result <- NULL
-  # `error =`, deliberately not `condition =`: the pre-milestone code returns
-  # normally here while signalling a failed-folds *warning*, and a condition
-  # handler would catch that warning, unwind before the assignment completed,
-  # and leave `result` NULL either way -- making the AC4 assertion below pass
-  # against the very behaviour this test exists to reject.
+  # `error =`, deliberately not `condition =`: a condition handler would also
+  # catch a failed-folds *warning*, unwind before the assignment completed, and
+  # leave `result` NULL either way -- making the assertion below pass against
+  # the very behaviour this test exists to reject.
   cnd <- tryCatch(
     without_pkgload_warning(
       result <- nested_tune_grid(
@@ -203,7 +203,7 @@ test_that("a cancelled parallel run returns nothing and restores the RNG state",
 
   expect_s3_class(cnd, "nestedtune_cancelled")
   expect_s3_class(cnd, "nestedtune_interrupted")
-  # AC4: nothing partial escapes -- no results object is built from the folds
+  # Nothing partial escapes -- no results object is built from the folds
   # that happened to finish before the stop landed.
   expect_null(result)
   expect_identical(.Random.seed, before_seed)
@@ -218,10 +218,10 @@ test_that("a failed fold matches serially in every field but its traces", {
   nested <- break_fold(det_nested(data), fold = 2L, stage = "inner tuning")
   wf <- stoch_workflow(data)
 
-  # expect_warning() hands back the *condition*, never the expression's value
-  # (M03 lesson) -- so the object is taken by assigning inside the expectation
-  # rather than by running the fit a second time to fetch it. Muffling a warning
-  # does not abort the expression, so `serial` is bound either way.
+  # expect_warning() hands back the *condition*, never the expression's value --
+  # so the object is taken by assigning inside the expectation rather than by
+  # running the fit a second time to fetch it. Muffling a warning does not abort
+  # the expression, so `serial` is bound either way.
   set.seed(2026L)
   # tune raises its own "All models failed" warning alongside ours; catching
   # only the outer one leaves it to surface as an uncaught warning in the run.
@@ -248,26 +248,26 @@ test_that("a failed fold matches serially in every field but its traces", {
   expect_identical(last_dispatch(), "parallel")
 
   # Traces are rlang backtraces: a daemon's call stack is rooted in
-  # mirai::daemon() and can never equal the host's, so they are outside the IP2
-  # identity claim (M07-D3). Everything a user reads -- text, location, type --
-  # is inside it.
+  # mirai::daemon() and can never equal the host's, so they are outside the
+  # reproducibility claim. Everything a user reads -- text, location, type -- is
+  # inside it.
   expect_identical(parallel$.completed, serial$.completed)
   expect_identical(parallel$.metrics, serial$.metrics)
   expect_identical(parallel$.selected, serial$.selected)
   expect_identical(parallel$.tuning_seed, serial$.tuning_seed)
   expect_identical(parallel$.outer_fit_seed, serial$.outer_fit_seed)
 
-  # Note TEXT is compared with whitespace normalized, which departs from BC6's
-  # literal "identical()" -- see the "Deviations from RR03" row in the milestone
-  # file. cli hard-wraps a message to the console width of the process that
-  # formats it, and a daemon's width is its own, so the same note arrives
-  # wrapped at 80 columns in parallel and at the host's width serially. The
-  # words are identical; only the line breaks differ. RR03 verified the text
-  # matched, but its probe formatted both sides at the same width. cli's
-  # bullet glyphs are the same kind of difference: a daemon has no UTF-8
-  # console, so the info bullet tune's note carries arrives as `i` where the
-  # host writes the glyph (the M59 fixture's zero-row note is the first with
-  # one), and both spellings are read as the ASCII one.
+  # Note TEXT is compared with whitespace normalized, which departs from the
+  # literal "identical()" the contract asks for. cli hard-wraps a message to
+  # the console width of the process that formats it, and a daemon's width is
+  # its own, so the same note arrives wrapped at 80 columns in parallel and at
+  # the host's width serially.
+  # The words are identical; only the line breaks differ. A probe that formatted
+  # both sides at one width would miss this. cli's bullet glyphs are the same
+  # kind of difference: a daemon has no UTF-8 console, so the info bullet tune's
+  # note carries arrives as `i` where the host writes the glyph (the zero-row
+  # note fixture is the first with one), and both spellings are read as the
+  # ASCII one.
   unwrap <- function(x) {
     gsub("[[:space:]]+", " ", gsub("\u2139", "i", x, fixed = TRUE))
   }
@@ -281,7 +281,7 @@ test_that("a failed fold matches serially in every field but its traces", {
   expect_false(serial$.completed[[2L]])
 })
 
-# AC5 (M35). The event level is the first setting the identity has to carry
+# The event level is the first setting the identity has to carry
 # that changes a *reported metric value* rather than the candidate chosen:
 # `.metrics` is fed by the `control_last_fit()` the outer scoring fit now
 # receives, so a level dropped on the daemon path alone -- threaded into
@@ -329,11 +329,11 @@ test_that("the identity holds with a two-class fixture at event_level = \"second
   expect_identical(parallel, serial)
 })
 
-# BC8 mirrors BC7 for the other argument this package forwards to tune: the
-# evaluation time a censored-regression metric is measured at. What it adds
-# beyond BC7 is the payload -- `eval_time` rides in `.args` alongside
-# `event_level`, so a run whose wrapper dropped it would still complete and
-# would still return a number, just tune's default one.
+# This test mirrors the event-level test above for the other argument this
+# package forwards to tune: the evaluation time a censored-regression metric is
+# measured at. What it adds beyond that test is the payload -- `eval_time`
+# rides in `.args` alongside `event_level`, so a run whose wrapper dropped it
+# would still complete and would still return a number, just tune's default one.
 
 test_that("the identity holds with a censored fixture at a named eval_time", {
   skip_if_no_daemons()
@@ -379,12 +379,11 @@ test_that("the identity holds with a censored fixture at a named eval_time", {
   expect_identical(parallel, serial)
 })
 
-# BC10's serial reference (M45, AC4): the stochastic fixture, so the
-# Gaussian-process proposals and the ranger fits both draw -- a deterministic
-# engine would leave only tune's own `set.seed(control$seed + i)` calls to
-# differ, and those are the seed rule under test on both sides of the
-# identity. Its one caller is the two-daemon block; the three-daemon one it
-# was shared with (M74) went at M113.
+# The serial reference: the stochastic fixture, so the Gaussian-process
+# proposals and the ranger fits both draw -- a deterministic engine would leave
+# only tune's own `set.seed(control$seed + i)` calls to differ, and those are
+# the seed rule under test on both sides of the identity. Its one caller is the
+# two-daemon block.
 bayes_serial_reference <- function(wf, nested, p) {
   set.seed(2026L)
   serial <- serial_run(nested_tune_bayes(
@@ -429,14 +428,13 @@ test_that("the Bayesian path matches serial at two daemons", {
   expect_identical(parallel, serial)
 })
 
-# BC6, BC11 and BC15 (M34, M48, M69): `param_info`, the control and the
-# selection rule are three formals of `dispatch_folds()` that ride in `.args`,
-# so one run sets all three. Each is set so that a daemon left on its default
-# would differ: `param_info` widens `deg_free` past its default range, the
-# control's `no_improve = 2` stops folds short of `initial + iter`, and the
-# percent-loss rule with a non-default limit and a two-term ordering picks a
-# candidate the default rule does not in two of the three folds. The
-# deterministic fixture, as the M48 AC1 oracle.
+# `param_info`, the control and the selection rule are three formals of
+# `dispatch_folds()` that ride in `.args`, so one run sets all three. Each is
+# set so that a daemon left on its default would differ: `param_info` widens
+# `deg_free` past its default range, the control's `no_improve = 2` stops folds
+# short of `initial + iter`, and the percent-loss rule with a non-default limit
+# and a two-term ordering picks a candidate the default rule does not in two of
+# the three folds. The fixture here is deterministic.
 
 test_that("param_info, control and select reach the folds on two daemons as serially", {
   skip_if_no_daemons()
@@ -506,13 +504,12 @@ test_that("param_info, control and select reach the folds on two daemons as seri
   expect_identical(parallel, serial)
 })
 
-# BC12 (M50, AC4), for both racers: D-079 keeps IP2 evidenced for every
-# tuner at two daemons, and the win/loss racer's registry entry sends its own
-# package to the daemons. The stochastic fixture, so the race's
-# resample shuffle and the ranger fits both draw; and the daemons' library
-# holds finetune, which the loop attaches in every daemon before the first
-# fold is sent. The serial race's one caller is the two-daemon block; the
-# three-daemon one it was shared with (M74) went at M113.
+# For both racers: every tuner is checked for reproducibility at two daemons,
+# and the win/loss racer's registry entry sends its own package to the daemons.
+# The stochastic fixture, so the race's resample shuffle and the ranger fits
+# both draw; and the daemons' library holds finetune, which the loop attaches in
+# every daemon before the first fold is sent. The serial race's one caller is
+# the two-daemon block.
 race_serial_reference <- function(fn, wf, nested, ms, ctrl) {
   set.seed(2026L)
   serial <- serial_run(race_call_by_name(
@@ -565,13 +562,11 @@ test_that("both racing paths match serial at two daemons", {
   }
 })
 
-# BC13 (M51, AC4): the stochastic fixture, so the search's initial design and
-# perturbations and the ranger fits all draw; and the daemons' library holds
-# finetune, which the loop attaches in every daemon before the first fold is
-# sent. `time_limit` is left unset (`NA`), as AC4 requires: a wall-clock stop
-# is the one slot that could make the two sides differ. The serial search's
-# one caller is the two-daemon block; the three-daemon one it was shared
-# with (M74) went at M113.
+# The stochastic fixture, so the search's initial design and perturbations and
+# the ranger fits all draw; and the daemons' library holds finetune, which the
+# loop attaches in every daemon before the first fold is sent. `time_limit` is
+# left unset (`NA`): a wall-clock stop is the one slot that could make the two
+# sides differ. The serial search's one caller is the two-daemon block.
 anneal_serial_reference <- function(wf, nested, p, ms, ctrl) {
   expect_true(is.na(ctrl$time_limit))
   set.seed(2026L)
@@ -627,14 +622,13 @@ test_that("the annealing path matches serial at two daemons", {
 })
 
 
-# BC14 (M68, AC4): the two columns the outer fit keeps under `save_pred` and
-# `extract` are identical between a serial run and a parallel one. The
-# extract reads ranger's out-of-bag prediction error, a number the fold's
-# seed decides, so the `.extracts` identity has a value to fail on. AC2's
-# coefficient extract is not usable here: `coef()` of a ranger fit is NULL,
-# and tune's inner run errors on a NULL extract ("attempt to set an attribute
-# on NULL", tune 2.1.0, measured 2026-09-06), so every fold would fail before
-# the outer fit.
+# The two columns the outer fit keeps under `save_pred` and `extract` are
+# identical between a serial run and a parallel one. The extract reads ranger's
+# out-of-bag prediction error, a number the fold's seed decides, so the
+# `.extracts` identity has a value to fail on. A coefficient extract is not
+# usable here: `coef()` of a ranger fit is NULL, and tune's inner run errors
+# on a NULL extract ("attempt to set an attribute on NULL", measured on tune
+# 2.1.0), so every fold would fail before the outer fit.
 
 test_that("the outer fit's predictions and extracts match serially and on two daemons", {
   skip_if_no_daemons()
@@ -683,7 +677,7 @@ test_that("the outer fit's predictions and extracts match serially and on two da
 })
 
 
-# BC16 (M70, AC6): the plain resampling path matches serial on two daemons.
+# The plain resampling path matches serial on two daemons.
 # ranger with every parameter fixed, so the outer fit draws from the stream
 # and a daemon that ran the fold under another seed, or ran an inner stage
 # at all, would differ; the tuner needs no package beyond tune, which every
@@ -717,7 +711,7 @@ test_that("the plain resampling path matches serial on two daemons", {
   expect_identical(parallel, serial)
 })
 
-# BC17 (M71, AC2): the workflow-set map matches serial on two daemons. The
+# The workflow-set map matches serial on two daemons. The
 # grid orchestrator on the mixed two-workflow fixture, every fold completing,
 # so each element's folds ran one parallel round per workflow under the
 # entry state the map reinstated; a daemon that ran a workflow's fold under
@@ -766,7 +760,7 @@ test_that("the workflow-set map matches serial on two daemons", {
   expect_identical(parallel, serial)
 })
 
-# BC9 is the last block on the shared 2-daemon pool (M74): it dirties every
+# This block is the last on the shared 2-daemon pool: it dirties every
 # daemon on purpose, and the pool is replaced by the 3-daemon one below
 # before any other block runs.
 
@@ -806,11 +800,10 @@ test_that("a fold is immune to whatever a daemon ran before it", {
   expect_identical(polluted, fresh)
 })
 
-# The shared 3-daemon pool (M74): the second count BC1 compares at, its
+# The shared 3-daemon pool: the second count the comparison runs at, its
 # serial reference rebuilt so that it depends on nothing an earlier block
-# computed. BC10, BC12 and BC13 compared here too until M113: no tuner code
-# reads the worker count, every tuner keeps its two-daemon block above, and
-# grid keeps both counts (D-079).
+# computed. Only grid runs here: no tuner code reads the worker count, so every
+# tuner keeps its two-daemon block above, and grid keeps both counts.
 
 test_that("the shared 3-daemon pool starts primed", {
   skip_if_no_daemons()
@@ -844,20 +837,18 @@ test_that("no shared pool outlives its section", {
   expect_identical(mirai::status()$connections, 0L)
 })
 
-# BC3 starts its own pool: it kills one of the daemons, so nothing may share
-# them (M74).
+# This block starts its own pool: it kills one of the daemons, so nothing may
+# share them.
 
 test_that("a daemon killed mid-run yields a recorded failure, not an abort", {
   skip_if_no_daemons()
   skip_if_not_installed("ranger")
 
-  # This drives the REAL nested_tune_grid() -> dispatch_folds() path. An earlier
-  # version hand-rolled mirai_map/collect_mirai/classify_fold_result instead, on
-  # the belief that production code had no injection point; review disproved
-  # that by execution. Because dispatch_folds() looks `fold_task` up by name and
-  # serializes it, a mocked binding reaches the daemon, so the kill happens
-  # inside a genuine dispatch. The old shape left AC5 unpinned: switching the
-  # collect to `.stop = TRUE` kept every test green.
+  # This drives the REAL nested_tune_grid() -> dispatch_folds() path rather
+  # than hand-rolling mirai_map/collect_mirai/classify_fold_result, which would
+  # leave the production collect unpinned. Because dispatch_folds() looks
+  # `fold_task` up by name and serializes it, a mocked binding reaches the
+  # daemon, so the kill happens inside a genuine dispatch.
   #
   # The mock communicates through environment variables, not captured locals:
   # dispatch strips the task's environment before sending it, and daemons
@@ -937,7 +928,7 @@ test_that("a daemon killed mid-run yields a recorded failure, not an abort", {
     )
   )
 
-  # The run returned rather than aborting -- the whole point (M03, IP4).
+  # The run returned rather than aborting -- the whole point.
   expect_identical(last_dispatch(), "parallel")
   expect_identical(nrow(parallel), nrow(serial))
 

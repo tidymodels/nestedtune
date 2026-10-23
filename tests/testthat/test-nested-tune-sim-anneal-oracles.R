@@ -1,8 +1,7 @@
 # Oracle records for nested_tune_sim_anneal() (DESIGN Conventions: oracles are
-# recorded in the test file that asserts them). The numbering is this file's
-# own.
+# recorded in the test file that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels and
+# Source: the tidymodels and
 #   finetune pipeline itself, recomputed at test time by
 #   reference_nested_anneal_loop() in helper-orchestration.R, written from
 #   the documented seed contract -- `set.seed(s)`, one
@@ -11,28 +10,26 @@
 #   allow_par = FALSE)`, fitting under element 2i -- and never from the
 #   driver's output. Pinned by "per-fold metrics, selections and inner tables
 #   match a hand-rolled annealing reference loop" on the deterministic and
-#   the metric-separating fixtures. Satisfies AC1.
+#   the metric-separating fixtures.
 #
-# O2 -- type "invariant". Source: no external one; the agreement between two
-#   independent internal routes is the oracle. `tune_sim_anneal()` scores its
-#   `initial` candidates as a space-filling design drawn under the fold's
-#   seed and scored with `tune_grid()` (tune's `check_initial()` and
-#   `create_initial_set()`, tune 2.1.0, read 2026-09-02), which is what
-#   `nested_tune_grid()` does with an integer `grid` of the same size under
-#   the same seed -- so the `.iter == 0` rows must carry the grid path's
-#   parameter values and means. Pinned by "the initial candidates are the
-#   grid path's under the same seed". Satisfies AC2.
+# No external source. The agreement between two independent internal routes
+#   is the oracle. `tune_sim_anneal()` scores its `initial` candidates as a
+#   space-filling design drawn under the fold's seed and scored with
+#   `tune_grid()` (tune's `check_initial()` and `create_initial_set()`,
+#   tune 2.1.0), which is what `nested_tune_grid()` does with an integer `grid`
+#   of the same size under the same seed -- so the `.iter == 0` rows must carry
+#   the grid path's parameter values and means. Pinned by "the initial
+#   candidates are the grid path's under the same seed".
 #
-# O3 -- type "invariant" (mode independence), pinned in
-#   test-parallel-identity.R as BC13: the same seed gives an identical result
-#   serially and at two daemons (the three-daemon repeat went at M113,
-#   D-079). Recorded here for the audit.
+# Mode independence, pinned in test-parallel-identity.R: the same seed gives an
+#   identical result serially and at two daemons. Recorded here for the audit.
 #
-# O1 and O2 are the >=2 independent oracle types GP2 asks of the package's own
-# contribution -- the call, the seed, the record, the loop -- at the initial
-# stage. The iteration stage has O1 and O3 only: the perturbations are
-# finetune's own search inside D-002's boundary, and no independent oracle
-# for them exists here.
+# At the initial stage, the package's own contribution -- the call, the seed,
+# the record, the loop -- has at least two independent oracles, as the package
+# requires. The iteration stage has the reference loop and the
+# mode-independence check only: the perturbations are finetune's own search,
+# inside the boundary that delegates inner tuning to tune, and no independent
+# oracle for them exists here.
 
 skip_heavy_on_cran()
 
@@ -98,7 +95,7 @@ expect_matches_reference <- function(res, ref) {
   invisible(res)
 }
 
-# `.iter` on the fold record (AC1): 0 on the initial candidates, whose labels
+# `.iter` on the fold record: 0 on the initial candidates, whose labels
 # finetune prefixes `initial_`, and the iteration number on the rest.
 expect_iter_column <- function(tbl, initial) {
   expect_true(".iter" %in% names(tbl))
@@ -296,6 +293,6 @@ test_that("the help page's by-hand recipe reproduces a fold's inner table and se
   )
 })
 
-# The selection rule on the annealing path was pinned here from M69 to M113.
-# `apply_selection_rule()` is one shared site inside `nested_fold_fit()`, so
-# the grid and racing oracle files' selection-rule blocks cover it (D-079).
+# The selection-rule blocks of the grid and racing oracle files cover the
+# annealing path too: `apply_selection_rule()` is one shared site inside
+# `nested_fold_fit()`.

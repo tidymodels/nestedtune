@@ -1,4 +1,4 @@
-# The record's `first_metric` entry (M116): the name of the first metric in the
+# The record's `first_metric` entry: the name of the first metric in the
 # set, as tune resolves it for the workflow. The oracle is tune's own reading
 # of the final fit's stored tuning run, `tune::.get_tune_metric_names()`, the
 # call every fold and the final fit select on. It is compared with the entry
@@ -93,7 +93,7 @@ test_that("the entry reaches no tuner, and a run that selects nothing records no
 })
 
 # A metric set tune cannot resolve for the workflow's mode is refused before
-# any fold runs, since the entry cannot be recorded for it (M116 review). Each
+# any fold runs, since the entry cannot be recorded for it. Each
 # fold's run would fail on the same set.
 test_that("a metric set that does not suit the model's mode is refused at entry", {
   skip_if_no_engines()
@@ -114,9 +114,8 @@ test_that("a metric set that does not suit the model's mode is refused at entry"
 })
 
 # `nested_fit_resamples()` selects nothing and records no name, but every
-# fold's run would still fail on such a set, so it is refused at entry too
-# (M117, D-082). Before, each fold ran, failed, and the call warned. The
-# warning count shows that the call did not reach the failed-fold warning,
+# fold's run would still fail on such a set, so it is refused at entry too.
+# The warning count shows that the call did not reach the failed-fold warning,
 # which follows every fold's run.
 expect_metrics_mode_refusal <- function(expr, fn) {
   warned <- 0L
@@ -157,8 +156,8 @@ test_that("a workflow set with an unsuitable metric set is refused before any wo
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   # The workflow with nothing to tune comes first and takes a suitable set
-  # from its own `option` entry, so the refusal is the tuned workflow's (M117
-  # made the pre-check judge both routes). A refusal made only at the tuned
+  # from its own `option` entry, so the refusal is the tuned workflow's, since
+  # the pre-check judges both routes. A refusal made only at the tuned
   # workflow's turn would follow the first workflow's run, which the counter
   # on `run_orchestrator()` would see.
   wset <- workflowsets::as_workflow_set(
@@ -186,9 +185,9 @@ test_that("a workflow set with an unsuitable metric set is refused before any wo
 })
 
 # A workflow the map routes to `nested_fit_resamples()` is judged in the
-# pre-check too (M117, D-082), whether `fn` names that function or a tuner. The refused workflow
-# comes second and takes its set from its own `option` entry, since a shared
-# set in `...` would refuse the first. No orchestrator call may start.
+# pre-check too, whether `fn` names that function or a tuner. The refused
+# workflow comes second and takes its set from its own `option` entry, since a
+# shared set in `...` would refuse the first. No orchestrator call may start.
 test_that("a workflow the map routes to nested_fit_resamples() is refused before any workflow runs", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()

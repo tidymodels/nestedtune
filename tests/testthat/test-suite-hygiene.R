@@ -6,10 +6,10 @@
 # then reads `$data`. Everything else mirai offers for getting a value out
 # blocks until it resolves and cannot be interrupted from R at all --
 # `setTimeLimit(elapsed=)` does not fire inside any of them, established by
-# execution while planning M14.
+# running them.
 #
 # Three shapes are matched, and the list is the enumeration this check is only
-# as good as (M14 review F1, which found the first draft matched one of them):
+# as good as:
 #   * `collect_mirai(x)` -- collects a whole map.
 #   * `call_mirai(x)` -- mirai's canonical blocking wait; `x[]` is sugar for it.
 #   * a `[` collect, empty (`mirai(...)[]`, `map[]`) or carrying one of mirai's
@@ -49,7 +49,7 @@ blocking_collect_sites <- function(path) {
   sort(unique(c(data$line1[named], data$line1[blocking])))
 }
 
-# The second rule (M16 T3, AC3): every wait-shaped call in the daemon files is
+# The second rule: every wait-shaped call in the daemon files is
 # accounted for in the time budget. `collect_bounded()` made the waits bounded;
 # this makes the SUM of those bounds visible, which is the part that killed a CI
 # job -- 1008.7 s of legal waiting in a file that normally takes 12.0 s, against
@@ -187,8 +187,8 @@ test_that("every wait-shaped call in the daemon files carries a budget row", {
   )
 
   # The check is only as good as its reaching the files at all -- a typo in a
-  # name would otherwise pass by finding nothing (M14's "a run that tested
-  # nothing reported clean").
+  # name would otherwise pass by finding nothing, and a run that tested nothing
+  # would report clean.
   expect_gt(length(found), 20L)
 
   unbudgeted <- setdiff(found, budgeted)
@@ -238,7 +238,7 @@ test_that("the budget ledger has no rows for calls that are gone", {
 # A ledger row whose seconds were COPIED from an explicit argument can drift from
 # that argument silently -- raising `timeout = 60000` to `600000` would leave both
 # accounting guards green and the printed total unchanged, while the real worst
-# case grew by nine minutes (M16 review F3). Rows whose bound comes from a named
+# case would grow by nine minutes. Rows whose bound comes from a named
 # constant in helper-parallel.R cannot drift that way and need no check.
 #
 # NA means the call carries no explicit bound of its own: a bound read from a
@@ -248,8 +248,8 @@ test_that("the budget ledger has no rows for calls that are gone", {
 #
 # Read from the whole CALL, which `wait_calls()` gives as parsed text. An
 # argument list wrapped across lines puts the bound on a later line than the
-# function name, and a read of one line once found nothing there and skipped
-# the row in silence (M24 review F9).
+# function name, and a read of one line would find nothing there and skip the
+# row in silence.
 #
 # The keyword is chosen by the call rather than tried in turn, because the
 # whole call brings any nested call's arguments into view with it --
@@ -272,8 +272,9 @@ call_site_bound_s <- function(txt, call) {
 }
 
 # The rows whose bound this cross-check cannot re-read, named so a new one
-# cannot join them in silence -- which is the failure F9 found. Keyed as the
-# ledger rows are, so a stale entry cannot quietly excuse a different row.
+# cannot join them in silence -- which is the failure this list exists to
+# prevent. Keyed as the ledger rows are, so a stale entry cannot quietly excuse
+# a different row.
 DECLARED_UNCHECKABLE_BOUNDS <- c(
   # Bound comes from COLLECT_BOUNDED_DEFAULT_S, which the row reads directly.
   wait_call_key(
@@ -338,7 +339,7 @@ test_that("a copied bound still matches the argument it was copied from", {
       )
     )
   }
-  # A skipped row is the failure mode, not an accident of it: F9's row declared a
+  # A skipped row is the failure mode, not an accident of it: a row declared a
   # copied bound, was never re-read, and nothing said so. Asserting the skipped
   # set EQUALS the declared one -- rather than counting the checked rows -- is
   # what makes a fourth unreadable row fail here instead of passing quietly.
@@ -355,15 +356,13 @@ test_that("a copied bound still matches the argument it was copied from", {
     )
   )
   # Without this the test passes by checking nothing the moment the filter or the
-  # regex stops matching -- the failure M14's review found in a harness that
-  # reported clean having asserted nothing.
+  # regex stops matching: a harness that reports clean having asserted nothing.
   expect_gt(checked, 4L)
 })
 
 test_that("the localized file's declared worst case fits the CI budget", {
-  # AC4. The number this milestone exists to move: what test-parallel-classify.R
-  # is ALLOWED to wait for, which on 2026-07-27 was 1008.7 s against a 1200 s
-  # job cap, in a file that typically runs 12.0 s.
+  # What test-parallel-classify.R is ALLOWED to wait for, held under its
+  # ceiling, in a file that typically runs 12.0 s.
   totals <- time_budget_totals()
   classify <- totals$seconds[totals$file == "test-parallel-classify.R"]
 
@@ -372,7 +371,7 @@ test_that("the localized file's declared worst case fits the CI budget", {
 })
 
 test_that("the metrics-delivery file stays inside its own ceiling", {
-  # M20 AC2. The file was born with a ceiling rather than given one later,
+  # The file was born with a ceiling rather than given one later,
   # which is the difference between holding a bound and measuring a regression.
   totals <- time_budget_totals()
   metrics <- totals$seconds[totals$file == "test-parallel-metrics.R"]
@@ -382,11 +381,11 @@ test_that("the metrics-delivery file stays inside its own ceiling", {
 })
 
 test_that("no test waits on a mirai result outside collect_bounded()", {
-  # Everything under tests/, not just this directory -- AC2 says "under
-  # `tests/`", and `tests/testthat.R` is R code that could acquire a wait too.
+  # Everything under tests/, not just this directory: `tests/testthat.R` is R
+  # code that could acquire a wait too.
   # `.r` as well as `.R`, since R does not care about the case. Deliberately
-  # NOT the repo root: `R/parallel.R:91` holds the production `collect_mirai()`
-  # that M07 put there on purpose, and this rule is about the suite.
+  # NOT the repo root: `R/parallel.R:91` holds the production `collect_mirai()`,
+  # which is there on purpose, and this rule is about the suite.
   files <- list.files(
     test_path(".."),
     pattern = "\\.[Rr]$",
@@ -412,14 +411,13 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
   )
 })
 
-# M79. The probe in `shared_daemons()` compares `names(now)` against
-# `names(was)` to say "the same daemons, by pid", so a name that belongs to a
-# different record turns a replaced daemon into a silent pass. The naming is
-# exercised here against fabricated answers rather than a live pool: the case
-# that told the two functions the old code used apart is an answer carrying no
-# integer `pid` -- what the helper's own `NA_integer_` fallback is written for
-# -- and fabricating that is cheaper and surer than breaking a pool into
-# producing one.
+# The probe in `shared_daemons()` compares `names(now)` against `names(was)` to
+# say "the same daemons, by pid", so a name that belongs to a different record
+# turns a replaced daemon into a silent pass. The naming is exercised here
+# against fabricated answers rather than a live pool: the case that tells the
+# two functions apart is an answer carrying no integer `pid` -- what the
+# helper's own `NA_integer_` fallback is written for -- and fabricating that is
+# cheaper and surer than breaking a pool into producing one.
 test_that("daemon answers are named by the pid each one holds", {
   answer <- function(pid) list(pid = pid, namespaces = character(0))
 

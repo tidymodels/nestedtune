@@ -31,7 +31,7 @@ test_that("the accessor returns the record the final fit carries", {
 
   got <- extract_procedure(objs$final)
   expect_identical(got, objs$final$procedure)
-  # The final fit re-runs the procedure the results object recorded (D-041),
+  # The final fit re-runs the procedure the results object recorded,
   # so the two doors open onto records that agree on the tuner.
   expect_identical(got$tuner, extract_procedure(objs$res)$tuner)
 })

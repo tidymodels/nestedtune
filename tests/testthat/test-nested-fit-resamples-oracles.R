@@ -1,47 +1,45 @@
-# Oracle records for nested_fit_resamples() (M70; DESIGN Conventions: oracles
+# Oracle records for nested_fit_resamples() (DESIGN Conventions: oracles
 # are recorded in the test file that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: tune::fit_resamples()
-#   itself, run at test time on the same outer `vfold_cv()` splits the nested
-#   design was built from, under the same seed, so the outer rows are the
-#   same rows without being read off the nested object. With nothing to tune
-#   the nested loop is ordinary resampling on the outer folds, and every
-#   fold's `.estimate` must be identical to fit_resamples()'s per-fold row.
-#   Pinned by "every fold's metrics are identical to fit_resamples() on the
-#   same outer splits". Deterministic engine only (RR01 B2): matching tune's
-#   own resampling with a stochastic engine would need its substream
-#   derivation, and ranger is pinned by seed identity in
-#   test-nested-fit-resamples-rng.R instead.
+# Source: tune::fit_resamples() itself, run at test
+#   time on the same outer `vfold_cv()` splits the nested design was built
+#   from, under the same seed, so the outer rows are the same rows without
+#   being read off the nested object. With nothing to tune the nested loop is
+#   ordinary resampling on the outer folds, and every fold's `.estimate` must
+#   be identical to fit_resamples()'s per-fold row. Pinned by "every fold's
+#   metrics are identical to fit_resamples() on the same outer splits".
+#   Deterministic engine only: matching tune's own resampling with a stochastic
+#   engine would need its substream derivation, and ranger is pinned by seed
+#   identity in test-nested-fit-resamples-rng.R instead.
 #
-# O2 -- type "analytic by-hand" (independent computation). Source: the fold
+# Source: the fold
 #   done by hand with no tune call at all -- `fit()` on the split's analysis
 #   set, `predict()` on its assessment set, and the metric set applied to the
 #   two columns -- so a value that fit_resamples() and the loop both got wrong
 #   the same way would still fail here. Pinned by "every fold's metrics are
 #   identical to a by-hand fit, predict and score".
 #
-# O3 -- type "analytic" (closed form from theory). Source: nachum2026,
+# Closed form from theory. Source: nachum2026,
 #   Lemma 4.9 and Theorem 4.10 (both p. 11), the mean squared error of k-fold
 #   CV for the majority rule under Bernoulli(1/2) labels. The rule (Section
 #   4.1.2, p. 10) predicts "0" unless the count of "1" labels in its training
 #   rows exceeds half of them, so a tie predicts "0". parsnip::null_model()
 #   predicts the first factor level on a tie, which is "0" under the levels
-#   c("0", "1") the test uses. Where O1 and O2 check each fold's number, O3
-#   checks the outer average over all 64 labelings of 6 rows in 3 folds. It
-#   runs one labeling for each of the 27 per-fold counts of "1" labels, weighted
-#   by the probability of that count, because a fold's accuracy depends only on
-#   the counts. Pinned by "the outer estimate's mean squared error for
-#   the majority rule is nachum2026's closed form". Planting a leak, the outer
-#   fit trained on all rows, moved the weighted error to 1/(4n) and failed it.
-#   A tie broken toward "1" gives the same closed form, because the labels are
-#   symmetric, so O3 does not detect the tie direction (M104).
+#   c("0", "1") the test uses. Where the reference and by-hand oracles check
+#   each fold's number, this one checks the outer average over all 64
+#   labelings of 6 rows in 3 folds. It runs one labeling for each of the 27
+#   per-fold counts of "1" labels, weighted by the probability of that count,
+#   because a fold's accuracy depends only on the counts. Pinned by "the outer
+#   estimate's mean squared error for the majority rule is nachum2026's closed
+#   form". Planting a leak, the outer fit trained on all rows, moved the
+#   weighted error to 1/(4n) and failed it. A tie broken toward "1" gives the
+#   same closed form, because the labels are symmetric, so this check does not
+#   detect the tie direction.
 #
-# O1 and O2 are the >=2 independent oracle types GP2 requires for the
-# estimate this orchestrator reports (AC1). O3 adds a third, independent
-# source of truth for the averaged estimate: a closed form from theory, where
-# O2 is a by-hand computation.
+# The closed form adds a third, independent source of truth for the averaged
+# estimate, beyond the by-hand computation.
 #
-# The rest of the file pins the record's shape (AC2): the same columns the
+# The rest of the file pins the record's shape: the same columns the
 # five tuning orchestrators write, an empty selection on every completed
 # fold, an inner table with tune's summary columns and no rows, the two seeds
 # drawn by the documented contract and shared with a tuned run under the same
@@ -106,7 +104,7 @@ test_that("every fold's metrics are identical to a by-hand fit, predict and scor
   ms <- reg_metrics()
   folds <- det_nested(d)
 
-  # The seed-30 run on this configuration, served from the cache (M113).
+  # The seed-30 run on this configuration, served from the cache.
   res <- fit_resamples_results(d)
 
   for (i in seq_len(nrow(res))) {
@@ -251,12 +249,12 @@ test_that("the two seeds are the documented draw, shared with a tuned run under 
   # 2i - 1 and 2i.
   # The tuned workflow is built before the seed is set: a recipe step draws
   # its id from the stream, and the contract's draw is the loop's first. The
-  # fixed workflow is the cached fixture's own (M113).
+  # fixed workflow is the cached fixture's own.
   tuned_wf <- det_workflow(d)
   set.seed(30)
   seeds <- sample.int(.Machine$integer.max, 2L * nrow(folds))
 
-  # The seed-30 run on this configuration, served from the cache (M113).
+  # The seed-30 run on this configuration, served from the cache.
   res <- fit_resamples_results(d)
   expect_identical(res$.tuning_seed, seeds[c(1L, 3L, 5L)])
   expect_identical(res$.outer_fit_seed, seeds[c(2L, 4L, 6L)])
@@ -290,7 +288,7 @@ test_that("`.predictions` and `.extracts` are present exactly when the control a
     )
   )
   expect_true(all(c(".predictions", ".extracts") %in% names(kept)))
-  # tune's order: `.predictions` then `.extracts`, after `.notes` (D-055).
+  # tune's order: `.predictions` then `.extracts`, after `.notes`.
   expect_identical(
     match(c(".notes", ".predictions", ".extracts"), names(kept)),
     match(".notes", names(kept)) + 0:2
@@ -341,7 +339,7 @@ test_that("a fold whose fit raises is recorded as failed with a note at the oute
   expect_identical(notes$location[[1L]], "outer fit")
   expect_identical(notes$type[[1L]], "error")
   # The failure is the one the design plants: an outer `in_id` past the
-  # frame, which `last_fit()` refuses (M54), not some other cause.
+  # frame, which `last_fit()` refuses, not some other cause.
   expect_match(notes$note[[1L]], "999999", fixed = TRUE)
 
   # A failed fold holds NULL where a completed one holds the empty table,

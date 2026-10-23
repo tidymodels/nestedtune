@@ -1,9 +1,9 @@
-# The readers on a nested_results_set (M71, AC3), the print and the
-# extractor (AC4). Every stacked table is checked against
-# `dplyr::bind_rows()` of the per-element tables keyed by `wflow_id`, the
-# oracle AC3 names, and every fold-state clause is asserted for each of the
-# readers it names, by looping over them: one exemplar cannot stand for the
-# family, since the five differ in what they check first.
+# The readers on a nested_results_set, the print and the extractor. Every
+# stacked table is checked against `dplyr::bind_rows()` of the per-element
+# tables keyed by `wflow_id`, the oracle for these readers, and every
+# fold-state clause is asserted for each of the readers it names, by looping
+# over them: one exemplar cannot stand for the family, since the five differ
+# in what they check first.
 
 # The five readers that read completed folds, by name, and the sixth.
 COMPLETED_READERS <- list(
@@ -151,7 +151,7 @@ test_that("a workflow that only partly completed raises the reader's partial war
 test_that("a workflow in which no fold completed is left out with a warning naming it, and collect_notes() keeps it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
-  # The tuned-plus-broken set under seed 32, served from the cache (M113).
+  # The tuned-plus-broken set under seed 32, served from the cache.
   res <- broken_set_results(d)
   expect_true(all(res$result[[1L]]$.completed))
   expect_false(any(res$result[[2L]]$.completed))
@@ -188,7 +188,7 @@ test_that("a workflow in which no fold completed is left out with a warning nami
 test_that("a set in which no workflow completed a fold is refused, and collect_notes() still answers", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
-  # The all-broken set under seed 32, served from the cache (M113).
+  # The all-broken set under seed 32, served from the cache.
   res <- broken_set_results(d, alone = TRUE)
   for (r in res$result) {
     expect_false(any(r$.completed))
@@ -240,7 +240,7 @@ test_that("a workflow that would contribute rows but did not keep the column is 
     )
     expect_identical(rlang::call_name(conditionCall(cnd)), name, info = name)
   }
-  # compute_metrics() and augment() read `.predictions` too (M92).
+  # compute_metrics() and augment() read `.predictions` too.
   readers <- list(
     compute_metrics = function() compute_metrics(res, reg_metrics()),
     augment = function() augment(res)
@@ -304,7 +304,7 @@ test_that("an element's table carrying a wflow_id column is refused", {
   expect_no_error(collect_selections(res))
 })
 
-# compute_metrics() and augment() on the set (M92). The oracle is the one
+# compute_metrics() and augment() on the set. The oracle is the one
 # above: each element's own table, the id in front, bound in set order.
 
 test_that("compute_metrics() and augment() on a set are bind_rows() of each workflow's call under wflow_id", {
@@ -331,7 +331,7 @@ test_that("compute_metrics() and augment() on a set are bind_rows() of each work
   expect_identical(nrow(augment(res)), 2L * nrow(d))
 })
 
-# M93: a workflow's saved predictions that do not match its held-out rows.
+# A workflow's saved predictions that do not match its held-out rows.
 test_that("augment() on a set keeps nestedtune_augment_predictions for a workflow whose saved predictions miss a held-out row, naming it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
@@ -346,7 +346,7 @@ test_that("augment() on a set keeps nestedtune_augment_predictions for a workflo
   expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
 })
 
-# M100: the same mismatch under compute_metrics() on the set.
+# The same mismatch under compute_metrics() on the set.
 test_that("compute_metrics() on a set keeps nestedtune_compute_metrics_predictions for a workflow whose saved predictions miss a held-out row, naming it", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
@@ -361,7 +361,7 @@ test_that("compute_metrics() on a set keeps nestedtune_compute_metrics_predictio
   expect_no_match(conditionMessage(cnd), '"tuned"', fixed = TRUE)
 })
 
-# M93: two classification workflows in one set, run at the default level.
+# Two classification workflows in one set, run at the default level.
 cls_set_results <- function(data, seed = 36) {
   wset <- workflowsets::as_workflow_set(
     forest_a = cls_workflow(data),
@@ -411,7 +411,7 @@ test_that("compute_metrics() on a set scores each workflow at the event_level pa
   expect_true(all(abs(second$mean[is_sens] - first$mean[is_sens]) > 1e-8))
 })
 
-# AC4 -------------------------------------------------------------------
+# ---- the set print ----------------------------------------------------
 
 test_that("print names the orchestrator, the workflow count and each workflow's fold counts", {
   skip_if_no_wset_fixture()
@@ -480,7 +480,7 @@ test_that("extract_workflow() returns the element's workflow and refuses an unkn
 })
 
 # The package registers no `rank_results()` or `fit_best()` method on the set,
-# so workflowsets and tune refuse it rather than answer (M71, AC4). What their
+# so workflowsets and tune refuse it rather than answer. What their
 # refusals say is theirs, and not asserted.
 test_that("no rank_results() or fit_best() method is registered for the set", {
   reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
@@ -490,7 +490,7 @@ test_that("no rank_results() or fit_best() method is registered for the set", {
   expect_true("collect_metrics" %in% on_set)
 })
 
-# A row subset of the set (M73, AC2 and AC3). A subset that keeps the class
+# A row subset of the set. A subset that keeps the class
 # answers for the workflows it holds, so every reader on it gives what the
 # whole set's reader gives for those workflows, in the subset's order; the
 # print reports the rows in hand alone.

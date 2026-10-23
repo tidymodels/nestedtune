@@ -1,4 +1,4 @@
-# The final fit on a record that selected nothing (M70, AC4): the procedure
+# The final fit on a record that selected nothing: the procedure
 # record's shape, the record check, the fit with no tuning run, its print,
 # and the two accessors that have nothing to return.
 
@@ -15,7 +15,7 @@ test_that("the procedure record names the tuner and carries no grid, param_info 
   expect_false(any(c("grid", "param_info", "select") %in% names(procedure)))
   expect_null(attr(res, "grid"))
 
-  # The effective control (D-042): tune's `control_resamples()` with the
+  # The effective control: tune's `control_resamples()` with the
   # forced slots applied, and nothing else changed.
   expected <- tune::control_resamples()
   expected$allow_par <- FALSE

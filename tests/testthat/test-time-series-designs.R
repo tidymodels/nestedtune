@@ -1,21 +1,21 @@
-# Oracle records for rolling-origin and sliding-window outer designs (M108),
-# extended to sliding-index and sliding-period outer designs (M111).
+# Oracle records for rolling-origin, sliding-window, sliding-index and
+# sliding-period outer designs.
 # DESIGN Conventions: oracles are recorded in the test file that asserts them.
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
+# Source: the tidymodels pipeline
 #   itself, recomputed at test time by reference_nested_loop() in
 #   helper-orchestration.R, written from the documented seed contract rather
 #   than from the driver. Run here on designs built by rsample::nested_cv()
 #   with `rolling_origin()`, `sliding_window()`, `sliding_index()` and
 #   `sliding_period()` outer resamples. Pinned by the four "match(es) a
-#   hand-rolled reference loop" tests. Satisfies M108 AC1/AC2 and M111 AC1.
+#   hand-rolled reference loop" tests.
 #
-# O2 -- type "live" (reference implementation). Source: rsample::nested_cv(),
+# Source: rsample::nested_cv(),
 #   recomputed at test time. Every outer and inner analysis and assessment set
 #   `nested_resamples()` builds must match it row for row. Pinned by the four
-#   "splits match rsample::nested_cv()" tests. Satisfies M108 AC3 and M111 AC3.
+#   "splits match rsample::nested_cv()" tests.
 #
-# O3 -- type "live" (reference implementation). Source: tune::tune_grid(),
+# Source: tune::tune_grid(),
 #   tune::select_best() and fit() run by hand under the final fit's
 #   `tuning_seed` and `fit_seed`, on an inner design built on the full data
 #   from the fixture's literal `rolling_origin()` call. Pinned by "the final
@@ -23,26 +23,24 @@
 #   final fit takes the data from the first outer split and never reads the
 #   outer split indices, so one outer design covers its path.
 #
-# The M110 oracles for the Bayesian, racing and annealing tuners are recorded
+# The oracles for the Bayesian, racing and annealing tuners are recorded
 # in test-time-series-bayes.R, test-time-series-race.R and
 # test-time-series-anneal.R, beside the tests that assert them.
 #
-# O5 -- type "live" (reference implementation), M110. Source:
+# Source:
 #   tune::fit_resamples() run by hand on the outer splits, rebuilt here from
 #   the fixture's literal outer call rather than read off the nested object,
 #   as test-nested-fit-resamples-oracles.R does for `vfold_cv()`. Pinned by
 #   the "nested_fit_resamples() matches fit_resamples() on a ... design"
-#   tests. Satisfies M110 AC2.
+#   tests.
 #
-# O7 -- type "live" (reference implementation), M110. Source: hand_call() in
+# Source: hand_call() in
 #   helper-orchestration.R, the orchestrator each workflow of a set routes
 #   to, called by hand under the same seed, as
 #   test-nested-workflow-map-oracles.R uses it. Pinned by "a workflow set on a
-#   rolling-origin design matches the hand calls". Satisfies M110 AC5.
+#   rolling-origin design matches the hand calls".
 #
-# O5 and O7 each check that an orchestrator gives what tune gives when run by
-# hand. The estimate itself adds nothing new for these designs, so no
-# second oracle type is asked of them here.
+# These two check that an orchestrator gives what tune gives when run by hand.
 
 skip_heavy_on_cran()
 
@@ -142,7 +140,7 @@ test_that("sliding-window splits match rsample::nested_cv()", {
 })
 
 # expect_final_matches_reference() is in helper-orchestration.R, so the inner
-# sliding designs' file can reach it (M119).
+# sliding designs' file can reach it.
 
 test_that("the final fit on a rolling-origin design matches a hand-rolled reference", {
   skip_if_no_engines()
@@ -150,9 +148,9 @@ test_that("the final fit on a rolling-origin design matches a hand-rolled refere
   expect_final_matches_reference(d, ts_rolling_nested(d))
 })
 
-# ---- Index-based and period-based designs (M111) -----------------------------
+# ---- Index-based and period-based designs ------------------------------------
 #
-# The O1 and O2 oracles above, run on `sliding_index()` and
+# The reference-loop and splits oracles above, run on `sliding_index()` and
 # `sliding_period()` outer designs over `make_ts_data()`. The fit_resamples
 # reference-loop and final-fit tests reach these designs through TS_DESIGNS.
 
@@ -225,7 +223,7 @@ for (design in names(TS_NEW_OUTER_CALLS)) {
   })
 }
 
-# ---- AC5: predictions and augment() -----------------------------------------
+# ---- Predictions and augment() ----------------------------------------------
 
 ts_pred_run <- function(data, design = ts_rolling_nested) {
   set.seed(20)
@@ -254,7 +252,7 @@ test_that("collect_predictions() returns each outer-assessment row once per fold
   }
 })
 
-# `expect_names_never_held()` is in helper-predictions.R (M125).
+# `expect_names_never_held()` is in helper-predictions.R.
 expect_augment_names_never_held <- function(res, d) {
   never <- setdiff(
     seq_len(nrow(d)),
@@ -282,7 +280,7 @@ test_that("augment() refuses a sliding-window result and names the rows never he
   expect_augment_names_never_held(res, d)
 })
 
-# Two outer slices whose eleven-row assessment sets share row 71 (M111).
+# Two outer slices whose eleven-row assessment sets share row 71.
 ts_overlap_nested <- function(data) {
   rsample::nested_cv(
     data,
@@ -306,8 +304,8 @@ test_that("augment() refuses an overlapping sliding-window result for the rows i
   )
   expect_identical(c(sum(counts == 0L), sum(counts > 1L)), c(69L, 1L))
 
-  # The row held out twice is not what is refused (M125): the message names
-  # the rows left out and says nothing of a design type.
+  # The row held out twice is not what is refused: the message names the rows
+  # left out and says nothing of a design type.
   msg <- expect_names_never_held(res, which(counts == 0L))
   expect_no_match(msg, "more than once", fixed = TRUE)
   expect_no_match(msg, "time-series", fixed = TRUE)
@@ -315,7 +313,7 @@ test_that("augment() refuses an overlapping sliding-window result for the rows i
   expect_no_match(msg, "Monte Carlo", fixed = TRUE)
 })
 
-# ---- The other orchestrators (M110) ------------------------------------------
+# ---- The other orchestrators -------------------------------------------------
 #
 # The Bayesian, racing and annealing tuners have their own files,
 # test-time-series-bayes.R, test-time-series-race.R and
@@ -390,10 +388,10 @@ for (design in names(TS_DESIGNS)) {
   )
 }
 
-# The final fit on a fit_resamples() result tunes nothing (M110 AC4): no
-# tuning run, an empty selection, and the plain fit on every row under the
-# recorded fit seed. Run on every design in TS_DESIGNS, so the help's claim
-# that `nested_fit_resamples()` results are tested on all four holds.
+# The final fit on a fit_resamples() result tunes nothing: no tuning run, an
+# empty selection, and the plain fit on every row under the recorded fit seed.
+# Run on every design in TS_DESIGNS, so the help's claim that
+# `nested_fit_resamples()` results are tested on all four holds.
 for (design in names(TS_DESIGNS)) {
   build <- TS_DESIGNS[[design]]
 
@@ -409,7 +407,7 @@ for (design in names(TS_DESIGNS)) {
       folds <- build(d)
       expect_s3_class(folds$splits[[1]], TS_SPLIT_CLASS[[design]])
 
-      # The seed-25 run the block above built, served from the cache (M113).
+      # The seed-25 run the block above built, served from the cache.
       set.seed(25)
       res <- memoised(nested_fit_resamples(wf, folds, metrics = ts_metrics()))
       set.seed(44)

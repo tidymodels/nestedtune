@@ -1,24 +1,24 @@
 # Oracle records (DESIGN Conventions: oracles are recorded in the test file
 # that asserts them).
 #
-# O1 -- type "closed-form". Source: the definition of sensitivity, the share of
+# Source: the definition of sensitivity, the share of
 #   true events the model called events, recomputed here with explicit code
 #   from a refit of the fold's selected candidate. Nothing from `tune` computes
 #   it, and `yardstick::sens_vec()` is read beside it as a second reading of
-#   the same predictions. Pinned by "AC2: the sensitivity each outer fold
+#   the same predictions. Pinned by "the sensitivity each outer fold
 #   reports is the one yardstick computes at that event level".
 #
-# O2 -- type "live" (independent implementation). Source: a `tune::tune_grid()`
+# Source: a `tune::tune_grid()`
 #   the test runs itself under `control_grid(allow_par = FALSE, event_level =
 #   "second")`, seeded by the by-hand recipe documented at
 #   `R/nested-final-fit.R:106-118` -- the object's own `tuning_seed`,
 #   kind-pinned, with the inner rset built inside that seed's scope. Pinned by
-#   "AC4: nested_final_fit() tunes under the caller's event level".
+#   "nested_final_fit() tunes under the caller's event level".
 #
-# The O3 record and its AC3 block, that the two levels exchange sensitivity
-# and specificity, went at M152: the exchange is yardstick's arithmetic.
+# The exchange of sensitivity and specificity between the two levels is
+# yardstick's arithmetic, so this file does not test it.
 #
-# The factor level a caller can name as the event (M35).
+# The factor level a caller can name as the event.
 #
 # Everything here runs on the cls_* fixture (helper-orchestration.R), which is
 # built so the setting has something to move: an imbalanced two-class outcome
@@ -118,7 +118,7 @@ test_that("the fixture keeps both classes in every split, and separates the two 
   expect_true(any(differs))
 })
 
-# AC1 -------------------------------------------------------------------
+# Entry check -----------------------------------------------------------
 
 test_that("a value that names no level is refused, by both orchestrators", {
   skip_if_no_engines()
@@ -170,7 +170,7 @@ test_that("the refusal fires before anything is fitted", {
   expect_identical(.Random.seed, before)
 })
 
-# AC2 -- O1 -------------------------------------------------------------
+# Sensitivity -----------------------------------------------------------
 
 test_that("the sensitivity each outer fold reports is the one yardstick computes at that event level", {
   skip_if_no_engines(stochastic = TRUE)
@@ -201,7 +201,7 @@ test_that("the sensitivity each outer fold reports is the one yardstick computes
   }
 })
 
-# AC4 -- O2 -------------------------------------------------------------
+# Final fit -------------------------------------------------------------
 
 test_that("nested_final_fit() tunes under the caller's event level", {
   skip_if_no_engines(stochastic = TRUE)

@@ -1,12 +1,12 @@
-# The final fit on an annealing result (M51 AC5, T4): `nested_final_fit()`
+# The final fit on an annealing result: `nested_final_fit()`
 # runs the recorded search again on the full data, and everything it reports
 # about that search reads through the same derivation the fold record uses.
 #
-# O5 -- type "live" (reference implementation). Source:
+# Source:
 #   reference_anneal_final_fit() in helper-orchestration.R, written from the
 #   documented contract -- its own `set.seed(s)` and
 #   `sample.int(.Machine$integer.max, 2)`, the inner rset built under the
-#   first seed (D-016), `tune_sim_anneal()` under `control_sim_anneal(
+#   first seed, `tune_sim_anneal()` under `control_sim_anneal(
 #   verbose_iter = FALSE, allow_par = FALSE)`, `select_best()`,
 #   `finalize_workflow()`, `fit()` under the second -- and never from the
 #   object. Pinned by "the annealing final fit matches a hand-rolled reference
@@ -48,7 +48,7 @@ test_that("the annealing final fit matches a hand-rolled reference pipeline", {
   # The seed layout, derived independently from the documented contract.
   expect_identical(c(final$tuning_seed, final$fit_seed), ref$seeds)
   expect_identical(final$selected, ref$selected)
-  # The resamples the search saw (D-016's ordering).
+  # The resamples the search saw, in order.
   expect_identical(in_ids(final$tuning), in_ids(ref$tuned))
   expect_identical(
     predict(extract_workflow(final), new_data = b$d),

@@ -1,4 +1,4 @@
-# `predict()` and `augment()` on a `nested_final_fit` (AC1-AC4, AC6).
+# `predict()` and `augment()` on a `nested_final_fit`.
 #
 # Oracle provenance: none is claimed here and none is owed. Both methods
 # delegate to the trained workflow the object carries, so the reference for
@@ -6,7 +6,7 @@
 # contract is "what the workflow gives", asserted as `identical()`, never a
 # number of this package's own. Each method is one call whatever the model,
 # so `predict()` is held on the regression fit and `augment()`, which passes
-# `eval_time` by name, on the censored one (M152).
+# `eval_time` by name, on the censored one.
 
 # Fixtures ---------------------------------------------------------------
 
@@ -36,7 +36,7 @@ srv_final <- function() {
   memoised(nested_final_fit(workflow, res))
 }
 
-# AC1 -------------------------------------------------------------------
+# Predict on the regression fit -----------------------------------------
 
 test_that("predict() on the regression fit is the workflow's prediction", {
   skip_if_no_engines()
@@ -61,7 +61,7 @@ test_that("predict() on the regression fit is the workflow's prediction", {
   ))
 })
 
-# AC2 -------------------------------------------------------------------
+# Augment on the censored fit -------------------------------------------
 
 test_that("augment() on the censored fit is the workflow's augmentation", {
   skip_if_no_censored()
@@ -79,7 +79,7 @@ test_that("augment() on the censored fit is the workflow's augmentation", {
   expect_identical(got$.pred[[1L]]$.eval_time, times)
 })
 
-# AC3 -------------------------------------------------------------------
+# Refusals --------------------------------------------------------------
 
 test_that("predict() forwards an unknown argument to parsnip's refusal", {
   skip_if_no_engines()
@@ -146,11 +146,11 @@ test_that("augment() refuses an argument it does not know", {
   ))
 })
 
-# AC6 -------------------------------------------------------------------
+# Registered methods ----------------------------------------------------
 #
-# D-014: tune's ranking and collecting generics get no method on the final
-# fit, so they refuse it. The registry is the package's part; what tune's
-# refusal says is tune's, and not asserted.
+# tune's ranking and collecting generics get no method on the final fit, so
+# they refuse it. The registry is the package's part; what tune's refusal says
+# is tune's, and not asserted.
 
 test_that("no method of tune's ranking and collecting generics is registered for the final fit", {
   reg <- getNamespaceInfo(asNamespace("nestedtune"), "S3methods")
@@ -162,7 +162,7 @@ test_that("no method of tune's ranking and collecting generics is registered for
   expect_true("extract_workflow" %in% on_final)
 })
 
-# AC4 -------------------------------------------------------------------
+# Re-export -------------------------------------------------------------
 
 test_that("augment is re-exported, so the call works with tune unattached", {
   skip_if_no_engines()

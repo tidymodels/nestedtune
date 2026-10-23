@@ -1,24 +1,23 @@
 # Oracle records (DESIGN Conventions: oracles are recorded in the test file
 # that asserts them).
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels pipeline
-#   itself, recomputed at test time by reference_nested_loop() in
-#   helper-orchestration.R, which is written from the documented seed contract
-#   rather than from the driver. The same oracle test-nested-tune-grid-oracles.R
-#   records; asserted here on the sep_* fixture with `metric_name = "mae"`, so
-#   it pins the metric the inner tuning selected under. Since M115 it is
-#   asserted under two rules, with the set's order as the variable: under
-#   `metric_set(mae, rmse)` each fold's candidate is the one tune's selector
-#   picks on the inner run's `mae` column, and each fold's outer `rmse` is the
-#   one `tune::last_fit()` gives that candidate. Pinned by "the first metric
-#   in the set selects, and the outer loop scores every metric".
+# Source: the tidymodels pipeline itself, recomputed at test time by
+# reference_nested_loop() in helper-orchestration.R, which is written from the
+# documented seed contract rather than from the driver. The same oracle
+# test-nested-tune-grid-oracles.R records; asserted here on the sep_* fixture
+# with `metric_name = "mae"`, so it pins the metric the inner tuning selected
+# under. It is asserted under two rules, with the set's order as the variable:
+# under `metric_set(mae, rmse)` each fold's candidate is the one tune's selector
+# picks on the inner run's `mae` column, and each fold's outer `rmse` is the one
+# `tune::last_fit()` gives that candidate. Pinned by "the first metric in the
+# set selects, and the outer loop scores every metric".
 #
-# The `metrics` argument reaches tune (M18).
+# The `metrics` argument reaches tune.
 #
-# Nothing here asserted anything before M18: the suite's shared metric set is
-# `metric_set(rmse, rsq)`, which IS tune's regression default, so every test
-# passing it produced a run identical to one passing nothing. Deleting the
-# argument from any call site left the suite green.
+# The suite's shared metric set is `metric_set(rmse, rsq)`, which IS tune's
+# regression default, so every test passing it produces a run identical to one
+# passing nothing. Deleting the argument from any call site would leave the
+# suite green.
 #
 # These tests run on sep_* (helper-orchestration.R), a fixture built so that the
 # caller's metric set and tune's default disagree about both the metric names
@@ -106,8 +105,8 @@ test_that("nested_final_fit() tunes under the metrics it was given", {
   )
 })
 
-# O1's pin (M115). The ordering is `desc(num_comp)` and not `num_comp`.
-# Measured 2026-09-24 on this fixture under seed 20, `mae` first against `rmse`
+# The ordering is `desc(num_comp)` and not `num_comp`.
+# Measured on this fixture under seed 20, `mae` first against `rmse`
 # first: "best" picks 1 2 2 against 3 1 3; "one_std_err" by `num_comp` picks
 # 1 1 1 against 1 1 1, so the two orders cannot be told apart; by
 # `desc(num_comp)` it picks 5 5 4 against 5 5 5.
@@ -130,7 +129,7 @@ test_that("the first metric in the set selects, and the outer loop scores every 
   # metric of the caller's set, as the driver does off its own tuned object, so
   # this fails if the inner tune_grid() stops receiving `metrics` and falls
   # back to `rmse`. Each rule is applied to the one reference tuning stage
-  # through reference_with_rule() (M74).
+  # through reference_with_rule().
   set.seed(20)
   default_run <- memoised(nested_tune_grid(
     wf,

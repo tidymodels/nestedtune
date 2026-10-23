@@ -1,8 +1,8 @@
 # Oracle records for nested_tune_bayes() (DESIGN Conventions: oracles are
-# recorded in the test file that asserts them). The numbering is this file's
-# own; test-nested-tune-grid-oracles.R keeps its O1-O4 for the grid path.
+# recorded in the test file that asserts them). The grid path's oracles are in
+# test-nested-tune-grid-oracles.R.
 #
-# O1 -- type "live" (reference implementation). Source: the tidymodels
+# Source: the tidymodels
 #   pipeline itself, recomputed at test time by reference_nested_bayes_loop()
 #   in helper-orchestration.R, written from the documented seed contract --
 #   `set.seed(s)`, one `sample.int(.Machine$integer.max, 2 * n)`, fold i
@@ -10,41 +10,37 @@
 #   <that element>, allow_par = FALSE)`, fitting under element 2i -- and never
 #   from the driver's output. Pinned by "per-fold metrics and selections match
 #   a hand-rolled Bayesian reference loop" (deterministic) and "the Bayesian
-#   reference loop also matches with a stochastic engine". Satisfies AC2.
+#   reference loop also matches with a stochastic engine".
 #
-# O2 -- type "invariant". Source: no external one; the agreement between two
-#   independent internal routes is the oracle. At `iter = 0` a Bayesian run
-#   scores its initial candidates and proposes nothing, so it must equal
-#   nested_tune_grid() on the grid those candidates form. The fixture has two
-#   integer-valued parameters, and for two or more parameters
-#   dials::grid_space_filling() returns sfd's precomputed design -- the same
-#   rows in the same order under every seed, with no draw (measured
-#   2026-09-01, dials 1.4.4; a single parameter is drawn from the stream and
-#   differs across seeds) -- so one grid built outside the loop is what every
-#   fold's Bayesian run scored. Pinned by "at iter = 0 the Bayesian path is the
-#   grid path on the space-filling grid". Satisfies AC3.
+# No external source. The agreement between two independent internal routes
+#   is the oracle. At `iter = 0` a Bayesian run scores its initial
+#   candidates and proposes nothing, so it must equal nested_tune_grid() on the
+#   grid those candidates form. The fixture has two integer-valued parameters,
+#   and for two or more parameters dials::grid_space_filling() returns sfd's
+#   precomputed design -- the same rows in the same order under every seed,
+#   with no draw (measured on dials 1.4.4; a single parameter is drawn from the
+#   stream and differs across seeds) -- so one grid built outside the loop is
+#   what every fold's Bayesian run scored. Pinned by "at iter = 0 the Bayesian
+#   path is the grid path on the space-filling grid".
 #
-# O3 -- type "invariant" (mode independence), pinned in
-#   test-parallel-identity.R as BC10: the same seed gives an identical result
-#   serially and at two daemons (the three-daemon repeat went at M113,
-#   D-079). Recorded here for the audit; the assertion lives with the other
-#   dispatch identities.
+# Mode independence, pinned in test-parallel-identity.R: the same seed gives an
+#   identical result serially and at two daemons. Recorded here for the audit;
+#   the assertion lives with the other dispatch identities.
 #
-# O4 -- type "live" (reference implementation), M48. Source: the same
-#   reference loop, handed the caller's `control_bayes()` and applying the
-#   documented merge -- `allow_par` off, the fold's tuning seed as `seed`,
-#   every other slot as passed. Pinned by "a control passed through `...`
-#   reaches every fold". The discriminator is the early stop `no_improve = 2`
-#   produces on the fixture: two of three folds record five candidates
-#   against the seven `initial + iter` would give, and the same run with no
-#   control records seven in every fold (measured 2026-09-02, tune 2.1.0).
-#   Satisfies M48 AC1.
+# Source: the same reference loop, handed the
+#   caller's `control_bayes()` and applying the documented merge -- `allow_par`
+#   off, the fold's tuning seed as `seed`, every other slot as passed. Pinned
+#   by "a control passed through `...` reaches every fold". The discriminator
+#   is the early stop `no_improve = 2` produces on the fixture: two of three
+#   folds record five candidates against the seven `initial + iter` would give,
+#   and the same run with no control records seven in every fold (measured on
+#   tune 2.1.0).
 #
-# O1 and O2 are the >=2 independent oracle types GP2 asks of the package's own
-# contribution -- the call, the seed, the record, the loop -- at the initial
-# stage. The iteration stage has O1 and O3 only: the proposals are tune's own
-# Gaussian-process search inside D-002's boundary, and no independent oracle
-# for them exists here or in a review brief (plan gate, 2026-09-01).
+# At the initial stage, the package's own contribution -- the call, the seed,
+# the record, the loop -- has at least two independent oracles. The iteration
+# stage has the reference loop and the mode-independence check only: the
+# proposals are tune's own Gaussian-process search, since inner tuning is
+# delegated to tune, and no independent oracle for them exists here.
 
 skip_heavy_on_cran()
 
@@ -84,7 +80,7 @@ test_that("per-fold metrics and selections match a hand-rolled Bayesian referenc
   for (i in seq_len(nrow(res))) {
     expect_identical(res$.metrics[[i]], ref[[i]]$metrics)
     expect_identical(res$.selected[[i]], ref[[i]]$selected)
-    # The inner table (M49, AC1): tune's own summary of the hand run, the
+    # The inner table: tune's own summary of the hand run, the
     # `.iter` column included, so a search trajectory can be drawn from it.
     expect_identical(
       res$.inner_metrics[[i]],
@@ -139,13 +135,13 @@ test_that("a control passed through `...` reaches every fold", {
     # The candidate set, as the hand run scored it: the same rows in the
     # same order, so a fold that stopped early stopped where tune stopped --
     # and derived from the fold's table exactly as the final fit derives its
-    # own from its run (D-043).
+    # own from its run.
     expect_identical(
       candidate_set(res$.inner_metrics[[i]]),
       scored_candidates(ref[[i]]$tuned)
     )
     # And the table under a control that stops folds early holds exactly the
-    # iterations the hand run reached (M49, AC1).
+    # iterations the hand run reached.
     expect_identical(
       res$.inner_metrics[[i]],
       tune::collect_metrics(ref[[i]]$tuned)
@@ -232,8 +228,9 @@ test_that("at iter = 0 the Bayesian path is the grid path on the space-filling g
   ms <- reg_metrics()
 
   # The grid every fold's Bayesian run scores: built once, outside any seed
-  # scope, which is the O2 premise -- and asserted rather than assumed, so a
-  # dials release that started drawing this design would fail here by name.
+  # scope, which the comparison below rests on -- and asserted rather than
+  # assumed, so a dials release that started drawing this design would fail
+  # here by name.
   set.seed(1)
   g <- dials::grid_space_filling(p, size = 3)
   set.seed(2)
@@ -277,7 +274,7 @@ test_that("at iter = 0 the Bayesian path is the grid path on the space-filling g
   }
 })
 
-# AC1: every method registered on the class runs on a Bayesian result.
+# Every method registered on the class runs on a Bayesian result.
 #
 # The list of methods is read from NAMESPACE at test time, so a method added
 # later fails here by its own line until this table gains a call for it. Each
@@ -350,7 +347,7 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
     "S3method(dplyr_reconstruct,nested_results)" = function() {
       dplyr::dplyr_reconstruct(df, res)
     },
-    # predict() refuses by contract (M106), so running it is running its
+    # predict() refuses by contract, so running it is running its
     # refusal, as with the casts into the class below.
     "S3method(predict,nested_results)" = function() {
       expect_error(predict(res), class = "nestedtune_predict_results")
@@ -427,17 +424,16 @@ test_that("every nested_results method in NAMESPACE runs on a Bayesian result", 
   }
 })
 
-# The M69 selection-rule block for the Bayesian path was pinned here until
-# M113. `apply_selection_rule()` is one shared site inside
-# `nested_fold_fit()`, so the grid and racing oracle files' selection-rule
-# blocks cover it (D-079).
+# The selection-rule blocks of the grid and racing oracle files cover the
+# Bayesian path too: `apply_selection_rule()` is one shared site inside
+# `nested_fold_fit()`.
 
-# The desirability rule on the Bayesian path (M109, AC2): the reference is
+# The desirability rule on the Bayesian path: the reference is
 # desirability2::select_best_desirability(), called by name with the terms
 # written out, on each fold's hand run from reference_nested_bayes_loop()
-# under the default rule, served from the cache. Parameter
-# columns and `.config` only. Measured 2026-09-21 on this fixture under seed
-# 20 (tune 2.1.0, desirability2 0.2.0): best picks (5,1), (5,1), (1,5), and
+# under the default rule, served from the cache. Parameter columns and
+# `.config` only. Measured on this fixture under seed 20 (tune 2.1.0,
+# desirability2 0.2.0): best picks (5,1), (5,1), (1,5), and
 # the terms below pick (1,5), (5,1), (1,5). The first fold differs, so a
 # driver that ignored the rule fails the last expectation. The grid oracle's
 # terms, which add `minimize(df2)`, pick what best picks on all three folds

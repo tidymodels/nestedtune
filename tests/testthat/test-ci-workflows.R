@@ -3,9 +3,8 @@
 # `JamesIves/github-pages-deploy-action` runs `git config user.name` inside the
 # workspace before it does anything else, so a job that only unpacks an artifact
 # into an otherwise empty runner directory dies with `fatal: not in a git
-# directory`. That is what the first run of `pkgdown.yaml` on the default branch
-# did: every pull-request run before it was green because the step's `if:` guard
-# skips deploying off that branch, so it had never once executed.
+# directory`. The step's `if:` guard skips deploying off the default branch, so
+# pull-request runs never reach it.
 #
 # `pkgdown.yaml` builds and deploys in two jobs, `build` and `deploy`, so the
 # checkout the deploy step needs is `deploy`'s own first step rather than a step

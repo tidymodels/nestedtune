@@ -2,30 +2,28 @@
 # parameter range on (DESIGN Conventions: oracles are recorded in the test file
 # that asserts them).
 #
-# O1 -- type "analytic" (closed form). Source: dials::get_n_frac_range(), whose
-#   finalized range is `floor(nrow(x) * frac)` of the frame it is handed (dials
-#   1.4.x, read 2026-09-03), so a candidate the fold searched is inside
-#   `floor(n * c(1/10, 5/10))` computed here from that fold's own
-#   `nrow(rsample::analysis(split))` -- and outside it, by up to 20 on the
-#   200-row fixture, when tune reads the full frame instead. Pinned by "AC2:
-#   every candidate a fold searched lies inside the range its analysis rows
-#   finalize". Under an outer split that repeats a row, the 65-row analysis
-#   frame gives 6 to 32 and the 90-row whole frame 9 to 45. Pinned by "under
-#   a repeated outer row every candidate a fold searched lies inside the range
-#   its 65 analysis rows finalize".
+# The range is checked against dials::get_n_frac_range(), whose finalized range
+#   is `floor(nrow(x) * frac)` of the frame it is handed (dials 1.4.x), so a
+#   candidate the fold searched is inside `floor(n * c(1/10, 5/10))` computed
+#   here from that fold's own `nrow(rsample::analysis(split))` -- and outside
+#   it, by up to 20 on the 200-row fixture, when tune reads the full frame
+#   instead. Pinned by "every candidate a fold searched lies inside the range
+#   its analysis rows finalize". Under an outer split that repeats a row, the
+#   65-row analysis frame gives 6 to 32 and the 90-row whole frame 9 to 45.
+#   Pinned by "under a repeated outer row every candidate a fold searched lies
+#   inside the range its 65 analysis rows finalize".
 #
-# O2 -- type "live" (reference implementation). Source: rsample::nested_cv()
-#   built under the same seed, whose inner splits carry each outer fold's
-#   analysis set as their own frame, so tune finalizes on it by construction.
-#   Pinned by "AC3: a nested_resamples() design and the nested_cv() design it
-#   matches tune identically", which asserts the inner rows identical first.
-#   Under an outer split that repeats a row the reference is the same outer
-#   splits with `inside` evaluated on each fold's analysis frame under the
-#   same seed. Pinned by "under a repeated outer row a nested_resamples()
-#   design and its analysis-frame reference tune identically".
+# The second check is rsample::nested_cv() built under the same seed, whose
+#   inner splits carry each outer fold's analysis set as their own frame, so
+#   tune finalizes on it by construction. Pinned by "a nested_resamples()
+#   design and the nested_cv() design it matches tune identically", which
+#   asserts the inner rows identical first. Under an outer split that repeats a
+#   row the reference is the same outer splits with `inside` evaluated on each
+#   fold's analysis frame under the same seed. Pinned by "under a repeated outer
+#   row a nested_resamples() design and its analysis-frame reference tune
+#   identically".
 #
-# O1 and O2 are the >=2 independent oracle types GP2 requires. AC1 is the
-# row-identity assertion behind both: the frame every finalizer call is handed
+# A row-identity check underlies both: the frame every finalizer call is handed
 # is one outer fold's analysis frame and no other rows.
 
 skip_heavy_on_cran()
@@ -33,7 +31,7 @@ skip_heavy_on_cran()
 # The fixture: a 200-row frame, five outer folds of four inner folds, so each
 # fold's analysis set holds 160 rows. Inner v = 4 clears the racers' burn-in
 # floor (R/checks.R, `check_race_burn_in()`); the `inside` arguments are
-# literal (the M05 lesson).
+# literal.
 finalize_data <- function() make_reg_data(n = 200, seed = 5454)
 
 finalize_nested <- function(data, seed = 54) {
@@ -55,7 +53,7 @@ finalize_nested_cv <- function(data, seed = 54) {
 }
 
 # FINALIZE_FRAC, frac_min_n() and frac_param_info() sit in
-# helper-orchestration.R, which test-time-series-pairs-other.R shares (M140).
+# helper-orchestration.R, which test-time-series-pairs-other.R shares.
 
 new_frame_record <- function() {
   record <- new.env(parent = emptyenv())
@@ -76,10 +74,10 @@ run_finalize_tuner <- function(fn, wf, nested, param_info) {
   ms <- reg_metrics()
   switch(
     fn,
-    # Served from the fixture cache, so AC2 reads the run AC1 built rather
-    # than paying for a second one (M74). The key sees the recording
-    # `param_info` with its record still empty, which is how AC2's fresh
-    # record keys to AC1's entry.
+    # Served from the fixture cache, so a later test reads the run an earlier
+    # one built rather than paying for a second one. The key sees the recording
+    # `param_info` with its record still empty, which is how a fresh record
+    # keys to the earlier entry.
     tune_grid = memoised(nested_tune_grid(
       wf,
       nested,
@@ -156,8 +154,8 @@ test_that("every tuner finalizes on the outer fold's analysis rows", {
   nested <- finalize_nested(d)
   wf <- stoch_workflow(d)
 
-  # The tuners that read a parameter set: the plain resampling fit (M70)
-  # takes none and finalizes nothing.
+  # The tuners that read a parameter set: the plain resampling fit takes none
+  # and finalizes nothing.
   tuners <- Filter(tuner_selects, setdiff(names(tuner_registry), "tune_bayes"))
   expect_length(tuners, 4L)
   ran <- character()
@@ -257,8 +255,8 @@ test_that("every candidate a fold searched lies inside the range its analysis ro
   nested <- finalize_nested(d)
   wf <- stoch_workflow(d)
 
-  # AC1's grid run, read back from the cache (M74): the same seed and a
-  # fresh, empty record key to the entry AC1 built.
+  # The grid run, read back from the cache: the same seed and a fresh, empty
+  # record key to the entry an earlier test built.
   set.seed(1)
   res <- suppressMessages(run_finalize_tuner(
     "tune_grid",
@@ -304,7 +302,7 @@ test_that("a nested_resamples() design and the nested_cv() design it matches tun
   wf <- stoch_workflow(d)
   ms <- reg_metrics()
 
-  # Two direct calls per grid shape, never memoised() (the M46 lesson).
+  # Two direct calls per grid shape, never memoised().
   set.seed(3)
   lean_unknown <- suppressMessages(nested_tune_grid(
     wf,
@@ -389,7 +387,7 @@ repeated_outer_split <- function(d) {
 # Two folds holding the repeated split, with inner folds grouped on `x1`.
 # Its values are all distinct, so both copies of a row land on one side of
 # every inner split: a copy on each side would share a row, which the design
-# refuses (M134).
+# refuses.
 repeated_grouped_design <- function(d) {
   split <- repeated_outer_split(d)
   outer <- rsample::manual_rset(list(split, split), c("a", "b"))
@@ -469,7 +467,8 @@ test_that("under a repeated outer row a hand-built inner design maps by occurren
 
   # Inner splits on the whole frame whose `out_id` is the logical NA,
   # rsample's "the complement". Over the whole frame that complement holds
-  # the outer held-out rows 61 to 90, which IP1 keeps out of the inner loop.
+  # the outer held-out rows 61 to 90, which the outer split keeps out of the
+  # inner loop.
   # The third split mentions row 1 three times, once more than the outer
   # split holds it.
   outer <- repeated_outer_split(d)
@@ -766,7 +765,7 @@ test_that("under a repeated outer row a nested_resamples() design and its analys
   wf <- stoch_workflow(d)
   ms <- reg_metrics()
 
-  # Two direct calls, never memoised() (the M46 lesson).
+  # Two direct calls, never memoised().
   set.seed(3)
   lean_res <- suppressMessages(nested_tune_grid(
     wf,

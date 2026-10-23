@@ -1,4 +1,4 @@
-# M106 AC3: `metric` and `eval_time` on autoplot(type = "performance").
+# `metric` and `eval_time` on autoplot(type = "performance").
 #
 # The reference for a filtered plot is the unfiltered one: its panels for the
 # named metrics (and times), drawn with the same points. A panel belongs to a
@@ -212,9 +212,9 @@ test_that("a filtered performance view looks the way it reads", {
   )
 })
 
-# M106 review F1: the time is judged by what the run scored, not by what the
-# named metrics scored. The static metric has no time, so filtering to it
-# alone would once leave no timed row and refuse a time the run did score.
+# The time is judged by what the run scored, not by what the named metrics
+# scored. The static metric has no time, so filtering to it alone would leave
+# no timed row and refuse a time the run did score.
 test_that("a time the run scored is accepted beside a static metric", {
   skip_if_no_censored()
 
@@ -233,8 +233,8 @@ test_that("a time the run scored is accepted beside a static metric", {
   )
 })
 
-# M106 review F7: on a set, the filter reads the stacked rows, so a metric
-# one workflow scored is kept for that workflow and refused only when no
+# On a set, the filter reads the stacked rows, so a metric one workflow
+# scored is kept for that workflow and refused only when no
 # workflow scored it. The set fixtures share one metric set, so the stacked
 # table is written here with a metric only workflow `b` scored.
 test_that("a set keeps a metric only one workflow scored", {

@@ -1,4 +1,4 @@
-# The map's `verbose` log (M149, AC1). One set holds a tuned and a fixed
+# The map's `verbose` log. One set holds a tuned and a fixed
 # workflow, so both route words are drawn. The time each workflow took is
 # masked in the snapshot, since it varies from run to run.
 

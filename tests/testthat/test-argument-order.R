@@ -1,4 +1,4 @@
-# Argument order beside tune's and finetune's (M148).
+# Argument order beside tune's and finetune's.
 #
 # Arguments after `...` match by name only, so their order breaks no call. It
 # still decides what the usage line on the help page shows, and a reader moving

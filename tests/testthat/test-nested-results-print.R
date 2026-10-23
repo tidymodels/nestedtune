@@ -1,4 +1,4 @@
-# Printing a nested_results object, and summarizing one (M04, split in M39).
+# Printing a nested_results object, and summarizing one.
 #
 # The two methods answer different questions and the blocks below are grouped by
 # which one they hold to account. print() describes the OBJECT -- the rows, the
@@ -15,7 +15,7 @@
 skip_heavy_on_cran()
 
 # The summary's rendered text, for the assertions below. Wrapped because a
-# partial run warns by design (AC3) and the warning is asserted where it is the
+# partial run warns by design and the warning is asserted where it is the
 # subject, not in every block that reads the text.
 summary_text <- function(x, width = 200) {
   print_text(suppressWarnings(summary(x)), width = width)
@@ -69,11 +69,11 @@ test_that("an outer scheme the object does not name is left unprinted", {
   ))
   txt <- print_text(as_fold_subset(res, 1:2))
 
-  # Since M36 `[` sheds the class outright on a row subset, so this object is
-  # built by the helper rather than by `[` and the test no longer exercises
-  # subsetting -- the title says so. What it does assert is unchanged and still
-  # worth asserting: a results object carrying no scheme label prints without
-  # one rather than reaching for the design it came from (IP4).
+  # `[` sheds the class outright on a row subset, so this object is built by
+  # the helper rather than by `[`, and the test does not exercise subsetting --
+  # the title says so. What it does assert is worth asserting: a results object
+  # carrying no scheme label prints without one rather than reaching for the
+  # design it came from.
   expect_no_match(txt, "3-fold cross-validation")
   expect_no_match(txt, "Outer resamples")
   expect_match(txt, "A tibble: 2")
@@ -180,7 +180,7 @@ test_that("print returns its input invisibly and is registered for S3 dispatch",
 
 # The rendered text of `print(x, ...)`, at a console width of the test's
 # choosing. Distinct from print_text() because the tibble `width` argument and
-# the console width are two different things and the M43 tests need both.
+# the console width are two different things and the width tests need both.
 print_text_at <- function(x, console, ...) {
   op <- options(width = console, cli.width = console)
   on.exit(options(op), add = TRUE)
@@ -208,7 +208,7 @@ test_that("print() takes `n` and hands it to the row rendering", {
   # times, through the constructor over stand-in records. Stacking the
   # three-fold fixture with rbind() cannot reach this shape -- the stamp rule
   # refuses a row count that differs from the run's, and hands back a bare
-  # tibble (M36).
+  # tibble.
   wide <- repeated_results(v = 3, repeats = 7)
   expect_s3_class(wide, "nested_results")
   expect_identical(nrow(wide), 21L)
@@ -269,7 +269,7 @@ test_that("print() still fences `...`, so a partial spelling is refused", {
   ))
 
   # Written as the real calls a user would make -- `print(res, ...)` through
-  # dispatch -- rather than by calling the method directly (M42 lesson). The
+  # dispatch -- rather than by calling the method directly. The
   # third is the case the fence exists for: `w` is a prefix of `width`, and
   # because `width` sits after `...` it does not partially match and lands in
   # the dots instead of being taken as `width`.
@@ -516,8 +516,8 @@ test_that("the failure advice names the results object's `.notes` column, never 
   d <- make_reg_data()
 
   # `x` inside the summary's print method is the summary bundle, which has no
-  # `.notes`; before M43 the advice read `x$.notes` and named nothing a reader
-  # could evaluate. Asserted on both failed fixtures -- one fold down and every
+  # `.notes`, so the advice must not name `x$.notes`: a reader cannot evaluate
+  # that. Asserted on both failed fixtures -- one fold down and every
   # fold down -- since the block is reached by each and the line closes both.
   set.seed(2)
   partial <- suppressWarnings(memoised(nested_tune_grid(
@@ -692,7 +692,7 @@ test_that("a list-valued selection prints instead of aborting", {
   expect_match(summary_text(listy), "1, 2", fixed = TRUE)
 })
 
-# ---- the fold-label record, when it cannot label the rows (AC4) -------------
+# ---- the fold-label record, when it cannot label the rows -------------------
 
 test_that("an unusable label record names failed folds by row position", {
   skip_if_no_engines()
@@ -706,9 +706,10 @@ test_that("an unusable label record names failed folds by row position", {
     metrics = reg_metrics()
   )))
 
-  # The three forms the record takes when it cannot label the rows. Before M39
-  # the first two made an indexing caller raise and the third pasted what
-  # survived into the truncated label "Fold1, " -- wrong, and silently so.
+  # The three forms the record takes when it cannot label the rows. Left
+  # unhandled, the first two would make an indexing caller raise, and the third
+  # would paste what survives into the truncated label "Fold1, " -- wrong, and
+  # silently so.
   forms <- list(
     empty = character(0),
     absent = "not_a_column",
@@ -734,7 +735,7 @@ test_that("an unusable label record names failed folds by row position", {
   expect_no_match(summary_text(res), "row 2")
 })
 
-# ---- the candidate-set line, which stays in print() (AC1) -------------------
+# ---- the candidate-set line, which stays in print() -------------------------
 
 test_that("folds that searched different candidate sets are said to have", {
   skip_if_no_engines()
@@ -844,8 +845,8 @@ test_that("printing survives a list-valued parameter column", {
 # its column-type row, cell text and `# i <k> more variables` footer have all
 # changed wording across pillar releases. The four print snapshots keep the
 # `# A tibble: <n> x <k>` header and every cli line, and stand one marker in
-# for the body -- everything between the header and the first cli bullet
-# (M43). The rows themselves are asserted in words above (n, width, Fold1).
+# for the body -- everything between the header and the first cli bullet.
+# The rows themselves are asserted in words above (n, width, Fold1).
 scrub_tibble_body <- function(lines) {
   header <- grep("^\\s*# A tibble: ", lines)
   if (length(header) != 1L) {
@@ -948,7 +949,7 @@ test_that("printed output holds its shape", {
     metrics = reg_metrics()
   )))
 
-  # The candidate-set line's own shape, snapshot beside the rest (M21). Built
+  # The candidate-set line's own shape, snapshot beside the rest. Built
   # from a grid SIZE rather than a frame, which is the only way folds come to
   # search different candidates.
   set.seed(11)
@@ -977,7 +978,7 @@ test_that("printed output holds its shape", {
   expect_snapshot(print(suppressWarnings(summary(nothing))))
 })
 
-# ---- summary() on a set (M72, AC1) -------------------------------------------
+# ---- summary() on a set ------------------------------------------------------
 
 test_that("summary() on a set is one element summary per workflow, named and in set order", {
   skip_if_no_wset_fixture()
@@ -1104,7 +1105,7 @@ test_that("the set's printed summary holds its shape", {
   )))))
 })
 
-# ---- the selection-rule line (M98, AC1, AC2, AC4) ---------------------------
+# ---- the selection-rule line ------------------------------------------------
 
 # A run under the rule given, on the deterministic workflow and
 # `det_nested()`, whose three inner resamples give tune's one-standard-error
@@ -1359,7 +1360,7 @@ test_that("the set's selection-rule line holds its shape", {
   expect_snapshot(print(summary(under_default)))
 })
 
-# The selecting-metric line (M116) ---------------------------------------------
+# The selecting-metric line ----------------------------------------------------
 
 selecting_metric_lines <- function(lines) {
   lines[startsWith(lines, "Selecting metric: ")]

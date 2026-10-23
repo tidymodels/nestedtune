@@ -1,5 +1,5 @@
-# Every refusal `nested_tune_bayes()` makes at entry, fired once (M45 AC6).
-# GP3: a provably wrong call is refused before a whole outer loop is paid for.
+# Every refusal `nested_tune_bayes()` makes at entry, fired once.
+# A provably wrong call is refused before a whole outer loop is paid for.
 #
 # Two halves. The three arguments that are this orchestrator's own -- `iter`,
 # `initial`, `objective` -- each refuse with a class of their own, naming the
@@ -149,7 +149,7 @@ test_that("each shared check fires through nested_tune_bayes()", {
       nested_tune_bayes(wf, preprocessor = y ~ x1, resamples = folds)
     },
     check_required = function() nested_tune_bayes(wf),
-    # An empty workflow, since a bare spec takes the model-spec route (M107).
+    # An empty workflow, since a bare spec takes the model-spec route.
     check_workflow = function() nested_tune_bayes(workflows::workflow(), folds),
     check_untuned_workflow = function() {
       nested_tune_bayes(fixed_workflow(d), folds)

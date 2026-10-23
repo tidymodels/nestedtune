@@ -1,4 +1,4 @@
-# A failing outer fold is recorded, not fatal (M03, IP4).
+# A failing outer fold is recorded, not fatal.
 #
 # The two stages fail in different shapes and both are covered here: inner
 # tuning raises, while the outer fit returns quietly with no metrics. A driver
@@ -62,7 +62,7 @@ test_that("the failing stage and its cause are recorded, tune's own notes includ
   expect_true(nrow(notes) > 1L)
   expect_identical(notes$location[[1L]], "inner tuning")
   expect_identical(notes$type[[1L]], "error")
-  # tune's own notes carried through verbatim (GP1): the real cause is the
+  # tune's own notes carried through verbatim: the real cause is the
   # recipe's PCA step failing on an analysis set of no rows, and only tune
   # ever saw it.
   expect_true(any(grepl("a dimension is zero", notes$note)))
@@ -124,7 +124,7 @@ test_that("the run itself warns when a fold fails, naming it", {
   nested <- break_fold(det_nested(d), fold = 2L, stage = "inner tuning")
 
   set.seed(2)
-  # tune warns as well, and deliberately is not muffled (GP1) -- the outer
+  # tune warns as well, and deliberately is not muffled -- the outer
   # expectation catches it so this test asserts both, rather than leaking one.
   expect_warning(
     expect_warning(
@@ -259,7 +259,7 @@ test_that("a fold's seeds do not move when an earlier fold fails", {
   expect_identical(clean$.selected[[2L]], broken$.selected[[2L]])
 })
 
-# Review findings, regression-tested (M03 review, F1 scored 96 and F2 scored 82).
+# Regression tests for two defects in how a fold's failure is recorded.
 
 test_that("a fold that completed on a truncated inner design keeps tune's notes", {
   skip_if_no_engines()
@@ -286,7 +286,7 @@ test_that("a fold that completed on a truncated inner design keeps tune's notes"
   # A genuinely clean fold still carries nothing.
   expect_identical(nrow(res$.notes[[1L]]), 0L)
 
-  # The inner table says the same thing in numbers (M49, AC1): every
+  # The inner table says the same thing in numbers: every
   # candidate of fold 2 scored on two of its three inner resamples, so its
   # `n` is below the inner resample count, while a clean fold's is the count.
   partial <- res$.inner_metrics[[2L]]
@@ -310,10 +310,10 @@ test_that("a row subset carries no record of the run at all", {
     ))
   )
 
-  # Until M36 these came back classed with the counts recomputed, which kept the
-  # record true but left a two-row object describing itself as the three-fold
-  # design it was cut from. Now the class goes, and the run's record goes with
-  # it -- there is nothing left to be stale (#32, IP4).
+  # A subset is returned as a bare tibble. Keeping the class on it would leave a
+  # two-row object describing itself as the three-fold design it was cut from,
+  # so the class goes, and the run's record goes with it -- there is nothing
+  # left to be stale (#32).
   for (subset in list(res[res$.completed, ], res[1L, ])) {
     expect_false(inherits(subset, "nested_results"))
     for (nm in c(
@@ -345,7 +345,7 @@ test_that("a results object holding no completed fold refuses to summarize", {
 
   # Before the fix this passed the guard on the parent's stale count and
   # returned a 0-row tibble, reporting "2 of 3" for an object covering none.
-  # The object is built by the helper, not by `[`, which since M36 returns a
+  # The object is built by the helper, not by `[`, which returns a
   # bare tibble -- so this is about the guard, not about subsetting.
   expect_error(
     collect_metrics(as_fold_subset(res, 1L)),
@@ -369,11 +369,10 @@ test_that("dropping any of the per-fold columns sheds the results class", {
   # claiming it can rather than answering from a stale attribute.
   expect_false(inherits(res["id"], "nested_results"))
 
-  # M03 asserted here that keeping .completed was enough to keep the class.
-  # Corrected at M04: it is not. Such an object kept the class while every
-  # method that reads .metrics or .selected -- collect_metrics() on M03,
-  # print() on M04 -- failed on it. The class is kept only when the whole
-  # per-fold record and an id column survive.
+  # Keeping .completed is not enough to keep the class. Such an object kept the
+  # class while every method that reads .metrics or .selected --
+  # collect_metrics(), print() -- failed on it. The class is kept only when the
+  # whole per-fold record and an id column survive.
   expect_false(inherits(res[, c("id", ".completed")], "nested_results"))
   expect_false(
     inherits(
@@ -382,7 +381,7 @@ test_that("dropping any of the per-fold columns sheds the results class", {
     )
   )
 
-  # .inner_metrics is in that set (M49; the candidate column joined it at M21).
+  # .inner_metrics is in that set.
   # Asserted by dropping it from an otherwise
   # complete object rather than by listing a subset that happens to omit it, so
   # this fails if the column stops being required rather than passing on some
@@ -396,11 +395,11 @@ test_that("dropping any of the per-fold columns sheds the results class", {
   expect_s3_class(res[, names(res)], "nested_results")
 })
 
-# What the evaluated-candidate record says when not everything ran (M21, IP4).
+# What the evaluated-candidate record says when not everything ran.
 #
 # The record is derived from the tuning run's metrics, so every one of these
 # cases is a different answer to "what does a fold that fell short record" --
-# and the wrong answer in either direction is an IP4 failure. Recording the
+# and the wrong answer in either direction is a failure. Recording the
 # request would claim candidates that never ran; recording nothing for a fold
 # that did tune would deny a grid that did.
 
@@ -411,7 +410,7 @@ test_that("a candidate that fails on every inner resample is absent from the rec
   # -5 is refused by step_pca()'s prep() on every inner split, while 1 and 2
   # score everywhere. The fold still completes: tune_grid() returns a usable
   # result and select_best() chooses among the survivors, which is exactly the
-  # "worked, on less than the whole design" case M03 records.
+  # "worked, on less than the whole design" case.
   grid <- data.frame(num_comp = c(1L, 2L, -5L))
 
   set.seed(2)
@@ -452,14 +451,14 @@ test_that("a fold that failed at the outer fit keeps the grid its tuning scored"
 
   # Fold 3 tuned successfully and died afterwards, so it DID evaluate a grid.
   # Giving it a zero-row record would report a fold that searched three
-  # candidates as having searched none -- IP4 pointing the other way, and the
-  # defect M21's criteria audit caught in the plan's own wording.
+  # candidates as having searched none, which is the opposite error to the one
+  # the record exists to prevent.
   expect_false(res$.completed[[3L]])
   scored <- candidate_set(res$.inner_metrics[[3L]])
   expect_identical(nrow(scored), 3L)
   expect_identical(sort(scored$num_comp), 1:3)
 
-  # And it keeps the inner table that tuning produced (M49, AC1), checked
+  # And it keeps the inner table that tuning produced, checked
   # against tune re-run by hand under the fold's own seed: the outer failure
   # came after the inner run, so the table is the completed run's, not a
   # zero-row stand-in for a fold that did tune.
@@ -501,11 +500,11 @@ test_that("a fold that scored nothing records an empty table, never NULL", {
   # and would make every lapply() over `.inner_metrics` special-case one fold.
   expect_false(any(vapply(res$.inner_metrics, is.null, logical(1))))
 
-  # Zero rows under a completed fold's columns (M49, AC1), name for name and
+  # Zero rows under a completed fold's columns, name for name and
   # type for type, so a reader stacking the folds' tables never meets a fold
   # whose columns differ. It is built without asking tune for it:
-  # `collect_metrics()` raises on a run in which every candidate failed (the
-  # M03 lesson), which is exactly this fold.
+  # `collect_metrics()` raises on a run in which every candidate failed, which
+  # is exactly this fold.
   done <- res$.inner_metrics[[1L]]
   expect_identical(names(none), names(done))
   expect_identical(
@@ -517,13 +516,13 @@ test_that("a fold that scored nothing records an empty table, never NULL", {
   expect_true(nrow(done) > 0L)
 })
 
-# The prototype on inputs the fixtures above never reach (M49 review, F1 and
-# F2). `.eval_time` is tune's column and tune adds it for a dynamic survival
-# metric only: an `eval_time` handed to a regression run, or to a censored run
-# scoring a static metric alone, draws tune's warning and no column (measured
-# 2026-09-02, tune 2.1.0). A parameter's type is the grid's when a grid data
-# frame was given -- tune passes a grid's columns through as typed -- and an
-# engine parameter with no dials object has nothing else to be typed from.
+# The prototype on inputs the fixtures above never reach. `.eval_time` is
+# tune's column and tune adds it for a dynamic survival metric only: an
+# `eval_time` handed to a regression run, or to a censored run scoring a static
+# metric alone, draws tune's warning and no column (measured on tune 2.1.0). A
+# parameter's type is the grid's when a grid data frame was given -- tune passes
+# a grid's columns through as typed -- and an engine parameter with no dials
+# object has nothing else to be typed from.
 expect_prototype_of_completed <- function(res, failed, completed = 1L) {
   none <- res$.inner_metrics[[failed]]
   done <- res$.inner_metrics[[completed]]
@@ -646,7 +645,7 @@ test_that("an engine parameter with no dials object is typed from the grid", {
   expect_true(is.double(none$max.depth))
 })
 
-# The thrown-error branches at each stage (M03 review, F3). The fixtures above
+# The thrown-error branches at each stage. The fixtures above
 # all reach the *quiet* paths -- tune returning a useless result rather than
 # raising -- which left the raise branches structurally plausible and unproven.
 
@@ -680,7 +679,7 @@ test_that("an error raised by tune_grid() itself is recorded, not propagated", {
 
   # No fold completed, so there is no completed fold's table to copy the
   # columns from: the zero-row table is built from the workflow's tuned
-  # parameter and tune's summary columns instead (M49, AC1). This is the one
+  # parameter and tune's summary columns instead. This is the one
   # branch where tuning returned nothing at all, not even a run to read.
   for (m in res$.inner_metrics) {
     expect_identical(nrow(m), 0L)
@@ -697,12 +696,11 @@ test_that("an error raised by last_fit() is recorded against the outer fit", {
   d <- make_reg_data()
 
   # An outer split indexing a row that does not exist: tuning succeeds, and
-  # last_fit() raises rather than filing the problem in its notes. The vehicle
-  # used to be a `splits` element that was not an rsplit at all, which M19
-  # refuses at the call, then an outer `in_id` substituted by `c(1L, 999999L)`,
-  # which M59 refuses at the call too, since the fold's inner splits then
-  # index rows the outer split does not hold -- so neither reaches the loop,
-  # and what this test is about is the loop's handling of a raising
+  # last_fit() raises rather than filing the problem in its notes. Two other
+  # shapes are refused at the call: a `splits` element that is not an rsplit at
+  # all, and an outer `in_id` replaced by `c(1L, 999999L)`, since the fold's
+  # inner splits then index rows the outer split does not hold. Neither reaches
+  # the loop, so what this test is about is the loop's handling of a raising
   # last_fit(), not the shape of the split. The substituted form stays as the
   # refused control.
   substituted <- det_nested(d)
@@ -764,7 +762,7 @@ test_that("an error while finalizing is this fold's failure, not the run's", {
 })
 
 test_that("a fake tuning run's method leaves with the block that made it", {
-  # The stand-in registers a method into tune's own table (M49 review, F4);
+  # The stand-in registers a method into tune's own table;
   # what it registers must not outlive the test, or every later dispatch on
   # the class reads a method no test asked for.
   registered <- function() {
@@ -787,7 +785,7 @@ test_that("bookkeeping the candidate record cannot abort a run", {
   # The candidate set is derived from a metrics table, on the final fit
   # outside every tryCatch -- so a raise there would abort a call that has a
   # fitted model to hand back, over bookkeeping rather than over a fit, which
-  # is the one outcome M03 exists to prevent.
+  # is the one outcome the failure handling exists to prevent.
   #
   # A list-valued parameter column was the suspected raise and is not one:
   # the derivation orders by the label and both candidates come back.

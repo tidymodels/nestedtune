@@ -1,5 +1,4 @@
-# Regressions found by the M01 review fan-out. Each test fails against the
-# implementation as it stood when the review ran.
+# Regression tests for construction defects in nested_resamples().
 
 test_that("a prebuilt `outside` rset built on other data is refused", {
   d1 <- data.frame(x = 1:40, tag = paste0("A", 1:40))
@@ -17,8 +16,9 @@ test_that("a prebuilt `outside` rset built on other data is refused", {
     "was built on different data"
   )
 
-  # A row-count mismatch used to construct fine and only fail later, on
-  # retrieval, with an out-of-range error naming nothing the user typed.
+  # A row-count mismatch is refused at construction. Left unchecked, it fails
+  # later, on retrieval, with an out-of-range error naming nothing the user
+  # typed.
   expect_error(
     nested_resamples(
       d1[1:20, ],
@@ -90,8 +90,8 @@ test_that("inner rsplit objects match rsample's in class and structure", {
       ref_split <- ref$inner_resamples[[1]]$splits[[j]]
       lean_split <- lean$inner_resamples[[1]]$splits[[j]]
 
-      # The oracle used to stop at analysis()/assessment(), which is why the
-      # split objects were free to diverge underneath.
+      # The comparison covers the split objects themselves, not only analysis()
+      # and assessment(), which can agree while the split objects diverge.
       expect_identical(class(lean_split), class(ref_split))
       expect_identical(names(lean_split), names(ref_split))
       expect_identical(lean_split$id, ref_split$id)

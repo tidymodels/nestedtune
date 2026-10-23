@@ -1,5 +1,5 @@
 # agreement(): how often each candidate was selected across the outer folds
-# (M44, issue #36).
+# (issue #36).
 #
 # Oracle provenance: the counts asserted below are read off the fixtures'
 # `.selected` columns by hand -- `det_nested(d)` selects num_comp 3, 3, 3 and
@@ -10,7 +10,7 @@
 
 skip_heavy_on_cran()
 
-# ---- the generic and its refusals (AC1) --------------------------------------
+# ---- the generic and its refusals --------------------------------------------
 
 test_that("agreement() refuses objects that are not nested results, naming both", {
   skip_if_no_engines()
@@ -72,7 +72,7 @@ test_that("agreement() refuses objects that are not nested results, naming both"
   expect_match(conditionMessage(cnd), "prop", fixed = TRUE)
 })
 
-# ---- the table (AC2) --------------------------------------------------------
+# ---- the table --------------------------------------------------------------
 
 test_that("a unanimous run is one row counting every completed fold", {
   skip_if_no_engines()
@@ -126,7 +126,7 @@ test_that("folds that disagree are counted per combination, most frequent first"
   expect_identical(sum(tab$n), sum(split$.completed))
 })
 
-# ---- identity is the whole tuple, order follows the rows (AC3) --------------
+# ---- identity is the whole tuple, order follows the rows --------------------
 
 test_that("two folds agree only when every selected parameter agrees", {
   skip_if_no_engines()
@@ -185,7 +185,7 @@ test_that("tune's .config label neither splits a row nor becomes a column", {
   ))
 
   # `.config` labels a candidate within one fold's own tuning run, and folds
-  # can search different grids (M21), so two folds choosing the same values
+  # can search different grids, so two folds choosing the same values
   # under different labels still chose the same thing.
   relabelled <- res
   relabelled$.selected[[1L]]$.config <- "Preprocessor7_Model1"
@@ -200,7 +200,7 @@ test_that("tune's .config label neither splits a row nor becomes a column", {
   expect_identical(tab$n, 3L)
 })
 
-# ---- a fold with no value, and a fold that chose NA (AC4) -------------------
+# ---- a fold with no value, and a fold that chose NA -------------------------
 
 test_that("a fold that recorded no value is its own row, under NA", {
   skip_if_no_engines()
@@ -248,7 +248,7 @@ test_that("a fold that selected NA is counted as a value", {
   expect_identical(sum(tab$n), sum(na_selected$.completed))
 })
 
-# ---- runs that fell short of their design (AC5) -----------------------------
+# ---- runs that fell short of their design -----------------------------------
 
 test_that("a partial run is tabulated over the folds that completed, with a warning", {
   skip_if_no_engines()
@@ -358,7 +358,7 @@ test_that("a partial run with nothing tuned still warns, then gives no rows", {
   expect_identical(nrow(tab), 0L)
 })
 
-# ---- the set method (M72, AC5) -----------------------------------------------
+# ---- the set method ----------------------------------------------------------
 
 # One element's block of the stacked table: its rows, less `wflow_id` and
 # the columns the element's own table lacks, in the element's column order.

@@ -1,8 +1,8 @@
-# `param_info` reaching tune, demonstrated by what it changes (M34, AC3).
+# `param_info` reaching tune, demonstrated by what it changes.
 #
 # The test is behavioural rather than a capture of the argument at the boundary:
 # a capture asserts the harness saw the value, not that tune acted on it, and a
-# mocked binding never reaches a mirai daemon at all (plan gate, 2026-08-30).
+# mocked binding never reaches a mirai daemon at all.
 # What is asserted instead is the one thing forwarding buys -- a restricted
 # range restricts the grid every fold searches -- with the unrestricted run
 # beside it as the control that shows the restriction is doing the work.

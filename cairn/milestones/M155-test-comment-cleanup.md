@@ -48,10 +48,10 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 ## Tasks
 
 - [x] T1: Write `benchmarks/sweep-test-comments.R`, with its planted cases. Run it on the branch point, and record the match count per file.
-- [ ] T2: Clean the helper and teardown files.
-- [ ] T3: Clean the driver, results, final-fit and readers test files, through Haiku subagents with a full spec, one file group each.
-- [ ] T4: Clean the parallel, time-series and remaining test files the same way. Read every subagent diff before it is committed.
-- [ ] T5: Run `benchmarks/test-blocks.R` at the head and compare with the branch point through the rename map. Compare each snapshot entry's body under its old and new names.
+- [x] T2: Clean the helper and teardown files.
+- [x] T3: Clean the driver, results, final-fit and readers test files, through Haiku subagents with a full spec, one file group each.
+- [x] T4: Clean the parallel, time-series and remaining test files the same way. Read every subagent diff before it is committed.
+- [x] T5: Run `benchmarks/test-blocks.R` at the head and compare with the branch point through the rename map. Compare each snapshot entry's body under its old and new names.
 - [ ] T6: Run the `verify` slot.
 
 ## Work log
@@ -66,6 +66,10 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - 2026-10-22: choice: the sweep pattern also matches principle ids (`IP`/`GP`) and single-letter review, oracle, task and question ids (`B F O P Q R S T` and digits, less `S3`, `S4`, `S7`, `R6`), since each is cairn vocabulary a test reader cannot resolve; a `--names` mode checks a `test-blocks.R` table for AC2.
 - 2026-10-22: T1 done: `benchmarks/sweep-test-comments.R` at the branch point, `--counts`: 1200 matching lines in 111 of 119 files (7399 comments, 66 ledger notes); largest helper-orchestration.R 122, test-parallel-classify.R 53, test-parallel-identity.R 52, helper-time-budget.R 31, test-nested-tune-grid-oracles.R 31; planted cases shown red by editing them in a copy.
 - 2026-10-22: minor amendment: the test names are renamed in one scripted pass across all files at the start of T3, since a name also lives in its snapshot header and the ledger's `payer`; the subagents of T3 and T4 then clean comments only. Rule: drop a leading id prefix (`AC1: `, `M126 AC4: `) and an id-only parenthetical; six names fixed by hand. 354 names renamed (348 literal, six built by `paste0()` over `MAP_FNS`), 10 snapshot headers, 21 ledger `payer` strings; map in `benchmarks/test-renames-576c3d19.csv`; suite-hygiene passes.
+- 2026-10-22: T2 done: the helper and teardown files other than helper-orchestration.R cleaned by hand; helper-orchestration.R (about 120 hits) delegated to a ninth Haiku subagent under the same spec. The ledger's seven id-bearing `note` strings lost their ids.
+- 2026-10-22: delegation: eight Haiku subagents cleaned the test files in groups (tune-grid and resamples; other tuners, fit-resamples and map; final fit; results and readers; parallel; time-series; remaining A-H; remaining H-Z), one spec in the session scratchpad. Each diff read before commit; about 40 comments corrected after review (stale "four files" claims, an unverified mutation claim, leftover "this milestone" and milestone-file pointers, oracle-type labels kept as "Reference implementation." or "Closed form." now "Source:", over-long lines).
+- 2026-10-22: T3, T4 done: sweep clean on all 119 files and 66 ledger notes; a parse-data comparison against 1e07e23c shows no non-comment token changed in any test file except the seven ledger notes; air clean.
+- 2026-10-22: T5 done: `benchmarks/test-blocks.R` at both trees, 1153 blocks each, 13367 expectations each, 0 failed, skipped or errored; `benchmarks/test-renames-check.R` (new) finds 0 mismatches over 1153 blocks, 22 snapshot sections in 10 files and 8 svg files; a map with the final-fit-print rows removed gives 17 mismatches. `sweep-test-comments.R --names` silent on the head table. Branch-point table kept as `benchmarks/test-blocks-576c3d19.csv`.
 
 ## Decisions
 

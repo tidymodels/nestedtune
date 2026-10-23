@@ -4,8 +4,7 @@
 # CPU. The whole suite takes far more than that, so the tests outside a small
 # smoke layer call `skip_heavy_on_cran()`. The smoke layer is the input
 # refusals, the readers, one end-to-end run per exported `nested_*` function,
-# and any other file that took under 2 s at the branch point; the M118
-# milestone record lists it file by file.
+# and any other file that took under 2 s when the layer was drawn.
 #
 # `NOT_CRAN` set to true runs every test. `devtools::test()` sets it, and so
 # does `r-lib/actions/setup-r` in every CI job. The two jobs in
