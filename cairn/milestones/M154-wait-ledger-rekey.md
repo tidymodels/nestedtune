@@ -1,13 +1,13 @@
 # M154: The wait ledger finds each call by its test block, so moving a line breaks no test
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M152
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a check over the repo's own test files
-- **Branch/PR:** —
+- **Branch/PR:** m154-wait-ledger-rekey
 
 ## Goal
 
@@ -44,7 +44,7 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 
 ## Tasks
 
-- [ ] T1: Record the branch point and save `time_budget_totals()` there.
+- [x] T1: Record the branch point and save `time_budget_totals()` there.
 - [ ] T2: Change `tb_row()`, the rows and `wait_call_sites()` to the new key. Change both accounting guards in `test-suite-hygiene.R`.
 - [ ] T3: Change the bound re-read and `DECLARED_UNCHECKABLE_BOUNDS` to the new key.
 - [ ] T4: Write the three probe scripts in the scratchpad and run them. Compare `time_budget_totals()`, and write the results to the Review section.
@@ -58,6 +58,9 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-21: plan gate chose keying each row on its enclosing unit and call position over one counted bound per file, because it keeps per-row bounds and the explicit-bound re-read; falsified by a reorder of wait calls inside one block that fails the guard.
 - 2026-10-21: depends on M152, because M152 deletes and merges wait calls in the parallel files, which changes the ledger's rows.
 - 2026-10-21: criteria audit (reduced, fresh Opus reader): three findings, all fixed. The row count is 106, not 107; the four `helper-parallel.R` rows key on their function; AC2's domain is the rows whose `call` is in `BUDGETED_WAIT_CALLS`; AC3's domain is computed from the ledger and has the same size at both ends.
+- 2026-10-22: implement started; branch m154-wait-ledger-rekey cut from main at 5bae6873, the branch point.
+- 2026-10-22: T1 done. Saved `time_budget_totals()` and the ledger at 5bae6873 to the scratchpad. The ledger has 98 rows, not the plan's 106, because M152 removed rows after the plan counted them; 95 of them name a call in `BUDGETED_WAIT_CALLS`.
+- 2026-10-22: found that `payer` is a hand-written paraphrase of the test name, and wrong in 8 rows (6 detection rows name a neighbouring test, 2 required-pkgs rows sit in a local `attached()` function). Decided: `payer` becomes the exact `test_that()` description, read from the parse tree, or the top-level function name in `helper-parallel.R`; the key is file, payer, and the call's position among the wait calls of that unit.
 
 ## Decisions
 
