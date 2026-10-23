@@ -38,7 +38,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - [x] AC3: `grep -niwE 'criteri(on|a)' tests/testthat/*.R` and `grep -nE 'test_that\("[^"]*(branch point|pre-milestone|used to emit)' tests/testthat/*.R` print nothing.
 - [x] AC4: In `R/parallel.R`, the comment above `workflow_pkgs()` names `test-parallel-interrupt.R` and `test-parallel-payload.R` and not `test-parallel-detection.R`, and the `.args` comment in `dispatch_folds()` states either no byte figure or only figures that appear verbatim in `test-parallel-payload.R` (`grep -F`).
 - [x] AC5: `grep -n 'Random\.seed' tests/testthat/test-nested-fit-resamples-checks.R` and `grep -n 'before <- \.Random\.seed' tests/testthat/test-nested-workflow-map-checks.R` print nothing, and the block "the refusals fire before the RNG is drawn from" either passes `class =` to each of its three `expect_error()` calls or is removed with the work log naming the test that asserts each class.
-- [ ] AC6: The `verify` slot is clean: `devtools::test()` with 0 failures, `air format --check .`, and `Rscript benchmarks/sweep-prose.R --plain`; `Rscript benchmarks/sweep-test-comments.R` and `Rscript benchmarks/test-time-budget.R` exit 0.
+- [x] AC6: The `verify` slot is clean: `devtools::test()` with 0 failures, `air format --check .`, and `Rscript benchmarks/sweep-prose.R --plain`; `Rscript benchmarks/sweep-test-comments.R` and `Rscript benchmarks/test-time-budget.R` exit 0.
 
 ## Coverage
 
@@ -152,3 +152,7 @@ Pass 2 (2026-10-23), evidence at 0a3d89f1, branch level with main.
 - ripple #2: test-workflow-identity.R comment above the renamed test keeps its own phrasing — reject, style (same fact).
 - ripple #3: test-dplyr-compat.R:205 "the one form" beside line 30's wording — reject, style (different referent, both true).
 - Gate at the fix head: cairn_validate passes (18 advisory WARNs on references staleness); `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted, no other diff; `pkgdown::check_pkgdown()` no problems; the six gating prose sweeps `--list-gating` prints are clean; README untouched; no changelog entry, since the milestone changes no user-visible behavior; no principle changed, so `cairn_impact` skipped.
+- Fix-now F13-F17 fixed 476a7188.
+- AC6: `devtools::test()` at 0a3d89f1, 1152 blocks, 0 failed; at the 476a7188 tree, which changes only comments, one test name and one printed string, the four files it touches pass (47 blocks, 0 failed), `air format --check .` and `sweep-prose.R --plain` are clean, and `sweep-test-comments.R` and `test-time-budget.R` exit 0.
+- snapshot: no file under `_snaps/` changed (`git diff --name-only origin/main...HEAD`).
+- Open-PR cap: 0 open PRs by the operator on tidymodels/nestedtune (feature cap 1).
