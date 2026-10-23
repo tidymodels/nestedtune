@@ -17,8 +17,9 @@
 #   plus `tune::last_fit()` the test runs itself from the fold's own
 #   `inner_resamples` and split, seeded by the recipe `nested_fold_fit()`
 #   follows -- the fold's recorded `.tuning_seed` then its `.outer_fit_seed`,
-#   both kind-pinned -- at the same evaluation time. Pinned by "each run's
-#   per-fold metrics are the ones tune produces at that evaluation time", and in
+#   both kind-pinned -- at the same evaluation time. Pinned by "two runs
+#   differing only in `eval_time` report different metrics, each the one tune
+#   produces", and in
 #   its final-fit form by "nested_final_fit() tunes and selects under the
 #   caller's evaluation time".
 #
@@ -26,7 +27,7 @@
 #   at a multi-element `eval_time` and a run at that vector's first element have
 #   to select the same candidate and report the same number at that element,
 #   because `tune:::first_eval_time()` takes element one either way. Pinned by
-#   "a multi-element evaluation time reports what its first element names".
+#   "a multi-element `eval_time` reports what its first element names".
 
 # The evaluation times a censored-regression metric is measured at.
 #

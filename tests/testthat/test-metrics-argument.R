@@ -15,9 +15,8 @@
 # The `metrics` argument reaches tune.
 #
 # The suite's shared metric set is `metric_set(rmse, rsq)`, which IS tune's
-# regression default, so every test passing it produces a run identical to one
-# passing nothing. Deleting the argument from any call site would leave the
-# suite green.
+# regression default, so a test passing it produces a run identical to one
+# passing nothing and cannot show that the argument reaches tune.
 #
 # These tests run on sep_* (helper-orchestration.R), a fixture built so that the
 # caller's metric set and tune's default disagree about both the metric names

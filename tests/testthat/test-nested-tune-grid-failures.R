@@ -369,10 +369,10 @@ test_that("dropping any of the per-fold columns sheds the results class", {
   # claiming it can rather than answering from a stale attribute.
   expect_false(inherits(res["id"], "nested_results"))
 
-  # Keeping .completed is not enough to keep the class. Such an object kept the
-  # class while every method that reads .metrics or .selected --
-  # collect_metrics(), print() -- failed on it. The class is kept only when the
-  # whole per-fold record and an id column survive.
+  # Keeping .completed is not enough to keep the class: every method that
+  # reads .metrics or .selected -- collect_metrics(), print() -- would fail on
+  # such an object. The class is kept only when the whole per-fold record and
+  # an id column survive.
   expect_false(inherits(res[, c("id", ".completed")], "nested_results"))
   expect_false(
     inherits(

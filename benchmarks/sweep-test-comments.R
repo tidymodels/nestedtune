@@ -14,7 +14,8 @@
 #   decision    `D-` and digits, or `D` and one or two digits (`M10-D1`)
 #   review      `RR` or `RB` and digits; a finding, oracle, task or question
 #               id: one of `B F O P Q R S T` and one or two digits, less the
-#               class systems `S3`, `S4`, `S7` and `R6`
+#               class systems `S3`, `S4`, `S7` and `R6`; and a review item
+#               in words, `review pass 2`, `finding 3`
 #   criterion   `AC` or `BC` and digits
 #   principle   `IP` or `GP` and digits
 #   date        `YYYY-MM-DD`
@@ -34,8 +35,9 @@
 #       table that matches the pattern, and every name used twice in one
 #       file, as `file: <reason>: <name>`; exits 1 on any hit
 #
-# Each mode first runs the planted cases: the pattern must match a
-# milestone id and stay silent on an issue number, or the script stops.
+# Each mode first runs the planted cases: the pattern must match one planted
+# id of each kind above and stay silent on an issue number and on the class
+# systems, or the script stops.
 
 id_pattern <- paste0(
   "\\b(",
@@ -48,6 +50,7 @@ id_pattern <- paste0(
   "|[0-9]{4}-[0-9]{2}-[0-9]{2}",
   "|run [0-9]{5,}|actions/runs/[0-9]+",
   "|PR #?[0-9]+",
+  "|review (pass|round|finding) [0-9]+|finding [0-9]+",
   ")\\b",
   "|-- type \""
 )
@@ -59,12 +62,24 @@ id_match <- function(text) {
   out
 }
 
-planted_hit <- "# The refusal covers both loops (M155)."
+planted_hit <- c(
+  "# The refusal covers both loops (M155).",
+  "# The order the rset is built in (D-016).",
+  "# Recorded in RR03 Q5.",
+  "# The second oracle, O2, reads the record.",
+  "# Pinned by the AC2 block and BC1.",
+  "# The seed contract (IP2).",
+  "# Measured 2026-09-01 on tune 2.1.0.",
+  "# The log of run 30303761053.",
+  "# The hang PR #13 found.",
+  "# The hint injects the whole argument (review pass 2, finding 3).",
+  "# O1 -- type \"live\". Source: tune itself."
+)
 planted_quiet <- c(
   "# The refusal covers both loops (#123).",
   "# S3 dispatch finds the method; R6 members are locked."
 )
-if (is.na(id_match(planted_hit)) || any(!is.na(id_match(planted_quiet)))) {
+if (anyNA(id_match(planted_hit)) || any(!is.na(id_match(planted_quiet)))) {
   stop("the pattern failed its planted cases", call. = FALSE)
 }
 

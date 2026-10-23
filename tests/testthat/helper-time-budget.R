@@ -37,7 +37,7 @@
 # What that cross-check cannot reach is declared here rather than left
 # implicit. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (classify:691 sets it, :697 spends it); and a wait that
+# and spent at another (classify:687 sets it, :693 spends it); and a wait that
 # is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
@@ -780,7 +780,7 @@ time_budget_ledger <- function() {
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two
-    # `mirai::daemons(0)` calls beside it (:50 teardown, :53 reset before the
+    # `mirai::daemons(0)` calls beside it (:51 teardown, :54 reset before the
     # serial reference) are not among BUDGETED_WAIT_CALLS and get no row:
     # `daemons(0)` measured returning in ~0.2 s with a live task outstanding --
     # it orphans rather than blocks -- so there is no bound to declare. They are
@@ -908,9 +908,8 @@ time_budget_totals <- function(ledger = time_budget_ledger()) {
   totals[order(-totals$seconds), , drop = FALSE]
 }
 
-# The ceiling on test-parallel-classify.R, the file with the largest declared
-# wait. The other three are recorded without one: detection is small,
-# interrupt is two pool starts, and identity reuses shared pools.
+# The ceiling on test-parallel-classify.R, the one file a CI stall has been
+# traced to. The other three daemon files are recorded without one.
 CLASSIFY_BUDGET_CEILING_S <- 480
 
 # What the same ledger totalled before its waits were first cut, so the

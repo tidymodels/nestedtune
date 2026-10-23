@@ -38,7 +38,7 @@ test_that("the shared 2-daemon pool starts primed", {
 
 # Both daemon counts compared here are >= 2, the threshold inherited from tune.
 # A one-daemon run would take the serial branch and the "identity" would be
-# serial vs serial -- the vacuity a review flagged. The two counts are two
+# serial vs serial, which proves nothing. The two counts are two
 # blocks, one per shared pool; the three-daemon one is below.
 
 test_that("parallel matches serial at two daemons", {

@@ -258,8 +258,9 @@ test_that("under parallel files every file and block gets exactly one live pair"
 # The trace keys a block by `<file> :: <description>`, so two blocks in one file
 # sharing a description share one key: the second never prints a `start`, and
 # the first `end` closes both. A hang in the second block would then be read
-# as a hang in the first. The reporter keeps no occurrence counter, so the
-# suite simply has no such pair, and the scan below is what keeps it so.
+# as a hang in the first. The reporter keeps no occurrence counter to tell the
+# two apart, so the suite must have no such pair, and the scan below keeps it
+# so.
 
 # Every `<file> :: <description>` that a second block in the same file repeats.
 duplicated_descriptions <- function(dir) {

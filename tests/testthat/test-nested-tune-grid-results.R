@@ -192,8 +192,9 @@ test_that("the object carries the grid and metrics it was asked to run", {
   expect_identical(attr(reordered, "metrics"), metrics)
   expect_identical(reordered$id, rev(res$id))
 
-  # Dropping the two seed columns sheds the class, because has_results_columns()
-  # names every column the constructor writes, these two included. The call's
+  # Dropping the two seed columns sheds the class, though has_results_columns()
+  # does not name them: the set an operation must leave alone is every column
+  # the constructor writes (`record_columns()`), these two included. The call's
   # record goes with the class rather than staying readable on the tibble that
   # comes back.
   cols <- setdiff(names(res), c(".tuning_seed", ".outer_fit_seed"))

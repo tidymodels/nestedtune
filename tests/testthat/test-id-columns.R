@@ -261,7 +261,7 @@ test_that("an unusable label record falls back to row positions", {
   attr(missing_one, "id_columns") <- "not_a_column"
   expect_identical(fold_ids(missing_one), positions)
 
-  # The form that gives a wrong label rather than raising.
+  # The form that would give a wrong label rather than raising.
   partly_missing <- res
   attr(partly_missing, "id_columns") <- c("id", "not_a_column")
   expect_identical(fold_ids(partly_missing), positions)

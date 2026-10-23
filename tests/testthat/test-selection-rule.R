@@ -188,7 +188,7 @@ test_that("an empty selection under another rule names that rule and not the sta
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   # No real run under these rules is known to select nothing, so the
-  # selector is mocked to return no row (review finding 5).
+  # selector is mocked to return no row.
   empty <- function(...) {
     data.frame(num_comp = integer(0), .config = character(0))
   }
@@ -294,7 +294,7 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   skip_if_not_installed("desirability2", minimum_version = "0.2.0")
 
   # A variable of the caller's: desirability2 would read it only when it
-  # scores each fold's run, after all the tuning (review finding 1).
+  # scores each fold's run, after all the tuning.
   lo <- 0.2
   cnd <- rlang::catch_cnd(selection_rule(
     "desirability",
@@ -306,8 +306,7 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   expect_match(msg, "maximize(rsq, low = lo)", fixed = TRUE)
   expect_match(msg, "low = !!lo", fixed = TRUE)
 
-  # The hint injects the whole argument, not its first name (review pass 2,
-  # finding 3).
+  # The hint injects the whole argument, not its first name.
   hint_of <- function(cnd) cli::ansi_strip(conditionMessage(cnd))
   cnd <- rlang::catch_cnd(selection_rule(
     "desirability",
@@ -321,8 +320,8 @@ test_that("the desirability rule refuses a name in a goal's later arguments", {
   ))
   expect_match(hint_of(cnd), "high = !!(lo * 2)", fixed = TRUE)
 
-  # A metric named in a later argument, which the entry check does not read
-  # (review finding 4), and a name inside a call there.
+  # A metric named in a later argument, which the entry check does not read,
+  # and a name inside a call there.
   expect_error(
     selection_rule("desirability", maximize(rsq, low = rmse)),
     class = "nestedtune_selection_rule_term_arg"

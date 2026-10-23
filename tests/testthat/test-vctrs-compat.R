@@ -307,10 +307,7 @@ test_that("group_by(), rowwise() and as_tibble() leave the recorded attributes r
   expect_identical(attr(res, "outer_label"), "3-fold cross-validation")
 })
 
-# The review's two returns. Neither is an acceptance criterion -- both are
-# defects the review found in the methods above -- so each is asserted against
-# behavior that already existed somewhere else: what `main` did before these
-# methods were registered, and what `dplyr::bind_cols()` does today.
+# Two regression tests for defects in the methods above.
 
 test_that("combining with a table whose columns differ answers rather than raising", {
   skip_if_not_installed("tibble")

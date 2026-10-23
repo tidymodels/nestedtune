@@ -3115,7 +3115,8 @@ coef_extract <- rlang::new_function(
 # holds two fixed workflows, the only set the plain resampling orchestrator
 # accepts (it refuses a marked one at entry). `wset_three()` adds a second
 # tuned workflow whose parameter `det_grid()` does not name, carrying its own
-# `grid` as a per-workflow option -- the override the third oracle reads, and
+# `grid` as a per-workflow option -- the override "a per-workflow grid option
+# overrides the grid in `...` for that workflow alone" reads, and
 # one the map must honour or the element fails at `check_grid_params()`.
 wset_two <- function(data) {
   workflowsets::as_workflow_set(

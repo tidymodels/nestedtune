@@ -228,7 +228,8 @@ test_that("a workflow with neither part has the identity it had at the branch po
   skip_if_no_engines()
   d <- make_reg_data()
 
-  # A record saved before the identity existed, under the workflow it ran under
+  # A record saved before the identity read case weights or a postprocessor,
+  # under the workflow it ran under
   # (fixtures/make-branch-point-results.R names the commit and the seeds).
   saved <- readRDS(test_path("fixtures", "branch-point-results.rds"))
   recorded <- extract_procedure(saved)$workflow

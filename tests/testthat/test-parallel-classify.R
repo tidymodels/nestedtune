@@ -666,7 +666,7 @@ test_that("a bound that is not a single positive finite number is refused", {
 test_that("an infinite bound is refused, because it is not a bound", {
   # Inf is numeric and positive, so it slips past every check above -- and
   # honouring it would hand back the unbreakable hang the bound exists to
-  # convert into an error (a hang that held `R CMD check` for 39 minutes). A
+  # convert into an error. A
   # user who needs longer sets a large finite value.
   old <- options(nestedtune.preflight_timeout = Inf)
   on.exit(options(old), add = TRUE)

@@ -257,11 +257,10 @@ test_that("no row-changing result prints the outer resampling scheme", {
 # The help page may not still promise the behavior this rule replaced.
 #
 # The behavioral half is already covered: test-nested-tune-grid-failures.R
-# asserts that a row subset comes back with all five attributes NULL. What was
-# missing is a guard on the prose, which promises the opposite in a `@details`
-# paragraph that a grep check in the suite was scoped away from. Both the
-# roxygen source and the generated `.Rd` are read, because the sentence has to
-# leave both.
+# asserts that a row subset comes back with all five attributes NULL. This
+# block guards the prose: a `@details` paragraph promising the opposite would
+# otherwise go unseen. Both the roxygen source and the generated `.Rd` are
+# read, because the sentence has to stay out of both.
 #
 # `test_path("..", "..", ...)` resolves outside the source tree under
 # `R CMD check`, so this skips there and fires where the documentation is
@@ -323,8 +322,8 @@ test_that("the help page makes no promise about what subsetting rows keeps", {
 #
 # The key is only reached where it is actually compared -- `id` has to tie, and
 # the added column has to sort ahead of `id2` -- and that second condition is a
-# question about collation rather than about the data. `id_junk`, the name the
-# review measured it with, sorts before `id2` under this machine's locale and
+# question about collation rather than about the data. `id_junk`, for example,
+# sorts before `id2` under this machine's locale and
 # after it under the C collation `R CMD check` runs in, so the test would have
 # been green on CI for a reason having nothing to do with the fix. `id0_junk`
 # sorts ahead of `id2` in both, which is the point: whether a caller's column

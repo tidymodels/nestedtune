@@ -288,10 +288,11 @@ test_that("each shared check fires through nested_tune_sim_anneal()", {
   }
 })
 
-# The falsifier, pinned: `iter`'s floor of 1 rests on finetune running
-# iterations at `iter = 0` (its loop is `(existing_iter + 1):iter`, which at
-# 0 is `1:0`). A finetune whose loop runs none at 0 turns this red, which is
-# the signal to reopen accepting 0 as the Bayesian sibling does.
+# What would show the floor wrong, pinned: `iter`'s floor of 1 rests on
+# finetune running iterations at `iter = 0` (its loop is
+# `(existing_iter + 1):iter`, which at 0 is `1:0`). A finetune whose loop runs
+# none at 0 turns this red, which is the signal to reopen accepting 0 as the
+# Bayesian sibling does.
 test_that("finetune still iterates at iter = 0, the fact iter's floor of 1 rests on", {
   skip_if_no_anneal_fixture()
 

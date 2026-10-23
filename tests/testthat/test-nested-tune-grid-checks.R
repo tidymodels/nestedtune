@@ -244,11 +244,11 @@ test_that("a grid given as a size is not held to the column check", {
   expect_no_error(check_grid_params(wf, 5))
 })
 
-# The two list columns are checked element by element. Before this, a bad
-# element was not a call error at all: tune raised it once per fold, so the run
-# cost a full pass and came back as an all-folds-failed object carrying tune's
-# message rather than ours -- the shape check_grid_params() already prevents for
-# a malformed grid.
+# The two list columns are checked element by element. Unchecked, a bad
+# element would not be a call error at all: tune would raise it once per fold,
+# so the run would cost a full pass and come back as an all-folds-failed object
+# carrying tune's message rather than ours -- the shape check_grid_params()
+# already prevents for a malformed grid.
 
 test_that("a non-rset element of inner_resamples is refused", {
   skip_if_no_engines()
@@ -1020,7 +1020,7 @@ test_that("the desirability rule is refused at entry on a censored regression mo
   folds <- srv_nested(d)
 
   # desirability2 ranks one row per candidate per evaluation time there, where
-  # tune's selectors use the first time (review finding 2).
+  # tune's selectors use the first time.
   cnd <- grid_refusal(nested_tune_grid(
     wf,
     folds,

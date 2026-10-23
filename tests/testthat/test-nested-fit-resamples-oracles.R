@@ -19,7 +19,7 @@
 #   the same way would still fail here. Pinned by "every fold's metrics are
 #   identical to a by-hand fit, predict and score".
 #
-# Closed form from theory. Source: nachum2026,
+# Source: nachum2026,
 #   Lemma 4.9 and Theorem 4.10 (both p. 11), the mean squared error of k-fold
 #   CV for the majority rule under Bernoulli(1/2) labels. The rule (Section
 #   4.1.2, p. 10) predicts "0" unless the count of "1" labels in its training

@@ -557,7 +557,9 @@ template_attributes <- function() {
 # so this is the one method in the file resting on an interface that may move
 # (D-033). It can move in two directions, and neither is silent for long. If
 # vctrs stops consulting the generic, `vec_cbind()` falls back to the default
-# and drops the class, which test-vctrs-compat.R's AC3 block says out loud. If vctrs stops exporting it, the `importFrom` below fails the package
+# and drops the class, which test-vctrs-compat.R's "same operation through
+# either door" block says out loud. If vctrs stops exporting it, the
+# `importFrom` below fails the package
 # at load, everywhere, immediately (RR04 recommendation 2).
 #' @importFrom vctrs vec_cbind_frame_ptype
 #' @export
