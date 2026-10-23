@@ -1751,7 +1751,7 @@ bayes_results <- function() {
 # draws its `seed` slot when it is built, and a fixture keyed on a control
 # holding a fresh draw would miss the cache on every request. The draw is
 # overwritten by every fold's tuning seed, so its value never reaches a run.
-ac1_control <- function() {
+early_stop_control <- function() {
   set.seed(1)
   tune::control_bayes(no_improve = 2, uncertain = 2)
 }
@@ -1766,7 +1766,7 @@ bayes_control_results <- function() {
   folds <- det_nested(d)
   p <- bayes_param_info(wf)
   ms <- reg_metrics()
-  ctrl <- ac1_control()
+  ctrl <- early_stop_control()
   set.seed(20)
   memoised(nested_tune_bayes(
     wf,
@@ -1789,7 +1789,7 @@ bayes_control_final_results <- function(data, seed = 26) {
   folds <- final_nested(data)
   p <- bayes_param_info(wf)
   ms <- reg_metrics()
-  ctrl <- ac1_control()
+  ctrl <- early_stop_control()
   set.seed(seed)
   memoised(nested_tune_bayes(
     wf,

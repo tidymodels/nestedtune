@@ -58,15 +58,15 @@ for (i in seq_len(nrow(totals))) {
 
 classify <- totals$seconds[totals$file == "test-parallel-classify.R"]
 cat(sprintf(
-  "localized file: %.1f s against a %.0f s ceiling and a %.1f s pre-M16 figure\n",
+  "localized file: %.1f s against a %.0f s ceiling and a %.1f s figure before the cut\n",
   classify,
   CLASSIFY_BUDGET_CEILING_S,
-  CLASSIFY_BUDGET_PRE_M16_S
+  CLASSIFY_BUDGET_BEFORE_CUT_S
 ))
 cat(sprintf(
-  "  under ceiling: %s   at most half of pre-M16: %s\n",
+  "  under ceiling: %s   at most half of the figure before the cut: %s\n",
   classify < CLASSIFY_BUDGET_CEILING_S,
-  classify <= CLASSIFY_BUDGET_PRE_M16_S / 2
+  classify <= CLASSIFY_BUDGET_BEFORE_CUT_S / 2
 ))
 cat(sprintf(
   "\nfor scale: this file typically runs 12.0 s (benchmarks/test-timing-baseline.md),\n"

@@ -918,7 +918,7 @@ CLASSIFY_BUDGET_CEILING_S <- 480
 # What the same ledger totalled before its waits were first cut, so the
 # reduction is a measured figure rather than a remembered one.
 # benchmarks/test-time-budget.R prints it beside the current total.
-CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
+CLASSIFY_BUDGET_BEFORE_CUT_S <- 1008.678
 
 # The ceiling on test-parallel-metrics.R, set at the file's one pool start plus
 # a margin. A new file is cheaper to hold to a bound from the start than to cut

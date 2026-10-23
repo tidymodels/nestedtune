@@ -444,7 +444,7 @@ test_that("param_info, control and select reach the folds on two daemons as seri
   nested <- det_nested(data)
   wf <- bayes_workflow(data)
   p <- bayes_param_info(wf)
-  ctrl <- ac1_control()
+  ctrl <- early_stop_control()
   rule <- selection_rule("pct_loss", df1, df2, limit = 20)
 
   set.seed(2026L)

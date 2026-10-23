@@ -108,7 +108,7 @@ test_that("a control passed through `...` reaches every fold", {
   folds <- det_nested(d)
   p <- bayes_param_info(wf)
   ms <- reg_metrics()
-  ctrl <- ac1_control()
+  ctrl <- early_stop_control()
 
   res <- bayes_control_results()
   expect_true(all(res$.completed))
