@@ -87,6 +87,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: T7 added for review return 1 (minor amendment; Coverage AC5 → T5, T7).
 - 2026-10-23: T7 done: "the shared entry checks fire, in the shared shapes" in test-nested-fit-resamples-checks.R now asserts each class of the removed block's three refusals: the design refusal by `nestedtune_bad_design`, the dots refusal by `nestedtune_bad_dots`, and the metrics refusal by `rlang_error` with its "metric_set" message (the class `rlang::catch_cnd()` showed it raises); F1-F12 fixed as the Review section lists; AC1-AC5 greps print nothing; air, prose sweep clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; the eight affected test files pass (123 blocks, 0 failed).
 - 2026-10-23: status review; handed to /milestone-review for pass 2.
+- 2026-10-23: step-7 approval: m156-test-tracking-leftovers approved for merge
 
 ## Review
 
