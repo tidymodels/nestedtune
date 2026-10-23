@@ -1,6 +1,6 @@
 # M156: Test code cites no line numbers and names no tracking records
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -56,7 +56,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - [x] T3: Rename `PRINT_AS_AGREED_M46`, `ac1_control()` and `CLASSIFY_BUDGET_PRE_M16_S` at every site the AC2 grep lists; run AC2's grep.
 - [x] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
 - [x] T5: Remove the seed-identity assertions, their `before` lines and the comment that vouches for them; give "the refusals fire before the RNG is drawn from" its condition classes, or remove it where other tests assert the same classes (name them in the work log); drop the unchecked "before ..." clause from the two test names, grepping `_snaps/` and `helper-time-budget.R` for the old names first; run AC5's greps.
-- [ ] T6: Run the `verify` slot, `benchmarks/sweep-test-comments.R` and `benchmarks/test-time-budget.R`.
+- [x] T6: Run the `verify` slot, `benchmarks/sweep-test-comments.R` and `benchmarks/test-time-budget.R`.
 
 ## Work log
 
@@ -79,3 +79,6 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: T4 done: four test names renamed (none had a snapshot section or ledger row); the 11 "criterion" and 3 "criteria" sites state the property in their own words; AC3's greps print nothing; `sweep-test-comments.R` exits 0; the seven affected files pass (110 blocks, 0 failed); `test-parallel-payload.R` runs at T6.
 - 2026-10-23: T5 done: the seed assertions, their `before` and `set.seed(1)` lines and the vouching comment are gone from both files; "the refusals fire before the RNG is drawn from" is removed, because "the shared entry checks fire, in the shared shapes" in the same file asserts all three refusals: the design one by `nestedtune_bad_design`, the dots one by `nestedtune_bad_dots`, and the metrics one by its "metric_set" message, since that refusal raises a plain `rlang_error` with no package class (checked by `rlang::catch_cnd()`); the tune() marker test and the file header drop "before any fold runs"; AC5's greps print nothing; both files pass (14 blocks, 0 failed).
 - 2026-10-23: observation: seed-identity assertions remain in 11 other test files (`grep -c 'expect_identical(\.Random\.seed'`), mostly the `-rng.R` files where restoring the caller's state is the property under test; M152's review left them, so no row is filed.
+- 2026-10-23: T6 done: `devtools::test()` at 49a5768c, run alone, 1152 blocks, 0 failed, 0 errors, 0 skipped (one block fewer than M155's 1153, the T5 removal); `air format --check .`, `sweep-prose.R --plain` clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted; every AC grep prints nothing.
+- 2026-10-23: claim audit: not owed — internal tier.
+- 2026-10-23: status review; handed to /milestone-review.
