@@ -44,7 +44,7 @@ Fix the test-code findings that M156's review filed, as the candidate row "Fix t
 - [x] AC3: The grid block "the new refusals fire before the RNG is drawn from" has a new name that states what it refuses and does not say "new". The comment above it does not say "added here". The block asserts each of its three refused calls with `expect_error()`. If the refusal has a `nestedtune_` class, the assertion names that class. If it has none, the assertion names a message pattern.
 - [x] AC4: In `tests/testthat/helper-orchestration.R`, the comment that opens "The stochastic sibling's parameter set" is directly above `bayes_stoch_param_info <- function`. The comment directly above `early_stop_control <- function` is the one that opens "The early-stopping control".
 - [x] AC5: The provenance of `cairn/references/code-inventory.md` names `601cff7e` as the commit its `R/` line numbers are read at. For each of the 106 `F` rows of its table, the cited line in `git show 601cff7e:<file>` contains the row's function name, by the row loop in T4.
-- [ ] AC6: `Rscript -e 'devtools::test()'` reports 0 failures. `air format --check .` is clean. `Rscript benchmarks/sweep-test-comments.R` is clean.
+- [x] AC6: `Rscript -e 'devtools::test()'` reports 0 failures. `air format --check .` is clean. `Rscript benchmarks/sweep-test-comments.R` is clean.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate; each acceptance criterion → the
@@ -149,3 +149,5 @@ Review pass 1, 2026-10-23, at 4622dfbb. main had not moved since the cut (d6ec5a
 - ripple #4: three prose citations of `R/nested-results.R:69` for `[.nested_results` — reject (false): line 69 holds that definition at `601cff7e` (checked)
 - ripple #5: the absorbed ROADMAP row still lists the fixed items — reject (planned change), as diff-bug #2
 - ripple #6: the select block's "before any fold runs" — reject (false), as prior-review #4
+- AC6 evidence: at 97ddd076, after the review fixes, `devtools::test()` gave 1152 blocks, 0 failed, 0 errors, 0 skipped. `air format --check .` is clean, and `Rscript benchmarks/sweep-test-comments.R` exited 0. `devtools::check()` at 4622dfbb gave 0 errors, 0 warnings and 0 notes. Pass.
+- snapshot: no changed `_snaps` file in `git diff --name-only main...HEAD`.
