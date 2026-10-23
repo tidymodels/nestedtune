@@ -177,7 +177,7 @@ test_that("rehydrating a leaned payload returns the serial path's own objects", 
   }
 })
 
-test_that("a leaned run puts under a quarter of the pre-milestone bytes on the wire", {
+test_that("a leaned run puts under a quarter of the unleaned bytes on the wire", {
   fx <- fixture_design()
   shared <- fx$data
   # The control rides in `.args`, so it is charged per fold here

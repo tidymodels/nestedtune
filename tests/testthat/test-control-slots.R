@@ -182,7 +182,7 @@ test_that("every control_race() slot sits under one heading on the racing page",
   expect_identical(buckets[["Forced"]], "allow_par")
   expect_identical(buckets[["Settable as its own argument"]], "event_level")
   expect_identical(buckets[["Refused"]], character(0))
-  # The racing slots pass through, as the criterion names them.
+  # The racing slots pass through.
   expect_true(all(
     c("burn_in", "alpha", "num_ties", "randomize", "verbose_elim") %in%
       buckets[["Passed through"]]
@@ -202,7 +202,7 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
   expect_identical(buckets[["Settable as its own argument"]], "event_level")
   expect_identical(buckets[["Refused"]], character(0))
   # The annealing slots pass through, `time_limit` and `verbose_iter` among
-  # them as the criterion names.
+  # them.
   expect_true(all(
     c(
       "no_improve",
@@ -222,7 +222,7 @@ test_that("every control_sim_anneal() slot sits under one heading on nested_tune
   )
   expect_identical(buckets[["Inert"]], "backend_options")
 
-  # The two caveats the criterion asks the page to carry: the wall-clock
+  # The two caveats the page carries: the wall-clock
   # stop's caveat, and the log `verbose_iter` prints from every fold.
   txt <- gsub("\\s+", " ", rd_text(help_rd("nested_tune_sim_anneal")))
   expect_match(

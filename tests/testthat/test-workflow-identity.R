@@ -141,7 +141,7 @@ test_that("the identity carries no data rows", {
   expect_type(leaves, "character")
 })
 
-test_that("the identity names the model and the preprocessor as the criteria describe", {
+test_that("the identity records the parts of the model and the preprocessor", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -224,7 +224,7 @@ test_that("a model argument is recorded as written, and a recipe setting as the 
 # postprocessor, are present only when the workflow carries them, so a workflow
 # with neither keeps the identity a record saved before them holds.
 
-test_that("a workflow with neither part has the identity it had at the branch point", {
+test_that("a workflow with neither part has the identity a record saved before them holds", {
   skip_if_no_engines()
   d <- make_reg_data()
 

@@ -79,7 +79,7 @@ test_that("`iter` must be a single whole number of at least 1", {
   wf <- det_workflow(d)
   folds <- anneal_folds(d)
 
-  # Each axis the criterion names has its exemplar: below the floor (0, where
+  # Each kind of bad value has its exemplar: below the floor (0, where
   # finetune runs two iterations, and -1), fractional, non-numeric (character,
   # logical, list, NULL), length 0 and 2, `NA` in both types, and non-finite.
   for (bad in list(

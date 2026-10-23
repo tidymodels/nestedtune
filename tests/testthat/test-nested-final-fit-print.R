@@ -93,7 +93,7 @@ test_that("the printed report is stable", {
 #
 # Written out here rather than left to the snapshot below it. The snapshot is
 # exactly the artifact a change to the print method would re-record, so a
-# criterion forbidding that output to change cannot be pinned to it -- accepting
+# promise that the output does not change cannot be pinned to it -- accepting
 # the new snapshot would satisfy the pin and falsify the promise at the same
 # time. These bytes have to be re-agreed by hand instead.
 #
