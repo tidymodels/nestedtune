@@ -1,13 +1,13 @@
 # M156: Test code cites no line numbers and names no tracking records
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — test comments, test identifiers and names, two `R/` code comments and one benchmark comment; no exported behavior, help page or NEWS changes
-- **Branch/PR:** —
+- **Branch/PR:** m156-test-tracking-leftovers
 
 ## Goal
 
@@ -33,12 +33,12 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 
 ## Acceptance criteria
 
-- [ ] AC1: ``grep -nE '#.*([A-Za-z_`]|[ (]):[0-9]{2,}' tests/testthat/*.R R/*.R`` and `grep -n 'helper-parallel.R:' benchmarks/probe-mori-dispatch.R` print nothing.
-- [ ] AC2: `grep -nwE '[A-Za-z_]*_M[0-9]{2,3}[A-Za-z0-9_]*|ac[0-9]+_[a-z_]+' tests/testthat/*.R benchmarks/*.R` prints nothing.
-- [ ] AC3: `grep -niwE 'criteri(on|a)' tests/testthat/*.R` and `grep -nE 'test_that\("[^"]*(branch point|pre-milestone|used to emit)' tests/testthat/*.R` print nothing.
-- [ ] AC4: In `R/parallel.R`, the comment above `workflow_pkgs()` names `test-parallel-interrupt.R` and `test-parallel-payload.R` and not `test-parallel-detection.R`, and the `.args` comment in `dispatch_folds()` states either no byte figure or only figures that appear verbatim in `test-parallel-payload.R` (`grep -F`).
-- [ ] AC5: `grep -n 'Random\.seed' tests/testthat/test-nested-fit-resamples-checks.R` and `grep -n 'before <- \.Random\.seed' tests/testthat/test-nested-workflow-map-checks.R` print nothing, and the block "the refusals fire before the RNG is drawn from" either passes `class =` to each of its three `expect_error()` calls or is removed with the work log naming the test that asserts each class.
-- [ ] AC6: The `verify` slot is clean: `devtools::test()` with 0 failures, `air format --check .`, and `Rscript benchmarks/sweep-prose.R --plain`; `Rscript benchmarks/sweep-test-comments.R` and `Rscript benchmarks/test-time-budget.R` exit 0.
+- [x] AC1: ``grep -nE '#.*([A-Za-z_`]|[ (]):[0-9]{2,}' tests/testthat/*.R R/*.R`` and `grep -n 'helper-parallel.R:' benchmarks/probe-mori-dispatch.R` print nothing.
+- [x] AC2: `grep -nwE '[A-Za-z_]*_M[0-9]{2,3}[A-Za-z0-9_]*|ac[0-9]+_[a-z_]+' tests/testthat/*.R benchmarks/*.R` prints nothing.
+- [x] AC3: `grep -niwE 'criteri(on|a)' tests/testthat/*.R` and `grep -nE 'test_that\("[^"]*(branch point|pre-milestone|used to emit)' tests/testthat/*.R` print nothing.
+- [x] AC4: In `R/parallel.R`, the comment above `workflow_pkgs()` names `test-parallel-interrupt.R` and `test-parallel-payload.R` and not `test-parallel-detection.R`, and the `.args` comment in `dispatch_folds()` states either no byte figure or only figures that appear verbatim in `test-parallel-payload.R` (`grep -F`).
+- [x] AC5: `grep -n 'Random\.seed' tests/testthat/test-nested-fit-resamples-checks.R` and `grep -n 'before <- \.Random\.seed' tests/testthat/test-nested-workflow-map-checks.R` print nothing, and the block "the refusals fire before the RNG is drawn from" either passes `class =` to each of its three `expect_error()` calls or is removed with the work log naming the test that asserts each class.
+- [x] AC6: The `verify` slot is clean: `devtools::test()` with 0 failures, `air format --check .`, and `Rscript benchmarks/sweep-prose.R --plain`; `Rscript benchmarks/sweep-test-comments.R` and `Rscript benchmarks/test-time-budget.R` exit 0.
 
 ## Coverage
 
@@ -46,17 +46,18 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - AC2 → T3
 - AC3 → T4
 - AC4 → T2
-- AC5 → T5
+- AC5 → T5, T7
 - AC6 → T6
 
 ## Tasks
 
-- [ ] T1: Rewrite the line citations Scope In lists to name the call, block or test; run AC1's greps.
-- [ ] T2: Fix the two `R/parallel.R` comments (stand-in payload files; `.args` byte figures, read against `test-parallel-payload.R`'s assertions); run `air format --check .` and the prose sweep.
-- [ ] T3: Rename `PRINT_AS_AGREED_M46`, `ac1_control()` and `CLASSIFY_BUDGET_PRE_M16_S` at every site the AC2 grep lists; run AC2's grep.
-- [ ] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
-- [ ] T5: Remove the seed-identity assertions, their `before` lines and the comment that vouches for them; give "the refusals fire before the RNG is drawn from" its condition classes, or remove it where other tests assert the same classes (name them in the work log); drop the unchecked "before ..." clause from the two test names, grepping `_snaps/` and `helper-time-budget.R` for the old names first; run AC5's greps.
-- [ ] T6: Run the `verify` slot, `benchmarks/sweep-test-comments.R` and `benchmarks/test-time-budget.R`.
+- [x] T1: Rewrite the line citations Scope In lists to name the call, block or test; run AC1's greps.
+- [x] T2: Fix the two `R/parallel.R` comments (stand-in payload files; `.args` byte figures, read against `test-parallel-payload.R`'s assertions); run `air format --check .` and the prose sweep.
+- [x] T3: Rename `PRINT_AS_AGREED_M46`, `ac1_control()` and `CLASSIFY_BUDGET_PRE_M16_S` at every site the AC2 grep lists; run AC2's grep.
+- [x] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
+- [x] T5: Remove the seed-identity assertions, their `before` lines and the comment that vouches for them; give "the refusals fire before the RNG is drawn from" its condition classes, or remove it where other tests assert the same classes (name them in the work log); drop the unchecked "before ..." clause from the two test names, grepping `_snaps/` and `helper-time-budget.R` for the old names first; run AC5's greps.
+- [x] T6: Run the `verify` slot, `benchmarks/sweep-test-comments.R` and `benchmarks/test-time-budget.R`.
+- [x] T7: Review return 1: assert the metrics refusal's `rlang_error` class in "the shared entry checks fire, in the shared shapes" and name that test in the work log for each class; fix F1-F12 from the Review section; re-run T6's checks.
 
 ## Work log
 
@@ -71,3 +72,88 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: lessons harvested: M33 (resolve each citation to the symbol it names, never repair blind), M154 (renaming a test means editing its ledger rows; none of the three renamed tests has one), M152 (`test-parallel-interrupt.R` fails beside other suites, so run `devtools::test()` alone).
 - 2026-10-23: checkpoint: plan committed locally while the reduced criteria audit runs; its result follows in the next line.
 - 2026-10-23: criteria audit (reduced mode, fresh Opus reader): AC1 left a universal Scope claim unchecked over `R/*.R` and missed `R/parallel.R:465` and the `classify:687` form, fixed with one comment grep over both trees and the site added; AC3 left "criteria" at 3 sites, added; AC4 "hold" undefined, now verbatim per `grep -F`; AC5 missed the vouching comment and `before` lines and its bare-`expect_error()` clause named no procedure, now two greps and the one named block, and the two test names promising "before" lose that clause; AC6 now exit status; AC2 no finding.
+- 2026-10-23: started on branch m156-test-tracking-leftovers, cut from main at defc7c02.
+- 2026-10-23: implement decision: comment-only tasks (T1, T2, T4's comments) are checked off on a parse check, `air format --check .` and the prose sweep; files whose code changes (T3, T4's names, T5) run their own test files; the full `devtools::test()` runs once at T6 before review.
+- 2026-10-23: T1 done: 10 citations now name the call, block or test (the ledger notes describe the `daemons(0)` calls by role, since their line numbers had drifted; required-pkgs now has two teardowns); AC1's greps print nothing; air, parse and prose sweep clean.
+- 2026-10-23: T2 done: the `workflow_pkgs()` comment names test-parallel-interrupt.R and test-parallel-payload.R (both call `dispatch_folds()` with `object = NULL`); the `.args` comment states the under-a-quarter ratio that test-parallel-payload.R asserts, with no byte figure; air, parse and prose sweep clean.
+- 2026-10-23: T3 done: `ac1_control()` is `early_stop_control()`, `PRINT_AS_AGREED_M46` is `PRINT_AS_AGREED`, `CLASSIFY_BUDGET_PRE_M16_S` is `CLASSIFY_BUDGET_BEFORE_CUT_S`, and `benchmarks/test-time-budget.R` prints "figure before the cut" in place of "pre-M16"; AC2's grep prints nothing; the three renamed test files pass (38 blocks, 0 failed); `benchmarks/test-time-budget.R` exits 0; `test-parallel-identity.R` runs at T6.
+- 2026-10-23: T4 done: four test names renamed (none had a snapshot section or ledger row); the 11 "criterion" and 3 "criteria" sites state the property in their own words; AC3's greps print nothing; `sweep-test-comments.R` exits 0; the seven affected files pass (110 blocks, 0 failed); `test-parallel-payload.R` runs at T6.
+- 2026-10-23: T5 done: the seed assertions, their `before` and `set.seed(1)` lines and the vouching comment are gone from both files; "the refusals fire before the RNG is drawn from" is removed, because "the shared entry checks fire, in the shared shapes" in the same file asserts all three refusals: the design one by `nestedtune_bad_design`, the dots one by `nestedtune_bad_dots`, and the metrics one by its "metric_set" message, since that refusal raises a plain `rlang_error` with no package class (checked by `rlang::catch_cnd()`); the tune() marker test and the file header drop "before any fold runs"; AC5's greps print nothing; both files pass (14 blocks, 0 failed).
+- 2026-10-23: observation: seed-identity assertions remain in 11 other test files (`grep -c 'expect_identical(\.Random\.seed'`), mostly the `-rng.R` files where restoring the caller's state is the property under test; M152's review left them, so no row is filed.
+- 2026-10-23: T6 done: `devtools::test()` at 49a5768c, run alone, 1152 blocks, 0 failed, 0 errors, 0 skipped (one block fewer than M155's 1153, the T5 removal); `air format --check .`, `sweep-prose.R --plain` clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted; every AC grep prints nothing.
+- 2026-10-23: claim audit: not owed — internal tier.
+- 2026-10-23: status review; handed to /milestone-review.
+- 2026-10-23: review return 1: AC5 fails as written (the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, but it asserts the metrics refusal by message only); with it go the fix-now findings F1-F12 the Review section lists (diff-bug #1, #2, #5-#13, prior-review #2).
+- 2026-10-23: T7 added for review return 1 (minor amendment; Coverage AC5 → T5, T7).
+- 2026-10-23: T7 done: "the shared entry checks fire, in the shared shapes" in test-nested-fit-resamples-checks.R now asserts each class of the removed block's three refusals: the design refusal by `nestedtune_bad_design`, the dots refusal by `nestedtune_bad_dots`, and the metrics refusal by `rlang_error` with its "metric_set" message (the class `rlang::catch_cnd()` showed it raises); F1-F12 fixed as the Review section lists; AC1-AC5 greps print nothing; air, prose sweep clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; the eight affected test files pass (123 blocks, 0 failed).
+- 2026-10-23: status review; handed to /milestone-review for pass 2.
+- 2026-10-23: step-7 approval: m156-test-tracking-leftovers approved for merge
+
+## Review
+
+Pass 1 (2026-10-23), evidence at 76ed9d9a, branch level with main (0 commits behind).
+- AC1: both greps run at 76ed9d9a print 0 lines.
+- AC2: the grep run at 76ed9d9a prints 0 lines.
+- AC3: both greps run at 76ed9d9a print 0 lines.
+- AC4: the comment above `workflow_pkgs()` (`R/parallel.R`, function at line 620) names test-parallel-interrupt.R and test-parallel-payload.R, and no line of that comment names test-parallel-detection.R; the `.args` comment in `dispatch_folds()` matches no byte figure (`grep -nE '[0-9],[0-9]{3}| B\b'` on its lines, exit 1).
+- AC5: FAILS as written. Both greps print 0 lines and the block is removed, but the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, and that block asserts the metrics refusal (`metrics = "rmse"`, class `rlang_error`) by its "metric_set" message only, with no `class =`; not ticked.
+- Gate at 76ed9d9a: `devtools::test()` 1152 blocks, 0 failed, 0 errors, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes, no tree change; AC6 is re-run on the next pass.
+- spawned: diff-bug, blame-history, prior-review, ripple
+- diff-bug #1: the `workflow_pkgs()` comment calls test-parallel-payload.R's payloads stand-ins, but they are real `fat_payload()` fold payloads; both files share only `object = NULL` — fix now (F1), fixed 0a3d89f1.
+- diff-bug #2: AC5 removal branch unmet, the metrics refusal asserted by message only — fix now (F2: assert its `rlang_error` class beside the message), fixed 0a3d89f1.
+- diff-bug #3: nothing in test-nested-fit-resamples-checks.R shows a refusal fires before any fold — reject, planned change (plan gate chose removal); the existence-check gap goes to the follow-up row.
+- diff-bug #4: test-nested-final-fit-checks.R keeps the same seed-identity pattern with comments vouching for it — follow-up, row "Fix the leftovers of M156's review".
+- diff-bug #5: test-parallel-identity.R "Each fold record, one by one" overclaims five columns and has no verb — fix now (F3), fixed 0a3d89f1.
+- diff-bug #6: test-help-structure.R glyph sentence: `tools` sets the bullet in its load hook wherever the locale can encode it (some Windows codepages too), so "a non-UTF-8 runner renders an asterisk" is not exact — fix now (F4), fixed 0a3d89f1.
+- diff-bug #7: test-event-level.R "redo-the-fit example" is in the Reproducibility section, not `@examples` — fix now (F5), fixed 0a3d89f1.
+- diff-bug #8: R/parallel.R says `dispatch_folds()` resolves both symbols, but `rehydrate_payload` is resolved in the task wrapper and `nested_fold_fit` in `fold_task()`; verbless — fix now (F6), fixed 0a3d89f1.
+- diff-bug #9: test-nested-results-print.R "did NOT come across" keeps the history framing the rename removed — fix now (F7), fixed 0a3d89f1.
+- diff-bug #10: test-dplyr-compat.R "the one form" lost its noun — fix now (F8), fixed 0a3d89f1.
+- diff-bug #11: test-workflow-identity.R new name's "them" has no antecedent — fix now (F9), fixed 0a3d89f1.
+- diff-bug #12: benchmarks/test-time-budget.R prints "the cut" with no referent — fix now (F10), fixed 0a3d89f1.
+- diff-bug #13: test-control-slots.R "The racing/annealing slots pass through" restate the assertion — fix now (F11: delete), fixed 0a3d89f1.
+- diff-bug #14: ragged comment wraps, a 90-character line — reject, style.
+- blame-history #1: removing the fit_resamples seed assertions loses a check that refusals fire before the draw — reject, false: `nested_loop()` registers `restore_rng()` before `sample.int()`, so identity holds whether or not the refusal follows the draw, as the comment above "the new refusals fire before the RNG is drawn from" in test-nested-tune-grid-checks.R states; the missing existence check goes to the follow-up row.
+- blame-history #2: the same for the map refusal — reject, false for the same reason; follow-up row as above.
+- blame-history #3: four other test names keep an unchecked "before any fold runs" (bayes, race, sim-anneal and grid check files) — follow-up, row "Fix the leftovers of M156's review".
+- blame-history #4: the archive of M46 names `PRINT_AS_AGREED_M46`, and "the cut" has no referent — reject the first, history record; the second is diff-bug #12.
+- blame-history #5: duplicate of diff-bug #7.
+- blame-history #6: "the caveats the page carries" lost the requirement that motivates it — reject, planned change (the tracking word was the scope).
+- blame-history #7: duplicate of diff-bug #5.
+- prior-review #1: duplicate of diff-bug #2.
+- prior-review #2: benchmarks/test-time-budget.R keeps "(M16 T2, AC2)" and "M14 established" in comments of a file this branch edits — fix now (F12), fixed 0a3d89f1.
+- prior-review #3: ids left in `R/` comments and line citations in `probe-mori-dispatch.R` — reject, planned change (Scope Out).
+- ripple #1: cairn/references/code-inventory.md:255 cites `R/parallel.R:585`, stale — follow-up, row "Fix the leftovers of M156's review".
+- ripple #2: code-inventory.md:212 cites `print_estimate()` at a stale line — follow-up, same row.
+- ripple #3: test-nested-tune-grid-checks.R "the new refusals fire before the RNG is drawn from" keeps the history word "new" — follow-up, same row.
+- ripple #4: no other file asserts the stream for the two removed refusals — reject, planned change.
+- Also: an orphaned comment above `early_stop_control()` in helper-orchestration.R (diff-bug, not ranked) — follow-up, same row.
+
+Pass 2 (2026-10-23), evidence at 0a3d89f1, branch level with main.
+- AC1-AC4: every grep run at 0a3d89f1 prints 0 lines; the `workflow_pkgs()` comment (function at line 622) names test-parallel-interrupt.R and test-parallel-payload.R and not test-parallel-detection.R; the `.args` comment matches no byte figure.
+- AC5: both greps print 0 lines; the block "the refusals fire before the RNG is drawn from" is gone, and the work log's T7 line names "the shared entry checks fire, in the shared shapes", which asserts the design refusal with `class = "nestedtune_bad_design"`, the dots refusal with `class = "nestedtune_bad_dots"`, and the metrics refusal with `class = "rlang_error"` beside "metric_set".
+- Gate at 0a3d89f1: `devtools::test()` 1152 blocks, 0 failed, 0 errors, 0 skipped; `devtools::check()` 0 errors, 0 warnings, 0 notes.
+- spawned: diff-bug, blame-history, prior-review, ripple (on the T7 commit 0a3d89f1 and the branch diff)
+- diff-bug #1: test-dplyr-compat.R F8's "the one table entry" is false: the partial fixture serves the standalone block below the table — fix now (F14).
+- diff-bug #2: R/parallel.R `.args` comment states the under-a-quarter ratio generally, but test-parallel-payload.R asserts it on its default fixture only — fix now (F15).
+- diff-bug #3: test-help-structure.R F4 wording is wrong for UTF-8 Windows sessions (codepage 65001 gets an asterisk) — fix now (F13).
+- diff-bug #4: AC5's removal branch is met; `rlang_error` with "metric_set" is the only class the refusal has — noted, requests nothing.
+- diff-bug #5: benchmarks/test-time-budget.R printed line has two "it"s with different referents — fix now (F16).
+- diff-bug #6: test-workflow-identity.R F9 name uses "older", a relative-time word — fix now (F17).
+- diff-bug #7: lines of 90 and 91 characters — reject, style.
+- diff-bug #8: "before any fold runs" names and "the new refusals" remain in other check files — duplicate of pass-1 follow-ups.
+- blame-history #1: `check_metrics()`'s refusal carries no package class, unlike the refusals beside it and DESIGN's classed-condition convention; pre-existing since 39d2f689 — follow-up, row "Fix the leftovers of M156's review".
+- blame-history #2: duplicate of diff-bug #3.
+- blame-history #3: the deleted annealing comment named why two slots are listed — reject, planned change (F11).
+- blame-history #4: the old test name stays in dated `benchmarks/test-blocks-*.csv` tables — reject, history record.
+- blame-history #5: "M14 established" removed — reject, planned change.
+- prior-review #1: test-help-structure.R comment names the wrong mechanism; the explicit `itemBullet` pins the glyph — duplicate of diff-bug #3.
+- prior-review #2: `rlang_error` does not pin the refusal's own class, `nestedtune_metrics_mode` — reject, false: `rlang::catch_cnd()` shows the `metrics = "rmse"` refusal's classes are `rlang_error`, `error`, `condition`; `nestedtune_metrics_mode` belongs to `check_metrics_mode()`, a different refusal.
+- ripple #1: a parked ROADMAP row says `dispatch_folds()` resolves a symbol by name, while the comment names the task wrapper and `fold_task()` — reject, false: `dispatch_folds()` resolves `fold_task` by name, so both hold.
+- ripple #2: test-workflow-identity.R comment above the renamed test keeps its own phrasing — reject, style (same fact).
+- ripple #3: test-dplyr-compat.R:205 "the one form" beside line 30's wording — reject, style (different referent, both true).
+- Gate at the fix head: cairn_validate passes (18 advisory WARNs on references staleness); `document()` changed only the roxygen2 version stamp in DESCRIPTION (8.1.0 to 8.1.1), reverted, no other diff; `pkgdown::check_pkgdown()` no problems; the six gating prose sweeps `--list-gating` prints are clean; README untouched; no changelog entry, since the milestone changes no user-visible behavior; no principle changed, so `cairn_impact` skipped.
+- Fix-now F13-F17 fixed 476a7188.
+- AC6: `devtools::test()` at 0a3d89f1, 1152 blocks, 0 failed; at the 476a7188 tree, which changes only comments, one test name and one printed string, the four files it touches pass (47 blocks, 0 failed), `air format --check .` and `sweep-prose.R --plain` are clean, and `sweep-test-comments.R` and `test-time-budget.R` exit 0.
+- snapshot: no file under `_snaps/` changed (`git diff --name-only origin/main...HEAD`).
+- Open-PR cap: 0 open PRs by the operator on tidymodels/nestedtune (feature cap 1).

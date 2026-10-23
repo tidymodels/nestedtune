@@ -93,7 +93,7 @@ test_that("the printed report is stable", {
 #
 # Written out here rather than left to the snapshot below it. The snapshot is
 # exactly the artifact a change to the print method would re-record, so a
-# criterion forbidding that output to change cannot be pinned to it -- accepting
+# promise that the output does not change cannot be pinned to it -- accepting
 # the new snapshot would satisfy the pin and falsify the promise at the same
 # time. These bytes have to be re-agreed by hand instead.
 #
@@ -103,7 +103,7 @@ test_that("the printed report is stable", {
 # `nested_tune_bayes()` result. A change to what this constant pins is
 # re-agreed by hand rather than accepted from the snapshot, for the same reason
 # as above.
-PRINT_AS_AGREED_M46 <- paste(
+PRINT_AS_AGREED <- paste(
   c(
     "",
     "-- Nested cross-validation final fit -------------------------------------------",
@@ -134,7 +134,7 @@ test_that("printing a grid final fit is the hand-agreed text, not the snapshot",
     local_reproducible_output()
     paste(cli::cli_fmt(print(final_for_print())), collapse = "\n")
   })
-  expect_identical(txt, PRINT_AS_AGREED_M46)
+  expect_identical(txt, PRINT_AS_AGREED)
 })
 
 test_that("summary() returns a classed object naming what was selected", {

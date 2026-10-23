@@ -97,8 +97,8 @@ test_that("the four entry points carry `...` after their required arguments", {
 # Refusals at entry -----------------------------------------------------
 
 # The entry points are checked one at a time rather than in a loop: a loop
-# over four names would report "one of them" on a failure, and the point of
-# the criterion is that each names its own call.
+# over four names would report "one of them" on a failure, and each refusal
+# must name its own call.
 #
 # The two orchestrators do not fence with `rlang::check_dots_empty()`: their
 # `...` admits `control`, so the refusal is this package's own,

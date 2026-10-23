@@ -7,8 +7,8 @@
 # holds the rows the run produced cannot answer for the run.
 #
 # The whole point is the second branch, so the table below states an expected
-# branch per entry rather than accepting either. Every verb the criteria name
-# appears by its own literal name, and the verbs with something to say in both
+# branch per entry rather than accepting either. Each verb appears by its own
+# literal name, and the verbs with something to say in both
 # directions get an entry each way.
 
 # The completed fixture: the suite's most-requested three-fold run, written the
@@ -27,8 +27,8 @@ compat_results <- function() {
   ))
 }
 
-# The partial fixture, for the one criterion form that needs a fold to be
-# missing: `filter(.completed)` removes a row only when a fold failed, and on a
+# The partial fixture, for the one block below the table that needs a fold to
+# be missing: `filter(.completed)` removes a row only when a fold failed, and on a
 # run where every fold completed it is a no-op that keeps the class. Written as
 # test-nested-tune-grid-failures.R writes it, so this is a cache hit too rather
 # than a second broken run.
@@ -84,7 +84,7 @@ expect_bare <- function(out, name = NULL) {
 
 # One entry per verb-and-direction. `branch` is what the entry must do, not
 # what it happens to do -- "kept" and "bare" each name one branch, and "either"
-# is the criterion's own disjunction for the one verb that does not reach this
+# is a disjunction for the one verb that does not reach this
 # package's rule at all (see `rename` below).
 dplyr_compat_table <- function() {
   list(
@@ -134,7 +134,7 @@ dplyr_compat_table <- function() {
     # `tune_results` sheds the class). What comes back is still
     # self-consistent -- same rows, same counts, same scheme -- so it is a
     # legitimate first branch rather than the stale claim this file exists to
-    # stop, and the criterion is asserted as the disjunction it is written as.
+    # stop, and it is asserted as that disjunction.
     list(name = "rename", branch = "either", f = function(x) {
       dplyr::rename(x, fold = "id")
     }),

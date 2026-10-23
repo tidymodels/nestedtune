@@ -336,7 +336,7 @@ test_that("the procedure records the effective control on both tuners", {
 
   # A run given a control records that control with the forced slots applied.
   res <- bayes_control_final_results(d)
-  expected <- ac1_control()
+  expected <- early_stop_control()
   expected$allow_par <- FALSE
   expected$event_level <- "first"
   expected$seed <- NULL

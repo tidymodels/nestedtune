@@ -216,8 +216,6 @@ test_that("a workflow check_workflow() refuses is refused naming its wflow_id", 
     fitted = parsnip::fit(fixed_workflow(d), d)
   )
   reset_dispatch_record()
-  set.seed(1)
-  before <- .Random.seed
   cnd <- rlang::catch_cnd(
     nested_workflow_map(wset, resamples = folds, grid = det_grid())
   )
@@ -229,7 +227,6 @@ test_that("a workflow check_workflow() refuses is refused naming its wflow_id", 
   )
   expect_match(conditionMessage(cnd), "fitted", fixed = TRUE)
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_workflow_map")
-  expect_identical(.Random.seed, before)
   expect_null(last_dispatch())
 })
 

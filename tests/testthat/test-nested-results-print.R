@@ -10,7 +10,7 @@
 # The snapshots at the bottom pin the shapes that carry meaning. The assertions
 # above them pin the facts a snapshot alone would let drift silently: an
 # approved snapshot records whatever the code printed, not what it owed, so a
-# criterion that must hold is asserted in words as well as recorded in shape.
+# fact that must hold is asserted in words as well as recorded in shape.
 
 skip_heavy_on_cran()
 
@@ -481,7 +481,7 @@ test_that("summarizing shows the estimate over the folds that contributed", {
   expect_match(txt, "3 of 3 outer folds")
 })
 
-test_that("printing the summary carries every section print() used to emit", {
+test_that("printing the summary carries the design, failure, selection and estimate sections", {
   skip_if_no_engines()
   d <- make_reg_data()
 
@@ -506,8 +506,8 @@ test_that("printing the summary carries every section print() used to emit", {
   expect_match(txt, "rmse")
   expect_match(txt, "describes the tune-and-fit procedure")
 
-  # The one section that did NOT come across: the candidate-set line stays in
-  # print(), where it qualifies the object, and is not repeated here.
+  # The candidate-set line is not here: it stays in print(), where it
+  # qualifies the object.
   expect_no_match(txt, "Candidates searched")
 })
 

@@ -226,7 +226,7 @@ plot_performance <- function(
   bases <- metric_panel(timed_rows, summarized$.estimator, ambiguous)
   # The qualifier goes on the panel, exactly where print puts it: a metric
   # averaged over fewer folds than completed says so on its own line, "where the
-  # heading would be wrong for it alone" (R/nested-results-print.R:229). One
+  # heading would be wrong for it alone" (`print_estimate()`). One
   # figure-level count cannot be true of every panel, and claiming otherwise is
   # what made the subtitle assert a three-fold estimate for a two-fold number
   # (M08 review F1).

@@ -22,7 +22,7 @@
 # WHAT THE SERIAL COMPARISON BELOW IS AND IS NOT. It pins argument plumbing. It
 # is NOT a mode-independence assertion, and must not be read as one: the
 # sep_* path is step_pca() + linear_reg(), which draws nothing, and
-# test-parallel-identity.R:12-13 records that identity comparisons on an
+# test-parallel-identity.R's header records that identity comparisons on an
 # RNG-free workflow pass vacuously. Mode independence is asserted in that file,
 # on ranger.
 #

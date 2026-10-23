@@ -37,7 +37,9 @@
 # What that cross-check cannot reach is declared here rather than left
 # implicit. Three kinds escape it: a bound read from a named constant, which
 # cannot drift and needs no re-read; a bound set through the OPTION at one line
-# and spent at another (classify:687 sets it, :693 spends it); and a wait that
+# and spent at another (in classify's "the probe reads its bound from the
+# option, not from the constant", `options()` sets it and
+# `daemons_load_status()` spends it); and a wait that
 # is no function call at all (the deadline poll in interrupt). None carries an
 # explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
@@ -569,7 +571,7 @@ time_budget_ledger <- function() {
     # start_daemons() would buy nothing and charge this file two more prime and
     # warm bounds. `daemons` is not among BUDGETED_WAIT_CALLS, so the guard
     # cannot see the two pool starts below, nor the three `daemons(0)` calls
-    # beside them (:165 on.exit teardown, :167 and :172 resets between kinds);
+    # beside them (the `on.exit()` teardown and two resets between kinds);
     # the starts are rowed here so the file's account is complete rather than
     # complete-looking, which is the same disclosure the test-parallel-metrics.R
     # block below makes for its own `daemons(0)` calls.
@@ -780,8 +782,8 @@ time_budget_ledger <- function() {
 
     # --- test-parallel-metrics.R --------------------------------------------
     # One pool start, and that is the whole file's declared waiting. The two
-    # `mirai::daemons(0)` calls beside it (:51 teardown, :54 reset before the
-    # serial reference) are not among BUDGETED_WAIT_CALLS and get no row:
+    # `mirai::daemons(0)` calls beside it (the `on.exit()` teardown and the
+    # reset before the serial reference) are not among BUDGETED_WAIT_CALLS and get no row:
     # `daemons(0)` measured returning in ~0.2 s with a live task outstanding --
     # it orphans rather than blocks -- so there is no bound to declare. They are
     # named here because the guard cannot see them, which is the same
@@ -805,8 +807,9 @@ time_budget_ledger <- function() {
     # One pool start and one bounded read, the read charged once even though the
     # test calls `attached()` twice: both calls are the same `collect_bounded()`
     # site, and the ledger rows sites rather than executions -- the same
-    # convention every helper-side row above follows. The `mirai::daemons(0)`
-    # teardown at :48 gets no row for the reason the metrics block states.
+    # convention every helper-side row above follows. The file's
+    # `mirai::daemons(0)` teardowns get no row for the reason the metrics block
+    # states.
     tb_row(
       "test-parallel-required-pkgs.R",
       1L,
@@ -915,7 +918,7 @@ CLASSIFY_BUDGET_CEILING_S <- 480
 # What the same ledger totalled before its waits were first cut, so the
 # reduction is a measured figure rather than a remembered one.
 # benchmarks/test-time-budget.R prints it beside the current total.
-CLASSIFY_BUDGET_PRE_M16_S <- 1008.678
+CLASSIFY_BUDGET_BEFORE_CUT_S <- 1008.678
 
 # The ceiling on test-parallel-metrics.R, set at the file's one pool start plus
 # a margin. A new file is cheaper to hold to a bound from the start than to cut

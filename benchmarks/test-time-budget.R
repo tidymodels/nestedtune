@@ -1,4 +1,4 @@
-# Report the daemon tests' declared worst case (M16 T2, AC2).
+# Report the daemon tests' declared worst case.
 #
 # The ledger itself lives in `tests/testthat/helper-time-budget.R`, not here.
 # That is deliberate and not an accident of layout: `benchmarks/` is
@@ -27,7 +27,7 @@ cat("test-time-budget -- declared worst case per file\n\n")
 cat(
   "Convention: each wait contributes its own declared seconds. An enclosing\n"
 )
-cat("setTimeLimit() never caps it -- M14 established it does not interrupt a\n")
+cat("setTimeLimit() never caps it: setTimeLimit() does not interrupt a\n")
 cat("blocked mirai wait, so it is not a bound on the path that stalls.\n\n")
 
 for (i in seq_len(nrow(totals))) {
@@ -58,15 +58,15 @@ for (i in seq_len(nrow(totals))) {
 
 classify <- totals$seconds[totals$file == "test-parallel-classify.R"]
 cat(sprintf(
-  "localized file: %.1f s against a %.0f s ceiling and a %.1f s pre-M16 figure\n",
+  "localized file: %.1f s against a %.0f s ceiling and %.1f s before the waits were cut\n",
   classify,
   CLASSIFY_BUDGET_CEILING_S,
-  CLASSIFY_BUDGET_PRE_M16_S
+  CLASSIFY_BUDGET_BEFORE_CUT_S
 ))
 cat(sprintf(
-  "  under ceiling: %s   at most half of pre-M16: %s\n",
+  "  under ceiling: %s   at most half the total before the cut: %s\n",
   classify < CLASSIFY_BUDGET_CEILING_S,
-  classify <= CLASSIFY_BUDGET_PRE_M16_S / 2
+  classify <= CLASSIFY_BUDGET_BEFORE_CUT_S / 2
 ))
 cat(sprintf(
   "\nfor scale: this file typically runs 12.0 s (benchmarks/test-timing-baseline.md),\n"

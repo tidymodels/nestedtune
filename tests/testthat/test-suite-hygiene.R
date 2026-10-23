@@ -384,8 +384,9 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
   # Everything under tests/, not just this directory: `tests/testthat.R` is R
   # code that could acquire a wait too.
   # `.r` as well as `.R`, since R does not care about the case. Deliberately
-  # NOT the repo root: `R/parallel.R:91` holds the production `collect_mirai()`,
-  # which is there on purpose, and this rule is about the suite.
+  # NOT the repo root: `dispatch_folds()` in `R/parallel.R` holds the
+  # production `collect_mirai()`, which is there on purpose, and this rule is
+  # about the suite.
   files <- list.files(
     test_path(".."),
     pattern = "\\.[Rr]$",
