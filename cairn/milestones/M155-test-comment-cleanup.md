@@ -1,6 +1,6 @@
 # M155: Test comments and test names state only what the code cannot show
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M151, M152, M154
 - **Driving RR:** —
@@ -52,7 +52,7 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - [x] T3: Clean the driver, results, final-fit and readers test files, through Haiku subagents with a full spec, one file group each.
 - [x] T4: Clean the parallel, time-series and remaining test files the same way. Read every subagent diff before it is committed.
 - [x] T5: Run `benchmarks/test-blocks.R` at the head and compare with the branch point through the rename map. Compare each snapshot entry's body under its old and new names.
-- [ ] T6: Run the `verify` slot.
+- [x] T6: Run the `verify` slot.
 
 ## Work log
 
@@ -70,6 +70,9 @@ Bring the comments and the test names of every file under `tests/testthat/` to t
 - 2026-10-22: delegation: eight Haiku subagents cleaned the test files in groups (tune-grid and resamples; other tuners, fit-resamples and map; final fit; results and readers; parallel; time-series; remaining A-H; remaining H-Z), one spec in the session scratchpad. Each diff read before commit; about 40 comments corrected after review (stale "four files" claims, an unverified mutation claim, leftover "this milestone" and milestone-file pointers, oracle-type labels kept as "Reference implementation." or "Closed form." now "Source:", over-long lines).
 - 2026-10-22: T3, T4 done: sweep clean on all 119 files and 66 ledger notes; a parse-data comparison against 1e07e23c shows no non-comment token changed in any test file except the seven ledger notes; air clean.
 - 2026-10-22: T5 done: `benchmarks/test-blocks.R` at both trees, 1153 blocks each, 13367 expectations each, 0 failed, skipped or errored; `benchmarks/test-renames-check.R` (new) finds 0 mismatches over 1153 blocks, 22 snapshot sections in 10 files and 8 svg files; a map with the final-fit-print rows removed gives 17 mismatches. `sweep-test-comments.R --names` silent on the head table. Branch-point table kept as `benchmarks/test-blocks-576c3d19.csv`.
+- 2026-10-22: T6 done: `devtools::test()` at beb6320b, 1153 blocks, 0 failed, 0 errored, 0 skipped, no snapshot file written; `air format --check .` clean; no `R/`, `vignettes/`, `README.Rmd` or roxygen change, so the prose sweeps and `document()` are not owed. Head table kept as `benchmarks/test-blocks-beb6320b.csv`.
+- 2026-10-22: claim audit: not owed — internal tier.
+- 2026-10-22: implement done; status review.
 
 ## Decisions
 
