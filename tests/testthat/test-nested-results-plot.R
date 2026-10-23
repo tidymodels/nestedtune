@@ -553,7 +553,11 @@ test_that("an unrecognized type is refused by name", {
     metrics = reg_metrics()
   ))
 
-  expect_error(autoplot(res, type = "parameter"), "must be one of")
+  expect_error(
+    autoplot(res, type = "parameter"),
+    class = "nestedtune_bad_type",
+    regexp = "must be one of"
+  )
   expect_error(autoplot(res, type = "parameter"), "performance")
   expect_error(autoplot(res, type = c("performance", "parameters")), "one of")
   expect_error(autoplot(res, type = 1), "must be one of")

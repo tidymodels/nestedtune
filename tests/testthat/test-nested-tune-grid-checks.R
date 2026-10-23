@@ -29,7 +29,11 @@ test_that("`object` must be an unfitted workflow", {
     workflows::workflow(y ~ x1 + x2 + x3 + x4, parsnip::linear_reg()),
     data = d
   )
-  expect_error(nested_tune_grid(fitted, folds), "already be fitted")
+  expect_error(
+    nested_tune_grid(fitted, folds),
+    class = "nestedtune_bad_workflow",
+    regexp = "already be fitted"
+  )
 })
 
 # A preprocessor-only workflow would fail inside
@@ -46,7 +50,11 @@ test_that("a workflow carrying no model spec is refused by nestedtune", {
     recipes::recipe(y ~ x1 + x2 + x3 + x4, data = d)
   )
 
-  expect_error(nested_tune_grid(prep_only, folds), "no model specification")
+  expect_error(
+    nested_tune_grid(prep_only, folds),
+    class = "nestedtune_bad_workflow",
+    regexp = "no model specification"
+  )
   expect_error(
     nested_tune_grid(workflows::workflow(), folds),
     "no model specification"
@@ -159,9 +167,14 @@ test_that("`grid` must be candidates or a positive whole number", {
 
   expect_error(
     nested_tune_grid(wf, folds, grid = det_grid()[0, , drop = FALSE]),
-    "at least one candidate"
+    class = "nestedtune_bad_grid",
+    regexp = "at least one candidate"
   )
-  expect_error(nested_tune_grid(wf, folds, grid = 0), "whole number")
+  expect_error(
+    nested_tune_grid(wf, folds, grid = 0),
+    class = "nestedtune_bad_grid",
+    regexp = "whole number"
+  )
   expect_error(nested_tune_grid(wf, folds, grid = -1), "whole number")
   expect_error(nested_tune_grid(wf, folds, grid = 2.5), "whole number")
   expect_error(nested_tune_grid(wf, folds, grid = c(1, 2)), "whole number")
@@ -176,7 +189,11 @@ test_that("`metrics` must be a metric set or NULL", {
   wf <- det_workflow(d)
   folds <- valid_folds(d)
 
-  expect_error(nested_tune_grid(wf, folds, metrics = "rmse"), "metric_set")
+  expect_error(
+    nested_tune_grid(wf, folds, metrics = "rmse"),
+    class = "nestedtune_bad_metrics",
+    regexp = "or `NULL`"
+  )
   expect_error(
     nested_tune_grid(wf, folds, metrics = yardstick::rmse),
     "metric_set"
@@ -197,7 +214,8 @@ test_that("a grid column not marked for tuning is refused", {
 
   expect_error(
     nested_tune_grid(wf, folds, grid = data.frame(not_a_param = 1:2)),
-    "not marked for tuning"
+    class = "nestedtune_bad_grid",
+    regexp = "not marked for tuning"
   )
   # Named, so the caller knows which column to fix.
   expect_error(
@@ -225,7 +243,8 @@ test_that("a tuned parameter with no grid column is refused", {
 
   expect_error(
     nested_tune_grid(wf, folds, grid = data.frame(min_n = c(2L, 10L))),
-    "no column for"
+    class = "nestedtune_bad_grid",
+    regexp = "`grid` has no column for"
   )
   expect_error(
     nested_tune_grid(wf, folds, grid = data.frame(min_n = c(2L, 10L))),
@@ -356,7 +375,8 @@ test_that("a workflow with a model but no preprocessor is refused", {
 
   expect_error(
     nested_tune_grid(model_only, folds, grid = data.frame(min_n = c(2L, 10L))),
-    "no preprocessor"
+    class = "nestedtune_bad_workflow",
+    regexp = "no preprocessor"
   )
   cnd <- tryCatch(
     nested_tune_grid(model_only, folds, grid = data.frame(min_n = c(2L, 10L))),
@@ -461,7 +481,7 @@ test_that("a malformed design or a workflow with no preprocessor is refused befo
       }
     ),
     list(
-      class = "rlang_error",
+      class = "nestedtune_bad_workflow",
       regexp = "has no preprocessor",
       refuse = function() {
         no_pre <- workflows::add_model(

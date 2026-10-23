@@ -139,7 +139,7 @@ test_that("a value that names no level is refused, by both orchestrators", {
       nested_tune_grid(wf, folds, grid = det_grid(), event_level = value),
       error = function(e) e
     )
-    expect_s3_class(cnd, "rlang_error")
+    expect_s3_class(cnd, "nestedtune_bad_event_level")
     expect_match(
       conditionMessage(cnd),
       "must be .*first.* or .*second"

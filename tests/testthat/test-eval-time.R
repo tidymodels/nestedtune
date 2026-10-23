@@ -144,7 +144,7 @@ test_that("an unusable `eval_time` is refused, naming the function the user call
       nested_tune_grid(wf, folds, grid = det_grid(), eval_time = value),
       error = function(e) e
     )
-    expect_s3_class(cnd, "rlang_error")
+    expect_s3_class(cnd, "nestedtune_bad_eval_time")
     expect_match(conditionMessage(cnd), "eval_time", fixed = TRUE)
     expect_identical(rlang::call_name(conditionCall(cnd)), "nested_tune_grid")
   }
@@ -159,7 +159,16 @@ test_that("an unusable `eval_time` is refused, naming the function the user call
     ),
     error = function(e) e
   )
+  expect_s3_class(cnd, "nestedtune_bad_eval_time")
+  expect_match(conditionMessage(cnd), "must be finite, non-missing")
   expect_match(conditionMessage(cnd), "2 and 4")
+
+  # The other refusal under the same class: a value that is not numeric.
+  expect_error(
+    nested_tune_grid(wf, folds, grid = det_grid(), eval_time = "1"),
+    class = "nestedtune_bad_eval_time",
+    regexp = "numeric vector of evaluation times"
+  )
 })
 
 test_that("the refusal fires before any fitting begins", {
@@ -181,7 +190,7 @@ test_that("the refusal fires before any fitting begins", {
   for (value in unusable_eval_times()) {
     expect_error(
       nested_tune_grid(wf, folds, grid = det_grid(), eval_time = value),
-      class = "rlang_error"
+      class = "nestedtune_bad_eval_time"
     )
     expect_false(inherits(
       tryCatch(

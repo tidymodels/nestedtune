@@ -24,6 +24,7 @@ check_workflow <- function(object, call = rlang::caller_env()) {
           "Wrap a model and a preprocessor with {.fn workflows::workflow}."
         }
       ),
+      class = "nestedtune_bad_workflow",
       call = call
     )
   }
@@ -36,6 +37,7 @@ check_workflow <- function(object, call = rlang::caller_env()) {
         x = "Nested cross-validation fits the workflow itself, once per outer \\
              fold, on that fold's analysis set."
       ),
+      class = "nestedtune_bad_workflow",
       call = call
     )
   }
@@ -60,6 +62,7 @@ check_workflow <- function(object, call = rlang::caller_env()) {
         },
         i = "Add one with {.fn workflows::add_model}."
       ),
+      class = "nestedtune_bad_workflow",
       call = call
     )
   }
@@ -75,6 +78,7 @@ check_workflow <- function(object, call = rlang::caller_env()) {
         i = "Add one with {.fn workflows::add_formula}, \\
              {.fn workflows::add_recipe}, or {.fn workflows::add_variables}."
       ),
+      class = "nestedtune_bad_workflow",
       call = call
     )
   }
@@ -208,6 +212,7 @@ abort_bad_object <- function(object, call = rlang::caller_env()) {
        specification.",
       x = "Got {.obj_type_friendly {object}}."
     ),
+    class = "nestedtune_bad_workflow",
     call = call
   )
 }
@@ -1910,6 +1915,7 @@ check_grid <- function(grid, call = rlang::caller_env()) {
     if (nrow(grid) == 0L) {
       cli::cli_abort(
         "{.arg grid} must have at least one candidate row.",
+        class = "nestedtune_bad_grid",
         call = call
       )
     }
@@ -1928,6 +1934,7 @@ check_grid <- function(grid, call = rlang::caller_env()) {
          whole number.",
         x = "Got {.obj_type_friendly {grid}}."
       ),
+      class = "nestedtune_bad_grid",
       call = call
     )
   }
@@ -1972,6 +1979,7 @@ check_grid_params <- function(
           i = "Hand over the workflow the nested run in {.arg results} was \\
                built around."
         ),
+        class = "nestedtune_bad_grid",
         call = call
       )
     }
@@ -1982,6 +1990,7 @@ check_grid_params <- function(
         i = "Mark {cli::qty(unknown)}{?it/them} with {.fn tune::tune}, or drop \\
              {cli::qty(unknown)}{?it/them} from the grid."
       ),
+      class = "nestedtune_bad_grid",
       call = call
     )
   }
@@ -1996,6 +2005,7 @@ check_grid_params <- function(
           i = "Hand over the workflow the nested run in {.arg results} was \\
                built around."
         ),
+        class = "nestedtune_bad_grid",
         call = call
       )
     }
@@ -2005,6 +2015,7 @@ check_grid_params <- function(
          {.val {missing}}.",
         i = "Every parameter marked with {.fn tune::tune} needs candidate values."
       ),
+      class = "nestedtune_bad_grid",
       call = call
     )
   }
@@ -2176,6 +2187,7 @@ eval_inside_spec <- function(inside, data, env, call = rlang::caller_env()) {
              such as {.code vfold_cv(v = 5)} always are."
       ),
       parent = out,
+      class = "nestedtune_bad_design",
       call = call
     )
   }
@@ -2186,6 +2198,7 @@ eval_inside_spec <- function(inside, data, env, call = rlang::caller_env()) {
          {.cls rset}.",
         x = "{.code {spec}} gave {.obj_type_friendly {out}}."
       ),
+      class = "nestedtune_bad_design",
       call = call
     )
   }
@@ -2303,6 +2316,7 @@ check_plot_type <- function(type, call = rlang::caller_env()) {
         "Got {.obj_type_friendly {type}}."
       }
     ),
+    class = "nestedtune_bad_type",
     call = call
   )
 }
@@ -2314,6 +2328,7 @@ check_metrics <- function(metrics, call = rlang::caller_env()) {
         "{.arg metrics} must be a {.fn yardstick::metric_set} or {.code NULL}.",
         x = "Got {.obj_type_friendly {metrics}}."
       ),
+      class = "nestedtune_bad_metrics",
       call = call
     )
   }
@@ -2354,6 +2369,7 @@ check_param_info <- function(param_info, call = rlang::caller_env()) {
         "{.arg param_info} must be a {.fn dials::parameters} object or {.code NULL}.",
         x = "Got {.obj_type_friendly {param_info}}."
       ),
+      class = "nestedtune_bad_param_info",
       call = call
     )
   }
@@ -2389,6 +2405,7 @@ check_eval_time <- function(eval_time, call = rlang::caller_env()) {
           "Got {.obj_type_friendly {eval_time}}."
         }
       ),
+      class = "nestedtune_bad_eval_time",
       call = call
     )
   }
@@ -2405,6 +2422,7 @@ check_eval_time <- function(eval_time, call = rlang::caller_env()) {
         "Every element of {.arg eval_time} must be finite, non-missing, and non-negative.",
         x = "{cli::qty(length(positions))}Element{?s} {positions} {?is/are} not."
       ),
+      class = "nestedtune_bad_eval_time",
       call = call
     )
   }
@@ -2436,6 +2454,7 @@ check_event_level <- function(event_level, call = rlang::caller_env()) {
         "Got {.obj_type_friendly {event_level}}."
       }
     ),
+    class = "nestedtune_bad_event_level",
     call = call
   )
 }

@@ -13,7 +13,11 @@ test_that("the workflow checks are wired into the final fit", {
   res <- final_results(d)
   wf <- det_workflow(d)
 
-  expect_error(nested_final_fit("not a workflow", res), "must be a")
+  expect_error(
+    nested_final_fit("not a workflow", res),
+    class = "nestedtune_bad_workflow",
+    regexp = "must be a <workflow>\\."
+  )
   expect_error(
     nested_final_fit(
       parsnip::fit(
@@ -22,7 +26,8 @@ test_that("the workflow checks are wired into the final fit", {
       ),
       res
     ),
-    "already be fitted"
+    class = "nestedtune_bad_workflow",
+    regexp = "already be fitted"
   )
 
   prep_only <- workflows::workflow(
@@ -39,11 +44,30 @@ test_that("the workflow checks are wired into the final fit", {
   # side the grid came from -- never a `grid` argument this signature lacks.
   other <- cont_workflow(d)
   cnd <- tryCatch(nested_final_fit(other, res), error = function(e) e)
+  expect_s3_class(cnd, "nestedtune_bad_grid")
+  expect_match(conditionMessage(cnd), "does not tune")
   expect_match(conditionMessage(cnd), "`object`")
   expect_match(conditionMessage(cnd), "recorded grid")
   expect_match(conditionMessage(cnd), "`results`")
   expect_no_match(conditionMessage(cnd), "`grid`")
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
+
+  # The other direction: the workflow tunes every recorded column and one
+  # more.
+  extra <- workflows::workflow(
+    recipes::step_pca(
+      recipes::recipe(y ~ x1 + x2 + x3 + x4, data = d),
+      recipes::all_predictors(),
+      num_comp = tune::tune(),
+      threshold = tune::tune()
+    ),
+    parsnip::linear_reg()
+  )
+  expect_error(
+    nested_final_fit(extra, res),
+    class = "nestedtune_bad_grid",
+    regexp = "recorded\\s+grid\\s+has\\s+no\\s+column\\s+for"
+  )
 })
 
 test_that("the former procedure arguments are refused as unknown", {
@@ -366,6 +390,7 @@ test_that("an inner specification that cannot be re-evaluated names itself and t
   expect_true(all(res$.completed))
 
   cnd <- tryCatch(nested_final_fit(wf, res), error = function(e) e)
+  expect_s3_class(cnd, "nestedtune_bad_design")
   expect_match(conditionMessage(cnd), "could not be\\s+re-evaluated")
   # The message names the call it tried, which is the only way a reader can
   # tell which variable went missing.
@@ -385,7 +410,8 @@ test_that("an inner specification that is not an rset is refused, naming the cal
   attr(res, "inside") <- quote(data.frame())
 
   cnd <- tryCatch(nested_final_fit(wf, res), error = function(e) e)
-  expect_match(conditionMessage(cnd), "did not produce an")
+  expect_s3_class(cnd, "nestedtune_bad_design")
+  expect_match(conditionMessage(cnd), "specification did not\\s+produce an")
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
 })
 

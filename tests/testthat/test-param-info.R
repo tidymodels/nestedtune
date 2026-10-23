@@ -111,6 +111,7 @@ test_that("a param_info that is not a parameters object is refused up front", {
   # is fitted.
   expect_error(
     nested_tune_grid(wf, nested, param_info = "wide", grid = det_grid()),
-    "`param_info` must be"
+    class = "nestedtune_bad_param_info",
+    regexp = "`param_info` must be"
   )
 })

@@ -1,13 +1,13 @@
 # M158: Give the unclassed refusals a class
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
 - **Resolves:** —
 - **Surface tier:** user-facing — users catch the new condition classes in their own code
-- **Branch/PR:** —
+- **Branch/PR:** m158-refusal-classes
 
 ## Goal
 
@@ -74,4 +74,6 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - 2026-10-23: collision check: absorbs the candidate row "Give the unclassed refusals a class". No D-entry or archived milestone covers condition classes for these calls. Inbox: 1 open issue (#91, docs pass, no overlap), 0 open PRs.
 - 2026-10-23: plan chose `nestedtune_bad_grid` for all four `check_grid_params()` refusals over `nestedtune_workflow_mismatch` for the two that name `object`, because DESIGN.md describes that class as the identity check's alone and the final fit's marker check has its own class; falsified by a user catching `nestedtune_workflow_mismatch` who expects those two among them.
 - 2026-10-23: criteria audit (full mode, fresh Opus reader): counts and attributions confirmed, all 26 refusals reachable. Fixed: AC1 assigned a class per function where two functions take two classes (now per table row); AC1's message fragment could match a sibling refusal or a parent condition's text (now a headline fragment unique within its class), and its "so a test fails" clause claimed a suite property no procedure checks (dropped); AC3 compared against a moving `main` (now the merge base); AC5's "0 notes" was stricter than the profile and over notes the milestone cannot control (now no NOTE the merge base lacks). Answered: `nestedtune_workflow_mismatch` would leave DESIGN.md's description incomplete (switched to `nestedtune_bad_grid`); `nestedtune_unknown_tuner` labels an internal error (kept, user's choice of all 26); the "built on different data" refusal keeps `nestedtune_bad_design`, since it refuses the `outside` design argument. AC2 and AC4 had no finding.
+- 2026-10-23: implement: branch `m158-refusal-classes` cut from 67aa0b3a; status in-progress.
+- 2026-10-23: T1 checkpoint: 19 `class` arguments added in `R/checks.R`; class assertions added or tightened in seven test files. Before the code change 18 edited blocks failed or errored, and after it they pass. The cont_workflow final-fit case reaches the "does not tune" refusal, so a new workflow tuning `num_comp` and `threshold` triggers the "recorded grid has no column" one. Full-suite verify still running; T1 not yet ticked.
 - 2026-10-23: plan chose the review-time parse walk over a committed test that parses `R/`, because such a test reads source text rather than behavior and AC1's tests pin each class; falsified by a new unclassed `cli_abort()` reaching main.
