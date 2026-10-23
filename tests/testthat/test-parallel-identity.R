@@ -491,7 +491,7 @@ test_that("param_info, control and select reach the folds on two daemons as seri
   )
   expect_identical(last_dispatch(), "parallel")
 
-  # Each fold record, one by one, and then the object.
+  # Compare these fold-record columns one by one, then the whole object.
   for (col in c(
     ".metrics",
     ".selected",

@@ -1,6 +1,6 @@
 # M156: Test code cites no line numbers and names no tracking records
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - AC2 → T3
 - AC3 → T4
 - AC4 → T2
-- AC5 → T5
+- AC5 → T5, T7
 - AC6 → T6
 
 ## Tasks
@@ -57,6 +57,7 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - [x] T4: Rename the three test names; grep `tests/testthat/_snaps/` and `helper-time-budget.R` for the old names first; rewrite the 11 "criterion" comments and the three "criteria" sites; run AC3's greps.
 - [x] T5: Remove the seed-identity assertions, their `before` lines and the comment that vouches for them; give "the refusals fire before the RNG is drawn from" its condition classes, or remove it where other tests assert the same classes (name them in the work log); drop the unchecked "before ..." clause from the two test names, grepping `_snaps/` and `helper-time-budget.R` for the old names first; run AC5's greps.
 - [x] T6: Run the `verify` slot, `benchmarks/sweep-test-comments.R` and `benchmarks/test-time-budget.R`.
+- [x] T7: Review return 1: assert the metrics refusal's `rlang_error` class in "the shared entry checks fire, in the shared shapes" and name that test in the work log for each class; fix F1-F12 from the Review section; re-run T6's checks.
 
 ## Work log
 
@@ -83,6 +84,9 @@ Clear the tracking leftovers that M152, M154 and M155's reviews filed against th
 - 2026-10-23: claim audit: not owed — internal tier.
 - 2026-10-23: status review; handed to /milestone-review.
 - 2026-10-23: review return 1: AC5 fails as written (the work log names "the shared entry checks fire, in the shared shapes" as asserting each class, but it asserts the metrics refusal by message only); with it go the fix-now findings F1-F12 the Review section lists (diff-bug #1, #2, #5-#13, prior-review #2).
+- 2026-10-23: T7 added for review return 1 (minor amendment; Coverage AC5 → T5, T7).
+- 2026-10-23: T7 done: "the shared entry checks fire, in the shared shapes" in test-nested-fit-resamples-checks.R now asserts each class of the removed block's three refusals: the design refusal by `nestedtune_bad_design`, the dots refusal by `nestedtune_bad_dots`, and the metrics refusal by `rlang_error` with its "metric_set" message (the class `rlang::catch_cnd()` showed it raises); F1-F12 fixed as the Review section lists; AC1-AC5 greps print nothing; air, prose sweep clean; `sweep-test-comments.R` and `test-time-budget.R` exit 0; the eight affected test files pass (123 blocks, 0 failed).
+- 2026-10-23: status review; handed to /milestone-review for pass 2.
 
 ## Review
 

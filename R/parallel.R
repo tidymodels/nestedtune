@@ -461,8 +461,9 @@ preflight_timeout <- function(call = rlang::caller_env()) {
 # carries for its own bookkeeping, which differ between an installed package and
 # one under pkgload and would report every daemon as incompatible.
 #
-# The whole namespace rather than the two symbols dispatch_folds() actually
-# resolves by name, `rehydrate_payload` and `nested_fold_fit`.
+# The whole namespace rather than the two symbols a daemon resolves by name:
+# `rehydrate_payload` in the task wrapper and `nested_fold_fit` in
+# `fold_task()`.
 # A hand-maintained list of those two is the defect this check exists to
 # catch -- M23 added the second and nothing made the pre-flight notice -- so the
 # manifest is derived, never written down. It costs 2,627 B serialized for 106
@@ -615,8 +616,9 @@ daemon_attach_expr <- function() {
 # recipe's package is not installed, say -- falls back to the engine's own
 # list, the check as it stood before M58, rather than to nothing; and an
 # object that is not a workflow answers with nothing, because
-# `dispatch_folds()` is also driven with stand-in payloads and no workflow at
-# all (test-parallel-interrupt.R and test-parallel-payload.R).
+# `dispatch_folds()` is also driven with no workflow at all: with stand-in
+# payloads in test-parallel-interrupt.R and with fold payloads in
+# test-parallel-payload.R, both passing `object = NULL`.
 workflow_pkgs <- function(object) {
   if (!inherits(object, "workflow")) {
     return(character())

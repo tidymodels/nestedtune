@@ -506,8 +506,8 @@ test_that("printing the summary carries the design, failure, selection and estim
   expect_match(txt, "rmse")
   expect_match(txt, "describes the tune-and-fit procedure")
 
-  # The one section that did NOT come across: the candidate-set line stays in
-  # print(), where it qualifies the object, and is not repeated here.
+  # The candidate-set line is not here: it stays in print(), where it
+  # qualifies the object.
   expect_no_match(txt, "Candidates searched")
 })
 

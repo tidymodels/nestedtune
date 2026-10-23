@@ -65,7 +65,11 @@ test_that("the shared entry checks fire, in the shared shapes", {
   )
 
   # The arguments the outer fit reads.
-  expect_error(nested_fit_resamples(wf, folds, metrics = "rmse"), "metric_set")
+  expect_error(
+    nested_fit_resamples(wf, folds, metrics = "rmse"),
+    "metric_set",
+    class = "rlang_error"
+  )
   expect_error(
     nested_fit_resamples(wf, folds, event_level = "third"),
     "must be \"first\" or \"second\""

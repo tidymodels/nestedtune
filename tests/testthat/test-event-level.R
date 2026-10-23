@@ -11,7 +11,7 @@
 # Source: a `tune::tune_grid()`
 #   the test runs itself under `control_grid(allow_par = FALSE, event_level =
 #   "second")`, seeded by the by-hand recipe in `?nested_final_fit`'s
-#   redo-the-fit example -- the object's own `tuning_seed`,
+#   Reproducibility section -- the object's own `tuning_seed`,
 #   kind-pinned, with the inner rset built inside that seed's scope. Pinned by
 #   "nested_final_fit() tunes under the caller's event level".
 #

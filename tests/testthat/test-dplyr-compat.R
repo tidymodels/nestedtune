@@ -27,7 +27,7 @@ compat_results <- function() {
   ))
 }
 
-# The partial fixture, for the one form that needs a fold to be
+# The partial fixture, for the one table entry that needs a fold to be
 # missing: `filter(.completed)` removes a row only when a fold failed, and on a
 # run where every fold completed it is a no-op that keeps the class. Written as
 # test-nested-tune-grid-failures.R writes it, so this is a cache hit too rather

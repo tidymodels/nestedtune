@@ -69,9 +69,9 @@ section_lists <- function(body) {
 
 # The rendered lines of the page's Differences section: from the line after
 # its title line to the line before the next section title. A title sits at
-# column 0; the body is indented. The bullet glyph is pinned to U+2022, the
-# glyph a UTF-8 locale gives: `tools::Rd2txt_options()` picks it from the locale
-# when tools loads, and a non-UTF-8 runner renders lists with an asterisk.
+# column 0; the body is indented. The bullet glyph is pinned to U+2022, which
+# tools sets through `tools::Rd2txt_options()` when it loads in a session whose
+# encoding can show it; elsewhere lists render with an asterisk.
 rendered_differences <- function(topic) {
   rendered_section(topic, DIFFERENCES_TITLE[[topic]])
 }
