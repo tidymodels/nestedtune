@@ -1,15 +1,14 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-22 after M152 (PR #169): archived, M149 row pruned, one row filed ("Clear two leftovers of the test prune"), "Fix the M079 review leftovers" unparked, one lesson added, none graduated. Validate green._
+_Last hygiene check: 2026-10-23 after M153 (PR #170): archived, M150 row pruned, one row filed ("Guard the devel-vctrs filter from drift"), one lesson extended, none graduated or unparked._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M153 | The devel-vctrs job runs the vctrs test files on each push and the whole suite each week | review | — | normal | milestones/M153-devel-vctrs-subset.md |
 | M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | planned | M152 | normal | milestones/M154-wait-ledger-rekey.md |
 | M155 | Test comments and test names state only what the code cannot show | planned | M151, M152, M154 | normal | milestones/M155-test-comment-cleanup.md |
+| M153 | The devel-vctrs job runs the vctrs test files on each push and the whole suite each week | done | — | normal | milestones/archive/M153-devel-vctrs-subset.md |
 | M152 | The suite drops tests that repeat a shared path, cannot fail, or test a dependency | done | — | normal | milestones/archive/M152-suite-shared-path-prune.md |
 | M151 | The four other tuners are tested on one inner sliding design, and the help claims only what the tests run | done | — | high | milestones/archive/M151-time-series-tuner-cut.md |
-| M150 | macOS CI takes CRAN binaries again | dropped | — | normal | milestones/archive/M150-macos-cran-binaries.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
