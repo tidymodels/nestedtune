@@ -1,10 +1,10 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-23 after M154 (PR #171): archived, M151 row pruned, one row filed ("Drop line numbers from test comments"), one row narrowed, LESSONS line corrected, none unparked._
+_Last hygiene check: 2026-10-23 after M155 (PR #172): archived, M152 row pruned, two rows filed, one extended, four parked rows compressed, none unparked._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M155 | Test comments and test names state only what the code cannot show | review | M151, M152, M154 | normal | milestones/M155-test-comment-cleanup.md |
+| M155 | Test comments and test names state only what the code cannot show | done | M151, M152, M154 | normal | milestones/archive/M155-test-comment-cleanup.md |
 | M154 | The wait ledger finds each call by its test block, so moving a line breaks no test | done | M152 | normal | milestones/archive/M154-wait-ledger-rekey.md |
 | M153 | The devel-vctrs job runs the vctrs test files on each push and the whole suite each week | done | — | normal | milestones/archive/M153-devel-vctrs-subset.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
