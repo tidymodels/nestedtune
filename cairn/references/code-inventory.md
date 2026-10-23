@@ -7,6 +7,7 @@ read-only outside this repo: `tidymodels/tune` at tag `v2.1.0` (commit
 versions installed in the development library on the day of the read.
 Pagination: —.
 Extraction: read directly from `R/*.R` at `89d8418` and from the two upstream trees named above — observed 2026-08-30.
+Line numbers: the table's `R/` line numbers are read at commit `601cff7e`, where M33 remapped them after its reformat, not at `89d8418` (corrected M157). Each of the 106 `F` rows' cited line held its function's name there — observed 2026-10-23. The prose's line citations were not re-read.
 
 **Scope.** This is an inventory of this package's own R code, sorted by where
 each definition would live in a world without package boundaries. It is not a
