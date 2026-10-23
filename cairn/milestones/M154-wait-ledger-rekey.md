@@ -47,8 +47,8 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - [x] T1: Record the branch point and save `time_budget_totals()` there.
 - [x] T2: Change `tb_row()`, the rows and `wait_call_sites()` to the new key. Change both accounting guards in `test-suite-hygiene.R`.
 - [x] T3: Change the bound re-read and `DECLARED_UNCHECKABLE_BOUNDS` to the new key.
-- [ ] T4: Write the three probe scripts in the scratchpad and run them. Compare `time_budget_totals()`, and write the results to the Review section.
-- [ ] T5: Run the `verify` slot.
+- [x] T4: Write the three probe scripts in the scratchpad and run them. Compare `time_budget_totals()`, and write the results to the work log (the Review section is review's alone).
+- [x] T5: Run the `verify` slot.
 
 ## Work log
 
@@ -63,6 +63,9 @@ Key each row of the `helper-time-budget.R` wait ledger on its file, its enclosin
 - 2026-10-22: found that `payer` is a hand-written paraphrase of the test name, and wrong in 8 rows (6 detection rows name a neighbouring test, 2 required-pkgs rows sit in a local `attached()` function). Decided: `payer` becomes the exact `test_that()` description, read from the parse tree, or the top-level function name in `helper-parallel.R`; the key is file, payer, and the call's position among the wait calls of that unit.
 - 2026-10-22: T2 and T3 done in one commit, because the bound re-read looks calls up by the row key and cannot keep line numbers once the rows drop them. `tb_row()` takes `at` in place of `line`; the 98 rows were rewritten from the parse tree by a scratchpad script, and the three rows whose call no guard sees (two bare `daemons`, the deadline poll) carry `at = NA`. New helpers in `test-suite-hygiene.R`: `wait_call_key()`, `enclosing_unit()`, `wait_calls()`, `ledger_keys()`. The bound re-read reads the call's parsed text, not whole source lines. `benchmarks/test-time-budget.R` prints `#at` and the payer in place of the line. The full suite passed and `air format --check .` was clean.
 - 2026-10-22: note for M155: test names are now part of the ledger key, so renaming a `test_that()` block in the eight budgeted files means editing its ledger rows' `payer` too; the guards fail and name the row if that is missed.
+- 2026-10-22: minor amendment: T4 wrote its results to the Review section, which the rulebook gives to review alone; it writes them here instead.
+- 2026-10-22: T4 done. One scratchpad script (`probes.R`) runs all three probes on a `git archive` copy of 8fd3a459, loading the package once and running `test-suite-hygiene.R` through `testthat::test_file()` after each planted change. AC1: a blank line atop the 8 files gave 0 failures of 29 expectations at the head, and 4 failures (both accounting guards and both bound checks) at 5bae6873. AC2: 95 rows deleted one at a time, 95 runs failed with the deleted row's key in the message. AC3: set size 10 at 5bae6873 and at the head; 10 bounds doubled one at a time, 10 runs failed on that row's bound check. AC4: `time_budget_totals()` plus the per-file row count is identical to the 5bae6873 copy.
+- 2026-10-22: T5 done. The `verify` slot ran on the tree that 8fd3a459 commits: `devtools::test()` clean, `air format --check .` clean (air 0.12.0). No roxygen, `R/`, vignette or README change, so `document()` and the prose sweep do not apply. T4 changed no code.
 
 ## Decisions
 
