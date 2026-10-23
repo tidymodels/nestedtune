@@ -27,7 +27,7 @@ cat("test-time-budget -- declared worst case per file\n\n")
 cat(
   "Convention: each wait contributes its own declared seconds. An enclosing\n"
 )
-cat("setTimeLimit() never caps it -- it does not interrupt a\n")
+cat("setTimeLimit() never caps it: setTimeLimit() does not interrupt a\n")
 cat("blocked mirai wait, so it is not a bound on the path that stalls.\n\n")
 
 for (i in seq_len(nrow(totals))) {

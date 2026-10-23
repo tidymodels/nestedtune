@@ -244,8 +244,9 @@ dispatch_folds <- function(
   #
   # `.args` is charged per fold, not per run -- mirai::mirai_map() serializes it
   # once per task -- so this is one copy per fold rather than one per run. With
-  # that charge counted, a leaned run still puts under a quarter of the
-  # unleaned bytes on the wire, which test-parallel-payload.R asserts.
+  # that charge counted, a leaned run of test-parallel-payload.R's default
+  # fixture still puts under a quarter of the unleaned bytes on the wire, as
+  # that file asserts.
   #
   # Leaning is skipped entirely unless every payload IS a fold payload.
   # dispatch_folds() is also driven directly with stand-in payloads carrying
