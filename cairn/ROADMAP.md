@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-23 after M157 (PR #174): archived, M154 row pruned,
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M158 | Give the unclassed refusals a class | in-progress | — | normal | milestones/M158-refusal-classes.md |
+| M158 | Give the unclassed refusals a class | review | — | normal | milestones/M158-refusal-classes.md |
 | M157 | Test checks and names that M156's review flagged say only what they check | done | — | normal | milestones/archive/M157-m156-review-leftovers.md |
 | M156 | Test code cites no line numbers and names no tracking records | done | — | normal | milestones/archive/M156-test-tracking-leftovers.md |
 | M155 | Test comments and test names state only what the code cannot show | done | M151, M152, M154 | normal | milestones/archive/M155-test-comment-cleanup.md |

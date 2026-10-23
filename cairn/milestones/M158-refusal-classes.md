@@ -1,6 +1,6 @@
 # M158: Give the unclassed refusals a class
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -80,4 +80,6 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - 2026-10-23: T2: 7 `class` arguments in `R/nested-resamples.R` and `R/tuner.R`; seven blocks in three test files red before, green after (20 blocks, 0 red). Four `cli_abort(c(...))` calls there took the file's existing multi-line form to carry `class`.
 - 2026-10-23: T3 in progress: NEWS bullet added. The AC3 walk (scratchpad script comparing each `R/` file's parse tree with the merge base after removing `class` from `cli_abort()` calls) first failed on `R/nested-resamples.R`: re-indenting two calls had shifted the continuation whitespace inside four string literals, which cli trims but the parse tree keeps. Restored; the walk then reported 25 files, 26 classes added, no other change and no existing class altered.
 - 2026-10-23: T3 verified at 3453ac96: `sweep-prose.R --plain` clean; `devtools::test()` 1152 blocks, 0 failed; `devtools::check()` 0 errors, 0 warnings, 0 notes (10m 38s). Claim audit spawned.
+- 2026-10-23: claim audit: 21 claims read, 2 corrected — NEWS.md (the `param_info`/`eval_time`/`event_level` sentence implied every refusal of those arguments carries the new classes, where `autoplot()` uses `nestedtune_bad_plot_filter` and `nested_fit_resamples()` and `compute_metrics()` also raise them; the grid sentence omitted "neither a data frame"). The re-read confirmed both, adding `nested_fit_resamples()`.
+- 2026-10-23: implement complete; status review.
 - 2026-10-23: plan chose the review-time parse walk over a committed test that parses `R/`, because such a test reads source text rather than behavior and AC1's tests pin each class; falsified by a new unclassed `cli_abort()` reaching main.

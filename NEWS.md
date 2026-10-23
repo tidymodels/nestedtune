@@ -5,14 +5,17 @@
   Seven classes are new:
   - `nestedtune_bad_workflow`: `object` is not a workflow, is already
     fitted, or has no model or no preprocessor.
-  - `nestedtune_bad_grid`: `grid` has no rows, is not a positive whole
-    number, or does not match the tuned parameters. When the workflow does
+  - `nestedtune_bad_grid`: `grid` has no rows, is neither a data frame
+    nor a positive whole number, or does not match the tuned parameters. When the workflow does
     not match the recorded grid, `nested_final_fit()` uses it too.
   - `nestedtune_bad_data`: `data` in `nested_resamples()` is not a data
     frame.
   - `nestedtune_bad_param_info`, `nestedtune_bad_eval_time` and
-    `nestedtune_bad_event_level`: that argument has a value nestedtune
-    refuses.
+    `nestedtune_bad_event_level`: a tuning function refuses the value of
+    that argument. `nested_fit_resamples()` also uses the last two, and
+    `compute_metrics()` also uses
+    `nestedtune_bad_event_level`. `autoplot()` still refuses an
+    `eval_time` with `nestedtune_bad_plot_filter`.
   - `nestedtune_unknown_tuner`: an internal error that a bug in nestedtune
     raises.
 
