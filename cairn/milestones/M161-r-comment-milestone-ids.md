@@ -26,7 +26,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - [x] AC1: At the branch head, no terminal token that `utils::getParseData()` returns for any file `Sys.glob("R/*.R")` lists has text matching the perl pattern `\bM[0-9]{2,3}\b`.
 - [x] AC2: The package code is unchanged: `Sys.glob("R/*.R")` lists the same files at the branch point and the branch head, `deparse()` of `parse(file, keep.source = FALSE)` is identical at both for each file, and `git diff <branch point> -- man NAMESPACE DESCRIPTION` is empty.
 - [x] AC3: No comment token that `utils::getParseData()` returns at the branch head, on a line of `R/*.R` that the diff from the branch point adds, holds a match of `\b(AC|BC|T|O|F|P)[0-9]{1,2}\b`, a match of `\bS[0-9]{1,2}\b` other than `S3`, `S4` and `S7`, or the word "milestone" in any letter case.
-- [ ] AC4: At the branch head, `devtools::test()` reports 0 failures, `devtools::check()` reports 0 errors, 0 warnings and 0 notes, `air format --check .` is clean, and `Rscript benchmarks/sweep-prose.R --plain` is clean.
+- [x] AC4: At the branch head, `devtools::test()` reports 0 failures, `devtools::check()` reports 0 errors, 0 warnings and 0 notes, `air format --check .` is clean, and `Rscript benchmarks/sweep-prose.R --plain` is clean.
 
 ## Coverage
 
@@ -71,6 +71,7 @@ Pass 1, 2026-10-24, head 0df9ef6e, branch point 84eb2a20 (default branch unmoved
 - AC1 evidence: `getParseData()` terminal-token sweep over `Sys.glob("R/*.R")` reads 25 files and finds 0 matches of `\bM[0-9]{2,3}\b` at 0df9ef6e; the same sweep in a worktree at 84eb2a20 finds 299, all in COMMENT tokens (domain non-empty).
 - AC2 evidence: `Sys.glob("R/*.R")` lists the same 25 files as `git ls-tree 84eb2a20 R/`; `deparse(parse(f, keep.source = FALSE))` is identical at 84eb2a20 and 0df9ef6e for all 25; `git diff 84eb2a20 -- man NAMESPACE DESCRIPTION` prints 0 lines. Control: a copy of `R/tuner.R` with `planted <- 1L` appended compares as different.
 - AC3 evidence: the lines `git diff -U0 84eb2a20 0df9ef6e -- R/` adds are 385 lines in 19 files; `getParseData()` at 0df9ef6e gives 385 COMMENT tokens on them and 0 match the three patterns (`(AC|BC|T|O|F|P)[0-9]{1,2}`, `S[0-9]{1,2}` other than S3/S4/S7, "milestone" in any case). Control: the same patterns match 32 of the lines the diff removes.
+- AC4 evidence: at 0df9ef6e (the head's code; later commits touch only `cairn/`), main checkout, working tree clean outside `cairn/`: `devtools::test()` FAIL 0, WARN 0, SKIP 0, PASS 13371; `devtools::check()` 0 errors, 0 warnings, 0 notes (8 min); `air format --check .` clean; `Rscript benchmarks/sweep-prose.R --plain` clean.
 
 Consistency gate at 0df9ef6e: `cairn_validate.py` exit 0 (18 references-staleness advisories, none from this branch). No principle changed, so `cairn_impact` skipped. `devtools::document()` leaves `man/` and `NAMESPACE` unchanged and rewrites only `Config/roxygen2/version` 8.1.0 to 8.1.1 in DESCRIPTION, because the local roxygen2 is 8.1.1; the branch changes no roxygen line, so this is the environment, not drift (reverted). README not touched. `pkgdown::check_pkgdown()`: no problems. NEWS: no entry, since nothing a user sees changed. No new top-level files. All six `sweep-prose.R --list-gating` commands clean. `air format --check .` clean.
 
