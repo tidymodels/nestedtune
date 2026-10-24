@@ -41,13 +41,12 @@ test_that("a fit by id is the fit of the extracted workflow with its own results
 test_that("an id naming no row is refused", {
   skip_if_no_wset_fixture()
   res <- wset_results("nested_tune_grid")
-  set.seed(1)
-  before <- .Random.seed
+  local_no_rng_state()
   cnd <- rlang::catch_cnd(nested_final_fit(res, id = "nonesuch"))
   expect_s3_class(cnd, "nestedtune_unknown_id")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
   expect_match(conditionMessage(cnd), "nonesuch", fixed = TRUE)
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
 
 test_that("a set with results, a set with no id, and a workflow with an id are refused", {

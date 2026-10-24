@@ -242,7 +242,7 @@ test_that("a results object with the record and no rows is refused", {
   expect_match(conditionMessage(cnd), "prototype")
 })
 
-test_that("the record refusals fire before anything is drawn", {
+test_that("the refusal of a record with no inner specification fires before anything is drawn", {
   skip_if_no_engines()
 
   d <- make_reg_data()
@@ -250,13 +250,7 @@ test_that("the record refusals fire before anything is drawn", {
   res <- final_results(d)
   attr(res, "inside") <- NULL
 
-  # Existence, not identity: the restore is registered before the draw, so
-  # the caller's state comes back either way. A session with no state keeps
-  # the one a draw creates, so a refusal after the draw leaves one behind.
-  saved <- .Random.seed
-  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
-  rm(".Random.seed", envir = globalenv())
-
+  local_no_rng_state()
   expect_error(nested_final_fit(wf, res), class = "nestedtune_bad_results")
   expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
@@ -305,10 +299,7 @@ test_that("the all-failed refusal fires before anything is drawn", {
   wf <- det_workflow(d)
   res <- all_failed_results(d, wf, "inner tuning")
 
-  saved <- .Random.seed
-  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
-  rm(".Random.seed", envir = globalenv())
-
+  local_no_rng_state()
   expect_error(
     nested_final_fit(wf, res),
     class = "nestedtune_no_completed_folds"

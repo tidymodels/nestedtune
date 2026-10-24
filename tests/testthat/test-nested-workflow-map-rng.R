@@ -113,7 +113,7 @@ test_that("the same seed gives identical sets across two direct calls, and a dif
   ))
 })
 
-test_that("an error partway through the set still restores the caller's state", {
+test_that("an error partway through the set still removes the state the map created", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
   set.seed(31)
@@ -124,8 +124,12 @@ test_that("an error partway through the set still restores the caller's state", 
   )
   folds <- final_nested(d)
 
-  set.seed(5)
-  before <- .Random.seed
-  expect_error(nested_workflow_map(wset, resamples = folds, grid = det_grid()))
-  expect_identical(.Random.seed, before)
+  # A session that never drew, since the map puts a set seed back before
+  # every workflow: only its exit handler removes the state it created.
+  local_no_rng_state()
+  expect_error(
+    nested_workflow_map(wset, resamples = folds, grid = det_grid()),
+    class = "nestedtune_bad_grid"
+  )
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })

@@ -95,8 +95,8 @@ test_that("the final fit's record carries the same entry, and the fit runs", {
 # cannot carry (the preprocessor's formula, the model's mode).
 #
 # Each probe asserts which failure it is: the mismatch class, the part the
-# message names, the user's call, the caller's generator state unchanged,
-# and nothing fitted -- the worker is replaced with one that raises a class
+# message names, the user's call, no generator state drawn before the
+# refusal, and nothing fitted -- the worker is replaced with one that raises a class
 # of its own, so a probe that reached it would fail on the class and not
 # merely on a count (the passing control at the end of the block shows that
 # stand-in firing).
@@ -111,8 +111,7 @@ expect_mismatch <- function(object, results, part) {
       rlang::abort("the worker was reached", class = "nestedtune_test_fitted")
     }
   )
-  set.seed(1)
-  before <- .Random.seed
+  local_no_rng_state()
   cnd <- rlang::catch_cnd(nested_final_fit(object, results))
   testthat::expect_s3_class(cnd, "nestedtune_workflow_mismatch")
   testthat::expect_match(conditionMessage(cnd), part, fixed = TRUE)
@@ -121,7 +120,9 @@ expect_mismatch <- function(object, results, part) {
     conditionCall(cnd)[[1]],
     as.name("nested_final_fit")
   )
-  testthat::expect_identical(.Random.seed, before)
+  testthat::expect_false(
+    exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  )
   invisible(cnd)
 }
 
@@ -534,15 +535,15 @@ test_that("a record with no workflow entry is refused before the identity check"
   attr(res, "procedure")$workflow <- NULL
   expect_false("workflow" %in% names(extract_procedure(res)))
 
-  set.seed(1)
-  before <- .Random.seed
+  saved <- local_no_rng_state()
   cnd <- rlang::catch_cnd(nested_final_fit(wf, res))
   expect_s3_class(cnd, "nestedtune_bad_results")
   expect_match(conditionMessage(cnd), "no record of the workflow")
   expect_match(conditionMessage(cnd), "earlier version")
   expect_match(conditionMessage(cnd), "not migrated")
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
+  assign(".Random.seed", saved, envir = globalenv())
 
   # A record missing both late entries names both, in one sentence.
   both <- final_results(d)
