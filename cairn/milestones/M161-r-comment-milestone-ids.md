@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M161: R source comments carry no milestone ids
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M160
 - **Driving RR:** —
@@ -39,7 +39,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 
 - [x] T1: Rewrite the comments of `R/checks.R` and `R/parallel.R`. Drop each id with the labels that point into its milestone, keep decision ids, and reword a comment that only makes sense with the id. Where an id was the only pointer to a reason the code still needs, state the reason in the comment.
 - [x] T2: Rewrite the other 23 files under the T1 spec, through Haiku subagents for file groups if the count warrants it; read each diff before it lands.
-- [ ] T3: Run the AC1 sweep (show it reads 25 files and finds 299 ids at the branch point), the AC2 comparison, the AC3 search over `git diff -U0`, the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the results.
+- [x] T3: Run the AC1 sweep (show it reads 25 files and finds 299 ids at the branch point), the AC2 comparison, the AC3 search over `git diff -U0`, the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the results.
 
 ## Work log
 
@@ -57,6 +57,8 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - 2026-10-24: delegation: three Haiku subagents rewrote the other 23 files in groups of 2, 3 and 12 files (55, 55 and 76 ids) under the T1 spec. I read all three diffs and fixed 12 sites: a sentence left with no period, two joined lines over 80 characters, a present-tense claim that the final fit's run is "reachable only as an undocumented list slot" (false since D-023), "Tune" capitalized, an event-level reword checked against the `control_last_fit(event_level = )` call, and six rewordings that still read as history.
 - 2026-10-24: implementation choice: review-report pointers (`RR02 Q7`, `RR03 Q5`, `RB04`) stay, for the reason decision ids stay: they name live records in `cairn/reviews/archive/`. The two comments that held the word "milestone" with no id (`R/nested-results.R`, `R/parallel.R`) are reworded under the Scope's "this milestone declined" clause.
 - 2026-10-24: T2 done: the AC1 sweep finds 0 ids in 25 files; AC2 finds no code change; no added comment line holds an AC3 pattern or runs over 80 characters; `air format --check .` clean.
+- 2026-10-24: T3 done at 3c4bc360 against branch point 84eb2a20. AC1: 25 files, 299 ids at the branch point, 0 at the head, all hits in COMMENT tokens. AC2: same 25 files, `deparse(parse(keep.source = FALSE))` identical for all 25, `git diff 84eb2a20 -- man NAMESPACE DESCRIPTION` empty; control: a planted `planted <- 1L` in a copy of `R/tuner.R` reads as different. AC3: 370 comment tokens on 370 added lines in 19 files, 0 hits; control: the same patterns hit 32 removed lines. AC4: `devtools::test()` 0 failures (13371 passes), `devtools::check()` 0 errors, 0 warnings, 0 notes (main checkout), `air format --check .` clean, `sweep-prose.R --plain` clean.
+- 2026-10-24: claim audit: not owed — internal tier.
 
 ## Decisions
 
