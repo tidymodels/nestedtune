@@ -844,6 +844,14 @@ time_budget_ledger <- function() {
     # --- test-parallel-interrupt.R ------------------------------------------
     tb_row(
       "test-parallel-interrupt.R",
+      NA_integer_,
+      "deadline poll",
+      5,
+      "an interrupted run leaves no fold executing",
+      note = "the SIGINT probe; spent in full only when the block then skips"
+    ),
+    tb_row(
+      "test-parallel-interrupt.R",
       1L,
       "start_daemons",
       START_DAEMONS_BOUND_S(),
@@ -855,7 +863,7 @@ time_budget_ledger <- function() {
       "deadline poll",
       15,
       "an interrupted run leaves no fold executing",
-      note = "repeat until executing() is 0 and the shell is done, or deadline"
+      note = "while (executing() > 0L && Sys.time() < deadline)"
     ),
     tb_row(
       "test-parallel-interrupt.R",
