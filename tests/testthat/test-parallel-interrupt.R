@@ -49,12 +49,36 @@ test_that("an interrupted run leaves no fold executing", {
   skip_on_os("windows")
   skip_if(!nzchar(Sys.which("sh")), "no POSIX shell to signal from")
 
+  # A process that ignores SIGINT can never receive the interrupt under test,
+  # and a test run started with `&` from a non-interactive shell is one: the
+  # shell starts it with SIGINT ignored, and every R process under it inherits
+  # that. So the process first signals itself, and the block skips when nothing
+  # arrives. `pskill()` signals in-process: `system2("kill")` would be lost,
+  # because R ignores SIGINT while it waits on a child.
+  probe_raised <- tryCatch(
+    {
+      tools::pskill(Sys.getpid(), tools::SIGINT)
+      deadline <- Sys.time() + 5
+      while (Sys.time() < deadline) {
+        Sys.sleep(0.1)
+      }
+      FALSE
+    },
+    interrupt = function(cnd) TRUE
+  )
+  skip_if(
+    !probe_raised,
+    "this process ignores SIGINT, so no interrupt can reach it"
+  )
+
   on.exit(mirai::daemons(0), add = TRUE)
   start_daemons(2)
 
   markers <- file.path(tempdir(), paste0("m15-fold-", 1:2))
-  unlink(markers)
-  on.exit(unlink(markers), add = TRUE)
+  # The shell records here that it sent the signal, before sending it.
+  sent <- file.path(tempdir(), "interrupt-sent")
+  unlink(c(markers, sent))
+  on.exit(unlink(c(markers, sent)), add = TRUE)
 
   local_mocked_bindings(
     fold_task = function(
@@ -87,11 +111,12 @@ test_that("an interrupted run leaves no fold executing", {
   # test was running twenty seconds later, aborting the run under `R CMD check`
   # with nothing to connect it to its cause.
   script <- sprintf(
-    'i=0; while [ $i -lt 200 ]; do [ -f "%s" ] && [ -f "%s" ] && break; sleep 0.1; i=$((i+1)); done; if [ -f "%s" ] && [ -f "%s" ]; then sleep 0.5; kill -INT %d; fi',
+    'i=0; while [ $i -lt 200 ]; do [ -f "%s" ] && [ -f "%s" ] && break; sleep 0.1; i=$((i+1)); done; if [ -f "%s" ] && [ -f "%s" ]; then sleep 0.5; : > "%s"; kill -INT %d; fi',
     markers[[1]],
     markers[[2]],
     markers[[1]],
     markers[[2]],
+    sent,
     Sys.getpid()
   )
   system2("sh", c("-c", shQuote(script)), wait = FALSE)
@@ -105,11 +130,21 @@ test_that("an interrupted run leaves no fold executing", {
     interrupt = function(cnd) interrupted <<- TRUE
   )
 
-  expect_true(interrupted)
-  # Not a vacuous pass: both folds really were executing when the signal landed.
-  # Without this an interrupt delivered before dispatch would report an idle
-  # pool and read as a fix.
-  expect_true(all(file.exists(markers)))
+  # The shell writes `sent` only once both markers exist, so a pass also shows
+  # both folds really were executing when the signal landed. Without that, an
+  # interrupt delivered before dispatch would report an idle pool and read as a
+  # fix.
+  was_sent <- file.exists(sent)
+  expect(
+    was_sent,
+    "The shell sent no interrupt: the two folds had not both marked themselves started when the run returned."
+  )
+  if (was_sent) {
+    expect(
+      interrupted,
+      "The shell sent an interrupt and it never reached the host."
+    )
+  }
 
   # Bounded, because the daemons report the cancellation back asynchronously --
   # the pool is idle within a moment of the unwind, not within the same

@@ -1,9 +1,19 @@
-# Hygiene checks on the test suite's own source.
+# Hygiene checks on the test suite's own source and helpers.
 #
-# One rule, and it exists because breaking it costs twenty minutes of silence
-# rather than a red test: every wait on a mirai result in this suite goes
-# through `collect_bounded()` (helper-parallel.R), which polls to a deadline and
-# then reads `$data`. Everything else mirai offers for getting a value out
+# The file checks four things:
+#   * Every wait on a mirai result goes through `collect_bounded()`.
+#   * Every wait-shaped call in the daemon files has a row in the time-budget
+#     ledger (helper-time-budget.R), no row is left for a call that is gone,
+#     and a row copied from an explicit bound still matches that bound.
+#   * The declared worst cases of test-parallel-classify.R and
+#     test-parallel-metrics.R stay under their ceilings.
+#   * `daemon_state_snapshot()` names each daemon's record by the pid that
+#     record holds, which is what `shared_daemons()` compares.
+#
+# The `collect_bounded()` rule exists because breaking it costs twenty minutes
+# of silence rather than a red test: every wait on a mirai result in this suite
+# goes through `collect_bounded()` (helper-parallel.R), which polls to a
+# deadline and then reads `$data`. Everything else mirai offers for getting a value out
 # blocks until it resolves and cannot be interrupted from R at all --
 # `setTimeLimit(elapsed=)` does not fire inside any of them, established by
 # running them.
@@ -49,7 +59,7 @@ blocking_collect_sites <- function(path) {
   sort(unique(c(data$line1[named], data$line1[blocking])))
 }
 
-# The second rule: every wait-shaped call in the daemon files is
+# The ledger rule: every wait-shaped call in the daemon files is
 # accounted for in the time budget. `collect_bounded()` made the waits bounded;
 # this makes the SUM of those bounds visible, which is the part that killed a CI
 # job -- 1008.7 s of legal waiting in a file that normally takes 12.0 s, against
@@ -209,9 +219,9 @@ test_that("the budget ledger has no rows for calls that are gone", {
   # and a stale row adds seconds to the totals for a call that is gone.
   ledger <- time_budget_ledger()
   # Scoped to rows describing an actual call. The ledger may also carry a wait
-  # that is not a function call at all -- the `while (... && Sys.time() <
-  # deadline)` poll in test-parallel-interrupt.R -- which is real budget but has
-  # no token to match, so it is exempt from this direction only.
+  # that is not a function call at all -- the two `while (... Sys.time() <
+  # deadline)` polls in test-parallel-interrupt.R -- which is real budget but
+  # has no token to match, so it is exempt from this direction only.
   ledger <- ledger[ledger$call %in% BUDGETED_WAIT_CALLS, , drop = FALSE]
   budgeted <- ledger_keys(ledger)
 
@@ -242,7 +252,7 @@ test_that("the budget ledger has no rows for calls that are gone", {
 # constant in helper-parallel.R cannot drift that way and need no check.
 #
 # NA means the call carries no explicit bound of its own: a bound read from a
-# named constant, the option-set-elsewhere case, and the deadline poll. Which
+# named constant, the option-set-elsewhere case, and the deadline polls. Which
 # rows those are is declared below rather than left to whatever the regex
 # happens to miss.
 #
@@ -414,17 +424,31 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
 
 # The probe in `shared_daemons()` compares `names(now)` against `names(was)` to
 # say "the same daemons, by pid", so a name that belongs to a different record
-# turns a replaced daemon into a silent pass. The naming is exercised here
-# against fabricated answers rather than a live pool: the case that tells the
-# two functions apart is an answer carrying no integer `pid` -- what the
-# helper's own `NA_integer_` fallback is written for -- and fabricating that is
-# cheaper and surer than breaking a pool into producing one.
-test_that("daemon answers are named by the pid each one holds", {
+# turns a replaced daemon into a silent pass. The snapshot is taken here over
+# fabricated answers rather than a live pool: the round trip is replaced, and
+# everything after it is the helper `shared_daemons()` calls. The case that
+# tells a right naming from a near miss is an answer carrying no integer `pid`
+# -- what the helper's own `NA_integer_` fallback is written for -- and
+# fabricating that is cheaper and surer than breaking a pool into producing
+# one.
+test_that("a daemon snapshot names each record by the pid it holds", {
   answer <- function(pid) list(pid = pid, namespaces = character(0))
+  snapshot_of <- function(answers) {
+    # `collect_bounded()` never forces its first argument here, so no
+    # `mirai::everywhere()` call is made and no pool is needed. Under
+    # `devtools::test()` and `R CMD check` the helper is not in the namespace,
+    # which `local_mocked_bindings()` searches, so it is rebound where the
+    # helpers live.
+    rlang::local_bindings(
+      collect_bounded = function(map, seconds) answers,
+      .env = environment(daemon_state_snapshot)
+    )
+    daemon_state_snapshot()
+  }
 
   # Named in true pid order, whichever order the daemons answered in.
   shuffled <- list(a = answer(30L), b = answer(10L), c = answer(20L))
-  named <- name_by_pid(shuffled)
+  named <- snapshot_of(shuffled)
   expect_identical(names(named), c("10", "20", "30"))
   expect_identical(
     vapply(named, function(x) x$pid, integer(1)),
@@ -443,7 +467,7 @@ test_that("daemon answers are named by the pid each one holds", {
     c = answer(10L),
     d = answer(NULL)
   )
-  gapped <- name_by_pid(with_gap)
+  gapped <- snapshot_of(with_gap)
   expect_identical(names(gapped), c("10", "30", NA, NA))
   expect_identical(gapped[[1L]]$pid, 10L)
   expect_identical(gapped[[2L]]$pid, 30L)
@@ -452,7 +476,7 @@ test_that("daemon answers are named by the pid each one holds", {
   # The property in one line, over both fixtures: every record's name is the
   # pid it carries, read back off the record itself.
   for (fixture in list(shuffled, with_gap)) {
-    out <- name_by_pid(fixture)
+    out <- snapshot_of(fixture)
     carried <- vapply(
       out,
       function(x) {

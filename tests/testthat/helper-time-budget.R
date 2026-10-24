@@ -40,8 +40,8 @@
 # and spent at another (in classify's "the probe reads its bound from the
 # option, not from the constant", `options()` sets it and
 # `daemons_load_status()` spends it); and a wait that
-# is no function call at all (the deadline poll in interrupt). None carries an
-# explicit bound argument in the call itself, which is exactly how the
+# is no function call at all (the two deadline polls in interrupt). None carries
+# an explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
 #
 # Those exemptions are DECLARED and asserted, not merely described here.
@@ -842,6 +842,14 @@ time_budget_ledger <- function() {
     ),
 
     # --- test-parallel-interrupt.R ------------------------------------------
+    tb_row(
+      "test-parallel-interrupt.R",
+      NA_integer_,
+      "deadline poll",
+      5,
+      "an interrupted run leaves no fold executing",
+      note = "the SIGINT probe; spent in full only when the block then skips"
+    ),
     tb_row(
       "test-parallel-interrupt.R",
       1L,
