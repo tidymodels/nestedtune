@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-23 triage: promoted "Fix the M079 review leftovers"
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | planned | — | high | milestones/M159-m079-review-leftovers.md |
+| M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | in-progress | — | high | milestones/M159-m079-review-leftovers.md |
 | M158 | Give the unclassed refusals a class | done | — | normal | milestones/archive/M158-refusal-classes.md |
 | M157 | Test checks and names that M156's review flagged say only what they check | done | — | normal | milestones/archive/M157-m156-review-leftovers.md |
 | M156 | Test code cites no line numbers and names no tracking records | done | — | normal | milestones/archive/M156-test-tracking-leftovers.md |

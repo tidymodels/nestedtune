@@ -414,17 +414,30 @@ test_that("no test waits on a mirai result outside collect_bounded()", {
 
 # The probe in `shared_daemons()` compares `names(now)` against `names(was)` to
 # say "the same daemons, by pid", so a name that belongs to a different record
-# turns a replaced daemon into a silent pass. The naming is exercised here
-# against fabricated answers rather than a live pool: the case that tells the
-# two functions apart is an answer carrying no integer `pid` -- what the
-# helper's own `NA_integer_` fallback is written for -- and fabricating that is
-# cheaper and surer than breaking a pool into producing one.
-test_that("daemon answers are named by the pid each one holds", {
+# turns a replaced daemon into a silent pass. The snapshot is taken here over
+# fabricated answers rather than a live pool: the round trip is replaced, and
+# everything after it is the helper `shared_daemons()` calls. The case that
+# tells a right naming from a near miss is an answer carrying no integer `pid`
+# -- what the helper's own `NA_integer_` fallback is written for -- and
+# fabricating that is cheaper and surer than breaking a pool into producing
+# one.
+test_that("a daemon snapshot names each record by the pid it holds", {
   answer <- function(pid) list(pid = pid, namespaces = character(0))
+  snapshot_of <- function(answers) {
+    # `collect_bounded()` never forces its first argument here, so no
+    # `mirai::everywhere()` call is made and no pool is needed. The helper is
+    # not in the namespace, which `local_mocked_bindings()` searches, so it is
+    # rebound where the helpers live.
+    rlang::local_bindings(
+      collect_bounded = function(map, seconds) answers,
+      .env = environment(daemon_state_snapshot)
+    )
+    daemon_state_snapshot()
+  }
 
   # Named in true pid order, whichever order the daemons answered in.
   shuffled <- list(a = answer(30L), b = answer(10L), c = answer(20L))
-  named <- name_by_pid(shuffled)
+  named <- snapshot_of(shuffled)
   expect_identical(names(named), c("10", "20", "30"))
   expect_identical(
     vapply(named, function(x) x$pid, integer(1)),
@@ -443,7 +456,7 @@ test_that("daemon answers are named by the pid each one holds", {
     c = answer(10L),
     d = answer(NULL)
   )
-  gapped <- name_by_pid(with_gap)
+  gapped <- snapshot_of(with_gap)
   expect_identical(names(gapped), c("10", "30", NA, NA))
   expect_identical(gapped[[1L]]$pid, 10L)
   expect_identical(gapped[[2L]]$pid, 30L)
@@ -452,7 +465,7 @@ test_that("daemon answers are named by the pid each one holds", {
   # The property in one line, over both fixtures: every record's name is the
   # pid it carries, read back off the record itself.
   for (fixture in list(shuffled, with_gap)) {
-    out <- name_by_pid(fixture)
+    out <- snapshot_of(fixture)
     carried <- vapply(
       out,
       function(x) {
