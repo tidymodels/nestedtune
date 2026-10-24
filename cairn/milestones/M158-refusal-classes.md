@@ -83,6 +83,8 @@ Tests that now assert `rlang_error` for one of these refusals (for example `test
 - 2026-10-23: claim audit: 21 claims read, 2 corrected — NEWS.md (the `param_info`/`eval_time`/`event_level` sentence implied every refusal of those arguments carries the new classes, where `autoplot()` uses `nestedtune_bad_plot_filter` and `nested_fit_resamples()` and `compute_metrics()` also raise them; the grid sentence omitted "neither a data frame"). The re-read confirmed both, adding `nested_fit_resamples()`.
 - 2026-10-23: implement complete; status review.
 - 2026-10-23: plan chose the review-time parse walk over a committed test that parses `R/`, because such a test reads source text rather than behavior and AC1's tests pin each class; falsified by a new unclassed `cli_abort()` reaching main.
+- 2026-10-23: review: 4-lens fan-out at ab3d2dc1, 23 findings (7 fixed at 24ce0fe5, 15 rejected, 1 noted, 0 follow-up); no return.
+- 2026-10-23: step-7 approval: m158-refusal-classes approved for merge
 
 ## Decisions
 
