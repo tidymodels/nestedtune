@@ -81,7 +81,7 @@ autoplot.nested_results <- function(
 plot_selection <- function(x, call = rlang::caller_env()) {
   frame <- selection_frame(x)
   if (is.null(frame)) {
-    # Classed since M70: a `nested_fit_resamples()` result reaches this on
+    # The refusal is classed: a `nested_fit_resamples()` result reaches this on
     # every call, so a caller can catch it as the refusal it is.
     cli::cli_abort(
       c(
@@ -127,7 +127,7 @@ plot_selection <- function(x, call = rlang::caller_env()) {
 # calling it with each panel's own limits -- so one continuous parameter judged
 # globally put every *other* panel back on fractional breaks, which is how the
 # defect this exists to fix came back for any grid mixing an integer parameter
-# with a continuous one (M08 review F3).
+# with a continuous one.
 value_scale <- function(values, parameter) {
   if (!is.numeric(values)) {
     return(NULL)
@@ -168,7 +168,7 @@ panel_breaks <- function(by_param) {
 # Asking instead which *pooled* values fall inside the limits is not the same
 # question, and answering it that way is what let a continuous parameter
 # overlapping an integer one put fractional ticks back on the integer panel: a
-# comment here once claimed the two were equivalent, and the M08 re-review
+# comment here once claimed the two were equivalent, and a re-review
 # disproved it with `num_comp` 2/3/4 beside a parameter valued 2.5/2.7/3.5.
 #
 # Two parameters with the same range are genuinely ambiguous and the first wins.
@@ -216,10 +216,10 @@ plot_performance <- function(
     call = call
   )
   summarized <- summarize_folds(per_fold)
-  # A metric measured at several evaluation times is one estimate per time
-  # (M41), so the time joins the panel name before the estimator question is
+  # A metric measured at several evaluation times is one estimate per time,
+  # so the time joins the panel name before the estimator question is
   # asked; a summary keyed on time alone would give two panels one label and
-  # the level factor below would abort on the duplicate (M41 review F1).
+  # the level factor below would abort on the duplicate.
   timed_rows <- timed_metric(summarized)
   timed_points <- timed_metric(per_fold)
   ambiguous <- ambiguous_metrics(timed_rows)
@@ -228,8 +228,7 @@ plot_performance <- function(
   # averaged over fewer folds than completed says so on its own line, "where the
   # heading would be wrong for it alone" (`print_estimate()`). One
   # figure-level count cannot be true of every panel, and claiming otherwise is
-  # what made the subtitle assert a three-fold estimate for a two-fold number
-  # (M08 review F1).
+  # what made the subtitle assert a three-fold estimate for a two-fold number.
   panels <- qualify_panels(bases, summarized$n, sum(x$.completed), from_folds)
 
   # A fold can complete and still score NA on one metric while scoring the
@@ -246,7 +245,7 @@ plot_performance <- function(
     bases
   )]
   # The fold axis pastes the label columns, as fold_ids() does, so a
-  # repeated design's folds read "Repeat1, Fold1" (M122).
+  # repeated design's folds read "Repeat1, Fold1".
   folds <- paste_labels(per_fold, per_fold_label_columns(x))
   points <- new_tbl(list(
     fold = factor(folds[scored], levels = fold_ids(x)),
@@ -272,7 +271,7 @@ plot_performance <- function(
     # was requested keeps its panel even when no completed fold could score it,
     # rather than vanishing with no trace that it had been asked for. It also
     # makes the nothing-scored-anywhere figure build instead of failing inside
-    # ggplot2 on an empty faceting variable (M08 review F4).
+    # ggplot2 on an empty faceting variable.
     ggplot2::facet_wrap(
       ggplot2::vars(.data$metric),
       scales = "free_y",
@@ -473,7 +472,7 @@ selection_frame <- function(x) {
 
 # The frame's rows before the axis is decided: the fold and qualified panel
 # label per drawn value, the values themselves as a list, and the levels of
-# each. Split from `selection_frame()` so the set's view (M72) can pool
+# each. Split from `selection_frame()` so the set's view can pool
 # every workflow's values before `selection_axis()` decides one axis for
 # every panel, where a decision per workflow could put a numeric panel
 # beside a discrete one.
@@ -503,8 +502,7 @@ selection_rows <- function(x) {
   # A parameter that only some completed folds chose a value for says so on its
   # own panel. Without it a flat row of two agreeing folds, under a figure-level
   # sentence counting three, read as three folds agreeing -- the false-agreement
-  # mirror of the false-instability flag print treats as its worst output
-  # (M08 review F2).
+  # mirror of the false-instability flag print treats as its worst output.
   panels <- qualify_panels(params, chose, sum(x$.completed), chose_value)
 
   list(
@@ -521,7 +519,7 @@ selection_rows <- function(x) {
 # `.selected` is a list column of one-row tibbles, so a value is reached through
 # the element and never with `$` on the column: `x$.selected$num_comp` answers
 # NULL rather than erroring, and a caller that believed it rendered "0 distinct
-# values" and built perfectly cleanly (M06).
+# values" and built perfectly cleanly.
 #
 # A fold that failed carries NULL, and a completed fold's selection may simply
 # have no such column. Both are "no value", and neither may be drawn.
@@ -580,7 +578,7 @@ autoplot.nested_results_set <- function(
   id = NULL
 ) {
   rlang::check_dots_empty()
-  # One workflow's plot (M149), as workflowsets' `id` draws one result: the
+  # One workflow's plot, as workflowsets' `id` draws one result: the
   # single-run method on that row, with every argument it takes. Its
   # conditions name the workflow and the user's call, as the set's readers'
   # do (`for_workflow()`).

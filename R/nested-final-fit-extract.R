@@ -1,11 +1,10 @@
 # The named doors onto what selection saw.
 #
-# `nested_final_fit` has carried its tuning run since M05, reachable only as an
-# undocumented list slot; D-014 shipped `extract_workflow()` and left this one
-# as "a documented slot suffices pre-1.0" (RR02 Q7). D-023 gives it a name, and
-# gives one to the candidate set that run scored -- the final fit's equivalent
-# of the candidate set each fold's `.inner_metrics` describes on
-# `nested_results` (M21's column, replaced at M49), derived by the same
+# `nested_final_fit` carries its tuning run as a list slot; D-014 shipped
+# `extract_workflow()` and left this one as "a documented slot suffices
+# pre-1.0" (RR02 Q7). D-023 gives it a name, and gives one to the candidate
+# set that run scored -- the final fit's equivalent of the candidate set each
+# fold's `.inner_metrics` describes on `nested_results`, derived by the same
 # function from the run's metrics table so the two can never describe the
 # same thing differently.
 #
@@ -19,7 +18,7 @@
 #
 # Both carry a default method because R's bare "no applicable method" names
 # neither what was handed over nor what would have answered. tune reaches for
-# the same remedy on `show_best()` (M06).
+# the same remedy on `show_best()`.
 
 #' Extract the tuning run of a final fit
 #'
@@ -56,7 +55,7 @@ extract_tune_results.default <- function(x, ...) {
   # No dots check here. A caller holding the wrong object is told so whatever
   # else they passed: a dots check before the refusal answered
   # `extract_tune_results(1, foo = 1)` with a complaint about `foo` and said
-  # nothing of `1` (an M34 review finding, closed in M56). The abort never
+  # nothing of `1`. The abort never
   # returns, so a check after it would never run either; the methods check
   # their own dots.
   #
@@ -132,7 +131,7 @@ extract_scored_candidates.nested_final_fit <- function(x, ...) {
   scored_candidates(x$tuning)
 }
 
-# A fit that ran no tuning has no run and no candidates to hand over (M70):
+# A fit that ran no tuning has no run and no candidates to hand over:
 # the record names a tuner that selects nothing, and both accessors refuse
 # rather than returning NULL or an empty table a caller might read as a run
 # that scored nothing. Read off the procedure, not off `tuning` being NULL,
@@ -158,8 +157,7 @@ check_tuning_run <- function(x, fn, call = rlang::caller_env()) {
 # One refusal serving every accessor here, so their wording cannot drift apart.
 #
 # Classed, so a caller can catch it as this package's own rather than by
-# matching the message -- the convention M18 established for the argument
-# checks.
+# matching the message -- the convention the argument checks use.
 abort_no_extract_method <- function(
   fn,
   x,
@@ -167,7 +165,7 @@ abort_no_extract_method <- function(
   call = rlang::caller_env()
 ) {
   # `classes` names the classes the generic answers for, each paired with
-  # where such an object comes from (M67 added `nested_results`). The
+  # where such an object comes from. The
   # `nested_results` phrase is abort_no_agreement_method()'s, so the two
   # families say the same thing about the same object.
   origins <- c(

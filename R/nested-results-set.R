@@ -1,4 +1,4 @@
-# The `nested_results_set` surface (M71, D-058): one `nested_results` per
+# The `nested_results_set` surface (D-058): one `nested_results` per
 # workflow, and readers that stack each element's table under its id. The
 # class adds no statistics of its own -- every number comes from an
 # element's own reader -- and it registers none of the ranking or
@@ -182,7 +182,7 @@ augment.nested_results_set <- function(x, ...) {
 #
 # `action` and `noun` are the words the two refusals say -- "collect" and
 # "table" for the readers, "plot" and "figure" for the set's `autoplot()`
-# views, which stack their per-workflow frames through here (M72) so the
+# views, which stack their per-workflow frames through here so the
 # fold-state rules are one code path.
 stack_set <- function(
   x,
@@ -425,8 +425,7 @@ match_set_id <- function(x, id, call = rlang::caller_env()) {
   match(id, ids)
 }
 
-# What an operation may and may not do to a `nested_results_set` (M73,
-# D-059).
+# What an operation may and may not do to a `nested_results_set` (D-059).
 #
 # The set's record is per row. Each row's `nested_results` describes its own
 # run whole, so a row dropped or reordered leaves every row in hand still

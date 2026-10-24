@@ -2,7 +2,7 @@
 #
 # summary() prints the selections one parameter at a time and autoplot() draws
 # them; this is the same fact as a table, keyed by the whole selected
-# combination rather than by one parameter (M44, issue #36). Nothing here ranks
+# combination rather than by one parameter (issue #36). Nothing here ranks
 # the folds or names a winner: the most frequent row is a description of the
 # procedure's choices, and the final model's parameters come from
 # nested_final_fit() running the same procedure on the whole data (D-014).
@@ -81,8 +81,8 @@ agreement.nested_results <- function(x, ...) {
   # One row per completed fold, in fold order, over the union of the parameters
   # any fold chose. A fold with no value for a parameter holds NA there, so it
   # still counts as a fold and its combination stays distinct from the folds
-  # that chose a value. Stacked through vctrs rather than `$` on the column
-  # (M06): the selections are tune's tibbles, and a fold's missing column is
+  # that chose a value. Stacked through vctrs rather than `$` on the column.
+  # The selections are tune's tibbles, and a fold's missing column is
   # filled by the common type, never by whichever fold happened to come first.
   rows <- lapply(selected, function(s) {
     cols <- lapply(params, function(p) if (p %in% names(s)) s[[p]] else NA)

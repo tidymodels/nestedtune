@@ -26,14 +26,14 @@ new_nested_results <- function(
   cols[[".selected"]] <- lapply(folds, function(x) x$selected)
   # IP4's "the grid actually evaluated", per fold rather than per run: each
   # fold's inner run summarized by tune, from which its candidate set is
-  # derived (M49, D-043). Folds can genuinely search different candidate sets,
+  # derived (D-043). Folds can genuinely search different candidate sets,
   # so this is a column and not an attribute. An attribute would also survive
-  # a row subset as the parent's record (M20), which is the stale claim the
+  # a row subset as the parent's record, which is the stale claim the
   # same principle forbids.
   cols[[".inner_metrics"]] <- lapply(folds, function(x) x$inner_metrics)
   cols[[".notes"]] <- lapply(folds, function(x) x$notes)
   # The outer fit's extract and predictions, each a column only when the
-  # control asked for it (M68): the slot is read off the recorded procedure,
+  # control asked for it: the slot is read off the recorded procedure,
   # so a column's presence says what ran (IP4), and an object built under the
   # default control looks as it did before. A failed fold's element is NULL,
   # and so is a completed fold's extract when the function errored on it (its
@@ -72,7 +72,7 @@ new_nested_results <- function(
   # IP4: what ran is recorded positively, never inferred from what is absent.
   attr(out, "folds_attempted") <- n
   attr(out, "folds_completed") <- sum(completed)
-  # The outer folds' weights (M101), as `tune::add_resample_weights()` left
+  # The outer folds' weights, as `tune::add_resample_weights()` left
   # them on the design: normalized to sum one, and absent when equal. Kept
   # as a table keyed by the fold label columns rather than as the design's
   # positional vector, so a run whose rows a caller reorders still pairs
@@ -134,15 +134,16 @@ outer_scheme_label <- function(resamples) {
 # added or reordered. An operation inside that set gets the class back; anything
 # else gets a bare tibble, because an object holding rows other than the ones
 # the run produced cannot answer for the run and must stop claiming it can
-# (IP4). The alternative -- what this class did until M36 -- is what makes
-# `slice(x, 1)` return a one-row object still headed "3-fold cross-validation".
+# (IP4). The alternative, keeping the class on whatever an operation returns,
+# would make `slice(x, 1)` return a one-row object still headed "3-fold
+# cross-validation".
 #
 # Only `dplyr_reconstruct()` is registered. dplyr's default `dplyr_row_slice()`
 # and `dplyr_col_modify()` both finish by calling it, and so does `bind_rows()`,
 # so one method covers the verbs; `[` is the one door that does not lead here on
 # its own, and is routed here explicitly below.
 #
-# What the rule cannot see (M49). `[` and `rbind()` take the object they act
+# What the rule cannot see. `[` and `rbind()` take the object they act
 # on as their own template, so a record column altered under the class --
 # `x$.inner_metrics[[1]] <- ...`, which tibble's `$<-` reattaches the class
 # after without consulting this rule (measured 2026-09-02) -- is compared
@@ -157,7 +158,7 @@ outer_scheme_label <- function(resamples) {
 # has_results_columns(), can_reconstruct_results() and fold_ids() all ask here,
 # so the class cannot hold two ideas of what a label column is.
 #
-# Until M38 this matched a name pattern, and every review round bought one more
+# A name pattern cannot do this job, since each pattern misses some
 # spelling. A bare `^id` prefix caught `ideal` and `id_extra`, names a caller
 # joins in to label folds with; anchoring it to `^id[0-9]*$` left `id2`, which
 # rsample gives a repeated design and a caller may add to a plain one. No
@@ -166,8 +167,8 @@ outer_scheme_label <- function(resamples) {
 # the answer is carried with the run's description.
 #
 # An object carrying no such record gets the empty answer, and the rule then
-# refuses rather than guessing: the conservative direction M36 review O6 already
-# chose for a label column it could not recognize.
+# refuses rather than guessing: the conservative direction chosen for a label
+# column it could not recognize.
 id_columns <- function(x) {
   nms <- attr(x, "id_columns")
   if (is.null(nms)) character(0) else nms
@@ -184,7 +185,7 @@ record_columns <- function(x) {
     ".selected",
     ".inner_metrics",
     ".notes",
-    # Present only on a run whose control asked for them (M68); a present
+    # Present only on a run whose control asked for them; a present
     # column is part of the record, an absent one is nothing to vouch for.
     ".predictions",
     ".extracts",
@@ -200,7 +201,7 @@ record_columns <- function(x) {
 # Counted over the record's names alone: the three doors that ask -- the
 # two template-taking reconstructions and `names<-` -- vouch for the record
 # by name, and a name two caller-added columns share is read by none of
-# them (an M56 review finding).
+# them.
 duplicated_record_names <- function(nms, record) {
   anyDuplicated(nms[nms %in% record]) > 0L
 }
@@ -214,7 +215,7 @@ duplicated_record_names <- function(nms, record) {
 # The record compared is the TEMPLATE's, and a column `data` carries beyond it
 # is simply not looked at. Comparing the two sets for equality instead would
 # read a caller-added column as a record that no longer matches, which is what
-# "columns may be added" forbids (M36 review F2).
+# "columns may be added" forbids.
 can_reconstruct_results <- function(data, template) {
   # The label columns come from the TEMPLATE's record, so what `data` is asked
   # for is what the run named -- `data` is a bare frame for half the verbs and
@@ -230,7 +231,7 @@ can_reconstruct_results <- function(data, template) {
   # A duplicated record name is a moved column by another route: `bind_cols(x,
   # tibble(splits = 1:3), .name_repair = "minimal")` keeps every record name
   # present, and `data[[nm]]` below reads whichever came first, so the record
-  # can be vouched for by name no longer (M56; the same rule `vec_restore()`
+  # can be vouched for by name no longer (the same rule `vec_restore()`
   # applies on its own door). Two columns outside the record sharing a name
   # touch nothing the record is read from, and are left alone.
   if (duplicated_record_names(names(data), cols)) {
@@ -242,7 +243,7 @@ can_reconstruct_results <- function(data, template) {
   # Without an id column there is no ordering to compare under: the
   # permutation is empty, every compared column comes out zero-length, and any
   # two objects are identical(). Refusing is the honest answer -- the record
-  # cannot be checked, so it cannot be vouched for (M36 review O5). A template
+  # cannot be checked, so it cannot be vouched for. A template
   # that records a label column it no longer carries is the same case.
   if (length(id_cols) == 0L || !all(id_cols %in% names(template))) {
     return(FALSE)
@@ -252,13 +253,13 @@ can_reconstruct_results <- function(data, template) {
   # `mutate(x, id = list(c(1, 2), 3, 4))` aborted with "unimplemented type
   # 'list' in 'orderVector1'" (measured 2026-08-31). A label column replaced by
   # something unorderable is a record that no longer matches, which the rule has
-  # an answer for -- it just has to reach it rather than die on the way (M38).
+  # an answer for -- it just has to reach it rather than die on the way.
   #
   # `is.atomic()` alone is not that test. A matrix is atomic, and `order()` takes
   # it column by column: a 3x2 matrix yields a length-6 permutation, which then
   # indexes the 3-row record columns out to six NA-padded values on both sides,
   # so the comparison below is identical() between two paddings and vouches for
-  # a record it never checked (measured 2026-08-31, M38 review O4). A column with
+  # a record it never checked (measured 2026-08-31). A column with
   # a `dim` is refused with the rest.
   orderable <- function(x) {
     all(vapply(
@@ -286,7 +287,7 @@ reconstruct_results <- function(data, template) {
   # Promoted before the class goes on, for the reason as_results_tbl() gives:
   # the class is documented as a tibble subclass, and dplyr hands this function
   # a bare data frame often enough that only the bare branch promoting would
-  # make it one for some verbs and not others (M36 review F1).
+  # make it one for some verbs and not others.
   out <- as_results_tbl(data)
   if (!inherits(out, "nested_results")) {
     class(out) <- c("nested_results", class(out))
@@ -306,9 +307,9 @@ stamp_results <- function(out, template) {
   attr(out, "inside") <- attr(template, "inside")
   attr(out, "outer_label") <- attr(template, "outer_label")
   # Which columns the design named its folds with travels the same way, and for
-  # the same reason: it describes the call, not the rows in hand (M38).
+  # the same reason: it describes the call, not the rows in hand.
   attr(out, "id_columns") <- attr(template, "id_columns")
-  # The fold weights describe the design the call ran on (M101), keyed by
+  # The fold weights describe the design the call ran on, keyed by
   # the label columns above, so a reordered object reads them as its own.
   attr(out, "resample_weights") <- attr(template, "resample_weights")
   # Read off the rows rather than copied from the template. Under the invariants
@@ -431,7 +432,7 @@ vec_restore.nested_results <- function(x, to, ...) {
   # before erroring on the missing columns (measured 2026-08-31). vctrs
   # documents that generic as experimental and keyword-internal, which is the
   # ground the RB04 review judged the exposure negligible on; no verb reaches
-  # it. Recorded in the milestone's review as R2.
+  # it.
   if (length(x) == 0L && nrow(x) == 0L && length(to) == 0L) {
     return(copy_results_attributes(as_results_tbl(x), to))
   }
@@ -444,8 +445,8 @@ vec_restore.nested_results <- function(x, to, ...) {
   # `splits` column arrives beside the record's: every required name is then
   # present, and `x$splits` answers with whichever came first, so a record
   # column can no longer be found by name. A duplicated record name is the
-  # same fault as a moved one and is shed the same way (an M37 review finding,
-  # closed in M56); a name duplicated outside the record is not.
+  # same fault as a moved one and is shed the same way; a name duplicated
+  # outside the record is not.
   attempted <- template_rows(to)
   required <- template_record(to)
   if (
@@ -896,7 +897,7 @@ pivot_metrics_wide <- function(long, call = rlang::caller_env()) {
 # instead. Both read the estimate off this one function, so they can never
 # disagree about it.
 summarize_folds <- function(per_fold) {
-  # Keyed on the evaluation time too when the rows carry one (M41 review R1):
+  # Keyed on the evaluation time too when the rows carry one:
   # a dynamic survival metric measured at several times is several estimates,
   # and an average across them would report a number no time was measured at,
   # with `n` counting fold x time. The time is rendered at full precision for
@@ -917,7 +918,7 @@ summarize_folds <- function(per_fold) {
   # reports no estimate while claiming every fold was in it. This is what
   # tune::estimate_tune_results() does, and GP1 says to match it.
   #
-  # On a weighted run (M101) the `.weight` column carries each fold's weight
+  # On a weighted run the `.weight` column carries each fold's weight
   # and the mean and standard error are tune 2.1.0's weighted ones
   # (`estimate_tune_results()`'s weighted branch, with `.weighted_sd()` and
   # `.effective_sample_size()`, read 2026-09-16): the weighted mean, and the
@@ -927,7 +928,7 @@ summarize_folds <- function(per_fold) {
   # and a failed fold makes tune ignore the weights with a warning (run
   # 2026-09-16, tune#1197), where this drops the fold and lets `cov.wt()`
   # renormalize the rest, so a missing fold does not blank a weighted run
-  # any more than an unweighted one (the M101 plan gate). Where the folds
+  # any more than an unweighted one. Where the folds
   # that scored carry zero weight between them (tune admits a zero weight,
   # and the dropped fold held all of it), there is no weighted evidence
   # and the row reads NA rather than aborting inside `cov.wt()`; `n` still
@@ -1068,12 +1069,12 @@ warn_partial_summary <- function(
 # One row per outer fold and metric. The per-fold tibbles come straight from
 # tune::last_fit(), so their columns are tune's, not ours -- including
 # `.eval_time`, which tune records exactly when the metric set holds a dynamic
-# or integrated survival metric and which is carried here on the same terms
-# (M41). A failed fold's tibble is empty and predates any evaluation time, so a
+# or integrated survival metric and which is carried here on the same terms.
+# A failed fold's tibble is empty and predates any evaluation time, so a
 # column some folds carry and others lack is read where it exists and filled
 # with NA over the (zero) rows of the tibbles that lack it. `frames` is one
 # metrics table per row of `x`; compute_metrics() passes the tables it scored
-# from the saved predictions (M92), so both readers build one shape.
+# from the saved predictions, so both readers build one shape.
 #
 # The rows are labelled by the design's own label columns, each its own
 # column, as tune labels its per-resample rows and as the stacking readers do
@@ -1114,7 +1115,7 @@ per_fold_metrics <- function(x, frames = x$.metrics) {
     cols$.eval_time <- column(".eval_time", NA_real_)
   }
   cols$.estimate <- column(".estimate", NA_real_)
-  # The fold's weight beside each of its rows on a weighted run (M101), the
+  # The fold's weight beside each of its rows on a weighted run, the
   # column summarize_folds() reads; an unweighted run's table is as it was.
   weights <- fold_weights(x)
   if (!is.null(weights)) {
@@ -1124,7 +1125,7 @@ per_fold_metrics <- function(x, frames = x$.metrics) {
 }
 
 # One per-fold list column stacked into a table, each fold's rows carrying
-# that fold's label columns first (M65, D-052). The labels are the record's
+# that fold's label columns first (D-052). The labels are the record's
 # (id_columns(), D-036), never a pasted `id`: a repeated design contributes
 # `id` and `id2` as two columns, the shape fold_ids() folds into one string
 # for a message. Stacked through vctrs over the union of the tables' columns,
@@ -1156,8 +1157,8 @@ stack_fold_column <- function(
     }
     # A stacked column named like a label column would be repaired to
     # `id...1`/`id...2` by the tibble constructor, the label lost under a
-    # message: refuse it, the rule agreement() applies to `n` and `prop`
-    # (M44 lesson). Reachable through a parameter given the id `id`.
+    # message: refuse it, the rule agreement() applies to `n` and `prop`.
+    # Reachable through a parameter given the id `id`.
     clash <- intersect(names(tbl), id_cols)
     if (length(clash) > 0L) {
       cli::cli_abort(
@@ -1187,8 +1188,7 @@ stack_fold_column <- function(
 # The outer fold labels. A repeated design carries id and id2; pasting them
 # keeps each row's label unique without assuming which columns are present.
 # Asking id_columns() -- the constructor's record -- rather than a name pattern
-# is what stops a column the caller added from being pasted in with them
-# (M36 T9, narrowed to the record in M38).
+# is what stops a column the caller added from being pasted in with them.
 #
 # A record that cannot label the rows -- empty, or naming any column the object
 # no longer carries -- falls back to row positions rather than guessing from
@@ -1220,8 +1220,8 @@ per_fold_label_columns <- function(x) {
   if (is.null(cols)) "id" else cols
 }
 
-# One string per row of `tbl` from its label columns `cols`, joined with ", "
-# (M122). A single column is returned as it is.
+# One string per row of `tbl` from its label columns `cols`, joined with
+# `", "`. A single column is returned as it is.
 paste_labels <- function(tbl, cols) {
   if (length(cols) == 1L) {
     return(tbl[[cols]])

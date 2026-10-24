@@ -14,7 +14,8 @@
 # Printing never raises and never warns. summary() and collect_metrics() warn on
 # a partial run, because asking what a design that only partly ran means
 # deserves an answer with a condition attached; printing is a description of an
-# object, and an object that describes a failed run is exactly what M03 built.
+# object, and an object that describes a failed run is exactly what recording
+# failed folds produces.
 
 #' Print a nested cross-validation result
 #'
@@ -181,7 +182,7 @@ print.summary.nested_results <- function(x, ...) {
 # The body of one summary's print: the design line, the failures, the
 # selections and the estimate, the last two under headings one level below
 # the heading the summary sits under -- h2 under the single summary's h1,
-# h3 under a workflow's h2 in a set's print (M72). The IP3 note is the
+# h3 under a workflow's h2 in a set's print. The IP3 note is the
 # caller's, printed once per print rather than once per summary.
 print_summary_sections <- function(s, level) {
   print_design(s)
@@ -259,13 +260,13 @@ new_summary_nested_results <- function(x) {
         stage = vapply(x$.notes[failed], fold_failure_stage, character(1))
       ),
       selection = summary_selection(selected),
-      # The rule the folds selected by, as the procedure record holds it
-      # (M98): a `selection_rule()`, or NULL on a record that applied none,
+      # The rule the folds selected by, as the procedure record holds it:
+      # a `selection_rule()`, or NULL on a record that applied none,
       # which `nested_fit_resamples()` writes. Carried as NULL rather than
       # dropped, in the habit the final fit's `estimate` set, so the name is
       # present whichever way the run went.
       select = attr(x, "procedure")$select,
-      # The name of the first metric, as the record holds it (M116), or NULL
+      # The name of the first metric, as the record holds it, or NULL
       # on a record that holds none.
       first_metric = attr(x, "procedure")$first_metric,
       grids = candidate_sets(x),
@@ -327,7 +328,7 @@ print_failures <- function(s) {
   }
   # The results object, not `x`: what is bound to `x` here is the summary
   # bundle, which has no `.notes`. The column lives on the object the caller
-  # summarized, and the sentence names it by the column alone (M43).
+  # summarized, and the sentence names it by the column alone.
   cli::cli_bullets(c(
     i = "See the {.code .notes} column of the results object for what went \\
          wrong."
@@ -335,9 +336,9 @@ print_failures <- function(s) {
   invisible(NULL)
 }
 
-# The stage is the first row of the fold's notes: M03 files its own note naming
-# the stage ahead of tune's notes about the cause. A fold recorded some other
-# way still prints, without inventing a stage it does not know.
+# The stage is the first row of the fold's notes: the outer loop files its own
+# note naming the stage ahead of tune's notes about the cause. A fold recorded
+# some other way still prints, without inventing a stage it does not know.
 fold_failure_stage <- function(notes) {
   if (is.null(notes) || nrow(notes) == 0L) {
     return("an unrecorded stage")
@@ -347,9 +348,9 @@ fold_failure_stage <- function(notes) {
 
 print_selection <- function(s, heading = cli::cli_h2) {
   heading("Selected parameters")
-  # The rule, where it is not the default (M98): the line's presence is the
+  # The rule, where it is not the default: the line's presence is the
   # signal, as with the failure count and the candidate-set line. Then the
-  # selecting metric, under every rule that selects on it (M116). Printed
+  # selecting metric, under every rule that selects on it. Printed
   # ahead of the early returns below, because the rule describes the
   # procedure the run asked for, not what completed (IP4): a run in which no
   # fold completed still selected by it, on the folds that failed later.
@@ -370,10 +371,10 @@ print_selection <- function(s, heading = cli::cli_h2) {
 }
 
 # The `Selected by:` line the results summary, the final fit's print and its
-# summary share (M98), rendered by the one helper the rule's own print uses,
+# summary share, rendered by the one helper the rule's own print uses,
 # so a reader meets the same words in every place. That line is silent on the
 # default rule and on a record that holds none. The `Selecting metric:` line
-# (M116) prints under every rule that selects on the first metric, the
+# prints under every rule that selects on the first metric, the
 # default included, so a reader can tell which metric in the set chose. It
 # comes after the `Selected by:` line when both print.
 print_selected_by <- function(select, first_metric = NULL) {
@@ -386,7 +387,7 @@ print_selected_by <- function(select, first_metric = NULL) {
   invisible(NULL)
 }
 
-# Whether the prints name the selecting metric (M116): under the three rules
+# Whether the prints name the selecting metric: under the three rules
 # tune's selectors take, which choose on the first metric, and never under
 # `"desirability"`, which chooses by its goals. A record built before the
 # entry was recorded holds no name, and nothing is printed for it.
@@ -397,13 +398,13 @@ names_selecting_metric <- function(select, first_metric) {
 }
 
 # The candidate set each completed fold searched, derived from its inner
-# table (M49): the distinct parameter rows of `.inner_metrics`, with tune's
+# table: the distinct parameter rows of `.inner_metrics`, with tune's
 # `.config` and `.iter` along, which `candidate_key()` then drops.
 candidate_sets <- function(x) {
   lapply(x$.inner_metrics[x$.completed], candidate_set)
 }
 
-# Whether the folds were even choosing from the same menu (M21).
+# Whether the folds were even choosing from the same menu.
 #
 # Printed by print() rather than behind summary() because it qualifies the rows
 # above it: a reader looking at a table of outer folds is entitled to know that
@@ -451,7 +452,7 @@ candidate_key <- function(g) {
   if (!is.data.frame(g)) {
     return(NULL)
   }
-  # `.iter` is bookkeeping too (M45): the iteration a candidate was proposed
+  # `.iter` is bookkeeping too: the iteration a candidate was proposed
   # in says when a fold reached it, not what it is, and two folds that scored
   # the same candidates in different iterations searched the same set.
   params <- sort(setdiff(names(g), c(".config", ".iter")))
@@ -465,10 +466,9 @@ candidate_key <- function(g) {
   #
   # The permutation comes from a rendered key rather than from `order()` over
   # the columns themselves. `order()` RAISES on a list column -- "unimplemented
-  # type 'list' in 'orderVector1'" -- and this method promises never to raise
-  # (M21 review F1; the earlier claim that it does not raise was measured
-  # against the derivation now in `candidate_set()`, which orders `.config`
-  # and never a parameter column, so it tested a different path).
+  # type 'list' in 'orderVector1'" -- and this method promises never to raise.
+  # `candidate_set()` orders `.config` and never a parameter column, so that
+  # it does not raise says nothing about this path.
   #
   # Rendering decides ROW ORDER ONLY. What is returned and compared is the
   # original values, so two candidates differing below print precision are
@@ -599,7 +599,7 @@ print_estimate <- function(s, heading = cli::cli_h2) {
     metric <- summarized$.metric[[i]]
     estimator <- summarized$.estimator[[i]]
     value <- format(summarized$mean[[i]], digits = 3)
-    # A metric measured at an evaluation time is one row per time (M41), and
+    # A metric measured at an evaluation time is one row per time, and
     # the line says which, as the condition the number was read under. A row
     # with no time -- a static metric, or a run that named none -- is unchanged.
     label <- "{metric} ({estimator})"

@@ -148,7 +148,7 @@ nested_resamples <- function(data, outside, inside, ...) {
       class = "nestedtune_bad_design"
     )
   }
-  # Every check below reads each split as the list rsample builds (M135).
+  # Every check below reads each split as the list rsample builds.
   check_column_class(
     outside,
     "splits",
@@ -206,10 +206,10 @@ nested_resamples <- function(data, outside, inside, ...) {
   # rebuild, is read by its split classes (D-097).
   check_outer_splits(outside, "outside", call = environment())
   # The outer half of the entry check's index rule, so the constructor does
-  # not build a design every driver refuses (M138, D-111; M141, D-114).
+  # not build a design every driver refuses (D-111, D-114).
   check_outer_indices(outside, "outside", call = environment())
   # A split rebuilt with make_splits() carries no class to read, so each
-  # split's rows are read next (M134, D-103).
+  # split's rows are read next (D-103).
   check_outer_overlap(outside, "outside", call = environment())
 
   inner_cl <- cl[["inside"]]
@@ -293,7 +293,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
       call = call
     )
   }
-  # The rule of check_inner_overlap(), for this one fold (M134, D-103). The
+  # The rule of check_inner_overlap(), for this one fold (D-103). The
   # inner splits index the analysis frame, so each index is read as the data
   # row the outer `in_id` puts there.
   shared <- inner_overlap_rows(inner_rset, outer_idx)
@@ -313,7 +313,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
       call = call
     )
   }
-  # The two id rules of check_inner_ids(), for this one fold (M133, D-102).
+  # The two id rules of check_inner_ids(), for this one fold (D-102).
   if (length(missing_id_rows(inner_rset)) > 0L) {
     cli::cli_abort(
       c(
@@ -346,7 +346,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
     )
   }
 
-  # The remap below reads each split as the list rsample builds (M135).
+  # The remap below reads each split as the list rsample builds.
   lines <- malformed_lines(
     inner_rset[["splits"]],
     "rsplit",
@@ -400,7 +400,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
 }
 
 # Re-point one outer fold's inner splits at that fold's analysis frame, so the
-# frame tune reads holds only the rows the fold may see (M54).
+# frame tune reads holds only the rows the fold may see.
 #
 # tune finalizes an unknown parameter range on `resamples$splits[[1]]$data`,
 # the whole frame the first inner split carries, molded through the workflow's

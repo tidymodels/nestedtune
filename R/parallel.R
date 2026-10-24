@@ -280,7 +280,7 @@ dispatch_folds <- function(
     # `pkgload::load_all()` this closure measures 202,363 B against 524 B from
     # an installed library, where srcrefs are absent; that was equally true of
     # `.f` before this, and stripping them needs `utils::removeSource()`, a
-    # dependency this milestone declined to add on its own authority.
+    # dependency the package does not take.
     worker <- fold_task
     environment(worker) <- globalenv()
     task <- function(

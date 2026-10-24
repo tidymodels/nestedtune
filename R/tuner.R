@@ -9,10 +9,10 @@
 # in place of the `grid` formal, and the worker assembles the call from it.
 # The description holds no function object, only the function's name: package
 # functions serialize by namespace name, so a mirai daemon resolves it inside
-# its own copy of tune, and a name costs nothing on the wire (M12/M23).
+# its own copy of tune, and a name costs nothing on the wire.
 #
 # The record a results object carries (`procedure`) is built from the same
-# description, which is what lets a later final fit re-run what ran (M46).
+# description, which is what lets a later final fit re-run what ran.
 
 tuner_grid <- function(grid) {
   new_tuner("tune_grid", list(grid = grid))
@@ -34,12 +34,12 @@ tuner_race <- function(fn, grid) {
 
 # finetune's simulated annealing takes the Bayesian tuner's two counts and no
 # acquisition function: `iter` perturbations from the best candidate so far,
-# after `initial` space-filling candidates are scored (M51).
+# after `initial` space-filling candidates are scored.
 tuner_anneal <- function(iter, initial) {
   new_tuner("tune_sim_anneal", list(iter = iter, initial = initial))
 }
 
-# tune's plain resampling fit (M70, D-057): no inner stage, no static
+# tune's plain resampling fit (D-057): no inner stage, no static
 # arguments. The fold skips the tuner call and the selection, and runs
 # `last_fit()` on the outer split alone; the description exists so the loop,
 # the record and the daemon pre-flight read one shape whichever path ran.
@@ -51,7 +51,7 @@ new_tuner <- function(tuner, args) {
   list(tuner = tuner, args = args)
 }
 
-# The tuner registry (M50): everything the package knows about a tuner that
+# The tuner registry: everything the package knows about a tuner that
 # is not the fold's own arguments, keyed by the tune or finetune function's
 # name -- the `tuner` field of a description and of a results object's
 # `procedure` record. Every site that used to switch on that name reads one
@@ -74,8 +74,8 @@ new_tuner <- function(tuner, args) {
 # (`procedure_counts()`). `selects` says the tuner picks a candidate from an
 # inner run, so its orchestrator takes a `select` rule, its record carries
 # one, and its final fit re-runs a search; the plain resampling fit is the
-# one tuner that does not (M70). `desirability` says the orchestrator applies
-# the desirability rule (M109, D-073): racing drops candidates before the end
+# one tuner that does not. `desirability` says the orchestrator applies
+# the desirability rule (D-073): racing drops candidates before the end
 # and annealing walks from one, so both refuse it. `label` is the search's
 # name in that print.
 tuner_registry <- list(
@@ -129,7 +129,7 @@ tuner_registry <- list(
     label = "win/loss racing"
   ),
   # `control_sim_anneal()` has no seed slot: the perturbations draw from the
-  # stream the fold's tuning seed set, so nothing is injected (M51).
+  # stream the fold's tuning seed set, so nothing is injected.
   tune_sim_anneal = list(
     package = "finetune",
     requires = "finetune",
@@ -141,7 +141,7 @@ tuner_registry <- list(
     desirability = FALSE,
     label = "simulated annealing"
   ),
-  # tune's plain resampling fit (M70): no inner run and nothing selected. Its
+  # tune's plain resampling fit: no inner run and nothing selected. Its
   # control is `control_resamples()`, whose class tune shares with
   # `control_grid()` (both `c("control_grid", "control_resamples")`, tune
   # 2.1.0, read 2026-09-06), so a `control_grid()` is accepted here as the
@@ -189,10 +189,10 @@ tuner_iterates <- function(tuner) {
     isTRUE(tuner_registry[[tuner]]$iterates)
 }
 
-# Whether the tuner selects a candidate from an inner run (M70). Total the
+# Whether the tuner selects a candidate from an inner run. Total the
 # other way round from `tuner_iterates()`: a tuner the registry does not
 # know, or no name at all, is read as one that selects, so a hand-built or
-# older record is still held to the selection rule M69 requires
+# older record is still held to the selection rule
 # (`check_results_record()`), and only the registry's own word waives it.
 tuner_selects <- function(tuner) {
   !(rlang::is_string(tuner) &&
@@ -200,7 +200,7 @@ tuner_selects <- function(tuner) {
     isFALSE(tuner_registry[[tuner]]$selects))
 }
 
-# Whether the orchestrator applies the desirability rule (M109).
+# Whether the orchestrator applies the desirability rule.
 tuner_takes_desirability <- function(tuner) {
   isTRUE(tuner_entry(tuner)$desirability)
 }
@@ -240,7 +240,7 @@ run_tuner <- function(
   # over the values themselves: a condition tune raises carries its call, and
   # a call holding the workflow inline holds the recipe's training data with
   # it -- 172,000 characters of deparsed call on a 400-row fixture against 173
-  # over symbols (measured 2026-09-01, M45 review). `object` stays positional
+  # over symbols (measured 2026-09-01). `object` stays positional
   # so the call reads as a by-hand one would.
   args <- c(
     list(
@@ -309,16 +309,16 @@ control_class <- function(tuner) {
 # flat named list, so a reader asks `attr(x, "procedure")$iter` rather than
 # walking a nested description, and so the record reads the same whichever
 # tuner ran. `control` is the effective control (D-042), so a later final fit
-# re-runs under exactly what ran, and `select` the selection rule (M69), so it
+# re-runs under exactly what ran, and `select` the selection rule, so it
 # selects by the rule the folds selected by. A tuner that selects nothing
-# (M70) records neither `select` nor `param_info`: no rule was applied and no
+# records neither `select` nor `param_info`: no rule was applied and no
 # parameter set was read, and a record naming them would claim otherwise
 # (IP4). `first_metric` is the name of the first metric in the set, as
-# tune resolves it for the workflow (M116): the metric that selects under
+# tune resolves it for the workflow: the metric that selects under
 # the three rules tune's selectors take, and the one the Bayesian, racing and
 # annealing searches steer on. A tuner that selects nothing records none.
 # `workflow` is the canonical identity of the workflow the run was
-# given (`workflow_identity()`, M83), recorded on every tuner's result so a
+# given (`workflow_identity()`), recorded on every tuner's result so a
 # later final fit can refuse a workflow other than that one; the workflow
 # object itself is not stored (R/workflow-identity.R says why).
 new_procedure <- function(
@@ -360,7 +360,7 @@ new_procedure <- function(
 # `control` and `select` are shared, so the final fit passes each once, as
 # its own argument, and never a second time inside the description; the
 # `workflow` identity is compared at entry and passed to no tuner, and
-# `first_metric` is resolved again by the final fit from its own run (M116).
+# `first_metric` is resolved again by the final fit from its own run.
 procedure_tuner <- function(procedure) {
   shared <- c(
     "tuner",

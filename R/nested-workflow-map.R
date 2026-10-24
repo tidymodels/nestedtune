@@ -1,4 +1,4 @@
-# The workflow-set orchestrator (M71, D-058): one call runs every workflow
+# The workflow-set orchestrator (D-058): one call runs every workflow
 # of a `workflow_set` through one nested design and hands back the results
 # side by side, one `nested_results` per workflow. Nothing statistical is
 # new here. Each workflow runs through the orchestrator it would have run
@@ -114,7 +114,7 @@ nested_workflow_map <- function(
         check_tuned_workflow(workflows[[i]], call = call)
       }
       # The metric set this workflow's run would get, resolved as the run
-      # resolves it (M116). A `metrics` that is not a metric set is left to
+      # resolves it. A `metrics` that is not a metric set is left to
       # the orchestrator's own check.
       metrics <- map_args(dots, object$option[[i]], routes[[i]], fn)$metrics
       if (is.null(metrics) || inherits(metrics, "metric_set")) {
@@ -168,7 +168,7 @@ nested_workflow_map <- function(
 # class is the contract (D-042), and `nested_fit_resamples()` refuses a
 # racing, Bayesian or annealing control by that class (measured 2026-09-06)
 # -- so a workflow routed elsewhere does not take it, and gets a control
-# from its `option` entry alone (M71 gate). `option` is a
+# from its `option` entry alone. `option` is a
 # `workflow_set_options` list; the entry checks have already held its names
 # to the route.
 map_args <- function(dots, option, route, fn) {
@@ -183,7 +183,7 @@ map_args <- function(dots, option, route, fn) {
   args[intersect(names(args), orchestrator_args(route))]
 }
 
-# The `verbose` log (M149), in workflowsets' `log_progress()` form: a line as
+# The `verbose` log, in workflowsets' `log_progress()` form: a line as
 # each workflow starts and one, with the time it took, as it finishes. A
 # workflow that errors gets no end line, because the error stops the map
 # and `for_workflow()` already names the workflow in it. The clock is read
@@ -213,15 +213,15 @@ map_log_text <- function(i, ids, route) {
     "tuning"
   }
   # Pasted, not interpolated, and handed to cli as a value, so a brace in
-  # an id is not read as cli markup (the M83 lesson).
+  # an id is not read as cli markup.
   paste0(i, " of ", length(ids), " ", event, ": ", ids[[i]])
 }
 
 # One orchestrator call, built as a call in an environment that binds the
-# workflow and every argument to a name (the M05 lesson: a value inlined
-# into a call is deparsed into every condition raised beneath it, and a
-# workflow or an rset deparses to thousands of lines). The environment's
-# parent is the namespace, where the orchestrator's name resolves.
+# workflow and every argument to a name. A value inlined into a call is
+# deparsed into every condition raised beneath it, and a workflow or an rset
+# deparses to thousands of lines. The environment's parent is the namespace,
+# where the orchestrator's name resolves.
 run_orchestrator <- function(fn, workflow, args) {
   env <- rlang::new_environment(
     c(list(.workflow = workflow), args),
@@ -233,7 +233,7 @@ run_orchestrator <- function(fn, workflow, args) {
   eval(expr, env)
 }
 
-# Conditions raised for one workflow, re-signalled naming it (M71 gate): the
+# Conditions raised for one workflow, re-signalled naming it: the
 # failed-fold warning an orchestrator raises, the partial-run warning a
 # reader raises, and any error either raises keep their class and their
 # text, gain the workflow's id at the front, and name the caller as their
@@ -257,12 +257,12 @@ for_workflow <- function(id, call, expr) {
 }
 
 # The re-signal itself, shared with the set's readers (R/nested-results-set.R).
-# The original condition object travels whole (M73): its class vector, its
+# The original condition object travels whole: its class vector, its
 # `parent` and the cause chain that prints under it, its bullets, its
 # format flag and every data field a handler reads, with the workflow's id
 # written in front of the first line of its header and the caller's call
 # in place of the element's. A rebuilt condition -- `rlang::abort()` on the
-# formatted text, what M71 did -- kept the class and the text and lost the
+# formatted text -- keeps the class and the text and loses the
 # rest. `cnd_signal()` raises the object as it is: a warning is raised with
 # `warning()`, an error through rlang's own signaller, which adds a trace
 # to one that has none.

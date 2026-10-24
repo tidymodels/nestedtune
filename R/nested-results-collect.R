@@ -1,5 +1,5 @@
 # The readers that stack a per-fold list column with the fold labels beside
-# it (M65, D-052). Each is one call in place of an apply loop that hardcodes
+# it (D-052). Each is one call in place of an apply loop that hardcodes
 # `id`, which is wrong on a repeated design: the labels come from the object's
 # record (D-036), through stack_fold_column() in R/nested-results.R.
 #
@@ -118,7 +118,7 @@ collect_inner_metrics.nested_results <- function(
     completed_only = TRUE,
     call = rlang::current_env()
   )
-  # The wide shape is collect_metrics()'s (M149): the inner table holds
+  # The wide shape is collect_metrics()'s: the inner table holds
   # tune's summarized columns, so the pivot keeps the fold labels, the
   # parameters, `.config` and any `.iter` or `.eval_time` as keys, which on
   # one fold's rows is the key set tune's own pivot uses (GP1).
@@ -155,7 +155,7 @@ abort_no_collect_method <- function(fn, x, call = rlang::caller_env()) {
   )
 }
 
-# The two readers over what the outer fit kept (M68). Both are methods on
+# The two readers over what the outer fit kept. Both are methods on
 # tune's generics, re-exported beside collect_notes(): the names exist and
 # their shapes are the shapes wanted. A run that did not ask for a column is
 # refused by name, so a caller learns which control slot to set rather than
@@ -292,7 +292,7 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
   out
 }
 
-# One averaged prediction per data row (M124). The average spans every
+# One averaged prediction per data row. The average spans every
 # completed fold that held the row out, whatever candidate each fold
 # selected, so the fold labels and `.config` are dropped: neither names
 # anything a row's average shares. The rule for each column is read from
@@ -301,11 +301,11 @@ collect_predictions.nested_results <- function(x, ..., summarize = FALSE) {
 # records none. The rules are tune 2.1.0's (`prob_summarize()`,
 # `class_summarize()`, `numeric_summarize()` and `surv_summarize()`, read
 # 2026-09-28), written here rather than called, because tune's internals
-# carry no stability promise (M28). Ties go to the first level in factor
+# carry no stability promise. Ties go to the first level in factor
 # order. One departure: a row whose averaged probabilities are missing gets
 # a missing class, where `prob_summarize()` gives it the first level.
 # `verb` and `call` name the reader in the refusal of a table the rules
-# would misread (M126), `check_average_columns()`.
+# would misread, `check_average_columns()`.
 average_fold_predictions <- function(
   preds,
   drop,
@@ -368,7 +368,7 @@ average_fold_predictions <- function(
 
 # Grouped statistics over `v`, one per group `1:n` of the integer `group`.
 # They are written with grouped sums and one sort rather than a call per
-# group (M126: the benchmark's 100,002-row probability table took 0.8 s
+# group (the benchmark's 100,002-row probability table took 0.8 s
 # that way, `benchmarks/averaging-speed.R`).
 # The mean ignores missing values, and a group with none left, or with no
 # rows, gives `NaN`, as `mean(na.rm = TRUE)` does. Like `mean()`, it adds a
@@ -429,7 +429,7 @@ factor_outcomes <- function(preds) {
   Filter(function(nm) is.factor(preds[[nm]]), others)
 }
 
-# Three shapes the averaging rules would misread (M126). With two factor
+# Three shapes the averaging rules would misread. With two factor
 # outcomes, which one names the probability columns is unknown. A saved
 # class beside no factor outcome leaves the probability columns unnamed, so
 # they would be averaged without renormalizing and the class voted. A
@@ -483,15 +483,14 @@ has_eval_time <- function(entries) {
   )
 }
 
-# Quantile predictions are not averaged (M124). tune 2.1.0 refuses a
+# Quantile predictions are not averaged. tune 2.1.0 refuses a
 # quantile metric set passed to `fit_resamples()`, but it runs a quantile
 # model on its default metric and averages those predictions with
 # `quantile_summarize()`. That rule is not ported, because checking a port
 # against it needs a quantile engine in Suggests. Read per fold before
 # stacking, so the refusal is this one and not whatever binding a quantile
 # column with the other folds raises. `augment()` averages on a design that
-# holds a row out more than once, and refuses under the same class there
-# (M125).
+# holds a row out more than once, and refuses under the same class there.
 check_no_quantile <- function(x, verb, call = rlang::caller_env()) {
   verb <- rlang::arg_match(verb, c("collect_predictions", "augment"))
   has <- vapply(
@@ -552,7 +551,7 @@ class_by_vote <- function(v, group, n = max(as.integer(group))) {
 # The censored `.pred` list column: per row and `.eval_time`, the mean of
 # every other column with missing values ignored, in the order the times
 # first appear. A NULL entry is left out, and a row whose every entry is
-# NULL holds NULL (M126), the value `augment()` gives a list column's row
+# NULL holds NULL, the value `augment()` gives a list column's row
 # that no completed fold held out. `group` numbers the rows `1:n`.
 average_survival <- function(v, group, n) {
   sizes <- vctrs::list_sizes(v)
@@ -606,7 +605,7 @@ collect_extracts.nested_results <- function(x, ...) {
   )
 }
 
-# Scoring the saved predictions again (M92). A method on tune's generic, for
+# Scoring the saved predictions again. A method on tune's generic, for
 # the reason collect_predictions() is one. Each completed row of `x` is scored
 # on its own, so a repeated design's folds stay apart: tune's own method
 # groups the stacked predictions by `id` alone, which on a repeated design is
@@ -616,7 +615,7 @@ collect_extracts.nested_results <- function(x, ...) {
 # shape, fold labels or the handling of an NA fold. The metric set is called
 # as tune calls it inside `last_fit()` (`tune:::.estimate_metrics()` and its
 # `estimate_*()` helpers, tune 2.1.0, read 2026-09-13), not through those
-# internals, which carry no stability promise (M28).
+# internals, which carry no stability promise.
 
 #' Score the saved predictions of a nested run with a metric set
 #'
@@ -682,7 +681,7 @@ compute_metrics.nested_results <- function(
   call <- rlang::current_env()
   check_score_metrics(metrics, call = call)
   if (is.null(event_level)) {
-    # A run built before the procedure was recorded (M46) takes tune's default.
+    # A run built before the procedure was recorded takes tune's default.
     event_level <- attr(x, "procedure")$event_level
     if (is.null(event_level)) event_level <- "first"
   }
@@ -872,9 +871,9 @@ score_fold <- function(preds, metrics, classes, event_level) {
   )
 }
 
-# The saved predictions joined onto the data rows (M92). On a design that
+# The saved predictions joined onto the data rows. On a design that
 # holds some row out more than once, every row joins its entry in
-# `collect_predictions(summarize = TRUE)`'s average (M125), the rows held out
+# `collect_predictions(summarize = TRUE)`'s average, the rows held out
 # once included, so one design never mixes averaged and saved values. A
 # design that holds each row out once joins the saved predictions as they
 # are. The hold-out counts are read from the splits of every fold, the
@@ -944,7 +943,7 @@ augment.nested_results <- function(x, ...) {
   repeated <- check_held_out(x, nrow(data), call = call)
   check_predictions_rows(x, verb = "augment", call = call)
   # The collision is read off the saved tables' names, before any refusal
-  # the average raises (M126): averaging keeps every `.pred` column's name.
+  # the average raises: averaging keeps every `.pred` column's name.
   pred_cols <- unique(unlist(lapply(
     x$.predictions[x$.completed],
     function(p) grep("^\\.pred", names(p), value = TRUE)
@@ -998,11 +997,10 @@ augment.nested_results <- function(x, ...) {
 }
 
 # Each data row's count of outer assessment sets holding it, over every fold.
-# A row no set holds is refused, naming the first five such rows (M108,
-# M125). The message names no design type: a Monte Carlo, rolling-origin or
-# overlapping sliding-window design can each leave rows out (M111). Returns
-# whether some row is held out more than once, which is when `augment()`
-# averages.
+# A row no set holds is refused, naming the first five such rows. The message
+# names no design type: a Monte Carlo, rolling-origin or overlapping
+# sliding-window design can each leave rows out. Returns whether some row is
+# held out more than once, which is when `augment()` averages.
 check_held_out <- function(x, n, call = rlang::caller_env()) {
   held <- unlist(lapply(x$splits, rsample::complement), use.names = FALSE)
   counts <- tabulate(held, nbins = n)
@@ -1031,18 +1029,18 @@ check_held_out <- function(x, n, call = rlang::caller_env()) {
   )
 }
 
-# Each completed fold's saved `.row` against the rows its split held out
-# (M93). `augment()` joins by `.row`, so a held-out row with no entry would
-# be left missing without a word, and a repeated one would overwrite another.
+# Each completed fold's saved `.row` against the rows its split held out.
+# `augment()` joins by `.row`, so a held-out row with no entry would be left
+# missing without a word, and a repeated one would overwrite another.
 # `compute_metrics()` scores the rows as they are, so a repeated row would
 # count twice and a foreign one would be scored against a row the fold
-# analysed (M100). `collect_predictions(summarize = TRUE)` averages by
-# `.row`, so a repeated row would weigh twice in its average (M126); the
-# per-fold table is not checked, as it only shows what was saved. tune 2.1.0
-# has no path to any of these short of an edit to the object, so any
-# mismatch refuses, under the class of the reader that found it:
-# `nestedtune_<verb>_predictions`. The values are compared as whole numbers:
-# a double `.row` holding the same values is accepted.
+# analysed. `collect_predictions(summarize = TRUE)` averages by `.row`, so a
+# repeated row would weigh twice in its average; the per-fold table is not
+# checked, as it only shows what was saved. tune 2.1.0 has no path to any of
+# these short of an edit to the object, so any mismatch refuses, under the
+# class of the reader that found it: `nestedtune_<verb>_predictions`. The
+# values are compared as whole numbers: a double `.row` holding the same
+# values is accepted.
 check_predictions_rows <- function(x, verb, call = rlang::caller_env()) {
   verb <- rlang::arg_match(
     verb,
@@ -1102,9 +1100,9 @@ predictions_match_rows <- function(preds, split) {
 # column's consistency across verbs and not for where it came from. The
 # object's names say whether the column is still there. Either failing
 # refuses, the first naming the control slot and the control function the
-# recorded procedure says the run took. A results object carries no `procedure` only
-# if it was built before M46, and then the column's presence is all there is
-# to read and the slot alone is named.
+# recorded procedure says the run took. A results object carries no
+# `procedure` only if it was built before the procedure was recorded, and then
+# the column's presence is all there is to read and the slot alone is named.
 check_column_saved <- function(x, column, call = rlang::caller_env()) {
   control <- attr(x, "procedure")$control
   present <- column %in% names(x)

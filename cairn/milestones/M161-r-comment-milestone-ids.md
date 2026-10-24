@@ -38,7 +38,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 ## Tasks
 
 - [x] T1: Rewrite the comments of `R/checks.R` and `R/parallel.R`. Drop each id with the labels that point into its milestone, keep decision ids, and reword a comment that only makes sense with the id. Where an id was the only pointer to a reason the code still needs, state the reason in the comment.
-- [ ] T2: Rewrite the other 23 files under the T1 spec, through Haiku subagents for file groups if the count warrants it; read each diff before it lands.
+- [x] T2: Rewrite the other 23 files under the T1 spec, through Haiku subagents for file groups if the count warrants it; read each diff before it lands.
 - [ ] T3: Run the AC1 sweep (show it reads 25 files and finds 299 ids at the branch point), the AC2 comparison, the AC3 search over `git diff -U0`, the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the results.
 
 ## Work log
@@ -54,6 +54,9 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - 2026-10-24: branch m161-r-comment-milestone-ids cut from 84eb2a20 (pushed default branch, M160 merged). The AC1 sweep there reads 25 files and 299 ids, all in COMMENT tokens; by token count `R/checks.R` holds 71 and `R/parallel.R` 42 (the plan's 67 and 41 were `grep -c` line counts).
 - 2026-10-24: implementation choice: a milestone-local decision label (`M10-D1`, `M07-D6`) and a "since M58" or "before M24" phrase are reworded to the fact they stood for; "M03 records fold failures" becomes "the outer loop records"; the "(probed at M133)" figure keeps a date (2026-09-30, M133's PR date) under the derived-figures rule; the "M05/M45 lesson" becomes its reason, that a frame in a message is deparsed whole.
 - 2026-10-24: T1 done: `R/checks.R` and `R/parallel.R` hold no milestone ids; 186 ids remain in the other 23 files. AC2's comparison finds no code change in any of the 25 files; `air format --check .` clean. Tests and check run once at T3, since AC2 shows the package code unchanged.
+- 2026-10-24: delegation: three Haiku subagents rewrote the other 23 files in groups of 2, 3 and 12 files (55, 55 and 76 ids) under the T1 spec. I read all three diffs and fixed 12 sites: a sentence left with no period, two joined lines over 80 characters, a present-tense claim that the final fit's run is "reachable only as an undocumented list slot" (false since D-023), "Tune" capitalized, an event-level reword checked against the `control_last_fit(event_level = )` call, and six rewordings that still read as history.
+- 2026-10-24: implementation choice: review-report pointers (`RR02 Q7`, `RR03 Q5`, `RB04`) stay, for the reason decision ids stay: they name live records in `cairn/reviews/archive/`. The two comments that held the word "milestone" with no id (`R/nested-results.R`, `R/parallel.R`) are reworded under the Scope's "this milestone declined" clause.
+- 2026-10-24: T2 done: the AC1 sweep finds 0 ids in 25 files; AC2 finds no code change; no added comment line holds an AC3 pattern or runs over 80 characters; `air format --check .` clean.
 
 ## Decisions
 

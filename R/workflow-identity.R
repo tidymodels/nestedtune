@@ -1,6 +1,6 @@
 # The canonical identity of a workflow: what a results object records about
 # the workflow it ran under, and what `nested_final_fit()` compares the
-# workflow it is handed against (M83).
+# workflow it is handed against.
 #
 # The workflow object itself is not stored. Two workflows built from the same
 # code are not `identical()`: a recipe step draws its `id` from the stream,
@@ -17,7 +17,7 @@
 # exception (see `preprocessor_identity()` below): recipes evaluates them
 # when the step is added, so they are recorded by value.
 #
-# Two parts are present only when the workflow carries them (M103): the
+# Two parts are present only when the workflow carries them: the
 # case-weights column `workflows::add_case_weights()` files under `pre`, and
 # the tailor `workflows::add_tailor()` files under `post`. Absent, they are
 # left out rather than recorded as NULL, so a workflow with neither has the
