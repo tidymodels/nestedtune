@@ -1,6 +1,16 @@
-# Hygiene checks on the test suite's own source.
+# Hygiene checks on the test suite's own source and helpers.
 #
-# One rule, and it exists because breaking it costs twenty minutes of silence
+# The file checks four things:
+#   * Every wait on a mirai result goes through `collect_bounded()`.
+#   * Every wait-shaped call in the daemon files has a row in the time-budget
+#     ledger (helper-time-budget.R), no row is left for a call that is gone,
+#     and a row copied from an explicit bound still matches that bound.
+#   * The declared worst cases of test-parallel-classify.R and
+#     test-parallel-metrics.R stay under their ceilings.
+#   * `daemon_state_snapshot()` names each daemon's record by the pid that
+#     record holds, which is what `shared_daemons()` compares.
+#
+# The first rule exists because breaking it costs twenty minutes of silence
 # rather than a red test: every wait on a mirai result in this suite goes
 # through `collect_bounded()` (helper-parallel.R), which polls to a deadline and
 # then reads `$data`. Everything else mirai offers for getting a value out
