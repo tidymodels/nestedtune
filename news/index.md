@@ -2,6 +2,44 @@
 
 ## nestedtune 0.0.0.9000
 
+- 26 errors that had no nestedtune class now have one, so you can catch
+  them by class instead of by message. The messages are unchanged. Seven
+  classes are new:
+
+  - `nestedtune_bad_workflow`: `object` is not a workflow, is already
+    fitted, or has no model or no preprocessor.
+  - `nestedtune_bad_grid`: `grid` has no rows, is neither a data frame
+    nor a positive whole number, or does not match the tuned parameters.
+    When the workflow tunes other parameters than the recorded grid
+    holds,
+    [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+    uses it too.
+  - `nestedtune_bad_data`: `data` in
+    [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+    is not a data frame.
+  - `nestedtune_bad_param_info`, `nestedtune_bad_eval_time` and
+    `nestedtune_bad_event_level`: a tuning function refuses the value of
+    that argument.
+    [`nested_fit_resamples()`](https://nestedtune.tidymodels.org/reference/nested_fit_resamples.md)
+    also uses the last two, and
+    [`compute_metrics()`](https://tune.tidymodels.org/reference/compute_metrics.html)
+    also uses `nestedtune_bad_event_level`.
+    [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+    still refuses an `eval_time` with `nestedtune_bad_plot_filter`.
+  - `nestedtune_unknown_tuner`: an internal error for a tuner name that
+    nestedtune does not know.
+
+  Three classes cover more errors. `nestedtune_bad_design` now also
+  covers the
+  [`nested_resamples()`](https://nestedtune.tidymodels.org/reference/nested_resamples.md)
+  errors for `outside` and `inside`. It also covers the
+  [`nested_final_fit()`](https://nestedtune.tidymodels.org/reference/nested_final_fit.md)
+  errors for an inner specification that fails to run again or does not
+  give an rset. `nestedtune_bad_type` covers a `type` that
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  refuses. `nestedtune_bad_metrics` covers a `metrics` that is not a
+  metric set or `NULL`.
+
 - Three arguments from tidymodels are new.
   [`nested_workflow_map()`](https://nestedtune.tidymodels.org/reference/nested_workflow_map.md)
   takes `verbose`, which writes a message as each workflow starts and
