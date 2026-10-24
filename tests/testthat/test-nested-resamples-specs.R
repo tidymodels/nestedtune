@@ -92,7 +92,8 @@ test_that("`data` must be a data frame", {
       outside = rsample::vfold_cv(v = 2),
       inside = rsample::vfold_cv(v = 2)
     ),
-    "must be a data frame"
+    class = "nestedtune_bad_data",
+    regexp = "must be a data frame"
   )
 })
 
@@ -106,7 +107,8 @@ test_that("`outside` must be a spec or an rset", {
       outside = not_an_rset,
       inside = rsample::vfold_cv(v = 2)
     ),
-    "must be a resampling specification or an"
+    class = "nestedtune_bad_design",
+    regexp = "must be a resampling specification or an"
   )
 })
 
@@ -139,7 +141,8 @@ test_that("`inside` must be an expression, not an existing object", {
 
   expect_error(
     nested_resamples(d, outside = rsample::vfold_cv(v = 2), inside = built),
-    "must be an expression"
+    class = "nestedtune_bad_design",
+    regexp = "must be an expression"
   )
 })
 
@@ -154,7 +157,8 @@ test_that("an `inside` spec that does not produce an rset is refused", {
 
   expect_error(
     nested_resamples(d, outside = rsample::vfold_cv(v = 2), inside = list()),
-    "did not produce an"
+    class = "nestedtune_bad_design",
+    regexp = "`inside` did not produce an"
   )
 })
 
@@ -235,6 +239,18 @@ test_that("a failing spec reports a message that does not carry the data", {
     expect_identical(small_msg, msg(large, which))
     expect_lt(nchar(small_msg), 500L)
   }
+})
+
+test_that("a spec that fails to evaluate is refused as a bad design", {
+  expect_error(
+    nested_resamples(
+      make_test_data(),
+      outside = nrow(),
+      inside = rsample::vfold_cv(v = 2)
+    ),
+    class = "nestedtune_bad_design",
+    regexp = "`outside` could not be evaluated"
+  )
 })
 
 test_that("a zero-row data frame is refused by the underlying spec", {

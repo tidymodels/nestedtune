@@ -68,15 +68,17 @@ test_that("the shared entry checks fire, in the shared shapes", {
   expect_error(
     nested_fit_resamples(wf, folds, metrics = "rmse"),
     "metric_set",
-    class = "rlang_error"
+    class = "nestedtune_bad_metrics"
   )
   expect_error(
     nested_fit_resamples(wf, folds, event_level = "third"),
-    "must be \"first\" or \"second\""
+    "must be \"first\" or \"second\"",
+    class = "nestedtune_bad_event_level"
   )
   expect_error(
     nested_fit_resamples(wf, folds, eval_time = c(1, -1)),
-    "Element 2"
+    "Element 2",
+    class = "nestedtune_bad_eval_time"
   )
 
   # The dots: `control` and nothing else, of the tuner's class, and

@@ -13,7 +13,8 @@ test_that("a prebuilt `outside` rset built on other data is refused", {
   # set into inner analysis sets -- 22 of them, where rsample leaks none.
   expect_error(
     nested_resamples(d2, outside = outer, inside = rsample::vfold_cv(v = 2)),
-    "was built on different data"
+    class = "nestedtune_bad_design",
+    regexp = "was built on different data"
   )
 
   # A row-count mismatch is refused at construction. Left unchecked, it fails

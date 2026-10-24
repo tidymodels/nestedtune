@@ -229,7 +229,7 @@ test_that("an object that is neither a workflow nor a model specification is ref
   for (fn in ORCHESTRATORS) {
     f <- function(...) call_by_name(fn, ...)
     cnd <- rlang::catch_cnd(f(data.frame(x = 1), 1))
-    expect_s3_class(cnd, "rlang_error")
+    expect_s3_class(cnd, "nestedtune_bad_workflow")
     expect_match(
       conditionMessage(cnd),
       "must be a <workflow> or a parsnip model specification"
@@ -240,7 +240,7 @@ test_that("an object that is neither a workflow nor a model specification is ref
 
 test_that("nested_final_fit() given a bare model specification names workflows::workflow()", {
   cnd <- rlang::catch_cnd(nested_final_fit(bare_spec(), 1))
-  expect_s3_class(cnd, "rlang_error")
+  expect_s3_class(cnd, "nestedtune_bad_workflow")
   expect_match(conditionMessage(cnd), "must be a <workflow>")
   expect_match(
     conditionMessage(cnd),

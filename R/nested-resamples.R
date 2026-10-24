@@ -130,7 +130,8 @@ nested_resamples <- function(data, outside, inside, ...) {
 
   if (!is.data.frame(data)) {
     cli::cli_abort(
-      "{.arg data} must be a data frame, not {.obj_type_friendly {data}}."
+      "{.arg data} must be a data frame, not {.obj_type_friendly {data}}.",
+      class = "nestedtune_bad_data"
     )
   }
 
@@ -139,10 +140,13 @@ nested_resamples <- function(data, outside, inside, ...) {
     outside <- eval_spec(outer_cl, data, env, "outside", call = environment())
   }
   if (!inherits(outside, "rset")) {
-    cli::cli_abort(c(
-      "{.arg outside} must be a resampling specification or an {.cls rset}.",
-      x = "Got {.obj_type_friendly {outside}}."
-    ))
+    cli::cli_abort(
+      c(
+        "{.arg outside} must be a resampling specification or an {.cls rset}.",
+        x = "Got {.obj_type_friendly {outside}}."
+      ),
+      class = "nestedtune_bad_design"
+    )
   }
   # Every check below reads each split as the list rsample builds (M135).
   check_column_class(
@@ -161,15 +165,18 @@ nested_resamples <- function(data, outside, inside, ...) {
   # reveal. rsample sidesteps this by ignoring `data` entirely for an rset;
   # refusing says so instead of quietly picking one.
   if (!identical(split_data(outside), data)) {
-    cli::cli_abort(c(
-      "{.arg outside} was built on different data than {.arg data}.",
-      x = "Its row indices refer to that other data frame, so composing them \\
+    cli::cli_abort(
+      c(
+        "{.arg outside} was built on different data than {.arg data}.",
+        x = "Its row indices refer to that other data frame, so composing them \\
            with {.arg data} would draw inner splits from rows the outer fold \\
            holds out.",
-      i = "Pass the same data frame {.arg outside} was built from, or give \\
+        i = "Pass the same data frame {.arg outside} was built from, or give \\
            {.arg outside} as an unevaluated call such as \\
            {.code vfold_cv(v = 5)}."
-    ))
+      ),
+      class = "nestedtune_bad_design"
+    )
   }
   if (inherits(outside, "bootstraps")) {
     cli::cli_abort(
@@ -207,12 +214,15 @@ nested_resamples <- function(data, outside, inside, ...) {
 
   inner_cl <- cl[["inside"]]
   if (!rlang::is_call(inner_cl)) {
-    cli::cli_abort(c(
-      "{.arg inside} must be an expression such as {.code vfold_cv(v = 5)}, \\
+    cli::cli_abort(
+      c(
+        "{.arg inside} must be an expression such as {.code vfold_cv(v = 5)}, \\
        not an existing object.",
-      i = "It is evaluated once per outer fold, so it cannot be evaluated \\
+        i = "It is evaluated once per outer fold, so it cannot be evaluated \\
            ahead of time."
-    ))
+      ),
+      class = "nestedtune_bad_design"
+    )
   }
 
   # By position rather than by Map(), which would evaluate the `inside` call
@@ -261,6 +271,7 @@ inner_resamples_from_split <- function(split, fold, cl, env, data, call) {
         i = "It is evaluated once per outer fold, so it must return an \\
              {.cls rset} for every one of them."
       ),
+      class = "nestedtune_bad_design",
       call = call
     )
   }
@@ -601,6 +612,7 @@ eval_spec <- function(cl, data, env, arg, call) {
         x = "Tried to run {.code {paste(deparse(cl), collapse = ' ')}}."
       ),
       parent = out,
+      class = "nestedtune_bad_design",
       call = call
     )
   }

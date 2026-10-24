@@ -167,6 +167,7 @@ tuner_entry <- function(tuner) {
   if (is.null(entry)) {
     cli::cli_abort(
       "Unknown tuner {.val {tuner}}.",
+      class = "nestedtune_unknown_tuner",
       .internal = TRUE
     )
   }
