@@ -2,8 +2,8 @@
 #
 # Every orchestrator stores the record of what ran as the `procedure`
 # attribute of its `nested_results`, and `nested_final_fit()` carries the
-# record it re-ran as a list slot. Before this generic, the help pages and the
-# tuners vignette told the reader to reach both by hand. A generic on the shape
+# record it re-ran as a list slot. Without a generic, a reader reaches both
+# by hand. A generic on the shape
 # D-023 fixed for the `extract_` family gives the record one name on both
 # objects; a `procedure()` function would collide with the variable the tuners
 # vignette binds and leave the `extract_` idiom.

@@ -467,8 +467,8 @@ candidate_key <- function(g) {
   # The permutation comes from a rendered key rather than from `order()` over
   # the columns themselves. `order()` RAISES on a list column -- "unimplemented
   # type 'list' in 'orderVector1'" -- and this method promises never to raise.
-  # `candidate_set()` orders `.config` and never a parameter column, so that
-  # it does not raise says nothing about this path.
+  # `candidate_set()` orders `.config` and never a parameter column, so its
+  # not raising says nothing about this path.
   #
   # Rendering decides ROW ORDER ONLY. What is returned and compared is the
   # original values, so two candidates differing below print precision are

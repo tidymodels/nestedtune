@@ -681,7 +681,8 @@ compute_metrics.nested_results <- function(
   call <- rlang::current_env()
   check_score_metrics(metrics, call = call)
   if (is.null(event_level)) {
-    # A run built before the procedure was recorded takes tune's default.
+    # A run built before the package recorded the event level takes tune's
+    # default.
     event_level <- attr(x, "procedure")$event_level
     if (is.null(event_level)) event_level <- "first"
   }
@@ -1101,7 +1102,7 @@ predictions_match_rows <- function(preds, split) {
 # object's names say whether the column is still there. Either failing
 # refuses, the first naming the control slot and the control function the
 # recorded procedure says the run took. A results object carries no
-# `procedure` only if it was built before the procedure was recorded, and then
+# `procedure` only if it was built before the package recorded one, and then
 # the column's presence is all there is to read and the slot alone is named.
 check_column_saved <- function(x, column, call = rlang::caller_env()) {
   control <- attr(x, "procedure")$control

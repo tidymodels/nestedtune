@@ -81,8 +81,8 @@ agreement.nested_results <- function(x, ...) {
   # One row per completed fold, in fold order, over the union of the parameters
   # any fold chose. A fold with no value for a parameter holds NA there, so it
   # still counts as a fold and its combination stays distinct from the folds
-  # that chose a value. Stacked through vctrs rather than `$` on the column.
-  # The selections are tune's tibbles, and a fold's missing column is
+  # that chose a value. Stacked through vctrs rather than `$` on the column:
+  # the selections are tune's tibbles, and a fold's missing column is
   # filled by the common type, never by whichever fold happened to come first.
   rows <- lapply(selected, function(s) {
     cols <- lapply(params, function(p) if (p %in% names(s)) s[[p]] else NA)

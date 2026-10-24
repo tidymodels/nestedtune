@@ -158,17 +158,18 @@ outer_scheme_label <- function(resamples) {
 # has_results_columns(), can_reconstruct_results() and fold_ids() all ask here,
 # so the class cannot hold two ideas of what a label column is.
 #
-# A name pattern cannot do this job, since each pattern misses some
-# spelling. A bare `^id` prefix caught `ideal` and `id_extra`, names a caller
-# joins in to label folds with; anchoring it to `^id[0-9]*$` left `id2`, which
-# rsample gives a repeated design and a caller may add to a plain one. No
+# A name pattern cannot do this job, since each pattern catches a name it
+# should not. A bare `^id` prefix catches `ideal` and `id_extra`, names a
+# caller joins in to label folds with; anchoring it to `^id[0-9]*$` leaves
+# `id2`, which rsample gives a repeated design and a caller may add to a plain
+# one. No
 # pattern separates those two, because they are spelled identically and only the
 # design knows which it is -- so the design is asked once, at construction, and
 # the answer is carried with the run's description.
 #
 # An object carrying no such record gets the empty answer, and the rule then
-# refuses rather than guessing: the conservative direction chosen for a label
-# column it could not recognize.
+# refuses rather than guessing, the conservative direction the rule takes for
+# a label column it cannot recognize.
 id_columns <- function(x) {
   nms <- attr(x, "id_columns")
   if (is.null(nms)) character(0) else nms

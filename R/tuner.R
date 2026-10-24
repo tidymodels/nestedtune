@@ -54,7 +54,7 @@ new_tuner <- function(tuner, args) {
 # The tuner registry: everything the package knows about a tuner that
 # is not the fold's own arguments, keyed by the tune or finetune function's
 # name -- the `tuner` field of a description and of a results object's
-# `procedure` record. Every site that used to switch on that name reads one
+# `procedure` record. Every site that would switch on that name reads one
 # of these fields instead, so a new tuner is one entry here and its export.
 #
 # `package` is where the function lives, and what the inner call's `.ns` and
@@ -192,8 +192,8 @@ tuner_iterates <- function(tuner) {
 # Whether the tuner selects a candidate from an inner run. Total the
 # other way round from `tuner_iterates()`: a tuner the registry does not
 # know, or no name at all, is read as one that selects, so a hand-built or
-# older record is still held to the selection rule
-# (`check_results_record()`), and only the registry's own word waives it.
+# older record must still hold a selection rule (`check_results_record()`),
+# and only the registry's own word waives it.
 tuner_selects <- function(tuner) {
   !(rlang::is_string(tuner) &&
     tuner %in% names(tuner_registry) &&

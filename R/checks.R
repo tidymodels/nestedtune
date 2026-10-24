@@ -605,8 +605,9 @@ missing_id_rows <- function(x) {
 # (D-102). A repeated design's `id` repeats across `id2`, so only the whole
 # set of id columns tells its splits apart. Two missing values compare equal,
 # as tune treats them when it assembles its results: two NA `id2` values
-# under one `id` gave 8 result rows for 6 splits (probed 2026-09-30). A factor's
-# NA level reads as missing here too. A row whose `id` is NA is left to
+# under one `id` gave 8 result rows for 6 splits (probed for commit
+# 4b3f15db, which added this rule). A factor's NA level reads as missing here
+# too. A row whose `id` is NA is left to
 # missing_id_rows().
 repeated_id_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
@@ -2039,7 +2040,7 @@ check_grid_params <- function(
 # attribute cannot hold NULL: a result built before the specification was
 # recorded, and one built from a design that carried none. A record whose
 # procedure holds no selection rule, or no workflow identity, was built
-# before that entry was recorded, and is refused the same way
+# before the package recorded that entry, and is refused the same way
 # rather than fitted under a rule or a workflow the folds may not have used
 # (D-041 declined migration). And a classed object
 # with the record and no rows is a prototype: it describes a run and holds

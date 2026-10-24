@@ -279,8 +279,8 @@ dispatch_folds <- function(
     # wrapper. A function's srcrefs travel with it, so under
     # `pkgload::load_all()` this closure measures 202,363 B against 524 B from
     # an installed library, where srcrefs are absent; that was equally true of
-    # `.f` before this, and stripping them needs `utils::removeSource()`, a
-    # dependency the package does not take.
+    # `.f` before this, and stripping them needs `utils::removeSource()`,
+    # which the package does not call.
     worker <- fold_task
     environment(worker) <- globalenv()
     task <- function(
@@ -392,11 +392,10 @@ dispatch_folds <- function(
 #
 # The bound is an option rather than an argument (D-020): it tunes
 # infrastructure and never anything statistical, so no result depends on it and
-# it names nothing in nested_tune_grid()'s signature. That signature also holds
-# `...`, `param_info` and `event_level`, none of which carries a bound.
-# Non-finite is refused along with non-positive and non-numeric -- an `Inf`
-# bound is not a bound, and would hand back the unbreakable hang this exists to
-# convert into an error.
+# it names nothing in the signatures of nested_tune_grid() and its methods,
+# none of whose arguments carries a bound. Non-finite is refused along with
+# non-positive and non-numeric -- an `Inf` bound is not a bound, and would hand
+# back the unbreakable hang this exists to convert into an error.
 default_preflight_timeout_ms <- 30000L
 
 preflight_timeout <- function(call = rlang::caller_env()) {
@@ -589,7 +588,7 @@ daemons_load_status <- function(
 #
 # Built from text for the reason daemon_probe_expr() is: everywhere() serializes
 # the expression the HOST's function body has been rewritten into, and under
-# covr that rewriting inserts counter calls a daemon's library may not have
+# covr that rewriting inserts counter calls a daemon's library may not have.
 # A string is data, so nothing rewrites it.
 daemon_attach_expr <- function() {
   str2lang(paste(
@@ -1007,9 +1006,9 @@ check_daemons_can_load <- function(
     bullets <- c(
       # `daemon{?s}` agrees with {n_total}, the interpolation before it, but the
       # verb belongs to the affected daemons -- and cli takes every plural's
-      # quantity from the LAST interpolation, so an unqualified `{?is/are}` read
-      # n_total too and every mixed pool said "1 of 2 mirai daemons ARE running"
-      # qty() sets the quantity without printing it.
+      # quantity from the LAST interpolation, so an unqualified `{?is/are}`
+      # reads n_total too and a mixed pool says "1 of 2 mirai daemons ARE
+      # running". qty() sets the quantity without printing it.
       "{n_incompatible} of {n_total} mirai daemon{?s}
        {cli::qty(n_incompatible)}{?is/are} running a
        different build of {.pkg {package}}.",
@@ -1137,7 +1136,7 @@ classify_fold_result <- function(
   }
   if (is_cancelled_value(x)) {
     # Same inversion as the interrupt above, reached by a different route and
-    # carrying none of its classes, so a handler for those classes misses it.
+    # carrying none of its classes, so the `inherits()` test above misses it.
     # The subclass keeps a handler for the general case working.
     cli::cli_abort(
       c(
@@ -1161,7 +1160,7 @@ classify_fold_result <- function(
 
 # nanonext's ECANCELED, which is what `mirai::stop_mirai()` leaves behind.
 #
-# Allowlisted to this one value, as probed: 20 appears only under
+# Allowlisted to this one value by a probe: 20 appears only under
 # cancellation -- in flight and still queued alike, and for every task in a
 # stopped `mirai_map()`, not just the one running. Deliberately NOT extended to
 # 19 (ECONNRESET), which the same probe found under a `daemons(0)` teardown AND

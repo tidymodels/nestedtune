@@ -240,7 +240,8 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
 # seeds and on nothing ambient. That is what makes the kind-independence
 # property testable -- from a user-visible seed it is not, because the entry
 # draw above reads the caller's stream and that draw is itself kind-dependent.
-# This departs from RR02's recommendation as literally written.
+# So the test departs from RR02, which asks for identical results from one
+# user-visible seed under either generator kind.
 # `call` is threaded through rather than defaulted at the abort site: the
 # specification is re-evaluated here, two frames below the function the user
 # called, so an abort left to name its own caller named this worker -- an

@@ -167,9 +167,9 @@ panel_breaks <- function(by_param) {
 #
 # Asking instead which *pooled* values fall inside the limits is not the same
 # question, and answering it that way is what let a continuous parameter
-# overlapping an integer one put fractional ticks back on the integer panel: a
-# comment here once claimed the two were equivalent, and a re-review
-# disproved it with `num_comp` 2/3/4 beside a parameter valued 2.5/2.7/3.5.
+# overlapping an integer one put fractional ticks back on the integer panel.
+# `num_comp` 2/3/4 beside a parameter valued 2.5/2.7/3.5 shows the two
+# questions differ.
 #
 # Two parameters with the same range are genuinely ambiguous and the first wins.
 # That is a tick label on one axis, not a claim about any fold, so it is left as
