@@ -64,6 +64,7 @@ Make the four refusal tests named by the candidate row "Fix seed checks in four 
 - 2026-10-24: T4: `devtools::check()` at 073dbf3b, main checkout: 0 errors, 0 warnings, 0 notes. `air format --check .` and `sweep-prose.R --plain` clean at 3488fffc. T2, T3 and T4 ticked.
 - 2026-10-24: claim audit: not owed — internal tier.
 - 2026-10-24: implement done; status review.
+- 2026-10-24: step-7 approval: m160-seed-check-refusals approved for merge
 
 ## Decisions
 
