@@ -1,18 +1,16 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-23 triage: promoted "Fix the M079 review leftovers" (normal → high); compressed the vendored CI workflows Known issue (refuted premise in part); none dropped, merged, split, routed or retitled; no decision entry; validate green._
+_Last hygiene check: 2026-10-24 after M159 (PR #176): archived, M156 row pruned, one row graduated, two filed, none unparked._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | review | — | high | milestones/M159-m079-review-leftovers.md |
+| M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | done | — | high | milestones/archive/M159-m079-review-leftovers.md |
 | M158 | Give the unclassed refusals a class | done | — | normal | milestones/archive/M158-refusal-classes.md |
 | M157 | Test checks and names that M156's review flagged say only what they check | done | — | normal | milestones/archive/M157-m156-review-leftovers.md |
-| M156 | Test code cites no line numbers and names no tracking records | done | — | normal | milestones/archive/M156-test-tracking-leftovers.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
-- [high] Fix the M079 review leftovers: three suite findings (5, 8, 9) that `milestones/archive/M079-review-remainders.md` owns, among them `test-parallel-interrupt.R:108` failing inside the parallel suite and passing alone. Promote when that failure costs a review a re-run, on a parallel-suite change that prices it, on `daemon_state_snapshot()`'s naming regressing unseen, or on suite time being priced again (M113 left both 2026-09-23) — added 2026-09-10 at M079's review gate — started M159
 - Find why the identity pool loses a daemon: in one quiet full run on M159's branch (`9e45aaea`, 2026-10-24, no other R session), `test-parallel-identity.R`'s shared pool read 1 connection where 2 were started. `shared_daemons(2)` then failed 10 expectations in four blocks (":241, :312, :357, :414"). The M152 lesson says that file fails only beside other R sessions. The same 10 failed again in a side-by-side run at `eb1ff5ac`. Promote on a second quiet-run failure, or on one in CI — added 2026-10-24 at M159's T5
 - Tidy the interrupt block's leftovers: four items in `test-parallel-interrupt.R` from M159's review, none added by M159. The ledger budgets no wait for the 60 s collect when no signal is sent. A SIGINT sent after `dispatch_folds()` returns early lands outside the block's handler. The header's "Established by execution against mirai 2.7.2 before the fix" is narrative history. The `m15-fold-` marker names carry a milestone id. Promote on the next change to that file — added 2026-10-24 at M159's review
 - Guard the devel-vctrs filter from drift: `devel-vctrs.yaml` names its three push-time test files by hand, so renaming one runs the other two with no signal, and its concurrency group repeats the test step's `FULL_SUITE` expression with nothing checking that the two copies agree. A check in `test-ci-workflows.R` could pin both — added 2026-10-22, M153 review
