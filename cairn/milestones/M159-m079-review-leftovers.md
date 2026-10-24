@@ -1,6 +1,6 @@
 # M159: The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -39,7 +39,7 @@ Close the three suite findings M079's review left (5, 8, 9) and the `test-parall
 - [x] T2: Rewrite the header of `test-suite-hygiene.R` (finding 9) so it names each check the file makes: the budget ledger rows, the copied bounds, the declared worst cases, the blocking-collect rule, and the snapshot naming. Record in the work log which header check covers each `^test_that(` line.
 - [x] T3: Diagnose the interrupt failure on `main` at `3fac0b62` by execution. Instrument a scratch copy of the block, outside the repo, to record whether the shell sent the signal, when dispatch began, and when each marker appeared. Run it inside full suite runs, quiet and side by side (M152's side-by-side runs failed it in both). Record which stage fails and a reproduction of that cause that can be planted inside the block's own run (for example, a delay in the mocked fold before it marks itself started). If the cause is in `R/`, stop for the user and route it to `/hotfix` (question set).
 - [x] T4: Fix the block for T3's cause (corrected in the work log: SIGINT ignored in a process started with `&`). Add the self-probe that skips when no interrupt arrives (AC3), and make a wait that times out fail with its own message (AC4): the shell records in a file that it sent the signal, and the block asserts that file. Show the skip branch by planting a probe that sends nothing, and AC4 by planting a wait that cannot see the markers. Add a ledger row for any new wait in `helper-time-budget.R`.
-- [ ] T5: The `verify` slot: `devtools::test()` with no failure and no error, and `air format --check .` clean. Then the full suite runs for review evidence, on the branch head with no other R session open, recording the interrupt block's result in each: three runs alone, two pairs run side by side with both runs in the foreground of their own shells, and one run started with `&`, where the block must skip.
+- [x] T5: The `verify` slot: `devtools::test()` with no failure and no error, and `air format --check .` clean. Then the full suite runs for review evidence, on the branch head with no other R session open, recording the interrupt block's result in each: three runs alone, two pairs run side by side with both runs in the foreground of their own shells, and one run started with `&`, where the block must skip.
 
 ## Work log
 
@@ -68,6 +68,9 @@ Close the three suite findings M079's review left (5, 8, 9) and the `test-parall
 - 2026-10-24: probe evidence: the file alone in the foreground passed, 8 expectations. A planted probe (`pskill(..., 0L)`, a signal that does nothing) skipped with "this process ignores SIGINT, so no interrupt can reach it". The file started with `&` skipped with the same reason, where `9e45aaea` failed. Restored (`cmp` equal); `air format --check .` clean; hygiene file `[ FAIL 0 | PASS 29 ]`.
 - 2026-10-24: substantive amendment: AC3 rewritten to the probe and skip, on the user's choices at two stops (the reader's narrower wording, then a replacement for its command `testthat::test_file(...)`, which aborts with "No packages loaded with pkgload"). The new command gave `[ FAIL 0 | WARN 0 | SKIP 0 | PASS 8 ]`. T4 and T5 reworded to match (minor), and T4 checked off. The Scope's "diagnose the cause by execution, fix the block" stands. The AC4 plant (unreachable marker path) is still to be re-run on this block, under T5.
 - 2026-10-24: AC4 plant on the probe block: with marker 1's path unreachable in both of the script's references (the first try changed only the wait loop's reference, so the shell still sent and the block passed), the block failed once at :133, "The shell sent no interrupt: the two folds did not both mark themselves started within its 20 s wait." Restored (`cmp` equal).
+- 2026-10-24: T5 on code head `eb1ff5ac` (tree `7e15e0fc`), on battery, no other R session, `air format --check .` clean. Quiet runs 1-3 (08:22-08:47): whole suite 0 failures each, and the interrupt block ran its 8 expectations each time (the first quiet run is the verify slot). Pair 1, both runs in the foreground of their own shells (08:47-08:56): 0 failures in each, block ran. Pair 2 (08:56-09:05): run B 0 failures. Run A had the block run and pass, plus 10 failures in `test-parallel-identity.R` (:241, :312, :357, :414), with `shared_daemons(2)` reading 1 connection for 2, the same signature as the candidate row's. The suite started with `&` (09:06-09:14): 0 failures, and the block skipped with "this process ignores SIGINT, so no interrupt can reach it".
+- 2026-10-24: claim audit: not owed — internal tier.
+- 2026-10-24: status to review.
 
 ## Decisions
 
