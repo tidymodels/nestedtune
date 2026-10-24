@@ -4,6 +4,7 @@ _Last hygiene check: 2026-10-23 triage: promoted "Fix the M079 review leftovers"
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | planned | — | high | milestones/M159-m079-review-leftovers.md |
 | M158 | Give the unclassed refusals a class | done | — | normal | milestones/archive/M158-refusal-classes.md |
 | M157 | Test checks and names that M156's review flagged say only what they check | done | — | normal | milestones/archive/M157-m156-review-leftovers.md |
 | M156 | Test code cites no line numbers and names no tracking records | done | — | normal | milestones/archive/M156-test-tracking-leftovers.md |
@@ -11,7 +12,7 @@ _Last hygiene check: 2026-10-23 triage: promoted "Fix the M079 review leftovers"
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
-- [high] Fix the M079 review leftovers: three suite findings (5, 8, 9) that `milestones/archive/M079-review-remainders.md` owns, among them `test-parallel-interrupt.R:108` failing inside the parallel suite and passing alone. Promote when that failure costs a review a re-run, on a parallel-suite change that prices it, on `daemon_state_snapshot()`'s naming regressing unseen, or on suite time being priced again (M113 left both 2026-09-23) — added 2026-09-10 at M079's review gate
+- [high] Fix the M079 review leftovers: three suite findings (5, 8, 9) that `milestones/archive/M079-review-remainders.md` owns, among them `test-parallel-interrupt.R:108` failing inside the parallel suite and passing alone. Promote when that failure costs a review a re-run, on a parallel-suite change that prices it, on `daemon_state_snapshot()`'s naming regressing unseen, or on suite time being priced again (M113 left both 2026-09-23) — added 2026-09-10 at M079's review gate — started M159
 - Guard the devel-vctrs filter from drift: `devel-vctrs.yaml` names its three push-time test files by hand, so renaming one runs the other two with no signal, and its concurrency group repeats the test step's `FULL_SUITE` expression with nothing checking that the two copies agree. A check in `test-ci-workflows.R` could pin both — added 2026-10-22, M153 review
 - Keep an oracle registry outside tests: M155 took oracle IDs and types out of the test headers, so no record holds the types the ≥2-types audit reads (DESIGN Conventions). A `cairn/ORACLES.md` rebuilt from the headers at 576c3d19 restores it — added 2026-10-22, M155 review
 - Clear milestone ids from R comments: about 290 `M<NNN>` ids sit in `R/*.R` comments (67 in `R/checks.R`, 41 in `R/parallel.R`; `grep -cE '\bM[0-9]{2,3}\b'`, 2026-10-23), some beside phrases such as "this milestone declined". M155 cleared them from the tests only — added 2026-10-23 at M156's plan gate
