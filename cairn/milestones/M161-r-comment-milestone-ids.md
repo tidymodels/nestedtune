@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M161: R source comments carry no milestone ids
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M160
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — comments in `R/*.R`; no code, help page or behavior changes
-- **Branch/PR:** —
+- **Branch/PR:** m161-r-comment-milestone-ids
 
 ## Goal
 
@@ -37,7 +37,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 
 ## Tasks
 
-- [ ] T1: Rewrite the comments of `R/checks.R` and `R/parallel.R`. Drop each id with the labels that point into its milestone, keep decision ids, and reword a comment that only makes sense with the id. Where an id was the only pointer to a reason the code still needs, state the reason in the comment.
+- [x] T1: Rewrite the comments of `R/checks.R` and `R/parallel.R`. Drop each id with the labels that point into its milestone, keep decision ids, and reword a comment that only makes sense with the id. Where an id was the only pointer to a reason the code still needs, state the reason in the comment.
 - [ ] T2: Rewrite the other 23 files under the T1 spec, through Haiku subagents for file groups if the count warrants it; read each diff before it lands.
 - [ ] T3: Run the AC1 sweep (show it reads 25 files and finds 299 ids at the branch point), the AC2 comparison, the AC3 search over `git diff -U0`, the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the results.
 
@@ -51,6 +51,9 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - 2026-10-24: plan gate chose keeping decision ids over removing them with the milestone ids, because the row asks for milestone ids and a decision id names a live record of why the code is as it is; falsified by a user or maintainer asking for decision ids out of `R/` too.
 - 2026-10-24: plan gate chose one-off sweep commands in the criteria over extending `benchmarks/sweep-test-comments.R` to `R/`, because a new checker over repo-internal text would need upkeep for a one-time cleanup; falsified by milestone ids reappearing in `R/` after this milestone.
 - 2026-10-24: criteria audit (reduced mode, fresh Opus reader): AC1, AC2 and AC4 passed. AC3 passed, with the note that "comment line" was loose, so AC3 now reads comment tokens from `utils::getParseData()` on the added lines. The reader found no one-digit or four-digit `M` ids in `R/*.R`, so AC1's pattern misses none today. No criterion binds an instrument.
+- 2026-10-24: branch m161-r-comment-milestone-ids cut from 84eb2a20 (pushed default branch, M160 merged). The AC1 sweep there reads 25 files and 299 ids, all in COMMENT tokens; by token count `R/checks.R` holds 71 and `R/parallel.R` 42 (the plan's 67 and 41 were `grep -c` line counts).
+- 2026-10-24: implementation choice: a milestone-local decision label (`M10-D1`, `M07-D6`) and a "since M58" or "before M24" phrase are reworded to the fact they stood for; "M03 records fold failures" becomes "the outer loop records"; the "(probed at M133)" figure keeps a date (2026-09-30, M133's PR date) under the derived-figures rule; the "M05/M45 lesson" becomes its reason, that a frame in a message is deparsed whole.
+- 2026-10-24: T1 done: `R/checks.R` and `R/parallel.R` hold no milestone ids; 186 ids remain in the other 23 files. AC2's comparison finds no code change in any of the 25 files; `air format --check .` clean. Tests and check run once at T3, since AC2 shows the package code unchanged.
 
 ## Decisions
 

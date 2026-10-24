@@ -5,7 +5,7 @@ _Last hygiene check: 2026-10-24 after M160 (PR #177): archived, one row graduate
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M160 | Seed checks in four refusal tests can fail | done | — | normal | milestones/archive/M160-seed-check-refusals.md |
-| M161 | R source comments carry no milestone ids | planned | M160 | normal | milestones/M161-r-comment-milestone-ids.md |
+| M161 | R source comments carry no milestone ids | in-progress | M160 | normal | milestones/M161-r-comment-milestone-ids.md |
 | M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | done | — | high | milestones/archive/M159-m079-review-leftovers.md |
 | M158 | Give the unclassed refusals a class | done | — | normal | milestones/archive/M158-refusal-classes.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
