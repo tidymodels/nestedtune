@@ -1,0 +1,15 @@
+# M160: Seed checks in four refusal tests can fail
+
+**Status:** done (2026-10-24, PR #177 https://github.com/tidymodels/nestedtune/pull/177)
+
+**Goal:** Make the four refusal tests named by the candidate row "Fix seed checks in four refusal tests" back their RNG claims with checks that can fail, and fix the two smaller items the row lists.
+
+**Outcome:** Tests and one source comment; no package behavior, help or NEWS change.
+- `local_no_rng_state()` (`tests/testthat/helper-nestedtune.R`) removes the generator state for a block and puts it back on exit, a session with no state included. Eight blocks use it with `expect_false(exists(".Random.seed", ...))` after the call. They are the four refusal blocks (event level, marked workflow, unknown set id, no workflow record), the `expect_mismatch()` helper behind every identity probe, the map block now named "an error partway through the set still removes the state the map created", and the two `test-nested-final-fit-checks.R` blocks that held the same setup.
+- `expect_identical(.Random.seed, before)` could not fail in those blocks, because each refusal comes before the draw and `restore_rng()` puts back a set seed either way. In the map block, the map reinstates its entry state before every workflow. Four comparisons remain (`final-fit-resamples`, `bayes-results`, `finalize`, `map-rng:31`), each shown to fail under its claim's break.
+- The block "the record refusals fire before anything is drawn" is now "the refusal of a record with no inner specification fires before anything is drawn". The comment above `check_workflow_identity()` says a set seed would come back from `restore_rng()` even if the check came after the draw.
+- Plants were run on scratch copies of the package (draw before the refusal, restores removed, `runif()` in `analysis_framed_inner()`, the map's restore alone removed), never on the checkout.
+
+**Decisions:** milestone-local only: the existence check over removing the comparisons; renaming the plural block over triggering each record refusal; the map's break counted as both its and the loop's restores removed. None promoted.
+
+**Review:** Four-lens fan-out, one pass, no return. 16 findings: 9 fixed (the comment's "either way", test-comment wording, the shared helper, the map block's name, a session with no state), 6 rejected (two style, three false, one planned change), 1 noted. `devtools::test()` 1153 blocks, 0 failed; `check()` 0/0/0. CI green on #177 (16 pass, deploy skipped); the first watch hit its 590 s ceiling and the review resumed. The local commits after 9f9020c3 (PR record, CI stop, resume, re-posed approval) were dropped by `--delete-branch`; this summary carries them. `document()` bumped only `Config/roxygen2/version` from the local roxygen2 8.1.1, reverted. One full run at 3488fffc failed 11 `test-parallel-identity.R` blocks with no messages kept, then passed in three full runs; noted on the row "Find why the identity pool loses a daemon". Row "Fix seed checks in four refusal tests" graduated. No lesson added (LESSONS at 19,994 bytes); none retired; none unparked.
