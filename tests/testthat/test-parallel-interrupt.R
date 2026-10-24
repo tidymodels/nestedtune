@@ -53,8 +53,8 @@ test_that("an interrupted run leaves no fold executing", {
   # and a test run started with `&` from a non-interactive shell is one: the
   # shell starts it with SIGINT ignored, and every R process under it inherits
   # that. So the process first signals itself, and the block skips when nothing
-  # arrives. `pskill()` signals in-process, where a `system2("kill")` would
-  # hand the signal to a child.
+  # arrives. `pskill()` signals in-process: `system2("kill")` would be lost,
+  # because R ignores SIGINT while it waits on a child.
   probe_raised <- tryCatch(
     {
       tools::pskill(Sys.getpid(), tools::SIGINT)
@@ -76,7 +76,7 @@ test_that("an interrupted run leaves no fold executing", {
 
   markers <- file.path(tempdir(), paste0("m15-fold-", 1:2))
   # The shell records here that it sent the signal, before sending it.
-  sent <- file.path(tempdir(), "m15-sent")
+  sent <- file.path(tempdir(), "interrupt-sent")
   unlink(c(markers, sent))
   on.exit(unlink(c(markers, sent)), add = TRUE)
 
@@ -130,20 +130,21 @@ test_that("an interrupted run leaves no fold executing", {
     interrupt = function(cnd) interrupted <<- TRUE
   )
 
+  # The shell writes `sent` only once both markers exist, so a pass also shows
+  # both folds really were executing when the signal landed. Without that, an
+  # interrupt delivered before dispatch would report an idle pool and read as a
+  # fix.
+  was_sent <- file.exists(sent)
   expect(
-    file.exists(sent),
-    "The shell sent no interrupt: the two folds did not both mark themselves started within its 20 s wait."
+    was_sent,
+    "The shell sent no interrupt: the two folds had not both marked themselves started when the run returned."
   )
-  if (file.exists(sent)) {
+  if (was_sent) {
     expect(
       interrupted,
       "The shell sent an interrupt and it never reached the host."
     )
   }
-  # Not a vacuous pass: both folds really were executing when the signal landed.
-  # Without this an interrupt delivered before dispatch would report an idle
-  # pool and read as a fix.
-  expect_true(all(file.exists(markers)))
 
   # Bounded, because the daemons report the cancellation back asynchronously --
   # the pool is idle within a moment of the unwind, not within the same

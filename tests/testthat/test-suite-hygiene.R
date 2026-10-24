@@ -10,10 +10,10 @@
 #   * `daemon_state_snapshot()` names each daemon's record by the pid that
 #     record holds, which is what `shared_daemons()` compares.
 #
-# The first rule exists because breaking it costs twenty minutes of silence
-# rather than a red test: every wait on a mirai result in this suite goes
-# through `collect_bounded()` (helper-parallel.R), which polls to a deadline and
-# then reads `$data`. Everything else mirai offers for getting a value out
+# The `collect_bounded()` rule exists because breaking it costs twenty minutes
+# of silence rather than a red test: every wait on a mirai result in this suite
+# goes through `collect_bounded()` (helper-parallel.R), which polls to a
+# deadline and then reads `$data`. Everything else mirai offers for getting a value out
 # blocks until it resolves and cannot be interrupted from R at all --
 # `setTimeLimit(elapsed=)` does not fire inside any of them, established by
 # running them.
@@ -59,7 +59,7 @@ blocking_collect_sites <- function(path) {
   sort(unique(c(data$line1[named], data$line1[blocking])))
 }
 
-# The second rule: every wait-shaped call in the daemon files is
+# The ledger rule: every wait-shaped call in the daemon files is
 # accounted for in the time budget. `collect_bounded()` made the waits bounded;
 # this makes the SUM of those bounds visible, which is the part that killed a CI
 # job -- 1008.7 s of legal waiting in a file that normally takes 12.0 s, against
@@ -219,9 +219,9 @@ test_that("the budget ledger has no rows for calls that are gone", {
   # and a stale row adds seconds to the totals for a call that is gone.
   ledger <- time_budget_ledger()
   # Scoped to rows describing an actual call. The ledger may also carry a wait
-  # that is not a function call at all -- the `while (... && Sys.time() <
-  # deadline)` poll in test-parallel-interrupt.R -- which is real budget but has
-  # no token to match, so it is exempt from this direction only.
+  # that is not a function call at all -- the two `while (... Sys.time() <
+  # deadline)` polls in test-parallel-interrupt.R -- which is real budget but
+  # has no token to match, so it is exempt from this direction only.
   ledger <- ledger[ledger$call %in% BUDGETED_WAIT_CALLS, , drop = FALSE]
   budgeted <- ledger_keys(ledger)
 
@@ -252,7 +252,7 @@ test_that("the budget ledger has no rows for calls that are gone", {
 # constant in helper-parallel.R cannot drift that way and need no check.
 #
 # NA means the call carries no explicit bound of its own: a bound read from a
-# named constant, the option-set-elsewhere case, and the deadline poll. Which
+# named constant, the option-set-elsewhere case, and the deadline polls. Which
 # rows those are is declared below rather than left to whatever the regex
 # happens to miss.
 #
@@ -435,9 +435,10 @@ test_that("a daemon snapshot names each record by the pid it holds", {
   answer <- function(pid) list(pid = pid, namespaces = character(0))
   snapshot_of <- function(answers) {
     # `collect_bounded()` never forces its first argument here, so no
-    # `mirai::everywhere()` call is made and no pool is needed. The helper is
-    # not in the namespace, which `local_mocked_bindings()` searches, so it is
-    # rebound where the helpers live.
+    # `mirai::everywhere()` call is made and no pool is needed. Under
+    # `devtools::test()` and `R CMD check` the helper is not in the namespace,
+    # which `local_mocked_bindings()` searches, so it is rebound where the
+    # helpers live.
     rlang::local_bindings(
       collect_bounded = function(map, seconds) answers,
       .env = environment(daemon_state_snapshot)

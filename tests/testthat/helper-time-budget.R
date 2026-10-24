@@ -40,8 +40,8 @@
 # and spent at another (in classify's "the probe reads its bound from the
 # option, not from the constant", `options()` sets it and
 # `daemons_load_status()` spends it); and a wait that
-# is no function call at all (the deadline poll in interrupt). None carries an
-# explicit bound argument in the call itself, which is exactly how the
+# is no function call at all (the two deadline polls in interrupt). None carries
+# an explicit bound argument in the call itself, which is exactly how the
 # cross-check recognises them.
 #
 # Those exemptions are DECLARED and asserted, not merely described here.
