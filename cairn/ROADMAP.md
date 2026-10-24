@@ -1,13 +1,12 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-24 after M160 (PR #177): archived, one row graduated, one extended, none unparked._
+_Last hygiene check: 2026-10-24 after M161 (PR #178): archived, one row graduated, one added, none unparked; LESSONS over its 25-lesson limit (32)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M161 | R source comments carry no milestone ids | done | M160 | normal | milestones/archive/M161-r-comment-milestone-ids.md |
 | M160 | Seed checks in four refusal tests can fail | done | — | normal | milestones/archive/M160-seed-check-refusals.md |
-| M161 | R source comments carry no milestone ids | review | M160 | normal | milestones/M161-r-comment-milestone-ids.md |
 | M159 | The snapshot naming is tested where it runs, the hygiene header describes its file, and the interrupt block withstands its failure's cause | done | — | high | milestones/archive/M159-m079-review-leftovers.md |
-| M158 | Give the unclassed refusals a class | done | — | normal | milestones/archive/M158-refusal-classes.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
@@ -16,7 +15,6 @@ _Last hygiene check: 2026-10-24 after M160 (PR #177): archived, one row graduate
 - Tidy the interrupt block's leftovers: four items in `test-parallel-interrupt.R` from M159's review, none added by M159. The ledger budgets no wait for the 60 s collect when no signal is sent. A SIGINT sent after `dispatch_folds()` returns early lands outside the block's handler. The header's "Established by execution against mirai 2.7.2 before the fix" is narrative history. The `m15-fold-` marker names carry a milestone id. Promote on the next change to that file — added 2026-10-24 at M159's review
 - Guard the devel-vctrs filter from drift: `devel-vctrs.yaml` names its three push-time test files by hand, so renaming one runs the other two with no signal, and its concurrency group repeats the test step's `FULL_SUITE` expression with nothing checking that the two copies agree. A check in `test-ci-workflows.R` could pin both — added 2026-10-22, M153 review
 - Keep an oracle registry outside tests: M155 took oracle IDs and types out of the test headers, so no record holds the types the ≥2-types audit reads (DESIGN Conventions). A `cairn/ORACLES.md` rebuilt from the headers at 576c3d19 restores it — added 2026-10-22, M155 review
-- Clear milestone ids from R comments: about 290 `M<NNN>` ids sit in `R/*.R` comments (67 in `R/checks.R`, 41 in `R/parallel.R`; `grep -cE '\bM[0-9]{2,3}\b'`, 2026-10-23), some beside phrases such as "this milestone declined". M155 cleared them from the tests only — added 2026-10-23 at M156's plan gate — started M161
 - [low] Pin the byte figures in parallel.R: three `R/parallel.R` comments state wire sizes with no commit, date or procedure beside them: 5,141,166 B against 840,540 B for six split copies, 202,363 B against 524 B for the worker closure under `load_all()`, and 2,627 B for the 106-name manifest. The derived-figures rule asks for one. They predate M161, whose review found them — added 2026-10-24 at M161's review
 - [parked] Add the Tibshirani flat estimate (#95): put the Tibshirani and Tibshirani (2009) corrected flat estimate beside the nested one, through tune's `debias_estimate()` on the final fit's stored run (D-062; tune#917). The nested record cannot carry it (`.inner_metrics` is summarized, D-043). It trades GP5 and amends D-014, so it takes a D-entry. Promote when tune exports the function and a source validates the correction for a tuned workflow, or when a user asks for the comparison — added 2026-09-11 at #95's plan gate. #95 closed 2026-09-13 by topepo, checked 2026-10-20T05:40:21Z
 - [parked] Get the maintainers' docs pass (#91): what [#91](https://github.com/tidymodels/nestedtune/issues/91) still asks for is the maintainers' human pass over the guides and help pages (topepo's PR offer in the thread). M84-M87, M96 and M142-M145 did the automated and tune-style passes, and M87 routed the passive-voice and -ing entries to DESIGN Known issues. #91 stays open. Promote on the issue author's PR offer landing
