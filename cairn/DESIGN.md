@@ -549,8 +549,8 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   users to write selectors as strings.
 
 - The three vendored organization CI workflows carry properties this repository
-  would not choose, accepted at M33's review for the same reason: each is held
-  at the organization's shared blob, and editing one puts it off that blob.
+  would not choose, accepted at M33's review because each was
+  vendored unedited at the organization's shared blob.
   `.github/workflows/pr-commands.yaml` offers a `/style` command that runs
   `styler::style_pkg()`, a different formatter from the `air` this repository
   adopted, so using it commits a tree `format-suggest.yaml` then flags line by
@@ -558,12 +558,12 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   `pull_request_target` with actions on moving tags under
   `pull-requests: write` (a candidate row carries the moving tags), and its
   `permissions:` block zeroes `contents`, which works only because this
-  repository is public. `lock.yaml` declares no `permissions:` block, so its
-  nightly run depends on the default workflow token being writable, a setting
-  that could not be read at review. The shared-blob boundary is those three
-  files alone (corrected M78). This repository's own workflows diverge from
-  the r-lib templates by design, each departure carrying an in-file comment
-  naming what it buys. Compressed 2026-09-28.
+  repository is public. Commits `e248d5ac` and `c859003d` later edited all
+  three files, so none sits at its shared blob now, and `lock.yaml` declares
+  `issues: write` and `pull-requests: write` (corrected M78; corrected
+  2026-10-23). This repository's own workflows diverge from the r-lib
+  templates by design, each departure carrying an in-file comment naming what
+  it buys.
 
 - `dplyr::group_by()`, `dplyr::rowwise()` and `tibble::as_tibble()` leave the
   run's recorded attributes readable on the object they return. None of the
