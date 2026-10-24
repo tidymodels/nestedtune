@@ -53,8 +53,12 @@ test_that("an interrupted run leaves no fold executing", {
   start_daemons(2)
 
   markers <- file.path(tempdir(), paste0("m15-fold-", 1:2))
-  unlink(markers)
-  on.exit(unlink(markers), add = TRUE)
+  # `ack` is written by the host when the interrupt reaches it, and `sent` is
+  # where the shell records each signal it sends and that it has finished.
+  ack <- file.path(tempdir(), "m15-ack")
+  sent <- file.path(tempdir(), "m15-sent")
+  unlink(c(markers, ack, sent))
+  on.exit(unlink(c(markers, ack, sent)), add = TRUE)
 
   local_mocked_bindings(
     fold_task = function(
@@ -86,12 +90,29 @@ test_that("an interrupted run leaves no fold executing", {
   # failed on its own error, and a signal fired anyway would land in whichever
   # test was running twenty seconds later, aborting the run under `R CMD check`
   # with nothing to connect it to its cause.
+  #
+  # One signal is not always enough. On a loaded machine a SIGINT sent while
+  # the host is inside the collect can be lost before R raises it: the shell
+  # sent it, both folds were running, and the collect still ran its full 60 s
+  # (observed with two suites run side by side on mirai 2.7.2 and nanonext
+  # 1.10.2). The package's collect handles no interrupt itself, so the loss is
+  # below it. The shell therefore sends up to three signals, 3 s apart, and
+  # stops as soon as the host has written `ack`. The last one goes out about
+  # 10 s after the folds start, well inside their 60 s sleep.
   script <- sprintf(
-    'i=0; while [ $i -lt 200 ]; do [ -f "%s" ] && [ -f "%s" ] && break; sleep 0.1; i=$((i+1)); done; if [ -f "%s" ] && [ -f "%s" ]; then sleep 0.5; kill -INT %d; fi',
+    paste(
+      'i=0; while [ $i -lt 200 ]; do [ -f "%1$s" ] && [ -f "%2$s" ] && break;',
+      "sleep 0.1; i=$((i+1)); done;",
+      'if [ -f "%1$s" ] && [ -f "%2$s" ]; then sleep 0.5; n=0;',
+      'while [ $n -lt 3 ] && [ ! -f "%3$s" ]; do',
+      'kill -INT %5$d; echo sent >> "%4$s"; n=$((n+1)); j=0;',
+      'while [ $j -lt 30 ] && [ ! -f "%3$s" ]; do sleep 0.1; j=$((j+1)); done;',
+      'done; fi; echo done >> "%4$s"'
+    ),
     markers[[1]],
     markers[[2]],
-    markers[[1]],
-    markers[[2]],
+    ack,
+    sent,
     Sys.getpid()
   )
   system2("sh", c("-c", shQuote(script)), wait = FALSE)
@@ -102,23 +123,49 @@ test_that("an interrupted run leaves no fold executing", {
     without_pkgload_warning(
       dispatch_folds(payloads, object = NULL, tuner = NULL, metrics = NULL)
     ),
-    interrupt = function(cnd) interrupted <<- TRUE
+    interrupt = function(cnd) {
+      file.create(ack)
+      interrupted <<- TRUE
+    }
   )
 
-  expect_true(interrupted)
+  # Bounded, because the daemons report the cancellation back asynchronously --
+  # the pool is idle within a moment of the unwind, not within the same
+  # instruction. The same wait lets the shell finish, and a signal it sent just
+  # before `ack` appeared is caught here rather than in a later test.
+  sent_lines <- function() if (file.exists(sent)) readLines(sent) else ""
+  executing <- function() mirai::status()$mirai[["executing"]]
+  deadline <- Sys.time() + 15
+  repeat {
+    waiting <- tryCatch(
+      (executing() > 0L || !"done" %in% sent_lines()) &&
+        Sys.time() < deadline,
+      interrupt = function(cnd) TRUE
+    )
+    if (!waiting) {
+      break
+    }
+    tryCatch(Sys.sleep(0.1), interrupt = function(cnd) NULL)
+  }
+
+  n_sent <- sum(sent_lines() == "sent")
+  expect(
+    n_sent > 0L,
+    "The shell sent no interrupt: the two folds did not both mark themselves started within its 20 s wait."
+  )
+  if (n_sent > 0L) {
+    expect(
+      interrupted,
+      sprintf(
+        "The shell sent %d interrupt(s) and none reached the host.",
+        n_sent
+      )
+    )
+  }
   # Not a vacuous pass: both folds really were executing when the signal landed.
   # Without this an interrupt delivered before dispatch would report an idle
   # pool and read as a fix.
   expect_true(all(file.exists(markers)))
-
-  # Bounded, because the daemons report the cancellation back asynchronously --
-  # the pool is idle within a moment of the unwind, not within the same
-  # instruction.
-  executing <- function() mirai::status()$mirai[["executing"]]
-  deadline <- Sys.time() + 15
-  while (executing() > 0L && Sys.time() < deadline) {
-    Sys.sleep(0.1)
-  }
   expect_identical(executing(), 0L)
 })
 

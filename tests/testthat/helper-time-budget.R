@@ -855,7 +855,7 @@ time_budget_ledger <- function() {
       "deadline poll",
       15,
       "an interrupted run leaves no fold executing",
-      note = "while (executing() > 0L && Sys.time() < deadline)"
+      note = "repeat until executing() is 0 and the shell is done, or deadline"
     ),
     tb_row(
       "test-parallel-interrupt.R",
