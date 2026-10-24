@@ -60,6 +60,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - 2026-10-24: T3 done at 3c4bc360 against branch point 84eb2a20. AC1: 25 files, 299 ids at the branch point, 0 at the head, all hits in COMMENT tokens. AC2: same 25 files, `deparse(parse(keep.source = FALSE))` identical for all 25, `git diff 84eb2a20 -- man NAMESPACE DESCRIPTION` empty; control: a planted `planted <- 1L` in a copy of `R/tuner.R` reads as different. AC3: 370 comment tokens on 370 added lines in 19 files, 0 hits; control: the same patterns hit 32 removed lines. AC4: `devtools::test()` 0 failures (13371 passes), `devtools::check()` 0 errors, 0 warnings, 0 notes (main checkout), `air format --check .` clean, `sweep-prose.R --plain` clean.
 - 2026-10-24: claim audit: not owed — internal tier.
 - 2026-10-24: review pass 1: four lenses spawned; 39 findings settled (25 fix now, fixed in 0df9ef6e or at hygiene, 13 rejected, 1 follow-up row); AC1-AC3 verified at 0df9ef6e; AC4's test and check re-running at 0df9ef6e, so AC4 is not yet ticked (checkpoint).
+- 2026-10-24: correction to the line above: the counts are 36 findings, 24 fix now, 11 rejected, 1 follow-up row, as the Review section lists them.
 
 ## Decisions
 
