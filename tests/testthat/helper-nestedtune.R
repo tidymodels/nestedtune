@@ -52,3 +52,33 @@ expect_outer_identical <- function(lean, ref) {
     )
   }
 }
+
+# Leaves the session with no generator state, and puts back the state it had
+# when `env` -- the test_that() block's own frame, by default -- exits, through
+# on.exit() scheduled there. A check that a refusal comes before the package's
+# draw needs it: a state the caller had is the same afterwards either way,
+# since `restore_rng()` puts back what a draw changed, but a session with no
+# state keeps the one a draw creates, so a state found afterwards shows that a
+# draw came first. Returns the saved state, or NULL where there was none.
+local_no_rng_state <- function(env = parent.frame()) {
+  had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  saved <- if (had_seed) get(".Random.seed", envir = globalenv())
+  do.call(
+    base::on.exit,
+    list(rlang::expr(put_back_rng_state(!!had_seed, !!saved)), add = TRUE),
+    envir = env
+  )
+  if (had_seed) {
+    rm(".Random.seed", envir = globalenv())
+  }
+  invisible(saved)
+}
+
+put_back_rng_state <- function(had_seed, saved) {
+  if (had_seed) {
+    assign(".Random.seed", saved, envir = globalenv())
+  } else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+    rm(".Random.seed", envir = globalenv())
+  }
+  invisible(NULL)
+}

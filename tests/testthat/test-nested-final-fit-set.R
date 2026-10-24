@@ -41,11 +41,7 @@ test_that("a fit by id is the fit of the extracted workflow with its own results
 test_that("an id naming no row is refused", {
   skip_if_no_wset_fixture()
   res <- wset_results("nested_tune_grid")
-  # Existence, not identity: the caller's state comes back either way, but a
-  # session with no state keeps the one a draw creates.
-  saved <- .Random.seed
-  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
-  rm(".Random.seed", envir = globalenv())
+  local_no_rng_state()
   cnd <- rlang::catch_cnd(nested_final_fit(res, id = "nonesuch"))
   expect_s3_class(cnd, "nestedtune_unknown_id")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
