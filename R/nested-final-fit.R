@@ -194,8 +194,9 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
   # The workflow itself, against the identity the run recorded (M83): the
   # grid and marker checks above catch a workflow tuning different names
   # and name the exact column or marker, so they run first; this catches
-  # every other difference, and runs before the seeds below are drawn, so a
-  # refusal leaves the caller's generator state untouched.
+  # every other difference. It runs before the seeds below are drawn, so a
+  # session with no generator state still has none after a refusal here.
+  # A session that had one gets it back from `restore_rng()` either way.
   check_workflow_identity(object, procedure$workflow)
   inside <- attr(results, "inside")
   # Absent rather than NULL when the run was given none; either way tune picks.

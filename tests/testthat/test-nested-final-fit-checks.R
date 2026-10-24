@@ -242,7 +242,7 @@ test_that("a results object with the record and no rows is refused", {
   expect_match(conditionMessage(cnd), "prototype")
 })
 
-test_that("the record refusals fire before anything is drawn", {
+test_that("the refusal of a record with no inner specification fires before anything is drawn", {
   skip_if_no_engines()
 
   d <- make_reg_data()

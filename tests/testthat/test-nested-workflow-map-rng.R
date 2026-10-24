@@ -124,8 +124,15 @@ test_that("an error partway through the set still restores the caller's state", 
   )
   folds <- final_nested(d)
 
-  set.seed(5)
-  before <- .Random.seed
-  expect_error(nested_workflow_map(wset, resamples = folds, grid = det_grid()))
-  expect_identical(.Random.seed, before)
+  # A session that never drew: the map reinstates its entry state before
+  # every workflow, so a seed the caller set comes back even with no exit
+  # handler, but only the exit handler removes the state the map created.
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
+  expect_error(
+    nested_workflow_map(wset, resamples = folds, grid = det_grid()),
+    class = "nestedtune_bad_grid"
+  )
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
