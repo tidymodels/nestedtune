@@ -348,7 +348,7 @@ nested_loop <- function(
   call
 ) {
   n <- nrow(resamples)
-  # Resolved before any fold runs and before the seed draw (M116), so a metric
+  # Resolved before any fold runs and before the seed draw, so a metric
   # set tune cannot resolve for the workflow is refused at entry rather than
   # after every fold has failed on it. Every tuner is checked, the plain
   # resampling one included (D-082); only a tuner that selects keeps the name.
@@ -427,17 +427,17 @@ nested_fold_fit <- function(
   select = selection_rule(),
   control = NULL
 ) {
-  # The zero-row inner table a fold that scores nothing records (M49). Built
+  # The zero-row inner table a fold that scores nothing records. Built
   # here, before anything can fail, from the workflow rather than from a run:
   # a fold whose tuning raised has no run to read columns off, and one whose
-  # every candidate failed has a run `collect_metrics()` raises on (M03).
+  # every candidate failed has a run `collect_metrics()` raises on.
   prototype <- empty_inner_metrics(object, tuner, metrics, param_info)
 
   # `tuned` is assigned inside the tryCatch expression, which evaluates in this
   # frame -- so when select_best() is what errors, tune's own notes explaining
   # why every model failed are still in hand to record.
   tuned <- NULL
-  # A tuner that selects nothing (M70, `tuner_selects()`) skips the inner
+  # A tuner that selects nothing (`tuner_selects()`) skips the inner
   # stage whole: no framed inner rset, no tuner call, no rule. The fold's
   # tuning seed was drawn with the others so the record keeps one layout, and
   # is consumed by nothing here; the outer fit below runs under the second
@@ -450,8 +450,8 @@ nested_fold_fit <- function(
     set_fold_seed(seeds[[1L]])
     tryCatch(
       {
-        # The inner rset tune reads is framed on this fold's analysis rows
-        # (M54): tune finalizes an unknown parameter range on the frame the
+        # The inner rset tune reads is framed on this fold's analysis rows:
+        # tune finalizes an unknown parameter range on the frame the
         # first inner split carries, and a `nested_resamples()` design's
         # splits carry the whole data. Inside the seed's scope so the fold
         # stays reproducible from its seeds alone; it draws nothing.
@@ -477,9 +477,9 @@ nested_fold_fit <- function(
         # and finetune's `tune_race_anova_workflow()`,
         # `tune_race_win_loss_workflow()` and `tune_sim_anneal_workflow()` each
         # set `opt_metric <- first_metric(metrics)` (tune 2.1.0, finetune 1.3.0,
-        # read 2026-09-24). The `metrics` help says so (M115).
+        # read 2026-09-24). The `metrics` help says so.
         metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
-        # The recorded rule (M69), one of tune's three selectors behind
+        # The recorded rule, one of tune's three selectors behind
         # `apply_selection_rule()` (R/selection-rule.R). `eval_time` is
         # deliberately not passed on (D-038). Left NULL,
         # `tune:::choose_eval_time()` reads the evaluation times off `tuned` --
@@ -510,17 +510,17 @@ nested_fold_fit <- function(
   fitted <- tryCatch(
     {
       # Nothing to finalize where nothing was selected: the workflow runs as
-      # given, its parameters already fixed (M70).
+      # given, its parameters already fixed.
       final_wf <- if (tuner_selects(tuner$tuner)) {
         tune::finalize_workflow(object, selected)
       } else {
         object
       }
       set_fold_seed(seeds[[2L]])
-      # The outer fit had no control object at all until M35, so its metrics
-      # were computed at tune's default event level whatever the inner run had
-      # been told -- the one place the setting had to reach for a reported
-      # number to move. `allow_par = FALSE` is stated rather than left to
+      # The outer fit's control carries `event_level`, so its metrics are
+      # computed at the event level the inner run was told -- the one place
+      # the setting has to reach for a reported number to move.
+      # `allow_par = FALSE` is stated rather than left to
       # tune, whose `control_last_fit()` defaults it off today: the outer fit
       # runs inside a mirai daemon on the parallel path, and "keep tune serial
       # within the outer loop" is this package's convention to hold, not an
@@ -565,8 +565,8 @@ nested_fold_fit <- function(
     ))
   }
 
-  # The outer fit's assessment-set predictions, kept when the control asks
-  # (M68). `last_fit()` always computes them, so `save_pred` decides only
+  # The outer fit's assessment-set predictions, kept when the control asks.
+  # `last_fit()` always computes them, so `save_pred` decides only
   # whether the fold record carries them home: on a daemon the table travels
   # back with the fold, and a caller who did not ask pays neither the wire
   # nor the object for it (GP4). The inner run's predictions, which the same
@@ -581,7 +581,7 @@ nested_fold_fit <- function(
   # The control's `extract`, applied to the outer fit's workflow after the
   # fit rather than passed to `control_last_fit()`: tune moves its own
   # identity extract into `.workflow` there, and a caller's function in that
-  # slot would replace the workflow (M68). An extract that errors is a
+  # slot would replace the workflow. An extract that errors is a
   # reporting failure and not a fold failure (IP4): the fold keeps its
   # metrics, its element is NULL, and the error is a note under its own
   # stage, so a NULL is never read as a value without the notes saying why.
@@ -619,7 +619,7 @@ nested_fold_fit <- function(
   )
 }
 
-# The inner run's metrics, as tune summarizes them (M49, IP4).
+# The inner run's metrics, as tune summarizes them (IP4).
 #
 # `tune::collect_metrics()` of the tuning run, verbatim: one row per candidate
 # and metric, with the mean, the resample count `n` and its standard error,
@@ -629,10 +629,10 @@ nested_fold_fit <- function(
 # metric row anywhere and is absent -- present in the fold's notes instead.
 #
 # A run in which nothing scored gets the prototype rather than a call:
-# `collect_metrics()` raises on such a run (the M03 lesson), and this runs
+# `collect_metrics()` raises on such a run, and this runs
 # inside the failure paths too, where `tuned` is whatever tune handed back
 # before giving up and may be NULL. The tryCatch is insurance against a shape
-# not thought of, on the same asymmetry M21 recorded: an empty table
+# not thought of, since the two failures cost unequally: an empty table
 # understates one fold, a raise discards every other fold's completed work.
 inner_metrics <- function(tuned, prototype) {
   if (!scored_anything(tuned)) {
@@ -641,8 +641,8 @@ inner_metrics <- function(tuned, prototype) {
   tryCatch(inner_metrics_table(tuned), error = function(cnd) prototype)
 }
 
-# The one `collect_metrics()` call behind every reader of an inner run (M50,
-# D-043): tune's summary, and on a race every candidate the race scored --
+# The one `collect_metrics()` call behind every reader of an inner run (D-043):
+# tune's summary, and on a race every candidate the race scored --
 # `all_configs = TRUE` -- where finetune's default keeps the survivors alone.
 # IP4 records what ran, and an eliminated candidate ran on `n` resamples.
 inner_metrics_table <- function(tuned) {
@@ -747,7 +747,7 @@ param_object <- function(id, params) {
 
 # The name of the first metric in the set, resolved as tune resolves it for
 # the workflow, so a run given `metrics = NULL` records the first metric of
-# tune's default set for the workflow's mode (M116). Each fold's run resolves
+# tune's default set for the workflow's mode. Each fold's run resolves
 # the same name through `tune::.get_tune_metric_names()`; this reads it once,
 # before any fold runs, so the record names it when no fold completes.
 first_metric_name <- function(metrics, object, call = rlang::caller_env()) {
@@ -820,7 +820,7 @@ scored_candidates <- function(tuned) {
 # it numerically. A grid table carries no `.iter`, and its order is the
 # label's alone. The ordering never touches a parameter column: `order()` raises on a
 # list-valued one, which is why `candidate_key()` in nested-results-print.R
-# renders rows before ordering them (M21 review F1).
+# renders rows before ordering them.
 candidate_set <- function(metrics) {
   if (!is.data.frame(metrics)) {
     return(empty_candidates())
@@ -855,7 +855,7 @@ candidate_set <- function(metrics) {
 # A candidate set holding nothing. Bare rather than typed: the final fit's
 # run may have raised before recording a parameter name, and deriving names
 # from the workflow would be machinery whose only job is to furnish an empty
-# record (M21 plan gate).
+# record.
 empty_candidates <- function() {
   structure(
     list(),
@@ -886,7 +886,7 @@ failed_fold <- function(
 ) {
   # `message` is supplied only by the worker-failure path, where there is no
   # condition to read: mirai's failure values are not conditions and one of them
-  # raises on conditionMessage() (M07-D2).
+  # raises on conditionMessage().
   if (is.null(message)) {
     message <- if (is.null(cnd)) {
       "The outer fit produced no metrics."
@@ -895,8 +895,7 @@ failed_fold <- function(
     }
   }
   # A fold that did not finish has no outer fit to have kept predictions or
-  # an extract from; each element is NULL whether or not the control asked
-  # (M68).
+  # an extract from; each element is NULL whether or not the control asked.
   list(
     completed = FALSE,
     metrics = empty_metrics(),

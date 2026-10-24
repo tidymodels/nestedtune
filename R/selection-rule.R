@@ -1,16 +1,15 @@
-# The rule each outer fold selects its candidate by (M69).
+# The rule each outer fold uses to select its candidate.
 #
-# The orchestrators took the best candidate by the first metric, full stop,
-# until M69: `tune::select_best()` on the fold's inner run. A caller who wants
+# The default rule takes the best candidate by the first metric:
+# `tune::select_best()` on the fold's inner run. A caller who wants
 # tune's one-standard-error or percent-loss rule needs to say so once, in a
 # form that reaches every fold and is recorded so the final fit applies the
 # same rule. That form is a small classed list rather than a function: a
-# user's closure would carry its frame to every daemon (the M12 lesson) and
-# defeat the fixture cache (the M68 lesson), while a string plus ordering and
-# limit formals would put three new arguments on five signatures. The
-# orderings are captured as bare expressions with `rlang::enexprs()`, never as
-# quosures, for the same reason: an expression carries no environment onto
-# the wire or into the cache.
+# user's closure would carry its frame to every daemon and defeat the fixture
+# cache, while a string plus ordering and limit formals would put three new
+# arguments on five signatures. The orderings are captured as bare
+# expressions with `rlang::enexprs()`, never as quosures, for the same reason:
+# an expression carries no environment onto the wire or into the cache.
 
 #' Choose how each fold selects its candidate
 #'
@@ -176,7 +175,7 @@ selection_rule <- function(
   new_selection_rule(rule, order, limit)
 }
 
-# The desirability rule's terms (M109, D-073): at least one, no `limit`, and
+# The desirability rule's terms (D-073): at least one, no `limit`, and
 # each judged by desirability2's own `desirability()`, which knows its goal
 # functions and their arguments. Its errors carry no class, so each is raised
 # again under this package's, with desirability2's message kept as the parent.
@@ -218,7 +217,7 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
   # with the goal as a bare expression, so a name there is never checked
   # before the tuning. A metric, or a variable local to the caller, fails
   # every fold after its inner run, and a global variable is read only where
-  # each fold runs (M109 review findings 1 and 4). Only the first argument
+  # each fold runs. Only the first argument
   # may name something, and the rest must be values.
   for (term in terms) {
     later <- as.list(term)[-(1:2)]
@@ -226,8 +225,7 @@ check_desirability_terms <- function(terms, limit, call = rlang::caller_env()) {
     if (length(named) > 0L) {
       goal <- deparse_in_full(term)
       # The hint injects the first argument that names something, whole, so
-      # `.data$lo` and `lo * 2` are not cut down to their first name (M109
-      # review finding 3).
+      # `.data$lo` and `lo * 2` are not cut down to their first name.
       names_something <- vapply(
         later,
         function(arg) length(all.vars(arg)) > 0L,
@@ -281,7 +279,7 @@ is_selection_rule <- function(x) {
 # The rule on one line: its name, then ` by ` and the orderings as written,
 # then ` (limit = <limit>)` where the rule carries one. The one rendering the
 # object's own print and the `Selected by:` line of the results and final-fit
-# summaries share (M98), so a reader meets the same words in both places.
+# summaries share, so a reader meets the same words in both places.
 selection_rule_label <- function(x) {
   out <- x$rule
   if (length(x$order) > 0L) {
@@ -298,12 +296,12 @@ selection_rule_label <- function(x) {
 }
 
 # One ordering or goal as written, on one line. `rlang::as_label()` shortens
-# a long call to `target(...)`, which hid a desirability goal's limits (M109).
+# a long call to `target(...)`, which hid a desirability goal's limits.
 deparse_in_full <- function(expr) {
   paste(rlang::expr_deparse(expr, width = Inf), collapse = " ")
 }
 
-# Whether the rule is one the summaries name (M98): the default best-by-metric
+# Whether the rule is one the summaries name: the default best-by-metric
 # rule stays unnamed, so the line's presence is itself the signal, as the
 # fold-failure and candidate-set lines are. `NULL` -- the record of a run that
 # applied no rule -- is not named either.
@@ -346,7 +344,7 @@ apply_selection_rule <- function(tuned, select, metric_name) {
       metric = metric_name,
       limit = select$limit
     ),
-    # Scored over the terms alone, so `metric_name` plays no part (M109).
+    # Scored over the terms alone, so `metric_name` plays no part.
     desirability = desirability2::select_best_desirability(
       tuned,
       !!!select$order
@@ -356,8 +354,7 @@ apply_selection_rule <- function(tuned, select, metric_name) {
   # resample leaves NA, so the selector returns no row; left alone, the empty
   # selection fails the outer fit one step later with a note about the
   # preprocessor. Name the failure where it happens, so the fold's note does.
-  # The standard-error cause is named only under the rule it belongs to
-  # (M109 review finding 5).
+  # The standard-error cause is named only under the rule it belongs to.
   if (nrow(selected) == 0L) {
     hint <- if (select$rule == "one_std_err") {
       c(

@@ -249,7 +249,7 @@ nested_tune_race_win_loss.workflow <- function(
   )
 }
 
-# The one body behind the two racing exports (M50). The exports differ in
+# The one body behind the two racing exports. The exports differ in
 # nothing but the registry key, so the checks and the loop are written once;
 # `call` is the export's frame, so every refusal and the run's warnings name
 # the function the user called. The checks run in the grid orchestrator's

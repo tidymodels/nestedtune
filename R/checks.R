@@ -102,7 +102,7 @@ has_preprocessor <- function(object) {
 # A missing package would surface anyway, but only once the first fold starts
 # fitting. Asking up front turns a wait-then-fail into an immediate answer,
 # which matters when the fold that fails is the tenth. Asked of the whole
-# workflow since M58 -- `workflow_pkgs()` (R/parallel.R), the list the daemon
+# workflow -- `workflow_pkgs()` (R/parallel.R), the list the daemon
 # pre-flight and the attach step read -- so a recipe step's package is refused
 # here as an engine's always was, under the class the tuner refusal carries
 # (`check_tuner_installed()`): both state the same fact about this library.
@@ -126,7 +126,7 @@ check_workflow_pkgs <- function(object, call = rlang::caller_env()) {
   invisible(needed)
 }
 
-# The model-spec door of the six orchestrators (M107, D-069). tune's own
+# The model-spec door of the six orchestrators (D-069). tune's own
 # `model_spec` methods take only a formula or a recipe and refuse a
 # `workflow_variables()` object. Here it is refused with the other wrong
 # types, and its hint names the workflow route that does take it.
@@ -254,7 +254,7 @@ tuned_parameter_ids <- function(object) {
   )
 }
 
-# The two doors a workflow takes (M70, D-057), decided by whether anything in
+# The two doors a workflow takes (D-057), decided by whether anything in
 # it is marked with `tune()`. The five tuning orchestrators refuse a workflow
 # with nothing to tune: an inner loop over one candidate runs for nothing,
 # tune warns once per fold, and the record would call it a search. Before
@@ -309,7 +309,7 @@ check_tuned_workflow <- function(object, call = rlang::caller_env()) {
 
 check_nested <- function(resamples, call = rlang::caller_env()) {
   # Every refusal here carries one class, so a caller can catch a malformed
-  # design at any of the five drivers alike (M55); each names every offending
+  # design at any of the five drivers alike; each names every offending
   # position or column rather than the first found, so one fix does not
   # merely reveal the next.
   if (
@@ -391,11 +391,11 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # but each split keeps its own (D-097).
   check_outer_splits(resamples, "resamples", call = call)
   # Before the rules that read row indices, which would otherwise refuse a bad
-  # index under another reason, with a coercion warning, or pass it (M138,
-  # D-111; M141, D-114).
+  # index under another reason, with a coercion warning, or pass it (D-111,
+  # D-114).
   check_split_indices(resamples, call = call)
   # A split rebuilt with make_splits() carries no class to read, so each
-  # split's rows are read next (M134, D-103).
+  # split's rows are read next (D-103).
   check_outer_overlap(resamples, "resamples", call = call)
   check_inner_refused(resamples, call = call)
   # The same rule on the inner splits, before the id rules, so a rebuilt
@@ -409,7 +409,7 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   # that is not a well-formed rsplit (split_shares_rows()).
   # Neither column is checked by anything upstream: a
   # design whose `inside` produced no rset is refused by nested_resamples()
-  # (M18) but built without complaint by rsample::nested_cv(), and nothing at
+  # but built without complaint by rsample::nested_cv(), and nothing at
   # all guards `splits`. Left to the drivers, both shapes cost a full run and
   # come back as tune's per-fold notes rather than as the call error they are
   # -- the same reason check_grid_params() refuses a malformed grid (GP3).
@@ -423,7 +423,7 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   )
   # A different hint, because the parallel sentence would be false here for the
   # commonest way of reaching this error: rsample builds the design whatever
-  # `inside` returned. Only nestedtune's own constructor refuses it (M18).
+  # `inside` returned. Only nestedtune's own constructor refuses it.
   check_column_class(
     resamples,
     "inner_resamples",
@@ -439,13 +439,13 @@ check_nested <- function(resamples, call = rlang::caller_env()) {
   check_inner_rows(resamples, call = call)
   check_label_columns(resamples, labels, call = call)
   check_label_values(resamples, labels, call = call)
-  # And the three over each fold's inner splits (M59), last of all: they read
+  # And the three over each fold's inner splits, last of all: they read
   # inside the inner rsets the class rules vouched for.
   check_inner_splits(resamples, call = call)
   invisible(resamples)
 }
 
-# The rsample designs refused in either loop (M128, D-096): each gives no
+# The rsample designs refused in either loop (D-096): each gives no
 # valid nested estimate there, and most fail every fold only after the whole
 # loop has run. rsample::nested_cv() builds all six pairings.
 refused_designs <- c("loo_cv", "apparent", "permutations")
@@ -551,11 +551,11 @@ apparent_id_hint <- paste(
 # The rows of `x` whose id is "Apparent" but whose split is not the apparent
 # split of a bootstrap design. tune leaves every row under that id out of its
 # estimates, so a fold tuning on `x` would use fewer resamples than it holds,
-# and nothing would say so (M132, D-100). Only a bootstrap's own apparent
+# and nothing would say so (D-100). Only a bootstrap's own apparent
 # split carries the id on purpose, and split_designs() names that split's
 # design as its bootstrap. The rule stands alone, although at entry and in
 # the final fit an apparent split beside no bootstrap splits is refused as
-# apparent() first (M133). Class inspection only, like split_designs().
+# apparent() first. Class inspection only, like split_designs().
 misread_apparent_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
   if (!is.list(splits)) {
@@ -587,7 +587,7 @@ apparent_id_reason <- paste(
 # The rows of `x` whose `id` is missing. tune 2.1.0 keeps the rows whose id
 # is not "Apparent" (tune:::estimate_tune_results()), and that comparison
 # gives NA for a missing id, so the split drops out of its estimate and an
-# empty metric row joins it (M133, D-102). A factor whose NA is a level
+# empty metric row joins it (D-102). A factor whose NA is a level
 # answers FALSE to is.na(), the comparison gives TRUE, and tune keeps the
 # split, so it is not refused (D-105). Only `id` is read: tune filters on no
 # other id column. Class inspection only, like split_designs().
@@ -601,12 +601,13 @@ missing_id_rows <- function(x) {
 }
 
 # The rows of `x` that share their values in every id column with another
-# row, read as labels. tune miscounts the resamples of such a design (M133,
-# D-102). A repeated design's `id` repeats across `id2`, so only the whole
+# row, read as labels. tune miscounts the resamples of such a design
+# (D-102). A repeated design's `id` repeats across `id2`, so only the whole
 # set of id columns tells its splits apart. Two missing values compare equal,
 # as tune treats them when it assembles its results: two NA `id2` values
-# under one `id` gave 8 result rows for 6 splits (probed at M133). A factor's
-# NA level reads as missing here too. A row whose `id` is NA is left to
+# under one `id` gave 8 result rows for 6 splits (probed for commit
+# 4b3f15db, which added this rule). A factor's NA level reads as missing here
+# too. A row whose `id` is NA is left to
 # missing_id_rows().
 repeated_id_rows <- function(x) {
   splits <- if (is.data.frame(x)) x[["splits"]]
@@ -631,7 +632,7 @@ repeated_id_rows <- function(x) {
 }
 
 # Why each id rule refuses, and what it costs where the design is tuned: each
-# outer fold at entry, or the one tuning run of the final fit (M133).
+# outer fold at entry, or the one tuning run of the final fit.
 id_rule_reason <- function(rule, final = FALSE) {
   if (identical(rule, "apparent") && !final) {
     return(apparent_id_reason)
@@ -665,7 +666,7 @@ id_rule_reason <- function(rule, final = FALSE) {
 }
 
 # Every inner element holding a split with a missing id, and then every one
-# holding splits whose ids repeat, each named in one message (M133, D-102).
+# holding splits whose ids repeat, each named in one message (D-102).
 check_inner_ids <- function(resamples, call = rlang::caller_env()) {
   inner <- resamples[["inner_resamples"]]
   if (!is.list(inner)) {
@@ -710,7 +711,7 @@ check_inner_ids <- function(resamples, call = rlang::caller_env()) {
 # `tune::collect_metrics(summarize = FALSE)` (test_parameters_gls() and
 # test_parameters_bt(), read 2026-09-29), which keeps the split whose id is
 # "Apparent". So a race drops candidates on a score from the rows the model
-# trained on, although tune's estimate leaves that split out (M132, D-100).
+# trained on, although tune's estimate leaves that split out (D-100).
 racer_tuners <- c("tune_race_anova", "tune_race_win_loss")
 
 # Whether `x` holds an apparent split. Any id counts, because the race
@@ -757,14 +758,14 @@ check_race_apparent <- function(resamples, call = rlang::caller_env()) {
 }
 
 # The entry check's design rules, id rules and "Apparent" rules on the one
-# inner rset `nested_final_fit()` rebuilds on the whole data (M132, D-100;
-# M133, D-102). No entry check reads it: it comes from the
+# inner rset `nested_final_fit()` rebuilds on the whole data (D-100,
+# D-102). No entry check reads it: it comes from the
 # recorded `inside`, which a record made before the rules, or an `inside`
 # that labels the whole data differently, can turn into such a design.
 check_final_inner <- function(inner, tuner, call = rlang::caller_env()) {
-  # The entry check's rules, in its order (M133, D-102): the refused designs
+  # The entry check's rules, in its order (D-102): the refused designs
   # and the rule on an apparent split beside bootstrap splits, then the rule
-  # on shared rows (M134, D-103), then the two id rules, then the two
+  # on shared rows (D-103), then the two id rules, then the two
   # "Apparent" rules. No reason names an outer fold, since
   # the rebuilt design belongs to none: a design refused by its rset class
   # and each id rule speak of the final fit's one tuning run, and a design
@@ -943,16 +944,15 @@ check_outer_splits <- function(x, arg, call = rlang::caller_env()) {
   )
 }
 
-# Whether the assessment set of `split` holds a row of its analysis set (M134,
-# D-103). `rows` gives the data row each index of the split's frame stands
+# Whether the assessment set of `split` holds a row of its analysis set
+# (D-103). `rows` gives the data row each index of the split's frame stands
 # for: NULL when the frame is the data, or the outer split's `in_id` when it
 # is that split's analysis set, so a row the outer split repeats is caught
 # under both of its positions. The assessment set is rsample::complement()'s,
 # which reads each split class's own rule. Anything malformed shares no row
 # here and is left to the checks that judge it. `hold`, when given, marks the
 # data rows the outer split holds, and a shared row outside it is left to the
-# containment rule of check_inner_splits(), which names the leak (M135,
-# D-109).
+# containment rule of check_inner_splits(), which names the leak (D-109).
 split_shares_rows <- function(
   split,
   rows = NULL,
@@ -968,7 +968,7 @@ split_shares_rows <- function(
   }
   n <- nrow(split[["data"]])
   # An NA in `rows`, from an outer `in_id` holding NA, names no data row, so
-  # such a fold is left as found (M134 review, S1).
+  # such a fold is left as found.
   if (!is.null(rows) && (length(rows) != n || anyNA(rows))) {
     return(FALSE)
   }
@@ -976,7 +976,7 @@ split_shares_rows <- function(
   # rsample's rsplit method gives every frame row outside `in_id` here,
   # which shares no frame row with it; only a row that `rows` repeats can.
   # `repeats` says whether `rows` repeats one, which overlap_rows() finds once
-  # for a fold rather than once for each split (M135, T5).
+  # for a fold rather than once for each split.
   if (default && !repeats) {
     return(FALSE)
   }
@@ -990,7 +990,7 @@ split_shares_rows <- function(
   if (default) {
     # The same set for any nonempty `in_id`, which rsample::rsplit()
     # requires, found without the unique() that method hashes the training
-    # rows with, which dominated this check's time (M134, T5). An empty
+    # rows with, which dominated this check's time. An empty
     # `in_id` gives FALSE either way.
     outside <- rep(TRUE, n)
     outside[trained] <- FALSE
@@ -1009,7 +1009,7 @@ split_shares_rows <- function(
     held_out <- rows[held_out]
   }
   # A marked vector rather than %in%, which hashes the training rows anew
-  # for every split (M134, T5).
+  # for every split.
   seen <- logical(max(c(0L, trained, held_out)))
   seen[trained] <- TRUE
   if (is.null(hold)) {
@@ -1050,7 +1050,7 @@ complement_is_default <- function(split) {
 # table of registered methods (the apparent, rolling-origin and sliding
 # splits, and any other package's), and base. Dispatch skips the search path
 # between the global environment and base, so a method in an attached
-# environment is never called and is not looked for (M135).
+# environment is never called and is not looked for.
 complement_envs <- function() {
   ns <- asNamespace("rsample")
   envs <- list(ns[[".__S3MethodsTable__."]])
@@ -1084,7 +1084,7 @@ overlap_rows <- function(x, rows = NULL, hold = NULL) {
 # analysis set ends, so it holds `assess + lag` rows (rsample 1.3.2). With
 # `lag` above 0 each split shares its last `lag` analysis rows. tune scores
 # them, so the rule refuses it, and the message says how to keep the lagged
-# predictors (M134, R1).
+# predictors.
 lag_advice <- paste(
   "A `rsample::rolling_origin()` design with `lag` above 0 puts the last",
   "`lag` analysis rows of each split in its assessment set. Use `lag = 0`,",
@@ -1140,7 +1140,7 @@ inner_overlap_rows <- function(x, rows = NULL, hold = NULL) {
 # split's analysis set, told apart as check_inner_splits() tells them, and
 # the second are read through the outer `in_id`. On the outer frame, only a
 # shared row the outer `in_id` holds counts: a held-out row is left to the
-# containment rule, which names the leak (M135, D-109). A fold whose splits
+# containment rule, which names the leak (D-109). A fold whose splits
 # are not all rsplits, or whose frames are another or disagree, is left to
 # check_inner_splits().
 fold_overlap_rows <- function(split, inner) {
@@ -1245,7 +1245,7 @@ check_outer_overlap <- function(x, arg, call = rlang::caller_env()) {
 # refuses it, or NA. The first shape that applies names it: an NA, an empty
 # `out_id`, a vector that is not numeric, a value outside integer range. An
 # `out_id` identical to the logical NA is rsample's mark for the complement
-# and is exempt (M138, D-111; M141, D-114).
+# and is exempt (D-111, D-114).
 index_shape <- function(x, slot) {
   if (slot == "out_id" && identical(x, NA)) {
     return(NA_character_)
@@ -1403,7 +1403,7 @@ refused_design_reason <- function(design, role) {
       "tune refuses {.fn rsample::permutations} as a tuning design, so each",
       "outer fold that tunes on it would fail."
     ),
-    # The design nested_final_fit() rebuilds on the whole data (M133).
+    # The design nested_final_fit() rebuilds on the whole data.
     "final loo_cv" = paste(
       "tune refuses {.fn rsample::loo_cv} as a tuning design, so the final",
       "fit would fail."
@@ -1515,7 +1515,7 @@ check_column_class <- function(
 # `class` object, `noun` naming one element and `after` following its
 # position: first those that lack the class, then those that carry it but
 # are not a list. Every reader of a split takes it to be the list rsample
-# builds, so such an element would crash the first one (M135). Empty when
+# builds, so such an element would crash the first one. Empty when
 # every element is well formed.
 malformed_lines <- function(elements, class, noun, after = "") {
   has_class <- vapply(elements, inherits, logical(1), class)
@@ -1674,7 +1674,7 @@ check_label_values <- function(
   )
 }
 
-# The three rules over a fold's inner splits (M59). Every element of a fold's
+# The three rules over a fold's inner splits. Every element of a fold's
 # inner `splits` list is an rsplit; every inner split of a fold carries one
 # frame, either the outer split's own (`nested_resamples()` remaps its inner
 # indices onto the caller's data) or that split's analysis set
@@ -1690,10 +1690,11 @@ check_label_values <- function(
 # `identical()` against the outer frame first -- pointer equality on a
 # `nested_resamples()` design, so the common case costs nothing -- and against
 # `rsample::analysis()` only for a fold whose outer indices lie in its frame:
-# an outer `in_id` reaching past the data is left to `last_fit()` (M54), and
-# `analysis()` would raise here instead. No frame reaches a message (the
-# M05/M45 lesson); every bullet names positions. A rule that finds an offender
-# refuses before the next rule reads what it would have judged.
+# an outer `in_id` reaching past the data is left to `last_fit()`, and
+# `analysis()` would raise here instead. No frame reaches a message, since a
+# frame in a message is deparsed whole; every bullet names positions. A rule
+# that finds an offender refuses before the next rule reads what it would have
+# judged.
 check_inner_splits <- function(resamples, call = rlang::caller_env()) {
   outer <- resamples[["splits"]]
   inner <- resamples[["inner_resamples"]]
@@ -1703,7 +1704,7 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
   }
 
   # An element that carries the class but is not a list counts as not an
-  # rsplit, since every rule below reads it as one (M135).
+  # rsplit, since every rule below reads it as one.
   not_rsplit <- lapply(inner, function(rs) {
     malformed_lines(rs[["splits"]], "rsplit", "inner split")
   })
@@ -1796,11 +1797,11 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
     }
     outer_in <- as.integer(outer[[f]][["in_id"]])
     # The rows the outer split holds, marked once for the fold rather than
-    # hashed by %in% for every split (M135, T5). An index outside the frame
+    # hashed by %in% for every split. An index outside the frame
     # is read with %in%, so every index gets the answer %in% gives.
     # check_split_indices() has refused every index that is not numeric, is
     # NA, or lies outside integer range, so as.integer() gives no NA here but
-    # the logical NA `out_id`, dropped below (M138, M141).
+    # the logical NA `out_id`, dropped below.
     mark <- logical(NROW(outer[[f]][["data"]]))
     marked <- outer_in[!is.na(outer_in) & outer_in >= 1L]
     mark[marked[marked <= length(mark)]] <- TRUE
@@ -1861,7 +1862,7 @@ check_inner_splits <- function(resamples, call = rlang::caller_env()) {
 # Which frame each of an outer split's inner splits carries, given their
 # frames: the outer split's own ("whole"), its analysis set ("analysis"), or
 # neither ("other"). NULL when the analysis set cannot be built (an outer
-# `in_id` past the frame, M54): the splits not on the outer frame are then
+# `in_id` past the frame): the splits not on the outer frame are then
 # left to `last_fit()` rather than judged against nothing. Read by
 # check_inner_splits() and by the rule on shared rows.
 inner_frame_kinds <- function(split, frames) {
@@ -1892,7 +1893,7 @@ inner_frame_kinds <- function(split, frames) {
 }
 
 # The outer split's analysis set, or NULL when it cannot be built: an outer
-# `in_id` reaching past the frame is `last_fit()`'s to refuse (M54), not this
+# `in_id` reaching past the frame is `last_fit()`'s to refuse, not this
 # check's.
 outer_analysis <- function(split) {
   idx <- split[["in_id"]]
@@ -1944,9 +1945,10 @@ check_grid <- function(grid, call = rlang::caller_env()) {
 # A grid can be judged against the workflow before any fitting: tune knows which
 # parameters are marked for tuning, and a column that is not one of them -- or a
 # tuned parameter with no column -- is wrong for every fold rather than for this
-# one. tune raises exactly this, but per fold, and M03 records fold failures
-# instead of re-raising them; without this check a malformed grid would surface
-# as an entire design failing rather than as the call error it is (GP3).
+# one. tune raises exactly this, but per fold, and the outer loop records fold
+# failures instead of re-raising them; without this check a malformed grid
+# would surface as an entire design failing rather than as the call error it
+# is (GP3).
 # `recorded = TRUE` is the final fit's reading: the grid came off the results
 # object and is the fixed side, so the message names `object` -- the workflow
 # handed over -- rather than a `grid` argument the caller never wrote (D-041).
@@ -2038,7 +2040,7 @@ check_grid_params <- function(
 # attribute cannot hold NULL: a result built before the specification was
 # recorded, and one built from a design that carried none. A record whose
 # procedure holds no selection rule, or no workflow identity, was built
-# before that entry was recorded (M69, M83), and is refused the same way
+# before the package recorded that entry, and is refused the same way
 # rather than fitted under a rule or a workflow the folds may not have used
 # (D-041 declined migration). And a classed object
 # with the record and no rows is a prototype: it describes a run and holds
@@ -2060,13 +2062,13 @@ check_results_record <- function(results, call = rlang::caller_env()) {
   }
   inside <- attr(results, "inside")
   procedure <- attr(results, "procedure")
-  # The selection rule is an entry of the procedure (M69), so it is asked
+  # The selection rule is an entry of the procedure, so it is asked
   # for only where there is a procedure to hold it: a record with none has
   # one absence to report, not two. A tuner the registry says selects
-  # nothing (M70, D-057) records no rule, and is not asked for one.
+  # nothing (D-057) records no rule, and is not asked for one.
   has_select <- is.list(procedure) &&
     (!tuner_selects(procedure$tuner) || is_selection_rule(procedure$select))
-  # The workflow identity (M83) is the same shape of absence as the rule: an
+  # The workflow identity is the same shape of absence as the rule: an
   # entry of the procedure that an earlier version did not record.
   has_workflow <- is.list(procedure) && is.list(procedure[["workflow"]])
   if (
@@ -2166,8 +2168,7 @@ eval_inside_spec <- function(inside, data, env, call = rlang::caller_env()) {
   # the call, because any condition raised downstream deparses the call it was
   # raised from -- and a call carrying the whole data frame produces an error
   # message thousands of lines long, which is the opposite of what this wrapper
-  # is for. `nested_resamples()` took the same shape at M18 (`eval_spec()`);
-  # before that it inlined, and this comment said so.
+  # is for. `nested_resamples()` takes the same shape (`eval_spec()`).
   eval_env <- rlang::new_environment(
     list(.nestedtune_data = data),
     parent = env
@@ -2335,7 +2336,7 @@ check_metrics <- function(metrics, call = rlang::caller_env()) {
   invisible(metrics)
 }
 
-# The first metric's name, as tune resolves the set for the workflow (M116),
+# The first metric's name, as tune resolves the set for the workflow,
 # or a refusal where it cannot, as for a set made for another model mode.
 # `nested_loop()` calls it for every tuner, a tuner that selects nothing
 # included (D-082), and keeps the name only where the tuner selects.
@@ -2470,7 +2471,7 @@ check_event_level <- function(event_level, call = rlang::caller_env()) {
 # `nested_tune_bayes()` -- the initial candidates alone -- and 1 for
 # `nested_tune_sim_anneal()`, because finetune 1.3.0 loops `(existing_iter +
 # 1):iter`, which at `iter = 0` is `1:0`: two iterations, not none (measured
-# 2026-09-02, M51). `initial` is 2 for Bayes, `tune_bayes()`'s own
+# 2026-09-02). `initial` is 2 for Bayes, `tune_bayes()`'s own
 # requirement, and 1 for annealing, finetune's default.
 
 check_iter <- function(iter, floor = 0, call = rlang::caller_env()) {
@@ -2623,7 +2624,7 @@ check_dots_control <- function(dots, call = rlang::caller_env()) {
   dots[["control"]]
 }
 
-# The selection rule (M69): what `selection_rule()` returns and nothing
+# The selection rule: what `selection_rule()` returns and nothing
 # else, so a string or NULL is refused at entry rather than inside every fold,
 # and every symbol its orderings name is a parameter the workflow tunes, read
 # off the workflow as `check_grid_params()` reads it. `all.vars()` rather than
@@ -2631,7 +2632,7 @@ check_dots_control <- function(dots, call = rlang::caller_env()) {
 # wrapped in. As there, an extraction that fails skips the check rather than
 # turning into a false refusal.
 #
-# The desirability rule (M109, D-073) is held to more: the tuner must be one
+# The desirability rule (D-073) is held to more: the tuner must be one
 # the registry says applies it, desirability2 must be installed, and every
 # name in a term's first argument must be a metric of the run's set or a
 # tuned parameter. `selection_rule()` already refuses a name in the later
@@ -2695,7 +2696,7 @@ check_desirability_rule <- function(
 ) {
   if (!tuner_takes_desirability(tuner)) {
     # The user called the orchestrator, so the message names it, not the
-    # tuner it wraps (M109 review finding 4).
+    # tuner it wraps.
     orchestrator <- paste0("nested_", tuner)
     supported <- paste0(
       "nested_",
@@ -2717,7 +2718,7 @@ check_desirability_rule <- function(
   check_desirability_installed(call = call)
   # On a censored regression model, desirability2 ranks one row per
   # candidate per evaluation time, where tune's selectors use the first time
-  # alone, so the rule is refused there (M109 review finding 2).
+  # alone, so the rule is refused there.
   mode <- tryCatch(
     workflows::extract_spec_parsnip(object)$mode,
     error = function(cnd) NULL
@@ -2793,7 +2794,7 @@ check_desirability_installed <- function(call = rlang::caller_env()) {
 # conflict, refused rather than silently overwritten. A control left at tune's
 # default takes the argument's level -- a control object cannot tell a default
 # "first" from a typed one, and refusing every disagreement would refuse
-# `event_level = "second"` beside every untouched control (M48 gate).
+# `event_level = "second"` beside every untouched control.
 check_control <- function(
   control,
   tuner,
@@ -2830,8 +2831,8 @@ check_control <- function(
   effective_control(tuner, control, event_level)
 }
 
-# The packages a tuner needs, required before anything else is judged (M50,
-# GP3): the registry's `requires` for the tuner -- finetune for the racers,
+# The packages a tuner needs, required before anything else is judged
+# (GP3): the registry's `requires` for the tuner -- finetune for the racers,
 # and the package each race calls `rlang::check_installed()` on inside the
 # first fold, which would otherwise prompt or fail there, one outer loop's
 # worth of checks later. Asked through `rlang::is_installed()` so a test can
@@ -2857,10 +2858,10 @@ check_tuner_installed <- function(tuner, call = rlang::caller_env()) {
 
 # A race scores every candidate on `burn_in` inner resamples before it
 # eliminates any, and finetune refuses a design whose resample count is not
-# greater than that -- per fold, inside the loop, where M03 records it as a
+# greater than that -- per fold, inside the loop, which records it as a
 # fold failure. Every outer fold's inner `rset` is judged here instead, at
 # entry, so a design no fold can race is refused before any work is spent
-# (GP3, M50 plan). `control` is the effective control, so `burn_in` is what
+# (GP3). `control` is the effective control, so `burn_in` is what
 # will run; the failing folds are named by position with their counts.
 check_race_burn_in <- function(resamples, control, call = rlang::caller_env()) {
   burn_in <- control[["burn_in"]]
@@ -2895,10 +2896,10 @@ check_race_burn_in <- function(resamples, control, call = rlang::caller_env()) {
   invisible(counts)
 }
 
-# The entry checks `nested_workflow_map()` runs over a workflow set (M71,
-# D-058), each before the first workflow runs (GP3). The set is read by its
-# columns and never through a workflowsets function, which is what keeps
-# that package in Suggests.
+# The entry checks `nested_workflow_map()` runs over a workflow set (D-058),
+# each before the first workflow runs (GP3). The set is read by its columns
+# and never through a workflowsets function, which is what keeps that package
+# in Suggests.
 
 check_workflow_set <- function(object, call = rlang::caller_env()) {
   needed <- c("wflow_id", "info", "option", "result")
@@ -2970,7 +2971,7 @@ check_map_fn <- function(fn, call = rlang::caller_env()) {
   )
 }
 
-# The map's `verbose` (M149): one `TRUE` or `FALSE`, as workflowsets'
+# The map's `verbose`: one `TRUE` or `FALSE`, as workflowsets'
 # `check_bool()` reads it, refused before any workflow runs. It sits in
 # `workflow_map()`'s place, before `...`, so a third argument passed by
 # position lands here. When the caller did not name `verbose`, the hint
@@ -3007,14 +3008,14 @@ check_map_verbose <- function(
 # itself, so a formal added to an orchestrator is accepted here the day it
 # lands.
 orchestrator_args <- function(fn) {
-  # The export is a generic `(object, ...)` since M107, so the arguments are
+  # The export is a generic `(object, ...)`, so the arguments are
   # the `workflow` method's, the one a set's workflows dispatch to.
   method <- paste0(fn, ".workflow")
   formals <- names(formals(get(method, envir = asNamespace("nestedtune"))))
   c(setdiff(formals, c("object", "...")), "control")
 }
 
-# The map's `...` (M71): every name must be one the orchestrator `fn` names
+# The map's `...`: every name must be one the orchestrator `fn` names
 # accepts, so a typo is refused rather than narrowed away for every
 # workflow; `object` is the set's to bind, never the caller's; everything
 # after `fn` and `verbose` is matched by name; and the design is the one argument every
@@ -3088,7 +3089,7 @@ route_workflow <- function(workflow, fn) {
 }
 
 # Each workflow's `option` entry, held to the orchestrator that workflow
-# routes to (M71): a name that orchestrator does not take is refused naming
+# routes to: a name that orchestrator does not take is refused naming
 # the workflow, and `object` and `resamples` are refused whatever the route,
 # since the workflow and the design come from the set and the call. Checked
 # over the whole set before the first workflow runs, so a bad entry on the
@@ -3131,7 +3132,7 @@ check_map_options <- function(object, routes, call = rlang::caller_env()) {
   invisible(object)
 }
 
-# The final fit's two shapes (M71): a workflow with its results, or a
+# The final fit's two shapes: a workflow with its results, or a
 # workflow-set run with an `id`. Anything between the two -- a set with
 # `results` supplied, a set with no `id`, a workflow with an `id` -- is a
 # call that meant one shape and wrote the other, refused naming both.
@@ -3166,7 +3167,7 @@ check_final_fit_set_args <- function(
 }
 
 # The workflow handed to the final fit, against the identity the run
-# recorded (M83). The grid-column and tune() marker checks run first and
+# recorded. The grid-column and tune() marker checks run first and
 # catch a workflow tuning different names, naming the column or the marker;
 # this catches every other difference -- model type, engine, mode, an
 # argument, the preprocessor's kind or any part of it -- and names the first
@@ -3220,7 +3221,7 @@ identity_difference <- function(recorded, given) {
   d <- first_difference(recorded, given)
   if (!is.null(d) && length(d$path) == 0L && identical(d$kind, "names")) {
     # A part present on one side only: the case weights or the
-    # postprocessor (M103), which the identity leaves out when the workflow
+    # postprocessor, which the identity leaves out when the workflow
     # carries none, so a record built without one and a workflow with one
     # differ in their parts' names.
     return(optional_part_difference(recorded, given))

@@ -147,7 +147,7 @@
 #' @export
 nested_final_fit <- function(object, results, ..., id = NULL) {
   rlang::check_dots_empty()
-  # A workflow-set run (M71): `object` is the set, `id` names the row, and
+  # A workflow-set run: `object` is the set, `id` names the row, and
   # the workflow and its record are read together off that row, so the
   # wrong pairing cannot happen. The rest of the path is the single
   # workflow's, on what the row holds.
@@ -169,7 +169,7 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
   # its model-fitting package is absent is refused before the inner rset is
   # built rather than inside the race.
   check_tuner_installed(procedure$tuner)
-  # And desirability2 for a recorded desirability rule (M109, D-072), which a
+  # And desirability2 for a recorded desirability rule (D-072), which a
   # result built where it was installed can carry to where it is not.
   if (
     is_selection_rule(procedure$select) &&
@@ -185,13 +185,13 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
   if (tuner_takes_grid(procedure$tuner)) {
     check_grid_params(object, procedure$grid, recorded = TRUE)
   }
-  # A record that selected nothing (M70) takes a workflow with nothing to
+  # A record that selected nothing takes a workflow with nothing to
   # tune, as `nested_fit_resamples()` took it: a marked parameter would reach
   # `fit()` unfinalized, and the refusal names the five that tune.
   if (!tuner_selects(procedure$tuner)) {
     check_tuned_workflow(object)
   }
-  # The workflow itself, against the identity the run recorded (M83): the
+  # The workflow itself, against the identity the run recorded: the
   # grid and marker checks above catch a workflow tuning different names
   # and name the exact column or marker, so they run first; this catches
   # every other difference. It runs before the seeds below are drawn, so a
@@ -239,8 +239,9 @@ nested_final_fit <- function(object, results, ..., id = NULL) {
 # everything it needs is an argument, so what it produces depends on the two
 # seeds and on nothing ambient. That is what makes the kind-independence
 # property testable -- from a user-visible seed it is not, because the entry
-# draw above reads the caller's stream and that draw is itself kind-dependent
-# (M05, deviating from RR02's BC6 as literally written).
+# draw above reads the caller's stream and that draw is itself kind-dependent.
+# So the test departs from RR02, which asks for identical results from one
+# user-visible seed under either generator kind.
 # `call` is threaded through rather than defaulted at the abort site: the
 # specification is re-evaluated here, two frames below the function the user
 # called, so an abort left to name its own caller named this worker -- an
@@ -264,12 +265,12 @@ final_fit_worker <- function(
   # `run_tuner()` makes are one object (D-042); a worker driven without one
   # runs and records tune's default, as the orchestrator would have.
   control <- effective_control(tuner$tuner, control, event_level)
-  # A tuner that selects nothing (M70): no inner rset, no run, no rule. The
+  # A tuner that selects nothing: no inner rset, no run, no rule. The
   # workflow is fitted as given on every row under the second seed; the
   # first is drawn with it so the object's seed layout matches a tuned fit's,
   # and is consumed by nothing. The design's inner specification is not
-  # evaluated, since nothing on this path reads it (a milestone-local
-  # decision, M70). `tuning` is NULL, and the two accessors say so.
+  # evaluated, since nothing on this path reads it. `tuning` is NULL, and the
+  # two accessors say so.
   if (!tuner_selects(tuner$tuner)) {
     set_fold_seed(seeds[[2L]])
     fitted <- parsnip::fit(object, data = data)
@@ -313,7 +314,7 @@ final_fit_worker <- function(
   # Resolved from the tuned object rather than from `metrics`, so the same code
   # answers whether the caller supplied a metric set or let tune pick.
   metric_name <- tune::.get_tune_metric_names(tuned)[[1L]]
-  # The recorded rule (M69), applied as every fold applied it. `eval_time` is
+  # The recorded rule, applied as every fold applied it. `eval_time` is
   # not passed on, for the reason `nested_fold_fit()` gives at the same call
   # (D-038): left NULL, tune reads the evaluation times off `tuned` -- the ones
   # this run was tuned at -- and selects at the first of them either way.
@@ -336,7 +337,7 @@ final_fit_worker <- function(
     workflow = workflow_identity(object),
     # The name this fit selected on, resolved above from its own run, so a
     # results object built before the entry was recorded still yields a fit
-    # that names it (M116).
+    # that names it.
     first_metric = metric_name
   )
   new_nested_final_fit(fitted, selected, tuned, seeds, procedure)
