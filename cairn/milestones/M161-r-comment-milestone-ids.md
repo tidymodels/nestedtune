@@ -25,7 +25,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 
 - [ ] AC1: At the branch head, no terminal token that `utils::getParseData()` returns for any file `Sys.glob("R/*.R")` lists has text matching the perl pattern `\bM[0-9]{2,3}\b`.
 - [ ] AC2: The package code is unchanged: `Sys.glob("R/*.R")` lists the same files at the branch point and the branch head, `deparse()` of `parse(file, keep.source = FALSE)` is identical at both for each file, and `git diff <branch point> -- man NAMESPACE DESCRIPTION` is empty.
-- [ ] AC3: No comment line the diff from the branch point adds to `R/*.R` holds a match of `\b(AC|BC|T|O|F|P)[0-9]{1,2}\b`, a match of `\bS[0-9]{1,2}\b` other than `S3`, `S4` and `S7`, or the word "milestone" in any letter case.
+- [ ] AC3: No comment token that `utils::getParseData()` returns at the branch head, on a line of `R/*.R` that the diff from the branch point adds, holds a match of `\b(AC|BC|T|O|F|P)[0-9]{1,2}\b`, a match of `\bS[0-9]{1,2}\b` other than `S3`, `S4` and `S7`, or the word "milestone" in any letter case.
 - [ ] AC4: At the branch head, `devtools::test()` reports 0 failures, `devtools::check()` reports 0 errors, 0 warnings and 0 notes, `air format --check .` is clean, and `Rscript benchmarks/sweep-prose.R --plain` is clean.
 
 ## Coverage
@@ -50,6 +50,7 @@ Remove the milestone ids from the comments in `R/*.R`, rewording each comment th
 - 2026-10-24: question set: plan a second milestone after the first — "Also the id cleanup"; it depends on M160 because both edit `R/nested-final-fit.R` comments.
 - 2026-10-24: plan gate chose keeping decision ids over removing them with the milestone ids, because the row asks for milestone ids and a decision id names a live record of why the code is as it is; falsified by a user or maintainer asking for decision ids out of `R/` too.
 - 2026-10-24: plan gate chose one-off sweep commands in the criteria over extending `benchmarks/sweep-test-comments.R` to `R/`, because a new checker over repo-internal text would need upkeep for a one-time cleanup; falsified by milestone ids reappearing in `R/` after this milestone.
+- 2026-10-24: criteria audit (reduced mode, fresh Opus reader): AC1, AC2 and AC4 passed. AC3 passed, with the note that "comment line" was loose, so AC3 now reads comment tokens from `utils::getParseData()` on the added lines. The reader found no one-digit or four-digit `M` ids in `R/*.R`, so AC1's pattern misses none today. No criterion binds an instrument.
 
 ## Decisions
 
