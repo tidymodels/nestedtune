@@ -71,6 +71,7 @@ Close the three suite findings M079's review left (5, 8, 9) and the `test-parall
 - 2026-10-24: T5 on code head `eb1ff5ac` (tree `7e15e0fc`), on battery, no other R session, `air format --check .` clean. Quiet runs 1-3 (08:22-08:47): whole suite 0 failures each, and the interrupt block ran its 8 expectations each time (the first quiet run is the verify slot). Pair 1, both runs in the foreground of their own shells (08:47-08:56): 0 failures in each, block ran. Pair 2 (08:56-09:05): run B 0 failures. Run A had the block run and pass, plus 10 failures in `test-parallel-identity.R` (:241, :312, :357, :414), with `shared_daemons(2)` reading 1 connection for 2, the same signature as the candidate row's. The suite started with `&` (09:06-09:14): 0 failures, and the block skipped with "this process ignores SIGINT, so no interrupt can reach it".
 - 2026-10-24: claim audit: not owed — internal tier.
 - 2026-10-24: status to review.
+- 2026-10-24: step-7 approval: m159-m079-review-leftovers approved for merge
 
 ## Decisions
 
