@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M160: Seed checks in four refusal tests can fail
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — test code and one source comment; no export, help page or behavior changes
-- **Branch/PR:** —
+- **Branch/PR:** m160-seed-check-refusals
 
 ## Goal
 
@@ -54,6 +54,8 @@ Make the four refusal tests named by the candidate row "Fix seed checks in four 
 - 2026-10-24: scope: the plan's grep found ten `.Random.seed, before)` sites, not the row's four; the six others join as AC2, fixed only where they cannot fail.
 - 2026-10-24: plan gate chose renaming the AC3 block to its one refusal over triggering each record refusal, because the narrower promise matches what the block checks and the record refusals each have their own blocks; falsified by evidence that no block tests the order of the other record refusals against the draw.
 - 2026-10-24: criteria audit (reduced mode, fresh Opus reader): 3 findings, all fixed. AC2 promised failure on any breaking code, so it now names one break per claim kind, and T2 plants it for restore claims too. AC2's grep also matched an `expect_false(identical(...))` line, so the pattern is now `expect_identical(.Random.seed, before)` and T2 names that line as outside. AC1 promised each RNG check fails while T1 only saw the block fail, so AC1 and T1 now read the failing expectations. AC3, AC4 and AC5 passed; no criterion binds an instrument.
+- 2026-10-24: implement started on `m160-seed-check-refusals`, cut from main at c869c197.
+- 2026-10-24: T1 (checkpoint, not yet ticked): the four blocks now remove `.Random.seed` and assert it is still absent after the refusal, and the event-level block asserts `nestedtune_bad_event_level`. All four refusals sit before the draw in `nested_tune_grid()` or `nested_final_fit()`, both of which keep a state their draw created, so the existence check applies to all four, the set path included. The identity block puts the seed back before its second half, which builds fixtures. Plant: moving `check_event_level()` after the draw in `nested_tune_grid()`, and the snapshot and draw to the top of `nested_final_fit()`, failed each of the four blocks on its `exists()` expectation, and that is the only RNG check each keeps. Reverted. The four files pass (26 blocks, 0 failed); the full suite is running.
 
 ## Decisions
 

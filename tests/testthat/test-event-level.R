@@ -162,12 +162,17 @@ test_that("the refusal fires before anything is fitted", {
   wf <- det_workflow(d)
   folds <- det_nested(d, v = 2)
 
-  set.seed(1)
-  before <- .Random.seed
+  # Existence, not identity: the caller's state comes back either way, but a
+  # session with no state keeps the one a draw creates.
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
+
   expect_error(
-    nested_tune_grid(wf, folds, grid = det_grid(), event_level = "third")
+    nested_tune_grid(wf, folds, grid = det_grid(), event_level = "third"),
+    class = "nestedtune_bad_event_level"
   )
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
 
 # Sensitivity -----------------------------------------------------------

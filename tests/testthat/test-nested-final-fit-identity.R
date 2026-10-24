@@ -534,15 +534,19 @@ test_that("a record with no workflow entry is refused before the identity check"
   attr(res, "procedure")$workflow <- NULL
   expect_false("workflow" %in% names(extract_procedure(res)))
 
-  set.seed(1)
-  before <- .Random.seed
+  # Existence, not identity: the caller's state comes back either way, but a
+  # session with no state keeps the one a draw creates.
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
   cnd <- rlang::catch_cnd(nested_final_fit(wf, res))
   expect_s3_class(cnd, "nestedtune_bad_results")
   expect_match(conditionMessage(cnd), "no record of the workflow")
   expect_match(conditionMessage(cnd), "earlier version")
   expect_match(conditionMessage(cnd), "not migrated")
   expect_identical(conditionCall(cnd)[[1]], as.name("nested_final_fit"))
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
+  assign(".Random.seed", saved, envir = globalenv())
 
   # A record missing both late entries names both, in one sentence.
   both <- final_results(d)

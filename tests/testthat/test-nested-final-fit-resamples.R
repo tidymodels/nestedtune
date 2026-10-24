@@ -106,12 +106,15 @@ test_that("a marked workflow is refused by the final fit on such a record, befor
   res <- fit_resamples_results(d)
 
   wf <- det_workflow(d)
-  set.seed(1)
-  before <- .Random.seed
+  # Existence, not identity: the caller's state comes back either way, but a
+  # session with no state keeps the one a draw creates.
+  saved <- .Random.seed
+  on.exit(assign(".Random.seed", saved, envir = globalenv()), add = TRUE)
+  rm(".Random.seed", envir = globalenv())
   cnd <- rlang::catch_cnd(nested_final_fit(wf, res))
   expect_s3_class(cnd, "nestedtune_tuned_workflow")
   expect_identical(rlang::call_name(conditionCall(cnd)), "nested_final_fit")
-  expect_identical(.Random.seed, before)
+  expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 })
 
 test_that("the caller's RNG state is restored, and the same seed gives the same fit", {
