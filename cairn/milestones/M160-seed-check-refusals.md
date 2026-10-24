@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M160: Seed checks in four refusal tests can fail
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -40,9 +40,9 @@ Make the four refusal tests named by the candidate row "Fix seed checks in four 
 ## Tasks
 
 - [x] T1: Fix the four AC1 blocks. Where the function keeps a state its draw created (`nested_tune_grid()`, `nested_final_fit()`), use the existence check of "the record refusals fire before anything is drawn" (`test-nested-final-fit-checks.R:245`). Where it does not (read the set path behind `test-nested-final-fit-set.R:50` first), use another check that can fail, or drop the comparison where the name claims no order. Give the event-level block `class =`. For each block, move the refusal after the draw on a scratch edit, read the failing expectations from testthat's output, and revert.
-- [ ] T2: Read the six other sites (`test-nested-final-fit-resamples.R:128`, `test-nested-final-fit-identity.R:124`, `test-nested-tune-bayes-results.R:284`, `test-nested-tune-finalize.R:799`, `test-nested-workflow-map-rng.R:31` and `:130`, line numbers at 6e5e3527). Fix each comparison that cannot fail on code that breaks its block's claim, or narrow the name to what it checks. Record each site's reading in one work-log line, and plant the AC2 break that matches each kept comparison's claim, restore claims included. `test-nested-tune-bayes-results.R:293` (`expect_false(identical(...))`, a check that the state moves) is outside AC2.
-- [ ] T3: Rename the AC3 block to the refusal it triggers. Reword the AC4 comment, reading `restore_rng()` (`R/nested-tune-grid.R:1004`) and the T1 existence check's result for the claim.
-- [ ] T4: Run the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the AC5 results.
+- [x] T2: Read the six other sites (`test-nested-final-fit-resamples.R:128`, `test-nested-final-fit-identity.R:124`, `test-nested-tune-bayes-results.R:284`, `test-nested-tune-finalize.R:799`, `test-nested-workflow-map-rng.R:31` and `:130`, line numbers at 6e5e3527). Fix each comparison that cannot fail on code that breaks its block's claim, or narrow the name to what it checks. Record each site's reading in one work-log line, and plant the AC2 break that matches each kept comparison's claim, restore claims included. `test-nested-tune-bayes-results.R:293` (`expect_false(identical(...))`, a check that the state moves) is outside AC2.
+- [x] T3: Rename the AC3 block to the refusal it triggers. Reword the AC4 comment, reading `restore_rng()` (`R/nested-tune-grid.R:1004`) and the T1 existence check's result for the claim.
+- [x] T4: Run the verify slot and `devtools::check()` from the main checkout (LESSONS M149), and record the AC5 results.
 
 ## Work log
 
@@ -61,6 +61,9 @@ Make the four refusal tests named by the candidate row "Fix seed checks in four 
 - 2026-10-24: T3: renamed the AC3 block "the refusal of a record with no inner specification fires before anything is drawn"; the old name is in no ledger or snapshot, only in the historical `benchmarks/test-blocks-*.csv` tables, left as they are. Reworded the AC4 comment, from `restore_rng()`'s two branches and T1's existence result. `M83` in it is left for M161.
 - 2026-10-24: T4: the full suite at 3488fffc, run alone, failed 11 blocks, all in `test-parallel-identity.R` (22 failures, 11 errors; the silent reporter kept no messages, so whether it is the lost-daemon failure of the candidate row is not known). The file alone then passed, 21 blocks, 0 failed. M160 touches neither that file nor parallel code. Rerunning the full suite with messages kept.
 - 2026-10-24: T4: the rerun at 3488fffc (tests unchanged since), run alone, gave 1153 blocks, 0 failed, 0 errors. `devtools::check()` running.
+- 2026-10-24: T4: `devtools::check()` at 073dbf3b, main checkout: 0 errors, 0 warnings, 0 notes. `air format --check .` and `sweep-prose.R --plain` clean at 3488fffc. T2, T3 and T4 ticked.
+- 2026-10-24: claim audit: not owed — internal tier.
+- 2026-10-24: implement done; status review.
 
 ## Decisions
 
