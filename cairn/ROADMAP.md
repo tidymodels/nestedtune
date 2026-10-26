@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-24 after M161 (PR #178): archived, one row graduated, one added, none unparked; LESSONS over its 25-lesson limit (32)._
+_Last hygiene check: 2026-10-26 lessons pass, 32 to 20 lessons, no D-entry, validate green. Dropped by planner test: 2026-09-04 (M60), 2026-09-07 (M71), 2026-09-11 (M85), 2026-09-14 (M92). Dropped by rank: 2026-07-26 (M08) 14, 2026-08-30 (M33) 37, 2026-07-26 (M09) 38, 2026-09-01 (M44) 44, 2026-07-26 (M05, M45) 45, 2026-09-01 (M42) 46, 2026-08-30 (M28) 47, 2026-07-26 (M05, M54) 54. Compressed: 2026-07-26 (M04), (M06), (M07); 2026-07-27 (M12), (M15), (M14), (M16), (M13); 2026-09-01 (M41); 2026-09-02 (M50); 2026-09-03 (M51); 2026-09-06 (M68); 2026-09-07 (M73); 2026-09-11 (M86); 2026-09-15 (M96); 2026-09-16 (M101); 2026-10-22 (M152)._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
