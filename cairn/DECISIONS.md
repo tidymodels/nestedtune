@@ -2123,6 +2123,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** on a `push` or `pull_request` event, the job runs `test-vctrs-compat.R`, `test-dplyr-compat.R` and `test-nested-results-set-compat.R` through a `test_local()` filter. On `schedule`, it runs the whole suite. A `workflow_dispatch` input `full`, default true, picks between the two. The concurrency group is keyed on that switch as well as the ref, so a three-file run never cancels or replaces a whole-suite run. Rejected at M153's plan gate: weekly-only runs, because a push still checks the watched generic at once.
 **Consequences:** a development-vctrs break that reaches only other test files shows up on the next weekly or full dispatch run, not on the push. Other test files call vctrs functions directly (`test-nested-tune-bayes-oracles.R` calls `vec_cbind_frame_ptype()`), and dplyr and tibble build on vctrs. A new test file that needs the watch adds itself to the filter. Falsified by a development-vctrs break that the three files miss and only the weekly run catches. (Narrows D-116's every-other-job-full-suite clause for this job alone. Every other CI job that runs the tests keeps what D-116 fixed.)
 
+### D-120 (2026-10-30): the candidate row on the cause of the two pre-M14 CI stalls is dropped as not worth keeping
+
+**Context:** a `/cairn-triage` pass weighed every ROADMAP candidate row and every DESIGN.md Known issues entry. The ROADMAP stood just under its byte budget.
+**Decision:** dropped the parked row "Cause of the two pre-M14 CI stalls". It would find why `R CMD check` on macOS (52 min) and `covr` on ubuntu (40 min) went silent after `* checking tests ...` in July 2026 and passed on re-run. Not worth the work: the stalls have not recurred past the trigger the row named, and the M012-M016 archives keep the mitigation and the two refuted suspects, so a recurrence would be investigated from them with or without the row.
+**Consequences:** a recurring stall is filed as a new candidate row that cites the M012-M016 archives. The drop is re-opened by superseding this entry.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

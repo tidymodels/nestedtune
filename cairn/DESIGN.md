@@ -627,31 +627,28 @@ execution in RR01, and tune 1.x seeded differently (D-012).
   candidates 2026-09-11; added 2026-07-30 — M18 review finding A2.
 
 - Index-slot shapes `check_inner_splits()` leaves to rsample. A fractional
-  index truncates and passes containment. Under an `rsample::nested_cv()`
-  design, a fractional outer `in_id` instead stops `check_nested()` with a
-  raw vctrs "loss of precision" error. That error is not a classed refusal
-  (observed 2026-10-01, M141 claim audit). A non-data.frame outer `$data`
-  reports as a frame mismatch. An empty inner `in_id` passes containment,
-  which the fixture vehicle `break_inner_split()` relies on. An outer `in_id`
-  past the frame, within integer range, is left to `rsample::analysis()` and
-  `last_fit()` (D-049). A logical `NA` `out_id` whose complement is empty
-  passes, because the entry check does not compute complements. rsample
-  builds it only for a split that holds every row. Accepted at M59's review
-  (O5, O6, O9, O15): each is a shape rsample itself admits, and the entry
-  check holds the shapes this package owns. Revisit on a user reaching one of
-  these past the entry check, or if rsample refuses one of them earlier.
-  (corrected M138: O7, an element-wise `NA` in `out_id`, is now refused
-  before containment with every other `NA` index but the logical `NA`
-  `out_id`, per D-111.) (corrected M141: a non-numeric slot, a value outside
-  integer range, and a `NULL` or empty `out_id` are now refused by the same
-  rule, per D-114.) (added M141 review: an outer `in_id` that holds a
-  negative index, or is empty, passes the rule. A negative index fails the
-  fold in vctrs. The containment rule refuses an empty one, but its message
-  hides the cause. A slot that is numeric but classed, a matrix, or
-  `bit64::integer64` passes `is.numeric()` and fails the fold in vctrs. An
+  index truncates and passes containment, but under an `rsample::nested_cv()`
+  design a fractional outer `in_id` stops `check_nested()` with a raw vctrs
+  "loss of precision" error, not a classed refusal (observed 2026-10-01, M141
+  claim audit). A non-data.frame outer `$data` reports as a frame mismatch.
+  An empty inner `in_id` passes containment, which the fixture vehicle
+  `break_inner_split()` relies on. An outer `in_id` past the frame, within
+  integer range, is left to `rsample::analysis()` and `last_fit()` (D-049).
+  A logical `NA` `out_id` whose complement is empty passes, because the entry
+  check does not compute complements. rsample builds it only for a split that
+  holds every row. An outer `in_id` holding a negative index fails the fold in
+  vctrs, and an empty one is refused by containment with a message that hides
+  the cause. A slot that is numeric but classed, a matrix, or
+  `bit64::integer64` passes `is.numeric()` and fails the fold in vctrs, but an
   integer64 inner `in_id` runs, so a stricter type rule would refuse a shape
-  that works. Observed 2026-10-01.) Routed from candidates 2026-09-11; added
-  2026-09-04 — M59 review O5, O6, O7, O9, O15.
+  that works (observed 2026-10-01). Every other `NA` index, a non-numeric
+  slot, a value outside integer range, and a `NULL` or empty `out_id` are
+  refused before containment (corrected M138, D-111; corrected M141, D-114).
+  Accepted at M59's review (O5, O6, O9, O15), extended at M141's review: each
+  is a shape rsample itself admits, and the entry check holds the shapes this
+  package owns. Revisit on a user reaching one of these past the entry check,
+  or if rsample refuses one of them earlier. Routed from candidates
+  2026-09-11; added 2026-09-04 — M59 review O5, O6, O7, O9, O15.
 
 - The guides say what to report after nesting, but not what to report when a
   user skips it. `vignettes/estimate.Rmd`'s tall-data paragraph (Wilimitis and
