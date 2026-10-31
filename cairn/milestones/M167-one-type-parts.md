@@ -81,3 +81,41 @@ Sync: branch level with origin/main at 6b374208; no PR; Copilot round off (no `#
 - AC3: `test-nested-tune-race-oracles.R` :: "an eliminated candidate carries the grid path's mean over the resamples the race scored it on" passes (file run: 9 tests, 0 failed, 0 errors, 0 skipped). On `race_results("tune_race_anova")` it compares each eliminated row's mean, n and std_err with `nested_tune_grid()` over a `manual_rset()` cut to the race's resamples (invariant), and asserts `eliminated > 0`.
 - AC4: `test-event-level.R` :: "the final fit's tuning run reports the sensitivity counted at the second level" passes (file run: 6 tests, 0 failed, 0 errors, 0 skipped). It counts sensitivity from the final fit's saved tuning predictions (closed-form) for all 9 resample-candidate pairs, and asserts the first level's count differs from the second's in each.
 - AC5: `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing (exit 1). The AC1 test is a line under `compute-metrics/U1` and the AC2 test under `compute-metrics/U2` (same type and source); the AC3 test is under new row `nested-tune-race-oracles/O5` (invariant) and the AC4 test under new row `event-level/O3` (closed-form). The compute_metrics() group credits dynamic metrics to U1 and U2, and static and linear-predictor metrics to O1 and U2; the racing group credits eliminated rows to O3 (live) and O5 (invariant); the event-level group credits the final fit to O2 (live) and O3 (closed-form).
+
+Consistency gate:
+- `cairn_validate.py`: all checks passed, 18 advisory warnings (reference staleness, pre-existing). No principle changed, so `cairn_impact.py` skipped.
+- `devtools::check()` at 5328c664: 0 errors, 0 warnings, 0 notes.
+- `devtools::document()`: no diff in `man/` or `NAMESPACE`; it rewrote `Config/roxygen2/version` 8.1.0 → 8.1.1 (local roxygen2, the M166 lesson), restored.
+- Six gating prose sweeps (`--list-gating`): each exit 0, clean. README.Rmd and README.md unchanged; no user-visible change, so no NEWS entry; no new top-level file.
+- The suite run after the check (working tree with the unrun fix edits of b654e825): 1169 tests, 1 error, in the edited AC2 test (`order()` on a missing `.eval_time` for a set with no dynamic metric); fixed in 206d1137.
+
+spawned: diff-bug, blame-history, prior-review, ripple
+- ripple #1: the ROADMAP candidate row "Add second oracles to one-type parts" still states the pre-diff coverage — reject (planned change: post-merge hygiene graduates and deletes the row).
+- blame-history #1: the event-level test re-checks yardstick's arithmetic, which M152 cut — reject (false: the plant at R/nested-final-fit.R:228 fails it 18 times, so it tests that the level reaches the final fit's run, not the level exchange).
+- blame-history #2: `event-level/O3` reuses the label of the record M152 removed — reject (false: the registry header gives a new oracle the number after the highest its file uses here, O2; the removed record never entered the registry).
+- blame-history #3: the racing group line should say the win-loss racer rests on the shared body — fix now (group line names `nested_tune_race()`).
+- blame-history #4: the added fits are unmeasured — reject (false: 1.6 s for the racing test, 1.0 s for the event-level test, file runs 2026-10-31).
+- prior-review #1: the widened compute_metrics() credits reverse M166's narrowing — reject (false: each credited part has a plant that fails its tests, recorded in the work log and below).
+- prior-review #2: the one-candidate grid in O5 echoes M164's failed plant — reject (false: the survivors-only and full-count plants fail O5's test 3 and 12 times).
+- prior-review #3: the censored tests pass no `event_level`, as M092 flagged for a set test — reject (false: survival metrics take no event level; the reviewer found it not reintroduced).
+- prior-review #4: `reverse_pred()` and M092's `.row` join follow-up — reject (false: the helper leaves `.row` alone; not reintroduced).
+- prior-review #5: M035's missing seed assertion — reject (false: the new test seeds both calls; not reintroduced).
+- prior-review #6: duplicate test labels, flagged at M035 — reject (false: none in the three files).
+- prior-review #7: power claims in new comments, as M166 found false records — reject (false: plants back the first-level and swap claims; re-run below).
+- diff-bug #1: no test reaches the static-alone or linear-alone branches of `score_fold()` — fix now (both the invariant and the live test run six mixes of kinds).
+- diff-bug #2: O5 picks the eliminated rows from the record under test — fix now (read from the reference race; the record must hold each one).
+- diff-bug #3: O5's source line hides that the resample ids come from O1's reference race — fix now (registry row and test comment say so).
+- diff-bug #4: the invariant test can pass on an empty metric mask — fix now (asserts the metric is present exactly when the set holds it).
+- diff-bug #5: O1 checks which column a metric reads, not its value, and U1 goes uncredited for the values — fix now (group line credits truth and weights to U1 and U2, the column choice to O1 and U2).
+- diff-bug #6: the header says the three parts were on one type, but static and linear-predictor metrics were on none — fix now ("one type or none").
+- diff-bug #7: the test-file header says any one column moves only its metrics, but only two columns are reordered — fix now (names `.pred_time` and `.pred_linear_pred`).
+- diff-bug #8: the AC2 test runs only on a run with hand-edited predictions — fix now (it runs on the run as saved and with `.pred_time` reversed).
+- diff-bug #9: T4 counts sensitivity only while the group line credits the whole final fit — fix now (specificity counted; group line credits sensitivity and specificity, `roc_auc` level-free per O2's test).
+- diff-bug #10: the event-level test partly checks yardstick — reject (false: as blame-history #1).
+- diff-bug #11: the plant counts in the work log are file-wide — fix now (re-planted; per-test counts below).
+- diff-bug #12: the new racing test runs uncached grid runs — reject (false: 1.6 s measured).
+Return floor: no finding shows a criterion failing as written; the fixes keep each criterion's wording.
+
+Re-run after the fixes (206d1137; file runs, 0 failed, 0 errors, 0 skipped in each file):
+- AC1 test: 3 expectations, passes. AC2 test: 144 expectations over the run as saved and reversed, six mixes each, passes. Invariant test: 36 expectations, passes. AC3 test: 28 expectations, passes. AC4 test (renamed "the final fit's tuning run reports the sensitivity and specificity counted at the second level"): 29 expectations, passes.
+- Plants, each restored (`git diff -- R/` empty after): linear-alone branch reads `.pred_time` → invariant 4, AC2 test 6 failures; static/linear swap in the combined branch → invariant 8, AC2 test 10; `all_configs = FALSE` → AC3 test 3; eliminated rows given the full count and a 1e-9 shift → AC3 test 12; `event_level = "first"` at R/nested-final-fit.R:228 → AC4 test 18, O2's test 4.
