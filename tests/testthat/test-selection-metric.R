@@ -2,7 +2,8 @@
 # set, as tune resolves it for the workflow. The oracle is tune's own reading
 # of the final fit's stored tuning run, `tune::.get_tune_metric_names()`, the
 # call every fold and the final fit select on. It is compared with the entry
-# on both the results object and the final fit built from it.
+# on both the results object and the final fit built from it. The grid test
+# also compares both entries with the first name of the set it passed.
 
 skip_heavy_on_cran()
 
@@ -27,6 +28,10 @@ test_that("a grid run records the first metric of the set it was given, in eithe
     expect_first_metric(res, final)
     expect_identical(
       extract_procedure(res)$first_metric,
+      names(attr(ms, "metrics"))[[1L]]
+    )
+    expect_identical(
+      extract_procedure(final)$first_metric,
       names(attr(ms, "metrics"))[[1L]]
     )
   }
