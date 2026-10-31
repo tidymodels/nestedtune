@@ -1,13 +1,13 @@
 # M166: Give finer results a second oracle
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — tests and in-repo tracking records; no package code or user doc changes
-- **Branch/PR:** —
+- **Branch/PR:** m166-finer-second-oracle
 
 ## Goal
 
@@ -41,7 +41,7 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 
 ## Tasks
 
-- [ ] T1: Final fit under `eval_time`, invariant. In `test-eval-time.R`, after the test at :491, run `nested_tune_grid()` through `memoised()` at `c(0.5, 10)`, `c(10, 0.5)`, `0.5` and `10`. Fit each run with `set.seed(11)` first, as that test does. Compare the selected `dist` and `predict()` on `srv_data()`. Plant: pair each order with the other element's run, and see the test fail.
+- [x] T1: Final fit under `eval_time`, invariant. In `test-eval-time.R`, after the test at :491, run `nested_tune_grid()` through `memoised()` at `c(0.5, 10)`, `c(10, 0.5)`, `0.5` and `10`. Fit each run with `set.seed(11)` first, as that test does. Compare the selected `dist` and `predict()` on `srv_data()`. Plant: pair each order with the other element's run, and see the test fail.
 - [ ] T2: Resample weights, invariant. In `test-resample-weights.R`, beside the tests at :172 and :204, build the weighted design with a new weight on the failed fold (`break_fold()`, helper-orchestration.R:532) and on the NA fold (`plant_na`). Compare `collect_metrics()` rows. Plant a defect the fixture can show, such as matching weights to folds by position in `summarize_folds()` (R/nested-results.R:900), see it fail, and restore.
 - [ ] T3: Desirability, closed-form. Read desirability2 0.2.0's help pages for `select_best_desirability()` and its term functions. Write the source note with its `INDEX.md` line. In `test-nested-tune-grid-oracles.R`, beside the test at :432, reuse that run's rule and fixture. Compute each term's desirability over each fold's candidates, their geometric mean, and the top candidate. Compare with `.selected`. Fold 3 picks apart from the best `rmse`, so the rule shows. Plant: flip one term's direction, and see the test fail.
 - [ ] T4: Selection metric. Add the assertion to the test at `test-selection-metric.R:15`. Plant: compare with the set's last name, and see it fail.
@@ -61,3 +61,4 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: plan gate chose a weight-change invariant for left-out folds over a comparison with `tune::fit_resamples()`, because tune ignores the weights or errors when a fold is missing (tune#1197); falsified by a tune release that drops a missing fold and keeps the weights.
 - 2026-10-31: plan gate chose a two-element-against-one-element invariant for the final fit under `eval_time` over the IPCW Brier score written out for the final fit's tuning run, because the invariant reuses fixtures and the closed form already backs the runs; falsified by the final fit reading `eval_time` by a route that the invariant cannot reach.
 - 2026-10-31: plan gate chose one milestone over two, because three tests, one assertion and the registry edit fit two sessions; falsified by the plan-owned body passing the cap or T1-T5 not fitting two sessions.
+- 2026-10-31: T1: added "a final fit at a multi-element `eval_time` is the final fit at its first element" to `test-eval-time.R` (5 expectations, file green under `NESTEDTUNE_FULL_SUITE=true`). Plant: pairing each order with the other element's run failed 4 of 5 expectations (lognormal against weibull), reverted. Header comment names the test beside the run form.
