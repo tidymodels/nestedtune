@@ -197,3 +197,16 @@ spawned: diff-bug, ripple (fourth pass)
 - ripple #3: the source row "Keep an oracle registry outside tests" still states the gap — reject (planned: it graduates at hygiene).
 - ripple #4: `DESIGN.md:137` "never a restated value" against a registry that restates test names — reject (false: the sentence is about an oracle's expected values, which the registry does not restate; it holds pointers to the asserting tests).
 - ripple #5: two files cite DESIGN "Oracle records" — reject (false: the reviewer finds the citation resolves).
+- diff-bug #1: `nested-workflow-map-readers/U1` compares the set reader with the package's own per-element reader, which is invariant, not live, so "Stacked reader tables" holds two types and the one-type count is nine — fix now (type changed, group and candidate row renamed to nine; no criterion fails, since each row's type is still a doctrine type and each count matched its rows).
+- diff-bug #2: `resample-weights/O1` and `collect-predictions-summarize/U2` copy tune's code or the package's help-page rules, not a published formula — reject (false: the doctrine's closed-form covers a definitional formula recomputed with explicit code, as settled at the third pass).
+- diff-bug #3: the header says it leaves out oracles that no comment records, but the two left out have comments the greps do not read; the DESIGN bullet says the header names the left-out oracles — fix now.
+- diff-bug #4: `test-nested-results-agreement.R` may hold an invariant — reject (planned: the line gives the reason its comments state, as settled before).
+- diff-bug #5: the `helper-orchestration.R` header describes the file rather than giving a reason — reject (false: its statement that it holds the fixtures and reference loop for the oracles is the reason it records none).
+- diff-bug #6: the header says names were mapped through the CSV, but the workflow-map pointer came from a later merge of six tests into one loop — fix now.
+- diff-bug #7: the header cites AC1 in `milestones/archive/M163-oracle-registry.md`, which the 25-line summary will not hold — fix now (state the rule briefly and point to git history).
+- diff-bug #8: D-079's reason covers the Bayesian, racing and annealing tuners only, not grid, fit_resamples or the final fit — fix now.
+- diff-bug #9: "also counted in the Bayesian group" fits two groups — fix now (names the final-fit group).
+- diff-bug #10: the workflow-map rows copy "live" though the reference is the package's own orchestrator — fix now (invariant, with "live" in brackets, and the rule stated in the header).
+- diff-bug #11: the `eval-time/O3` note omits that the quote names no test at `576c3d19` either — fix now.
+- diff-bug #12: unescaped inner quotes in a literal name — reject (style).
+- After these fixes: 71 typed rows, 20 file lines, 26 groups (9 of one type), 147 pointers, marks unchanged by the naming script, 0 problems; `cairn_validate` passes; ROADMAP 23,988 bytes.

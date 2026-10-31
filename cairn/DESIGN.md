@@ -131,7 +131,7 @@ naming convention.
   asserting test file.** `cairn/ORACLES.md` records the id, type, source and
   asserting tests of each oracle that the test comments at `576c3d19` recorded,
   in named groups, and is the record a ≥2-types audit reads. Its header names
-  the oracles it leaves out. The comments of the `tests/testthat/test-*.R` file
+  the comments it reads. The comments of the `tests/testthat/test-*.R` file
   that asserts an oracle state its source, and for most oracles which test pins
   it, but no id or type, since the test-comment rule forbids them there. The
   asserting test is the single source of truth, never a restated value. A milestone that adds or
