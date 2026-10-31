@@ -487,3 +487,69 @@ test_that("the desirability rule picks what desirability2 picks on the fold's in
   best <- lapply(ref_best, function(fold) fold$selected[cols])
   expect_false(identical(lapply(res$.selected, `[`, cols), best))
 })
+
+# The desirability rule as desirability2 0.2.0's `?show_best_desirability`
+# and `?d_max` pages define it (Derringer and Suich, 1980).
+test_that("the desirability rule picks the candidate its definition names in the fold's inner metrics", {
+  skip_if_no_bayes_fixture()
+  skip_if_not_installed("desirability2", minimum_version = "0.2.0")
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+  rule <- selection_rule(
+    "desirability",
+    minimize(rmse),
+    maximize(rsq),
+    minimize(df1),
+    minimize(df2)
+  )
+  set.seed(20)
+  res <- memoised(nested_tune_grid(
+    wf,
+    folds,
+    grid = g,
+    metrics = reg_metrics(),
+    param_info = p,
+    select = rule
+  ))
+
+  # With no `low` or `high` given, each term's range is the observed one.
+  d_max <- function(x) (x - min(x)) / (max(x) - min(x))
+  d_min <- function(x) (x - max(x)) / (min(x) - max(x))
+  pick <- function(m) {
+    rmse <- m[m$.metric == "rmse", ]
+    rsq <- m[m$.metric == "rsq", ]
+    rsq <- rsq[match(rmse$.config, rsq$.config), ]
+    terms <- cbind(
+      d_min(rmse$mean),
+      d_max(rsq$mean),
+      d_min(rmse$df1),
+      d_min(rmse$df2)
+    )
+    overall <- apply(terms, 1L, function(t) prod(t)^(1 / length(t)))
+    # One top candidate, so the pick does not rest on a tie-break.
+    expect_identical(sum(overall == max(overall)), 1L)
+    top <- which.max(overall)
+    c(df1 = rmse$df1[[top]], df2 = rmse$df2[[top]])
+  }
+
+  picks <- lapply(res$.inner_metrics, pick)
+  for (i in seq_len(nrow(res))) {
+    sel <- res$.selected[[i]]
+    expect_identical(
+      c(df1 = sel$df1, df2 = sel$df2),
+      picks[[i]],
+      info = paste("fold", i)
+    )
+  }
+  # A rule that picked by rmse alone would fail the comparison above in a
+  # fold (see the desirability note above).
+  best <- lapply(res$.inner_metrics, function(m) {
+    m <- m[m$.metric == "rmse", ]
+    c(df1 = m$df1[[which.min(m$mean)]], df2 = m$df2[[which.min(m$mean)]])
+  })
+  expect_false(identical(picks, best))
+})

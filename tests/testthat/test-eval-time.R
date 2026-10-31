@@ -27,7 +27,9 @@
 #   at a multi-element `eval_time` and a run at that vector's first element have
 #   to select the same candidate and report the same number at that element,
 #   because `tune:::first_eval_time()` takes element one either way. Pinned by
-#   "a multi-element `eval_time` reports what its first element names".
+#   "a multi-element `eval_time` reports what its first element names", and in
+#   its final-fit form by "a final fit at a multi-element `eval_time` is the
+#   final fit at its first element".
 
 # The evaluation times a censored-regression metric is measured at.
 #
@@ -543,6 +545,41 @@ test_that("nested_final_fit() tunes and selects under the caller's evaluation ti
   })
   expect_false(identical(ranked[[1L]], ranked[[2L]]))
   expect_false(identical(fits[[1L]]$selected$dist, fits[[2L]]$selected$dist))
+})
+
+test_that("a final fit at a multi-element `eval_time` is the final fit at its first element", {
+  skip_if_no_censored()
+
+  data <- srv_data()
+  nested <- srv_nested(data)
+  workflow <- srv_workflow(data)
+  times <- srv_eval_times()
+
+  final_at <- function(eval_time) {
+    set.seed(9)
+    res <- suppressWarnings(memoised(nested_tune_grid(
+      workflow,
+      nested,
+      grid = srv_grid(),
+      metrics = srv_metrics(),
+      eval_time = eval_time
+    )))
+    set.seed(11)
+    suppressWarnings(memoised(nested_final_fit(workflow, res)))
+  }
+
+  orders <- list(times, rev(times))
+  picked <- character(0)
+  for (k in seq_along(orders)) {
+    vector_fit <- final_at(orders[[k]])
+    scalar_fit <- final_at(orders[[k]][[1L]])
+    expect_identical(vector_fit$selected$dist, scalar_fit$selected$dist)
+    expect_identical(predict(vector_fit, data), predict(scalar_fit, data))
+    picked[[k]] <- vector_fit$selected$dist
+  }
+  # The two orders pick apart, so a final fit that read the wrong element
+  # would fail one of the comparisons above.
+  expect_false(identical(picked[[1L]], picked[[2L]]))
 })
 
 # Help pages ------------------------------------------------------------

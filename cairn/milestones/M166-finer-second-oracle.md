@@ -1,13 +1,13 @@
 # M166: Give finer results a second oracle
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — tests and in-repo tracking records; no package code or user doc changes
-- **Branch/PR:** —
+- **Branch/PR:** m166-finer-second-oracle
 
 ## Goal
 
@@ -15,19 +15,20 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 
 ## Scope
 
-**In:** three new tests. One covers the final fit under a two-element `eval_time`, one covers resample weights with a left-out fold, and one covers the desirability rule by its definitions. One assertion joins the selection-metric test. A source note covers desirability2's help pages. `cairn/ORACLES.md` gains rows for the new oracles and for two assertions already in the suite. It gains one line for each result that owes no oracle of its own, and a D-entry records that rule.
+**In:** five new tests. They cover the final fit under a two-element `eval_time`, resample weights with a left-out fold, the desirability rule by its definitions, renormalized probability averages, and the censored median over three repeats. One assertion joins the selection-metric test. A source note covers desirability2's help pages. `cairn/ORACLES.md` gains rows for the new oracles and for one assertion already in the suite. It gains one line for each of five results, naming the parts left on one type. A D-entry records the rule those lines apply. (Amended 2026-10-31 at review pass 1, the user's stop answer.)
 
-**Out:** the averaging tests hold each censored row out twice, so the median and the mean of `.pred_time` agree there. That gap goes to the parked row "M126 review leftovers on averaging". Pointing the 21 test-file headers at the registry goes to its parked row. No change to package code.
+**Out:** the parts left on one type (the survival branch on a new metric set, the eliminated candidates' rows, the final fit under `event_level`) → a new candidate row "Add second oracles to one-type parts". Pointing the 21 test-file headers at the registry goes to its parked row. No change to package code.
 
 ## Acceptance criteria
 
-- [ ] AC1: `test-eval-time.R` gains a test that runs `nested_tune_grid()` at each order of `srv_eval_times()` and at each order's first element alone. For each order, it asserts that `nested_final_fit()` on the two-element run selects the same candidate as on the one-element run. It also asserts that the two fits give the same predictions on the data. It also asserts that the two orders select different candidates.
-- [ ] AC2: `test-resample-weights.R` gains a test on the weighted design with one failed fold, and on the same design with one fold scoring NA on one metric. In each case it asserts that a new weight on the left-out fold leaves each affected summary row's `mean`, `std_err` and `n` identical. It also asserts that a new weight on a scored fold changes that row's `mean`.
-- [ ] AC3: `test-nested-tune-grid-oracles.R` gains a test on one grid run under a desirability rule. Its expected selection for each fold is computed by explicit code from the definitions in desirability2's help pages, on that fold's inner metrics. The test asserts that each fold's recorded selection equals that candidate. A source note in `cairn/references/` records those definitions and desirability2's version.
-- [ ] AC4: the test `"a grid run records the first metric of the set it was given, in either order"` in `test-selection-metric.R` gains one assertion. For each of its two metric sets, the final fit's recorded first metric equals `names(attr(ms, "metrics"))[[1L]]`.
-- [ ] AC5: `cairn/ORACLES.md` holds one oracle row for each test that AC1, AC2 and AC3 add. It holds one invariant row for the level exchange that `"nested_final_fit() tunes under the caller's event level"` in `test-event-level.R` asserts. It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. The memory group counts `nested-resamples-memory/O2` for the size slope.
-- [ ] AC6: `cairn/ORACLES.md` carries one line for each of four results. The first is `compute_metrics()` on the run's own and on a new metric set. The others are the averages that only `hand_average()` checks, the racing fold record, and the Bayesian and annealing iteration stage. Each line names the rows that back the result and why it owes no oracle of its own. A new `cairn/DECISIONS.md` entry records the rule that those lines apply. `grep -n 'Give finer results a second oracle' cairn/ORACLES.md` returns no line.
-- [ ] AC7: `devtools::test()` reports no failures, and `air format --check .` is clean.
+- [x] AC1: `test-eval-time.R` gains a test that runs `nested_tune_grid()` at each order of `srv_eval_times()` and at each order's first element alone. For each order, it asserts that `nested_final_fit()` on the two-element run selects the same candidate as on the one-element run. It also asserts that the two fits give the same predictions on the data. It also asserts that the two orders select different candidates.
+- [x] AC2: `test-resample-weights.R` gains a test on the weighted design with one failed fold, and on the same design with one fold scoring NA on one metric. In each case it asserts that a new weight on the left-out fold leaves each affected summary row's `mean`, `std_err` and `n` identical. It also asserts that a new weight on a scored fold changes that row's `mean`.
+- [x] AC3: `test-nested-tune-grid-oracles.R` gains a test on one grid run under a desirability rule. Its expected selection for each fold is computed by explicit code from the definitions in desirability2's help pages, on that fold's inner metrics. The test asserts that each fold's recorded selection equals that candidate. A source note in `cairn/references/` records those definitions and desirability2's version.
+- [x] AC4: the test `"a grid run records the first metric of the set it was given, in either order"` in `test-selection-metric.R` gains one assertion. For each of its two metric sets, the final fit's recorded first metric equals `names(attr(ms, "metrics"))[[1L]]`.
+- [x] AC5: `cairn/ORACLES.md` holds one oracle row for each test that AC1, AC2, AC3 and AC7 add. It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. `grep -n 'event-level/O3' cairn/ORACLES.md` returns no line. The header of `test-event-level.R` says again that the file does not test the exchange of `sens` and `spec`. The memory group counts `nested-resamples-memory/O2` for the size slope.
+- [x] AC6: `cairn/ORACLES.md` carries one line for each of five results. The `compute_metrics()` line names the survival branch on a new metric set. The averages line names the renormalized probabilities and the median of `.pred_time`. The racing line names the rows of eliminated candidates. The line on the final fit under `event_level` names the level exchange. The iteration-stage line, in the Bayesian and in the annealing group, names the proposals and the perturbations. For each named part, the line names the registry rows it credits for that part. The lines for the survival branch, the eliminated candidates' rows, the level exchange, the proposals and the perturbations each name the candidate row that holds that part, or say why it owes no second type. A new `cairn/DECISIONS.md` entry records the rule that those lines apply. `grep -n 'Give finer results a second oracle' cairn/ORACLES.md` returns no line.
+- [x] AC7: `test-collect-predictions-summarize.R` gains two tests. The first uses the probability grid run with one `.pred_event` value planted as missing. It asserts that each row's averaged class probabilities sum to 1 within 1e-12. It also asserts that the planted row's probability means, before renormalization, do not sum to 1. The second runs the censored fixed workflow on a repeated v-fold outer design with three repeats. It asserts that `collect_predictions(summarize = TRUE)` matches tune's average on `tune::fit_resamples()` over the same outer splits, through `expect_matches_tune()`. It asserts that the same average matches `hand_average()` through `expect_matches_hand()`. It also asserts that for some row, the median of its three `.pred_time` values differs from their mean.
+- [x] AC8: `devtools::test()` reports no failures, and `air format --check .` is clean.
 
 ## Coverage
 
@@ -35,18 +36,23 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - AC2 → T2
 - AC3 → T3
 - AC4 → T4
-- AC5 → T5
-- AC6 → T5
-- AC7 → T6
+- AC5 → T5, T8
+- AC6 → T5, T8
+- AC7 → T7
+- AC8 → T6, T10
 
 ## Tasks
 
-- [ ] T1: Final fit under `eval_time`, invariant. In `test-eval-time.R`, after the test at :491, run `nested_tune_grid()` through `memoised()` at `c(0.5, 10)`, `c(10, 0.5)`, `0.5` and `10`. Fit each run with `set.seed(11)` first, as that test does. Compare the selected `dist` and `predict()` on `srv_data()`. Plant: pair each order with the other element's run, and see the test fail.
-- [ ] T2: Resample weights, invariant. In `test-resample-weights.R`, beside the tests at :172 and :204, build the weighted design with a new weight on the failed fold (`break_fold()`, helper-orchestration.R:532) and on the NA fold (`plant_na`). Compare `collect_metrics()` rows. Plant a defect the fixture can show, such as matching weights to folds by position in `summarize_folds()` (R/nested-results.R:900), see it fail, and restore.
-- [ ] T3: Desirability, closed-form. Read desirability2 0.2.0's help pages for `select_best_desirability()` and its term functions. Write the source note with its `INDEX.md` line. In `test-nested-tune-grid-oracles.R`, beside the test at :432, reuse that run's rule and fixture. Compute each term's desirability over each fold's candidates, their geometric mean, and the top candidate. Compare with `.selected`. Fold 3 picks apart from the best `rmse`, so the rule shows. Plant: flip one term's direction, and see the test fail.
-- [ ] T4: Selection metric. Add the assertion to the test at `test-selection-metric.R:15`. Plant: compare with the set's last name, and see it fail.
-- [ ] T5: Registry and decision. Add the AC5 rows and the AC6 lines under the file's quoting rule. Rewrite the selection group's paragraph and the header paragraph that point at the candidate row. Append the D-entry. Re-point `helper-time-budget.R` rows for the new blocks in one pass.
-- [ ] T6: Run `devtools::test()` and `air format --check .` clean.
+- [x] T1: Final fit under `eval_time`, invariant. In `test-eval-time.R`, after the test at :491, run `nested_tune_grid()` through `memoised()` at `c(0.5, 10)`, `c(10, 0.5)`, `0.5` and `10`. Fit each run with `set.seed(11)` first, as that test does. Compare the selected `dist` and `predict()` on `srv_data()`. Plant: pair each order with the other element's run, and see the test fail.
+- [x] T2: Resample weights, invariant. In `test-resample-weights.R`, beside the tests at :172 and :204, build the weighted design with a new weight on the failed fold (`break_fold()`, helper-orchestration.R:532) and on the NA fold (`plant_na`). Compare `collect_metrics()` rows. Plant a defect the fixture can show, such as matching weights to folds by position in `summarize_folds()` (R/nested-results.R:900), see it fail, and restore.
+- [x] T3: Desirability, closed-form. Read desirability2 0.2.0's help pages for `select_best_desirability()` and its term functions. Write the source note with its `INDEX.md` line. In `test-nested-tune-grid-oracles.R`, beside the test at :432, reuse that run's rule and fixture. Compute each term's desirability over each fold's candidates, their geometric mean, and the top candidate. Compare with `.selected`. Fold 3 picks apart from the best `rmse`, so the rule shows. Plant: flip one term's direction, and see the test fail.
+- [x] T4: Selection metric. Add the assertion to the test at `test-selection-metric.R:15`. Plant: compare with the set's last name, and see it fail.
+- [x] T5: Registry and decision. Add the AC5 rows and the AC6 lines under the file's quoting rule. Rewrite the selection group's paragraph and the header paragraph that point at the candidate row. Append the D-entry. Re-point `helper-time-budget.R` rows for the new blocks in one pass.
+- [x] T6: Run `devtools::test()` and `air format --check .` clean.
+- [x] T7: Averages. In `test-collect-predictions-summarize.R`, a sums-to-one invariant on `grid_prob_run()` with the planted missing value, and a three-repeat censored `fixed_pair()` checked with `expect_matches_tune()` and `expect_matches_hand()`. Plant: `mean_by` for `.pred_time`, and no renormalization.
+- [x] T8: Registry rework. Drop `event-level/O3`, restore M152's sentence in `test-event-level.R`'s header, add the AC7 rows, and rewrite the five lines per AC6. Rewrite D-123 to the narrowed rule, naming the plugin's "What gets a test" rule where it is cited. Add the candidate row the Out item names. Remove the median gap from "M126 review leftovers on averaging", which AC7 closes. Carry the review return's fix-now findings.
+- [x] T9: Weights failed case. Plant a missing renormalization over the stored weights in `summarize_folds()` and see the failed-fold case of the AC2 test fail; restore.
+- [x] T10: Run `devtools::test()` and `air format --check .` clean, alone.
 
 ## Work log
 
@@ -61,3 +67,120 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: plan gate chose a weight-change invariant for left-out folds over a comparison with `tune::fit_resamples()`, because tune ignores the weights or errors when a fold is missing (tune#1197); falsified by a tune release that drops a missing fold and keeps the weights.
 - 2026-10-31: plan gate chose a two-element-against-one-element invariant for the final fit under `eval_time` over the IPCW Brier score written out for the final fit's tuning run, because the invariant reuses fixtures and the closed form already backs the runs; falsified by the final fit reading `eval_time` by a route that the invariant cannot reach.
 - 2026-10-31: plan gate chose one milestone over two, because three tests, one assertion and the registry edit fit two sessions; falsified by the plan-owned body passing the cap or T1-T5 not fitting two sessions.
+- 2026-10-31: T1: added "a final fit at a multi-element `eval_time` is the final fit at its first element" to `test-eval-time.R` (5 expectations, file green under `NESTEDTUNE_FULL_SUITE=true`). Plant: pairing each order with the other element's run failed 4 of 5 expectations (lognormal against weibull), reverted. Header comment names the test beside the run form.
+- 2026-10-31: T2: added "a new weight on the fold a summary row leaves out leaves that row unchanged" to `test-resample-weights.R` (6 expectations, file green), and moved `plant_na()` to file level for both tests. A first draft set the left-out weight to 9 and differed in the 16th digit, because tune divides each weight by the total; the new weight now doubles the total, so the stored weights halve exactly. Plant: dividing the weighted sum by every fold's weight failed the NA case (0.196 against 0.392), reverted. The failed-fold case cannot show that plant, since a failed fold has no per-fold row.
+- 2026-10-31: T3: added "the desirability rule picks the candidate its definition names in the fold's inner metrics" to `test-nested-tune-grid-oracles.R:493` (10 expectations, green), on the same rule, grid and seed 20 as the desirability2 test, memoised. Source note `cairn/references/desirability2-select-best.md` with its INDEX line. The page's minimization formula prints "data = low", a typo; the note takes `.comp_min`'s body. The test asserts one top candidate per fold, since the pages leave the tie order unstated. Plant: `df2` maximized in the expected pick failed folds 2 and 3, reverted. The lint hook's remaining hits on the note are cairn's provenance tokens and minus signs.
+- 2026-10-31: T4: the grid test in `test-selection-metric.R` now also compares the final fit's `first_metric` with `names(attr(ms, "metrics"))[[1L]]`; file green (8 tests). Plant: the set's second name failed both metric sets ("mae" against "rmse"), reverted. Header comment names the added comparison.
+- 2026-10-31: T5: `cairn/ORACLES.md` gained five rows (`nested-tune-grid-oracles/O8`, `selection-metric/O1`, `eval-time/O4`, `event-level/O3`, `resample-weights/O3`), the memory group's slope line, the four D-123 lines (compute_metrics, averages, racing record, and the iteration-stage sentence in the Bayesian and annealing groups), and rewrites of the header and selection-group paragraphs. `grep -n 'Give finer results a second oracle' cairn/ORACLES.md` returns no line. D-123 appended to `cairn/DECISIONS.md`. `helper-time-budget.R` holds no row for the four test files changed, so nothing was re-pointed. The averages line names the two-repeat median gap and its parked row.
+- 2026-10-31: T6: `air format --check .` clean; `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, run alone: 1162 tests, 0 failed, 0 errors, 0 skipped.
+- 2026-10-31: claim audit: not owed — internal tier
+- 2026-10-31: implement done; status review.
+- 2026-10-31: review pass 1: four of the D-123 records rest on a false premise (Review section, findings marked "at the stop"); stopped for the user, since the repair changes what the plan promised.
+- 2026-10-31: stop answer: the user chose "Build two cheap tests": a sums-to-one invariant for renormalized probabilities, and a censored average on a design holding rows out three times, checked against tune; the other one-type parts recorded as such, the event-level row dropped and M152's header restored, D-123 narrowed, the uncovered parts on a new candidate row.
+- 2026-10-31: amendment routed: AC5 — the event-level exchange row reverses M152 (diff-bug #3, ripple #1); the two new tests need rows.
+- 2026-10-31: amendment routed: AC6 — the averages, compute_metrics and racing lines rest on a false premise (diff-bug #1, #5, #6; blame-history #2, #3).
+- 2026-10-31: re-audit: AC5 (reduced) — "holds no row for the exchange" rested on judgment; replaced by `grep -n 'event-level/O3'` returning no line.
+- 2026-10-31: re-audit: AC6 (reduced) — "each part that rests on one type" had no listing procedure; the parts were named in the criterion.
+- 2026-10-31: re-audit: AC7 (reduced) — nothing. The wording then gained a `hand_average()` assertion on the three-repeat run, so the median has a closed-form check beside tune's.
+- 2026-10-31: re-audit: AC5 (reduced) — nothing.
+- 2026-10-31: re-audit: AC6 (reduced) — "the rows that reach it" and "parts that rest on one type" are still decided by judgment; suggested crediting rows by the line's own naming and naming the one-type parts outright. Second line for AC6, so the wording goes to the user.
+- 2026-10-31: re-audit: AC7 (reduced) — nothing.
+- 2026-10-31: T7 (pending the amendment's write): `test-collect-predictions-summarize.R` gained "a renormalized probability average sums to one in every row" and "a censored average over three repeats takes the median time, as tune does"; `repeated_pair()` and `fixed_pair()` take `repeats` (default 2, injected so the stored call stays literal). File green, 34 tests. Plants in `R/nested-results-collect.R`: `mean_by` for `.pred_time` failed the three-repeat test (2 expectations) and the missing-median test; no renormalization failed the sums test and the hand renormalization test; both reverted, `git diff -- R/` empty.
+- 2026-10-31: re-audit stop answer: the user chose to name the parts in AC6, crediting rows by each line's own naming.
+- 2026-10-31: amendment return: AC5 — "It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. `grep -n 'event-level/O3' cairn/ORACLES.md` returns no line. The header of `test-event-level.R` says again that the file does not test the exchange of `sens` and `spec`."
+- 2026-10-31: amendment return: AC6 — "For each named part, the line names the registry rows it credits for that part. The lines for the survival branch, the eliminated candidates' rows, the level exchange, the proposals and the perturbations each name the candidate row that holds that part, or say why it owes no second type."
+- 2026-10-31: substantive amendment: AC7 added (two averaging tests, the user's stop answer); the old AC7 is now AC8; Scope In and Out, Coverage and T7-T10 updated.
+- 2026-10-31: T8: `cairn/ORACLES.md` dropped `event-level/O3` and gained `collect-predictions-summarize/O1` (invariant) and `/O2` (live), the three-repeat test listed under U2 as well. The five AC6 lines now credit rows per part: compute_metrics survival branch on U1, averages' renormalization on O1 and U2 and median on O2 and U2, racing eliminated rows on O1 and O3, the event_level final fit on O2, the iteration stage on O1 with no independent oracle. Headings for weights and averages read 3 types; memory slope is a group sentence; the 2026-09-01 cite gave way to D-123; the header counts six rows. D-123 rewritten on the branch to the narrowed rule, so the "testing rule" cite went. New candidate row "Add second oracles to one-type parts"; the median gap left "M126 review leftovers on averaging". `test-event-level.R`'s header already carried M152's sentence, unchanged on the branch. Selection-metric header names both oracles; the source note gained the `geomean()` sentence.
+- 2026-10-31: T9: plant `sum(e$vals * e$w)` (no renormalization) in `summarize_folds()` failed the AC2 test's failed-fold case (rmse 0.525 against 1.051) and NA case; reverted.
+- 2026-10-31: T10: `air format --check .` clean; `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, alone: 1164 tests, 0 failed, 0 errors, 0 skipped.
+- 2026-10-31: claim audit: not owed — internal tier
+- 2026-10-31: implement pass 2 done; status review.
+- 2026-10-31: step-7 approval: m166-finer-second-oracle approved for merge
+- 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
+
+## Decisions
+
+## Review
+
+- spawned: diff-bug, blame-history, prior-review, ripple
+- cairn_validate: all checks passed, 18 advisory warnings (references staleness).
+- diff-bug #1: the averages line says U1 backs the `hand_average()`-only cases because they run the same branches, but U1's fixtures need no renormalization and hold each row out twice, so a mean in place of the median passes U1 and U2 — at the stop.
+- diff-bug #2: the AC4 assertion follows from three assertions already in the test, and its plant edited the expected value — reject, planned change (AC4 names that assertion).
+- diff-bug #3: `event-level/O3` reverses M152, which removed that record because the sens/spec exchange is yardstick's arithmetic, and the file header still says so — at the stop.
+- diff-bug #4: the failed-fold case of the weights test was never shown failing — fix now (plant a missing renormalization over the stored weights, which the failed case can show).
+- diff-bug #5: the compute_metrics line holds for the numeric and class-probability branches, but U2 never reaches the survival branch, so a new set on a censored run rests on U1 alone — at the stop.
+- diff-bug #6: the racing line is true to the code, but no check of a second type reaches the eliminated candidates' rows — at the stop.
+- diff-bug #7: O8 follows `.comp_min`'s body, not the page's printed formula — reject, false (the row cites the note, which records the typo and the reading taken).
+- diff-bug #8: the source note leaves out that `geomean()` returns 0 when a term is 0, so exact ties are the only exposure — fix now (one sentence in the note).
+- diff-bug #9: the desirability test's closing guard repeats the existing test's guard on the same run — reject, false (it compares the new test's own definition-based picks with rmse's, which the existing guard does not).
+- diff-bug #10: the eval_time test's last assertion repeats the existing test's — reject, planned change (AC1 names it, and it keeps the comparisons from passing on a fixture where both orders pick alike).
+- diff-bug #11: the weights test's "doubles the total" comment is near worked arithmetic — reject, false (it states why the comparison can be exact, which the code cannot show).
+- diff-bug #12: the ORACLES header says the five rows are for tests written after `576c3d19`, but two register assertions in older tests — fix now (reword).
+- blame-history #1: D-123 contradicts D-121's clause that an average or rescoring owes two types — reject, false (the groups still hold two types; D-123 is about finer inputs), but the wording is redone with the stop's answer.
+- blame-history #2: D-123 rests on the test rule against repeated checks, which does not speak to oracle counts — at the stop (D-123 is rewritten with the answer).
+- blame-history #3: the averages line fails for the censored median — at the stop (same as diff-bug #1).
+- blame-history #4: the slope is credited to O2, which checks sizes, not the slope — reject, false (every size the lean slope is computed from is within 2% of `analytic_size()`; the line is reworded under prior-review #3).
+- blame-history #5: race O3 compares with the same tune call the code makes — reject, false (O3 calls it on an independent re-run of the race).
+- blame-history #6: ORACLES:14 says each waived result "owes none" while the iteration stage keeps one type — fix now (reword).
+- blame-history #7: the new weights Source paragraph sits under the "every-fold case only" qualifier — reject, false (the qualifier ends its own paragraph; the new one follows a blank comment line).
+- blame-history #8: test-eval-time.R's "and in its final-fit form by" now appears twice — reject, false (each route, live and invariant, has its own final-fit test).
+- blame-history #9: test-selection-metric.R's header names tune's reading as "the oracle" before the closed-form check — fix now (name both).
+- blame-history #10: the candidate row still reads "started M166" — reject, planned change (step 9 hygiene graduates it).
+- prior-review #1: the event-level heading says 2 types while listing an invariant row — at the stop (depends on the O3 answer).
+- prior-review #2: the resample-weights heading says 2 types while listing an invariant row — fix now (3 types).
+- prior-review #3: the memory slope line repeats a row of its own group — fix now (a group sentence in place of the bullet).
+- prior-review #4: the eval_time and weights tests have no source comment directly above them — reject, false (both files keep their sources in the header block, where the new paragraphs went).
+- prior-review #5: the iteration-stage paragraph still cites an unrecorded plan gate of 2026-09-01 — fix now (cite D-123).
+- prior-review #6: the desirability test tells its pick from rmse's only across folds — reject, false (fold 3 differs, and the plant failed folds 2 and 3).
+- prior-review #7: the failed and NA weight cases' values rest on O1, the new test checking invariance only — reject, planned change (AC2 names the invariant as the second type).
+- ripple #1: the event-level header contradicts `event-level/O3` — at the stop (same as diff-bug #3).
+- ripple #2: GP2 states no exception for D-123 — reject, false (GP2 is a guiding principle traded with stated justification, as D-121 did).
+- ripple #3: the per-file list omits `selection-metric/O1` — reject, false (the list is of records at `576c3d19`).
+- ripple #4: the candidate row still lists the results — reject, planned change (graduated at step 9).
+- ripple #5: the new rows carry no "(found by reading)" mark — reject, false (rows added after `576c3d19` name their test in the row, as M164's do).
+- ripple #6: D-123 cites "the testing rule" without naming it — fix now (name the plugin's "What gets a test" rule, if the rule stays).
+- Pass 1 fix-now lines settled in implement pass 2: diff-bug #4, fixed 7161e181 (T9 plant); diff-bug #8, #12, blame-history #6, #9, prior-review #2, #3, #5, fixed 7161e181; ripple #6, fixed 7161e181 (D-123 no longer cites the rule); the "at the stop" lines, fixed by the stop answer in a1af2737 and 7161e181.
+
+### Pass 2
+
+- spawned: diff-bug, blame-history, prior-review, ripple
+- cairn_validate: all checks passed. Gate at 417a8d17: `air format --check .` clean; `document()` changed no NAMESPACE or man file (it rewrites `Config/roxygen2/version` to the local 8.1.1, restored, not committed); `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, alone: 1164 tests, 0 failed, 0 errors, 0 skipped; six gating prose sweeps exit 0; `devtools::check()` 0 errors, 0 warnings, 0 notes. After the pass-2 fixes, the two changed test files rerun green (34 and 10 tests, 0 failed) and `air` is clean.
+- diff-bug #1: the compute_metrics survival branch credit to U1 is false for static and linear-predictor metrics, since U1's censored test scores `brier_survival` only — fix now, fixed 6a50ea28 (line and candidate row say they reach no test).
+- diff-bug #2: O1's racing fixtures may eliminate no candidate, so crediting O1 counts one check twice — fix now, fixed 6a50ea28 (credited to O3 alone).
+- diff-bug #3: the median guard's 1e-6 gap does not prove the comparisons can fail at `expect_equal`'s tolerance — fix now (guard on the column's relative gap above 1e-4, passing).
+- diff-bug #4: the event-level line says the test "also asserts" the exchange while the header says the file does not test it — fix now, fixed 6a50ea28 (line cites M152's removal only). The header's mismatch with the assertions at :268 predates the diff — reject, unmodified lines.
+- diff-bug #5: D-123 narrows D-121 and GP2 without saying so — fix now, fixed 6a50ea28 (heading names the GP2 exemption; D-121's owed second type stands, held by the candidate row).
+- diff-bug #6: O1 runs tune's and finetune's own search, so it cannot show a defect in the proposals or perturbations — fix now, fixed 6a50ea28 (credited to no row; O1 checks the driving).
+- diff-bug #7: the averaging header names no source for the sums-to-one invariant — fix now, fixed 6a50ea28.
+- diff-bug #8: `collect-predictions-summarize/O2` shares U1's source on a new fixture — reject, planned change (AC5 asks one row per new test; the test's hand check is listed under U2, whose source it is).
+- diff-bug #9: the AC4 assertion follows from three others — reject, planned change (as at pass 1).
+- diff-bug #10: the three-repeat test makes the two-repeat censored tests repeats on one path — reject, unmodified lines (the older tests are outside the diff).
+- diff-bug #11: the desirability tie check runs twice per fold — fix now (picks computed once).
+- diff-bug #12: the eval_time `predict()` identity follows from the `dist` identity — reject, planned change (AC1 names it).
+- diff-bug #13: the weights comment is near worked arithmetic — reject, false (as at pass 1).
+- diff-bug #14: the registry header sentence does not describe the memory slope — fix now, fixed 6a50ea28 ("or is counted on an existing row").
+- diff-bug #15: D-123's heading says "row" where it means candidate row — fix now, fixed 6a50ea28.
+- blame-history #1: the survival-branch credit on a new metric set rests on the same-code reading — fix now, fixed 6a50ea28 (same fix as diff-bug #1).
+- blame-history #2: the memory slope is credited to O2 — reject, planned change (AC5 names it).
+- blame-history #3: D-079's "stays two" count of selection oracles is stale — reject, history record.
+- blame-history #4: the 2026-09-01 plan-gate cite is gone — reject, planned change (pass 1 prior-review #5 replaced it with D-123).
+- blame-history #5: the racing rows credit two live rows — fix now, fixed 6a50ea28 (same fix as diff-bug #2).
+- blame-history #6: the header's "nine" does not match the row's count of parts — fix now, fixed e1d3f35c (number dropped).
+- blame-history #7: the tie check uses `prod()^(1/k)` where desirability2 uses `exp(mean(log))` — reject, false (the test asserts one top candidate, and the note records the difference).
+- prior-review #1: the sums-to-one premise and the median guard add with `mean()`, against M126's double-arithmetic convention — fix now (the guard sums in double; the premise's 1e-6 margin is far above any long-double difference, reject for it, false).
+- prior-review #2: the median guard uses `mean()` — fix now (same fix as #1).
+- prior-review #3: no source comment for the sums-to-one invariant — fix now, fixed 6a50ea28 (same fix as diff-bug #7).
+- prior-review #4: the O8 row does not name the page's typo — reject, false (as at pass 1; the row cites the note).
+- ripple #1: U2 lists median tests that the averages line does not credit — reject, false (the line names U2's three-repeat test).
+- ripple #2: the candidate row "Give finer results a second oracle" still lists the selection results — reject, planned change (graduated at step 9).
+- ripple #3: the weights source sits away from its test — reject, false (it is in the header block at :28, the file's convention).
+- ripple #4: "held out twice" at :793 is not true of the new three-repeat pair — reject, false (it describes the fixtures its helper reads).
+- Pass 2 fix-now lines without a sha above (diff-bug #3, #11; prior-review #1, #2): fixed 22bc50c7.
+- AC1 evidence: `test-eval-time.R` holds "a final fit at a multi-element `eval_time` is the final fit at its first element", which runs both orders of `srv_eval_times()` and each first element alone, and asserts the same `dist`, identical `predict()` on the data, and different picks across orders. Green in the 1164-test run at 417a8d17. T1's plant (pairing each order with the other element) failed 4 of 5 expectations.
+- AC2 evidence: `test-resample-weights.R` holds "a new weight on the fold a summary row leaves out leaves that row unchanged", over a failed fold 2 (`break_fold()`) and an NA rsq on fold 3 (`plant_na()`). It asserts identical `mean`, `std_err` and `n` under a new left-out weight, and a changed `mean` under a new scored-fold weight. Green at 417a8d17. T9's plant (no renormalization) failed both cases.
+- AC3 evidence: `test-nested-tune-grid-oracles.R:493` holds "the desirability rule picks the candidate its definition names in the fold's inner metrics" on one seed-20 grid run under the four-term rule. It writes `d_min`/`d_max` over each fold's observed range and their geometric mean, and asserts each fold's `.selected` equals the top candidate. The file reran green after pass 2 (10 tests). `cairn/references/desirability2-select-best.md` records the pages and desirability2 0.2.0. T3's plant (`df2` maximized) failed folds 2 and 3.
+- AC4 evidence: the test "a grid run records the first metric of the set it was given, in either order" asserts `extract_procedure(final)$first_metric` equals `names(attr(ms, "metrics"))[[1L]]` for both metric sets (`test-selection-metric.R:34-37`). Green at 417a8d17.
+- AC5 evidence: `cairn/ORACLES.md` holds `nested-tune-grid-oracles/O8` (:55), `eval-time/O4` (:235), `resample-weights/O3` (:286), `collect-predictions-summarize/O1` (:304) and `/O2` (:306) for the AC1-AC3 and AC7 tests, and closed-form `selection-metric/O1` (:65) for AC4's test, each with id, type, source and its test in quotes. `grep -c 'event-level/O3' cairn/ORACLES.md` prints 0. `test-event-level.R:18-19` reads "The exchange of sensitivity and specificity between the two levels is yardstick's arithmetic, so this file does not test it." The memory group's sentence at :262 counts O2 for the size slope.
+- AC6 evidence: `cairn/ORACLES.md` lines: compute_metrics (:311) names the survival branch, crediting U1 for dynamic metrics and no row for static and linear-predictor ones, and the candidate row; averages (:291) names the renormalized probabilities (O1, U2) and the median of `.pred_time` (O2, U2's three-repeat test); racing (:90) names the eliminated candidates' rows (O3) and the candidate row; event_level (:240) names the level exchange, credits O2, and names the candidate row; Bayesian (:70) and annealing (:107) name the proposals and perturbations, credit no row, and say no independent oracle exists. `### D-123` sits at `cairn/DECISIONS.md:2144`. `grep -c 'Give finer results a second oracle' cairn/ORACLES.md` prints 0.
+- AC7 evidence: `test-collect-predictions-summarize.R` holds "a renormalized probability average sums to one in every row" (sums within 1e-12; the planted row's raw means do not sum to 1) and "a censored average over three repeats takes the median time, as tune does" (`repeats = 3`; `expect_matches_tune()`, `expect_matches_hand()`, and a median-mean gap above 1e-4 of the column). The file reran green after pass 2 (34 tests). T7's plants (`mean_by` for `.pred_time`, no renormalization) failed both tests.
+- AC8 evidence: `devtools::test()` at 417a8d17, alone: 1164 tests, 0 failed. The pass-2 edits touched two test files, which reran green; `air format --check .` clean at 22bc50c7.
