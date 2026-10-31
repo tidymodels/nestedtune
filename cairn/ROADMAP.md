@@ -4,6 +4,7 @@ _Last hygiene check: 2026-10-31 status audit. No change since the triage pass; n
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M167 | Add second oracles to one-type parts | planned | — | normal | milestones/M167-one-type-parts.md |
 | M166 | Give finer results a second oracle | done | — | normal | milestones/archive/M166-finer-second-oracle.md |
 | M165 | Keep the devel-vctrs test choice from drifting | done | — | normal | milestones/archive/M165-devel-vctrs-drift.md |
 | M164 | Give six one-type results a second oracle | done | — | normal | milestones/archive/M164-second-oracle-types.md |
@@ -11,7 +12,7 @@ _Last hygiene check: 2026-10-31 status audit. No change since the triage pass; n
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
-- Add second oracles to one-type parts: three parts that `cairn/ORACLES.md` credits to one type or none (D-123). In `compute_metrics()`'s survival branch, dynamic metrics rest on U1, and static and linear-predictor metrics reach no test. The racing record's rows for eliminated candidates rest on one live row, O3. The final fit under `event_level` rests on `event-level/O2`, since its level exchange is yardstick's arithmetic. Normal rung: shipped on one type — added 2026-10-31 at M166's review
+- Add second oracles to one-type parts: three parts that `cairn/ORACLES.md` credits to one type or none (D-123). In `compute_metrics()`'s survival branch, dynamic metrics rest on U1, and static and linear-predictor metrics reach no test. The racing record's rows for eliminated candidates rest on one live row, O3. The final fit under `event_level` rests on `event-level/O2`, since its level exchange is yardstick's arithmetic. Normal rung: shipped on one type — added 2026-10-31 at M166's review — started M167
 - [low] Pin the byte figures in parallel.R: three `R/parallel.R` comments state wire sizes with no commit, date or procedure beside them: 5,141,166 B against 840,540 B for six split copies, 202,363 B against 524 B for the worker closure under `load_all()`, and 2,627 B for the 106-name manifest. The derived-figures rule asks for one. They predate M161, whose review found them — added 2026-10-24 at M161's review
 - [parked] Tidy the interrupt block's leftovers: four items in `test-parallel-interrupt.R` from M159's review, none added by M159. The ledger budgets no wait for the 60 s collect when no signal is sent. A SIGINT sent after `dispatch_folds()` returns early lands outside the block's handler. The header's "Established by execution against mirai 2.7.2 before the fix" is narrative history. The `m15-fold-` marker names carry a milestone id. Promote on the next change to that file — added 2026-10-24 at M159's review
 - [parked] Point oracle headers at the registry: 18 test-file headers say "DESIGN Conventions: oracles are recorded in the test file that asserts them", and `test-parallel-payload.R` and `test-nested-resamples-memory.R` say the records sit beside the test, but since M163 each oracle's id and type live in `cairn/ORACLES.md`. Promote on the next change to those headers — added 2026-10-31 at M163's review, corrected 2026-10-31
