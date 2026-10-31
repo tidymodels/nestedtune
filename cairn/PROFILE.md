@@ -41,7 +41,7 @@ rules in tracking-rules:
   merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
   `.Rbuildignore`d.
 - Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80, M88). **A `concurrency` block** cancels a
-  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. `devel-vctrs.yaml` also keys its group on its full/subset switch, so a three-file run never cancels a whole-suite run (M153). **A
+  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. `devel-vctrs.yaml` also keys its group on the event name and its `full` input, so a subset run never cancels a whole-suite run (M153, M165). **A
   `paths-ignore` filter** on both triggers of `R-CMD-check-cran.yaml`, `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
   `pkgdown.yaml`, `prose-sweep.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
   check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
@@ -62,7 +62,7 @@ rules in tracking-rules:
   hunts the hang on demand under a job cap far above the rest, invisible to `ci-usage.py` for carrying neither trigger.
   **A devel-vctrs leg** (`devel-vctrs.yaml`, M80) tests against `r-lib/vctrs@main` for the experimental `vec_cbind_frame_ptype()`
   method in `R/nested-results.R`, non-gating and not a required check, so upstream cannot freeze a merge. Triggers: `push` and
-  `pull_request` (the three vctrs compatibility test files), `schedule` (Mondays 06:17 UTC, the whole suite) and `workflow_dispatch`
+  `pull_request` (the test files carrying its marker line, M165), `schedule` (Mondays 06:17 UTC, the whole suite) and `workflow_dispatch`
   (M102, the whole suite unless `full` is false, M153). `cache-version: devel-vctrs` keys its post-devel-install cache apart from the other workflows'. **Three organization
   workflows** ride unedited at tidymodels' shared blobs (`lock.yaml`, `pr-commands.yaml`, `format-suggest.yaml`, M33):
   no `push`/`pull_request` trigger, so neither the filter nor `ci-usage.py` sees them; `format-suggest.yaml` runs `air format .`.

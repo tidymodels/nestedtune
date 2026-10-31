@@ -12,6 +12,8 @@
 # A caller cannot see which door a verb uses, so the answer has to be the same
 # through all of them, and the assertions below are written per form rather
 # than in one loop so a failure says which form regressed.
+#
+# devel-vctrs.yaml runs this file on every push and pull request.
 
 # The completed fixture, written exactly as test-dplyr-compat.R writes it: same
 # function, same arguments, same RNG state, so `memoised()` serves this file

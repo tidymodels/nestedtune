@@ -10,6 +10,8 @@
 # branch per entry rather than accepting either. Each verb appears by its own
 # literal name, and the verbs with something to say in both
 # directions get an entry each way.
+#
+# devel-vctrs.yaml runs this file on every push and pull request.
 
 # The completed fixture: the suite's most-requested three-fold run, written the
 # way test-nested-results-print.R and test-nested-results-plot.R write it, so

@@ -17,11 +17,11 @@
 # still needs the dispatch.
 #
 # What a run tests depends on its trigger. A push or pull request runs only
-# the three vctrs compatibility test files (`test-vctrs-compat.R`,
-# `test-dplyr-compat.R`, `test-nested-results-set-compat.R`; the `filter` in
-# the last step). The weekly schedule runs the whole suite, because a
-# development-vctrs break can reach files outside the three: other test files
-# call vctrs functions too (`test-nested-tune-bayes-oracles.R` calls
+# the vctrs compatibility test files that carry the marker line the last step
+# names; a file joins or leaves the watch by that line. The weekly schedule
+# runs the whole suite, because a development-vctrs break can reach files
+# outside the watched ones: other test files call vctrs functions too
+# (`test-nested-tune-bayes-oracles.R` calls
 # `vec_cbind_frame_ptype()`), and dplyr and tibble build on vctrs. A dispatch
 # runs the whole suite unless its `full` input is set to false.
 #
@@ -63,7 +63,7 @@ on:
   workflow_dispatch:
     inputs:
       full:
-        description: 'Run the whole suite (false runs the three vctrs test files)'
+        description: 'Run the whole suite (false runs the watched vctrs test files)'
         type: boolean
         default: true
 
@@ -81,11 +81,16 @@ permissions:
 
 # Extends the block in R-CMD-check.yaml. Keyed on the workflow as well as
 # the ref, so cancelling a superseded run of this leg never touches a check run.
-# Also keyed on the test step's `FULL_SUITE` switch (the same expression), so a
-# three-file run never cancels or replaces a pending or running whole-suite
-# run: GitHub keeps one pending run per group and cancels the older one.
+# Also keyed on the event name and the `full` input, the two values the test
+# step decides its whole-suite switch from, so two runs in one group always make
+# the same choice between the whole suite and the watched files (each commit's
+# markers decide which files are watched), and a subset run never cancels or
+# replaces a pending or
+# running whole-suite run: GitHub keeps one pending run per group and cancels
+# the older one. A scheduled run and a full dispatch therefore sit in
+# different groups and can both run.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ inputs.full }}
   cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 jobs:
@@ -147,18 +152,36 @@ jobs:
           }
         shell: Rscript {0}
 
-      # testthat matches `filter` against each file name with `test-` and `.R`
-      # removed. A NULL filter runs every file.
+      # The whole-suite switch is decided here and nowhere else, from the two
+      # values the concurrency group above is keyed on. `inputs.full` renders
+      # as "" outside a dispatch. A subset run takes the test files that carry
+      # the marker line below as a whole line, so a file renamed within the
+      # `test-*.R` pattern stays in and a run that finds none stops red. A file
+      # whose marker line is removed or reworded leaves the watch with no
+      # signal. testthat matches `filter` against
+      # each file name with `test-` and `.R` removed. A NULL filter runs every
+      # file.
       - name: Run the tests against it
         env:
-          FULL_SUITE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
+          FULL_INPUT: ${{ inputs.full }}
         run: |
-          full <- identical(Sys.getenv("FULL_SUITE"), "true")
+          event <- Sys.getenv("GITHUB_EVENT_NAME")
+          full <- event == "schedule" ||
+            (event == "workflow_dispatch" && Sys.getenv("FULL_INPUT") == "true")
           cat("Whole suite: ", full, "\n", sep = "")
-          filter <- if (full) {
-            NULL
-          } else {
-            "^(vctrs-compat|dplyr-compat|nested-results-set-compat)$"
+          filter <- NULL
+          if (!full) {
+            marker <- "# devel-vctrs.yaml runs this file on every push and pull request."
+            files <- list.files("tests/testthat", "^test-.*\\.R$", full.names = TRUE)
+            watched <- files[vapply(files, function(f) marker %in% readLines(f, warn = FALSE), logical(1))]
+            if (length(watched) == 0) {
+              stop("No test file in tests/testthat carries the line '", marker, "'.")
+            }
+            cat("Watched files:", basename(watched), sep = "\n  ")
+            cat("\n")
+            stems <- sub("^test-(.*)\\.R$", "\\1", basename(watched))
+            stems <- gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", stems)
+            filter <- paste0("^(", paste(stems, collapse = "|"), ")$")
           }
           pkgload::load_all(".", quiet = TRUE)
           testthat::test_local(filter = filter, stop_on_failure = TRUE)
