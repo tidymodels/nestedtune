@@ -69,6 +69,7 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - 2026-10-31: T6 done. `devtools::test()` run alone: 1169 tests, 0 failed, 0 errors, 0 skipped; `air format --check .` clean.
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: implement complete; status review.
+- 2026-10-31: step-7 approval: m167-one-type-parts approved for merge
 
 ## Decisions
 
