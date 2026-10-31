@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-31 M165 review. Graduated Guard the devel-vctrs fil
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M166 | Give finer results a second oracle | review | — | normal | milestones/M166-finer-second-oracle.md |
+| M166 | Give finer results a second oracle | in-progress | — | normal | milestones/M166-finer-second-oracle.md |
 | M165 | Keep the devel-vctrs test choice from drifting | done | — | normal | milestones/archive/M165-devel-vctrs-drift.md |
 | M164 | Give six one-type results a second oracle | done | — | normal | milestones/archive/M164-second-oracle-types.md |
 | M163 | Keep an oracle registry outside tests | done | — | normal | milestones/archive/M163-oracle-registry.md |

@@ -1,6 +1,6 @@
 # M166: Give finer results a second oracle
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -70,6 +70,10 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: claim audit: not owed — internal tier
 - 2026-10-31: implement done; status review.
 - 2026-10-31: review pass 1: four of the D-123 records rest on a false premise (Review section, findings marked "at the stop"); stopped for the user, since the repair changes what the plan promised.
+- 2026-10-31: stop answer: the user chose "Build two cheap tests": a sums-to-one invariant for renormalized probabilities, and a censored average on a design holding rows out three times, checked against tune; the other one-type parts recorded as such, the event-level row dropped and M152's header restored, D-123 narrowed, the uncovered parts on a new candidate row.
+- 2026-10-31: amendment routed: AC5 — the event-level exchange row reverses M152 (diff-bug #3, ripple #1); the two new tests need rows.
+- 2026-10-31: amendment routed: AC6 — the averages, compute_metrics and racing lines rest on a false premise (diff-bug #1, #5, #6; blame-history #2, #3).
+- 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
 
 ## Decisions
 
