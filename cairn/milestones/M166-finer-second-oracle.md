@@ -69,3 +69,46 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: T6: `air format --check .` clean; `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, run alone: 1162 tests, 0 failed, 0 errors, 0 skipped.
 - 2026-10-31: claim audit: not owed — internal tier
 - 2026-10-31: implement done; status review.
+- 2026-10-31: review pass 1: four of the D-123 records rest on a false premise (Review section, findings marked "at the stop"); stopped for the user, since the repair changes what the plan promised.
+
+## Decisions
+
+## Review
+
+- spawned: diff-bug, blame-history, prior-review, ripple
+- cairn_validate: all checks passed, 18 advisory warnings (references staleness).
+- diff-bug #1: the averages line says U1 backs the `hand_average()`-only cases because they run the same branches, but U1's fixtures need no renormalization and hold each row out twice, so a mean in place of the median passes U1 and U2 — at the stop.
+- diff-bug #2: the AC4 assertion follows from three assertions already in the test, and its plant edited the expected value — reject, planned change (AC4 names that assertion).
+- diff-bug #3: `event-level/O3` reverses M152, which removed that record because the sens/spec exchange is yardstick's arithmetic, and the file header still says so — at the stop.
+- diff-bug #4: the failed-fold case of the weights test was never shown failing — fix now (plant a missing renormalization over the stored weights, which the failed case can show).
+- diff-bug #5: the compute_metrics line holds for the numeric and class-probability branches, but U2 never reaches the survival branch, so a new set on a censored run rests on U1 alone — at the stop.
+- diff-bug #6: the racing line is true to the code, but no check of a second type reaches the eliminated candidates' rows — at the stop.
+- diff-bug #7: O8 follows `.comp_min`'s body, not the page's printed formula — reject, false (the row cites the note, which records the typo and the reading taken).
+- diff-bug #8: the source note leaves out that `geomean()` returns 0 when a term is 0, so exact ties are the only exposure — fix now (one sentence in the note).
+- diff-bug #9: the desirability test's closing guard repeats the existing test's guard on the same run — reject, false (it compares the new test's own definition-based picks with rmse's, which the existing guard does not).
+- diff-bug #10: the eval_time test's last assertion repeats the existing test's — reject, planned change (AC1 names it, and it keeps the comparisons from passing on a fixture where both orders pick alike).
+- diff-bug #11: the weights test's "doubles the total" comment is near worked arithmetic — reject, false (it states why the comparison can be exact, which the code cannot show).
+- diff-bug #12: the ORACLES header says the five rows are for tests written after `576c3d19`, but two register assertions in older tests — fix now (reword).
+- blame-history #1: D-123 contradicts D-121's clause that an average or rescoring owes two types — reject, false (the groups still hold two types; D-123 is about finer inputs), but the wording is redone with the stop's answer.
+- blame-history #2: D-123 rests on the test rule against repeated checks, which does not speak to oracle counts — at the stop (D-123 is rewritten with the answer).
+- blame-history #3: the averages line fails for the censored median — at the stop (same as diff-bug #1).
+- blame-history #4: the slope is credited to O2, which checks sizes, not the slope — reject, false (every size the lean slope is computed from is within 2% of `analytic_size()`; the line is reworded under prior-review #3).
+- blame-history #5: race O3 compares with the same tune call the code makes — reject, false (O3 calls it on an independent re-run of the race).
+- blame-history #6: ORACLES:14 says each waived result "owes none" while the iteration stage keeps one type — fix now (reword).
+- blame-history #7: the new weights Source paragraph sits under the "every-fold case only" qualifier — reject, false (the qualifier ends its own paragraph; the new one follows a blank comment line).
+- blame-history #8: test-eval-time.R's "and in its final-fit form by" now appears twice — reject, false (each route, live and invariant, has its own final-fit test).
+- blame-history #9: test-selection-metric.R's header names tune's reading as "the oracle" before the closed-form check — fix now (name both).
+- blame-history #10: the candidate row still reads "started M166" — reject, planned change (step 9 hygiene graduates it).
+- prior-review #1: the event-level heading says 2 types while listing an invariant row — at the stop (depends on the O3 answer).
+- prior-review #2: the resample-weights heading says 2 types while listing an invariant row — fix now (3 types).
+- prior-review #3: the memory slope line repeats a row of its own group — fix now (a group sentence in place of the bullet).
+- prior-review #4: the eval_time and weights tests have no source comment directly above them — reject, false (both files keep their sources in the header block, where the new paragraphs went).
+- prior-review #5: the iteration-stage paragraph still cites an unrecorded plan gate of 2026-09-01 — fix now (cite D-123).
+- prior-review #6: the desirability test tells its pick from rmse's only across folds — reject, false (fold 3 differs, and the plant failed folds 2 and 3).
+- prior-review #7: the failed and NA weight cases' values rest on O1, the new test checking invariance only — reject, planned change (AC2 names the invariant as the second type).
+- ripple #1: the event-level header contradicts `event-level/O3` — at the stop (same as diff-bug #3).
+- ripple #2: GP2 states no exception for D-123 — reject, false (GP2 is a guiding principle traded with stated justification, as D-121 did).
+- ripple #3: the per-file list omits `selection-metric/O1` — reject, false (the list is of records at `576c3d19`).
+- ripple #4: the candidate row still lists the results — reject, planned change (graduated at step 9).
+- ripple #5: the new rows carry no "(found by reading)" mark — reject, false (rows added after `576c3d19` name their test in the row, as M164's do).
+- ripple #6: D-123 cites "the testing rule" without naming it — fix now (name the plugin's "What gets a test" rule, if the rule stays).
