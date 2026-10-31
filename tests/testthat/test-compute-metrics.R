@@ -414,7 +414,11 @@ test_that("a static, a dynamic and a linear-predictor metric on a censored run a
       yardstick::royston_survival(rows, !!truth, .pred_linear_pred)
     }
   )
-  in_order <- function(x) x[order(x$fold, x$.metric, x$.eval_time), ]
+  # A set with no dynamic metric can come back with no `.eval_time` column.
+  time_of <- function(x) {
+    if (".eval_time" %in% names(x)) x$.eval_time else rep(NA_real_, nrow(x))
+  }
+  in_order <- function(x) x[order(x$fold, x$.metric, time_of(x)), ]
 
   # The run as saved, and with `.pred_time` reversed so that it no longer
   # rises with `.pred_linear_pred`.
@@ -432,18 +436,15 @@ test_that("a static, a dynamic and a linear-predictor metric on a censored run a
       per_fold <- in_order(per_fold)
       expect_identical(per_fold$fold, by_hand$fold, info = set)
       expect_identical(per_fold$.metric, by_hand$.metric, info = set)
-      expect_identical(per_fold$.eval_time, by_hand$.eval_time, info = set)
+      expect_identical(time_of(per_fold), time_of(by_hand), info = set)
       expect_identical(per_fold$.estimate, by_hand$.estimate, info = set)
 
       summary <- compute_metrics(res, ms)
+      hand_time <- time_of(by_hand)
       for (j in seq_len(nrow(summary))) {
-        time <- summary$.eval_time[[j]]
+        time <- time_of(summary)[[j]]
         rows <- by_hand$.metric == summary$.metric[[j]] &
-          (if (is.na(time)) {
-            is.na(by_hand$.eval_time)
-          } else {
-            by_hand$.eval_time %in% time
-          })
+          (if (is.na(time)) is.na(hand_time) else hand_time %in% time)
         want <- hand_summary(by_hand[rows, ], summary$.metric[[j]])
         expect_identical(summary$mean[[j]], want$mean, info = set)
         expect_identical(summary$n[[j]], want$n, info = set)
@@ -451,7 +452,7 @@ test_that("a static, a dynamic and a linear-predictor metric on a censored run a
       }
       expect_identical(
         nrow(summary),
-        nrow(unique(by_hand[c(".metric", ".eval_time")])),
+        nrow(unique(data.frame(by_hand$.metric, hand_time))),
         info = set
       )
     }
