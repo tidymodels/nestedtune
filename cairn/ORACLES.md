@@ -7,7 +7,7 @@ M163 built the file on 2026-10-31 from the oracle records in `tests/testthat/` a
 - Typed records: `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` (71 records in 26 files).
 - Prose records: the files that `git grep -l -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists and that hold no typed record (20 files, listed at the end).
 
-An id is the test file's name without `test-` and `.R`, then the record's own label (`O1`, `O3b`). A prose record takes `U1`, `U2` in file order. An oracle that a later milestone adds takes the lowest `O` number that its file has not used in this registry. A type is one of the doctrine's five: frozen, live, invariant, closed-form, simulation-coverage. Where the record used another word, the row gives that word in brackets. "Analytic" maps to closed-form. "Analytic by-hand" maps by what the oracle does: an independent run of the pipeline by hand is live, and formulas written out in code are closed-form. A reference that runs the package's own function by hand and compares is invariant, whatever word the record used.
+An id is the test file's name without `test-` and `.R`, then the record's own label (`O1`, `O3b`). A prose record takes `U1`, `U2` in file order. An oracle that a later milestone adds takes the `O` number after the highest one its file uses here. If its file uses none, it takes `O1`. A type is one of the doctrine's five: frozen, live, invariant, closed-form, simulation-coverage. Where the record used another word, the row gives that word in brackets. "Analytic" maps to closed-form. "Analytic by-hand" maps by what the oracle does: an independent run of the pipeline by hand is live, and formulas written out in code are closed-form. A reference that runs the package's own function by hand and compares is invariant, whatever word the record used.
 
 Each test line gives a file under `tests/testthat/` and the first argument of a `test_that()` call in that file at the milestone's head. A literal name is in double quotes. For a name built in code, the line gives `code` and the one-line deparsed call. M163 mapped the names from `576c3d19` through `benchmarks/test-renames-576c3d19.csv`. Where a later commit merged tests, as six workflow-map tests became one `paste0()` loop, M163 read the file at the head. A test line ending "(found by reading)" is a test that the record does not name, found in the file's code. If a record's text quotes a test's name, the record names that test. In the quote, `...` or text in angle brackets matches any text. The full rule is M163's AC1, in the git history of `cairn/milestones/M163-oracle-registry.md`. A prose record names no test. Where a string quoted after "Pinned by" names no test, the row says so.
 
@@ -50,7 +50,7 @@ M164 added the closed-form row, which covers tune's three rules. The desirabilit
   - test-nested-tune-grid-oracles.R :: "each selection rule picks what tune's selector picks on the fold's inner run" (found by reading)
 - `nested-tune-grid-oracles/O6` live. Source: `desirability2::select_best_desirability()` called by name on each fold's hand-run tuning result.
   - test-nested-tune-grid-oracles.R :: "the desirability rule picks what desirability2 picks on the fold's inner run" (found by reading)
-- `nested-tune-grid-oracles/O7` closed-form. Source: `select_best()`, `select_by_one_std_err()` and `select_by_pct_loss()` as tune 2.1.0's help page defines them, written out on each fold's `.inner_metrics` (`references/tune-select-best.md`).
+- `nested-tune-grid-oracles/O7` closed-form. Source: `select_best()`, `select_by_one_std_err()` and `select_by_pct_loss()` as tune 2.1.0's help page defines them, written out on each fold's `.inner_metrics`. The page's percent-loss example divides by the candidate's value and tune's code by the best's, which `references/tune-select-best.md` records.
   - test-nested-tune-grid-oracles.R :: "each selection rule picks the candidate its definition names in the fold's inner metrics"
 - `nested-final-fit-results/U1` live. Source: tune's selector on the final fit's `$tuning`.
   - test-nested-final-fit-results.R :: "the final fit selects by the recorded rule, and records it" (found by reading)
@@ -174,7 +174,7 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## nested_workflow_map(): invariant, live (2 types)
 
-- `nested-workflow-map-oracles/O2` live. Source: `reference_nested_loop()` in helper-orchestration.R on the grid workflow of `wset_two()`, under the map's seed.
+- `nested-workflow-map-oracles/O2` live. Source: `reference_nested_loop()` in helper-orchestration.R on the grid workflow of `wset_two()`. The workflow is deterministic, so the seed reaches nothing the test compares.
   - test-nested-workflow-map-oracles.R :: "the grid element matches a hand-rolled reference loop"
 - `nested-workflow-map-oracles/O1` invariant ["live"]. Source: the orchestrator each workflow routes to, called by hand with the same arguments after `set.seed()` of the same value.
   - test-nested-workflow-map-oracles.R :: code paste0("each element is identical to the hand call (fn = ", fn, ")") (found by reading)
@@ -295,7 +295,7 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
   - test-compute-metrics.R :: "a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
   - test-compute-metrics.R :: "a class-probability metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
 
-The four groups below hold tables that restate what a run stored: numbers that the groups above test, and fold labels read from the design. Three of them rest on one type. Under D-121 a table that restates numbers another group checks, or holds no number, owes no second type of its own. Each of the three names the group it rides on.
+The four groups below hold tables that restate what a run stored: numbers that the groups above test, and fold labels read from the design. Three of them rest on one type. Under D-121 a table that restates numbers another group checks, or holds no number, owes no second type of its own. Each of the three names the group it rides on, or says that it holds no number.
 
 ## Stacked reader tables: live, invariant (2 types)
 

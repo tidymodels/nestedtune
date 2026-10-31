@@ -19,9 +19,9 @@ Extraction: read directly 2026-10-31 from tune 2.1.0's installed help page and m
 
 ## Traces to
 
-- `tests/testthat/test-nested-tune-grid-oracles.R:360` — the test "each selection rule picks the candidate its definition names in the fold's inner metrics". It writes the three rules from the Description and the percent-loss example, not from the method bodies.
+- `tests/testthat/test-nested-tune-grid-oracles.R:360` — the test "each selection rule picks the candidate its definition names in the fold's inner metrics". It writes the three rules from the Description and the percent-loss example. Where the page is silent, it takes the reading that the method bodies also take. The bound uses the best candidate's own `std_err`. "Within" one standard error keeps a candidate on the bound. A loss must be below `limit`. So for `select_by_one_std_err()` the oracle agrees with tune's code by construction, not by an independent reading.
 - `cairn/ORACLES.md`, the selection group — the closed-form row for that test.
 
 ## Open questions
 
-- The page's percent-loss example and tune 2.1.0's method body give different losses. The page also does not say that only candidates at or before the best are kept. The test's fixture is seed 20, the `df1` and `df2` grid, and `limit = 5`. On it, both readings pick the same candidate in each of the three folds, measured 2026-10-31. On a fixture where the two readings differ, the test fails while tune does what its code says — observed 2026-10-31.
+- The page's percent-loss example and tune 2.1.0's method body give different losses. The body's `slice(1:best_index)` cannot change a pick: the best candidate's loss is 0, so the first candidate within the limit in simplicity order is never after the best. The test's fixture is seed 20, the `df1` and `df2` grid, and `limit = 5`. On it, both readings pick the same candidate in each of the three folds, measured 2026-10-31. On a fixture where the two readings differ, the test fails while tune does what its code says — observed 2026-10-31.
