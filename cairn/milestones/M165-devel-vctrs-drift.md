@@ -78,10 +78,10 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - AC5 (2026-10-31 at 6c3ded1f): the step's `env:` has one entry, `FULL_INPUT: ${{ inputs.full }}`. The switch code, run with (schedule,""), (workflow_dispatch,"true"), (workflow_dispatch,"false"), (push,""), (pull_request,""), printed `Whole suite: TRUE`, `TRUE`, `FALSE`, `FALSE`, `FALSE`.
 - spawned: diff-bug, blame-history, prior-review, ripple
 - diff-bug #1: one file losing its marker drops out of the watch with no signal — reject (planned change): the plan gate chose the marker with this as its falsifier (D-122); the step comment now says so.
-- diff-bug #2: "two runs in one group run the same tests" overstates, since each commit's markers pick the files — fix now: workflow concurrency comment and D-122 Decision (branch-only, corrected in place) say the group fixes the whole-suite choice.
-- diff-bug #3: the search pattern `^test-.*\.R$` misses testthat's `test_*.R` and `.r` names, so "a renamed file stays in" overstates — fix now: the comment says a file renamed within the `test-*.R` pattern stays in. The pattern stays: every file in `tests/testthat/` is `test-*.R`, and Scope In names that pattern.
-- diff-bug #4: `cairn/PROFILE.md:65` still says "the three vctrs compatibility test files" — fix now: it names the marker line.
-- diff-bug #5: an orphan short line in the header paragraph — fix now: rewrapped.
+- diff-bug #2: "two runs in one group run the same tests" overstates, since each commit's markers pick the files — fix now, fixed 91003c46: workflow concurrency comment and D-122 Decision (branch-only, corrected in place) say the group fixes the whole-suite choice.
+- diff-bug #3: the search pattern `^test-.*\.R$` misses testthat's `test_*.R` and `.r` names, so "a renamed file stays in" overstates — fix now, fixed 91003c46: the comment says a file renamed within the `test-*.R` pattern stays in. The pattern stays: every file in `tests/testthat/` is `test-*.R`, and Scope In names that pattern.
+- diff-bug #4: `cairn/PROFILE.md:65` still says "the three vctrs compatibility test files" — fix now, fixed 91003c46: it names the marker line.
+- diff-bug #5: an orphan short line in the header paragraph — fix now, fixed 91003c46: rewrapped.
 - blame-history #1: marker deletion is not guarded — reject (planned change), as diff-bug #1.
 - blame-history #2: a scheduled run and a full dispatch can now run side by side, costing CI minutes — reject (planned change): D-122 Consequences records it, and subset groups stay apart from whole-suite groups.
 - blame-history #3: the concurrency comment's "same tests" claim — fix now, as diff-bug #2.
