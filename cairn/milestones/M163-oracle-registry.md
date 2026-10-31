@@ -1,13 +1,13 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — a tracking file under `cairn/` and one DESIGN.md convention bullet, which no package user reads
-- **Branch/PR:** —
+- **Branch/PR:** m163-oracle-registry
 
 ## Goal
 
@@ -41,8 +41,8 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Tasks
 
-- [ ] T1: List the 71 typed records at `576c3d19` with the AC1 grep, and show the count before you use the list. For each record, map each test it names through `benchmarks/test-renames-576c3d19.csv` and the later block tables in `benchmarks/` to its name at the head. Write one row for each record in `cairn/ORACLES.md`, under a header that states the file's scope, the two greps, and the commit they read.
-- [ ] T2: Read the comments of the 20 untyped files at `576c3d19` and at the head. Add rows in AC1's form for the oracles that they describe, and one line for each file as AC2 states.
+- [x] T1: List the 71 typed records at `576c3d19` with the AC1 grep, and show the count before you use the list. For each record, map each test it names through `benchmarks/test-renames-576c3d19.csv` and the later block tables in `benchmarks/` to its name at the head. Write one row for each record in `cairn/ORACLES.md`, under a header that states the file's scope, the two greps, and the commit they read.
+- [x] T2: Read the comments of the 20 untyped files at `576c3d19` and at the head. Add rows in AC1's form for the oracles that they describe, and one line for each file as AC2 states.
 - [ ] T3: Group the rows by the numeric result that they test, and count the doctrine types in each group. For each group under two types, cite the D-entry or archived milestone that accepts the shortfall, or search the candidates, the archive and DECISIONS.md for overlap and then add a candidate row.
 - [ ] T4: Rewrite the oracle-records bullet at `cairn/DESIGN.md:130`. List each pair of a file and a name from the registry and compare it with the `test_that()` calls at the head. Run `cairn_validate`.
 
@@ -57,6 +57,9 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: plan decided that a group under two types gets a candidate row or a cited accepting record, and is not fixed here, so the milestone stays a record and adds no test.
 - 2026-10-31: lessons used: 2026-09-11 (M86, extended M89), a checker that finds prose by dropping lines can drop its whole domain. It shaped the stated grep counts in AC1 and AC2 and the count step in T1.
 - 2026-10-31: criteria audit (reduced mode, fresh Opus reader): 3 findings, all fixed. AC1's grep missed `O3b`, `O4b` and `O3c` and the `#   O1  type` form in two files, so the pattern now admits a letter suffix and an optional `--` (64 to 71 records, 24 to 26 files, 22 to 20 untyped files). AC1 promised every test that asserts an oracle, which no procedure lists, so it now covers the tests each record names. AC2's per-file oracles were left to judgment, so each file now gets one line with its row ids or a no-oracle reason. The untyped O5 strand now joins the O5 row. AC3, AC4, AC5: no finding.
+- 2026-10-31: implement started on branch `m163-oracle-registry`. The profile's verify slot runs after code changes, and this milestone changes only `cairn/` files, so no verify run applies.
+- 2026-10-31: T1 and T2 done in one pass: `cairn/ORACLES.md` holds 71 typed rows (ids compared with the AC1 grep's 71 records, no difference) and 17 prose rows from 13 of the 20 untyped files. The other 7 files have a line each: 5 record no oracle, and 2 point at typed rows. A one-off parse of `test_that()` calls at the head found 1080 calls, 38 with names built in code. Those names are given as deparsed code. All 123 test pointers matched a call at the head.
+- 2026-10-31: implementation choices: ids are file stem plus the record's label, and prose rows take `U<n>`. "Analytic" maps to closed-form, and so does "analytic by-hand", because both are explicit code written from a formula or definition. A row that tests two results is written once and counted by id in the second group.
 
 ## Decisions
 
