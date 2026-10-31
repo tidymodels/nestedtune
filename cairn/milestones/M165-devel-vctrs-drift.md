@@ -66,6 +66,8 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - 2026-10-31: verify: no `R/` change and the `.R` changes are comment lines, so the gate is `air format --check .` clean plus T4's run of the three watched files (PASS 988); status review.
 - 2026-10-31: review checkpoint (half-done): AC2-AC5 evidence recorded and ticked; AC1 waits for the PR run; the gate's `devtools::check()` and the four-lens review are running.
 - 2026-10-31: review pass 1: four lenses reported 15 findings; 7 fix now (comment and record wording only), 4 rejected as planned change, 4 noted; no floor return. `devtools::check()` still running.
+- 2026-10-31: correction: review pass 1 recorded 17 Review lines, 8 fix now (not 7), 4 rejected, 5 noted.
+- 2026-10-31: step-7 approval: m165-devel-vctrs-drift approved for merge
 
 ## Decisions
 
