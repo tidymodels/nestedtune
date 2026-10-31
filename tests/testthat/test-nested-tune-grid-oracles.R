@@ -536,11 +536,12 @@ test_that("the desirability rule picks the candidate its definition names in the
     c(df1 = rmse$df1[[top]], df2 = rmse$df2[[top]])
   }
 
+  picks <- lapply(res$.inner_metrics, pick)
   for (i in seq_len(nrow(res))) {
     sel <- res$.selected[[i]]
     expect_identical(
       c(df1 = sel$df1, df2 = sel$df2),
-      pick(res$.inner_metrics[[i]]),
+      picks[[i]],
       info = paste("fold", i)
     )
   }
@@ -550,8 +551,5 @@ test_that("the desirability rule picks the candidate its definition names in the
     m <- m[m$.metric == "rmse", ]
     c(df1 = m$df1[[which.min(m$mean)]], df2 = m$df2[[which.min(m$mean)]])
   })
-  expect_false(identical(
-    lapply(seq_len(nrow(res)), function(i) pick(res$.inner_metrics[[i]])),
-    best
-  ))
+  expect_false(identical(picks, best))
 })

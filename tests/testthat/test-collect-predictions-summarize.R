@@ -341,14 +341,13 @@ test_that("a censored average over three repeats takes the median time, as tune 
     hand_average(p, outcome),
     outcome
   )
-  # Each row is held out three times, so a mean in place of the median
-  # would give another number on some row.
-  gap <- vapply(
-    split(p$.pred_time, p$.row),
-    function(t) stats::median(t) - mean(t),
-    numeric(1)
-  )
-  expect_true(any(abs(gap) > 1e-6))
+  # Each row is held out three times. A mean in place of the median would
+  # move the column by more than the comparisons above tolerate, which is
+  # a mean relative difference of about 1.5e-8.
+  by_row_time <- split(p$.pred_time, p$.row)
+  medians <- vapply(by_row_time, stats::median, numeric(1))
+  means <- vapply(by_row_time, function(t) sum(t) / length(t), numeric(1))
+  expect_gt(sum(abs(means - medians)) / sum(abs(medians)), 1e-4)
 })
 
 # ---- across the candidates the folds selected -----------------------------

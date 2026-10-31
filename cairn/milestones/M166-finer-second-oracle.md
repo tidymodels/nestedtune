@@ -138,3 +138,39 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - ripple #4: the candidate row still lists the results — reject, planned change (graduated at step 9).
 - ripple #5: the new rows carry no "(found by reading)" mark — reject, false (rows added after `576c3d19` name their test in the row, as M164's do).
 - ripple #6: D-123 cites "the testing rule" without naming it — fix now (name the plugin's "What gets a test" rule, if the rule stays).
+- Pass 1 fix-now lines settled in implement pass 2: diff-bug #4, fixed 7161e181 (T9 plant); diff-bug #8, #12, blame-history #6, #9, prior-review #2, #3, #5, fixed 7161e181; ripple #6, fixed 7161e181 (D-123 no longer cites the rule); the "at the stop" lines, fixed by the stop answer in a1af2737 and 7161e181.
+
+### Pass 2
+
+- spawned: diff-bug, blame-history, prior-review, ripple
+- cairn_validate: all checks passed. Gate at 417a8d17: `air format --check .` clean; `document()` changed no NAMESPACE or man file (it rewrites `Config/roxygen2/version` to the local 8.1.1, restored, not committed); `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, alone: 1164 tests, 0 failed, 0 errors, 0 skipped; six gating prose sweeps exit 0; `devtools::check()` 0 errors, 0 warnings, 0 notes. After the pass-2 fixes, the two changed test files rerun green (34 and 10 tests, 0 failed) and `air` is clean.
+- diff-bug #1: the compute_metrics survival branch credit to U1 is false for static and linear-predictor metrics, since U1's censored test scores `brier_survival` only — fix now, fixed 6a50ea28 (line and candidate row say they reach no test).
+- diff-bug #2: O1's racing fixtures may eliminate no candidate, so crediting O1 counts one check twice — fix now, fixed 6a50ea28 (credited to O3 alone).
+- diff-bug #3: the median guard's 1e-6 gap does not prove the comparisons can fail at `expect_equal`'s tolerance — fix now (guard on the column's relative gap above 1e-4, passing).
+- diff-bug #4: the event-level line says the test "also asserts" the exchange while the header says the file does not test it — fix now, fixed 6a50ea28 (line cites M152's removal only). The header's mismatch with the assertions at :268 predates the diff — reject, unmodified lines.
+- diff-bug #5: D-123 narrows D-121 and GP2 without saying so — fix now, fixed 6a50ea28 (heading names the GP2 exemption; D-121's owed second type stands, held by the candidate row).
+- diff-bug #6: O1 runs tune's and finetune's own search, so it cannot show a defect in the proposals or perturbations — fix now, fixed 6a50ea28 (credited to no row; O1 checks the driving).
+- diff-bug #7: the averaging header names no source for the sums-to-one invariant — fix now, fixed 6a50ea28.
+- diff-bug #8: `collect-predictions-summarize/O2` shares U1's source on a new fixture — reject, planned change (AC5 asks one row per new test; the test's hand check is listed under U2, whose source it is).
+- diff-bug #9: the AC4 assertion follows from three others — reject, planned change (as at pass 1).
+- diff-bug #10: the three-repeat test makes the two-repeat censored tests repeats on one path — reject, unmodified lines (the older tests are outside the diff).
+- diff-bug #11: the desirability tie check runs twice per fold — fix now (picks computed once).
+- diff-bug #12: the eval_time `predict()` identity follows from the `dist` identity — reject, planned change (AC1 names it).
+- diff-bug #13: the weights comment is near worked arithmetic — reject, false (as at pass 1).
+- diff-bug #14: the registry header sentence does not describe the memory slope — fix now, fixed 6a50ea28 ("or is counted on an existing row").
+- diff-bug #15: D-123's heading says "row" where it means candidate row — fix now, fixed 6a50ea28.
+- blame-history #1: the survival-branch credit on a new metric set rests on the same-code reading — fix now, fixed 6a50ea28 (same fix as diff-bug #1).
+- blame-history #2: the memory slope is credited to O2 — reject, planned change (AC5 names it).
+- blame-history #3: D-079's "stays two" count of selection oracles is stale — reject, history record.
+- blame-history #4: the 2026-09-01 plan-gate cite is gone — reject, planned change (pass 1 prior-review #5 replaced it with D-123).
+- blame-history #5: the racing rows credit two live rows — fix now, fixed 6a50ea28 (same fix as diff-bug #2).
+- blame-history #6: the header's "nine" does not match the row's count of parts — fix now, fixed e1d3f35c (number dropped).
+- blame-history #7: the tie check uses `prod()^(1/k)` where desirability2 uses `exp(mean(log))` — reject, false (the test asserts one top candidate, and the note records the difference).
+- prior-review #1: the sums-to-one premise and the median guard add with `mean()`, against M126's double-arithmetic convention — fix now (the guard sums in double; the premise's 1e-6 margin is far above any long-double difference, reject for it, false).
+- prior-review #2: the median guard uses `mean()` — fix now (same fix as #1).
+- prior-review #3: no source comment for the sums-to-one invariant — fix now, fixed 6a50ea28 (same fix as diff-bug #7).
+- prior-review #4: the O8 row does not name the page's typo — reject, false (as at pass 1; the row cites the note).
+- ripple #1: U2 lists median tests that the averages line does not credit — reject, false (the line names U2's three-repeat test).
+- ripple #2: the candidate row "Give finer results a second oracle" still lists the selection results — reject, planned change (graduated at step 9).
+- ripple #3: the weights source sits away from its test — reject, false (it is in the header block at :28, the file's convention).
+- ripple #4: "held out twice" at :793 is not true of the new three-repeat pair — reject, false (it describes the fixtures its helper reads).
