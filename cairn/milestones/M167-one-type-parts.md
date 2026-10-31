@@ -1,6 +1,6 @@
 # M167: Add second oracles to one-type parts
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -44,7 +44,7 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - [x] T3: Racing eliminated rows. In `test-nested-tune-race-oracles.R`, beside the test at :186, read which inner resamples the race scored each eliminated candidate on from the race's unsummarized metrics. Compare the candidate's `mean` and `n` with `nested_tune_grid()` over an inner design cut to those resamples (invariant, as `nested-tune-race-oracles/O2` is for survivors). If the grid path cannot be cut that way, refit the candidate on those inner analysis sets and compute its metric by formula (closed-form), building a fixture if the stochastic one cannot be refit exactly. Plant: store finetune's survivors alone (`all_configs = FALSE`), see the test fail, and restore.
 - [x] T4: Final fit under `event_level`. In `test-event-level.R`, beside the test at :206, count sensitivity and specificity at the second level from the final fit's stored tuning run (closed-form, as `event-level/O1` counts for the outer folds), from its saved predictions or from a refit of each candidate. Build a fixture if `cls_*` cannot give a count that matches exactly. Plant: drop `event_level` from the final fit's tuning call, see the test fail, and restore.
 - [x] T5: Registry. Add the AC5 test lines and rows under the file's quoting rule, and rewrite the three group lines at `cairn/ORACLES.md` :90, :240 and :311 so each credits its part to rows of two types (D-123 (1)). Re-point `helper-time-budget.R` rows for the new blocks in one pass.
-- [ ] T6: Run `devtools::test()` and `air format --check .` clean.
+- [x] T6: Run `devtools::test()` and `air format --check .` clean.
 
 ## Work log
 
@@ -66,3 +66,6 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - 2026-10-31: correction to the T3 amendment line: at seed 20 `race_results("tune_race_anova")` eliminates `num_comp = 1` alone in each of the three folds; the `num_comp = 3` elimination in fold 3 came from a seed-24 probe.
 - 2026-10-31: T4 done. Test "the final fit's tuning run reports the sensitivity counted at the second level" (closed-form), on a `save_pred = TRUE` grid run at `event_level = "second"`, whose control the final fit reuses: 9 resample-candidate pairs, each count equal to tune's `sens` and differing from the first level's count. Plant: `event_level = "first"` where `nested_final_fit()` reads the procedure (R/nested-final-fit.R:228) failed it (9) and `event-level/O2`'s test (4); restored. A plant at `effective_control()` (:267) passed both, since `run_tuner()` sets the level again from its own argument.
 - 2026-10-31: T5 done. `cairn/ORACLES.md`: rows `compute-metrics/O1` (invariant), `nested-tune-race-oracles/O5` (invariant), `event-level/O3` (closed-form); the AC1 test under `compute-metrics/U1` and the AC2 test under `compute-metrics/U2`, both "(found by reading)"; the three group lines rewritten and the header's two milestone sentences extended; `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing. The compute_metrics test header now quotes the invariant's test after "Pinned by". `helper-time-budget.R` names none of the three changed files, so no row moved.
+- 2026-10-31: T6 done. `devtools::test()` run alone: 1169 tests, 0 failed, 0 errors, 0 skipped; `air format --check .` clean.
+- 2026-10-31: claim audit: not owed — internal tier.
+- 2026-10-31: implement complete; status review.
