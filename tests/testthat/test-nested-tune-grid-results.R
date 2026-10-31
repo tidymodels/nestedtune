@@ -448,6 +448,35 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
   expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
 })
 
+# Source: `predict()` of each fold's saved outer-fit workflow on its assessment rows.
+test_that("each fold's saved predictions are its extracted outer-fit workflow's predictions", {
+  skip_if_no_engines()
+
+  d <- make_reg_data()
+  keep_workflow <- rlang::new_function(
+    rlang::pairlist2(x = ),
+    quote(x),
+    env = baseenv()
+  )
+  res <- extracted_results(d, extract = keep_workflow)
+
+  expect_true(all(res$.completed))
+  for (i in seq_len(nrow(res))) {
+    held_out <- rsample::assessment(res$splits[[i]])
+    by_hand <- predict(res$.extracts[[i]], new_data = held_out)
+    expect_identical(
+      res$.predictions[[i]]$.pred,
+      by_hand$.pred,
+      info = paste(i)
+    )
+    expect_identical(
+      res$.predictions[[i]]$.row,
+      rsample::complement(res$splits[[i]]),
+      info = paste(i)
+    )
+  }
+})
+
 test_that("an extract that errors leaves the fold completed, its element NULL, and one note", {
   skip_if_no_engines()
 

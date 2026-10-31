@@ -2129,6 +2129,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** dropped the parked row "Cause of the two pre-M14 CI stalls". It would find why `R CMD check` on macOS (52 min) and `covr` on ubuntu (40 min) went silent after `* checking tests ...` in July 2026 and passed on re-run. Not worth the work: the stalls have not recurred past the trigger the row named, and the M012-M016 archives keep the mitigation and the two refuted suspects, so a recurrence would be investigated from them with or without the row.
 **Consequences:** a recurring stall is filed as a new candidate row that cites the M012-M016 archives. The drop is re-opened by superseding this entry.
 
+### D-121 (2026-10-31): a table that restates numbers another oracle group checks, or holds no number, owes no second oracle type. Applies GP2 to the three table groups of `cairn/ORACLES.md`
+
+**Context:** M163's registry left three groups on one oracle type that restate what a run stored: the wide metric tables, the fold labels, and the rows `augment()` joins. GP2 asks two independent types for each numeric result. M164's plan gate asked whether these three owe a second type.
+**Decision:** they do not. A table that only reshapes, labels or joins numbers that another group's oracles check is not a numeric result of its own, and a table that holds no number is not one either. Each such group in `cairn/ORACLES.md` carries one line naming the group it rides on, or saying it holds no number. The user chose this at M164's plan gate over adding a second type to all nine groups.
+**Consequences:** a table that computes a new number, such as an average or a rescoring, is a result of its own and owes two types. The three groups keep their one oracle, which checks the reshaping. Falsified by a reshaping table that changes a number (drops, duplicates or misplaces a value) with no test failing.
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

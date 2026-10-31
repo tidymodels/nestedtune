@@ -83,6 +83,28 @@ test_that("the final fit's candidates carry the iteration each came from", {
   expect_lte(initial, 3L)
 })
 
+# Source: the recorded rule's pick from the final fit's own run, finalized and fit by hand.
+test_that("the annealing final fit is the workflow finalized on its own run's pick", {
+  skip_if_no_anneal_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  res <- anneal_final_results(d)
+  set.seed(33)
+  final <- memoised(nested_final_fit(wf, res))
+
+  best <- reference_select(
+    extract_tune_results(final),
+    final$procedure$select,
+    "rmse"
+  )
+  by_hand <- parsnip::fit(tune::finalize_workflow(wf, best), data = d)
+  expect_identical(
+    predict(extract_workflow(final), new_data = d),
+    predict(by_hand, new_data = d)
+  )
+})
+
 test_that("print() and summary() name simulated annealing with the counts that ran", {
   skip_if_no_anneal_fixture()
 

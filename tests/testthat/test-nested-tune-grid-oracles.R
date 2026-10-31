@@ -333,14 +333,14 @@ test_that("each selection rule picks what tune's selector picks on the fold's in
   picked <- list()
   for (nm in names(rules)) {
     set.seed(20)
-    res <- nested_tune_grid(
+    res <- memoised(nested_tune_grid(
       wf,
       folds,
       grid = g,
       metrics = ms,
       param_info = p,
       select = rules[[nm]]
-    )
+    ))
     expect_true(all(res$.completed), info = nm)
     ref <- reference_with_rule(ref_best, wf, folds, ms, rules[[nm]], "rmse")
     for (i in seq_len(nrow(res))) {
@@ -354,6 +354,69 @@ test_that("each selection rule picks what tune's selector picks on the fold's in
   # The rule reached the selection (see the selection-rule note above).
   expect_false(identical(picked$one_std_err, picked$best))
   expect_false(identical(picked$pct_loss, picked$best))
+})
+
+# The three rules as tune 2.1.0's `?select_best` page defines them.
+test_that("each selection rule picks the candidate its definition names in the fold's inner metrics", {
+  skip_if_no_bayes_fixture()
+
+  d <- make_reg_data()
+  wf <- bayes_workflow(d)
+  folds <- det_nested(d)
+  p <- bayes_param_info(wf)
+  ms <- reg_metrics()
+  g <- expand.grid(df1 = c(2L, 5L, 8L), df2 = c(2L, 5L, 8L))
+
+  rules <- list(
+    best = selection_rule("best"),
+    one_std_err = selection_rule("one_std_err", desc(df1), df2),
+    pct_loss = selection_rule("pct_loss", desc(df1), df2, limit = 5)
+  )
+  # rmse is minimized. Simplest first is large df1, then small df2.
+  pick <- function(m, rule) {
+    m <- m[m$.metric == "rmse", ]
+    best <- which.min(m$mean)
+    if (rule == "best") {
+      keep <- seq_len(nrow(m)) == best
+    } else if (rule == "one_std_err") {
+      keep <- m$mean <= m$mean[[best]] + m$std_err[[best]]
+    } else {
+      keep <- (m$mean - m$mean[[best]]) / m$mean * 100 < 5
+    }
+    m <- m[keep, ]
+    m <- m[order(-m$df1, m$df2), ]
+    c(df1 = m$df1[[1L]], df2 = m$df2[[1L]])
+  }
+
+  runs <- lapply(rules, function(rule) {
+    set.seed(20)
+    memoised(nested_tune_grid(
+      wf,
+      folds,
+      grid = g,
+      metrics = ms,
+      param_info = p,
+      select = rule
+    ))
+  })
+  # The rule changes only what is selected, so one run's inner metrics serve all three.
+  inner <- runs$best$.inner_metrics
+  expect_identical(runs$one_std_err$.inner_metrics, inner)
+  expect_identical(runs$pct_loss$.inner_metrics, inner)
+  for (nm in names(rules)) {
+    for (i in seq_along(inner)) {
+      sel <- runs[[nm]]$.selected[[i]]
+      expect_identical(
+        c(df1 = sel$df1, df2 = sel$df2),
+        pick(inner[[i]], nm),
+        info = paste(nm, "fold", i)
+      )
+    }
+  }
+  picked <- lapply(runs, function(r) r$.selected)
+  expect_false(identical(picked$one_std_err, picked$best))
+  expect_false(identical(picked$pct_loss, picked$best))
+  expect_false(identical(picked$one_std_err, picked$pct_loss))
 })
 
 # The desirability rule is checked against
