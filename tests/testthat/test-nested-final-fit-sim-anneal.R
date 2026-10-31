@@ -83,6 +83,7 @@ test_that("the final fit's candidates carry the iteration each came from", {
   expect_lte(initial, 3L)
 })
 
+# Source: the recorded rule's pick from the final fit's own run, finalized and fit by hand.
 test_that("the annealing final fit is the workflow finalized on its own run's pick", {
   skip_if_no_anneal_fixture()
 

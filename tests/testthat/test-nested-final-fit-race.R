@@ -64,6 +64,7 @@ test_that("the racing final fit matches a hand-rolled reference pipeline", {
   }
 })
 
+# Source: the recorded rule's pick from the final fit's own race, finalized and fit by hand.
 test_that("the racing final fit is the workflow finalized on its own race's pick", {
   skip_if_no_race_fixture()
 

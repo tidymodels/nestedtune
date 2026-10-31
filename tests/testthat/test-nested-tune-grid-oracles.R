@@ -388,29 +388,35 @@ test_that("each selection rule picks the candidate its definition names in the f
     c(df1 = m$df1[[1L]], df2 = m$df2[[1L]])
   }
 
-  picked <- list()
-  for (nm in names(rules)) {
+  runs <- lapply(rules, function(rule) {
     set.seed(20)
-    res <- memoised(nested_tune_grid(
+    memoised(nested_tune_grid(
       wf,
       folds,
       grid = g,
       metrics = ms,
       param_info = p,
-      select = rules[[nm]]
+      select = rule
     ))
-    for (i in seq_len(nrow(res))) {
-      sel <- res$.selected[[i]]
+  })
+  # The rule changes only what is selected, so one run's inner metrics serve all three.
+  inner <- runs$best$.inner_metrics
+  expect_identical(runs$one_std_err$.inner_metrics, inner)
+  expect_identical(runs$pct_loss$.inner_metrics, inner)
+  for (nm in names(rules)) {
+    for (i in seq_along(inner)) {
+      sel <- runs[[nm]]$.selected[[i]]
       expect_identical(
         c(df1 = sel$df1, df2 = sel$df2),
-        pick(res$.inner_metrics[[i]], nm),
+        pick(inner[[i]], nm),
         info = paste(nm, "fold", i)
       )
     }
-    picked[[nm]] <- res$.selected
   }
+  picked <- lapply(runs, function(r) r$.selected)
   expect_false(identical(picked$one_std_err, picked$best))
   expect_false(identical(picked$pct_loss, picked$best))
+  expect_false(identical(picked$one_std_err, picked$pct_loss))
 })
 
 # The desirability rule is checked against

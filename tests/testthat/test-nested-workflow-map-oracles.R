@@ -70,6 +70,7 @@ for (fn in MAP_FNS) {
   )
 }
 
+# Source: `reference_nested_loop()` in helper-orchestration.R, run on the grid workflow.
 test_that("the grid element matches a hand-rolled reference loop", {
   skip_if_no_wset_fixture("nested_tune_grid")
   d <- make_reg_data()

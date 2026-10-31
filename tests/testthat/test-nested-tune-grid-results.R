@@ -448,6 +448,7 @@ test_that("extract = f keeps f() of each fold's outer-fit workflow, identical to
   expect_lt(match(".predictions", names(res)), match(".extracts", names(res)))
 })
 
+# Source: `predict()` of each fold's saved outer-fit workflow on its assessment rows.
 test_that("each fold's saved predictions are its extracted outer-fit workflow's predictions", {
   skip_if_no_engines()
 
@@ -466,6 +467,11 @@ test_that("each fold's saved predictions are its extracted outer-fit workflow's 
     expect_identical(
       res$.predictions[[i]]$.pred,
       by_hand$.pred,
+      info = paste(i)
+    )
+    expect_identical(
+      res$.predictions[[i]]$.row,
+      rsample::complement(res$splits[[i]]),
       info = paste(i)
     )
   }
