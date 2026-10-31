@@ -7,7 +7,8 @@
 # deterministic (lm, glm, survreg), because a stochastic engine's per-fold
 # predictions differ between the two runs. The second is `hand_average()`
 # below, base R written from the rules the help page states and read off
-# `collect_predictions(res)`, never off the method's output.
+# `collect_predictions(res)`, never off the method's output. The third is an
+# invariant: averaged class probabilities sum to one in every row.
 
 skip_heavy_on_cran()
 
