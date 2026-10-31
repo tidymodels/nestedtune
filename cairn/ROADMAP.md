@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-30 triage pass, 65 items. Retitled `r-lib/actions/p
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M163 | Keep an oracle registry outside tests | review | — | normal | milestones/M163-oracle-registry.md |
+| M163 | Keep an oracle registry outside tests | in-progress | — | normal | milestones/M163-oracle-registry.md |
 | M162 | The shared test pool keeps both daemons | dropped | — | normal | milestones/archive/M162-shared-pool-daemon-loss.md |
 | M161 | R source comments carry no milestone ids | done | M160 | normal | milestones/archive/M161-r-comment-milestone-ids.md |
 | M160 | Seed checks in four refusal tests can fail | done | — | normal | milestones/archive/M160-seed-check-refusals.md |

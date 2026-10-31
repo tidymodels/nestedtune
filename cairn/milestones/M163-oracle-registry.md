@@ -1,6 +1,6 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -25,10 +25,10 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Acceptance criteria
 
-- [x] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
+- [ ] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
 - [x] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
 - [x] AC3: Each pair of a file and a `test_that()` name in the registry exists at the milestone's head. The file is under `tests/testthat/`, and it holds a `test_that()` call whose first argument is that name.
-- [x] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
+- [ ] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
 - [x] AC5: The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` names `cairn/ORACLES.md` as the record of oracle ids and types. The bullet says that a milestone that adds or removes an oracle updates the registry. The bullet no longer says that no committed record holds the types.
 
 ## Coverage
@@ -65,6 +65,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: all tasks done; status set to review.
 - 2026-10-31: review checkpoint (in progress): AC1-AC5 evidence recorded and ticked; `cairn_validate` and the six gating prose sweeps clean; `devtools::check()` and the two reviewers still running.
+- 2026-10-31: review return 1: diff-bug #4 and #6 show AC1 failing (a row that does not say its named test never existed; two rows that say the record names no test when it names one), and #1 shows AC4 failing (one group merging four results). Fix those and the other fix-now findings #2, #3, #5, #7, #8 and #9 listed in the Review section, then rename the candidate row to the new count of one-type groups.
 
 ## Decisions
 
@@ -77,3 +78,23 @@ Evidence at `8f70dc69` (branch head), 2026-10-31. A one-off script read `cairn/O
 - AC3: 123 pairs of a file and a name in the registry, each compared with the `test_that()` calls in that file at the head (a literal name by its string, a built name by its one-line deparsed call). 0 unparsed lines, 0 missing.
 - AC4: 23 group headings, each stating its types and count. For each, the stated set equals the set of types of its rows plus the rows it counts by id, and every row sits in a group. 6 groups hold one type, and each names the candidate row "Add second oracle types to six groups", which `cairn/ROADMAP.md` holds. 0 problems.
 - AC5: `cairn/DESIGN.md:130-138` names `cairn/ORACLES.md` as the record of each oracle's id and type, and says "A milestone that adds or removes an oracle updates `cairn/ORACLES.md`". `grep -c 'no committed record holds' cairn/DESIGN.md` gives 0.
+
+Consistency gate: `cairn_validate` passed (18 advisory staleness warnings, none new). The six gating prose sweeps exit 0. The diff touches only `cairn/` (no `principle` changed, so no `cairn_impact` run). `devtools::check()` was still running at this pass.
+
+spawned: diff-bug, ripple (internal tier, docs-only diff)
+
+- diff-bug #1: the "Reader tables" group merges four results (stacked readers, wide tables, fold labels, `augment()` joins), each on one type, so its "3 types" hides four shortfalls and fails AC4's one group per result — fix now (split, each named in the candidate row).
+- diff-bug #2: the BC10/BC12/BC13 rows count serial-against-parallel identity as invariant, while BC14 and BC17 go unregistered, and the parallel-identity file calls these mode-independence checks — reject in part (false: no record at `576c3d19` names BC14 or BC17 as an oracle, so a row would invent one); fix now in part (note the file's disclaimer on the three rows and the records' own initial-stage and iteration-stage split on the Bayesian and annealing groups).
+- diff-bug #3: four prose rows list no test though their tests exist — fix now (found by reading).
+- diff-bug #4: `eval-time/O2`'s first named test did not exist even at `576c3d19`, and the row says nothing, which fails AC1; `eval-time/O3`'s record writes "evaluation time" for `eval_time` — fix now.
+- diff-bug #5: `nested-fit-resamples-oracles/O2`, a by-hand fit, predict and score, is an independent implementation, so live, not closed-form — fix now; `resample-weights/O1` stays closed-form (written-out weighted-mean formulas).
+- diff-bug #6: `time-series-pairs-other/O5` and `O6` say the record names no test, but the record's lead-in names one, which fails AC1 — fix now.
+- diff-bug #7: the racing selector test that D-079 counts is absent, and the M92 set test that `nested-workflow-map-readers` comments tie to its oracle is missing — fix now (note the racing test, which no record at `576c3d19` describes as an oracle; add the M92 test to the readers row).
+- diff-bug #8: the `test-nested-tune-grid-results.R` file line omits `nested-tune-grid-oracles/O4`, whose test is there, while the parallel-identity line lists by test location — fix now.
+- diff-bug #9: D-079's reason (the outer design never reaches tuner code) is cited for inner-design and pair rows it does not cover — fix now (narrow the citation).
+- diff-bug #10: no provenance field — reject (false: each id names the record's file and label, and the header names the commit read).
+- diff-bug #11: a literal name holds unescaped inner quotes; `test-nested-results-agreement.R` gives an oracle source — reject (style: the parse reads it; planned: the line gives the reason the file's own comment states, as AC2 asks).
+- ripple #1: 21 test headers quote "oracles are recorded in the test file that asserts them" — reject (false: the new bullet still places each oracle's source and pinning test in that file).
+- ripple #2: `test-parallel-payload.R:10-11` says the records live beside the asserting test — reject (false, same reason).
+- ripple #3: the source candidate row still says no record holds the types — reject (planned: it graduates at hygiene).
+- ripple #4: `test-parallel-metrics.R` and `test-parallel-identity.R` cite DESIGN "Oracle records" — reject (false: the reviewer finds no conflict, and the bullet keeps that title).
