@@ -1,6 +1,7 @@
 # The reference implementation is rsample::nested_cv(), recomputed at test
 # time: every inner analysis and assessment set must match it row for row
-# under one seed.
+# under one seed. The partition test reads the inner splits against their own
+# outer analysis rows instead.
 
 test_that("inner splits match rsample::nested_cv() for a v-fold/v-fold scheme", {
   d <- make_test_data()
@@ -20,6 +21,33 @@ test_that("inner splits match rsample::nested_cv() for a v-fold/v-fold scheme", 
 
   expect_outer_identical(lean, ref)
   expect_inner_identical(lean, ref)
+})
+
+test_that("inner v-fold splits partition their outer analysis rows", {
+  d <- make_test_data()
+  d$.row_id <- seq_len(nrow(d))
+
+  set.seed(1)
+  lean <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = rsample::vfold_cv(v = 4)
+  )
+
+  for (i in seq_len(nrow(lean))) {
+    outer_rows <- rsample::analysis(lean$splits[[i]])$.row_id
+    inner <- lean$inner_resamples[[i]]
+    held_out <- integer(0)
+    for (j in seq_len(nrow(inner))) {
+      fit_rows <- rsample::analysis(inner$splits[[j]])$.row_id
+      out_rows <- rsample::assessment(inner$splits[[j]])$.row_id
+      expect_true(all(fit_rows %in% outer_rows), info = paste(i, j))
+      expect_true(all(out_rows %in% outer_rows), info = paste(i, j))
+      expect_length(intersect(fit_rows, out_rows), 0L)
+      held_out <- c(held_out, out_rows)
+    }
+    expect_identical(sort(held_out), sort(outer_rows), info = paste(i))
+  }
 })
 
 test_that("inner splits match rsample::nested_cv() for a v-fold/bootstrap scheme", {

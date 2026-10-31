@@ -130,13 +130,13 @@ naming convention.
 - **Oracle records: central `cairn/ORACLES.md`, with provenance headers in the
   asserting test file.** `cairn/ORACLES.md` records the id, type, source and
   asserting tests of each oracle that the test comments at `576c3d19` recorded,
-  in named groups, and is the record a ≥2-types audit reads. Its header names
+  and of each oracle a later milestone adds, in named groups, and is the record a ≥2-types audit reads. Its header names
   the comments it reads. The comments of the `tests/testthat/test-*.R` file
   that asserts an oracle state its source, and for most oracles which test pins
   it, but no id or type, since the test-comment rule forbids them there. The
   asserting test is the single source of truth, never a restated value. A milestone that adds or
   removes an oracle updates `cairn/ORACLES.md`. _(added 2026-07-25, M01;
-  corrected M155, M163.)_
+  corrected M155, M163, M164.)_
 - **`air` is the formatter, and a committed tree is clean under it.** `air.toml`
   at the root declares the settings (the tidymodels shape: `[format]` with
   `skip = ["tribble"]`), `air format .` is expected to change nothing on a

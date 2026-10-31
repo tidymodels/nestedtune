@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-31 M163 review. Graduated Keep an oracle registry o
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M164 | Give six one-type results a second oracle | planned | — | normal | milestones/M164-second-oracle-types.md |
+| M164 | Give six one-type results a second oracle | review | — | normal | milestones/M164-second-oracle-types.md |
 | M163 | Keep an oracle registry outside tests | done | — | normal | milestones/archive/M163-oracle-registry.md |
 | M162 | The shared test pool keeps both daemons | dropped | — | normal | milestones/archive/M162-shared-pool-daemon-loss.md |
 | M161 | R source comments carry no milestone ids | done | M160 | normal | milestones/archive/M161-r-comment-milestone-ids.md |
