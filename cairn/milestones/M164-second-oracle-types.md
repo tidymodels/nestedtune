@@ -119,3 +119,4 @@ Evidence at head `dda5c363` (tests) and `163b1f55` (registry), gathered 2026-10-
 - ripple #5: the "Files with prose oracle comments at 576c3d19" list omits the new rows — reject, false: the heading scopes it to records at `576c3d19`
 - ripple #6: race and anneal headers describe only O5 — fix now, source lines before the new blocks, fixed dda5c363
 - Changed snapshot files: none (`git diff --name-only main...HEAD` lists no `_snaps` path).
+- 2026-10-31: step-7 approval: m164-second-oracle-types approved for merge
