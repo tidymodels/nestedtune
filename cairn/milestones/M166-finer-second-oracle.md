@@ -73,6 +73,13 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: stop answer: the user chose "Build two cheap tests": a sums-to-one invariant for renormalized probabilities, and a censored average on a design holding rows out three times, checked against tune; the other one-type parts recorded as such, the event-level row dropped and M152's header restored, D-123 narrowed, the uncovered parts on a new candidate row.
 - 2026-10-31: amendment routed: AC5 — the event-level exchange row reverses M152 (diff-bug #3, ripple #1); the two new tests need rows.
 - 2026-10-31: amendment routed: AC6 — the averages, compute_metrics and racing lines rest on a false premise (diff-bug #1, #5, #6; blame-history #2, #3).
+- 2026-10-31: re-audit: AC5 (reduced) — "holds no row for the exchange" rested on judgment; replaced by `grep -n 'event-level/O3'` returning no line.
+- 2026-10-31: re-audit: AC6 (reduced) — "each part that rests on one type" had no listing procedure; the parts were named in the criterion.
+- 2026-10-31: re-audit: AC7 (reduced) — nothing. The wording then gained a `hand_average()` assertion on the three-repeat run, so the median has a closed-form check beside tune's.
+- 2026-10-31: re-audit: AC5 (reduced) — nothing.
+- 2026-10-31: re-audit: AC6 (reduced) — "the rows that reach it" and "parts that rest on one type" are still decided by judgment; suggested crediting rows by the line's own naming and naming the one-type parts outright. Second line for AC6, so the wording goes to the user.
+- 2026-10-31: re-audit: AC7 (reduced) — nothing.
+- 2026-10-31: T7 (pending the amendment's write): `test-collect-predictions-summarize.R` gained "a renormalized probability average sums to one in every row" and "a censored average over three repeats takes the median time, as tune does"; `repeated_pair()` and `fixed_pair()` take `repeats` (default 2, injected so the stored call stays literal). File green, 34 tests. Plants in `R/nested-results-collect.R`: `mean_by` for `.pred_time` failed the three-repeat test (2 expectations) and the missing-median test; no renormalization failed the sums test and the hand renormalization test; both reverted, `git diff -- R/` empty.
 - 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
 
 ## Decisions

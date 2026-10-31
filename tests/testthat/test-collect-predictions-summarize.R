@@ -34,24 +34,24 @@ srv_fixed_workflow <- function(data) {
 # The repeated outer design and the rset `fit_resamples()` reads. Each is
 # drawn under the same seed, the outer design first, so the splits are the
 # same without being read off the nested object.
-repeated_pair <- function(data, seed, stratify = FALSE) {
+repeated_pair <- function(data, seed, stratify = FALSE, repeats = 2) {
   set.seed(seed)
   if (stratify) {
-    folds <- nested_resamples(
+    folds <- rlang::inject(nested_resamples(
       data,
-      outside = rsample::vfold_cv(v = 3, repeats = 2, strata = y),
+      outside = rsample::vfold_cv(v = 3, repeats = !!repeats, strata = y),
       inside = rsample::vfold_cv(v = 3)
-    )
+    ))
     set.seed(seed)
-    outer <- rsample::vfold_cv(data, v = 3, repeats = 2, strata = y)
+    outer <- rsample::vfold_cv(data, v = 3, repeats = repeats, strata = y)
   } else {
-    folds <- nested_resamples(
+    folds <- rlang::inject(nested_resamples(
       data,
-      outside = rsample::vfold_cv(v = 3, repeats = 2),
+      outside = rsample::vfold_cv(v = 3, repeats = !!repeats),
       inside = rsample::vfold_cv(v = 3)
-    )
+    ))
     set.seed(seed)
-    outer <- rsample::vfold_cv(data, v = 3, repeats = 2)
+    outer <- rsample::vfold_cv(data, v = 3, repeats = repeats)
   }
   list(folds = folds, outer = outer)
 }
@@ -64,9 +64,10 @@ fixed_pair <- function(
   seed,
   metrics,
   eval_time = NULL,
-  stratify = FALSE
+  stratify = FALSE,
+  repeats = 2
 ) {
-  pair <- repeated_pair(data, seed, stratify = stratify)
+  pair <- repeated_pair(data, seed, stratify = stratify, repeats = repeats)
   folds <- pair$folds
   res <- memoised(nested_fit_resamples(
     wf,
@@ -319,6 +320,36 @@ test_that("a censored regression average equals tune's", {
   expect_matches_tune(pair)
 })
 
+test_that("a censored average over three repeats takes the median time, as tune does", {
+  skip_if_no_engines()
+  skip_if_no_censored()
+  d <- srv_data()
+  pair <- fixed_pair(
+    srv_fixed_workflow(d),
+    d,
+    44,
+    metrics = srv_set_metrics(),
+    eval_time = srv_eval_times(),
+    repeats = 3
+  )
+  expect_matches_tune(pair)
+  p <- collect_predictions(pair$res)
+  outcome <- "survival::Surv(time, event)"
+  expect_matches_hand(
+    collect_predictions(pair$res, summarize = TRUE),
+    hand_average(p, outcome),
+    outcome
+  )
+  # Each row is held out three times, so a mean in place of the median
+  # would give another number on some row.
+  gap <- vapply(
+    split(p$.pred_time, p$.row),
+    function(t) stats::median(t) - mean(t),
+    numeric(1)
+  )
+  expect_true(any(abs(gap) > 1e-6))
+})
+
 # ---- across the candidates the folds selected -----------------------------
 
 # One missing value planted in fold 1's first saved row, so the rule that
@@ -354,6 +385,22 @@ test_that("a probability average is renormalized and names its class", {
   avg <- collect_predictions(res, summarize = TRUE)
   expect_false(anyNA(avg$.pred_event))
   expect_matches_hand(avg, hand_average(collect_predictions(res), "y"), "y")
+})
+
+test_that("a renormalized probability average sums to one in every row", {
+  skip_if_no_engines()
+  res <- grid_prob_run()
+  target <- res$.predictions[[1L]]$.row[[1L]]
+  res <- plant_missing(res, ".pred_event")
+  avg <- collect_predictions(res, summarize = TRUE)
+  expect_true(all(abs(avg$.pred_event + avg$.pred_other - 1) <= 1e-12))
+
+  # The planted row's means do not sum to one, so the assertion above can
+  # fail.
+  p <- collect_predictions(res)
+  rows <- p[p$.row == target, ]
+  sums <- mean(rows$.pred_event, na.rm = TRUE) + mean(rows$.pred_other)
+  expect_gt(abs(sums - 1), 1e-6)
 })
 
 test_that("a censored average takes the median time and the mean survival", {
