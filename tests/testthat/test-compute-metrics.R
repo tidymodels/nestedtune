@@ -5,7 +5,12 @@
 # a rescoring that differs from tune's own scoring in any number, metric
 # order or column fails it. The second is yardstick called metric by
 # metric on each fold's rows of `collect_predictions()`, and the summary
-# computed by hand from those per-fold numbers, never from the method.
+# computed by hand from those per-fold numbers, never from the method. The
+# third, on a censored run, is that reordering `.pred_time` or
+# `.pred_linear_pred` moves only the metric that reads it, under each mix of
+# survival metric kinds. Pinned by "reordering a censored run's
+# `.pred_time` moves only the static metric, and its `.pred_linear_pred` only
+# the linear-predictor metric".
 
 skip_heavy_on_cran()
 
@@ -44,6 +49,51 @@ saved_srv_run <- function() {
     srv_nested(d),
     grid = srv_grid(),
     metrics = srv_metrics(),
+    eval_time = srv_eval_times(),
+    control = tune::control_grid(save_pred = TRUE)
+  )))
+}
+
+# One survival metric of each kind the censored branch scores: static on
+# `.pred_time`, dynamic on `.pred`, linear-predictor on `.pred_linear_pred`.
+srv_kinds_metrics <- function() {
+  yardstick::metric_set(
+    yardstick::concordance_survival,
+    yardstick::brier_survival,
+    yardstick::royston_survival
+  )
+}
+
+# Each mix of those kinds that picks its own branch in `score_fold()`: static
+# and linear-predictor together, each alone, each with and without dynamic.
+srv_kind_sets <- function() {
+  list(
+    all = srv_kinds_metrics(),
+    static_linear = yardstick::metric_set(
+      yardstick::concordance_survival,
+      yardstick::royston_survival
+    ),
+    static = yardstick::metric_set(yardstick::concordance_survival),
+    static_dynamic = yardstick::metric_set(
+      yardstick::concordance_survival,
+      yardstick::brier_survival
+    ),
+    linear = yardstick::metric_set(yardstick::royston_survival),
+    dynamic_linear = yardstick::metric_set(
+      yardstick::brier_survival,
+      yardstick::royston_survival
+    )
+  )
+}
+
+saved_srv_kinds_run <- function() {
+  d <- srv_data()
+  set.seed(4)
+  suppressWarnings(memoised(nested_tune_grid(
+    srv_workflow(d),
+    srv_nested(d),
+    grid = srv_grid(),
+    metrics = srv_kinds_metrics(),
     eval_time = srv_eval_times(),
     control = tune::control_grid(save_pred = TRUE)
   )))
@@ -96,6 +146,17 @@ with_na_fold <- function(x, fold = 4L) {
     preds[[nm]][seq_len(nrow(preds))] <- NA
   }
   x$.predictions[[fold]] <- preds
+  x
+}
+
+# One prediction column reversed within each fold. The censored engine's
+# `.pred_time` rises with its `.pred_linear_pred`, and the static and
+# linear-predictor metrics score by rank, so either column gives both metrics
+# the same value until one is reordered.
+reverse_pred <- function(x, column) {
+  for (i in seq_len(nrow(x))) {
+    x$.predictions[[i]][[column]] <- rev(x$.predictions[[i]][[column]])
+  }
   x
 }
 
@@ -202,6 +263,47 @@ test_that("with the run's metric set, compute_metrics() is collect_metrics() on 
   }
 })
 
+test_that("with a static, a dynamic and a linear-predictor metric, compute_metrics() is collect_metrics() on a censored-regression run", {
+  skip_if_no_censored()
+  res <- saved_srv_kinds_run()
+  expect_setequal(
+    collect_metrics(res)$.metric,
+    c("concordance_survival", "brier_survival", "royston_survival")
+  )
+
+  for (summarize in c(TRUE, FALSE)) {
+    expect_identical(
+      compute_metrics(res, srv_kinds_metrics(), summarize = summarize),
+      collect_metrics(res, summarize = summarize)
+    )
+  }
+})
+
+test_that("reordering a censored run's `.pred_time` moves only the static metric, and its `.pred_linear_pred` only the linear-predictor metric", {
+  skip_if_no_censored()
+  res <- saved_srv_kinds_run()
+
+  for (set in names(srv_kind_sets())) {
+    ms <- srv_kind_sets()[[set]]
+    score <- function(x) compute_metrics(x, ms, summarize = FALSE)
+    base <- score(res)
+    for (moved in list(
+      c(column = ".pred_time", metric = "concordance_survival"),
+      c(column = ".pred_linear_pred", metric = "royston_survival")
+    )) {
+      hit <- base$.metric == moved[["metric"]]
+      expect_identical(
+        any(hit),
+        moved[["metric"]] %in% names(attr(ms, "metrics")),
+        info = set
+      )
+      after <- score(reverse_pred(res, moved[["column"]]))
+      expect_true(all(after$.estimate[hit] != base$.estimate[hit]), info = set)
+      expect_identical(after$.estimate[!hit], base$.estimate[!hit], info = set)
+    }
+  }
+})
+
 # ---- a new metric set, scored by hand with yardstick -----------------------
 
 test_that("a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary", {
@@ -295,6 +397,66 @@ test_that("a new class-probability metric set is scored at the event_level given
   first <- compute_metrics(res, ms, summarize = FALSE)
   loss <- first$.metric == "mn_log_loss"
   expect_false(identical(first$.estimate[loss], second$.estimate[loss]))
+})
+
+test_that("a static, a dynamic and a linear-predictor metric on a censored run are yardstick on each fold's rows", {
+  skip_if_no_censored()
+  run <- saved_srv_kinds_run()
+  truth <- rlang::sym("survival::Surv(time, event)")
+  by_metric <- list(
+    brier_survival = function(rows) {
+      yardstick::brier_survival(rows, !!truth, .pred)
+    },
+    concordance_survival = function(rows) {
+      yardstick::concordance_survival(rows, !!truth, .pred_time)
+    },
+    royston_survival = function(rows) {
+      yardstick::royston_survival(rows, !!truth, .pred_linear_pred)
+    }
+  )
+  # A set with no dynamic metric can come back with no `.eval_time` column.
+  time_of <- function(x) {
+    if (".eval_time" %in% names(x)) x$.eval_time else rep(NA_real_, nrow(x))
+  }
+  in_order <- function(x) x[order(x$fold, x$.metric, time_of(x)), ]
+
+  # The run as saved, and with `.pred_time` reversed so that it no longer
+  # rises with `.pred_linear_pred`.
+  for (res in list(run, reverse_pred(run, ".pred_time"))) {
+    for (set in names(srv_kind_sets())) {
+      ms <- srv_kind_sets()[[set]]
+      by_hand <- in_order(hand_per_fold(res, function(rows) {
+        dplyr::bind_rows(lapply(
+          by_metric[names(attr(ms, "metrics"))],
+          function(f) f(rows)
+        ))
+      }))
+      per_fold <- compute_metrics(res, ms, summarize = FALSE)
+      per_fold$fold <- match(per_fold$id, res$id)
+      per_fold <- in_order(per_fold)
+      expect_identical(per_fold$fold, by_hand$fold, info = set)
+      expect_identical(per_fold$.metric, by_hand$.metric, info = set)
+      expect_identical(time_of(per_fold), time_of(by_hand), info = set)
+      expect_identical(per_fold$.estimate, by_hand$.estimate, info = set)
+
+      summary <- compute_metrics(res, ms)
+      hand_time <- time_of(by_hand)
+      for (j in seq_len(nrow(summary))) {
+        time <- time_of(summary)[[j]]
+        rows <- by_hand$.metric == summary$.metric[[j]] &
+          (if (is.na(time)) is.na(hand_time) else hand_time %in% time)
+        want <- hand_summary(by_hand[rows, ], summary$.metric[[j]])
+        expect_identical(summary$mean[[j]], want$mean, info = set)
+        expect_identical(summary$n[[j]], want$n, info = set)
+        expect_identical(summary$std_err[[j]], want$std_err, info = set)
+      }
+      expect_identical(
+        nrow(summary),
+        nrow(unique(data.frame(by_hand$.metric, hand_time))),
+        info = set
+      )
+    }
+  }
 })
 
 # ---- refusals --------------------------------------------------------------

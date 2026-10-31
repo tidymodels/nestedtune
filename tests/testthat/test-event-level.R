@@ -15,6 +15,11 @@
 #   kind-pinned, with the inner rset built inside that seed's scope. Pinned by
 #   "nested_final_fit() tunes under the caller's event level".
 #
+# Source: the definitions of sensitivity and specificity, counted with explicit
+#   code from the predictions the final fit's own tuning run saved. Pinned by
+#   "the final fit's tuning run reports the sensitivity and specificity counted
+#   at the second level".
+#
 # The exchange of sensitivity and specificity between the two levels is
 # yardstick's arithmetic, so this file does not test it.
 #
@@ -271,4 +276,44 @@ test_that("nested_final_fit() tunes under the caller's event level", {
   # At least one candidate whose two estimates differ, without which the
   # exchange above is satisfied by any implementation at all.
   expect_true(any(key(one, "sens") != key(one, "spec")))
+})
+
+test_that("the final fit's tuning run reports the sensitivity and specificity counted at the second level", {
+  skip_if_no_engines(stochastic = TRUE)
+
+  d <- cls_data()
+  wf <- cls_workflow(d)
+  set.seed(3)
+  res <- memoised(nested_tune_grid(
+    wf,
+    cls_nested(d),
+    grid = cls_grid(),
+    metrics = cls_metrics(),
+    event_level = "second",
+    control = tune::control_grid(save_pred = TRUE)
+  ))
+  set.seed(11)
+  tuned <- extract_tune_results(memoised(nested_final_fit(wf, res)))
+
+  # The share of each level's rows called that level, on each inner
+  # resample and candidate the final fit's run saved.
+  lv <- levels(d$y)
+  preds <- tune::collect_predictions(tuned, summarize = FALSE)
+  metrics <- tune::collect_metrics(tuned, summarize = FALSE)
+  sens <- metrics[metrics$.metric == "sens", ]
+  spec <- metrics[metrics$.metric == "spec", ]
+  expect_identical(nrow(sens), 9L)
+  expect_identical(spec[c("id", ".config")], sens[c("id", ".config")])
+  for (r in seq_len(nrow(sens))) {
+    rows <- preds[
+      preds$id == sens$id[[r]] & preds$.config == sens$.config[[r]],
+    ]
+    called <- function(level) mean(rows$.pred_class[rows$y == level] == level)
+    # At the second level, sensitivity reads the second level's rows and
+    # specificity the first's.
+    expect_equal(sens$.estimate[[r]], called(lv[[2L]]))
+    expect_equal(spec$.estimate[[r]], called(lv[[1L]]))
+    # The levels separate here, so a run scored at the first level fails.
+    expect_true(called(lv[[1L]]) != called(lv[[2L]]))
+  }
 })

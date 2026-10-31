@@ -21,7 +21,13 @@
 #   and the same explicit grid; the race shuffles the resample order, and the
 #   means agreed to the last bit on every fold of the fixture under two seeds
 #   (measured on finetune 1.3.0). Pinned by "a candidate raced to the end
-#   carries the grid path's mean".
+#   carries the grid path's mean". A candidate the race eliminated was scored
+#   on fewer resamples, which the reference race above names. On the
+#   deterministic fixture, whose engine draws nothing, the grid orchestrator
+#   over an inner design cut to those resamples fits the same models, so the
+#   candidate's row must equal the grid's. Pinned
+#   by "an eliminated candidate carries the grid path's mean over the
+#   resamples the race scored it on".
 #
 # On the record's derivation: a fold's `.inner_metrics` is
 #   `collect_metrics(<the race>, all_configs = TRUE)`, eliminated candidates
@@ -242,6 +248,71 @@ test_that("the fold record is every candidate the race scored, and the selection
   # Some candidate was eliminated somewhere: the record holds a row with
   # `n` below the resample count, which the survivors-only default would
   # have dropped.
+  expect_gt(eliminated, 0L)
+})
+
+test_that("an eliminated candidate carries the grid path's mean over the resamples the race scored it on", {
+  skip_if_no_race_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+  folds <- det_nested(d)
+  ms <- reg_metrics()
+  res <- race_results("tune_race_anova")
+  ref <- memoised(reference_nested_race_loop(
+    "tune_race_anova",
+    wf,
+    folds,
+    grid = det_grid(),
+    metrics = ms,
+    seed = 20,
+    metric_name = "rmse",
+    control = race_control()
+  ))
+
+  eliminated <- 0L
+  for (i in seq_len(nrow(res))) {
+    inner <- folds$inner_resamples[[i]]
+    tbl <- res$.inner_metrics[[i]]
+    # Which candidates the race eliminated, and on which resamples it scored
+    # them, read from the reference race rather than from the record.
+    scored <- tune::collect_metrics(
+      ref[[i]]$tuned,
+      summarize = FALSE,
+      all_configs = TRUE
+    )
+    ids <- split(scored$id, scored$.config)
+    out <- names(ids)[lengths(lapply(ids, unique)) < nrow(inner)]
+    for (cfg in out) {
+      eliminated <- eliminated + 1L
+      rows <- tbl[tbl$.config == cfg, ]
+      expect_setequal(rows$.metric, unique(scored$.metric))
+      # The engine draws nothing, so the grid path over the inner resamples
+      # the race scored this candidate on fits what the race fitted.
+      keep <- inner$id %in% ids[[cfg]]
+      cut <- folds
+      cut$inner_resamples[[i]] <- rsample::manual_rset(
+        inner$splits[keep],
+        inner$id[keep]
+      )
+      set.seed(20)
+      by_grid <- nested_tune_grid(
+        wf,
+        cut,
+        grid = data.frame(
+          num_comp = scored$num_comp[scored$.config == cfg][[1L]]
+        ),
+        metrics = ms
+      )$.inner_metrics[[i]]
+      for (r in seq_len(nrow(rows))) {
+        match <- by_grid$.metric == rows$.metric[[r]]
+        expect_identical(sum(match), 1L)
+        expect_identical(rows$mean[[r]], by_grid$mean[[which(match)]])
+        expect_identical(rows$n[[r]], by_grid$n[[which(match)]])
+        expect_identical(rows$std_err[[r]], by_grid$std_err[[which(match)]])
+      }
+    }
+  }
   expect_gt(eliminated, 0L)
 })
 
