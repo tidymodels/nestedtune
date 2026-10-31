@@ -25,11 +25,11 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Acceptance criteria
 
-- [ ] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
-- [ ] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
-- [ ] AC3: Each pair of a file and a `test_that()` name in the registry exists at the milestone's head. The file is under `tests/testthat/`, and it holds a `test_that()` call whose first argument is that name.
-- [ ] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
-- [ ] AC5: The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` names `cairn/ORACLES.md` as the record of oracle ids and types. The bullet says that a milestone that adds or removes an oracle updates the registry. The bullet no longer says that no committed record holds the types.
+- [x] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
+- [x] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
+- [x] AC3: Each pair of a file and a `test_that()` name in the registry exists at the milestone's head. The file is under `tests/testthat/`, and it holds a `test_that()` call whose first argument is that name.
+- [x] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
+- [x] AC5: The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` names `cairn/ORACLES.md` as the record of oracle ids and types. The bullet says that a milestone that adds or removes an oracle updates the registry. The bullet no longer says that no committed record holds the types.
 
 ## Coverage
 
@@ -64,7 +64,16 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: T4 done: the DESIGN.md oracle-records bullet now names `cairn/ORACLES.md`, says a milestone that adds or removes an oracle updates it, and drops the no-record sentence. The pointer comparison re-run read 123 pointers with 0 problems, and `cairn_validate` passed (18 advisory warnings on references staleness, none new).
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: all tasks done; status set to review.
+- 2026-10-31: review checkpoint (in progress): AC1-AC5 evidence recorded and ticked; `cairn_validate` and the six gating prose sweeps clean; `devtools::check()` and the two reviewers still running.
 
 ## Decisions
 
 ## Review
+
+Evidence at `8f70dc69` (branch head), 2026-10-31. A one-off script read `cairn/ORACLES.md` against the greps at `576c3d19`. A one-off R parse listed the `test_that()` calls at the head (1080 calls, 38 with built names, 105 files).
+
+- AC1: the AC1 grep lists 71 typed records in 26 files. The registry holds 71 typed rows whose ids equal the 71 records, with no duplicate id. Each row's type is one of the five doctrine types. The 5 records whose own word differs ("analytic", "analytic by-hand") carry that word in brackets, and no row carries a needless one. Each row has a source. Each row names its tests or says that the record names none. The `O5` row of `nested-final-fit-oracles` holds the Bayesian strand and its test. 0 problems.
+- AC2: the AC2 grep, less the typed files, gives 20 files. The last section holds exactly one line for each, and no line for any other file. 14 lines give row ids, all of which exist in the registry. The other 6 say that the file records no oracle, with the reason its comments state. 0 problems.
+- AC3: 123 pairs of a file and a name in the registry, each compared with the `test_that()` calls in that file at the head (a literal name by its string, a built name by its one-line deparsed call). 0 unparsed lines, 0 missing.
+- AC4: 23 group headings, each stating its types and count. For each, the stated set equals the set of types of its rows plus the rows it counts by id, and every row sits in a group. 6 groups hold one type, and each names the candidate row "Add second oracle types to six groups", which `cairn/ROADMAP.md` holds. 0 problems.
+- AC5: `cairn/DESIGN.md:130-138` names `cairn/ORACLES.md` as the record of each oracle's id and type, and says "A milestone that adds or removes an oracle updates `cairn/ORACLES.md`". `grep -c 'no committed record holds' cairn/DESIGN.md` gives 0.
