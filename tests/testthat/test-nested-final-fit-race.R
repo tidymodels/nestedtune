@@ -64,6 +64,31 @@ test_that("the racing final fit matches a hand-rolled reference pipeline", {
   }
 })
 
+test_that("the racing final fit is the workflow finalized on its own race's pick", {
+  skip_if_no_race_fixture()
+
+  d <- make_reg_data()
+  wf <- det_workflow(d)
+
+  for (fn in RACERS) {
+    res <- race_final_results(fn, d)
+    set.seed(33)
+    final <- memoised(nested_final_fit(wf, res))
+
+    best <- reference_select(
+      extract_tune_results(final),
+      final$procedure$select,
+      "rmse"
+    )
+    by_hand <- parsnip::fit(tune::finalize_workflow(wf, best), data = d)
+    expect_identical(
+      predict(extract_workflow(final), new_data = d),
+      predict(by_hand, new_data = d),
+      info = fn
+    )
+  }
+})
+
 test_that("the final fit's candidates are every candidate its race scored", {
   skip_if_no_race_fixture(stochastic = TRUE)
 
