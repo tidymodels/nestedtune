@@ -1,6 +1,6 @@
 # Oracle registry
 
-This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review. M164 added six rows for tests written after `576c3d19`, each naming its test in quotes. M166 added six more the same way, one of them for an assertion in an older test, and the lines that D-123 asks for.
+This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review. M164 added six rows for tests written after `576c3d19`, each naming its test in quotes. M166 added six more the same way, one of them for an assertion in an older test, and the lines that D-123 asks for. M167 added three rows the same way, and two test lines under existing rows whose type and source they share.
 
 M163 built the file on 2026-10-31 from the oracle records in `tests/testthat/` at `576c3d19`. That commit is the last one before M155 removed oracle ids and types from test comments. Two greps list the records that M163 read:
 
@@ -11,7 +11,7 @@ An id is the test file's name without `test-` and `.R`, then the record's own la
 
 Each test line gives a file under `tests/testthat/` and the first argument of a `test_that()` call in that file at the milestone's head. A literal name is in double quotes. For a name built in code, the line gives `code` and the one-line deparsed call. M163 mapped the names from `576c3d19` through `benchmarks/test-renames-576c3d19.csv`. Where a later commit merged tests, as six workflow-map tests became one `paste0()` loop, M163 read the file at the head. A test line ending "(found by reading)" is a test that the record does not name, found in the file's code. If a record's text quotes a test's name, the record names that test. In the quote, `...` or text in angle brackets matches any text. The full rule is M163's AC1, in the git history of `cairn/milestones/M163-oracle-registry.md`. A prose record names no test. Where a string quoted after "Pinned by" names no test, the row says so.
 
-Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type. M166 checked the finer results that M163's and M164's reviews found. Each gained a row of a second type or is counted on an existing row. Otherwise its group carries a line that names the part left on one type. The line says where that part's second type is held, or why it has none (D-123). Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
+Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type. M166 checked the finer results that M163's and M164's reviews found. Each gained a row of a second type or is counted on an existing row. Otherwise its group carries a line that names the part left on one type. The line says where that part's second type is held, or why it has none (D-123). M167 gave a second type to the three parts that M166 left on one. Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
 
 ## nested_tune_grid() estimate: live, invariant (2 types)
 
@@ -87,7 +87,7 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## nested_tune_race_anova() and nested_tune_race_win_loss() estimate: live, invariant (2 types)
 
-The fold record holds every candidate the race scored. O2 checks the survivors' rows against the grid path. The rows of eliminated candidates are credited to O3 alone, whose test asserts that some candidate was eliminated. O2 reaches no eliminated candidate. The candidate row "Add second oracles to one-type parts" holds their second type (D-123).
+The fold record holds every candidate the race scored. O2 checks the survivors' rows against the grid path. The rows of eliminated candidates are credited to O3, whose test asserts that some candidate was eliminated, and to O5. O2 reaches no eliminated candidate.
 
 - `nested-tune-race-oracles/O1` live. Source: `reference_nested_race_loop()` in helper-orchestration.R, written from the seed contract. The string its record quotes after "Pinned by" names no test: the test's name adds "(deterministic)".
   - test-nested-tune-race-oracles.R :: "per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (deterministic)" (found by reading)
@@ -98,6 +98,8 @@ The fold record holds every candidate the race scored. O2 checks the survivors' 
   - test-nested-tune-race-oracles.R :: "the fold record is every candidate the race scored, and the selection a survivor"
 - `nested-tune-race-oracles/O4` invariant. Source: the same seed gives an identical result serially and at two daemons. test-parallel-identity.R calls this a mode-independence check, not a correctness check.
   - test-parallel-identity.R :: "both racing paths match serial at two daemons" (found by reading)
+- `nested-tune-race-oracles/O5` invariant. Source: the grid orchestrator over an inner design cut to the resamples the race scored the eliminated candidate on. The deterministic fixture's engine draws nothing, so the grid fits what the race fitted.
+  - test-nested-tune-race-oracles.R :: "an eliminated candidate carries the grid path's mean over the resamples the race scored it on"
 - `time-series-race/O1` live. Source: `reference_nested_race_loop()` on the rolling-origin design, for each racer.
   - test-time-series-race.R :: code sprintf("%s matches its reference loop on a %s design", fn, design)
 - Also counted: `time-series-pairs-other/O1` live.
@@ -237,12 +239,14 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## Event level on classification models: closed-form, live (2 types)
 
-The final fit under `event_level` is credited to `event-level/O2` alone. M152 removed the record of the level exchange as yardstick's arithmetic, and it backs no part here. The candidate row "Add second oracles to one-type parts" holds the final fit's second type (D-123).
+The final fit under `event_level` is credited to `event-level/O2` and `event-level/O3`. M152 removed the record of the level exchange as yardstick's arithmetic, and it backs no part here.
 
 - `event-level/O1` closed-form. Source: the definition of sensitivity, recomputed from a refit of each fold's selected candidate.
   - test-event-level.R :: "the sensitivity each outer fold reports is the one yardstick computes at that event level"
 - `event-level/O2` live. Source: `tune::tune_grid()` run by the test under `event_level = "second"`, seeded by the by-hand recipe in `R/nested-final-fit.R`.
   - test-event-level.R :: "nested_final_fit() tunes under the caller's event level"
+- `event-level/O3` closed-form. Source: the definition of sensitivity, counted from the predictions that the final fit's own tuning run saved under `event_level = "second"`.
+  - test-event-level.R :: "the final fit's tuning run reports the sensitivity counted at the second level"
 
 ## Range finalized from the data: closed-form, live (2 types)
 
@@ -308,15 +312,19 @@ Two parts of the average need input that U1's fixtures lack. The renormalized pr
 
 ## compute_metrics() rescoring: invariant, live (2 types)
 
-`compute_metrics()` runs the same scoring code, `score_fold()`, on the run's own metric set and on a new one. U1 and U2 both reach its numeric and class-probability branches. In the survival branch, dynamic metrics are credited to U1 alone, since U2 rescores no censored run. Static and linear-predictor survival metrics are credited to no row, since U1's censored test scores `brier_survival` only. The candidate row "Add second oracles to one-type parts" holds the survival branch (D-123).
+`compute_metrics()` runs the same scoring code, `score_fold()`, on the run's own metric set and on a new one. U1 and U2 both reach its numeric and class-probability branches. In the survival branch, dynamic metrics are credited to U1 and U2. Static and linear-predictor metrics are credited to O1 and U2. U1's censored tests cannot show a swap of `.pred_time` and `.pred_linear_pred`. The engine's predicted time rises with its linear predictor, and both metrics score by rank. O1's test and U2's censored test reverse `.pred_time` within each fold, so they can show it.
 
 - `compute-metrics/U1` invariant. Source: `collect_metrics()` on the same run, which reads the `.metrics` that `tune::last_fit()` wrote.
   - test-compute-metrics.R :: "with the run's metric set, compute_metrics() is collect_metrics() on a regression run" (found by reading)
   - test-compute-metrics.R :: "with the run's metric set and level, compute_metrics() is collect_metrics() on a classification run at event_level = "second"" (found by reading)
   - test-compute-metrics.R :: "with the run's metric set, compute_metrics() is collect_metrics() on a censored-regression run" (found by reading)
+  - test-compute-metrics.R :: "with a static, a dynamic and a linear-predictor metric, compute_metrics() is collect_metrics() on a censored-regression run" (found by reading)
 - `compute-metrics/U2` live. Source: yardstick called metric by metric on each fold's rows of `collect_predictions()`, with the summary computed by hand.
   - test-compute-metrics.R :: "a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
   - test-compute-metrics.R :: "a class-probability metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
+  - test-compute-metrics.R :: "a static, a dynamic and a linear-predictor metric on a censored run are yardstick on each fold's rows" (found by reading)
+- `compute-metrics/O1` invariant. Source: on a censored run, reversing one prediction column within each fold moves only the metrics that read that column.
+  - test-compute-metrics.R :: "reordering a censored run's `.pred_time` moves only the static metric, and its `.pred_linear_pred` only the linear-predictor metric"
 
 The four groups below hold tables that restate what a run stored: numbers that the groups above test, and fold labels read from the design. Three of them rest on one type. Under D-121 a table that restates numbers another group checks, or holds no number, owes no second type of its own. Each of the three names the group it rides on, or says that it holds no number.
 

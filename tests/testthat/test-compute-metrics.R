@@ -7,7 +7,9 @@
 # metric on each fold's rows of `collect_predictions()`, and the summary
 # computed by hand from those per-fold numbers, never from the method. The
 # third, on a censored run, is that reordering one prediction column moves
-# only the metrics that read it.
+# only the metrics that read it. Pinned by "reordering a censored run's
+# `.pred_time` moves only the static metric, and its `.pred_linear_pred` only
+# the linear-predictor metric".
 
 skip_heavy_on_cran()
 
