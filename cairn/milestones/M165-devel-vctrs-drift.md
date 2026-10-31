@@ -1,13 +1,13 @@
 # M165: Keep the devel-vctrs test choice from drifting
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** internal — a CI workflow and a marker comment in three test files; no package user relies on either
-- **Branch/PR:** —
+- **Branch/PR:** m165-devel-vctrs-drift
 
 ## Goal
 
@@ -37,7 +37,7 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 
 ## Tasks
 
-- [ ] T1: Add the line `# devel-vctrs.yaml runs this file on every push and pull request.` to `tests/testthat/test-vctrs-compat.R`, `test-dplyr-compat.R` and `test-nested-results-set-compat.R`, as a whole line after each file's header comment.
+- [x] T1: Add the line `# devel-vctrs.yaml runs this file on every push and pull request.` to `tests/testthat/test-vctrs-compat.R`, `test-dplyr-compat.R` and `test-nested-results-set-compat.R`, as a whole line after each file's header comment.
 - [ ] T2: Rewrite the "Run the tests against it" step of `.github/workflows/devel-vctrs.yaml`. Its `env:` maps `inputs.full` alone; the R code sets the switch to true on `schedule`, and on `workflow_dispatch` when the full value is "true". When the switch is false, it reads `tests/testthat/test-*.R`, keeps the files holding the marker as a whole line, stops with an error naming the marker when none does, prints the selected files, and passes `testthat::test_local()` a filter built from their names with regex characters escaped. It prints `Whole suite:` as now.
 - [ ] T3: Key the concurrency group on `github.workflow`, `github.ref`, `github.event_name` and `inputs.full`. Rewrite the header paragraph that names the three files, and the concurrency comment, from a same-session read of the new step, to point at the marker line and the raw key. Edit the `devel-vctrs.yaml` concurrency sentence on `cairn/PROFILE.md` line 44 in place, adding no line (the file is at 119 of its <120 cap).
 - [ ] T4: Copy the step's R code to a scratch script and run it locally: the five cases of AC5, then the rename plant and the no-marker plant of AC2 on a copy of `tests/testthat/`, each plant seen to give its stated result. Record the outcomes in one work-log line.
@@ -56,6 +56,8 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - 2026-10-31: lessons used: 2026-09-02 (M50, extended M53/M58/M67/M79/M88/M153) on CI pushes and dispatch concurrency; 2026-09-11 (M86, extended M89) on a checker whose domain can empty.
 - 2026-10-31: criteria audit (reduced mode, fresh Opus reader): AC1 claimed every push and pull request and a log listing no task printed; narrowed to this PR's run against a grep of marker files, the print moved to T2, contexts named instead of files. AC2 narrowed to two named plants, search limited to `test-*.R`. AC3 none. AC4 narrowed to four bare properties. AC5 narrowed to a one-entry `env:` and five named cases with empty full values. Side effect of AC4 moved to T5.
 - 2026-10-31: no changelog entry: CI-only, as at M153.
+- 2026-10-31: status in-progress, branch m165-devel-vctrs-drift cut from main at f9160fdc.
+- 2026-10-31: T1 done: marker line added as its own paragraph at the end of each file's header comment; `grep -lxF` lists the three files; `air format --check .` clean. Comment-only change, so verify's `devtools::test()` waits for T4, which runs the three files through the new step.
 
 ## Decisions
 

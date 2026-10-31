@@ -10,6 +10,8 @@
 #
 # As in test-dplyr-compat.R, every entry names the branch it must take, and
 # every door the check must cover appears by its own literal name.
+#
+# devel-vctrs.yaml runs this file on every push and pull request.
 
 # The suite's two-workflow grid run, served from the cache: `tuned` then
 # `fixed`, two outer folds each.
