@@ -1,6 +1,6 @@
 # M166: Give finer results a second oracle
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,7 +52,7 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - [x] T7: Averages. In `test-collect-predictions-summarize.R`, a sums-to-one invariant on `grid_prob_run()` with the planted missing value, and a three-repeat censored `fixed_pair()` checked with `expect_matches_tune()` and `expect_matches_hand()`. Plant: `mean_by` for `.pred_time`, and no renormalization.
 - [x] T8: Registry rework. Drop `event-level/O3`, restore M152's sentence in `test-event-level.R`'s header, add the AC7 rows, and rewrite the five lines per AC6. Rewrite D-123 to the narrowed rule, naming the plugin's "What gets a test" rule where it is cited. Add the candidate row the Out item names. Remove the median gap from "M126 review leftovers on averaging", which AC7 closes. Carry the review return's fix-now findings.
 - [x] T9: Weights failed case. Plant a missing renormalization over the stored weights in `summarize_folds()` and see the failed-fold case of the AC2 test fail; restore.
-- [ ] T10: Run `devtools::test()` and `air format --check .` clean, alone.
+- [x] T10: Run `devtools::test()` and `air format --check .` clean, alone.
 
 ## Work log
 
@@ -92,6 +92,9 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: substantive amendment: AC7 added (two averaging tests, the user's stop answer); the old AC7 is now AC8; Scope In and Out, Coverage and T7-T10 updated.
 - 2026-10-31: T8: `cairn/ORACLES.md` dropped `event-level/O3` and gained `collect-predictions-summarize/O1` (invariant) and `/O2` (live), the three-repeat test listed under U2 as well. The five AC6 lines now credit rows per part: compute_metrics survival branch on U1, averages' renormalization on O1 and U2 and median on O2 and U2, racing eliminated rows on O1 and O3, the event_level final fit on O2, the iteration stage on O1 with no independent oracle. Headings for weights and averages read 3 types; memory slope is a group sentence; the 2026-09-01 cite gave way to D-123; the header counts six rows. D-123 rewritten on the branch to the narrowed rule, so the "testing rule" cite went. New candidate row "Add second oracles to one-type parts"; the median gap left "M126 review leftovers on averaging". `test-event-level.R`'s header already carried M152's sentence, unchanged on the branch. Selection-metric header names both oracles; the source note gained the `geomean()` sentence.
 - 2026-10-31: T9: plant `sum(e$vals * e$w)` (no renormalization) in `summarize_folds()` failed the AC2 test's failed-fold case (rmse 0.525 against 1.051) and NA case; reverted.
+- 2026-10-31: T10: `air format --check .` clean; `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, alone: 1164 tests, 0 failed, 0 errors, 0 skipped.
+- 2026-10-31: claim audit: not owed — internal tier
+- 2026-10-31: implement pass 2 done; status review.
 - 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
 
 ## Decisions
