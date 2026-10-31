@@ -152,3 +152,10 @@ Third pass, after review return 2 and the AC4 amendment. Evidence at `42a9cf66`,
 - AC2 (re-verified): 20 files, one line each, every id known. The `helper-orchestration.R` line now gives the reason in its header's own words. 0 problems.
 - AC3 (re-checked): 147 pairs, each matched to a `test_that()` call at the head. 0 missing.
 - AC4 (verified against the amended wording): every row sits in one of 26 named groups. Each group states its types and count, and each count equals the types of the rows it lists plus the rows it counts by id. The 10 groups of one type each name "Settle oracle types for ten groups", which `cairn/ROADMAP.md` holds. The header holds "The groups are one cut, and a finer cut can find more results backed by one type". 0 problems.
+
+spawned: diff-bug, ripple (third pass)
+
+- ripple #1: `test-parallel-payload.R:10-11` cites DESIGN for records that live beside the test — follow-up, row "Point test oracle headers at the registry" (parked, promote on the next change to those headers). The third pass raised it again. The headers still hold each oracle's source, but they no longer say where its id and type live. The row is written at hygiene, after the source row graduates, because the ROADMAP is at 23,985 of its 24,000 bytes.
+- ripple #2: `test-nested-resamples-memory.R:2-3`, same — follow-up, same row.
+- ripple #3: 18 headers cite "oracles are recorded in the test file that asserts them" — follow-up, same row.
+- ripple #4: the source row "Keep an oracle registry outside tests" still states the gap — reject (planned: it graduates at hygiene).
