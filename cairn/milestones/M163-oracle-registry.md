@@ -1,6 +1,6 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -15,7 +15,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Scope
 
-**In:** A new `cairn/ORACLES.md` built from the oracle records in the test-file comments at `576c3d19`, the last commit before M155 removed oracle ids and types from test comments. Each row points at the test's name at the milestone's head, through `benchmarks/test-renames-576c3d19.csv` and any later rename. The rows are grouped by numeric result, with a count of oracle types for each group. The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` points at the registry.
+**In:** A new `cairn/ORACLES.md` built from the oracle records in the test-file comments at `576c3d19`, the last commit before M155 removed oracle ids and types from test comments. Each row points at the test's name at the milestone's head, through `benchmarks/test-renames-576c3d19.csv` and any later rename. The rows are put in named groups, with a count of oracle types for each group. The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` points at the registry.
 
 **Out:**
 - A test that keeps the registry in step with the test files. The plan gate on 2026-10-31 chose upkeep by hand at review, so no row holds it.
@@ -28,15 +28,15 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - [ ] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
 - [ ] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
 - [x] AC3: Each pair of a file and a `test_that()` name in the registry exists at the milestone's head. The file is under `tests/testthat/`, and it holds a `test_that()` call whose first argument is that name.
-- [ ] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
+- [ ] AC4: The registry puts each row in one or more named groups. Each group states how many distinct doctrine types are carried by the rows it lists and the rows it counts by id. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle, or names the record (a D-entry or an archived milestone) that accepts the shortfall. The registry says that its groups are one cut of the results, and that a finer cut can find more results backed by one type.
 - [x] AC5: The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` names `cairn/ORACLES.md` as the record of oracle ids and types. The bullet says that a milestone that adds or removes an oracle updates the registry. The bullet no longer says that no committed record holds the types.
 
 ## Coverage
 
-- AC1 → T1, T5
-- AC2 → T2
+- AC1 → T1, T5, T6
+- AC2 → T2, T6
 - AC3 → T1, T2, T4
-- AC4 → T3, T5
+- AC4 → T3, T5, T6
 - AC5 → T4
 
 ## Tasks
@@ -46,6 +46,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - [x] T3: Group the rows by the numeric result that they test, and count the doctrine types in each group. For each group under two types, cite the D-entry or archived milestone that accepts the shortfall, or search the candidates, the archive and DECISIONS.md for overlap and then add a candidate row.
 - [x] T4: Rewrite the oracle-records bullet at `cairn/DESIGN.md:130`. List each pair of a file and a name from the registry and compare it with the `test_that()` calls at the head. Run `cairn_validate`.
 - [x] T5: Fix review return 1: the AC1 rows for `eval-time/O2`, `eval-time/O3` and `time-series-pairs-other/O5`/`O6`; split the reader-tables group (AC4); and the other fix-now findings the Review section lists. Rename the candidate row to the new count.
+- [x] T6: Fix review return 2: the AC1 rows for `nested-workflow-map-oracles/O1` and the `O5` Bayesian strand, the AC2 line for `helper-orchestration.R`, and fix-now findings #8, #13, #14, #15 and #16 from the second pass. Carry out the AC4 amendment: the registry's note on its groups, and the finer splits in the candidate row.
 
 ## Work log
 
@@ -72,6 +73,12 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: status set to review.
 - 2026-10-31: review return 2: second-pass diff-bug #6 and #7 show AC1 failing (two rows list tests their records do not name, without saying so), and #12 shows AC2 failing (the helper-orchestration line gives a reason its comments do not state). Fix those and fix-now findings #8, #13, #14, #15 and #16 from the Review section.
 - 2026-10-31: amendment routed: AC4 — second-pass diff-bug #1-#5, #9 and #10 each split a group into finer results on one type; AC4's "groups its rows by the numeric result that they test" names no procedure that decides a result's grain, so each pass can find a finer split (widening test). Narrow AC4 to what the file can show, and carry the finer splits in the candidate row.
+- 2026-10-31: T6 added for review return 2 and the AC4 amendment (minor amendment; Coverage AC1, AC2 and AC4 now also map to T6).
+- 2026-10-31: re-audit: AC4 (reduced) — nothing. The fresh Opus reader judged the amended wording bounded (rows and `##` groups a reader lists), proportionate, deliverable-bound and narrower than before. It noted that a single all-rows group would pass, and suggested an optional heading clause. That clause was not taken, because adding a property after defect returns would widen the criterion. It also noted the Goal's and Scope's old wording.
+- 2026-10-31: amendment return: AC4 — "The registry puts each row in one or more named groups. Each group states how many distinct doctrine types are carried by the rows it lists and the rows it counts by id. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle, or names the record (a D-entry or an archived milestone) that accepts the shortfall. The registry says that its groups are one cut of the results, and that a finer cut can find more results backed by one type."
+- 2026-10-31: Scope In now says "The rows are put in named groups", to match AC4. The Goal keeps "each numeric result", because a Goal changes only through a re-plan, and the AC4 wording binds what review checks.
+- 2026-10-31: T6 done. `nested-workflow-map-oracles/O1` and the `O5` Bayesian strand now say that their records name no test, and give the tests found by reading. The `helper-orchestration.R` line rests on its header's own words. The registry header states the "analytic by-hand" mapping rule. `nested-resamples-identity/U1` gains its fourth test. The selection group notes the Bayesian desirability test beside the racing one. The registry header and the DESIGN bullet now say the test file names the pinning test "for most oracles". The registry says its groups are one cut. The candidate row is retitled "Settle oracle types for ten groups" and lists the finer one-type results from the second pass. Checks: 71 typed rows, 20 file lines, 26 groups (10 of one type), 147 pointers, 0 problems; `cairn_validate` passes; ROADMAP is 58 lines and 23,990 bytes.
+- 2026-10-31: status set to review.
 
 ## Decisions
 
