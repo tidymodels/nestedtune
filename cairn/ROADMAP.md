@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-31 status audit. No change since the triage pass; n
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M167 | Add second oracles to one-type parts | planned | — | normal | milestones/M167-one-type-parts.md |
+| M167 | Add second oracles to one-type parts | in-progress | — | normal | milestones/M167-one-type-parts.md |
 | M166 | Give finer results a second oracle | done | — | normal | milestones/archive/M166-finer-second-oracle.md |
 | M165 | Keep the devel-vctrs test choice from drifting | done | — | normal | milestones/archive/M165-devel-vctrs-drift.md |
 | M164 | Give six one-type results a second oracle | done | — | normal | milestones/archive/M164-second-oracle-types.md |

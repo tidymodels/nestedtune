@@ -1,13 +1,13 @@
 # M167: Add second oracles to one-type parts
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** internal — tests and in-repo tracking records; no package code or user doc changes
-- **Branch/PR:** —
+- **Branch/PR:** m167-one-type-parts
 
 ## Goal
 
@@ -39,8 +39,8 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 
 ## Tasks
 
-- [ ] T1: Survival branch, invariant. In `test-compute-metrics.R`, beside the censored test at :192, add a run helper beside `saved_srv_run()` (:39) whose metric set holds the three kinds, with `save_pred = TRUE`; `saved_srv_run()` stays as it is, since other tests read its Brier-only set. Assert `compute_metrics()` against `collect_metrics()` at both `summarize` values. Plant: swap the static and linear-predictor estimates in `score_fold()` (R/nested-results-collect.R:840), see the test fail, and restore.
-- [ ] T2: Survival branch, live. Beside the yardstick tests at :207, score each fold's rows of `collect_predictions()` with `concordance_survival()`, `brier_survival()` and `royston_survival()` called one by one, summarize by hand as the numeric test does, and compare per fold and summarized. Plant: drop the dynamic `.pred` argument in `score_fold()`, see the test fail, and restore.
+- [x] T1: Survival branch, invariant. In `test-compute-metrics.R`, beside the censored test at :192, add a run helper beside `saved_srv_run()` (:39) whose metric set holds the three kinds, with `save_pred = TRUE`; `saved_srv_run()` stays as it is, since other tests read its Brier-only set. Assert `compute_metrics()` against `collect_metrics()` at both `summarize` values. Plant: swap the static and linear-predictor estimates in `score_fold()` (R/nested-results-collect.R:840), see the test fail, and restore.
+- [x] T2: Survival branch, live. Beside the yardstick tests at :207, score each fold's rows of `collect_predictions()` with `concordance_survival()`, `brier_survival()` and `royston_survival()` called one by one, summarize by hand as the numeric test does, and compare per fold and summarized. Plant: drop the dynamic `.pred` argument in `score_fold()`, see the test fail, and restore.
 - [ ] T3: Racing eliminated rows. In `test-nested-tune-race-oracles.R`, beside the test at :186, read which inner resamples the race scored each eliminated candidate on from the race's unsummarized metrics. Compare the candidate's `mean` and `n` with `nested_tune_grid()` over an inner design cut to those resamples (invariant, as `nested-tune-race-oracles/O2` is for survivors). If the grid path cannot be cut that way, refit the candidate on those inner analysis sets and compute its metric by formula (closed-form), building a fixture if the stochastic one cannot be refit exactly. Plant: store finetune's survivors alone (`all_configs = FALSE`), see the test fail, and restore.
 - [ ] T4: Final fit under `event_level`. In `test-event-level.R`, beside the test at :206, count sensitivity and specificity at the second level from the final fit's stored tuning run (closed-form, as `event-level/O1` counts for the outer folds), from its saved predictions or from a refit of each candidate. Build a fixture if `cls_*` cannot give a count that matches exactly. Plant: drop `event_level` from the final fit's tuning call, see the test fail, and restore.
 - [ ] T5: Registry. Add the AC5 test lines and rows under the file's quoting rule, and rewrite the three group lines at `cairn/ORACLES.md` :90, :240 and :311 so each credits its part to rows of two types (D-123 (1)). Re-point `helper-time-budget.R` rows for the new blocks in one pass.
@@ -58,3 +58,6 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - 2026-10-31: plan gate chose an invariant against the grid orchestrator over an inner design cut to the race's resamples for the eliminated rows, over `tune::tune_grid()` called by the test, because the latter is live, the type O3 already holds; falsified by the cut grid's mean differing from the race's for a survivor scored on all resamples.
 - 2026-10-31: plan gate chose a closed-form count for the final fit under `event_level` over a level-swap invariant (relevel `y`, run at `"first"`), because `vfold_cv(strata = y)` may draw other splits when the level order changes, which is unchecked; falsified by the swapped run drawing identical inner splits.
 - 2026-10-31: plan gate chose one milestone over three, because four tests and the registry edit fit two sessions like M164 and M166; falsified by the plan-owned body passing the cap or T1-T5 not fitting two sessions.
+- 2026-10-31: implement started; branch m167-one-type-parts cut from main at 6b374208.
+- 2026-10-31: T1/T2 minor amendment: the planned swap plant passed on the unmodified run, since survreg's `.pred_time` rises with `.pred_linear_pred` and both metrics score by rank. Per the fixture answer, added `reverse_pred()` (one column reversed per fold) and an invariant test, "reordering a censored run's `.pred_time` moves only the static metric, and its `.pred_linear_pred` only the linear-predictor metric"; the live test runs on `.pred_time` reversed. The collect_metrics() test (AC1) cannot show the swap.
+- 2026-10-31: T1/T2 done. Tests: AC1 "with a static, a dynamic and a linear-predictor metric, compute_metrics() is collect_metrics() on a censored-regression run"; AC2 "a static, a dynamic and a linear-predictor metric on a censored run are yardstick on each fold's rows"; the reordering invariant. Plants: static/linear swap failed the invariant (4) and live (5) tests; `.pred` reversed in the survival branch failed the old censored, AC1 and live tests; each restored. File: 23 tests clean.
