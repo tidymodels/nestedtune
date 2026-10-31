@@ -1,6 +1,6 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -44,7 +44,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - [x] T1: List the 71 typed records at `576c3d19` with the AC1 grep, and show the count before you use the list. For each record, map each test it names through `benchmarks/test-renames-576c3d19.csv` and the later block tables in `benchmarks/` to its name at the head. Write one row for each record in `cairn/ORACLES.md`, under a header that states the file's scope, the two greps, and the commit they read.
 - [x] T2: Read the comments of the 20 untyped files at `576c3d19` and at the head. Add rows in AC1's form for the oracles that they describe, and one line for each file as AC2 states.
 - [x] T3: Group the rows by the numeric result that they test, and count the doctrine types in each group. For each group under two types, cite the D-entry or archived milestone that accepts the shortfall, or search the candidates, the archive and DECISIONS.md for overlap and then add a candidate row.
-- [ ] T4: Rewrite the oracle-records bullet at `cairn/DESIGN.md:130`. List each pair of a file and a name from the registry and compare it with the `test_that()` calls at the head. Run `cairn_validate`.
+- [x] T4: Rewrite the oracle-records bullet at `cairn/DESIGN.md:130`. List each pair of a file and a name from the registry and compare it with the `test_that()` calls at the head. Run `cairn_validate`.
 
 ## Work log
 
@@ -61,6 +61,9 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: T1 and T2 done in one pass: `cairn/ORACLES.md` holds 71 typed rows (ids compared with the AC1 grep's 71 records, no difference) and 17 prose rows from 13 of the 20 untyped files. The other 7 files have a line each: 5 record no oracle, and 2 point at typed rows. A one-off parse of `test_that()` calls at the head found 1080 calls, 38 with names built in code. Those names are given as deparsed code. All 123 test pointers matched a call at the head.
 - 2026-10-31: implementation choices: ids are file stem plus the record's label, and prose rows take `U<n>`. "Analytic" maps to closed-form, and so does "analytic by-hand", because both are explicit code written from a formula or definition. A row that tests two results is written once and counted by id in the second group.
 - 2026-10-31: T3 done: 23 groups. 17 hold two or more types and 6 hold live oracles only. The search of the candidates, the archive and DECISIONS.md found no record that accepts one type (D-079 counts two oracles for the selection rules, but both are live). So one candidate row, "Add second oracle types to six groups", holds all six, because the ROADMAP had room for one row (58 lines, 23,950 bytes after it).
+- 2026-10-31: T4 done: the DESIGN.md oracle-records bullet now names `cairn/ORACLES.md`, says a milestone that adds or removes an oracle updates it, and drops the no-record sentence. The pointer comparison re-run read 123 pointers with 0 problems, and `cairn_validate` passed (18 advisory warnings on references staleness, none new).
+- 2026-10-31: claim audit: not owed — internal tier.
+- 2026-10-31: all tasks done; status set to review.
 
 ## Decisions
 

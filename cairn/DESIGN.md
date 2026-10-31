@@ -127,13 +127,15 @@ naming convention.
   not an oracle. See the plugin's `skills/shared/validation-doctrine.md`.
   For a resampling package this is load-bearing: a subtly wrong outer-loop
   estimate is self-consistent and will pass its own unit tests.
-- **Oracle records: provenance headers in the asserting test file.** Each oracle
-  is recorded at the top of the `tests/testthat/test-*.R` file that asserts it,
-  by source and which test pins it — the asserting test is the single source of
-  truth, never a restated value. The headers carry no oracle ID or type, since
-  the test-comment rule forbids them there, so no committed record holds the
-  types that a ≥2-types audit reads; the candidate row "Keep an oracle registry
-  outside tests" owns that gap. _(added 2026-07-25, M01; corrected M155.)_
+- **Oracle records: central `cairn/ORACLES.md`, with provenance headers in the
+  asserting test file.** `cairn/ORACLES.md` records each oracle's id, type,
+  source and asserting test, grouped by the numeric result it tests, and is the
+  record a ≥2-types audit reads. The top of the `tests/testthat/test-*.R` file
+  that asserts an oracle states its source and which test pins it, but no id or
+  type, since the test-comment rule forbids them there. The asserting test is
+  the single source of truth, never a restated value. A milestone that adds or
+  removes an oracle updates `cairn/ORACLES.md`. _(added 2026-07-25, M01;
+  corrected M155, M163.)_
 - **`air` is the formatter, and a committed tree is clean under it.** `air.toml`
   at the root declares the settings (the tidymodels shape: `[format]` with
   `skip = ["tribble"]`), `air format .` is expected to change nothing on a
