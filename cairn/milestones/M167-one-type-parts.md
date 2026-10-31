@@ -26,7 +26,7 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - [x] AC3: A test asserts, on a `nested_tune_race_anova()` run in which at least one fold eliminated a candidate, each eliminated candidate's row in the `.inner_metrics` of a fold that eliminated a candidate against an oracle whose type is not live.
 - [x] AC4: A test asserts the tuning run that `nested_final_fit()` stores under `event_level = "second"` against an oracle whose type is not live, on input where the first and second levels give different values for at least one metric the oracle checks.
 - [x] AC5: In `cairn/ORACLES.md`, each of the tests that AC1-AC4 name appears as a test line under a row with id, type and source. A test whose type and source match an existing row goes under that row, and any other test gets a new row. The `compute_metrics()`, racing and event-level groups each credit their part to rows of two types, and `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing.
-- [ ] AC6: `devtools::test()` runs clean.
+- [x] AC6: `devtools::test()` runs clean.
 
 ## Coverage
 
@@ -119,3 +119,5 @@ Return floor: no finding shows a criterion failing as written; the fixes keep ea
 Re-run after the fixes (206d1137; file runs, 0 failed, 0 errors, 0 skipped in each file):
 - AC1 test: 3 expectations, passes. AC2 test: 144 expectations over the run as saved and reversed, six mixes each, passes. Invariant test: 36 expectations, passes. AC3 test: 28 expectations, passes. AC4 test (renamed "the final fit's tuning run reports the sensitivity and specificity counted at the second level"): 29 expectations, passes.
 - Plants, each restored (`git diff -- R/` empty after): linear-alone branch reads `.pred_time` → invariant 4, AC2 test 6 failures; static/linear swap in the combined branch → invariant 8, AC2 test 10; `all_configs = FALSE` → AC3 test 3; eliminated rows given the full count and a 1e-9 shift → AC3 test 12; `event_level = "first"` at R/nested-final-fit.R:228 → AC4 test 18, O2's test 4.
+- AC6: `devtools::test()` run alone at 206d1137 (test files unchanged since; b5cf9aed changed only this file): 1169 tests, 0 failed, 0 errors, 0 skipped. `air format --check .` clean.
+- `pkgdown::check_pkgdown()`: no problems found.
