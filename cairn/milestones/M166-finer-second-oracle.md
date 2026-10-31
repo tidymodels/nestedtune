@@ -95,6 +95,7 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: T10: `air format --check .` clean; `devtools::test()` under `NESTEDTUNE_FULL_SUITE=true`, alone: 1164 tests, 0 failed, 0 errors, 0 skipped.
 - 2026-10-31: claim audit: not owed — internal tier
 - 2026-10-31: implement pass 2 done; status review.
+- 2026-10-31: step-7 approval: m166-finer-second-oracle approved for merge
 - 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
 
 ## Decisions
