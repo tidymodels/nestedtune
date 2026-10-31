@@ -21,11 +21,11 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 
 ## Acceptance criteria
 
-- [ ] AC1: A test in `test-compute-metrics.R` asserts, at `summarize = TRUE` and at `summarize = FALSE`, that `compute_metrics()` called with a censored-regression run's own metric set equals `collect_metrics()` on that run, where the metric set holds a static, a dynamic and a linear-predictor survival metric.
-- [ ] AC2: A test in `test-compute-metrics.R` asserts that `compute_metrics()` on a censored-regression run, with a metric set holding a static, a dynamic and a linear-predictor survival metric, equals yardstick called metric by metric on each fold's rows of `collect_predictions()`, both per fold and in a summary computed in the test.
-- [ ] AC3: A test asserts, on a `nested_tune_race_anova()` run in which at least one fold eliminated a candidate, each eliminated candidate's row in the `.inner_metrics` of a fold that eliminated a candidate against an oracle whose type is not live.
-- [ ] AC4: A test asserts the tuning run that `nested_final_fit()` stores under `event_level = "second"` against an oracle whose type is not live, on input where the first and second levels give different values for at least one metric the oracle checks.
-- [ ] AC5: In `cairn/ORACLES.md`, each of the tests that AC1-AC4 name appears as a test line under a row with id, type and source. A test whose type and source match an existing row goes under that row, and any other test gets a new row. The `compute_metrics()`, racing and event-level groups each credit their part to rows of two types, and `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing.
+- [x] AC1: A test in `test-compute-metrics.R` asserts, at `summarize = TRUE` and at `summarize = FALSE`, that `compute_metrics()` called with a censored-regression run's own metric set equals `collect_metrics()` on that run, where the metric set holds a static, a dynamic and a linear-predictor survival metric.
+- [x] AC2: A test in `test-compute-metrics.R` asserts that `compute_metrics()` on a censored-regression run, with a metric set holding a static, a dynamic and a linear-predictor survival metric, equals yardstick called metric by metric on each fold's rows of `collect_predictions()`, both per fold and in a summary computed in the test.
+- [x] AC3: A test asserts, on a `nested_tune_race_anova()` run in which at least one fold eliminated a candidate, each eliminated candidate's row in the `.inner_metrics` of a fold that eliminated a candidate against an oracle whose type is not live.
+- [x] AC4: A test asserts the tuning run that `nested_final_fit()` stores under `event_level = "second"` against an oracle whose type is not live, on input where the first and second levels give different values for at least one metric the oracle checks.
+- [x] AC5: In `cairn/ORACLES.md`, each of the tests that AC1-AC4 name appears as a test line under a row with id, type and source. A test whose type and source match an existing row goes under that row, and any other test gets a new row. The `compute_metrics()`, racing and event-level groups each credit their part to rows of two types, and `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing.
 - [ ] AC6: `devtools::test()` runs clean.
 
 ## Coverage
@@ -69,3 +69,15 @@ Back each of the three parts that the candidate row "Add second oracles to one-t
 - 2026-10-31: T6 done. `devtools::test()` run alone: 1169 tests, 0 failed, 0 errors, 0 skipped; `air format --check .` clean.
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: implement complete; status review.
+
+## Decisions
+
+## Review
+
+Sync: branch level with origin/main at 6b374208; no PR; Copilot round off (no `# Copilot review:` line).
+
+- AC1: `test-compute-metrics.R` :: "with a static, a dynamic and a linear-predictor metric, compute_metrics() is collect_metrics() on a censored-regression run" passes (file run 2026-10-31 at f4d1008b: 23 tests, 0 failed, 0 errors, 0 skipped). It loops `summarize` over TRUE and FALSE with `srv_kinds_metrics()` (`concordance_survival` static, `brier_survival` dynamic, `royston_survival` linear-predictor) and `expect_identical()` against `collect_metrics()`.
+- AC2: `test-compute-metrics.R` :: "a static, a dynamic and a linear-predictor metric on a censored run are yardstick on each fold's rows" passes in the same run. It scores `collect_predictions()` rows per fold with the three yardstick functions called one by one (`hand_per_fold()`), compares id, metric, eval time and estimate per fold, and compares each summary row's mean, n and std_err with `hand_summary()`; the run has `.pred_time` reversed per fold.
+- AC3: `test-nested-tune-race-oracles.R` :: "an eliminated candidate carries the grid path's mean over the resamples the race scored it on" passes (file run: 9 tests, 0 failed, 0 errors, 0 skipped). On `race_results("tune_race_anova")` it compares each eliminated row's mean, n and std_err with `nested_tune_grid()` over a `manual_rset()` cut to the race's resamples (invariant), and asserts `eliminated > 0`.
+- AC4: `test-event-level.R` :: "the final fit's tuning run reports the sensitivity counted at the second level" passes (file run: 6 tests, 0 failed, 0 errors, 0 skipped). It counts sensitivity from the final fit's saved tuning predictions (closed-form) for all 9 resample-candidate pairs, and asserts the first level's count differs from the second's in each.
+- AC5: `grep -n 'Add second oracles to one-type parts' cairn/ORACLES.md` prints nothing (exit 1). The AC1 test is a line under `compute-metrics/U1` and the AC2 test under `compute-metrics/U2` (same type and source); the AC3 test is under new row `nested-tune-race-oracles/O5` (invariant) and the AC4 test under new row `event-level/O3` (closed-form). The compute_metrics() group credits dynamic metrics to U1 and U2, and static and linear-predictor metrics to O1 and U2; the racing group credits eliminated rows to O3 (live) and O5 (invariant); the event-level group credits the final fit to O2 (live) and O3 (closed-form).
