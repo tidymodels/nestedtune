@@ -4,7 +4,7 @@ _Last hygiene check: 2026-10-31 M164 review. Graduated Settle oracle types for n
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M165 | Keep the devel-vctrs test choice from drifting | in-progress | — | normal | milestones/M165-devel-vctrs-drift.md |
+| M165 | Keep the devel-vctrs test choice from drifting | review | — | normal | milestones/M165-devel-vctrs-drift.md |
 | M164 | Give six one-type results a second oracle | done | — | normal | milestones/archive/M164-second-oracle-types.md |
 | M163 | Keep an oracle registry outside tests | done | — | normal | milestones/archive/M163-oracle-registry.md |
 | M162 | The shared test pool keeps both daemons | dropped | — | normal | milestones/archive/M162-shared-pool-daemon-loss.md |

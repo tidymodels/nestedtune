@@ -1,6 +1,6 @@
 # M165: Keep the devel-vctrs test choice from drifting
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,10 +38,10 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 ## Tasks
 
 - [x] T1: Add the line `# devel-vctrs.yaml runs this file on every push and pull request.` to `tests/testthat/test-vctrs-compat.R`, `test-dplyr-compat.R` and `test-nested-results-set-compat.R`, as a whole line after each file's header comment.
-- [ ] T2: Rewrite the "Run the tests against it" step of `.github/workflows/devel-vctrs.yaml`. Its `env:` maps `inputs.full` alone; the R code sets the switch to true on `schedule`, and on `workflow_dispatch` when the full value is "true". When the switch is false, it reads `tests/testthat/test-*.R`, keeps the files holding the marker as a whole line, stops with an error naming the marker when none does, prints the selected files, and passes `testthat::test_local()` a filter built from their names with regex characters escaped. It prints `Whole suite:` as now.
-- [ ] T3: Key the concurrency group on `github.workflow`, `github.ref`, `github.event_name` and `inputs.full`. Rewrite the header paragraph that names the three files, and the concurrency comment, from a same-session read of the new step, to point at the marker line and the raw key. Edit the `devel-vctrs.yaml` concurrency sentence on `cairn/PROFILE.md` line 44 in place, adding no line (the file is at 119 of its <120 cap).
-- [ ] T4: Copy the step's R code to a scratch script and run it locally: the five cases of AC5, then the rename plant and the no-marker plant of AC2 on a copy of `tests/testthat/`, each plant seen to give its stated result. Record the outcomes in one work-log line.
-- [ ] T5: Append a D-entry narrowing D-119: the concurrency group keys on `github.event_name` and `inputs.full`, and a test file joins the push-time watch by its marker line. Record the side effect: a scheduled run and a full dispatch no longer share a group, nor do a `full` false dispatch on the default branch and a push to it.
+- [x] T2: Rewrite the "Run the tests against it" step of `.github/workflows/devel-vctrs.yaml`. Its `env:` maps `inputs.full` alone; the R code sets the switch to true on `schedule`, and on `workflow_dispatch` when the full value is "true". When the switch is false, it reads `tests/testthat/test-*.R`, keeps the files holding the marker as a whole line, stops with an error naming the marker when none does, prints the selected files, and passes `testthat::test_local()` a filter built from their names with regex characters escaped. It prints `Whole suite:` as now.
+- [x] T3: Key the concurrency group on `github.workflow`, `github.ref`, `github.event_name` and `inputs.full`. Rewrite the header paragraph that names the three files, and the concurrency comment, from a same-session read of the new step, to point at the marker line and the raw key. Edit the `devel-vctrs.yaml` concurrency sentence on `cairn/PROFILE.md` line 44 in place, adding no line (the file is at 119 of its <120 cap).
+- [x] T4: Copy the step's R code to a scratch script and run it locally: the five cases of AC5, then the rename plant and the no-marker plant of AC2 on a copy of `tests/testthat/`, each plant seen to give its stated result. Record the outcomes in one work-log line.
+- [x] T5: Append a D-entry narrowing D-119: the concurrency group keys on `github.event_name` and `inputs.full`, and a test file joins the push-time watch by its marker line. Record the side effect: a scheduled run and a full dispatch no longer share a group, nor do a `full` false dispatch on the default branch and a push to it.
 
 ## Work log
 
@@ -58,6 +58,12 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - 2026-10-31: no changelog entry: CI-only, as at M153.
 - 2026-10-31: status in-progress, branch m165-devel-vctrs-drift cut from main at f9160fdc.
 - 2026-10-31: T1 done: marker line added as its own paragraph at the end of each file's header comment; `grep -lxF` lists the three files; `air format --check .` clean. Comment-only change, so verify's `devtools::test()` waits for T4, which runs the three files through the new step.
+- 2026-10-31: T2 done: the step's `env:` holds `FULL_INPUT` alone; the R code decides the switch from `GITHUB_EVENT_NAME` and it, selects marked `test-*.R` files with `readLines(warn = FALSE)`, stops when none, prints the selection, escapes regex characters in the stems. Implementation choice: the marker is matched with `%in%` over the file's lines, a whole-line match like `grep -x`.
+- 2026-10-31: T3 done: group keyed on workflow, ref, `github.event_name`, `inputs.full`; header paragraph and concurrency comment rewritten from a same-session read of the step, the dispatch input's description says "watched"; PROFILE.md line 44 edited in place, still 119 lines. A simple-english hook flagged older PROFILE.md sentences outside the edit; left alone, out of scope.
+- 2026-10-31: T4 done: step code read from the YAML with `yaml::read_yaml()` into scratch scripts. Switch under (schedule,""), (workflow_dispatch,"true"), (workflow_dispatch,"false"), (push,""), (pull_request,"") printed TRUE, TRUE, FALSE, FALSE, FALSE. Rename plant (`test-renamed-plant.R`) selected it and the other two; no-marker plant stopped with the step's own "No test file ... carries the line" error before `load_all()`. Full step for push ran the three files: FAIL 0, PASS 988 (verify for T1). The escape line, run from a file, gave `a\.b\+c` and `q\(1\)`; an `Rscript -e` check had mangled the backslashes.
+- 2026-10-31: T5 done: D-122 narrows D-119's filter and concurrency clauses and records the group side effect.
+- 2026-10-31: claim audit: not owed — internal tier.
+- 2026-10-31: verify: no `R/` change and the `.R` changes are comment lines, so the gate is `air format --check .` clean plus T4's run of the three watched files (PASS 988); status review.
 
 ## Decisions
 

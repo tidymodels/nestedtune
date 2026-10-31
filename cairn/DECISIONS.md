@@ -2135,6 +2135,12 @@ upstream, either of which would let the file return to a shared blob.
 **Decision:** they do not. A table that only reshapes, labels or joins numbers that another group's oracles check is not a numeric result of its own, and a table that holds no number is not one either. Each such group in `cairn/ORACLES.md` carries one line naming the group it rides on, or saying it holds no number. The user chose this at M164's plan gate over adding a second type to all nine groups.
 **Consequences:** a table that computes a new number, such as an average or a rescoring, is a result of its own and owes two types. The three groups keep their one oracle, which checks the reshaping. Falsified by a reshaping table that changes a number (drops, duplicates or misplaces a value) with no test failing.
 
+### D-122 (2026-10-31): `devel-vctrs.yaml` picks its push-time test files by a marker line and keys its concurrency group on the event name and the `full` input. Narrows D-119's filter and concurrency clauses
+
+**Context:** D-119's filter named three test files by hand, so a renamed file dropped out with no signal, and its concurrency group repeated the test step's switch expression with nothing keeping the two copies equal (M153 review). M165's plan gate chose to simplify the workflow over adding a drift test, and kept push and pull-request runs off the whole suite.
+**Decision:** on a push or pull request the test step runs the `tests/testthat/test-*.R` files that carry the line `# devel-vctrs.yaml runs this file on every push and pull request.` as a whole line, and stops with an error when none does. The step decides the whole-suite switch from `GITHUB_EVENT_NAME` and `inputs.full` alone, and the concurrency group is keyed on those two raw values with the workflow and ref, so two runs in one group run the same tests. Rejected at the plan gate: a `-compat` file-name convention, which still drops a file renamed out of it.
+**Consequences:** a test file joins the push-time watch by taking the marker line, replacing D-119's "adds itself to the filter". A scheduled run and a full dispatch no longer share a group, nor do a `full` false dispatch on the default branch and a push to it, so each pair can run side by side. Falsified by a watched file losing its marker in an edit that no run flags, or by a subset run cancelling or replacing a whole-suite run. (Narrows D-119.)
+
 <!-- Template:
 
 ### D-00N (YYYY-MM-DD): Title

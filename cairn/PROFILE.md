@@ -41,7 +41,7 @@ rules in tracking-rules:
   merge clause below), `test-coverage` runs `covr` to Codecov, annotating a PR but never gating it; `.github/` is
   `.Rbuildignore`d.
 - Divergences from that stock shape (M11 ×2, M12 rev. M31, M14, M33, M52, M78, M80, M88). **A `concurrency` block** cancels a
-  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. `devel-vctrs.yaml` also keys its group on its full/subset switch, so a three-file run never cancels a whole-suite run (M153). **A
+  superseded run on every ref but the default branch, a distribution channel that keeps a completed check instead. `devel-vctrs.yaml` also keys its group on the event name and its `full` input, so a subset run never cancels a whole-suite run (M153, M165). **A
   `paths-ignore` filter** on both triggers of `R-CMD-check-cran.yaml`, `R-CMD-check-hard.yaml`, `R-CMD-check.yaml`, `devel-vctrs.yaml`,
   `pkgdown.yaml`, `prose-sweep.yaml` and `test-coverage.yaml` skips `cairn/**`, `CLAUDE.md`, `.claude/**`, which cannot change what `R CMD
   check` sees — that is the test a fourth path must meet; it bites on `push` only, GitHub evaluating it on a
