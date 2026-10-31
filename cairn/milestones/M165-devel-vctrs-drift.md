@@ -22,10 +22,10 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 ## Acceptance criteria
 
 - [ ] AC1: On this milestone's PR `pull_request` run, `devel-vctrs.yaml` runs exactly the test files that `grep -lxF '# devel-vctrs.yaml runs this file on every push and pull request.' tests/testthat/test-*.R` lists at the PR head, and that command lists `test-vctrs-compat.R`, `test-dplyr-compat.R` and `test-nested-results-set-compat.R`. Evidence: the run passes, its log prints `Whole suite: FALSE`, and testthat's report in that log shows no context other than `vctrs-compat`, `dplyr-compat` and `nested-results-set-compat`.
-- [ ] AC2: In a copy of the repo with `test-vctrs-compat.R` renamed to `test-renamed-plant.R`, the test step's R code selects that file and the other two watched files. With the marker line removed from all three, it stops with an error before `testthat::test_local()` is called.
-- [ ] AC3: `grep -nE 'vctrs-compat|dplyr-compat|nested-results-set-compat' .github/workflows/devel-vctrs.yaml` prints no line.
-- [ ] AC4: The `group:` line of the workflow-level `concurrency:` block in `.github/workflows/devel-vctrs.yaml` is four `${{ }}` blocks joined by `-`, holding `github.workflow`, `github.ref`, `github.event_name` and `inputs.full`, each a bare property with no operator.
-- [ ] AC5: The test step's `env:` block holds one entry, mapped from `inputs.full`, read from the YAML. The step's switch code, run locally with (`GITHUB_EVENT_NAME`, full value) set to (`schedule`, ""), (`workflow_dispatch`, "true"), (`workflow_dispatch`, "false"), (`push`, "") and (`pull_request`, ""), prints `Whole suite: TRUE`, `TRUE`, `FALSE`, `FALSE` and `FALSE` in that order.
+- [x] AC2: In a copy of the repo with `test-vctrs-compat.R` renamed to `test-renamed-plant.R`, the test step's R code selects that file and the other two watched files. With the marker line removed from all three, it stops with an error before `testthat::test_local()` is called.
+- [x] AC3: `grep -nE 'vctrs-compat|dplyr-compat|nested-results-set-compat' .github/workflows/devel-vctrs.yaml` prints no line.
+- [x] AC4: The `group:` line of the workflow-level `concurrency:` block in `.github/workflows/devel-vctrs.yaml` is four `${{ }}` blocks joined by `-`, holding `github.workflow`, `github.ref`, `github.event_name` and `inputs.full`, each a bare property with no operator.
+- [x] AC5: The test step's `env:` block holds one entry, mapped from `inputs.full`, read from the YAML. The step's switch code, run locally with (`GITHUB_EVENT_NAME`, full value) set to (`schedule`, ""), (`workflow_dispatch`, "true"), (`workflow_dispatch`, "false"), (`push`, "") and (`pull_request`, ""), prints `Whole suite: TRUE`, `TRUE`, `FALSE`, `FALSE` and `FALSE` in that order.
 
 ## Coverage
 
@@ -64,7 +64,14 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - 2026-10-31: T5 done: D-122 narrows D-119's filter and concurrency clauses and records the group side effect.
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: verify: no `R/` change and the `.R` changes are comment lines, so the gate is `air format --check .` clean plus T4's run of the three watched files (PASS 988); status review.
+- 2026-10-31: review checkpoint (half-done): AC2-AC5 evidence recorded and ticked; AC1 waits for the PR run; the gate's `devtools::check()` and the four-lens review are running.
 
 ## Decisions
 
 ## Review
+
+- AC1 (local part, 2026-10-31 at 6c3ded1f): `grep -lxF` with the marker lists `test-dplyr-compat.R`, `test-nested-results-set-compat.R`, `test-vctrs-compat.R`. The PR's `pull_request` run of `devel-vctrs.yaml` is read at step 8 before the merge; the box is ticked only then.
+- AC2 (2026-10-31 at 6c3ded1f): the step's code before `pkgload::load_all()`, read from the YAML with `yaml::read_yaml()`, run under `pull_request` in a copy with `test-renamed-plant.R`: selected `test-dplyr-compat.R`, `test-nested-results-set-compat.R`, `test-renamed-plant.R`, filter `^(dplyr-compat|nested-results-set-compat|renamed-plant)$`. With the marker removed from all three: stopped with "No test file in tests/testthat carries the line …", exit 1, before `test_local()`.
+- AC3 (2026-10-31 at 6c3ded1f): the grep printed no line, exit 1.
+- AC4 (2026-10-31 at 6c3ded1f): `group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ inputs.full }}`, four bare properties joined by `-`.
+- AC5 (2026-10-31 at 6c3ded1f): the step's `env:` has one entry, `FULL_INPUT: ${{ inputs.full }}`. The switch code, run with (schedule,""), (workflow_dispatch,"true"), (workflow_dispatch,"false"), (push,""), (pull_request,""), printed `Whole suite: TRUE`, `TRUE`, `FALSE`, `FALSE`, `FALSE`.
