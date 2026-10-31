@@ -1,19 +1,17 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-31 M164 review. Graduated Settle oracle types for nine groups; pruned the M161 row. validate green._
+_Last hygiene check: 2026-10-31 M165 review. Graduated Guard the devel-vctrs filter from drift; pruned the M162 row. validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M165 | Keep the devel-vctrs test choice from drifting | review | — | normal | milestones/M165-devel-vctrs-drift.md |
+| M165 | Keep the devel-vctrs test choice from drifting | done | — | normal | milestones/archive/M165-devel-vctrs-drift.md |
 | M164 | Give six one-type results a second oracle | done | — | normal | milestones/archive/M164-second-oracle-types.md |
 | M163 | Keep an oracle registry outside tests | done | — | normal | milestones/archive/M163-oracle-registry.md |
-| M162 | The shared test pool keeps both daemons | dropped | — | normal | milestones/archive/M162-shared-pool-daemon-loss.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent terminal (done/dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
 <!-- unnumbered ideas; one line each: idea — added YYYY-MM-DD — links -->
 - Tidy the interrupt block's leftovers: four items in `test-parallel-interrupt.R` from M159's review, none added by M159. The ledger budgets no wait for the 60 s collect when no signal is sent. A SIGINT sent after `dispatch_folds()` returns early lands outside the block's handler. The header's "Established by execution against mirai 2.7.2 before the fix" is narrative history. The `m15-fold-` marker names carry a milestone id. Promote on the next change to that file — added 2026-10-24 at M159's review
-- Guard the devel-vctrs filter from drift: `devel-vctrs.yaml` names its three push-time test files by hand, so renaming one runs the other two with no signal, and its concurrency group repeats the test step's `FULL_SUITE` expression with nothing checking that the two copies agree. A check in `test-ci-workflows.R` could pin both — added 2026-10-22, M153 review — started M165
 - Give finer results a second oracle: one-type results in two-type `cairn/ORACLES.md` groups (M163 review): `compute_metrics()` own vs new metric set, final fit under `eval_time` and `event_level`, failed-fold weights, race fold record, Bayesian and annealing iteration stage, memory slope, `hand_average()`-only cases. Also the selection group's desirability rule and selection metric (M164 Out). Normal rung: shipped on one type — added 2026-10-31 at M164's plan gate
 - [low] Pin the byte figures in parallel.R: three `R/parallel.R` comments state wire sizes with no commit, date or procedure beside them: 5,141,166 B against 840,540 B for six split copies, 202,363 B against 524 B for the worker closure under `load_all()`, and 2,627 B for the 106-name manifest. The derived-figures rule asks for one. They predate M161, whose review found them — added 2026-10-24 at M161's review
 - [parked] Point oracle headers at the registry: 21 test-file headers say "DESIGN Conventions: oracles are recorded in the test file that asserts them", and `test-parallel-payload.R` and `test-nested-resamples-memory.R` say the records sit beside the test, but since M163 each oracle's id and type live in `cairn/ORACLES.md`. Promote on the next change to those headers — added 2026-10-31 at M163's review
