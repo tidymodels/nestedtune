@@ -1,6 +1,6 @@
 # Roadmap
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-31 triage pass. Re-rated Tidy the interrupt block's leftovers normal → parked; compressed Find why the shared pool loses a daemon, Normalize cli glyphs at the daemon, Move the deadline off the wall clock, Revisit two pkgdown site settings, Do the chores of the first release; corrected the header count in Point oracle headers at the registry (21 → 18). No drops, no decision entry. validate green._
+_Last hygiene check: 2026-10-31 status audit. No change since the triage pass; no outside merges, no linked-item news, validate green._
 ## Milestones
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
