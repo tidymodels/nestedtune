@@ -81,6 +81,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: status set to review.
 - 2026-10-31: amendment routed: AC1 — third-pass diff-bug #1, #2, #5 and #6: rows list tests their records describe in prose ("the test below", "stochastic variants", "AC2's tests") with no mark. Which tests a record "names" is decided by reading prose, and the first and second passes each found other rows of this shape. Narrow AC1 so that only a name the record quotes counts as named, and mark every other listed test as found by reading. Also fix third-pass #3, #7, #9 and #10. AC1 has no earlier amendment return. The defect-return count stays at 2.
 - 2026-10-31: checkpoint (half done): third-pass fixes #3, #7, #9 and #10 are in `cairn/ORACLES.md` and `cairn/DESIGN.md`. The AC1 amendment awaits its fresh reader. The quoted-name marking is not yet written.
+- 2026-10-31: re-audit: AC1 (reduced) — four findings in the matching rule, all taken: a record's text had no stated bounds; wildcard quotes matched tests in other files (wider than before); edge cases (a backtick span that is only `...`, `paste0()` names with no `%s`, `<that element>` as two words); and "Pinned by" said "matches" where the naming rule says "names". Clauses on boundedness, proportion and instrument pass once these are fixed. The fixed wording goes to its own fresh reader.
 
 ## Decisions
 
