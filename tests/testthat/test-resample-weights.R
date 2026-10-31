@@ -24,6 +24,9 @@
 # Source: `tune::fit_resamples()` on the same outer `vfold_cv()` splits under
 # the same weights, whose `collect_metrics()` is tune's weighted branch itself.
 # Every-fold case only, where tune and this package agree.
+#
+# Source: two runs that differ only in the weight of a fold that a summary row
+# leaves out must give that row the same mean, standard error and count.
 
 skip_heavy_on_cran()
 
@@ -63,6 +66,12 @@ expect_weighted_rows <- function(summarized, per_fold, weights) {
     expect_identical(got$n, as.integer(ref$n))
     expect_equal(got$std_err, ref$std_err, tolerance = 1e-12)
   }
+}
+
+# Fold 3's rsq estimate set to NA on the record.
+plant_na <- function(x) {
+  x$.metrics[[3L]]$.estimate[x$.metrics[[3L]]$.metric == "rsq"] <- NA_real_
+  x
 }
 
 # The normalized weights tune stores, named by fold id.
@@ -211,10 +220,6 @@ test_that("with a fold scoring NA, the weights are renormalized over the folds t
   # record rather than the reader, so the summary's NA rule is what is under
   # test; the per-fold estimates the oracle averages come off the unweighted
   # run, as in the other tests.
-  plant_na <- function(x) {
-    x$.metrics[[3L]]$.estimate[x$.metrics[[3L]]$.metric == "rsq"] <- NA_real_
-    x
-  }
   res <- plant_na(res)
   plain <- plant_na(plain)
   per_fold <- collect_metrics(plain, summarize = FALSE)
@@ -228,6 +233,51 @@ test_that("with a fold scoring NA, the weights are renormalized over the folds t
   expect_weighted_rows(got, per_fold, stored_weights(design))
   expect_identical(got$n[got$.metric == "rsq"], 2L)
   expect_identical(got$n[got$.metric == "rmse"], 3L)
+})
+
+test_that("a new weight on the fold a summary row leaves out leaves that row unchanged", {
+  skip_if_no_engines()
+  d <- make_reg_data()
+  summary_at <- function(weights, edit) {
+    design <- weighted_design(d, weights)
+    res <- suppressWarnings(weighted_grid_run(d, edit$design(design)))
+    got <- suppressWarnings(collect_metrics(edit$run(res)))
+    got[got$.metric %in% edit$rows, c(".metric", "mean", "std_err", "n")]
+  }
+  cases <- list(
+    failed = list(
+      design = function(x) break_fold(x, 2L, "inner tuning"),
+      run = identity,
+      rows = c("rmse", "rsq"),
+      left_out = 2L,
+      scored = 1L
+    ),
+    na = list(
+      design = identity,
+      run = plant_na,
+      rows = "rsq",
+      left_out = 3L,
+      scored = 1L
+    )
+  )
+  base <- c(1, 2, 3)
+  for (edit in cases) {
+    reference <- summary_at(base, edit)
+    expect_false(anyNA(reference$mean))
+
+    # The new weight doubles the total, so the weights tune stores (each over
+    # the total) halve exactly and the comparison can be exact.
+    moved <- base
+    moved[[edit$left_out]] <- base[[edit$left_out]] + sum(base)
+    expect_identical(summary_at(moved, edit), reference)
+
+    # A new weight on a scored fold moves the mean, so the comparison above
+    # can fail.
+    moved <- base
+    moved[[edit$scored]] <- 9
+    changed <- summary_at(moved, edit)
+    expect_true(all(changed$mean != reference$mean))
+  }
 })
 
 test_that("equal weights are no weights, and the numbers are the unweighted run's", {
