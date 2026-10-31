@@ -20,8 +20,8 @@
 # the vctrs compatibility test files that carry the marker line the last step
 # names; a file joins or leaves the watch by that line. The weekly schedule
 # runs the whole suite, because a development-vctrs break can reach files
-# outside the watched ones: other test files
-# call vctrs functions too (`test-nested-tune-bayes-oracles.R` calls
+# outside the watched ones: other test files call vctrs functions too
+# (`test-nested-tune-bayes-oracles.R` calls
 # `vec_cbind_frame_ptype()`), and dplyr and tibble build on vctrs. A dispatch
 # runs the whole suite unless its `full` input is set to false.
 #
@@ -82,8 +82,10 @@ permissions:
 # Extends the block in R-CMD-check.yaml. Keyed on the workflow as well as
 # the ref, so cancelling a superseded run of this leg never touches a check run.
 # Also keyed on the event name and the `full` input, the two values the test
-# step decides its whole-suite switch from, so two runs in one group always run
-# the same tests, and a subset run never cancels or replaces a pending or
+# step decides its whole-suite switch from, so two runs in one group always make
+# the same choice between the whole suite and the watched files (each commit's
+# markers decide which files are watched), and a subset run never cancels or
+# replaces a pending or
 # running whole-suite run: GitHub keeps one pending run per group and cancels
 # the older one. A scheduled run and a full dispatch therefore sit in
 # different groups and can both run.
@@ -153,8 +155,10 @@ jobs:
       # The whole-suite switch is decided here and nowhere else, from the two
       # values the concurrency group above is keyed on. `inputs.full` renders
       # as "" outside a dispatch. A subset run takes the test files that carry
-      # the marker line below as a whole line, so a renamed file stays in and
-      # a run that finds none stops red. testthat matches `filter` against
+      # the marker line below as a whole line, so a file renamed within the
+      # `test-*.R` pattern stays in and a run that finds none stops red. A file
+      # whose marker line is removed or reworded leaves the watch with no
+      # signal. testthat matches `filter` against
       # each file name with `test-` and `.R` removed. A NULL filter runs every
       # file.
       - name: Run the tests against it

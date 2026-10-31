@@ -65,6 +65,7 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - 2026-10-31: claim audit: not owed — internal tier.
 - 2026-10-31: verify: no `R/` change and the `.R` changes are comment lines, so the gate is `air format --check .` clean plus T4's run of the three watched files (PASS 988); status review.
 - 2026-10-31: review checkpoint (half-done): AC2-AC5 evidence recorded and ticked; AC1 waits for the PR run; the gate's `devtools::check()` and the four-lens review are running.
+- 2026-10-31: review pass 1: four lenses reported 15 findings; 7 fix now (comment and record wording only), 4 rejected as planned change, 4 noted; no floor return. `devtools::check()` still running.
 
 ## Decisions
 
@@ -75,3 +76,17 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - AC3 (2026-10-31 at 6c3ded1f): the grep printed no line, exit 1.
 - AC4 (2026-10-31 at 6c3ded1f): `group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ inputs.full }}`, four bare properties joined by `-`.
 - AC5 (2026-10-31 at 6c3ded1f): the step's `env:` has one entry, `FULL_INPUT: ${{ inputs.full }}`. The switch code, run with (schedule,""), (workflow_dispatch,"true"), (workflow_dispatch,"false"), (push,""), (pull_request,""), printed `Whole suite: TRUE`, `TRUE`, `FALSE`, `FALSE`, `FALSE`.
+- spawned: diff-bug, blame-history, prior-review, ripple
+- diff-bug #1: one file losing its marker drops out of the watch with no signal — reject (planned change): the plan gate chose the marker with this as its falsifier (D-122); the step comment now says so.
+- diff-bug #2: "two runs in one group run the same tests" overstates, since each commit's markers pick the files — fix now: workflow concurrency comment and D-122 Decision (branch-only, corrected in place) say the group fixes the whole-suite choice.
+- diff-bug #3: the search pattern `^test-.*\.R$` misses testthat's `test_*.R` and `.r` names, so "a renamed file stays in" overstates — fix now: the comment says a file renamed within the `test-*.R` pattern stays in. The pattern stays: every file in `tests/testthat/` is `test-*.R`, and Scope In names that pattern.
+- diff-bug #4: `cairn/PROFILE.md:65` still says "the three vctrs compatibility test files" — fix now: it names the marker line.
+- diff-bug #5: an orphan short line in the header paragraph — fix now: rewrapped.
+- blame-history #1: marker deletion is not guarded — reject (planned change), as diff-bug #1.
+- blame-history #2: a scheduled run and a full dispatch can now run side by side, costing CI minutes — reject (planned change): D-122 Consequences records it, and subset groups stay apart from whole-suite groups.
+- blame-history #3: the concurrency comment's "same tests" claim — fix now, as diff-bug #2.
+- blame-history #4: `cairn/PROFILE.md:65` — fix now, as diff-bug #4.
+- prior-review #1, #2, #4, #5, #6: earlier findings checked and not reintroduced (M153 concurrency defect, PROFILE cap at 119, the drift row, M102 and M080 claims, M057 comment accuracy) — noted, no action.
+- prior-review #3: `cairn/PROFILE.md:65` — fix now, as diff-bug #4; the 2m38s timeout comment is a dated measurement and stays.
+- ripple #1: the ROADMAP candidate row "Guard the devel-vctrs filter from drift" still describes the defect as open — reject (planned change): it carries `started M165` and post-merge hygiene graduates it.
+- ripple #2: `cairn/PROFILE.md:65` — fix now, as diff-bug #4.
