@@ -15,9 +15,9 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 
 ## Scope
 
-**In:** three new tests. One covers the final fit under a two-element `eval_time`, one covers resample weights with a left-out fold, and one covers the desirability rule by its definitions. One assertion joins the selection-metric test. A source note covers desirability2's help pages. `cairn/ORACLES.md` gains rows for the new oracles and for two assertions already in the suite. It gains one line for each result that owes no oracle of its own, and a D-entry records that rule.
+**In:** five new tests. They cover the final fit under a two-element `eval_time`, resample weights with a left-out fold, the desirability rule by its definitions, renormalized probability averages, and the censored median over three repeats. One assertion joins the selection-metric test. A source note covers desirability2's help pages. `cairn/ORACLES.md` gains rows for the new oracles and for one assertion already in the suite. It gains one line for each of five results, naming the parts left on one type. A D-entry records the rule those lines apply. (Amended 2026-10-31 at review pass 1, the user's stop answer.)
 
-**Out:** the averaging tests hold each censored row out twice, so the median and the mean of `.pred_time` agree there. That gap goes to the parked row "M126 review leftovers on averaging". Pointing the 21 test-file headers at the registry goes to its parked row. No change to package code.
+**Out:** the parts left on one type (the survival branch on a new metric set, the eliminated candidates' rows, the final fit under `event_level`) → a new candidate row "Add second oracles to one-type parts". Pointing the 21 test-file headers at the registry goes to its parked row. No change to package code.
 
 ## Acceptance criteria
 
@@ -25,9 +25,10 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - [ ] AC2: `test-resample-weights.R` gains a test on the weighted design with one failed fold, and on the same design with one fold scoring NA on one metric. In each case it asserts that a new weight on the left-out fold leaves each affected summary row's `mean`, `std_err` and `n` identical. It also asserts that a new weight on a scored fold changes that row's `mean`.
 - [ ] AC3: `test-nested-tune-grid-oracles.R` gains a test on one grid run under a desirability rule. Its expected selection for each fold is computed by explicit code from the definitions in desirability2's help pages, on that fold's inner metrics. The test asserts that each fold's recorded selection equals that candidate. A source note in `cairn/references/` records those definitions and desirability2's version.
 - [ ] AC4: the test `"a grid run records the first metric of the set it was given, in either order"` in `test-selection-metric.R` gains one assertion. For each of its two metric sets, the final fit's recorded first metric equals `names(attr(ms, "metrics"))[[1L]]`.
-- [ ] AC5: `cairn/ORACLES.md` holds one oracle row for each test that AC1, AC2 and AC3 add. It holds one invariant row for the level exchange that `"nested_final_fit() tunes under the caller's event level"` in `test-event-level.R` asserts. It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. The memory group counts `nested-resamples-memory/O2` for the size slope.
-- [ ] AC6: `cairn/ORACLES.md` carries one line for each of four results. The first is `compute_metrics()` on the run's own and on a new metric set. The others are the averages that only `hand_average()` checks, the racing fold record, and the Bayesian and annealing iteration stage. Each line names the rows that back the result and why it owes no oracle of its own. A new `cairn/DECISIONS.md` entry records the rule that those lines apply. `grep -n 'Give finer results a second oracle' cairn/ORACLES.md` returns no line.
-- [ ] AC7: `devtools::test()` reports no failures, and `air format --check .` is clean.
+- [ ] AC5: `cairn/ORACLES.md` holds one oracle row for each test that AC1, AC2, AC3 and AC7 add. It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. `grep -n 'event-level/O3' cairn/ORACLES.md` returns no line. The header of `test-event-level.R` says again that the file does not test the exchange of `sens` and `spec`. The memory group counts `nested-resamples-memory/O2` for the size slope.
+- [ ] AC6: `cairn/ORACLES.md` carries one line for each of five results. The `compute_metrics()` line names the survival branch on a new metric set. The averages line names the renormalized probabilities and the median of `.pred_time`. The racing line names the rows of eliminated candidates. The line on the final fit under `event_level` names the level exchange. The iteration-stage line, in the Bayesian and in the annealing group, names the proposals and the perturbations. For each named part, the line names the registry rows it credits for that part. The lines for the survival branch, the eliminated candidates' rows, the level exchange, the proposals and the perturbations each name the candidate row that holds that part, or say why it owes no second type. A new `cairn/DECISIONS.md` entry records the rule that those lines apply. `grep -n 'Give finer results a second oracle' cairn/ORACLES.md` returns no line.
+- [ ] AC7: `test-collect-predictions-summarize.R` gains two tests. The first uses the probability grid run with one `.pred_event` value planted as missing. It asserts that each row's averaged class probabilities sum to 1 within 1e-12. It also asserts that the planted row's probability means, before renormalization, do not sum to 1. The second runs the censored fixed workflow on a repeated v-fold outer design with three repeats. It asserts that `collect_predictions(summarize = TRUE)` matches tune's average on `tune::fit_resamples()` over the same outer splits, through `expect_matches_tune()`. It asserts that the same average matches `hand_average()` through `expect_matches_hand()`. It also asserts that for some row, the median of its three `.pred_time` values differs from their mean.
+- [ ] AC8: `devtools::test()` reports no failures, and `air format --check .` is clean.
 
 ## Coverage
 
@@ -35,9 +36,10 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - AC2 → T2
 - AC3 → T3
 - AC4 → T4
-- AC5 → T5
-- AC6 → T5
-- AC7 → T6
+- AC5 → T5, T8
+- AC6 → T5, T8
+- AC7 → T7
+- AC8 → T6, T10
 
 ## Tasks
 
@@ -47,6 +49,10 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - [x] T4: Selection metric. Add the assertion to the test at `test-selection-metric.R:15`. Plant: compare with the set's last name, and see it fail.
 - [x] T5: Registry and decision. Add the AC5 rows and the AC6 lines under the file's quoting rule. Rewrite the selection group's paragraph and the header paragraph that point at the candidate row. Append the D-entry. Re-point `helper-time-budget.R` rows for the new blocks in one pass.
 - [x] T6: Run `devtools::test()` and `air format --check .` clean.
+- [x] T7: Averages. In `test-collect-predictions-summarize.R`, a sums-to-one invariant on `grid_prob_run()` with the planted missing value, and a three-repeat censored `fixed_pair()` checked with `expect_matches_tune()` and `expect_matches_hand()`. Plant: `mean_by` for `.pred_time`, and no renormalization.
+- [x] T8: Registry rework. Drop `event-level/O3`, restore M152's sentence in `test-event-level.R`'s header, add the AC7 rows, and rewrite the five lines per AC6. Rewrite D-123 to the narrowed rule, naming the plugin's "What gets a test" rule where it is cited. Add the candidate row the Out item names. Remove the median gap from "M126 review leftovers on averaging", which AC7 closes. Carry the review return's fix-now findings.
+- [x] T9: Weights failed case. Plant a missing renormalization over the stored weights in `summarize_folds()` and see the failed-fold case of the AC2 test fail; restore.
+- [ ] T10: Run `devtools::test()` and `air format --check .` clean, alone.
 
 ## Work log
 
@@ -80,6 +86,12 @@ Back each result that the candidate row "Give finer results a second oracle" nam
 - 2026-10-31: re-audit: AC6 (reduced) — "the rows that reach it" and "parts that rest on one type" are still decided by judgment; suggested crediting rows by the line's own naming and naming the one-type parts outright. Second line for AC6, so the wording goes to the user.
 - 2026-10-31: re-audit: AC7 (reduced) — nothing.
 - 2026-10-31: T7 (pending the amendment's write): `test-collect-predictions-summarize.R` gained "a renormalized probability average sums to one in every row" and "a censored average over three repeats takes the median time, as tune does"; `repeated_pair()` and `fixed_pair()` take `repeats` (default 2, injected so the stored call stays literal). File green, 34 tests. Plants in `R/nested-results-collect.R`: `mean_by` for `.pred_time` failed the three-repeat test (2 expectations) and the missing-median test; no renormalization failed the sums test and the hand renormalization test; both reverted, `git diff -- R/` empty.
+- 2026-10-31: re-audit stop answer: the user chose to name the parts in AC6, crediting rows by each line's own naming.
+- 2026-10-31: amendment return: AC5 — "It holds one closed-form row for the first-name assertions of the test that AC4 names. Each row gives id, type, source and its test quoted by name. `grep -n 'event-level/O3' cairn/ORACLES.md` returns no line. The header of `test-event-level.R` says again that the file does not test the exchange of `sens` and `spec`."
+- 2026-10-31: amendment return: AC6 — "For each named part, the line names the registry rows it credits for that part. The lines for the survival branch, the eliminated candidates' rows, the level exchange, the proposals and the perturbations each name the candidate row that holds that part, or say why it owes no second type."
+- 2026-10-31: substantive amendment: AC7 added (two averaging tests, the user's stop answer); the old AC7 is now AC8; Scope In and Out, Coverage and T7-T10 updated.
+- 2026-10-31: T8: `cairn/ORACLES.md` dropped `event-level/O3` and gained `collect-predictions-summarize/O1` (invariant) and `/O2` (live), the three-repeat test listed under U2 as well. The five AC6 lines now credit rows per part: compute_metrics survival branch on U1, averages' renormalization on O1 and U2 and median on O2 and U2, racing eliminated rows on O1 and O3, the event_level final fit on O2, the iteration stage on O1 with no independent oracle. Headings for weights and averages read 3 types; memory slope is a group sentence; the 2026-09-01 cite gave way to D-123; the header counts six rows. D-123 rewritten on the branch to the narrowed rule, so the "testing rule" cite went. New candidate row "Add second oracles to one-type parts"; the median gap left "M126 review leftovers on averaging". `test-event-level.R`'s header already carried M152's sentence, unchanged on the branch. Selection-metric header names both oracles; the source note gained the `geomean()` sentence.
+- 2026-10-31: T9: plant `sum(e$vals * e$w)` (no renormalization) in `summarize_folds()` failed the AC2 test's failed-fold case (rmse 0.525 against 1.051) and NA case; reverted.
 - 2026-10-31: review return 1: fix-now findings to carry in the implement pass: diff-bug #4 (show the failed-fold weights case failing), #8, #12; blame-history #6, #9; prior-review #2, #3, #5; ripple #6.
 
 ## Decisions

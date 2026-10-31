@@ -1,6 +1,6 @@
 # Oracle registry
 
-This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review. M164 added six rows for tests written after `576c3d19`, each naming its test in quotes. M166 added five more, and the lines that D-123 asks for.
+This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review. M164 added six rows for tests written after `576c3d19`, each naming its test in quotes. M166 added six more the same way, one of them for an assertion in an older test, and the lines that D-123 asks for.
 
 M163 built the file on 2026-10-31 from the oracle records in `tests/testthat/` at `576c3d19`. That commit is the last one before M155 removed oracle ids and types from test comments. Two greps list the records that M163 read:
 
@@ -11,7 +11,7 @@ An id is the test file's name without `test-` and `.R`, then the record's own la
 
 Each test line gives a file under `tests/testthat/` and the first argument of a `test_that()` call in that file at the milestone's head. A literal name is in double quotes. For a name built in code, the line gives `code` and the one-line deparsed call. M163 mapped the names from `576c3d19` through `benchmarks/test-renames-576c3d19.csv`. Where a later commit merged tests, as six workflow-map tests became one `paste0()` loop, M163 read the file at the head. A test line ending "(found by reading)" is a test that the record does not name, found in the file's code. If a record's text quotes a test's name, the record names that test. In the quote, `...` or text in angle brackets matches any text. The full rule is M163's AC1, in the git history of `cairn/milestones/M163-oracle-registry.md`. A prose record names no test. Where a string quoted after "Pinned by" names no test, the row says so.
 
-Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type. M166 checked the nine that M163's and M164's reviews found. Each gained a row of a second type, or its group carries a line that says why it owes none (D-123). Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
+Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type. M166 checked the nine that M163's and M164's reviews found. Each gained a row of a second type, or its group carries a line that names the part left on one type. The line says where that part's second type is held, or why it has none (D-123). Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
 
 ## nested_tune_grid() estimate: live, invariant (2 types)
 
@@ -67,7 +67,7 @@ M164 added the closed-form row, which covers tune's three rules. M166 added clos
 
 ## nested_tune_bayes() estimate: live, invariant (2 types)
 
-The records split this result in two. At the initial stage, O1 and O2 are the two types. At the iteration stage only O1 and O3 apply. The proposals are tune's own Gaussian-process search, and no independent oracle for them exists (the records cite the plan gate of 2026-09-01). O3 is a serial-against-parallel identity, which test-parallel-identity.R calls a mode-independence check, not a correctness check. Under D-123 the iteration stage keeps this one correctness type.
+The records split this result in two. At the initial stage, O1 and O2 are the two types. At the iteration stage only O1 and O3 apply. O3 is a serial-against-parallel identity, which test-parallel-identity.R calls a mode-independence check, not a correctness check. The proposals are credited to O1 alone. They are tune's own Gaussian-process search, and no independent oracle for them exists, so they owe no second type (D-123).
 
 - `nested-tune-bayes-oracles/O1` live. Source: `reference_nested_bayes_loop()` in helper-orchestration.R, written from the seed contract.
   - test-nested-tune-bayes-oracles.R :: "per-fold metrics and selections match a hand-rolled Bayesian reference loop"
@@ -87,7 +87,7 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## nested_tune_race_anova() and nested_tune_race_win_loss() estimate: live, invariant (2 types)
 
-The fold record holds every candidate the race scored. Its rows for eliminated candidates come from the same `collect_metrics(all_configs = TRUE)` call in `inner_metrics_table()` as the survivors' rows. O2 checks the survivors' rows against the grid path, and O3 checks the whole table, so the record owes no oracle of its own (D-123).
+The fold record holds every candidate the race scored. O2 checks the survivors' rows against the grid path. The rows of eliminated candidates are credited to O1 and O3, both live, since O2 reaches no eliminated candidate. The candidate row "Add second oracles to one-type parts" holds their second type (D-123).
 
 - `nested-tune-race-oracles/O1` live. Source: `reference_nested_race_loop()` in helper-orchestration.R, written from the seed contract. The string its record quotes after "Pinned by" names no test: the test's name adds "(deterministic)".
   - test-nested-tune-race-oracles.R :: "per-fold metrics, selections and inner tables match a hand-rolled racing reference loop (deterministic)" (found by reading)
@@ -104,7 +104,7 @@ The fold record holds every candidate the race scored. Its rows for eliminated c
 
 ## nested_tune_sim_anneal() estimate: live, invariant (2 types)
 
-The records split this result in two. At the initial stage, O1 and O2 are the two types. At the iteration stage only O1 and O3 apply. The perturbations are finetune's own search, and no independent oracle for them exists. O3 is a serial-against-parallel identity, which test-parallel-identity.R calls a mode-independence check, not a correctness check. Under D-123 the iteration stage keeps this one correctness type.
+The records split this result in two. At the initial stage, O1 and O2 are the two types. At the iteration stage only O1 and O3 apply. O3 is a serial-against-parallel identity, which test-parallel-identity.R calls a mode-independence check, not a correctness check. The perturbations are credited to O1 alone. They are finetune's own search, and no independent oracle for them exists, so they owe no second type (D-123).
 
 - `nested-tune-sim-anneal-oracles/O1` live. Source: `reference_nested_anneal_loop()` in helper-orchestration.R, written from the seed contract. The string its record quotes after "Pinned by" names no test: the test's name adds "(deterministic)".
   - test-nested-tune-sim-anneal-oracles.R :: "per-fold metrics, selections and inner tables match a hand-rolled annealing reference loop (deterministic)" (found by reading)
@@ -237,11 +237,11 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## Event level on classification models: closed-form, live (2 types)
 
+The final fit under `event_level` is credited to `event-level/O2` alone. The level exchange that its test also asserts is yardstick's arithmetic, so M152 removed its record and it backs no part here. The candidate row "Add second oracles to one-type parts" holds the final fit's second type (D-123).
+
 - `event-level/O1` closed-form. Source: the definition of sensitivity, recomputed from a refit of each fold's selected candidate.
   - test-event-level.R :: "the sensitivity each outer fold reports is the one yardstick computes at that event level"
 - `event-level/O2` live. Source: `tune::tune_grid()` run by the test under `event_level = "second"`, seeded by the by-hand recipe in `R/nested-final-fit.R`.
-  - test-event-level.R :: "nested_final_fit() tunes under the caller's event level"
-- `event-level/O3` invariant. Source: the final fit's tuning metrics at `event_level = "first"` and at `"second"`. Candidate for candidate, they keep `roc_auc` and exchange `sens` with `spec`, on a fixture where the two differ.
   - test-event-level.R :: "nested_final_fit() tunes under the caller's event level"
 
 ## Range finalized from the data: closed-form, live (2 types)
@@ -259,11 +259,12 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 
 ## Memory size of a nested_resamples() design: live, closed-form (2 types)
 
+O2 also counts for the size slope. The slope that O1's test bounds is computed from the same measured sizes, each of which O2 checks against `analytic_size()`.
+
 - `nested-resamples-memory/O1` live. Source: `rsample::nested_cv()` recomputed at test time.
   - test-nested-resamples-memory.R :: "the size slope is far shallower than rsample::nested_cv()'s"
 - `nested-resamples-memory/O2` closed-form. Source: `analytic_size()`, a storage model of one shared data copy plus the outer and inner index vectors.
   - test-nested-resamples-memory.R :: "measured size matches the analytic prediction within 2%" (found by reading)
-- Also counted for the size slope: `nested-resamples-memory/O2` closed-form. The slope that O1's test bounds is computed from the same measured sizes, each of which O2 checks against `analytic_size()`.
 
 ## Size of a fold's dispatch payload: closed-form, invariant (2 types)
 
@@ -273,7 +274,7 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
   - test-parallel-payload.R :: "a fold's dispatch carries the data exactly once"
   - test-parallel-payload.R :: "a design whose folds share no frame is leaned too" (found by reading)
 
-## Resample weights: closed-form, live (2 types)
+## Resample weights: closed-form, live, invariant (3 types)
 
 - `resample-weights/O1` closed-form ["analytic by-hand"]. Source: tune's weighted formulas written out in `weighted_summary()` (tune 2.1.0), applied to the unweighted run's per-fold estimates.
   - test-resample-weights.R :: "nested_fit_resamples() on a weighted design reports tune's weighted mean and standard error" (found by reading)
@@ -285,9 +286,9 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
 - `resample-weights/O3` invariant. Source: two runs that differ only in the weight of a fold that a summary row leaves out. The fold failed or scored NA. The two runs give that row the same mean, standard error and count.
   - test-resample-weights.R :: "a new weight on the fold a summary row leaves out leaves that row unchanged"
 
-## collect_predictions(summarize = TRUE) average: live, closed-form (2 types)
+## collect_predictions(summarize = TRUE) average: live, closed-form, invariant (3 types)
 
-The cases that only `hand_average()` checks are candidates that differ across repeats, renormalized probabilities, and the censored median time and mean survival. They run the same `average_fold_predictions()` branches that U1's four tests run. U1 and U2 back them, and they owe no oracle of their own (D-123). Each censored row is held out twice in these fixtures, so the median and the mean of `.pred_time` agree there. The parked row "M126 review leftovers on averaging" holds that gap.
+Two parts of the average need input that U1's fixtures lack. The renormalized probabilities are credited to O1 and U2, whose tests plant a missing probability. The median of `.pred_time` is credited to O2 and to U2's three-repeat test. A row held out twice has a median equal to its mean (D-123).
 
 - `collect-predictions-summarize/U1` live. Source: `tune::collect_predictions(summarize = TRUE)` on `tune::fit_resamples()` over the same outer splits.
   - test-collect-predictions-summarize.R :: "a regression average equals tune's on the same outer splits" (found by reading)
@@ -299,10 +300,15 @@ The cases that only `hand_average()` checks are candidates that differ across re
   - test-collect-predictions-summarize.R :: "a probability average is renormalized and names its class" (found by reading)
   - test-collect-predictions-summarize.R :: "a censored average takes the median time and the mean survival" (found by reading)
   - test-collect-predictions-summarize.R :: "a missing .pred_time makes the row's median missing" (found by reading)
+  - test-collect-predictions-summarize.R :: "a censored average over three repeats takes the median time, as tune does"
+- `collect-predictions-summarize/O1` invariant. Source: each row's averaged class probabilities sum to one, on a run with one probability planted as missing.
+  - test-collect-predictions-summarize.R :: "a renormalized probability average sums to one in every row"
+- `collect-predictions-summarize/O2` live. Source: `tune::collect_predictions(summarize = TRUE)` on `tune::fit_resamples()` over a censored design with three repeats, where median and mean differ.
+  - test-collect-predictions-summarize.R :: "a censored average over three repeats takes the median time, as tune does"
 
 ## compute_metrics() rescoring: invariant, live (2 types)
 
-`compute_metrics()` runs the same scoring code, `score_fold()`, on the run's own metric set and on a new one. U1 and U2 back both inputs, and neither owes an oracle of its own (D-123).
+`compute_metrics()` runs the same scoring code, `score_fold()`, on the run's own metric set and on a new one. U1 and U2 both reach its numeric and class-probability branches. The survival branch on a new metric set is credited to U1 alone, since U2 rescores no censored run. The candidate row "Add second oracles to one-type parts" holds its second type (D-123).
 
 - `compute-metrics/U1` invariant. Source: `collect_metrics()` on the same run, which reads the `.metrics` that `tune::last_fit()` wrote.
   - test-compute-metrics.R :: "with the run's metric set, compute_metrics() is collect_metrics() on a regression run" (found by reading)

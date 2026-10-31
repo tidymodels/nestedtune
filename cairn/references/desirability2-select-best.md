@@ -14,7 +14,7 @@ Extraction: read directly 2026-10-31 from desirability2 0.2.0's installed help p
 - "If `low`, `high`, or `target` are not specified, the observed data are used to estimate their values" (same page, Details). The page's example sets `low` and `high` to the observed minimum and maximum of the column.
 - Maximization: d = 1 above `high`, 0 below `low`, and ((data - low) / (high - low))^scale between them (`inline_desirability.Rd`, Equations). `scale` defaults to 1.
 - Minimization: d = 0 above `high` and 1 below `low` (same page). Between them the page prints the fraction as "data = low" over "low - high", a typo. The body of `.comp_min` computes ((x - high) / (low - high))^scale. That is the one reading that gives 1 at `low` and 0 at `high`.
-- `d_overall()` takes the geometric mean by default (`d_overall.Rd`, Usage, `geometric = TRUE`).
+- `d_overall()` takes the geometric mean by default (`d_overall.Rd`, Usage, `geometric = TRUE`). If a term is 0, its internal `geomean()` returns 0. Otherwise it returns `exp(mean(log(x)))`, which can differ from `prod(x)^(1/k)` in the last bits. Only an exact tie at the top exposes that difference.
 - `select_best_desirability()` "returns a single row" (`show_best_desirability.Rd`, Value). The page also says that the ranking can hold "more than one model configuration that has identical overall desirability" (Details). The pages do not say which tied row comes first.
 
 ## Traces to

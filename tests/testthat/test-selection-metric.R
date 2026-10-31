@@ -1,9 +1,9 @@
 # The record's `first_metric` entry: the name of the first metric in the
-# set, as tune resolves it for the workflow. The oracle is tune's own reading
+# set, as tune resolves it for the workflow. One oracle is tune's own reading
 # of the final fit's stored tuning run, `tune::.get_tune_metric_names()`, the
 # call every fold and the final fit select on. It is compared with the entry
-# on both the results object and the final fit built from it. The grid test
-# also compares both entries with the first name of the set it passed.
+# on both the results object and the final fit built from it. The other, in
+# the grid test, is the first name of the set the test passed.
 
 skip_heavy_on_cran()
 
