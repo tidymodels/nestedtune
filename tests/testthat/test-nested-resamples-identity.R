@@ -22,6 +22,32 @@ test_that("inner splits match rsample::nested_cv() for a v-fold/v-fold scheme", 
   expect_inner_identical(lean, ref)
 })
 
+test_that("inner v-fold splits partition their outer analysis rows", {
+  d <- make_test_data()
+  d$.row_id <- seq_len(nrow(d))
+
+  set.seed(1)
+  lean <- nested_resamples(
+    d,
+    outside = rsample::vfold_cv(v = 3),
+    inside = rsample::vfold_cv(v = 4)
+  )
+
+  for (i in seq_len(nrow(lean))) {
+    outer_rows <- rsample::analysis(lean$splits[[i]])$.row_id
+    inner <- lean$inner_resamples[[i]]
+    held_out <- integer(0)
+    for (j in seq_len(nrow(inner))) {
+      fit_rows <- rsample::analysis(inner$splits[[j]])$.row_id
+      out_rows <- rsample::assessment(inner$splits[[j]])$.row_id
+      expect_true(all(fit_rows %in% outer_rows), info = paste(i, j))
+      expect_true(all(out_rows %in% outer_rows), info = paste(i, j))
+      held_out <- c(held_out, out_rows)
+    }
+    expect_identical(sort(held_out), sort(outer_rows), info = paste(i))
+  }
+})
+
 test_that("inner splits match rsample::nested_cv() for a v-fold/bootstrap scheme", {
   d <- make_test_data()
 
