@@ -210,3 +210,4 @@ spawned: diff-bug, ripple (fourth pass)
 - diff-bug #11: the `eval-time/O3` note omits that the quote names no test at `576c3d19` either — fix now.
 - diff-bug #12: unescaped inner quotes in a literal name — reject (style).
 - After these fixes: 71 typed rows, 20 file lines, 26 groups (9 of one type), 147 pointers, marks unchanged by the naming script, 0 problems; `cairn_validate` passes; ROADMAP 23,988 bytes.
+- Fixed in: first-pass fix-now findings, `606a3d44`; second-pass findings and the AC4 amendment, `42a9cf66`; third-pass findings, `6b0e0ae9`; the AC1 amendment, `5f33468e`; fourth-pass findings, `a830b3e1`.
