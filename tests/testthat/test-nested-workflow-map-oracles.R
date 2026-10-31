@@ -70,6 +70,34 @@ for (fn in MAP_FNS) {
   )
 }
 
+test_that("the grid element matches a hand-rolled reference loop", {
+  skip_if_no_wset_fixture("nested_tune_grid")
+  d <- make_reg_data()
+  res <- wset_results("nested_tune_grid")
+
+  set.seed(31)
+  wset <- wset_two(d)
+  folds <- final_nested(d)
+  ms <- reg_metrics()
+  wf <- wset$info[[1L]]$workflow[[1L]]
+  expect_identical(res$workflow[[1L]], wf)
+
+  ref <- memoised(reference_nested_loop(
+    wf,
+    folds,
+    det_grid(),
+    ms,
+    seed = 31,
+    metric_name = "rmse"
+  ))
+  grid_res <- res$result[[1L]]
+  expect_true(all(grid_res$.completed))
+  for (i in seq_len(nrow(grid_res))) {
+    expect_identical(grid_res$.selected[[i]], ref[[i]]$selected)
+    expect_identical(grid_res$.metrics[[i]], ref[[i]]$metrics)
+  }
+})
+
 test_that("a per-workflow grid option overrides the grid in `...` for that workflow alone", {
   skip_if_no_wset_fixture()
   d <- make_reg_data()
