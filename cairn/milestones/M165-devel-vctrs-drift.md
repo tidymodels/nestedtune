@@ -84,9 +84,11 @@ Remove the two places where `devel-vctrs.yaml` can drift without a signal, while
 - diff-bug #5: an orphan short line in the header paragraph — fix now, fixed 91003c46: rewrapped.
 - blame-history #1: marker deletion is not guarded — reject (planned change), as diff-bug #1.
 - blame-history #2: a scheduled run and a full dispatch can now run side by side, costing CI minutes — reject (planned change): D-122 Consequences records it, and subset groups stay apart from whole-suite groups.
-- blame-history #3: the concurrency comment's "same tests" claim — fix now, as diff-bug #2.
-- blame-history #4: `cairn/PROFILE.md:65` — fix now, as diff-bug #4.
+- blame-history #3: the concurrency comment's "same tests" claim — fix now, fixed 91003c46, as diff-bug #2.
+- blame-history #4: `cairn/PROFILE.md:65` — fix now, fixed 91003c46, as diff-bug #4.
 - prior-review #1, #2, #4, #5, #6: earlier findings checked and not reintroduced (M153 concurrency defect, PROFILE cap at 119, the drift row, M102 and M080 claims, M057 comment accuracy) — noted, no action.
-- prior-review #3: `cairn/PROFILE.md:65` — fix now, as diff-bug #4; the 2m38s timeout comment is a dated measurement and stays.
+- prior-review #3: `cairn/PROFILE.md:65` — fix now, fixed 91003c46, as diff-bug #4; the 2m38s timeout comment is a dated measurement and stays.
 - ripple #1: the ROADMAP candidate row "Guard the devel-vctrs filter from drift" still describes the defect as open — reject (planned change): it carries `started M165` and post-merge hygiene graduates it.
-- ripple #2: `cairn/PROFILE.md:65` — fix now, as diff-bug #4.
+- ripple #2: `cairn/PROFILE.md:65` — fix now, fixed 91003c46, as diff-bug #4.
+- gate: `cairn_validate.py` all checks passed (18 advisories, reference staleness). No principle changed, so `cairn_impact` skipped. `devtools::check()` 0 errors, 0 warnings, 0 notes (10m37s, started at 2985eb24; 91003c46 changes comments and records only). `devtools::document()` changed only `Config/roxygen2/version` to the local 8.1.1, reverted as tool drift, as at M153. `pkgdown::check_pkgdown()` no problems. The six gating prose sweeps exit 0. No changelog entry: no user-visible change. No new top-level file. YAML parses with `yaml::read_yaml()` after the fixes.
+- snapshot: no changed snapshot file in `git diff --name-only main...HEAD`.
