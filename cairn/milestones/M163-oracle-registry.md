@@ -1,6 +1,6 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -33,10 +33,10 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Coverage
 
-- AC1 → T1
+- AC1 → T1, T5
 - AC2 → T2
 - AC3 → T1, T2, T4
-- AC4 → T3
+- AC4 → T3, T5
 - AC5 → T4
 
 ## Tasks
@@ -45,6 +45,7 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - [x] T2: Read the comments of the 20 untyped files at `576c3d19` and at the head. Add rows in AC1's form for the oracles that they describe, and one line for each file as AC2 states.
 - [x] T3: Group the rows by the numeric result that they test, and count the doctrine types in each group. For each group under two types, cite the D-entry or archived milestone that accepts the shortfall, or search the candidates, the archive and DECISIONS.md for overlap and then add a candidate row.
 - [x] T4: Rewrite the oracle-records bullet at `cairn/DESIGN.md:130`. List each pair of a file and a name from the registry and compare it with the `test_that()` calls at the head. Run `cairn_validate`.
+- [x] T5: Fix review return 1: the AC1 rows for `eval-time/O2`, `eval-time/O3` and `time-series-pairs-other/O5`/`O6`; split the reader-tables group (AC4); and the other fix-now findings the Review section lists. Rename the candidate row to the new count.
 
 ## Work log
 
@@ -66,6 +67,9 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: all tasks done; status set to review.
 - 2026-10-31: review checkpoint (in progress): AC1-AC5 evidence recorded and ticked; `cairn_validate` and the six gating prose sweeps clean; `devtools::check()` and the two reviewers still running.
 - 2026-10-31: review return 1: diff-bug #4 and #6 show AC1 failing (a row that does not say its named test never existed; two rows that say the record names no test when it names one), and #1 shows AC4 failing (one group merging four results). Fix those and the other fix-now findings #2, #3, #5, #7, #8 and #9 listed in the Review section, then rename the candidate row to the new count of one-type groups.
+- 2026-10-31: T5 added for review return 1 (minor amendment; Coverage AC1 and AC4 now also map to T5).
+- 2026-10-31: T5 done. `eval-time/O2` says its first named test matches no test even at `576c3d19` and gives the test found in its place, and `eval-time/O3` notes its name's wording. `time-series-pairs-other/O5`/`O6` name the test the record's lead-in names. The reader-tables group became four groups (stacked readers, wide tables, fold labels, `augment()` joins). Found-by-reading tests were added to four prose rows, and the M92 set test to the workflow-map readers row. `nested-fit-resamples-oracles/O2` is now live, which supersedes the T1 choice for that row. The Bayesian and annealing groups note the records' stage split, and the mode-independence rows note the parallel-identity file's disclaimer. The D-079 citation now covers outer designs only, and the grid-results file line lists O4. The candidate row is now "Add second oracle types to ten groups". The registry checks give 71 typed rows, 20 file lines, 26 groups (10 of one type), 146 pointers, 0 problems. ROADMAP is 58 lines and 23,899 bytes.
+- 2026-10-31: status set to review.
 
 ## Decisions
 
