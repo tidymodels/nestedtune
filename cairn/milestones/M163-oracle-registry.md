@@ -189,3 +189,11 @@ Fourth pass, after the AC1 amendment. Evidence at `5f33468e`, 2026-10-31, same o
 - AC2, AC3, AC4 (re-checked at this head): 20 file lines, all ids known; 147 pointers matched; 26 groups with correct counts, 10 of one type naming the candidate row, and the one-cut sentence present. 0 problems each.
 - AC5 (re-checked): `cairn/DESIGN.md:130-139` names `cairn/ORACLES.md` as the record of oracle ids and types and says "A milestone that adds or removes an oracle updates `cairn/ORACLES.md`". `grep -c 'no committed record holds'` gives 0.
 - Gate at this head: `cairn_validate` passes. The diff since the `devtools::check()` run touches only `cairn/`.
+
+spawned: diff-bug, ripple (fourth pass)
+
+- ripple #1: `test-parallel-payload.R:10-11` places the records beside the test — follow-up, the parked row "Point test oracle headers at the registry" (written at hygiene), as at the third pass.
+- ripple #2: 21 headers say "oracles are recorded in the test file that asserts them" — follow-up, same row.
+- ripple #3: the source row "Keep an oracle registry outside tests" still states the gap — reject (planned: it graduates at hygiene).
+- ripple #4: `DESIGN.md:137` "never a restated value" against a registry that restates test names — reject (false: the sentence is about an oracle's expected values, which the registry does not restate; it holds pointers to the asserting tests).
+- ripple #5: two files cite DESIGN "Oracle records" — reject (false: the reviewer finds the citation resolves).
