@@ -109,3 +109,13 @@ Second pass, after review return 1. Evidence at `606a3d44`, 2026-10-31, with the
 - AC2 (re-checked): 20 files, one line each, no extra line, every id known. 0 problems.
 - AC3 (re-checked): 146 pairs of a file and a name, each matched to a `test_that()` call at the head. 0 missing.
 - AC4 (re-verified): 26 groups, each stating its types and count, each count equal to its rows' types, every row in a group. The four reader tables are now four groups (stacked readers, wide tables, fold labels, `augment()` joins). 10 groups hold one type, and each names "Add second oracle types to ten groups", which `cairn/ROADMAP.md` holds. 0 problems.
+- Gate: `devtools::check()` (started at `d9b097a4`; the branch since changed only `cairn/`, which `.Rbuildignore` leaves out) gave 0 errors, 0 warnings, 0 notes in 11m 10s. `devtools::document()` changed only `Config/roxygen2/version` (8.1.0 to the local 8.1.1), reverted, as at M161. No README, pkgdown, NEWS or new top-level file change is owed: the diff is under `cairn/` alone. `cairn_validate` passes at `606a3d44`.
+
+spawned: diff-bug, ripple (second pass)
+
+- ripple #1: the source row "Keep an oracle registry outside tests" says no record holds the types — reject (planned: it graduates at hygiene).
+- ripple #2: test headers cite "oracles are recorded in the test file that asserts them" — reject (false: the bullet still places each oracle's source and pinning test there).
+- ripple #3: `test-parallel-payload.R:10-11` says the records live beside the test — reject (false, same reason).
+- ripple #4: `test-nested-resamples-memory.R:2-3` says the records sit beside the test — reject (false, same reason).
+- ripple #5: `benchmarks/sweep-test-comments.R:24` names the `-- type "` header label — reject (false: it names a pattern the sweep forbids in test comments, which stays true).
+- ripple #6: two files cite DESIGN "Oracle records" — reject (false: the reviewer finds the citation resolves).
