@@ -1,6 +1,6 @@
 # M164: Give six one-type results a second oracle
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@ Back each of the six `cairn/ORACLES.md` groups whose result is its own and that 
 - [x] T5: Splits, invariant. In `test-nested-resamples-identity.R`, map each inner split back through a row-id column and check containment and the exactly-once cover. Plant a dropped row and see it fail.
 - [x] T6: Outer-fit predictions, invariant. In `test-nested-tune-grid-results.R`, run with an `extract` that returns the fitted workflow, built over `baseenv()` so the fixture cache keys it, and compare each fold's `.predictions` with `predict()` on the outer assessment rows. Plant a shifted row and see it fail.
 - [x] T7: Registry and decision. Add the new rows to `cairn/ORACLES.md` under its quoting rule, update the six headings, write the three table-group lines with the group each rides on, and append the D-entry. Re-point `helper-time-budget.R` rows for the new blocks in one pass.
-- [ ] T8: Run `devtools::test()` and `air format --check .` clean.
+- [x] T8: Run `devtools::test()` and `air format --check .` clean.
 
 ## Work log
 
@@ -69,3 +69,5 @@ Back each of the six `cairn/ORACLES.md` groups whose result is its own and that 
 - 2026-10-31: T5 done. New test "inner v-fold splits partition their outer analysis rows" (test-nested-resamples-identity.R) maps a `.row_id` column through each inner split of a 3-fold outer, 4-fold inner `nested_resamples()` design. Planted defects: a row dropped from an inner `in_id` passed (vfold carries an explicit `out_id`, so the assessment cover is unchanged and AC4 does not check analysis completeness); a row dropped from an inner `out_id` failed the cover. A first run of that plant errored on `info = i` (a number), fixed to `paste(i)`.
 - 2026-10-31: T6 done. New test "each fold's saved predictions are its extracted outer-fit workflow's predictions" (test-nested-tune-grid-results.R) runs `extracted_results()` with an `extract` returning the workflow, built over `baseenv()`, and compares each fold's `.pred` with `predict()` on the outer assessment rows. Planted defect (fold 1's predictions reversed) failed. `air format` applied.
 - 2026-10-31: T7 done. `cairn/ORACLES.md`: six rows (grid-oracles/O7 closed-form, final-fit-race/O6 and final-fit-sim-anneal/O6 invariant, workflow-map-oracles/O2 live, resamples-identity/O1 and tune-grid-results/O1 invariant), six headings at two types, a ride-on line in each table group, a header rule for labels on added oracles, and the finer-results pointer re-aimed at the new row. D-121 appended. `helper-time-budget.R` needed no rows: it ledgers daemon waits, and no new test starts daemons.
+- 2026-10-31: T8 done. Full `devtools::test()` run alone with `SummaryReporter$new(max_reports = Inf)`: no failed, skipped or warnings section; the six changed files all ran. `air format --check .` clean.
+- 2026-10-31: claim audit: not owed — internal tier
