@@ -1,6 +1,6 @@
 # M163: Keep an oracle registry outside tests
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -25,10 +25,10 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 
 ## Acceptance criteria
 
-- [x] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
-- [x] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
+- [ ] AC1: `cairn/ORACLES.md` holds one row for each typed oracle record that `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` lists (71 records in 26 files on 2026-10-31). Each row gives a registry id that no other row uses, and the oracle's type in the doctrine's five-type vocabulary. Where the record's own type word differs, the row also gives that word. Each row gives the oracle's source. Each row names each test that the record names, by file and by its `test_that()` name at the milestone's head. Where that test no longer exists, or the record names no test, the row says so. The untyped `# O5 (Bayesian strand)` record in `test-nested-final-fit-oracles.R` is part of the O5 row of that file.
+- [ ] AC2: Some files hold a line that `git grep -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists but no line that matches AC1's pattern (20 files on 2026-10-31). For each such file, the registry holds one line that names the file. The line gives the registry ids of the rows drawn from that file, or it says that the file records no oracle and gives the reason that its comments state.
 - [x] AC3: Each pair of a file and a `test_that()` name in the registry exists at the milestone's head. The file is under `tests/testthat/`, and it holds a `test_that()` call whose first argument is that name.
-- [x] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
+- [ ] AC4: The registry groups its rows by the numeric result that they test. Each group states how many distinct doctrine types its rows hold. A group with fewer than two types names a `cairn/ROADMAP.md` candidate row for the missing oracle. Otherwise it names the record (a D-entry or an archived milestone) that accepts the shortfall.
 - [x] AC5: The oracle-records bullet in the Conventions section of `cairn/DESIGN.md` names `cairn/ORACLES.md` as the record of oracle ids and types. The bullet says that a milestone that adds or removes an oracle updates the registry. The bullet no longer says that no committed record holds the types.
 
 ## Coverage
@@ -70,6 +70,8 @@ Record each oracle of the test suite in `cairn/ORACLES.md`, so that a committed 
 - 2026-10-31: T5 added for review return 1 (minor amendment; Coverage AC1 and AC4 now also map to T5).
 - 2026-10-31: T5 done. `eval-time/O2` says its first named test matches no test even at `576c3d19` and gives the test found in its place, and `eval-time/O3` notes its name's wording. `time-series-pairs-other/O5`/`O6` name the test the record's lead-in names. The reader-tables group became four groups (stacked readers, wide tables, fold labels, `augment()` joins). Found-by-reading tests were added to four prose rows, and the M92 set test to the workflow-map readers row. `nested-fit-resamples-oracles/O2` is now live, which supersedes the T1 choice for that row. The Bayesian and annealing groups note the records' stage split, and the mode-independence rows note the parallel-identity file's disclaimer. The D-079 citation now covers outer designs only, and the grid-results file line lists O4. The candidate row is now "Add second oracle types to ten groups". The registry checks give 71 typed rows, 20 file lines, 26 groups (10 of one type), 146 pointers, 0 problems. ROADMAP is 58 lines and 23,899 bytes.
 - 2026-10-31: status set to review.
+- 2026-10-31: review return 2: second-pass diff-bug #6 and #7 show AC1 failing (two rows list tests their records do not name, without saying so), and #12 shows AC2 failing (the helper-orchestration line gives a reason its comments do not state). Fix those and fix-now findings #8, #13, #14, #15 and #16 from the Review section.
+- 2026-10-31: amendment routed: AC4 — second-pass diff-bug #1-#5, #9 and #10 each split a group into finer results on one type; AC4's "groups its rows by the numeric result that they test" names no procedure that decides a result's grain, so each pass can find a finer split (widening test). Narrow AC4 to what the file can show, and carry the finer splits in the candidate row.
 
 ## Decisions
 
@@ -119,3 +121,20 @@ spawned: diff-bug, ripple (second pass)
 - ripple #4: `test-nested-resamples-memory.R:2-3` says the records sit beside the test — reject (false, same reason).
 - ripple #5: `benchmarks/sweep-test-comments.R:24` names the `-- type "` header label — reject (false: it names a pattern the sweep forbids in test comments, which stays true).
 - ripple #6: two files cite DESIGN "Oracle records" — reject (false: the reviewer finds the citation resolves).
+- diff-bug #1: `compute_metrics()` U1 covers the run's own metric set and U2 a new one, each on one type — amendment return (AC4 names no procedure that decides how fine a "numeric result" is, so this split widens an author-recall enumeration; the follow-up goes to the candidate row).
+- diff-bug #2: event level and eval-time groups merge the outer-fold metric with the final fit's tuning, each on one type — amendment return (same reason).
+- diff-bug #3: the weights group's failed-fold and NA-fold cases rest on O1 alone, since O2 is every-fold only — amendment return (same reason).
+- diff-bug #4: the race fold record sits in the race estimate group, while grid's fold record has its own — amendment return (same reason).
+- diff-bug #5: the Bayesian and annealing iteration stage rests on live plus a mode-independence identity, and the plan gate the records cite is no D-entry or archived milestone — amendment return (same reason).
+- diff-bug #6: `nested-workflow-map-oracles/O1`'s record names no test ("One block per `fn`"), and the row does not say so, which fails AC1 — fix now (review return 2).
+- diff-bug #7: the `O5` Bayesian strand's record names no test, and the row lists one without saying so, which fails AC1 — fix now (review return 2).
+- diff-bug #8: "analytic by-hand" maps to live for one row and closed-form for another, with no stated rule — fix now (state the rule: an independent run of the pipeline is live, written-out formulas are closed-form).
+- diff-bug #9: the memory group merges a slope comparison with an absolute size — amendment return (same reason as #1).
+- diff-bug #10: the `hand_average()`-only cases rest on one type — amendment return (same reason as #1).
+- diff-bug #11: `test-nested-results-agreement.R` gives oracle provenance, yet the registry says it records no oracle — reject (planned: AC2 accepts the reason the file's comments give, and they say no statistic there needs an oracle).
+- diff-bug #12: the `helper-orchestration.R` line gives a reason of the registry's own, not its comments', which fails AC2 — fix now (review return 2).
+- diff-bug #13: `nested-resamples-identity/U1` omits "an already-evaluated outer rset is accepted and matches" — fix now.
+- diff-bug #14: the Bayesian desirability rule's prose oracle in a typed file goes unmentioned — fix now (note it beside the racing one).
+- diff-bug #15: the candidate row's title asks for second types for ten groups, then says four can owe none; fold labels are not tested numbers — fix now (retitle and reword).
+- diff-bug #16: the DESIGN bullet and the registry header say each test file's header names the pinning test, but many records name none and some sit mid-file — fix now.
+- diff-bug #17: three file lines list ids of rows from other files — reject (style: each line says why the id is there, which AC2's form allows).
