@@ -1,17 +1,17 @@
 # Oracle registry
 
-This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review.
+This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. The file leaves out oracles whose comments the two greps do not read, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review. M164 added six rows for tests written after `576c3d19`, each naming its test in quotes.
 
 M163 built the file on 2026-10-31 from the oracle records in `tests/testthat/` at `576c3d19`. That commit is the last one before M155 removed oracle ids and types from test comments. Two greps list the records that M163 read:
 
 - Typed records: `git grep -E '^# +O[0-9]+[a-z]?( +--)? +type' 576c3d19 -- tests/testthat` (71 records in 26 files).
 - Prose records: the files that `git grep -l -i -E '^# .*oracle' 576c3d19 -- tests/testthat` lists and that hold no typed record (20 files, listed at the end).
 
-An id is the test file's name without `test-` and `.R`, then the record's own label (`O1`, `O3b`). A prose record takes `U1`, `U2` in file order. A type is one of the doctrine's five: frozen, live, invariant, closed-form, simulation-coverage. Where the record used another word, the row gives that word in brackets. "Analytic" maps to closed-form. "Analytic by-hand" maps by what the oracle does: an independent run of the pipeline by hand is live, and formulas written out in code are closed-form. A reference that runs the package's own function by hand and compares is invariant, whatever word the record used.
+An id is the test file's name without `test-` and `.R`, then the record's own label (`O1`, `O3b`). A prose record takes `U1`, `U2` in file order. An oracle that a later milestone adds takes the lowest `O` number that its file has not used in this registry. A type is one of the doctrine's five: frozen, live, invariant, closed-form, simulation-coverage. Where the record used another word, the row gives that word in brackets. "Analytic" maps to closed-form. "Analytic by-hand" maps by what the oracle does: an independent run of the pipeline by hand is live, and formulas written out in code are closed-form. A reference that runs the package's own function by hand and compares is invariant, whatever word the record used.
 
 Each test line gives a file under `tests/testthat/` and the first argument of a `test_that()` call in that file at the milestone's head. A literal name is in double quotes. For a name built in code, the line gives `code` and the one-line deparsed call. M163 mapped the names from `576c3d19` through `benchmarks/test-renames-576c3d19.csv`. Where a later commit merged tests, as six workflow-map tests became one `paste0()` loop, M163 read the file at the head. A test line ending "(found by reading)" is a test that the record does not name, found in the file's code. If a record's text quotes a test's name, the record names that test. In the quote, `...` or text in angle brackets matches any text. The full rule is M163's AC1, in the git history of `cairn/milestones/M163-oracle-registry.md`. A prose record names no test. Where a string quoted after "Pinned by" names no test, the row says so.
 
-Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type: the candidate row "Settle oracle types for nine groups" names the finer results that M163's review found. Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
+Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type: the candidate row "Give finer results a second oracle" names the finer results that M163's review found. Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives that reason for the Bayesian, racing and annealing tuners: the outer design never reaches tuner code. For the other functions, and for inner designs, pairs and the splits group, the grouping is this file's choice. Each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
 
 ## nested_tune_grid() estimate: live, invariant (2 types)
 
@@ -42,14 +42,16 @@ Each group collects rows that test one result, as this file cuts the results. Th
 - `nested-tune-grid-oracles/O4` invariant. Source: a data-frame grid comes back as itself, since nothing expands.
   - test-nested-tune-grid-results.R :: "each fold records the candidates its inner tuning actually scored"
 
-## Selection rules and the selection metric: live (1 type)
+## Selection rules and the selection metric: live, closed-form (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups". D-079 counts two oracles for the selection rules, grid and racing, but both are tune's own selector, one type. The racing one is a test in test-nested-tune-race-oracles.R: "each selection rule picks what tune's selector picks on the fold's race". No oracle record at `576c3d19` names it, so it has no row here. The same holds for the Bayesian path's desirability test in test-nested-tune-bayes-oracles.R, "the desirability rule picks what desirability2 picks on the fold's Bayesian run". Its comment names desirability2 as the reference. That file also holds typed records, so neither grep reads the comment as a prose record. It is live, the type this group already holds.
+M164 added the closed-form row, which covers tune's three rules. The desirability rule and the recorded selection metric stay on one type, in the candidate row "Give finer results a second oracle". D-079 counts two oracles for the selection rules, grid and racing, but both are tune's own selector, one type. The racing one is a test in test-nested-tune-race-oracles.R: "each selection rule picks what tune's selector picks on the fold's race". No oracle record at `576c3d19` names it, so it has no row here. The same holds for the Bayesian path's desirability test in test-nested-tune-bayes-oracles.R, "the desirability rule picks what desirability2 picks on the fold's Bayesian run". Its comment names desirability2 as the reference. That file also holds typed records, so neither grep reads the comment as a prose record. It is live, the type this group already holds.
 
 - `nested-tune-grid-oracles/O5` live. Source: tune's selectors called by name on each fold's hand-run tuning result (`reference_select()`).
   - test-nested-tune-grid-oracles.R :: "each selection rule picks what tune's selector picks on the fold's inner run" (found by reading)
 - `nested-tune-grid-oracles/O6` live. Source: `desirability2::select_best_desirability()` called by name on each fold's hand-run tuning result.
   - test-nested-tune-grid-oracles.R :: "the desirability rule picks what desirability2 picks on the fold's inner run" (found by reading)
+- `nested-tune-grid-oracles/O7` closed-form. Source: `select_best()`, `select_by_one_std_err()` and `select_by_pct_loss()` as tune 2.1.0's help page defines them, written out on each fold's `.inner_metrics` (`references/tune-select-best.md`).
+  - test-nested-tune-grid-oracles.R :: "each selection rule picks the candidate its definition names in the fold's inner metrics"
 - `nested-final-fit-results/U1` live. Source: tune's selector on the final fit's `$tuning`.
   - test-nested-final-fit-results.R :: "the final fit selects by the recorded rule, and records it" (found by reading)
 - `nested-final-fit-results/U2` live. Source: `desirability2::select_best_desirability()` on the run `extract_tune_results()` returns.
@@ -152,28 +154,28 @@ The records split this result in two. At the initial stage, O1 and O2 are the tw
   - test-time-series-bayes.R :: code sprintf("the Bayesian final fit on a %s result matches its reference", design)
 - Also counted: `nested-final-fit-oracles/O5` live (its Bayesian strand).
 
-## nested_final_fit() on racing results: live (1 type)
+## nested_final_fit() on racing results: live, invariant (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
-
+- `nested-final-fit-race/O6` invariant. Source: the recorded rule's pick from the final fit's own race (`extract_tune_results()`), finalized and fit by hand on the same data. The fixture is the deterministic one.
+  - test-nested-final-fit-race.R :: "the racing final fit is the workflow finalized on its own race's pick"
 - `nested-final-fit-race/O5` live. Source: `reference_race_final_fit()` in helper-orchestration.R, written from the documented contract.
   - test-nested-final-fit-race.R :: "the racing final fit matches a hand-rolled reference pipeline"
 - `time-series-race/O2` live. Source: `reference_race_final_fit()` handed the fixture's literal inner `rolling_origin()` call.
   - test-time-series-race.R :: code sprintf("the %s final fit on a rolling-origin result matches its reference", fn)
 
-## nested_final_fit() on annealing results: live (1 type)
+## nested_final_fit() on annealing results: live, invariant (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
-
+- `nested-final-fit-sim-anneal/O6` invariant. Source: the recorded rule's pick from the final fit's own annealing run (`extract_tune_results()`), finalized and fit by hand on the same data. The fixture is the deterministic one.
+  - test-nested-final-fit-sim-anneal.R :: "the annealing final fit is the workflow finalized on its own run's pick"
 - `nested-final-fit-sim-anneal/O5` live. Source: `reference_anneal_final_fit()` in helper-orchestration.R, written from the documented contract.
   - test-nested-final-fit-sim-anneal.R :: "the annealing final fit matches a hand-rolled reference pipeline"
 - `time-series-anneal/O2` live. Source: `reference_anneal_final_fit()` handed the fixture's literal inner `rolling_origin()` call.
   - test-time-series-anneal.R :: "the annealing final fit on a rolling-origin result matches its reference"
 
-## nested_workflow_map(): invariant (1 type)
+## nested_workflow_map(): invariant, live (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups". The record says that the map adds nothing statistical, but no D-entry or archived milestone accepts one type.
-
+- `nested-workflow-map-oracles/O2` live. Source: `reference_nested_loop()` in helper-orchestration.R on the grid workflow of `wset_two()`, under the map's seed.
+  - test-nested-workflow-map-oracles.R :: "the grid element matches a hand-rolled reference loop"
 - `nested-workflow-map-oracles/O1` invariant ["live"]. Source: the orchestrator each workflow routes to, called by hand with the same arguments after `set.seed()` of the same value.
   - test-nested-workflow-map-oracles.R :: code paste0("each element is identical to the hand call (fn = ", fn, ")") (found by reading)
 - `time-series-designs/O7` invariant ["live"]. Source: `hand_call()` in helper-orchestration.R under the same seed.
@@ -183,9 +185,10 @@ Short of two types. Candidate row "Settle oracle types for nine groups". The rec
 - `time-series-pairs-other/O3` invariant ["live"]. Source: `hand_call()` on the sliding-window / sliding-window pair.
   - test-time-series-pairs-other.R :: code sprintf("a workflow set on the %s pair matches the hand calls", pair)
 
-## Splits that nested_resamples() builds: live (1 type)
+## Splits that nested_resamples() builds: live, invariant (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
+- `nested-resamples-identity/O1` invariant. Source: each inner split's rows, mapped back through a row-id column to their outer analysis set. The design is a 3-fold outer and 4-fold inner one.
+  - test-nested-resamples-identity.R :: "inner v-fold splits partition their outer analysis rows"
 
 - `nested-resamples-identity/U1` live. Source: `rsample::nested_cv()` recomputed at test time, matched row for row under one seed.
   - test-nested-resamples-identity.R :: "inner splits match rsample::nested_cv() for a v-fold/v-fold scheme" (found by reading)
@@ -205,9 +208,10 @@ Short of two types. Candidate row "Settle oracle types for nine groups".
 - `time-series-pairs-window/O1` live. Source: `rsample::nested_cv()` on the pair's own arguments (`ts_pair_reference()`).
   - test-time-series-pairs-window.R :: code sprintf("%s splits match rsample::nested_cv()", pair)
 
-## Each fold's outer-fit predictions and extracts: live (1 type)
+## Each fold's outer-fit predictions and extracts: live, invariant (2 types)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
+- `nested-tune-grid-results/O1` invariant. Source: `predict()` of each fold's extracted outer-fit workflow on that fold's outer assessment rows.
+  - test-nested-tune-grid-results.R :: "each fold's saved predictions are its extracted outer-fit workflow's predictions"
 
 - `nested-tune-grid-results/U1` live. Source: `tune::last_fit()` called by hand on each fold's outer split under its recorded `.outer_fit_seed`.
   - test-nested-tune-grid-results.R :: "save_pred = TRUE keeps each fold's outer-fit predictions, identical to last_fit()'s" (found by reading)
@@ -291,7 +295,7 @@ Short of two types. Candidate row "Settle oracle types for nine groups".
   - test-compute-metrics.R :: "a numeric metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
   - test-compute-metrics.R :: "a class-probability metric set the run did not use is yardstick on each fold's rows, NA fold left out of the summary" (found by reading)
 
-The four groups below hold tables that restate what a run stored: numbers that the groups above test, and fold labels read from the design. Three of them are short of two types, and each of those is in the candidate row "Settle oracle types for nine groups". That row leaves open whether a restated table owes a second type of its own.
+The four groups below hold tables that restate what a run stored: numbers that the groups above test, and fold labels read from the design. Three of them rest on one type. Under D-121 a table that restates numbers another group checks, or holds no number, owes no second type of its own. Each of the three names the group it rides on.
 
 ## Stacked reader tables: live, invariant (2 types)
 
@@ -315,7 +319,7 @@ The four groups below hold tables that restate what a run stored: numbers that t
 
 ## Wide metric tables: live (1 type)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
+Rides on "nested_tune_grid() estimate", whose oracles check the per-fold outer metrics that the wide type pivots (D-121).
 
 - `collect-metrics-wide/U1` live. Source: a second pivot written with `stats::reshape()` (`wide_reference()`).
   - test-collect-metrics-wide.R :: "the wide type pivots a classification run's metrics" (found by reading)
@@ -327,7 +331,7 @@ Short of two types. Candidate row "Settle oracle types for nine groups".
 
 ## Fold labels: invariant (1 type)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
+Holds no number: the labels are the design's `id` and `id2` values (D-121).
 
 - `fold-labels/U1` invariant. Source: the labels read row by row from the rsample design the run was given, which must agree with the labels on the result.
   - test-fold-labels.R :: "a repeated design's per-fold tables carry id and id2 from the design, long and wide" (found by reading)
@@ -339,7 +343,7 @@ Short of two types. Candidate row "Settle oracle types for nine groups".
 
 ## Rows that augment() joins: invariant (1 type)
 
-Short of two types. Candidate row "Settle oracle types for nine groups".
+Rides on "Each fold's outer-fit predictions and extracts" and "collect_predictions(summarize = TRUE) average", whose oracles check the predictions that `augment()` joins to the data (D-121).
 
 - `augment/U1` invariant. Source: the expected table built from the data and from `collect_predictions()` by `.row`.
   - test-augment.R :: "on a v-fold design from nested_resamples(), augment() joins each row's held-out prediction" (found by reading)
