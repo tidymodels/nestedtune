@@ -22,9 +22,10 @@
 #   means agreed to the last bit on every fold of the fixture under two seeds
 #   (measured on finetune 1.3.0). Pinned by "a candidate raced to the end
 #   carries the grid path's mean". A candidate the race eliminated was scored
-#   on fewer resamples. On the deterministic fixture, whose engine draws
-#   nothing, the grid orchestrator over an inner design cut to those resamples
-#   fits the same models, so the candidate's row must equal the grid's. Pinned
+#   on fewer resamples, which the reference race above names. On the
+#   deterministic fixture, whose engine draws nothing, the grid orchestrator
+#   over an inner design cut to those resamples fits the same models, so the
+#   candidate's row must equal the grid's. Pinned
 #   by "an eliminated candidate carries the grid path's mean over the
 #   resamples the race scored it on".
 #
@@ -273,18 +274,22 @@ test_that("an eliminated candidate carries the grid path's mean over the resampl
   for (i in seq_len(nrow(res))) {
     inner <- folds$inner_resamples[[i]]
     tbl <- res$.inner_metrics[[i]]
-    out <- tbl[tbl$n < nrow(inner), ]
+    # Which candidates the race eliminated, and on which resamples it scored
+    # them, read from the reference race rather than from the record.
     scored <- tune::collect_metrics(
       ref[[i]]$tuned,
       summarize = FALSE,
       all_configs = TRUE
     )
-    for (cfg in unique(out$.config)) {
+    ids <- split(scored$id, scored$.config)
+    out <- names(ids)[lengths(lapply(ids, unique)) < nrow(inner)]
+    for (cfg in out) {
       eliminated <- eliminated + 1L
-      rows <- out[out$.config == cfg, ]
+      rows <- tbl[tbl$.config == cfg, ]
+      expect_setequal(rows$.metric, unique(scored$.metric))
       # The engine draws nothing, so the grid path over the inner resamples
       # the race scored this candidate on fits what the race fitted.
-      keep <- inner$id %in% scored$id[scored$.config == cfg]
+      keep <- inner$id %in% ids[[cfg]]
       cut <- folds
       cut$inner_resamples[[i]] <- rsample::manual_rset(
         inner$splits[keep],
@@ -294,7 +299,9 @@ test_that("an eliminated candidate carries the grid path's mean over the resampl
       by_grid <- nested_tune_grid(
         wf,
         cut,
-        grid = data.frame(num_comp = rows$num_comp[[1L]]),
+        grid = data.frame(
+          num_comp = scored$num_comp[scored$.config == cfg][[1L]]
+        ),
         metrics = ms
       )$.inner_metrics[[i]]
       for (r in seq_len(nrow(rows))) {
