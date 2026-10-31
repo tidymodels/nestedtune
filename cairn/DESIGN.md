@@ -128,12 +128,13 @@ naming convention.
   For a resampling package this is load-bearing: a subtly wrong outer-loop
   estimate is self-consistent and will pass its own unit tests.
 - **Oracle records: central `cairn/ORACLES.md`, with provenance headers in the
-  asserting test file.** `cairn/ORACLES.md` records each oracle's id, type,
-  source and asserting test, grouped by the numeric result it tests, and is the
-  record a ≥2-types audit reads. The comments of the `tests/testthat/test-*.R`
-  file that asserts an oracle state its source, and for most oracles which test
-  pins it, but no id or type, since the test-comment rule forbids them there. The asserting test is
-  the single source of truth, never a restated value. A milestone that adds or
+  asserting test file.** `cairn/ORACLES.md` records the id, type, source and
+  asserting tests of each oracle that the test comments at `576c3d19` recorded,
+  in named groups, and is the record a ≥2-types audit reads. Its header names
+  the oracles it leaves out. The comments of the `tests/testthat/test-*.R` file
+  that asserts an oracle state its source, and for most oracles which test pins
+  it, but no id or type, since the test-comment rule forbids them there. The
+  asserting test is the single source of truth, never a restated value. A milestone that adds or
   removes an oracle updates `cairn/ORACLES.md`. _(added 2026-07-25, M01;
   corrected M155, M163.)_
 - **`air` is the formatter, and a committed tree is clean under it.** `air.toml`

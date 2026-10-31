@@ -1,6 +1,6 @@
 # Oracle registry
 
-This file records each oracle that the test suite asserts, by id, type, source and asserting test. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review.
+This file records each oracle that the test comments at `576c3d19` recorded, by id, type, source and asserting test. The two greps below list those records. It leaves out oracles that no such comment records, such as the two selection tests that the selection group names. With it, a reviewer can audit the rule that each numeric result has at least two independent oracle types (DESIGN.md Conventions, GP2). Test comments hold each oracle's source, and for most oracles the test that pins it, but never its id or type (the test-comment rule). A milestone that adds or removes an oracle updates this file at its review.
 
 M163 built the file on 2026-10-31 from the oracle records in `tests/testthat/` at `576c3d19`. That commit is the last one before M155 removed oracle ids and types from test comments. Two greps list the records that M163 read:
 
@@ -11,7 +11,7 @@ An id is the test file's name without `test-` and `.R`, then the record's own la
 
 Each test line gives a file under `tests/testthat/` and the first argument of a `test_that()` call in that file at the milestone's head. A literal name is in double quotes. For a name built in code, the line gives `code` and the one-line deparsed call. M163 mapped the names from `576c3d19` through `benchmarks/test-renames-576c3d19.csv`. "Found by reading" marks tests that the record does not name, found in the file's code.
 
-Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type: the candidate row "Settle oracle types for ten groups" names the finer results that M163's review found. Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives the reason for outer designs: the outer design never reaches tuner code. For inner designs and pairs, the grouping is this file's choice, and each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
+Each group collects rows that test one result, as this file cuts the results. The groups are one cut, and a finer cut can find more results backed by one type: the candidate row "Settle oracle types for ten groups" names the finer results that M163's review found. Rows for time-series designs join their function's group, because the design is an input to the same result. D-079 gives the reason for outer designs: the outer design never reaches tuner code. For inner designs, pairs and the splits group, the design is the input under test. There the grouping is this file's choice, and each row's source names its design. A row that tests two results is written once, and the second group counts it by id.
 
 ## nested_tune_grid() estimate: live, invariant (2 types)
 
@@ -330,11 +330,11 @@ Short of two types. Candidate row "Settle oracle types for ten groups".
 - `collect-inner-metrics-wide/U1` live. Source: tune's own wide table on fold 1's inner run, rebuilt by hand from the seed contract. The record names AC2's tests. This is the one that compares with tune:
   - test-collect-inner-metrics-wide.R :: "fold 1's wide rows equal tune's wide table on fold 1's inner run"
 
-## Fold labels: closed-form (1 type)
+## Fold labels: invariant (1 type)
 
 Short of two types. Candidate row "Settle oracle types for ten groups".
 
-- `fold-labels/U1` closed-form. Source: the labels read row by row from the rsample design the run was given. The record names no test. Found by reading:
+- `fold-labels/U1` invariant. Source: the labels read row by row from the rsample design the run was given, which must agree with the labels on the result. The record names no test. Found by reading:
   - test-fold-labels.R :: "a repeated design's per-fold tables carry id and id2 from the design, long and wide"
   - test-fold-labels.R :: "a single-column design keeps its one id column, and the summaries match the repeated design's names"
   - test-fold-labels.R :: "a set over a repeated design carries wflow_id, id and id2 as separate columns"
@@ -360,7 +360,7 @@ Short of two types. Candidate row "Settle oracle types for ten groups".
 
 ## Files with prose oracle comments at 576c3d19
 
-- helper-orchestration.R: records no oracle. The reason its comments state: it holds "Fixtures and the reference loop for the orchestration oracles", which are sources for oracles, not oracles.
+- helper-orchestration.R: records no oracle. Its header says it holds "Fixtures and the reference loop for the orchestration oracles".
 - helper-payload-size.R: `parallel-payload/O1`, `parallel-payload/O2`. Its header names the two oracles whose records are in test-parallel-payload.R.
 - test-augment.R: `augment/U1`, `augment/U2`.
 - test-collect-inner-metrics-wide.R: `collect-inner-metrics-wide/U1`.
